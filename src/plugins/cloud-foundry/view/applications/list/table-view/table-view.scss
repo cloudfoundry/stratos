@@ -125,5 +125,16 @@
     .list-view-app-state-label {
       display: none;
     }
+    // In tight layouts, take space away from the state column since we only show the icon!
+    > table.table {
+      // App Name
+      th:nth-child(1) {
+        width: 35%;
+      }
+      // App State
+      th:nth-child(2) {
+        width: 10%;
+      }
+    }
   }
 }

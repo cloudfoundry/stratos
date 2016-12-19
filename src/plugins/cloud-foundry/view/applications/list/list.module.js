@@ -26,6 +26,7 @@
     '$state',
     '$timeout',
     '$q',
+    '$window',
     'app.model.modelManager',
     'app.event.eventService',
     'app.error.errorService',
@@ -41,6 +42,7 @@
    * @param {object} $state - the UI router $state service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $q - the angular $q promise service
+   * @param {object} $window - the angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
@@ -54,7 +56,7 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils, detailView) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils, detailView) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
@@ -90,9 +92,31 @@
       }
     };
 
+    // Width at which we automatically switch to the grid layout
+    var FORCE_GRID_LAYOUT_WIDTH = 640;
+
     // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
     // use case where nothing has changed.
     this.ready = this.model.hasApps;
+
+    // Force card layout on smaller screen sizes - listen for resize events
+    this.forceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
+    var previousLayout = false;
+    function onResize() {
+      var shouldForceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
+      if (shouldForceCardLayout !== that.forceCardLayout) {
+        that.forceCardLayout = shouldForceCardLayout;
+        $scope.$apply(function () {
+          if (that.forceCardLayout) {
+            previousLayout = that.model.showCardLayout;
+            that.goToGalleryView(true);
+          } else {
+            that.goToGalleryView(previousLayout);
+          }
+        });
+      }
+    }
+    angular.element($window).on('resize', onResize);
 
     function init() {
       var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
@@ -123,6 +147,8 @@
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
       that.errorService.clearAppError();
+      // Ensure that remove the resize handler on the window
+      angular.element($window).off('resize', onResize);
     });
   }
 

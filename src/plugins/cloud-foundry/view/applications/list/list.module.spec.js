@@ -25,6 +25,7 @@
       eventService = $injector.get('app.event.eventService');
       var errorService = $injector.get('app.error.errorService');
       var utils = $injector.get('app.utils.utilsService');
+      var $window = $injector.get('$window');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       if (Object.keys(userCnsiModel.serviceInstances).length === 0) {
@@ -49,7 +50,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
