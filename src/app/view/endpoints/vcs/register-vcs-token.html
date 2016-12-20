@@ -1,11 +1,22 @@
 <div class="register-token">
   <div class="register-token-description">
+
     <p translate>
-      To connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}', register a
-      <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>.
+      Connect Stackato to the
+      <a class="bold nofocus" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}" target="_blank">
+        {{ asyncTaskDialogCtrl.context.vcs.label }}
+      </a>
+      by registering a GitHub
+      <a class="bold nofocus" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">
+        Personal Access Token</a>.
     </p>
     <p translate>
       Choose a name to help you identify the Token later on as the full token value will not be shown again once you submit this form.
+    </p>
+    <p>
+      <span class="italic">Note:</span> make sure the token has the
+      <span class="bold required-scope">repo</span> and <span class="bold required-scope">admin:repo_hook</span>
+      scopes.
     </p>
   </div>
   <div class="separator"></div>
@@ -19,7 +30,8 @@
     </span>
       <input type="text" name="tokenName" auto-focus="300" class="form-control"
              helion-unique items="asyncTaskDialogCtrl.context.tokenNames"
-             ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+             ng-model="asyncTaskDialogCtrl.context.data.name" required
+             placeholder="Choose a name for this token"/>
       <br><br>
     </div>
     <div class="input-container form-group" focusable-input
@@ -31,7 +43,8 @@
     </span>
       <input type="text" name="tokenValue" class="form-control"
              ng-model="asyncTaskDialogCtrl.context.data.value" required
-             ng-pattern="asyncTaskDialogCtrl.context.tokenPattern"/>
+             ng-pattern="asyncTaskDialogCtrl.context.tokenPattern"
+             placeholder="Paste the 40 character token value"/>
       <br><br>
     </div>
   </form>

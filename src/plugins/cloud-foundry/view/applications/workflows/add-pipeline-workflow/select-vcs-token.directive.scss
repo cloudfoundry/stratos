@@ -30,18 +30,51 @@
       justify-content: space-between;
       align-self: stretch;
       align-items: baseline;
+      margin-bottom: $padding-small-vertical;
+
+      font-weight: 500;
 
       .vcs-label {
         margin-top: 0;
-        margin-bottom: $padding-small-vertical;
+        font-size: 20px;
+        font-weight: 500;
       }
 
       .manage-tokens-link {
+        white-space: nowrap;
+        font-size: 16px;
         margin-top: 0;
-        margin-bottom: $padding-small-vertical;
         margin-left: $padding-small-horizontal;
       }
 
+      .add-new-token-wrapper {
+        margin-left: $padding-xs-horizontal;
+        font-size: 16px;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: baseline;
+        .add-new-token-icon {
+          // SVG elements are a pain to position
+          position: relative;
+          top: 8px;
+          width: 28px;
+          .st0 {
+            fill: $brand-primary;
+          }
+        }
+        &:hover {
+          cursor: pointer;
+          color: #01765b;
+          .add-new-token-icon {
+            .st0 {
+              fill: #01765b;
+            }
+          }
+        }
+      }
+      .manage-tokens-link {
+        margin-left: $padding-xs-horizontal;
+      }
     }
 
     .vcs-url {

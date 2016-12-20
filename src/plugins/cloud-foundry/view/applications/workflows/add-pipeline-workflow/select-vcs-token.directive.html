@@ -2,13 +2,20 @@
   <radio-input class="radio-icon"
                ng-model="selectVcsAndTokenCtrl.selectedSource"
                input-value="selectVcsAndTokenCtrl.source.value"
-               input-disabled="selectVcsAndTokenCtrl.noToken()">
+               input-disabled="selectVcsAndTokenCtrl.noValidToken()">
   </radio-input>
-  <img class="vcs-icon" ng-class="{disabled: selectVcsAndTokenCtrl.noToken()}" ng-src="/plugins/cloud-foundry/view/assets/hce/{{ selectVcsAndTokenCtrl.source.img }}"/>
+  <img class="vcs-icon" ng-class="{disabled: selectVcsAndTokenCtrl.noValidToken()}" ng-src="/plugins/cloud-foundry/view/assets/hce/{{ selectVcsAndTokenCtrl.source.img }}"/>
   <div class="vcs-vertical-panel">
     <div class="vcs-title">
-      <h4 class="vcs-label">{{ ::selectVcsAndTokenCtrl.source.label }}</h4>
-      <h5 class="manage-tokens-link" ng-click="selectVcsAndTokenCtrl.manageTokens($event)">Manage VCS Tokens</h5>
+      <div class="vcs-label">{{ ::selectVcsAndTokenCtrl.source.label }}</div>
+      <div ng-if="!selectVcsAndTokenCtrl.noToken()" class="manage-tokens-link" ng-click="selectVcsAndTokenCtrl.manageTokens($event)">Manage VCS Tokens</div>
+      <div ng-if="selectVcsAndTokenCtrl.noToken()" class="add-new-token-wrapper">
+        <div>
+          <svg-image class="add-new-token-icon" src="/svg/Add_Green.svg"></svg-image></div>
+        <div class="manage-tokens-link" ng-click="selectVcsAndTokenCtrl.addNewToken($event)">
+          Add New Token
+        </div>
+      </div>
     </div>
     <h5 class="vcs-url" ng-if="selectVcsAndTokenCtrl.source.browse_url">
       <a target="_blank" href="{{ ::selectVcsAndTokenCtrl.source.browse_url }}">{{ ::selectVcsAndTokenCtrl.source.browse_url }}</a>
@@ -17,11 +24,12 @@
       <div class="vcs-description">{{ ::selectVcsAndTokenCtrl.source.description }}</div>
 
       <!--Single or no valid token - show label-->
-      <div ng-if="selectVcsAndTokenCtrl.noToken() || selectVcsAndTokenCtrl.singleToken()" class="single-token-wrapper">
+      <div ng-if="selectVcsAndTokenCtrl.noValidToken() || selectVcsAndTokenCtrl.singleToken()" class="single-token-wrapper">
         <div translate class="single-token-label">TOKEN</div>
-        <div ng-if="selectVcsAndTokenCtrl.noToken()">
+        <div ng-if="selectVcsAndTokenCtrl.noValidToken()">
           <span class="no-token-warning-icon helion-icon helion-icon-Warning_S"></span>
-          <span translate>No valid token registered</span>
+          <span ng-if="selectVcsAndTokenCtrl.noToken()" translate>No token registered</span>
+          <span ng-if="!selectVcsAndTokenCtrl.noToken()" translate>No valid token registered</span>
         </div>
         <div ng-if="selectVcsAndTokenCtrl.singleToken()">
           {{ selectVcsAndTokenCtrl.source.value.tokenOptions[0].label }}
