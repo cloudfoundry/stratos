@@ -30,8 +30,9 @@
       <div ng-if="selectVcsAndTokenCtrl.noValidToken() || selectVcsAndTokenCtrl.singleToken()" class="single-token-wrapper">
         <div translate class="single-token-label">TOKEN</div>
         <div ng-if="selectVcsAndTokenCtrl.noValidToken()">
-          <span class="no-token-warning-icon helion-icon helion-icon-Warning_S"></span>
+          <span ng-if="selectVcsAndTokenCtrl.noToken()" class="no-token-warning-icon helion-icon helion-icon-Warning_S"></span>
           <span ng-if="selectVcsAndTokenCtrl.noToken()" translate>No token registered</span>
+          <span ng-if="!selectVcsAndTokenCtrl.noToken()" class="no-valid-token-warning-icon helion-icon helion-icon-Critical_S"></span>
           <span ng-if="!selectVcsAndTokenCtrl.noToken()" translate>No valid token registered</span>
         </div>
         <div ng-if="selectVcsAndTokenCtrl.singleToken()">

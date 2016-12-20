@@ -25,7 +25,7 @@
            ng-disabled = "!asyncTaskDialogCtrl.context.data.isUserOrgManager(asyncTaskDialogCtrl.context.data.organization)"
            required/>
     <div translate class="remove-space"
-         ng-disabled="asyncTaskDialogCtrl.context.data.spaces.length < 2"
+         ng-if="asyncTaskDialogCtrl.context.data.spaces.length > 1"
          ng-click="asyncTaskDialogCtrl.context.data.removeSpace($index)">
       Remove
     </div>

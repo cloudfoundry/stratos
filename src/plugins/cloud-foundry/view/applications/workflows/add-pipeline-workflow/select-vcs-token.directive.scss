@@ -119,9 +119,15 @@
         }
 
         .no-token-warning-icon {
-          color: #F4B51E;
+          color: $status-warning;
           margin-right: $padding-xs-horizontal;
         }
+
+        .no-valid-token-warning-icon {
+          color: $status-critical;
+          margin-right: $padding-xs-horizontal;
+        }
+
       }
 
       .many-tokens-wrapper {
