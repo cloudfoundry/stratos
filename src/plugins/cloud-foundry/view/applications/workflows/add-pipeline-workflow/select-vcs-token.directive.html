@@ -1,4 +1,7 @@
-<div class="media vcs-token-selector">
+<div class="media vcs-token-selector" ng-class="{
+                                                  disabled: selectVcsAndTokenCtrl.noValidToken(),
+                                                  active: selectVcsAndTokenCtrl.isSelected()
+                                                 }">
   <radio-input class="radio-icon"
                ng-model="selectVcsAndTokenCtrl.selectedSource"
                input-value="selectVcsAndTokenCtrl.source.value"
@@ -9,10 +12,10 @@
     <div class="vcs-title">
       <div class="vcs-label">{{ ::selectVcsAndTokenCtrl.source.label }}</div>
       <div ng-if="!selectVcsAndTokenCtrl.noToken()" class="manage-tokens-link" ng-click="selectVcsAndTokenCtrl.manageTokens($event)">Manage VCS Tokens</div>
-      <div ng-if="selectVcsAndTokenCtrl.noToken()" class="add-new-token-wrapper">
+      <div ng-if="selectVcsAndTokenCtrl.noToken()" class="add-new-token-wrapper" ng-click="selectVcsAndTokenCtrl.addNewToken($event)">
         <div>
           <svg-image class="add-new-token-icon" src="/svg/Add_Green.svg"></svg-image></div>
-        <div class="manage-tokens-link" ng-click="selectVcsAndTokenCtrl.addNewToken($event)">
+        <div class="manage-tokens-link">
           Add New Token
         </div>
       </div>

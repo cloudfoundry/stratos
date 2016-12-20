@@ -39,6 +39,7 @@
     vm.manyTokens = manyTokens;
     vm.manageTokens = manageTokens;
     vm.addNewToken = addNewToken;
+    vm.isSelected = isSelected;
 
     refreshSelectedToken();
 
@@ -117,6 +118,10 @@
           delete vm.source.value.selectedToken;
         }
       }
+    }
+
+    function isSelected() {
+      return vm.selectedSource === vm.source.value;
     }
 
   }

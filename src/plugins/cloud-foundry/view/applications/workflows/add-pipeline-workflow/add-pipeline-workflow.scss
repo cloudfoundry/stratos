@@ -46,15 +46,12 @@ add-pipeline-workflow {
     padding: $hpe-unit-space 0;
   }
 
-  .manage-tokens-link {
-    color: $hpe-primary;
-    &:hover {
-      color: #01765b;
-      cursor: pointer;
-    }
-  }
-
   .clickable {
     cursor: pointer;
+  }
+
+  .hpe-media-select-col {
+    width: 64px;
+    padding-right: 0;
   }
 }
