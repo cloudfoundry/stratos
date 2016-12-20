@@ -28,6 +28,7 @@
     'app.event.eventService',
     'app.model.modelManager',
     'app.view.vcs.manageVcsTokens',
+    'app.view.vcs.registerVcsToken',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
@@ -49,6 +50,7 @@
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
+   * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {app.view.notificationsService} notificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
@@ -66,12 +68,13 @@
    * @property {string} id - the application GUID
    * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService,
+  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, registerVcsToken, confirmDialog, notificationsService,
                                                  addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
     this.vcsTokenManager = vcsTokenManager;
+    this.registerVcsToken = registerVcsToken;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
@@ -256,19 +259,6 @@
       });
     },
 
-    _deleteHCEServiceInstance: function () {
-      var that = this;
-      var serviceInstanceGuid = this.model.application.pipeline.hceServiceGuid;
-      return this.userProvidedInstanceModel.listAllServiceBindings(this.cnsiGuid, serviceInstanceGuid)
-        .then(function (response) {
-          var bindingGuid = response.data.resources[0].metadata.guid;
-          return that.bindingModel.deleteServiceBinding(that.cnsiGuid, bindingGuid)
-            .then(function () {
-              return that.userProvidedInstanceModel.deleteUserProvidedServiceInstance(that.cnsiGuid, serviceInstanceGuid);
-            });
-        });
-    },
-
     getPipelineData: function () {
       if (this.hceCnsi && this.project) {
         var that = this;
@@ -292,13 +282,6 @@
           });
 
       }
-    },
-
-    _getPatGuid: function () {
-      if (!this.project) {
-        return undefined;
-      }
-      return this.vcsTokenManager.getPatGuid(this.project.name);
     },
 
     isLegacyToken: function () {
@@ -339,26 +322,19 @@
 
     manageVcsTokens: function () {
       var that = this;
-      var vi = this.hceModel.data.vcsInstance;
-      var vcs = _.find(this.vcsModel.vcsClients, function (vc) {
-        return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
-      });
+      var vcs = that._getVcs();
       if (vcs) {
-        var patGuid = this._getPatGuid();
-        return this.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
-          // If the token was changed. update the HCE project
-          if (newTokenGuid !== patGuid) {
-            that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
-            return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
-              that.model.application.project = res.data;
-              var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
-              that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
-                {name: newTokenName});
-            });
-          }
-        });
+        var tokensForVcs = that.vcsModel.getTokensForVcs(vcs);
+        if (tokensForVcs.length > 0) {
+          return that._manageTokens(vcs);
+        } else {
+          return that.registerVcsToken.registerToken(vcs).then(function () {
+            return that._manageTokens(vcs);
+          });
+        }
+
       } else {
-        this.$log.error('Cannot find vcs to manage tokens', this.hceModel.data.vcsInstance);
+        this.$log.error('Cannot find VCS to manage tokens', that.hceModel.data.vcsInstance);
       }
     },
 
@@ -378,7 +354,52 @@
         .then(function (postDeployAction) {
           that.postDeployActions.push(postDeployAction.data);
         });
+    },
+
+    _getVcs: function () {
+      var vi = this.hceModel.data.vcsInstance;
+      return _.find(this.vcsModel.vcsClients, function (vc) {
+        return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
+      });
+    },
+
+    _deleteHCEServiceInstance: function () {
+      var that = this;
+      var serviceInstanceGuid = this.model.application.pipeline.hceServiceGuid;
+      return this.userProvidedInstanceModel.listAllServiceBindings(this.cnsiGuid, serviceInstanceGuid)
+        .then(function (response) {
+          var bindingGuid = response.data.resources[0].metadata.guid;
+          return that.bindingModel.deleteServiceBinding(that.cnsiGuid, bindingGuid)
+            .then(function () {
+              return that.userProvidedInstanceModel.deleteUserProvidedServiceInstance(that.cnsiGuid, serviceInstanceGuid);
+            });
+        });
+    },
+
+    _getPatGuid: function () {
+      if (!this.project) {
+        return undefined;
+      }
+      return this.vcsTokenManager.getPatGuid(this.project.name);
+    },
+
+    _manageTokens: function (vcs) {
+      var that = this;
+      var patGuid = that._getPatGuid();
+      return that.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+        // If the token was changed. update the HCE project
+        if (newTokenGuid !== patGuid) {
+          that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
+          return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
+            that.model.application.project = res.data;
+            var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
+            that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
+              {name: newTokenName});
+          });
+        }
+      });
     }
+
   });
 
 })();

@@ -80,10 +80,14 @@
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
             inline-message-colspan="5"
             table-inline-status="{{ endpoint.error.status }}">
+
+          <!--Endpoint Name-->
           <td ng-if="endpoint.visit">
             <a ng-href="{{endpoint.visit()}}">{{ endpoint.name }}</a>
           </td>
           <td ng-if="!endpoint.visit">{{ endpoint.name }}</td>
+
+          <!--Endpoint Connection Status-->
           <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
@@ -101,6 +105,7 @@
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                   ng-switch-when="complicated"></span>
           </td>
+
           <td>{{ endpoint.type }}</td>
           <td>{{ endpoint.url }}</td>
           <td>
