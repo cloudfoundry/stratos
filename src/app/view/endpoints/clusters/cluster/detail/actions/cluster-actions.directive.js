@@ -135,7 +135,7 @@
         }
 
         function createSpaceDisabled() {
-          if (contextData.spaces.length >= 10) {
+          if (contextData.spaces.length >= 5) {
             return true;
           }
           // Make sure all spaces have a valid name before allowing creating another
@@ -155,8 +155,11 @@
           contextData.spaces.push('');
         }
 
-        function removeSpace() {
-          contextData.spaces.length--;
+        function removeSpace(index) {
+          if (contextData.spaces.length < 2) {
+            return;
+          }
+          contextData.spaces.splice(index, 1);
         }
 
         contextData = {

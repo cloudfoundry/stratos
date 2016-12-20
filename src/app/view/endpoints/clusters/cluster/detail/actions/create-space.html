@@ -24,21 +24,20 @@
            unique-space-name="{{ $index }}"
            ng-disabled = "!asyncTaskDialogCtrl.context.data.isUserOrgManager(asyncTaskDialogCtrl.context.data.organization)"
            required/>
+    <div translate class="remove-space"
+         ng-disabled="asyncTaskDialogCtrl.context.data.spaces.length < 2"
+         ng-click="asyncTaskDialogCtrl.context.data.removeSpace($index)">
+      Remove
+    </div>
   </div>
 
-  <div>
-    <a class="btn btn-link create-space-button"
+  <div class="create-space-button"
        ng-disabled="asyncTaskDialogCtrl.context.data.createSpaceDisabled()"
        ng-click="asyncTaskDialogCtrl.context.data.addSpace()">
-      <i class="helion-icon helion-icon-Add"></i>
-      <span translate>Create Another Space</span>
-    </a>
-    <a class="btn btn-link create-space-button"
-       ng-if="asyncTaskDialogCtrl.context.data.spaces.length > 1"
-       ng-click="asyncTaskDialogCtrl.context.data.removeSpace()">
-      <i class="helion-icon helion-icon-Minus"></i>
-      <span translate>Remove Last Space</span>
-    </a>
+    <div>
+      <svg-image class="add-icon" src="/svg/Add_Green.svg"></svg-image>
+    </div>
+    <span translate>Create Another Space</span>
   </div>
 
 </form>
