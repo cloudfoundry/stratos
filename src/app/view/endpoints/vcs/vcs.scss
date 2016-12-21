@@ -1,18 +1,20 @@
 $border: 1px solid $gray-light;
+
+.bold {
+  font-weight: 600;
+}
+
+a.nofocus:focus {
+  outline: none;
+  color: $link-color;
+  text-decoration: none;
+}
+
+.italic {
+  font-style: italic;
+}
+
 .manage-tokens {
-
-  .bold {
-    font-weight: 600;
-  }
-
-  .italic {
-    font-style: italic;
-  }
-
-  .required-scope {
-    font-family: "Source Code Pro", monospace;
-    font-size: 13px;
-  }
 
   .token-value {
     letter-spacing: 0.05em;
@@ -25,6 +27,8 @@ $border: 1px solid $gray-light;
     text-align: start;
     font-weight: 600;
     .add-new-token-icon {
+      width: 28px;
+      margin-right: 10px;
       .st0 {
         fill: $brand-primary;
       }
@@ -37,10 +41,6 @@ $border: 1px solid $gray-light;
           fill: #01765b;
         }
       }
-    }
-    .add-new-token-icon {
-      width: 28px;
-      margin-right: 10px;
     }
     .add-new-token-icon-chooser {
       margin-right: 28px;
@@ -87,6 +87,11 @@ $border: 1px solid $gray-light;
     .form-group {
       width: 100%;
     }
+  }
+
+  .required-scope {
+    font-family: "Source Code Pro", monospace;
+    font-size: 13px;
   }
 }
 

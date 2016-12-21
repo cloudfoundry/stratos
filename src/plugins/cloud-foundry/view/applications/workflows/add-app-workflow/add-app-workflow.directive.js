@@ -145,16 +145,6 @@
           }
         });
 
-        this.stopWatchSubflow = $scope.$watch(function () {
-          return that.options.subflow;
-        }, function (subflow) {
-          if (subflow) {
-            that.appendSubflow(that.data.subflows[subflow]);
-          }
-        });
-
-        addPipelineWorkflowPrototype.setWatchers.apply(this);
-
         // Start the workflow
         this.startWorkflow();
       },
@@ -254,32 +244,6 @@
                 });
               }
             }
-            /*,
-            {
-              title: gettext('Services'),
-              formName: 'application-services-form',
-              templateUrl: path + 'services.html',
-              nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
-                that.userInput.services = that.appModel.application.summary.services;
-                that.options.subflow = that.options.subflow || 'pipeline';
-              }
-            },
-            {
-              title: gettext('Delivery'),
-              formName: 'application-delivery-form',
-              templateUrl: path + 'delivery.html',
-              nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
-                if (that.options.subflow === 'pipeline') {
-                  that.options.sources.length = 0;
-                  return that.getVcsInstances();
-                }
-              }
-            }
-            */
           ]
         };
 
@@ -518,18 +482,6 @@
         return this.sharedDomainModel.listAllSharedDomains(cnsiGuid).then(function (sharedDomains) {
           [].push.apply(that.options.domains, _.map(sharedDomains, that.selectOptionMapping));
         });
-      },
-
-      /**
-       * @function redefineWorkflowWithoutHce
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
-       * @description redefine the workflow if there is no HCE service instances registered
-       */
-      redefineWorkflowWithoutHce: function () {
-        this.options.subflow = 'cli';
-        this.data.countMainWorkflowSteps -= 1;
-        this.data.workflow.steps.pop();
-        //[].push.apply(this.data.workflow.steps, this.data.subflows.cli);
       },
 
       /**

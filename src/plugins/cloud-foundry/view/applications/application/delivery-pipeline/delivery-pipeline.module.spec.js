@@ -4,7 +4,7 @@
   describe('Delivery Pipeline', function () {
 
     var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, notificationsService,
-      modelManager, vcsTokenManager, PAT_DELIMITER, $httpBackend, account, utils, $q;
+      modelManager, vcsTokenManager, registerVcsToken, PAT_DELIMITER, $httpBackend, account, utils, $q;
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
@@ -48,6 +48,7 @@
       $stateParams = $injector.get('$stateParams');
       modelManager = $injector.get('app.model.modelManager');
       vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
+      registerVcsToken = $injector.get('app.view.vcs.registerVcsToken');
       PAT_DELIMITER = $injector.get('PAT_DELIMITER');
 
       // Some generic vars needed in tests
@@ -113,8 +114,10 @@
       $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
-      // eventService, modelManager, vcsTokenManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER, $interpolate, $stateParams, $scope, $q, $state, $log
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService, addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager,
+        registerVcsToken, confirmDialog, notificationsService, addNotificationService,
+        postDeployActionService, utils, detailView, PAT_DELIMITER,
+        $interpolate, $stateParams, $rootScope.$new(), $q, $state);
 
       $httpBackend.flush();
 

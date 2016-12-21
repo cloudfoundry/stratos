@@ -96,18 +96,6 @@
         expect(that.userInput.search.entity.extra).toBe(that.userInput.searchCategory);
       });
 
-      it('should watch options.subflow', function () {
-        that.data = {
-          subflows: {
-            foo: 'bar'
-          }
-        };
-        spyOn(that, 'appendSubflow');
-        that.options.subflow = 'foo';
-        $scope.$apply();
-        expect(that.appendSubflow).toHaveBeenCalledWith('bar');
-      });
-
       describe('- after reset', function () {
         beforeEach(function () {
           that.reset();
@@ -518,11 +506,9 @@
 
         it('#startWorkflow', function () {
           spyOn(that, 'reset');
-          spyOn(that, 'getHceInstances');
           that.startWorkflow();
           expect(that.addingApplication).toBe(true);
           expect(that.reset).toHaveBeenCalled();
-          expect(that.getHceInstances).not.toHaveBeenCalled();
           that.addingApplication = false;
         });
 
@@ -548,7 +534,6 @@
       that.stopWatchOrganization();
       that.stopWatchSpace();
       that.stopWatchSearchCategory();
-      that.stopWatchSubflow();
     }
 
     function simulateUserInput() {

@@ -158,6 +158,9 @@
           return isValid ? 'connected' : 'unconnected';
         };
 
+        // required for smart-table sorting
+        endpoint.connected = endpoint.getStatus();
+
         // Error states
         if (serviceInstance.error) {
           // Service could not be contacted

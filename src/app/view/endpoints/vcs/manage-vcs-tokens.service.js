@@ -63,7 +63,7 @@
           context.triggerWatch(); // work-around weird smart table bug
         }
         // Note: for speediness this doesn't block - if interested in results chain on vcsModel.lastValidityCheck
-        vcsModel.checkTokensValidity();
+        vcsModel.checkTokensValidity(context.vcs);
       });
     };
 

@@ -366,7 +366,7 @@
             });
           });
 
-          var sources = _.map(clientsInCodeEngine, function (vcs) {
+          return _.map(clientsInCodeEngine, function (vcs) {
             var source = vcsModel.getSupportedType(vcs);
 
             var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
@@ -381,7 +381,6 @@
 
             return source;
           });
-          return sources;
         }, function () {
           var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
           return that.$q.reject(msg);

@@ -82,6 +82,19 @@
         });
     },
 
+    listVcsTokens: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .listVcsTokens().then(function (res) {
+          that.vcsTokens = res.data;
+
+          that._rebuildTokenMap();
+
+          that.vcsTokensFetched = true;
+          return that.vcsTokens;
+        });
+    },
+
     registerVcsToken: function (vcsGuid, tokenName, tokenValue) {
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
         .registerVcsToken(vcsGuid, tokenName, tokenValue).then(function (res) {
@@ -98,24 +111,19 @@
         });
     },
 
-    _cacheInvalid: function (tokenGuid, valid) {
-      this.invalidTokens[tokenGuid] = valid;
-    },
-
-    _tokenFinder: function (tokenGuid) {
-      return function (token) {
-        return token.token.guid === tokenGuid;
-      };
-    },
-
     getToken: function (tokenGuid) {
       return _.find(this.vcsTokens, this._tokenFinder(tokenGuid));
     },
 
-    checkTokensValidity: function () {
+    getTokensForVcs: function (vcs) {
+      return this.tokensByVcs[vcs.guid] || [];
+    },
+
+    checkTokensValidity: function (vcs) {
+      var tokensToCheck, tokenGuid;
 
       // Cleanup cached invalidity of stale tokens
-      for (var tokenGuid in this.invalidTokens) {
+      for (tokenGuid in this.invalidTokens) {
         if (!this.invalidTokens.hasOwnProperty(tokenGuid)) {
           continue;
         }
@@ -124,9 +132,15 @@
         }
       }
 
+      if (angular.isUndefined(vcs)) {
+        tokensToCheck = this.vcsTokens;
+      } else {
+        tokensToCheck = this.getTokensForVcs(vcs);
+      }
+
       var promises = [];
-      for (var i = 0; i < this.vcsTokens.length; i++) {
-        promises.push(this.checkVcsToken(this.vcsTokens[i].token.guid));
+      for (var i = 0; i < tokensToCheck.length; i++) {
+        promises.push(this.checkVcsToken(tokensToCheck[i].token.guid));
       }
 
       this.lastValidityCheck = this.$q.all(promises);
@@ -155,17 +169,8 @@
           });
           if (index > -1) {
             that.vcsTokens.splice(index, 1);
+            that._rebuildTokenMap();
           }
-        });
-    },
-
-    listVcsTokens: function () {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
-        .listVcsTokens().then(function (res) {
-          that.vcsTokens = res.data;
-          that.vcsTokensFetched = true;
-          return that.vcsTokens;
         });
     },
 
@@ -203,8 +208,8 @@
 
     buildTokenOptions: function (vcs) {
       var that = this;
-      var validTokens = _.filter(this.vcsTokens, function (vcsToken) {
-        return vcsToken.vcs.guid === vcs.guid && !that.invalidTokens[vcsToken.token.guid];
+      var validTokens = _.filter(this.getTokensForVcs(vcs), function (vcsToken) {
+        return !that.invalidTokens[vcsToken.token.guid];
       });
 
       vcs.tokenOptions = _.map(validTokens, function (vcsToken) {
@@ -214,6 +219,26 @@
         };
       });
       return validTokens;
+    },
+
+    _cacheInvalid: function (tokenGuid, valid) {
+      this.invalidTokens[tokenGuid] = valid;
+    },
+
+    _tokenFinder: function (tokenGuid) {
+      return function (token) {
+        return token.token.guid === tokenGuid;
+      };
+    },
+
+    _rebuildTokenMap: function () {
+      // Build a map of tokens by VCS guid for quick access
+      this.tokensByVcs = {};
+      for (var i = 0; i < this.vcsTokens.length; i++) {
+        var token = this.vcsTokens[i];
+        this.tokensByVcs[token.vcs.guid] = this.tokensByVcs[token.vcs.guid] || [];
+        this.tokensByVcs[token.vcs.guid].push(token);
+      }
     }
 
   });

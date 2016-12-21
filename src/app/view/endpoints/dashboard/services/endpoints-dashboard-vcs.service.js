@@ -8,7 +8,8 @@
   vcsServiceFactory.$inject = [
     '$q',
     'app.model.modelManager',
-    'app.view.vcs.manageVcsTokens'
+    'app.view.vcs.manageVcsTokens',
+    'app.view.vcs.registerVcsToken'
   ];
 
   /**
@@ -17,9 +18,10 @@
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {object} manageVcsTokens - the manage VCS tokens service
+   * @param {object} registerVcsToken - register a new VCS token
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, modelManager, manageVcsTokens) {
+  function vcsServiceFactory($q, modelManager, manageVcsTokens, registerVcsToken) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -52,9 +54,7 @@
      * @public
      */
     function updateInstances() {
-      return $q.all([vcsModel.listVcsTokens().then(function () {
-        vcsModel.checkTokensValidity();
-      }), vcsModel.listVcsClients()]);
+      return $q.all([_refreshTokens(), vcsModel.listVcsClients()]);
     }
 
     /**
@@ -72,33 +72,31 @@
       createEndpointEntries(endpoints);
     }
 
-    function getStatus(vcsGuid) {
+    function getStatus(vcs) {
       return function () {
 
-        var filtered = _.filter(vcsModel.vcsTokens, function (token) {
-          return token.vcs.guid === vcsGuid;
-        });
+        var vcsTokens = vcsModel.getTokensForVcs(vcs);
 
-        if (filtered.length < 1) {
+        if (vcsTokens.length < 1) {
           return 'unconnected';
         }
 
         var allValid = true;
         var allInvalid = true;
         var anyUnknown = false;
-        for (var i = 0; i < filtered.length; i++) {
-          var tokenGuid = filtered[i].token.guid;
-          allValid = allValid && !vcsModel.invalidTokens[tokenGuid];
+        for (var i = 0; i < vcsTokens.length; i++) {
+          var tokenGuid = vcsTokens[i].token.guid;
+          allValid = allValid && vcsModel.invalidTokens[tokenGuid] === false;
           allInvalid = allInvalid && !!vcsModel.invalidTokens[tokenGuid];
           anyUnknown = anyUnknown || angular.isUndefined(vcsModel.invalidTokens[tokenGuid]);
         }
 
-        if (allValid) {
-          return 'connected';
-        }
         // Show disconnected until the check comes back
         if (anyUnknown) {
           return 'unconnected';
+        }
+        if (allValid) {
+          return 'connected';
         }
         if (allInvalid) {
           return 'error';
@@ -125,7 +123,7 @@
             key: endpointPrefix + vcs.guid,
             guid: vcs.guid,
             connected: 'unconnected',
-            getStatus: getStatus(vcs.guid)
+            getStatus: getStatus(vcs)
           };
           endpoints.push(endpoint);
         }
@@ -134,8 +132,9 @@
         endpoint.name = vcs.label;
         endpoint.type = gettext(vcsModel.getTypeLabel(vcs));
         endpoint.url = vcs.browse_url;
-        endpoint.actionsTarget = vcs;
-        endpoint.actions = _createInstanceActions(endpoints);
+        endpoint.actionsTarget = endpoint;
+        endpoint.vcs = vcs;
+        _createVcsActions(endpoint);
       });
 
       _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
@@ -169,17 +168,43 @@
      */
     function clear() {}
 
-    function _createInstanceActions(endpoints) {
-      return [{
-        name: gettext('Manage Tokens'),
-        execute: function (vcs) {
-          _manage(endpoints, vcs);
-        }
-      }];
+    function _createVcsActions(endpoint) {
+      if (vcsModel.getTokensForVcs(endpoint.vcs).length > 0) {
+        endpoint.actions = [{
+          name: gettext('Manage Tokens'),
+          execute: function (endpoint) {
+            _manageTokens(endpoint);
+          }
+        }];
+      } else {
+        endpoint.actions = [{
+          name: gettext('Add Token'),
+          execute: function (endpoint) {
+            _addToken(endpoint);
+          }
+        }];
+      }
     }
 
-    function _manage(endpoints, vcs) {
-      return manageVcsTokens.manage(vcs);
+    function _refreshTokens() {
+      return vcsModel.listVcsTokens().then(function () {
+        // No need to return this promise, validity data is updated asynchronously
+        vcsModel.checkTokensValidity();
+      });
+    }
+
+    function _manageTokens(endpoint) {
+      return manageVcsTokens.manage(endpoint.vcs).then(function () {
+        _createVcsActions(endpoint);
+      });
+    }
+
+    function _addToken(endpoint) {
+      return registerVcsToken.registerToken(endpoint.vcs).then(function () {
+        return _refreshTokens().then(function () {
+          _createVcsActions(endpoint);
+        });
+      });
     }
 
   }
