@@ -47,13 +47,21 @@
     );
   });
 
-  gulp.task('examples:copy:theme', function () {
+  gulp.task('examples:copy:theme', ['examples:oem:images'], function () {
     return gulp
       .src([
         paths.theme + '**/*',
         '!' + paths.theme + 'scss/**/*',
         '!' + paths.theme + '**/*.scss'
       ], {base: paths.theme})
+      .pipe(gulp.dest(paths.examplesDist));
+  });
+
+  gulp.task('examples:oem:images', function () {
+    return gulp
+      .src([
+        '../oem/brands/hpe/images/*'
+      ], {base: '../oem/brands/hpe'})
       .pipe(gulp.dest(paths.examplesDist));
   });
 
@@ -101,8 +109,8 @@
     gulp.watch(config.paths.theme + '**/*', ['examples:copy:theme']);
     gulp.watch(config.frameworkHtml, ['examples:copy:theme']);
     gulp.watch(paths.framework + 'src/**/*.html', ['examples:copy:templates']);
-    gulp.watch(paths.framework + 'src/**/*.scss', ['copy:css']);
-    gulp.watch(paths.framework + 'theme/**/*.scss', ['copy:css']);
+    gulp.watch(paths.framework + 'src/**/*.scss', ['css']);
+    gulp.watch(paths.framework + 'theme/**/*.scss', ['css']);
 
     // Watch dist for changes and reload with browsersync
     gulp.watch([
