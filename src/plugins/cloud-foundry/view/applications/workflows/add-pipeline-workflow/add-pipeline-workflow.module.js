@@ -67,6 +67,10 @@
           loadingRepos: false,
           repoStSearch: 'full_name',
           branches: [],
+          refreshBranches: {
+            label: gettext('Refresh'),
+            execute: angular.bind(that, that.refreshBranches)
+          },
           buildContainers: [],
           notificationFormAppMode: true,
           imageRegistries: [],
@@ -180,41 +184,7 @@
               onEnter: function () {
                 that.options.repoStSearch = '';
                 that.getPipelineDetailsData();
-                var githubModel = that.modelManager.retrieve('github.model');
-                var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
-
-                if (that.userInput.repo) {
-                  return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
-                    var githubOptions = that._getVcsHeaders();
-                    var usedBranches = _.chain(projects)
-                      .filter(function (p) {
-                        return p.repo.full_name === that.userInput.repo.full_name;
-                      })
-                      .map(function (p) { return p.repo.branch; })
-                      .value();
-
-                    return githubModel.branches(that.userInput.repo.full_name, githubOptions)
-                      .then(function () {
-                        var branches = _.map(githubModel.data.branches,
-                          function (o) {
-                            var used = _.indexOf(usedBranches, o.name) >= 0;
-                            return {
-                              disabled: used,
-                              label: o.name + (used ? gettext(' (used by another project)') : ''),
-                              value: o.name
-                            };
-                          });
-                        [].push.apply(that.options.branches, branches);
-                      })
-                      .catch(function () {
-                        var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
-                        return that.$q.reject(msg);
-                      });
-                  }).catch(function (msg) {
-                    that.options.repoStSearch = 'full_name';
-                    return that.$q.reject(msg);
-                  });
-                }
+                that.refreshBranches();
               },
               onNext: function () {
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
@@ -299,6 +269,45 @@
             }
           ]
         };
+      },
+
+      refreshBranches: function () {
+        var that = this;
+        var githubModel = that.modelManager.retrieve('github.model');
+        var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+        if (that.userInput.repo) {
+          return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
+            var githubOptions = that._getVcsHeaders();
+            var usedBranches = _.chain(projects)
+              .filter(function (p) {
+                return p.repo.full_name === that.userInput.repo.full_name;
+              })
+              .map(function (p) { return p.repo.branch; })
+              .value();
+
+            return githubModel.branches(that.userInput.repo.full_name, githubOptions)
+              .then(function () {
+                var branches = _.map(githubModel.data.branches,
+                  function (o) {
+                    var used = _.indexOf(usedBranches, o.name) >= 0;
+                    return {
+                      disabled: used,
+                      label: o.name + (used ? gettext(' (used by another project)') : ''),
+                      value: o.name
+                    };
+                  });
+                that.options.branches.length = 0;
+                [].push.apply(that.options.branches, branches);
+              })
+              .catch(function () {
+                var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
+                return that.$q.reject(msg);
+              });
+          }).catch(function (msg) {
+            that.options.repoStSearch = 'full_name';
+            return that.$q.reject(msg);
+          });
+        }
       },
 
       /**

@@ -7,7 +7,19 @@
     <i class="dropdown-toggle" ng-class="selectInputCtrl.arrowIcon"></i>
   </div>
   <ul class="dropdown-menu">
-    <li class="dropdown-menu-header" disabled>{{ selectInputCtrl.placeholder }}</li>
+    <li ng-if="selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled>
+      <div class="select-input-refresh-wrapper">
+        <div>{{ selectInputCtrl.placeholder }}</div>
+        <div class="select-input-refresh" ng-click="selectInputCtrl.refreshActionWrapper($event)">
+          <div ng-if="selectInputCtrl.refreshing" class="spinner-wrapper">
+            <svg-image class="spinner" src="/svg/Refresh.svg"></svg-image>
+          </div>
+          <div class="refresh-label">{{ selectInputCtrl.refreshAction.label }}</div>
+        </div>
+      </div>
+
+    </li>
+    <li ng-if="!selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled>{{ selectInputCtrl.placeholder }}</li>
     <li class="select-option" ng-repeat="option in selectInputCtrl.inputOptions"
       ng-click="selectInputCtrl.setValue(option)" ng-disabled="option.disabled"
       ng-class="{ 'selected': option.value === selectInputCtrl.ngModelCtrl.$modelValue }">
