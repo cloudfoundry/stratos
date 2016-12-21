@@ -361,7 +361,7 @@ div.user-avatar {
     width: $user-avatar-image-size;
 
     > svg {
-      transition: opacity .25s ease-in-out;
+      transition: opacity .1s linear;
     }
 
     > svg > path {
@@ -376,9 +376,7 @@ div.user-avatar {
 
       > svg {
         opacity: 0;
-        transition: opacity .1s linear;
       }
-      
     }
 
     .press-to-open {

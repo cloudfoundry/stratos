@@ -1,4 +1,13 @@
 /* eslint-disable angular/log,no-console,no-process-env,no-sync */
+
+/**
+ * This file defined the gulp task 'oem' that is used in the main build.
+ * It's purpose is to collect all of the SCSS files and flatten the folder hierarchy so that
+ * they are all in one folder.
+ * This set of SCSS is then included in the oem builder image, so that we can re-generate the
+ * CSS from it when needed, applying the OEM SCSS customizations.
+ */
+
 (function () {
   'use strict';
 
