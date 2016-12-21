@@ -68,7 +68,7 @@
       helpers.checkAndCloseToast(/Organisation '.*' successfully created/);
 
       var theTile = element.all(by.repeater('organization in clusterDetailController.organizations')).filter(function (tile) {
-        return tile.element(by.css('.panel-heading span:first-of-type')).getText().then(function (title) {
+        return tile.element(by.css('.panel-heading > span.gallery-card-title')).getText().then(function (title) {
           return title === testOrgName;
         });
       }).first();
