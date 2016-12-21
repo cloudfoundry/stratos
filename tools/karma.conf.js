@@ -46,7 +46,7 @@
           nocache: false
         },
         {
-          pattern: 'app/view/assets/**/*.png',
+          pattern: 'src/plugins/cloud-foundry/view/assets/**/*.png',
           watched: false,
           included: false,
           served: true,
