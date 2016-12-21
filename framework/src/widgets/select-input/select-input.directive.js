@@ -34,6 +34,7 @@
         addAction: '=?',
         arrowIcon: '@?',
         inputOptions: '=',
+        refreshAction: '=?',
         placeholder: '@?'
       },
       controller: SelectInputController,
@@ -98,7 +99,8 @@
   }
 
   SelectInputController.$inject = [
-    '$scope'
+    '$scope',
+    '$q'
   ];
 
   /**
@@ -107,6 +109,7 @@
    * @name SelectInputController
    * @constructor
    * @param {object} $scope - the Angular $scope
+   * @param {object} $q - the Angular $q service
    * @property {object} $scope - the Angular $scope
    * @property {object} ngModelCtrl - the ng-model controller
    * @property {string} arrowIcon - the arrow icon
@@ -115,8 +118,9 @@
    * @property {boolean} open - flag whether menu should be visible
    * @property {object} optionsMap - the input options map
    */
-  function SelectInputController($scope) {
+  function SelectInputController($scope, $q) {
     this.$scope = $scope;
+    this.$q = $q;
     this.ngModelCtrl = null;
     this.arrowIcon = this.arrowIcon || 'helion-icon helion-icon-Up_tab helion-icon-r180';
     this.placeholder = this.placeholder || 'Select';
@@ -215,7 +219,30 @@
      */
     toggleMenu: function () {
       this.open = !this.open;
+    },
+
+    /**
+     * @function refreshActionWrapper
+     * @memberof helion.framework.widgets.SelectInputController
+     * @description Wrapper around the refresh action to manage the spinner and intercept the click event
+     * @param {object} $event - click event
+     * @returns {boolean} true
+     * */
+    refreshActionWrapper: function ($event) {
+      var that = this;
+      $event.stopPropagation();
+
+      if (that.refreshing) {
+        return true;
+      }
+
+      that.refreshing = true;
+      that.$q.when(this.refreshAction.execute()).finally(function () {
+        that.refreshing = false;
+      });
+      return true;
     }
+
   });
 
 })();
