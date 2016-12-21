@@ -1,3 +1,8 @@
+&.space-dialog-form > .modal-dialog .detail-view-content {
+  width: $hpe-input-width + 2 * $hpe-unit-space;
+  min-height: 390px;
+}
+
 .create-space-form {
 
   div.organizations-drop-down {
