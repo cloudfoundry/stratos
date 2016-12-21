@@ -35,11 +35,15 @@ table.table {
     th:first-child, td:first-child {
       width: $hpe-unit-space * 2.5;
       position: relative;
-
       checkbox-input {
         position: absolute;
-        top: 22px;
       }
+    }
+    th:first-child checkbox-input {
+      top: 22px;
+    }
+    td:first-child checkbox-input {
+      top: $hpe-unit-space * 2 / 3;
     }
   }
 
