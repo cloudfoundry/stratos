@@ -35,7 +35,8 @@
 
   CodeBlockController.$inject = [
     '$window',
-    '$document'
+    '$document',
+    '$timeout'
   ];
 
   /**
@@ -45,9 +46,11 @@
    * @constructor
    * @param {object} $window - Angular $window service
    * @param {object} $document - Angular $document service
+   * @param {object} $timeout - Angular $timeout service
    */
-  function CodeBlockController($window, $document) {
+  function CodeBlockController($window, $document, $timeout) {
     this.$document = $document;
+    this.$timeout = $timeout;
     this.init();
   }
 
@@ -76,6 +79,7 @@
      */
     copyToClipboard: function (event) {
       /* eslint-disable */
+      var that = this;
       var textElement = this.$document[0].createElement('textarea');
       var jqTextElement = $(textElement);
       var scrollTop = $(this.$document[0]).scrollTop();
@@ -89,6 +93,12 @@
         this.$document[0].getSelection().removeAllRanges();
         textElement.select();
         this.$document[0].execCommand('copy');
+
+        // Show the message that we copied to the clipboard
+        element.addClass('copy-success');
+        that.$timeout(function() {
+          element.removeClass('copy-success');
+        }, 1000);
       } catch (err) {
         // Failed to copy to clipboard
       } finally {

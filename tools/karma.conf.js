@@ -30,7 +30,7 @@
         'src/plugins/*/plugin.config.js',
 
         'framework/**/*.html',
-        'framework/**/*.svg',
+        'framework/theme/**/*.svg',
         {
           pattern: 'framework/theme/images/*.png',
           watched: false,
