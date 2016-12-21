@@ -150,7 +150,12 @@
       return browser.driver.wait(promise);
     });
 
-    afterAll(function () {
+    // Cleanup of test application created by tests
+    beforeEach(function () {
+      testApp = undefined;
+    });
+
+    afterEach(function () {
       if (testApp) {
         var promise = cfModel.deleteAppIfExisting(testCluster.guid, testApp.entity.name, helpers.getUser(), helpers.getPassword())
           .catch(function (error) {
