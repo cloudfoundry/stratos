@@ -179,7 +179,6 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-
   gulp.task('copy:theme', function () {
     return gulp
       .src(themeFiles, {base: paths.theme})

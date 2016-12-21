@@ -39,7 +39,7 @@
           nocache: false
         },
         {
-          pattern: 'src/plugins/cloud-foundry/view/assets/**/*.png',
+          pattern: 'oem/brands/hpe/images/*.png',
           watched: false,
           included: false,
           served: true,
@@ -117,7 +117,7 @@
       },
 
       proxies: {
-        '/images/': '/base/framework/theme/images/',
+        '/images/': '/base/oem/brands/hpe/images/',
         '/svg/': '/base/framework/theme/svg/',
         '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/',
         '/app/view/assets/': '/base/app/view/assets/'
