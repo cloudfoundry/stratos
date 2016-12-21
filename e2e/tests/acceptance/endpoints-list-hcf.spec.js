@@ -68,8 +68,8 @@
         });
       });
 
-      it('should have breadcrumb to `Helion Cloud Foundry`', function () {
-        expect(endpointsHcf.getBreadcrumb(1).getText()).toBe('Helion Cloud Foundry');
+      it('should have breadcrumb to `Cloud Foundry`', function () {
+        expect(endpointsHcf.getBreadcrumb(1).getText()).toBe('Cloud Foundry');
       });
 
       it('should go to `Helion Cloud Foundry` page when appropriate breadcrumb is clicked', function () {

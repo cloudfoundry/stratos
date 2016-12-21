@@ -1,7 +1,8 @@
-/* eslint-disable angular/log,no-console,no-process-env */
+/* eslint-disable angular/log,no-console,no-process-env,angular/json-functions */
 (function () {
   'use strict';
 
+  var _ = require('lodash');
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var eslint = require('gulp-eslint');
@@ -10,6 +11,7 @@
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
+  var gulpreplace = require('gulp-replace');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
@@ -27,6 +29,7 @@
   var gulpBowerFiles = require('bower-files');
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
+  var path = require('path');
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -40,6 +43,13 @@
   var cssFiles = config.cssFiles;
   var partials = config.partials;
 
+  // Default OEM Config
+  var defaultBrandFolder = '../oem/brands/hpe/';
+  var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
+  var defaultConfig = require('../oem/config-defaults.json');
+  oemConfig = _.defaults(oemConfig, defaultConfig);
+  var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
+
   var usePlumber = true;
 
   var bowerFiles = gulpBowerFiles({
@@ -49,6 +59,10 @@
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
   examples(config);
+
+  // Pull in the gulp tasks for oem support
+  var oem = require('./oem.gulp.js');
+  oem(config);
 
   // Clear the 'dist' folder
   gulp.task('clean:dist', function (next) {
@@ -114,13 +128,23 @@
     done();
   });
 
-  // Copy JavaScript source files to 'dist'
-  gulp.task('copy:configjs', function () {
+  // Copy JavScript config file to 'dist'- patch in the default OEM configuration
+  gulp.task('copy:configjs', ['copy:configjs:oem'], function () {
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('stackato-config.js'))
       .pipe(gulp.dest(paths.dist));
+  });
+
+  // Copy JavaScript config file to the OEM 'dist' folder so it can be patched during OEM process
+  gulp.task('copy:configjs:oem', function () {
+    return gulp
+      .src(paths.src + 'config.js')
+      .pipe(uglify())
+      .pipe(rename('stackato-config.js'))
+      .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
   gulp.task('copy:framework:js', function () {
@@ -139,9 +163,19 @@
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
-  gulp.task('copy:assets', function () {
+  gulp.task('copy:assets', ['copy:default-brand'], function () {
     return gulp
       .src(assetFiles, {base: paths.src})
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  // Copy the default brand's images and logo to the dist folder
+  gulp.task('copy:default-brand', function () {
+    return gulp
+      .src([
+        defaultBrandFolder + 'images/*',
+        defaultBrandFolder + 'favicon.ico'
+      ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -191,7 +225,15 @@
   });
 
   // Inject JavaScript and SCSS source file references in index.html
-  gulp.task('inject:index', ['copy:index'], function () {
+  gulp.task('inject:index', ['inject:index:oem'], function () {
+    return gulp
+      .src(paths.oem + 'dist/index.html')
+      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  // Inject JavaScript and SCSS source file references in index.html
+  gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
         plugins
         .concat(jsFiles)
@@ -204,7 +246,7 @@
       .pipe(wiredep(config.bower))
       .pipe(gulpinject(sources, {relative: true}))
       .pipe(concat.header())
-      .pipe(gulp.dest(paths.dist));
+      .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
   // Automatically inject SCSS file imports from Bower packages
@@ -378,6 +420,7 @@
       'copy:theme',
       'postbuild',
       'inject:index',
+      'oem',
       next
     );
   });

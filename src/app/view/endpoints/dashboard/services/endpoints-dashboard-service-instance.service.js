@@ -134,7 +134,7 @@
         if (!reuse) {
           endpoint = {
             key: eKey,
-            type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine')
+            type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getOemConfiguration().CLOUD_FOUNDRY : utilsService.getOemConfiguration().CODE_ENGINE
           };
           endpoints.push(endpoint);
         }

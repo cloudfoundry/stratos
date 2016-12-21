@@ -32,7 +32,7 @@ $actions-menu-border:             1px solid #ddd !default;
 $actions-menu-border-radius:      0 !default;
 $actions-menu-bg:                 #ffffff !default;
 $actions-menu-fg:                 #333333 !default;
-$actions-menu-hover-bg:           #01a982 !default;
+$actions-menu-hover-bg:           $form-control-selected-color !default;
 $actions-menu-hover-fg:           #ffffff !default;
 $actions-menu-label-fg:           #767676 !default;
 $actions-menu-item-disabled-fg:   #cccccc !default;
@@ -44,13 +44,13 @@ $tabbed-nav-min-width:            300px !default;
 $tabbed-nav-padding:              0 24px !default;
 
 // Select Input
-$select-input-selected-bg:        #01a982 !default;
+$select-input-selected-bg:        $form-control-selected-color !default;
 $select-input-selected-fg:        #ffffff !default;
 
 // Radio Input
 $radio-input-size:                24px !default;
 $radio-input-color:               #666666 !default;
-$radio-input-checked-color:       #01a982 !default;
+$radio-input-checked-color:       $form-control-selected-color !default;
 $radio-input-hover-color:         #333333 !default;
 $radio-input-disabled-opacity:    0.3 !default;
 $radio-button-font-family:        'Glyphicons Halflings' !default;
@@ -60,7 +60,7 @@ $radio-button-checked-icon:       '\e067' !default;
 // Checkbox Input
 $checkbox-input-size:                24px !default;
 $checkbox-input-color:               #666666 !default;
-$checkbox-input-checked-color:       #01a982 !default;
+$checkbox-input-checked-color:       $form-control-selected-color !default;
 $checkbox-input-hover-color:         #333333 !default;
 $checkbox-input-disabled-opacity:    0.65 !default;
 $checkbox-button-font-family:        'Glyphicons Halflings' !default;

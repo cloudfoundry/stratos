@@ -9,7 +9,7 @@
     </div>
     <div ng-switch-when="noClusters" class="applications-empty">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
-      <div class="applications-msg" translate>No connected Helion Cloud Foundry endpoints.</div>
+      <div class="applications-msg" translate>No connected {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoints.</div>
       <div class="applications-cta" ng-show="clustersCtrl.currentUserAccount.isAdmin()">
         <a class="btn-link" ui-sref="endpoint.dashboard" translate>Use the Endpoints Dashboard</a>
         <span translate>to fix your connections or connect to new endpoints.</span>
@@ -21,7 +21,7 @@
     <div ng-switch-default>
       <div class="header">
         <div class="applications-header font-semi-bold pull-left" translate>
-          Helion Cloud Foundry Endpoints
+          {{ OEM_CONFIG.CLOUD_FOUNDRY }}
         </div>
       </div>
       <div class="cluster-gallery-card-container">

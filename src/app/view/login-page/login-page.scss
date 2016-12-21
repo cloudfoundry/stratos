@@ -1,5 +1,9 @@
 @import "login-form/login-form";
 
+$login-page-text-panel-align: center !default;
+$login-page-text-panel-display: block !default;
+$login-page-text-fg: $white !default;
+
 .login-page {
 
   display: flex;
@@ -7,12 +11,12 @@
 
   .login-background {
     flex: 8 1 0px;
-    background: url('app/view/assets/login-page-bg.jpg') no-repeat center center;
+    background: url('images/login_bg.jpg') no-repeat center center;
     background-size: cover;
-    color: white;
+    color: $login-page-text-fg;
     height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: $login-page-text-panel-align;
     justify-content: center;
     padding: 1em 3em;
 
@@ -31,6 +35,10 @@
         margin-right: auto;
         font-size: 20px;
       }
+    }
+
+    .login-page-text {
+      display: $login-page-text-panel-display;
     }
 
     .login-panel-hpe-logo {
@@ -79,7 +87,7 @@
 
       .hpe-logo {
         flex: 0 0 auto;
-        padding: 0 0 3 * $hpe-unit-space $hpe-unit-space;
+        padding: 0 0 4 * $hpe-unit-space $hpe-unit-space;
       }
     }
   }

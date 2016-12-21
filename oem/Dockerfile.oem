@@ -1,0 +1,13 @@
+FROM node:6.9
+
+ADD . /oem
+ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/bin/jq
+RUN chmod +x /usr/bin/jq
+
+WORKDIR /oem
+ENV PATH /oem/node_modules/.bin:$PATH
+
+RUN rm -rf /oem/node_modules
+RUN cd /oem && npm install
+VOLUME /brand
+ENTRYPOINT ["./oem-setup.sh","-b", "/brand", "-d","/dist", "-p", "-s"]

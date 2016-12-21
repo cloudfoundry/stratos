@@ -9,7 +9,9 @@
   var env = {
     registerApplication: registerApplication,
 
-    HELION_UI_FRAMEWORK_BASE_PATH: ''
+    HELION_UI_FRAMEWORK_BASE_PATH: '',
+
+    OEM_CONFIG:{}
   };
 
   expose({

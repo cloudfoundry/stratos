@@ -1,12 +1,6 @@
+// Deault branding
 
-// UI Framework
+@import "../oem/brands/hpe/brand.scss"; 
 
-@import "framework.scss";
-
-// Application mixins
-@import "app/view/mixins/mixins";
-
-// App
-
-@import "app/app";
-@import "plugins/.plugins"; // auto-generated after running gulp
+// Main SCSS file
+@import "index_oem";

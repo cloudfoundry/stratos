@@ -2,7 +2,7 @@
   <div ng-if="!applicationSetupPipelineCtrl.pipeline.valid && applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
     <p>
       <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
-      <h3 translate>The Helion Code Engine associated with this application is not registered with the Console.</h3>
+      <h3 translate>The {{ OEM_CONFIG.CODE_ENGINE }} associated with this application is not registered with the Console.</h3>
     </p>
   </div>
   <div ng-if="!applicationSetupPipelineCtrl.pipeline.valid && !applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
@@ -12,10 +12,10 @@
     </p>
     <div ng-if="applicationSetupPipelineCtrl.hce && !applicationSetupPipelineCtrl.hce.fetching">
       <button id="pipeline-setup-button" ng-if="applicationSetupPipelineCtrl.hce.valid > 0" ng-click="applicationSetupPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
-      <h4 ng-if="applicationSetupPipelineCtrl.hce.available > 0 && applicationSetupPipelineCtrl.hce.valid === 0" translate>Connect one or more Helion Code Engine Endpoints in order to set up a delivery pipeline.</h4>
+      <h4 ng-if="applicationSetupPipelineCtrl.hce.available > 0 && applicationSetupPipelineCtrl.hce.valid === 0" translate>Connect one or more {{ OEM_CONFIG.CODE_ENGINE }} Endpoints in order to set up a delivery pipeline.</h4>
       <div ng-if="applicationSetupPipelineCtrl.hce.available === 0 && applicationSetupPipelineCtrl.hce.valid === 0">
-        <h4 ng-if="applicationSetupPipelineCtrl.hce.isAdmin" translate>Register and connect one or more Helion Code Engine Endpoints in order to set up a delivery pipeline.</h4>
-        <h4 ng-if="!applicationSetupPipelineCtrl.hce.isAdmin" translate>Please contact your Administrator to register Helion Code Engine Endpoints so that you can set up a delivery pipeline.</h4>
+        <h4 ng-if="applicationSetupPipelineCtrl.hce.isAdmin" translate>Register and connect one or more {{ OEM_CONFIG.CODE_ENGINE }} Endpoints in order to set up a delivery pipeline.</h4>
+        <h4 ng-if="!applicationSetupPipelineCtrl.hce.isAdmin" translate>Please contact your Administrator to register {{ OEM_CONFIG.CODE_ENGINE }} Endpoints so that you can set up a delivery pipeline.</h4>
       </div>
     </div>
   </div>

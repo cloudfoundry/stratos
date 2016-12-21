@@ -9,6 +9,7 @@
       translations: '../translations/',
       tools: '../tools/',
       e2e: '../e2e/',
+      oem: '../oem/',
       theme: '../framework/theme/',
       framework: '../framework/',
       frameworkDist: '../dist/framework/',

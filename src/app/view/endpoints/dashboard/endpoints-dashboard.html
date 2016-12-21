@@ -13,7 +13,7 @@
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
       <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
-      <div class="applications-msg" translate>The Console could not retrieve Endpoint information.</div>
+      <div class="applications-msg" translate>The {{ OEM_CONFIG.CONSOLE }} could not retrieve Endpoint information.</div>
       <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
     </div>
   </div>
@@ -24,18 +24,18 @@
       <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
       <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
-            To enable developers to use this Web console to interact with Helion Stackato, please register
+            To enable developers to use this {{ OEM_CONFIG.CONSOLE }} to interact with {{ OEM_CONFIG.PRODUCT_NAME }}, please register
           </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            Helion Cloud Foundry
+            {{ OEM_CONFIG.CLOUD_FOUNDRY }}
           </span>
         <span translate> and </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            Helion Code Engine
+            {{ OEM_CONFIG.CODE_ENGINE }}
           </span>
           <span translate>
             endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs
-            into this console. Once you register an endpoint, we recommend connecting it to your account so you can
+            into this {{ OEM_CONFIG.CONSOLE }}. Once you register an endpoint, we recommend connecting it to your account so you can
             manage it.
           </span>
       </div>

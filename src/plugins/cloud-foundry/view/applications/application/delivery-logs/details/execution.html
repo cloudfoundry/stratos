@@ -20,7 +20,7 @@
       <tr ng-repeat="event in detailViewCtrl.context.events">
         <td ng-switch="event.state" class="row result-col event-result" id="build-result-col">
           <div ng-switch="event.state" class="pull-left">
-            <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
+            <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-success"></span>
             <span ng-switch-when="running"><spinner></spinner></span>
             <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
             <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
