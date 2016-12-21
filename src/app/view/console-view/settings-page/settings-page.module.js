@@ -7,18 +7,13 @@
     .run(register);
 
   registerRoute.$inject = [
-    '$stateProvider',
-    '$windowProvider'
+    '$stateProvider'
   ];
 
-  function registerRoute($stateProvider, $windowProvider) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('account-settings', {
       url: '/account/settings',
-      templateUrl: function () {
-        var $window = $windowProvider.$get();
-        var oem = $window && $window.env ? $window.env.OEM_CONFIG : {};
-        return oem && oem.ABOUT_TEMPLATE ? oem.ABOUT_TEMPLATE : '/app/view/console-view/settings-page/settings-page.html';
-      },
+      templateUrl: '/app/view/console-view/settings-page/settings-page.html',
       controller: SettingsController,
       controllerAs: 'settingsCtrl',
       data: {
