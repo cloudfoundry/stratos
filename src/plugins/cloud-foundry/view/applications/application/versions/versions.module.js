@@ -137,6 +137,7 @@
       this.confirmDialog({
         title: gettext('Rollback Application to previous Version'),
         description: confirmMessage,
+        submitCommit: true,
         buttonText: {
           yes: gettext('Rollback'),
           no: gettext('Cancel')

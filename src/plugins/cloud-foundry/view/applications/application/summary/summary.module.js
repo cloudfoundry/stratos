@@ -124,6 +124,7 @@
             title: gettext('Terminate Instance'),
             description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
             errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),
+            submitCommit: true,
             buttonText: {
               yes: gettext('Terminate'),
               no: gettext('Cancel')

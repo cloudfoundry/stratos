@@ -88,12 +88,12 @@
         title: gettext('Delete Personal Access Token'),
         description: gettext('Are you sure you want to delete the') +
         " '" + token.token.name + "' Personal Access Token?",
+        submitCommit: true,
         buttonText: {
           yes: gettext('Delete'),
           no: gettext('Cancel')
         },
         errorMessage: gettext('Failed to delete Personal Access Token'),
-        submitCommit: true,
         callback: function () {
           return vcsModel.deleteVcsToken(token.token.guid)
             .then(function () {

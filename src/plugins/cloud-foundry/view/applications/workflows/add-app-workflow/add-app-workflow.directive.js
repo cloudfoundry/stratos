@@ -189,6 +189,7 @@
           allowBack: false,
           allowCancelAtLastStep: true,
           title: gettext('Add Application'),
+          lastStepCommit: true,
           btnText: {
             cancel: gettext('Cancel')
           },

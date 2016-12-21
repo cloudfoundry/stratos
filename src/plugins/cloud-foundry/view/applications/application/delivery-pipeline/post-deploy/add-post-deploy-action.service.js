@@ -80,6 +80,7 @@
             title: gettext('Add Post Deploy Action'),
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/delivery-pipeline/post-deploy/add-post-deploy-action.html',
+            submitCommit: true,
             buttonTitles: {
               submit: 'Add action'
             }

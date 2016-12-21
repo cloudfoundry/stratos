@@ -70,6 +70,7 @@
       this.confirmDialog({
         title: gettext('Unmap Route from Application'),
         description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
+        submitCommit: true,
         buttonText: {
           yes: gettext('Unmap'),
           no: gettext('Cancel')
@@ -113,6 +114,7 @@
         title: gettext('Unmap Route from Applications'),
         description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
+        submitCommit: true,
         buttonText: {
           yes: gettext('Unmap'),
           no: gettext('Cancel')
@@ -165,6 +167,7 @@
         title: gettext('Delete Route'),
         description: gettext('Are you sure you want to delete ') + this.getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
+        submitCommit: true,
         buttonText: {
           yes: gettext('Delete'),
           no: gettext('Cancel')

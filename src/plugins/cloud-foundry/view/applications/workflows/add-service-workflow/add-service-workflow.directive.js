@@ -122,6 +122,7 @@
         allowBack: false,
         allowCancelAtLastStep: false,
         hideStepNavStack: true,
+        lastStepCommit: false,
         btnText: {
           cancel: config.confirm ? gettext('Cancel') : gettext('Back to Services')
         },
@@ -131,6 +132,7 @@
             formName: 'addInstanceForm',
             nextBtnText: gettext('Add Service Instance'),
             showBusyOnNext: true,
+            stepCommit: true,
             onNext: function () {
               return that.addService().then(function () {
                 return that.addBinding().then(function () {

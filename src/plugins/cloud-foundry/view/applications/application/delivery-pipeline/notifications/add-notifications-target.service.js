@@ -92,6 +92,7 @@
           nextBtnText: 'Add Notification',
           templateUrl: 'plugins/cloud-foundry/view/applications/application/' +
           'delivery-pipeline/notifications/templates/step2.html',
+          stepCommit: true,
           isLastStep: true
         }
       ]

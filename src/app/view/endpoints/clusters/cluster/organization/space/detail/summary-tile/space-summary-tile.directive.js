@@ -79,10 +79,12 @@
           {
             title: gettext('Rename Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
+            submitCommit: true,
             buttonTitles: {
               submit: gettext('Save')
             },
-            class: 'detail-view-thin'
+            class: 'dialog-form',
+            dialog: true
           },
           {
             data: {
@@ -118,6 +120,7 @@
           title: gettext('Delete Space'),
           description: gettext('Are you sure you want to delete space') +
           " '" + that.spaceDetail().details.space.entity.name + "'?",
+          submitCommit: true,
           buttonText: {
             yes: gettext('Delete'),
             no: gettext('Cancel')

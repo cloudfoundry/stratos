@@ -125,10 +125,12 @@
             title: gettext('Add a Route'),
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/summary/add-route/add-route.html',
+            submitCommit: true,
             buttonTitles: {
               submit: 'Create route'
             },
-            class: 'detail-view-thin'
+            class: 'dialog-form',
+            dialog: true
           },
           {
             data: data,

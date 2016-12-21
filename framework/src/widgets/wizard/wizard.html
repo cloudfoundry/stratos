@@ -80,7 +80,11 @@
     </button>
 
     <button type="button"
-      class="btn btn-primary next"
+      class="btn next"
+            ng-class="{
+                        'btn-primary': !wizardCtrl.stepCommit,
+                        'btn-commit': wizardCtrl.stepCommit
+                      }"
       ng-click="wizardCtrl.next()"
       ng-show="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
       ng-disabled="wizardCtrl.disableNext()">

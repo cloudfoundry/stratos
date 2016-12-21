@@ -178,6 +178,7 @@
               title: gettext('Pipeline Details'),
               templateUrl: path + 'pipeline-details.html',
               formName: 'application-pipeline-details-form',
+              stepCommit: true,
               nextBtnText: gettext('Create pipeline'),
               showBusyOnNext: gettext('Creating pipeline'),
               showBusyOnEnter: gettext("Retrieving the repository's branches"),

@@ -1,0 +1,6 @@
+button.no-focus:focus {
+  color: inherit;
+}
+button.no-focus:focus:hover {
+  color: $hpe-primary;
+}

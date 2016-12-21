@@ -99,6 +99,7 @@
             });
           });
         },
+        lastStepCommit: true,
         allowCancelAtLastStep: true,
         hideStepNavStack: true,
         steps: [

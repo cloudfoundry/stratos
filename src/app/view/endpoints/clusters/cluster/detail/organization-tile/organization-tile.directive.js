@@ -137,10 +137,12 @@
           {
             title: gettext('Edit Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
+            submitCommit: true,
             buttonTitles: {
               submit: gettext('Save')
             },
-            class: 'detail-view-thin'
+            class: 'dialog-form',
+            dialog: true
           },
           {
             data: {
@@ -174,6 +176,7 @@
         return confirmDialog({
           title: gettext('Delete Organization'),
           description: gettext('Are you sure you want to delete organization') + " '" + organizationName() + "'?",
+          submitCommit: true,
           buttonText: {
             yes: gettext('Delete'),
             no: gettext('Cancel')
