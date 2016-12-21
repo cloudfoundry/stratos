@@ -29,6 +29,7 @@
   var gulpBowerFiles = require('bower-files');
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
+  var path = require('path');
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -43,7 +44,8 @@
   var partials = config.partials;
 
   // Default OEM Config
-  var oemConfig = require('../oem/brands/hpe/oem_config.json');
+  var defaultBrandFolder = '../oem/brands/hpe/';
+  var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
@@ -161,11 +163,22 @@
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
-  gulp.task('copy:assets', function () {
+  gulp.task('copy:assets', ['copy:default-brand'], function () {
     return gulp
       .src(assetFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
+
+  // Copy the default brand's images and logo to the dist folder
+  gulp.task('copy:default-brand', function () {
+    return gulp
+      .src([
+        defaultBrandFolder + 'images/*',
+        defaultBrandFolder + 'favicon.ico'
+      ], {base: defaultBrandFolder})
+      .pipe(gulp.dest(paths.dist));
+  });
+
 
   gulp.task('copy:theme', function () {
     return gulp
