@@ -1,94 +1,129 @@
-'use strict';
+(function () {
+  'use strict';
 
-module.exports = function (config) {
+  module.exports = function (config) {
 
-  config.set({
+    config.set({
 
-    autoWatch: true,
+      autoWatch: true,
 
-    basePath: '../src/',
+      basePath: '../',
 
-    browserDisconnectTimeout: 10000,
+      browserDisconnectTimeout: 10000,
 
-    browserNoActivityTimeout: 20000,
+      browserNoActivityTimeout: 20000,
 
-    browsers: ['PhantomJS'],
+      browsers: ['PhantomJS'],
 
-    coverageReporter: {
-      type: 'html',
-      dir: '../tools/.coverage-karma/'
-    },
-
-    files: [
-      'lib/jquery/dist/jquery.js',
-      'lib/angular-mocks/angular-mocks.js',
-      'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
-      '../tools/stackato-templates.js',
-
-      'config.js',
-      'plugins/*/plugin.config.js',
-
-      'lib/helion-ui-framework/dist/**/*.html', {
-        pattern: 'lib/helion-ui-framework/dist/images/*.png',
-        watched: false,
-        included: false,
-        served: true,
-        nocache: false
-      }, {
-        pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
-        watched: false,
-        included: false,
-        served: true,
-        nocache: false
+      coverageReporter: {
+        type: 'html',
+        dir: 'tools/.coverage-karma/'
       },
 
-      'index.module.js',
-      'app/**/*.module.js',
-      'app/**/!(*.mock|*.spec).js',
-      'app/**/*.mock.js',
-      'app/**/*.spec.js',
-      'app/**/*.html',
-      'plugins/**/*.module.js',
-      'plugins/**/!(*.mock|*.spec).js',
-      'plugins/**/*.mock.js',
-      'plugins/**/*.spec.js',
-      'plugins/**/*.html'
-    ],
+      files: [
+        'src/lib/jquery/dist/jquery.js',
+        'src/lib/angular-mocks/angular-mocks.js',
+        'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        'tools/stackato-templates.js',
 
-    frameworks: ['wiredep', 'jasmine'],
+        'src/config.js',
+        'src/plugins/*/plugin.config.js',
 
-    ngHtml2JsPreprocessor: {
-      stripPrefix: 'lib/helion-ui-framework/dist/',
-      moduleName: 'templates'
-    },
+        'framework/**/*.html',
+        'framework/theme/**/*.svg',
+        {
+          pattern: 'framework/theme/images/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
+        {
+          pattern: 'oem/brands/hpe/images/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
+        {
+          pattern: 'src/plugins/cloud-foundry/view/assets/**/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
 
-    phantomjsLauncher: {
-      // Have phantomjs exit if a ResourceError is encountered
-      // (useful if karma exits without killing phantom)
-      exitOnResourceError: true
-    },
+        'framework/src/**/*.module.js',
+        'framework/src/**/!(*.mock|*.spec).js',
+        // Ignore for now - suppresses warning when running tests as we don't have any mocks'
+        //'framework/src/**/*.mock.js',
+        'framework/src/**/*.spec.js',
 
-    plugins: [
-      'karma-phantomjs-launcher',
-      'karma-jasmine',
-      'karma-ng-html2js-preprocessor',
-      'karma-coverage',
-      'karma-wiredep'
-    ],
+        'src/index.module.js',
+        'src/app/**/*.module.js',
+        'src/app/**/!(*.mock|*.spec).js',
+        'src/app/**/*.mock.js',
+        'src/app/**/*.spec.js',
+        'src/app/**/*.html',
+        'src/plugins/**/*.module.js',
+        'src/plugins/**/!(*.mock|*.spec).js',
+        'src/plugins/**/*.mock.js',
+        'src/plugins/**/*.spec.js',
+        'src/plugins/**/*.html'
+      ],
 
-    preprocessors: {
-      'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
-      'app/**/*.html': ['ng-html2js'],
-      'app/**/!(*.mock|*.spec).js': ['coverage'],
-      'plugins/**/*.html': ['ng-html2js'],
-      'plugins/**/!(*.mock|*.spec).js': ['coverage']
-    },
+      frameworks: ['wiredep', 'jasmine'],
 
-    proxies: {
-      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
-    },
+      ngHtml2JsPreprocessor: {
+        moduleName: 'templates',
 
-    reporters: ['progress', 'coverage']
-  });
-};
+        cacheIdFromPath: function (filePath) {
+          if (filePath.indexOf('src/') === 0) {
+            return filePath.substr(4);
+          } else if (filePath.indexOf('framework/src/') === 0) {
+            return filePath.substr(14);
+          } else if (filePath.indexOf('framework/theme/') === 0) {
+            return filePath.substr(16);
+          } else {
+            return filePath;
+          }
+        }
+      },
+
+      phantomjsLauncher: {
+        // Have phantomjs exit if a ResourceError is encountered
+        // (useful if karma exits without killing phantom)
+        exitOnResourceError: true
+      },
+
+      plugins: [
+        'karma-phantomjs-launcher',
+        'karma-jasmine',
+        'karma-ng-html2js-preprocessor',
+        'karma-coverage',
+        'karma-wiredep'
+      ],
+
+      preprocessors: {
+        'framework/theme/**/*.svg': ['ng-html2js'],
+        'framework/src/**/*.html': ['ng-html2js'],
+        'framework/src/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/app/**/*.html': ['ng-html2js'],
+        'src/app/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/**/*.html': ['ng-html2js'],
+        'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
+        'src/plugins/github/!(*.mock|*.spec).js': ['coverage']
+      },
+
+      proxies: {
+        '/images/': '/base/oem/brands/hpe/images/',
+        '/svg/': '/base/framework/theme/svg/',
+        '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/',
+        '/app/view/assets/': '/base/app/view/assets/'
+      },
+
+      reporters: ['progress', 'coverage']
+    });
+  };
+})();

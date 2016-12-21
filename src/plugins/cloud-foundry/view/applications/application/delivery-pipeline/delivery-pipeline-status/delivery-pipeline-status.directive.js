@@ -17,26 +17,23 @@
     return {
       scope: {
         pipeline: '=',
-        hce: '='
+        hce: '=',
+        setup: '='
       },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline-status/delivery-pipeline-status.html',
       controller: ApplicationSetupPipelineController,
-      controllerAs: 'applicationSetupPipelineCtrl'
+      controllerAs: 'applicationSetupPipelineCtrl',
+      bindToController: true
     };
   }
 
-  ApplicationSetupPipelineController.$inject = [
-    'app.event.eventService'
-  ];
+  ApplicationSetupPipelineController.$inject = [];
 
   /**
    * @name ApplicationSetupPipelineController
    * @constructor
-   * @param {app.event.eventService} eventService - the Event management service
-   * @property {app.event.eventService} eventService - the Event management service
    */
-  function ApplicationSetupPipelineController(eventService) {
-    this.eventService = eventService;
+  function ApplicationSetupPipelineController() {
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {
@@ -46,7 +43,7 @@
      * @description trigger add pipeline workflow
      */
     setupPipeline: function () {
-      this.eventService.$emit('cf.events.START_ADD_PIPELINE_WORKFLOW');
+      this.setup();
     }
   });
 

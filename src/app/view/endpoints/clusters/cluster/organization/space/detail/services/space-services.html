@@ -1,25 +1,27 @@
 <div class="space-services-table">
-  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length < 1"
+  <div ng-if="spaceSrvsCtrl.serviceInstances.length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>
       You have no service instances
     </div>
   </div>
 
-  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length > 0"
+  <div ng-if="spaceSrvsCtrl.serviceInstances.length > 0"
        st-table="spaceSrvsCtrl.visibleServiceInstances"
-       st-safe-src="spaceSrvsCtrl.spaceDetail().instances">
+       st-safe-src="spaceSrvsCtrl.serviceInstances">
 
     <div>
       <div class="panel panel-default">
-        <table class="table table-actionable" >
+        <table
+          class="table"
+          ng-class="{'table-actionable' : spaceSrvsCtrl.canDeleteOrUnbind}">
           <thead>
           <tr>
             <th st-sort="entity.name" st-sort-default="true" translate>SERVICE INSTANCES</th>
             <th st-sort="entity.type" translate>TYPE</th>
             <th translate>PLAN</th>
             <th translate>APPLICATION ATTACHED</th>
-            <th translate>ACTION</th>
+            <th translate ng-if="spaceSrvsCtrl.canDeleteOrUnbind">ACTION</th>
           </tr>
           </thead>
           <tbody>
@@ -29,21 +31,22 @@
             <td>{{ instance.entity.service_plan.entity.service.entity.label }}</td>
             <td>{{ instance.entity.service_plan.entity.name }}</td>
             <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
-            <td>
+            <td ng-if="spaceSrvsCtrl.canDeleteOrUnbind">
               <actions-menu actions="spaceSrvsCtrl.actionsPerSI[instance.metadata.guid]"
                             action-target="instance"
                             menu-icon="helion-icon helion-icon-More"
-                            menu-position="actions-menu-right">
+                            menu-position="actions-menu-right"
+                            enable-button-mode="true">
               </actions-menu>
             </td>
           </tr>
           </tbody>
           <tfoot ng-init="spaceSrvsCtrl.showInstances = 5"
-                 ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.spaceDetail().instances.length">
+                 ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.serviceInstances.length">
           <tr>
-            <td colspan="5" class="text-center">
-              <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.spaceDetail().instances.length">
-                <span translate>Show All</span> ({{spaceSrvsCtrl.spaceDetail().instances.length}})
+            <td colspan="{{spaceSrvsCtrl.canDeleteOrUnbind ? 5 : 4}}" class="text-center">
+              <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.serviceInstances.length">
+                <span translate>Show All</span> ({{spaceSrvsCtrl.serviceInstances.length}})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
             </td>

@@ -12,6 +12,9 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.summary', {
       url: '/summary',
+      params: {
+        newlyCreated: false
+      },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/summary.html',
       controller: ApplicationSummaryController,
       controllerAs: 'applicationSummaryCtrl'
@@ -24,11 +27,14 @@
     '$log',
     '$q',
     '$scope',
+    '$filter',
     'app.model.modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.routesService'
+    'app.view.endpoints.clusters.routesService',
+    'helion.framework.widgets.dialog.confirm',
+    'app.view.notificationsService'
   ];
 
   /**
@@ -39,20 +45,26 @@
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $filter - the Angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
-   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.utils.utilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @property {app.model.utilsService} utils - the utils service
+   * @property {app.utils.utilsService} utils - the utils service
+   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
+   * @property {app.view.notificationsService} notificationsService - the toast notification service
    */
-  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils,
-                                        routesService) {
+  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
+                                        modelManager, addRoutesService, editAppService, utils,
+                                        routesService, confirmDialog, notificationsService) {
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -62,12 +74,19 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
     this.editAppService = editAppService;
+    this.confirmDialog = confirmDialog;
+    this.notificationsService = notificationsService;
     this.utils = utils;
     this.$log = $log;
     this.$q = $q;
     this.instanceViewLimit = 5;
 
-    this.update = _.get($scope, '$parent.appCtrl.updateSummary') || angular.noop;
+    this.update = function () {
+      return this.appCtrl.update();
+    };
+
+    // Show a "suggested next steps" if this app is newly created (transitionned from add app flow)
+    this.newlyCreated = $stateParams.newlyCreated;
 
     // Hide these options by default until we can ascertain that user can perform them
     this.hideAddRoutes = true;
@@ -78,7 +97,7 @@
     this.routesActionMenu = [
       {
         name: gettext('Unmap from App'),
-        disabled: true,
+        disabled: false,
         execute: function (route) {
           routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
             that.update();
@@ -87,7 +106,7 @@
       },
       {
         name: gettext('Delete Route'),
-        disable: true,
+        disabled: false,
         execute: function (route) {
           routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
             that.update();
@@ -96,40 +115,76 @@
       }
     ];
 
+    this.instancesActionMenu = [
+      {
+        name: gettext('Terminate'),
+        disabled: false,
+        execute: function (instanceIndex) {
+          that.confirmDialog({
+            title: gettext('Terminate Instance'),
+            description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
+            errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),
+            buttonText: {
+              yes: gettext('Terminate'),
+              no: gettext('Cancel')
+            },
+            callback: function () {
+              return that.model.terminateRunningAppInstanceAtGivenIndex(that.cnsiGuid, that.id, instanceIndex)
+                .then(function () {
+                  that.notificationsService.notify('success', gettext('Instance successfully terminated'));
+                  that.update();
+                });
+            }
+          });
+        }
+      }
+    ];
+
     function init() {
+      // Filter out the stackato hce service
+      that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
+
+      that.canSetupPipeline = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
 
       // Unmap from app
-      that.routesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+      that.routesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update,
         that.model.application.summary.space_guid
       );
-      that.$log.debug('Auth Action: Unmap from app disabled: ' + that.routesActionMenu[0].disabled);
+      that.$log.debug('Auth Action: Unmap from app hidden: ' + that.routesActionMenu[0].hidden);
       // delete route
-      that.routesActionMenu[1].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+      that.routesActionMenu[1].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.route,
         that.authModel.actions.delete,
         that.model.application.summary.space_guid
       );
-      that.$log.debug('Auth Action: Delete from app disabled: ' + that.routesActionMenu[1].disabled);
+      that.$log.debug('Auth Action: Delete from app hidden: ' + that.routesActionMenu[1].hidden);
+      that.hideRouteActions = !_.find(that.routesActionMenu, { hidden: false });
 
       // hide Add Routes
       that.hideAddRoutes = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.route,
         that.authModel.actions.create, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Add routes disabled: ' + that.hideAddRoutes);
+      that.$log.debug('Auth Action: Hide Add routes hidden: ' + that.hideAddRoutes);
 
       // hide Edit App
       that.hideEditApp = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Edit App disabled: ' + that.hideEditApp);
+      that.$log.debug('Auth Action: Hide Edit App hidden: ' + that.hideEditApp);
 
       // hide Manage Services
       that.hideManageServices = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.managed_service_instance,
         that.authModel.actions.create, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Manage Services disabled: ' + that.hideEditApp);
+      that.$log.debug('Auth Action: Hide Manage Services hidden: ' + that.hideEditApp);
+
+      // Terminate instance action
+      that.instancesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.application,
+        that.authModel.actions.update, that.model.application.summary.space_guid);
+      that.hideInstanceActions = !_.find(that.instancesActionMenu, { hidden: false });
 
       return that.$q.resolve();
     }

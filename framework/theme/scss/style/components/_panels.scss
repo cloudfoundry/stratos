@@ -1,0 +1,31 @@
+.panel {
+  @include hpe-box-shadow-small();
+  border: none;
+  color: $panel-fg;
+
+  .panel-heading.action-header {
+    height: $panel-heading-height;
+    padding: $panel-heading-padding;
+  }
+}
+
+.panel:not(.panel-default) {
+  .panel-title,
+  .panel-heading {
+    font-size: $font-size-large;
+    border: none;
+  }
+}
+
+.panel.panel-bordered {
+  border: 2px solid $panel-default-border;
+  box-shadow: none;
+
+  .panel-heading {
+    border-bottom: 1px solid $panel-default-border;
+
+    &.action-header {
+      font-size: $font-size-base;
+    }
+  }
+}

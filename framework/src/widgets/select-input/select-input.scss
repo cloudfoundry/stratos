@@ -1,0 +1,82 @@
+select-input {
+  display: block;
+
+  &:hover, label:hover {
+    cursor: pointer;
+  }
+
+  .dropdown {
+    min-width: 100%;
+  }
+
+  .dropdown-menu {
+    left: 0;
+    top: 0;
+    margin-top: 0;
+    min-width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .select-input-field {
+    @include helion-flex-align(flex-start, center);
+
+    .dropdown-toggle {
+      margin-left: auto;
+    }
+
+    .select-input-value {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .select-option {
+    white-space: nowrap;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: $select-input-selected-bg;
+      color: $select-input-selected-fg;
+    }
+  }
+
+  .select-input-refresh-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+
+    .select-input-refresh {
+      display: flex;
+      flex-flow: row nowrap;
+
+      .refresh-label {
+        user-select: none;
+        font-weight: 500;
+        color: $hpe-primary;
+        &:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
+
+      .spinner-wrapper {
+        display: flex;
+        align-items: center;
+        margin-right: $padding-xs-horizontal;
+
+        .spinner {
+          @keyframes spin { 100% { transform:rotate(360deg); } }
+          font-size: $font-size-base;
+          width: $font-size-base;
+          height: $font-size-base;
+          animation: spin 666ms linear infinite;
+        }
+      }
+
+    }
+  }
+
+}

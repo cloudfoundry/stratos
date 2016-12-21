@@ -11,76 +11,68 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.tiles', {
-      url: '',
+      url: '/list',
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
       controller: ClusterTilesController,
       controllerAs: 'clustersCtrl',
+      params: {
+        // param set by Router module to prevent relisting
+        // of servicesInstances and userServiceInstances
+        instancesListed: false
+      },
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry Endpoints'),
-        parent: function () {
-          return 'endpoint.dashboard';
-        }
+        label: gettext('Cloud Foundry'),
+        parent: 'endpoint.dashboard'
       }
     });
   }
 
   ClusterTilesController.$inject = [
     '$q',
+    '$state',
+    '$stateParams',
     'app.model.modelManager',
-    'app.view.hcfRegistration',
-    'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm'
+    'app.utils.utilsService'
   ];
 
   /**
    * @name ClusterTilesController
    * @constructor
    * @param {object} $q - the angular $q service
+   * @param {object} $state - the UI router $state service
+   * @param  {$stateParams} $stateParams - UI Router state params
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @property {object} $q - the angular $q service
+   * @property {object} $state - the UI router $state service
+   * @property  {$stateParams} $stateParams - UI Router state params
+   * @property {app.model.modelManager} modelManager - the Model management service
+   * @property {app.utils.utilsService} utils - the utils service
    */
-  function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog) {
+  function ClusterTilesController($q, $state, $stateParams, modelManager, utils) {
+    var that = this;
+    this.modelManager = modelManager;
+
     this.$q = $q;
-    this.hcfRegistration = hcfRegistration;
-    this.notificationsService = notificationsService;
-    this.confirmDialog = confirmDialog;
+    this.$state = $state;
+    this.$stateParams = $stateParams;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
+    this.serviceInstances = {};
+    this.state = '';
 
-    this.boundUnregister = angular.bind(this, this.unregister);
-    this.boundConnect = angular.bind(this, this.connect);
-    this.boundDisconnect = angular.bind(this, this.disconnect);
+    function init() {
+      return that.refreshClusterModel();
+    }
 
-    this.createClusterList();
-    this.refreshClusterModel();
+    utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
+
   }
 
   angular.extend(ClusterTilesController.prototype, {
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name refreshClusterList
-     * @description Update the core model data + create the cluster list
-     * @returns {promise} refresh cluster promise
-     */
-    refreshClusterModel: function () {
-      var that = this;
-      this.updateState(true, false);
-      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
-        .then(function () {
-          that.createClusterList();
-        })
-        .catch(function () {
-          that.updateState(false, true);
-        });
-    },
-
     /**
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
@@ -97,12 +89,8 @@
 
         if (cloned.isConnected) {
           cloned.hasExpired = false;
-        } else {
-          var tokenExpiry =
-            _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-          cloned.hasExpired = new Date().getTime() > tokenExpiry * 1000;
+          that.serviceInstances[cloned.guid] = cloned;
         }
-        that.serviceInstances[cloned.guid] = cloned;
       });
       this.updateState(false, false);
     },
@@ -110,104 +98,25 @@
     /**
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
-     * @name connect
-     * @description Connect this cluster using credentials about to be supplied
-     * @param {string} cnsiGUID identifier of cluster
+     * @name refreshClusterList
+     * @description Update the core model data + create the cluster list
+     * @returns {promise} refresh cluster promise
      */
-    connect: function (cnsiGUID) {
-      this.credentialsFormCNSI = cnsiGUID;
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name onConnectCancel
-     * @description Handle the cancel from connecting to a cluster
-     */
-    onConnectCancel: function () {
-      this.credentialsFormCNSI = false;
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name onConnectCancel
-     * @param {object} serviceInstance - Service instance details
-     * @description Handle the success from connecting to a cluster
-     */
-    onConnectSuccess: function (serviceInstance) {
-      this.credentialsFormCNSI = false;
+    refreshClusterModel: function () {
       var that = this;
-      this.refreshClusterModel().then(function () {
-        // Initialise AuthModel for service
-        that.authModel.initializeForEndpoint(serviceInstance.guid);
-      });
-    },
+      this.updateState(true, false);
 
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name disconnect
-     * @description Disconnect this cluster
-     * @param {string} cnsiGUID identifier of cluster
-     */
-    disconnect: function (cnsiGUID) {
-      var that = this;
-      this.userServiceInstanceModel.disconnect(cnsiGUID)
-        .catch(function (error) {
-          that.notificationsService.notify('error', gettext('Failed to disconnect Cloud Foundry endpoint'), {
-            timeOut: 10000
-          });
-          return that.$q.reject(error);
-        })
+      var promises = [this.stackatoInfo.getStackatoInfo()];
+      if (!that.$stateParams.instancesListed) {
+        promises = promises.concat([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
+      }
+      return this.$q.all(promises)
         .then(function () {
-          that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
-          that.refreshClusterModel().then(function () {
-            that.authModel.remove(cnsiGUID);
-          });
+          that.createClusterList();
+        })
+        .catch(function () {
+          that.updateState(false, true);
         });
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name register
-     * @description Add a cluster to the console
-     */
-    register: function () {
-      var that = this;
-      this.hcfRegistration.add().then(function () {
-        return that.refreshClusterModel();
-      });
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name unregister
-     * @description Remove a cluster from the console
-     * @param {object} serviceInstance cnsi entry for cluster
-     */
-    unregister: function (serviceInstance) {
-      var that = this;
-
-      this.confirmDialog({
-        title: gettext('Unregister Endpoint'),
-        description: gettext('Are you sure you want to unregister endpoint \'' + serviceInstance.name + '\''),
-        errorMessage: gettext('Failed to unregister endpoint'),
-        buttonText: {
-          yes: gettext('Unregister'),
-          no: gettext('Cancel')
-        },
-        callback: function () {
-          return that.serviceInstanceModel.remove(serviceInstance).then(function () {
-            that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
-            that.refreshClusterModel().then(function () {
-              that.authModel.remove(serviceInstance.guid);
-            });
-          });
-        }
-      });
     },
 
     /**
@@ -230,6 +139,5 @@
         this.state = 'noClusters';
       }
     }
-
   });
 })();

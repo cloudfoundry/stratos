@@ -1,0 +1,106 @@
+//
+// Percent-Gauges
+// --------------------------------------------------
+.percent-gauge {
+  padding-bottom: $percent-gauge-margin-vertical;
+  padding-top: $percent-gauge-margin-vertical;
+
+  .gauge-label {
+    line-height: 100%;
+    margin-bottom: $percent-gauge-margin-vertical;
+    margin-top: $percent-gauge-margin-vertical;
+    text-transform: uppercase;
+
+    .gauge-info {
+      float: right;
+    }
+  }
+
+  .percent-gauge-bar {
+    display: inline-block;
+    height: $hpe-progress-bar-height;
+    margin-bottom: $percent-gauge-margin-vertical;
+    margin-top: $percent-gauge-margin-vertical;
+    vertical-align: middle;
+    width: 100%;
+
+    .percent-gauge-progress-bar {
+      height: 4px;
+      margin-top: 0px;
+      box-shadow: none;
+      float: left;
+      background-color: $percent-gauge-bar-color;
+    }
+
+    &.percent-gauge-quota {
+      &:after {
+        @include hpe-four-stepped-gradient();
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+
+      .percent-gauge-progress-bar {
+        width: 0%;
+        transition: width 0.6s ease;
+      }
+
+      .percent-gauge-utilized-bar {
+        @include progress-bar-variant($percent-gauge-bar-color);
+        margin-bottom: 0;
+        margin-top: 0;
+
+        &:only-child {
+          margin-bottom: 0;
+          margin-top: 0;
+        }
+
+        &.percent-gauge-at-max {
+          @include progress-bar-variant($percent-gauge-bar-max-color);
+        }
+      }
+    }
+
+    &.percent-gauge-instance {
+      &:after {
+        background-color: $percent-gauge-bar-max-color;
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+
+      .percent-gauge-progress-bar {
+        width: 1000%;
+        transition: width 0.6s ease;
+      }
+
+      .percent-gauge-utilized-bar {
+        background-color: $percent-gauge-bar-color;
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+
+      .progress-bar {
+        width: 100%;
+      }
+    }
+
+  }
+
+  &.percent-gauge-over-max {
+    &:after {
+      // Make a small circle that sits to the right of the progress bar.
+      background-color: $percent-gauge-alert-color;
+      border-radius: $percent-gauge-alert-size / 2;
+      content: "";
+      display: inline-block;
+      height: $percent-gauge-alert-size;
+      margin-bottom: 0;
+      margin-top: 0;
+      vertical-align: middle;
+      width: $percent-gauge-alert-size;
+    }
+
+    .percent-gauge-bar {
+      width: calc(100% - #{$percent-gauge-alert-box-width});
+    }
+  }
+}

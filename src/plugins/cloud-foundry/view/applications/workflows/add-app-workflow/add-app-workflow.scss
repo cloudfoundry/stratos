@@ -5,12 +5,20 @@
 }
 
 add-app-workflow {
+  height: 100%;
+  display: flex;
+
   .services-filter-form {
     margin-bottom: $hpe-unit-space / 2;
+  }
+
+  .media-body.select-delivery-pipeline > p {
+    padding-bottom: $hpe-unit-space / 2;
   }
 }
 
 .offline-route-value {
   color: $gray-darker;
   background: none;
+  word-wrap: break-word;
 }

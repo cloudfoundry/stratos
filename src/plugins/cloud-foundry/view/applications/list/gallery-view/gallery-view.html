@@ -1,4 +1,8 @@
-<div class="app-gallery-card col-md-4 col-sm-1"
-     ng-repeat="app in applicationsListCtrl.model.data.applications track by app.metadata.guid">
+<div ng-if="applicationsListCtrl.model.showCardLayout" class="app-gallery-card col-md-4 col-sm-1"
+     ng-repeat="app in applicationsListCtrl.model.data.applications track by app.clusterId + app.metadata.guid">
   <application-gallery-card app="app" cnsi-guid="app.clusterId"></application-gallery-card>
+</div>
+
+<div ng-if="!applicationsListCtrl.model.showCardLayout">
+    <table-view apps="applicationsListCtrl.model.data.applications"></table-view>
 </div>

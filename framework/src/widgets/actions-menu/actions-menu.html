@@ -1,0 +1,25 @@
+<div class="action-menu-wrapper">
+  <div ng-show="actionsMenuCtrl.buttonMode"
+       class="action-button">
+    <a class="btn btn-link" ng-click="actionsMenuCtrl.executeAction($event, actionsMenuCtrl.actions[0])">
+      <span>{{ actionsMenuCtrl.actions[0].name }}</span>
+    </a>
+  </div>
+  <div ng-show="!actionsMenuCtrl.buttonMode"
+       class="actions-menu dropdown"
+       ng-class="{ 'open': actionsMenuCtrl.open }">
+    <i class="actions-menu-icon dropdown-toggle" ng-class="actionsMenuCtrl.icon" tabindex="0"></i>
+    <ul class="actions-menu-list dropdown-menu" ng-class="actionsMenuCtrl.position">
+      <li class="actions-menu-label dropdown-header" ng-if="actionsMenuCtrl.menuLabel">
+        {{ actionsMenuCtrl.menuLabel }}
+      </li>
+      <li class="actions-menu-item" ng-repeat="action in actionsMenuCtrl.actions"
+          ng-click="actionsMenuCtrl.executeAction($event, action)" tabindex="0"
+          ng-disabled="action.disabled" ng-hide="action.hidden">
+        <i ng-class="action.icon" ng-if="action.icon"></i>
+        {{ action.name }}
+      </li>
+    </ul>
+  </div>
+</div>
+

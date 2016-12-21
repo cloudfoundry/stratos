@@ -56,6 +56,9 @@
     this.stateInitialised = false;
 
     function refreshUsers() {
+      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      that.isAdmin = user.admin;
+
       that.userRoles = {};
 
       // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
@@ -84,17 +87,23 @@
               roleLabel: that.organizationModel.organizationRoleToString(role)
             });
             unEditableOrg = unEditableOrg ||
-                !that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, orgGuid);
+                !that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, orgGuid);
           });
         });
 
-        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid] || createUserActions();
-        // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
-        that.userActions[aUser.metadata.guid][0].disabled = !that.canEditAnOrg;
-        // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role
-        // of the user row
-        that.userActions[aUser.metadata.guid][1].disabled = unEditableOrg;
+        if (that.showTopAction()) {
+          that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid] || createUserActions();
+          // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
+          that.userActions[aUser.metadata.guid][0].disabled = !that.canEditAnOrg;
+          // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role
+          // of the user row
+          that.userActions[aUser.metadata.guid][1].disabled = unEditableOrg;
+        } else {
+          delete that.userActions[aUser.metadata.guid];
+        }
       });
+
+      that.haveShownAnAction = Object.keys(that.userActions).length;
 
       return $q.resolve();
     }
@@ -104,11 +113,15 @@
     };
 
     this.disableChangeRoles = function () {
-      return !that.canEditAnOrg;
+      return !this.canEditAnOrg;
     };
 
     this.disableRemoveFromOrg = function () {
-      return this.selectedUsersCount() < 1 || !that.canEditAllOrgs;
+      return this.selectedUsersCount() < 1 || !this.canEditAllOrgs;
+    };
+
+    this.showTopAction = function () {
+      return this.canEditAnOrg || this.isAdmin;
     };
 
     // We need the debounce to account for SmartTable delays
@@ -235,12 +248,14 @@
       return rolesService.removeAllRoles(that.guid, guidsToUsers(that.selectedUsers));
     };
 
-    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.detail.users', $state, init);
+
+    $scope.$on('$destroy', rolesUpdatedListener);
   }
 
 })();

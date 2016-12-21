@@ -1,0 +1,55 @@
+body {
+  padding-top: $navbar-height;
+}
+
+.font-thin {
+  font-weight: 100;
+}
+
+.font-extra-light {
+  font-weight: 200;
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semi-bold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extra-bold {
+  font-weight: 800;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+a {
+  cursor: pointer;
+}
+
+.helion-icon-r90 {
+  transform: rotate(90deg);
+}
+
+.helion-icon-r180 {
+  transform: rotate(180deg);
+}
+
+.helion-icon-r270 {
+  transform: rotate(270deg);
+}

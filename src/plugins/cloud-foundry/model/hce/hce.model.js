@@ -49,12 +49,18 @@
       notificationTargetTypes: []
     };
 
+    var baseNotificationData = {
+      tokenLabel: gettext('Token'),
+      tokenErrorLabel: gettext('Token is required')
+    };
+
     // This will be provided by HCE in future
     this.staticNotificationData = {
       hipchat: {
         title: gettext('HipChat'),
         description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
         endpointLabel: gettext('Server URL with Room Number or Name'),
+        endpointErrorLabel: gettext('Server URL is required'),
         img: 'hipchat_logo.png',
         imgScale: 0.8
       },
@@ -62,6 +68,7 @@
         title: gettext('Http'),
         description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
         endpointLabel: gettext('Server URL'),
+        endpointErrorLabel: gettext('Server URL is required'),
         img: 'httppost_logo.png',
         imgScale: 0.8
       },
@@ -69,31 +76,26 @@
         title: gettext('Flow Dock'),
         description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
         endpointLabel: gettext('API Endpoint'),
+        endpointErrorLabel: gettext('API Endpoint is required'),
         img: 'flowdock_logo.png',
         imgScale: 0.75
-      },
-      githubpullrequest: {
-        hidden: true,
-        title: gettext('GitHub'),
-        description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
-        endpointLabel: gettext('Target URL'),
-        img: 'github_octocat.png'
       },
       slack: {
         title: gettext('Slack'),
         description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack channel.'),
-        endpointLabel: gettext('URL with optional Channel or User name'),
+        endpointLabel: gettext('Webhook URL'),
+        endpointErrorLabel: gettext('Webhook URL is required'),
+        tokenLabel: gettext('Provide #<Channel Name> or @<Username>'),
+        tokenErrorLabel: gettext('Channel or user name is required'),
         img: 'slack.png',
         imgScale: 0.75
-      },
-      bitbucketpullrequest: {
-        hidden: true,
-        title: gettext('BitBucket'),
-        description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
-        endpointLabel: gettext('Target URL'),
-        img: 'bitbucket.png'
       }
     };
+
+    // Fill in defaults
+    _.each(this.staticNotificationData, function (val, key) {
+      that.staticNotificationData[key] = _.defaults(val, baseNotificationData);
+    });
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLogout();
@@ -283,7 +285,7 @@
 
       var data = {
         // NOTE: Currently `stormrunner` is the only post-deploy action supported
-        task_type: "stormrunner",
+        task_type: 'stormrunner',
         task_label: taskLabel,
         project_id: projectId,
         credential_id: credentialId,
@@ -539,11 +541,11 @@
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
-     * @param {string} vcsUrl - the VCS browse URL
+     * @param {string} tokenGuid - the guid of the VCS token to use
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, vcsUrl) {
+    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, tokenGuid) {
       var newProject = {
         name: name,
         vcs_id: vcs.vcs_id,
@@ -567,14 +569,37 @@
       // Special header to insert Github token
       var headers = angular.extend(
         {
-          'x-cnap-vcs-url': vcsUrl,
-          'x-cnap-vcs-token-required': true
+          'x-cnap-vcs-token-guid': tokenGuid
         },
         this.hceProxyPassthroughConfig.headers
       );
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .createProject(guid, newProject, {}, {headers: headers});
+    },
+
+    /**
+     * @function updateProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Update an existing project
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} tokenGuid - the ID of the VCS token to use
+     * @param {number} projectId - the HCE project ID to update
+     * @param {object} data - the new project data
+     * @returns {promise} A promise object
+     * @public
+     */
+    updateProject: function (guid, tokenGuid, projectId, data) {
+      // Special header to insert Github token
+      var headers = angular.extend(
+        {
+          'x-cnap-vcs-token-guid': tokenGuid
+        },
+        this.hceProxyPassthroughConfig.headers
+      );
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .updateProject(guid, projectId, data, {}, {headers: headers});
     },
 
     /**

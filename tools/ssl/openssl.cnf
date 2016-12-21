@@ -1,0 +1,17 @@
+[ req ]
+distinguished_name     = req_distinguished_name
+prompt                 = no
+attributes             = req_attributes
+
+[ req_distinguished_name ]
+C                      = GB
+ST                     = Bristol
+L                      = Bristol
+O                      = HPe
+OU                     = Stackato
+CN                     = localhost
+emailAddress           = test.stackato@hpe.com
+
+[ req_attributes ]
+challengePassword              = EMPTY
+unstructuredName               = EMPTY

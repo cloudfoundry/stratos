@@ -9,7 +9,8 @@
   utilsServiceFactory.$inject = [
     '$q',
     '$timeout',
-    '$log'
+    '$log',
+    '$window'
   ];
 
   /**
@@ -20,10 +21,54 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
+   * @param {object} $window - angular $window service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log) {
+  function utilsServiceFactory($q, $timeout, $log, $window) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
+
+    /*
+     * Expression used to validate URLs in the Endpoint registration form.
+     * Expression explanation available from https://gist.github.com/dperini/729294
+     * Passes the following criteria: https://mathiasbynens.be/demo/url-regex
+     *
+     */
+    var urlValidationExpression = new RegExp(
+      '^' +
+      // protocol identifier
+      'http(s)?://' +
+      // user:pass authentication
+      '(?:\\S+(?::\\S*)?@)?' +
+      '(?:' +
+      // IP address exclusion
+      // private & local networks
+      '(?!(?:10|127)(?:\\.\\d{1,3}){3})' +
+      '(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})' +
+      '(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})' +
+      // IP address dotted notation octets
+      // excludes loopback network 0.0.0.0
+      // excludes reserved space >= 224.0.0.0
+      // excludes network & broacast addresses
+      // (first & last IP address of each class)
+      '(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])' +
+      '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
+      '(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))' +
+      '|' +
+      // host name
+      '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
+      // domain name
+      '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
+      // TLD identifier
+      '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' +
+      // TLD may end with dot
+      '\\.?' +
+      ')' +
+      // port number
+      '(?::\\d{2,5})?' +
+      // resource path
+      '(?:[/?#]\\S*)?' +
+      '$', 'i'
+    );
 
     return {
       chainStateResolve: chainStateResolve,
@@ -31,7 +76,11 @@
       mbToHumanSize: mbToHumanSize,
       retryRequest: retryRequest,
       runInSequence: runInSequence,
-      sizeUtilization: sizeUtilization
+      sizeUtilization: sizeUtilization,
+      urlValidationExpression: urlValidationExpression,
+      extractCloudFoundryError: extractCloudFoundryError,
+      extractCodeEngineError: extractCodeEngineError,
+      getOemConfiguration: getOemConfiguration
     };
 
     /**
@@ -200,6 +249,10 @@
       }
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
+
+    function getOemConfiguration() {
+      return $window.env.OEM_CONFIG;
+    }
   }
 
   mbToHumanSizeFilter.$inject = [
@@ -211,4 +264,65 @@
       return utilsService.mbToHumanSize(input);
     };
   }
+
+  function extractCloudFoundryError(errorResponse) {
+    /*
+     Cloud Foundry errors have the following format:
+     data: {
+     description: 'some text',
+     errorCode: 1000,
+     error_code: 'UnknownHostException'
+     }
+     */
+    var errorText;
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
+    if (errorResponse.data && errorResponse.data.error_code) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.description && _.isString(errorResponse.description)) {
+      errorText = errorResponse.description;
+    }
+
+    if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
+      errorText = errorText + gettext(', Error Code: ') + errorResponse.error_code;
+    }
+
+    return errorText;
+  }
+
+  function extractCodeEngineError(errorResponse) {
+
+    /*
+     Code Engine errors have the following format
+     data: {
+     message: 'some text',
+     detail: 'more text',
+     }
+     */
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
+    var errorText;
+    if (errorResponse.data && errorResponse.data.message) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.message && _.isString(errorResponse.message)) {
+      errorText = errorResponse.message;
+      if (errorResponse.details || errorResponse.detail) {
+        var detail = errorResponse.details || errorResponse.detail;
+        if (_.isString(detail)) {
+          errorText = errorText + ', ' + detail;
+        }
+      }
+    }
+
+    return errorText;
+  }
+
 })();

@@ -87,6 +87,14 @@
       }
     });
 
+    this.actions = [{
+      name: gettext('Rollback'),
+      disabled: that.disableRollbackAction,
+      execute: function (v) {
+        return that.rollback(v);
+      }
+    }];
+
     function init() {
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -96,6 +104,7 @@
         authModel.resources.application,
         authModel.actions.update,
         that.appModel.application.summary.space_guid);
+      that.actions[0].disabled = that.disableRollbackAction;
 
       return that.$q.resolve();
     }

@@ -1,0 +1,56 @@
+// Generate styles for the stacked detail views
+@for $i from 1 through 10 {
+  .detail-view.detail-view-stack-#{$i} {
+      left: $i * -$detail-view-inset;
+      top: $i * $detail-view-inset;
+      bottom: $i * $detail-view-inset;
+  }
+}
+
+.detail-view {
+
+  > .modal-dialog {
+    margin: 0;
+    height: 100%;
+    width: $detail-view-width;
+    > .modal-content {
+      box-shadow: none;
+      height: 100%;
+
+      .wizard-step-full {
+        width: 100%;
+      }
+    }
+  }
+
+  &.fade {
+    .modal-dialog {
+      transform: none;
+      transition: left $detail-view-transition-duration ease-out;
+      left: 100%;
+    }
+    &.in {
+      transition: all $detail-view-shrink-transition-duration ease-out;
+      transition-property: left, bottom, top;
+      .modal-dialog {
+        left: 100%-$detail-view-width;
+      }
+    }
+  }
+}
+
+body:not(.modal-open) {
+  > .detail-view-open {
+    .modal-backdrop.detail-view-backdrop {
+      z-index: 1040 !important;
+    }
+  }
+}
+
+body > .detail-view-container {
+  position: absolute;
+}
+
+body.detail-view-open {
+  overflow: hidden;
+}

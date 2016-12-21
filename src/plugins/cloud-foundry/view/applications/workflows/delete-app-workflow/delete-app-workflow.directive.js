@@ -17,11 +17,18 @@
     return {
       controller: DeleteAppWorkflowController,
       controllerAs: 'deleteAppWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '=',
+        guids: '='
+      },
+      bindToController: true
     };
   }
 
   DeleteAppWorkflowController.$inject = [
+    '$filter',
     'app.model.modelManager',
     'app.event.eventService',
     '$q',
@@ -33,6 +40,7 @@
    * @memberof cloud-foundry.view.applications
    * @name DeleteAppWorkflowController
    * @constructor
+   * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
@@ -48,9 +56,7 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate, utils) {
-    var that = this;
-
+  function DeleteAppWorkflowController($filter, modelManager, eventService, $q, $interpolate, utils) {
     this.eventService = eventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -62,10 +68,9 @@
     this.deletingApplication = false;
     this.cnsiGuid = null;
     this.hceCnsiGuid = null;
+    this.$filter = $filter;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
-      that.startWorkflow(data);
-    });
+    this.startWorkflow(this.guids || {});
   }
 
   angular.extend(DeleteAppWorkflowController.prototype, {
@@ -77,6 +82,7 @@
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
+        // This will include any hce user server.. even through we may not show it we still want it removed
         checkedServiceValue: _.keyBy(this.appModel.application.summary.services, 'guid')
       };
 
@@ -94,7 +100,6 @@
           });
         },
         allowCancelAtLastStep: true,
-        title: gettext('Delete App, Pipeline, and Selected Items'),
         hideStepNavStack: true,
         steps: [
           {
@@ -155,6 +160,8 @@
           return o.bound_app_count === 1;
         }
       );
+      this.options.safeServices =
+       this.$filter('removeHceServiceInstance')(this.options.safeServices, this.appModel.application.summary.guid);
     },
 
     /**
@@ -374,6 +381,7 @@
      */
     stopWorkflow: function () {
       this.deletingApplication = false;
+      this.closeDialog();
     },
 
     /**
@@ -390,10 +398,11 @@
       return this.deleteApp().then(function () {
         that.deletingApplication = false;
         // show notification for successful binding
-        var successMsg = gettext('"{{appName}}" has been deleted.');
+        var successMsg = gettext("'{{appName}}' has been deleted");
         var message = that.$interpolate(successMsg)({appName: appName});
         that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        that.dismissDialog();
       })
       .catch(function () {
         that.options.hasError = true;

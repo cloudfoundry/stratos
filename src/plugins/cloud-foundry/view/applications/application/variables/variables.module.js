@@ -41,7 +41,6 @@
     this.id = $stateParams.guid;
     this.appVarsManager = appVarsManager;
 
-    /* eslint-disable */
     this.variableActions = [
       {name: gettext('Edit Variable'), execute: _.bind(that.editVariable, this)},
       {name: gettext('Delete Variable'), execute: _.bind(that.deleteVariable, this)}
@@ -95,13 +94,13 @@
           that.variableNames = _.sortBy(
             _.keys(that.model.application.variables.environment_json),
             function (v) {
-              return v.toUpperCase()
+              return v.toUpperCase();
             });
         }).catch(function () {
-        that.fetchError = true;
-      }).finally(function () {
-        that.isBusy = false;
-      })
+          that.fetchError = true;
+        }).finally(function () {
+          that.isBusy = false;
+        });
     },
 
     /**
@@ -143,10 +142,10 @@
         .then(function () {
           that.refreshVariables();
         }).catch(function () {
-        that.deleteError = name;
-      }).finally(function () {
-        that.isBusy = false;
-      });
+          that.deleteError = name;
+        }).finally(function () {
+          that.isBusy = false;
+        });
     }
   });
 })();

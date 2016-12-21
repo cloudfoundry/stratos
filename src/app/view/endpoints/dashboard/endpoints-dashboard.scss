@@ -1,30 +1,48 @@
-@import "tiles/service-tile";
+.endpoint-notification.alert {
 
-.endpoints-dashboard {
-  $gallery-card-side-margins: 30px;
-  $gallery-card-max-width: 400px;
-  $gallery-card-layout-steps: 4;
+  margin-bottom: $hpe-unit-space;
+  font-size: 18px;
 
-  .action-header{
-    position: relative;
-    padding-top: $hpe-unit-space;
-    button{
-      position: absolute;
-      top: $hpe-unit-space;
-      right: $hpe-unit-space;
+  .endpoint-notification-icon {
+    position: absolute;
+    left: $hpe-unit-space;
+    top: $hpe-unit-space;
+    width: $hpe-unit-space;
+    path, rect {
+      fill: $charcoal;
     }
   }
-  .tile-btn {
-    text-transform: capitalize;
-    font-size: 16px;
-    font-weight: 600;
-  }
 
-  @for $i from 1 through $gallery-card-layout-steps {
-    @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
-      .endpoint-tile.col-md-4.col-sm-1 {
-        width: percentage(1/$i);
+  &.endpoint-notification-slim {
+    width: 80%;
+    margin: auto;
+    margin-top: 40px;
+    margin-bottom: 0;
+  }
+}
+.endpoint-notification-error {
+
+}
+
+.endpoints {
+  &.endpoints-dashboard {
+    .endpoints-table {
+
+      .endpoint-table-connected {
+        padding-top: 3px;
+        padding-bottom: 0;
+        vertical-align: middle;
+        svg {
+          width: 24px;
+          path {
+            fill: grey;
+          }
+          polygon {
+            fill: red;
+          }
+        }
       }
+
     }
   }
 }

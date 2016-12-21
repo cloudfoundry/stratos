@@ -33,6 +33,7 @@
     'helion.framework.widgets.dialog.confirm',
     'app.utils.utilsService',
     'cloud-foundry.view.applications.application.summary.cliCommands',
+    'helion.framework.widgets.detailView',
     '$stateParams',
     '$scope',
     '$window',
@@ -50,6 +51,7 @@
    * @param {object} confirmDialog - the confirm dialog service
    * @param {object} utils - the utils service
    * @param {object} cliCommands - the cliCommands dialog service
+   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
@@ -68,7 +70,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -77,6 +79,7 @@
     this.$interpolate = $interpolate;
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
+    this.detailView = detailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -89,6 +92,7 @@
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
+    this.pipelineReady = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     this.supportsVersions = false;
@@ -178,9 +182,10 @@
     this.onAppStateChange();
 
     $scope.$watch(function () {
-      return that.model.application.state ? that.model.application.state.label : undefined;
-    }, function (newState) {
-      that.onAppStateChange(newState);
+      return that.model.application.state
+        ? that.model.application.state.label + that.model.application.state.subLabel : undefined;
+    }, function () {
+      that.onAppStateChange();
     });
 
     $scope.$watch(function () {
@@ -267,7 +272,12 @@
           // Don't create timer when scope has been destroyed
           if (!that.scopeDestroyed) {
             return that.$q.all(blockUpdate).finally(function () {
-              that.startUpdate();
+              // HSC-1410: Need to check again that the scope has not been destroyed
+              if (!that.scopeDestroyed) {
+                that.pipelineReady = true;
+                that.onAppStateChange();
+                that.startUpdate();
+              }
             });
           }
 
@@ -415,10 +425,22 @@
           cnsiGuid: this.cnsiGuid,
           hceCnsiGuid: this.hceCnsi ? this.hceCnsi.guid : ''
         };
-        this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW', guids);
+        this.complexDeleteAppDialog(guids);
       } else {
         this.simpleDeleteAppDialog();
       }
+    },
+
+    complexDeleteAppDialog: function (guids) {
+      this.detailView(
+        {
+          template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
+          title: gettext('Delete App, Pipeline, and Selected Items')
+        },
+        {
+          guids: guids
+        }
+      );
     },
 
     simpleDeleteAppDialog: function () {
@@ -434,7 +456,7 @@
           var appName = that.model.application.summary.name;
           that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
             // show notification for successful binding
-            var successMsg = gettext('"{{appName}}" has been deleted.');
+            var successMsg = gettext("'{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: appName});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
@@ -468,22 +490,37 @@
     },
 
     /**
+     * @function isActionDisabled
+     * @description Determine if an application action should be disabled
+     * @param {string} id - the ID of the action
+     * @returns {boolean} Whether or not the action should be disabled
+     */
+    isActionDisabled: function (id) {
+      if (id === 'delete') {
+        return !this.pipelineReady;
+      } else {
+        return false;
+      }
+    },
+
+    /**
      * @function onAppStateChange
      * @description invoked when the application state changes, so we can update action visibility
      */
     onAppStateChange: function () {
       var that = this;
       angular.forEach(this.appActions, function (appAction) {
-        appAction.disabled = false;
+        appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
+      this.visibleActions = _.find(this.appActions, { hidden: false });
       this.onAppRoutesChange();
     },
 
     /**
      * @function onAppRoutesChange
      * @description invoked when the application routes change, so we can update action visibility
-     * @param {object} newRoutes - application route metadata
+     * @param {object=} newRoutes - application route metadata
      */
     onAppRoutesChange: function (newRoutes) {
       // Must have a route to be able to view an application

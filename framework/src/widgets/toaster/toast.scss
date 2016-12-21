@@ -1,0 +1,138 @@
+#toast-container {
+	position: fixed;
+	z-index: 999999;
+
+	&.toast-top-right {
+	  right: $toast-spacing;
+	  top: $toast-spacing;
+	}
+
+  * {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+	div[toast] {
+		position: relative;
+    overflow: hidden;
+		width: $toast-width;
+		height: $toast-height;
+		border: $toast-border-width solid $rule;
+		background-color: $toast-background;
+		margin: $toast-spacing 0 0 0;
+		@include hpe-box-shadow-small();
+		border-radius: 0;
+		cursor: auto;
+		padding: 0;
+
+		.toast-close-button {
+			position: absolute;
+			top: $hpe-unit-space;
+			right: $hpe-unit-space;
+			border: 0;
+			background-color: $toast-background;
+			font-family: 'helion-icons';
+			color: $dove-gray2;
+			outline: 0;
+
+			&:before {
+				content: $helion-icon-Close;
+			}
+		}
+
+		.toast-progress {
+			position: absolute;
+			height: $toast-height-inside;
+			left: ($toast-icon-space - $toast-spinner-width) / 2;
+			display: flex;
+
+			> bounce-spinner {
+				vertical-align: middle;
+				margin: auto;
+
+				.bounce-spinner.bounce-spinner-sm {
+					> div {
+						width: $toast-spinner-size;
+						height: $toast-spinner-size;
+					}
+				}
+			}
+		}
+
+		.toast-icon {
+			position: absolute;
+			left: ($toast-icon-space - $toast-icon-size) / 2;
+			height: $toast-height-inside;
+			display: flex;
+
+			.toast-icon-icon {
+				font-size: $toast-icon-size;
+				margin: auto;
+				color: $dove-gray2;
+				background-color: $toast-background;
+
+				&.toast-success {
+					color: $status-okay;
+					&:before {
+						content: $helion-icon-Active_L;
+					}
+				}
+
+				&.toast-error {
+					color: $status-critical;
+					&:before {
+						content: $helion-icon-Critical_L;
+					}
+				}
+
+				&.toast-warning {
+					color: $status-warning;
+					&:before {
+						content: $helion-icon-Alert;
+					}
+				}
+			}
+		}
+
+		.toast-body {
+			vertical-align: middle;
+			display: flex;
+			margin: auto $toast-icon-space auto $toast-icon-space;
+			height: $toast-height-inside;
+
+			.toast-message {
+				line-height: $toast-line-height;
+				vertical-align: middle;
+				margin: auto 0 auto 0;
+				font-weight: $hpe-font-weight-semibold;
+				color: $dove-gray2;
+				cursor: default;
+			}
+		}
+	}
+
+	/*Animations*/
+	div[toast] {
+		right: 0px;
+	}
+
+	div[toast].ng-enter {
+		right: (-$toast-width);
+		transition: right .15s ease-in;
+	}
+
+	div[toast].ng-enter.ng-enter-active {
+		right: 0px;
+	}
+
+	div[toast].ng-leave {
+		right: 0px;
+	  transition: right .15s ease-out;
+	}
+
+	div[toast].ng-leave.ng-leave-active {
+		right: (-$toast-width);
+	}
+}
+

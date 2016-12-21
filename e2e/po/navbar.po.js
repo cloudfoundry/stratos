@@ -1,42 +1,39 @@
-'use strict';
+(function () {
+  'use strict';
 
-// Navbar helpers
-module.exports = {
+  // Navbar helpers
+  module.exports = {
 
-  goToView: goToView,
+    navBarElement: navBarElement,
+    goToView: goToView,
 
-  accountActionsButton: accountActionsButton,
-  showAccountActions: showAccountActions,
-  showAccountSettings: showAccountSettings,
-  logout: logout
+    showAccountSettings: showAccountSettings,
+    logout: logout
 
-};
+  };
 
-function goToView(viewName) {
-  return element(by.css('navigation'))
-    .element(by.linkText(viewName))
-    .click();
-}
+  function navBarElement() {
+    return element(by.css('navigation'));
+  }
 
-function accountActionsButton() {
-  return element(by.css('avatar'))
-    .element(by.css('[ng-click="avatarCtrl.showActions()"]'))
-}
+  function goToView(viewName) {
+    var id = 'navbar-item-' + viewName.toLowerCase();
+    return element(by.css('navigation'))
+      .element(by.id(id))
+      .click();
+  }
 
-function showAccountActions() {
-  accountActionsButton().click();
-}
+  function showAccountSettings() {
+    return goToView('account-settings');
+  }
 
-function showAccountSettings() {
-  showAccountActions();
-  element(by.css('account-actions'))
-    .element(by.css('[href="#/account/settings"]'))
-    .click();
-}
-
-function logout() {
-  showAccountActions();
-  element(by.css('account-actions'))
-    .element(by.css('[ng-click="applicationCtrl.logout()"]'))
-    .click();
-}
+  function logout() {
+    return element(by.id('navbar-user-menu-dropdown'))
+      .click().then(function () {
+        browser.driver.sleep(100);
+        return element(by.id('navbar-item-logout')).click().then(function () {
+          browser.driver.sleep(100);
+        });
+      });
+  }
+})();

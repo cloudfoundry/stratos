@@ -20,7 +20,7 @@
       <tr ng-repeat="event in detailViewCtrl.context.events">
         <td ng-switch="event.state" class="row result-col event-result" id="build-result-col">
           <div ng-switch="event.state" class="pull-left">
-            <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
+            <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-success"></span>
             <span ng-switch-when="running"><spinner></spinner></span>
             <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
             <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
@@ -34,9 +34,7 @@
         </td>
         <td></td>
         <td class="row result-col" ng-if="typeof(event.durationString) !== 'undefined'">
-          <span translate>Duration: </span>
-          <span ng-if="event.duration < 1000" translate>Less than a second</span>
-          <span ng-if="event.duration >= 1000"> {{ event.durationString }}</span>
+          <span translate>Duration: </span> {{ event.durationString }}
         </td>
         <td class="row result-col" ng-if="typeof(event.durationString) === 'undefined'"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">

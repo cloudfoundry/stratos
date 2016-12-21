@@ -6,7 +6,201 @@
 
   mock.cloudFoundryAPI.Apps = {
 
-    GetAppSummary: function (guid) {
+    ListAllAppsOneResult: function (cnsiGuid) {
+
+      var cnsiBody = {
+        'total_results': 2,
+        'total_pages': 2,
+        'prev_url': null,
+        'next_url': '/v2/apps?order-direction=asc\u0026page=2\u0026results-per-page=1',
+        'resources': [{
+          'metadata': {
+            'guid': '0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'created_at': '2016-10-28T13:55:48Z',
+            'updated_at': '2016-11-01T14:38:37Z'
+          },
+          'entity': {
+            'name': 'rc-test-1',
+            'production': false,
+            'space_guid': '0063f106-074b-415a-94ee-5cf3afd7db5c',
+            'stack_guid': 'b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'buildpack': null,
+            'detected_buildpack': 'node.js 1.5.18',
+            'detected_buildpack_guid': '37f697af-47e1-47c0-adcc-30609e98769d',
+            'environment_json': {'sadasd': 'asdasd'},
+            'memory': 32,
+            'instances': 1,
+            'disk_quota': 1024,
+            'state': 'STARTED',
+            'version': 'f150f598-8b45-4f4e-afa4-6b52bc37137d',
+            'command': null,
+            'console': false,
+            'debug': null,
+            'staging_task_id': '229923080a4c457b9503e310807e32b5',
+            'package_state': 'STAGED',
+            'health_check_type': 'port',
+            'health_check_timeout': null,
+            'staging_failed_reason': null,
+            'staging_failed_description': null,
+            'diego': true,
+            'docker_image': null,
+            'package_updated_at': '2016-10-28T14:02:08Z',
+            'detected_start_command': 'node server.js',
+            'enable_ssh': true,
+            'docker_credentials_json': {'redacted_message': '[PRIVATE DATA HIDDEN]'},
+            'ports': [8080],
+            'space_url': '/v2/spaces/4e102665-1138-46ea-9bf3-5766070fb8bd',
+            'stack_url': '/v2/stacks/b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'routes_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/routes',
+            'events_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/events',
+            'service_bindings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/service_bindings',
+            'route_mappings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/route_mappings'
+          }
+        }]
+      };
+      var body = _.set({}, cnsiGuid, cnsiBody);
+
+      return {
+        url: '/pp/v1/proxy/v2/apps?results-per-page=1',
+
+        response: {
+          200: {
+            body: body
+          }
+        }
+      };
+    },
+
+    ListAllApps: function (cnsiGuid, page, spaceGuid) {
+      var baseUrl = '/pp/v1/proxy/v2/apps?';
+      if (page || spaceGuid) {
+        if (page) {
+          baseUrl += 'page=' + page;
+          if (spaceGuid) {
+            baseUrl += '&';
+          }
+        }
+        if (spaceGuid) {
+          baseUrl += 'q=space_guid:' + spaceGuid;
+        }
+        baseUrl += '&results-per-page=100';
+      } else {
+        baseUrl += 'results-per-page=100';
+      }
+
+      var cnsiBody = {
+        'total_results': 2,
+        'total_pages': 1,
+        'prev_url': null,
+        'next_url': '/v2/apps?order-direction=asc\u0026page=2\u0026results-per-page=1',
+        'resources': [{
+          'metadata': {
+            'guid': '0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'created_at': '2016-10-28T13:55:48Z',
+            'updated_at': '2016-11-01T14:38:37Z'
+          },
+          'entity': {
+            'name': 'rc-test-1',
+            'production': false,
+            'space_guid': spaceGuid,
+            'stack_guid': 'b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'buildpack': null,
+            'detected_buildpack': 'node.js 1.5.18',
+            'detected_buildpack_guid': '37f697af-47e1-47c0-adcc-30609e98769d',
+            'environment_json': {'sadasd': 'asdasd'},
+            'memory': 32,
+            'instances': 1,
+            'disk_quota': 1024,
+            'state': 'STARTED',
+            'version': 'f150f598-8b45-4f4e-afa4-6b52bc37137d',
+            'command': null,
+            'console': false,
+            'debug': null,
+            'staging_task_id': '229923080a4c457b9503e310807e32b5',
+            'package_state': 'STAGED',
+            'health_check_type': 'port',
+            'health_check_timeout': null,
+            'staging_failed_reason': null,
+            'staging_failed_description': null,
+            'diego': true,
+            'docker_image': null,
+            'package_updated_at': '2016-10-28T14:02:08Z',
+            'detected_start_command': 'node server.js',
+            'enable_ssh': true,
+            'docker_credentials_json': {'redacted_message': '[PRIVATE DATA HIDDEN]'},
+            'ports': [8080],
+            'space_url': '/v2/spaces/4e102665-1138-46ea-9bf3-5766070fb8bd',
+            'stack_url': '/v2/stacks/b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'routes_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/routes',
+            'events_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/events',
+            'service_bindings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/service_bindings',
+            'route_mappings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/route_mappings'
+          }
+        },{
+          'metadata': {
+            'guid': '1a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'url': '/v2/apps/1a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+            'created_at': '2016-10-28T13:55:48Z',
+            'updated_at': '2016-11-01T14:38:37Z'
+          },
+          'entity': {
+            'name': 'other-app',
+            'production': false,
+            'space_guid': '0063f106-074b-415a-94ee-5cf3afd7db5c',
+            'stack_guid': 'b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'buildpack': null,
+            'detected_buildpack': 'node.js 1.5.18',
+            'detected_buildpack_guid': '37f697af-47e1-47c0-adcc-30609e98769d',
+            'environment_json': {'sadasd': 'asdasd'},
+            'memory': 32,
+            'instances': 1,
+            'disk_quota': 1024,
+            'state': 'STARTED',
+            'version': 'f150f598-8b45-4f4e-afa4-6b52bc37137d',
+            'command': null,
+            'console': false,
+            'debug': null,
+            'staging_task_id': '229923080a4c457b9503e310807e32b5',
+            'package_state': 'STAGED',
+            'health_check_type': 'port',
+            'health_check_timeout': null,
+            'staging_failed_reason': null,
+            'staging_failed_description': null,
+            'diego': true,
+            'docker_image': null,
+            'package_updated_at': '2016-10-28T14:02:08Z',
+            'detected_start_command': 'node server.js',
+            'enable_ssh': true,
+            'docker_credentials_json': {'redacted_message': '[PRIVATE DATA HIDDEN]'},
+            'ports': [8080],
+            'space_url': '/v2/spaces/4e102665-1138-46ea-9bf3-5766070fb8bd',
+            'stack_url': '/v2/stacks/b55ebf93-a0b7-4f27-b30f-5273c37af661',
+            'routes_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/routes',
+            'events_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/events',
+            'service_bindings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/service_bindings',
+            'route_mappings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/route_mappings'
+          }
+        }]
+      };
+      var body = _.set({}, cnsiGuid, cnsiBody);
+
+      return {
+        url: baseUrl,
+
+        response: {
+          200: {
+            body: body
+          }
+        }
+      };
+    },
+
+    GetAppSummary: function (guid, spaceGuid) {
+
+      spaceGuid = spaceGuid || 'spaceGuid';
+
       return {
         url: '/pp/v1/proxy/v2/apps/' + guid + '/summary',
 
@@ -68,7 +262,7 @@
                 }
               ],
               "production": false,
-              "space_guid": "c79071fc-3e74-4d3e-912f-782b3433ccc3",
+              "space_guid": spaceGuid,
               "stack_guid": "19fb9562-b371-44e5-b008-09d3e34c2041",
               "buildpack": null,
               "detected_buildpack": null,
@@ -100,7 +294,7 @@
           },
 
           500: {
-            body: { }
+            body: {}
           }
         }
       };
@@ -163,7 +357,7 @@
           },
 
           500: {
-            body: { }
+            body: {}
           }
         }
       };
@@ -241,16 +435,16 @@
 
         response: {
           204: {
-            body: { }
+            body: {}
           },
           500: {
-            body: { }
+            body: {}
           }
         }
       };
     },
 
-    GetDetailedStatsForStartedApp: function(guid) {
+    GetDetailedStatsForStartedApp: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/apps/' + guid + '/stats',
 
@@ -284,7 +478,7 @@
           },
 
           500: {
-            body: {  }
+            body: {}
           }
         }
       };
@@ -328,7 +522,7 @@
           },
 
           400: {
-            body: { }
+            body: {}
           }
         }
       }
@@ -380,7 +574,119 @@
           },
 
           400: {
-            body: { }
+            body: {}
+          }
+        }
+      };
+    },
+
+    RetrieveApp: function (guid) {
+      return {
+        url: '/pp/v1/proxy/v2/apps/' + guid + '?include-relations=organization,space&inline-relations-depth=2',
+        response: {
+          200: {
+            body: {
+              "metadata": {
+                "guid": guid,
+                "url": "/v2/apps/" + guid,
+                "created_at": "2016-10-15T17:12:52Z",
+                "updated_at": "2016-10-20T11:30:20Z"
+              },
+              "entity": {
+                "name": "node-env",
+                "production": false,
+                "space_guid": "ece5299a-35e8-4ecf-96ad-e1ec0df1073f",
+                "stack_guid": "f7ea50c4-cf7d-4935-b0dc-279c72e2bbc5",
+                "buildpack": null,
+                "detected_buildpack": "node.js 1.5.18",
+                "detected_buildpack_guid": "00b92f7a-d298-44bc-b9a6-afd751321cb6",
+                "environment_json": {},
+                "memory": 31,
+                "instances": 0,
+                "disk_quota": 1024,
+                "state": "STARTED",
+                "version": "887a058b-da40-4ac4-a3ac-6cc21b18f050",
+                "command": null,
+                "console": false,
+                "debug": null,
+                "staging_task_id": "aec4cad6529a428e90256726bda988ff",
+                "package_state": "STAGED",
+                "health_check_type": "port",
+                "health_check_timeout": null,
+                "staging_failed_reason": null,
+                "staging_failed_description": null,
+                "diego": true,
+                "docker_image": null,
+                "package_updated_at": "2016-10-17T15:02:59Z",
+                "detected_start_command": "node server.js",
+                "enable_ssh": true,
+                "docker_credentials_json": {
+                  "redacted_message": "[PRIVATE DATA HIDDEN]"
+                },
+                "ports": [
+                  8080
+                ],
+                "space_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f",
+                "space": {
+                  "metadata": {
+                    "guid": "ece5299a-35e8-4ecf-96ad-e1ec0df1073f",
+                    "url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f",
+                    "created_at": "2016-10-15T17:11:11Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "name": "Dev",
+                    "organization_guid": "4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099",
+                    "space_quota_definition_guid": null,
+                    "allow_ssh": true,
+                    "organization_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099",
+                    "organization": {
+                      "metadata": {
+                        "guid": "4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099",
+                        "url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099",
+                        "created_at": "2016-10-15T17:10:42Z",
+                        "updated_at": null
+                      },
+                      "entity": {
+                        "name": "Bristol",
+                        "billing_enabled": false,
+                        "quota_definition_guid": "7b742342-cdb4-4550-9601-181ff5944cfc",
+                        "status": "active",
+                        "quota_definition_url": "/v2/quota_definitions/7b742342-cdb4-4550-9601-181ff5944cfc",
+                        "spaces_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/spaces",
+                        "domains_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/domains",
+                        "private_domains_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/private_domains",
+                        "users_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/users",
+                        "managers_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/managers",
+                        "billing_managers_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/billing_managers",
+                        "auditors_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/auditors",
+                        "app_events_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/app_events",
+                        "space_quota_definitions_url": "/v2/organizations/4f95b8fd-69b4-4b2b-a4e4-d45b74bdf099/space_quota_definitions"
+                      }
+                    },
+                    "developers_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/developers",
+                    "managers_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/managers",
+                    "auditors_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/auditors",
+                    "apps_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/apps",
+                    "routes_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/routes",
+                    "domains_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/domains",
+                    "service_instances_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/service_instances",
+                    "app_events_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/app_events",
+                    "events_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/events",
+                    "security_groups_url": "/v2/spaces/ece5299a-35e8-4ecf-96ad-e1ec0df1073f/security_groups"
+                  }
+                },
+                "stack_url": "/v2/stacks/f7ea50c4-cf7d-4935-b0dc-279c72e2bbc5",
+                "routes_url": "/v2/apps/d87c4e68-a486-443f-b83e-fc9536f8478f/routes",
+                "events_url": "/v2/apps/d87c4e68-a486-443f-b83e-fc9536f8478f/events",
+                "service_bindings_url": "/v2/apps/d87c4e68-a486-443f-b83e-fc9536f8478f/service_bindings",
+                "route_mappings_url": "/v2/apps/d87c4e68-a486-443f-b83e-fc9536f8478f/route_mappings"
+              }
+            }
+          },
+
+          400: {
+            body: {}
           }
         }
       };

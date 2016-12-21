@@ -1,0 +1,15 @@
+<form class="applications-sorting">
+  <div class="form-group" focusable-input>
+    <label class="control-label" translate>Sort by</label>
+    <div ng-click="applicationsSortingCtrl.toggleSortOrder()" class="sort-asc-desc-btn">
+      <svg-image ng-if="applicationsSortingCtrl.model.sortAscending" src="svg/SortAscending_Green.svg"></svg-image>
+      <svg-image ng-if="!applicationsSortingCtrl.model.sortAscending" src="svg/SortDescending_Green.svg"></svg-image>
+    </div>
+    <select-input
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+      ng-model="applicationsSortingCtrl.selectedOption"
+      input-options="applicationsSortingCtrl.sortOptions"
+      ng-change="applicationsSortingCtrl.setSort()">
+    </select-input>
+  </div>
+</form>        

@@ -1,26 +1,35 @@
 <div class="delivery-log-trigger-build delivery-log-flex">
-  <!-- User has no github token -->
-  <div ng-if="!detailViewCtrl.isAuthenticated">
-    <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.githubAuth()">
-      Authenticate with Github</button>
+  <div ng-if="detailViewCtrl.tokenInvalid">
+    <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.updateToken()">
+      Update Token</button>
     <div class="alert alert-warning" ng-if="!detailViewCtrl.githubAuthFailed">
-      <p translate >Please authenticate with github before continuing</p>
+      <p translate >The token is invalid</p>
     </div>
-    <div class="alert alert-danger" ng-if="detailViewCtrl.githubAuthFailed">
-      <p translate >Github authentication failed</p>
+  </div>
+
+  <div ng-if="detailViewCtrl.permissionError">
+    <div class="alert alert-danger">
+      <p translate>You don't have permissions to trigger a build for this repository.</p>
+    </div>
+  </div>
+
+  <!-- Commits have failed to have been fetched -->
+  <div ng-if="detailViewCtrl.fetchError">
+    <div class="alert alert-danger">
+      <p translate>There was a problem fetching commits. Please try again. If this error persists, please contact the administrator.</p>
     </div>
   </div>
 
   <!-- User has a github token -->
-  <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
+  <div ng-if="!detailViewCtrl.tokenInvalid" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
-    <div ng-if="detailViewCtrl.fetchError === undefined" class="message-box message-box-no-bg">
+    <div ng-if="detailViewCtrl.fetching || detailViewCtrl.triggering" class="message-box message-box-no-bg">
       <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
     </div>
 
     <!-- Commits have been fetched, no errors -->
-    <div ng-if="detailViewCtrl.fetchError === false" class="delivery-log-flex">
+    <div ng-if="detailViewCtrl.fetchError === false && !detailViewCtrl.triggering" class="delivery-log-flex">
 
       <!-- No commits for this project (think this might be impossible?) -->
       <div ng-if="detailViewCtrl.githubModel.data.commits.length < 1" class="message-box message-box-no-bg">
@@ -52,9 +61,8 @@
       </div>
 
       <!-- Failed to trigger a build -->
-      <div ng-if="detailViewCtrl.triggerError" class="alert alert-danger pull-left">
-        <p translate> There was a problem triggering the build. Please try again. If this error persists, please contact the
-          administrator. </p>
+      <div ng-if="!detailViewCtrl.triggering && detailViewCtrl.triggerError" class="alert alert-danger pull-left">
+        <p translate>There was a problem triggering the build. Please try again. If this error persists, please contact the administrator.</p>
       </div>
 
       <div class="delivery-log-trigger-build-buttons">
@@ -62,17 +70,10 @@
           CANCEL
         </button>
         <button translate type="button" class="btn btn-primary next" ng-click="detailViewCtrl.build()"
-                ng-disabled="!detailViewCtrl.selectedCommit || detailViewCtrl.githubModel.data.commits.length < 1">
+                ng-disabled="!detailViewCtrl.selectedCommit || detailViewCtrl.githubModel.data.commits.length < 1 || detailViewCtrl.triggering">
           START BUILD
         </button>
       </div>
     </div>
-
-    <!-- Commits have failed to have been fetched -->
-    <div ng-if="detailViewCtrl.fetchError" class="alert alert-danger pull-left">
-      <p translate> There was a problem fetching commits. Please try again. If this error persists, please contact the
-        administrator. </p>
-    </div>
-
   </div>
 </div>

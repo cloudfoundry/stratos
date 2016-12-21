@@ -183,12 +183,15 @@
      * @param {string} action - action (create, delete, update..)
      * @returns {*}
      */
-    /* eslint-disable */
+    /* eslint-disable no-unused-vars */
     isAllowed: function (cnsiGuid, resourceType, action) {
       var args = Array.prototype.slice.call(arguments);
+      if (!this.isInitialized(cnsiGuid)) {
+        return false;
+      }
       return this.principal[cnsiGuid].isAllowed.apply(this.principal[cnsiGuid], args.slice(1));
     },
-    /* eslint-enable */
+    /* eslint-enable no-unused-vars */
 
     /**
      * @name isInitialized
@@ -227,15 +230,12 @@
     doesUserHaveRole: function (cnsiGuid, role) {
 
       // convenience method implemented for Application permissions
-      var cnsiPrincipal = this.principal[cnsiGuid];
-      if (_.isUndefined(cnsiPrincipal) || _.isNull(cnsiPrincipal)) {
-        // Principal object is probably being initialised
-        // Unable to ascertain is user has role now
+      if (!this.isInitialized(cnsiGuid)) {
         return false;
       }
       var hasRole = false;
       if (role === 'space_developer') {
-        hasRole = cnsiPrincipal.userSummary.spaces.all.length > 0;
+        hasRole = this.principal[cnsiGuid].userSummary.spaces.all.length > 0;
       }
       return hasRole;
     },
@@ -246,23 +246,22 @@
      * in the organization or any of the organization's spaces
      * @param {string} cnsiGuid - Cluster GUID
      * @param {object} org - console organization object
-     * @param {string} resourceType - Type of resource
      * (organization, space, user, service_managed_instances, routes, applications)
      * @param {string} action - action (create, delete, update..)
      * @returns {boolean}
      */
-    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, resourceType, action) {
+    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, action) {
       var that = this;
       var orgGuid = org.details.org.metadata.guid;
       // Is the organization valid?
-      if (this.isAllowed(cnsiGuid, resourceType, action, null, orgGuid)) {
+      if (this.isAllowed(cnsiGuid, this.resources.organization, action, orgGuid)) {
         return true;
       } else {
         // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
           if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
           var space = org.spaces[spaceGuid];
-          if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
+          if (that.isAllowed(cnsiGuid, this.resources.space, action, space.metadata.guid, orgGuid)) {
             return true;
           }
         }
@@ -277,6 +276,9 @@
      * @returns {boolean}
      */
     isAdmin: function (cnsiGuid) {
+      if (!this.isInitialized(cnsiGuid)) {
+        return false;
+      }
       return this.principal[cnsiGuid].isAdmin;
     },
 

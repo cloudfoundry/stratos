@@ -16,7 +16,7 @@
       controller: SpaceUsersController,
       controllerAs: 'spaceUsersController',
       ncyBreadcrumb: {
-        label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
+        label: '{{ clusterSpaceController.space().details.space.entity.name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.organization.detail.users';
         }
@@ -62,6 +62,9 @@
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
     function refreshUsers() {
+      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      that.isAdmin = user.admin;
+
       that.userRoles = {};
 
       // For each user, get its roles in this space
@@ -98,13 +101,13 @@
 
     this.canUserManageRoles = function () {
       // User can assign org roles
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, that.organizationGuid) ||
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, that.organizationGuid) ||
         // User can assign space roles
-        that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
+        that.authModel.isAllowed(that.guid, that.authModel.resources.space, that.authModel.actions.update, that.spaceGuid, that.organizationGuid);
     };
 
     this.canUserRemoveFromOrg = function () {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, that.organizationGuid);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, that.organizationGuid);
     };
 
     this.canUserRemoveFromSpace = function () {
@@ -126,16 +129,67 @@
       return this.selectedUsersCount() < 1 || !that.canUserRemoveFromSpace();
     };
 
+    this.showManageRoles = function () {
+      return that.canUserManageRoles();
+    };
+
+    this.showRemoveFromSpace = function () {
+      return that.canUserRemoveFromSpace();
+    };
+
+    this.showRemoveFromOrg = function () {
+      return that.canUserRemoveFromOrg();
+    };
+
+    this.canAction = function () {
+      return that.showManageRoles() || that.showRemoveFromOrg() || that.showRemoveFromSpace();
+    };
+    var manageRoles = {
+      name: gettext('Manage Roles'),
+      disabled: true,
+      execute: function (aUser) {
+        return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
+      }
+    };
+    var removeFromOrg = {
+      name: gettext('Remove from Organization'),
+      disabled: true,
+      execute: function (aUser) {
+        return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
+          [aUser]);
+      }
+    };
+    var removeFromSpace = {
+      name: gettext('Remove from Space'),
+      disabled: true,
+      execute: function (aUser) {
+        return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
+          that.space.details.space.metadata.guid, [aUser]);
+      }
+    };
+
     function init() {
-
-      // Manage Roles - show slide in if user is an admin, org manager or the space manager
-      that.userActions[0].disabled = !that.canUserManageRoles();
-
-      //Remove from Organization - remove user from organization if user is an admin or org manager
-      that.userActions[1].disabled = !that.canUserRemoveFromOrg();
-
-      // Remove from Space - remove if user is an admin, org manager or the space manager
-      that.userActions[2].disabled = !that.canUserManageRoles();
+      if (that.canAction()) {
+        that.userActions = [];
+        if (that.showManageRoles()) {
+          // Manage Roles - show slide in if user is an admin, org manager or the space manager
+          manageRoles.disabled = !that.canUserManageRoles();
+          that.userActions.push(manageRoles);
+        }
+        if (that.showRemoveFromOrg()) {
+          //Remove from Organization - remove user from organization if user is an admin or org manager
+          removeFromOrg.disabled = !that.canUserRemoveFromOrg();
+          that.userActions.push(removeFromOrg);
+        }
+        if (that.showRemoveFromSpace()) {
+          // Remove from Space - remove if user is an admin, org manager or the space manager
+          removeFromSpace.disabled = !that.canUserManageRoles();
+          that.userActions.push(removeFromSpace);
+        }
+        if (that.userActions.length < 1) {
+          delete that.userActions;
+        }
+      }
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
@@ -159,32 +213,6 @@
         });
 
     }
-
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
-        }
-      },
-      {
-        name: gettext('Remove from Organization'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
-            [aUser]);
-        }
-      },
-      {
-        name: gettext('Remove from Space'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
-            that.space.details.space.metadata.guid, [aUser]);
-        }
-      }
-    ];
 
     this.getSpaceRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];
@@ -240,12 +268,14 @@
         guidsToUsers());
     };
 
-    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);
+
+    $scope.$on('$destroy', rolesUpdatedListener);
   }
 
 })();

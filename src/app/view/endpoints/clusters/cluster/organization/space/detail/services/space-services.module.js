@@ -16,7 +16,7 @@
       controller: SpaceServicesController,
       controllerAs: 'spaceSrvsCtrl',
       ncyBreadcrumb: {
-        label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
+        label: '{{ clusterSpaceController.space().details.space.entity.name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.organization.detail.spaces';
         }
@@ -29,12 +29,14 @@
     '$state',
     '$stateParams',
     '$q',
+    '$filter',
     'app.model.modelManager',
     'cloud-foundry.view.applications.services.serviceInstanceService',
     'app.utils.utilsService'
   ];
 
-  function SpaceServicesController($scope, $state, $stateParams, $q, modelManager, serviceInstanceService, utils) {
+  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,
+                                   utils) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -42,6 +44,8 @@
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.serviceInstanceService = serviceInstanceService;
+    this.serviceInstances = [];
+    this.$filter = $filter;
 
     this.actionsPerSI = {};
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -60,6 +64,8 @@
         return that.update();
       }
 
+      that.updateLocalServiceInstances();
+
       return $q.resolve();
     }
 
@@ -67,11 +73,19 @@
   }
 
   angular.extend(SpaceServicesController.prototype, {
+
+    updateLocalServiceInstances: function () {
+      // Filter out the stackato hce service
+      this.serviceInstances = this.$filter('removeHceServiceInstance')(this.spaceDetail().instances);
+    },
+
     update: function (serviceInstance) {
       var that = this;
       return this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid, {
-        return_user_provided_service_instances: false
+        return_user_provided_service_instances: true
       }).then(function () {
+        that.updateLocalServiceInstances();
+
         if (serviceInstance) {
           that.updateActions([serviceInstance]);
           that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().instances).length);
@@ -117,13 +131,18 @@
 
     updateActions: function (serviceInstances) {
       var that = this;
+      var space = that.spaceDetail().details.space;
+      var canDelete = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
+      var canUnbind = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
+      that.canDeleteOrUnbind = canDelete || canUnbind;
       _.forEach(serviceInstances, function (si) {
-        that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
-        var space = that.spaceDetail().details.space;
-        // Delete Services
-        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
-        // Unbind Services
-        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
+        if (that.canDeleteOrUnbind) {
+          that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
+          that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
+          that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
+        } else {
+          delete that.actionsPerSI[si.metadata.guid];
+        }
       });
     }
 

@@ -1,0 +1,14 @@
+//=== Toast Notifications
+
+$toast-height: 84px;
+$toast-width: 420px;
+$toast-border-width: 2px;
+$toast-icon-size: 32px;
+$toast-spacing: 12px;
+$toast-height-inside: $toast-height - 2 * $toast-border-width;
+$toast-background: $white;
+$toast-icon-space: $hpe-unit-space * 2.5;
+$toast-spinner-size: 9px;
+$toast-spinner-spacing: 5px;
+$toast-spinner-width: $toast-spinner-size * 3 + $toast-spinner-spacing * 2;
+$toast-line-height: 20px;

@@ -39,5 +39,15 @@
    */
   function NavigationController(modelManager) {
     this.navigationModel = modelManager.retrieve('app.model.navigation');
+
+    // For Bootrap: Hide the responsive nav menu when a user clicks on an item in it
+
+    /* eslint-disable angular/angularelement */
+    var navMain = $('#navbar');
+    navMain.on('click', 'a', null, function () {
+      navMain.collapse('hide');
+    });
+    /* eslint-enable angular/angularelement */
+
   }
 })();

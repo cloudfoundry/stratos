@@ -13,14 +13,14 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'app.utils.utilsService',
+    'cloud-foundry.model.modelUtils',
     '$q',
-    '$log',
-    'cloud-foundry.model.modelUtils'
+    '$log'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q, $log, modelUtils) {
+  function registerOrgModel(modelManager, apiManager, utils, modelUtils, $q, $log) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(modelManager, apiManager, utils, $q, $log, modelUtils));
+      new Organization(modelManager, apiManager, utils, modelUtils, $q, $log));
   }
 
   /**
@@ -30,24 +30,26 @@
    * @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
    * @param {object} utils - the utils service
+   * @param {object} modelUtils - service containing general hcf model helpers
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+
    * @property {object} modelManager - the model manager
    * @property {object} apiManager - the API manager
    * @property {object} utils - the utils service
+   * @property {object} modelUtils - service containing general hcf model helpers
    * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Organization(modelManager, apiManager, utils, $q, $log, modelUtils) {
-    this.apiManager = apiManager;
+  function Organization(modelManager, apiManager, utils, modelUtils, $q, $log) {
     this.modelManager = modelManager;
-    this.$q = $q;
-    this.$log = $log;
+    this.apiManager = apiManager;
     this.utils = utils;
     this.modelUtils = modelUtils;
+
+    this.$q = $q;
+    this.$log = $log;
 
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
@@ -210,7 +212,9 @@
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
       this.initOrganizationCache(cnsiGuid, orgGuid);
       this.organizations[cnsiGuid][orgGuid].details = details;
-      this.organizationNames[cnsiGuid].push(details.org.entity.name);
+      if (this.organizationNames[cnsiGuid].indexOf(details.org.entity.name) === -1) {
+        this.organizationNames[cnsiGuid].push(details.org.entity.name);
+      }
     },
 
     cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, allUsersRoles) {
@@ -317,7 +321,7 @@
         })
         .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
-          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
+          return that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
             return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
               return depthOneSpaces;
             });
@@ -342,7 +346,7 @@
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
-      var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
+      var createdDate = moment(org.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
       var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       function getRoles(org) {
@@ -612,15 +616,18 @@
       return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, that.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (val) {
           that.organizations[cnsiGuid][orgGuid].details.org = val.data;
-          var newName = _.get(val.data, 'entity.name');
-          if (oldName !== newName) {
-            var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
-            if (idx > -1) {
-              that.organizationNames[cnsiGuid].splice(idx, 1);
+          return that.refreshOrganizationSpaces(cnsiGuid, orgGuid).then(function () {
+            var newName = _.get(val.data, 'entity.name');
+            if (oldName !== newName) {
+              var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
+              if (idx > -1) {
+                that.organizationNames[cnsiGuid].splice(idx, 1);
+              }
+              if (that.organizationNames[cnsiGuid].indexOf(newName) === -1) {
+                that.organizationNames[cnsiGuid].push(newName);
+              }
             }
-            that.organizationNames[cnsiGuid].push(newName);
-          }
-          return val;
+          });
         });
     },
 

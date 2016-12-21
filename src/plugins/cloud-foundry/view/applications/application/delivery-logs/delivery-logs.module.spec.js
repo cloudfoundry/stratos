@@ -362,19 +362,20 @@
         expect(event.mEndDate).toBeDefined();
         expect(event.duration).toBeDefined();
         expect(event.durationString).toBeDefined();
-        expect(event.durationString).not.toEqual('Unknown');
+        expect(event.durationString).toEqual('Less than a second');
         expect(event.name).toBeDefined();
       });
 
       it('Populated event - calculate duration', function () {
         var event = {
-          start_date: moment().subtract(100, 's').format(),
+          start_date: moment().subtract(1, 'm').format(),
           end_date: moment().format()
         };
         controller.parseEvent(event);
         expect(event.mEndDate).toBeDefined();
         expect(event.duration).toBeDefined();
         expect(event.durationString).toBeDefined();
+        expect(event.durationString).not.toEqual('Less than a second');
         expect(event.durationString).not.toEqual('Unknown');
       });
 
@@ -388,6 +389,7 @@
           };
           controller.parseEvent(event);
           expect(event.name).toBeDefined();
+          expect(event.resultLabel).toBeDefined();
         });
       });
     });
@@ -525,15 +527,16 @@
             created_date: moment().format()
           }
         };
-        var event = {
+        var parsedEvent = {
           name: 'event name',
+          resultLabel: 'result label',
           artifact_id: 'artifact id'
         };
-        var events = [event];
+        var events = [parsedEvent];
         controller.parseExecution(execution, events);
         expect(execution.result).toBeDefined();
         expect(execution.result.state).toBeDefined();
-        expect(execution.result.label).toEqual(event.name);
+        expect(execution.result.label).toEqual(parsedEvent.resultLabel);
       });
     });
 
@@ -580,20 +583,20 @@
         var event = {
           type: controller.eventTypes.TESTING,
           state: controller.eventStates.FAILED,
-          name: 'label'
+          resultLabel: 'label'
         };
         var res = controller.determineExecutionResult(event);
-        expect(res.label).toEqual(event.name);
+        expect(res.label).toEqual(event.resultLabel);
         expect(res.state).toEqual(event.state);
       });
 
       it('execution still running', function () {
         var event = {
           type: controller.eventTypes.TESTING,
-          name: 'label'
+          resultLabel: 'label'
         };
         var res = controller.determineExecutionResult(event);
-        expect(res.label).toEqual(event.name);
+        expect(res.label).toEqual(event.resultLabel);
         expect(res.state).toEqual(controller.eventStates.RUNNING);
       });
 
@@ -604,14 +607,17 @@
           var event = {
             type: type,
             state: origState,
-            name: 'Name'
+            resultLabel: 'Name'
           };
           var state = controller.determineExecutionResult(event);
           switch (type) {
             case controller.eventTypes.BUILDING:
+            case controller.eventTypes.BUILT:
             case controller.eventTypes.TESTING:
+            case controller.eventTypes.TESTED:
             case controller.eventTypes.DEPLOYING:
-              expect(state.label).toEqual(event.name);
+            case controller.eventTypes.DEPLOYED:
+              expect(state.label).toEqual(event.resultLabel);
               expect(state.state).toEqual(controller.eventStates.RUNNING);
               break;
             case controller.eventTypes.PIPELINE_COMPLETED:
@@ -620,7 +626,7 @@
               break;
             case controller.eventTypes.WATCHDOG_TERMINATED:
               expect(state.state).toEqual(origState);
-              expect(state.label).toEqual(event.name);
+              expect(state.label).toEqual(event.resultLabel);
               break;
             default:
               fail('Unknown event type: ' + type);

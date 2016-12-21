@@ -18,7 +18,7 @@
       controller: ClusterActionsController,
       controllerAs: 'clusterActionsCtrl',
       scope: {
-        // stateName: '@'
+        hasActions: '=?'
       },
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/cluster-actions.html'
     };
@@ -56,6 +56,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
@@ -76,7 +77,7 @@
 
     var createOrg = {
       name: gettext('Create Organization'),
-      disabled: true,
+      disabled: false,
       execute: function () {
         return asyncTaskDialog(
           {
@@ -111,7 +112,7 @@
 
     var createSpace = {
       name: gettext('Create Space'),
-      disabled: true,
+      disabled: false,
       execute: function () {
 
         var existingSpaceNames, selectedOrg;
@@ -134,7 +135,7 @@
         }
 
         function createSpaceDisabled() {
-          if (contextData.spaces.length >= 10) {
+          if (contextData.spaces.length >= 5) {
             return true;
           }
           // Make sure all spaces have a valid name before allowing creating another
@@ -154,8 +155,11 @@
           contextData.spaces.push('');
         }
 
-        function removeSpace() {
-          contextData.spaces.length--;
+        function removeSpace(index) {
+          if (contextData.spaces.length < 2) {
+            return;
+          }
+          contextData.spaces.splice(index, 1);
         }
 
         contextData = {
@@ -218,7 +222,7 @@
 
     var assignUsers = {
       name: gettext('Assign User(s)'),
-      disabled: true,
+      disabled: false,
       execute: function () {
         return assignUsersService.assign({
           clusterGuid: that.clusterGuid,
@@ -228,20 +232,11 @@
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
     };
 
-    this.clusterActions = [
-      createOrg,
-      createSpace,
-      assignUsers
-    ];
-
-    /**
-     * Enable actions based on admin status
-     * N.B. when finer grain ACLs are wired in this should be updated
-     * */
-    function enableActions() {
+    function enableActions() { // eslint-disable-line complexity
+      var isAdmin = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
-      that.clusterActions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);
+      var canCreateOrg = authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);
 
       var canCreateSpace = false;
       var canAssignUsers = false;
@@ -251,11 +246,11 @@
         if (that.spaceGuid) {
           // We're at least the 'space' depth of a cluster. Check permissions against it.
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
+            authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.update, that.spaceGuid, that.organizationGuid);
         } else {
           // We're at the organization depth, check if user has any space manager roles within it
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, null, that.organizationGuid) ||
+            authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update, that.organizationGuid) ||
             _.find(authModel.principal[that.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
         }
       } else {
@@ -266,10 +261,18 @@
           authModel.principal[that.clusterGuid].userSummary.spaces.managed.length > 0;
       }
 
-      // Space access
-      that.clusterActions[1].disabled = !canCreateSpace;
-      // User Assignment access
-      that.clusterActions[2].disabled = !canAssignUsers;
+      that.clusterActions = [];
+
+      if (canCreateOrg) {
+        that.clusterActions.push(createOrg);
+      }
+      if (canCreateSpace) {
+        that.clusterActions.push(createSpace);
+      }
+      if (canAssignUsers || isAdmin) {
+        that.clusterActions.push(assignUsers);
+      }
+      that.hasActions = !!(that.clusterActions && that.clusterActions.length > 0);
     }
 
     function init() {

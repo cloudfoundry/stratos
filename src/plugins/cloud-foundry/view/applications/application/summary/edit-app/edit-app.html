@@ -1,22 +1,34 @@
-<form name="editAppForm" class="edit-app">
-  <div class="form-group " focusable-input>
+<form name="form.editAppForm" class="edit-app">
+  <div class="form-group " focusable-input ng-class="{'has-error': form.editAppForm.appName.$invalid}">
     <label class="control-label" translate>Application Name</label>
-    <input type="text" name="name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name"
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.appName.$error.required">Name is required</span>
+    </span>
+    <input type="text" name="appName" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name"
            required
     />
   </div>
-  <div class="form-group" focusable-input>
+  <div class="form-group" focusable-input ng-class="{'has-error': form.editAppForm.appMemory.$invalid}">
     <label class="control-label" translate>Memory Usage</label>
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.appMemory.$error.required">Memory is required</span>
+      <span translate ng-if="form.editAppForm.appMemory.$error.min">Memory must be higher than 0</span>
+    </span>
     <div class="input-group">
-      <input type="number" name="memory" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.memory"
+      <input type="number" min="1" name="appMemory" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.memory"
              required
       />
       <label class="input-group-addon rm-background" translate>MB</label>
     </div>
   </div>
-  <div class="form-group " focusable-input>
+  <div class="form-group " focusable-input ng-class="{'has-error': form.editAppForm.appInstances.$invalid}">
     <label class="control-label" translate>Instances</label>
-    <input type="number" name="instances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.appInstances.$error.required">Instances is required</span>
+      <span translate ng-if="form.editAppForm.appInstances.$error.min">Instances must be 0 or more</span>
+      <span translate ng-if="form.editAppForm.appInstances.$error.pattern && !form.editAppForm.appInstances.$error.min">Instances must be whole number</span>
+    </span>
+    <input type="number" min="0" pattern="\d*" name="appInstances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
            required
     />
   </div>

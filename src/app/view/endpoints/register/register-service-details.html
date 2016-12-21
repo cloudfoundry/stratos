@@ -1,0 +1,67 @@
+<div class="register-service-details">
+
+  <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hcf'">
+    <p translate><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank" translate>
+      Cloud Foundry</a> supports the full lifecycle, from initial development, through all testing stages, to
+      deployment.</p>
+    <p translate>Allow you and your development team to access their applications on a known Cloud Foundry cluster by
+      registering
+      the existing endpoint.</p>
+    <p translate>Create a unique recongizable name so that your developers can recognize and provide the endpoint's
+      instance
+      address to register your endpoint.</p>
+  </div>
+  <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hce'">
+    <p translate>{{ OEM_CONFIG.CODE_ENGINE }} is a continuous delivery service for enterprise development teams that automates
+      build, test, and deploy cycles. Developers can push and merge changes into their source control system (e.g.
+      GitHub or GitHub Enterprise) and {{ OEM_CONFIG.CODE_ENGINE }} builds, tests, and deploys each change.</p>
+    <p translate>Allow you and your development team to automate their work cycles by registering the existing {{ OEM_CONFIG.CODE_ENGINE }} endpoint.</p>
+    <p translate>Create a unique recognizable name so that your developers can recognize and provide the endpoint’s
+      instance address to register your endpoint.</p>
+  </div>
+  <div class="register-content-right">
+    <h4>{{step.title}}</h4>
+    <div>
+      <div class="form-group" focusable-input
+           ng-class="{'has-error': wizardForm[step.formName][step.nameOfUrlInput].$invalid && wizardForm[step.formName][step.nameOfUrlInput].$dirty}">
+        <label class="control-label" translate>Endpoint Address</label>
+        <span class="control-message">
+        <span translate
+              ng-if="wizardForm[step.formName][step.nameOfUrlInput].$error.required && wizardForm[step.formName][step.nameOfUrlInput].$dirty">
+          Url is required
+        </span>
+        <span translate
+              ng-if="wizardForm[step.formName][step.nameOfUrlInput].$error.pattern && wizardForm[step.formName][step.nameOfUrlInput].$dirty">
+          Invalid url format
+        </span>
+        <span translate
+              ng-if="wizardForm[step.formName][step.nameOfUrlInput].$error.helionUnique && wizardForm[step.formName][step.nameOfUrlInput].$dirty">
+          Url is not unique
+        </span>
+      </span>
+        <input type="text" name="{{step.nameOfUrlInput}}" class="form-control"
+               ng-model="wizardCtrl.options.userInput.url"
+               required
+               placeholder="{{ step.urlHint }}"
+               ng-pattern="step.urlValidationExpr"
+               helion-unique items="step.instances"
+               ignore-case
+               auto-focus/>
+      </div>
+      <div class="form-group" focusable-input
+           ng-class="{'has-error': wizardForm[step.formName][step.nameOfNameInput].$invalid && wizardForm[step.formName][step.nameOfNameInput].$dirty}">
+        <label class="control-label" translate>Name</label>
+      <span class="control-message">
+        <span translate ng-if="wizardForm[step.formName][step.nameOfNameInput].$error.required">Name is required</span>
+      </span>
+        <input type="text" name="{{step.nameOfNameInput}}" class="form-control"
+               ng-model="wizardCtrl.options.userInput.name" required/>
+      </div>
+      <div class="form-group skip-ssl-validation-checkbox" focusable-input>
+        <checkbox-input ng-model="wizardCtrl.options.userInput.skipSslValidation"
+                        input-label="{{'Skip SSL validation for the endpoint' | translate}}">
+        </checkbox-input>
+      </div>
+    </div>
+  </div>
+</div>

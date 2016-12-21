@@ -13,7 +13,8 @@
     '$interpolate',
     '$rootScope',
     '$window',
-    '$log'
+    '$log',
+    '$document'
   ];
 
   /**
@@ -28,10 +29,11 @@
    * @param {object} $rootScope - the angular $rootScope Service
    * @param {object} $window - the angular $window Service
    * @param {object} $log - the angular $log Service
+   * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(eventService, modelManager, confirmDialog,
-                                  $interval, $interpolate, $rootScope, $window, $log) {
+                                  $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();
@@ -48,6 +50,9 @@
 
     // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
     var autoLogoutDelta = 5 * 1000;
+
+    // When we see the following events, we consider the user as active
+    var userActiveEvents = 'keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll';
 
     var activityPromptShown = false;
 
@@ -132,6 +137,10 @@
         }
       }
     }
+
+    $document.find('html').on(userActiveEvents, function () {
+      userInteracted();
+    });
 
     eventService.$on(eventService.events.LOGIN, function () {
       loggedIn = true;

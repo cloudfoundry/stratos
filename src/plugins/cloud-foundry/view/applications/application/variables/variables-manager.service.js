@@ -49,7 +49,8 @@
         return detailView({
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
-          detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html'
+          detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
+          class: 'detail-view-thin'
         }, {
           cnsiGuid: cnsiGuid,
           guid: id,

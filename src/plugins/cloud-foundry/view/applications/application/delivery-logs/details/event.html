@@ -6,9 +6,7 @@
       <span ng-if="!detailViewCtrl.context.event.start_date" translate>Unknown</span>
     </div>
     <div class="row col-md-4">
-      <span translate>Duration: </span>
-      <span ng-if="detailViewCtrl.context.event.duration < 1000" translate>Less than a second</span>
-      <span ng-if="detailViewCtrl.context.event.duration >= 1000"> {{ detailViewCtrl.duration }}</span>
+      <span translate>Duration: </span> {{ detailViewCtrl.context.event.durationString }}
     </div>
   </div>
   <div ng-if="detailViewCtrl.log === null" class="message-box message-box-no-bg">
@@ -18,5 +16,5 @@
     <span translate>No log available</span>
   </div>
   <log-viewer ng-if="detailViewCtrl.log" class="delivery-log-event-log-view"
-              auto-scroll-on="false" log-text="detailViewCtrl.log"></log-viewer>
+              auto-scroll-on="false" colorize="true" log-text="detailViewCtrl.log"></log-viewer>
 </div>

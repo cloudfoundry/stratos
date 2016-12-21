@@ -1,0 +1,52 @@
+<div class="register-token">
+  <div class="register-token-description">
+
+    <p translate>
+      Connect Stackato to the
+      <a class="bold nofocus" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}" target="_blank">
+        {{ asyncTaskDialogCtrl.context.vcs.label }}
+      </a>
+      by registering a GitHub
+      <a class="bold nofocus" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">
+        Personal Access Token</a>.
+    </p>
+    <p translate>
+      Choose a name to help you identify the Token later on as the full token value will not be shown again once you submit this form.
+    </p>
+    <p>
+      <span class="italic">Note:</span> make sure the token has the
+      <span class="bold required-scope">repo</span> and <span class="bold required-scope">admin:repo_hook</span>
+      scopes.
+    </p>
+  </div>
+  <div class="separator"></div>
+  <form name="form.registerVcsToken" class="register-form">
+    <div class="input-container form-group" focusable-input
+         ng-class="{'has-error': form.registerVcsToken.tokenName.$dirty && form.registerVcsToken.tokenName.$invalid}">
+      <label class="control-label" translate>Token Name</label>
+      <span class="control-message">
+      <span translate ng-if="form.registerVcsToken.tokenName.$error.required">Token Name is required</span>
+      <span translate ng-if="form.registerVcsToken.tokenName.$error.helionUnique">Token Name must be unique within a VCS</span>
+    </span>
+      <input type="text" name="tokenName" auto-focus="300" class="form-control"
+             helion-unique items="asyncTaskDialogCtrl.context.tokenNames"
+             ng-model="asyncTaskDialogCtrl.context.data.name" required
+             placeholder="Choose a name for this token"/>
+      <br><br>
+    </div>
+    <div class="input-container form-group" focusable-input
+         ng-class="{'has-error': form.registerVcsToken.tokenValue.$dirty && form.registerVcsToken.tokenValue.$invalid}">
+      <label class="control-label" translate>Personal Access Token</label>
+      <span class="control-message">
+      <span translate ng-if="form.registerVcsToken.tokenValue.$error.required">Token Value is required</span>
+      <span translate ng-if="form.registerVcsToken.tokenValue.$error.pattern">Token Value must be a valid GitHub Personal Access Token</span>
+    </span>
+      <input type="text" name="tokenValue" class="form-control"
+             ng-model="asyncTaskDialogCtrl.context.data.value" required
+             ng-pattern="asyncTaskDialogCtrl.context.tokenPattern"
+             placeholder="Paste the 40 character token value"/>
+      <br><br>
+    </div>
+  </form>
+
+</div>

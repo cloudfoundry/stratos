@@ -9,6 +9,7 @@
   <select-input ng-model="wizardCtrl.options.userInput.branch"
     input-options="wizardCtrl.options.branches"
     placeholder="{{'Select Branch' | translate}}" tabindex="0"
+    refresh-action="wizardCtrl.options.refreshBranches"
     arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
     required></select-input>
 </div>
@@ -21,22 +22,23 @@
     required></select-input>
 </div>
 
-<p class="control-title" translate>Connect Pipeline to Endpoint</p>
-<div class="form-group">
+<p class="control-title" translate>Connect Pipeline to HCF Endpoint</p>
+<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].serviceName.$invalid && wizardForm['application-pipeline-details-form'].serviceName.$dirty}">
   <label class="control-label" translate>Endpoint Selected</label>
-  <input class="form-control" type="text"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].serviceName.$error.required">Username is required</span></span>
+  <input class="form-control" name="serviceName" type="text"
     ng-value="wizardCtrl.options.userInput.serviceInstance.name" readonly>
 </div>
-<div class="form-group">
+<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].hcfUsername.$invalid && wizardForm['application-pipeline-details-form'].hcfUsername.$dirty}">
   <label class="control-label" translate>Username</label>
-  <input type="text" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].hcfUsername.$error.required">Username is required</span></span>
+  <input type="text" name="hcfUsername"  class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterUsername" required/>
 </div>
-<div class="form-group has-feedback">
-  <label class="control-label" translate ng-show="!wizardCtrl.options.deploymentTarget">Password</label>
-  <label class="control-label" translate ng-show="wizardCtrl.options.deploymentTarget">Update Password (Optional)</label>
-  <input type="password" class="form-control"
+<div class="form-group has-feedback" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].hcfPassword.$invalid && wizardForm['application-pipeline-details-form'].hcfPassword.$dirty}">
+  <label class="control-label" translate>Password</label>
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].hcfPassword.$error.required">Password is required</span></span>
+  <input type="password" name="hcfPassword" class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterPassword"
-    password-reveal password-reveal-icon="'helion-icon helion-icon-View'"
-    ng-required="!wizardCtrl.options.deploymentTarget"/>
+    password-reveal password-reveal-icon="'helion-icon helion-icon-View'" required/>
 </div>

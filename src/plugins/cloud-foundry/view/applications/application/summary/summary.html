@@ -1,4 +1,26 @@
-<div class="panel panel-default summary">
+<div id="new-app-panel" ng-if="applicationSummaryCtrl.newlyCreated" class="new-app-panel">
+  <div class="new-app-title-box">
+    <span class="new-app-okay helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>
+    <span class="new-app-headline" translate>Your application has been created.</span>
+    <button type="button" class="close helion-icon helion-icon-Close"
+      ng-click="applicationSummaryCtrl.newlyCreated = false">
+    </button>
+  </div>
+  <div class="new-app-nextsteps" ng-if="appCtrl.ready && (applicationSummaryCtrl.canSetupPipeline || !applicationSummaryCtrl.hideManageServices)">
+    <span translate>You may want to:</span>
+    <ul>
+      <li ng-if="applicationSummaryCtrl.canSetupPipeline" >
+        <a id="new-app-setup-pipeline" translate ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id, showSetup: true})">Setup a Delivery Pipeline for your application</a>
+      </li>
+      <li ng-if="!applicationSummaryCtrl.hideManageServices">
+        <a id="new-app-add-services" translate ui-sref="cf.applications.application.services({guid: appCtrl.id})">Add services to your application</a>
+       </li>
+    </ul>
+  </div>
+</div>
+
+<div class="panel panel-default summary" ng-init="applicationSummaryCtrl.appCtrl = appCtrl">
+
   <div class="panel-heading action-header">
     <span translate>Summary</span>
     <a class="btn btn-link" ng-click="applicationSummaryCtrl.editApp()" ng-hide="applicationSummaryCtrl.hideEditApp">
@@ -14,25 +36,38 @@
         <dt translate>STATE</dt>
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
-            <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
-            <span class="app-status">{{ appCtrl.model.application.state.label }}</span>
+          <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
+          <span class="app-status">{{ appCtrl.model.application.state.label }}
+            <span ng-if="appCtrl.model.application.state.subLabel">&nbsp;- {{ appCtrl.model.application.state.subLabel }}</span>
+          </span>
           </div>
         </dd>
 
         <dt class="app-instance-title" translate>INSTANCES</dt>
         <dd>
-          <percent-gauge mode="instance"
+          <percent-gauge ng-if="appCtrl.model.application.summary.package_updated_at" mode="instance"
                          value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
-                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}">
+          </percent-gauge>
+          <percent-gauge ng-if="!appCtrl.model.application.summary.package_updated_at" mode="quota"
+                         value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}">
+          </percent-gauge>
         </dd>
+
+        <dt translate>CREATED</dt>
+        <dd class="pull-right" ng-if="appCtrl.model.application.metadata.created_at">
+          {{ appCtrl.model.application.metadata.created_at | amDateFormat: 'L - LTS' }}
+        </dd>
+        <dd class="pull-right" ng-if="!appCtrl.model.application.metadata.created_at">-</dd>
 
         <dt translate>MODIFIED</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
-          {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a'}}
+          {{ appCtrl.model.application.summary.package_updated_at | amDateFormat: 'L - LTS' }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
-        <dt translate>MEMORY QUOTA</dt>
+        <dt translate>MEMORY</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.memory)}}
         </dd>
@@ -81,7 +116,7 @@
 
         <dt translate>SPACE</dt>
         <dd class="pull-right">
-          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.services({
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications({
                   guid: applicationSummaryCtrl.cnsiGuid,
                   organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
                   space: applicationSummaryCtrl.model.application.space.metadata.guid
@@ -108,7 +143,8 @@
     <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
       This application has no running instances.
     </div>
-    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0" >
+    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0"
+           ng-class="{ 'table-actionable' : !applicationSummaryCtrl.hideInstanceActions}">
       <thead>
       <tr>
         <th translate>Index</th>
@@ -116,8 +152,7 @@
         <th translate>Memory</th>
         <th translate>Disk</th>
         <th translate>Uptime</th>
-        <!--<th></th>-->
-      </tr>
+        <th translate ng-if="!applicationSummaryCtrl.hideInstanceActions">Action</th>
       </tr>
       </thead>
       <tbody>
@@ -133,12 +168,18 @@
                          value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
         </td>
         <td class="instance-uptime-td">{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
-        <!--<td></td>-->
+        <td ng-if="!applicationSummaryCtrl.hideInstanceActions">
+          <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
+                        action-target="$index"
+                        menu-position="actions-menu-right"
+                        menu-icon="helion-icon helion-icon-More"
+                        enable-button-mode="true"></actions-menu>
+        </td>
       </tr>
       </tbody>
       <tfoot ng-show="applicationSummaryCtrl.instanceViewLimit < appCtrl.model.application.instanceCount">
       <tr>
-        <td colspan="4" class="text-center">
+        <td colspan="{{ applicationSummaryCtrl.hideInstanceActions ? 5 : 6}}" class="text-center">
           <a ng-click="applicationSummaryCtrl.instanceViewLimit = appCtrl.model.application.instanceCount">
             <span translate>Show All</span> ({{appCtrl.model.application.instanceCount}})
           </a>
@@ -162,22 +203,24 @@
          ng-if="!appCtrl.model.application.summary.routes.length" translate>
       You have no routes.
     </div>
-    <table class="table table-actionable"
+    <table class="table"
+           ng-class="{'table-actionable' : !applicationSummaryCtrl.hideRouteActions}"
            ng-if="appCtrl.model.application.summary.routes.length" >
       <thead>
       <tr>
         <th translate>Route</th>
-        <th translate>Actions</th>
+        <th translate ng-if="!applicationSummaryCtrl.hideRouteActions">Actions</th>
       </tr>
       </thead>
       <tbody>
       <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
         <td>{{ applicationSummaryCtrl.routesService.getRouteId(route) }}</td>
-        <td>
+        <td ng-if="!applicationSummaryCtrl.hideRouteActions">
           <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
                         action-target="route"
                         menu-position="actions-menu-right"
-                        menu-icon="helion-icon helion-icon-More"></actions-menu>
+                        menu-icon="helion-icon helion-icon-More"
+                        enable-button-mode="true"></actions-menu>
         </td>
       </tr>
       </tbody>
@@ -196,11 +239,11 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-body"
-      ng-if="!appCtrl.model.application.summary.services.length" translate>
+      ng-if="!applicationSummaryCtrl.serviceInstances.length" translate>
       You have no service instances.
     </div>
     <table class="table table-actionable"
-      ng-if="appCtrl.model.application.summary.services.length">
+      ng-if="applicationSummaryCtrl.serviceInstances.length">
       <thead>
         <tr>
           <th translate>Name</th>
@@ -212,7 +255,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="service in appCtrl.model.application.summary.services">
+        <tr ng-repeat="service in applicationSummaryCtrl.serviceInstances">
           <td>{{ service.name }}</td>
           <td>{{ service.service_plan.service.label }}</td>
           <td>{{ service.service_plan.name }}</td>

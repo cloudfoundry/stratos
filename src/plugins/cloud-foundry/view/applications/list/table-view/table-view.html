@@ -1,5 +1,48 @@
-<h1>Applications Table View (<a ui-sref="cf.applications.list.gallery-view">Gallery View</a>)</h1>
-
-<div ng-repeat="app in applicationsListCtrl.model.data.applications.resources track by app.metadata.guid">
-  <a ui-sref="cf.applications.application.summary({guid: app.metadata.guid})">{{ app.metadata.guid }}</a>
+<div ng-if="tableViewCtrl.apps.length"
+     class="apps-table">
+  <table class="table"
+        st-table="tableViewCtrl.stApps"
+        st-safe-src="tableViewCtrl.apps"
+        st-pipe="tableViewCtrl.stMiddleware"
+        st-binding="tableViewCtrl.table">
+    <thead>
+      <tr >
+        <th class="column"
+            ng-repeat="column in tableViewCtrl.tableColumns"
+            st-skip-natural="true"
+            ng-class="{'column-no-sort': column.noSort}"
+            st-sort="{{ column.noSort ? '' : column.value }}"
+            st-descending-first="{{ column.descendingFirst ? 'true' : '' }}">
+            <div class="column-div">
+              <div class="column-text" translate>{{ column.name }}</div>
+              <div class="smart-separator"></div>
+              <div class="column-no-sort"></div>
+              <div class="column-sorter-asc"></div>
+              <div class="column-sorter-desc"></div>
+            </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="app in tableViewCtrl.stApps">
+      <td class="table-view-app-name">
+        <a ng-href="{{ tableViewCtrl.getAppSummaryLink(app) }}">{{ app.entity.name }}</a>
+      </td>
+      <td>
+        <div class="app-state-column">
+        <app-state-icon state="app.state.indicator"></app-state-icon>
+        <span class="list-view-app-state-label">{{ app.state.label }}
+        <span
+          ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel }}
+        </span>
+        </span
+        </div>
+      </td>
+      <td class="text-uppercase">{{ app.instanceCount || 0 }}/{{ app.entity.instances }}</td>
+      <td>{{ app.entity.disk_quota | mbToHumanSize }}</td>
+      <td>{{ app.entity.memory | mbToHumanSize }}</td>
+      <td>{{ app.metadata.created_at | amDateFormat:'L - LTS' }}</td>
+    </tr>
+    </tbody>
+  </table>
 </div>

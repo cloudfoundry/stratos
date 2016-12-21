@@ -11,12 +11,14 @@
        st-safe-src="spaceRoutesCtrl.spaceDetail().routes">
     <div>
       <div class="panel panel-default">
-        <table class="table table-actionable" >
+        <table
+          class="table"
+          ng-class="{'table-actionable' : spaceRoutesCtrl.canDeleteOrUnmap}">
           <thead>
           <tr>
             <th st-sort="entity.host" st-sort-default="true" translate>ROUTE</th>
             <th translate>APPLICATION ATTACHED</th>
-            <th translate>ACTION</th>
+            <th translate ng-if="spaceRoutesCtrl.canDeleteOrUnmap">ACTION</th>
           </tr>
           </thead>
           <tbody>
@@ -24,11 +26,12 @@
             ng-repeat="route in spaceRoutesCtrl.visibleRoutes">
             <td>{{ spaceRoutesCtrl.routesService.getRouteId(route)}}</td>
             <td>{{ spaceRoutesCtrl.appsToNames(route.entity.apps).join(',')}}</td>
-            <td>
+            <td ng-if="spaceRoutesCtrl.canDeleteOrUnmap">
               <actions-menu actions="spaceRoutesCtrl.actionsPerRoute[route.metadata.guid]"
                             action-target="route"
                             menu-icon="helion-icon helion-icon-More"
-                            menu-position="actions-menu-right">
+                            menu-position="actions-menu-right"
+                            enable-button-mode="true">
               </actions-menu>
             </td>
           </tr>
@@ -36,7 +39,7 @@
           <tfoot ng-init="spaceRoutesCtrl.showRoutes = 5"
                  ng-show="spaceRoutesCtrl.showRoutes < spaceRoutesCtrl.spaceDetail().routes.length">
           <tr>
-            <td colspan="5" class="text-center">
+            <td colspan="{{spaceRoutesCtrl.canDeleteOrUnmap ? 3 : 2}}" class="text-center">
               <a ng-click="spaceRoutesCtrl.showRoutes = spaceRoutesCtrl.spaceDetail().routes.length">
                 <span translate>Show All</span> ({{spaceRoutesCtrl.spaceDetail().routes.length}})
               </a>

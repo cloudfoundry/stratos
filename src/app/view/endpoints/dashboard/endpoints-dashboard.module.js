@@ -22,70 +22,96 @@
   }
 
   EndpointsDashboardController.$inject = [
-    'app.model.modelManager',
+    '$q',
+    '$scope',
     '$state',
-    'app.view.hceRegistration',
-    'app.view.hcfRegistration',
-    '$q'
+    'app.model.modelManager',
+    'app.utils.utilsService',
+    'app.view.registerService',
+    'app.view.endpoints.dashboard.cnsiService',
+    'app.view.endpoints.dashboard.vcsService'
   ];
 
   /**
-   * @namespace app.view.endpoints.hce
-   * @memberof app.view.endpoints.hce
+   * @namespace app.view.endpoints.dashboard
+   * @memberof app.view.endpoints.dashboard
    * @name EndpointsDashboardController
-   * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {object} $state - the UI router $state service
-   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
    * @param {object} $q - the Angular $q service
+   * @param {object} $scope - the angular scope service
+   * @param {object} $state - the UI router $state service
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.utils.utilsService} utilsService - the utils service
+   * @param {app.view.registerService} registerService register service to display the core slide out
+   * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints
+   * @param {app.view.endpoints.dashboard.vcsService} vcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
-  function EndpointsDashboardController(modelManager, $state, hceRegistration, hcfRegistration, $q) {
+  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
+                                        cnsiService, vcsService) {
     var that = this;
-    this.modelManager = modelManager;
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.$state = $state;
-    this.hceRegistration = hceRegistration;
-    this.hcfRegistration = hcfRegistration;
-    this.listPromiseResolved = false;
+
+    var currentUserAccount = modelManager.retrieve('app.model.account');
+
+    var endpointsProviders = [cnsiService, vcsService];
+
+    this.endpoints = [];
+
+    /*
+     * Call method on all service providers, forwarding the passed arguments
+     * If the called method returns a promise, we return a $q.all() on all the returned promises,
+     * otherwise we return an array of the returned values
+     * */
+    function callForAllProviders(method) {
+      Array.prototype.shift.apply(arguments);
+
+      var values = [];
+      var isPromise = null;
+
+      for (var i = 0; i < endpointsProviders.length; i++) {
+        if (!angular.isFunction(endpointsProviders[i][method])) {
+          throw new Error('callForAllProviders: service provider does not implement method: ' + method);
+        }
+        var ret = endpointsProviders[i][method].apply(this, arguments);
+        if (ret && angular.isFunction(ret.then)) {
+          if (isPromise === null) {
+            isPromise = true;
+          } else if (!isPromise) {
+            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
+          }
+          values.push(ret);
+        } else {
+          if (isPromise === null) {
+            isPromise = false;
+          } else if (isPromise) {
+            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
+          }
+          values.push(ret);
+        }
+      }
+      if (isPromise) {
+        return $q.all(values);
+      }
+      return values;
+    }
+
+    this.initialised = false;
     this.listError = false;
 
-    this.serviceInstances = {};
-    if (this.serviceInstanceModel.serviceInstances > 0) {
-      // serviceInstanceModel has previously been updated
-      // to decrease load time, we will use that data.
-      // we will still refresh the data asyncronously and the UI will update to relect and changes
-      this.listPromiseResolved = true;
-      _updateLocalServiceInstances();
-    }
-    // Show welcome message only if no endpoints are registered
-    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
-    this.$q = $q;
-
-    _updateEndpoints();
+    // Ensure any app errors we have set are cleared when the scope is destroyed
+    $scope.$on('$destroy', function () {
+      callForAllProviders('clear');
+    });
 
     /**
      * @namespace app.view.endpoints.dashboard
      * @memberof app.view.endpoints.dashboard
-     * @name showClusterAddForm
-     * @description Show cluster add form
-     * @param {boolean} isHcf  when true show cluster add form for HCF
+     * @name register
+     * @description Register a service endpoint
      */
-    this.showClusterAddForm = function (isHcf) {
-      var that = this;
-      if (isHcf) {
-        this.hcfRegistration.add()
-          .then(function () {
-            return that._updateEndpoints;
-          });
-      } else {
-        this.hceRegistration.add()
-          .then(function () {
-            return that._updateEndpoints;
-          });
-      }
+    this.register = function () {
+      registerService.show($scope).then(function () {
+        _updateEndpoints();
+      });
     };
 
     /**
@@ -105,55 +131,94 @@
      * @returns {Boolean}
      */
     this.isUserAdmin = function () {
-      return that.currentUserAccount.isAdmin();
+      return currentUserAccount.isAdmin();
     };
 
     /**
      * @function reload
      * @memberOf app.view.endpoints.dashboard
-     * @description Reload the curent view (used if there was an error loading the dashboard)
+     * @description Reload the current view (used if there was an error loading the dashboard)
      */
     this.reload = function () {
       $state.reload();
     };
 
-    /**
-     * @function _updateLocalServiceInstances
-     * @memberOf app.view.endpoints.dashboard
-     * @description Updates local service instances
-     * @private
-     */
-    function _updateLocalServiceInstances() {
-      if (that.showWelcomeMessage && that.serviceInstanceModel.serviceInstances.length > 0) {
-        that.showWelcomeMessage = false;
-      }
-      _.forEach(that.serviceInstanceModel.serviceInstances, function (serviceInstance) {
-        var guid = serviceInstance.guid;
-        if (angular.isUndefined(that.serviceInstances[guid])) {
-          that.serviceInstances[guid] = serviceInstance;
-        } else {
-          angular.extend(that.serviceInstances[guid], serviceInstance);
-        }
+    function init() {
+      _updateEndpoints().then(function () {
+        _updateWelcomeMessage();
       });
+    }
+
+    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+
+    function _updateWelcomeMessage() {
+      // Show the welcome message if either...
+      if (that.isUserAdmin()) {
+        // The user is admin and there are no endpoints registered
+        that.showWelcomeMessage = that.endpoints.length === 0;
+      } else {
+        // The user is not admin and there are no connected endpoints (note - they should never reach here if there
+        // are no registered endpoints)
+        that.showWelcomeMessage = !_.find(that.endpoints, { connected: 'connected' });
+      }
+    }
+
+    function _haveCachedEndpoints() {
+      var ret = callForAllProviders('haveInstances');
+      for (var i = 0; i < ret.length; i++) {
+        if (ret[i]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function _updateEndpointsFromCache() {
+      callForAllProviders('createEndpointEntries', that.endpoints);
+      _updateWelcomeMessage();
+
+      // Pre-sort the array by reverse type to avoid initial smart-table flicker
+      that.endpoints.sort(function (e1, e2) {
+        if (e1.type < e2.type) {
+          return 1;
+        }
+        if (e1.type > e2.type) {
+          return -1;
+        }
+        return 0;
+      });
+
+      that.initialised = true;
     }
 
     /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard
-     * @description Is current user an admin?
-     * @returns {*}
+     * @description update the models supporting the endpoints dashboard and refresh the local endpoints list
+     * @returns {object} a promise
      * @private
      */
     function _updateEndpoints() {
-      return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
+      return callForAllProviders('updateInstances')
         .then(function () {
           that.listError = false;
-          _updateLocalServiceInstances();
-        }).catch(function () {
+        })
+        .catch(function () {
           that.listError = true;
-        }).finally(function () {
-          that.listPromiseResolved = true;
+        })
+        .then(function () {
+          return _updateEndpointsFromCache(that.endpoints);
+        })
+        .finally(function () {
+          that.intialised = true;
         });
+    }
+
+    if (_haveCachedEndpoints()) {
+      // serviceInstanceModel has previously been updated
+      // to decrease load time, we will use that data.
+      // we will still refresh the data asynchronously and the UI will update to reflect changes
+      _updateEndpointsFromCache();
     }
   }
 

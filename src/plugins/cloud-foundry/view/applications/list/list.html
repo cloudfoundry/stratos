@@ -1,81 +1,169 @@
-<div class="action-bar app-actions-bar panel-less">
-  <div class="applications-header font-semi-bold pull-left" translate>
+<div class="app-top-bar action-bar app-actions-bar panel-less application-wall-header">
+  <div class="applications-header font-semi-bold" translate>
     Applications
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
-  <div class="pull-right">
+  <div class="application-header-right">
     <button class="btn btn-primary"
-      ng-if="applicationsListCtrl.showAddApplicationButton()"
-      translate
-      ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
+            id="app-wall-add-new-application-btn"
+            ng-if="applicationsListCtrl.showAddApplicationButton()"
+            ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
+            translate
+            ng-click="applicationsListCtrl.addApplication()">
       add application
     </button>
   </div>
 </div>
 
 <div ng-if="applicationsListCtrl.ready">
-  <div class="applications-filter" ng-if="applicationsListCtrl.model.clusterCount > 0">
+  <div class="application-control-bar" ng-if="applicationsListCtrl.model.clusterCount > 0">
     <div class="panel panel-default">
-      <div class="panel-body">
-        <form class="form-horizontal">
+      <div class="panel-body application-main-controls">
+        <div class="application-search-box">
+          <form>
+            <div class="form-group search-field" focusable-input>
+              <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+              <input type="text" class="form-control" id="applications-text" name="applications-text"
+                    ng-model="applicationsListCtrl.filter.text"
+                    ng-model-options='{ debounce: 100 }'
+                    ng-change="applicationsListCtrl.setText()"
+                    ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps"
+                    placeholder="{{'Search by name' | translate}}"/>
+            </div>
+          </form>
+        </div>
+        <div class="app-total-control">
+          <form class="form-horizontal">
+            <div class=" form-group">
+              <label ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>Total Applications</label>
+              <label ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>Filtered Applications</label>
+              <div class="app-count">
+                <div class="app-count-number">
+                  <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
+                    {{ applicationsListCtrl.model.unfilteredApplicationCount }}
+                  </span>
+                  <span ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
+                    {{ applicationsListCtrl.model.filteredApplications.length }} / {{ applicationsListCtrl.model.unfilteredApplicationCount }}
+                  </span>
+                </div>
+                <div class="app-count-reset">
+                  <div class="reset-link">
+                    <a class="btn-link"
+                      ng-click="applicationsListCtrl.resetFilter()"
+                      ng-show="applicationsListCtrl.filter.cnsiGuid !== 'all' || applicationsListCtrl.filter.text.length"
+                      translate>Reset</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="view-buttons" ng-if="!applicationsListCtrl.forceCardLayout">
+          <button class="btn btn-link btn-border-less"
+                  ng-class="!applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+                  type="button" ng-click="applicationsListCtrl.goToGalleryView(false)"
+                  ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
+            <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
+          </button>
+          <button class="btn btn-link btn-border-less"
+                  ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+                  type="button" ng-click="applicationsListCtrl.goToGalleryView(true)"
+                  ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
+            <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
+          </button>
+        </div>
+        <div class="application-options-control">
+          <div class="reset-link">
+            <a class="btn-link"
+              ng-if="applicationsListCtrl.model.hideFilterPanel"
+              ng-click="applicationsListCtrl.toggleFilterPanel()"
+              translate>Show Options</a>
+            <a class="btn-link"
+              ng-if="!applicationsListCtrl.model.hideFilterPanel"
+              ng-click="applicationsListCtrl.toggleFilterPanel()"
+              translate>Hide Options</a>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body applications-filter" ng-show="!applicationsListCtrl.model.hideFilterPanel">
+        <form class="form-horizontal application-cf-filters">
           <div class="form-group">
             <label class="control-label" translate>Endpoint</label>
             <search-box
               ng-model="applicationsListCtrl.filter.cnsiGuid"
               input-options="applicationsListCtrl.clusters"
-              tabindex="0"
               ng-change="applicationsListCtrl.setCluster()">
             </search-box>
           </div>
-          <div class="form-group" ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all'">
-            <label class="control-label" translate>Organization</label>
+          <div class="form-group" ng-class="{'form-group-disabled': applicationsListCtrl.filter.cnsiGuid === 'all'}">
+            <label class="control-label" translate>Org</label>
             <search-box
               ng-model="applicationsListCtrl.filter.orgGuid"
               input-options="applicationsListCtrl.organizations"
-              tabindex="0"
               ng-change="applicationsListCtrl.setOrganization()">
             </search-box>
           </div>
-          <div class="form-group" ng-if="applicationsListCtrl.filter.orgGuid !== 'all'">
+          <div class="form-group" ng-class="{'form-group-disabled': applicationsListCtrl.filter.orgGuid === 'all'}">
             <label class="control-label" translate>Space</label>
             <search-box
               ng-model="applicationsListCtrl.filter.spaceGuid"
               input-options="applicationsListCtrl.spaces"
-              tabindex="0"
               ng-change="applicationsListCtrl.setSpace()">
             </search-box>
           </div>
-          <div class="reset-link">
-            <a class="btn-link"
-              ng-click="applicationsListCtrl.resetFilter()"
-              ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all'"
-              translate>Reset</a>
-          </div>
         </form>
+        <div class="apps-sorting" ng-hide="!applicationsListCtrl.model.hasApps">
+          <applications-sorting></applications-sorting>
+        </div>
       </div>
     </div>
   </div>
+
 
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
     <div ng-if="applicationsListCtrl.model.clusterCount === 0">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
       <div class="applications-msg" translate>You cannot view any applications.</div>
-      <div class="applications-cta" ><a class="btn-link" href="#/endpoint" translate>
-        Use the Endpoints Dashboard</a> <span translate>to fix your connections or connect to new endpoints.</span>
+      <div class="applications-cta">
+        <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints Dashboard</a>
+        <span translate>to fix your connections or connect to new endpoints.</span>
       </div>
     </div>
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
-      <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
-      <div class="applications-msg" translate>You have no applications.</div>
-      <div class="applications-cta">
-        <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')" ng-hide="!applicationsListCtrl.isSpaceDeveloper" translate><span>Add an application.</span></a>
+      <div ng-if="!applicationsListCtrl.isSpaceDeveloper">
+        <div ng-if="applicationsListCtrl.isAdminInAnyHcf()">
+          <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
+          <div class="applications-msg" translate>You have no applications and</div>
+          <div class="applications-msg" translate>there are no spaces where you can add any.</div>
+          <div class="applications-cta">
+            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
+              Dashboard</a>
+            <span translate>to manage spaces.</span>
+          </div>
+        </div>
+        <div ng-if="!applicationsListCtrl.isAdminInAnyHcf()">
+          <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
+          <div class="applications-msg" translate>You have no applications and cannot add any.</div>
+          <div class="applications-msg" translate>Please contact your administrator.</div>
+        </div>
+      </div>
+      <div ng-if="applicationsListCtrl.isSpaceDeveloper">
+        <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
+        <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
+        <div class="applications-cta">
+          <a class="btn btn-link" ng-click="applicationsListCtrl.addApplication()"
+             translate>
+            Add an application
+          </a>
+        </div>
       </div>
     </div>
+
   </div>
 
   <div ng-if="applicationsListCtrl.model.hasApps" ui-view></div>
 
-  <paginator ng-if="applicationsListCtrl.model.appPage > 0"
+  <paginator
     properties="applicationsListCtrl.paginationProperties">
   </paginator>
 </div>

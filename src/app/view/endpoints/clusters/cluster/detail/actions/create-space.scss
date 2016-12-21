@@ -4,11 +4,86 @@
     margin-bottom: 30px;
   }
 
+  .form-group {
+    input {
+      width: 232px;
+    }
+  }
+
+  .remove-space {
+    position: absolute;
+    right: 14px;
+    bottom: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    color: $brand-primary;
+    user-select: none;
+
+    &:hover {
+      cursor: pointer;
+      color: #01765b;
+      text-decoration: underline;
+    }
+
+    &[disabled]:hover {
+      color: $brand-primary;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    &[disabled] {
+      opacity: $radio-input-disabled-opacity;
+    }
+  }
+
   .create-space-button {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: baseline;
     padding-left: 0;
     padding-right: 10px;
     font-size: 16px;
     text-transform: none;
+    font-weight: 600;
+    color: $brand-primary;
+    user-select: none;
+
+    .add-icon {
+      // SVG elements are a pain to position
+      position: relative;
+      top: $padding-base-vertical;
+      margin-right: $padding-xs-horizontal;
+      width: 22px;
+      .st0 {
+        fill: $brand-primary;
+      }
+    }
+
+    &:hover {
+      cursor: pointer;
+      color: #01765b;
+      text-decoration: underline;
+      .add-icon {
+        .st0 {
+          fill: #01765b;
+        }
+      }
+    }
+
+    &[disabled]:hover {
+      color: $brand-primary;
+      cursor: not-allowed;
+      text-decoration: none;
+      .add-icon {
+        .st0 {
+          fill: $brand-primary;
+        }
+      }
+    }
+
+    &[disabled] {
+      opacity: $radio-input-disabled-opacity;
+    }
   }
 
 }

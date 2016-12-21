@@ -1,0 +1,23 @@
+// Forms
+// ======
+
+// Generic names for OEM branding
+$input-select-fg:                 $form-control-selected-color !default;
+
+// HPE semantic names
+// ------------------
+$hpe-input-height:                $hpe-unit-space * 2.25 !default;  // 54px
+$hpe-input-width:                 $hpe-unit-space * 13.5 !default;  // 324px
+$hpe-input-label-fg:              $gray-darker !default;
+$hpe-input-select-fg:             $input-select-fg;
+
+// Form groups
+$form-group-margin-bottom:        -1px !default;
+
+$select-input-option-padding:       10px $padding-large-horizontal !default;
+$select-input-menu-header-color:    #999999 !default;
+$select-input-menu-header-padding:  10px $padding-large-horizontal 5px !default;
+$select-input-disabled-color:       $gray-light !default;
+
+// Placeholder text color - override bootstrap default
+$input-color-placeholder:          #aaa !default;

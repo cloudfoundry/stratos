@@ -28,13 +28,25 @@
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message
-       * @param {object=} messageInterpolate - optional object used in interpolation
+       * @param {object=} interpolateScope - optional scope used for interpolating message
        * @param {object=} toastOptions - optional override options for toast
        * @returns {object} The toast object
        * @public
        */
-      notify: function (toastType, message, messageInterpolate, toastOptions) {
-        var interpolatedMessage = messageInterpolate ? $interpolate(message)(messageInterpolate) : message;
+      notify: function (toastType, message, interpolateScope, toastOptions) {
+
+        var interpolatedMessage;
+        if (interpolateScope) {
+          // Escape possible HTML properties in interpolateScope
+          _.forEach(interpolateScope, function (val, key) {
+            if (_.isString(val)) {
+              interpolateScope[key] = _.escape(val);
+            }
+          });
+          interpolatedMessage = $interpolate(message)(interpolateScope);
+        } else {
+          interpolatedMessage = message;
+        }
         switch (toastType) {
           case 'busy':
             return toaster.busy(interpolatedMessage, toastOptions);
@@ -51,19 +63,19 @@
     };
 
     eventService.$on('cf.events.NOTIFY', function (event, config) {
-      service.notify(config.toastType, config.message, config.options);
+      service.notify(config.toastType, config.message, config.scope, config.options);
     });
     eventService.$on('cf.events.NOTIFY_BUSY', function (event, config) {
-      service.notify('busy', config.message, config.options);
+      service.notify('busy', config.message, config.scope, config.options);
     });
     eventService.$on('cf.events.NOTIFY_ERROR', function (event, config) {
-      service.notify('error', config.message, config.options);
+      service.notify('error', config.message, config.scope, config.options);
     });
     eventService.$on('cf.events.NOTIFY_SUCCESS', function (event, config) {
-      service.notify('success', config.message, config.options);
+      service.notify('success', config.message, config.scope, config.options);
     });
     eventService.$on('cf.events.NOTIFY_WARNING', function (event, config) {
-      service.notify('warning', config.message, config.options);
+      service.notify('warning', config.message, config.scope, config.options);
     });
 
     return service;

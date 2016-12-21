@@ -1,0 +1,11 @@
+@mixin hpe-progress-bar($size, $num) {
+  @for $ii from 1 through $num {
+    $increment: 1 / $num;
+    $this-size: $size * (1 - ($increment * ($ii - 1)));
+
+    .progress-bar:nth-child(#{$ii}) {
+      height: $this-size;
+      margin-top: ($size - $this-size) / 2;
+    }
+  }
+}

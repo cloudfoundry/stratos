@@ -104,9 +104,8 @@
     this.canRemoveOrgRole = function (role, clusterGuid, orgGuid, userGuid) {
 
       var isAllowed = authModel.isAllowed(clusterGuid,
-        authModel.resources.user,
-        authModel.actions.update, null,
-        orgGuid);
+        authModel.resources.organization,
+        authModel.actions.update, orgGuid);
 
       if (!isAllowed) {
         return false;
@@ -392,6 +391,15 @@
       roles.organization.org_user = true;
     };
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.listUsers
+     * @description Fetch a list of users in all organizations the connected user can see. For a cluster admin this is
+     * done in a single call to listAllUsers, for non-cluster admin this is done via a call to each organization they
+     * can see
+     * @param {string} clusterGuid - HCF service guid
+     * @param {boolean} forceRefresh - set to true to always reach out to HCF instead of using cached version
+     * @returns {promise} Promise containing Array of users.
+     */
     this.listUsers = function (clusterGuid, forceRefresh) {
       var isAdmin = stackatoInfo.info.endpoints.hcf[clusterGuid].user.admin;
       if (!forceRefresh && angular.isDefined(promiseForUsers)) {
@@ -568,7 +576,8 @@
           yes: gettext('Yes'),
           no: gettext('No')
         },
-        windowClass: 'roles-conf-dialog'
+        windowClass: 'roles-conf-dialog',
+        noHtmlEscape: true
       };
     }
 
@@ -600,10 +609,8 @@
 
           // Calculate org role delta only for organizations for which user is allowed to
           var isUserAllowed = authModel.isAllowed(clusterGuid,
-            authModel.resources.user,
-            authModel.actions.update,
-            null,
-            orgGuid);
+            authModel.resources.organization,
+            authModel.actions.update, orgGuid);
 
           // For each organization role
           _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
@@ -620,8 +627,8 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
-              authModel.actions.update, spaceGuid, orgGuid, true);
+            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.space,
+              authModel.actions.update, spaceGuid, orgGuid);
 
             // For each space role
             _.forEach(spaceRoles, function (selected, roleKey) {

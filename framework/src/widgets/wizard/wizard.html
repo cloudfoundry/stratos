@@ -1,0 +1,90 @@
+<div class="wizard" ng-form="wizardForm" ng-keydown="$event.keyCode === 13 && !wizardCtrl.disableNext() && wizardCtrl.next()">
+  <div ng-if="wizardCtrl.workflow.title" class="wizard-head">
+    <h4>{{ ::wizardCtrl.workflow.title }}</h4>
+  </div>
+
+  <div class="wizard-body row">
+    <ul class="wizard-nav tabbed-nav nav nav-pills nav-stacked col-xs-12 col-sm-3"
+      ng-if="!wizardCtrl.workflow.hideStepNavStack">
+      <li class="wizard-nav-item nav-item"
+        ng-class="{
+                    'complete': wizardCtrl.currentIndex > $index,
+                    'active': wizardCtrl.currentIndex === $index,
+                    'disabled': wizardCtrl.isNavEntryDisabled($index)
+                  }"
+        ng-click="!wizardCtrl.isNavEntryDisabled($index) && wizardCtrl.switchTo($index)"
+        ng-repeat="step in wizardCtrl.steps"
+        ng-if="step.ready">
+        <a>{{ ::step.title }}</a>
+      </li>
+    </ul>
+
+    <div class="wizard-step"
+      ng-class="{ 'col-xs-12 col-sm-9': !wizardCtrl.workflow.hideStepNavStack, 'wizard-step-nonav': wizardCtrl.workflow.hideStepNavStack }"
+      ng-repeat="step in wizardCtrl.steps"
+      ng-if="wizardCtrl.currentIndex === $index">
+      <ng-include ng-form="{{ step.formName }}" src="step.templateUrl" novalidation></ng-include>
+    </div>
+
+    <!-- OnEnter Loading Indicator -->
+    <div class="wizard-step wizard-loading-indicator"
+      ng-class="{ 'col-xs-12 col-sm-9': !wizardCtrl.workflow.hideStepNavStack, 'wizard-step-full': wizardCtrl.workflow.hideStepNavStack}"
+      ng-if="wizardCtrl.currentIndex === -1">
+      <div class="message-box message-box-no-bg">
+        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy">{{wizardCtrl.busyMessage}}</div>
+        <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+      </div>
+    </div>
+
+    <!-- OnNext Loading Indicator -->
+    <div class="wizard-step wizard-loading-indicator"
+      ng-class="{ 'col-xs-12 col-sm-9': !wizardCtrl.workflow.hideStepNavStack, 'wizard-step-full': wizardCtrl.workflow.hideStepNavStack}"
+      ng-if="wizardCtrl.currentIndex === -2">
+      <div class="message-box message-box-no-bg">
+        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy">{{wizardCtrl.busyMessage}}</div>
+        <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+        <div>
+          <button type="button" class="btn btn-sm btn-default"
+            ng-click="wizardCtrl.cancelNextTask()"
+            ng-if="wizardCtrl.showNextCancel"
+            translate>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="wizard-message alert" ng-show="wizardCtrl.hasMessage" ng-class="wizardCtrl.messageClass">
+      {{ wizardCtrl.message }}
+    </div>
+  </div>
+
+  <div class="wizard-foot" ng-if="!wizardCtrl.workflow.hideFooter">
+
+    <button type="button"
+            class="btn btn-default cancel"
+            ng-click="wizardCtrl.cancel()"
+            ng-disabled="wizardCtrl.cancelBtnDisabled"
+            ng-show="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'Cancel' }}
+    </button>
+
+    <button type="button"
+      class="btn btn-default back"
+      ng-click="wizardCtrl.back()"
+      ng-disabled="wizardCtrl.backBtnDisabled"
+      ng-if="wizardCtrl.workflow.allowBack()">
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'Back' }}
+    </button>
+
+    <button type="button"
+      class="btn btn-primary next"
+      ng-click="wizardCtrl.next()"
+      ng-show="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
+      ng-disabled="wizardCtrl.disableNext()">
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'Next' }}
+    </button>
+  </div>
+</div>

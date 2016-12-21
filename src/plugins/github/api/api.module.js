@@ -106,8 +106,7 @@
         params: params || {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          'x-cnap-vcs-url': this.GITHUB_ENDPOINTS.URL,
-          'x-cnap-vcs-api-url': this.GITHUB_ENDPOINTS.API_URL
+          'Cache-Control': 'no-cache'
         }
       };
 

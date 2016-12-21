@@ -2,16 +2,16 @@
   'use strict';
 
   // Supported VCS Types
-  var VCS_TYPES = {
+  var SUPPORTED_VCS_TYPES = {
     GITHUB: {
       description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
       img: 'github_octocat.png',
-      supported: true
+      label: 'GitHub'
     },
     GITHUB_ENTERPRISE: {
       description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
       img: 'GitHub-Mark-120px-plus.png',
-      supported: true
+      label: 'GitHub Enterprise'
     }
   };
 
@@ -42,97 +42,205 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {object} $q - the Angular $q service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {array} vcsClients - the list of VCS clients
-   * @property {array} supportedVcsInstances - the list of supported VCS instances
+   * @property {Array} vcsClients - the list of VCS clients
+   * @property {Array} supportedVcsInstances - the list of supported VCS instances
    * @class
    */
   function VcsModel($q, apiManager) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.vcsClients = null;
-    this.supportedVcsInstances = [];
+    this.invalidTokens = {};
+    this.vcsTokens = [];
+    this.vcsTokensFetched = false;
+    this.vcsClientsFetched = false;
+    this.lastValidityCheck = $q.resolve();
   }
 
   angular.extend(VcsModel.prototype, {
+
     /**
      * @function listVcsClients
      * @memberof cloud-foundry.model.vcs.VcsModel
      * @description Get the list of valid VCS clients
-     * @param {boolean} forceFetch - force fetch VCS clients
      * @returns {promise} A promise object
      * @public
      */
-    listVcsClients: function (forceFetch) {
-      if (forceFetch || this.vcsClients === null) {
-        var that = this;
-        return this.apiManager.retrieve('cloud-foundry.api.Vcs')
-          .listVcsClients()
-          .then(function (response) {
-            that.vcsClients = response.data;
-            return response;
+    listVcsClients: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .listVcsClients()
+        .then(function (res) {
+          // Filter out unsupported clients
+          var supported = _.filter(res.data, function (vcs) {
+            return SUPPORTED_VCS_TYPES[that.expandVcsType(vcs)];
           });
-      } else {
-        var deferred = this.$q.defer();
-        deferred.resolve({data: this.vcsClients});
-        return deferred.promise;
-      }
+
+          that.vcsClients = supported;
+          that.vcsClientsFetched = true;
+          return supported;
+        });
     },
 
-    /**
-     * @function getSupportedVcsInstances
-     * @memberof cloud-foundry.model.vcs.VcsModel
-     * @description Returns metadata about the supported VCS Instances, given a list of all of the available instances
-     * @param {object} hceVcsInstances - HCE VCS instance metadata from HCE
-     * @returns {object} Metadata array with details of the set of supported VCS instances that can be presented to the user
-     * @public
-     */
-    getSupportedVcsInstances: function (hceVcsInstances) {
-      var deferred = this.$q.defer();
+    listVcsTokens: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .listVcsTokens().then(function (res) {
+          that.vcsTokens = res.data;
 
-      if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
-        this.supportedVcsInstances = [];
-        deferred.resolve(this.supportedVcsInstances);
-      } else {
-        var that = this;
-        this.listVcsClients().then(function () {
-          var supported = _.filter(hceVcsInstances, function (vcs) {
-            var vcsInfo = VCS_TYPES[that._expandVcsType(vcs)];
-            return vcsInfo && vcsInfo.supported && _.includes(that.vcsClients, vcs.browse_url);
-          });
+          that._rebuildTokenMap();
 
-          that.supportedVcsInstances = _.map(supported, function (supportedVcs) {
-            var vcs = _.clone(VCS_TYPES[that._expandVcsType(supportedVcs)]);
-            vcs.label = supportedVcs.label;
-            vcs.browse_url = supportedVcs.browse_url;
-            vcs.value = supportedVcs;
-            return vcs;
-          });
-
-          deferred.resolve(that.supportedVcsInstances);
-        }, function () {
-          var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
-          deferred.reject(msg);
+          that.vcsTokensFetched = true;
+          return that.vcsTokens;
         });
+    },
+
+    registerVcsToken: function (vcsGuid, tokenName, tokenValue) {
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .registerVcsToken(vcsGuid, tokenName, tokenValue).then(function (res) {
+          return res.data;
+        });
+    },
+
+    checkVcsToken: function (tokenGuid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .checkVcsToken(tokenGuid).then(function (res) {
+          that._cacheInvalid(tokenGuid, res.data.valid === false && res.data.invalid_reason);
+          return res.data;
+        });
+    },
+
+    getToken: function (tokenGuid) {
+      return _.find(this.vcsTokens, this._tokenFinder(tokenGuid));
+    },
+
+    getTokensForVcs: function (vcs) {
+      return this.tokensByVcs[vcs.guid] || [];
+    },
+
+    checkTokensValidity: function (vcs) {
+      var tokensToCheck, tokenGuid;
+
+      // Cleanup cached invalidity of stale tokens
+      for (tokenGuid in this.invalidTokens) {
+        if (!this.invalidTokens.hasOwnProperty(tokenGuid)) {
+          continue;
+        }
+        if (!this.getToken(tokenGuid)) {
+          delete this.invalidTokens[tokenGuid];
+        }
       }
 
-      return deferred.promise;
+      if (angular.isUndefined(vcs)) {
+        tokensToCheck = this.vcsTokens;
+      } else {
+        tokensToCheck = this.getTokensForVcs(vcs);
+      }
+
+      var promises = [];
+      for (var i = 0; i < tokensToCheck.length; i++) {
+        promises.push(this.checkVcsToken(tokensToCheck[i].token.guid));
+      }
+
+      this.lastValidityCheck = this.$q.all(promises);
+      return this.lastValidityCheck;
+    },
+
+    renameVcsToken: function (tokenGuid, tokenName) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .renameVcsToken(tokenGuid, tokenName).then(function () {
+          // Update cache after successful rename
+          var cachedToken = that.getToken(tokenGuid);
+          if (cachedToken) {
+            cachedToken.token.name = tokenName;
+          }
+        });
+    },
+
+    deleteVcsToken: function (tokenGuid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .deleteVcsToken(tokenGuid).then(function () {
+          // Remove token from cache on successful delete
+          var index = _.findIndex(that.vcsTokens, function (vcsToken) {
+            return vcsToken.token.guid === tokenGuid;
+          });
+          if (index > -1) {
+            that.vcsTokens.splice(index, 1);
+            that._rebuildTokenMap();
+          }
+        });
+    },
+
+    getSupportedType: function (vcs) {
+      return _.clone(SUPPORTED_VCS_TYPES[this.expandVcsType(vcs)]);
     },
 
     /**
      * @function _expandVcsType
      * @memberof cloud-foundry.model.vcs.VcsModel
-     * @description Returns more detailed CS type name from VCS instance metadata
+     * @description Returns more detailed VCS type name from VCS instance metadata
      * @param {object} vcs - VCS Instance Metadata
      * @returns {string} VCS type - expanded to split types like GitHub to GitHub and GitHub Enterprise
      * @private
      */
-    _expandVcsType: function (vcs) {
+    expandVcsType: function (vcs) {
       var expType = vcs.vcs_type;
-      if (expType === 'GITHUB' && vcs.browse_url && vcs.browse_url.indexOf('https://github.com') === -1) {
-        expType = 'GITHUB_ENTERPRISE';
+      if (expType === 'github') {
+        if (vcs.browse_url && vcs.browse_url.indexOf('https://github.com') === -1) {
+          expType = 'GITHUB_ENTERPRISE';
+        } else {
+          expType = 'GITHUB';
+        }
       }
       return expType;
+    },
+
+    getTypeLabel: function (vcs) {
+      var vcsTypeDef = SUPPORTED_VCS_TYPES[this.expandVcsType(vcs)];
+      if (!vcsTypeDef) {
+        return 'Unknown Type';
+      }
+      return vcsTypeDef.label;
+    },
+
+    buildTokenOptions: function (vcs) {
+      var that = this;
+      var validTokens = _.filter(this.getTokensForVcs(vcs), function (vcsToken) {
+        return !that.invalidTokens[vcsToken.token.guid];
+      });
+
+      vcs.tokenOptions = _.map(validTokens, function (vcsToken) {
+        return {
+          value: vcsToken.token.guid,
+          label: vcsToken.token.name
+        };
+      });
+      return validTokens;
+    },
+
+    _cacheInvalid: function (tokenGuid, valid) {
+      this.invalidTokens[tokenGuid] = valid;
+    },
+
+    _tokenFinder: function (tokenGuid) {
+      return function (token) {
+        return token.token.guid === tokenGuid;
+      };
+    },
+
+    _rebuildTokenMap: function () {
+      // Build a map of tokens by VCS guid for quick access
+      this.tokensByVcs = {};
+      for (var i = 0; i < this.vcsTokens.length; i++) {
+        var token = this.vcsTokens[i];
+        this.tokensByVcs[token.vcs.guid] = this.tokensByVcs[token.vcs.guid] || [];
+        this.tokensByVcs[token.vcs.guid].push(token);
+      }
     }
+
   });
 
 })();

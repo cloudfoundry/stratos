@@ -1,6 +1,14 @@
+@import "select-vcs-token.directive";
+
 add-app-workflow,
 add-pipeline-workflow {
   table.table {
+    border: 1px solid transparent;
+
+    .radio-td {
+      width: 64px;
+    }
+
     tbody, tr:nth-child(2) {
       border: 1px solid $table-border-color;
     }
@@ -40,5 +48,14 @@ add-pipeline-workflow {
 
   .step-spinner {
     padding: $hpe-unit-space 0;
+  }
+
+  .clickable {
+    cursor: pointer;
+  }
+
+  .hpe-media-select-col {
+    width: 64px;
+    padding-right: 0;
   }
 }

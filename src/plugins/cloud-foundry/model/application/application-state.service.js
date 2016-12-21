@@ -71,43 +71,67 @@
         }
       },
       STARTED: {
+        NO_INSTANCES: {
+          label: gettext('Deployed'),
+          subLabel: gettext('No Instances'),
+          indicator: 'ok',
+          actions: 'stop,restart,cli'
+        },
         PENDING: {
           label: gettext('Staging App'),
           indicator: 'busy',
           actions: 'delete'
         },
+        'STAGED(?,?,?)': {
+          label: gettext('Deployed'),
+          indicator: 'tentative',
+          actions: 'stop,restart,cli'
+        },
         'STAGED(0,0,0)': {
-          label: gettext('Starting App'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Starting App'),
+          indicator: 'busy',
+          actions: 'stop,restart,cli'
+        },
+        'STAGED(N,0,0,N)': {
+          label: gettext('Deployed'),
+          subLabel: gettext('Starting App'),
           indicator: 'busy',
           actions: 'stop,restart,cli'
         },
         'STAGED(N,0,0)': {
-          label: gettext('Online'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Online'),
           indicator: 'ok',
           actions: 'stop,restart,launch,cli'
         },
         'STAGED(0,N,0)': {
-          label: gettext('Crashed'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Crashed'),
           indicator: 'error',
           actions: 'stop,restart,cli'
         },
         'STAGED(0,0,N)': {
-          label: gettext('Starting App'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Starting App'),
           indicator: 'warning',
           actions: 'stop,restart,cli'
         },
         'STAGED(0,N,N)': {
-          label: gettext('Crashing'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Crashing'),
           indicator: 'error',
           actions: 'stop,restart,cli'
         },
         'STAGED(N,N,0)': {
-          label: gettext('Partially Online'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Partially Online'),
           indicator: 'warning',
           actions: 'stop,restart,launch,cli'
         },
         'STAGED(N,0,N)': {
-          label: gettext('Partially Online'),
+          label: gettext('Deployed'),
+          subLabel: gettext('Partially Online'),
           indicator: 'warning',
           actions: 'stop,restart,launch,cli'
         }
@@ -166,11 +190,29 @@
           if (appStateMatch['?']) {
             return appStateMatch['?'];
           } else {
-            var counts = getCounts(summary, appInstances);
-            var extState = pkgState + '(' +
-              formatCount(counts.running) + ',' +
-              formatCount(counts.crashed) + ',' +
-              formatCount(counts.flapping) + ')';
+
+            // Special case for when the desired app instance counf is 0
+            if (summary && summary.instances === 0) {
+              return appStateMatch.NO_INSTANCES;
+            }
+
+            var extState;
+            // Do the best we can if we do not have app instance metadata
+            if (appInstances) {
+              var counts = getCounts(summary, appInstances);
+
+              // Special case: App instances only in running and starting state
+              if (counts.starting > 0 && counts.okay === summary.instances) {
+                extState = pkgState + '(N,0,0,N)';
+              } else {
+                extState = pkgState + '(' +
+                formatCount(counts.running) + ',' +
+                formatCount(counts.crashed) + ',' +
+                formatCount(counts.flapping) + ')';
+              }
+            } else {
+              extState = pkgState + '(?,?,?)';
+            }
             if (appStateMatch[extState]) {
               return appStateMatch[extState];
             }
@@ -215,7 +257,11 @@
       var counts = {};
       // Need to check based on additional state
       // Note that the app summary returned when we are getting all apps does not report running_instances
-      counts.running = getCount(summary.running_instances, appInstances, 'RUNNING');
+      // NOTE: running_instances does not mean that the instance states ar "RUNNING"
+      counts.running = getCount(undefined, appInstances, 'RUNNING');
+      counts.starting = getCount(undefined, appInstances, 'STARTING');
+      counts.okay = counts.running + counts.starting;
+
       // If we know how many aer running and this is the same as the total # instances then
       // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
       if (counts.running === summary.instances) {

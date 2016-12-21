@@ -1,0 +1,20 @@
+{
+  "name": "oem",
+  "version": "1.0.0",
+  "description": "Stackato Console OEM Packaging",
+  "scripts": {
+    "build": "gulp oem"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-sass": "^2.1.1",
+    "gulp-if": "^2.0.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^2.0.0",
+    "lodash": "^4.13.1"
+  }
+}

@@ -19,8 +19,23 @@
    */
   function pageFooter(path) {
     return {
-      templateUrl: path + 'view/page-footer/page-footer.html'
+      templateUrl: path + 'view/page-footer/page-footer.html',
+      controller: PageFooterController,
+      controllerAs: 'pageFooterCtrl',
+      scope: {
+        mode: '@'
+      },
+      bindToController: true
     };
+  }
+
+  PageFooterController.$inject = [
+    '$scope',
+    'app.utils.utilsService'
+  ];
+
+  function PageFooterController($scope, utilsService) {
+    this.OEM_CONFIG = utilsService.getOemConfiguration();
   }
 
 })();

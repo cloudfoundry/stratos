@@ -1,0 +1,23 @@
+// Breadcrumbs
+// ===========
+
+$breadcrumb-bg:                  $white !default;
+$breadcrumb-container-height:    48px !default;
+
+$breadcrumb-separator-padding:   12px !default;
+
+$breadcrumb-color:               $gray-darker !default;
+$breadcrumb-font-size:           $font-size-large !default;
+$breadcrumb-font-weight:         $hpe-font-weight-semibold !default;
+
+$breadcrumb-active-color:        $gray-darker !default;
+$breadcrumb-active-font-weight:  normal !default;
+
+$breadcrumb-hover-color:         $link-color !default;
+
+$breadcrumb-padding-vertical:    (($breadcrumb-container-height - $breadcrumb-font-size) / 2) !default;
+$breadcrumb-padding-horizontal:  $hpe-unit-space !default;
+
+$breadcrumb-border-width:        1px !default;
+$breadcrumb-border-style:        solid !default;
+$breadcrumb-border-color:        $rule !default; // Should likely be converted to $gray-light or $gray (depending) at some point.

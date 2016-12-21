@@ -38,7 +38,7 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
-   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.utils.utilsService} utils - the utils service
    * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
@@ -57,10 +57,10 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.modelUtils = modelUtils;
-
-    this.actions = [];
+    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.orgCount = null;
     this.userCount = null;
+    this.userService = {};
 
     var cardData = {};
     var expiredStatus = {
@@ -69,9 +69,17 @@
       description: gettext('Token has expired')
     };
 
+    var erroredStatus = {
+      classes: 'danger',
+      icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+      description: gettext('Cannot contact endpoint')
+    };
+
     cardData.title = this.service.name;
     this.getCardData = function () {
-      if (that.service.hasExpired) {
+      if (this.userService.error) {
+        cardData.status = erroredStatus;
+      } else if (that.service.hasExpired) {
         cardData.status = expiredStatus;
       } else {
         delete cardData.status;
@@ -84,7 +92,7 @@
         if (!newVal) {
           return;
         }
-        that.setActions();
+        that.userService = userServiceInstanceModel.serviceInstances[that.service.guid] || {};
         that.setOrganisationCount();
         that.setUserCount();
       });
@@ -99,51 +107,14 @@
     /**
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
-     * @name setActions
-     * @description Set the contents of the tile's action menu
-     */
-    setActions: function () {
-      var that = this;
-      this.actions = [];
-
-      if (!this.service.isConnected) {
-        this.actions.push({
-          name: gettext('Connect'),
-          execute: function () {
-            that.connect(that.service);
-          }
-        });
-      }
-
-      if (this.service.isConnected || this.service.hasExpired) {
-        this.actions.push({
-          name: gettext('Disconnect'),
-          execute: function () {
-            that.disconnect(that.service.guid);
-          }
-        });
-      }
-
-      if (this.currentUserAccount.isAdmin()) {
-        this.actions.push({
-          name: gettext('Unregister'),
-          execute: function () {
-            that.unregister(that.service);
-          }
-        });
-      }
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
      * @name setUserCount
      * @description Determine the number of users associated with this cluster
      */
     setUserCount: function () {
       this.userCount = 0;
 
-      if (!this.service.isConnected || !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
+      if (!this.service.isConnected || this.userService.error ||
+        !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
         this.userCount = undefined;
         return;
       }
@@ -152,7 +123,8 @@
       this.userApi.ListAllUsers({'results-per-page': 1}, this.modelUtils.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.userCount = response.data.total_results;
-        }).catch(function () {
+        })
+        .catch(function () {
           that.userCount = undefined;
         });
     },
@@ -166,7 +138,8 @@
     setOrganisationCount: function () {
       this.orgCount = 0;
 
-      if (!this.service.isConnected) {
+      if (!this.service.isConnected || this.userService.error) {
+        this.orgCount = undefined;
         return;
       }
       var that = this;
@@ -174,7 +147,8 @@
         this.modelUtils.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.orgCount = response.data.total_results;
-        }).catch(function () {
+        })
+        .catch(function () {
           that.orgCount = undefined;
         });
     },
@@ -186,7 +160,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid});
+      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid, orgCount: this.orgCount, userCount: this.userCount});
     }
 
   });

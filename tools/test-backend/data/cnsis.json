@@ -1,0 +1,24 @@
+{
+  "url": "/pp/v1/cnsis",
+  "response": [
+    {
+      "guid": "ff095d55-9831-409a-b6e5-3fb0d7fad509",
+      "name": "LOL",
+      "cnsi_type": "hcf",
+      "api_endpoint": {
+        "Scheme": "http",
+        "Opaque": "",
+        "User": null,
+        "Host": "api.hcf.hsc.stacktest.io",
+        "Path": "",
+        "RawPath": "",
+        "RawQuery": "",
+        "Fragment": ""
+      },
+      "authorization_endpoint": "https://login.hcf.helion.lol",
+      "token_endpoint": "https://uaa.hcf.helion.lol",
+      "doppler_logging_endpoint": "wss://doppler.hcf.helion.lol:4443",
+      "skip_ssl_validation": true
+    }
+  ]
+}

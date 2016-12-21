@@ -3,7 +3,7 @@
 
   /* eslint-disable angular/no-private-call */
   describe('add-service-workflow directive - ', function () {
-    var $httpBackend, $scope, eventService, that;
+    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute;
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
@@ -13,19 +13,32 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      eventService = $injector.get('app.event.eventService');
+      var modelManager = $injector.get('app.model.modelManager');
+      var appModel = modelManager.retrieve('cloud-foundry.model.application');
 
-      var markup = '<delete-app-workflow></delete-app-workflow>';
+      var mockAppsApi = mock.cloudFoundryAPI.Apps;
+      var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
+      appModel.application = {
+        summary: GetAppSummary.response['200'].body
+      };
+
+      $scope.guids = {
+        cnsiGuid: 'cnsiGuid',
+        hceCnsiGuid: 'hceCnsiGuid'
+      };
+
+      $scope.testNoOp = function () {};
+      var routeGuid = '84a911b3-16f7-4f47-afa4-581c86018600';
+      ListAllAppsForRoute = mock.cloudFoundryAPI.Routes.ListAllAppsForRoute(routeGuid);
+      listAllAppsForRouteCall = $httpBackend.whenGET(ListAllAppsForRoute.url + '?results-per-page=1').respond(ListAllAppsForRoute.response[200].body);
+
+      var markup = '<delete-app-workflow guids="guids" close-dialog="testNoOp" dismiss-dialog="testNoOp"></delete-app-workflow>';
       var element = angular.element(markup);
       $compile(element)($scope);
       $scope.$apply();
 
       that = element.controller('deleteAppWorkflow');
-      var mockAppsApi = mock.cloudFoundryAPI.Apps;
-      var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
-      that.appModel.application = {
-        summary: GetAppSummary.response['200'].body
-      };
+      $httpBackend.flush();
     }));
 
     afterEach(function () {
@@ -35,12 +48,6 @@
 
     it('should be compilable', function () {
       expect(that).toBeDefined();
-    });
-
-    it('should listen on cf.events.START_DELETE_APP_WORKFLOW', function () {
-      spyOn(that, 'startWorkflow');
-      eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW', 'foo');
-      expect(that.startWorkflow).toHaveBeenCalledWith('foo');
     });
 
     describe('after resetting', function () {
@@ -108,9 +115,7 @@
       });
 
       it('#checkAppRoutes', function () {
-        var routeGuid = '84a911b3-16f7-4f47-afa4-581c86018600';
-        var ListAllAppsForRoute = mock.cloudFoundryAPI.Routes.ListAllAppsForRoute(routeGuid);
-        $httpBackend.whenGET(ListAllAppsForRoute.url + '?results-per-page=1').respond(ListAllAppsForRoute.response[200].body);
+        listAllAppsForRouteCall.respond(ListAllAppsForRoute.response[200].body);
         $httpBackend.expectGET(ListAllAppsForRoute.url + '?results-per-page=1');
         expect(that.options.safeRoutes.length).toBe(0);
         that.checkAppRoutes();
@@ -119,9 +124,7 @@
       });
 
       it('#checkAppRoutes - multi-binding', function () {
-        var routeGuid = '84a911b3-16f7-4f47-afa4-581c86018600';
-        var ListAllAppsForRoute = mock.cloudFoundryAPI.Routes.ListAllAppsForRoute(routeGuid);
-        $httpBackend.whenGET(ListAllAppsForRoute.url + '?results-per-page=1').respond(angular.extend({}, ListAllAppsForRoute.response[200].body, {
+        listAllAppsForRouteCall.respond(angular.extend({}, ListAllAppsForRoute.response[200].body, {
           total_results: 2
         }));
         $httpBackend.expectGET(ListAllAppsForRoute.url + '?results-per-page=1');

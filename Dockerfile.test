@@ -1,17 +1,10 @@
-FROM node:4.2.3
+FROM stackatotest/hsc-concourse:latest
 
-RUN apt-get update && \
-    apt-get install -y openjdk-7-jre-headless && \
-    apt-get install -y xvfb wget openjdk-7-jre && \
-    apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic && \
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg --unpack google-chrome-stable_current_amd64.deb && \
-    apt-get install -f -y && \
-    apt-get clean && \
-    rm google-chrome-stable_current_amd64.deb && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /usr/src/app
-
+# These args need to be consumed, otherwise build fails
+ARG USER_ID
+ARG GROUP_ID
+ARG USER_NAME
+ENV LANG en_US.UTF-8
+ENV DBUS_SESSION_BUS_ADDRESS /dev/null
 WORKDIR /usr/src/app
-
-CMD bash provision.sh && cd tools && npm run gate-check && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
+CMD bash e2e/provision.sh && cd tools && npm run headless-e2e -- --params.host=nginx --params.port=

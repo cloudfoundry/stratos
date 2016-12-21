@@ -14,6 +14,7 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('app.model.modelManager');
+      var apiManager = $injector.get('app.api.apiManager');
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       var $scope = $injector.get('$rootScope').$new();
@@ -24,13 +25,13 @@
       var cliCommands = $injector.get('app.view.endpoints.clusters.cluster.cliCommands');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
-      $controller = new ClusterController(modelManager, $stateParams, $scope, utils, $state, $q, cliCommands);
+      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands);
 
     }));
 

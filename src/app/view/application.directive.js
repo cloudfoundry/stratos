@@ -28,53 +28,89 @@
   }
 
   ApplicationController.$inject = [
-    '$timeout',
     'app.event.eventService',
     'app.model.modelManager',
-    '$state',
-    '$window',
+    'app.basePath',
     'app.view.upgradeCheck',
-    'app.logged-in.loggedInService'
+    'app.logged-in.loggedInService',
+    'app.view.localStorage',
+    '$timeout',
+    '$state',
+    '$stateParams',
+    '$window',
+    '$rootScope',
+    '$scope'
   ];
 
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
-   * @param {function} $timeout - angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {$state} $state - Angular ui-router $state service
-   * @param {$window} $window - Angular $window service
+   * @param {app.basePath} path - the base path serving our app (i.e. /app)
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
    * @param {object} loggedInService - the Logged In Service
+   * @param {object} localStorage - the Local Storage In Service
+   * @param {object} $timeout - Angular $timeout service
+   * @param {$state} $state - Angular ui-router $state service
+   * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
+   * @param {$window} $window - Angular $window service
+   * @param {$rootScope} $rootScope - Angular $rootScope service
+   * @param {$scope} $scope - Angular $scope service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
+   * @property {app.basePath} path - the base path serving our app (i.e. /app)
+   * @property {app.view.upgradeCheck} upgradeCheck - the upgrade check service
+   * @property {object} loggedInService - the Logged In Service
+   * @property {$state} $state - Angular ui-router $state service
+   * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
-   * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck, loggedInService) {
+  function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService, localStorage,
+                                 $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
+
     this.eventService = eventService;
     this.modelManager = modelManager;
+    this.path = path;
+    this.upgradeCheck = upgradeCheck;
+    this.loggedInService = loggedInService;
+
     this.$state = $state;
     this.$window = $window;
-    this.upgradeCheck = upgradeCheck;
+
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
     this.showGlobalSpinner = false;
-    this.showRegistration = false;
     this.ready = false;
-    this.loggedInService = loggedInService;
 
     $timeout(function () {
       that.verifySessionOrCheckUpgrade();
     }, 0);
+
+    // Navigation options
+    this.hideNavigation = $stateParams.hideNavigation;
+    this.hideAccount = $stateParams.hideAccount;
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+      that.hideNavigation = toParams.hideNavigation;
+      that.hideAccount = toParams.hideAccount;
+    });
+
+    // Read back and persist the state of the navigation bar to local storage
+    this.navbarIconsOnly = localStorage.getItem('navbarIconsOnly', 'false') === 'true';
+    $scope.$watch(function () {
+      return that.navbarIconsOnly;
+    }, function (nv, ov) {
+      if (nv !== ov) {
+        localStorage.setItem('navbarIconsOnly', nv);
+      }
+    });
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -102,13 +138,7 @@
      */
     verifySessionOrCheckUpgrade: function () {
       var that = this;
-      var api = this.modelManager.retrieve('app.model.account');
-      var infoApi = this.modelManager.retrieve('app.model.stackatoInfo');
-      // We need to make an API call to see if an upgrade is in progress
-      // If we have a session cookie, we will make a verifySession call anyway, so use that
-      // Otherwise, we need to make some call - so we use the version api to get the basic version metadata
-      var check = api.hasSessionCookie() ? this.verifySession() : infoApi.stackatoInfo.version();
-      check.catch(function (response) {
+      this.verifySession().catch(function (response) {
         // We only care about 503 - use upgrade service to determine if this is an upgrade
         if (that.upgradeCheck.isUpgrading(response)) {
           // Upgrade service will cause the upgrade page to be displayed to the user
@@ -130,6 +160,10 @@
      * @public
      */
     login: function (username, password) {
+      this.serverFailedToRespond = false;
+      this.serverErrorOnLogin = false;
+      this.failedLogin = false;
+
       var that = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
@@ -197,7 +231,9 @@
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
-                that.showRegistration = userServiceInstanceModel.numValid === 0;
+                if (userServiceInstanceModel.numValid === 0) {
+                  that.redirectState = 'endpoint.dashboard';
+                }
               });
             }
           }
@@ -272,6 +308,7 @@
      */
     logout: function () {
       var that = this;
+      this.showGlobalSpinner = true;
       this.modelManager.retrieve('app.model.account')
         .logout()
         .then(function () {
@@ -291,7 +328,7 @@
     reload: function () {
       /* eslint-disable no-warning-comments */
       // FIXME: Can we clean the model and all current state instead? (reload the app for now)
-      /* eslint-disable no-warning-comments */
+      /* eslint-enable no-warning-comments */
       // Hard reload of the app in the browser ensures all state is cleared
       this.$window.location = '/';
     },
@@ -306,7 +343,6 @@
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGOUT);
       this.loggedIn = false;
-      this.showRegistration = false;
     }
   });
 

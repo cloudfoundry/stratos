@@ -1,0 +1,144 @@
+.vcs-token-selector {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  overflow: visible;
+
+  cursor: pointer;
+  &.active {
+    cursor: default;
+  }
+  &.disabled {
+    cursor: not-allowed;
+  }
+
+  .radio-icon {
+    margin-right: $hpe-unit-space  / 2;
+  }
+
+  .vcs-icon {
+    margin-right: $hpe-unit-space;
+    width: 96px;
+    &.disabled {
+      filter: grayscale(100%);
+      opacity: $radio-input-disabled-opacity;
+    }
+  }
+
+  .vcs-vertical-panel {
+    display: flex;
+    flex-flow: column nowrap;
+    flex: 1 1 0px;
+
+    .vcs-title {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      align-self: stretch;
+      align-items: baseline;
+      margin-bottom: $padding-small-vertical;
+
+      font-weight: 500;
+
+      .vcs-label {
+        margin-top: 0;
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .manage-tokens-link {
+        color: $hpe-primary;
+        white-space: nowrap;
+        font-size: 16px;
+        margin-top: 0;
+        margin-left: $padding-xs-horizontal;
+        &:hover {
+          cursor: pointer;
+          color: #01765b;
+          text-decoration: underline;
+        }
+      }
+
+      .add-new-token-wrapper {
+        margin-left: $padding-xs-horizontal;
+        font-size: 16px;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: baseline;
+        .add-new-token-icon {
+          // SVG elements are a pain to position
+          position: relative;
+          top: 8px;
+          width: 28px;
+          .st0 {
+            fill: $brand-primary;
+          }
+        }
+        &:hover {
+          color: #01765b;
+          text-decoration: underline;
+          cursor: pointer;
+          .manage-tokens-link {
+            color: #01765b;
+            text-decoration: underline;
+          }
+          .add-new-token-icon {
+            .st0 {
+              fill: #01765b;
+            }
+          }
+        }
+      }
+    }
+
+    .vcs-url {
+      margin-top: 0;
+      margin-bottom: $padding-large-vertical + $padding-small-vertical;
+    }
+
+    .vcs-description-and-token {
+      display: flex;
+      flex-flow: row nowrap;
+      margin-top: 0;
+      margin-bottom: $padding-small-vertical;
+
+      .vcs-description {
+        flex: 4 1 0px;
+        margin-right: $hpe-unit-space;
+      }
+
+      .single-token-wrapper {
+        flex: 5 1 0px;
+        display: flex;
+        flex-flow: column nowrap;
+        color: #555555;
+        font-size: 18px;
+
+        .single-token-label {
+          font-weight: 600;
+        }
+
+        .no-token-warning-icon {
+          color: $status-warning;
+          margin-right: $padding-xs-horizontal;
+        }
+
+        .no-valid-token-warning-icon {
+          color: $status-critical;
+          margin-right: $padding-xs-horizontal;
+        }
+
+      }
+
+      .many-tokens-wrapper {
+        flex: 5 1 0px;
+        display: flex;
+        flex-flow: column nowrap;
+        .form-group {
+          width: auto;
+        }
+      }
+
+    }
+  }
+}

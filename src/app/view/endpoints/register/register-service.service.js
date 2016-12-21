@@ -3,77 +3,144 @@
 
   angular
     .module('app.view')
-    .factory('app.view.registerService', ServiceRegistrationService);
+    .factory('app.view.registerService', ServiceRegistrationFactory);
 
-  ServiceRegistrationService.$inject = [
+  ServiceRegistrationFactory.$inject = [
+    '$q',
+    '$interpolate',
     'app.model.modelManager',
+    'app.utils.utilsService',
     'app.view.notificationsService',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.detailView'
   ];
 
   /**
-   * @name ServiceRegistrationService
+   * @name ServiceRegistrationFactory
    * @description Register a service via a slide out
    * @namespace app.view.registerService.ServiceRegistrationService
+   * @param {object} $q - the Angular $q service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager The console model manager service
+   * @param {app.utils.utilsService} utilsService - the console utils service
    * @param {app.view.notificationsService} notificationsService The console notification service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
-   * @property {function} add Opens slide out containing registration form
-   * @constructor
+   * @param {helion.framework.widgets.detailView} detailView The framework async detail view
+   * @returns {object} Object containing 'show' function
    */
-  function ServiceRegistrationService(modelManager, notificationsService, asyncTaskDialog) {
-    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+  function ServiceRegistrationFactory($q, $interpolate, modelManager, utilsService, notificationsService, detailView) {
 
     function createInstances(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
-      return _.map(filteredInstances,
-        function (c) {
-          var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
-        });
+      return _.map(filteredInstances, utilsService.getClusterEndpoint);
     }
 
     return {
-      /**
-       * @name add
-       * @description Opens slide out containing registration form
-       * @namespace app.view.registerService.ServiceRegistrationService
-       * @param {string} type The type of service. For example hce or hcf
-       * @param {string} title The title of the detail view
-       * @param {string=} description optional description to add in the detail view
-       * @param {string=} urlHint optional hint to use for the URL field
-       * @returns {promise}
-       */
-      add: function (type, title, description, urlHint) {
-        var data = {
-          name: '',
-          url: '',
-          skipSslValidation: false
-        };
-        return asyncTaskDialog(
-          {
-            title: title,
-            templateUrl: 'app/view/endpoints/register/register-service.html',
-            class: 'detail-view-thin',
-            buttonTitles: {
-              submit: gettext('Register')
+      show: function () {
+        var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+        var modal;
+        var allowBack = false;
+        var context = {
+          wizardOptions: {
+            scope: {
+              OEM_CONFIG: utilsService.getOemConfiguration()
+            },
+            workflow: {
+              allowCancelAtLastStep: true,
+              hideStepNavStack: true,
+              title: gettext('Register an endpoint'),
+              allowBack: function () {
+                return allowBack;
+              },
+              steps: [
+                {
+                  hideNext: true,
+                  templateUrl: 'app/view/endpoints/register/register-service-type.html',
+                  onNext: function () {
+                    var step = context.wizardOptions.workflow.steps[1];
+                    var scope = {};
+                    switch (context.wizardOptions.userInput.type) {
+                      case 'hcf':
+                        scope.endpoint = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+                        step.product = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
+                        step.nameOfNameInput = 'hcfName';
+                        step.nameOfUrlInput = 'hcfUrl';
+                        step.urlHint = $interpolate(gettext('{{ endpoint }} API endpoint'))(scope);
+                        break;
+                      case 'hce':
+                        scope.endpoint = utilsService.getOemConfiguration().CODE_ENGINE;
+                        step.product = utilsService.getOemConfiguration().CODE_ENGINE;
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
+                        step.nameOfNameInput = 'hceName';
+                        step.nameOfUrlInput = 'hceUrl';
+                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
+                        break;
+                      default:
+                        step.product = gettext('Endpoint');
+                        step.title = gettext('Register Endpoint');
+                        step.typeLabel = gettext('Service Endpoint');
+                        step.urlHint = gettext('');
+                        break;
+                    }
+                    step.urlValidationExpr = utilsService.urlValidationExpression;
+                    step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                  },
+                  onEnter: function () {
+                    allowBack = false;
+                  }
+                },
+                {
+                  formName: 'regServiceDetails',
+                  templateUrl: 'app/view/endpoints/register/register-service-details.html',
+                  showBusyOnNext: true,
+                  isLastStep: true,
+                  nextBtnText: gettext('Register'),
+                  onNext: function () {
+                    var userInput = context.wizardOptions.userInput;
+                    var stepTwo = context.wizardOptions.workflow.steps[1];
+                    return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
+                      notificationsService.notify('success',
+                        gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
+                        {endpointType: stepTwo.product, name: userInput.name});
+                      return serviceInstance;
+                    }).catch(function (response) {
+                      if (response.status === 403) {
+                        return $q.reject(gettext('Endpoint uses a certificate signed by an unknown authority.' +
+                          ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                      }
+                      return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
+                        'is correct and try again. If this error persists, please contact the administrator.'));
+                    });
+                  },
+                  onEnter: function () {
+                    delete context.wizardOptions.userInput.url;
+                    delete context.wizardOptions.userInput.name;
+                    delete context.wizardOptions.userInput.skipSslValidation;
+                    allowBack = true;
+                  }
+                }
+              ]
+            },
+            userInput: {}
+          },
+          wizardActions: {
+            stop: function () {
+              modal.close();
+            },
+
+            finish: function () {
+              modal.close();
             }
-          },
-          {
-            data: data,
-            instances: createInstances(serviceInstanceModel.serviceInstances, type),
-            description: description,
-            urlHint: urlHint
-          },
-          function () {
-            return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
-              notificationsService.notify('success',
-                gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                {endpointType: type.toUpperCase(), name: data.name});
-              return serviceInstance;
-            });
           }
-        ).result;
+        };
+        modal = detailView({
+          template: '<wizard ' +
+          'class="register-service-wizard" ' +
+          'actions="context.wizardActions" ' +
+          'options="context.wizardOptions">' +
+          '</wizard>'
+        }, context);
+
+        return modal.result;
       }
     };
   }

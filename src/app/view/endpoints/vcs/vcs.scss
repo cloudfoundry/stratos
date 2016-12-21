@@ -1,0 +1,120 @@
+$border: 1px solid $gray-light;
+
+.bold {
+  font-weight: 600;
+}
+
+a.nofocus:focus {
+  outline: none;
+  color: $link-color;
+  text-decoration: none;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.manage-tokens {
+
+  .token-value {
+    letter-spacing: 0.05em;
+  }
+
+  .add-new-token {
+    color: $brand-primary;
+    display: flex;
+    align-items: center;
+    text-align: start;
+    font-weight: 600;
+    .add-new-token-icon {
+      width: 28px;
+      margin-right: 10px;
+      .st0 {
+        fill: $brand-primary;
+      }
+    }
+    &:hover {
+      cursor: pointer;
+      color: #01765b;
+      .add-new-token-icon {
+        .st0 {
+          fill: #01765b;
+        }
+      }
+    }
+    .add-new-token-icon-chooser {
+      margin-right: 28px;
+    }
+  }
+
+  .tokens-list-table {
+    .chooser-radio {
+      width: 70px;
+    }
+
+    &.table {
+      tr {
+        border: $border;
+      }
+      tr[table-inline-message] {
+        border-top-style: none;
+        border-bottom-style: none;
+      }
+      tr.add-new-token-tr {
+        border: 1px dashed $gray-light;
+        border-top-style: none;
+      }
+    }
+
+  }
+
+}
+
+.register-token {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .register-token-description {
+    flex: 1 0 250px;
+  }
+
+  .separator {
+    flex: 0 0 40px;
+  }
+
+  .register-form {
+    flex: 3 1 0px;
+    .form-group {
+      width: 100%;
+    }
+  }
+
+  .required-scope {
+    font-family: "Source Code Pro", monospace;
+    font-size: 13px;
+  }
+}
+
+.edit-token {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .italic {
+    font-style: italic;
+  }
+
+  .edit-token-description {
+    flex: 1 0 250px;
+  }
+
+  .separator {
+    flex: 0 0 40px;
+  }
+
+  .edit-form {
+    flex: 3 1 0px;
+    .form-group {
+      width: 100%;
+    }
+  }
+}

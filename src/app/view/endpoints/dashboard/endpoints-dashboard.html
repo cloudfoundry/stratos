@@ -1,48 +1,123 @@
 <div class="endpoints endpoints-dashboard">
-  <div class="action-bar app-actions-bar col-md-12 panel-less">
+  <div class="header">
     <div class="applications-header font-semi-bold pull-left" translate>
       Endpoints
-      <bounce-spinner classes="bounce-spinner-sm" ng-show="!endpointsDashboardCtrl.listPromiseResolved"></bounce-spinner>
+      <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
     </div>
+    <button ng-if="endpointsDashboardCtrl.initialised &&
+                     endpointsDashboardCtrl.isUserAdmin()"
+            class="btn btn-primary" stlye="position: absolute; right: 0px;"
+            ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint
+    </button>
   </div>
-  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.listPromiseResolved && endpointsDashboardCtrl.listError">
+  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
       <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
-      <div class="applications-msg" translate>The Console could not retrieve Endpoint information.</div>
+      <div class="applications-msg" translate>The {{ OEM_CONFIG.CONSOLE }} could not retrieve Endpoint information.</div>
       <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
     </div>
   </div>
-  <div ng-show="endpointsDashboardCtrl.listPromiseResolved && !endpointsDashboardCtrl.listError">
-    <div id="welcome-message" class="welcome-message"
-         ng-if="endpointsDashboardCtrl.showWelcomeMessage"
-         ng-show="endpointsDashboardCtrl.isUserAdmin()">
-      <div class="panel panel-default">
-        <div class="action-header">
-          <span translate>Welcome to Stackato</span>
-          <button type="button" class="close helion-icon helion-icon-Close"
-                  ng-click="endpointsDashboardCtrl.hideWelcomeMessage()">
-          </button>
-        </div>
-        <div class=" panel-body">
+  <div ng-if="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
+    <div ng-if="endpointsDashboardCtrl.showWelcomeMessage"
+         class="endpoint-notification panel panel-default alert"
+          ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
+      <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
+      <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
-            To enable developers to use this Web console to interact with Stackato, please
+            To enable developers to use this {{ OEM_CONFIG.CONSOLE }} to interact with {{ OEM_CONFIG.PRODUCT_NAME }}, please register
           </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm(true)" translate>
-            Register Cloud Foundry endpoints
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+            {{ OEM_CONFIG.CLOUD_FOUNDRY }}
           </span>
-            and
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm()" translate>
-            Code Engine endpoints
+        <span translate> and </span>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+            {{ OEM_CONFIG.CODE_ENGINE }}
           </span>
           <span translate>
-            here. The process of registering these endpoints will make them discoverable for anyone who logs into this
-            console. Once you register an endpoint, we recommend connecting it to your account so you can manage it.
+            endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs
+            into this {{ OEM_CONFIG.CONSOLE }}. Once you register an endpoint, we recommend connecting it to your account so you can
+            manage it.
           </span>
-        </div>
+      </div>
+      <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
+          <span translate>
+            To access your cloud native workloads and other related third party services, connect with your personal
+            credentials to the corresponding registered services. Registered services are provided by your systems administrator.
+          </span>
       </div>
     </div>
+    <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"
+         class="applications-empty">
 
-    <service-tile use-cached-data="true" service-type="hcf" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-    <service-tile use-cached-data="true" service-type="hce" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
+         <!--class="console-error-block console-error">-->
+      <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
+      <div class="applications-msg" translate>There are no registered endpoints.</div>
+      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+            Register an endpoint
+          </span> to make it available to developers
+      </div>
+      <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+        Please contact your administrator.
+      </div>
+    </div>
+    <div ng-if="endpointsDashboardCtrl.endpoints.length"
+          class="endpoints-table">
+      <table class="table table-actionable"
+             st-table="endpointsDashboardCtrl.stTableEndpoints"
+             st-safe-src="endpointsDashboardCtrl.endpoints">
+        <thead>
+        <tr>
+          <th translate st-sort="name" st-skip-natural="true">Name</th>
+          <th translate st-sort="connected" st-skip-natural="true">Connection</th>
+          <th translate st-sort="type" st-sort-default="reverse" st-skip-natural="true">Type</th>
+          <th translate st-sort="url" st-skip-natural="true">Address</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
+            show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+            inline-message-colspan="5"
+            table-inline-status="{{ endpoint.error.status }}">
+
+          <!--Endpoint Name-->
+          <td ng-if="endpoint.visit">
+            <a ng-href="{{endpoint.visit()}}">{{ endpoint.name }}</a>
+          </td>
+          <td ng-if="!endpoint.visit">{{ endpoint.name }}</td>
+
+          <!--Endpoint Connection Status-->
+          <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
+            <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                  ng-switch-when="connected"></span>
+            <div ng-switch-when="unconnected"
+                 uib-popover="{{ 'Disconnected' | translate }}"
+                 popover-trigger="'mouseenter'"
+                 popover-placement="top-left"
+                 popover-popup-delay="1000">
+              <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
+            </div>
+            <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                  ng-switch-when="expired"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                  ng-switch-when="error"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                  ng-switch-when="complicated"></span>
+          </td>
+
+          <td>{{ endpoint.type }}</td>
+          <td>{{ endpoint.url }}</td>
+          <td>
+            <actions-menu actions="endpoint.actions"
+                          action-target="endpoint.actionsTarget"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right"
+                          enable-button-mode="true"></actions-menu>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

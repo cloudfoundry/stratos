@@ -86,8 +86,8 @@
       }));
 
       it('should show login page when no upgrade is in progress', function () {
-        $httpBackend.when('GET', '/pp/v1/version').respond(200, {});
-        $httpBackend.expectGET('/pp/v1/version');
+        $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(401, null);
+        $httpBackend.expectGET('/pp/v1/auth/session/verify');
         $timeout.flush();
         $httpBackend.flush();
         expect(applicationCtrl.ready).toBe(true);
@@ -99,8 +99,8 @@
       });
 
       it('should show upgrade page when an upgrade is in progress', function () {
-        $httpBackend.when('GET', '/pp/v1/version').respond(503, {}, {'Retry-After': 300});
-        $httpBackend.expectGET('/pp/v1/version');
+        $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(503, null, {'Retry-After': 300});
+        $httpBackend.expectGET('/pp/v1/auth/session/verify');
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectGET('/app/view/console-error/console-error.html');
         $timeout.flush();
@@ -178,6 +178,7 @@
         beforeEach(function () {
           applicationCtrl.loggedIn = false;
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
@@ -190,7 +191,7 @@
           expect(applicationCtrl.failedLogin).toBe(false);
           expect(applicationCtrl.serverErrorOnLogin).toBe(false);
           expect(applicationCtrl.serverFailedToRespond).toBe(false);
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('503 is not an upgrade', function () {
@@ -198,15 +199,15 @@
           $httpBackend.expectGET('/pp/v1/cnsis/test');
           $http.get('/pp/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
-        it('503 is not an protal proxy request', function () {
+        it('503 is not an portal proxy request', function () {
           $httpBackend.when('GET', '/github/v1/cnsis/test').respond(503, {}, {});
           $httpBackend.expectGET('/github/v1/cnsis/test');
           $http.get('/github/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('503 is upgrade', function () {
