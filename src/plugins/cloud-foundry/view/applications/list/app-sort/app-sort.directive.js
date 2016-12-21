@@ -38,11 +38,11 @@
     this.sortOptions = [
       {label: 'App Name', value: 'entity.name'},
       // This one relies on app state, which we don't have yet
-      //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label', ascending: true},
-      {label: 'Instances', value: 'entity.instances'},
-      {label: 'Disk Quota', value: 'entity.disk_quota'},
-      {label: 'Memory', value: 'entity.memory'},
-      {label: 'Creation Date', value: 'metadata.created_at'}
+      //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label'},
+      {label: 'Instances', value: 'entity.instances', descendingFirst: true},
+      {label: 'Disk Quota', value: 'entity.disk_quota', descendingFirst: true},
+      {label: 'Memory', value: 'entity.memory', descendingFirst: true},
+      {label: 'Creation Date', value: 'metadata.created_at', descendingFirst: true}
     ];
 
     // If currentSortOption and sort order change update filteredApplications
@@ -84,14 +84,16 @@
 
     /**
      * @name setSort
-     * @description Set the sort option
+     * @description Set the sort option and reset the direction to that option's default
      */
     setSort: function () {
       var item = _.find(this.sortOptions, {value: this.selectedOption});
       if (item) {
-        this.sort({value: item.value});
-        // Default to sortascending when the menu item changes
-        this.setSortOrder(true);
+        if (item.value !== this.model.currentSortOption) {
+          this.model.currentSortOption = item.value;
+          // Reset the direction to that option's default
+          this.model.sortAscending = !item.descendingFirst;
+        }
       }
     },
 
@@ -110,53 +112,7 @@
      */
     toggleSortOrder: function () {
       this.model.sortAscending = !this.model.sortAscending;
-    },
-
-    /**
-     * @name isCurrentSort
-     * @description Helper to apply appropriate style to sort button
-     * @param {boolean} option - sort option
-     * @returns {boolean}
-     */
-    isCurrentSort: function (option) {
-      return option.value === this.model.currentSortOption;
-    },
-
-    /**
-     * @name showAscending
-     * @description Helper to show appropriate sort order button
-     * @param {boolean} option - sort option
-     * @returns {boolean}
-     */
-    showAscending: function (option) {
-      return this.isCurrentSort(option) && this.model.sortAscending;
-    },
-
-    /**
-     * @name showDescending
-     * @description Helper to show appropriate sort order button
-     * @param {boolean} option - sort option
-     * @returns {boolean}
-     */
-    showDescending: function (option) {
-      return this.isCurrentSort(option) && !this.model.sortAscending;
-    },
-
-    /**
-     * @name sort
-     * @description Helper to set the appropriate model sort options
-     * @param {boolean} option - sort option
-     */
-    sort: function (option) {
-      // when current sort is different by default switch to ascending
-      // when current sort is the same toggle order
-      if (option.value !== this.model.currentSortOption) {
-        this.model.currentSortOption = option.value;
-        this.model.sortAscending = true;
-      } else if (option.value === this.model.currentSortOption) {
-        // Current sort option is already the same, toggle order
-        this.model.sortAscending = !this.model.sortAscending;
-      }
     }
+
   });
 })();
