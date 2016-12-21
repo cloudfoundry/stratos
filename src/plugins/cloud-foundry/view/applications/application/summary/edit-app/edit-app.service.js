@@ -45,10 +45,12 @@
             title: 'Edit App',
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/summary/edit-app/edit-app.html',
+            submitCommit: true,
             buttonTitles: {
               submit: 'Save'
             },
-            class: 'detail-view-thin'
+            class: 'dialog-form',
+            dialog: true
           },
           {
             data: data

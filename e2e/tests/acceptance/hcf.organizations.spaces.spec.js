@@ -77,7 +77,7 @@
       actionsMenuHelper.click(actionMenu);
       actionsMenuHelper.clickItem(actionMenu, 1);
       expect(confirmationModalHelper.isVisible()).toBeTruthy();
-      return confirmationModalHelper.primary().then(function () {
+      return confirmationModalHelper.commit().then(function () {
         return helpers.checkAndCloseToast(/Organization '.*' successfully deleted/);
       });
     });

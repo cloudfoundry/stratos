@@ -53,6 +53,7 @@
           title: gettext('Detach Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
+          submitCommit: true,
           buttonText: {
             yes: gettext('Detach'),
             no: gettext('Cancel')
@@ -93,6 +94,7 @@
           title: gettext('Detach Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
+          submitCommit: true,
           buttonText: {
             yes: gettext('Detach'),
             no: gettext('Cancel')
@@ -159,6 +161,7 @@
           title: gettext('Delete Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.'),
+          submitCommit: true,
           buttonText: {
             yes: gettext('Delete'),
             no: gettext('Cancel')

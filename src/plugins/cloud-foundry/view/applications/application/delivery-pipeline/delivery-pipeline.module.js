@@ -147,6 +147,7 @@
           that.confirmDialog({
             title: gettext('Delete Notification Target'),
             description: gettext('Are you sure you want to delete this notification target?'),
+            submitCommit: true,
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
@@ -169,6 +170,7 @@
           that.confirmDialog({
             title: gettext('Delete Post Deploy Task'),
             description: gettext('Are you sure you want to delete this post deploy task?'),
+            submitCommit: true,
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
@@ -232,6 +234,7 @@
       this.confirmDialog({
         title: 'Delete Pipeline',
         description: 'Are you sure you want to delete this pipeline?',
+        submitCommit: true,
         buttonText: {
           yes: 'Delete',
           no: 'Cancel'

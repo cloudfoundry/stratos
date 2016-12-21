@@ -209,6 +209,14 @@
       this.busyMessage = false;
       this.disableButtons();
 
+      this.btnText = this.btnText || {};
+
+      // Set step commit from current step or lastStepCommit
+      this.stepCommit = this.steps[index].stepCommit || this.workflow.lastStepCommit && index === this.steps.length - 1;
+
+      // Persist next button text to avoid flicker during transitions
+      this.btnText.next = this.steps[index].nextBtnText;
+
       // Allow a step to support an onEnter property which can return a promise (use resolved promise if not)
       var step = this.steps[index];
       var readyToGo = step.onEnter ? step.onEnter(this) || this.$q.resolve() : this.$q.resolve();

@@ -44,6 +44,7 @@
               OEM_CONFIG: utilsService.getOemConfiguration()
             },
             workflow: {
+              lastStepCommit: true,
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
               title: gettext('Register an endpoint'),

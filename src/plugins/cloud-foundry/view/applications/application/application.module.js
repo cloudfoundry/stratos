@@ -448,6 +448,7 @@
       this.confirmDialog({
         title: gettext('Delete Application'),
         description: gettext('Are you sure you want to delete ') + this.model.application.summary.name + '?',
+        submitCommit: true,
         buttonText: {
           yes: gettext('Delete'),
           no: gettext('Cancel')

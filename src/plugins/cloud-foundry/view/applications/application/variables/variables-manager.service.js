@@ -30,7 +30,7 @@
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
           detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
-          class: 'detail-view-thin'
+          class: 'detail-view-thin' // NOTE: turning this into a dialog doesn't work well for some reason (width is incorrect)
         }, {
           cnsiGuid: cnsiGuid,
           guid: id

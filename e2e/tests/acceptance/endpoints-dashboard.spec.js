@@ -441,7 +441,7 @@
               })
               .then(function () {
                 expect(confModal.isVisible()).toBeTruthy();
-                return confModal.primary();
+                return confModal.commit();
               })
               .then(function () {
                 // The new row count should be two less than when we started (row had an additional 'disconnected' error)

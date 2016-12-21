@@ -250,6 +250,7 @@
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\''))({name: serviceInstance.name}),
         errorMessage: gettext('Failed to unregister endpoint'),
+        submitCommit: true,
         buttonText: {
           yes: gettext('Unregister'),
           no: gettext('Cancel')

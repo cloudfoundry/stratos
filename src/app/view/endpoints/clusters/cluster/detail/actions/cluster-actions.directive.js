@@ -83,10 +83,12 @@
           {
             title: gettext('Create Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
+            submitCommit: true,
             buttonTitles: {
               submit: gettext('Create')
             },
-            class: 'detail-view-thin'
+            class: 'dialog-form',
+            dialog: true
           },
           {
             data: {
@@ -189,10 +191,12 @@
           {
             title: gettext('Create Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-space.html',
+            submitCommit: true,
             buttonTitles: {
               submit: gettext('Create')
             },
-            class: 'detail-view-thin'
+            class: 'space-dialog-form',
+            dialog: true
           },
           {
             data: contextData
