@@ -4,12 +4,9 @@
   /**
    * @namespace env
    * @name env
-   * @property {string} HELION_UI_FRAMEWORK_BASE_PATH - the Helion UI framework path
    */
   var env = {
     registerApplication: registerApplication,
-
-    HELION_UI_FRAMEWORK_BASE_PATH: '',
 
     OEM_CONFIG:{}
   };

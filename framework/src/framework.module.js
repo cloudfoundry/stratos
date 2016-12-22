@@ -11,10 +11,7 @@
       'ngAnimate',
       'toastr'
     ])
-    /* eslint-disable */
-    // We can't use  $window in this context
-    .constant('helion.framework.basePath',
-      window.env && window.env.HELION_UI_FRAMEWORK_BASE_PATH || '');
-    /* eslint-enable */
+    // UI Framework is not integrated, so the path can be set to be empty
+    .constant('helion.framework.basePath', '');
 
 })();
