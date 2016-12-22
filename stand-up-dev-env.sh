@@ -27,13 +27,6 @@ function clean {
     echo "===== Cleaning up cached intermediate items"
 
     if [ "$NO_UI" != true ]; then
-        echo "----- helion-ui-framework"
-        pushd ../helion-ui-framework
-        rm -rf lib/
-        rm -rf node_modules/
-        rm -rf bower_components/
-        popd
-
         echo "----- stratos-ui"
         pushd ../stratos-ui
         rm -rf dist/

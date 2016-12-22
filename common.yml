@@ -78,4 +78,3 @@ services:
         - USER_NAME
     volumes:
       - ../stratos-ui:/usr/src/app
-      - ../helion-ui-framework:/usr/src/helion-ui-framework

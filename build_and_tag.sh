@@ -297,7 +297,6 @@ function buildUI {
   docker run --rm \
     ${RUN_ARGS} \
     -v ${__DIRNAME}/../stratos-ui:/usr/src/app \
-    -v ${__DIRNAME}/../helion-ui-framework:/usr/src/helion-ui-framework \
     -w /usr/src/app \
     node:6.9.1 \
     /bin/bash ./provision.sh
@@ -346,7 +345,6 @@ if [ "${PROD_RELEASE}" == true ]; then
   checkMasterBranch ${__DIRNAME}
   checkMasterBranch ${PORTAL_PROXY_PATH}
   checkMasterBranch ${__DIRNAME}/../stratos-ui
-  checkMasterBranch ${__DIRNAME}/../helion-ui-framework
 fi
 
 # Build all of the components that make up the Console
@@ -367,10 +365,6 @@ if [ "${PROD_RELEASE}" == true ]; then
   echo
   echo "-- Tag the stratos-ui GitHub repo "
   pushGitTag ${__DIRNAME}/../stratos-ui
-
-  echo
-  echo "-- Tag the helion-ui-framework GitHub repo "
-  pushGitTag ${__DIRNAME}/../helion-ui-framework
 
   echo
   echo "-- Tag the stratos-deploy GitHub repo"
