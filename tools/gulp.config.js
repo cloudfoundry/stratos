@@ -15,7 +15,8 @@
       frameworkDist: '../dist/framework/',
       examples: '../framework/examples/',
       examplesScripts: '../framework/examples/scripts/',
-      examplesDist: '../framework/examples/dist/'
+      examplesDist: '../framework/examples/dist/',
+      browserSyncDist: '../dist'
     };
 
     return {
@@ -51,6 +52,17 @@
         directory: '../src/lib/',
         ignorePath: '../src/',
         devDependencies: false
+      },
+
+      browserSyncPort: 3100,
+
+      istanbul: {
+        instrumentation: {
+          'include-all-sources': true,
+          variable: '__coverage__'
+        },
+        includeUntested: true,
+        coverageVariable: '__coverage__'
       },
 
       assetFiles: [

@@ -1,7 +1,11 @@
 (function () {
   'use strict';
 
+  var path = require('path');
+
   module.exports = function (config) {
+
+    var reportPath = path.resolve(__dirname, '..', 'coverage-report');
 
     config.set({
 
@@ -16,8 +20,11 @@
       browsers: ['PhantomJS'],
 
       coverageReporter: {
-        type: 'html',
-        dir: 'tools/.coverage-karma/'
+        dir: reportPath,
+        reporters: [
+          { type: 'html', subdir: 'unit' },
+         { type: 'json', subdir: '_json', file: 'unit-coverage.json' }
+        ]
       },
 
       files: [
