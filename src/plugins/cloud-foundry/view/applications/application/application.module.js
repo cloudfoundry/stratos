@@ -107,7 +107,9 @@
     });
     // When a modal interaction ends, resume the background polling
     this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
-      that.startUpdate();
+      that.update().finally(function () {
+        that.startUpdate();
+      });
     });
 
     this.appActions = [
@@ -327,7 +329,7 @@
       var that = this;
 
       this.updating = true;
-      this.$q.when()
+      return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
             return that.model.updateDeliveryPipelineMetadata()

@@ -59,3 +59,11 @@ add-pipeline-workflow {
     padding-right: 0;
   }
 }
+
+.deploy-app-instructions {
+  margin: 0;
+  
+  > div {
+    padding: 0;
+  }
+}
