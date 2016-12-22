@@ -44,9 +44,12 @@
   var partials = config.partials;
 
   // Default OEM Config
+  // Read version number from the package.json file
+  var packageJson = require('./package.json');
   var defaultBrandFolder = '../oem/brands/hpe/';
   var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
+  defaultConfig.PRODUCT_VERSION = getMajorMinor(packageJson.version);
   oemConfig = _.defaults(oemConfig, defaultConfig);
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
 
@@ -63,6 +66,11 @@
   // Pull in the gulp tasks for oem support
   var oem = require('./oem.gulp.js');
   oem(config);
+
+  function getMajorMinor(version) {
+    var regex = /^(\d+\.)?(\d)/i;
+    return version.match(regex)[0];
+  }
 
   // Clear the 'dist' folder
   gulp.task('clean:dist', function (next) {

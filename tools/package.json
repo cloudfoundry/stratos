@@ -1,7 +1,7 @@
 {
   "name": "ui",
-  "version": "1.0.0",
-  "description": "",
+  "version": "4.1.0",
+  "description": "Console (HSC)",
   "main": "index.js",
   "scripts": {
     "build": "gulp clean:dist && gulp",
