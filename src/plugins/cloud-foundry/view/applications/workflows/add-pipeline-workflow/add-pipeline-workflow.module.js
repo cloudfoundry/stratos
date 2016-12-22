@@ -599,7 +599,10 @@
       createPipeline: function (targetId) {
         var that = this;
         return this.createProject(targetId).then(function () {
-          return that.createCfBinding().catch(function () {
+          return that.createCfBinding().then(function () {
+            // Notify (the app summary view) that a pipeline has been created
+            that.eventService.$emit(that.eventService.events.DELIVERY_PIPELINE_CREATED);
+          }).catch(function () {
             return that.$q.when(that.deleteProject(that.userInput.projectId))
               .then(function () {
                 that.userInput.projectId = null;
