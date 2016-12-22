@@ -65,7 +65,7 @@ func getConnectedCodeEngines(dcp *sql.DB) (map[string][]string, error) {
 func migrateVcsFromCodeEngine(p *portalProxy) error {
 
 	// Check we need to migrate
-	migrationMarker := "/hsc-migration-volume/.vcs-migrated"
+	migrationMarker := "/hsc-upgrade-volume/.vcs-migrated"
 	if _, err := os.Stat(migrationMarker); err == nil {
 		// Already migrated, nothing to do
 		return nil
