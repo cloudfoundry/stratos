@@ -170,13 +170,19 @@
   });
 
   // Copy the default brand's images and logo to the dist folder
-  gulp.task('copy:default-brand', function () {
+  gulp.task('copy:default-brand', ['copy:default-brand:favicon'], function () {
     return gulp
       .src([
-        defaultBrandFolder + 'images/*',
-        defaultBrandFolder + 'favicon.ico'
+        defaultBrandFolder + 'images/*'
       ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
+  });
+
+  // Copy the default brand's images and logo to the dist folder
+  gulp.task('copy:default-brand:favicon', function () {
+    return gulp
+      .src(defaultBrandFolder + 'favicon.ico', {base: defaultBrandFolder})
+      .pipe(gulp.dest(paths.dist + 'images'));
   });
 
   gulp.task('copy:theme', function () {
