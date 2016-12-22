@@ -1,6 +1,6 @@
 {
   "name": "hsc",
-  "product_version": "4.0.1",
+  "product_version": "4.1.0",
   "sdl_version": "{{TAG}}",
   "vendor": "HPE",
   "components": [
