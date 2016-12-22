@@ -179,6 +179,7 @@
 
       it('should resume polling when a modal interaction starts', function () {
         controller.eventService.$emit(controller.eventService.events.MODAL_INTERACTION_END);
+        $httpBackend.flush();
         expect(controller.scheduledUpdate).toBe('interval_created');
       });
     });
