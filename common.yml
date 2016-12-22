@@ -52,7 +52,7 @@ services:
       ./proxy.env
     volumes:
       - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
-      - ./hsc-migration-volume:/hsc-migration-volume
+      - ./hsc-upgrade-volume:/hsc-upgrade-volume
 
 
   nginx:

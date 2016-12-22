@@ -85,7 +85,7 @@ function build {
     fi
 
     # Prevent docker from creating the migration volume as root if it doesn't exist
-    mkdir -p ./hsc-migration-volume
+    mkdir -p ./hsc-upgrade-volume
 
     docker-compose -f ${DEV_DOCKER_COMPOSE} build
     docker-compose -f ${DEV_DOCKER_COMPOSE} up -d
