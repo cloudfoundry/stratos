@@ -7,7 +7,7 @@ DOCKER_REGISTRY=docker.io
 DOCKER_ORG=stackatodev
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":hopr:t:" opt; do
+while getopts ":ho:pr:t:" opt; do
   case $opt in
     h)
       echo
@@ -311,6 +311,8 @@ function buildUI {
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   buildAndPublishImage hsc-console Dockerfile.HCP ${__DIRNAME}/../stratos-ui/containers/nginx
+  echo "-- Building/publishing the container image for the facilitating OEM branding for Console"
+  buildAndPublishImage hsc-console-oem-builder Dockerfile.oem ${__DIRNAME}/../stratos-ui/oem
 }
 
 function generateSDL {
