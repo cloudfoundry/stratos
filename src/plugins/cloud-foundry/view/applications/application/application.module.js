@@ -319,6 +319,7 @@
     /**
      * @function update
      * @description update application
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     update: function () {
