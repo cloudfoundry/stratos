@@ -7,7 +7,6 @@ RUN export DEBIAN_FRONTEND=noninteractive &&\
 
 WORKDIR /srv
 
-COPY templates/ templates/
 COPY portal-proxy portal-proxy
 COPY /containers/proxy/LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
 COPY /containers/proxy/run.sh /
