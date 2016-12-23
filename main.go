@@ -150,10 +150,7 @@ func main() {
 	}()
 
 	// If needed, migrate VCSes from connected Code Engines
-	err = migrateVcsFromCodeEngine(portalProxy)
-	if err != nil {
-		logger.Warnf("Problem while migrating VCSes from connected Code Engines %+v", err)
-	}
+	go migrateVcsFromCodeEngine(portalProxy)
 
 	// Start the proxy
 	if err := start(portalProxy); err != nil {
