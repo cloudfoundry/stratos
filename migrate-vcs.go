@@ -85,7 +85,7 @@ func migrateVcsFromCodeEngine(p *portalProxy) error {
 		_, err = os.Stat(upgradeLock)
 	}
 
-	logger.Infof("Waiting upgrade completed, proceeding")
+	logger.Infof("Upgrade completed, proceeding")
 	ceConnectedUsers, err := getConnectedCodeEngines(p.DatabaseConnectionPool)
 	if err != nil {
 		msg := "Unable to retrieve Code Engine connected users: %v"
