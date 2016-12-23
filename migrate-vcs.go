@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"database/sql"
 	"os"
+	"time"
 )
 
 // This is a one-off migration of VCS entries from Connected Code Engine endpoints
@@ -73,6 +74,18 @@ func migrateVcsFromCodeEngine(p *portalProxy) error {
 
 	logger.Infof("migrateVcsFromCodeEngine")
 
+	// Wait for the upgrade lock file to disappear
+	upgradeLock := "/hsc-upgrade-volume/upgrade.lock"
+	_, err := os.Stat(upgradeLock)
+	if err == nil {
+		logger.Infof("Waiting for upgrade to complete...")
+	}
+	for err == nil {
+		time.Sleep(1 * time.Second)
+		_, err = os.Stat(upgradeLock)
+	}
+
+	logger.Infof("Upgrade completed, proceeding")
 	ceConnectedUsers, err := getConnectedCodeEngines(p.DatabaseConnectionPool)
 	if err != nil {
 		msg := "Unable to retrieve Code Engine connected users: %v"
