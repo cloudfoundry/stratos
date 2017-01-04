@@ -21,9 +21,10 @@
   var fork = require('child_process').fork;
   var runSequence = require('run-sequence');
   var combine = require('istanbul-combine');
+  var istanbul = require('gulp-istanbul');
 
   gulp.task('e2e:clean:dist', function (next) {
-    del('./tmp', {force: true}, next);
+    del('../tmp', {force: true}, next);
   });
 
   gulp.task('coverage-combine', function () {
@@ -56,29 +57,33 @@
     });
   });
 
-  function updateDist(list, oldDist, newDist) {
-    var newList = [];
-    _.each(list, function (item) {
-      if (item.indexOf(oldDist) === 0) {
-        newList.push(newDist + item.substr(oldDist.length));
-      } else {
-        newList.push(item);
-      }
-    });
-    return newList;
-  }
+  gulp.task('e2e:pre-instrument', function () {
+    return gulp.src(paths.dist + '**/*.*')
+      .pipe(gulp.dest(paths.instrumented));
+  });
+
+  gulp.task('e2e:instrument-source', function () {
+    var sources = gulp.src(config.sourceFilesToInstrument, {base: paths.src});
+    return sources
+      .pipe(istanbul(config.istanbul))
+      .pipe(gulp.dest(paths.instrumented));
+  });
+
+  gulp.task('e2e:instrument-framework', function () {
+    var sources = gulp.src(config.frameworkFilesToInstrument);
+    return sources
+      .pipe(istanbul(config.istanbul))
+      .pipe(gulp.dest(paths.instrumented + 'framework/'));
+  });
 
   gulp.task('e2e:run', ['e2e:clean:dist'], function () {
-    config.instrumentCode = true;
-    var e2eDist = '../tmp/dist-e2e/';
-    config.cssFiles = updateDist(config.cssFiles, paths.dist, e2eDist);
-    config.jsFiles = updateDist(config.jsFiles, paths.dist, e2eDist);
-    paths.dist = e2eDist;
-    paths.browserSyncDist = '../tmp/dist-e2e';
-    paths.frameworkDist = paths.dist + 'framework/';
+    paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
     runSequence(
       'dev-default',
+      'e2e:pre-instrument',
+      'e2e:instrument-source',
+      'e2e:instrument-framework',
       'browsersync',
       'e2e:tests',
       'browsersync:stop',

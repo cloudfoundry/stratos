@@ -30,7 +30,6 @@
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
   var path = require('path');
-  var istanbul = require('gulp-istanbul');
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -121,7 +120,6 @@
       .pipe(angularFilesort())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(config.instrumentCode ? istanbul(config.istanbul) : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -156,7 +154,6 @@
       .pipe(angularFilesort())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(config.instrumentCode ? istanbul(config.istanbul) : gutil.noop())
       .pipe(gulp.dest(paths.frameworkDist));
   });
 
@@ -321,8 +318,6 @@
   });
 
   gulp.task('browsersync', function (callback) {
-
-    console.log(config);
     var middleware = [];
     var https;
     try {

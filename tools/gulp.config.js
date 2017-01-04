@@ -9,6 +9,7 @@
       translations: '../translations/',
       tools: '../tools/',
       e2e: '../e2e/',
+      instrumented: '../tmp/instrumented/',
       oem: '../oem/',
       theme: '../framework/theme/',
       framework: '../framework/',
@@ -122,6 +123,27 @@
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js'
+      ],
+
+      sourceFilesToInstrument: [
+        paths.src + '*.js',
+        paths.src + 'app/**/*.js',
+        paths.src + 'plugins/**/*.js',
+        '!' + paths.src + 'config.js',
+        '!' + paths.src + 'app/**/*.mock.js',
+        '!' + paths.src + 'app/**/*.spec.js',
+        '!' + paths.src + 'plugins/**/*.mock.js',
+        '!' + paths.src + 'plugins/**/*.spec.js',
+        '!' + paths.src + 'plugins/cloud-foundry/api/**/*.js'
+      ],
+
+      frameworkFilesToInstrument: [
+        paths.framework + 'src/**/*.module.js',
+        paths.framework + 'src/**/*.js',
+        '!' + paths.framework + 'src/**/*.spec.js',
+        '!' + paths.framework + 'src/**/*.mock.js',
+        '!' + paths.framework + 'src/utils/wheel-handler/*.js',
+        '!' + paths.framework + 'src/widgets/ring-chart/*.js'
       ],
 
       // Sacrifice all inclusive with exclusions for explicit declaration of directories saves ~10s per run
