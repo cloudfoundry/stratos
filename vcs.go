@@ -200,6 +200,9 @@ func (p *portalProxy) checkVcsToken(c echo.Context) error {
 	valid, reason, err := _checkVcsToken(vr, tr)
 	if err != nil {
 		msg := "Error checking VCS token"
+		if reason != "" {
+			msg += " - " + reason
+		}
 		return newHTTPShadowError(http.StatusInternalServerError, msg, msg + ": %v", err)
 	}
 	tokenValid := VcsTokenValid{
@@ -283,7 +286,7 @@ func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, stri
 	// Do the request
 	res, err := client.Do(req)
 	if err != nil {
-		return false, "Failed to contact the VCS to make verify the token", err
+		return false, "Failed to contact the VCS", err
 	}
 
 	valid := res.StatusCode == http.StatusOK
