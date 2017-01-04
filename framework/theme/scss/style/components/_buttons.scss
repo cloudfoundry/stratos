@@ -50,6 +50,7 @@
 }
 
 .btn-link {
+  cursor: pointer;
   &[disabled],
   fieldset[disabled] & {
     &:hover,
