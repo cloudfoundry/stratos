@@ -108,6 +108,17 @@
         .checkVcsToken(tokenGuid).then(function (res) {
           that._cacheInvalid(tokenGuid, res.data.valid === false && res.data.invalid_reason);
           return res.data;
+        }, function (res) {
+          // Best effort to get data out of the error
+          var reason = _.get(res, 'data.error');
+          if (!reason) {
+            reason = _.get(res, 'data');
+          }
+          if (!reason) {
+            reason = 'Checking Token failed for an unknown reason';
+          }
+          that._cacheInvalid(tokenGuid, reason);
+          // the result was processed, resolve the promise
         });
     },
 
@@ -138,7 +149,9 @@
         tokensToCheck = this.getTokensForVcs(vcs);
       }
 
-      var promises = [];
+      // Also queue up any previous validity checks
+      var promises = [this.lastValidityCheck];
+
       for (var i = 0; i < tokensToCheck.length; i++) {
         promises.push(this.checkVcsToken(tokensToCheck[i].token.guid));
       }
