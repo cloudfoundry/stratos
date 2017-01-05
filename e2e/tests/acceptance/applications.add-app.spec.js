@@ -258,7 +258,7 @@
 
       // Should now have reached the application page
       expect(application.getHeader().isDisplayed()).toBe(true);
-      expect(application.getHeader().getText()).toBe(appName.toUpperCase());
+      expect(application.getHeader().getText()).toBe(appName);
       expect(application.getActiveTab().getText()).toBe('Summary');
       expect(application.isIncomplete()).toBe(true);
       expect(application.isNewlyCreated()).toBe(true);
