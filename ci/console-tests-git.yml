@@ -17,19 +17,12 @@ resources:
     branch: master
     private_key: {{github-private-key}}
     uri: git@github.com:hpcloud/stratos-ui.git
-- name: helion-ui-framework
-  type: git
-  source:
-    uri: git@github.com:hpcloud/helion-ui-framework.git
-    branch: master
-    private_key: {{github-private-key}}
 
 jobs:
 - name: console-tests
   plan:
   - get: stratos-deploy
   - get: portal-proxy
-  - get: helion-ui-framework
   - get: stratos-ui
 
   - do:

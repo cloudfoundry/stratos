@@ -2,7 +2,6 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: helion-ui-framework
 image_resource:
   type: docker-image
   source: {repository: "stackatotest/hsc-concourse", tag: "latest"}
