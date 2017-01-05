@@ -508,6 +508,17 @@
     },
 
     /**
+     * @function showCliInstructions
+     * @description Show the CLI Instructions slide-in
+     */
+    showCliInstructions: function () {
+      var cliAction = _.find(this.appActions, {id: 'cli'});
+      if (cliAction && !cliAction.disabled && !cliAction.hidden) {
+        cliAction.execute();
+      }
+    },
+
+    /**
      * @function onAppStateChange
      * @description invoked when the application state changes, so we can update action visibility
      */

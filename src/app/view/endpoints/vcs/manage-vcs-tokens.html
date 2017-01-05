@@ -40,8 +40,11 @@
           ></radio-input>
         </td>
         <td>{{ vcsToken.token.name }}</td>
-        <td class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" ng-if="asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
-        <td class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger" ng-if="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td ng-if="asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken)">
+          <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+        </td>
+        <td class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && !asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
         <td class="token-value">{{ vcsToken.token.token }}</td>
         <td>
           <actions-menu actions="asyncTaskDialogCtrl.context.actions"

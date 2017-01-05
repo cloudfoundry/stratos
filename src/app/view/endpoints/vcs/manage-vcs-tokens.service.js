@@ -106,8 +106,11 @@
       });
     }
 
+    context.isCheckInProgress = function (token) {
+      return _.isUndefined(vcsModel.invalidTokens[token.token.guid]);
+    };
+
     context.isTokenValid = function (token) {
-      token.valid = vcsModel.invalidTokens[token.token.guid];
       return !vcsModel.invalidTokens[token.token.guid];
     };
 
