@@ -2,10 +2,6 @@
 (function () {
   'use strict';
 
-  console.log('HELLO');
-
-  console.log(__dirname);
-
   var helpers = require('./helpers.po');
   var resetTo = require('./resets.po');
   var loginPage = require('./login-page.po');
