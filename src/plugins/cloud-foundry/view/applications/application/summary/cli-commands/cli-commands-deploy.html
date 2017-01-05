@@ -1,0 +1,39 @@
+<div
+  ng-init="context = context || detailViewCtrl.context">
+
+  <p translate>To deploy your app using the CLI, follow these steps:</p>
+  <p translate>1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
+  <p translate>2. Add a <strong>manifest.yml</strong> file to your source code or update your existing one using the content below.
+  Cloud Foundry uses the manifest file to set the application's name, route(s) and service binding(s).
+  Please ensure that the application name and route(s) of your manifest file match that shown below.
+  If the application name and route(s) are not correct in the manifest file, multiple applications and routes will get created.</p>
+  <div class="row">
+    <div class="col-sm-12 col-md-12">
+      <code-block>---
+  applications:      
+  - name: {{ context.appName }}<span ng-if="context.routes.length > 0">
+    routes:
+  <span ng-repeat="route in context.routes">  - route: {{ route.host }}.{{ route.domain.name }}</span></span><span ng-if="context.services.length > 0">
+    services:<span ng-repeat="service in context.services">
+    - {{ service.name }}</span></code-block>
+    </div>
+  </div>
+  <br/>
+  <p translate>3. Enter the following commands in the CLI:</p>
+
+  <h5 translate>Set the api endpoint</h5>
+  <code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</code-block>
+  <h5 translate>Login</h5>
+  <code-block hide-copy="true">$ cf login
+    API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
+
+    Email> {{context.username || '[username]'}}
+
+    Password> [password]
+    Authenticating...
+    OK
+  </code-block>
+  <h5 translate>Push to the Cloud Foundry endpoint</h5>
+  <p translate>Navigate to the project directory and execute the following.</p>
+  <code-block>cf push {{context.appName || '[app name]'}}</code-block></p>
+</div>
