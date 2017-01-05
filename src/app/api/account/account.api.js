@@ -15,12 +15,11 @@
     '$http',
     '$httpParamSerializer',
     '$q',
-    '$cookies',
     'app.api.apiManager'
   ];
 
-  function registerAccountApi($http, $httpParamSerializer, $q, $cookies, apiManager) {
-    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer, $q, $cookies));
+  function registerAccountApi($http, $httpParamSerializer, $q, apiManager) {
+    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer, $q));
   }
 
   /**
@@ -30,18 +29,15 @@
    * @param {object} $http - the Angular $http service
    * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @param {object} $q - the Angular Promise service
-   * @param {object} $cookies - the Angular cookies service
    * @property {object} $http - the Angular $http service
    * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $q - the Angular Promise service
-   * @property {object} $cookies - the Angular cookies service
    * @class
    */
-  function AccountApi($http, $httpParamSerializer, $q, $cookies) {
+  function AccountApi($http, $httpParamSerializer, $q) {
     this.$http = $http;
     this.$httpParamSerializer = $httpParamSerializer;
     this.$q = $q;
-    this.$cookies = $cookies;
   }
 
   angular.extend(AccountApi.prototype, {

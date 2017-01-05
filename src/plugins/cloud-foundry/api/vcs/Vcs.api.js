@@ -79,6 +79,10 @@
 
     listVcsTokens: function () {
       return this.$http.get(this.vcsApiUrl + 'pat');
+    },
+
+    unregisterVcs: function (vcsGuid) {
+      return this.$http.delete(this.vcsApiUrl + 'clients/' + vcsGuid);
     }
 
   });

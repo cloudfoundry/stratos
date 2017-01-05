@@ -10,6 +10,7 @@
     '$state',
     '$interpolate',
     'app.model.modelManager',
+    'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
     'app.utils.utilsService',
     'app.error.errorService',
@@ -27,6 +28,7 @@
    * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.error.errorService} errorService - service to show custom errors below title bar
@@ -35,7 +37,7 @@
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, vcsService, utilsService, errorService,
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
     var endpointPrefix = 'cnsi_';
@@ -43,7 +45,6 @@
     return {
       haveInstances: haveInstances,
       updateInstances: updateInstances,
-      updateInstancesCache: updateInstancesCache,
       createEndpointEntries: createEndpointEntries,
       clear: clear
     };
@@ -95,28 +96,17 @@
     }
 
     /**
-     * @function updateInstancesCache
-     * @memberOf app.view.endpoints.dashboard.cnsiService
-     * @description repopulate the endpoints list with the latest data from cache
-     * @param {Array} endpoints - collection of existing endpoints
-     * @returns {Array} the list of endpoints that still exist (not deleted in the backend)
-     * @public
-     */
-    function updateInstancesCache(endpoints) {
-      return createEndpointEntries(endpoints);
-    }
-
-    /**
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
      * @public
      */
-    function createEndpointEntries(endpoints) {
+    function createEndpointEntries() {
       var activeEndpointsKeys = [];
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var endpoints = dashboardService.endpoints;
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
@@ -140,7 +130,7 @@
         }
         activeEndpointsKeys.push(endpoint.key);
 
-        endpoint.actions = _createInstanceActions(endpoints, isValid, hasExpired);
+        endpoint.actions = _createInstanceActions(isValid, hasExpired);
         endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
           return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
         } : undefined;
@@ -177,12 +167,13 @@
         }
       });
 
-      _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
+      _cleanupStaleEndpoints(activeEndpointsKeys);
 
     }
 
-    function _cleanupStaleEndpoints(allEndpoints, activeEndpointsKeys) {
+    function _cleanupStaleEndpoints(activeEndpointsKeys) {
 
+      var allEndpoints = dashboardService.endpoints;
       var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
         return anEndpoint.key.indexOf(endpointPrefix) === 0;
       });
@@ -211,7 +202,8 @@
       errorService.clearAppError();
     }
 
-    function _createInstanceActions(endpoints, isConnected, expired) {
+    function _createInstanceActions(isConnected, expired) {
+      var endpoints = dashboardService.endpoints;
       var actions = [];
 
       if (!isConnected) {
@@ -248,7 +240,7 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       confirmDialog({
         title: gettext('Unregister Endpoint'),
-        description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\''))({name: serviceInstance.name}),
+        description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\'?'))({name: serviceInstance.name}),
         errorMessage: gettext('Failed to unregister endpoint'),
         submitCommit: true,
         buttonText: {
@@ -262,7 +254,7 @@
               name: serviceInstance.name
             });
             updateInstances().then(function () {
-              updateInstancesCache(endpoints);
+              createEndpointEntries();
               if (serviceInstance.cnsi_type === 'hcf') {
                 authModel.remove(serviceInstance.guid);
               }
@@ -288,15 +280,16 @@
             that.dialog = undefined;
           }
           updateInstances().then(function () {
-            updateInstancesCache(endpoints);
+            createEndpointEntries();
             switch (serviceInstance.cnsi_type) {
               case 'hcf':
                 // Initialise AuthModel for service
                 authModel.initializeForEndpoint(serviceInstance.guid);
                 break;
               case 'hce':
-                vcsService.updateInstances().then(function () {
-                  vcsService.updateInstancesCache(endpoints);
+                $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
+                .then(function () {
+                  vcsService.createEndpointEntries();
                 });
                 break;
             }
@@ -320,9 +313,18 @@
           notificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
             name: serviceInstance.name
           });
-          updateInstancesCache(endpoints);
-          if (serviceInstance.cnsi_type === 'hcf') {
-            authModel.remove(serviceInstance.guid);
+          createEndpointEntries();
+          switch (serviceInstance.cnsi_type) {
+            case 'hcf':
+              authModel.remove(serviceInstance.guid);
+              break;
+            case 'hce':
+              dashboardService.refreshCodeEngineVcses()
+                .then(function () {
+                  // Note: we could optimize this with the createEndpointEntries above somehow
+                  vcsService.createEndpointEntries();
+                });
+              break;
           }
         });
     }
