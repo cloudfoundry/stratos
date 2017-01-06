@@ -28,9 +28,13 @@
    */
   function ServiceRegistrationFactory($q, $interpolate, modelManager, utilsService, notificationsService, detailView) {
 
-    function createInstances(serviceInstances, filter) {
+    function createInstanceUrls(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
       return _.map(filteredInstances, utilsService.getClusterEndpoint);
+    }
+
+    function createInstanceNames(serviceInstances) {
+      return _.map(serviceInstances, 'name');
     }
 
     return {
@@ -83,7 +87,8 @@
                         break;
                     }
                     step.urlValidationExpr = utilsService.urlValidationExpression;
-                    step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                    step.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                    step.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
                   },
                   onEnter: function () {
                     allowBack = false;
