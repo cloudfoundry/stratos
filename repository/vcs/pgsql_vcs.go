@@ -46,6 +46,15 @@ type Scannable interface {
 	Scan(dest ...interface{}) error
 }
 
+// VcsNotFound - Error returned when a matching VCS was not found in the DB
+type VcsNotFound struct {
+	matchDetails string
+}
+
+func (e *VcsNotFound) Error() string {
+	return "Unable to Find VCS matching [" + e.matchDetails + "]"
+}
+
 // scanRow - scan a DB row into our VcsRecord struct
 func scanRow(scannable Scannable) (*VcsRecord, error) {
 	var vr *VcsRecord = &VcsRecord{}
@@ -180,8 +189,12 @@ func (p *PostgresVcsRepository) Save(vcs VcsRecord) error {
 // Delete - Remove a VCS Record from the DB
 func (p *PostgresVcsRepository) Delete(guid string) error {
 	log.Println("Delete VCS record")
-	if _, err := p.db.Exec(deleteVcs, guid); err != nil {
+	res, err := p.db.Exec(deleteVcs, guid)
+	if err != nil {
 		return fmt.Errorf("Unable to Delete VCS record: %v", err)
+	}
+	if rows, _ := res.RowsAffected(); rows < 1 {
+		return &VcsNotFound{"id: " + guid}
 	}
 
 	return nil

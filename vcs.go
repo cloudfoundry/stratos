@@ -45,10 +45,11 @@ func (p *portalProxy) deleteVCSClient(c echo.Context) error {
 	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
 	err := vcsRepository.Delete(vcsGuid)
 	if err != nil {
-		return newHTTPShadowError(
-			http.StatusInternalServerError,
-			"Deleting VCS client failed",
-			"Deleting VCS client failed: %v", err)
+		if _, ok := err.(*vcs.VcsNotFound); ok {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		// Shouldn't happen
+		return echo.NewHTTPError(http.StatusInternalServerError, "We found the VCS but failed to delete it")
 	}
 
 	logger.Infof("deleteVCSClient: successfully deleted VCS Client: %s", vcsGuid)
