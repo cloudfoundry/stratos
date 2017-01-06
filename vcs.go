@@ -37,6 +37,24 @@ func (p *portalProxy) listVCSClients(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) deleteVCSClient(c echo.Context) error {
+	logger.Info("deleteVCSClient")
+
+	vcsGuid := c.Param("vcsGuid")
+
+	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
+	err := vcsRepository.Delete(vcsGuid)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusInternalServerError,
+			"Deleting VCS client failed",
+			"Deleting VCS client failed: %v", err)
+	}
+
+	logger.Infof("deleteVCSClient: successfully deleted VCS Client: %s", vcsGuid)
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (p *portalProxy) listVcsTokens(c echo.Context) error {
 	logger.Info("listVcsTokens")
 	userGuid, err := getPortalUserGUID(c)

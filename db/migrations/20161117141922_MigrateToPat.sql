@@ -52,7 +52,7 @@ CREATE INDEX vcs_type ON vcs (type);
 CREATE TABLE IF NOT EXISTS vcs_tokens (
   guid       VARCHAR(36)              PRIMARY KEY,
   user_guid  VARCHAR(36)              NOT NULL,
-  vcs_guid   VARCHAR(36)              NOT NULL,
+  vcs_guid   VARCHAR(36)              NOT NULL REFERENCES vcs ON DELETE CASCADE,
   name       VARCHAR(255)             NOT NULL,
   token      BYTEA                    NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL  DEFAULT (NOW() AT TIME ZONE 'utc'),

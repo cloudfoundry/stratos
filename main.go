@@ -396,6 +396,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// List VCS clients
 	vcsGroup.GET("/clients", p.listVCSClients)
 
+	// Delete a VCS client
+	vcsGroup.DELETE("/clients/:vcsGuid", p.deleteVCSClient)
+
 	// Register a new personal access token
 	vcsGroup.POST("/pat", p.registerVcsToken)
 
