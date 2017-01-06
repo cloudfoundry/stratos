@@ -2,12 +2,12 @@
 
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hcf'">
     <p translate><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank" translate>
-      Cloud Foundry</a> supports the full application lifecycle, from initial development, through testing to
+      {{ OEM_CONFIG.CLOUD_FOUNDRY }}</a> supports the full application lifecycle, from initial development, through testing to
       deployment.</p>
-    <p translate>Register an existing Cloud Foundry endpoint to allow your development team to create and manage
+    <p translate>Register an existing {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoint to allow your development team to create and manage
       their applications.</p>
-    <p translate>When registering, choose a unique, easily recognizable name so that your developers can easily
-      know which Cloud Foundry endpoint they are working with.</p>
+    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
+      know which {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoint they are working with.</p>
   </div>
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hce'">
     <p translate>{{ OEM_CONFIG.CODE_ENGINE }} is a continuous delivery service for enterprise development teams that automates
@@ -15,7 +15,7 @@
       GitHub or GitHub Enterprise) and {{ OEM_CONFIG.CODE_ENGINE }} builds, tests, and deploys each change.</p>
     <p translate>Register an existing {{ OEM_CONFIG.CODE_ENGINE }} endpoint to allow your development team to automate their
       application development process.</p>
-    <p translate>When registering, choose a unique, easily recognizable name so that your developers can easily
+    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
       know which {{ OEM_CONFIG.CODE_ENGINE }} endpoint they are working with.</p>
   </div>
   <div class="register-content-right">
