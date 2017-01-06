@@ -29,19 +29,19 @@ type hceInfo struct {
 	AuthorizationEndpoint string `json:"auth_endpoint"`
 }
 
-func isSSLRelatedError(err error) bool {
+func isSSLRelatedError(err error) (bool, string) {
 	if urlErr, ok := err.(*url.Error); ok {
-		if _, ok = urlErr.Err.(x509.UnknownAuthorityError); ok {
-			return true
+		if x509Err, ok := urlErr.Err.(x509.UnknownAuthorityError); ok {
+			return true, x509Err.Error()
 		}
-		if _, ok = urlErr.Err.(x509.HostnameError); ok {
-			return true
+		if x509Err, ok := urlErr.Err.(x509.HostnameError); ok {
+			return true, x509Err.Error()
 		}
-		if _, ok = urlErr.Err.(x509.CertificateInvalidError); ok {
-			return true
+		if x509Err, ok := urlErr.Err.(x509.CertificateInvalidError); ok {
+			return true, x509Err.Error()
 		}
 	}
-	return false
+	return false, ""
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
@@ -83,12 +83,12 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint, skipSSLValidation)
 	if err != nil {
-		if isSSLRelatedError(err) {
+		if ok, detail := isSSLRelatedError(err); ok {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"There is a problem with the server Certificate",
-				"There is a problem with the server Certificate: %v",
-				err)
+				"SSL error - " + detail,
+				"There is a problem with the server Certificate - %s",
+				detail)
 		}
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -158,12 +158,12 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 
 	infoResponse, err := getHCEInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
-		if isSSLRelatedError(err) {
+		if ok, detail := isSSLRelatedError(err); ok {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"There is a problem with the server Certificate",
-				"There is a problem with the server Certificate: %v",
-				err)
+				"SSL error - " + detail,
+				"There is a problem with the server Certificate -  %s",
+				detail)
 		}
 		return newHTTPShadowError(
 			http.StatusBadRequest,
