@@ -51,7 +51,7 @@
               lastStepCommit: true,
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
-              title: gettext('Register an endpoint'),
+              title: gettext('Register an Endpoint'),
               allowBack: function () {
                 return allowBack;
               },

@@ -146,7 +146,7 @@
                       if (name === 'hce') {
                         expect(endpointsPage.endpointType(index)).toBe('Helion Code Engine');
                       } else if (name === 'hcf') {
-                        expect(endpointsPage.endpointType(index)).toBe('Helion Cloud Foundry');
+                        expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
                       // 3) the address is correct
                       expect(endpointsPage.endpointUrl(index)).toBe(service.register.api_endpoint);
@@ -355,7 +355,7 @@
                 registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
                   service.register.skip_ssl_validation)
                   .then(function () {
-                    var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
+                    var toastText = new RegExp("(?:Helion Code Engine|Cloud Foundry) endpoint '" +
                       service.register.cnsi_name + "' successfully registered");
                     return helpers.checkAndCloseToast(toastText);
                   })

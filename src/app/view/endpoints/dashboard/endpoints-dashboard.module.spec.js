@@ -18,7 +18,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
 
     beforeEach(module('templates'));
@@ -43,7 +43,7 @@
             TERMS_OF_USE: 'Terms of Use',
             PRIVACY: 'Privacy',
             CODE_ENGINE: 'Helion Code Engine',
-            CLOUD_FOUNDRY: 'Helion Cloud Foundry'
+            CLOUD_FOUNDRY: 'Cloud Foundry'
           };
         }
       }
