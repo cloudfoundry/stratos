@@ -216,10 +216,10 @@
       var scope = $rootScope.$new();
       scope.name = endpoint.name;
       confirmDialog({
-        title: gettext('Unregister Endpoint'),
-        description: $interpolate(gettext('Please ensure that you have removed this VCS from ' +
+        title: gettext('Unregister VCS'),
+        description: $interpolate(gettext('Please ensure that you have removed VCS <span class="font-semi-bold">{{name}}</span> from ' +
           '{{ OEM_CONFIG.CODE_ENGINE }} before proceeding. <br><br>' +
-          'Are you sure you want to unregister VCS endpoint \'{{name}}\'?'
+          'All tokens associated with this VCS will also be deleted.'
           ))(scope),
         errorMessage: gettext('Failed to unregister VCS endpoint'),
         submitCommit: true,
