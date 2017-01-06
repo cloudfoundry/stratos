@@ -3,7 +3,7 @@
          ng-change="searchBoxCtrl.onChange()"
          ng-model="searchBoxCtrl.searchText"
          ng-keydown="searchBoxCtrl.onKeyDown($event)"
-         placeholder="{{ searchBoxCtrl.placeholder }}" />
+         placeholder="{{ searchBoxCtrl.placeholder }}" ng-disabled="searchBoxCtrl.disabled"/>
   <i class="search-icon"
      ng-class="searchBoxCtrl.searchIcon || 'helion-icon helion-icon-Search'"></i>
 
