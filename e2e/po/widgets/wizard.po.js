@@ -2,6 +2,7 @@
   'use strict';
 
   var _ = require('../../../tools/node_modules/lodash');
+  var helpers = require('../helpers.po');
 
   module.exports = {
     wrap: wrap,
@@ -94,19 +95,6 @@
   }
 
   function _buttonEnabled(element) {
-    return element.getAttribute('disabled')
-      .then(function (isDisabled) {
-        if (isDisabled === 'true') {
-          return false;
-        }
-        if (isDisabled === 'false') {
-          return true;
-        }
-        return isDisabled !== 'disabled';
-      })
-      .catch(function () {
-        // no disabled attribute --> enabled button
-        return true;
-      });
+    return helpers.isButtonEnabled(element);
   }
 })();

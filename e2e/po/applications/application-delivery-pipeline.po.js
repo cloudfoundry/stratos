@@ -7,7 +7,10 @@
     setupPipelineButton: setupPipelineButton,
     getDeliveryPipelineStatusMessage: getDeliveryPipelineStatusMessage,
     getSetupElement: getSetupElement,
-    getSetupWizard: getSetupWizard
+    getSetupWizard: getSetupWizard,
+    getVCSServer: getVCSServer,
+    isVCSServerEnabled: isVCSServerEnabled,
+    addNewTokenButton: addNewTokenButton
   };
 
   function setupPipelineButton() {
@@ -28,5 +31,17 @@
 
   function getDeliveryPipelineStatusMessage() {
     return getDeliveryPipelineStatus().element(by.tagName('h3')).getText();
+  }
+
+  function getVCSServer() {
+    return element(by.css('.media.vcs-token-selector'));
+  }
+
+  function isVCSServerEnabled() {
+    return getVCSServer().isEnabled();
+  }
+
+  function addNewTokenButton() {
+    return element(by.css('.add-new-token-wrapper'));
   }
 })();
