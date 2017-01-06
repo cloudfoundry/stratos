@@ -203,14 +203,13 @@
     }
 
     function _createInstanceActions(isConnected, expired) {
-      var endpoints = dashboardService.endpoints;
       var actions = [];
 
       if (!isConnected) {
         actions.push({
           name: gettext('Connect'),
           execute: function (serviceInstance) {
-            _connect(endpoints, serviceInstance);
+            _connect(serviceInstance);
           }
         });
       }
@@ -219,7 +218,7 @@
         actions.push({
           name: gettext('Disconnect'),
           execute: function (serviceInstance) {
-            _disconnect(endpoints, serviceInstance);
+            _disconnect(serviceInstance);
           }
         });
       }
@@ -229,14 +228,14 @@
         actions.push({
           name: gettext('Unregister'),
           execute: function (serviceInstance) {
-            _unregister(endpoints, serviceInstance);
+            _unregister(serviceInstance);
           }
         });
       }
       return actions;
     }
 
-    function _unregister(endpoints, serviceInstance) {
+    function _unregister(serviceInstance) {
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       confirmDialog({
         title: gettext('Unregister Endpoint'),
@@ -255,8 +254,15 @@
             });
             updateInstances().then(function () {
               createEndpointEntries();
-              if (serviceInstance.cnsi_type === 'hcf') {
-                authModel.remove(serviceInstance.guid);
+              switch (serviceInstance.cnsi_type) {
+                case 'hcf':
+                  authModel.remove(serviceInstance.guid);
+                  break;
+                case 'hce':
+                  dashboardService.refreshCodeEngineVcses().then(function () {
+                    vcsService.createEndpointEntries();
+                  });
+                  break;
               }
             });
           });
@@ -264,7 +270,7 @@
       });
     }
 
-    function _connect(endpoints, serviceInstance) {
+    function _connect(serviceInstance) {
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = credentialsDialog.show({
         activeServiceInstance: serviceInstance,
@@ -298,7 +304,7 @@
       });
     }
 
-    function _disconnect(endpoints, serviceInstance) {
+    function _disconnect(serviceInstance) {
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
