@@ -7,6 +7,11 @@
 	  top: $toast-spacing;
 	}
 
+	&.toast-top-center {
+		left: calc(50% - #{$toast-width/2});
+	  top: 0px;
+	}
+
   * {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -28,8 +33,8 @@
 
 		.toast-close-button {
 			position: absolute;
-			top: $hpe-unit-space;
-			right: $hpe-unit-space;
+			top: $hpe-unit-space * 0.5;
+			right: $hpe-unit-space * 0.5;
 			border: 0;
 			background-color: $toast-background;
 			font-family: 'helion-icons';
@@ -112,27 +117,89 @@
 		}
 	}
 
-	/*Animations*/
-	div[toast] {
-		right: 0px;
+	&.toast-top-right {
+
+		/*Animations*/
+		div[toast] {
+			right: 0px;
+		}
+
+		div[toast].ng-enter {
+			right: (-$toast-width);
+			transition: right .15s ease-in;
+		}
+
+		div[toast].ng-enter.ng-enter-active {
+			right: 0px;
+		}
+
+		div[toast].ng-leave {
+			right: 0px;
+			transition: right .15s ease-out;
+		}
+
+		div[toast].ng-leave.ng-leave-active {
+			right: (-$toast-width);
+		}
 	}
 
-	div[toast].ng-enter {
-		right: (-$toast-width);
-		transition: right .15s ease-in;
-	}
+	&.toast-top-center {
 
-	div[toast].ng-enter.ng-enter-active {
-		right: 0px;
-	}
+		@for $i from 1 through 10 {
+			div[toast]:nth-child(#{$i}) {
+				margin: 0px;
+				position: absolute;
+				top: $toast-spacing + ($i - 1) * $toast-height-with-spacing;
+			}
+		}
 
-	div[toast].ng-leave {
-		right: 0px;
-	  transition: right .15s ease-out;
-	}
+		/*Animations*/
+		div[toast] {
+			transition: all .25s ease-in;
+			opacity: 1;
+		}
 
-	div[toast].ng-leave.ng-leave-active {
-		right: (-$toast-width);
+		div[toast].ng-enter {
+			transition: all .25s ease-in;
+			opacity: 0;
+		}
+
+		div[toast].ng-enter.ng-enter-active {
+			transition: all .25s ease-out;
+			opacity: 1;
+		}
+
+		div[toast].ng-leave {
+			transition: all .25s ease-out;
+			opacity: 1;
+		}
+
+		div[toast].ng-leave.ng-leave-active {
+			opacity: 0;
+			transition: all .25s ease-out;
+		}
+
+		div[toast]:first-child {
+			top: $toast-spacing;
+		}
+
+		div[toast]:first-child.ng-enter {
+			top: (-$toast-height-with-spacing);
+		}
+
+		div[toast]:first-child.ng-enter.ng-enter-active {
+			top: $toast-spacing;
+		}
+
+		div[toast]:first-child.ng-leave {
+			top: $toast-spacing;
+		}
+
+		div[toast]:first-child.ng-leave.ng-leave-active {
+			top: (-$toast-height-with-spacing);
+		}
+		
 	}
+	
+
 }
-
