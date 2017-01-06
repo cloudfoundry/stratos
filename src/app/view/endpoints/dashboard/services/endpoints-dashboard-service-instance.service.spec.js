@@ -13,7 +13,7 @@
       var utils = $injector.get('app.utils.utilsService');
       utils.getOemConfiguration = function () {
         return {
-          CLOUD_FOUNDRY: 'Helion Cloud Foundry',
+          CLOUD_FOUNDRY: 'Cloud Foundry',
           CODE_ENGINE: 'Helion Code Engine'
         };
       };
@@ -38,7 +38,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var invalidService = {
       api_endpoint: {
@@ -54,7 +54,7 @@
     var invalidServicesEndpoint = {
       key: 'cnsi_2',
       name: 'c2',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var expiredService = {
       api_endpoint: {
@@ -69,7 +69,7 @@
     var expiredServicesEndpoint = {
       key: 'cnsi_3',
       name: 'c3',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var hceService = {
       api_endpoint: {
@@ -173,19 +173,19 @@
             key: 'cnsi_1',
             guid: '1',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'cnsi_2',
             guid: '2',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'somethingElse-guid',
             guid: 'guid',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }];
           service.updateInstancesCache(result);

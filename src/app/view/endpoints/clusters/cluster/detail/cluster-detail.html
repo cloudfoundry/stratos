@@ -15,19 +15,19 @@
       <div class="panel-body cluster-summary-panel row">
         <div class="col-md-5">
           <dl class="dl-horizontal">
-            <dt translate>Total Applications</dt>
+            <dt translate>Applications</dt>
             <dd>
               {{ clusterDetailController.totalApps }}
             </dd>
-            <dt translate>Total Memory</dt>
+            <dt translate>Memory Utilization</dt>
             <dd>
               {{ clusterDetailController.totalMemoryUsed }}
             </dd>
-          <dt ng-if="clusterDetailController.orgCount >= 0" translate>Total Organizations</dt>
+          <dt ng-if="clusterDetailController.orgCount >= 0" translate>Organizations</dt>
           <dd ng-if="clusterDetailController.orgCount >= 0">
             {{ clusterDetailController.orgCount }}
           </dd>
-          <dt ng-if="clusterDetailController.userCount >= 0" translate>Total Users</dt>
+          <dt ng-if="clusterDetailController.userCount >= 0" translate>Users</dt>
           <dd ng-if="clusterDetailController.userCount >= 0">
             {{ clusterDetailController.userCount }}
           </dd>
