@@ -212,6 +212,16 @@
         this.model.filterParams.cnsiGuid = 'all';
       }
 
+      // Check to see if the set of clusters has changed
+      var clusterGuids = _.map(clusters, 'value');
+      if (this.model.filterLastCluster) {
+        var intersection = _.intersection(this.model.filterLastCluster, clusterGuids);
+        if (this.model.filterLastCluster.length !== intersection.length || clusterGuids.length !== intersection.length) {
+          // Set of GUIDs has changed, so reset the filter
+          this.model.filterParams.cnsiGuid = 'all';
+        }
+      }
+
       // Select the previous filter value or first cluster in list
       if (this.model.filterParams.cnsiGuid !== 'all') {
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
@@ -219,6 +229,8 @@
         this.model.filterParams.cnsiGuid = clusters[0].value;
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
       }
+
+      this.model.filterLastCluster = clusterGuids;
 
       return this.$q.resolve();
     },
