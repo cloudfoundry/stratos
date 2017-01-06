@@ -230,7 +230,7 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          vcsModel.unregisterVcs(endpoint.vcs.guid).then(function () {
+          return vcsModel.unregisterVcs(endpoint.vcs.guid).then(function () {
             notificationsService.notify('success', gettext('Successfully unregistered VCS endpoint \'{{name}}\''), {
               name: endpoint.vcs.label
             });
