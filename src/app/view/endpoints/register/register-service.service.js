@@ -110,8 +110,7 @@
                       return serviceInstance;
                     }).catch(function (response) {
                       if (response.status === 403) {
-                        return $q.reject(gettext('This endpoint uses a certificate signed by an unknown authority.' +
-                          ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                        return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
                       }
                       return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
                         'is correct and try again. If this error persists, please contact the administrator.'));
