@@ -1,16 +1,16 @@
 #toast-container {
-	position: fixed;
-	z-index: 999999;
+  position: fixed;
+  z-index: 999999;
 
-	&.toast-top-right {
-	  right: $toast-spacing;
-	  top: $toast-spacing;
-	}
+  &.toast-top-right {
+    right: $toast-spacing;
+    top: $toast-spacing;
+  }
 
-	&.toast-top-center {
-		left: calc(50% - #{$toast-width/2});
-	  top: 0px;
-	}
+  &.toast-top-center {
+    left: calc(50% - #{$toast-width/2});
+    top: 0px;
+  }
 
   * {
     -moz-box-sizing: border-box;
@@ -18,188 +18,176 @@
     box-sizing: border-box;
   }
 
-	div[toast] {
-		position: relative;
+  div[toast] {
+    position: relative;
     overflow: hidden;
-		width: $toast-width;
-		height: $toast-height;
-		border: $toast-border-width solid $rule;
-		background-color: $toast-background;
-		margin: $toast-spacing 0 0 0;
-		@include hpe-box-shadow-small();
-		border-radius: 0;
-		cursor: auto;
-		padding: 0;
+    width: $toast-width;
+    height: $toast-height;
+    border: $toast-border-width solid $rule;
+    background-color: $toast-background;
+    margin: $toast-spacing 0 0 0;
+    @include hpe-box-shadow-small();
+    border-radius: 0;
+    cursor: auto;
+    padding: 0;
 
-		.toast-close-button {
-			position: absolute;
-			top: $hpe-unit-space * 0.5;
-			right: $hpe-unit-space * 0.5;
-			border: 0;
-			background-color: $toast-background;
-			font-family: 'helion-icons';
-			color: $dove-gray2;
-			outline: 0;
+    .toast-close-button {
+      font-size: 18px;
+      position: absolute;
+      top: $hpe-unit-space * 0.5;
+      right: $hpe-unit-space * 0.5;
+      border: 0;
+      background-color: $toast-background;
+      font-family: 'helion-icons';
+      color: $dove-gray2;
+      outline: 0;
 
-			&:before {
-				content: $helion-icon-Close;
-			}
-		}
+      &:before {
+        content: $helion-icon-Close;
+      }
+    }
 
-		.toast-progress {
-			position: absolute;
-			height: $toast-height-inside;
-			left: ($toast-icon-space - $toast-spinner-width) / 2;
-			display: flex;
+    .toast-progress {
+      position: absolute;
+      height: $toast-height-inside;
+      left: ($toast-icon-space - $toast-spinner-width) / 2;
+      display: flex;
 
-			> bounce-spinner {
-				vertical-align: middle;
-				margin: auto;
+      > bounce-spinner {
+        vertical-align: middle;
+        margin: auto;
 
-				.bounce-spinner.bounce-spinner-sm {
-					> div {
-						width: $toast-spinner-size;
-						height: $toast-spinner-size;
-					}
-				}
-			}
-		}
+        .bounce-spinner.bounce-spinner-sm {
+          > div {
+            width: $toast-spinner-size;
+            height: $toast-spinner-size;
+          }
+        }
+      }
+    }
 
-		.toast-icon {
-			position: absolute;
-			left: ($toast-icon-space - $toast-icon-size) / 2;
-			height: $toast-height-inside;
-			display: flex;
+    .toast-icon {
+      position: absolute;
+      left: ($toast-icon-space - $toast-icon-size) / 2;
+      height: $toast-height-inside;
+      display: flex;
 
-			.toast-icon-icon {
-				font-size: $toast-icon-size;
-				margin: auto;
-				color: $dove-gray2;
-				background-color: $toast-background;
+      .toast-icon-icon {
+        font-size: $toast-icon-size;
+        margin: auto;
+        color: $dove-gray2;
+        background-color: $toast-background;
 
-				&.toast-success {
-					color: $status-okay;
-					&:before {
-						content: $helion-icon-Active_L;
-					}
-				}
+        &.toast-success {
+          color: $status-okay;
+          &:before {
+            content: $helion-icon-Active_L;
+          }
+        }
 
-				&.toast-error {
-					color: $status-critical;
-					&:before {
-						content: $helion-icon-Critical_L;
-					}
-				}
+        &.toast-error {
+          color: $status-critical;
+          &:before {
+            content: $helion-icon-Critical_L;
+          }
+        }
 
-				&.toast-warning {
-					color: $status-warning;
-					&:before {
-						content: $helion-icon-Alert;
-					}
-				}
-			}
-		}
+        &.toast-warning {
+          color: $status-warning;
+          &:before {
+            content: $helion-icon-Alert;
+          }
+        }
+      }
+    }
 
-		.toast-body {
-			vertical-align: middle;
-			display: flex;
-			margin: auto $toast-icon-space auto $toast-icon-space;
-			height: $toast-height-inside;
+    .toast-body {
+      vertical-align: middle;
+      display: flex;
+      margin: auto $toast-icon-space auto $toast-icon-space;
+      height: $toast-height-inside;
 
-			.toast-message {
-				line-height: $toast-line-height;
-				vertical-align: middle;
-				margin: auto 0 auto 0;
-				font-weight: $hpe-font-weight-semibold;
-				color: $dove-gray2;
-				cursor: default;
-			}
-		}
-	}
+      .toast-message {
+        line-height: $toast-line-height;
+        vertical-align: middle;
+        margin: auto 0 auto 0;
+        font-weight: $hpe-font-weight-semibold;
+        color: $dove-gray2;
+        cursor: default;
+      }
+    }
+  }
 
-	&.toast-top-right {
+  &.toast-top-right {
 
-		/*Animations*/
-		div[toast] {
-			right: 0px;
-		}
+    /*Animations*/
+    div[toast] {
+      right: 0px;
+    }
 
-		div[toast].ng-enter {
-			right: (-$toast-width);
-			transition: right .15s ease-in;
-		}
+    div[toast].ng-enter {
+      right: (-$toast-width);
+      transition: right .15s ease-in;
+    }
 
-		div[toast].ng-enter.ng-enter-active {
-			right: 0px;
-		}
+    div[toast].ng-enter.ng-enter-active {
+      right: 0px;
+    }
 
-		div[toast].ng-leave {
-			right: 0px;
-			transition: right .15s ease-out;
-		}
+    div[toast].ng-leave {
+      right: 0px;
+      transition: right .15s ease-out;
+    }
 
-		div[toast].ng-leave.ng-leave-active {
-			right: (-$toast-width);
-		}
-	}
+    div[toast].ng-leave.ng-leave-active {
+      right: (-$toast-width);
+    }
+  }
 
-	&.toast-top-center {
+  &.toast-top-center {
 
-		@for $i from 1 through 10 {
-			div[toast]:nth-child(#{$i}) {
-				margin: 0px;
-				position: absolute;
-				top: $toast-spacing + ($i - 1) * $toast-height-with-spacing;
-			}
-		}
+    @for $i from 1 through 10 {
+      div[toast]:nth-child(#{$i}) {
+        top: $toast-spacing + ($i - 1) * $toast-height-with-spacing;
+      }
+    }
 
-		/*Animations*/
-		div[toast] {
-			transition: all .25s ease-in;
-			opacity: 1;
-		}
+    /*Animations*/
+    div[toast] {
+      opacity: 1;
+      margin: 0;
+      position: absolute;
+      transition: opacity .25s linear, top .25s linear;
+    }
 
-		div[toast].ng-enter {
-			transition: all .25s ease-in;
-			opacity: 0;
-		}
+    div[toast].ng-enter {
+      opacity: 0;
+      &.ng-enter-active {
+        opacity: 1;
+      }
+    }
 
-		div[toast].ng-enter.ng-enter-active {
-			transition: all .25s ease-out;
-			opacity: 1;
-		}
+    div[toast].ng-leave {
+      opacity: 1;
+      &.ng-leave-active {
+        opacity: 0;
+      }
+    }
 
-		div[toast].ng-leave {
-			transition: all .25s ease-out;
-			opacity: 1;
-		}
+    div[toast]:first-child.ng-enter {
+      top: -$toast-height-with-spacing;
+      &.ng-enter-active {
+        top: $toast-spacing;
+      }
+    }
 
-		div[toast].ng-leave.ng-leave-active {
-			opacity: 0;
-			transition: all .25s ease-out;
-		}
+    div[toast]:first-child.ng-leave {
+      top: $toast-spacing;
+      &.ng-leave-active {
+        top: -$toast-height-with-spacing;
+      }
+    }
 
-		div[toast]:first-child {
-			top: $toast-spacing;
-		}
-
-		div[toast]:first-child.ng-enter {
-			top: (-$toast-height-with-spacing);
-		}
-
-		div[toast]:first-child.ng-enter.ng-enter-active {
-			top: $toast-spacing;
-		}
-
-		div[toast]:first-child.ng-leave {
-			top: $toast-spacing;
-		}
-
-		div[toast]:first-child.ng-leave.ng-leave-active {
-			top: (-$toast-height-with-spacing);
-		}
-		
-	}
-	
+  }
 
 }
