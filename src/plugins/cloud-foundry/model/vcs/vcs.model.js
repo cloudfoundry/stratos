@@ -172,6 +172,14 @@
         });
     },
 
+    unregisterVcs: function (vcsGuid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .unregisterVcs(vcsGuid).then(function () {
+          that.listVcsClients();
+        });
+    },
+
     deleteVcsToken: function (tokenGuid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')

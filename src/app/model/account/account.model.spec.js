@@ -21,7 +21,6 @@
     });
 
     it('should have initial properties defined', function () {
-      expect(accountModel.$cookies).toBeDefined();
       expect(accountModel.apiManager).toBeDefined();
       expect(accountModel.loggedIn).toBeDefined();
       expect(accountModel.loggedIn).toBe(false);

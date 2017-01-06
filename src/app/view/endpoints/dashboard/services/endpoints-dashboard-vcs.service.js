@@ -7,21 +7,31 @@
 
   vcsServiceFactory.$inject = [
     '$q',
+    '$rootScope',
+    '$interpolate',
     'app.model.modelManager',
+    'app.view.endpoints.dashboard.dashboardService',
     'app.view.vcs.manageVcsTokens',
-    'app.view.vcs.registerVcsToken'
+    'app.view.vcs.registerVcsToken',
+    'app.view.notificationsService',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
    * @name vcsService
    * @description provide functionality to view and manage VCS endpoints in the endpoints dashboard
    * @param {object} $q - the Angular $q service
+   * @param {object} $rootScope - the angular $rootScope service
+   * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {object} manageVcsTokens - the manage VCS tokens service
    * @param {object} registerVcsToken - register a new VCS token
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, modelManager, manageVcsTokens, registerVcsToken) {
+  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, notificationsService, confirmDialog) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -30,7 +40,6 @@
     return {
       haveInstances: haveInstances,
       updateInstances: updateInstances,
-      updateInstancesCache: updateInstancesCache,
       createEndpointEntries: createEndpointEntries,
       clear: clear
     };
@@ -49,27 +58,12 @@
     /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard.cnsiService
-     * @description Refresh the cnsi service instances within the model
+     * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
      */
     function updateInstances() {
       return $q.all([_refreshTokens(), vcsModel.listVcsClients()]);
-    }
-
-    /**
-     * @function updateInstancesCache
-     * @memberOf app.view.endpoints.dashboard.cnsiService
-     * @description repopulate the endpoints list with the latest data from cache
-     * @param {Array} endpoints - collection of existing endpoints
-     * @public
-     */
-    function updateInstancesCache(endpoints) {
-      // First remove any stale data. Any digests should be unaffected by flip-flopping as this is all sync
-      _.remove(endpoints, function (endpoint) {
-        return endpoint.key.indexOf(endpointPrefix) === 0;
-      });
-      createEndpointEntries(endpoints);
     }
 
     function getStatus(vcs) {
@@ -109,10 +103,10 @@
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
-     * @param {Array} endpoints - collection of existing endpoints
      * @public
      */
-    function createEndpointEntries(endpoints) {
+    function createEndpointEntries() {
+      var endpoints = dashboardService.endpoints;
       var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
       _.forEach(vcsModel.vcsClients, function (vcs) {
@@ -137,10 +131,12 @@
         _createVcsActions(endpoint);
       });
 
-      _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
+      _cleanupStaleEndpoints(activeEndpointsKeys);
     }
 
-    function _cleanupStaleEndpoints(allEndpoints, activeEndpointsKeys) {
+    function _cleanupStaleEndpoints(activeEndpointsKeys) {
+
+      var allEndpoints = dashboardService.endpoints;
 
       var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
         return anEndpoint.key.indexOf(endpointPrefix) === 0;
@@ -184,6 +180,15 @@
           }
         }];
       }
+      var currentUserAccount = modelManager.retrieve('app.model.account');
+      if (currentUserAccount.isAdmin() && !dashboardService.isCodeEngineVcs(endpoint)) {
+        endpoint.actions.push({
+          name: gettext('Unregister'),
+          execute: function (endpoint) {
+            _unregister(endpoint);
+          }
+        });
+      }
     }
 
     function _refreshTokens() {
@@ -204,6 +209,36 @@
         return _refreshTokens().then(function () {
           _createVcsActions(endpoint);
         });
+      });
+    }
+
+    function _unregister(endpoint) {
+      var scope = $rootScope.$new();
+      scope.name = endpoint.name;
+      confirmDialog({
+        title: gettext('Unregister VCS'),
+        description: $interpolate(gettext('Please ensure that you have removed VCS <span class="font-semi-bold">{{name}}</span> from ' +
+          '{{ OEM_CONFIG.CODE_ENGINE }} before proceeding. <br><br>' +
+          'All tokens associated with this VCS will also be deleted.'
+          ))(scope),
+        errorMessage: gettext('Failed to unregister VCS endpoint'),
+        submitCommit: true,
+        noHtmlEscape: true,
+        windowClass: 'unregister-vcs-dialog',
+        buttonText: {
+          yes: gettext('Unregister'),
+          no: gettext('Cancel')
+        },
+        callback: function () {
+          vcsModel.unregisterVcs(endpoint.vcs.guid).then(function () {
+            notificationsService.notify('success', gettext('Successfully unregistered VCS endpoint \'{{name}}\''), {
+              name: endpoint.vcs.label
+            });
+            updateInstances().then(function () {
+              createEndpointEntries();
+            });
+          });
+        }
       });
     }
 
