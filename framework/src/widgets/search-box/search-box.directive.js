@@ -60,7 +60,8 @@
         addAction: '=?',
         inputOptions: '=',
         placeholder: '@?',
-        searchIcon: '@?'
+        searchIcon: '@?',
+        disabled: '=?'
       },
       controller: SearchBoxController,
       controllerAs: 'searchBoxCtrl',

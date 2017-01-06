@@ -1,9 +1,9 @@
-<div ng-click="searchBoxCtrl.openIt()" class="search-box" ng-class="{ open: searchBoxCtrl.open }">
+<div ng-click="!searchBoxCtrl.disabled && searchBoxCtrl.openIt()" class="search-box" ng-class="{ open: searchBoxCtrl.open }">
   <input type="text"
          ng-change="searchBoxCtrl.onChange()"
          ng-model="searchBoxCtrl.searchText"
          ng-keydown="searchBoxCtrl.onKeyDown($event)"
-         placeholder="{{ searchBoxCtrl.placeholder }}" />
+         placeholder="{{ searchBoxCtrl.placeholder }}" ng-disabled="searchBoxCtrl.disabled"/>
   <i class="search-icon"
      ng-class="searchBoxCtrl.searchIcon || 'helion-icon helion-icon-Search'"></i>
 
