@@ -67,7 +67,7 @@
             class="btn btn-default cancel"
             ng-click="wizardCtrl.cancel()"
             ng-disabled="wizardCtrl.cancelBtnDisabled"
-            ng-show="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
+            ng-if="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
       {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'Cancel' }}
     </button>
 
@@ -86,7 +86,7 @@
                         'btn-commit': wizardCtrl.stepCommit
                       }"
       ng-click="wizardCtrl.next()"
-      ng-show="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
+      ng-if="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
       ng-disabled="wizardCtrl.disableNext()">
       {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'Next' }}
     </button>
