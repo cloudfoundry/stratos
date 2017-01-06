@@ -86,7 +86,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		if ok, detail := isSSLRelatedError(err); ok {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"There is a problem with the server Certificate - " + detail,
+				"SSL error - " + detail,
 				"There is a problem with the server Certificate - %s",
 				detail)
 		}
@@ -161,7 +161,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 		if ok, detail := isSSLRelatedError(err); ok {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"There is a problem with the server Certificate - " + detail,
+				"SSL error - " + detail,
 				"There is a problem with the server Certificate -  %s",
 				detail)
 		}
