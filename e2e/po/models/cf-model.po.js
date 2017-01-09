@@ -172,11 +172,16 @@
         _.forEach(app.entity.service_bindings, function (serviceBinding) {
 
           // attempt to delete pipeline if exists
-          promises.push(helpers.sendRequest(req, {
-            headers: createHeader(hceCnsiGuid),
-            method: 'DELETE',
-            url: 'pp/v1/proxy/v2/projects/' + serviceBinding.entity.credentials.hce_pipeline_id
-          }));
+          if (_.has(serviceBinding, 'entity.credentials.hce_pipeline_id')) {
+            promises.push(helpers.sendRequest(req, {
+              headers: createHeader(hceCnsiGuid),
+              method: 'DELETE',
+              url: 'pp/v1/proxy/v2/projects/' + serviceBinding.entity.credentials.hce_pipeline_id
+            })).catch(function () {
+              //noop
+            });
+
+          }
 
           promises.push(helpers.sendRequest(req, {
             headers: createHeader(cnsiGuid),

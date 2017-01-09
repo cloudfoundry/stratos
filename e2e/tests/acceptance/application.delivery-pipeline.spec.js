@@ -19,7 +19,7 @@
   var _ = require('../../../tools/node_modules/lodash');
   //var helpers = require('../../po/helpers.po');
 
-  fdescribe('Application Delivery Pipeline', function () {
+  describe('Application Delivery Pipeline', function () {
     //var testConfig;
     var testTime = (new Date()).getTime();
     var testAppName = 'acceptance.e2e.' + testTime;
