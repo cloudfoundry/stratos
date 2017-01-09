@@ -16,7 +16,9 @@
     getActiveTab: getActiveTab,
     getTabs: getTabs,
 
-    addRoute: addRoute
+    // Summary Tab
+    addRoute: addRoute,
+    editApplication: editApplication
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -75,6 +77,10 @@
 
   function addRoute() {
     return element(by.css('.summary-routes .action-header a.btn.btn-link')).click();
+  }
+
+  function editApplication() {
+    return element(by.css('.summary .action-header a.btn.btn-link')).click();
   }
 
 })();
