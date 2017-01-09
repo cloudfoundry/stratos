@@ -19,6 +19,7 @@
 
     isCancelEnabled: isCancelEnabled,
     isNextEnabled: isNextEnabled,
+    isErrored: isErrored,
 
     cancel: cancel,
     next: next
@@ -38,6 +39,7 @@
 
       isCancelEnabled: _.partial(isCancelEnabled, element),
       isNextEnabled: _.partial(isNextEnabled, element),
+      isErrored: _.partial(isErrored, element),
 
       cancel: _.partial(cancel, element),
       next: _.partial(next, element)
@@ -84,6 +86,10 @@
 
   function isNextEnabled(element) {
     return _buttonEnabled(getNext(element));
+  }
+
+  function isErrored(ele) {
+    return ele.element(by.css('.alert-danger')).isPresent();
   }
 
   function cancel(element) {

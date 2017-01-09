@@ -10,7 +10,8 @@
     getSetupWizard: getSetupWizard,
     getVCSServer: getVCSServer,
     isVCSServerEnabled: isVCSServerEnabled,
-    addNewTokenButton: addNewTokenButton
+    addNewTokenButton: addNewTokenButton,
+    manageVcsTokenButton: manageVcsTokenButton
   };
 
   function setupPipelineButton() {
@@ -44,4 +45,9 @@
   function addNewTokenButton() {
     return element(by.css('.add-new-token-wrapper'));
   }
+
+  function manageVcsTokenButton() {
+    return element(by.css('.manage-tokens-link'));
+  }
+
 })();

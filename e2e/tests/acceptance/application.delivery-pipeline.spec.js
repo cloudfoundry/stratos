@@ -8,6 +8,14 @@
   var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
   var application = require('../../po/applications/application.po');
   var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
+  var registerVcsToken = require('../../po/applications/register-vcs-token.po');
+  var renameVcsToken = require('../../po/applications/rename-vcs-token.po');
+  var manageVcsToken = require('../../po/applications/manage-vcs-token.po');
+  var selectRepository = require('../../po/applications/select-repository.po');
+  var pipelineDetails = require('../../po/applications/pipeline-details.po');
+  var notificationTargetTypes = require('../../po/applications/notifications-target.po');
+
+  var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
   //var helpers = require('../../po/helpers.po');
 
@@ -38,7 +46,10 @@
     });
 
     afterAll(function () {
-      return appSetupHelper.deleteAppByName(testAppName);
+      return appSetupHelper.deleteAppByName(testAppName)
+        .then(function () {
+          return appSetupHelper.deletePat(helpers.getGithubTokenName());
+        });
     });
 
     describe('Delivery Pipeline Tab', function () {
@@ -51,128 +62,192 @@
         expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
       });
 
-      // Check for text  `You have not set up a delivery pipeline`
-      // Check for button
       it('Should not have a pipeline set up', function () {
         var message = deliveryPipeline.getDeliveryPipelineStatusMessage();
-        console.log(message)
         expect(message).toBe('You have not set up a delivery pipeline');
         expect(deliveryPipeline.setupPipelineButton().isPresent()).toBe(true);
       });
 
-      // Check for flyout after button press
-      // Check that only one entry is shown
-      // check that it is selected
-      // it('Should show delivery pipeline slide out', function(){
-      //
-      // })
+      function stepCheck(index) {
+        expect(deliveryPipeline.getSetupWizard().getCurrentStep().getText())
+          .toBe(deliveryPipeline.getSetupWizard().getStepNames()
+            .then(function (steps) {
+              return steps[index];
+            }));
+      }
 
-      // Click next
-      // Should have one configured VCS server
-      // it('Should show configured VCS servers', function(){
-      //
-      // })
+      it('Should show delivery pipeline slide out upon click', function () {
+        deliveryPipeline.setupPipelineButton().click();
+        expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
+        expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+        stepCheck(0);
 
-      // Should show `no token registered` warning
-      // Should have `Add new Token` button enabled`
-      // it('Should have no token available', function (){
-      //
-      // })
+      });
 
-      // Click `Add new token` button
-      // Should show register PAT fly out
-      // it('Should show register PAT fly out', function(){
-      //
-      // })
+      it('Should show configured VCS servers on next step', function () {
 
-      // Enter invalid PAT
-      // Should show text `Token Value must be a valid GitHub Personal Access Token`
-      // Register token should be disabled
-      // it('Should show error message on invalid PAT', function(){
-      //
-      // })
+        deliveryPipeline.getSetupWizard().next();
+        stepCheck(1);
 
-      // Enter valid token
-      // Should have VCS server enabled
-      // Should have token name under `Token`
-      // Should `Manage VCS tokens`
-      // it('Should enabled VCS server after registering PAT', function(){
-      //
-      // })
+        expect(deliveryPipeline.getVCSServer().isPresent()).toBe(true);
+        expect(deliveryPipeline.getVCSServer().getAttribute('class')).toContain('disabled');
+        expect(deliveryPipeline.addNewTokenButton().isPresent()).toBe(true);
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
 
-      // Press Manage VCS token
-      // Should show manage VCS token interface
-      // Should have registered token available
-      // Should have green tick
-      // Should have menu
-      // Should have rename and delete
-      // Should have add new token
-      // TODO: This test can be extended
-      // it('Should show Manage VCS token interface', function(){
-      //
-      // })
+      });
 
-      // Press Next
-      // Should show repositories
-      // Select irfanhabib/node-env
-      // it('Should show repositories when proceeding', function(){
-      //
-      // })
+      it('Should show register PAT fly out', function () {
+        deliveryPipeline.addNewTokenButton().click();
+        expect(registerVcsToken.getTokenForm().isPresent()).toBe(true);
+        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
+      });
 
-      // Press Next
-      // Should have node-env selected in the `Repository Selected` field
-      // Should show branches
-      // Should have refresh button
-      // Select `e2e` branch
-      // Should show build containers
-      // Select NodeJs container
-      // Should have hcf selected
-      // Eneter name and password
-      // Confirm Create Pipelin is enabled
-      // it('Should  show repositories when proceeding', function(){
-      //
-      // })
+      it('Should disable form submission with invalid token', function () {
+        registerVcsToken.enterToken('test', 'test');
+        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-dirty');
+        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
+      });
 
-      // Should have node-env selected in the `Repository Selected` field
-      // Should show branches
-      // Should have refresh button
-      // Select `e2e` branch
-      // Should show build containers
-      // Select NodeJs container
-      // Should have hcf selected
-      // Eneter name and password
-      // it('Should `create pipeline`', function(){
-      //
-      // })
+      it('Should enable form submission with valid token', function () {
+        registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
+        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
+        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
+      });
 
-      // Press create pipeline
-      // Should show notification targets
-      // Should have add notification button which all work
-      // TODO expand tests
-      // it('Should show notification targets', function(){
-      //
-      // })
+      it('Should enable VCS server after registering token', function () {
+        registerVcsToken.registerTokenButton().click();
+        expect(deliveryPipeline.getVCSServer().getAttribute('class')).not.toContain('disabled');
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+      });
 
-      // Press next
-      // should show deploy app page
-      // should have manifest
-      // Should show copy button
-      // Press finished code change
-      // it('Should show manifest', function(){
-      //
-      // })
+      // Manage VCS tests
+      it('should be able to manage VCS tokens', function () {
+        expect(deliveryPipeline.manageVcsTokenButton().isPresent()).toBe(true);
 
-      // Press complete
-      // Should be in teh delivery pipeline page
-      // should have token name to `E2E-TOKEN`
-      // should have repo to `irfanhabib/node-env`
-      // should have branch `e2e
-      // TODO: furter tests
-      // it('Should be in the delivery pipeline page after pipeline creation', function(){
-      //
-      // })
+        deliveryPipeline.manageVcsTokenButton().click();
 
-      // TODO at the end delete pipeline
+        expect(manageVcsToken.getTokensList().count()).toBe(1);
+        // expect(manageVcsToken.isTokenOkay(0)).toBe(true);
+        expect(manageVcsToken.addNewTokenButton().isPresent()).toBe(true);
+        expect(manageVcsToken.getActionsMenu(0).isPresent()).toBe(true);
+      });
+
+      it('should be able to add a new token', function () {
+
+        manageVcsToken.addNewTokenButton().click();
+        registerVcsToken.enterToken('testToken', helpers.getGithubToken());
+
+        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
+        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
+
+        registerVcsToken.registerTokenButton().click();
+        expect(manageVcsToken.getTokensList().count()).toBe(2);
+      });
+
+      it('should be able to delete a token', function () {
+
+        manageVcsToken.clickActionsMenu(0).click();
+        expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
+        expect(manageVcsToken.getActionMenuItemText(0, 1)).toBe('Delete');
+
+        manageVcsToken.clickActionMenuItem(0, 1);
+        expect(manageVcsToken.isDeleteModalPresent()).toBe(true);
+        manageVcsToken.confirmModal();
+        expect(manageVcsToken.getTokensList().count()).toBe(1);
+      });
+
+      it('should be able to rename token', function () {
+
+        manageVcsToken.clickActionsMenu(0).click();
+        expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
+        expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
+
+        manageVcsToken.clickActionMenuItem(0, 0);
+
+        expect(renameVcsToken.getRenameTokenForm().isPresent()).toBe(true);
+
+        renameVcsToken.getRenameTokenFormFields().get(0).clear();
+        expect(renameVcsToken.isSaveEnabled()).toBe(false);
+
+        renameVcsToken.enterToken(helpers.getGithubTokenName());
+        expect(renameVcsToken.isSaveEnabled()).toBe(true);
+
+        renameVcsToken.saveButton().click();
+
+        // close manage-vcs screen
+        manageVcsToken.doneButton().click();
+
+      });
+
+      it('Should show repositories when proceeding', function () {
+        deliveryPipeline.getSetupWizard().next();
+        stepCheck(2);
+
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
+
+        selectRepository.enterRepositoryFilter(helpers.getGithubRepository());
+
+        expect(element.all(by.repeater('repo in wizardCtrl.options.displayedRepos')).count()).toBe(1);
+      });
+
+      it('Should show pipeline details page when proceeding', function () {
+        selectRepository.selectFirstRepository();
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+      });
+
+      it('should allow user to create pipeline with correct data', function () {
+        deliveryPipeline.getSetupWizard().next();
+        stepCheck(3);
+
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
+        var hcfCredentials = helpers.getHcfs().hcf1.admin;
+        pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+
+        deliveryPipeline.getSetupWizard().next();
+
+        stepCheck(3);
+        expect(deliveryPipeline.getSetupWizard().isErrored()).toBe(true);
+
+      });
+
+      it('should allow user to create pipeline with correct data', function () {
+        var hcfCredentials = helpers.getHcfs().hcf1.admin;
+        pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+      });
+
+      it('should take user to notification targets page when proceeding', function () {
+        deliveryPipeline.getSetupWizard().next();
+        stepCheck(4);
+
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+        browser.pause();
+
+        expect(notificationTargetTypes.getTargetTypes().count()).toBe(4);
+
+        notificationTargetTypes.getTargetTypes()
+          .then(function (targetTypes) {
+            _.each(targetTypes, function (targetType) {
+              // Navigate to fly-out
+              notificationTargetTypes.addNewNotificationTarget(targetType).click();
+              // Cancel
+              notificationTargetTypes.cancel().click();
+            });
+          });
+      });
+
+      it('should take user to the manifest page', function () {
+        deliveryPipeline.getSetupWizard().next();
+        stepCheck(5);
+        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+      });
+
+      it('should have a populated delivery pipeline page', function () {
+        deliveryPipeline.getSetupWizard().next();
+        expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
+      });
 
     });
   });

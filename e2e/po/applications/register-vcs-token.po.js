@@ -40,5 +40,4 @@
     return fields.get(1).sendKeys(token);
   }
 
-
 })();

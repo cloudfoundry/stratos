@@ -155,7 +155,7 @@
       });
   }
 
-  function deleteAppIfExisting(cnsiGuid, appName, username, password) {
+  function deleteAppIfExisting(cnsiGuid, appName, username, password, hceCnsiGuid) {
     var req;
     return helpers.createReqAndSession(null, username, password)
       .then(function (inReq) {
@@ -170,6 +170,14 @@
 
         // Delete service instance
         _.forEach(app.entity.service_bindings, function (serviceBinding) {
+
+          // attempt to delete pipeline if exists
+          promises.push(helpers.sendRequest(req, {
+            headers: createHeader(hceCnsiGuid),
+            method: 'DELETE',
+            url: 'pp/v1/proxy/v2/projects/' + serviceBinding.entity.credentials.hce_pipeline_id
+          }));
+
           promises.push(helpers.sendRequest(req, {
             headers: createHeader(cnsiGuid),
             method: 'DELETE',

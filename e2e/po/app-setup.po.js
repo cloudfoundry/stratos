@@ -8,6 +8,7 @@
   var galleryWall = require('./applications/applications.po');
   var _ = require('../../tools/node_modules/lodash');
   var cfModel = require('./models/cf-model.po');
+  var vcsModel = require('./models/vcs-model.po');
   var proxyModel = require('./models/proxy-model.po');
   var searchBox = require('./widgets/input-search-box.po');
 
@@ -15,12 +16,14 @@
     appSetup: appSetup,
     deleteApp: deleteApp,
     deleteAppByName: deleteAppByName,
-    getTestCluster: getTestCluster
+    getTestCluster: getTestCluster,
+    deletePat: deletePat
   };
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
-    organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, appSetupPromise;
+    organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, appSetupPromise, testHceCluster;
   var hcfFromConfig = helpers.getHcfs().hcf1;
+  var hceFromConfig = helpers.getHces().hce1;
 
   function getSearchBoxes() {
     return element.all(by.css('.application-cf-filters .form-group'));
@@ -38,12 +41,20 @@
 
   function deleteAppByName(appName) {
     if (appName) {
-      var promise = cfModel.deleteAppIfExisting(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+      var promise = cfModel.deleteAppIfExisting(testCluster.guid, appName, helpers.getUser(), helpers.getPassword(), testHceCluster.guid)
         .catch(function (error) {
           fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (appName || 'unknown') + '\'. Error:', error);
         });
       return browser.driver.wait(promise);
     }
+  }
+
+  function deletePat(patName) {
+    var promise = vcsModel.deletePat(patName)
+      .catch(function (error) {
+        fail('Failed to clean up after running e2e test, there will be a token named: ' + patName + ', Error: ' + error);
+      });
+    return browser.driver.wait(promise);
   }
 
   function getTestCluster() {
@@ -77,6 +88,7 @@
         return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
           registeredCnsi = JSON.parse(response);
           testCluster = _.find(registeredCnsi, {name: hcfFromConfig.register.cnsi_name});
+          testHceCluster = _.find(registeredCnsi, {name: hceFromConfig.register.cnsi_name});
           expect(testCluster).toBeDefined();
         });
       })

@@ -15,14 +15,16 @@
     buildContainerField.sendKeys(buildContainer);
 
     var clusterUsernameField = element(by.model('wizardCtrl.options.userInput.clusterUsername'));
+    clusterUsernameField.clear();
     clusterUsernameField.sendKeys(clusterUsername);
 
     var clusterPasswordField = element(by.model('wizardCtrl.options.userInput.clusterPassword'));
+    clusterPasswordField.clear();
     return clusterPasswordField.sendKeys(clusterPassword);
   }
 
   function invalidPasswordMessage() {
     return element(by.css('.alert-danger'));
-   }
+  }
 
 })();
