@@ -57,14 +57,7 @@
       that.model.reSort();
     });
 
-    // Default to sorting with the newest applications first
-    if (_.isUndefined(this.model.currentSortOption)) {
-      this.model.currentSortOption = 'metadata.created_at';
-      this.model.sortAscending = false;
-    }
-
     this.ensureOptionSelected();
-    that.model.reSort();
   }
 
   angular.extend(ApplicationsSortingController.prototype, {

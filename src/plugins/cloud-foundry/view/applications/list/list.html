@@ -100,7 +100,8 @@
             <search-box
               ng-model="applicationsListCtrl.filter.orgGuid"
               input-options="applicationsListCtrl.organizations"
-              ng-change="applicationsListCtrl.setOrganization()">
+              ng-change="applicationsListCtrl.setOrganization()"
+              disabled="applicationsListCtrl.filter.cnsiGuid === 'all'">
             </search-box>
           </div>
           <div class="form-group" ng-class="{'form-group-disabled': applicationsListCtrl.filter.orgGuid === 'all'}">
@@ -108,7 +109,8 @@
             <search-box
               ng-model="applicationsListCtrl.filter.spaceGuid"
               input-options="applicationsListCtrl.spaces"
-              ng-change="applicationsListCtrl.setSpace()">
+              ng-change="applicationsListCtrl.setSpace()"
+              disabled="applicationsListCtrl.filter.orgGuid === 'all'">
             </search-box>
           </div>
         </form>

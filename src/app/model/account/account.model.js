@@ -12,32 +12,28 @@
     .run(registerAccountModel);
 
   registerAccountModel.$inject = [
-    '$cookies',
     'app.model.modelManager',
     'app.api.apiManager',
     '$q'
   ];
 
-  function registerAccountModel($cookies, modelManager, apiManager, $q) {
-    modelManager.register('app.model.account', new Account($cookies, apiManager, $q));
+  function registerAccountModel(modelManager, apiManager, $q) {
+    modelManager.register('app.model.account', new Account(apiManager, $q));
   }
 
   /**
    * @namespace app.model.account.Account
    * @memberof app.model.account
    * @name app.model.account.Account
-   * @param {object} $cookies - the Angular $cookies service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {object} $q - the $q service for promise/deferred objects
-   * @property {object} $cookies - the Angular $cookies service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {object} $q - the $q service for promise/deferred objects
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {object} accountData - the account data object
    * @class
    */
-  function Account($cookies, apiManager, $q) {
-    this.$cookies = $cookies;
+  function Account(apiManager, $q) {
     this.apiManager = apiManager;
     this.$q = $q;
     this.loggedIn = false;

@@ -3,7 +3,7 @@
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $httpBackend, service, modelManager;
+    var $httpBackend, service, modelManager, dashboardService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -13,7 +13,7 @@
       var utils = $injector.get('app.utils.utilsService');
       utils.getOemConfiguration = function () {
         return {
-          CLOUD_FOUNDRY: 'Helion Cloud Foundry',
+          CLOUD_FOUNDRY: 'Cloud Foundry',
           CODE_ENGINE: 'Helion Code Engine'
         };
       };
@@ -38,7 +38,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var invalidService = {
       api_endpoint: {
@@ -54,7 +54,7 @@
     var invalidServicesEndpoint = {
       key: 'cnsi_2',
       name: 'c2',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var expiredService = {
       api_endpoint: {
@@ -69,7 +69,7 @@
     var expiredServicesEndpoint = {
       key: 'cnsi_3',
       name: 'c3',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
     var hceService = {
       api_endpoint: {
@@ -92,6 +92,7 @@
       $httpBackend = $injector.get('$httpBackend');
       service = $injector.get('app.view.endpoints.dashboard.cnsiService');
       modelManager = $injector.get('app.model.modelManager');
+      dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
     }
 
     describe('controller tests', function () {
@@ -140,7 +141,7 @@
         });
       });
 
-      describe('updateInstancesCache', function () {
+      describe('createEndpointEntries', function () {
         it('empty cache', function () {
           var services = [validService, invalidService, expiredService, hceService];
           var endpoints = [validServicesEndpoint, invalidServicesEndpoint, expiredServicesEndpoint, hceServicesEndpoint];
@@ -149,9 +150,9 @@
           var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
           userServiceInstanceModel.serviceInstances = _.keyBy(services, 'guid');
 
-          var result = [];
-          service.updateInstancesCache(result);
+          service.createEndpointEntries();
 
+          var result = dashboardService.endpoints;
           expect(result.length).toBe(4);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {
@@ -169,27 +170,28 @@
           var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
           userServiceInstanceModel.serviceInstances = _.keyBy(services, 'guid');
 
-          var result = [{
+          dashboardService.endpoints = [{
             key: 'cnsi_1',
             guid: '1',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'cnsi_2',
             guid: '2',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'somethingElse-guid',
             guid: 'guid',
             valid: true,
-            type: 'Helion Cloud Foundry',
+            type: 'Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }];
-          service.updateInstancesCache(result);
+          service.createEndpointEntries();
 
+          var result = dashboardService.endpoints;
           expect(result.length).toBe(5);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {

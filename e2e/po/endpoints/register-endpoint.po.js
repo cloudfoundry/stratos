@@ -69,7 +69,7 @@
       text = text.trim();
 
       switch (text) {
-        case 'Register a Helion Cloud Foundry Endpoint':
+        case 'Register a Cloud Foundry Endpoint':
           return 'hcf';
         case 'Register a Helion Code Engine Endpoint':
           return 'hce';

@@ -39,7 +39,7 @@
 
       it('should show the `no registered endpoints` message', function () {
         element(by.css('.applications-msg')).getText().then(function (text) {
-          expect(text).toEqual('No connected Helion Cloud Foundry endpoints.');
+          expect(text).toEqual('No connected Cloud Foundry endpoints.');
         });
       });
     });
@@ -72,7 +72,7 @@
         expect(endpointsHcf.getBreadcrumb(1).getText()).toBe('Cloud Foundry');
       });
 
-      it('should go to `Helion Cloud Foundry` page when appropriate breadcrumb is clicked', function () {
+      it('should go to `Cloud Foundry` page when appropriate breadcrumb is clicked', function () {
         endpointsHcf.clickBreadcrumb(1).then(function () {
           endpointsHcf.isHcfEndpoints();
         });

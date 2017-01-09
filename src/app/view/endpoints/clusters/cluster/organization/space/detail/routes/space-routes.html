@@ -16,7 +16,7 @@
           ng-class="{'table-actionable' : spaceRoutesCtrl.canDeleteOrUnmap}">
           <thead>
           <tr>
-            <th st-sort="entity.host" st-sort-default="true" translate>ROUTE</th>
+            <th st-sort="entity.host" st-sort-default="true" st-skip-natural="true" translate>ROUTE</th>
             <th translate>APPLICATION ATTACHED</th>
             <th translate ng-if="spaceRoutesCtrl.canDeleteOrUnmap">ACTION</th>
           </tr>
