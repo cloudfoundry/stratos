@@ -27,7 +27,8 @@
       getOptions: _.partial(getOptions, element),
       selectOption: _.partial(selectOption, element),
       selectOptionByLabel: _.partial(selectOptionByLabel, element),
-      open: _.partial(open, element)
+      open: _.partial(open, element),
+      getText: _.partial(getText, element)
     };
   }
 
@@ -41,6 +42,10 @@
 
   function clear(element) {
     return element.element(by.css('input')).clear();
+  }
+
+  function getText(element) {
+    return element.element(by.css('search-box input #inner-editor')).getText();
   }
 
   function getValue(element) {

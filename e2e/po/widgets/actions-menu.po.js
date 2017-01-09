@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var wrapper = require('../wrapper.po');
+
   module.exports = {
     isSingleButton: isSingleButton,
     getSingleButton: getSingleButton,
@@ -10,6 +12,8 @@
     clickItem: clickItem,
     click: click
   };
+
+  wrapper(module);
 
   function isSingleButton(actionMenu) {
     return actionMenu.element(by.css('.action-button')).isDisplayed();

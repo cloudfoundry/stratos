@@ -14,7 +14,9 @@
 
     getHeader: getHeader,
     getActiveTab: getActiveTab,
-    getTabs: getTabs
+    getTabs: getTabs,
+
+    addRoute: addRoute
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -69,6 +71,10 @@
 
   function getTabs() {
     return element.all(by.css('ul.application-nav.nav > li.nav-item > a'));
+  }
+
+  function addRoute() {
+    return element(by.css('.summary-routes .action-header a.btn.btn-link')).click();
   }
 
 })();
