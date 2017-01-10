@@ -2,14 +2,14 @@
   'use strict';
 
   var inputText = require('../widgets/input-text.po');
-  var inputSearchBox = require('../widgets/input-search-box.po');
   var asyncDialog = require('../widgets/async-dialog.po');
 
   module.exports = {
-    host: host,
-    domain: domain,
+    name: name,
+    memoryUsage: memoryUsage,
+    instances: instances,
     cancel: cancel,
-    commit: commit,
+    save: save,
     getTitle: getTitle,
     isDisplayed: isDisplayed,
     getElement: getElement
@@ -27,7 +27,7 @@
     return asyncDialog.cancel();
   }
 
-  function commit() {
+  function save() {
     return asyncDialog.commit();
   }
 
@@ -35,11 +35,16 @@
     return asyncDialog.getTitle();
   }
 
-  function domain() {
-    return inputSearchBox.wrap(asyncDialog.getContentElement().all(by.css('.form-group')).get(1));
-  }
-
-  function host() {
+  function name() {
     return inputText.wrap(asyncDialog.getContentElement().all(by.css('.form-group')).get(0));
   }
+
+  function memoryUsage() {
+    return inputText.wrap(asyncDialog.getContentElement().all(by.css('.form-group')).get(1));
+  }
+
+  function instances() {
+    return inputText.wrap(asyncDialog.getContentElement().all(by.css('.form-group')).get(2));
+  }
+
 })();
