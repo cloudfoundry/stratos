@@ -26,7 +26,7 @@
   };
 
   function doneButton() {
-    return element(by.css('.btn-primary'));
+    return element(by.css('.modal-footer button.btn.btn-primary'));
   }
 
   function cancel() {

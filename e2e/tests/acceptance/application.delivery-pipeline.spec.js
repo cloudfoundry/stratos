@@ -18,7 +18,7 @@
   var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
 
-  describe('Application Delivery Pipeline', function () {
+  fdescribe('Application Delivery Pipeline', function () {
     //var testConfig;
     var testTime = (new Date()).getTime();
     var testAppName = 'acceptance.e2e.' + testTime;
@@ -140,35 +140,47 @@
           expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
 
+        });
+
+        it('should have two registered tokens', function () {
           registerVcsToken.registerTokenButton().click();
           expect(manageVcsToken.getTokensList().count()).toBe(2);
         });
 
-        it('should be able to delete a token', function () {
-
+        it('should have two operations in the action menu', function () {
           manageVcsToken.clickActionsMenu(0).click();
           expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
+          expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
           expect(manageVcsToken.getActionMenuItemText(0, 1)).toBe('Delete');
+        });
 
+        it('should show confirmation modal when deleting a token', function () {
           manageVcsToken.clickActionMenuItem(0, 1);
           expect(manageVcsToken.isDeleteModalPresent()).toBe(true);
+
+        });
+
+        it('should delete token after confirming model', function () {
           manageVcsToken.confirmModal();
           expect(manageVcsToken.getTokensList().count()).toBe(1);
         });
 
-        it('should be able to rename token', function () {
+        it('should show form to rename a token', function () {
 
           manageVcsToken.clickActionsMenu(0).click();
-          expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
-          expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
-
           manageVcsToken.clickActionMenuItem(0, 0);
 
           expect(renameVcsToken.getRenameTokenForm().isPresent()).toBe(true);
 
+        });
+
+        it('should disable save if form is invalid', function () {
+
           renameVcsToken.getRenameTokenFormFields().get(0).clear();
           expect(renameVcsToken.isSaveEnabled()).toBe(false);
+        });
 
+        it('should rename successfully with valid information', function () {
           renameVcsToken.enterToken(helpers.getGithubTokenName());
           expect(renameVcsToken.isSaveEnabled()).toBe(true);
 
@@ -185,9 +197,7 @@
         stepCheck(2);
 
         expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
-
         selectRepository.enterRepositoryFilter(helpers.getGithubRepository());
-
         expect(element.all(by.repeater('repo in wizardCtrl.options.displayedRepos')).count()).toBe(1);
       });
 

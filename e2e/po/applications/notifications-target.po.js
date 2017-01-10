@@ -8,11 +8,9 @@
     cancel: cancel,
 
     getTargetTypes: getTargetTypes,
+    getDialog: getDialog,
 
-    addNewNotificationTarget: addNewNotificationTarget,
-
-    getDialog: getDialog
-
+    addNewNotificationTarget: addNewNotificationTarget
   };
 
   function getDialog() {
@@ -24,11 +22,11 @@
   }
 
   function doneButton() {
-    return element(by.css('.btn-primary'));
+    return element(by.css('.modal-footer button.btn.btn-primary'));
   }
 
   function cancel() {
-    return element(by.css('.btn-default'));
+    return element(by.css('.modal-footer button.btn.btn-default'));
   }
 
   function getTargetTypes() {

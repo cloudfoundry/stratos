@@ -31,7 +31,7 @@
 
   function deleteApp(testApp) {
     if (testApp) {
-      var promise = cfModel.deleteAppIfExisting(testCluster.guid, testApp.entity.name, helpers.getUser(), helpers.getPassword())
+      var promise = cfModel.deleteAppIfExisting(testCluster.guid, null, testApp.entity.name, helpers.getUser(), helpers.getPassword())
         .catch(function (error) {
           fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (testApp.entity.name || 'unknown') + '\'. Error:', error);
         });
@@ -41,7 +41,7 @@
 
   function deleteAppByName(appName) {
     if (appName) {
-      var promise = cfModel.deleteAppIfExisting(testCluster.guid, appName, helpers.getUser(), helpers.getPassword(), testHceCluster.guid)
+      var promise = cfModel.deleteAppIfExisting(testCluster.guid, testHceCluster.guid, appName, helpers.getUser(), helpers.getPassword())
         .catch(function (error) {
           fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (appName || 'unknown') + '\'. Error:', error);
         });

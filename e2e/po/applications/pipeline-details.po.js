@@ -8,6 +8,8 @@
 
   function enterPipelineDetails(branchName, buildContainer, clusterUsername, clusterPassword) {
 
+    // NOTE: Can't use helpers.getForm* here, since the form is distributed
+
     var branchField = element(by.model('wizardCtrl.options.userInput.branch'));
     branchField.sendKeys(branchName);
 
