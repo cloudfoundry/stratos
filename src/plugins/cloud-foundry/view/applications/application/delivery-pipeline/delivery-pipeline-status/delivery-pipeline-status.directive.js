@@ -27,13 +27,19 @@
     };
   }
 
-  ApplicationSetupPipelineController.$inject = [];
+  ApplicationSetupPipelineController.$inject = [
+    '$rootScope',
+    '$scope'
+  ];
 
   /**
    * @name ApplicationSetupPipelineController
+   * @param {object} $rootScope  - the Angular $rootScope
+   * @param {object} $scope  - the Angular $scope
    * @constructor
    */
-  function ApplicationSetupPipelineController() {
+  function ApplicationSetupPipelineController($rootScope, $scope) {
+    $scope.OEM_CONFIG = $rootScope.OEM_CONFIG;
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {

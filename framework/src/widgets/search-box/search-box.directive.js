@@ -60,7 +60,8 @@
         addAction: '=?',
         inputOptions: '=',
         placeholder: '@?',
-        searchIcon: '@?'
+        searchIcon: '@?',
+        disabled: '=?'
       },
       controller: SearchBoxController,
       controllerAs: 'searchBoxCtrl',
@@ -337,7 +338,7 @@
     /* eslint-enable complexity */
 
     openIt: function () {
-      if (this.open) {
+      if (this.open || this.disabled) {
         return false;
       }
       this.open = true;

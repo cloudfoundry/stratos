@@ -23,21 +23,17 @@
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
       <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
       <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
-          <span translate>
-            To enable developers to use this {{ OEM_CONFIG.CONSOLE }} to interact with {{ OEM_CONFIG.PRODUCT_NAME }}, please register
-          </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            {{ OEM_CONFIG.CLOUD_FOUNDRY }}
-          </span>
-        <span translate> and </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            {{ OEM_CONFIG.CODE_ENGINE }}
-          </span>
-          <span translate>
-            endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs
-            into this {{ OEM_CONFIG.CONSOLE }}. Once you register an endpoint, we recommend connecting it to your account so you can
-            manage it.
-          </span>
+        <span translate>
+          To enable developers to use this {{ OEM_CONFIG.CONSOLE }} to interact with {{ OEM_CONFIG.PRODUCT_NAME }},
+        </span>
+        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+          please register {{ OEM_CONFIG.CLOUD_FOUNDRY }} and {{ OEM_CONFIG.CODE_ENGINE }}
+          endpoints.
+        </span>
+        <span translate>The process of registering these endpoints will make them discoverable for anyone who logs
+          into this {{ OEM_CONFIG.CONSOLE }}. Once you register an endpoint, we recommend connecting it to your account so you can
+          manage it.
+        </span>
       </div>
       <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
           <span translate>

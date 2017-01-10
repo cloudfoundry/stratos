@@ -36,7 +36,7 @@
           <th ng-if="spaceUsersController.canAction()">
             <checkbox-input class="select-all-checkbox" ng-change="spaceUsersController.selectAllChanged()" ng-model="spaceUsersController.selectAllUsers"></checkbox-input>
           </th>
-          <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
+          <th class="sortable" translate st-sort-default="true" st-skip-natural="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
           <th translate>Space Roles</th>
           <th ng-if="spaceUsersController.canAction()" translate>ACTION</th>
         </tr>

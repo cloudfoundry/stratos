@@ -107,7 +107,9 @@
     });
     // When a modal interaction ends, resume the background polling
     this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
-      that.startUpdate();
+      that.update().finally(function () {
+        that.startUpdate();
+      });
     });
 
     this.appActions = [
@@ -317,6 +319,7 @@
     /**
      * @function update
      * @description update application
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     update: function () {
@@ -327,7 +330,7 @@
       var that = this;
 
       this.updating = true;
-      this.$q.when()
+      return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
             return that.model.updateDeliveryPipelineMetadata()
@@ -501,6 +504,17 @@
         return !this.pipelineReady;
       } else {
         return false;
+      }
+    },
+
+    /**
+     * @function showCliInstructions
+     * @description Show the CLI Instructions slide-in
+     */
+    showCliInstructions: function () {
+      var cliAction = _.find(this.appActions, {id: 'cli'});
+      if (cliAction && !cliAction.disabled && !cliAction.hidden) {
+        cliAction.execute();
       }
     },
 

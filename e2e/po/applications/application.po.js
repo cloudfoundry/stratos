@@ -3,6 +3,8 @@
 
   module.exports = {
 
+    showSummary: showSummary,
+    showLogView: showLogView,
     showServices: showServices,
     showDeliveryPipeline: showDeliveryPipeline,
     showDeliveryLogs: showDeliveryLogs,
@@ -11,7 +13,10 @@
     isIncomplete: isIncomplete,
 
     getHeader: getHeader,
-    getActiveTab: getActiveTab
+    getActiveTab: getActiveTab,
+    getTabs: getTabs,
+
+    addRoute: addRoute
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -19,6 +24,14 @@
     // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
   };
+
+  function showSummary() {
+    applicationAction(0).click();
+  }
+
+  function showLogView() {
+    applicationAction(1).click();
+  }
 
   function showServices() {
     applicationAction(2).click();
@@ -54,6 +67,14 @@
 
   function getActiveTab() {
     return element(by.css('ul.application-nav.nav > li.nav-item.active > a'));
+  }
+
+  function getTabs() {
+    return element.all(by.css('ul.application-nav.nav > li.nav-item > a'));
+  }
+
+  function addRoute() {
+    return element(by.css('.summary-routes .action-header a.btn.btn-link')).click();
   }
 
 })();

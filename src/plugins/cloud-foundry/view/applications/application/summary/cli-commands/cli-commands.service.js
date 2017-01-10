@@ -31,17 +31,21 @@
        * @public
        */
       show: function (appModel, username) {
+        var incomplete = appModel.state && appModel.state.label === 'Incomplete';
+        var templateName = incomplete ? 'cli-commands-deploy.html' : 'cli-commands.html';
         return detailView(
           {
-            templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/cli-commands.html',
-            title: gettext('CLI Commands')
+            templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/' + templateName,
+            title: incomplete ? gettext('Deploy Using CLI') : gettext('CLI Commands')
           },
           {
             apiEndpoint: utils.getClusterEndpoint(appModel.cluster),
             orgName: appModel.organization.entity.name,
             spaceName: appModel.space.entity.name,
             appName: appModel.summary.name,
-            username: username
+            username: username,
+            routes: appModel.summary.routes || [],
+            services: appModel.summary.services || []
           }
         );
       }

@@ -7,7 +7,7 @@
   <dl class="dl-horizontal" ng-if="orgSpaceTileCtrl.spaceDetail().details">
     <dt translate>ROLE</dt>
     <dd><div ng-repeat="role in orgSpaceTileCtrl.roles">{{ role }}</div></dd>
-    <dt translate>TOTAL APPS</dt>
+    <dt translate>APPLICATIONS</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
     <dt translate>APP INSTANCES</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalAppInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota }}</dd>

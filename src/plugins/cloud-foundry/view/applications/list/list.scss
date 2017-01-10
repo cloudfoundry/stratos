@@ -6,7 +6,6 @@ $applications-msg-height: 50px;
 .application-wall-header.action-bar {
   display: flex;
   flex-wrap: wrap;
-  height: $main-nav-item-height;
   line-height: $main-nav-item-height;
 
   .application-header-right {
@@ -14,6 +13,7 @@ $applications-msg-height: 50px;
     justify-content: flex-end;
     align-items: center;
     display: flex;
+    min-height: $main-nav-item-height;
 
     .btn-primary {
       font-size: 16px;
