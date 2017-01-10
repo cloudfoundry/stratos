@@ -17,7 +17,6 @@
 
   var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
-  //var helpers = require('../../po/helpers.po');
 
   describe('Application Delivery Pipeline', function () {
     //var testConfig;
@@ -28,9 +27,7 @@
       // Setup the test environment.
       // Reset all cnsi that exist in params
       return appSetupHelper.appSetup().then(function () {
-        //testConfig = setup;
 
-        // Create a test app for all of these test to use
         var hostName = testAppName.replace(/\./g, '_');
         var until = protractor.ExpectedConditions;
         galleryWall.showApplications();
@@ -97,87 +94,90 @@
 
       });
 
-      it('Should show register PAT fly out', function () {
-        deliveryPipeline.addNewTokenButton().click();
-        expect(registerVcsToken.getTokenForm().isPresent()).toBe(true);
-        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
-      });
+      describe('Token management', function () {
 
-      it('Should disable form submission with invalid token', function () {
-        registerVcsToken.enterToken('test', 'test');
-        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-dirty');
-        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
-      });
+        it('Should show register PAT detail view', function () {
+          deliveryPipeline.addNewTokenButton().click();
+          expect(registerVcsToken.getTokenForm().isPresent()).toBe(true);
+          expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
+        });
 
-      it('Should enable form submission with valid token', function () {
-        registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
-        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
-        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
-      });
+        it('Should disable form submission with invalid token', function () {
+          registerVcsToken.enterToken('test', 'test');
+          expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-dirty');
+          expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
+        });
 
-      it('Should enable VCS server after registering token', function () {
-        registerVcsToken.registerTokenButton().click();
-        expect(deliveryPipeline.getVCSServer().getAttribute('class')).not.toContain('disabled');
-        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
-      });
+        it('Should enable form submission with valid token', function () {
+          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
+          expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
+          expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
+        });
 
-      // Manage VCS tests
-      it('should be able to manage VCS tokens', function () {
-        expect(deliveryPipeline.manageVcsTokenButton().isPresent()).toBe(true);
+        it('Should enable VCS server after registering token', function () {
+          registerVcsToken.registerTokenButton().click();
+          expect(deliveryPipeline.getVCSServer().getAttribute('class')).not.toContain('disabled');
+          expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+        });
 
-        deliveryPipeline.manageVcsTokenButton().click();
+        // Manage VCS tests
+        it('should be able to manage VCS tokens', function () {
+          expect(deliveryPipeline.manageVcsTokenButton().isPresent()).toBe(true);
 
-        expect(manageVcsToken.getTokensList().count()).toBe(1);
-        // expect(manageVcsToken.isTokenOkay(0)).toBe(true);
-        expect(manageVcsToken.addNewTokenButton().isPresent()).toBe(true);
-        expect(manageVcsToken.getActionsMenu(0).isPresent()).toBe(true);
-      });
+          deliveryPipeline.manageVcsTokenButton().click();
 
-      it('should be able to add a new token', function () {
+          expect(manageVcsToken.getTokensList().count()).toBe(1);
+          // expect(manageVcsToken.isTokenOkay(0)).toBe(true);
+          expect(manageVcsToken.addNewTokenButton().isPresent()).toBe(true);
+          expect(manageVcsToken.getActionsMenu(0).isPresent()).toBe(true);
+        });
 
-        manageVcsToken.addNewTokenButton().click();
-        registerVcsToken.enterToken('testToken', helpers.getGithubToken());
+        it('should be able to add a new token', function () {
 
-        expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
-        expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
+          manageVcsToken.addNewTokenButton().click();
+          registerVcsToken.enterToken('testToken', helpers.getGithubToken());
 
-        registerVcsToken.registerTokenButton().click();
-        expect(manageVcsToken.getTokensList().count()).toBe(2);
-      });
+          expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
+          expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
 
-      it('should be able to delete a token', function () {
+          registerVcsToken.registerTokenButton().click();
+          expect(manageVcsToken.getTokensList().count()).toBe(2);
+        });
 
-        manageVcsToken.clickActionsMenu(0).click();
-        expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
-        expect(manageVcsToken.getActionMenuItemText(0, 1)).toBe('Delete');
+        it('should be able to delete a token', function () {
 
-        manageVcsToken.clickActionMenuItem(0, 1);
-        expect(manageVcsToken.isDeleteModalPresent()).toBe(true);
-        manageVcsToken.confirmModal();
-        expect(manageVcsToken.getTokensList().count()).toBe(1);
-      });
+          manageVcsToken.clickActionsMenu(0).click();
+          expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
+          expect(manageVcsToken.getActionMenuItemText(0, 1)).toBe('Delete');
 
-      it('should be able to rename token', function () {
+          manageVcsToken.clickActionMenuItem(0, 1);
+          expect(manageVcsToken.isDeleteModalPresent()).toBe(true);
+          manageVcsToken.confirmModal();
+          expect(manageVcsToken.getTokensList().count()).toBe(1);
+        });
 
-        manageVcsToken.clickActionsMenu(0).click();
-        expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
-        expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
+        it('should be able to rename token', function () {
 
-        manageVcsToken.clickActionMenuItem(0, 0);
+          manageVcsToken.clickActionsMenu(0).click();
+          expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
+          expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
 
-        expect(renameVcsToken.getRenameTokenForm().isPresent()).toBe(true);
+          manageVcsToken.clickActionMenuItem(0, 0);
 
-        renameVcsToken.getRenameTokenFormFields().get(0).clear();
-        expect(renameVcsToken.isSaveEnabled()).toBe(false);
+          expect(renameVcsToken.getRenameTokenForm().isPresent()).toBe(true);
 
-        renameVcsToken.enterToken(helpers.getGithubTokenName());
-        expect(renameVcsToken.isSaveEnabled()).toBe(true);
+          renameVcsToken.getRenameTokenFormFields().get(0).clear();
+          expect(renameVcsToken.isSaveEnabled()).toBe(false);
 
-        renameVcsToken.saveButton().click();
+          renameVcsToken.enterToken(helpers.getGithubTokenName());
+          expect(renameVcsToken.isSaveEnabled()).toBe(true);
 
-        // close manage-vcs screen
-        manageVcsToken.doneButton().click();
+          renameVcsToken.saveButton().click();
 
+          // close manage-vcs screen
+          manageVcsToken.doneButton().click();
+
+        });
       });
 
       it('Should show repositories when proceeding', function () {
@@ -196,46 +196,53 @@
         expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
       });
 
-      it('should allow user to create pipeline with correct data', function () {
-        deliveryPipeline.getSetupWizard().next();
-        stepCheck(3);
+      describe('Pipeline details', function () {
+        it('should not allow user to create pipeline with incorrect data', function () {
+          deliveryPipeline.getSetupWizard().next();
+          stepCheck(3);
 
-        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
-        var hcfCredentials = helpers.getHcfs().hcf1.admin;
-        pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
-        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+          expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
+          var hcfCredentials = helpers.getHcfs().hcf1.admin;
+          pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
+          expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
 
-        deliveryPipeline.getSetupWizard().next();
+          deliveryPipeline.getSetupWizard().next();
 
-        stepCheck(3);
-        expect(deliveryPipeline.getSetupWizard().isErrored()).toBe(true);
+          stepCheck(3);
+          expect(deliveryPipeline.getSetupWizard().isErrored()).toBe(true);
 
+        });
+
+        it('should allow user to create pipeline with correct data', function () {
+          var hcfCredentials = helpers.getHcfs().hcf1.admin;
+          pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
+          expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
+        });
       });
 
-      it('should allow user to create pipeline with correct data', function () {
-        var hcfCredentials = helpers.getHcfs().hcf1.admin;
-        pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
-        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
-      });
+      describe('Notification targets tests', function () {
 
-      it('should take user to notification targets page when proceeding', function () {
-        deliveryPipeline.getSetupWizard().next();
-        stepCheck(4);
+        it('should take user to notification targets page when proceeding', function () {
+          deliveryPipeline.getSetupWizard().next();
+          stepCheck(4);
 
-        expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
-        browser.pause();
+          expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
 
-        expect(notificationTargetTypes.getTargetTypes().count()).toBe(4);
+        });
 
-        notificationTargetTypes.getTargetTypes()
-          .then(function (targetTypes) {
-            _.each(targetTypes, function (targetType) {
-              // Navigate to fly-out
-              notificationTargetTypes.addNewNotificationTarget(targetType).click();
-              // Cancel
-              notificationTargetTypes.cancel().click();
+        it('should contain four target types', function () {
+          expect(notificationTargetTypes.getTargetTypes().count()).toBe(4);
+        });
+
+        it('should be able to navigate to a specific target type', function () {
+          notificationTargetTypes.getTargetTypes()
+            .then(function (targetTypes) {
+              _.each(targetTypes, function (targetType) {
+                notificationTargetTypes.addNewNotificationTarget(targetType).click();
+                notificationTargetTypes.cancel().click();
+              });
             });
-          });
+        });
       });
 
       it('should take user to the manifest page', function () {

@@ -33,7 +33,6 @@
           }
           var patToken = patTokens[tokenIndex];
 
-
           var name = _.get(patToken, 'token.name', null);
           var guid = _.get(patToken, 'token.guid', null);
 
@@ -45,7 +44,6 @@
               url: 'pp/v1/vcs/pat/' + guid
             });
           }
-
         }
 
         return Q.resolve();

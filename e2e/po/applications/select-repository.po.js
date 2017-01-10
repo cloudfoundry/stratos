@@ -32,6 +32,4 @@
     fields.get(1).clear();
     return fields.get(1).sendKeys(repoName);
   }
-
-
 })();

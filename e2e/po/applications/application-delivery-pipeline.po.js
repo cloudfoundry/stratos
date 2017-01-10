@@ -6,8 +6,10 @@
   module.exports = {
     setupPipelineButton: setupPipelineButton,
     getDeliveryPipelineStatusMessage: getDeliveryPipelineStatusMessage,
+
     getSetupElement: getSetupElement,
     getSetupWizard: getSetupWizard,
+
     getVCSServer: getVCSServer,
     isVCSServerEnabled: isVCSServerEnabled,
     addNewTokenButton: addNewTokenButton,
