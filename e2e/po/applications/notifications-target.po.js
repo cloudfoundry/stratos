@@ -1,25 +1,14 @@
 (function () {
   'use strict';
 
-  var asyncDialog = require('../widgets/async-dialog-view.po');
-
   module.exports = {
     doneButton: doneButton,
     cancel: cancel,
 
     getTargetTypes: getTargetTypes,
-    getDialog: getDialog,
 
     addNewNotificationTarget: addNewNotificationTarget
   };
-
-  function getDialog() {
-    return asyncDialog.wrap(getDialogElement());
-  }
-
-  function getDialogElement() {
-    return element(by.css('.async-dialog'));
-  }
 
   function doneButton() {
     return element(by.css('.modal-footer button.btn.btn-primary'));
