@@ -21,8 +21,7 @@
     confirmModal: confirmModal,
     cancelModal: cancelModal,
 
-    isTokenOkay: isTokenOkay
-
+    getStatusCell: getStatusCell
   };
 
   function doneButton() {
@@ -53,8 +52,8 @@
     return helpers.getTableCellAt(getTokensTable(), row, 3).element(by.css('actions-menu .dropdown-toggle'));
   }
 
-  function isTokenOkay(row) {
-    return helpers.getTableCellAt(getTokensTable(), row, 1).element(by.css('.helion-icon-Active_L')).isPresent();
+  function getStatusCell(row) {
+    return helpers.getTableCellAt(getTokensTable(), row, 1);
   }
 
   function getActionMenuItems(row) {

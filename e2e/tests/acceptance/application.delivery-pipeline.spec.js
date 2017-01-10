@@ -109,7 +109,7 @@
         });
 
         it('Should enable form submission with valid token', function () {
-          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
+          registerVcsToken.enterToken(helpers.getGithubTokenName() + '-test', helpers.getGithubToken());
           expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
         });
@@ -135,7 +135,7 @@
         it('should be able to add a new token', function () {
 
           manageVcsToken.addNewTokenButton().click();
-          registerVcsToken.enterToken('testToken', helpers.getGithubToken());
+          registerVcsToken.enterToken(helpers.getGithubInvalidTokenName(), helpers.getGithubInvalidToken());
 
           expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
@@ -144,18 +144,26 @@
 
         it('should have two registered tokens', function () {
           registerVcsToken.registerTokenButton().click();
-          expect(manageVcsToken.getTokensList().count()).toBe(2);
+          // There should be another row for the error case
+          expect(manageVcsToken.getTokensList().count()).toBe(3);
+        });
+
+        it('should have correct connection states', function () {
+          // Should be critical
+          expect(manageVcsToken.getStatusCell(1).getAttribute('class')).toContain('helion-icon-Critical_L');
+          // Should be Active
+          expect(manageVcsToken.getStatusCell(0).getAttribute('class')).toContain('helion-icon-Active_L');
         });
 
         it('should have two operations in the action menu', function () {
-          manageVcsToken.clickActionsMenu(0).click();
-          expect(manageVcsToken.getActionMenuItems(0).count()).toBe(2);
-          expect(manageVcsToken.getActionMenuItemText(0, 0)).toBe('Rename');
-          expect(manageVcsToken.getActionMenuItemText(0, 1)).toBe('Delete');
+          manageVcsToken.clickActionsMenu(1).click();
+          expect(manageVcsToken.getActionMenuItems(1).count()).toBe(2);
+          expect(manageVcsToken.getActionMenuItemText(1, 0)).toBe('Rename');
+          expect(manageVcsToken.getActionMenuItemText(1, 1)).toBe('Delete');
         });
 
         it('should show confirmation modal when deleting a token', function () {
-          manageVcsToken.clickActionMenuItem(0, 1);
+          manageVcsToken.clickActionMenuItem(1, 1);
           expect(manageVcsToken.isDeleteModalPresent()).toBe(true);
 
         });

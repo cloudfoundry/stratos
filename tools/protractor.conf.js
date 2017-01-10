@@ -106,9 +106,16 @@
         }
       },
       github: {
-        tokenName: 'e2e-test',
-        token: 'a50928e2a0f83fc3786661217c878a2d791e56a6',
-        repository: 'node-env'
+        valid: {
+          tokenName: 'e2e-test',
+          token: 'a50928e2a0f83fc3786661217c878a2d791e56a6'
+        },
+        repository: 'node-env',
+        invalid: {
+          tokenName: 'invalid-e2e-test',
+          token: '0d3d0e1c098676c1f366f18a2836ebcddb3cde69 '
+        }
+
       },
       pipelineDetails: {
         branch: 'e',

@@ -23,9 +23,11 @@
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
-  var githubTokenName = browser.params.github.tokenName;
-  var githubToken = browser.params.github.token;
+  var githubTokenName = browser.params.github.valid.tokenName;
+  var githubToken = browser.params.github.valid.token;
   var githubRepository = browser.params.github.repository;
+  var githubInvalidTokenName = browser.params.github.invalid.tokenName;
+  var githubInvalidToken = browser.params.github.invalid.token;
 
   var branchName = browser.params.pipelineDetails.branch;
   var buildContainer = browser.params.pipelineDetails.buildContainer;
@@ -43,6 +45,8 @@
 
     getGithubTokenName: getGithubTokenName,
     getGithubToken: getGithubToken,
+    getGithubInvalidTokenName: getGithubInvalidTokenName,
+    getGithubInvalidToken: getGithubInvalidToken,
     getGithubRepository: getGithubRepository,
     getBranchName: getBranchName,
     getBuildContainer: getBuildContainer,
@@ -119,6 +123,14 @@
 
   function getGithubToken() {
     return githubToken;
+  }
+
+  function getGithubInvalidTokenName() {
+    return githubInvalidTokenName;
+  }
+
+  function getGithubInvalidToken() {
+    return githubInvalidToken;
   }
 
   function getGithubRepository() {
