@@ -13,6 +13,7 @@
   var addRouteDialog = require('../../po/applications/add-application-route.po');
   var actionMenu = require('../../po/widgets/actions-menu.po');
   var confirmModal = require('../../po/widgets/confirmation-modal.po');
+  var editApplicationModal = require('../../po/applications/edit-application.po');
 
   describe('Application View', function () {
     //var testConfig;
@@ -131,6 +132,114 @@
             });
           });
         });
+      });
+
+      describe('Edit Application', function () {
+
+        var modalTitle = 'Edit App';
+
+        function getMemoryUtilisation() {
+          return element(by.css('.summary .row .col-md-6:first-of-type dd:nth-of-type(5)')).getText()
+            .then(function (text) {
+              var number = text.substring(0, text.indexOf(' '));
+              if (text.indexOf('GB') >= 0 || text.indexOf('MB') >= 0) {
+                if (text.indexOf('GB') >= 0) {
+                  var iNumber = parseInt(number, 10) * 1024;
+                  number = iNumber.toString();
+                }
+              } else {
+                fail('Unhandled mem usage size');
+              }
+              return number;
+            });
+        }
+
+        function getInstances() {
+          return element(by.css('.app-instance-title + dd percent-gauge')).getAttribute('value-text')
+            .then(function (text) {
+              return text.substring(text.indexOf('/') + 2, text.length);
+            });
+        }
+
+        it('should open + close + open with initial values', function () {
+          var until = protractor.ExpectedConditions;
+
+          // Initial Values - Name
+          var originalAppName = application.getHeader().getText();
+          expect(originalAppName).toBe(testAppName);
+
+          // Initial Values - Memory Utilisation
+          var originalMemUsage = getMemoryUtilisation();
+
+          // Initial Values - Instances
+          var originalInstances = getInstances();
+
+          // Open the modal
+          application.editApplication();
+          browser.wait(until.presenceOf(editApplicationModal.getElement()), 5000);
+          expect(editApplicationModal.getTitle()).toBe(modalTitle);
+
+          // Close
+          editApplicationModal.cancel();
+          browser.wait(until.not(until.presenceOf(editApplicationModal.getElement())), 5000);
+
+          // Open and check values
+          application.editApplication();
+          browser.wait(until.presenceOf(editApplicationModal.getElement()), 5000);
+          expect(editApplicationModal.getTitle()).toBe(modalTitle);
+
+          expect(editApplicationModal.name().getValue()).toBe(originalAppName);
+          expect(editApplicationModal.memoryUsage().getValue()).toBe(originalMemUsage);
+          expect(editApplicationModal.instances().getValue()).toBe(originalInstances);
+        });
+
+        it('should edit values and save changes', function () {
+          //Note - depends on open modal from previous test
+          expect(editApplicationModal.isDisplayed()).toBe(true);
+
+          var until = protractor.ExpectedConditions;
+
+          // App name
+          editApplicationModal.name().clear();
+          // Ensure we update the core app name, this will allow app to be deleted at end of test
+          testAppName += '-edited';
+          var newName = editApplicationModal.name().addText(testAppName).then(function () {
+            return testAppName;
+          });
+
+          // Mem Usage
+          var newMem = editApplicationModal.memoryUsage().getValue().then(function (text) {
+            var newValue = parseInt(text, 10) * 2;
+            newValue = newValue.toString();
+            editApplicationModal.memoryUsage().clear();
+            editApplicationModal.memoryUsage().addText(newValue);
+            return newValue;
+          });
+
+          // Instances
+          var newInstance = editApplicationModal.instances().getValue().then(function (text) {
+            var newValue = parseInt(text, 10) + 1;
+            newValue = newValue.toString();
+            editApplicationModal.instances().clear();
+            editApplicationModal.instances().addText(newValue);
+            return newValue;
+          });
+
+          // Input values should be correct
+          expect(editApplicationModal.name().getValue()).toBe(newName);
+          expect(editApplicationModal.memoryUsage().getValue()).toBe(newMem);
+          expect(editApplicationModal.instances().getValue()).toBe(newInstance);
+
+          // Save
+          editApplicationModal.save();
+          browser.wait(until.not(until.presenceOf(editApplicationModal.getElement())), 5000);
+
+          // App values should be correct
+          expect(application.getHeader().getText()).toBe(newName);
+          expect(getMemoryUtilisation()).toBe(newMem);
+          expect(getInstances()).toBe(newInstance);
+        });
+
       });
     });
   });
