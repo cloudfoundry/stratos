@@ -127,6 +127,8 @@
             type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getOemConfiguration().CLOUD_FOUNDRY : utilsService.getOemConfiguration().CODE_ENGINE
           };
           endpoints.push(endpoint);
+        } else {
+          delete endpoint.error;
         }
         activeEndpointsKeys.push(endpoint.key);
 
