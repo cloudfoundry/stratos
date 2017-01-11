@@ -2,6 +2,7 @@
   'use strict';
 
   var _ = require('../../../tools/node_modules/lodash');
+  var helpers = require('../helpers.po');
 
   module.exports = {
     wrap: wrap,
@@ -18,6 +19,7 @@
 
     isCancelEnabled: isCancelEnabled,
     isNextEnabled: isNextEnabled,
+    isErrored: isErrored,
 
     cancel: cancel,
     next: next
@@ -37,6 +39,7 @@
 
       isCancelEnabled: _.partial(isCancelEnabled, element),
       isNextEnabled: _.partial(isNextEnabled, element),
+      isErrored: _.partial(isErrored, element),
 
       cancel: _.partial(cancel, element),
       next: _.partial(next, element)
@@ -85,6 +88,10 @@
     return _buttonEnabled(getNext(element));
   }
 
+  function isErrored(ele) {
+    return ele.element(by.css('.alert-danger')).isPresent();
+  }
+
   function cancel(element) {
     return getCancel(element).click();
   }
@@ -94,19 +101,6 @@
   }
 
   function _buttonEnabled(element) {
-    return element.getAttribute('disabled')
-      .then(function (isDisabled) {
-        if (isDisabled === 'true') {
-          return false;
-        }
-        if (isDisabled === 'false') {
-          return true;
-        }
-        return isDisabled !== 'disabled';
-      })
-      .catch(function () {
-        // no disabled attribute --> enabled button
-        return true;
-      });
+    return helpers.isButtonEnabled(element);
   }
 })();
