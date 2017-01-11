@@ -8,6 +8,7 @@
     '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
     '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
     '../e2e/tests/acceptance/applications.add-app.spec.js',
+    '../e2e/tests/acceptance/application.delivery-pipeline.spec.js',
     '../e2e/tests/acceptance/application.spec.js',
     '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js'
   ];
@@ -103,6 +104,22 @@
             }
           }
         }
+      },
+      github: {
+        valid: {
+          tokenName: 'e2e-test',
+          token: 'my-pat-token'
+        },
+        repository: 'node-env',
+        invalid: {
+          tokenName: 'invalid-e2e-test',
+          token: '0d3d0e1c098676c1f366f18a2836ebcddb3cde69 '
+        }
+
+      },
+      pipelineDetails: {
+        branch: 'e',
+        buildContainer: 'n'
       }
     },
 

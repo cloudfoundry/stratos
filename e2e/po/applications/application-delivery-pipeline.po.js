@@ -5,8 +5,15 @@
 
   module.exports = {
     setupPipelineButton: setupPipelineButton,
+    getDeliveryPipelineStatusMessage: getDeliveryPipelineStatusMessage,
+
     getSetupElement: getSetupElement,
-    getSetupWizard: getSetupWizard
+    getSetupWizard: getSetupWizard,
+
+    getVCSServer: getVCSServer,
+    isVCSServerEnabled: isVCSServerEnabled,
+    addNewTokenButton: addNewTokenButton,
+    manageVcsTokenButton: manageVcsTokenButton
   };
 
   function setupPipelineButton() {
@@ -20,4 +27,29 @@
   function getSetupElement() {
     return element(by.css('add-pipeline-workflow'));
   }
+
+  function getDeliveryPipelineStatus() {
+    return element(by.tagName('delivery-pipeline-status'));
+  }
+
+  function getDeliveryPipelineStatusMessage() {
+    return getDeliveryPipelineStatus().element(by.tagName('h3')).getText();
+  }
+
+  function getVCSServer() {
+    return element(by.css('.media.vcs-token-selector'));
+  }
+
+  function isVCSServerEnabled() {
+    return getVCSServer().isEnabled();
+  }
+
+  function addNewTokenButton() {
+    return element(by.css('.add-new-token-wrapper'));
+  }
+
+  function manageVcsTokenButton() {
+    return element(by.css('.manage-tokens-link'));
+  }
+
 })();
