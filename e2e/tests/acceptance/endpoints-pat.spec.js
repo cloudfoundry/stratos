@@ -211,6 +211,13 @@
             renameVcsToken.saveButton().click();
           });
         });
+
+        it('should not allow addition of duplicate token', function () {
+          manageVcsToken.addNewTokenButton().click();
+          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
+          expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
+        });
+
       });
     });
   });
