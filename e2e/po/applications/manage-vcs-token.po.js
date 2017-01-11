@@ -105,7 +105,7 @@
 
   function tokenIsMessageRow(row) {
     return helpers.getTableRowAt(getTokensTable(), row).getAttribute('table-inline-message').then(function (text) {
-      return (text === '');
+      return text === '';
     });
   }
 

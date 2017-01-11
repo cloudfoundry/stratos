@@ -9,7 +9,6 @@
     getGitHubLink: getGitHubLink,
     getGitHubPATLink: getGitHubPATLink,
 
-
     isRegisterTokenEnabled: isRegisterTokenEnabled,
     isRegisterTokenView: isRegisterTokenView,
 
