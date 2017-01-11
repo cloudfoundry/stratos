@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var _ = require('../../../tools/node_modules/lodash');
   var navbar = require('../navbar.po');
   var helpers = require('../helpers.po');
   var actionMenu = require('../widgets/actions-menu.po');
@@ -19,13 +20,16 @@
 
     getEndpointTable: getEndpointTable,
     getRowWithEndpointName: getRowWithEndpointName,
+    getRowWithEndpointType: getRowWithEndpointType,
     endpointNameClick: endpointNameClick,
     endpointName: endpointName,
     endpointIsDisconnected: endpointIsDisconnected,
     endpointIsConnected: endpointIsConnected,
+    endpointIsCritical: endpointIsCritical,
     endpointType: endpointType,
     endpointUrl: endpointUrl,
     endpointConnectLink: endpointConnectButton,
+    endpointActionButton: endpointActionButton,
     endpointDisconnectLink: endpointDisconnectButton,
     endpointActionMenu: endpointActionMenu,
     endpointError: endpointError,
@@ -45,6 +49,7 @@
   function showEndpoints() {
     return navbar.goToView('Endpoints');
   }
+
   function showHcfEndpoints() {
     return navbar.goToView('endpoint.clusters');
   }
@@ -104,6 +109,25 @@
     });
   }
 
+  function getRowWithEndpointType(typeName) {
+    var endpointsRows = helpers.getTableRows(getEndpointTable());
+    var rowIndex;
+    return endpointsRows.each(function (element, index) {
+      return endpointIsMessageRow(index).then(function (endpointRow) {
+        if (!endpointRow) {
+          return;
+        }
+        return endpointType(index).then(function (endpointType) {
+          if (endpointType.toLowerCase() === typeName.toLowerCase()) {
+            rowIndex = index;
+          }
+        });
+      });
+    }).then(function () {
+      return rowIndex;
+    });
+  }
+
   function endpointName(row) {
     return helpers.getTableCellAt(getEndpointTable(), row, 0).getText();
   }
@@ -120,6 +144,10 @@
     return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Active_L')).isPresent();
   }
 
+  function endpointIsCritical(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Critical_L')).isPresent();
+  }
+
   function endpointType(row) {
     return helpers.getTableCellAt(getEndpointTable(), row, 2).getText();
   }
@@ -127,6 +155,11 @@
   function endpointIsErrorRow(row) {
     return helpers.getTableRowAt(getEndpointTable(), row).getAttribute('table-inline-message').then(function (text) {
       return !!text;
+    });
+  }
+  function endpointIsMessageRow(row) {
+    return helpers.getTableRowAt(getEndpointTable(), row).getAttribute('table-inline-message').then(function (text) {
+      return _.isNull(text);
     });
   }
 
@@ -140,6 +173,18 @@
         return actionMenu.getSingleButton(actionMenuElement);
       } else {
         // Admin will have an action menu. Need to implement iterating over action menu item tests for 'connect'
+        fail('Not implemented');
+      }
+    });
+  }
+
+  function endpointActionButton(row) {
+    var actionMenuElement = endpointActionMenu(row);
+    return actionMenu.isSingleButton(actionMenuElement).then(function (isSingleButton) {
+      if (isSingleButton) {
+        // Non-admin will only have connect or disconnected (ok maybe also reconnect)
+        return actionMenu.getSingleButton(actionMenuElement);
+      } else {
         fail('Not implemented');
       }
     });

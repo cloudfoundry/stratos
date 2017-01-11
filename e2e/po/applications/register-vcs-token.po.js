@@ -6,14 +6,32 @@
   module.exports = {
     getTokenForm: getTokenForm,
     tokenFormFields: tokenFormFields,
-    registerTokenButton: registerTokenButton,
-    cancel: cancel,
+    getGitHubLink: getGitHubLink,
+    getGitHubPATLink: getGitHubPATLink,
+
+
     isRegisterTokenEnabled: isRegisterTokenEnabled,
-    enterToken: enterToken
+    isRegisterTokenView: isRegisterTokenView,
+
+    registerTokenButton: registerTokenButton,
+    enterToken: enterToken,
+    cancel: cancel
   };
 
   function getTokenForm() {
     return helpers.getForm('form.registerVcsToken');
+  }
+
+  function getGitHubLink() {
+    return element(by.css('.register-token-description')).element(by.linkText('Public GitHub.com vcs server'));
+  }
+
+  function getGitHubPATLink() {
+    return element(by.css('.register-token-description')).element(by.linkText('Personal Access Token'));
+  }
+
+  function isRegisterTokenView() {
+    return helpers.getForm('form.registerVcsToken').isDisplayed();
   }
 
   function tokenFormFields() {
