@@ -23,6 +23,14 @@
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
+  var githubTokenName = browser.params.github.valid.tokenName;
+  var githubToken = browser.params.github.valid.token;
+  var githubRepository = browser.params.github.repository;
+  var githubInvalidTokenName = browser.params.github.invalid.tokenName;
+  var githubInvalidToken = browser.params.github.invalid.token;
+
+  var branchName = browser.params.pipelineDetails.branch;
+  var buildContainer = browser.params.pipelineDetails.buildContainer;
 
   module.exports = {
 
@@ -34,6 +42,14 @@
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
+
+    getGithubTokenName: getGithubTokenName,
+    getGithubToken: getGithubToken,
+    getGithubInvalidTokenName: getGithubInvalidTokenName,
+    getGithubInvalidToken: getGithubInvalidToken,
+    getGithubRepository: getGithubRepository,
+    getBranchName: getBranchName,
+    getBuildContainer: getBuildContainer,
 
     newBrowser: newBrowser,
     loadApp: loadApp,
@@ -65,7 +81,8 @@
 
     getCnsiForUrl: getCnsiForUrl,
 
-    hasClass: hasClass
+    hasClass: hasClass,
+    isButtonEnabled: isButtonEnabled
   };
 
   function getHost() {
@@ -98,6 +115,34 @@
 
   function getPassword() {
     return password;
+  }
+
+  function getGithubTokenName() {
+    return githubTokenName;
+  }
+
+  function getGithubToken() {
+    return githubToken;
+  }
+
+  function getGithubInvalidTokenName() {
+    return githubInvalidTokenName;
+  }
+
+  function getGithubInvalidToken() {
+    return githubInvalidToken;
+  }
+
+  function getGithubRepository() {
+    return githubRepository;
+  }
+
+  function getBranchName() {
+    return branchName;
+  }
+
+  function getBuildContainer() {
+    return buildContainer;
   }
 
   function newBrowser() {
@@ -393,6 +438,23 @@
     return element.getAttribute('class')
       .then(function (classes) {
         return classes.split(' ').indexOf(cls) !== -1;
+      });
+  }
+
+  function isButtonEnabled(element) {
+    return element.getAttribute('disabled')
+      .then(function (isDisabled) {
+        if (isDisabled === 'true') {
+          return false;
+        }
+        if (isDisabled === 'false') {
+          return true;
+        }
+        return isDisabled !== 'disabled';
+      })
+      .catch(function () {
+        // no disabled attribute --> enabled button
+        return true;
       });
   }
 
