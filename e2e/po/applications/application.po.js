@@ -14,7 +14,11 @@
 
     getHeader: getHeader,
     getActiveTab: getActiveTab,
-    getTabs: getTabs
+    getTabs: getTabs,
+
+    // Summary Tab
+    addRoute: addRoute,
+    editApplication: editApplication
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -69,6 +73,14 @@
 
   function getTabs() {
     return element.all(by.css('ul.application-nav.nav > li.nav-item > a'));
+  }
+
+  function addRoute() {
+    return element(by.css('.summary-routes .action-header a.btn.btn-link')).click();
+  }
+
+  function editApplication() {
+    return element(by.css('.summary .action-header a.btn.btn-link')).click();
   }
 
 })();

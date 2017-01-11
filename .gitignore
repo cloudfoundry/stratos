@@ -17,4 +17,5 @@ translations/**/*.mo
 framework/examples/dist/
 oem/scss
 oem/tmp
-coverage-report/
+tmp
+coverage-report
