@@ -9,7 +9,8 @@
     '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
     '../e2e/tests/acceptance/applications.add-app.spec.js',
     '../e2e/tests/acceptance/application.spec.js',
-    '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js'
+    '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
+    '../e2e/tests/acceptance/application-wall.spec.js'
   ];
 
   exports.config = {
