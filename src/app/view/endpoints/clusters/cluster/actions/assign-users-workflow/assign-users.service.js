@@ -216,6 +216,22 @@
             data: that.data,
             userInput: that.userInput,
             nextBtnText: gettext('Assign'),
+            stepCommit: true,
+            onNext: function () {
+              // Make the call to the role service to assign new roles. To do this we need to create the params in the
+              // required format.
+
+              // The service expects an object of type obj[orgGuid] = <org roles>
+              var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
+              var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
+
+              // The service expects an object of HCF user objects keyed by their guid
+              var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
+                return user.metadata.guid;
+              });
+
+              return rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles);
+            },
             isLastStep: true,
             actions: {
               changeOrganization: function (org) {
@@ -248,10 +264,6 @@
       }
     };
 
-    // Simple mechanism to stop double click on 'assign'. Ideally it would be better to do this via the wizard
-    // controller
-    this.assigning = false;
-
     // Actions for the wizard controller
     this.actions = {
       stop: function () {
@@ -259,30 +271,7 @@
       },
 
       finish: function () {
-        if (that.assigning) {
-          return;
-        }
-        that.assigning = true;
-
-        // Make the call to the role service to assign new roles. To do this we need to create the params in the
-        // required format.
-
-        // The service expects an object of type obj[orgGuid] = <org roles>
-        var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
-        var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
-
-        // The service expects an object of HCF user objects keyed by their guid
-        var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
-          return user.metadata.guid;
-        });
-
-        rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles)
-          .then(function () {
-            that.$uibModalInstance.close();
-          })
-          .finally(function () {
-            that.assigning = false;
-          });
+        that.$uibModalInstance.close();
       }
     };
   }
