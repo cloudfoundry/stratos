@@ -44,6 +44,9 @@
     this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
       $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
 
+    // Comment this out to test log stream in gulp dev
+    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
+
     this.autoScrollOn = true; // auto-scroll by default
 
     // After the user has scrolled up we disable auto-scroll
@@ -60,12 +63,10 @@
         var messageString = base64.decode(messageObj.message) + '\n';
 
         var colour;
-        switch (messageObj.source_type) {
-          case 'APP':
-            colour = 'red';
-            break;
-          default:
-            colour = 'yellow';
+        if (/APP/.test(messageObj.source_type)) {
+          colour = 'red';
+        } else {
+          colour = 'yellow';
         }
         var messageSource = coloredLog('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', colour);
 
