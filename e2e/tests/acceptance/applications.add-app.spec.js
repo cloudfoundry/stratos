@@ -14,6 +14,9 @@
   var cfModel = require('../../po/models/cf-model.po');
   var inputText = require('../../po/widgets/input-text.po');
 
+  // Service to use when adding a service to the app
+  var SERVICE_NAME = 'app-autoscaler';
+
   describe('Applications - Add application', function () {
 
     /**
@@ -150,34 +153,31 @@
 
       browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
 
-      element.all(by.css('service-card .service-actions button.btn.btn-link')).then(function (addServiceButtons) {
-        expect(addServiceButtons.length).toBeGreaterThan(0);
-        addServiceButtons[0].click();
+      addAppService.addService(SERVICE_NAME);
 
-        var serviceWizard = addAppService.getServiceWizard();
-        expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      var serviceWizard = addAppService.getServiceWizard();
+      expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-        expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
-        serviceWizard.getCreateNewName().addText(serviceName);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+      serviceWizard.getCreateNewName().addText(serviceName);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-        serviceName = serviceName.replace(/\./g, '_');
-        serviceWizard.getCreateNewName().clear();
-        serviceWizard.getCreateNewName().addText(serviceName);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+      serviceName = serviceName.replace(/\./g, '_');
+      serviceWizard.getCreateNewName().clear();
+      serviceWizard.getCreateNewName().addText(serviceName);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
 
-        serviceWizard.getWizard().next();
-        expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
-        serviceWizard.getWizard().next().then(function () {
-          cfModel.fetchServiceExist(testConfig.testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
-            .then(function (service) {
-              expect(service).toBeTruthy();
-            })
-            .catch(function () {
-              fail('Failed to determine if service exists');
-            });
-        });
+      serviceWizard.getWizard().next();
+      expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
+      serviceWizard.getWizard().next().then(function () {
+        cfModel.fetchServiceExist(testConfig.testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
+          .then(function (service) {
+            expect(service).toBeTruthy();
+          })
+          .catch(function () {
+            fail('Failed to determine if service exists');
+          });
       });
 
       // Go to the delivery pipeline tab
