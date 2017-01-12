@@ -18,7 +18,9 @@
 
     // Summary Tab
     addRoute: addRoute,
-    editApplication: editApplication
+    editApplication: editApplication,
+
+    invokeAction: invokeAction
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -83,6 +85,15 @@
     return element(by.css('.summary .action-header a.btn.btn-link')).click();
   }
 
+  function invokeAction(actionName) {
+    var actions = element.all(by.css('ul.application-action-col > li > button'));
+    var matchingAction = actions.filter(function (elem) {
+      return elem.getText().then(function (text) {
+        return text === actionName;
+      });
+    }).first();
+    return matchingAction.click();
+  }
 })();
 
 // function servicePanelsAddServiceButtons() {
