@@ -18,7 +18,7 @@
   var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
 
-  fdescribe('Application Delivery Pipeline', function () {
+  describe('Application Delivery Pipeline', function () {
     //var testConfig;
     var testTime = (new Date()).getTime();
     var testAppName = 'acceptance.e2e.' + testTime;
@@ -126,8 +126,13 @@
 
           deliveryPipeline.manageVcsTokenButton().click();
 
+<<<<<<< HEAD
           expect(manageVcsToken.getTokensCount()).toBe(1);
           expect(manageVcsToken.isTokenValid(0)).toBe(true);
+=======
+          expect(manageVcsToken.getTokensList().count()).toBe(1);
+          // expect(manageVcsToken.isTokenOkay(0)).toBe(true);
+>>>>>>> master
           expect(manageVcsToken.addNewTokenButton().isPresent()).toBe(true);
           expect(manageVcsToken.getActionsMenu(0).isPresent()).toBe(true);
         });
@@ -145,14 +150,24 @@
         it('should have two registered tokens', function () {
           registerVcsToken.registerTokenButton().click();
           // There should be another row for the error case
+<<<<<<< HEAD
           expect(manageVcsToken.getTokensCount()).toBe(2);
+=======
+          expect(manageVcsToken.getTokensList().count()).toBe(3);
+>>>>>>> master
         });
 
         it('should have correct connection states', function () {
           // Should be critical
+<<<<<<< HEAD
           expect(manageVcsToken.isTokenInvalid(1)).toBe(true);
           // Should be Active
           expect(manageVcsToken.isTokenValid(0)).toBe(true);
+=======
+          expect(manageVcsToken.getStatusCell(1).getAttribute('class')).toContain('helion-icon-Critical_L');
+          // Should be Active
+          expect(manageVcsToken.getStatusCell(0).getAttribute('class')).toContain('helion-icon-Active_L');
+>>>>>>> master
         });
 
         it('should have two operations in the action menu', function () {
@@ -170,7 +185,11 @@
 
         it('should delete token after confirming model', function () {
           manageVcsToken.confirmModal();
+<<<<<<< HEAD
           expect(manageVcsToken.getTokensCount()).toBe(1);
+=======
+          expect(manageVcsToken.getTokensList().count()).toBe(1);
+>>>>>>> master
         });
 
         it('should show form to rename a token', function () {
@@ -273,15 +292,6 @@
         deliveryPipeline.getSetupWizard().next();
         expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
       });
-
-      describe('Delivery Pipeline Summary page tests', function () {
-
-        // TODO
-        it ('should pause', function(){
-          browser.pause();
-        })
-
-      })
 
     });
   });
