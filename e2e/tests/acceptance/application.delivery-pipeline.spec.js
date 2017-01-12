@@ -126,8 +126,8 @@
 
           deliveryPipeline.manageVcsTokenButton().click();
 
-          expect(manageVcsToken.getTokensList().count()).toBe(1);
-          // expect(manageVcsToken.isTokenOkay(0)).toBe(true);
+          expect(manageVcsToken.getTokensCount()).toBe(1);
+          expect(manageVcsToken.isTokenValid(0)).toBe(true);
           expect(manageVcsToken.addNewTokenButton().isPresent()).toBe(true);
           expect(manageVcsToken.getActionsMenu(0).isPresent()).toBe(true);
         });
@@ -145,14 +145,14 @@
         it('should have two registered tokens', function () {
           registerVcsToken.registerTokenButton().click();
           // There should be another row for the error case
-          expect(manageVcsToken.getTokensList().count()).toBe(3);
+          expect(manageVcsToken.getTokensCount()).toBe(2);
         });
 
         it('should have correct connection states', function () {
           // Should be critical
-          expect(manageVcsToken.getStatusCell(1).getAttribute('class')).toContain('helion-icon-Critical_L');
+          expect(manageVcsToken.isTokenInvalid(1)).toBe(true);
           // Should be Active
-          expect(manageVcsToken.getStatusCell(0).getAttribute('class')).toContain('helion-icon-Active_L');
+          expect(manageVcsToken.isTokenValid(0)).toBe(true);
         });
 
         it('should have two operations in the action menu', function () {
@@ -170,7 +170,7 @@
 
         it('should delete token after confirming model', function () {
           manageVcsToken.confirmModal();
-          expect(manageVcsToken.getTokensList().count()).toBe(1);
+          expect(manageVcsToken.getTokensCount()).toBe(1);
         });
 
         it('should show form to rename a token', function () {
