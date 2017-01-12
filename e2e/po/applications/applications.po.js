@@ -3,6 +3,7 @@
 
   var navbar = require('../navbar.po');
   var helpers = require('../helpers.po');
+  var inputSelectInput = require('../widgets/input-select-input.po');
 
   module.exports = {
 
@@ -21,7 +22,12 @@
 
     appNameSearch: appNameSearch,
     resetFilters: resetFilters,
-    getAddAppWhenNoApps: getAddAppWhenNoApps
+    getAddAppWhenNoApps: getAddAppWhenNoApps,
+
+    getAppCount: getAppCount,
+
+    setSortOrder: setSortOrder,
+    toggleSortDirection: toggleSortDirection
   };
 
   function applicationGalleryCard(idx) {
@@ -75,5 +81,21 @@
 
   function getAddAppWhenNoApps() {
     return element(by.css('.applications-cta .btn.btn-link'));
+  }
+
+  function getSortDropDown() {
+    return inputSelectInput.wrap(element(by.css('applications-sorting .form-group')));
+  }
+
+  function setSortOrder(name) {
+    return getSortDropDown().selectOptionByLabel(name);
+  }
+
+  function toggleSortDirection() {
+    return element(by.css('applications-sorting .sort-asc-desc-btn')).click();
+  }
+
+  function getAppCount() {
+    return element(by.css('.app-count-number')).getText();
   }
 })();

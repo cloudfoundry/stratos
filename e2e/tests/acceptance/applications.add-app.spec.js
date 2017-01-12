@@ -189,6 +189,25 @@
       expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
       deliveryPipeline.getSetupWizard().cancel();
 
+      application.showSummary();
+      application.invokeAction('CLI Instructions');
+
+      // cf push acceptance.e2e.1484149644648
+      // Check copy to clipboard
+      element.all(by.css('code-block .hpe-copy')).get(2).click();
+      element(by.css('button.close')).click();
+
+      galleryWall.showApplications();
+
+      // Check that the text from the CLI Instructions was copied to the clipboard
+      galleryWall.addApplication();
+      expect(addAppHcfApp.name().getValue()).toBe('');
+      var inputField = element(by.id('add-app-workflow-application-name'));
+      inputField.click();
+      inputField.sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'v'));
+      expect(addAppHcfApp.name().getValue()).toBe('cf push ' + appName);
+
+      addAppWizard.getWizard().cancel();
       galleryWall.showApplications();
     });
 
