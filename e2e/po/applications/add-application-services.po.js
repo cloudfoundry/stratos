@@ -10,7 +10,7 @@
   };
 
   function getServices() {
-    return element.all(by.css('.wizard-step service-card'));
+    return element.all(by.css('service-card'));
   }
 
   function addService(serviceName) {
