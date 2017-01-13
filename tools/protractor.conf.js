@@ -120,8 +120,8 @@
 
       },
       pipelineDetails: {
-        branch: 'e',
-        buildContainer: 'n'
+        branchNames: ['e2e-1', 'e2e-2', 'e2e-3', 'e2e-4', 'e2e-5'],
+        buildContainer: 'NodeJS build container'
       }
     },
 
