@@ -12,7 +12,9 @@
     '../e2e/tests/acceptance/application.delivery-pipeline.spec.js',
     '../e2e/tests/acceptance/application.spec.js',
     '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
-    '../e2e/tests/acceptance/application-wall.spec.js'
+    '../e2e/tests/acceptance/application-wall.spec.js',
+    '../e2e/tests/acceptance/navbar.spec.js',
+    '../e2e/tests/acceptance/log-stream.spec.js'
   ];
 
   exports.config = {

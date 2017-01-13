@@ -1,4 +1,3 @@
-/* eslint-disable angular/json-functions */
 (function () {
   'use strict';
 
@@ -8,7 +7,6 @@
   var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
   var application = require('../../po/applications/application.po');
   var _ = require('../../../tools/node_modules/lodash');
-  //var helpers = require('../../po/helpers.po');
   var table = require('../../po/widgets/table.po');
   var addRouteDialog = require('../../po/applications/add-application-route.po');
   var actionMenu = require('../../po/widgets/actions-menu.po');

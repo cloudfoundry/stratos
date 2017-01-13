@@ -2,7 +2,7 @@
   'use strict';
 
   describe('logged-in service', function () {
-    var loggedInService, eventService, $document, $interval, $httpBackend, modelManager;
+    var loggedInService, eventService, $q, $document, $interval, $httpBackend, modelManager;
     var mocks = {};
 
     angular.module('IntervalMockModule', []).factory('$interval', function () {
@@ -24,6 +24,7 @@
       loggedInService = $injector.get('app.logged-in.loggedInService');
       eventService = $injector.get('app.event.eventService');
       $document = $injector.get('$document');
+      $q = $injector.get('$q');
       modelManager = $injector.get('app.model.modelManager');
     }));
 
@@ -85,7 +86,10 @@
             };
           },
           accountData: {
-            sessionExpiresOn: moment()
+            sessionExpiresOn: moment('2015-10-19')
+          },
+          verifySession: function () {
+            return $q.reject();
           }
         };
         modelManager.register('app.model.account', mockModel);
@@ -106,6 +110,18 @@
         eventService.$apply();
         // We should be logged out
       });
+
+      it('should logout if verifySession fails', function () {
+        // Fake the last user interaction time
+        var fakeUserInteractionTime = moment().toDate();
+        jasmine.clock().mockDate(fakeUserInteractionTime);
+        loggedInService.userInteracted();
+        jasmine.clock().mockDate(moment('2016-10-19').toDate());
+        eventService.$emit(eventService.events.LOGIN);
+        eventService.$apply();
+        // We should be logged out
+      });
+
     });
   });
 })();
