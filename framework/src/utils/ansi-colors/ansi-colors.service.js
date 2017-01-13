@@ -93,8 +93,6 @@
         return close + span;
       },
 
-      /* eslint-disable */
-      // TODO created issue TEAMFOUR-952 to reduce complexity of this function
       smartReplacer: function (match) {
         // First flatten all consecutive mode switches into a single string
         var modes = match.replace(ansiEscapeExtractor, this.ansiGroupParser.bind(this)).split(';');
@@ -112,46 +110,45 @@
             continue;
           }
 
-          switch (mode) {
-            case 0:
-              // $log.debug('// Reset all!');
-              this.reset();
-              break;
-            case 1:
-              // $log.debug('// Enable bold: ' + mode);
-              this.boldOn = true;
-              break;
-            case 22:
-              // $log.debug('// Disable bold: ' + mode);
-              this.boldOn = false;
-              break;
-            case 39:
-              // $log.debug('// Reset foreground: ' + mode);
-              this.currentFg = null;
-              break;
-            case 49:
-              // $log.debug('// Reset background: ' + mode);
-              this.currentBg = null;
-              break;
-            default:
-              if (mode <= 37 && mode >= 30) {
-                // Normal foreground color
-                // $log.debug('// Set foreground color: ' + mode);
-                this.currentFg = mode;
-              } else if (mode <= 47 && mode >= 40) {
-                // Background color
-                // $log.debug('// Set background color: ' + mode);
-                this.currentBg = mode;
-              } else {
-                // $log.debug('// Not yet supported graphics mode: ' + mode);
-              }
-              break;
-          }
+          this.handleMode(mode);
         }
         // Return a single span with the correct classes for all consecutive SGR parameters
         return this.makeSpan() + lineFeeds;
       },
-      /* eslint-enable */
+
+      handleMode: function (mode) {
+        switch (mode) {
+          // Reset all
+          case 0:
+            this.reset();
+            break;
+          // Enable bold
+          case 1:
+            this.boldOn = true;
+            break;
+          // Disable bold
+          case 22:
+            this.boldOn = false;
+            break;
+          // Reset foreground
+          case 39:
+            this.currentFg = null;
+            break;
+          // Reset background
+          case 49:
+            this.currentBg = null;
+            break;
+          default:
+            if (mode <= 37 && mode >= 30) {
+              // Normal foreground color
+              this.currentFg = mode;
+            } else if (mode <= 47 && mode >= 40) {
+              // Background color
+              this.currentBg = mode;
+            }
+            break;
+        }
+      },
 
       ansiGroupParser: function (match, graphicModes, lineFeeds) {
         var ret = '';
