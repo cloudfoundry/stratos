@@ -79,14 +79,15 @@
   gulp.task('e2e:run', ['e2e:clean:dist'], function () {
     paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
+    config.disableServerLogging = true;
     runSequence(
       'dev-default',
       'e2e:pre-instrument',
       'e2e:instrument-source',
       'e2e:instrument-framework',
-      'browsersync',
+      'start-server',
       'e2e:tests',
-      'browsersync:stop',
+      'stop-server',
       'e2e:clean:dist'
     );
   });

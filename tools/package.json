@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp clean:dist && gulp",
+    "precoverage": "npm run update-webdriver",
+    "coverage": "npm test && gulp e2e:run && gulp coverage-combine",
     "lint": "gulp lint",
     "gate-check": "gulp lint && npm test",
     "test-backend": "node test_server.js",

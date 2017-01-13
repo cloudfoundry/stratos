@@ -27,7 +27,14 @@
     getAppCount: getAppCount,
 
     setSortOrder: setSortOrder,
-    toggleSortDirection: toggleSortDirection
+    toggleSortDirection: toggleSortDirection,
+
+    setGridView: setGridView,
+    setListView: setListView,
+
+    isGridView: isGridView,
+    isListView: isListView
+
   };
 
   function applicationGalleryCard(idx) {
@@ -97,5 +104,26 @@
 
   function getAppCount() {
     return element(by.css('.app-count-number')).getText();
+  }
+
+  // Grid and List view
+  function getViewButtonElement(index) {
+    return element.all(by.css('.application-main-controls .view-buttons button')).get(index);
+  }
+
+  function setGridView() {
+    return getViewButtonElement(1).click();
+  }
+
+  function setListView() {
+    return getViewButtonElement(0).click();
+  }
+
+  function isGridView() {
+    return helpers.hasClass(getViewButtonElement(1), 'btn-active');
+  }
+
+  function isListView() {
+    return helpers.hasClass(getViewButtonElement(0), 'btn-active');
   }
 })();

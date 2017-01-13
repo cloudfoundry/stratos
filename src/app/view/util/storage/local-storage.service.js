@@ -23,8 +23,10 @@
       if ($window.localStorage) {
         $window.localStorage.setItem('_localStorageCheck', '_localStorageCheck');
         $window.localStorage.removeItem('_localStorageCheck');
+        supported = true;
+      } else {
+        supported = false;
       }
-      supported = true;
     } catch (err) {
       supported = false;
     }
@@ -76,7 +78,7 @@
       getItem: function (key, defaultValue) {
         if (supported) {
           var value = $window.localStorage.getItem(key);
-          return angular.isUndefined(value) ? defaultValue : value;
+          return angular.isUndefined(value) || value === null ? defaultValue : value;
         } else {
           return defaultValue;
         }

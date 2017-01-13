@@ -30,6 +30,7 @@
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
   var path = require('path');
+  var fork = require('child_process').fork;
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -48,6 +49,7 @@
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
 
   var usePlumber = true;
+  var server;
 
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
@@ -385,6 +387,24 @@
     cb();
   });
 
+  gulp.task('start-server', function () {
+    var options = {};
+    options.env = _.clone(process.env);
+    options.env.NODE_ENV = 'development';
+    options.env.client_folder = paths.browserSyncDist;
+    options.env.client_port = config.browserSyncPort;
+    options.env.client_logging = config.disableServerLogging || false;
+
+    server = fork('./server.js', [], options);
+  });
+
+  gulp.task('stop-server', function () {
+    if (server) {
+      server.kill();
+      server = undefined;
+    }
+  });
+
   gulp.task('dev-default', function (next) {
     gutil.env.devMode = true;
     delete config.bower.exclude;
@@ -413,7 +433,7 @@
   });
 
   gulp.task('run-default', ['default'], function () {
-    runSequence('browsersync', 'watch');
+    runSequence('start-server');
   });
 
   gulp.task('default', function (next) {
