@@ -316,7 +316,7 @@
 
           it('should contain branch name', function () {
             expect(deliveryPipeline.getBranchText().isDisplayed()).toBe(true);
-            expect(deliveryPipeline.getBranchText()).toContain('legacy');
+            expect(deliveryPipeline.getBranchText()).toContain('e2e');
           });
 
           it('should contain build container', function () {
