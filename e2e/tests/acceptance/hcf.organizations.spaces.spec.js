@@ -82,6 +82,13 @@
       });
     });
 
+    it('should show the CLI commands', function () {
+      // Open the first org
+      var orgTiles = element.all(by.css('organization-tile .panel-heading.linked'));
+      orgTiles.get(0).click();
+      var cliCommands = element(by.linkText('CLI Commands'));
+      cliCommands.click();
+      element(by.css('.detail-view-close.close')).click();
+    });
   });
-
 })();
