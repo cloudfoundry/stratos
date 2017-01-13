@@ -221,7 +221,7 @@
 
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
           var hcfCredentials = helpers.getHcfs().hcf1.admin;
-          pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
+          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
 
           deliveryPipeline.getSetupWizard().next();
@@ -233,7 +233,7 @@
 
         it('should allow user to create pipeline with correct data', function () {
           var hcfCredentials = helpers.getHcfs().hcf1.admin;
-          pipelineDetails.enterPipelineDetails(helpers.getBranchName(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
+          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
         });
       });
