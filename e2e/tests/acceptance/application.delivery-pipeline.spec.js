@@ -20,10 +20,10 @@
   var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
 
-  fdescribe('Application Delivery Pipeline', function () {
+  describe('Application Delivery Pipeline', function () {
     //var testConfig;
     var testTime = (new Date()).getTime();
-    var testAppName = 'irfan.acceptance.e2e.' + testTime;
+    var testAppName = 'acceptance.e2e.' + testTime;
 
     beforeAll(function () {
       // Setup the test environment.
@@ -387,45 +387,46 @@
             expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe('You have no notification targets.');
           });
         });
-        //
-        // describe('Post Deploy Action', function () {
-        //
-        //   it('should have `post deploy` section', function () {
-        //     expect(deliveryPipeline.getPostDeployActionsSection().isPresent()).toBe(true);
-        //   });
-        //
-        //   it('should contain an `Add Action` link', function () {
-        //     expect(deliveryPipeline.getAddPostDeployActionButton().isPresent()).toBe(true);
-        //   });
-        //
-        //   it('should display `You have no notification targets.` message', function () {
-        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(true);
-        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
-        //   });
-        //
-        //   it('should be able to add new target', function () {
-        //     deliveryPipeline.getAddPostDeployActionButton().click();
-        //     expect(postDeployAction.getForm().isDisplayed()).toBe(true);
-        //   });
-        //
-        //   it('should be able to enter details', function () {
-        //     expect(postDeployAction.isAddActionEnabled()).toBe(false);
-        //     postDeployAction.enterPostDeployDetails(testAppName + '-pa', 'test', 'test', 'test', 'test', 'test');
-        //     expect(postDeployAction.isAddActionEnabled()).toBe(true);
-        //     postDeployAction.addAction().click();
-        //
-        //   });
-        //
-        //   it('should update table', function () {
-        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(false);
-        //   });
-        //
-        //   it('should be able delete notification target', function () {
-        //     expect(deliveryPipeline.getPostDeployActionDeleteAction().isDisplayed()).toBe(true);
-        //     deliveryPipeline.getPostDeployActionDeleteAction().click();
-        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no notification targets.');
-        //   });
-        // });
+
+        describe('Post Deploy Action', function () {
+
+          it('should have `post deploy` section', function () {
+            expect(deliveryPipeline.getPostDeployActionsSection().isPresent()).toBe(true);
+          });
+
+          it('should contain an `Add Action` link', function () {
+            expect(deliveryPipeline.getAddPostDeployActionButton().isPresent()).toBe(true);
+          });
+
+          it('should display `You have no notification targets.` message', function () {
+            expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(true);
+            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
+          });
+
+          it('should be able to add new target', function () {
+            deliveryPipeline.getAddPostDeployActionButton().click();
+            expect(postDeployAction.getForm().isDisplayed()).toBe(true);
+          });
+
+          it('should be able to enter details', function () {
+            expect(postDeployAction.isAddActionEnabled()).toBe(false);
+            postDeployAction.enterPostDeployDetails(testAppName + '-pa', 'test', 'test', 'test', 'test', 'test');
+            expect(postDeployAction.isAddActionEnabled()).toBe(true);
+            postDeployAction.addAction().click();
+
+          });
+
+          it('should update table', function () {
+            expect(deliveryPipeline.getPostDeployActions().count()).toBe(1);
+          });
+
+          it('should be able delete notification target', function () {
+            expect(deliveryPipeline.getPostDeployActionDeleteAction(0).isDisplayed()).toBe(true);
+            deliveryPipeline.getPostDeployActionDeleteAction(0).click();
+            deliveryPipeline.acknowledgeDeletion();
+            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
+          });
+        });
 
       });
     });

@@ -29,7 +29,6 @@
 
     getPostDeployActionsSection: getPostDeployActionsSection,
     getPostDeployActions: getPostDeployActions,
-    getPostDeployActionActionMenu: getPostDeployActionActionMenu,
     getPostDeployActionDeleteAction: getPostDeployActionDeleteAction,
     getNoPostDeployActionsMessage: getNoPostDeployActionsMessage,
 
@@ -160,21 +159,9 @@
       .element(by.css('.panel-body > span'));
   }
 
-  function getPostDeployActionTable() {
-    return getPostDeployActionsSection().element(by.css('table'));
-  }
-
-  function getPostDeployActionActionMenu(rowIndex) {
-    return helpers.getTableCellAt(getPostDeployActionTable(), rowIndex, 3).element(by.css('actions-menu'));
-  }
-
   function getPostDeployActionDeleteAction(rowIndex) {
-    var actionMenuElement = getPostDeployActionActionMenu(rowIndex);
-    return actionMenu.isSingleButton(actionMenuElement).then(function () {
-      var anchor = actionMenu.getSingleButton(actionMenuElement);
-      expect(anchor.element(by.css('span')).getText()).toEqual('DELETE');
-      return actionMenu.getSingleButton(actionMenuElement);
-    });
+    return getPostDeployActions().get(rowIndex)
+      .element(by.css('actions-menu'));
   }
 
   function deletePipelineButton() {
