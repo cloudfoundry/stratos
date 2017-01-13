@@ -29,7 +29,7 @@
   var githubInvalidTokenName = browser.params.github.invalid.tokenName;
   var githubInvalidToken = browser.params.github.invalid.token;
 
-  var branchName = browser.params.pipelineDetails.branch;
+  var branchNames = browser.params.pipelineDetails.branchNames;
   var buildContainer = browser.params.pipelineDetails.buildContainer;
 
   module.exports = {
@@ -48,7 +48,7 @@
     getGithubInvalidTokenName: getGithubInvalidTokenName,
     getGithubInvalidToken: getGithubInvalidToken,
     getGithubRepository: getGithubRepository,
-    getBranchName: getBranchName,
+    getBranchNames: getBranchNames,
     getBuildContainer: getBuildContainer,
 
     newBrowser: newBrowser,
@@ -137,8 +137,8 @@
     return githubRepository;
   }
 
-  function getBranchName() {
-    return branchName;
+  function getBranchNames() {
+    return branchNames;
   }
 
   function getBuildContainer() {
