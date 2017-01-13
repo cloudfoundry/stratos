@@ -27,11 +27,11 @@
     return element(by.css('.async-dialog'));
   }
 
-  function getWizardElement(){
+  function getWizardElement() {
     return element(by.css('.add-notification-target'));
   }
 
-  function getWizard(){
+  function getWizard() {
     return wizard.wrap(getWizardElement());
   }
 
@@ -47,9 +47,10 @@
     return element.all(by.repeater('notificationTargetType in wizardCtrl.options.notificationTargetTypes'));
   }
 
-  function selectTargetType(index){
+  function selectTargetType(index) {
     return getTargetTypes().get(index).element(by.css('radio-input')).click();
   }
+
   function addNewNotificationTarget(targetType) {
     return targetType.element(by.css('.btn.btn-sm.btn-link'));
   }

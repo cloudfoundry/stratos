@@ -2,8 +2,6 @@
   'use strict';
 
   var wizard = require('../widgets/wizard.po');
-  var helpers = require('../helpers.po');
-  var actionMenu = require('../widgets/actions-menu.po');
   var confirmationModal = require('../widgets/confirmation-modal.po');
 
   module.exports = {
