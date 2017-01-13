@@ -29,16 +29,13 @@
       return appSetupHelper.appSetup().then(function () {
 
         var hostName = testAppName.replace(/\./g, '_');
-        var until = protractor.ExpectedConditions;
         galleryWall.showApplications();
-        browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
         galleryWall.addApplication();
-        browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
         addAppHcfApp.name().addText(testAppName);
         addAppHcfApp.host().clear();
         addAppHcfApp.host().addText(hostName);
         addAppWizard.getWizard().next();
-        return browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
+        helpers.checkAndCloseToast(/application.*created/);
       });
     });
 
@@ -109,13 +106,14 @@
         });
 
         it('Should enable form submission with valid token', function () {
-          registerVcsToken.enterToken(helpers.getGithubTokenName() + '-test', helpers.getGithubToken());
+          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
           expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
         });
 
         it('Should enable VCS server after registering token', function () {
           registerVcsToken.registerTokenButton().click();
+          helpers.checkAndCloseToast(/Personal Access Token .* successfully registered/);
           expect(deliveryPipeline.getVCSServer().getAttribute('class')).not.toContain('disabled');
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
         });
@@ -144,6 +142,7 @@
 
         it('should have two registered tokens', function () {
           registerVcsToken.registerTokenButton().click();
+          helpers.checkAndCloseToast(/Personal Access Token .* successfully registered/);
           // There should be another row for the error case
           expect(manageVcsToken.getTokensCount()).toBe(2);
         });
@@ -170,6 +169,7 @@
 
         it('should delete token after confirming model', function () {
           manageVcsToken.confirmModal();
+          helpers.checkAndCloseToast(/Personal Access Token .* successfully deleted/);
           expect(manageVcsToken.getTokensCount()).toBe(1);
         });
 
@@ -189,10 +189,14 @@
         });
 
         it('should rename successfully with valid information', function () {
-          renameVcsToken.enterToken(helpers.getGithubTokenName());
+          renameVcsToken.enterToken(helpers.getGithubNewTokenName());
           expect(renameVcsToken.isSaveEnabled()).toBe(true);
 
           renameVcsToken.saveButton().click();
+
+          var toastText = new RegExp("Personal Access Token '[^']+' successfully renamed to '" +
+            helpers.getGithubNewTokenName() + "'");
+          helpers.checkAndCloseToast(toastText);
 
           // close manage-vcs screen
           manageVcsToken.doneButton().click();

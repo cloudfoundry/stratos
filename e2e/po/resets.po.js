@@ -203,6 +203,25 @@
         var promises = data.map(function (c) {
           return helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/unregister'}, null, {cnsi_guid: c.guid});
         });
+        promises.push(_removeAllVcses(req));
+        Promise.all(promises).then(resolve, reject);
+      }, reject);
+    });
+  }
+
+  function _removeAllVcses(req) {
+    return new Promise(function (resolve, reject) {
+      helpers.sendRequest(req, {method: 'GET', url: 'pp/v1/vcs/clients'}).then(function (data) {
+        data = data.trim();
+        data = JSON.parse(data);
+
+        if (!data || !data.length) {
+          resolve();
+          return;
+        }
+        var promises = data.map(function (vcs) {
+          return helpers.sendRequest(req, {method: 'DELETE', url: 'pp/v1/vcs/clients/' + vcs.guid});
+        });
         Promise.all(promises).then(resolve, reject);
 
       }, reject);
