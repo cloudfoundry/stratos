@@ -177,10 +177,7 @@
               headers: createHeader(hceCnsiGuid),
               method: 'DELETE',
               url: 'pp/v1/proxy/v2/projects/' + serviceBinding.entity.credentials.hce_pipeline_id
-            })).catch(function () {
-              //noop
-            });
-
+            }));
           }
 
           promises.push(helpers.sendRequest(req, {
