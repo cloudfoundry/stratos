@@ -2,6 +2,9 @@
   'use strict';
 
   var wizard = require('../widgets/wizard.po');
+  var helpers = require('../helpers.po');
+  var actionMenu = require('../widgets/actions-menu.po');
+  var confirmationModal = require('../widgets/confirmation-modal.po');
 
   module.exports = {
     setupPipelineButton: setupPipelineButton,
@@ -9,6 +12,7 @@
 
     getSetupElement: getSetupElement,
     getSetupWizard: getSetupWizard,
+    getDeliveryPipelineSummary: getDeliveryPipelineSummary,
     getTokenLink: getTokenLink,
     getRepositoryLink: getRepositoryLink,
     getSourceText: getSourceText,
@@ -18,16 +22,23 @@
     getAddTargetButton: getAddTargetButton,
     getAddPostDeployActionButton: getAddPostDeployActionButton,
 
+    getNotificationTargetsSection: getNotificationTargetsSection,
     getNotificationTargets: getNotificationTargets,
+    getNotificationTargetDeleteAction: getNotificationTargetDeleteAction,
     getNoNotificationTargetsMessage: getNoNotificationTargetsMessage,
 
+    getPostDeployActionsSection: getPostDeployActionsSection,
     getPostDeployActions: getPostDeployActions,
+    getPostDeployActionActionMenu: getPostDeployActionActionMenu,
+    getPostDeployActionDeleteAction: getPostDeployActionDeleteAction,
     getNoPostDeployActionsMessage: getNoPostDeployActionsMessage,
 
     getVCSServer: getVCSServer,
     isVCSServerEnabled: isVCSServerEnabled,
+    acknowledgeDeletion: acknowledgeDeletion,
     addNewTokenButton: addNewTokenButton,
-    manageVcsTokenButton: manageVcsTokenButton
+    manageVcsTokenButton: manageVcsTokenButton,
+    deletePipelineButton: deletePipelineButton
   };
 
   function setupPipelineButton() {
@@ -70,11 +81,10 @@
     return element(by.css('.delivery-pipeline-summary'));
   }
 
-
   function getSummaryRow(colIndex, rowIndex) {
     return getDeliveryPipelineSummary()
-      .element.all(by.css('dl')).get(colIndex)
-      .element.all(by.css('dd')).get(rowIndex);
+      .all(by.css('dl')).get(colIndex)
+      .all(by.css('dd')).get(rowIndex);
   }
 
   function getTokenLink() {
@@ -101,28 +111,77 @@
     return getSummaryRow(1, 2).getText();
   }
 
-  function getNotificationTargetsSection(){
+  function getNotificationTargetsSection() {
     return element(by.id('notification-targets'));
   }
+
+  function getPostDeployActionsSection() {
+    return element(by.id('post-deploy-actions'));
+  }
+
   function getAddTargetButton() {
     return getNotificationTargetsSection()
       .element(by.css('.btn.btn-link'));
   }
 
   function getAddPostDeployActionButton() {
-    return element(by.id('post-deploy-actions'))
+    return getPostDeployActionsSection()
       .element(by.css('.btn.btn-link'));
   }
 
   function getNotificationTargets() {
-    return getNotificationTargetsSection().
-    element.all(by.repeater('target in applicationDeliveryPipelineCtrl.notificationTargets'));
+    return getNotificationTargetsSection().all(by.repeater('target in applicationDeliveryPipelineCtrl.notificationTargets'));
   }
 
-  function getNoNotificationTargetsMessage(){
-    return getNotificationTargetsSection().
-
+  function getNoNotificationTargetsMessage() {
+    return getNotificationTargetsSection()
+      .element(by.css('.panel-body > span'));
   }
 
+  function getNotificationTargetsTable() {
+    return getNotificationTargetsSection().element(by.css('table'));
+  }
 
+  function getNotificationTargetDeleteAction(rowIndex) {
+    return getNotificationTargetsTable().get(rowIndex)
+      .element(by.css('actions-menu')).click();
+  }
+
+  function acknowledgeDeletion() {
+    return confirmationModal.commit();
+  }
+
+  function getPostDeployActions() {
+    return getPostDeployActionsSection().all(by.repeater('postDeployAction in applicationDeliveryPipelineCtrl.postDeployActions'));
+  }
+
+  function getPostDeployForm() {
+    return helpers.getForm('form.postDeployForm');
+  }
+
+  function getNoPostDeployActionsMessage() {
+    return getPostDeployActionsSection()
+      .element(by.css('.panel-body > span'));
+  }
+
+  function getPostDeployActionTable() {
+    return getPostDeployActionsSection().element(by.css('table'));
+  }
+
+  function getPostDeployActionActionMenu(rowIndex) {
+    return helpers.getTableCellAt(getPostDeployActionTable(), rowIndex, 3).element(by.css('actions-menu'));
+  }
+
+  function getPostDeployActionDeleteAction(rowIndex) {
+    var actionMenuElement = getPostDeployActionActionMenu(rowIndex);
+    return actionMenu.isSingleButton(actionMenuElement).then(function () {
+      var anchor = actionMenu.getSingleButton(actionMenuElement);
+      expect(anchor.element(by.css('span')).getText()).toEqual('DELETE');
+      return actionMenu.getSingleButton(actionMenuElement);
+    });
+  }
+
+  function deletePipelineButton() {
+    return element(by.css('.panel-heading > .btn.btn-link'));
+  }
 })();

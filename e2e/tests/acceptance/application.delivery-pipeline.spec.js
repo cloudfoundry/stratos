@@ -14,6 +14,8 @@
   var selectRepository = require('../../po/applications/select-repository.po');
   var pipelineDetails = require('../../po/applications/pipeline-details.po');
   var notificationTargetTypes = require('../../po/applications/notifications-target.po');
+  var registerNotificationTarget = require('../../po/applications/register-notification-target.po');
+  var postDeployAction = require('../../po/applications/add-post-deploy.po');
 
   var helpers = require('../../po/helpers.po');
   var _ = require('../../../tools/node_modules/lodash');
@@ -21,7 +23,7 @@
   fdescribe('Application Delivery Pipeline', function () {
     //var testConfig;
     var testTime = (new Date()).getTime();
-    var testAppName = 'acceptance.e2e.' + testTime;
+    var testAppName = 'irfan.acceptance.e2e.' + testTime;
 
     beforeAll(function () {
       // Setup the test environment.
@@ -276,13 +278,156 @@
 
       describe('Delivery Pipeline Summary page tests', function () {
 
-        // TODO
-        it ('should pause', function(){
-          browser.pause();
-        })
+        describe('Summary section', function () {
+          it('should have summary section', function () {
+            expect(deliveryPipeline.getDeliveryPipelineSummary().isDisplayed()).toBe(true);
+          });
 
-      })
+          it('should mention source in summary', function () {
+            expect(deliveryPipeline.getSourceText()).toBe('PUBLIC GITHUB.COM VCS SERVER');
+          });
 
+          it('should mention token', function () {
+            expect(deliveryPipeline.getTokenLink().getText()).toBe(helpers.getGithubTokenName().toUpperCase());
+          });
+
+          it('should display `Manage VCS` token detail view when clicking on token link', function () {
+            deliveryPipeline.getTokenLink().click();
+            expect(manageVcsToken.isManageTokensDialog()).toBe(true);
+            manageVcsToken.doneButton().click();
+          });
+
+          it('should display repo name', function () {
+            expect(deliveryPipeline.getRepositoryLink().getText()).toContain(helpers.getGithubRepository());
+          });
+
+          it('should open github page when clicking on repo link', function () {
+            deliveryPipeline.getRepositoryLink().click().then(function () {
+              browser.getAllWindowHandles().then(function (handles) {
+                var githubWindowHandler = handles[1];
+                browser.switchTo().window(githubWindowHandler).then(function () {
+                  expect(browser.driver.getCurrentUrl()).toContain('https://github.com/');
+                  browser.driver.close();
+                  browser.switchTo().window(handles[0]);
+                });
+              });
+            });
+          });
+
+          it('should contain branch name', function () {
+            expect(deliveryPipeline.getBranchText().isDisplayed()).toBe(true);
+            expect(deliveryPipeline.getBranchText()).toContain('legacy');
+          });
+
+          it('should contain build container', function () {
+            expect(deliveryPipeline.getBuildContainerText().isDisplayed()).toBe(true);
+            expect(deliveryPipeline.getBuildContainerText()).toBe(helpers.getBuildContainer());
+
+          });
+
+          it('should contain HCE Endpoint', function () {
+            expect(deliveryPipeline.getHceEndpointUrlText().isDisplayed()).toBe(true);
+            expect(deliveryPipeline.getHceEndpointUrlText()).toBe(helpers.getHces().hce1.register.api_endpoint);
+          });
+
+          it('should have `delete pipeline` option', function () {
+            expect(deliveryPipeline.deletePipelineButton().isPresent()).toBe(true);
+          });
+
+        });
+
+        describe('Notification Targets', function () {
+
+          it('should have `notification targets` section', function () {
+            expect(deliveryPipeline.getNotificationTargetsSection().isPresent()).toBe(true);
+          });
+
+          it('should contain an `Add Target` link', function () {
+            expect(deliveryPipeline.getAddTargetButton().isPresent()).toBe(true);
+          });
+
+          it('should display `You have no notification targets.` message', function () {
+            expect(deliveryPipeline.getNoNotificationTargetsMessage().isDisplayed()).toBe(true);
+            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe('You have no notification targets.');
+          });
+
+          it('should be able to add new target', function () {
+            deliveryPipeline.getAddTargetButton().click();
+            expect(notificationTargetTypes.getWizardElement().isDisplayed()).toBe(true);
+          });
+
+          it('should contain four target types', function () {
+            expect(notificationTargetTypes.getTargetTypes().count()).toBe(4);
+            expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(false);
+          });
+
+          it('should be able to add a notification target', function () {
+            // Select first target
+            notificationTargetTypes.selectTargetType(0);
+            expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(true);
+            notificationTargetTypes.getWizard().next();
+          });
+
+          it('should be able to enter details', function () {
+            expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(false);
+            registerNotificationTarget.enterNotificationTargetDetails(testAppName + '-nf', 'test', 'test');
+            expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(true);
+
+          });
+
+          it('should update table', function () {
+            notificationTargetTypes.getWizard().next();
+            expect(deliveryPipeline.getNotificationTargets().count()).toBe(1);
+          });
+
+          it('should be able delete notification target', function () {
+            expect(deliveryPipeline.getNotificationTargetDeleteAction(0).isPresent()).toBe(true);
+            deliveryPipeline.getNotificationTargetDeleteAction(0).click();
+            deliveryPipeline.acknowledgeDeletion();
+            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe('You have no notification targets.');
+          });
+        });
+        //
+        // describe('Post Deploy Action', function () {
+        //
+        //   it('should have `post deploy` section', function () {
+        //     expect(deliveryPipeline.getPostDeployActionsSection().isPresent()).toBe(true);
+        //   });
+        //
+        //   it('should contain an `Add Action` link', function () {
+        //     expect(deliveryPipeline.getAddPostDeployActionButton().isPresent()).toBe(true);
+        //   });
+        //
+        //   it('should display `You have no notification targets.` message', function () {
+        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(true);
+        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
+        //   });
+        //
+        //   it('should be able to add new target', function () {
+        //     deliveryPipeline.getAddPostDeployActionButton().click();
+        //     expect(postDeployAction.getForm().isDisplayed()).toBe(true);
+        //   });
+        //
+        //   it('should be able to enter details', function () {
+        //     expect(postDeployAction.isAddActionEnabled()).toBe(false);
+        //     postDeployAction.enterPostDeployDetails(testAppName + '-pa', 'test', 'test', 'test', 'test', 'test');
+        //     expect(postDeployAction.isAddActionEnabled()).toBe(true);
+        //     postDeployAction.addAction().click();
+        //
+        //   });
+        //
+        //   it('should update table', function () {
+        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(false);
+        //   });
+        //
+        //   it('should be able delete notification target', function () {
+        //     expect(deliveryPipeline.getPostDeployActionDeleteAction().isDisplayed()).toBe(true);
+        //     deliveryPipeline.getPostDeployActionDeleteAction().click();
+        //     expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no notification targets.');
+        //   });
+        // });
+
+      });
     });
   });
 })();
