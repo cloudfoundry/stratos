@@ -156,7 +156,6 @@
   }
 
   function deleteAppIfExisting(cnsiGuid, hceCnsiGuid, appName, username, password) {
-
     var req;
     return helpers.createReqAndSession(null, username, password)
       .then(function (inReq) {
