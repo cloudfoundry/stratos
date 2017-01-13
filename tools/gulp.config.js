@@ -134,7 +134,8 @@
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/**/*.js'
+        '!' + paths.src + 'plugins/cloud-foundry/api/hce/**/*.js',
+        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js'
       ],
 
       frameworkFilesToInstrument: [
