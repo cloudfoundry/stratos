@@ -413,6 +413,9 @@
             pipeline.valid = false;
             that.model.application.project = null;
             return that.$q.reject(response);
+          })
+          .finally(function () {
+            that.updateActions();
           });
       } else {
         this.model.application.project = null;
@@ -537,13 +540,17 @@
      * @description invoked when the application state changes, so we can update action visibility
      */
     onAppStateChange: function () {
+      this.updateActions();
+      this.onAppRoutesChange();
+    },
+
+    updateActions: function () {
       var that = this;
       angular.forEach(this.appActions, function (appAction) {
         appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
       this.visibleActions = _.find(this.appActions, { hidden: false });
-      this.onAppRoutesChange();
     },
 
     /**
