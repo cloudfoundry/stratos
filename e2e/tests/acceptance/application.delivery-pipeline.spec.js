@@ -348,7 +348,7 @@
 
           it('should display `You have no notification targets.` message', function () {
             expect(deliveryPipeline.getNoNotificationTargetsMessage().isDisplayed()).toBe(true);
-            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe('You have no notification targets.');
+            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe(deliveryPipeline.getNoTargetsMessage());
           });
 
           it('should be able to add new target', function () {
@@ -372,7 +372,6 @@
             expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(false);
             registerNotificationTarget.enterNotificationTargetDetails(testAppName + '-nf', 'test', 'test');
             expect(notificationTargetTypes.getWizard().isNextEnabled()).toBe(true);
-
           });
 
           it('should update table', function () {
@@ -384,7 +383,7 @@
             expect(deliveryPipeline.getNotificationTargetDeleteAction(0).isPresent()).toBe(true);
             deliveryPipeline.getNotificationTargetDeleteAction(0).click();
             deliveryPipeline.acknowledgeDeletion();
-            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe('You have no notification targets.');
+            expect(deliveryPipeline.getNoNotificationTargetsMessage().getText()).toBe(deliveryPipeline.getNoTargetsMessage());
           });
         });
 
@@ -400,7 +399,7 @@
 
           it('should display `You have no notification targets.` message', function () {
             expect(deliveryPipeline.getNoPostDeployActionsMessage().isDisplayed()).toBe(true);
-            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
+            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe(deliveryPipeline.getNoActionsMessage());
           });
 
           it('should be able to add new target', function () {
@@ -413,7 +412,6 @@
             postDeployAction.enterPostDeployDetails(testAppName + '-pa', 'test', 'test', 'test', 'test', 'test');
             expect(postDeployAction.isAddActionEnabled()).toBe(true);
             postDeployAction.addAction().click();
-
           });
 
           it('should update table', function () {
@@ -424,7 +422,7 @@
             expect(deliveryPipeline.getPostDeployActionDeleteAction(0).isDisplayed()).toBe(true);
             deliveryPipeline.getPostDeployActionDeleteAction(0).click();
             deliveryPipeline.acknowledgeDeletion();
-            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe('You have no post deploy actions.');
+            expect(deliveryPipeline.getNoPostDeployActionsMessage().getText()).toBe(deliveryPipeline.getNoActionsMessage());
           });
         });
 

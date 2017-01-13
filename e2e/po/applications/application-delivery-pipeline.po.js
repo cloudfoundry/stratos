@@ -26,11 +26,13 @@
     getNotificationTargets: getNotificationTargets,
     getNotificationTargetDeleteAction: getNotificationTargetDeleteAction,
     getNoNotificationTargetsMessage: getNoNotificationTargetsMessage,
+    getNoTargetsMessage: getNoTargetsMessage,
 
     getPostDeployActionsSection: getPostDeployActionsSection,
     getPostDeployActions: getPostDeployActions,
     getPostDeployActionDeleteAction: getPostDeployActionDeleteAction,
     getNoPostDeployActionsMessage: getNoPostDeployActionsMessage,
+    getNoActionsMessage: getNoActionsMesasge,
 
     getVCSServer: getVCSServer,
     isVCSServerEnabled: isVCSServerEnabled,
@@ -114,6 +116,10 @@
     return element(by.id('notification-targets'));
   }
 
+  function getNoTargetsMessage() {
+    return 'You have no notification targets.';
+  }
+
   function getPostDeployActionsSection() {
     return element(by.id('post-deploy-actions'));
   }
@@ -150,8 +156,8 @@
     return getPostDeployActionsSection().all(by.repeater('postDeployAction in applicationDeliveryPipelineCtrl.postDeployActions'));
   }
 
-  function getPostDeployForm() {
-    return helpers.getForm('form.postDeployForm');
+  function getNoActionsMesasge() {
+    return 'You have no post deploy actions.';
   }
 
   function getNoPostDeployActionsMessage() {
