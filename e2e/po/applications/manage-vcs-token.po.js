@@ -25,7 +25,8 @@
 
     getRowWithTokenName: getRowWithTokenName,
     isTokenValid: isTokenValid,
-    isTokenInvalid: isTokenInvalid
+    isTokenInvalid: isTokenInvalid,
+    getTokenError: getTokenError
   };
 
   function doneButton() {
@@ -74,6 +75,10 @@
 
   function isTokenInvalid(row) {
     return helpers.getTableRowAt(getTokensTable(), row).element(by.css('.helion-icon-Critical_L')).isPresent();
+  }
+
+  function getTokenError(row) {
+    return helpers.getTableRowAt(getTokensTable(), row + 1).element(by.css('.table-inline-message')).getText();
   }
 
   function isTokenValid(row) {

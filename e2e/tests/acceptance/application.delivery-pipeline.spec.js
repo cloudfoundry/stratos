@@ -106,7 +106,7 @@
         });
 
         it('Should enable form submission with valid token', function () {
-          registerVcsToken.enterToken(helpers.getGithubTokenName() + '-test', helpers.getGithubToken());
+          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
           expect(registerVcsToken.tokenFormFields().get(1).getAttribute('class')).toContain('ng-valid');
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
         });
@@ -189,11 +189,14 @@
         });
 
         it('should rename successfully with valid information', function () {
-          renameVcsToken.enterToken(helpers.getGithubTokenName());
+          renameVcsToken.enterToken(helpers.getGithubNewTokenName());
           expect(renameVcsToken.isSaveEnabled()).toBe(true);
 
           renameVcsToken.saveButton().click();
-          helpers.checkAndCloseToast(/Personal Access Token .* successfully renamed/);
+
+          var toastText = new RegExp("Personal Access Token '[^']+' successfully renamed to '" +
+            helpers.getGithubNewTokenName() + "'");
+          helpers.checkAndCloseToast(toastText);
 
           // close manage-vcs screen
           manageVcsToken.doneButton().click();

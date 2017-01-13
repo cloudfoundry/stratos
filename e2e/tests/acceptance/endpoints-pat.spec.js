@@ -28,6 +28,7 @@
     afterAll(function () {
       return Q.all([
         appSetupHelper.deletePat(helpers.getGithubInvalidTokenName()),
+        appSetupHelper.deletePat(helpers.getGithubNewTokenName()),
         appSetupHelper.deletePat(helpers.getGithubTokenName())
       ]);
     });
@@ -105,6 +106,7 @@
         registerVcsToken.enterToken(helpers.getGithubInvalidTokenName(), helpers.getGithubInvalidToken());
         expect(registerVcsToken.isRegisterTokenEnabled()).toBe(true);
         registerVcsToken.registerTokenButton().click();
+        helpers.checkAndCloseToast(/Personal Access Token .* successfully registered/);
       });
 
       it('should `critical` state in the `Endpoints Dashboard`', function () {
@@ -132,10 +134,11 @@
           expect(manageVcsToken.addNewTokenButton().isDisplayed()).toBe(true);
         });
 
-        it('should have a `critical` icon for the invalid token', function () {
+        it('should have a `critical` icon for the invalid token and explain the problem', function () {
           manageVcsToken.getRowWithTokenName(helpers.getGithubInvalidTokenName())
             .then(function (tokenRow) {
               expect(manageVcsToken.isTokenInvalid(tokenRow)).toBe(true);
+              expect(manageVcsToken.getTokenError(tokenRow)).toMatch(/lacks the following required scopes/);
             });
         });
 
@@ -156,6 +159,7 @@
 
         it('should be add new token and increment token cound', function () {
           registerVcsToken.registerTokenButton().click();
+          helpers.checkAndCloseToast(/Personal Access Token .* successfully registered/);
           expect(manageVcsToken.getTokensCount()).toBe(2);
         });
 
@@ -188,6 +192,7 @@
 
           it('should delete token after confirming model', function () {
             manageVcsToken.confirmModal();
+            helpers.checkAndCloseToast(/Personal Access Token .* successfully deleted/);
             expect(manageVcsToken.getTokensCount()).toBe(1);
           });
 
@@ -206,15 +211,18 @@
           });
 
           it('should rename successfully with valid information', function () {
-            renameVcsToken.enterToken(helpers.getGithubTokenName());
+            renameVcsToken.enterToken(helpers.getGithubNewTokenName());
             expect(renameVcsToken.isSaveEnabled()).toBe(true);
             renameVcsToken.saveButton().click();
+            var toastText = new RegExp("Personal Access Token '[^']+' successfully renamed to '" +
+              helpers.getGithubNewTokenName() + "'");
+            helpers.checkAndCloseToast(toastText);
           });
         });
 
         it('should not allow addition of duplicate token', function () {
           manageVcsToken.addNewTokenButton().click();
-          registerVcsToken.enterToken(helpers.getGithubTokenName(), helpers.getGithubToken());
+          registerVcsToken.enterToken(helpers.getGithubNewTokenName(), helpers.getGithubToken());
           expect(registerVcsToken.isRegisterTokenEnabled()).toBe(false);
         });
 
