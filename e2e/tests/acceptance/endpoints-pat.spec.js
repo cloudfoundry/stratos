@@ -16,12 +16,15 @@
 
     var gitHubRowIndex;
 
-    function resetToLoggedIn(stateSetter, isAdmin) {
-      return browser.driver.wait(stateSetter())
+    function resetToLoggedIn() {
+      var stateSetter = resetTo.resetAllCnsi().then(function () {
+        return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
+      });
+      return browser.driver.wait(stateSetter)
         .then(function () {
           helpers.setBrowserNormal();
           helpers.loadApp();
-          return isAdmin ? loginPage.loginAsAdmin() : loginPage.loginAsNonAdmin();
+          return loginPage.loginAsNonAdmin();
         });
     }
 
@@ -36,7 +39,7 @@
     describe('PAT Management', function () {
 
       beforeAll(function () {
-        resetToLoggedIn(resetTo.resetAllCnsi, false);
+        resetToLoggedIn();
       });
 
       it('should be the Endpoints Dashboard page', function () {
