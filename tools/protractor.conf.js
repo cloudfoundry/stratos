@@ -112,6 +112,7 @@
       github: {
         valid: {
           tokenName: 'e2e-test',
+          newTokenName: 'e2e-test-renamed',
           token: 'my-pat-token'
         },
         repository: 'node-env',

@@ -24,6 +24,7 @@
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
   var githubTokenName = browser.params.github.valid.tokenName;
+  var githubNewTokenName = browser.params.github.valid.newTokenName;
   var githubToken = browser.params.github.valid.token;
   var githubRepository = browser.params.github.repository;
   var githubInvalidTokenName = browser.params.github.invalid.tokenName;
@@ -44,6 +45,7 @@
     getPassword: getPassword,
 
     getGithubTokenName: getGithubTokenName,
+    getGithubNewTokenName: getGithubNewTokenName,
     getGithubToken: getGithubToken,
     getGithubInvalidTokenName: getGithubInvalidTokenName,
     getGithubInvalidToken: getGithubInvalidToken,
@@ -131,6 +133,10 @@
 
   function getGithubInvalidToken() {
     return githubInvalidToken;
+  }
+
+  function getGithubNewTokenName() {
+    return githubNewTokenName;
   }
 
   function getGithubRepository() {

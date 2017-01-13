@@ -26,27 +26,24 @@
     describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints)', function () {
       describe('As Admin', function () {
 
-        /* eslint-disable no-warning-comments */
-        // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
-        // describe('No registered endpoints', function () {
-        //   beforeAll(function () {
-        //     resetToLoggedIn(resetTo.removeAllCnsi, true);
-        //   });
-        //
-        //   it('Should reach endpoints dashboard after log in', function () {
-        //     endpointsPage.isEndpoints().then(function (isEndpoints) {
-        //       expect(isEndpoints).toBe(true);
-        //     });
-        //     expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
-        //     expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
-        //   });
-        //
-        //   it('should show register button', function () {
-        //     expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
-        //   });
-        //
-        // });
-        /* eslint-enable no-warning-comments */
+        describe('No registered endpoints', function () {
+          beforeAll(function () {
+            resetToLoggedIn(resetTo.removeAllCnsi, true);
+          });
+
+          it('Should reach endpoints dashboard after log in', function () {
+            endpointsPage.isEndpoints().then(function (isEndpoints) {
+              expect(isEndpoints).toBe(true);
+            });
+            expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+            expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+          });
+
+          it('should show register button', function () {
+            expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
+          });
+
+        });
 
         describe('Some registered endpoints', function () {
           beforeAll(function () {
@@ -156,11 +153,6 @@
                       endpointsPage.endpointConnectLink(index).then(function (button) {
                         expect(button.isDisplayed()).toBeTruthy();
                       });
-                    } else {
-                      /* eslint-disable no-warning-comments,angular/log,no-console */
-                      // TODO: We should beef up these tests to cover the other type of endpoint
-                      console.log('Skipping tests for service with name: ', name);
-                      /* eslint-disable no-warning-comments,angular/log,no-console */
                     }
                   });
                 }
@@ -189,11 +181,8 @@
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
 
-                /* eslint-disable no-warning-comments */
-                // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
                 // No endpoints ... no table
-                // expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
-                /* eslint-enable no-warning-comments */
+                expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
               });
           });
 
@@ -201,14 +190,11 @@
             registerEndpoint.safeClose();
           });
 
-          /* eslint-disable no-warning-comments */
-          // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
-          // it('should show add form detail view when btn in welcome is pressed', function () {
-          //   endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
-          //     expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-          //   });
-          // });
-          /* eslint-enable no-warning-comments */
+          it('should show add form detail view when btn in welcome is pressed', function () {
+            endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
+              expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
+            });
+          });
 
           it('should show add form detail view when btn in tile is pressed', function () {
             endpointsPage.headerRegister().then(function () {
