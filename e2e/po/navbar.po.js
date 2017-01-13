@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var helpers = require('./helpers.po');
+
   // Navbar helpers
   module.exports = {
 
@@ -8,7 +10,11 @@
     goToView: goToView,
 
     showAccountSettings: showAccountSettings,
-    logout: logout
+    logout: logout,
+
+    toggleNavBar: toggleNavBar,
+    isIconsOnly: isIconsOnly,
+    setLabelsShown: setLabelsShown
 
   };
 
@@ -36,4 +42,21 @@
         });
       });
   }
+
+  function toggleNavBar() {
+    return element(by.css('.navbar-toggle-labels > i')).click();
+  }
+
+  function isIconsOnly() {
+    return helpers.hasClass(element(by.css('navbar nav')), 'navbar-icons-only');
+  }
+
+  function setLabelsShown() {
+    return isIconsOnly().then(function (iconsOnly) {
+      if (iconsOnly) {
+        return toggleNavBar();
+      }
+    });
+  }
 })();
+

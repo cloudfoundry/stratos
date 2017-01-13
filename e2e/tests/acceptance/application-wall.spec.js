@@ -291,5 +291,35 @@
         });
       });
     });
+
+    describe('Changing the view', function () {
+      beforeAll(function () {
+        ngMockE2E.init();
+        // Configure HTTP responses for all wall with 500 apps
+        appWallConfig500(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+        applicationWall.setGridView();
+      });
+
+      afterAll(function () {
+        ngMockE2E.unload();
+      });
+
+      it('Should show the grid view by default', function () {
+        // Reload the app to make sure the grid view is maintained
+        helpers.loadApp();
+        expect(applicationWall.isGridView()).toBe(true);
+        expect(applicationWall.isListView()).toBe(false);
+      });
+
+      it('Should allow changing to the list view', function () {
+        expect(applicationWall.isGridView()).toBe(true);
+        applicationWall.setListView();
+        expect(applicationWall.isGridView()).toBe(false);
+        expect(applicationWall.isListView()).toBe(true);
+      });
+    });
   });
 })();
+
