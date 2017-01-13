@@ -138,13 +138,9 @@
       .element(by.css('.panel-body > span'));
   }
 
-  function getNotificationTargetsTable() {
-    return getNotificationTargetsSection().element(by.css('table'));
-  }
-
   function getNotificationTargetDeleteAction(rowIndex) {
-    return getNotificationTargetsTable().get(rowIndex)
-      .element(by.css('actions-menu')).click();
+    return getNotificationTargets().get(rowIndex)
+      .element(by.css('actions-menu'));
   }
 
   function acknowledgeDeletion() {
