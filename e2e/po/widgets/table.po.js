@@ -9,6 +9,9 @@
 
   function wrap(element) {
     return {
+      getElement: function () {
+        return element;
+      },
       getRows: _.partial(getRows, element),
       //getItem: _.partial(getItem, element),
       getData: _.partial(getData, element),
@@ -32,4 +35,5 @@
       });
     });
   }
+
 })();

@@ -155,8 +155,10 @@
     return browser.forkNewDriverInstance(true);
   }
 
-  function loadApp() {
-    browser.manage().deleteAllCookies();
+  function loadApp(keepCookies) {
+    if (!keepCookies) {
+      browser.manage().deleteAllCookies();
+    }
     return browser.get(host);
   }
 

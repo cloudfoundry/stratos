@@ -13,6 +13,12 @@
   var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('../../po/models/cf-model.po');
   var inputText = require('../../po/widgets/input-text.po');
+  var orgsAndSpaces = require('../../po/endpoints/endpoints-org-spaces.po');
+  var navbar = require('../../po/navbar.po');
+  var Q = require('../../../tools/node_modules/q');
+  var table = require('../../po/widgets/table.po');
+  var actionMenu = require('../../po/widgets/actions-menu.po');
+  var confirmModal = require('../../po/widgets/confirmation-modal.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -31,6 +37,7 @@
 
     var testConfig, testApp;
     var testTime = (new Date()).getTime();
+    var appsToDelete = [];
 
     beforeAll(function () {
       // Setup the test environment.
@@ -41,12 +48,21 @@
     });
 
     // Cleanup of test application created by tests
+    afterAll(function () {
+      // Delete the apps at the end of all of the tests
+      return Q.all(_.map(appsToDelete, function (appName) {
+        return appSetupHelper.deleteApp(appName);
+      }));
+    });
+
     beforeEach(function () {
       testApp = undefined;
     });
 
     afterEach(function () {
-      return appSetupHelper.deleteApp(testApp);
+      if (testApp) {
+        appsToDelete.push(testApp);
+      }
     });
 
     it('Add Application button should be visible', function () {
@@ -272,5 +288,72 @@
       addAppWizard.getWizard().cancel();
     });
 
+    describe('check application on the cf endpoints dashboard', function () {
+
+      var serviceName = 'acceptance_e2e_service_' + testTime;
+
+      beforeAll(function () {
+        // Load the app again - keep the cookies so we don't have to login
+        // This is a workaround for a Bug
+        helpers.loadApp(true);
+        navbar.goToView('endpoint.clusters');
+        orgsAndSpaces.goToOrg('e2e');
+        orgsAndSpaces.goToSpace('e2e');
+      });
+
+      it('should show the org/space view and its tabs', function () {
+        // Walk through each of the tabs on the space page
+        application.getTabs().then(function (tabs) {
+          _.each(tabs, function (tab) {
+            tab.click();
+          });
+        });
+      });
+
+      it('should contain the service that was created', function () {
+        // Go to Services tab
+        application.getTabs().get(1).click();
+        // Check that we have at least one service
+        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
+        serviceInstances.getRows().then(function (rows) {
+          expect(rows.length).toBeGreaterThan(0);
+        });
+        // Table should contain our service
+        var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
+          return elem.getText().then(function (text) {
+            return text === serviceName;
+          });
+        }).first();
+        expect(column).toBeDefined();
+      });
+
+      it('should allow the serice to be detached and then deleted', function () {
+        // Go to Services tab
+        application.getTabs().get(1).click();
+        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
+        serviceInstances.getData().then(function (rows) {
+          var index = _.findIndex(rows, function (row) {
+            return row[0] === serviceName;
+          });
+
+          // Detach Service
+          var columnMenu = actionMenu.wrap(serviceInstances.getItem(index, 4));
+          columnMenu.click();
+          columnMenu.clickItem(1);
+          expect(confirmModal.getTitle()).toBe('Detach Service');
+          confirmModal.commit();
+
+          // Delete Service
+          columnMenu.click();
+          columnMenu.clickItem(0);
+          expect(confirmModal.getTitle()).toBe('Delete Service');
+          confirmModal.commit();
+
+          serviceInstances.getData().then(function (newRows) {
+            expect(newRows.length).toBe(rows.length - 1);
+          });
+        });
+      });
+    });
   });
 })();

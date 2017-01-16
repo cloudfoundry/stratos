@@ -12,6 +12,9 @@
   var actionMenu = require('../../po/widgets/actions-menu.po');
   var confirmModal = require('../../po/widgets/confirmation-modal.po');
   var editApplicationModal = require('../../po/applications/edit-application.po');
+  var navbar = require('../../po/navbar.po');
+  var orgsAndSpaces = require('../../po/endpoints/endpoints-org-spaces.po');
+  var helpers = require('../../po/helpers.po');
 
   describe('Application View', function () {
     //var testConfig;
@@ -130,6 +133,86 @@
             });
           });
         });
+
+        describe('Application route should show up on CF Endpoints view', function () {
+
+          var appRouteName = hostName + '.' + domain;
+          var appViewUrl;
+          beforeAll(function () {
+            browser.getCurrentUrl().then(function (url) {
+              appViewUrl = url;
+            });
+            helpers.loadApp(true);
+            navbar.goToView('endpoint.clusters');
+            orgsAndSpaces.goToOrg('e2e');
+            orgsAndSpaces.goToSpace('e2e');
+            // Go to Routes tab
+            application.getTabs().get(2).click();
+          });
+
+          // After all tests have run, return to the app view page
+          afterAll(function () {
+            return browser.get(appViewUrl);
+          });
+
+          it('routes table should include our app route', function () {
+            // Note: Even though its routes, the class is services
+            var routes = table.wrap(element(by.css('.space-services-table table')));
+            routes.getRows().then(function (rows) {
+              expect(rows.length).toBeGreaterThan(0);
+            });
+            // Table should contain our service
+            var column = routes.getElement().all(by.css('td')).filter(function (elem) {
+              return elem.getText().then(function (text) {
+                return text === appRouteName;
+              });
+            }).first();
+            expect(column).toBeDefined();
+          });
+
+          it('should allow the route to be un-mapped and then deleted', function () {
+            var routes = table.wrap(element(by.css('.space-services-table table')));
+
+            // Click the "Show More" button in case there are many routes
+            var showMoreButtonLink = element(by.css('.space-services-table tfoot > tr > td > a'));
+            showMoreButtonLink.isDisplayed().then(function (visible) {
+              if (visible) {
+                showMoreButtonLink.click();
+              }
+            });
+
+            routes.getData().then(function (rows) {
+              var index = _.findIndex(rows, function (row) {
+                return row[0] === appRouteName;
+              });
+
+              // Unmap Route
+              var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
+              columnMenu.click();
+              columnMenu.clickItem(1);
+              confirmModal.waitForModal();
+              expect(confirmModal.getTitle()).toBe('Unmap Route from Application');
+              confirmModal.commit();
+              confirmModal.waitUntilNotPresent();
+
+              // Delete Route
+              columnMenu.click();
+              columnMenu.clickItem(0);
+              confirmModal.waitForModal();
+              expect(confirmModal.getTitle()).toBe('Delete Route');
+              confirmModal.commit();
+              confirmModal.waitUntilNotPresent();
+
+              if (rows.length === 1) {
+                expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no routes');
+              } else {
+                routes.getData().then(function (newRows) {
+                  expect(newRows.length).toBe(rows.length - 1);
+                });
+              }
+            });
+          });
+        });
       });
 
       describe('Edit Application', function () {
@@ -239,6 +322,7 @@
         });
 
       });
+
     });
   });
 })();
