@@ -292,7 +292,7 @@
           });
 
           it('should mention token', function () {
-            expect(deliveryPipeline.getTokenLink().getText()).toBe(helpers.getGithubTokenName().toUpperCase());
+            expect(deliveryPipeline.getTokenLink().getText()).toBe(helpers.getGithubNewTokenName().toUpperCase());
           });
 
           it('should display `Manage VCS` token detail view when clicking on token link', function () {
