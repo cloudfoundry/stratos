@@ -10,7 +10,7 @@
   /**
    * @memberof cloud-foundry.view.applications
    * @name deliveryPipelineStatus
-   * @description A dierctive for showing the delivery pipeline status
+   * @description A directive for showing the delivery pipeline status
    * @returns {object} The delivery-pipeline-status directive definition object
    */
   function deliveryPipelineStatus() {

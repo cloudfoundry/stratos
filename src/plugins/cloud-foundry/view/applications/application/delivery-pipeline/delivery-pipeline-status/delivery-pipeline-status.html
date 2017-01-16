@@ -1,11 +1,21 @@
 <div ng-if="applicationSetupPipelineCtrl.pipeline && !applicationSetupPipelineCtrl.pipeline.fetching">
-  <div ng-if="!applicationSetupPipelineCtrl.pipeline.valid && applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
+  <div ng-if="applicationSetupPipelineCtrl.pipeline.forbidden" class="message-box message-box-no-bg">
     <p>
       <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
-      <h3 translate>The {{ OEM_CONFIG.CODE_ENGINE }} associated with this application is not registered with the Console.</h3>
+      <h3 translate>You do not have permission to view this pipeline.</h3>
     </p>
   </div>
-  <div ng-if="!applicationSetupPipelineCtrl.pipeline.valid && !applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
+  <div ng-if="!applicationSetupPipelineCtrl.pipeline.forbidden
+              && !applicationSetupPipelineCtrl.pipeline.valid
+              && applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
+    <p>
+      <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
+      <h3 translate>The {{ OEM_CONFIG.CODE_ENGINE }} associated with this application is not registered with the Consoleand/or connected with the Console.</h3>
+    </p>
+  </div>
+  <div ng-if="!applicationSetupPipelineCtrl.pipeline.forbidden
+              && !applicationSetupPipelineCtrl.pipeline.valid
+              && !applicationSetupPipelineCtrl.pipeline.hce_api_url" class="message-box message-box-no-bg">
     <p>
       <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
       <h3 translate>You have not set up a delivery pipeline</h3>
