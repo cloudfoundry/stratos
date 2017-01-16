@@ -113,6 +113,7 @@
         pipeline: {
           fetching: false,
           valid: false,
+          forbidden: false,
           hceCnsi: undefined,
           hceServiceGuid: undefined,
           projectId: undefined

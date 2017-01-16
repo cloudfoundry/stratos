@@ -177,13 +177,18 @@
         return that.tryDeleteEachRoute();
       });
 
-      return this.$q.all([
-        removeAndDeleteRoutes,
-        this.deleteServiceBindings(),
-        this.deleteProject()
-      ]).then(function () {
-        return that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid);
-      });
+      // May not be able to delete the project (HCE user is project developer and not project admin) so ensure
+      // we attempt this up front
+      return this.deleteProject()
+        .then(function () {
+          return that.$q.all([
+            removeAndDeleteRoutes,
+            that.deleteServiceBindings()
+          ]);
+        })
+        .then(function () {
+          return that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid);
+        });
     },
 
     /**
@@ -355,10 +360,11 @@
     deleteProject: function () {
       if (this.appModel.application.project) {
         return this.hceModel.removeProject(this.hceCnsiGuid, this.appModel.application.project.id);
+      } else if (_.get(this.appModel.application.pipeline, 'forbidden')) {
+        // No project due to forbidden request? Ensure we stop the delete chain
+        return this.$q.reject('You do not have permission to delete the associated HCE project');
       } else {
-        var deferred = this.$q.defer();
-        deferred.resolve();
-        return deferred.promise;
+        return this.$q.resolve();
       }
     },
 
