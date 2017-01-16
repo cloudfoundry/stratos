@@ -8,8 +8,20 @@
     commit: commit,
     getTitle: getTitle,
     getBody: getBody,
-    getElement: getElement
+    getElement: getElement,
+    waitForModal: waitForModal,
+    waitUntilNotPresent: waitUntilNotPresent
   };
+
+  function waitForModal() {
+    var until = protractor.ExpectedConditions;
+    return browser.wait(until.presenceOf(getElement()), 5000);
+  }
+
+  function waitUntilNotPresent() {
+    var until = protractor.ExpectedConditions;
+    return browser.wait(until.not(until.presenceOf(getElement())), 5000);
+  }
 
   function getElement() {
     return element(by.css('.modal.confirm-dialog'));
