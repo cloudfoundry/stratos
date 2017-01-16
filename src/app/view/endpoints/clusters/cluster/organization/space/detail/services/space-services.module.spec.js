@@ -16,8 +16,7 @@
       metadata: {
         guid: 'serviceGuid'
       },
-      entity: {
-      }
+      entity: {}
     };
     var space = {
       instances: [service],
@@ -26,7 +25,8 @@
           metadata: {
             guid: spaceGuid
           }
-        }
+        },
+        totalServiceInstances: 1
       }
     };
 
@@ -86,7 +86,7 @@
 
     it('update actions', function () {
       createController(space);
-      $controller.visibleServiceInstances = [ service ];
+      $controller.visibleServiceInstances = [service];
       $scope.$digest();
 
     });
