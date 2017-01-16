@@ -85,7 +85,7 @@
 
     it('update actions', function () {
       createController(space);
-      $controller.visibleRoutes = [ route ];
+      $controller.visibleRoutes = [route];
       $scope.$digest();
 
     });
