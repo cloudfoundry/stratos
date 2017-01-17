@@ -424,7 +424,7 @@
             if (u.entity.username) {
               return u.entity.username.toLowerCase();
             }
-            return u.entity.username;
+            return u.metadata.guid.toLowerCase();
           });
         });
       }
