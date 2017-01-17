@@ -16,6 +16,7 @@
         guid: 'routeGuid'
       },
       entity: {
+        host: 'www.foo.com',
         apps: []
       }
     };
