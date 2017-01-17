@@ -8,7 +8,7 @@
   var inputText = require('../../po/widgets/input-text.po');
   var loginPage = require('../../po/login-page.po');
 
-  describe('Application Log Stream', function () {
+  fdescribe('Application Log Stream', function () {
 
     var haveAppWithLogStream = false;
 
@@ -87,6 +87,8 @@
         expect(helpers.hasClass(logStatusIcon, 'helion-icon-Active_S')).toBe(true);
       });
 
+      /*
+
       it('should stop scrolling when manually scrolled', function () {
         // Move the scroll to the top to stop auto-scroll
         browser.executeScript('$(".log-container").scrollTop(0);');
@@ -104,6 +106,8 @@
         var nextScroll = getLogViewerScrollTop();
         expect(initialScroll).toBeLessThan(nextScroll);
       });
+      
+      */
     });
   });
 })();
