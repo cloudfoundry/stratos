@@ -8,7 +8,7 @@
   var inputText = require('../../po/widgets/input-text.po');
   var loginPage = require('../../po/login-page.po');
 
-  fdescribe('Application Log Stream', function () {
+  describe('Application Log Stream', function () {
 
     var haveAppWithLogStream = false;
 
