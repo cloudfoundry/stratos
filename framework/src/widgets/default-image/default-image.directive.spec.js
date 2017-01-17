@@ -28,7 +28,7 @@
       $scope.$destroy();
     });
 
-    it('should use defalt src when no src specified', function () {
+    it('should use default src when no src specified', function () {
       var markupEmpty = '<img ng-src="" default-image default-image-src="images/brand_product_family_logo.png"></img>';
       create(markupEmpty);
       expect(element.attr('src')).toBe('images/brand_product_family_logo.png');
