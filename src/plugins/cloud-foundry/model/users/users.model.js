@@ -72,6 +72,14 @@
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
+        }).then(function (users) {
+          // Pre-sort users to avoid smart-table flicker in the endpoints dashboard
+          return _.sortBy(users, function (u) {
+            if (u.entity.username) {
+              return u.entity.username.toLowerCase();
+            }
+            return u.entity.username;
+          });
         });
     },
 
