@@ -342,13 +342,14 @@
           columnMenu.clickItem(1);
           expect(confirmModal.getTitle()).toBe('Detach Service');
           confirmModal.commit();
+          helpers.checkAndCloseToast(/Service instance successfully detached/);
 
           // Delete Service
           columnMenu.click();
           columnMenu.clickItem(0);
           expect(confirmModal.getTitle()).toBe('Delete Service');
           confirmModal.commit();
-
+          helpers.checkAndCloseToast(/Service instance successfully deleted/);
           if (rows.length === 1) {
             expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no service instances');
           } else {
