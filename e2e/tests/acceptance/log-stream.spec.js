@@ -106,7 +106,6 @@
         var nextScroll = getLogViewerScrollTop();
         expect(initialScroll).toBeLessThan(nextScroll);
       });
-      
       */
     });
   });

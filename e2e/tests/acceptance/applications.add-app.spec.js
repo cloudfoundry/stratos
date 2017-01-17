@@ -349,9 +349,13 @@
           expect(confirmModal.getTitle()).toBe('Delete Service');
           confirmModal.commit();
 
-          serviceInstances.getData().then(function (newRows) {
-            expect(newRows.length).toBe(rows.length - 1);
-          });
+          if (rows.length === 1) {
+            expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no service instances');
+          } else {
+            serviceInstances.getData().then(function (newRows) {
+              expect(newRows.length).toBe(rows.length - 1);
+            });
+          }
         });
       });
     });
