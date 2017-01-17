@@ -63,6 +63,7 @@
       if (angular.isUndefined(that.spaceDetail().instances)) {
         return that.update();
       }
+      that.updateLocalServiceInstances();
       return $q.resolve();
     }
 
