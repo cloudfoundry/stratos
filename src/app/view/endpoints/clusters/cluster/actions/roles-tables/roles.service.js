@@ -419,7 +419,13 @@
               allUsers[aUser.metadata.guid] = aUser;
             });
           });
-          return _.values(allUsers);
+          // Pre-sort users to avoid smart-table flicker in the endpoints dashboard
+          return _.sortBy(_.values(allUsers), function (u) {
+            if (u.entity.username) {
+              return u.entity.username.toLowerCase();
+            }
+            return u.entity.username;
+          });
         });
       }
       return promiseForUsers;
