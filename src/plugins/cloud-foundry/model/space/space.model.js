@@ -216,7 +216,7 @@
     /**
      * @function uncacheAllServiceInstancesForSpace
      * @memberof cloud-foundry.model.space
-     * @description uncache all route instances for a space
+     * @description uncache all service instances for a space
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @public
