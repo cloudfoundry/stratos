@@ -1,0 +1,45 @@
+<div class="panel panel-default summary">
+  <div class="panel-heading action-header firehose-header">
+    <span class="log-stream-title" translate>Firehose Stream</span>
+    <span ng-if="clusterFirehoseController.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
+          ng-class="{
+                'helion-icon-Active_S text-primary': clusterFirehoseController.streamingStatus === 1,
+                'helion-icon-Critical_S text-danger': clusterFirehoseController.streamingStatus === 3
+              }"></span>
+    <bounce-spinner class="app-log-stream-indicator" classes="bounce-spinner-sm" ng-if="clusterFirehoseController.streamingStatus === 2"></bounce-spinner>
+    <div class="firehose-filters">
+      <checkbox-input ng-model="clusterFirehoseController.show.api"
+                      input-label="{{'API' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.apps"
+                      input-label="{{'Apps' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.metrics"
+                      input-label="{{'Metrics' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.counters"
+                      input-label="{{'Counters' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.errors"
+                      input-label="{{'Errors' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.containerMetrics"
+                      input-label="{{'Container Metrics' | translate}}">
+      </checkbox-input>
+      <checkbox-input ng-model="clusterFirehoseController.show.others"
+                      input-label="{{'Others' | translate}}">
+      </checkbox-input>
+    </div>
+    <div class="scroll-to-bottom btn btn-link" ng-click="clusterFirehoseController.autoScroll()">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Scroll to bottom</span>
+    </div>
+  </div>
+  <log-viewer class="log-viewer"
+              auto-scroll-on="clusterFirehoseController.autoScrollOn"
+              websocket-url="clusterFirehoseController.websocketUrl"
+              colorize="true"
+              filter="clusterFirehoseController.jsonFilter"
+              streaming="clusterFirehoseController.streamingStatus"
+              capacity-bytes="5242880"></log-viewer>
+</div>

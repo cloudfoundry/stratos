@@ -73,6 +73,7 @@
     return {
       chainStateResolve: chainStateResolve,
       getClusterEndpoint: getClusterEndpoint,
+      bytesToHumanSize: bytesToHumanSize,
       mbToHumanSize: mbToHumanSize,
       retryRequest: retryRequest,
       runInSequence: runInSequence,
@@ -157,6 +158,28 @@
         return floored;
       }
       return fixed;
+    }
+
+    function bytesToHumanSize(sizeB) {
+      if (angular.isUndefined(sizeB)) {
+        return '';
+      }
+      if (sizeB === -1) {
+        return '∞';
+      }
+      if (sizeB >= 1099511627776) {
+        return precisionIfUseful(sizeB / 1099511627776) + ' TB';
+      }
+      if (sizeB >= 1073741824) {
+        return precisionIfUseful(sizeB / 1073741824) + ' GB';
+      }
+      if (sizeB >= 1048576) {
+        return precisionIfUseful(sizeB / 1048576) + ' MB';
+      }
+      if (sizeB >= 1024) {
+        return precisionIfUseful(sizeB / 1024) + ' kB';
+      }
+      return precisionIfUseful(sizeB) + ' B';
     }
 
     function mbToHumanSize(sizeMb) {

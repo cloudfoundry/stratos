@@ -1,0 +1,32 @@
+.log-viewer {
+  width: 100%;
+  height: 500px;
+}
+
+.firehose-header {
+  display: flex;
+  flex-flow: row wrap;
+
+  .app-log-stream-indicator {
+    width: 45px;
+  }
+
+  .log-stream-title {
+    margin-right: $padding-small-horizontal;
+  }
+
+  .firehose-filters {
+    display: flex;
+    flex-flow: row wrap;
+    flex: 1 1 0;
+    justify-content: space-around;
+    checkbox-input {
+
+    }
+  }
+
+  .scroll-to-bottom {
+
+  }
+
+}

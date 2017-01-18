@@ -1,6 +1,7 @@
 @import 'organization-tile/organization-tile',
-        'actions/cluster-actions.scss',
-        'actions/create-space.scss';
+        'actions/cluster-actions',
+        'actions/create-space',
+        'firehose/cluster-detail.firehose';
 
 .cluster-detail {
 
