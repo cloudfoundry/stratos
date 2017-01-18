@@ -17,6 +17,16 @@
     '../e2e/tests/acceptance/log-stream.spec.js'
   ];
 
+  var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+
+  var reporter = new HtmlScreenshotReporter({
+    dest: 'tests/screenshots',
+    filename: 'test-report.html',
+    ignoreSkippedSpecs: true,
+    captureOnlyFailedSpecs: true,
+    showQuickLinks: true
+  });
+
   exports.config = {
 
     suites: {
@@ -128,6 +138,12 @@
       }
     },
 
+    beforeLaunch: function () {
+      return new Promise(function (resolve) {
+        reporter.beforeLaunch(resolve);
+      });
+    },
+
     onPrepare: function () {
       // // Not quite sure we need this, could be helpful.
       // var jasmineReporters = require('jasmine-reporters');
@@ -153,6 +169,8 @@
         }]);
       };
 
+      jasmine.getEnv().addReporter(reporter);
+
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
       // Optional. Really nice to see the progress of the tests while executing
@@ -162,6 +180,12 @@
         displayPendingSummary: false,
         displayStacktrace: 'specs'
       }));
+    },
+
+    afterLaunch: function (exitCode) {
+      return new Promise(function (resolve) {
+        reporter.afterLaunch(resolve.bind(this, exitCode));
+      });
     },
 
     jasmineNodeOpts: {
