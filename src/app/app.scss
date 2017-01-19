@@ -12,3 +12,11 @@ body {
   height: 100%;
   overflow: hidden;
 }
+
+.i18n-missing {
+  color: red;
+  border: 2px dotted red;
+  padding: 0 10px;
+  background-color: beige;
+  border-radius: 4px;
+}

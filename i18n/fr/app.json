@@ -1,0 +1,8 @@
+{
+  "app": {
+    "state": {
+      "deployed": "Le Deployed",
+      "incomplete": "L'Incomplete"
+    }
+  }
+}

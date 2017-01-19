@@ -1,10 +1,11 @@
 <gallery-card card-data="applicationGalleryCardCtrl.cardData"
   on-card-click="applicationGalleryCardCtrl.goToApp()">
   <dl class="dl-horizontal">
-    <dt translate class="app-status-wrapper">
+    <dt class="app-status-wrapper">
       <app-state-icon state="applicationGalleryCardCtrl.app.state.indicator"></app-state-icon>
-      {{ applicationGalleryCardCtrl.app.state.label }}
-      <span ng-if="applicationGalleryCardCtrl.app.state.subLabel">&nbsp;- {{ applicationGalleryCardCtrl.app.state.subLabel }}
+      <span translate>{{ applicationGalleryCardCtrl.app.state.label }}</span>
+      <span ng-if="applicationGalleryCardCtrl.app.state.subLabel" translate>app.state.separator</span>
+      <span ng-if="applicationGalleryCardCtrl.app.state.subLabel" translate>{{ applicationGalleryCardCtrl.app.state.subLabel }}</span>
       </span>
     </dt>
     <dd></dd>

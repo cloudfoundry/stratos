@@ -1,0 +1,8 @@
+{
+  "login": {
+    "login": "Login",
+    "username": "@:auth.username",
+    "password": "@:auth.password",
+    "authenticating": "Authentsssicating Credentials"
+  }
+}

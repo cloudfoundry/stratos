@@ -29,6 +29,7 @@
 
       files: [
         'src/lib/jquery/dist/jquery.js',
+        'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
         'src/lib/angular-mocks/angular-mocks.js',
         'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
         'tools/stackato-templates.js',
@@ -36,8 +37,17 @@
         'src/config.js',
         'src/plugins/*/plugin.config.js',
 
+        'tools/unit-test-helpers.js',
+
         'framework/**/*.html',
         'framework/theme/**/*.svg',
+        {
+          pattern: 'dist/i18n/*.json',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
         {
           pattern: 'framework/theme/images/*.png',
           watched: false,

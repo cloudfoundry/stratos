@@ -1,0 +1,19 @@
+{
+  "product": {
+    "version": "4.1",
+    "name": "Helion Stackato"
+  },
+  "company": {
+    "name": "Hewlett Packard Enterprise Company, L.P.",
+    "TERMS_OF_USE_HREF": "",
+    "PRIVACY_HREF": "",
+    "PRODUCT_FAMILY_HREF": "",
+    "COMPANY_HREF": "http://www.hpe.com",
+    "PRODUCT_CONSOLE": "Helion Stackato Web Console",
+    "CODE_ENGINE": "Code Engine",
+    "CLOUD_FOUNDRY": "Cloud Foundry",
+    "COMPANY_LOGO_HREF": "images/brand_company_logo.png",
+    "PRODUCT_FAMILY_LOGO_HREF": "",
+    "ABOUT_COMPANY_LOGO_HREF": "images/brand_company_logo.png"
+  }
+}

@@ -59,7 +59,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', gettext('Cloud Foundry'), 1, 'helion-icon-Cloud');
+      menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', 'menu.cloud-foundry', 1, 'helion-icon-Cloud');
       this.initialized.resolve();
     }
   });

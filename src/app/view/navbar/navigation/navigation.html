@@ -3,11 +3,11 @@
       ng-class="{ 'navitem-bottom': menuItem.alignBottom, active: navigationCtrl.navigationModel.menu.currentState === menuItem.baseState }">
     <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.href" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">
       <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
-      <span class="navitem-label" >{{ menuItem.text }}</span>
+      <span class="navitem-label" translate>{{ menuItem.text }}</span>
     </a>
     <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.onClick" ng-click="menuItem.onClick()">
       <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
-      <span class="navitem-label" >{{ menuItem.text }}</span>
+      <span class="navitem-label" translate>{{ menuItem.text }}</span>
     </a>
   </li>
 </ul>

@@ -61,7 +61,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 2, 'helion-icon-Inherit helion-icon-r270');
+      menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'helion-icon-Inherit helion-icon-r270');
       this.initialized.resolve();
     }
 

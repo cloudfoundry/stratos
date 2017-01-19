@@ -1,0 +1,21 @@
+{
+  "app": {
+    "state": {
+      "separator": "&nbsp;-&nbsp;",
+      "deployed": "Deployed",
+      "incomplete": "Incomplete",
+      "failed": "Staging Failed",
+      "pending": "Pending",
+      "loading": "Loading",
+      "offline": "Offline",
+      "updating":  "Offline while Updating",
+      "no_instances": "No Instances",
+      "staging": "Staging App",
+      "starting": "Starting App",
+      "online": "Online",
+      "crashed": "Crashed",
+      "crashing": "Crashing",
+      "partial": "Partially Online"
+    }
+  }
+}

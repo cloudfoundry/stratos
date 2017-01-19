@@ -17,7 +17,9 @@
       examples: '../framework/examples/',
       examplesScripts: '../framework/examples/scripts/',
       examplesDist: '../framework/examples/dist/',
-      browserSyncDist: '../dist'
+      browserSyncDist: '../dist',
+      i18n: '../i18n/',
+      i18nDist: '../dist/i18n/'
     };
 
     return {
@@ -65,6 +67,10 @@
         includeUntested: true,
         coverageVariable: '__coverage__'
       },
+
+      i18nFiles: [
+        paths.i18n + '**/*.json'
+      ],
 
       assetFiles: [
         paths.src + 'app/**/assets/**/*',

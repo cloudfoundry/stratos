@@ -57,6 +57,9 @@
    * @returns {string} The translated text
    */
   function gettext(text) {
+    /* eslint-disable no-console, angular/log*/
+    console.warn('gettext: ' + text);
+    /* eslint-enable no-console, angular/log*/
     return text;
   }
 

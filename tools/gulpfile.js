@@ -7,7 +7,6 @@
   var del = require('delete');
   var eslint = require('gulp-eslint');
   var file = require('gulp-file');
-  var gettext = require('gulp-angular-gettext');
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
@@ -29,6 +28,7 @@
   var gulpBowerFiles = require('bower-files');
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
+  var i18n = require('./gulp.i18n');
   var path = require('path');
   var fork = require('child_process').fork;
 
@@ -194,13 +194,6 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'translations' folder to 'dist'
-  gulp.task('copy:translations', function () {
-    return gulp
-      .src(config.translate.json + '**/*')
-      .pipe(gulp.dest(config.translate.dist));
-  });
-
   // Compile SCSS to CSS
   gulp.task('css', ['inject:scss'], function () {
     return gulp
@@ -276,6 +269,13 @@
       .pipe(eslint.failAfterError());
   });
 
+  gulp.task('i18n', function () {
+    return gulp.src(config.i18nFiles)
+      .pipe(i18n(gutil.env.devMode))
+      //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulp.dest(paths.i18nDist));
+  });
+
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
     var CMD = 'cd ../src/plugins && ls */*.scss';
@@ -291,26 +291,6 @@
       .pipe(gulp.dest(paths.src + 'plugins'));
   });
 
-  // Generate the POT file to be translated
-  gulp.task('translate:extract', function () {
-    /* eslint-disable no-warning-comments */
-    //TODO: Need to include framework templates + js
-    /* eslint-enable  no-warning-comments */
-    var sources = config.partials
-      .concat(config.jsSourceFiles);
-
-    return gulp.src(sources)
-      .pipe(gettext.extract(config.translate.pot))
-      .pipe(gulp.dest(config.paths.translations));
-  });
-
-  // Convert translated PO files into JSON format
-  gulp.task('translate:compile', function () {
-    return gulp.src(config.translate.po)
-      .pipe(gettext.compile(config.translate.options))
-      .pipe(gulp.dest(config.translate.js));
-  });
-
   // Gulp watch JavaScript, SCSS and HTML source files
   gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
@@ -322,6 +302,7 @@
     gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
+    gulp.watch(config.i18nFiles, ['i18n', callback]);
 
   });
 
@@ -412,11 +393,11 @@
     runSequence(
       'clean:dist',
       'plugin',
-      'translate:compile',
       'copy:framework:templates',
       'copy:js',
       'copy:lib',
       'css',
+      'i18n',
       'dev-template-cache',
       'copy:html',
       'copy:assets',
@@ -441,11 +422,11 @@
     runSequence(
       'clean:dist',
       'plugin',
-      'translate:compile',
       'copy:framework:templates',
       'js:combine',
       'copy:lib',
       'css',
+      'i18n',
       'template-cache',
       'copy:html',
       'copy:assets',

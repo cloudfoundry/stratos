@@ -1,0 +1,30 @@
+{
+  "about": "About",
+  "applications": "Applications",
+  "cloud-foundry": "Cloud Foundry",
+  "code-engine": "Code Engine",
+  "console": "Console",
+  "endpoints": "Endpoints",
+  "privacy": "privacy",
+  "terms": "Terms of Use",
+
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "next": "Next",
+    "previous": "Previous",
+    "done": "Done",
+    "add": "Add"
+  },
+  "auth": {
+    "username": "Username",
+    "password": "Password"
+  },
+  "menu": {
+    "applications": "@:applications",
+    "cloud-foundry": "@:cloud-foundry",
+    "code-engine": "@:code-engine",
+    "endpoints": "@:endpoints",
+    "about": "@:about"
+  }
+}
