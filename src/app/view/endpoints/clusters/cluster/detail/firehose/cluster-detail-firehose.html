@@ -1,45 +1,61 @@
-<div class="panel panel-default summary">
+<div class="panel panel-default summary firehose-container" ng-class="{fullscreen: firehoseCtrl.fullScreen}">
+
   <div class="panel-heading action-header firehose-header">
-    <span class="log-stream-title" translate>Firehose Stream</span>
-    <span ng-if="clusterFirehoseController.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
-          ng-class="{
-                'helion-icon-Active_S text-primary': clusterFirehoseController.streamingStatus === 1,
-                'helion-icon-Critical_S text-danger': clusterFirehoseController.streamingStatus === 3
+
+    <div class="firehose-header-left">
+      <div class="firehose-status">
+        <div class="log-stream-title" translate>Firehose Stream</div>
+        <span ng-if="firehoseCtrl.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
+              ng-class="{
+                'helion-icon-Active_S text-primary': firehoseCtrl.streamingStatus === 1,
+                'helion-icon-Critical_S text-danger': firehoseCtrl.streamingStatus === 3
               }"></span>
-    <bounce-spinner class="app-log-stream-indicator" classes="bounce-spinner-sm" ng-if="clusterFirehoseController.streamingStatus === 2"></bounce-spinner>
-    <div class="firehose-filters">
-      <checkbox-input ng-model="clusterFirehoseController.show.api"
-                      input-label="{{'API' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.apps"
-                      input-label="{{'Apps' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.metrics"
-                      input-label="{{'Metrics' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.counters"
-                      input-label="{{'Counters' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.errors"
-                      input-label="{{'Errors' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.containerMetrics"
-                      input-label="{{'Container Metrics' | translate}}">
-      </checkbox-input>
-      <checkbox-input ng-model="clusterFirehoseController.show.others"
-                      input-label="{{'Others' | translate}}">
-      </checkbox-input>
+        <bounce-spinner ng-if="firehoseCtrl.streamingStatus === 2"
+                        class="app-log-stream-indicator" classes="bounce-spinner-sm"></bounce-spinner>
+      </div>
+      <div class="firehose-filters">
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.api)"
+                        ng-model="firehoseCtrl.show.api"
+                        input-label="{{'API' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.apps)"
+                        ng-model="firehoseCtrl.show.apps"
+                        input-label="{{'Apps' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.metrics)"
+                        ng-model="firehoseCtrl.show.metrics"
+                        input-label="{{'Metrics' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.counters)"
+                        ng-model="firehoseCtrl.show.counters"
+                        input-label="{{'Counters' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.errors)"
+                        ng-model="firehoseCtrl.show.errors"
+                        input-label="{{'Errors' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.containerMetrics)"
+                        ng-model="firehoseCtrl.show.containerMetrics"
+                        input-label="{{'Container Metrics' | translate}}">
+        </checkbox-input>
+      </div>
     </div>
-    <div class="scroll-to-bottom btn btn-link" ng-click="clusterFirehoseController.autoScroll()">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
-      <span translate>Scroll to bottom</span>
+
+    <div class="firehose-header-right">
+      <span ng-click="firehoseCtrl.fullScreen = true" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
+      <span ng-click="firehoseCtrl.fullScreen = false" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+      <div class="scroll-to-bottom btn btn-link" ng-click="firehoseCtrl.autoScroll()">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Scroll to bottom</span>
+      </div>
     </div>
   </div>
+
   <log-viewer class="log-viewer"
-              auto-scroll-on="clusterFirehoseController.autoScrollOn"
-              websocket-url="clusterFirehoseController.websocketUrl"
+              auto-scroll-on="firehoseCtrl.autoScrollOn"
+              websocket-url="firehoseCtrl.websocketUrl"
               colorize="true"
-              filter="clusterFirehoseController.jsonFilter"
-              streaming="clusterFirehoseController.streamingStatus"
-              capacity-bytes="5242880"></log-viewer>
+              filter="firehoseCtrl.jsonFilter"
+              streaming="firehoseCtrl.streamingStatus"
+              capacity-bytes="1048576"></log-viewer>
 </div>

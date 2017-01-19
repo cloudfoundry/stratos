@@ -14,7 +14,7 @@
       url: '/firehose',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/firehose/cluster-detail-firehose.html',
       controller: ClusterFirehoseController,
-      controllerAs: 'clusterFirehoseController',
+      controllerAs: 'firehoseCtrl',
       ncyBreadcrumb: {
         label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name ||"..." }}',
         parent: function () {
@@ -32,10 +32,11 @@
     '$stateParams',
     '$location',
     '$log',
-    '$timeout'
+    '$timeout',
+    '$document'
   ];
 
-  function ClusterFirehoseController(base64, modelManager, utils, $scope, $stateParams, $location, $log, $timeout) {
+  function ClusterFirehoseController(base64, modelManager, utils, $scope, $stateParams, $location, $log, $timeout, $document) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -50,29 +51,36 @@
       others: true
     };
 
-    $scope.$watchCollection(function () {
-      return that.show;
-    }, function (newVal, oldVal) {
-      if (newVal === oldVal) {
-        return;
+    this.onFilterChanged = function (onOff) {
+      if (!onOff) {
+        var url = that.websocketUrl;
+        that.websocketUrl = undefined;
+        $timeout(function () {
+          that.websocketUrl = url;
+        });
       }
-      var url = that.websocketUrl;
-      that.websocketUrl = undefined;
-      $timeout(function () {
-        that.websocketUrl = url;
-      });
+    };
 
+    var handlerUnbind = $document.on('keydown', function (e) {
+      if (e.keyCode === 27 && that.fullScreen) {
+        e.stopPropagation();
+        e.preventDefault();
+        $scope.$apply(function () {
+          that.fullScreen = false;
+        });
+        return true;
+      }
+    });
+    $scope.$on('$destroy', function () {
+      handlerUnbind();
     });
 
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
     this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
       $stateParams.guid + '/apps/' + $stateParams.guid + '/stream';
 
-    // Comment this out to test log stream in gulp dev
-    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/apps/' + $stateParams.guid + '/stream';
-
     // Comment this out to test firehose stream in gulp dev
-    this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
+    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
 
     this.autoScrollOn = true; // auto-scroll by default
 
@@ -131,71 +139,96 @@
       'VERSION_CONTROL'
     ];
 
+    function processTimeStamp(eventObj) {
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(eventObj.timestamp / 1000000);
+      return coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+    }
+
+    function buildOriginString(eventObj) {
+      return '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
+    }
+
+    function handleApiEvent(eventObj) {
+      var httpStartStop = eventObj.httpStartStop;
+      var method = httpMethods[httpStartStop.method];
+      var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
+      var httpEventString = peerType + ' ' + method + ' -> ' + httpStartStop.uri +
+        ', status: ' + coloredLog(httpStartStop.statusCode, 'green') +
+        ', content length: ' + httpStartStop.contentLength +
+        ', agent: ' + httpStartStop.userAgent + '\n';
+      return processTimeStamp(eventObj) + ' ' + coloredLog(buildOriginString(eventObj), 'magenta') + ' ' + httpEventString;
+    }
+
     this.jsonFilter = function (jsonString) {
       try {
         var eventObj = angular.fromJson(jsonString);
 
-        // CF timestamps are in nanoseconds
-        var msStamp = Math.round(eventObj.timestamp / 1000000);
-        var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-
-        var origin;
         switch (eventObj.eventType) {
           case 4:
             if (!that.show.api) {
               return '';
             }
-            var httpStartStop = eventObj.httpStartStop;
-            origin = coloredLog('[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']', 'magenta');
-            var method = httpMethods[httpStartStop.method];
-            var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
-            var httpEventString = peerType + ' ' + method + ' -> ' + httpStartStop.uri +
-              ', status: ' + httpStartStop.statusCode +
-              ', content length: ' + httpStartStop.contentLength +
-              ', agent: ' + httpStartStop.userAgent + '\n';
-            return origin + ' ' + timeStamp + ': ' + httpEventString;
+            return handleApiEvent(eventObj);
           case 5:
             if (!that.show.apps) {
               return '';
             }
+            // CF timestamps are in nanoseconds
+            var msStamp = Math.round(eventObj.timestamp / 1000000);
+            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
             var message = eventObj.logMessage;
             var messageString = base64.decode(message.message) + '\n';
-            var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'green');
-            return messageSource + ' ' + timeStamp + ': ' + messageString;
+            var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'red');
+            return timeStamp + ' ' + coloredLog(originString, 'green') + ' ' + messageSource + ' ' + messageString;
           case 6:
             if (!that.show.metrics) {
               return '';
             }
+            // CF timestamps are in nanoseconds
+            var msStamp = Math.round(eventObj.timestamp / 1000000);
+            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
             var valueMetric = eventObj.valueMetric;
-            origin = coloredLog('[' + eventObj.origin + '/' + eventObj.deployment + ']', 'yellow');
-            var valueMetricString = valueMetric.name + ': ' + valueMetric.value + ' ' + valueMetric.unit + '\n';
-            return origin + ' ' + timeStamp + ': ' + valueMetricString;
+            var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green') + '\n';
+            return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + valueMetricString;
           case 7:
             if (!that.show.counters) {
               return '';
             }
+            // CF timestamps are in nanoseconds
+            var msStamp = Math.round(eventObj.timestamp / 1000000);
+            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
             var counterEvent = eventObj.counterEvent;
-            origin = coloredLog('[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + ']', 'yellow');
-            var counterEventString = counterEvent.name + ': delta = ' + counterEvent.delta + ', total = ' + counterEvent.total + '\n';
-            return origin + ' ' + timeStamp + ': ' + counterEventString;
+            var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green') +
+              ', total = ' + coloredLog(counterEvent.total, 'green') + '\n';
+            return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + counterEventString;
           case 8:
             if (!that.show.errors) {
               return '';
             }
-            origin = coloredLog('[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + ']', 'red');
+            // CF timestamps are in nanoseconds
+            var msStamp = Math.round(eventObj.timestamp / 1000000);
+            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
             var errorString = '';
-            return origin + ' ' + timeStamp + ': ' + errorString + '\n';
+            return timeStamp + ' ' + coloredLog(originString, 'red') + ' ' + errorString + '\n';
           case 9:
             if (!that.show.containerMetrics) {
               return '';
             }
-            origin = coloredLog('[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + ']', 'cyan');
+            // CF timestamps are in nanoseconds
+            var msStamp = Math.round(eventObj.timestamp / 1000000);
+            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
             var containerMetric = eventObj.containerMetric;
             var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
-              ', CPU: ' + Math.round(containerMetric.cpuPercentage * 100) + '%' +
-              ', Memory: ' + utils.bytesToHumanSize(containerMetric.memoryBytes) +
-              ', Disk: ' + utils.bytesToHumanSize(containerMetric.diskBytes);
-            return origin + ' ' + timeStamp + ': ' + metricString + '\n';
+              ', CPU: ' + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green') +
+              ', Memory: ' + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green') +
+              ', Disk: ' + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green');
+            return timeStamp + ' ' + coloredLog(originString, 'cyan') + ' ' + metricString + '\n';
           default:
             if (!that.show.others) {
               return '';
@@ -209,22 +242,19 @@
       }
     };
 
-    var colorCodes = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'];
-    function coloredLog(message, color, background) {
-      var colorCode = color ? colorCodes.indexOf(color) : false;
-      var backgroundCode = background ? colorCodes.indexOf(background) : false;
-      var ret = '';
-      if (color) {
-        ret += '\x1B[3' + colorCode + 'm';
-      }
-      if (background) {
-        ret += '\x1B[4' + backgroundCode + 'm';
-      }
-      ret += message;
-      if (color || background) {
-        ret += '\x1B[0m';
-      }
-      return ret;
+    var colorCodes = {
+      black: 0,
+      red: 1,
+      green: 2,
+      yellow: 3,
+      blue: 4,
+      magenta: 5,
+      cyan: 6,
+      white: 7
+    };
+
+    function coloredLog(message, color) {
+      return '\x1B[3' + colorCodes[color] + 'm' + message + '\x1B[0m';
     }
   }
 

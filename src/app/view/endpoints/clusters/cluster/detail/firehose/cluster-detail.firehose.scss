@@ -1,32 +1,104 @@
-.log-viewer {
-  width: 100%;
-  height: 500px;
-}
+.firehose-container {
 
-.firehose-header {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: column nowrap;
+  height: calc(100vh - 460px);
 
-  .app-log-stream-indicator {
-    width: 45px;
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: $zindex-navbar-fixed + 1;
   }
 
-  .log-stream-title {
-    margin-right: $padding-small-horizontal;
-  }
-
-  .firehose-filters {
+  .firehose-header {
     display: flex;
-    flex-flow: row wrap;
-    flex: 1 1 0;
-    justify-content: space-around;
-    checkbox-input {
+    flex-flow: row nowrap;
+    align-items: stretch;
 
+    &.panel-heading.action-header {
+      height: initial;
+      min-height: 60px;
+      padding: 0;
+    }
+
+    .firehose-header-left {
+      padding: $hpe-unit-space / 2 3 * $hpe-unit-space / 4;
+      flex: 1 1 auto;
+      display: flex;
+      flex-flow: column nowrap;
+
+      .firehose-status {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+
+        .log-stream-title {
+          margin-right: $padding-small-horizontal;
+          height: 21px;
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+        }
+
+        .app-log-stream-indicator {
+          width: 45px;
+        }
+      }
+
+      .firehose-filters {
+        margin-top: $padding-large-vertical;
+        align-items: center;
+        display: flex;
+        flex-flow: row wrap;
+        flex: 0 1 auto;
+
+        checkbox-input {
+          margin-top: $padding-small-vertical / 2;
+          margin-bottom: $padding-small-vertical / 2;
+          &:not(:last-child) {
+            margin-right: $padding-base-horizontal;
+          }
+        }
+      }
+    }
+
+    .firehose-header-right {
+      padding: 16px 16px 12px 0;
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: space-between;
+      align-items: flex-end;
+
+      .scroll-to-bottom.btn.btn-link {
+        height: 21px;
+        border: 0;
+        align-self: flex-end;
+      }
+
+      .fullscreen-toggle {
+        $transition: 15ms;
+        position: relative;
+        top: 0;
+        left: 0;
+        cursor: pointer;
+        margin-left: $padding-base-horizontal;
+        transition: top $transition, left $transition, text-shadow $transition;
+        &:hover {
+          top: -1px;
+          left: -1px;
+          color: $hpe-primary-fg;
+          text-shadow: 1px 1px 1px rgba($hpe-primary-fg, 0.2);
+        }
+      }
     }
   }
 
-  .scroll-to-bottom {
-
+  .log-viewer {
+    width: 100%;
+    flex: 1 1 0;
   }
 
 }
