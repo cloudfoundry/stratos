@@ -19,3 +19,4 @@ oem/scss
 oem/tmp
 tmp
 coverage-report
+tools/tests
