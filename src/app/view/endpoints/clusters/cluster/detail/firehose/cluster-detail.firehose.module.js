@@ -77,10 +77,11 @@
 
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
     this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
-      $stateParams.guid + '/apps/' + $stateParams.guid + '/stream';
+      $stateParams.guid + '/firehose';
 
     // Comment this out to test firehose stream in gulp dev
     // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
+    this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
 
     this.autoScrollOn = true; // auto-scroll by default
 
@@ -149,91 +150,115 @@
       return '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
     }
 
-    function handleApiEvent(eventObj) {
-      var httpStartStop = eventObj.httpStartStop;
+    function handleApiEvent(cfEvent) {
+      if (!that.show.api) {
+        return '';
+      }
+      console.log(JSON.stringify(cfEvent, null, 4));
+      var httpStartStop = cfEvent.httpStartStop;
       var method = httpMethods[httpStartStop.method];
       var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
-      var httpEventString = peerType + ' ' + method + ' -> ' + httpStartStop.uri +
-        ', status: ' + coloredLog(httpStartStop.statusCode, 'green') +
-        ', content length: ' + httpStartStop.contentLength +
-        ', agent: ' + httpStartStop.userAgent + '\n';
-      return processTimeStamp(eventObj) + ' ' + coloredLog(buildOriginString(eventObj), 'magenta') + ' ' + httpEventString;
+      var httpEventString = peerType + ' ' + coloredLog(method, 'red') + ' ' + httpStartStop.uri +
+        ', status-code: ' + coloredLog(httpStartStop.statusCode, 'green') +
+        ', content-length: ' + coloredLog(utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
+        ', user-agent: ' + httpStartStop.userAgent + '\n';
+      return processTimeStamp(cfEvent) + ' ' + coloredLog(buildOriginString(cfEvent), 'magenta') + ' ' + httpEventString;
+    }
+
+    function handleAppLog(cfEvent) {
+      if (!that.show.apps) {
+        return '';
+      }
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var message = cfEvent.logMessage;
+      var messageString = base64.decode(message.message) + '\n';
+      var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'red');
+      return timeStamp + ' ' + coloredLog(originString, 'green') + ' ' + messageSource + ' ' + messageString;
+    }
+
+    function handleMetricEvent(cfEvent) {
+      if (!that.show.metrics) {
+        return '';
+      }
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var valueMetric = cfEvent.valueMetric;
+      var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green') + '\n';
+      return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + valueMetricString;
+    }
+
+    function handleCounterEvent(cfEvent) {
+      if (!that.show.counters) {
+        return '';
+      }
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var counterEvent = cfEvent.counterEvent;
+      var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green') +
+        ', total = ' + coloredLog(counterEvent.total, 'green') + '\n';
+      return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + counterEventString;
+    }
+
+    function handleErrorEvent(cfEvent) {
+      if (!that.show.errors) {
+        return '';
+      }
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var errorString = '';
+      return timeStamp + ' ' + coloredLog(originString, 'red') + ' ' + errorString + '\n';
+    }
+
+    function handleContainerMetricsEvent(cfEvent) {
+      if (!that.show.containerMetrics) {
+        return '';
+      }
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var containerMetric = cfEvent.containerMetric;
+      var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
+        ', CPU: ' + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green') +
+        ', Memory: ' + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green') +
+        ', Disk: ' + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green');
+      return timeStamp + ' ' + coloredLog(originString, 'cyan') + ' ' + metricString + '\n';
+    }
+
+    function handleOtherEvent(jsonString) {
+      if (!that.show.others) {
+        return '';
+      }
+      return jsonString;
     }
 
     this.jsonFilter = function (jsonString) {
       try {
-        var eventObj = angular.fromJson(jsonString);
-
-        switch (eventObj.eventType) {
+        var cfEvent = angular.fromJson(jsonString);
+        switch (cfEvent.eventType) {
           case 4:
-            if (!that.show.api) {
-              return '';
-            }
-            return handleApiEvent(eventObj);
+            return handleApiEvent(cfEvent);
           case 5:
-            if (!that.show.apps) {
-              return '';
-            }
-            // CF timestamps are in nanoseconds
-            var msStamp = Math.round(eventObj.timestamp / 1000000);
-            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
-            var message = eventObj.logMessage;
-            var messageString = base64.decode(message.message) + '\n';
-            var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'red');
-            return timeStamp + ' ' + coloredLog(originString, 'green') + ' ' + messageSource + ' ' + messageString;
+            return handleAppLog(cfEvent);
           case 6:
-            if (!that.show.metrics) {
-              return '';
-            }
-            // CF timestamps are in nanoseconds
-            var msStamp = Math.round(eventObj.timestamp / 1000000);
-            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
-            var valueMetric = eventObj.valueMetric;
-            var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green') + '\n';
-            return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + valueMetricString;
+            return handleMetricEvent(cfEvent);
           case 7:
-            if (!that.show.counters) {
-              return '';
-            }
-            // CF timestamps are in nanoseconds
-            var msStamp = Math.round(eventObj.timestamp / 1000000);
-            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
-            var counterEvent = eventObj.counterEvent;
-            var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green') +
-              ', total = ' + coloredLog(counterEvent.total, 'green') + '\n';
-            return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + counterEventString;
+            return handleCounterEvent(cfEvent);
           case 8:
-            if (!that.show.errors) {
-              return '';
-            }
-            // CF timestamps are in nanoseconds
-            var msStamp = Math.round(eventObj.timestamp / 1000000);
-            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
-            var errorString = '';
-            return timeStamp + ' ' + coloredLog(originString, 'red') + ' ' + errorString + '\n';
+            return handleErrorEvent(cfEvent);
           case 9:
-            if (!that.show.containerMetrics) {
-              return '';
-            }
-            // CF timestamps are in nanoseconds
-            var msStamp = Math.round(eventObj.timestamp / 1000000);
-            var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-            var originString = '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
-            var containerMetric = eventObj.containerMetric;
-            var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
-              ', CPU: ' + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green') +
-              ', Memory: ' + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green') +
-              ', Disk: ' + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green');
-            return timeStamp + ' ' + coloredLog(originString, 'cyan') + ' ' + metricString + '\n';
+            return handleContainerMetricsEvent(cfEvent);
           default:
-            if (!that.show.others) {
-              return '';
-            }
-            return jsonString;
+            return handleOtherEvent(cfEvent);
         }
 
       } catch (error) {

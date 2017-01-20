@@ -15,7 +15,7 @@
 
   .firehose-header {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: column nowrap;
     align-items: stretch;
 
     &.panel-heading.action-header {
@@ -24,11 +24,14 @@
       padding: 0;
     }
 
-    .firehose-header-left {
+    .firehose-header-top {
       padding: $hpe-unit-space / 2 3 * $hpe-unit-space / 4;
       flex: 1 1 auto;
       display: flex;
-      flex-flow: column nowrap;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+
+      border-bottom: 1px solid $gray-light;
 
       .firehose-status {
         display: flex;
@@ -48,36 +51,6 @@
         }
       }
 
-      .firehose-filters {
-        margin-top: $padding-large-vertical;
-        align-items: center;
-        display: flex;
-        flex-flow: row wrap;
-        flex: 0 1 auto;
-
-        checkbox-input {
-          margin-top: $padding-small-vertical / 2;
-          margin-bottom: $padding-small-vertical / 2;
-          &:not(:last-child) {
-            margin-right: $padding-base-horizontal;
-          }
-        }
-      }
-    }
-
-    .firehose-header-right {
-      padding: 16px 16px 12px 0;
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: space-between;
-      align-items: flex-end;
-
-      .scroll-to-bottom.btn.btn-link {
-        height: 21px;
-        border: 0;
-        align-self: flex-end;
-      }
-
       .fullscreen-toggle {
         $transition: 15ms;
         position: relative;
@@ -93,6 +66,43 @@
           text-shadow: 1px 1px 1px rgba($hpe-primary-fg, 0.2);
         }
       }
+    }
+
+    .firehose-header-bottom {
+      padding: 12px 16px 12px 16px;
+      display: flex;
+      flex-flow: row nowrap;
+
+      align-items: flex-end;
+
+      .firehose-filters {
+        align-items: center;
+        display: flex;
+        flex-flow: row wrap;
+        flex: 0 1 auto;
+
+        checkbox-input {
+          .checkbox-input .checkbox-input-button:before {
+            font-size: 16px;
+          }
+          .checkbox-input-label {
+            font-size: 16px;
+            font-weight: 500;
+          }
+          margin-top: $padding-small-vertical / 2;
+          margin-bottom: $padding-small-vertical / 2;
+          &:not(:last-child) {
+            margin-right: $padding-base-horizontal;
+          }
+        }
+      }
+
+      .scroll-to-bottom.btn.btn-link {
+        height: 21px;
+        border: 0;
+        align-self: flex-end;
+      }
+
     }
   }
 

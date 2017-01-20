@@ -2,7 +2,7 @@
 
   <div class="panel-heading action-header firehose-header">
 
-    <div class="firehose-header-left">
+    <div class="firehose-header-top">
       <div class="firehose-status">
         <div class="log-stream-title" translate>Firehose Stream</div>
         <span ng-if="firehoseCtrl.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
@@ -13,6 +13,12 @@
         <bounce-spinner ng-if="firehoseCtrl.streamingStatus === 2"
                         class="app-log-stream-indicator" classes="bounce-spinner-sm"></bounce-spinner>
       </div>
+
+      <span ng-click="firehoseCtrl.fullScreen = true" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
+      <span ng-click="firehoseCtrl.fullScreen = false" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+    </div>
+
+    <div class="firehose-header-bottom">
       <div class="firehose-filters">
         <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.api)"
                         ng-model="firehoseCtrl.show.api"
@@ -39,11 +45,7 @@
                         input-label="{{'Container Metrics' | translate}}">
         </checkbox-input>
       </div>
-    </div>
 
-    <div class="firehose-header-right">
-      <span ng-click="firehoseCtrl.fullScreen = true" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
-      <span ng-click="firehoseCtrl.fullScreen = false" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
       <div class="scroll-to-bottom btn btn-link" ng-click="firehoseCtrl.autoScroll()">
         <i class="helion-icon helion-icon-Right_Arrow"></i>
         <span translate>Scroll to bottom</span>
