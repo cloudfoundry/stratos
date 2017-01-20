@@ -1,5 +1,21 @@
 {
   "app-wall": {
-
+    "app-wall": "@:applications",
+    "search-placeholder": "Search by name",
+    "add-application": "Add Application",
+    "reset": "Reset",
+    "options": {
+      "show": "Show Options",
+      "hide": "Hide Options"
+    },
+    "sort-by": "Sort By",
+    "total-apps": "Total Applications",
+    "filtered-apps": "Filtered Applications",
+    "instances": "Instances",
+    "disk-quota": "Disk Quota",
+    "memory": "Memory"
+  },
+  "add-app-dialog": {
+    "title": "@:app-wall.add-application"
   }
 }

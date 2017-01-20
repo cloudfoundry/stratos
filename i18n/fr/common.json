@@ -1,8 +1,8 @@
 {
+  "applications": "Les Applications",
+  "cloud-foundry": "Le Cloud Foundry",
   "welcome": "FRENCH Welcome to the Console",
   "menu": {
-    "applications": "Les Applications",
-    "cloud-foundry": "Le Cloud Foundry",
     "code-engine": "Le Engine du Code",
     "endpoints": "Les Endpoints",
     "about": "Le About"

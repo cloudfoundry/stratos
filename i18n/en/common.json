@@ -8,13 +8,18 @@
   "privacy": "privacy",
   "terms": "Terms of Use",
 
+  "org": "Org",
+  "space": "Space",
+  "endpoint": "Endpoint",
+
   "buttons": {
     "ok": "OK",
     "cancel": "Cancel",
     "next": "Next",
     "previous": "Previous",
     "done": "Done",
-    "add": "Add"
+    "add": "Add",
+    "set": "Set"
   },
   "auth": {
     "username": "Username",
@@ -25,6 +30,12 @@
     "cloud-foundry": "@:cloud-foundry",
     "code-engine": "@:code-engine",
     "endpoints": "@:endpoints",
-    "about": "@:about"
+    "about": "@:about",
+    "language": "Language",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "language": {
+    "select": "Select Language"
   }
 }

@@ -9,12 +9,12 @@
       </span>
     </dt>
     <dd></dd>
-    <dt translate>Instances</dt>
+    <dt translate>app-wall.instances</dt>
     <dd ng-if="applicationGalleryCardCtrl.canShowStats">{{ applicationGalleryCardCtrl.app.instanceCount }} / {{ applicationGalleryCardCtrl.app.entity.instances }}</dd>
     <dd ng-if="!applicationGalleryCardCtrl.canShowStats">0 / {{ applicationGalleryCardCtrl.app.entity.instances }}</dd>
-    <dt translate>Disk Quota</dt>
+    <dt translate>app-wall.disk-quota</dt>
     <dd>{{ applicationGalleryCardCtrl.app.entity.disk_quota | mbToHumanSize }}</dd>
-    <dt translate>Memory</dt>
+    <dt translate>app-wall.memory</dt>
     <dd>{{ applicationGalleryCardCtrl.app.entity.memory | mbToHumanSize }}</dd>
   </dl>
 </gallery-card>

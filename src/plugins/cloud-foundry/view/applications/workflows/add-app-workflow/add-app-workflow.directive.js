@@ -188,18 +188,18 @@
           allowJump: false,
           allowBack: false,
           allowCancelAtLastStep: true,
-          title: gettext('Add Application'),
+          title: 'add-app-dialog.title',
           lastStepCommit: true,
           btnText: {
-            cancel: gettext('Cancel')
+            cancel: 'buttons.cancel'
           },
           steps: [
             {
               title: gettext('Name'),
               templateUrl: path + 'name.html',
               formName: 'application-name-form',
-              nextBtnText: gettext('Add'),
-              cancelBtnText: gettext('Cancel'),
+              nextBtnText: 'buttons.add',
+              cancelBtnText: 'buttons.cancel',
               showBusyOnNext: true,
               isLastStep: true,
               onEnter: function () {

@@ -2,18 +2,7 @@
   'use strict';
 
   // Supported VCS Types
-  var SUPPORTED_VCS_TYPES = {
-    GITHUB: {
-      description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
-      img: 'github_octocat.png',
-      label: 'GitHub'
-    },
-    GITHUB_ENTERPRISE: {
-      description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
-      img: 'GitHub-Mark-120px-plus.png',
-      label: 'GitHub Enterprise'
-    }
-  };
+  var SUPPORTED_VCS_TYPES;
 
   /**
    * @namespace cloud-foundry.model.vcs
@@ -33,6 +22,20 @@
 
   function registerVcsModel($q, modelManager, apiManager) {
     modelManager.register('cloud-foundry.model.vcs', new VcsModel($q, apiManager));
+
+    // Init these here - gettext will then ot be available
+    SUPPORTED_VCS_TYPES = {
+      GITHUB: {
+        description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
+        img: 'github_octocat.png',
+        label: 'GitHub'
+      },
+      GITHUB_ENTERPRISE: {
+        description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
+        img: 'GitHub-Mark-120px-plus.png',
+        label: 'GitHub Enterprise'
+      }
+    };
   }
 
   /**

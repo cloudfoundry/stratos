@@ -1,7 +1,8 @@
 {
   "product": {
     "version": "4.1",
-    "name": "Helion Stackato"
+    "name": "Helion Stackato",
+    "console": "Helion Stackato Web Console"
   },
   "company": {
     "name": "Hewlett Packard Enterprise Company, L.P.",

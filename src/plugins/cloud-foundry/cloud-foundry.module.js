@@ -54,7 +54,7 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'), 0, 'helion-icon-Application');
+      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', 0, 'helion-icon-Application');
     }
   });
 

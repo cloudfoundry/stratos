@@ -9,13 +9,14 @@
       "loading": "Loading",
       "offline": "Offline",
       "updating":  "Offline while Updating",
-      "no_instances": "No Instances",
+      "no-instances": "No Instances",
       "staging": "Staging App",
       "starting": "Starting App",
       "online": "Online",
       "crashed": "Crashed",
       "crashing": "Crashing",
-      "partial": "Partially Online"
+      "partial": "Partially Online",
+      "unknown": "Unknown"
     }
   }
 }

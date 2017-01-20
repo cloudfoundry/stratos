@@ -83,8 +83,8 @@
         seen[translationId] = true;
       }
 
-      // Highlight missing translations
-      return '<span class="i18n-missing">' + translationId + '</span>';
+      // Highlight missing translations (breaks unit tests)
+      //return '<span class="i18n-missing">' + translationId + '</span>';
     };
   }
 

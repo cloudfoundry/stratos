@@ -34,16 +34,17 @@
         });
 
         var setLocalePromise = function (data) {
+          $translate.fallbackLanguage('en');
           return $translate.use(data.currentLocale);
         };
 
         return asyncTaskDialog(
           {
-            title: 'Select Langauge',
+            title: 'language.select',
             templateUrl: 'app/view/navbar/language/select-language.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'Set'
+              submit: 'buttons.set'
             },
             class: 'dialog-form',
             dialog: true

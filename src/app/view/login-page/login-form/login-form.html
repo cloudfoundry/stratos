@@ -21,18 +21,16 @@
   <div class="login-clear-both"></div>
 
   <div class="login-form-spinner" ng-show="loginFormCtrl.loggingIn">
-    <span class="spinner-notification" translate>
-      Authenticating Credentials
-    </span>
+    <span class="spinner-notification" translate>login.authenticating</span>
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
 </form>
 <div ng-if="applicationCtrl.failedLogin" class="alert alert-danger login-error">
-  <p translate>The login and password combination you used are incorrect. Please try again.</p>
+  <p translate>login.error.credentials</p>
 </div>
 <div ng-if="applicationCtrl.serverErrorOnLogin" class="alert alert-danger login-error">
-  <p translate>A server error occurred when attempting to log you in. Please try again. If this error persists, please contact the administrator.</p>
+  <p translate>login.error.server</p>
 </div>
 <div ng-if="applicationCtrl.serverFailedToRespond" class="alert alert-danger login-error">
-  <p translate>The authentication server failed to respond. Please try again. If this error persists, please contact the administrator.</p>
+  <p translate>login.error.no-response</p>
 </div>

@@ -14,6 +14,7 @@
    * @name errorService
    * @description The application error service
    * @param {object} eventService - the event service
+   * @param {object} $translate - the i18n $translate service
    * @returns {object} the error service
    */
   function errorServiceFactory(eventService) {

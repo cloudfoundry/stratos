@@ -1,7 +1,7 @@
 <div class="async-dialog">
   <div class="detail-view-content no-margin" ng-keydown="$event.keyCode === 13 && !asyncTaskDialogCtrl.disableSubmit() && asyncTaskDialogCtrl.invokeAction()">
     <div ng-if="asyncTaskDialogCtrl.content.title" class="detail-view-header">
-      <h4>{{asyncTaskDialogCtrl.content.title}}</h4>
+      <h4 translate>{{asyncTaskDialogCtrl.content.title}}</h4>
     </div>
     <ng-include src="asyncTaskDialogCtrl.content.templateUrl"></ng-include>
     <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>
@@ -25,12 +25,14 @@
   </div>
   <div class="form-actions modal-footer" ng-class="{ 'disable-margin': asyncTaskDialogCtrl.disableMargin() } ">
     <button ng-if="!asyncTaskDialogCtrl.context.noCancel"
+            translate
             ng-disabled="asyncTaskDialogCtrl.disableButtons || asyncTaskDialogCtrl.showSpinner"
             type="button" class="btn btn-default"
             ng-click="$dismiss()">{{ asyncTaskDialogCtrl.context.buttonTitles.cancel }}
     </button>
     <button ng-if="!asyncTaskDialogCtrl.context.noSubmit"
             class="btn"
+            translate
             ng-class="{
                         'btn-primary': !asyncTaskDialogCtrl.context.submitCommit(),
                         'btn-commit': asyncTaskDialogCtrl.context.submitCommit()

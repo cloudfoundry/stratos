@@ -1,6 +1,6 @@
 <div class="app-top-bar action-bar app-actions-bar panel-less application-wall-header">
-  <div class="applications-header font-semi-bold" translate>
-    Applications
+  <div class="applications-header font-semi-bold">
+    <span translate>app-wall</span>
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
   <div class="application-header-right">
@@ -9,9 +9,7 @@
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
             translate
-            ng-click="applicationsListCtrl.addApplication()">
-      add application
-    </button>
+            ng-click="applicationsListCtrl.addApplication()">app-wall.add-application</button>
   </div>
 </div>
 
@@ -28,15 +26,15 @@
                     ng-model-options='{ debounce: 100 }'
                     ng-change="applicationsListCtrl.setText()"
                     ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps"
-                    placeholder="{{'Search by name' | translate}}"/>
+                    placeholder="{{'app-wall.search-placeholder' | translate}}"/>
             </div>
           </form>
         </div>
         <div class="app-total-control">
           <form class="form-horizontal">
             <div class=" form-group">
-              <label ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>Total Applications</label>
-              <label ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>Filtered Applications</label>
+              <label ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>app-wall.total-apps</label>
+              <label ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>app-wall.filtered-apps</label>
               <div class="app-count">
                 <div class="app-count-number">
                   <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
@@ -51,7 +49,7 @@
                     <a class="btn-link"
                       ng-click="applicationsListCtrl.resetFilter()"
                       ng-show="applicationsListCtrl.filter.cnsiGuid !== 'all' || applicationsListCtrl.filter.text.length"
-                      translate>Reset</a>
+                      translate>app-wall.reset</a>
                   </div>
                 </div>
               </div>
@@ -77,18 +75,18 @@
             <a class="btn-link"
               ng-if="applicationsListCtrl.model.hideFilterPanel"
               ng-click="applicationsListCtrl.toggleFilterPanel()"
-              translate>Show Options</a>
+              translate>app-wall.options.show</a>
             <a class="btn-link"
               ng-if="!applicationsListCtrl.model.hideFilterPanel"
               ng-click="applicationsListCtrl.toggleFilterPanel()"
-              translate>Hide Options</a>
+              translate>app-wall.options.hide</a>
           </div>
         </div>
       </div>
       <div class="panel-body applications-filter" ng-show="!applicationsListCtrl.model.hideFilterPanel">
         <form class="form-horizontal application-cf-filters">
           <div class="form-group">
-            <label class="control-label" translate>Endpoint</label>
+            <label class="control-label" translate>endpoint</label>
             <search-box
               ng-model="applicationsListCtrl.filter.cnsiGuid"
               input-options="applicationsListCtrl.clusters"
@@ -96,7 +94,7 @@
             </search-box>
           </div>
           <div class="form-group" ng-class="{'form-group-disabled': applicationsListCtrl.filter.cnsiGuid === 'all'}">
-            <label class="control-label" translate>Org</label>
+            <label class="control-label" translate>org</label>
             <search-box
               ng-model="applicationsListCtrl.filter.orgGuid"
               input-options="applicationsListCtrl.organizations"
@@ -105,7 +103,7 @@
             </search-box>
           </div>
           <div class="form-group" ng-class="{'form-group-disabled': applicationsListCtrl.filter.orgGuid === 'all'}">
-            <label class="control-label" translate>Space</label>
+            <label class="control-label" translate>space</label>
             <search-box
               ng-model="applicationsListCtrl.filter.spaceGuid"
               input-options="applicationsListCtrl.spaces"

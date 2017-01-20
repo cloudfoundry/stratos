@@ -1,6 +1,6 @@
 <div class="wizard" ng-form="wizardForm" ng-keydown="$event.keyCode === 13 && !wizardCtrl.disableNext() && wizardCtrl.next()">
   <div ng-if="wizardCtrl.workflow.title" class="wizard-head">
-    <h4>{{ ::wizardCtrl.workflow.title }}</h4>
+    <h4 translate>{{ ::wizardCtrl.workflow.title }}</h4>
   </div>
 
   <div class="wizard-body row">
@@ -45,11 +45,10 @@
         <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
         <div>
           <button type="button" class="btn btn-sm btn-default"
+            translate
             ng-click="wizardCtrl.cancelNextTask()"
             ng-if="wizardCtrl.showNextCancel"
-            translate>
-            Cancel
-          </button>
+            translate>buttons.cancel</button>
         </div>
       </div>
     </div>
@@ -64,11 +63,12 @@
   <div class="wizard-foot" ng-if="!wizardCtrl.workflow.hideFooter">
 
     <button type="button"
+            translate
             class="btn btn-default cancel"
             ng-click="wizardCtrl.cancel()"
             ng-disabled="wizardCtrl.cancelBtnDisabled"
             ng-if="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'Cancel' }}
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'buttons.cancel' }}
     </button>
 
     <button type="button"
@@ -76,19 +76,20 @@
       ng-click="wizardCtrl.back()"
       ng-disabled="wizardCtrl.backBtnDisabled"
       ng-if="wizardCtrl.workflow.allowBack()">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'Back' }}
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'buttons.back' }}
     </button>
 
     <button type="button"
       class="btn next"
-            ng-class="{
-                        'btn-primary': !wizardCtrl.stepCommit,
-                        'btn-commit': wizardCtrl.stepCommit
-                      }"
+      translate
+      ng-class="{
+                  'btn-primary': !wizardCtrl.stepCommit,
+                  'btn-commit': wizardCtrl.stepCommit
+                }"
       ng-click="wizardCtrl.next()"
       ng-if="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
       ng-disabled="wizardCtrl.disableNext()">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'Next' }}
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'buttons.next' }}
     </button>
   </div>
 </div>

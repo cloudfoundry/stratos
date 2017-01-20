@@ -38,7 +38,7 @@
    */
   function interceptor($q, errorService, upgradeCheck) {
 
-    var commsErrorMsg = gettext('The Console encountered a problem communicating with the server. Please try again.');
+    var commsErrorMsg = 'errors.server_comms';
     return {
       response: response,
       responseError: responseError
