@@ -154,7 +154,6 @@
       if (!that.show.api) {
         return '';
       }
-      console.log(JSON.stringify(cfEvent, null, 4));
       var httpStartStop = cfEvent.httpStartStop;
       var method = httpMethods[httpStartStop.method];
       var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
@@ -172,7 +171,7 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var message = cfEvent.logMessage;
       var messageString = base64.decode(message.message) + '\n';
       var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'red');
@@ -186,7 +185,7 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var valueMetric = cfEvent.valueMetric;
       var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green') + '\n';
       return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + valueMetricString;
@@ -199,7 +198,7 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var counterEvent = cfEvent.counterEvent;
       var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green') +
         ', total = ' + coloredLog(counterEvent.total, 'green') + '\n';
@@ -213,7 +212,7 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var errorString = '';
       return timeStamp + ' ' + coloredLog(originString, 'red') + ' ' + errorString + '\n';
     }
@@ -225,7 +224,7 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.origin + '/' + cfEvent.deployment + '/' + cfEvent.job + '.' + cfEvent.index + ']';
+      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var containerMetric = cfEvent.containerMetric;
       var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
         ', CPU: ' + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green') +
