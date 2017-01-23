@@ -1,5 +1,5 @@
 // Terminal colours based on the Dark Pastels konsole scheme
-$colours: (
+$ansi-colours: (
     'black': (
         normal: #3F3F3F,
         intense: #709080
@@ -20,7 +20,7 @@ $colours: (
         normal: #9AB8D7,
         intense: #94BFF3
     ),
-    'purple': (
+    'magenta': (
         normal: #DC8CC3,
         intense: #EC93D3
     ),
@@ -34,7 +34,16 @@ $colours: (
     )
 );
 
-@each $colourName, $colour in $colours {
+@function ansi-colour($colourName) {
+  @if map-has-key($ansi-colours, $colourName) {
+    @return map-get(map-get($ansi-colours, $colourName), normal);
+  }
+
+  @warn "Unknown `#{$colourName}` in $ansi-colours.";
+  @return null;
+}
+
+@each $colourName, $colour in $ansi-colours {
     .ansi-#{$colourName} {
         color: map-get($colour, normal);
         &.intense {

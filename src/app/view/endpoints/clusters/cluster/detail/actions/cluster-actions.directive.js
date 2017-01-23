@@ -76,7 +76,7 @@
     }
 
     var createOrg = {
-      name: gettext('Create Organization'),
+      name: gettext('Create Org'),
       disabled: false,
       execute: function () {
         return asyncTaskDialog(

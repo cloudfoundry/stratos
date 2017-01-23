@@ -28,6 +28,7 @@
     'base64',
     'app.model.modelManager',
     'app.utils.utilsService',
+    'app.view.localStorage',
     '$scope',
     '$stateParams',
     '$location',
@@ -36,12 +37,12 @@
     '$document'
   ];
 
-  function ClusterFirehoseController(base64, modelManager, utils, $scope, $stateParams, $location, $log, $timeout, $document) {
+  function ClusterFirehoseController(base64, modelManager, utils, localStorage, $scope, $stateParams, $location, $log, $timeout, $document) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    this.show = {
+    var defaultFilters = {
       api: true,
       apps: true,
       metrics: true,
@@ -51,14 +52,14 @@
       others: true
     };
 
-    this.onFilterChanged = function (onOff) {
-      if (!onOff) {
-        var url = that.websocketUrl;
-        that.websocketUrl = undefined;
-        $timeout(function () {
-          that.websocketUrl = url;
-        });
-      }
+    try {
+      this.hoseFilters = angular.fromJson(localStorage.getItem('firehose-filters', defaultFilters));
+    } catch (error) {
+      this.hoseFilters = defaultFilters;
+    }
+
+    this.onFilterChanged = function () {
+      localStorage.setItem('firehose-filters', angular.toJson(this.hoseFilters));
     };
 
     var handlerUnbind = $document.on('keydown', function (e) {
@@ -80,8 +81,8 @@
       $stateParams.guid + '/firehose';
 
     // Comment this out to test firehose stream in gulp dev
-    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
-    this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
+    this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
+    // this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
 
     this.autoScrollOn = true; // auto-scroll by default
 
@@ -94,147 +95,101 @@
     };
 
     var httpMethods = [
-      'GET',
-      'POST',
-      'PUT',
-      'DELETE',
-      'HEAD',
-      'ACL',
-      'BASELINE_CONTROL',
-      'BIND',
-      'CHECKIN',
-      'CHECKOUT',
-      'CONNECT',
-      'COPY',
-      'DEBUG',
-      'LABEL',
-      'LINK',
-      'LOCK',
-      'MERGE',
-      'MKACTIVITY',
-      'MKCALENDAR',
-      'MKCOL',
-      'MKREDIRECTREF',
-      'MKWORKSPACE',
-      'MOVE',
-      'OPTIONS',
-      'ORDERPATCH',
-      'PATCH',
-      'PRI',
-      'PROPFIND',
-      'PROPPATCH',
-      'REBIND',
-      'REPORT',
-      'SEARCH',
-      'SHOWMETHOD',
-      'SPACEJUMP',
-      'TEXTSEARCH',
-      'TRACE',
-      'TRACK',
-      'UNBIND',
-      'UNCHECKOUT',
-      'UNLINK',
-      'UNLOCK',
-      'UPDATE',
-      'UPDATEREDIRECTREF',
-      'VERSION_CONTROL'
+      'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'ACL', 'BASELINE_CONTROL', 'BIND', 'CHECKIN', 'CHECKOUT', 'CONNECT',
+      'COPY', 'DEBUG', 'LABEL', 'LINK', 'LOCK', 'MERGE', 'MKACTIVITY', 'MKCALENDAR', 'MKCOL', 'MKREDIRECTREF',
+      'MKWORKSPACE', 'MOVE', 'OPTIONS', 'ORDERPATCH', 'PATCH', 'PRI', 'PROPFIND', 'PROPPATCH', 'REBIND', 'REPORT',
+      'SEARCH', 'SHOWMETHOD', 'SPACEJUMP', 'TEXTSEARCH', 'TRACE', 'TRACK', 'UNBIND', 'UNCHECKOUT', 'UNLINK', 'UNLOCK',
+      'UPDATE', 'UPDATEREDIRECTREF', 'VERSION_CONTROL'
     ];
 
-    function processTimeStamp(eventObj) {
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(eventObj.timestamp / 1000000);
-      return coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+    function buildOriginString(cfEvent, colour) {
+      return buildTimestampString(cfEvent) + ': ' +
+        coloredLog('[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + ']', colour);
     }
 
-    function buildOriginString(eventObj) {
-      return '[' + eventObj.origin + '/' + eventObj.deployment + '/' + eventObj.job + '.' + eventObj.index + ']';
+    function buildTimestampString(cfEvent) {
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(cfEvent.timestamp / 1000000);
+      return moment(msStamp).format('HH:mm:ss.SSS');
     }
 
     function handleApiEvent(cfEvent) {
-      if (!that.show.api) {
+      if (!that.hoseFilters.api) {
         return '';
       }
       var httpStartStop = cfEvent.httpStartStop;
       var method = httpMethods[httpStartStop.method];
       var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
-      var httpEventString = peerType + ' ' + coloredLog(method, 'red') + ' ' + httpStartStop.uri +
-        ', status-code: ' + coloredLog(httpStartStop.statusCode, 'green') +
-        ', content-length: ' + coloredLog(utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
-        ', user-agent: ' + httpStartStop.userAgent + '\n';
-      return processTimeStamp(cfEvent) + ' ' + coloredLog(buildOriginString(cfEvent), 'magenta') + ' ' + httpEventString;
+      var httpEventString = peerType + ' ' + coloredLog(method, 'green', true) + ' ' +
+        coloredLog(httpStartStop.uri, null, true) +
+        ', Status-Code: ' + coloredLog(httpStartStop.statusCode, 'green') +
+        ', Content-Length: ' + coloredLog(utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
+        ', User-Agent: ' + httpStartStop.userAgent +
+        ', Remote-Address: ' + httpStartStop.remoteAddress + '\n';
+      return buildOriginString(cfEvent, 'magenta') + ' ' + httpEventString;
     }
 
     function handleAppLog(cfEvent) {
-      if (!that.show.apps) {
+      if (!that.hoseFilters.apps) {
         return '';
       }
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(cfEvent.timestamp / 1000000);
-      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var message = cfEvent.logMessage;
-      var messageString = base64.decode(message.message) + '\n';
-      var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'red');
-      return timeStamp + ' ' + coloredLog(originString, 'green') + ' ' + messageSource + ' ' + messageString;
+      var messageString = coloredLog(base64.decode(message.message), null, true) + '\n';
+      var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'green', true);
+      return buildOriginString(cfEvent, 'green') + ' ' + messageSource + ' ' + messageString;
     }
 
     function handleMetricEvent(cfEvent) {
-      if (!that.show.metrics) {
+      if (!that.hoseFilters.metrics) {
         return '';
       }
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(cfEvent.timestamp / 1000000);
-      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var valueMetric = cfEvent.valueMetric;
-      var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green') + '\n';
-      return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + valueMetricString;
+      var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green', true) + '\n';
+      return buildOriginString(cfEvent, 'blue') + ' ' + valueMetricString;
     }
 
     function handleCounterEvent(cfEvent) {
-      if (!that.show.counters) {
+      if (!that.hoseFilters.counters) {
         return '';
       }
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(cfEvent.timestamp / 1000000);
-      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var counterEvent = cfEvent.counterEvent;
-      var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green') +
-        ', total = ' + coloredLog(counterEvent.total, 'green') + '\n';
-      return timeStamp + ' ' + coloredLog(originString, 'yellow') + ' ' + counterEventString;
-    }
-
-    function handleErrorEvent(cfEvent) {
-      if (!that.show.errors) {
-        return '';
-      }
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(cfEvent.timestamp / 1000000);
-      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
-      var errorString = '';
-      return timeStamp + ' ' + coloredLog(originString, 'red') + ' ' + errorString + '\n';
+      var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green', true) +
+        ', total = ' + coloredLog(counterEvent.total, 'green', true) + '\n';
+      return buildOriginString(cfEvent, 'yellow') + ' ' + counterEventString;
     }
 
     function handleContainerMetricsEvent(cfEvent) {
-      if (!that.show.containerMetrics) {
+      if (!that.hoseFilters.containerMetrics) {
         return '';
       }
-      // CF timestamps are in nanoseconds
-      var msStamp = Math.round(cfEvent.timestamp / 1000000);
-      var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
-      var originString = '[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + '.' + cfEvent.index + ']';
       var containerMetric = cfEvent.containerMetric;
       var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
-        ', CPU: ' + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green') +
-        ', Memory: ' + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green') +
-        ', Disk: ' + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green');
-      return timeStamp + ' ' + coloredLog(originString, 'cyan') + ' ' + metricString + '\n';
+        ' - ' + coloredLog('CPU: ', null, true) + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
+        ', ' + coloredLog('Memory: ', null, true) + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
+        ', ' + coloredLog('Disk: ', null, true) + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green', true);
+      return buildOriginString(cfEvent, 'cyan') + ' ' + metricString + '\n';
+    }
+
+    function handleErrorEvent(cfEvent) {
+      if (!that.hoseFilters.errors) {
+        return '';
+      }
+      var errorObj = cfEvent.error;
+      var errorString = 'ERROR: ';
+      if (angular.isDefined(errorObj.source)) {
+        errorString += 'Source: ' + coloredLog(errorObj.source, 'red', true) + ', ';
+      }
+      if (angular.isDefined(errorObj.code)) {
+        errorString += 'Code: ' + coloredLog(errorObj.code, 'red', true) + ', ';
+      }
+      if (angular.isDefined(errorObj.message)) {
+        errorString += 'Message: ' + coloredLog(errorObj.message, 'red', true);
+      }
+      return buildOriginString(cfEvent, 'red', true) + ' ' + errorString + '\n';
     }
 
     function handleOtherEvent(jsonString) {
-      if (!that.show.others) {
+      if (!that.hoseFilters.others) {
         return '';
       }
       return jsonString;
@@ -259,7 +214,6 @@
           default:
             return handleOtherEvent(cfEvent);
         }
-
       } catch (error) {
         $log.error('Failed to filter jsonMessage from WebSocket: ', jsonString);
         return jsonString;
@@ -277,7 +231,13 @@
       white: 7
     };
 
-    function coloredLog(message, color) {
+    function coloredLog(message, color, boldOn) {
+      if (boldOn) {
+        if (color) {
+          return '\x1B[1;3' + colorCodes[color] + 'm' + message + '\x1B[0m';
+        }
+        return '\x1B[1m' + message + '\x1B[0m';
+      }
       return '\x1B[3' + colorCodes[color] + 'm' + message + '\x1B[0m';
     }
   }

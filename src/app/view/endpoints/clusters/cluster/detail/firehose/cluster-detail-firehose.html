@@ -20,29 +20,35 @@
 
     <div class="firehose-header-bottom">
       <div class="firehose-filters">
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.api)"
-                        ng-model="firehoseCtrl.show.api"
+        <checkbox-input ng-class="{'api-filter': firehoseCtrl.hoseFilters.api}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.api)"
+                        ng-model="firehoseCtrl.hoseFilters.api"
                         input-label="{{'API' | translate}}">
         </checkbox-input>
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.apps)"
-                        ng-model="firehoseCtrl.show.apps"
+        <checkbox-input ng-class="{'apps-filter': firehoseCtrl.hoseFilters.apps}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.apps)"
+                        ng-model="firehoseCtrl.hoseFilters.apps"
                         input-label="{{'Apps' | translate}}">
         </checkbox-input>
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.metrics)"
-                        ng-model="firehoseCtrl.show.metrics"
+        <checkbox-input ng-class="{'metrics-filter': firehoseCtrl.hoseFilters.metrics}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.metrics)"
+                        ng-model="firehoseCtrl.hoseFilters.metrics"
                         input-label="{{'Metrics' | translate}}">
         </checkbox-input>
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.counters)"
-                        ng-model="firehoseCtrl.show.counters"
+        <checkbox-input ng-class="{'counters-filter': firehoseCtrl.hoseFilters.counters}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.counters)"
+                        ng-model="firehoseCtrl.hoseFilters.counters"
                         input-label="{{'Counters' | translate}}">
         </checkbox-input>
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.errors)"
-                        ng-model="firehoseCtrl.show.errors"
-                        input-label="{{'Errors' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.show.containerMetrics)"
-                        ng-model="firehoseCtrl.show.containerMetrics"
+        <checkbox-input ng-class="{'container-metrics-filter': firehoseCtrl.hoseFilters.containerMetrics}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.containerMetrics)"
+                        ng-model="firehoseCtrl.hoseFilters.containerMetrics"
                         input-label="{{'Container Metrics' | translate}}">
+        </checkbox-input>
+        <checkbox-input ng-class="{'errors-filter': firehoseCtrl.hoseFilters.errors}"
+                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.errors)"
+                        ng-model="firehoseCtrl.hoseFilters.errors"
+                        input-label="{{'Errors' | translate}}">
         </checkbox-input>
       </div>
 

@@ -69,7 +69,7 @@
     }
 
     .firehose-header-bottom {
-      padding: 12px 16px 12px 16px;
+      padding: $hpe-unit-space / 2 $padding-base-horizontal $padding-large-vertical $padding-base-horizontal;
       display: flex;
       flex-flow: row nowrap;
 
@@ -82,17 +82,65 @@
         flex: 0 1 auto;
 
         checkbox-input {
-          .checkbox-input .checkbox-input-button:before {
-            font-size: 16px;
+          margin-top: $padding-small-vertical / 2;
+          border-bottom: 3px solid transparent;
+          padding-bottom: $padding-small-vertical;
+
+          .checkbox-input .checkbox-input-button {
+            height: 16px;
+            width: 16px;
+            &:before {
+              font-size: 16px;
+            }
           }
           .checkbox-input-label {
+            user-select: none;
+            margin-top: -2px;
             font-size: 16px;
             font-weight: 500;
           }
-          margin-top: $padding-small-vertical / 2;
-          margin-bottom: $padding-small-vertical / 2;
+
           &:not(:last-child) {
             margin-right: $padding-base-horizontal;
+          }
+
+          // Colourise checkboxes
+          &.api-filter {
+            border-bottom-color: ansi-colour('magenta');
+            .checkbox-input-button {
+              color: ansi-colour('magenta');
+            }
+          }
+          &.apps-filter {
+            border-bottom-color: ansi-colour('green');
+            .checkbox-input-button {
+              color: ansi-colour('green');
+            }
+          }
+
+          &.metrics-filter {
+            border-bottom-color: ansi-colour('blue');
+            .checkbox-input-button {
+              color: ansi-colour('blue');
+            }
+          }
+          &.counters-filter {
+            border-bottom-color: ansi-colour('yellow');
+            .checkbox-input-button {
+              color: ansi-colour('yellow');
+            }
+          }
+          &.errors-filter {
+            border-bottom-color: ansi-colour('red');
+            .checkbox-input-button {
+              color: ansi-colour('red');
+            }
+          }
+          &.container-metrics-filter {
+            border-bottom-color: ansi-colour('cyan');
+            .checkbox-input-button {
+              color: ansi-colour('cyan');
+            }
           }
         }
       }

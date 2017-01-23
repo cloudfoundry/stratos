@@ -32,6 +32,11 @@ console-view {
     }
   }
 
+  > .container-fluid {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
 }
 
 @media (max-width: 479px) {
