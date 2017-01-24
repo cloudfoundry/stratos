@@ -16,7 +16,8 @@
     'app.error.errorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'app.event.eventService'
   ];
 
   /**
@@ -35,10 +36,11 @@
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.event.eventService} eventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog) {
+                                         notificationsService, credentialsDialog, confirmDialog, eventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -123,9 +125,21 @@
         var reuse = !!endpoint;
         if (!reuse) {
           endpoint = {
-            key: eKey,
-            type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getOemConfiguration().CLOUD_FOUNDRY : utilsService.getOemConfiguration().CODE_ENGINE
+            key: eKey
           };
+          switch (serviceInstance.cnsi_type) {
+            case 'hcf':
+              endpoint.type = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+              break;
+            case 'hce':
+              endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
+              break;
+            case 'hsm':
+              endpoint.type = 'Helion Service Manager';
+              break;
+            default:
+              endpoint.type = gettext('Unknown');
+          }
           endpoints.push(endpoint);
         } else {
           delete endpoint.error;
@@ -301,6 +315,7 @@
                 });
                 break;
             }
+            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         }
       });
@@ -334,6 +349,7 @@
                 });
               break;
           }
+          eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
         });
     }
   }

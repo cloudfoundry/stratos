@@ -1,0 +1,75 @@
+<div ng-if="!smCtrl.model.services && smCtrl.model.services !== false"
+     class="cluster-loading message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="smCtrl.model.services === false" class="cluster-loading col-md-9 col-sm-12">
+  <div translate>An error occurred retrieving services</div>
+</div>
+<div class="cluster-gallery-card-container" ng-if="smCtrl.model.services">
+  <div ng-if="smCtrl.model.services.length < 1"
+       class="panel panel-default cluster-empty-list">
+    <div class="panel-body" translate>
+      You have no services
+    </div>
+  </div>
+    <table ng-if="smCtrl.model.services.length" class="table table-actionable"
+            st-table="svcsCtrl.stTableInstances"
+            st-safe-src="smCtrl.model.services">
+      <thead>
+        <tr>
+          <th translate st-sort="id" st-sort-default="true" st-skip-natural="true">ID</th>
+          <th translate st-sort="name" st-skip-natural="true">Name</th>
+          <th translate st-sort="versions" st-skip-natural="true">Product Versions</th>
+          <th translate st-sort="vendor" st-skip-natural="true">Vendor</th>
+          <th></th>
+        </tr>
+        <tr>
+          <th colspan="5" class="table-sort-filter">
+            <form>
+              <div class="form-group search-field" focusable-input>
+                <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+                <input st-search=""
+                      type="text" class="form-control"
+                      placeholder="{{'Filter services' | translate}}"/>
+              </div>
+            </form>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="endpoint in svcsCtrl.stTableInstances track by endpoint.id"
+          show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+          inline-message-colspan="5"
+          inline-message-link="{ ref: neil.route, params: { guid: guid } }"
+          table-inline-status="{{ endpoint.error.status }}">
+        <td>
+          <a ng-click="servicesCtrl.open(endpoint)">{{ endpoint.id }}</a>
+        </td>
+        <td>{{ endpoint.name }}</td>
+        <td>
+          <span class="product-version" ng-repeat="version in endpoint.product_versions track by version.product_version">{{ version.product_version }}</span>
+        </td>
+        <td>{{ endpoint.vendor }}</td>
+        <td class="hsm-actions">
+          <a ng-click="smCtrl.createInstance(endpoint)">
+            <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon ng-scope"></i>
+          </a>
+          <!--
+          <actions-menu actions="endpoint.actions"
+                        action-target="endpoint.actionsTarget"
+                        menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right"
+                        enable-button-mode="true"></actions-menu>
+          -->
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+<!--
+
+  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
+    <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
+  </div>
+  -->
+</div>

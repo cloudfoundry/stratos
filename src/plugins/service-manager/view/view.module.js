@@ -2,7 +2,14 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters.router', [])
+    .module('service-manager.view', [
+      'service-manager.view.services',
+      'service-manager.tiles',
+      'service-manager.view.service',
+      'service-manager.view.service.instance-detail',
+      'service-manager.view.service.service-detail',
+      'service-manager.view.create-instance'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -11,19 +18,27 @@
 
   function registerRoute($stateProvider) {
 
-    // Cloud Foundry
-    $stateProvider.state('endpoint.clusters.router', {
-      url: '',
+    $stateProvider.state('sm', {
+      url: '/sm',
+      abstract: true,
       template: '<ui-view/>',
-      controller: ClustersRouterController,
-      controllerAs: 'clustersRouterCtrl',
+      data: {
+        activeMenuState: 'sm.list'
+      }
+    });
+
+    $stateProvider.state('sm.list', {
+      url: '/sm',
+      template: '<ui-view/>',
+      controller: ServicesManagersRouterController,
+      controllerAs: 'smRouterCtrl',
       ncyBreadcrumb: {
         skip: true
       }
     });
   }
 
-  ClustersRouterController.$inject = [
+  ServicesManagersRouterController.$inject = [
     '$q',
     '$state',
     'app.model.modelManager',
@@ -31,7 +46,7 @@
   ];
 
   /**
-   * @name ClustersRouterController
+   * @name ServicesManagersRouterController
    * @description Redirects the user to either the Organizations Detail page or
    * the Cluster tiles page depending on the number of HCF instances connected.
    * @param {object} $q - the Angular $q service
@@ -40,7 +55,7 @@
    * @param {app.utils.utilsService} utils - the utils service
    * @constructor
    */
-  function ClustersRouterController($q, $state, modelManager, utils) {
+  function ServicesManagersRouterController($q, $state, modelManager, utils) {
     var that = this;
     this.modelManager = modelManager;
 
@@ -52,10 +67,9 @@
 
       return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
         .then(function () {
-
           var connectedInstances = 0;
           var serviceInstanceGuid;
-          var hcfInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          var hcfInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hsm'});
           _.forEach(hcfInstances, function (hcfInstance) {
             if (_.get(that.userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
               serviceInstanceGuid = hcfInstance.guid;
@@ -64,18 +78,16 @@
           });
 
           if (connectedInstances === 1) {
-            $state.go('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstanceGuid});
+            $state.go('sm.endpoint.detail.instances', {guid: serviceInstanceGuid});
           } else {
-            $state.go('endpoint.clusters.tiles', {instancesListed: true});
+            $state.go('sm.tiles', {instancesListed: true});
           }
-
         });
     }
 
-    utils.chainStateResolve('endpoint.clusters.router', $state, init);
-
+    utils.chainStateResolve('sm.list', $state, init);
   }
 
-  angular.extend(ClustersRouterController.prototype, {});
+  angular.extend(ServicesManagersRouterController.prototype, {});
 
 })();

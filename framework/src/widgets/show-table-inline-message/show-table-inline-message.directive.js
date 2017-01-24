@@ -28,6 +28,7 @@
       setMessage(attrs.showTableInlineMessage, true);
       setStatus(attrs.tableInlineStatus, true);
       setColSpan(attrs.inlineMessageColspan, true);
+      setLink(attrs.inlineMessageLink, true);
       element.after(elem);
 
       $compile(elem)(scope);
@@ -36,6 +37,7 @@
       attrs.$observe('showTableInlineMessage', setMessage);
       attrs.$observe('tableInlineStatus', setStatus);
       attrs.$observe('inlineMessageColspan', setColSpan);
+      attrs.$observe('inlineMessageLink', setLink);
 
       function setMessage(message, skipCompile) {
         if (message === elem.attr('message')) {
@@ -69,6 +71,12 @@
         }
       }
 
+      function setLink(newLink, skipCompile) {
+        elem.attr('link', newLink);
+        if (!skipCompile) {
+          $compile(elem)(scope);
+        }
+      }
     }
   }
 

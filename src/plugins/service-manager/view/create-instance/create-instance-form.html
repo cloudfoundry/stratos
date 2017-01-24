@@ -1,0 +1,60 @@
+<h4>Choose Product Version, SDL Version and an Instance ID</h4>
+
+<form name="form.createInstanceForm">
+  <fieldset class="fieldset-horizontal">
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Product Version</label>
+      <select-input
+        class="form-control"
+        ng-model="ciFormCtrl.data.product"
+        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+        input-options="ciFormCtrl.data.productVersions"
+        required
+        ng-change="ciFormCtrl.productChanged()"
+      />
+    </div>
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>SDL Version</label>
+      <select-input
+        class="form-control"
+        ng-model="ciFormCtrl.data.sdl"
+        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+        input-options="ciFormCtrl.sdlOptions"
+        required
+        ng-change="ciFormCtrl.sdlChanged()"
+      />
+    </div>
+  </fieldset>
+  <fieldset class="two-width-fields">
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Instance ID</label>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="ciFormCtrl.data.instanceId"
+        placeholder="Instance ID"
+      />
+    </div>
+  </fieldset>
+
+  <div ng-show="ciFormCtrl.data.sdl">
+
+  <h4>Service Parameters</h4>
+
+  <fieldset class="two-width-fields">
+    <div ng-repeat="p in ciFormCtrl.parameters" class="form-group" focusable-input>
+      <label class="control-label" translate>{{p.name}}</label>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="ciFormCtrl.data.params[p.name]"
+        placeholder="{{p.default || p.example}}"
+        required
+      />
+    </div>
+  </fieldset>
+  <div ng-if="ciFormCtrl.parameters.length === 0">
+    This service does not have any parameters that must be provided.
+  </div>
+  </div>
+</form>

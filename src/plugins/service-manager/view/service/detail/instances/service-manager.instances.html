@@ -1,0 +1,81 @@
+<div ng-if="!smCtrl.model.instances && smCtrl.model.instances !== false"
+     class="cluster-loading message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterDetailController.organizations === false" class="cluster-loading col-md-9 col-sm-12">
+  <div translate>An error occurred retrieving instances</div>
+</div>
+<div class="cluster-gallery-card-container" ng-if="smCtrl.model.instances">
+  <div ng-if="smCtrl.model.instances.length < 1"
+       class="panel panel-default cluster-empty-list">
+    <div class="panel-body" translate>
+      You have no instances
+    </div>
+  </div>
+    <table ng-if="smCtrl.model.instances.length" class="table table-actionable"
+            st-table="svcsCtrl.stTableInstances"
+            st-safe-src="smCtrl.model.instances">
+      <thead>
+      <tr>
+        <th translate st-sort="instance_id" st-sort-default="true" st-skip-natural="true">Instance ID</th>
+        <th translate st-sort="state" st-skip-natural="true">State</th>
+        <th translate st-sort="service_id" st-skip-natural="true">Service ID</th>
+        <th translate st-sort="product_version" st-skip-natural="true">Product Version</th>
+        <th translate st-sort="sdl_version" st-skip-natural="true">SDL Version</th>
+        <th translate st-sort="vendor" st-skip-natural="true">Vendor</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="endpoint in svcsCtrl.stTableInstances track by endpoint.instance_id"
+          show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+          inline-message-colspan="7"
+          inline-message-link="sm.endpoint.instance.upgrades/id:{{endpoint.instance_id}}"
+          table-inline-status="{{ endpoint.error.status }}">
+
+        <!--Endpoint Name-->
+        <td >
+          <a ng-click="instancesCtrl.open(endpoint)">{{ endpoint.instance_id }}</a>
+        </td>
+
+        <!--Endpoint Connection Status-->
+        <td ng-switch="endpoint.state" class="endpoint-table-connected">
+          <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                ng-switch-when="running"></span>
+          <div ng-switch-when="error"
+                uib-popover="{{ 'Disconnected' | translate }}"
+                popover-trigger="'mouseenter'"
+                popover-placement="top-left"
+                popover-popup-delay="1000">
+            <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
+          </div>
+          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                ng-switch-when="expired"></span>
+          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                ng-switch-when="pending"></span>
+          <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                ng-switch-when="complicated"></span>
+        </td>
+
+        <td>{{ endpoint.service_id }}</td>
+        <td>{{ endpoint.product_version }}</td>
+        <td>{{ endpoint.sdl_version }}</td>
+        <td>{{ endpoint.vendor }}</td>
+        <td>
+          <actions-menu actions="endpoint.actions"
+                        action-target="endpoint.actionsTarget"
+                        menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right"
+                        enable-button-mode="true"></actions-menu>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+<!--
+
+  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
+    <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
+  </div>
+  -->
+</div>

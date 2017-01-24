@@ -1,0 +1,28 @@
+<div class="applications-empty"
+  ng-if="!instanceCtrl.instance.available_upgrades || instanceCtrl.instance.available_upgrades.length === 0"
+>
+  <div class="applications-msg" translate>No available upgrades.</div>
+</div>
+
+<table class="table"
+        ng-if="instanceCtrl.instance.available_upgrades && instanceCtrl.instance.available_upgrades.length"
+        st-table="instanceCtrl.stTableInstanceUpgrades"
+        st-safe-src="instanceCtrl.instance.available_upgrades">
+  <thead>
+  <tr>
+    <th translate st-sort="procuct_version" st-sort-default="true" st-skip-natural="true">Product Version</th>
+    <th translate >SDL Versions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="upgrade in instanceCtrl.stTableInstanceUpgrades track by $index">
+    <td>{{ upgrade.product_version }}</td>
+    <td>
+      <div ng-class="{'sdl-latest-version' : sdl.is_latest}" class="upgrade-version" ng-repeat="sdl in upgrade.sdl_versions track by sdl.sdl_version">
+        <span>{{ sdl.sdl_version}}</span>
+        <span ng-if="sdl.is_latest">(Latest)</span>
+      </div>
+    </td>
+  </tr>
+  </tbody>
+</table>
