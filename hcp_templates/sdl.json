@@ -397,6 +397,7 @@
       "data_type": "string",
       "required": true,
       "secret": true,
+      "immutable": true,
       "generator":
         {
           "id": "pgsql_password",
@@ -466,6 +467,7 @@
       "data_type": "string",
       "required": true,
       "secret": true,
+      "immutable": true,
       "generator":
         {
           "id": "stolon_password",
@@ -600,6 +602,7 @@
       "data_type": "string",
       "required": true,
       "secret": true,
+      "immutable": true,
       "generator":
         {
           "id": "session_store_secret",
