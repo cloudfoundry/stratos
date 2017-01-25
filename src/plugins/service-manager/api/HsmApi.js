@@ -123,7 +123,6 @@
     },
 
     createInstance: function (guid, id, productVersion, sdlVersion, instanceId, params, httpConfigOptions) {
-      console.log('api create instance');
       var instanceRequest = {
         service_id: id,
         product_version: productVersion,
@@ -141,9 +140,6 @@
           value: value
         });
       });
-
-      console.log('CREATE INSTANCE');
-      console.log(instanceRequest);
       return this._post('instances', guid, instanceRequest, httpConfigOptions);
     },
 

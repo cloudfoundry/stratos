@@ -2,10 +2,9 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model.hce
-   * @memberOf cloud-foundry.model
-   * @name hce
-   * @description Helion Code Engine model
+   * @namespace service-manager.model
+   * @name service-manager.model
+   * @description Helion Service Manager model
    */
   angular
     .module('service-manager.model', [])
@@ -25,9 +24,12 @@
   /**
    * @memberof cloud-foundry.model.hce
    * @name ServiceManagerModel
+   * @param {object} $q - the Angular $q service
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the application event service
-   * @param {object} $log - Angular $log service
+   * @property {object} $q - the Angular $q service
+   * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.event.eventService} eventService - the application event service
    * @property {object} data - the Helion Code Engine data
@@ -123,13 +125,6 @@
       return count;
     },
 
-    // _buildModel: function (guid) {
-    //   this._checkUpgrade(guid);
-    //   var m = this.model[guid];
-    //   m.instanceCount = m.instances.length;
-
-    // },
-
     setUpgradesAvailable: function () {
       var that = this;
       var count = 0;
@@ -143,7 +138,7 @@
 
       if (count > 0) {
         menuItem.badge = {
-          value: upgrades
+          value: count
         };
       } else {
         delete menuItem.badge;
@@ -161,8 +156,8 @@
       _.each(data, function (instance) {
         if (instance.available_upgrades && instance.available_upgrades.length) {
           instance.error = {
-            message: instance.available_upgrades.length + ' upgrades are available for this instance',
-            status: 'info'
+            message: 'Upgrade available',
+            status: 'upgrade'
           };
           upgrades.push(instance);
         }
@@ -178,7 +173,6 @@
     },
 
     checkForUpgrades: function () {
-      console.log('checkForUpgrades');
       var that = this;
       var promises = [];
 

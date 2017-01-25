@@ -32,8 +32,6 @@
 
   angular.extend(ServiceManagerServicesController.prototype, {
     open: function (endpoint) {
-      console.log('OPEN');
-      console.log(endpoint);
       this.$state.go('sm.endpoint.service', {id: endpoint.id});
     }
   });

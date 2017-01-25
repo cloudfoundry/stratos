@@ -175,3 +175,25 @@ fieldset.fieldset-horizontal {
     width: 647px;
   }
 }
+
+table tr td.table-inline-message {
+  .popover.hpe-popover-alert-upgrade {
+    > .arrow {
+      display: none;
+    }
+
+    > .popover-content {
+      border-top: 1px solid #eee;
+      margin: 0px 24px;
+      padding: 12px 0;
+
+      a {
+        color: #888;
+        &:hover, &:focus {
+          text-decoration: none;
+          color: #01a982;
+        }
+      }
+    }
+  }
+}

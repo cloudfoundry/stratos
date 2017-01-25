@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('service-manager.tiles', [])
+    .module('service-manager.view.tiles', [])
     .config(registerRoute);
 
   registerRoute.$inject = [

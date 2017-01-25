@@ -97,6 +97,24 @@
         });
     }
 
+    function _setEndpointVisit(isValid, serviceInstance, endpoint) {
+      // Some service types have more detail available
+      if (isValid) {
+        switch (serviceInstance.cnsi_type) {
+          case 'hcf':
+            endpoint.visit = function () {
+              return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+            };
+            break;
+          case 'hsm':
+            endpoint.visit = function () {
+              return $state.href('sm.endpoint.detail.instances', {guid: serviceInstance.guid});
+            };
+            break;
+        }
+      }
+    }
+
     /**
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.cnsiService
@@ -147,9 +165,8 @@
         activeEndpointsKeys.push(endpoint.key);
 
         endpoint.actions = _createInstanceActions(isValid, hasExpired);
-        endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
-          return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-        } : undefined;
+        endpoint.visit = undefined;
+        _setEndpointVisit(isValid, serviceInstance, endpoint);
         endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
         endpoint.actionsTarget = serviceInstance;
         endpoint.name = serviceInstance.name;

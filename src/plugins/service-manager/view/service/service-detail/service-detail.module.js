@@ -56,16 +56,9 @@
 
     this.id = id;
 
-    console.log('Service Detail');
-    console.log(guid);
-    console.log(id);
-
     this.hsmModel.getService(guid, id).then(function (data) {
       that.service = data;
-      console.log(that.service);
-
       that.versions = [];
-
       _.each(that.service.product_versions, function (product) {
         _.each(product.sdl_versions, function (sdl, sdlVersion) {
           that.versions.push({
@@ -76,10 +69,9 @@
         });
       });
 
-      console.log(that.versions);
+      /*
 
       var product = data.product_versions[0];
-
       var pv = product.product_version;
       var sv = product.latest;
 
@@ -92,6 +84,7 @@
         console.log('GOT PRODUCT');
         console.log(sdl);
       });
+      */
     });
   }
 

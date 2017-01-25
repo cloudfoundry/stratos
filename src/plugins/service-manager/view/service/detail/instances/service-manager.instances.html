@@ -57,7 +57,11 @@
                 ng-switch-when="complicated"></span>
         </td>
 
-        <td>{{ endpoint.service_id }}</td>
+        <td>
+          <a ui-sref="sm.endpoint.service({id:  endpoint.service_id })">
+          {{  endpoint.service_id }}
+          </a>
+        </td>
         <td>{{ endpoint.product_version }}</td>
         <td>{{ endpoint.sdl_version }}</td>
         <td>{{ endpoint.vendor }}</td>

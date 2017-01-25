@@ -25,28 +25,19 @@
   }
 
   CreateInstanceForm.$inject = [
-    'app.event.eventService',
-    'app.model.modelManager',
-    'app.basePath',
-    'app.view.upgradeCheck',
-    'app.logged-in.loggedInService',
-    'app.view.localStorage',
-    '$timeout',
-    '$state',
-    '$stateParams',
-    '$window',
-    '$rootScope',
-    '$scope'
+    '$scope',
+    'app.model.modelManager'
   ];
 
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name CreateInstanceForm
+   * @param {object} $scope - the Angular $scope service
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @class
    */
-  function CreateInstanceForm(eventService, modelManager, path, upgradeCheck, loggedInService, localStorage,
-                                 $timeout, $state, $stateParams, $window, $rootScope, $scope) {
+  function CreateInstanceForm($scope, modelManager) {
     var that = this;
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.data.form = $scope.form;
@@ -72,15 +63,12 @@
 
     sdlChanged: function () {
       var that = this;
-      console.log('SDL Changed');
-      console.log(this.data.sdl, this.data.product, this.data.service.id, this.data.guid);
       if (this.data.sdl) {
         this.hsmModel.getServiceSdl(this.data.guid, this.data.service.id, this.data.product, this.data.sdl).then(function (sdl) {
           var params = _.filter(sdl.parameters, function (param) {
             return param.required && !param.generator && !param.secret && !param.default;
           });
           that.parameters = params;
-          console.log(that.parameters);
         });
       } else {
         this.parameters = undefined;

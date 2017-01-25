@@ -3,8 +3,7 @@
 
   angular
     .module('service-manager.view', [
-      'service-manager.view.services',
-      'service-manager.tiles',
+      'service-manager.view.tiles',
       'service-manager.view.service',
       'service-manager.view.service.instance-detail',
       'service-manager.view.service.service-detail',
@@ -47,8 +46,8 @@
 
   /**
    * @name ServicesManagersRouterController
-   * @description Redirects the user to either the Organizations Detail page or
-   * the Cluster tiles page depending on the number of HCF instances connected.
+   * @description Redirects the user to either the Tiles page ot the detail
+   * page for a given HSM Detail page or  depending on the number of HSM instances connected.
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
@@ -58,13 +57,11 @@
   function ServicesManagersRouterController($q, $state, modelManager, utils) {
     var that = this;
     this.modelManager = modelManager;
-
     this.$q = $q;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
     function init() {
-
       return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
         .then(function () {
           var connectedInstances = 0;

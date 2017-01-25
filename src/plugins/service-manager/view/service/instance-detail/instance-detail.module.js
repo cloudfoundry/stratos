@@ -124,18 +124,17 @@
     this.guid = $state.params.guid;
     this.id = $state.params.id;
 
+    this.interestingState = false;
+
     this.actions = [
       { name: 'Upgrade Instance'},
       { name: 'Configure Instance'},
-      { name: 'Delete Instance', execute: function () {
-        return that.deleteInstance(that.id);
+      { name: 'Delete Instance',
+        execute: function () {
+          return that.deleteInstance(that.id);
+        }
       }
-    }
     ];
-
-    this.setParamsFilterText = function () {
-      console.log('FILTER');
-    };
 
     this.highlight = function (id, on) {
       if (on) {
@@ -147,7 +146,6 @@
 
     // Poll for updates
     $scope.$on('$destroy', function () {
-      console.log('stop polling');
       that.$timeout.cancel(that.pollTimer);
     });
 
@@ -158,37 +156,78 @@
 
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
 
-    poll: function () {
+    poll: function (fetchNow) {
       var that = this;
-      if (that.deleted) {
+      if (that.deleted || that.notFound) {
         return;
       }
 
+      // Cancel timer if one is outstanding
+      if (this.pollTimer) {
+        this.$timeout.cancel(this.pollTimer);
+      }
+
+      var pollTime = that.interestingState ? 2500 : 5000;
+      pollTime = fetchNow ? 0 : pollTime;
+
       this.pollTimer = this.$timeout(function () {
         that.fetch().finally(function () {
+          delete that.pollTimer;
           that.poll();
         });
-      }, 5000);
+      }, pollTime);
     },
 
     fetch: function () {
       var that = this;
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
-        that.stateIndicator = 'ok';
+        that._setStateIndicator();
       }).catch(function (err) {
-        console.log(err);
         if (that.deleting) {
           that.deleted = true;
+          that.instance.state = 'deleted';
+          that._setStateIndicator();
+        } else if (err.status === 404) {
+          that.notFound = true;
+          that.instance = that.instance || {};
+          that.instance.state = '404';
+          that._setStateIndicator();
         }
       });
     },
 
+    _setStateIndicator: function () {
+      var that = this;
+      that.interestingState = false;
+      switch (this.instance.state) {
+        case 'running':
+          that.stateIndicator = 'ok';
+          break;
+        case 'creating':
+          that.stateIndicator = 'busy';
+          that.interestingState = true;
+          break;
+        case 'deleting':
+          that.stateIndicator = 'busy';
+          that.interestingState = true;
+          break;
+        case 'deleted':
+          that.stateIndicator = 'tentative';
+          break;
+        case 'degraded':
+          that.stateIndicator = 'warning';
+          break;
+        case '404':
+          that.stateIndicator = 'error';
+          break;
+        default:
+          that.stateIndicator = 'tentative';
+      }
+    },
+
     deleteInstance: function (id) {
       var that = this;
-      console.log('Delete Instance');
-      console.log(id);
-
       var dialog = this.confirmDialog({
         title: gettext('Delete Instance'),
         description: function () {
@@ -201,9 +240,9 @@
         }
       });
       dialog.result.then(function () {
-        console.log('DELETE');
         that.hsmModel.deleteInstance(that.guid, id).then(function () {
           that.deleting = true;
+          that.poll(true);
         });
       });
     }

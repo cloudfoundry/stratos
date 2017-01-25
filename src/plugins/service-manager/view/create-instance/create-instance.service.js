@@ -15,6 +15,7 @@
    * @memberof app.view.endpoints.clusters.cluster
    * @name CreateInstanceDialogFactory
    * @constructor
+   * @param {object} $q - Angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} asyncTaskDialog - our async dialog service
    */
@@ -23,12 +24,8 @@
     this.show = function (serviceManagerGuid, service, productVersion, sdlVersion) {
 
       function create(data) {
-        console.log('CREATE INSTANCE');
-        console.log(data);
         var hsmModel = modelManager.retrieve('service-manager.model');
         return hsmModel.createInstance(serviceManagerGuid, service.id, data.product, data.sdl, data.instanceId, data.params).then(function (d) {
-          console.log('created');
-          console.log(d);
           return d;
         });
       }
@@ -43,7 +40,6 @@
         var sdl = [];
         sdlVersions[version.product_version] = sdl;
         _.each(version.sdl_versions, function (url, sdlVersion) {
-          console.log(sdlVersion,  version.latest);
           sdl.push({
             label: sdlVersion,
             value: sdlVersion,
@@ -51,9 +47,6 @@
           });
         });
       });
-
-      console.log(productVersions);
-      console.log(sdlVersions);
 
       return asyncTaskDialog(
         {

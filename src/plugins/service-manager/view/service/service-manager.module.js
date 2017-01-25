@@ -30,12 +30,11 @@
     'app.utils.utilsService',
     '$state',
     '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
     'service-manager.view.create-instance.dialog'
   ];
 
-  function ServiceManagerController($stateParams, $log, utils, $state, $q, rolesService, modelManager, createInstanceDialog) {
+  function ServiceManagerController($stateParams, $log, utils, $state, $q, modelManager, createInstanceDialog) {
     var that = this;
 
     this.initialized = false;
@@ -64,12 +63,8 @@
 
     createInstance: function (service) {
       var that = this;
-      var p = this.createInstanceDialog.show(this.guid, service);
-      p.result.then(function (instance) {
-        console.log('instance created');
-        console.log(instance.instance_id);
-
-        // Open the instance
+      this.createInstanceDialog.show(this.guid, service).result.then(function (instance) {
+        // Open the instance once it has been created
         that.$state.go('sm.endpoint.instance.components', {guid: that.guid, id: instance.instance_id});
       });
     }

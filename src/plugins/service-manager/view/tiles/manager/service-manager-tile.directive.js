@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('service-manager.tiles')
+    .module('service-manager.view.tiles')
     .directive('serviceManagerTile', ServiceManagerTile);
 
   ServiceManagerTile.$inject = [];
@@ -97,8 +97,6 @@
         that.serviceManagerModel.getModel(that.service.guid).then(function (model) {
           that.instancesCount = model.instances.length;
           that.servicesCount = model.services.length;
-          console.log('HELLO');
-          console.log(model);
         });
       });
     }

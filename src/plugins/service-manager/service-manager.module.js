@@ -51,21 +51,22 @@
 
   angular.extend(ServiceManager.prototype, {
     update: function (services) {
+      var that = this;
       // Check to see if we have any services
       var userServices = this.modelManager.retrieve('app.model.serviceInstance.user');
       services = services || userServices.serviceInstances;
       var hsmServices = _.filter(services, {cnsi_type: 'hsm'});
       this.menuItem.hidden = hsmServices.length === 0;
+      if (!this.menuItem.hidden) {
+        var smModel = this.modelManager.retrieve('service-manager.model');
+        smModel.checkForUpgrades().then(function (upgrades) {
+          that.setUpgradesAvailable(upgrades);
+        });
+      }
     },
     onLoggedIn: function () {
-      var that = this;
       this.registerNavigation();
       this.update();
-
-      var smModel = this.modelManager.retrieve('service-manager.model');
-      smModel.checkForUpgrades().then(function (upgrades) {
-        that.setUpgradesAvailable(upgrades);
-      });
     },
 
     setUpgradesAvailable: function (upgrades) {

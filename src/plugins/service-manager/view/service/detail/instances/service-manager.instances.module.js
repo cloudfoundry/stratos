@@ -22,7 +22,6 @@
     });
   }
 
-
   ServiceManagerInstancesController.$inject = [
     '$state'
   ];
@@ -30,7 +29,6 @@
   function ServiceManagerInstancesController($state) {
     this.$state = $state;
   }
-
 
   angular.extend(ServiceManagerInstancesController.prototype, {
     open: function (endpoint) {

@@ -11,7 +11,7 @@
       </actions-menu>
     </div>
 
-    <div class="cluster-summary-tile">
+    <div ng-if="!instanceCtrl.notFound" class="cluster-summary-tile">
       <div class="card panel panel-default">
         <div class="panel-heading action-header">
           <span translate>Summary</span>
@@ -34,7 +34,9 @@
               </dd>
               <dt translate>Service ID</dt>
               <dd>
+                <a ui-sref="sm.endpoint.service({id: instanceCtrl.instance.service_id })">
                 {{ instanceCtrl.instance.service_id }}
+                </a>
               </dd>
             </dl>
           </div>
@@ -70,31 +72,35 @@
       <div class="applications-msg" translate>Instance has been deleted.</div>
     </div>
 
-    <div ng-if="!instanceCtrl.deleted">
+    <div class="applications-empty" ng-if="instanceCtrl.notFound">
+      <div class="applications-msg" translate>Instance not found.</div>
+    </div>
+
+    <div ng-if="!instanceCtrl.deleted && !instanceCtrl.notFound">
 
     <ul class="application-nav nav nav-tabs col-sm-12">
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.components">
           <span translate>Components</span>
-          <span class="tab-count-indicator">({{instanceCtrl.instance.components.length}})</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.components.length || 0}})</span>
         </a>
       </li>
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.services">
           <span translate>Services</span>
-          <span class="tab-count-indicator">({{instanceCtrl.instance.service_locations.length}})</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.service_locations.length || 0}})</span>
         </a>
       </li>
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.parameters">
           <span translate>Parameters</span>
-          <span class="tab-count-indicator">({{instanceCtrl.instance.parameters.length}})</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.parameters.length || 0}})</span>
         </a>
       </li>
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.scaling">
           <span translate>Scaling</span>
-          <span class="tab-count-indicator">({{instanceCtrl.instance.scaling.length}})</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.scaling.length || 0}})</span>
         </a>
       </li>
       <li class="nav-item" ui-sref-active="active">

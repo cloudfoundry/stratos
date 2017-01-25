@@ -6,8 +6,7 @@
     .directive('tableInlineMessage', tableInlineMessage);
 
   tableInlineMessage.$inject = [
-    'helion.framework.basePath',
-    '$parse'
+    'helion.framework.basePath'
   ];
 
   /**
@@ -18,7 +17,7 @@
    * @param {string} path - the application base path
    * @returns {object} The table-inline-message directive definition object
    */
-  function tableInlineMessage(path, $parse) {
+  function tableInlineMessage(path) {
 
     return {
       bindToController: {
@@ -35,11 +34,10 @@
   }
 
   InlineMessageController.$inject = [
-    '$state',
-    '$scope'
+    '$state'
   ];
 
-  function InlineMessageController($state, $scope) {
+  function InlineMessageController($state) {
 
     this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
 
