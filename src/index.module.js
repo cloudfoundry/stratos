@@ -15,7 +15,8 @@
     'ui.bootstrap',
     'ui.router',
     'smart-table',
-    'ig.linkHeaderParser'
+     'kubernetesDashboard'
+
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();

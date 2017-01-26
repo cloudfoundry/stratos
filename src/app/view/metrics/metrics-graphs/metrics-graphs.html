@@ -1,0 +1,11 @@
+<div class="metrics-graphs">
+    <kd-graph-card ng-if="metricGraphsCtrl.hasMetrics('cpu/usage_rate')" class="graph-card" graph-title="CPU usage"
+                   metrics="metricGraphsCtrl.metricsModel.cumulativeMetrics"
+                   selected-metric-names="'cpu/usage_rate'">
+    </kd-graph-card>
+    <kd-graph-card  ng-if="metricGraphsCtrl.hasMetrics('memory/usage')" class="graph-card" graph-title="Memory usage"
+                   graph-info="[[The memory usage includes the caches in the pods managed by these resources. (Does not count pods double because it is mentioned both in the pod list and its controller is mentioned in e.g. a replica set.)|Help message detailing what is included in the memory usage]]"
+                   metrics="metricGraphsCtrl.metricsModel.cumulativeMetrics"
+                   selected-metric-names="'memory/usage'">
+    </kd-graph-card>
+</div>

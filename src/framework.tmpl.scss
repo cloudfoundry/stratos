@@ -28,3 +28,6 @@ $radio-button-checked-icon      : "\ea74" !default; // helion-icon-Radial_Black
 // endbower
 
 @import "../framework/framework.scss";
+
+// Kubernetes dashboard styles
+@import "../dashboard/src/app/frontend/index";
