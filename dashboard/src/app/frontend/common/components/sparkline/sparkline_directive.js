@@ -24,7 +24,6 @@ export default function sparklineDirective() {
     controllerAs: 'sparklineCtrl',
     templateUrl: 'common/components/sparkline/sparkline.html',
     templateNamespace: 'svg',
-    scope: {},
-    bindToController: {'timeseries': '<'},
+    bindToController: {'timeseries': '<', 'className': '@'}
   };
 }

@@ -51,6 +51,14 @@
         });
     },
 
+    getNodes: function () {
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNodes()
+        .then(function (res) {
+          return res.data;
+        });
+    },
+
     getPodsByNamespace: function (namespaceName) {
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getPodsByNamespace(namespaceName)
@@ -66,6 +74,22 @@
         .then(function (res) {
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'cpu/usage_rate' + (filter ? filter : ''));
+        }).catch(function (err) {
+          //
+
+
+        });
+    },
+
+    getCpuUtilization: function (filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getCpuUtilization(filter)
+        .then(function (res) {
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, 'cpu/utilization' + (filter ? filter : ''));
+        }).catch(function (err) {
+          //noop
         });
     },
 
@@ -76,6 +100,29 @@
         .then(function (res) {
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'memory/usage' + (filter ? filter : ''));
+        }).catch(function (err) {
+          //noop
+        });
+    },
+    getMemoryUtilization: function (filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getMemoryUtilization(filter)
+        .then(function (res) {
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, 'memory/utilization' + (filter ? filter : ''));
+        }).catch(function (err) {
+          //noop
+        });
+    },
+    getNodeUptime: function (nodeName) {
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNodeUptime(nodeName)
+        .then(function (res) {
+          var getLastMetricReading = res.data.latestTimestamp;
+          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+        }).catch(function (err) {
+          //noop
         });
     },
 
@@ -125,6 +172,9 @@
     },
     makePodFilter: function (namespaceName, podName) {
       return '{namespace_name=' + namespaceName + ',pod_name=' + podName + '}';
+    },
+    makeNodeNameFilter: function (nodeName) {
+      return '{nodename=' + nodeName + '}';
     },
 
     retrieveNamespaceInformation: function () {

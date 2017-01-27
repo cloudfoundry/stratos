@@ -1,15 +1,7 @@
 <div class="metrics-table" ui-view>
-
-  <div class="row">
-    <metrics-graphs class="full-width"></metrics-graphs>
-  </div>
-
-  <div class="row">
-
-    <div class="namespace-cards">
-      <div class="namespace-card" ng-repeat="namespaceDetail in metricsDashboardCtrl.namespacesList">
-        <namespace-card namespace-detail="namespaceDetail"></namespace-card>
-      </div>
+  <div class="node-cards">
+    <div class="node-card" ng-repeat="node in metricsDashboardCtrl.nodesList">
+      <node-card node-name="node"></node-card>
     </div>
   </div>
 

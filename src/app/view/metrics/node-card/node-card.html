@@ -1,0 +1,26 @@
+<gallery-card class="namespace-card"
+              card-data="nodeCardCtrl.getCardData()">
+
+  <dl class="dl-horizontal">
+    <dt translate>Uptime</dt>
+    <dd>
+      {{ nodeCardCtrl.nodeUptime }}
+    </dd>
+
+      <dt translate>CPU Utilization</dt>
+      <dd class="chart">
+        <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
+                       metrics="nodeCardCtrl.metricsData['cpu/utilization']"
+                       selected-metric-names="'cpu/utilization'">
+        </kd-graph-card>
+      </dd>
+      <dt translate>Memory Utilization</dt>
+      <dd class="chart">
+        <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
+                       graph-title="Memory usage"
+                       metrics="nodeCardCtrl.metricsData['memory/utilization']"
+                       selected-metric-names="'memory/utilization'">
+        </kd-graph-card>
+      </dd>
+  </dl>
+</gallery-card>

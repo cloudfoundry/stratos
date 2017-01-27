@@ -79,6 +79,7 @@ export class GraphController {
                   'Can\'t display requested data - metrics have inconsistent types of y1 axis!');
             }
             y1max = Math.max(y1max, Math.max(...metric.dataPoints.map((e) => e.y)));
+
           } else {  // yAxis is 2
             if (typeof yAxis2Type === 'undefined') {
               yAxis2Type = metricSettings.yAxisType;

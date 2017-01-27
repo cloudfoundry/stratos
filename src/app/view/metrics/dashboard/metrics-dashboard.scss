@@ -1,32 +1,27 @@
 .metrics-table {
 
+
+  @media (max-width: 1024px) {
+    .node-cards {
+      flex-direction: column;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .node-cards {
+      flex-direction: row;
+    }
+  }
+
   padding-top: 24px;
   display: flex;
-  flex-direction: column;
-
-  .row {
+  .node-cards {
+    padding-top: 24px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    .full-width {
-      width: 100%;
+    div:last-child {
+      padding-right: 12px;
     }
-
-    .namespace-cards {
-      padding-top: 24px;
-      flex-direction: row;
-      display: flex;
-      div:last-child {
-        padding-right: 12px;
-      }
-      width:100%;
-
-
-      .namespace-card{
-        padding-right: 12px;
-        flex-grow: 1;
-      }
-    }
+    width: 100%;
   }
 
 }

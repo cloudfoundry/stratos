@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {formatCpuUsage, formatMemoryUsage, formatTime} from './graph_tick_formatters';
+import {formatCpuUsage, formatMemoryUsage, formatCpuUtilization, formatTime} from './graph_tick_formatters';
 
 const i18n = {
   /** @export {string} @desc Name of the CPU usage metric as displayed in the legend. */
   MSG_GRAPH_CPU_USAGE_LEGEND_LABEL: goog.getMsg('CPU Usage'),
+  /** @export {string} @desc Name of the CPU usage metric as displayed in the legend. */
+  MSG_GRAPH_CPU_UTILIZATION_LEGEND_LABEL: goog.getMsg('CPU Utilization'),
+  /** @export {string} @desc Name of the CPU usage metric as displayed in the legend. */
+  MSG_GRAPH_MEM_UTILIZATION_LEGEND_LABEL: goog.getMsg('Memory Utilization'),
   /** @export {string} @desc Name of the memory usage metric as displayed in the legend. */
   MSG_GRAPH_MEMORY_USAGE_LEGEND_LABEL: goog.getMsg('Memory Usage'),
   /** @export {string} @desc Name of the CPU limit metric as displayed in the legend. */
   MSG_GRAPH_CPU_LIMIT_LEGEND_LABEL: goog.getMsg('CPU Limit'),
   /** @export {string} @desc Name of Y axis showing CPU usage. */
   MSG_GRAPH_CPU_AXIS_LABEL: goog.getMsg('CPU (cores)'),
+  /** @export {string} @desc Name of Y axis showing CPU Utilization. */
+  MSG_GRAPH_CPU_UTIL_AXIS_LABEL: goog.getMsg('CPU Utilization (%)'),
+  /** @export {string} @desc Name of Y axis showing Memory Utilization. */
+  MSG_GRAPH_MEM_UTIL_AXIS_LABEL: goog.getMsg('Memory Utilization (%)'),
   /** @export {string} @desc Name of Y axis showing memory usage. */
   MSG_GRAPH_MEMORY_AXIS_LABEL: goog.getMsg('Memory (bytes)'),
   /** @export {string} @desc Name of time axis. */
@@ -39,7 +47,7 @@ export const TICK_NUM = 4.5;
 /**
  * Settings specifying the range of position of the maximum value on Y axis (units = number of
  * ticks).
- * For example setting [4,5] means that maximum value of the graph should be somewhere between tick
+ * For example setting [4,5]   means that maximum value of the graph should be somewhere between tick
  * 4 and tick 5.
  *
  * @type {!Array<number>}
@@ -47,6 +55,8 @@ export const TICK_NUM = 4.5;
 export const MAX_BETWEEN_TICKS = [3.8, 4.1];
 
 export const CPUAxisType = 'CPUAxisType';
+export const CPUUtilizationAxisType = 'CPUUtilizationAxisType';
+export const MemoryUtilizationAxisType = 'MemoryUtilizationAxisType';
 export const MemoryAxisType = 'MemoryAxisType';
 export const TimeAxisType = 'TimeAxisType';
 
@@ -60,6 +70,16 @@ export const metricDisplaySettings = {
     yAxisType: CPUAxisType,
     area: true,
     key: i18n.MSG_GRAPH_CPU_USAGE_LEGEND_LABEL,
+    color: '#00c752',  // $chart-1
+    fillOpacity: 0.2,
+    strokeWidth: 3,
+    type: 'line',
+    yAxis: 1,
+  },
+  'cpu/utilization': {
+    yAxisType: CPUUtilizationAxisType,
+    area: true,
+    key: i18n.MSG_GRAPH_CPU_UTILIZATION_LEGEND_LABEL,
     color: '#00c752',  // $chart-1
     fillOpacity: 0.2,
     strokeWidth: 3,
@@ -95,6 +115,16 @@ export const metricDisplaySettings = {
     strokeWidth: 3,
     type: 'line',
     yAxis: 2,
+  },
+  'memory/utilization': {
+    yAxisType: MemoryUtilizationAxisType,
+    area: true,
+    key: i18n.MSG_GRAPH_MEM_UTILIZATION_LEGEND_LABEL,
+    color: '#326de6',  // $chart-1
+    fillOpacity: 0.2,
+    strokeWidth: 3,
+    type: 'line',
+    yAxis: 1,
   },
   memory_usage_gauge: {
     yAxisType: MemoryAxisType,
@@ -133,6 +163,14 @@ export const axisSettings = {
   'CPUAxisType': {
     formatter: formatCpuUsage,
     label: i18n.MSG_GRAPH_CPU_AXIS_LABEL,
+  },
+  'CPUUtilizationAxisType': {
+    formatter: formatCpuUtilization,
+    label: i18n.MSG_GRAPH_CPU_UTIL_AXIS_LABEL,
+  },
+  'MemoryUtilizationAxisType': {
+    formatter: formatCpuUtilization,
+    label: i18n.MSG_GRAPH_MEM_UTIL_AXIS_LABEL,
   },
   'MemoryAxisType': {
     formatter: formatMemoryUsage,

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import coresFilter from 'common/filters/cores_filter';
+import utilizationFilter from 'common/filters/utilization_filter';
 import memoryFilter from 'common/filters/memory_filter';
 
 /**
@@ -51,6 +52,10 @@ export function formatMemoryUsage(d) {
  */
 export function formatCpuUsage(d) {
   return d === null ? i18n.MSG_GRAPH_DATA_POINT_NOT_AVAILABLE : coresFilter(precisionFilter)(d);
+}
+
+export function formatCpuUtilization(d) {
+  return d === null ? i18n.MSG_GRAPH_DATA_POINT_NOT_AVAILABLE : utilizationFilter(precisionFilter)(d);
 }
 
 /**

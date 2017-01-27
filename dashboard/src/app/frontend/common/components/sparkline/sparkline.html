@@ -16,6 +16,6 @@ limitations under the License.
 
 <svg viewBox="0,0 1,1"
      preserveAspectRatio="none"
-     class="kd-sparkline">
+     class="{{ sparklineCtrl.className || 'kd-sparkline'}}">
   <polygon ng-attr-points="0,1 {{::sparklineCtrl.polygonPoints()}} 1,1"/>
 </svg>

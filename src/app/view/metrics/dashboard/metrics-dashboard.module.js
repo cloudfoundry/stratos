@@ -49,8 +49,8 @@
     var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
 
     function init() {
-      return metricsModel.retrieveNamespaceInformation().then(function (namespaceInformation) {
-        that.namespacesList = _.values(namespaceInformation);
+      return metricsModel.getNodes().then(function (nodes) {
+        that.nodesList = nodes;
       });
     }
 

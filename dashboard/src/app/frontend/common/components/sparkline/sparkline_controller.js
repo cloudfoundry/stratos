@@ -36,9 +36,8 @@ export default class SparklineController {
    * @export
    */
   polygonPoints() {
+
     const series = this.timeseries.map(({timestamp, value}) => [Date.parse(timestamp), value]);
-    console.log('sparkline sries:')
-    console.log(series)
     const sorted = series.slice().sort((a, b) => a[0] - b[0]);
     const xShift = Math.min(...sorted.map((pt) => pt[0]));
     const shifted = sorted.map(([x, y]) => [x - xShift, y]);

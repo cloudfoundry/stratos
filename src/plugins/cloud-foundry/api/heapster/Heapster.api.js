@@ -28,8 +28,12 @@
     this.getNamespaceNames = getNamespaceNames;
     this.getPodsByNamespace = getPodsByNamespace;
     this.getNamespaceNames = getNamespaceNames;
+    this.getNodeUptime = getNodeUptime;
+    this.getNodes = getNodes;
     this.getCpuUsage = _metricsQuery('cpu_usage_rate_gauge');
+    this.getCpuUtilization = _metricsQuery('cpu_node_utilization_gauge');
     this.getMemoryUsage = _metricsQuery('memory_usage_gauge');
+    this.getMemoryUtilization = _metricsQuery('memory_node_utilization_gauge');
 
     function _metricsQuery(metrics) {
       return function (filter, time) {
@@ -49,6 +53,16 @@
 
     function getPodsByNamespace(namespaceName) {
       var url = heapsterApiUrl + 'api/v1/model/namespaces/' + namespaceName + '/pods/';
+      return $http.get(url);
+    }
+
+    function getNodes() {
+      var url = heapsterApiUrl + 'api/v1/model/nodes';
+      return $http.get(url);
+    }
+
+    function getNodeUptime(nodeName) {
+      var url = heapsterApiUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/uptime';
       return $http.get(url);
     }
 

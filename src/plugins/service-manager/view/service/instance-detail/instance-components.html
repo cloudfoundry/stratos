@@ -11,6 +11,8 @@
     <th translate st-sort="name" st-sort-default="true" st-skip-natural="true">Component Name</th>
     <th translate st-sort="state.phase" st-skip-natural="true">State</th>
     <th translate st-sort="volumes" st-skip-natural="true">Volumes</th>
+    <th translate >CPU Usage</th>
+    <th translate> Memory Usage</th>
   </tr>
   <tr>
     <th colspan="3" class="table-sort-filter">
@@ -36,6 +38,8 @@
           class="product-version pointer hsm-volume-{{volume.name}}"
           ng-repeat="volume in component.volumes">{{ volume.name }}</span>
     </td>
+    <td><kd-sparkline ng-if="instanceCtrl.cpuUsageData[component.name].length > 0" class-name="expanded-kd-sparkline-cpu-series"   timeseries="instanceCtrl.cpuUsageData[component.name]"></td>
+    <td><kd-sparkline ng-if="instanceCtrl.memoryUsageData[component.name].length > 0" class-name="expanded-kd-sparkline-memory-series"  timeseries="instanceCtrl.memoryUsageData[component.name]"></td>
   </tr>
   </tbody>
 </table>

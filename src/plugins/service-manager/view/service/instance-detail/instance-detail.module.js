@@ -111,9 +111,10 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.confirmDialog = confirmDialog;
     this.$timeout = $timeout;
-
+    this.$q = $q;
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
@@ -126,10 +127,14 @@
 
     this.interestingState = false;
 
+    this.cpuUsageData = {};
+    this.memoryUsageData = {};
+
     this.actions = [
-      { name: 'Upgrade Instance'},
-      { name: 'Configure Instance'},
-      { name: 'Delete Instance',
+      {name: 'Upgrade Instance'},
+      {name: 'Configure Instance'},
+      {
+        name: 'Delete Instance',
         execute: function () {
           return that.deleteInstance(that.id);
         }
@@ -152,6 +157,7 @@
     this.fetch().then(function () {
       that.poll();
     });
+
   }
 
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
@@ -182,6 +188,7 @@
       var that = this;
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
+        that._fetchInstanceMetrics(that.instance);
         that._setStateIndicator();
       }).catch(function (err) {
         if (that.deleting) {
@@ -245,7 +252,41 @@
           that.poll(true);
         });
       });
+    },
+
+    updateCpuUsage: function (componentName) {
+      var that = this;
+      return this.metricsModel.getCpuUsageRate(this.metricsModel.makePodFilter(this.id, componentName))
+        .then(function (metricsData) {
+          if (_.has(metricsData, 'timeSeries')) {
+            that.cpuUsageData[componentName] = metricsData.timeSeries;
+          }
+        });
+    },
+    updateMemoryUsage: function (componentName) {
+      var that = this;
+      return this.metricsModel.getMemoryUsage(this.metricsModel.makePodFilter(this.id, componentName))
+        .then(function (metricsData) {
+          if (_.has(metricsData, 'timeSeries')) {
+            that.memoryUsageData[componentName] = metricsData.timeSeries;
+          }
+        });
+    },
+
+    _fetchInstanceMetrics: function (instance) {
+
+      var that = this;
+      var metricsPromises = [];
+      _.each(instance.components, function (component) {
+        if (component.state.phase !== 'Running') {
+          return;
+        }
+        metricsPromises.push(that.updateCpuUsage(component.name));
+        metricsPromises.push(that.updateMemoryUsage(component.name));
+      });
+      return this.$q.all(metricsPromises);
     }
+
   });
 
   UpgradeController.$inject = [

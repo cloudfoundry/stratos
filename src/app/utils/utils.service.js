@@ -80,7 +80,8 @@
       urlValidationExpression: urlValidationExpression,
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
-      getOemConfiguration: getOemConfiguration
+      getOemConfiguration: getOemConfiguration,
+      getSensibleTime: getSensibleTime
     };
 
     /**
@@ -323,6 +324,31 @@
     }
 
     return errorText;
+  }
+
+  function getSensibleTime(timeInMilis) {
+
+    var seconds = Math.floor(timeInMilis / 1000 % 60);
+    var minutes = Math.floor(timeInMilis / (1000 * 60) % 60);
+    var hours = Math.floor(timeInMilis / (1000 * 3600) % 60);
+
+    var timeString = '';
+    if (hours > 0) {
+      timeString = hours + 'h ';
+    }
+    if (minutes > 0 || hours > 0) {
+      timeString = timeString + minutes + 'm ';
+    }
+
+    if (seconds > 0 || minutes > 0 || hours > 0) {
+      timeString = timeString + seconds + 's ';
+    } else {
+      if (seconds === 0 && minutes === 0 && hours === 0) {
+        timeString = gettext('Less than a second');
+      }
+    }
+
+    return timeString;
   }
 
 })();
