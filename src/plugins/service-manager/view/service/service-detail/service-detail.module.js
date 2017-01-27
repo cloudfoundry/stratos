@@ -11,20 +11,39 @@
 
   function registerRoute($stateProvider) {
 
-    // Abstract detail route
     $stateProvider.state('sm.endpoint.service', {
       url: '/service/:id',
+      template: '<ui-view/>',
+      controller: ServiceManagerServiceController,
+      controllerAs: 'svCtrl',
+      abstract: true,
+      data: {
+        activeMenuState: 'sm.list'
+      }
+    });
+
+    // Abstract detail route
+    $stateProvider.state('sm.endpoint.service.detail', {
+      url: '/detail',
       templateUrl: 'plugins/service-manager/view/service/service-detail/service-detail.html',
       controller: ServiceManagerServiceDetailController,
       controllerAs: 'sCtrl',
       ncyBreadcrumb: {
-        label: '{{ sCtrl.id || "..." }}',
+        label: '{{ svCtrl.id || "..." }}',
         parent: 'sm.endpoint.detail.instances'
       },
       data: {
         activeMenuState: 'sm.list'
       }
     });
+  }
+
+  ServiceManagerServiceController.$inject = [
+    '$state'
+  ];
+
+  function ServiceManagerServiceController($state) {
+    this.id = $state.params.id;
   }
 
   ServiceManagerServiceDetailController.$inject = [

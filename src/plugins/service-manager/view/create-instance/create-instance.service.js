@@ -1,4 +1,5 @@
 (function () {
+
   'use strict';
 
   angular
@@ -21,56 +22,36 @@
    */
   function CreateInstanceDialogFactory($q, modelManager, asyncTaskDialog) {
 
-    this.show = function (serviceManagerGuid, service, productVersion, sdlVersion) {
+    this.show = function (serviceManagerGuid, services, serviceId, productVersion, sdlVersion) {
 
       function create(data) {
         var hsmModel = modelManager.retrieve('service-manager.model');
-        return hsmModel.createInstance(serviceManagerGuid, service.id, data.product, data.sdl, data.instanceId, data.params).then(function (d) {
+        return hsmModel.createInstance(serviceManagerGuid, data.serviceId, data.product, data.sdl, data.instanceId, data.params).then(function (d) {
           return d;
         });
       }
 
-      var productVersions = [];
-      var sdlVersions = {};
-      _.each(service.product_versions, function (version) {
-        productVersions.push({
-          label: version.product_version,
-          value: version.product_version
-        });
-        var sdl = [];
-        sdlVersions[version.product_version] = sdl;
-        _.each(version.sdl_versions, function (url, sdlVersion) {
-          sdl.push({
-            label: sdlVersion,
-            value: sdlVersion,
-            latest: sdlVersion === version.latest
-          });
-        });
-      });
-
       return asyncTaskDialog(
         {
-          title: 'Create Instance of Service "' + service.id + '"',
+          title: 'Create Service Instance',
           templateUrl: 'plugins/service-manager/view/create-instance/create-instance.html',
+          class: 'detail-view-two-fields',
           buttonTitles: {
             submit: gettext('Create')
           }
-        },
-        {
+        }, {
           data: {
             guid: serviceManagerGuid,
-            service: service,
+            serviceId: serviceId,
+            services: services,
             productVersion: productVersion,
-            sdlVersion: sdlVersion,
-            productVersions: productVersions,
-            sdlVersions: sdlVersions
+            sdlVersion: sdlVersion
           },
           invalidityCheck: function (data) {
             return data.form && data.form.createInstanceForm ? data.form.createInstanceForm.$invalid : true;
           }
         },
-        create
-      );
+      create);
     };
 
     return this;

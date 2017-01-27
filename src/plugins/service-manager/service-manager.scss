@@ -197,3 +197,150 @@ table tr td.table-inline-message {
     }
   }
 }
+
+table.table > tbody > tr > td.table-inline-message.hsm-upgrade, div.hsm-upgrade {
+  padding: 0;
+  margin: 0;
+  text-align: left;
+
+  > div {
+    display: flex;
+    margin: 0;
+    border-top: 1px solid #eee;
+    padding: 12px 0;    
+
+    > div.upgrade-message {
+      text-align: left;
+      flex: 1;
+      color: #888;
+      display: flex;
+      align-items: center;
+
+      > i.helion-icon {
+        font-size: 18px;
+        margin-right: 8px;
+        cursor: pointer;
+        &:hover, &:focus {
+          color: #01a982;
+        }
+      }
+
+      a {
+        color: #888;
+        &:hover, &:focus {
+          text-decoration: none;
+          color: #01a982;
+        }
+      }
+    }
+
+    > div.upgrade-acknowledge {
+      > i {
+        font-size: 16px;
+      }
+      color: #888;
+      cursor: pointer;
+      &:hover, &:focus {
+        color: #01a982;
+      }
+    }
+  }
+}
+
+div.hsm-upgrade > div {
+  padding-bottom: 0px;
+}
+
+.upgrade-indicator {
+  > i {
+    font-size: 16px;
+  }
+  color: #888;
+  cursor: pointer;
+  &:hover, &:focus {
+    color: #01a982;
+  }
+}
+
+form.hsm-filter-box {
+  margin-bottom: $hpe-unit-space * 0.5;
+  width: $hpe-unit-space * 15;
+
+  .form-group {
+    width: auto;
+    text-align: left;
+    height: $hpe-unit-space * 1.5;
+
+    i {
+      position: absolute;
+      margin-left: -12px;
+      height: $hpe-unit-space * 1.5;;
+      vertical-align: middle;
+      line-height: $hpe-unit-space * 1.5;;
+      font-size: 18px;          
+    }
+
+    input {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      margin-left: $hpe-unit-space;
+      font-weight: normal;
+    }
+  }
+}
+
+fieldset.fieldset-horizontal .form-group.file-drop-active {
+  border-color: red;
+  background-color: green;
+  opacity: 0.75;
+}
+
+.hsm-file-drop-target {
+  display: flex;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 53px;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+
+    > div {
+      border: 1px dashed #ccc;
+        padding: 4px 8px;
+        margin-right: 6px;
+        color: #666;
+    }
+
+    &.file-drop-active > div {
+      border-color: $hpe-primary;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+}
+
+form.file-drop-active {
+  opacity: 0.5;
+}
+
+#hsm-choose-instance-file {
+  display: none;
+}
+
+.hsm-create-instance-intro {
+  display: flex;
+
+  > div {
+    margin-left: $hpe-unit-space * 0.5;
+  }
+}
+
+.hsm-params-selector {
+  display: flex;
+  align-items: center;
+
+  > h4 {
+    flex: 1;
+  }
+}

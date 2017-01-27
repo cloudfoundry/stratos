@@ -68,6 +68,14 @@
       });
     },
 
+    getTemplate: function (guid, url) {
+      var i = url.indexOf('/v1/');
+      if (i > 0) {
+        url = url.substr(i + 4);
+      }
+      return this._get(url, guid);
+    },
+
     /**
      * @name instances
      * @description Get the instances for the HSM instance

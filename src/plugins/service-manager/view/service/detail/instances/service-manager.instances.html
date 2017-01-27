@@ -27,18 +27,10 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="endpoint in svcsCtrl.stTableInstances track by endpoint.instance_id"
-          show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
-          inline-message-colspan="7"
-          inline-message-link="sm.endpoint.instance.upgrades/id:{{endpoint.instance_id}}"
-          table-inline-status="{{ endpoint.error.status }}">
-
-        <!--Endpoint Name-->
+      <tr ng-repeat-start="endpoint in svcsCtrl.stTableInstances track by endpoint.instance_id">
         <td >
           <a ng-click="instancesCtrl.open(endpoint)">{{ endpoint.instance_id }}</a>
         </td>
-
-        <!--Endpoint Connection Status-->
         <td ng-switch="endpoint.state" class="endpoint-table-connected">
           <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                 ng-switch-when="running"></span>
@@ -58,28 +50,43 @@
         </td>
 
         <td>
-          <a ui-sref="sm.endpoint.service({id:  endpoint.service_id })">
+          <a ui-sref="sm.endpoint.service.detail({id:  endpoint.service_id })">
           {{  endpoint.service_id }}
           </a>
         </td>
         <td>{{ endpoint.product_version }}</td>
-        <td>{{ endpoint.sdl_version }}</td>
+        <td>
+          <a ui-sref="sm.endpoint.service.sdl({id: endpoint.service_id, product: endpoint.product_version, sdl: endpoint.sdl_version})">
+          {{ endpoint.sdl_version }}
+          </a>
+        </td>
         <td>{{ endpoint.vendor }}</td>
         <td>
+          <!--
           <actions-menu actions="endpoint.actions"
                         action-target="endpoint.actionsTarget"
                         menu-icon="helion-icon helion-icon-More"
                         menu-position="actions-menu-right"
                         enable-button-mode="true"></actions-menu>
+        -->
+          <div ng-if="smCtrl.hasUpgrade(endpoint.instance_id, true) && !smCtrl.hasUpgrade(endpoint.instance_id)" class="upgrade-indicator">
+            <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="smCtrl.hasUpgrade(endpoint.instance_id)" ng-repeat-end>
+        <td colspan="7" class="table-inline-message hsm-upgrade">
+          <div>
+            <div class="upgrade-message">
+              <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+              <a ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})">Upgrade available</a>
+            </div>
+            <div class="upgrade-acknowledge">
+              <i ng-click="smCtrl.acknowledgeUpgrade(endpoint.instance_id)" class="helion-icon helion-icon-Close"></i>
+            </div>
+          <div>
         </td>
       </tr>
       </tbody>
     </table>
-
-<!--
-
-  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
-    <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
-  </div>
-  -->
 </div>

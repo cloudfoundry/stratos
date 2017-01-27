@@ -5,7 +5,7 @@
       <h3 translate>Service : {{ sCtrl.service.id }}</h3>
       <div class="create-instance-btn">
         <button class="btn btn-primary" translate
-          ng-click="smCtrl.createInstance(sCtrl.service)">
+          ng-click="smCtrl.createInstance(sCtrl.service.id)">
           Create Instance
           </button>      
       </div>
@@ -16,7 +16,6 @@
           <span translate>Summary</span>
           <img class="hsm-service-icon" src="{{sCtrl.service.iconURL}}"/>
         </div>
-
 
         <div class="panel-body cluster-summary-panel row">
           <div class="col-md-5">
@@ -99,7 +98,10 @@
   <tbody>
     <tr ng-repeat="svc in sCtrl.stTableServiceVersions track by $index">
       <td>{{ svc.product_version }}</td>
-      <td>{{ svc.sdl_version }}</td>
+      <td>
+        <a ui-sref="sm.endpoint.service.sdl({product: svc.product_version, sdl: svc.sdl_version})">
+        {{ svc.sdl_version }}</td>
+        </a>
     </tr>
   </tbody>
 </table>

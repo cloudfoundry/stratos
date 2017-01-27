@@ -1,6 +1,42 @@
+<form name="form.createInstanceForm" file-drop="ciFormCtrl.instanceFile">
+
+  <div class="hsm-create-instance-intro">
+    <p>
+      You can upload a pre-prepared instance JSON file, by either selecting the file below or by
+      draggina dnd dropping it onto this area.
+    </p>
+    <div>
+      <input id="hsm-choose-instance-file" fileread="ciFormCtrl.instanceFile" type="file"></input>
+      <label for="hsm-choose-instance-file" class="btn btn-default btn-sm">Select Instance JSON</label>
+    </div>
+  </div>
+
+
+  <h4>Service</h4>
+  <fieldset class="fieldset-horizontal">
+  <div class="form-group" focusable-input>
+    <label class="control-label" translate>Service</label>
+    <select-input
+      class="form-control"
+      ng-model="ciFormCtrl.data.serviceId"
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+      input-options="ciFormCtrl.serviceOptions"
+      required
+      ng-change="ciFormCtrl.serviceChanged()"
+    />
+  </div>
+  <!--
+  <div class="form-group hsn-instance-file-upload">
+    <input fileread="ciFormCtrl.instanceFile" type="file"></input>
+    <div class="hsm-file-drop-target" file-drop="ciFormCtrl.instanceFile">
+      <div>Drop file here</div>
+    </div>
+  </div>
+  -->
+  </fieldset>
+
 <h4>Choose Product Version, SDL Version and an Instance ID</h4>
 
-<form name="form.createInstanceForm">
   <fieldset class="fieldset-horizontal">
     <div class="form-group" focusable-input>
       <label class="control-label" translate>Product Version</label>
@@ -8,7 +44,7 @@
         class="form-control"
         ng-model="ciFormCtrl.data.product"
         arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-        input-options="ciFormCtrl.data.productVersions"
+        input-options="ciFormCtrl.productVersions"
         required
         ng-change="ciFormCtrl.productChanged()"
       />
@@ -39,10 +75,17 @@
 
   <div ng-show="ciFormCtrl.data.sdl">
 
-  <h4>Service Parameters</h4>
+  <div class="hsm-params-selector">
+    <h4 translate>Service Parameters</h4>
+    <div>
+      <span>Show:</span>
+      <a translate ng-click="ciFormCtrl.showAllParams(false)">Required</a>
+      <a translate ng-click="ciFormCtrl.showAllParams(true)">All</a>
+    </div>
+  </div>
 
   <fieldset class="two-width-fields">
-    <div ng-repeat="p in ciFormCtrl.parameters" class="form-group" focusable-input>
+    <div ng-repeat="p in ciFormCtrl.shownParams" class="form-group" focusable-input>
       <label class="control-label" translate>{{p.name}}</label>
       <input
         type="text"
@@ -53,7 +96,7 @@
       />
     </div>
   </fieldset>
-  <div ng-if="ciFormCtrl.parameters.length === 0">
+  <div ng-if="ciFormCtrl.shownParams.length === 0">
     This service does not have any parameters that must be provided.
   </div>
   </div>
