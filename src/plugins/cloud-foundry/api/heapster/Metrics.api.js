@@ -20,9 +20,7 @@
     var that = this;
     this.$httpParamSerializer = $httpParamSerializer;
 
-    // TODO no portal-proxy integration yet
-    var heapsterApiUrl = '/metrics/heapster/';
-    var opentsdbApiUrl = '/metrics/opentsdb/';
+    var metricsUrl = '/pp/v1/metrics/';
 
     // Exports
     this.getNamespaceNames = getNamespaceNames;
@@ -40,29 +38,29 @@
         if (!time) {
           time = '24h-ago';
         }
-        var url = opentsdbApiUrl + 'api/query?start=' + time + '&m=sum:' + metrics + (filter ? filter : '');
+        var url = metricsUrl + 'api/query?start=' + time + '&m=sum:' + metrics + (filter ? filter : '');
         return $http.get(url);
       };
     }
 
     function getNamespaceNames() {
-      var url = heapsterApiUrl + 'api/v1/model/namespaces/';
+      var url = metricsUrl + 'api/v1/model/namespaces/';
       return $http.get(url);
 
     }
 
     function getPodsByNamespace(namespaceName) {
-      var url = heapsterApiUrl + 'api/v1/model/namespaces/' + namespaceName + '/pods/';
+      var url = metricsUrl + 'api/v1/model/namespaces/' + namespaceName + '/pods/';
       return $http.get(url);
     }
 
     function getNodes() {
-      var url = heapsterApiUrl + 'api/v1/model/nodes';
+      var url = metricsUrl + 'api/v1/model/nodes';
       return $http.get(url);
     }
 
     function getNodeUptime(nodeName) {
-      var url = heapsterApiUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/uptime';
+      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/uptime';
       return $http.get(url);
     }
 

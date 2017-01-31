@@ -400,8 +400,6 @@
       // Need a JSON file named 'dev_config.json'
       var devOptions = require('./dev_config.json');
       var targetUrl = nodeUrl.parse(devOptions.pp);
-      var metricsHeapsterUrl = nodeUrl.parse(devOptions.metrics_heapster);
-      var metricsOpenTsdbUrl = nodeUrl.parse(devOptions.metrics_opentsdb);
       https = devOptions.https;
       if (https && https.cert && https.key) {
         gutil.log('Serving HTTPS with the following certificate:', gutil.colors.magenta(https.cert));
@@ -431,32 +429,7 @@
           req.pipe(proxiedRequest(url)).pipe(res);
         }
       };
-
-      var metricsHeapsterMiddleware = {
-        route: '/metrics/heapster',
-        handle: function (req, res) {
-          console.log('Handling /metrics/heapster call');
-          var url = nodeUrl.format(metricsHeapsterUrl) + req.url;
-          console.log('full url' + url);
-          var method = (req.method + '        ').substring(0, 8);
-          gutil.log(method, req.url);
-          req.pipe(proxiedRequest(url)).pipe(res);
-        }
-      };
-      var metricsOpenTsdbMiddleware = {
-        route: '/metrics/opentsdb',
-        handle: function (req, res) {
-          console.log('Handling /metrics/opentsdb call');
-          var url = nodeUrl.format(metricsOpenTsdbUrl) + req.url;
-          console.log('full url' + url);
-          var method = (req.method + '        ').substring(0, 8);
-          gutil.log(method, req.url);
-          req.pipe(proxiedRequest(url)).pipe(res);
-        }
-      };
       middleware.push(proxyMiddleware);
-      middleware.push(metricsHeapsterMiddleware);
-      middleware.push(metricsOpenTsdbMiddleware);
     } catch (e) {
       throw new gutil.PluginError('browsersync', 'dev_config.json file is required with portal-proxy(pp) endpoint' +
         'configuration');
