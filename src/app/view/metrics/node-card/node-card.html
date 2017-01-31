@@ -15,14 +15,14 @@
       {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
     </dd>
 
-    <dt translate>CPU Utilization</dt>
+    <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
                      metrics="nodeCardCtrl.metricsData['cpu/utilization']"
                      selected-metric-names="'cpu/utilization'">
       </kd-graph-card>
     </dd>
-    <dt translate>Memory Utilization</dt>
+    <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
                      graph-title="Memory usage"
@@ -30,7 +30,7 @@
                      selected-metric-names="'memory/utilization'">
       </kd-graph-card>
     </dd>
-    <dt translate>Data Transmitted</dt>
+    <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_tx_cumulative')" class="graph-card"
                      graph-title="Data Transmitted"
@@ -38,7 +38,7 @@
                      selected-metric-names="'network_tx_cumulative'">
       </kd-graph-card>
     </dd>
-    <dt translate>Data Received</dt>
+    <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_rx_cumulative')" class="graph-card"
                      graph-title="Data Received"
