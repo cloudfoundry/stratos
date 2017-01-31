@@ -35,10 +35,19 @@
     var logDivCapacity = 8 * 1024;
 
     // Batch up removes from DOM to save reflow costs
-    var truncateDelayMs = 1000;
+    var truncateDelayMs = 5000;
 
     // Batch up appends to DOM to save reflow costs
-    var batchDelayMs = 33;
+    var batchDelayMs = 40;
+
+    // Resize divs one by one at an interval
+    var divResizeIntervalMs = 66; // resizing a single div takes somewhere between 4ms and 10ms
+
+    // Keep track of the current width of the viewer
+    var currentWidth = 0;
+
+    // The horizontal padding inside the viewer is measured once during the link phase
+    var hPadding = 0;
 
     var STREAMING_STATUS = {
       NOT_STREAMING: 0,
@@ -47,21 +56,24 @@
       CLOSED: 3
     };
 
-    function logViewerLink(scope, logContainerJq) {
+    function logViewerLink(ignore, logContainerJq) {
       logContainer = logContainerJq[0];
       logContainerJq.on('scroll', handleScroll);
       logContainerJq.on('mousewheel', handleWheel);
+      hPadding = parseFloat(getComputedStyle(logContainer).getPropertyValue('padding-left'));
+      hPadding += parseFloat(getComputedStyle(logContainer).getPropertyValue('padding-right'));
+      currentWidth = logContainer.clientWidth;
     }
 
-    LogViewerController.$inject = ['$scope'];
+    LogViewerController.$inject = ['$scope', '$window'];
 
-    function LogViewerController($scope) {
+    function LogViewerController($scope, $window) {
       var logViewer = this;
 
       var colorizer = AnsiColorsService.getInstance();
 
       var logDivId = 0;
-      var oldestLogDiv = 0;
+      var oldestLogDiv = 1;
 
       // Keep track of the number of bytes held in the viewer
       var totalSize = 0;
@@ -69,38 +81,163 @@
       // Prevent wrongly toggling autoScrollOn after non-user scroll events
       var automaticScrolled = false;
 
+      // Suspend appends to DOM
+      var paused = false;
+
+      // Interval that periodically resizes a single log div
+      var resizeInterval;
+
+      // Keep track of what's left to resize
+      var divsToResize = [];
+      var resizedDivsMap = {};
+
       handleScroll = scrollHandler;
       handleWheel = wheelHandler;
 
       function makeLogDiv() {
-        angular.element(logContainer).append('<div id="logDiv-' + ++logDivId + '" style="width: 100%;"></div>');
+        angular.element(logContainer).append(
+          '<div id="logDiv-' + ++logDivId + '" style="width: ' + currentWidth + 'px;"></div>'
+        );
         logTextArea = angular.element('#logDiv-' + logDivId)[0];
         logViewer.currentLog = '';
       }
 
+      function getFirstDivInView() {
+        // Note: we know that divs are stacked vertically so some optimizations are possible
+        var viewerTop = logContainer.scrollTop;
+        var viewerBottom = viewerTop + logContainer.offsetHeight;
+
+        for (var divId = oldestLogDiv; divId <= logDivId; divId++) {
+          var aDiv = angular.element('#logDiv-' + divId);
+          if (aDiv.length < 1) {
+            // Shouldn't happen
+            continue;
+          }
+          var divTop = aDiv[0].offsetTop;
+          if (divTop > viewerBottom) {
+            // Subsequent divs cannot be in view since we're already beyond the bottom of the viewer
+            return null;
+          }
+          var divBottom = divTop + aDiv[0].offsetHeight;
+          if (divBottom < viewerTop) {
+            continue;
+          }
+          // Div is in view
+          return divId;
+        }
+        return null;
+      }
+
+      function resizeSingleDiv(divId, widthPx) {
+        resizedDivsMap[divId] = true;
+        var index = divsToResize.indexOf(divId);
+        if (index > -1) {
+          divsToResize.splice(index, 1);
+        }
+        var aDiv = angular.element('#logDiv-' + divId);
+        if (aDiv.length < 1) {
+          return;
+        }
+
+        var previousHeight = aDiv[0].offsetHeight;
+        var scrollAffected = !logViewer.autoScrollOn && logContainer.scrollTop > aDiv[0].offsetTop;
+
+        aDiv[0].style.width = widthPx;
+
+        // Adjust scroll: best effort to maintain viewer's context
+        if (scrollAffected) {
+          var newHeight = aDiv[0].offsetHeight;
+          if (newHeight !== previousHeight) {
+            logContainer.scrollTop += newHeight - previousHeight;
+          }
+        }
+
+        // If we're auto-scrolling, ensure we stick to the bottom
+        autoScroll();
+      }
+
+      function resizeAllDivs() {
+
+        resizedDivsMap = {};
+        divsToResize = [];
+
+        // Work out which div is currently shown
+        var shownDiv;
+        if (!logViewer.autoScrollOn) {
+          var inView = getFirstDivInView();
+          if (inView === null) {
+            shownDiv = logDivId;
+          } else {
+            shownDiv = inView;
+          }
+        } else {
+          shownDiv = logDivId;
+        }
+
+        divsToResize.push(shownDiv);
+
+        // Resize all divs starting from the first in-view and outwards in both directions
+        var upwards = shownDiv;
+        var downwards = shownDiv;
+        while (downwards < logDivId || upwards > oldestLogDiv) {
+          if (upwards > oldestLogDiv) {
+            divsToResize.push(--upwards);
+          }
+          if (downwards < logDivId) {
+            divsToResize.push(++downwards);
+          }
+        }
+
+        // Synchronously resize the shown div and its immediate neighbours
+        var widthPx = currentWidth + 'px';
+        for (var i = 0; i < 3; i++) {
+          resizeSingleDiv(divsToResize[0], widthPx);
+        }
+
+        // Asynchronously resize the rest
+        if (resizeInterval) {
+          clearInterval(resizeInterval);
+        }
+
+        // Let's not incur an unnecessary digest here
+        /* eslint-disable angular/interval-service */
+        resizeInterval = setInterval(function () {
+          resizeSingleDiv(divsToResize[0], widthPx);
+          if (divsToResize.length < 1) {
+            clearInterval(resizeInterval);
+            resizeInterval = undefined;
+          }
+        }, divResizeIntervalMs);
+        /* eslint-enable angular/interval-service */
+
+      }
+
       function realTruncateOldDivs() {
-        if (!logViewer.maxSize) {
+        if (!logViewer.capacityBytes) {
           return;
         }
 
         // Remember scrollTop and scrollHeight before truncation
-        var oldScrollTop = logContainer.scrollTop;
-        var preHeight = logContainer.scrollHeight;
+        var oldScrollTop, preHeight;
+        if (!logViewer.autoScrollOn) {
+          oldScrollTop = logContainer.scrollTop;
+          preHeight = logContainer.scrollHeight;
+        }
 
-        // Truncate to reclaim 2 divs worth of spare capacity
-        while (totalSize > logViewer.maxSize - 2 * logDivCapacity) {
+        // Truncate to reclaim 3 divs worth of spare capacity
+        while (totalSize > logViewer.capacityBytes - 3 * logDivCapacity) {
 
           // Keep at least 2 divs to avoid blanking the log
           if (oldestLogDiv >= logDivId - 2) {
             break;
           }
 
-          var oldDiv = angular.element('#logDiv-' + ++oldestLogDiv);
+          var oldDiv = angular.element('#logDiv-' + oldestLogDiv);
           if (oldDiv.length < 1) {
             // Shouldn't happen
-            oldestLogDiv--;
             break;
           }
+          oldestLogDiv++;
           totalSize -= oldDiv[0].innerHTML.length;
           oldDiv.remove();
         }
@@ -131,14 +268,30 @@
         logViewer.autoScrollOn = logContainer.scrollTop + 1 >= logContainer.scrollHeight - logContainer.clientHeight;
       }
 
+      function resizeInView() {
+        var inView = getFirstDivInView();
+        if (!resizedDivsMap[inView]) {
+          // Immediately resize
+          resizeSingleDiv(inView);
+        }
+      }
+
+      var debouncedResizeInView = _.debounce(resizeInView, 100);
+
       // Detect user (manual) scroll
       function scrollHandler() {
         if (automaticScrolled) {
           // Save on reflow cycles if scroll was automatic
           automaticScrolled = false;
         } else {
-          // User scroll, update auto scroll
+          // User scroll
+
           $scope.$apply(function () {
+            // Resize div in view if needed
+            if (resizeInterval) {
+              debouncedResizeInView();
+            }
+            // Update auto scroll
             updateAutoScroll();
           });
         }
@@ -177,14 +330,17 @@
         }
       }
 
-      function realAppend() {
+      var realAppend = function () {
+        if (paused) {
+          return;
+        }
         logTextArea.innerHTML = logViewer.currentLog;
         rollNextLogDiv();
         autoScroll();
-        if (logViewer.maxSize && totalSize > logViewer.maxSize) {
+        if (logViewer.capacityBytes && totalSize > logViewer.capacityBytes) {
           truncateOldDivs();
         }
-      }
+      };
 
       // This debounce is crucial to improving performance on very fast streaming logs
       var appendLog = _.debounce(realAppend, batchDelayMs, {
@@ -196,7 +352,7 @@
       function resetLog() {
         angular.element(logContainer).empty();
         logDivId = 0;
-        oldestLogDiv = 0;
+        oldestLogDiv = 1;
         totalSize = 0;
         automaticScrolled = false;
         makeLogDiv();
@@ -230,14 +386,14 @@
         }
       }
 
+      /* eslint-disable angular/no-private-call */
       function safeApply() {
-        /* eslint-disable */
         if ($scope.$$destroyed || $scope.$$phase) {
           return;
         }
-        /* eslint-enable */
         $scope.$apply();
       }
+      /* eslint-enable angular/no-private-call */
 
       // Handle streaming logs
       function requestStreamingLog() {
@@ -258,11 +414,14 @@
           if (angular.isFunction(logViewer.filter)) {
             logData = logViewer.filter(logData);
           }
+          if (logData.length < 1) {
+            return;
+          }
           var htmlMessage;
           if (logViewer.colorize) {
             htmlMessage = colorizer.ansiColorsToHtml(logData);
           } else {
-            htmlMessage = logData;
+            htmlMessage = logData.replace(/</g, '&lt;'); // Escape embedded markup
           }
           logViewer.currentLog += htmlMessage;
           appendLog();
@@ -349,15 +508,40 @@
         }
       });
 
-      // Ensure maxSize is at least 2 divs worth
-      $scope.$watch('logViewer.maxSize', function () {
-        if (logViewer.maxSize && logViewer.maxSize < 2 * logDivCapacity) {
-          logViewer.maxSize = 2 * logDivCapacity;
+      var onResize = _.debounce(function () {
+        resizeAllDivs();
+        paused = false;
+      }, 100);
+
+      // If the logViewer is hidden and shown again we need to skip a scroll event
+      $scope.$watch(function () {
+        return logContainer.clientWidth;
+      }, function (newVal, oldVal) {
+        currentWidth = newVal - hPadding;
+        if (newVal === oldVal) {
+          return;
+        }
+        paused = true;
+        onResize();
+      });
+
+      // Ensure capacityBytes is at least 2 divs worth
+      $scope.$watch('logViewer.capacityBytes', function () {
+        if (logViewer.capacityBytes && logViewer.capacityBytes < 2 * logDivCapacity) {
+          logViewer.capacityBytes = 2 * logDivCapacity;
         }
       });
 
+      var digestOnResize = _.debounce(function () {
+        $scope.$digest();
+      }, 100);
+
+      angular.element($window).on('resize', digestOnResize);
+
       $scope.$on('$destroy', function () {
         closeWebSocket();
+        realAppend = function () {};
+        angular.element($window).off('resize', digestOnResize);
       });
 
     }
@@ -375,7 +559,7 @@
         autoScrollOn: '=?',
         filter: '=?',
         colorize: '=?',
-        maxSize: '=?',
+        capacityBytes: '=?',
         streaming: '=?'
       },
       controllerAs: 'logViewer',

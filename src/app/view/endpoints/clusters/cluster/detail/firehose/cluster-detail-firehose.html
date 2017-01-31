@@ -1,4 +1,4 @@
-<div class="panel panel-default summary firehose-container" ng-class="{fullscreen: firehoseCtrl.fullScreen}">
+<div id="firehose-container" class="panel panel-default summary firehose-container" ng-class="{fullscreen: firehoseCtrl.fullScreen}">
 
   <div class="panel-heading action-header firehose-header">
 
@@ -14,47 +14,59 @@
                         class="app-log-stream-indicator" classes="bounce-spinner-sm"></bounce-spinner>
       </div>
 
-      <span ng-click="firehoseCtrl.fullScreen = true" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
-      <span ng-click="firehoseCtrl.fullScreen = false" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+      <div class="view-controls">
+        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
+        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+      </div>
+
+
     </div>
 
     <div class="firehose-header-bottom">
-      <div class="firehose-filters">
-        <checkbox-input ng-class="{'api-filter': firehoseCtrl.hoseFilters.api}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.api)"
-                        ng-model="firehoseCtrl.hoseFilters.api"
-                        input-label="{{'API' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-class="{'apps-filter': firehoseCtrl.hoseFilters.apps}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.apps)"
-                        ng-model="firehoseCtrl.hoseFilters.apps"
-                        input-label="{{'Apps' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-class="{'metrics-filter': firehoseCtrl.hoseFilters.metrics}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.metrics)"
-                        ng-model="firehoseCtrl.hoseFilters.metrics"
-                        input-label="{{'Metrics' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-class="{'counters-filter': firehoseCtrl.hoseFilters.counters}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.counters)"
-                        ng-model="firehoseCtrl.hoseFilters.counters"
-                        input-label="{{'Counters' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-class="{'container-metrics-filter': firehoseCtrl.hoseFilters.containerMetrics}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.containerMetrics)"
-                        ng-model="firehoseCtrl.hoseFilters.containerMetrics"
-                        input-label="{{'Container Metrics' | translate}}">
-        </checkbox-input>
-        <checkbox-input ng-class="{'errors-filter': firehoseCtrl.hoseFilters.errors}"
-                        ng-change="firehoseCtrl.onFilterChanged(firehoseCtrl.hoseFilters.errors)"
-                        ng-model="firehoseCtrl.hoseFilters.errors"
-                        input-label="{{'Errors' | translate}}">
-        </checkbox-input>
+      <div class="text-filter">
+        <i class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+        <input class="text-filter-input" ng-model="firehoseCtrl.textFilter" type="text">
+        <i ng-click="firehoseCtrl.textFilter = undefined" class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></i>
       </div>
+      <div class="type-filters">
+        <div class="filters-controls">
+          <span class="controls-label">Select:</span>
+          <span class="control" ng-click="firehoseCtrl.showAll(true)">All</span>
+          <span class="separator">|</span>
+          <span class="control" ng-click="firehoseCtrl.showAll(false)">None</span>
+        </div>
 
-      <div class="scroll-to-bottom btn btn-link" ng-click="firehoseCtrl.autoScroll()">
-        <i class="helion-icon helion-icon-Right_Arrow"></i>
-        <span translate>Scroll to bottom</span>
+        <div class="firehose-filters">
+          <checkbox-input ng-class="{'apps-filter': firehoseCtrl.hoseFilters.apps}"
+                          ng-model="firehoseCtrl.hoseFilters.apps"
+                          input-label="{{'Apps' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-class="{'api-filter': firehoseCtrl.hoseFilters.api}"
+                          ng-model="firehoseCtrl.hoseFilters.api"
+                          input-label="{{'API' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-class="{'metrics-filter': firehoseCtrl.hoseFilters.metrics}"
+                          ng-model="firehoseCtrl.hoseFilters.metrics"
+                          input-label="{{'Metrics' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-class="{'counters-filter': firehoseCtrl.hoseFilters.counters}"
+                          ng-model="firehoseCtrl.hoseFilters.counters"
+                          input-label="{{'Counters' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-class="{'container-metrics-filter': firehoseCtrl.hoseFilters.containerMetrics}"
+                          ng-model="firehoseCtrl.hoseFilters.containerMetrics"
+                          input-label="{{'Container Metrics' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-class="{'errors-filter': firehoseCtrl.hoseFilters.errors}"
+                          ng-model="firehoseCtrl.hoseFilters.errors"
+                          input-label="{{'Errors' | translate}}">
+          </checkbox-input>
+        </div>
+
+        <div class="btn btn-link" ng-click="firehoseCtrl.autoScroll()">
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <span translate>Scroll to bottom</span>
+        </div>
       </div>
     </div>
   </div>
@@ -65,5 +77,5 @@
               colorize="true"
               filter="firehoseCtrl.jsonFilter"
               streaming="firehoseCtrl.streamingStatus"
-              capacity-bytes="1048576"></log-viewer>
+              capacity-bytes="10485760"></log-viewer>
 </div>

@@ -33,12 +33,14 @@
     '$stateParams',
     '$location',
     '$log',
+    '$document',
     '$timeout',
-    '$document'
+    '$animate'
   ];
 
-  function ClusterFirehoseController(base64, modelManager, utils, localStorage, $scope, $stateParams, $location, $log, $timeout, $document) {
-    var that = this;
+  function ClusterFirehoseController(base64, modelManager, utils, localStorage,
+                                     $scope, $stateParams, $location, $log, $document, $timeout, $animate) {
+    var vm = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
@@ -58,22 +60,47 @@
       this.hoseFilters = defaultFilters;
     }
 
-    this.onFilterChanged = function () {
-      localStorage.setItem('firehose-filters', angular.toJson(this.hoseFilters));
+    var theElement = angular.element('#firehose-container')[0];
+    $animate.enabled(false, theElement);
+
+    $scope.$watchCollection(function () {
+      return vm.hoseFilters;
+    }, function (newVal, oldVal) {
+      if (newVal === oldVal) {
+        return;
+      }
+      localStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
+    });
+
+    vm.showAll = function (onOff) {
+      for (var key in vm.hoseFilters) {
+        if (!vm.hoseFilters.hasOwnProperty(key)) { continue; }
+        vm.hoseFilters[key] = onOff;
+      }
     };
 
-    var handlerUnbind = $document.on('keydown', function (e) {
-      if (e.keyCode === 27 && that.fullScreen) {
+    vm.fullScreenOn = function () {
+      vm.fullScreen = true;
+    };
+
+    vm.fullScreenOff = function () {
+      vm.fullScreen = false;
+    };
+
+    function keyHandler(e) {
+      if (e.keyCode === 27 && vm.fullScreen) {
         e.stopPropagation();
         e.preventDefault();
         $scope.$apply(function () {
-          that.fullScreen = false;
+          vm.fullScreen = false;
         });
         return true;
       }
-    });
+    }
+
+    $document.on('keydown', keyHandler);
     $scope.$on('$destroy', function () {
-      handlerUnbind();
+      $document.off('keydown', keyHandler);
     });
 
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
@@ -81,8 +108,8 @@
       $stateParams.guid + '/firehose';
 
     // Comment this out to test firehose stream in gulp dev
-    this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
-    // this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
+    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
+    this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
 
     this.autoScrollOn = true; // auto-scroll by default
 
@@ -102,9 +129,9 @@
       'UPDATE', 'UPDATEREDIRECTREF', 'VERSION_CONTROL'
     ];
 
-    function buildOriginString(cfEvent, colour) {
+    function buildOriginString(cfEvent, colour, bold) {
       return buildTimestampString(cfEvent) + ': ' +
-        coloredLog('[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + ']', colour);
+        coloredLog('[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + ']', colour, bold);
     }
 
     function buildTimestampString(cfEvent) {
@@ -114,23 +141,23 @@
     }
 
     function handleApiEvent(cfEvent) {
-      if (!that.hoseFilters.api) {
+      if (!vm.hoseFilters.api) {
         return '';
       }
       var httpStartStop = cfEvent.httpStartStop;
       var method = httpMethods[httpStartStop.method];
       var peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
-      var httpEventString = peerType + ' ' + coloredLog(method, 'green', true) + ' ' +
+      var httpEventString = peerType + ' ' + coloredLog(method, 'magenta', true) + ' ' +
         coloredLog(httpStartStop.uri, null, true) +
         ', Status-Code: ' + coloredLog(httpStartStop.statusCode, 'green') +
         ', Content-Length: ' + coloredLog(utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
-        ', User-Agent: ' + httpStartStop.userAgent +
-        ', Remote-Address: ' + httpStartStop.remoteAddress + '\n';
+        ', User-Agent: ' + coloredLog(httpStartStop.userAgent, 'green') +
+        ', Remote-Address: ' + coloredLog(httpStartStop.remoteAddress, 'green') + '\n';
       return buildOriginString(cfEvent, 'magenta') + ' ' + httpEventString;
     }
 
     function handleAppLog(cfEvent) {
-      if (!that.hoseFilters.apps) {
+      if (!vm.hoseFilters.apps) {
         return '';
       }
       var message = cfEvent.logMessage;
@@ -139,39 +166,61 @@
       return buildOriginString(cfEvent, 'green') + ' ' + messageSource + ' ' + messageString;
     }
 
+    function emphasizeName(dottedString, colour) {
+      var metricName = dottedString;
+      var lastDot = metricName.lastIndexOf('.');
+      if (lastDot > -1) {
+        // Weird bug where sometimes the name ends with a dot
+        if (lastDot === dottedString.length - 1) {
+          return coloredLog(metricName.slice(0, -1), colour, true);
+        }
+        var prefix = metricName.slice(0, lastDot + 1);
+        var name = metricName.slice(lastDot + 1);
+        metricName = prefix + coloredLog(name, colour, true);
+      } else {
+        metricName = coloredLog(metricName, colour, true);
+      }
+      return metricName;
+    }
+
     function handleMetricEvent(cfEvent) {
-      if (!that.hoseFilters.metrics) {
+      if (!vm.hoseFilters.metrics) {
         return '';
       }
       var valueMetric = cfEvent.valueMetric;
-      var valueMetricString = valueMetric.name + ': ' + coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green', true) + '\n';
+      var valueMetricString = emphasizeName(valueMetric.name, 'blue') + ': ' +
+        coloredLog(valueMetric.value + ' ' + valueMetric.unit, 'green', true) + '\n';
       return buildOriginString(cfEvent, 'blue') + ' ' + valueMetricString;
     }
 
     function handleCounterEvent(cfEvent) {
-      if (!that.hoseFilters.counters) {
+      if (!vm.hoseFilters.counters) {
         return '';
       }
       var counterEvent = cfEvent.counterEvent;
-      var counterEventString = counterEvent.name + ': delta = ' + coloredLog(counterEvent.delta, 'green', true) +
+      var counterEventString = emphasizeName(counterEvent.name, 'yellow') +
+        ': delta = ' + coloredLog(counterEvent.delta, 'green', true) +
         ', total = ' + coloredLog(counterEvent.total, 'green', true) + '\n';
       return buildOriginString(cfEvent, 'yellow') + ' ' + counterEventString;
     }
 
     function handleContainerMetricsEvent(cfEvent) {
-      if (!that.hoseFilters.containerMetrics) {
+      if (!vm.hoseFilters.containerMetrics) {
         return '';
       }
       var containerMetric = cfEvent.containerMetric;
       var metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
-        ' - ' + coloredLog('CPU: ', null, true) + coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
-        ', ' + coloredLog('Memory: ', null, true) + coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
-        ', ' + coloredLog('Disk: ', null, true) + coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green', true);
+        ' ' + coloredLog('[', 'cyan', true) + coloredLog('CPU: ', 'cyan', true) +
+        coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
+        ', ' + coloredLog('Memory: ', 'cyan', true) +
+        coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
+        ', ' + coloredLog('Disk: ', 'cyan', true) +
+        coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green', true) + coloredLog(']', 'cyan', true);
       return buildOriginString(cfEvent, 'cyan') + ' ' + metricString + '\n';
     }
 
     function handleErrorEvent(cfEvent) {
-      if (!that.hoseFilters.errors) {
+      if (!vm.hoseFilters.errors) {
         return '';
       }
       var errorObj = cfEvent.error;
@@ -189,35 +238,120 @@
     }
 
     function handleOtherEvent(jsonString) {
-      if (!that.hoseFilters.others) {
+      if (!vm.hoseFilters.others) {
         return '';
       }
       return jsonString;
     }
 
+    var RESET = '\x1B[0m';
+    /* eslint-disable no-control-regex */
+    var lastColourMatcher = new RegExp('\x1B\\[([0-9;]*)m', 'g');
+    /* eslint-enable no-control-regex */
+
     this.jsonFilter = function (jsonString) {
+      var filtered = jsonString;
       try {
         var cfEvent = angular.fromJson(jsonString);
         switch (cfEvent.eventType) {
           case 4:
-            return handleApiEvent(cfEvent);
+            filtered = handleApiEvent(cfEvent);
+            break;
           case 5:
-            return handleAppLog(cfEvent);
+            filtered = handleAppLog(cfEvent);
+            break;
           case 6:
-            return handleMetricEvent(cfEvent);
+            filtered = handleMetricEvent(cfEvent);
+            break;
           case 7:
-            return handleCounterEvent(cfEvent);
+            filtered = handleCounterEvent(cfEvent);
+            break;
           case 8:
-            return handleErrorEvent(cfEvent);
+            filtered = handleErrorEvent(cfEvent);
+            break;
           case 9:
-            return handleContainerMetricsEvent(cfEvent);
+            filtered = handleContainerMetricsEvent(cfEvent);
+            break;
           default:
-            return handleOtherEvent(cfEvent);
+            filtered = handleOtherEvent(cfEvent);
         }
       } catch (error) {
         $log.error('Failed to filter jsonMessage from WebSocket: ', jsonString);
-        return jsonString;
+        filtered = jsonString;
       }
+      if (vm.textFilter) {
+        if (vm.textFilterRegex) {
+          if (!filtered.match(new RegExp(vm.textFilter))) {
+            return '';
+          }
+        } else {
+          var matchIndex;
+          if (vm.textFilterCaseSensitive) {
+            matchIndex = filtered.indexOf(vm.textFilter);
+          } else {
+            matchIndex = filtered.toLowerCase().indexOf(vm.textFilter.toLowerCase());
+          }
+          if (matchIndex < 0) {
+            return '';
+          }
+          var finalString = '';
+          var leftToParse = filtered;
+          var trueMatch = false;
+          while (matchIndex >= 0) {
+            var before = leftToParse.slice(0, matchIndex);
+            var allBefore = finalString + before;
+            var matched = leftToParse.slice(matchIndex, matchIndex + vm.textFilter.length);
+            leftToParse = leftToParse.slice(matchIndex + vm.textFilter.length);
+
+            var lastEscape = allBefore.lastIndexOf('\x1B');
+            if (lastEscape > -1) {
+              var escaped = allBefore.slice(lastEscape);
+              var mIndex = escaped.indexOf('m');
+              if (mIndex < 0) {
+                finalString = allBefore + matched;
+                matchIndex = leftToParse.toLowerCase().indexOf(vm.textFilter.toLowerCase());
+                continue;
+              }
+            }
+
+            trueMatch = true;
+
+            // Remember the previous foreground colour and bold (we know we don't use background colours)
+            var lastReset = allBefore.lastIndexOf(RESET);
+            if (lastReset < 0) {
+              lastReset = 0;
+            } else {
+              lastReset += RESET.length;
+            }
+            var afterReset = allBefore.slice(lastReset);
+
+            lastColourMatcher.lastIndex = 0;
+            var matches = lastColourMatcher.exec(afterReset);
+
+            var boldOn, prevColour;
+            if (matches !== null) {
+              boldOn = matches[1].indexOf('1') === 0;
+              if (matches[1] === '1') {
+                prevColour = null;
+              } else {
+                if (boldOn) {
+                  prevColour = matches[1][3];
+                } else {
+                  prevColour = matches[1][1];
+                }
+              }
+            }
+            finalString = allBefore + highlightLog(matched, prevColour, boldOn);
+            matchIndex = leftToParse.toLowerCase().indexOf(vm.textFilter.toLowerCase());
+          }
+
+          if (!trueMatch) {
+            return '';
+          }
+          return finalString + leftToParse;
+        }
+      }
+      return filtered;
     };
 
     var colorCodes = {
@@ -234,12 +368,25 @@
     function coloredLog(message, color, boldOn) {
       if (boldOn) {
         if (color) {
-          return '\x1B[1;3' + colorCodes[color] + 'm' + message + '\x1B[0m';
+          return '\x1B[1;3' + colorCodes[color] + 'm' + message + RESET;
         }
-        return '\x1B[1m' + message + '\x1B[0m';
+        return '\x1B[1m' + message + RESET;
       }
-      return '\x1B[3' + colorCodes[color] + 'm' + message + '\x1B[0m';
+      return '\x1B[3' + colorCodes[color] + 'm' + message + RESET;
     }
+
+    function highlightLog(message, previousColour, wasBoldOn) {
+      var ret = '\x1B[0;4' + colorCodes.yellow + ';30m' + message + RESET;
+      if (previousColour) {
+        ret += '\x1B[3' + previousColour + 'm';
+      }
+      if (wasBoldOn) {
+        ret += '\x1B[1m';
+      }
+      console.log('Returning ret ' + ret);
+      return ret;
+    }
+
   }
 
 })();

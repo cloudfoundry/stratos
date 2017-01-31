@@ -1,42 +1,142 @@
 // Terminal colours based on the Dark Pastels konsole scheme
-$ansi-colours: (
-    'black': (
-        normal: #3F3F3F,
-        intense: #709080
-    ),
-    'red': (
-        normal: #C25E00,
-        intense: #DCA3A3
-    ),
-    'green': (
-        normal: #60B48A,
-        intense: #72D5A3
-    ),
-    'yellow': (
-        normal: #DFAF8F,
-        intense: #F0DFAF
-    ),
-    'blue': (
-        normal: #9AB8D7,
-        intense: #94BFF3
-    ),
-    'magenta': (
-        normal: #DC8CC3,
-        intense: #EC93D3
-    ),
-    'cyan': (
-        normal: #8CD0D3,
-        intense: #93E0E3
-    ),
-    'white': (
-        normal: #DCDCCC,
-        intense: #FFFFFF
-    )
+$dark-pastels: (
+  'default-foreground': (
+    normal: #DCDCCC,
+    intense: #709080
+  ),
+  'default-background': (
+    normal: #2C2C2C,
+  ),
+  'black': (
+    normal: #3F3F3F,
+    intense: #709080
+  ),
+  'red': (
+    normal: #C25E00,
+    intense: #DCA3A3
+  ),
+  'green': (
+    normal: #60B48A,
+    intense: #72D5A3
+  ),
+  'yellow': (
+    normal: #DFAF8F,
+    intense: #F0DFAF
+  ),
+  'blue': (
+    normal: #9AB8D7,
+    intense: #94BFF3
+  ),
+  'magenta': (
+    normal: #DC8CC3,
+    intense: #EC93D3
+  ),
+  'cyan': (
+    normal: #8CD0D3,
+    intense: #93E0E3
+  ),
+  'white': (
+    normal: #DCDCCC,
+    intense: #FFFFFF
+  )
 );
 
-@function ansi-colour($colourName) {
+$breeze: (
+  'default-foreground': (
+    normal: #EFF0F1,
+    intense: #FCFCFC
+  ),
+  'default-background': (
+    normal: #31363B,
+  ),
+  'black': (
+    normal: #31363B,
+    intense: #7F8C8D
+  ),
+  'red': (
+    normal: #ED1515,
+    intense: #C0392B
+  ),
+  'green': (
+    normal: #11D116,
+    intense: #1CDC9A
+  ),
+  'yellow': (
+    normal: #F67400,
+    intense: #FDBC4B
+  ),
+  'blue': (
+    normal: #1D99F3,
+    intense: #3DAEE9
+  ),
+  'magenta': (
+    normal: #9B59B6,
+    intense: #8E44AD
+  ),
+  'cyan': (
+    normal: #1ABC9C,
+    intense: #16A085
+  ),
+  'white': (
+    normal: #EFF0F1,
+    intense: #FCFCFC
+  )
+);
+
+$stackato: (
+  'default-foreground': (
+    normal: #CCCCCC,
+    intense: #F6F6F6
+  ),
+  'default-background': (
+    normal: #333333,
+  ),
+  'black': (
+    normal: #333333,
+    intense: #767676
+  ),
+  'red': (
+    normal: #AE202A,
+    intense: #FF454F
+  ),
+  'green': (
+    normal: #01A982,
+    intense: #69CFB4
+  ),
+  'yellow': (
+    normal: #BF9C32,
+    intense: #FFD042
+  ),
+  'blue': (
+    normal: #638FB0,
+    intense: #50A6E6
+  ),
+  'magenta': (
+    normal: #7C4F87,
+    intense: #982FB3
+  ),
+  'cyan': (
+    normal: #268F88,
+    intense: #668F89
+  ),
+  'white': (
+    normal: #CCCCCC,
+    intense: #F6F6F6
+  )
+);
+
+$ansi-colours: $stackato;
+//$ansi-colours: $breeze;
+//$ansi-colours: $dark-pastels;
+
+@function ansi-colour($colourName, $intense) {
   @if map-has-key($ansi-colours, $colourName) {
-    @return map-get(map-get($ansi-colours, $colourName), normal);
+    @if $intense {
+      @return map-get(map-get($ansi-colours, $colourName), intense);
+    }
+    @else {
+      @return map-get(map-get($ansi-colours, $colourName), normal);
+    }
   }
 
   @warn "Unknown `#{$colourName}` in $ansi-colours.";
