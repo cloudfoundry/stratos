@@ -48,8 +48,6 @@ function niceNum(a, b) {
  * @return {number}
  */
 function getYTickSeparation(yMax) {
-  console.log('YTick Separation: ')
-  console.log(niceNum(yMax / MAX_BETWEEN_TICKS[1], yMax / MAX_BETWEEN_TICKS[0]))
   return niceNum(yMax / MAX_BETWEEN_TICKS[1], yMax / MAX_BETWEEN_TICKS[0]);
 }
 
@@ -61,7 +59,7 @@ function getYTickSeparation(yMax) {
 export function getNewMax(yMax) {
   // console.log('Optimal Max value: ')
   // console.log(getYTickSeparation(yMax) * TICK_NUM)
-  return 1.0;
+  return getYTickSeparation(yMax) * TICK_NUM;
 }
 
 /**
@@ -75,7 +73,5 @@ export function getTickValues(yMax) {
   for (let i = 1; i <= Math.ceil(TICK_NUM - 1); i++) {
     ticks.push(yTickSep * i);
   }
-  console.log('Sending ticks: ')
-  console.log(ticks)
   return ticks;
 }

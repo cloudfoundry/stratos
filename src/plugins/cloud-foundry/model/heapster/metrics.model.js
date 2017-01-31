@@ -73,11 +73,9 @@
         .getCpuUsage(filter)
         .then(function (res) {
           // transform in kd-graph format
-          return that._addOpenTsdbMetrics(res.data, 'cpu/usage_rate' + (filter ? filter : ''));
+          return that._addOpenTsdbMetrics(res.data, 'cpu/usage_rate');
         }).catch(function (err) {
           //
-
-
         });
     },
 
@@ -87,7 +85,7 @@
         .getCpuUtilization(filter)
         .then(function (res) {
           // transform in kd-graph format
-          return that._addOpenTsdbMetrics(res.data, 'cpu/utilization' + (filter ? filter : ''));
+          return that._addOpenTsdbMetrics(res.data, 'cpu/utilization');
         }).catch(function (err) {
           //noop
         });
@@ -99,22 +97,70 @@
         .getMemoryUsage(filter)
         .then(function (res) {
           // transform in kd-graph format
-          return that._addOpenTsdbMetrics(res.data, 'memory/usage' + (filter ? filter : ''));
+          return that._addOpenTsdbMetrics(res.data, 'memory/usage');
         }).catch(function (err) {
           //noop
         });
     },
+
     getMemoryUtilization: function (filter) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getMemoryUtilization(filter)
         .then(function (res) {
           // transform in kd-graph format
-          return that._addOpenTsdbMetrics(res.data, 'memory/utilization' + (filter ? filter : ''));
+          return that._addOpenTsdbMetrics(res.data, 'memory/utilization');
         }).catch(function (err) {
           //noop
         });
     },
+
+    updateNetworkDataTransmitted: function (filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .updateNetworkDataTransmitted(filter)
+        .then(function (res) {
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, 'network_tx_cumulative');
+        }).catch(function (err) {
+          //noop
+        });
+    },
+
+    updateNetworkDataReceived: function (filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .updateNetworkDataReceived(filter)
+        .then(function (res) {
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, 'network_rx_cumulative');
+        }).catch(function (err) {
+          //noop
+        });
+    },
+
+    getNodeCpuLimit: function (nodeName) {
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNodeCpuLimit(nodeName)
+        .then(function (res) {
+          var getLastMetricReading = res.data.latestTimestamp;
+          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+        }).catch(function (err) {
+          //noop
+        });
+    },
+
+    getNodeMemoryLimit: function (nodeName) {
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNodeMemoryLimit(nodeName)
+        .then(function (res) {
+          var getLastMetricReading = res.data.latestTimestamp;
+          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+        }).catch(function (err) {
+          //noop
+        });
+    },
+
     getNodeUptime: function (nodeName) {
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeUptime(nodeName)

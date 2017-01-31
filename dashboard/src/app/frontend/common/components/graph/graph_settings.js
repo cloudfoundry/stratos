@@ -23,6 +23,10 @@ const i18n = {
   MSG_GRAPH_MEM_UTILIZATION_LEGEND_LABEL: goog.getMsg('Memory Utilization'),
   /** @export {string} @desc Name of the memory usage metric as displayed in the legend. */
   MSG_GRAPH_MEMORY_USAGE_LEGEND_LABEL: goog.getMsg('Memory Usage'),
+  /** @export {string} @desc Name of the memory usage metric as displayed in the legend. */
+  MSG_GRAPH_NETWORK_RX_LEGEND_LABEL: goog.getMsg('Data Received'),
+  /** @export {string} @desc Name of the memory usage metric as displayed in the legend. */
+  MSG_GRAPH_NETWORK_TX_LEGEND_LABEL: goog.getMsg('Data Transmitted'),
   /** @export {string} @desc Name of the CPU limit metric as displayed in the legend. */
   MSG_GRAPH_CPU_LIMIT_LEGEND_LABEL: goog.getMsg('CPU Limit'),
   /** @export {string} @desc Name of Y axis showing CPU usage. */
@@ -35,6 +39,10 @@ const i18n = {
   MSG_GRAPH_MEMORY_AXIS_LABEL: goog.getMsg('Memory (bytes)'),
   /** @export {string} @desc Name of time axis. */
   MSG_GRAPH_TIME_AXIS_LABEL: goog.getMsg('Time'),
+  /** @export {string} @desc Name of time axis. */
+  MSG_GRAPH_NETWORK_RX_AXIS_LABEL: goog.getMsg('Data Received (bytes)'),
+  /** @export {string} @desc Name of time axis. */
+  MSG_GRAPH_NETWORK_TX_AXIS_LABEL: goog.getMsg('Data Transmitted (bytes)'),
 };
 
 /**
@@ -58,6 +66,8 @@ export const CPUAxisType = 'CPUAxisType';
 export const CPUUtilizationAxisType = 'CPUUtilizationAxisType';
 export const MemoryUtilizationAxisType = 'MemoryUtilizationAxisType';
 export const MemoryAxisType = 'MemoryAxisType';
+export const NetworkRxAxisType = 'NetworkRxAxisType';
+export const NetworkTxAxisType = 'NetworkTxAxisType';
 export const TimeAxisType = 'TimeAxisType';
 
 /**
@@ -84,17 +94,7 @@ export const metricDisplaySettings = {
     fillOpacity: 0.2,
     strokeWidth: 3,
     type: 'line',
-    yAxis: 1,
-  },
-  cpu_usage_rate_gauge: {
-    yAxisType: CPUAxisType,
-    area: true,
-    key: i18n.MSG_GRAPH_CPU_USAGE_LEGEND_LABEL,
-    color: '#00c752',  // $chart-1
-    fillOpacity: 0.2,
-    strokeWidth: 3,
-    type: 'line',
-    yAxis: 1,
+    yAxis: 1
   },
   'cpu/limit': {
     yAxisType: CPUAxisType,
@@ -105,6 +105,7 @@ export const metricDisplaySettings = {
     strokeWidth: 3,
     type: 'line',
     yAxis: 1,
+
   },
   'memory/usage': {
     yAxisType: MemoryAxisType,
@@ -114,7 +115,7 @@ export const metricDisplaySettings = {
     fillOpacity: 0.2,
     strokeWidth: 3,
     type: 'line',
-    yAxis: 2,
+    yAxis: 2
   },
   'memory/utilization': {
     yAxisType: MemoryUtilizationAxisType,
@@ -126,15 +127,25 @@ export const metricDisplaySettings = {
     type: 'line',
     yAxis: 1,
   },
-  memory_usage_gauge: {
-    yAxisType: MemoryAxisType,
+   'network_rx_cumulative': {
+    yAxisType: NetworkRxAxisType,
     area: true,
-    key: i18n.MSG_GRAPH_MEMORY_USAGE_LEGEND_LABEL,
+    key: i18n.MSG_GRAPH_NETWORK_RX_LEGEND_LABEL,
     color: '#326de6',  // $chart-2
     fillOpacity: 0.2,
     strokeWidth: 3,
     type: 'line',
-    yAxis: 2,
+    yAxis: 1,
+  },
+  'network_tx_cumulative': {
+    yAxisType: NetworkTxAxisType,
+    area: true,
+    key: i18n.MSG_GRAPH_NETWORK_TX_LEGEND_LABEL,
+    color: '#00c752',  // $chart-2
+    fillOpacity: 0.2,
+    strokeWidth: 3,
+    type: 'line',
+    yAxis: 1,
   },
 };
 
@@ -167,10 +178,14 @@ export const axisSettings = {
   'CPUUtilizationAxisType': {
     formatter: formatCpuUtilization,
     label: i18n.MSG_GRAPH_CPU_UTIL_AXIS_LABEL,
+    utilization: true
+
   },
   'MemoryUtilizationAxisType': {
     formatter: formatCpuUtilization,
     label: i18n.MSG_GRAPH_MEM_UTIL_AXIS_LABEL,
+    utilization: true
+
   },
   'MemoryAxisType': {
     formatter: formatMemoryUsage,
@@ -179,6 +194,14 @@ export const axisSettings = {
   'TimeAxisType': {
     formatter: formatTime,
     label: i18n.MSG_GRAPH_TIME_AXIS_LABEL,
+  },
+  'NetworkRxAxisType': {
+    formatter: formatMemoryUsage,
+    label: i18n.MSG_GRAPH_NETWORK_RX_AXIS_LABEL,
+  },
+  'NetworkTxAxisType': {
+    formatter: formatMemoryUsage,
+    label: i18n.MSG_GRAPH_NETWORK_TX_AXIS_LABEL,
   },
 };
 

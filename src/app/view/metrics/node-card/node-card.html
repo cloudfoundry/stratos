@@ -6,21 +6,45 @@
     <dd>
       {{ nodeCardCtrl.nodeUptime }}
     </dd>
+    <dt translate>CPU Limit (mili-cores)</dt>
+    <dd>
+      {{ nodeCardCtrl.cpuLimit }}
+    </dd>
+    <dt translate>Memory Limit</dt>
+    <dd>
+      {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
+    </dd>
 
-      <dt translate>CPU Utilization</dt>
-      <dd class="chart">
-        <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
-                       metrics="nodeCardCtrl.metricsData['cpu/utilization']"
-                       selected-metric-names="'cpu/utilization'">
-        </kd-graph-card>
-      </dd>
-      <dt translate>Memory Utilization</dt>
-      <dd class="chart">
-        <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
-                       graph-title="Memory usage"
-                       metrics="nodeCardCtrl.metricsData['memory/utilization']"
-                       selected-metric-names="'memory/utilization'">
-        </kd-graph-card>
-      </dd>
+    <dt translate>CPU Utilization</dt>
+    <dd class="chart">
+      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
+                     metrics="nodeCardCtrl.metricsData['cpu/utilization']"
+                     selected-metric-names="'cpu/utilization'">
+      </kd-graph-card>
+    </dd>
+    <dt translate>Memory Utilization</dt>
+    <dd class="chart">
+      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
+                     graph-title="Memory usage"
+                     metrics="nodeCardCtrl.metricsData['memory/utilization']"
+                     selected-metric-names="'memory/utilization'">
+      </kd-graph-card>
+    </dd>
+    <dt translate>Data Transmitted</dt>
+    <dd class="chart">
+      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_tx_cumulative')" class="graph-card"
+                     graph-title="Data Transmitted"
+                     metrics="nodeCardCtrl.metricsData['network_tx_cumulative']"
+                     selected-metric-names="'network_tx_cumulative'">
+      </kd-graph-card>
+    </dd>
+    <dt translate>Data Received</dt>
+    <dd class="chart">
+      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_rx_cumulative')" class="graph-card"
+                     graph-title="Data Received"
+                     metrics="nodeCardCtrl.metricsData['network_rx_cumulative']"
+                     selected-metric-names="'network_rx_cumulative'">
+      </kd-graph-card>
+    </dd>
   </dl>
 </gallery-card>

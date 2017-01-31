@@ -27,11 +27,15 @@
     this.getPodsByNamespace = getPodsByNamespace;
     this.getNamespaceNames = getNamespaceNames;
     this.getNodeUptime = getNodeUptime;
+    this.getNodeCpuLimit = getNodeCpuLimit;
+    this.getNodeMemoryLimit = getNodeMemoryLimit;
     this.getNodes = getNodes;
     this.getCpuUsage = _metricsQuery('cpu_usage_rate_gauge');
     this.getCpuUtilization = _metricsQuery('cpu_node_utilization_gauge');
     this.getMemoryUsage = _metricsQuery('memory_usage_gauge');
     this.getMemoryUtilization = _metricsQuery('memory_node_utilization_gauge');
+    this.updateNetworkDataReceived = _metricsQuery('network_rx_cumulative');
+    this.updateNetworkDataTransmitted = _metricsQuery('network_tx_cumulative');
 
     function _metricsQuery(metrics) {
       return function (filter, time) {
@@ -56,6 +60,16 @@
 
     function getNodes() {
       var url = metricsUrl + 'api/v1/model/nodes';
+      return $http.get(url);
+    }
+
+    function getNodeCpuLimit(nodeName) {
+      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/cpu/node_capacity';
+      return $http.get(url);
+    }
+
+    function getNodeMemoryLimit(nodeName) {
+      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/memory/node_capacity';
       return $http.get(url);
     }
 

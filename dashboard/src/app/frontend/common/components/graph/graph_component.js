@@ -130,15 +130,24 @@ export class GraphController {
         chart.yAxis1.axisLabel(yAxis1Settings.label)
             .tickFormat(yAxis1Settings.formatter)
             .tickValues(getTickValues(y1max));
-        chart.yDomain1([0, getNewMax(y1max)]);
+
+        if (yAxis1Settings.utilization){
+          chart.yDomain1([0, 1.0]);
+         } else {
+          chart.yDomain1([0, getNewMax(y1max)]);
+        }
       }
       if (typeof yAxis2Type !== 'undefined') {
         let yAxis2Settings = axisSettings[yAxis2Type];
         chart.yAxis2.axisLabel(yAxis2Settings.label)
             .tickFormat(yAxis2Settings.formatter)
             .tickValues(getTickValues(y2max));
-        chart.yDomain2([0, getNewMax(y2max)]);
-      }
+        if (yAxis2Settings.utilization){
+          chart.yDomain1([0, 1.0]);
+        } else {
+          chart.yDomain1([0, getNewMax(y1max)]);
+
+        }      }
 
       // hack to fix tooltip to use appropriate formatters instead of raw numbers.
       // d is the value to be formatted, tooltip_row_index is an index of a row in tooltip that is

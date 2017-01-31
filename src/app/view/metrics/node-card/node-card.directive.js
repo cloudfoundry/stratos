@@ -33,11 +33,17 @@
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.$state = $state;
+    this.$q = $q;
     this.utilsService = utilsService;
     this.metricsData = {};
+    this.cpuLimit = 0;
+    this.memoryLimit = 0;
 
     var interval = $interval(function () {
       that.updateCpuUtilization();
+      that.updateMemoryUtilization();
+      that.updateNetworkDataTransmitted();
+      that.updateNetworkDataReceived();
       that.updateMemoryUtilization();
       that.updateNodeUptime();
     }, 30000);
@@ -52,7 +58,12 @@
 
     function init() {
       // prefetch cpu-usage and memory data
-      return $q.all([that.updateCpuUtilization(), that.updateMemoryUtilization(), that.updateNodeUptime()]);
+      return $q.all([that.updateCpuUtilization(),
+        that.updateMemoryUtilization(),
+        that.updateNodeUptime(),
+        that.updateNetworkDataTransmitted(),
+        that.updateNetworkDataReceived(),
+        that.fetchLimitMetrics()]);
     }
 
     utilsService.chainStateResolve('metrics.dashboard', $state, init);
@@ -68,7 +79,6 @@
       var that = this;
       return this.metricsModel.getCpuUtilization(this.metricsModel.makeNodeNameFilter(this.nodeName))
         .then(function (metricsData) {
-          metricsData.metricName = 'cpu/utilization';
           that.metricsData[metricsData.metricName] = [metricsData];
         });
     },
@@ -77,7 +87,22 @@
       var that = this;
       return this.metricsModel.getMemoryUtilization(this.metricsModel.makeNodeNameFilter(this.nodeName))
         .then(function (metricsData) {
-          metricsData.metricName = 'memory/utilization';
+          that.metricsData[metricsData.metricName] = [metricsData];
+        });
+    },
+
+    updateNetworkDataTransmitted: function () {
+      var that = this;
+      return this.metricsModel.updateNetworkDataTransmitted(this.metricsModel.makeNodeNameFilter(this.nodeName))
+        .then(function (metricsData) {
+          that.metricsData[metricsData.metricName] = [metricsData];
+        });
+    },
+
+    updateNetworkDataReceived: function () {
+      var that = this;
+      return this.metricsModel.updateNetworkDataReceived(this.metricsModel.makeNodeNameFilter(this.nodeName))
+        .then(function (metricsData) {
           that.metricsData[metricsData.metricName] = [metricsData];
         });
     },
@@ -88,6 +113,17 @@
         .then(function (uptime) {
           that.nodeUptime = that.utilsService.getSensibleTime(uptime);
         });
+    },
+
+    fetchLimitMetrics: function () {
+      var that = this;
+      var promises = [this.metricsModel.getNodeCpuLimit(this.nodeName),
+        this.metricsModel.getNodeMemoryLimit(this.nodeName)];
+      this.$q.all(promises).then(function (limits) {
+        that.cpuLimit = limits[0];
+        // Memory limit is in bytes, convert to Mb for the filter
+        that.memoryLimit = parseInt(limits[1]) / (1024 * 1024);
+      });
     },
 
     hasMetrics: function (metricName) {
