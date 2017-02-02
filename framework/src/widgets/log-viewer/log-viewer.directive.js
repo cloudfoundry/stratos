@@ -511,7 +511,7 @@
       var onResize = _.debounce(function () {
         resizeAllDivs();
         paused = false;
-      }, 100);
+      }, 150);
 
       // If the logViewer is hidden and shown again we need to skip a scroll event
       $scope.$watch(function () {

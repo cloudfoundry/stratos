@@ -42,7 +42,12 @@
                                      $scope, $stateParams, $location, $log, $document, $timeout, $animate) {
     var vm = this;
 
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
+    // Ansi code to reset all colours
+    var RESET = '\x1B[0m';
+
+    /* eslint-disable no-control-regex */
+    var ANSI_COLOUR_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');
+    /* eslint-enable no-control-regex */
 
     var defaultFilters = {
       api: true,
@@ -55,22 +60,13 @@
     };
 
     try {
-      this.hoseFilters = angular.fromJson(localStorage.getItem('firehose-filters', defaultFilters));
+      vm.hoseFilters = angular.fromJson(localStorage.getItem('firehose-filters', defaultFilters));
     } catch (error) {
-      this.hoseFilters = defaultFilters;
+      vm.hoseFilters = defaultFilters;
     }
 
     var theElement = angular.element('#firehose-container')[0];
     $animate.enabled(false, theElement);
-
-    $scope.$watchCollection(function () {
-      return vm.hoseFilters;
-    }, function (newVal, oldVal) {
-      if (newVal === oldVal) {
-        return;
-      }
-      localStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
-    });
 
     vm.showAll = function (onOff) {
       for (var key in vm.hoseFilters) {
@@ -98,28 +94,25 @@
       }
     }
 
-    $document.on('keydown', keyHandler);
-    $scope.$on('$destroy', function () {
-      $document.off('keydown', keyHandler);
-    });
-
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
-    this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
+    vm.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
       $stateParams.guid + '/firehose';
 
     // Comment this out to test firehose stream in gulp dev
-    // this.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
-    this.websocketUrl = 'wss://julien.labs.hpecorp.net:3003/v1/' + $stateParams.guid + '/firehose';
+    // vm.websocketUrl = 'wss://localhost:3003/v1/' + $stateParams.guid + '/firehose';
+    vm.websocketUrl = 'wss://16.27.45.28:3003/v1/' + $stateParams.guid + '/firehose';
 
-    this.autoScrollOn = true; // auto-scroll by default
+    vm.autoScrollOn = true; // auto-scroll by default
 
     // After the user has scrolled up we disable auto-scroll
     // They can re-enable auto-scroll either by:
     // - manually scrolling to the bottom
     // - clicking the auto-scroll button
-    this.autoScroll = function () {
-      this.autoScrollOn = true;
+    vm.autoScroll = function () {
+      vm.autoScrollOn = true;
     };
+
+    vm.jsonFilter = jsonFilter;
 
     var httpMethods = [
       'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'ACL', 'BASELINE_CONTROL', 'BIND', 'CHECKIN', 'CHECKOUT', 'CONNECT',
@@ -128,6 +121,19 @@
       'SEARCH', 'SHOWMETHOD', 'SPACEJUMP', 'TEXTSEARCH', 'TRACE', 'TRACK', 'UNBIND', 'UNCHECKOUT', 'UNLINK', 'UNLOCK',
       'UPDATE', 'UPDATEREDIRECTREF', 'VERSION_CONTROL'
     ];
+
+    $document.on('keydown', keyHandler);
+    $scope.$on('$destroy', function () {
+      $document.off('keydown', keyHandler);
+    });
+    $scope.$watchCollection(function () {
+      return vm.hoseFilters;
+    }, function (newVal, oldVal) {
+      if (newVal === oldVal) {
+        return;
+      }
+      localStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
+    });
 
     function buildOriginString(cfEvent, colour, bold) {
       return buildTimestampString(cfEvent) + ': ' +
@@ -244,12 +250,7 @@
       return jsonString;
     }
 
-    var RESET = '\x1B[0m';
-    /* eslint-disable no-control-regex */
-    var lastColourMatcher = new RegExp('\x1B\\[([0-9;]*)m', 'g');
-    /* eslint-enable no-control-regex */
-
-    this.jsonFilter = function (jsonString) {
+    function jsonFilter(jsonString) {
       var filtered = jsonString;
       try {
         var cfEvent = angular.fromJson(jsonString);
@@ -279,6 +280,7 @@
         $log.error('Failed to filter jsonMessage from WebSocket: ', jsonString);
         filtered = jsonString;
       }
+
       if (vm.textFilter) {
         if (vm.textFilterRegex) {
           if (!filtered.match(new RegExp(vm.textFilter))) {
@@ -325,8 +327,8 @@
             }
             var afterReset = allBefore.slice(lastReset);
 
-            lastColourMatcher.lastIndex = 0;
-            var matches = lastColourMatcher.exec(afterReset);
+            ANSI_COLOUR_MATCHER.lastIndex = 0;
+            var matches = ANSI_COLOUR_MATCHER.exec(afterReset);
 
             var boldOn, prevColour;
             if (matches !== null) {
