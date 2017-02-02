@@ -24,7 +24,7 @@
       frontendSrc: '../dashboard/src/app/frontend/',
       k8sComponentDistPath: '../dist/common/components/',
       frontendExterns: '../dashboard/src/app/externs/'
-    }
+    };
 
     return {
       bower: {

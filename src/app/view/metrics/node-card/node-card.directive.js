@@ -122,7 +122,7 @@
       this.$q.all(promises).then(function (limits) {
         that.cpuLimit = limits[0];
         // Memory limit is in bytes, convert to Mb for the filter
-        that.memoryLimit = parseInt(limits[1]) / (1024 * 1024);
+        that.memoryLimit = parseInt(limits[1], 10) / (1024 * 1024);
       });
     },
 

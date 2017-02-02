@@ -17,7 +17,7 @@
  */
 export class GraphCardController {
   /** @ngInject */
-  constructor() {
+  constructor($scope) {
     /** @export {!Array<!backendApi.Metric>} - Initialized from binding */
     this.metrics;
 
@@ -29,11 +29,20 @@ export class GraphCardController {
 
     /** @export {!Array<!backendApi.Metric>}  */
     this.selectedMetrics;
+
+    this.scope = $scope;
   }
 
   $onInit() {
     this.selectedMetrics = this.getSelectedMetrics();
-    console.log(this.selectedMetrics)
+    var that = this;
+    this.scope.$watch(function () {
+       return that.getSelectedMetrics()[0].lastUpdate
+      },
+      function () {
+        that.selectedMetrics = that.getSelectedMetrics();
+      }
+    )
   }
 
   /**
@@ -47,7 +56,6 @@ export class GraphCardController {
       return this.metrics;
     }
     let selectedMetricNameList = this.selectedMetricNames.split(',');
-    console.log(selectedMetricNameList)
     return this.metrics &&
         this.metrics.filter((metric) => selectedMetricNameList.indexOf(metric.metricName) !== -1);
   }

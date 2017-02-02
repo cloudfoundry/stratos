@@ -37,6 +37,7 @@ export class GraphController {
 
   $onInit() {
     // draw graph if data is available
+    var that = this;
     if (this.metrics !== null && this.metrics.length !== 0) {
       this.generateGraph();
     }
@@ -62,7 +63,21 @@ export class GraphController {
       let y1max = 1;
       let y2max = 1;
       // iterate over metrics and add them to graph display
-      for (let i = 0; i < this.metrics.length; i++) {
+    function generateData(metricSettings, metric) {
+     data = [];
+     data.push({
+       'area': metricSettings.area,
+       'values': metric.dataPoints,
+       'key': metricSettings.key,
+       'color': metricSettings.color,
+       'fillOpacity': metricSettings.fillOpacity,
+       'strokeWidth': metricSettings.strokeWidth,
+       'type': metricSettings.type,
+       'yAxis': metricSettings.yAxis,
+     });
+    }
+
+    for (let i = 0; i < this.metrics.length; i++) {
         let metric = this.metrics[i];
         // don't display metric if the number of its data points is smaller than 2
         if (metric.dataPoints.length < 2) {
@@ -89,16 +104,7 @@ export class GraphController {
             }
             y2max = Math.max(y2max, Math.max(...metric.dataPoints.map((e) => e.y)));
           }
-          data.push({
-            'area': metricSettings.area,
-            'values': metric.dataPoints,
-            'key': metricSettings.key,
-            'color': metricSettings.color,
-            'fillOpacity': metricSettings.fillOpacity,
-            'strokeWidth': metricSettings.strokeWidth,
-            'type': metricSettings.type,
-            'yAxis': metricSettings.yAxis,
-          });
+          generateData(metricSettings, metric);
         }
       }
       // don't display empty graph, hide it completely,
@@ -185,7 +191,9 @@ export class GraphController {
        * @param {number} updatePeriod
        * @param {number} timeBetweenUpdates
        */
+      var that = this;
       let startChartUpdatePeriod = function(updatePeriod, timeBetweenUpdates) {
+
         if (isUpdatingFunctionRunning) {
           // Don't start another updater oif updating funciton is already running
           // just the prolong running time of currently running function to required value.
@@ -196,7 +204,15 @@ export class GraphController {
         updateUntil = new Date().valueOf() + updatePeriod;
         // update chart and call itself again if still in update period.
         let updater = function() {
-          chart.update();
+
+          let metric = that.metrics[0];
+          let metricSettings = metricDisplaySettings[metric.metricName];
+          generateData(metricSettings, metric);
+
+          let chartElement = d3.select(that.element_[0]).select('svg');
+          chartElement.datum(data).transition().call(chart);
+          nv.utils.windowResize(chart.update);
+
           if (new Date() < updateUntil) {
             setTimeout(updater, timeBetweenUpdates);
           } else {
@@ -213,7 +229,15 @@ export class GraphController {
           () => startChartUpdatePeriod(1600, 200),
           false  // not a deep watch
           );
-
+      this.scope_.$watch(
+        function(){
+          return that.metrics[0].lastUpdate;
+        },
+        function(newVal, oldVal){
+          startChartUpdatePeriod(1600, 200)
+        },
+        false  // not a deep watch
+      );
       return chart;
     });
   }

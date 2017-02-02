@@ -591,6 +591,7 @@ backendApi.PodList;
  *   dataPoints: !Array<!backendApi.DataPoint>,
  *   metricName: string,
  *   aggregation: string,
+ *   lastUpdate: string
  * }}
  */
 backendApi.Metric;

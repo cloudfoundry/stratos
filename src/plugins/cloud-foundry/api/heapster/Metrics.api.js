@@ -17,7 +17,6 @@
 
   function MetricsApi($http, $httpParamSerializer) {
 
-    var that = this;
     this.$httpParamSerializer = $httpParamSerializer;
 
     var metricsUrl = '/pp/v1/metrics/';
@@ -33,6 +32,7 @@
     this.getCpuUsage = _metricsQuery('cpu_usage_rate_gauge');
     this.getCpuUtilization = _metricsQuery('cpu_node_utilization_gauge');
     this.getMemoryUsage = _metricsQuery('memory_usage_gauge');
+    this.getMemoryWorkingSetUsasge = _metricsQuery('memory_working_set_gauge');
     this.getMemoryUtilization = _metricsQuery('memory_node_utilization_gauge');
     this.updateNetworkDataReceived = _metricsQuery('network_rx_cumulative');
     this.updateNetworkDataTransmitted = _metricsQuery('network_tx_cumulative');

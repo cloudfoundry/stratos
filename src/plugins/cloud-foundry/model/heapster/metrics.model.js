@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-
   /**
    * @namespace cloud-foundry.model.heapster
    * @memberOf cloud-foundry.model
@@ -72,10 +71,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getCpuUsage(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'cpu/usage_rate');
-        }).catch(function (err) {
-          //
         });
     },
 
@@ -84,10 +84,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getCpuUtilization(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'cpu/utilization');
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -96,10 +97,24 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getMemoryUsage(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'memory/usage');
-        }).catch(function (err) {
-          //noop
+        });
+    },
+
+    getMemoryWorkingSetUsasge: function (filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getMemoryWorkingSetUsasge(filter)
+        .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, 'memory_working_set_gauge');
         });
     },
 
@@ -108,10 +123,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getMemoryUtilization(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'memory/utilization');
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -120,10 +136,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .updateNetworkDataTransmitted(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'network_tx_cumulative');
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -132,10 +149,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .updateNetworkDataReceived(filter)
         .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
           // transform in kd-graph format
           return that._addOpenTsdbMetrics(res.data, 'network_rx_cumulative');
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -145,8 +163,6 @@
         .then(function (res) {
           var getLastMetricReading = res.data.latestTimestamp;
           return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -156,8 +172,6 @@
         .then(function (res) {
           var getLastMetricReading = res.data.latestTimestamp;
           return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -167,8 +181,6 @@
         .then(function (res) {
           var getLastMetricReading = res.data.latestTimestamp;
           return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
-        }).catch(function (err) {
-          //noop
         });
     },
 
@@ -181,11 +193,11 @@
       if (_.has(responseData, 'dps')) {
         _.each(responseData.dps, function (dataPoint, timestemp) {
           dataPoints.push({
-            x: parseInt(timestemp),
+            x: parseInt(timestemp, 10),
             y: dataPoint
           });
           timeSeries.push({
-            timestamp: moment(parseInt(timestemp)).format('YYYY-MM-DDTHH:mm:ssZ'),
+            timestamp: moment(parseInt(timestemp, 10)).format('YYYY-MM-DDTHH:mm:ssZ'),
             value: dataPoint
           });
         });
@@ -195,21 +207,10 @@
         metricName: metricName,
         aggregation: 'sum',
         dataPoints: dataPoints,
-        timeSeries: timeSeries
+        timeSeries: timeSeries,
+        lastUpdate: Date.now()
       };
-      var index = _.findIndex(this.cumulativeMetrics, ['metricName', metricName]);
-      if (index !== -1) {
-        this.cumulativeMetrics[index].dataPoints = dataPoints;
-        this.cumulativeMetrics[index].timeSeries = timeSeries;
-        cumulativeMetricObj = this.cumulativeMetrics[index];
-      } else {
-        this.cumulativeMetrics.push({
-          metricName: metricName,
-          aggregation: 'sum',
-          dataPoints: dataPoints,
-          timeSeries: timeSeries
-        });
-      }
+
       return cumulativeMetricObj;
     },
 
@@ -256,6 +257,10 @@
         that.namespaceInformation = obj;
         return obj;
       });
+    },
+
+    _isErrorResponse: function (res) {
+      return _.has(res, 'data.error');
     }
   });
 
