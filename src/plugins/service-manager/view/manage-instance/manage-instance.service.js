@@ -37,6 +37,16 @@
         });
       }
 
+      function upgrade(data) {
+        var hsmModel = modelManager.retrieve('service-manager.model');
+        // Update the product and sdl versions for the instance
+        data.instance.product_version = data.product;
+        data.instance.sdl_version = data.sdl;
+        return hsmModel.configureInstance(serviceManagerGuid, data.instance, data.params).then(function (d) {
+          return d;
+        });
+      }
+
       function execute(data) {
         switch (mode) {
           case 'upgrade':

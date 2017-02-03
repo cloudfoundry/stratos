@@ -155,6 +155,7 @@
       return this._request('DELETE', 'instances/' + id, guid, undefined, httpConfigOptions);
     },
 
+    // Note this is used for both upgrade and configure
     configureInstance: function (guid, instance, params, httpConfigOptions) {
       var instanceRequest = {
         instance_id: instance.instance_id,

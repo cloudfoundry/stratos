@@ -224,10 +224,10 @@
 
     _sortUpgrades: function () {
       var that = this;
-      this.versionUtils.sort(this.instance.available_upgrades, 'product_version', true);
+      this.versionUtils.sortByProperty(this.instance.available_upgrades, 'product_version', true);
       _.each(this.instance.available_upgrades, function (product) {
         //console.log(product);
-        that.versionUtils.sort(product.sdl_versions, 'sdl_version', true);
+        that.versionUtils.sortByProperty(product.sdl_versions, 'sdl_version', true);
       });
     },
 
