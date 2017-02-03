@@ -116,6 +116,10 @@
       return this.hsmApi.deleteInstance(guid, id);
     },
 
+    configureInstance: function (serviceManagerGuid, instance, params) {
+      return this.hsmApi.configureInstance(serviceManagerGuid, instance, params);
+    },
+
     getHsmEndpoints: function () {
       var userServices = this.modelManager.retrieve('app.model.serviceInstance.user');
       var hsmServices = _.filter(userServices.serviceInstances, {cnsi_type: 'hsm'});

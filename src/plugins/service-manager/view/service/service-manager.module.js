@@ -32,17 +32,17 @@
     '$state',
     '$q',
     'app.model.modelManager',
-    'service-manager.view.create-instance.dialog'
+    'service-manager.view.manage-instance.dialog'
   ];
 
-  function ServiceManagerController($stateParams, $log, utils, $state, $q, modelManager, createInstanceDialog) {
+  function ServiceManagerController($stateParams, $log, utils, $state, $q, modelManager, manageInstanceDialog) {
     var that = this;
 
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.$state = $state;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.createInstanceDialog = createInstanceDialog;
+    this.manageInstanceDialog = manageInstanceDialog;
 
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -73,7 +73,7 @@
     createInstance: function (serviceId, productVersion, sdlVersion) {
       var that = this;
       this.hsmModel.getServices(that.guid).then(function (services) {
-        that.createInstanceDialog.show(that.guid, _.keyBy(services, 'id'), serviceId, productVersion, sdlVersion).result.then(function (instance) {
+        that.manageInstanceDialog.show('create', that.guid, _.keyBy(services, 'id'), serviceId, productVersion, sdlVersion).result.then(function (instance) {
           // Open the instance once it has been created
           that.$state.go('sm.endpoint.instance.components', {guid: that.guid, id: instance.instance_id});
         });

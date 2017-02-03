@@ -1,0 +1,136 @@
+<form name="form.createInstanceForm" file-drop="ciFormCtrl.instanceFile">
+
+  <div class="hsm-create-instance-intro">
+    <p>
+      You can upload a pre-prepared instance JSON file, by either selecting the file below or by
+      dragging and dropping it onto this area.
+    </p>
+    <div>
+      <input id="hsm-choose-instance-file" fileread="ciFormCtrl.instanceFile" type="file"></input>
+      <label for="hsm-choose-instance-file" class="btn btn-default btn-sm">Select Instance JSON</label>
+    </div>
+  </div>
+
+  <div ng-if="ciFormCtrl.data.mode !== 'create'">
+    <dl class="dl-horizontal">
+      <dt translate>Instance ID</dt>
+      <dd>{{ ciFormCtrl.data.instance.instance_id}}</dd>
+      <dt translate>Service ID</dt>
+      <dd>{{ ciFormCtrl.data.serviceId}}</dd>
+      <dt translate>Product Version</dt>
+      <dd>{{ ciFormCtrl.data.instance.product_version }}</dd>
+      <dt translate>SDL Version</dt>
+      <dd>{{ ciFormCtrl.data.instance.sdl_version }}</dd>
+    </dl>
+  </div>
+
+  <div ng-if="ciFormCtrl.data.mode === 'upgrade'">
+    <h4>Choose Product Version and SDL Version to upgrade to</h4>
+    <fieldset class="fieldset-horizontal">
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Product Version</label>
+        <select-input
+          class="form-control"
+          ng-model="ciFormCtrl.data.product"
+          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+          input-options="ciFormCtrl.productVersions"
+          required
+          ng-change="ciFormCtrl.productChanged()"
+        />
+      </div>
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>SDL Version</label>
+        <select-input
+          class="form-control"
+          ng-model="ciFormCtrl.data.sdl"
+          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+          input-options="ciFormCtrl.sdlOptions"
+          required
+          ng-change="ciFormCtrl.sdlChanged()"
+        />
+      </div>
+    </fieldset>
+  </div>
+
+  <div ng-if="ciFormCtrl.data.mode === 'create'">
+    <h4>Service</h4>
+    <fieldset class="fieldset-horizontal">
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Service</label>
+      <select-input
+        class="form-control"
+        ng-model="ciFormCtrl.data.serviceId"
+        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+        input-options="ciFormCtrl.serviceOptions"
+        required
+        ng-change="ciFormCtrl.serviceChanged()"
+      />
+    </div>
+    </fieldset>
+
+    <h4>Choose Product Version, SDL Version and an Instance ID</h4>
+    <fieldset class="fieldset-horizontal">
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Product Version</label>
+        <select-input
+          class="form-control"
+          ng-model="ciFormCtrl.data.product"
+          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+          input-options="ciFormCtrl.productVersions"
+          required
+          ng-change="ciFormCtrl.productChanged()"
+        />
+      </div>
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>SDL Version</label>
+        <select-input
+          class="form-control"
+          ng-model="ciFormCtrl.data.sdl"
+          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+          input-options="ciFormCtrl.sdlOptions"
+          required
+          ng-change="ciFormCtrl.sdlChanged()"
+        />
+      </div>
+    </fieldset>
+    <fieldset class="two-width-fields">
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Instance ID</label>
+        <input
+          type="text"
+          class="form-control"
+          ng-model="ciFormCtrl.data.instanceId"
+          placeholder="Instance ID"
+        />
+      </div>
+    </fieldset>
+  </div>
+
+  <div ng-show="ciFormCtrl.shownParams">
+
+  <div class="hsm-params-selector">
+    <h4 translate>Service Parameters</h4>
+    <div ng-if="ciFormCtrl.data.mode === 'create'">
+      <span>Show:</span>
+      <a translate ng-click="ciFormCtrl.showAllParams(false)">Required</a>
+      <a translate ng-click="ciFormCtrl.showAllParams(true)">All</a>
+    </div>
+  </div>
+
+  <fieldset class="two-width-fields">
+    <div ng-repeat="p in ciFormCtrl.shownParams" class="form-group" focusable-input>
+      <label class="control-label" translate>{{p.name}}</label>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="ciFormCtrl.data.params[p.name]"
+        placeholder="{{p.default || p.example}}"
+        ng-required="ciFormCtrl.data.mode === 'create' && p.notSupplied"
+      />
+    </div>
+  </fieldset>
+  <div ng-if="ciFormCtrl.shownParams.length === 0">
+    This service does not have any parameters that must be provided.
+  </div>
+  </div>
+</form>

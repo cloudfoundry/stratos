@@ -14,7 +14,8 @@
     .module('service-manager', [
       'service-manager.api',
       'service-manager.view',
-      'service-manager.model'
+      'service-manager.model',
+      'service-manager.utils'
     ])
     .run(register);
 

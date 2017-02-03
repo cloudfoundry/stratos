@@ -36,7 +36,7 @@
               </dd>
               <dt translate>Service ID</dt>
               <dd>
-                <a ui-sref="sm.endpoint.service({id: instanceCtrl.instance.service_id })">
+                <a ui-sref="sm.endpoint.service.detail({id: instanceCtrl.instance.service_id })">
                 {{ instanceCtrl.instance.service_id }}
                 </a>
               </dd>
@@ -89,7 +89,7 @@
       </li>
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.services">
-          <span translate>Services</span>
+          <span translate>Service Locations</span>
           <span class="tab-count-indicator">({{instanceCtrl.instance.service_locations.length || 0}})</span>
         </a>
       </li>

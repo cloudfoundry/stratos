@@ -2,21 +2,21 @@
   'use strict';
 
   angular
-    .module('service-manager.view.create-instance.form', [])
-    .directive('createInstanceForm', createInstanceForm);
+    .module('service-manager.view.manage-instance.form', [])
+    .directive('manageInstanceForm', manageInstanceForm);
 
-  createInstanceForm.$inject = [
+  manageInstanceForm.$inject = [
   ];
 
   /**
    * @name application
-   * @returns {object} The create instance form directive definition object
+   * @returns {object} The manage instance form directive definition object
    */
-  function createInstanceForm() {
+  function manageInstanceForm() {
     return {
-      controller: CreateInstanceForm,
+      controller: ManageInstanceForm,
       controllerAs: 'ciFormCtrl',
-      templateUrl: 'plugins/service-manager/view/create-instance/create-instance-form.html',
+      templateUrl: 'plugins/service-manager/view/manage-instance/manage-instance-form.html',
       scope: {
         data: '='
       },
@@ -24,29 +24,30 @@
     };
   }
 
-  CreateInstanceForm.$inject = [
+  ManageInstanceForm.$inject = [
     '$scope',
     '$q',
     '$window',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'service-manager.utils.version'
   ];
 
   /**
-   * @namespace app.view.application.ApplicationController
-   * @memberof app.view.application
-   * @name CreateInstanceForm
+   * @name ManageInstanceForm
    * @param {object} $scope - the Angular $scope service
    * @param {object} $q - the Angular $q promise service
    * @param {object} $window - the Angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} versionUtils - version utils service
    * @class
    */
-  function CreateInstanceForm($scope, $q, $window, modelManager) {
+  function ManageInstanceForm($scope, $q, $window, modelManager, versionUtils) {
     var that = this;
     this.$q = $q;
     this.hsmModel = modelManager.retrieve('service-manager.model');
+    this.versionUtils = versionUtils;
     this.data.form = $scope.form;
-    this.data.params = [];
+    this.data.params = {};
 
     this.sdlOptions = [];
 
@@ -75,10 +76,24 @@
       });
     });
 
-    this.serviceChanged(this.data.productVersion, this.data.sdlVersion);
+    if (this.data.mode === 'create') {
+      this.serviceChanged(this.data.productVersion, this.data.sdlVersion);
+    }
+
+    if (this.data.mode === 'upgrade') {
+      //this.serviceChanged(this.data.productVersion, this.data.sdlVersion);
+      this.getUpgradeMetadata();
+    }
+
+    if (this.data.instance) {
+      this.shownParams = this.data.instance.parameters;
+      _.each(this.shownParams, function (p) {
+        p.default = p.value;
+      });
+    }
   }
 
-  angular.extend(CreateInstanceForm.prototype, {
+  angular.extend(ManageInstanceForm.prototype, {
     readInstanceFile: function (file, encoding) {
       var deferred = this.$q.defer();
       var reader = new this.FileReader();
@@ -137,15 +152,17 @@
               latest: sdlVersion === version.latest
             });
           });
+          that.versionUtils.sortByProperty(sdl, 'value', true);
         });
+
+        this.versionUtils.sortByProperty(that.productVersions, 'value', true);
 
         if (productVersion) {
           this.data.product = productVersion;
         } else {
-          this.data.product = service.product_versions[0].product_version;
+          this.data.product = this.productVersions[0].value;
         }
       }
-
       this.productChanged(sdlVersion);
     },
 
@@ -157,7 +174,7 @@
         this.data.sdl = found ? found.value : undefined;
       } else {
         this.data.sdl = sdlVersion;
-        if (!this.data.services[sdlVersion]) {
+        if (!_.find(this.sdlOptions, {value: sdlVersion})) {
           this.data.sdl = found ? found.value : undefined;
         }
       }
@@ -169,6 +186,9 @@
       if (this.data.sdl) {
         this.hsmModel.getServiceSdl(this.data.guid, this.service.id, this.data.product, this.data.sdl).then(function (sdl) {
           that.parameters = sdl.parameters;
+          _.each(that.parameters, function (param) {
+            param.notSupplied = param.required && !param.generator && !param.secret && !param.default;
+          });
           that.showAllParams(false);
         });
       } else {
@@ -185,6 +205,34 @@
       } else {
         that.shownParams = that.parameters;
       }
+    },
+
+    getUpgradeMetadata: function () {
+      var that = this;
+      this.productVersions = [];
+      this.sdlVersions = {};
+      var upgrades = this.data.instance.available_upgrades;
+      _.each(upgrades, function (version) {
+        that.productVersions.push({
+          label: version.product_version,
+          value: version.product_version
+        });
+        var sdl = [];
+        that.sdlVersions[version.product_version] = sdl;
+        _.each(version.sdl_versions, function (sdlVersion) {
+          sdl.push({
+            label: sdlVersion.sdl_version,
+            value: sdlVersion.sdl_version,
+            latest: sdlVersion.is_latest
+          });
+        });
+        that.versionUtils.sortByProperty(sdl, 'value', true);
+      });
+      this.versionUtils.sortByProperty(that.productVersions, 'value', true);
+      this.data.product = that.productVersions[0].value;
+      this.sdlOptions = this.sdlVersions[this.data.product] || [];
+      var found = _.find(this.sdlOptions, {latest: true});
+      this.data.sdl = found ? found.value : undefined;
     }
   });
 })();

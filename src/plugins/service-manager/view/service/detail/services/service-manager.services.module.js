@@ -17,7 +17,7 @@
       controllerAs: 'servicesCtrl',
       ncyBreadcrumb: {
         label: '{{ smCtrl.endpoint.name || "..." }}',
-        parent: 'sm.endpoint.detail'
+        parent: 'sm.tiles'
       }
     });
   }
@@ -32,7 +32,7 @@
 
   angular.extend(ServiceManagerServicesController.prototype, {
     open: function (endpoint) {
-      this.$state.go('sm.endpoint.service', {id: endpoint.id});
+      this.$state.go('sm.endpoint.service.detail', {id: endpoint.id});
     }
   });
 

@@ -102,17 +102,22 @@
     '$q',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'service-manager.view.manage-instance.dialog',
+    'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog) {
+  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog, manageInstanceDialog, versionUtils) {
     var that = this;
 
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.confirmDialog = confirmDialog;
+    this.manageInstanceDialog = manageInstanceDialog;
     this.$timeout = $timeout;
+    this.$state = $state;
+    this.versionUtils = versionUtils;
 
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -127,14 +132,24 @@
     this.interestingState = false;
 
     this.actions = [
-      { name: 'Upgrade Instance'},
-      { name: 'Configure Instance'},
-      { name: 'Delete Instance',
+      { id: 'upgrade', name: 'Upgrade Instance',
+        execute: function () {
+          return that.upgradeInstance(that.id);
+        }
+      },
+      { id: 'configure', name: 'Configure Instance',
+        execute: function () {
+          return that.configureInstance(that.id);
+        }
+      },
+      { id: 'delete', name: 'Delete Instance',
         execute: function () {
           return that.deleteInstance(that.id);
         }
       }
     ];
+
+    this.actionsMap = _.keyBy(this.actions, 'id');
 
     this.highlight = function (id, on) {
       if (on) {
@@ -155,6 +170,15 @@
   }
 
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
+
+    updateActions: function () {
+      var isBusy = this.deleting || this.deleted || this.interestingState;
+      this.actionsMap.configure.disabled = isBusy;
+      this.actionsMap.delete.disabled = isBusy;
+
+      var hasUpgrades = this.instance && this.instance.available_upgrades && this.instance.available_upgrades.length > 0;
+      this.actionsMap.upgrade.disabled = isBusy || !hasUpgrades;
+    },
 
     poll: function (fetchNow) {
       var that = this;
@@ -183,6 +207,7 @@
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
         that._setStateIndicator();
+        that._sortUpgrades();
       }).catch(function (err) {
         if (that.deleting) {
           that.deleted = true;
@@ -194,6 +219,15 @@
           that.instance.state = '404';
           that._setStateIndicator();
         }
+      });
+    },
+
+    _sortUpgrades: function () {
+      var that = this;
+      this.versionUtils.sort(this.instance.available_upgrades, 'product_version', true);
+      _.each(this.instance.available_upgrades, function (product) {
+        //console.log(product);
+        that.versionUtils.sort(product.sdl_versions, 'sdl_version', true);
       });
     },
 
@@ -212,6 +246,10 @@
           that.stateIndicator = 'busy';
           that.interestingState = true;
           break;
+        case 'modifying':
+          that.stateIndicator = 'busy';
+          that.interestingState = true;
+          break;
         case 'deleted':
           that.stateIndicator = 'tentative';
           break;
@@ -224,6 +262,7 @@
         default:
           that.stateIndicator = 'tentative';
       }
+      this.updateActions();
     },
 
     deleteInstance: function (id) {
@@ -244,6 +283,20 @@
           that.deleting = true;
           that.poll(true);
         });
+      });
+    },
+
+    upgradeInstance: function () {
+      var that = this;
+      that.manageInstanceDialog.show('upgrade', that.guid, null, that.instance).result.then(function () {
+        that.poll(true);
+      });
+    },
+
+    configureInstance: function () {
+      var that = this;
+      that.manageInstanceDialog.show('configure', that.guid, null, that.instance).result.then(function () {
+        that.poll(true);
       });
     }
   });

@@ -153,6 +153,27 @@
 
     deleteInstance: function (guid, id, httpConfigOptions) {
       return this._request('DELETE', 'instances/' + id, guid, undefined, httpConfigOptions);
+    },
+
+    configureInstance: function (guid, instance, params, httpConfigOptions) {
+      var instanceRequest = {
+        instance_id: instance.instance_id,
+        service_id: instance.service_id,
+        vendor: instance.vendor,
+        product_version: instance.product_version,
+        sdl_version: instance.sdl_version,
+        parameters: []
+      };
+
+      _.each(params, function (value, key) {
+        instanceRequest.parameters.push({
+          name: key,
+          value: value
+        });
+      });
+
+      return this._request('PUT', 'instances/' + instance.instance_id, guid, instanceRequest, httpConfigOptions);
     }
+
   });
 })();

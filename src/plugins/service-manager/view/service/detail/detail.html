@@ -61,8 +61,8 @@
         <div class="panel-body cluster-summary-panel row hsm-upgrade" ng-if="smCtrl.endpointHasUpgrades()">
           <div>
           <div class="upgrade-message">
-            <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
-            <a ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})">Upgrade(s) are available for one or more instances</a>
+            <i class="helion-icon helion-icon-Upgrade"></i>
+            <span>Upgrade(s) are available for one or more instances</span>
           </div>
           <div class="upgrade-acknowledge">
             <i ng-click="smCtrl.acknowledgeUpgrade()" class="helion-icon helion-icon-Close"></i>

@@ -30,7 +30,7 @@
       controllerAs: 'sCtrl',
       ncyBreadcrumb: {
         label: '{{ svCtrl.id || "..." }}',
-        parent: 'sm.endpoint.detail.instances'
+        parent: 'sm.endpoint.detail.services'
       },
       data: {
         activeMenuState: 'sm.list'
