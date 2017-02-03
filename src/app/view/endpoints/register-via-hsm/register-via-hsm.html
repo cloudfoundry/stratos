@@ -1,0 +1,53 @@
+<div ng-init="data = asyncTaskDialogCtrl.context.data">
+  <div>
+    <p translate>Additional unregistered service endpoints have been discovered via Helion Service Manager.
+      Would you like to now register them?</p>
+  </div>
+  <form class="form-stacked center-block" name="data.form" role="form">
+  <table class="table table-outlined table-selectable"
+         st-table="data.stTableEndpoints"
+         st-safe-src="data.endpoints">
+    <thead>
+    <tr>
+      <th></th>
+      <th translate st-sort="name" st-skip-natural="true">Name</th>
+      <th translate st-sort="productName" st-sort-default="reverse" st-skip-natural="true">Type</th>
+      <th translate st-sort="url" st-skip-natural="true">Address</th>
+      <th translate>Skip SSL Validation</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="endpoint in data.stTableEndpoints track by endpoint.url"
+        show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+        inline-message-colspan="5"
+        table-inline-status="{{ endpoint.error.status }}"
+        >
+      <td><checkbox-input ng-model="endpoint.register" ng-change="data.buildEndpointNames()"></checkbox-input></td>
+      <td>
+        <div class="form-group" focusable-input
+             ng-class="{'has-error': (data.form[endpoint.key].$invalid && data.form[endpoint.key].$dirty) || data.form[endpoint.key].$error.helionUnique}">
+          <label class="control-label" translate></label>
+          <span class="control-message">
+          <span translate ng-if="data.form[endpoint.key].$error.required">Name is required</span>
+          <span translate ng-if="data.form[endpoint.key].$error.helionUnique">Name is not unique</span>
+          </span>
+          <input type="text" name="{{endpoint.key}}" class="form-control"
+                 ng-model="endpoint.name"
+                 ng-change="data.buildEndpointNames()"
+                 helion-unique items="endpoint.endpointNames"
+                 ignore-case
+                 required/>
+        </div>
+      </td>
+      <td>{{ endpoint.productName }}</td>
+      <td>{{ endpoint.url }}</td>
+      <td>
+        <checkbox-input ng-model="endpoint.skipSll"
+                        input-label="{{'Skip SSL validation for the endpoint' | translate}}">
+        </checkbox-input>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  </form>
+</div>

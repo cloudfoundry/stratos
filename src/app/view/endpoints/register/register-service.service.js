@@ -37,7 +37,19 @@
       return _.map(serviceInstances, 'name');
     }
 
+    function register(productName, type, url, name, skipSslValidation) {
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      return serviceInstanceModel.create(type, url, name, skipSslValidation).then(function (serviceInstance) {
+        notificationsService.notify('success',
+          gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
+          {endpointType: productName, name: name});
+        return serviceInstance;
+      });
+    }
+
     return {
+      register: register,
+      createInstanceNames: createInstanceNames,
       show: function () {
         var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
         var modal;
@@ -111,18 +123,15 @@
                   onNext: function () {
                     var userInput = context.wizardOptions.userInput;
                     var stepTwo = context.wizardOptions.workflow.steps[1];
-                    return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
-                      notificationsService.notify('success',
-                        gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                        {endpointType: stepTwo.product, name: userInput.name});
-                      return serviceInstance;
-                    }).catch(function (response) {
-                      if (response.status === 403) {
-                        return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
-                      }
-                      return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
-                        'is correct and try again. If this error persists, please contact the administrator.'));
-                    });
+
+                    return register(stepTwo.product, userInput.type, userInput.url, userInput.name, userInput.skipSslValidation)
+                      .catch(function (response) {
+                        if (response.status === 403) {
+                          return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                        }
+                        return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
+                          'is correct and try again. If this error persists, please contact the administrator.'));
+                      });
                   },
                   onEnter: function () {
                     delete context.wizardOptions.userInput.url;

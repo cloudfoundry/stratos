@@ -17,7 +17,9 @@
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'helion.framework.widgets.dialog.confirm',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.registerServiceViaHsm'
+
   ];
 
   /**
@@ -40,7 +42,7 @@
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog, eventService) {
+                                         notificationsService, credentialsDialog, confirmDialog, eventService, registerServiceViaHsm) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -314,26 +316,34 @@
           }
         },
         onConnectSuccess: function () {
-          if (that.dialog) {
-            that.dialog.close();
-            that.dialog = undefined;
-          }
-          updateInstances().then(function () {
-            createEndpointEntries();
-            switch (serviceInstance.cnsi_type) {
-              case 'hcf':
-                // Initialise AuthModel for service
-                authModel.initializeForEndpoint(serviceInstance.guid);
-                break;
-              case 'hce':
-                $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
-                .then(function () {
-                  vcsService.createEndpointEntries();
-                });
-                break;
-            }
-            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
-          });
+          // TODO: RC Only do if admin
+          return registerServiceViaHsm.show(serviceInstance.guid)
+            .then(function () {
+              console.log('UPDATING ENDPOINT TABLE');
+              return updateInstances();
+            })
+            .then(function () {
+              createEndpointEntries();
+              switch (serviceInstance.cnsi_type) {
+                case 'hcf':
+                  // Initialise AuthModel for service
+                  authModel.initializeForEndpoint(serviceInstance.guid);
+                  break;
+                case 'hce':
+                  $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
+                    .then(function () {
+                      vcsService.createEndpointEntries();
+                    });
+                  break;
+              }
+              eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            })
+            .finally(function () {
+              if (that.dialog) {
+                that.dialog.close();
+                that.dialog = undefined;
+              }
+            });
         }
       });
     }
