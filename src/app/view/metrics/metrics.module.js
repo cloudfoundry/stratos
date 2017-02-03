@@ -3,7 +3,8 @@
 
   angular
     .module('app.view.metrics', [
-      'app.view.metrics.dashboard'
+      'app.view.metrics.dashboard',
+      'nvd3'
     ])
     .config(registerRoute)
     .run(register);

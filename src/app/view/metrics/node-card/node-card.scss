@@ -1,8 +1,20 @@
-.node-card{
+.node-card {
   padding-right: 12px;
   flex-grow: 1;
 
-.chart{
- margin-left: 0px !important;
-}
+  .charts {
+    display: flex;
+    flex-direction: row;
+  }
+  .chart {
+    margin-left: 0px !important;
+  }
+
+  .consume-space{
+    flex-grow: 2;
+  }
+
+  .donut-space{
+    flex-grow: 1;
+  }
 }

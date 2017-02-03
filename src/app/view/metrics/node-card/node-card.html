@@ -15,6 +15,21 @@
       {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
     </dd>
 
+    <!--<dt translate></dt>-->
+    <dd class="chart">
+      <div class="charts">
+        <utilization-donut  class="donut-space" metric="cpu_node_utilization_gauge"
+                           filter="nodename={{nodeCardCtrl.nodeName}}"
+                           y-label="CPU Utilization (%)"
+                           node-name="{{nodeCardCtrl.nodeName}}"
+        ></utilization-donut>
+        <average-rate-graph  class="consume-space" metric="cpu_node_utilization_gauge"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="CPU Utilization (%)"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+        ></average-rate-graph>
+      </div>
+    </dd>
     <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
