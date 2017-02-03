@@ -70,6 +70,20 @@
       '$', 'i'
     );
 
+    var colorCodes = {
+      black: 0,
+      red: 1,
+      green: 2,
+      yellow: 3,
+      blue: 4,
+      magenta: 5,
+      cyan: 6,
+      white: 7
+    };
+
+    // Ansi code to reset all colours
+    var RESET = '\x1B[0m';
+
     return {
       chainStateResolve: chainStateResolve,
       getClusterEndpoint: getClusterEndpoint,
@@ -81,7 +95,9 @@
       urlValidationExpression: urlValidationExpression,
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
-      getOemConfiguration: getOemConfiguration
+      getOemConfiguration: getOemConfiguration,
+      coloredLog: coloredLog,
+      highlightLog: highlightLog
     };
 
     /**
@@ -209,6 +225,30 @@
       }
 
       return usedMemHuman + ' / ' + totalMemHuman;
+    }
+
+    function coloredLog(message, color, boldOn) {
+      if (boldOn) {
+        if (color) {
+          return '\x1B[1;3' + colorCodes[color] + 'm' + message + RESET;
+        }
+        return '\x1B[1m' + message + RESET;
+      }
+      if (color) {
+        return '\x1B[3' + colorCodes[color] + 'm' + message + RESET;
+      }
+      return message;
+    }
+
+    function highlightLog(message, previousColour, wasBoldOn) {
+      var ret = '\x1B[0;4' + colorCodes.yellow + ';30m' + message + RESET;
+      if (previousColour) {
+        ret += '\x1B[3' + previousColour + 'm';
+      }
+      if (wasBoldOn) {
+        ret += '\x1B[1m';
+      }
+      return ret;
     }
 
     // Wrap val into a promise if it's not one already

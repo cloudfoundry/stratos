@@ -128,6 +128,7 @@
         return null;
       }
 
+      var smartBrowser = false;
       function resizeSingleDiv(divId, widthPx) {
         resizedDivsMap[divId] = true;
         var index = divsToResize.indexOf(divId);
@@ -140,7 +141,8 @@
         }
 
         var previousHeight = aDiv[0].offsetHeight;
-        var scrollAffected = !logViewer.autoScrollOn && logContainer.scrollTop > aDiv[0].offsetTop;
+        var prevScrollTop = logContainer.scrollTop;
+        var scrollAffected = !smartBrowser && !logViewer.autoScrollOn && prevScrollTop > aDiv[0].offsetTop;
 
         aDiv[0].style.width = widthPx;
 
@@ -148,7 +150,12 @@
         if (scrollAffected) {
           var newHeight = aDiv[0].offsetHeight;
           if (newHeight !== previousHeight) {
-            logContainer.scrollTop += newHeight - previousHeight;
+            // Check if Chrome 56+ has kindly done the adjustment for us
+            if (prevScrollTop === logContainer.scrollTop) {
+              logContainer.scrollTop += newHeight - previousHeight;
+            } else {
+              smartBrowser = true;
+            }
           }
         }
 

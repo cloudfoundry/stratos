@@ -24,8 +24,8 @@
     <div class="firehose-header-bottom">
       <div class="text-filter">
         <i class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></i>
-        <input class="text-filter-input" ng-model="firehoseCtrl.textFilter" type="text">
-        <i ng-click="firehoseCtrl.textFilter = undefined" class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></i>
+        <input class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" ng-trim="false" type="text">
+        <i ng-click="firehoseCtrl.textFilter.toMatch = undefined" class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></i>
       </div>
       <div class="type-filters">
         <div class="filters-controls">
