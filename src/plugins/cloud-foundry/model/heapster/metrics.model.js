@@ -92,6 +92,20 @@
         });
     },
 
+
+    getMetrics: function (metricsName, filter) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getMetrics(metricsName, filter)
+        .then(function (res) {
+          if (that._isErrorResponse(res)) {
+            return that.$q.reject(res.data.error);
+          }
+          // transform in kd-graph format
+          return that._addOpenTsdbMetrics(res.data, metricsName);
+        });
+    },
+
     getMemoryUsage: function (filter) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')

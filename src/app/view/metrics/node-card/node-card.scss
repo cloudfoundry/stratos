@@ -1,20 +1,31 @@
 .node-card {
-  padding-right: 12px;
+ padding-right: 12px;
   flex-grow: 1;
 
   .charts {
-    display: flex;
-    flex-direction: row;
+    //display: flex;
+    //flex-direction: row;
+    width: 100%;
   }
   .chart {
     margin-left: 0px !important;
   }
 
   .consume-space{
-    flex-grow: 2;
+   // align-self: auto;
+   // order:1;
+   // flex: 2 0 auto;
+//	float:right;
+	width:75%;
+     overflow:hidden;
   }
 
   .donut-space{
-    flex-grow: 1;
+    //align-self: auto;
+    //order:0;
+    //width: 50%;    
+    //flex: 1 0 auto;
+   float:left;
+   width:25%;
   }
 }

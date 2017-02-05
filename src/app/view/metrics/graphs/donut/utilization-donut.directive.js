@@ -13,7 +13,8 @@
         filter: '@',
         metric: '@',
         yLabel: '@',
-        nodeName: '@'
+        nodeName: '@',
+        metricLimit: '@'
       },
       controller: UtilizationDonutController,
       controllerAs: 'utilizationDonutCtrl',
@@ -37,10 +38,11 @@
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
 
-    this.updateCpuUtilization();
+    this.metricData = {};
+    this.updateUtilization();
 
     var interval = $interval(function () {
-      that.updateCpuUtilization();
+      that.updateUtilization();
     }, 60000);
 
     $scope.$on('$destroy', function () {
@@ -60,6 +62,12 @@
         y: function (d) {
           return d.value;
         },
+      	margin: {
+      		top: 0,
+      		bottom: 0,
+      		right: 0,
+      		left: 0,
+        	},
         pie: {
           startAngle: function (d) {
             if (d.data.idle) {
@@ -87,15 +95,7 @@
             return d.color;
           }
         },
-        duration: 500,
-        legend: {
-          margin: {
-            top: 5,
-            right: 140,
-            bottom: 5,
-            left: 0
-          }
-        }
+        duration: 500
       }
     };
 
@@ -103,13 +103,13 @@
 
     this.data = [
       {
-        value: 0.5,
-        label: 'Utilized',
+        value: 0.0,
+        label: 'UTILIZED',
         color:  '#4dc1be'
       },
-      {
-        value: 0.5,
-        label: 'idle',
+      { 
+        value: 1.00,      
+        label: 'LIMIT',
         color: '#60798D',
         idle: true
       }
@@ -119,47 +119,29 @@
 
   angular.extend(UtilizationDonutController.prototype, {
 
-    updateCpuUtilization: function () {
+    updateUtilization: function () {
       var that = this;
 
-
-      var movingAverage = [];
-
-      function convertToPercentage(dataPoints) {
-        var transformedDp = [];
-
-        var average = 0;
-        _.each(dataPoints, function (dataPoint) {
-          average += dataPoint.y;
-        });
-        average = average / dataPoints.length;
-        average = (average * 100).toFixed(2);
-        _.transform(dataPoints, function (result, dataPoint) {
-          result.push(
-            {
-              x: dataPoint.x,
-              y: ((dataPoint.y) * 100).toFixed(2),
-            }
-          );
-          movingAverage.push({
-            x: dataPoint.x,
-            y: average
-          });
-          return true;
-        }, transformedDp);
-        return transformedDp;
-      }
-
-      return this.metricsModel.getCpuUtilization('{' + this.filter + '}')
+      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
         .then(function (metricsData) {
-          //   that.data = [{
-          //     color: '#60799d',
-          //     values: 60,
-          //     key: 'CPU Utilization'
-          //   }];
-          // that.chartApi.refresh();
+            
+            var value =  (metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100);
+
+                that.data = [
+      {
+        value: value,
+        label: 'UTILIZED ' + (value.toFixed(2)) + '%',
+        color:  '#4dc1be'
+      },
+            { // TODO add limit
+        value: (100 - value),      
+        label: 'LIMIT ' + that.metricLimit,
+        color: '#60798D',
+        idle: true
+      }];
+
         });
-    },
+    }
 
   });
 

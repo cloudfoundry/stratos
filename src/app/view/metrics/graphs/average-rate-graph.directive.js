@@ -37,10 +37,10 @@
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
 
-    this.updateCpuUtilization();
+    this.updateUtilization();
 
     var interval = $interval(function () {
-      that.updateCpuUtilization();
+      that.updateUtilization();
     }, 60000);
 
     $scope.$on('$destroy', function () {
@@ -107,7 +107,7 @@
 
   angular.extend(AverageRateGraphController.prototype, {
 
-    updateCpuUtilization: function () {
+    updateUtilization: function () {
       var that = this;
 
 
@@ -138,7 +138,7 @@
         return transformedDp;
       }
 
-      return this.metricsModel.getCpuUtilization('{' + this.filter + '}')
+      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
         .then(function (metricsData) {
           that.data = [{
             color: '#60799d',

@@ -17,34 +17,68 @@
 
     <!--<dt translate></dt>-->
     <dd class="chart">
-      <div class="charts">
-        <utilization-donut  class="donut-space" metric="cpu_node_utilization_gauge"
+    <div class="charts ">
+      <div class="donut-space">
+        <utilization-donut metric="cpu_node_utilization_gauge"
                            filter="nodename={{nodeCardCtrl.nodeName}}"
                            y-label="CPU Utilization (%)"
                            node-name="{{nodeCardCtrl.nodeName}}"
+                           metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
         ></utilization-donut>
-        <average-rate-graph  class="consume-space" metric="cpu_node_utilization_gauge"
+      </div>
+
+      <div class="consume-space">
+
+        <average-rate-graph metric="cpu_node_utilization_gauge"
                             filter="nodename={{nodeCardCtrl.nodeName}}"
                             y-label="CPU Utilization (%)"
                             node-name="{{nodeCardCtrl.nodeName}}"
+                            metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
         ></average-rate-graph>
       </div>
+    </div>
+
     </dd>
-    <dt translate></dt>
+<!--     <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
                      metrics="nodeCardCtrl.metricsData['cpu/utilization']"
                      selected-metric-names="'cpu/utilization'">
       </kd-graph-card>
     </dd>
-    <dt translate></dt>
+ -->   
+
+    <dd class="chart">
+    <div class="charts ">
+      <div class="donut-space">
+        <utilization-donut metric="memory_node_utilization_gauge"
+                           filter="nodename={{nodeCardCtrl.nodeName}}"
+                           y-label="Memory Utilization (%)"
+                           node-name="{{nodeCardCtrl.nodeName}}"
+                           metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
+        ></utilization-donut>
+      </div>
+
+      <div class="consume-space">
+
+        <average-rate-graph metric="memory_node_utilization_gauge"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="Memory Utilization (%)"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+                            metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
+        ></average-rate-graph>
+      </div>
+    </div>
+
+    </dd>
+<!--   <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
                      graph-title="Memory usage"
                      metrics="nodeCardCtrl.metricsData['memory/utilization']"
                      selected-metric-names="'memory/utilization'">
       </kd-graph-card>
-    </dd>
+    </dd> -->
     <dt translate></dt>
     <dd class="chart">
       <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_tx_cumulative')" class="graph-card"
