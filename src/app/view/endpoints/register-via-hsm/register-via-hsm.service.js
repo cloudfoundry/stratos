@@ -64,6 +64,7 @@
     var endpoints = [];
     var instanceNames = [];
     var existingEndpointNames = [];
+    var existingEndpointUrls = [];
 
     /**
      * @name getHCFEndpoint
@@ -156,11 +157,6 @@
       // Find instances of the required service
       var matchingInstances = _.filter(serviceInstances, {state: 'running', service_id: serviceToDiscover.id});
 
-      // Discover existing cnsi's of the required service type
-      var existingCnsiEndpoints = _.filter(modelManager.retrieve('app.model.serviceInstance').serviceInstances,
-        {cnsi_type: serviceToDiscover.type});
-      existingCnsiEndpoints = _.map(existingCnsiEndpoints, utilsService.getClusterEndpoint);
-
       var services = [];
       var promises = [];
 
@@ -187,7 +183,7 @@
             return createEndpointPromise
               .then(function (publicUrl) {
                 // Ensure we don't already have a cnsi with this endpoint
-                if (_.indexOf(existingCnsiEndpoints, publicUrl) < 0) {
+                if (_.indexOf(existingEndpointUrls, publicUrl) < 0) {
                   services.push({
                     key: instanceInfo.instance_id + instanceInfo.service_id,
                     productName: serviceToDiscover.name,
@@ -236,7 +232,7 @@
           .catch(function (response) {
 
             var errorMessage = response.status === 403
-              ? gettext('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.')
+              ? response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.')
               : gettext('There was a problem registering the endpoint. If this error persists, please contact the' +
                 'administrator.');
 
@@ -281,6 +277,32 @@
     }
 
     /**
+     * @name buildEndpointNames
+     * @description Each entry in the endpoint table will need a unique set of endpoint names to disallow.
+     */
+    function buildEndpointUrls() {
+      _.forEach(endpoints, function (endpoint) {
+        if (endpoint.endpointUrls) {
+          endpoint.endpointUrls.length = 0;
+        } else {
+          endpoint.endpointUrls = [];
+        }
+
+        // Candidate urls from table of endpoints that are checked
+        var candidateUrls = _.map(_.filter(endpoints, { register: true}), 'url');
+        // Ensure we do not include the candidate endpoint url in it's own unique items list
+        var index = _.indexOf(candidateUrls, endpoint.url);
+        if (index > -1) {
+          _.pullAt(candidateUrls, index);
+        }
+
+        [].push.apply(endpoint.endpointUrls, existingEndpointUrls);
+        [].push.apply(endpoint.endpointUrls, candidateUrls);
+
+      });
+    }
+
+    /**
      * @name discoverAndShowSelection
      * @description Discover applicable service endpoints from the given HSM and provide user with a way to optionally
      * add them as console endpoints
@@ -310,9 +332,12 @@
           return $q.all(findServicesPromises)
             .then(function () {
 
-              existingEndpointNames = registerService
-                .createInstanceNames(modelManager.retrieve('app.model.serviceInstance').serviceInstances);
+              var cnsis = modelManager.retrieve('app.model.serviceInstance').serviceInstances;
+              existingEndpointNames = registerService.createInstanceNames(cnsis);
+              existingEndpointUrls = _.map(cnsis, utilsService.getClusterEndpoint);
+
               buildEndpointNames();
+              buildEndpointUrls();
 
               if (endpoints.length === 0) {
                 return $q.resolve();
@@ -331,7 +356,8 @@
                   data: {
                     endpoints: endpoints,
                     instanceNames: instanceNames,
-                    buildEndpointNames: buildEndpointNames
+                    buildEndpointNames: buildEndpointNames,
+                    buildEndpointUrls: buildEndpointUrls
                   },
                   hideErrorMsg: true,
                   invalidityCheck: function (data) {
@@ -343,7 +369,7 @@
                       if (!endpoint.register) {
                         continue;
                       }
-                      valid = data.form[endpoint.key].$valid;
+                      valid = data.form[endpoint.key + 'name'].$valid && data.form[endpoint.key + 'url'].$valid;
                       if (!valid) {
                         return true;
                       }

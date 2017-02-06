@@ -22,16 +22,18 @@
         inline-message-colspan="5"
         table-inline-status="{{ endpoint.error.status }}"
         >
-      <td><checkbox-input ng-model="endpoint.register" ng-change="data.buildEndpointNames()"></checkbox-input></td>
+      <td><checkbox-input ng-model="endpoint.register" ng-change="data.buildEndpointNames() && data.buildEndpointUrls()"></checkbox-input></td>
       <td>
         <div class="form-group" focusable-input
-             ng-class="{'has-error': (data.form[endpoint.key].$invalid && data.form[endpoint.key].$dirty) || data.form[endpoint.key].$error.helionUnique}">
+             style="width: 150px;"
+             ng-class="{'has-error': (data.form[endpoint.key + 'name'].$invalid && data.form[endpoint.key + 'name'].$dirty) || data.form[endpoint.key + 'name'].$error.helionUnique}"
+        >
           <label class="control-label" translate></label>
           <span class="control-message">
-          <span translate ng-if="data.form[endpoint.key].$error.required">Name is required</span>
-          <span translate ng-if="data.form[endpoint.key].$error.helionUnique">Name is not unique</span>
+          <span translate ng-if="data.form[endpoint.key + 'name'].$error.required">Name is required</span>
+          <span translate ng-if="data.form[endpoint.key + 'name'].$error.helionUnique">Name is not unique</span>
           </span>
-          <input type="text" name="{{endpoint.key}}" class="form-control"
+          <input type="text" name="{{endpoint.key + 'name'}}" class="form-control"
                  ng-model="endpoint.name"
                  ng-change="data.buildEndpointNames()"
                  helion-unique items="endpoint.endpointNames"
@@ -40,7 +42,22 @@
         </div>
       </td>
       <td>{{ endpoint.productName }}</td>
-      <td>{{ endpoint.url }}</td>
+      <td>
+        <div class="form-group" focusable-input
+             ng-class="{'has-error': (data.form[endpoint.key + 'url'].$invalid && data.form[endpoint.key + 'url'].$dirty) || data.form[endpoint.key + 'url'].$error.helionUnique}">
+          <label class="control-label" translate></label>
+          <span class="control-message">
+          <span translate ng-if="data.form[endpoint.key + 'url'].$error.required">Url is required</span>
+          <span translate ng-if="data.form[endpoint.key + 'url'].$error.helionUnique">Url is not unique</span>
+          </span>
+          <input type="text" name="{{endpoint.key + 'url'}}" class="form-control"
+                 ng-model="endpoint.url"
+                 ng-change="data.buildEndpointUrls()"
+                 helion-unique items="endpoint.endpointUrls"
+                 ignore-case
+                 required/>
+        </div>
+      </td>
       <td>
         <checkbox-input ng-model="endpoint.skipSll"
                         input-label="{{'Skip SSL validation for the endpoint' | translate}}">
