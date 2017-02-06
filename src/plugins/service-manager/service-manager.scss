@@ -175,18 +175,18 @@ fieldset.fieldset-horizontal {
     width: 647px;
   }
 }
-
-.expanded-kd-sparkline-cpu-series {
-  @extend .kd-sparkline-cpu-series;
-  @extend .kd-sparkline;
-  width: 16 * $baseline-grid;
-}
-
-.expanded-kd-sparkline-memory-series {
-  @extend .kd-sparkline-memory-series;
-  @extend .kd-sparkline;
-  width: 16 * $baseline-grid;
-}
+//
+//.expanded-kd-sparkline-cpu-series {
+//  @extend .kd-sparkline-cpu-series;
+//  @extend .kd-sparkline;
+//  width: 16 * $baseline-grid;
+//}
+//
+//.expanded-kd-sparkline-memory-series {
+//  @extend .kd-sparkline-memory-series;
+//  @extend .kd-sparkline;
+//  width: 16 * $baseline-grid;
+//}
 
 table tr td.table-inline-message {
   .popover.hpe-popover-alert-upgrade {

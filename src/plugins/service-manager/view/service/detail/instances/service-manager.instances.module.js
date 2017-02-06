@@ -93,7 +93,6 @@
       return this.metricsModel.getMemoryWorkingSetUsasge(this.metricsModel.makeNameSpaceFilter(namespaceName))
         .then(function (metricsData) {
           if (_.has(metricsData, 'timeSeries')) {
-            // TODO get rate
             that.memoryUsageRate[namespaceName] = metricsData.timeSeries;
           }
         });

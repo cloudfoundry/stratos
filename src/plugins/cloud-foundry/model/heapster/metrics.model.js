@@ -205,13 +205,13 @@
       // For spark lines
       var timeSeries = [];
       if (_.has(responseData, 'dps')) {
-        _.each(responseData.dps, function (dataPoint, timestemp) {
+        _.each(responseData.dps, function (dataPoint, timestamp) {
           dataPoints.push({
-            x: parseInt(timestemp, 10),
+            x: parseInt(timestamp, 10),
             y: dataPoint
           });
           timeSeries.push({
-            timestamp: moment(parseInt(timestemp, 10)).format('YYYY-MM-DDTHH:mm:ssZ'),
+            timestamp: parseInt(timestamp, 10) * 1000,
             value: dataPoint
           });
         });

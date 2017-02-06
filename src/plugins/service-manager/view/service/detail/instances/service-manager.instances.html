@@ -68,16 +68,24 @@
       <td>{{ endpoint.sdl_version }}</td>
       <td>{{ endpoint.vendor }}</td>
       <td>
-        <kd-sparkline ng-if="instancesCtrl.cpuUsageRate[endpoint.instance_id].length > 0"
-                      class-name="expanded-kd-sparkline-cpu-series"
-                      timeseries="instancesCtrl.cpuUsageRate[endpoint.instance_id]">
-        </kd-sparkline>
+        <sparkline-graph ng-if="instancesCtrl.cpuUsageRate[endpoint.instance_id].length > 0"
+                         timeseries="instancesCtrl.cpuUsageRate[endpoint.instance_id]"
+        >
+        </sparkline-graph>
+        <!--<kd-sparkline ng-if="instancesCtrl.cpuUsageRate[endpoint.instance_id].length > 0"-->
+        <!--class-name="expanded-kd-sparkline-cpu-series"-->
+        <!--timeseries="instancesCtrl.cpuUsageRate[endpoint.instance_id]">-->
+        <!--</kd-sparkline>-->
       </td>
       <td>
-        <kd-sparkline ng-if="instancesCtrl.memoryUsageRate[endpoint.instance_id].length > 0"
-                      class-name="expanded-kd-sparkline-memory-series"
-                      timeseries="instancesCtrl.memoryUsageRate[endpoint.instance_id]">
-        </kd-sparkline>
+        <sparkline-graph ng-if="instancesCtrl.memoryUsageRate[endpoint.instance_id].length > 0"
+                         timeseries="instancesCtrl.memoryUsageRate[endpoint.instance_id]"
+        >
+        </sparkline-graph>
+        <!--<kd-sparkline ng-if="instancesCtrl.memoryUsageRate[endpoint.instance_id].length > 0"-->
+        <!--class-name="expanded-kd-sparkline-memory-series"-->
+        <!--timeseries="instancesCtrl.memoryUsageRate[endpoint.instance_id]">-->
+        <!--</kd-sparkline>-->
       </td>
 
       <td>

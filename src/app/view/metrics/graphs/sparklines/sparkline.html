@@ -1,8 +1,5 @@
-<diV class="sparkline-graph">
-  <nvd3 options="sparklineGraphCtrl.options"
-        data="sparklineGraphCtrl.data"
-        api="sparklineGraphCtrl.chartApi"
-        id="{{sparklineGraphCtrl.metric}}_{{sparklineGraphCtrl.nodeName}}_sparkline"
-  >
-  </nvd3>
-</diV>
+<svg viewBox="0,0 1,1"
+     preserveAspectRatio="none"
+     class="sparkline">
+  <polygon ng-attr-points="0,1 {{sparklineGraphCtrl.polygonPoints()}} 1,1"/>
+</svg>

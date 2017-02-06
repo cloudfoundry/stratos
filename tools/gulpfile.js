@@ -31,7 +31,6 @@
   var wiredep = require('wiredep').stream;
   var path = require('path');
   var fork = require('child_process').fork;
-  var closureCompiler = require('gulp-closure-compiler');
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -92,11 +91,6 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  gulp.task('copy:k8sComponents:templates', function () {
-    return gulp.src(config.k8sCommonComponentsTemplates)
-      .pipe(gulp.dest(paths.k8sComponentDistPath));
-  });
-
   gulp.task('js:combine', ['copy:js'], function () {
     return gulp.src([
       paths.frameworkDist + config.jsFrameworkFile,
@@ -117,7 +111,7 @@
   });
 
   // Copy JavaScript source files to 'dist'
-  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework-components:js', 'copy:framework:js'], function () {
+  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
     var sourceFiles = jsSourceFiles;
     if (!gutil.env.devMode) {
       sourceFiles = jsSourceFiles.concat(config.jsLibs);
@@ -154,68 +148,6 @@
       .pipe(uglify())
       .pipe(rename('stackato-config.js'))
       .pipe(gulp.dest(paths.oem + 'dist'));
-  });
-
-  gulp.task('copy:framework-components:js', function () {
-    return gulp.src(config.jsComponentLibs)
-      .pipe(sort())
-      .pipe(closureCompiler({
-        compilerFlags: {
-
-          angular_pass: null,
-          entry_point: 'index_module',
-          compilation_level: 'ADVANCED_OPTIMIZATIONS',
-          export_local_property_definitions: null,
-          externs: [
-            path.join(config.paths.nodeModules, 'google-closure-compiler/contrib/externs/angular-1.5.js'),
-            path.join(
-              config.paths.nodeModules,
-              'google-closure-compiler/contrib/externs/angular-1.5-http-promise_templated.js'),
-            path.join(
-              config.paths.nodeModules,
-              'google-closure-compiler/contrib/externs/angular-1.5-q_templated.js'),
-            path.join(
-              config.paths.nodeModules, 'google-closure-compiler/contrib/externs/angular-material.js'),
-            path.join(
-              config.paths.nodeModules, 'google-closure-compiler/contrib/externs/angular_ui_router.js'),
-            path.join(
-              config.paths.nodeModules,
-              'google-closure-compiler/contrib/externs/angular-1.4-resource.js'),
-            path.join(
-              config.paths.bowerComponents,
-              'cljsjs-packages-externs/d3/resources/cljsjs/d3/common/d3.ext.js'),
-            path.join(
-              config.paths.bowerComponents,
-              'cljsjs-packages-externs/nvd3/resources/cljsjs/nvd3/common/nvd3.ext.js'),
-            path.join(config.paths.frontendExterns, '**/*.js')
-          ],
-          generate_exports: null,
-          js_module_root: path.relative('./', config.paths.frontendSrc),
-          // Enable all compiler checks by default and make them errors.
-          jscomp_error: '*',
-          // Disable checks that are not applicable to the project.
-          jscomp_off: [
-            // Let ESLint handle all lint checks.
-            'lintChecks',
-            // This checks aren't working with current google-closure-library version. Will be deleted
-            // once it's fixed there.
-            'unnecessaryCasts',
-            'analyzerChecks'
-          ],
-          language_in: 'ECMASCRIPT6_STRICT',
-          language_out: 'ECMASCRIPT3',
-          dependency_mode: 'LOOSE',
-          use_types_for_optimization: null
-        },
-        compilerPath: path.join(config.paths.nodeModules, 'google-closure-compiler/compiler.jar'),
-        // This makes the compiler faster. Requires Java 7+.
-        tieredCompilation: true,
-        fileName: 'dashboard.js'
-      }))
-      .pipe(angularFilesort())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
-      // .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulp.dest(paths.frameworkDist));
   });
 
   gulp.task('copy:framework:js', function () {
@@ -482,7 +414,6 @@
       'plugin',
       'translate:compile',
       'copy:framework:templates',
-      'copy:k8sComponents:templates',
       'copy:js',
       'copy:lib',
       'css',
@@ -512,7 +443,6 @@
       'plugin',
       'translate:compile',
       'copy:framework:templates',
-      'copy:k8sComponents:templates',
       'js:combine',
       'copy:lib',
       'css',

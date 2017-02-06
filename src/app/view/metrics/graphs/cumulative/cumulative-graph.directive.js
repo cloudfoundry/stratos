@@ -102,7 +102,7 @@
             renderEnd: function () {
               var id = '#' + that.metric + '_' + that.nodeName + '_cchart';
               var selectedElement = d3.select(id + ' svg');
-              if (selectedElement) {
+              if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
                 var yAxis = d3.select(id + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
@@ -139,8 +139,7 @@
               label: 'Data Transmitted',
               color: '#60798D'
             }];
-
-        });
+         });
     }
 
   });

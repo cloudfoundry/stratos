@@ -13,17 +13,11 @@
       oem: '../oem/',
       theme: '../framework/theme/',
       framework: '../framework/',
-      k8sDashboard: '../dashboard/',
       frameworkDist: '../dist/framework/',
       examples: '../framework/examples/',
       examplesScripts: '../framework/examples/scripts/',
       examplesDist: '../framework/examples/dist/',
-      browserSyncDist: '../dist',
-      nodeModules: './node_modules/',
-      bowerComponents: '../src/lib/',
-      frontendSrc: '../dashboard/src/app/frontend/',
-      k8sComponentDistPath: '../dist/common/components/',
-      frontendExterns: '../dashboard/src/app/externs/'
+      browserSyncDist: '../dist'
     };
 
     return {
@@ -33,7 +27,7 @@
         ignorePath: '../src/',
         exclude: [/.js$/, 'jquery.js'],
         overrides: {
-          'angular-1.5-link-header-parser': {
+          'angular-link-header-parser': {
             main: ['release/angular-link-header-parser.min.js']
           },
           'angular-toastr': {
@@ -120,11 +114,6 @@
         '!' + paths.framework + 'src/**/*.mock.js'
       ],
 
-      jsComponentLibs: [
-        paths.k8sDashboard + 'src/app/frontend/**/*.js',
-        paths.bowerComponents + 'google-closure-library/closure/goog/base.js'
-      ],
-
       jsSourceFiles: [
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
@@ -180,9 +169,6 @@
 
       frameworkTemplates: [
         paths.framework + 'src/**/*.html'
-      ],
-      k8sCommonComponentsTemplates: [
-        paths.frontendSrc + 'common/components/**/*.html'
       ],
 
       frameworkScssFiles: [

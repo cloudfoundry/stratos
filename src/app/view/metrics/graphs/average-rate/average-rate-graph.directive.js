@@ -80,7 +80,7 @@
           dispatch: {
             renderEnd: function () {
               var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
-              if (selectedElement){
+              if (selectedElement.length > 0 && selectedElement[0][0]){
                 var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
                 var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
