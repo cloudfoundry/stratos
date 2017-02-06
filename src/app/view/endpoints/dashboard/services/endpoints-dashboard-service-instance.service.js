@@ -39,6 +39,8 @@
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {app.event.eventService} eventService - the event service
+   * @param {app.view.registerServiceViaHsm} registerServiceViaHsm - service that will discover and optionally register
+   * services discovered in hsm
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
@@ -316,10 +318,20 @@
           }
         },
         onConnectSuccess: function () {
-          // TODO: RC Only do if admin
-          return registerServiceViaHsm.show(serviceInstance.guid)
+
+          // Note - Always close even in the case of the register vis hsm dialog.
+          if (that.dialog) {
+            that.dialog.close();
+            that.dialog = undefined;
+          }
+
+          var registerViaHsmPromise =
+            serviceInstance.cnsi_type === 'hsm' && modelManager.retrieve('app.model.account').isAdmin()
+            ? registerServiceViaHsm.show(serviceInstance.guid)
+            : $q.resolve();
+
+          registerViaHsmPromise
             .then(function () {
-              console.log('UPDATING ENDPOINT TABLE');
               return updateInstances();
             })
             .then(function () {
@@ -337,12 +349,6 @@
                   break;
               }
               eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
-            })
-            .finally(function () {
-              if (that.dialog) {
-                that.dialog.close();
-                that.dialog = undefined;
-              }
             });
         }
       });
