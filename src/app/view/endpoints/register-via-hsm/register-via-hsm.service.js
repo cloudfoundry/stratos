@@ -44,7 +44,7 @@
         name: utilsService.getOemConfiguration().CLOUD_FOUNDRY,
         type: 'hcf',
         serviceLocationName: 'router',
-        serviceLocationPort: 'router'
+        serviceLocationPort: 'router2'
       },
       {
         id: 'hsc-catalog.hpe.hce',
@@ -118,7 +118,7 @@
      * @description Given a list of service locations find the required service and create a url from it
      * @param {object} serviceLocations -
      * @param {object} serviceToDiscover -
-     * @returns {string} url
+     * @returns {string?} url
      */
     function findPublicUrl(serviceLocations, serviceToDiscover) {
 
@@ -131,15 +131,9 @@
         return null;
       }
 
-      var publicUrl = serviceLocation.public_location;
+      var publicUrl = 'https://' + serviceLocation.public_location;
       if (serviceLocation.public_port) {
         publicUrl += ':' + serviceLocation.public_port;
-      }
-
-      if (serviceLocation.public_port === 443) {
-        publicUrl = 'https://' + publicUrl;
-      } else {
-        publicUrl = 'http://' + publicUrl;
       }
 
       return publicUrl;
