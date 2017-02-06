@@ -46,7 +46,7 @@
                      selected-metric-names="'cpu/utilization'">
       </kd-graph-card>
     </dd>
- -->   
+ -->
 
     <dd class="chart">
     <div class="charts ">
@@ -67,6 +67,29 @@
                             node-name="{{nodeCardCtrl.nodeName}}"
                             metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
         ></average-rate-graph>
+      </div>
+    </div>
+
+    <dd class="chart">
+      <div>
+
+        <cumulative-chart metric="network_tx_cumulative"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="Data Transmitted"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+        ></cumulative-chart>
+      </div>
+    </div>
+
+    </dd>
+    <dd class="chart">
+      <div>
+
+        <cumulative-chart metric="network_rx_cumulative"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="Data Received"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+        ></cumulative-chart>
       </div>
     </div>
 

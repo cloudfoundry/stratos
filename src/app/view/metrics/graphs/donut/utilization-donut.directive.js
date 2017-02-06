@@ -133,7 +133,7 @@
               label: 'UTILIZED ' + (value.toFixed(2)) + '%',
               color: '#4dc1be'
             },
-            { // TODO add limit
+            {
               value: (100 - value),
               label: 'LIMIT ' + that.metricLimit,
               color: '#60798D',

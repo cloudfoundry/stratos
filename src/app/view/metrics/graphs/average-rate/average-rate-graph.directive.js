@@ -18,7 +18,7 @@
       controller: AverageRateGraphController,
       controllerAs: 'averageRateGraphCtrl',
       scope: {},
-      templateUrl: path + 'view/metrics/graphs/average-rate-graph.html'
+      templateUrl: path + 'view/metrics/graphs/average-rate/average-rate-graph.html'
     };
   }
 
@@ -79,14 +79,18 @@
           orient: 'right',
           dispatch: {
             renderEnd: function () {
-              var width = parseInt(d3.select('#' + that.metric + '_' + that.nodeName + ' svg').style('width').replace(/px/, '')) - 80;
-              var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
-              yAxis.attr('transform', 'translate(' + width + ',0)');
+              var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
+              if (selectedElement){
+                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
+                var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
+                yAxis.attr('transform', 'translate(' + width + ',0)');
+              }
+
             }
           }
         },
         showLegend: false,
-        interpolate: "bundle"
+        interpolate: 'basis'
       }
     };
 
