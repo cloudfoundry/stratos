@@ -62,18 +62,18 @@
         y: function (d) {
           return d.value;
         },
-      	margin: {
-      		top: 0,
-      		bottom: 0,
-      		right: 0,
-      		left: 0,
-        	},
+        margin: {
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0
+        },
         pie: {
           startAngle: function (d) {
             if (d.data.idle) {
-              return d.startAngle *0.75 - Math.PI * 0.75;
+              return d.startAngle * 0.75 - Math.PI * 0.75;
             }
-            return d.startAngle/ 2 - Math.PI * 0.75;
+            return d.startAngle / 2 - Math.PI * 0.75;
           },
           endAngle: function (d) {
             if (d.data.idle) {
@@ -105,10 +105,10 @@
       {
         value: 0.0,
         label: 'UTILIZED',
-        color:  '#4dc1be'
+        color: '#4dc1be'
       },
-      { 
-        value: 1.00,      
+      {
+        value: 1.00,
         label: 'LIMIT',
         color: '#60798D',
         idle: true
@@ -124,21 +124,21 @@
 
       return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
         .then(function (metricsData) {
-            
-            var value =  (metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100);
 
-                that.data = [
-      {
-        value: value,
-        label: 'UTILIZED ' + (value.toFixed(2)) + '%',
-        color:  '#4dc1be'
-      },
+          var value = (metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100);
+
+          that.data = [
+            {
+              value: value,
+              label: 'UTILIZED ' + (value.toFixed(2)) + '%',
+              color: '#4dc1be'
+            },
             { // TODO add limit
-        value: (100 - value),      
-        label: 'LIMIT ' + that.metricLimit,
-        color: '#60798D',
-        idle: true
-      }];
+              value: (100 - value),
+              label: 'LIMIT ' + that.metricLimit,
+              color: '#60798D',
+              idle: true
+            }];
 
         });
     }
