@@ -36,7 +36,7 @@
   function MetricsModel($q, $interval, apiManager) {
     this.$q = $q;
     this.apiManager = apiManager;
-    this.cumulativeMetrics = [];
+    this.metricsData = {};
     this.namespaceInformation = {};
   }
 
@@ -91,7 +91,6 @@
           return that._addOpenTsdbMetrics(res.data, 'cpu/utilization');
         });
     },
-
 
     getMetrics: function (metricsName, filter) {
       var that = this;
@@ -172,20 +171,26 @@
     },
 
     getNodeCpuLimit: function (nodeName) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeCpuLimit(nodeName)
         .then(function (res) {
           var getLastMetricReading = res.data.latestTimestamp;
-          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          var lastReading = _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          _.set(that.metricsData, nodeName + '.cpuLimit', lastReading);
+          return lastReading;
         });
     },
 
     getNodeMemoryLimit: function (nodeName) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeMemoryLimit(nodeName)
         .then(function (res) {
           var getLastMetricReading = res.data.latestTimestamp;
-          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          var lastReading = _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          _.set(that.metricsData, nodeName + '.memoryLimit', lastReading);
+          return lastReading;
         });
     },
 

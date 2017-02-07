@@ -82,6 +82,7 @@
           showMaxMin: true,
           staggerLabels: true
         },
+        // yDomain:[0,100],
         yAxis: {
           axisLabel: this.yLabel,
           axisLabelDistance: 0,

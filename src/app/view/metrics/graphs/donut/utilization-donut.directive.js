@@ -49,6 +49,17 @@
       $interval.cancel(interval);
     });
 
+
+    $scope.$watch(function () {
+      return that.metricLimit;
+    }, function () {
+      if (that.chartApi) {
+        // Update limit as soon as metric limit is available
+        var element = _.find(that.data, {idle: true});
+        element.label = 'LIMIT ' + that.metricLimit;
+      }
+    });
+
     this.options = {
       chart: {
         type: 'pieChart',
@@ -126,6 +137,8 @@
 
           var value = (metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100);
 
+          that.options.chart.title = (value.toFixed(2)) + '%';
+
           that.data = [
             {
               value: value,
@@ -138,6 +151,7 @@
               color: '#60798D',
               idle: true
             }];
+
 
         });
     }
