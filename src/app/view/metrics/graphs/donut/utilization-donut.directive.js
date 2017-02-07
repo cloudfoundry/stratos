@@ -89,7 +89,6 @@
             inner: 0.8,
             outer: 0.9
           }
-
           ],
           color: function (d) {
             return d.color;

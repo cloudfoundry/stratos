@@ -55,7 +55,7 @@
         height: 200,
         margin: {
           top: 20,
-          right: 65,
+          right: 85,
           bottom: 50,
           left: 20
         },
@@ -79,13 +79,14 @@
             }
             return duration + 'HR';
           },
-          showMaxMin: false,
+          showMaxMin: true,
           staggerLabels: true
         },
         yAxis: {
           axisLabel: this.yLabel,
           axisLabelDistance: 0,
           orient: 'right',
+          showMaxMin: false,
           tickFormat: function (y) {
 
             var mbData = y / (1024 * 1024);
@@ -93,7 +94,7 @@
 
             if (mbData > 1000) {
               // When its GBs set line per GB
-              return gbData.toFixed(2) + ' GB';
+              return gbData.toFixed(1) + ' GB';
             } else {
               return mbData.toFixed(0) + ' MB';
             }
@@ -103,7 +104,7 @@
               var id = '#' + that.metric + '_' + that.nodeName + '_cchart';
               var selectedElement = d3.select(id + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
-                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
+                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 105;
                 var yAxis = d3.select(id + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
               }

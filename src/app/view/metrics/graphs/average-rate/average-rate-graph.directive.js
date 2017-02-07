@@ -77,10 +77,13 @@
           axisLabelDistance: -35,
           showMaxMin: false,
           orient: 'right',
+          tickFormat: function (d) {
+            return parseFloat(d).toFixed(0);
+          },
           dispatch: {
             renderEnd: function () {
               var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
-              if (selectedElement.length > 0 && selectedElement[0][0]){
+              if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
                 var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
@@ -89,6 +92,7 @@
             }
           }
         },
+        // yDomain: [0,100],
         showLegend: false,
         interpolate: 'basis'
       }

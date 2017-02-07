@@ -1,122 +1,121 @@
-<gallery-card class="namespace-card"
-              card-data="nodeCardCtrl.getCardData()">
+<div>
+  <gallery-card class="namespace-card"
+                card-data="nodeCardCtrl.getCardData()">
 
-  <dl class="dl-horizontal">
-    <dt translate>Uptime</dt>
-    <dd>
-      {{ nodeCardCtrl.nodeUptime }}
-    </dd>
-    <dt translate>CPU Limit (mili-cores)</dt>
-    <dd>
-      {{ nodeCardCtrl.cpuLimit }}
-    </dd>
-    <dt translate>Memory Limit</dt>
-    <dd>
-      {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
-    </dd>
+    <dl class="dl-horizontal">
+      <dt translate>Uptime</dt>
+      <dd>
+        {{ nodeCardCtrl.nodeUptime }}
+      </dd>
+      <dt translate>CPU Limit (mili-cores)</dt>
+      <dd>
+        {{ nodeCardCtrl.cpuLimit }}
+      </dd>
+      <dt translate>Memory Limit</dt>
+      <dd>
+        {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
+      </dd>
 
-    <!--<dt translate></dt>-->
-    <dd class="chart">
-    <div class="charts ">
-      <div class="donut-space">
-        <utilization-donut metric="cpu_node_utilization_gauge"
-                           filter="nodename={{nodeCardCtrl.nodeName}}"
-                           y-label="CPU Utilization (%)"
-                           node-name="{{nodeCardCtrl.nodeName}}"
-                           metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
-        ></utilization-donut>
-      </div>
+    <!--</dl>-->
+  <!--</gallery-card>-->
 
-      <div class="consume-space">
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
 
-        <average-rate-graph metric="cpu_node_utilization_gauge"
-                            filter="nodename={{nodeCardCtrl.nodeName}}"
-                            y-label="CPU Utilization (%)"
-                            node-name="{{nodeCardCtrl.nodeName}}"
-                            metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
-        ></average-rate-graph>
-      </div>
-    </div>
+    <!--<dl class="dl-horizontal">-->
 
-    </dd>
-<!--     <dt translate></dt>
-    <dd class="chart">
-      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('cpu/utilization')" class="graph-card" graph-title="CPU usage"
-                     metrics="nodeCardCtrl.metricsData['cpu/utilization']"
-                     selected-metric-names="'cpu/utilization'">
-      </kd-graph-card>
-    </dd>
- -->
+      <dd class="chart">
+        <div class="charts ">
+          <div class="donut-space">
+            <utilization-donut metric="cpu_node_utilization_gauge"
+                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               y-label="CPU Utilization (%)"
+                               node-name="{{nodeCardCtrl.nodeName}}"
+                               metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
+            ></utilization-donut>
+          </div>
 
-    <dd class="chart">
-    <div class="charts ">
-      <div class="donut-space">
-        <utilization-donut metric="memory_node_utilization_gauge"
-                           filter="nodename={{nodeCardCtrl.nodeName}}"
-                           y-label="Memory Utilization (%)"
-                           node-name="{{nodeCardCtrl.nodeName}}"
-                           metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
-        ></utilization-donut>
-      </div>
+          <div class="consume-space">
 
-      <div class="consume-space">
+            <average-rate-graph metric="cpu_node_utilization_gauge"
+                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                y-label="CPU Utilization (%)"
+                                node-name="{{nodeCardCtrl.nodeName}}"
+            ></average-rate-graph>
+          </div>
+        </div>
+      </dd>
+    </dl>
+  <!--</gallery-card>-->
 
-        <average-rate-graph metric="memory_node_utilization_gauge"
-                            filter="nodename={{nodeCardCtrl.nodeName}}"
-                            y-label="Memory Utilization (%)"
-                            node-name="{{nodeCardCtrl.nodeName}}"
-                            metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
-        ></average-rate-graph>
-      </div>
-    </div>
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
 
-    <dd class="chart">
-      <div>
+    <!--<dl class="dl-horizontal">-->
 
-        <cumulative-chart metric="network_tx_cumulative"
+      <dd class="chart">
+        <div class="charts ">
+          <div class="donut-space">
+            <utilization-donut metric="memory_node_utilization_gauge"
+                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               y-label="Memory Utilization (%)"
+                               node-name="{{nodeCardCtrl.nodeName}}"
+                               metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
+            ></utilization-donut>
+          </div>
+
+          <div class="consume-space">
+
+            <average-rate-graph metric="memory_node_utilization_gauge"
+                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                y-label="Memory Utilization (%)"
+                                node-name="{{nodeCardCtrl.nodeName}}"
+                                metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
+            ></average-rate-graph>
+          </div>
+        </div>
+      </dd>
+    <!--</dl>-->
+  <!--</gallery-card>-->
+
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+      <dd class="chart">
+        <div>
+
+          <cumulative-chart metric="network_tx_cumulative"
                             filter="nodename={{nodeCardCtrl.nodeName}}"
                             y-label="Data Transmitted"
                             node-name="{{nodeCardCtrl.nodeName}}"
-        ></cumulative-chart>
-      </div>
-    </div>
+          ></cumulative-chart>
+        </div>
 
-    </dd>
-    <dd class="chart">
-      <div>
+      </dd>
+    <!--</dl>-->
+  <!--</gallery-card>-->
 
-        <cumulative-chart metric="network_rx_cumulative"
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+
+      <dd class="chart">
+        <div>
+
+          <cumulative-chart metric="network_rx_cumulative"
                             filter="nodename={{nodeCardCtrl.nodeName}}"
                             y-label="Data Received"
                             node-name="{{nodeCardCtrl.nodeName}}"
-        ></cumulative-chart>
-      </div>
-    </div>
+          ></cumulative-chart>
+        </div>
 
-    </dd>
-<!--   <dt translate></dt>
-    <dd class="chart">
-      <kd-graph-card ng-if="nodeCardCtrl.hasMetrics('memory/utilization')" class="graph-card"
-                     graph-title="Memory usage"
-                     metrics="nodeCardCtrl.metricsData['memory/utilization']"
-                     selected-metric-names="'memory/utilization'">
-      </kd-graph-card>
-    </dd> -->
-    <!--<dt translate></dt>-->
-    <!--<dd class="chart">-->
-      <!--<kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_tx_cumulative')" class="graph-card"-->
-                     <!--graph-title="Data Transmitted"-->
-                     <!--metrics="nodeCardCtrl.metricsData['network_tx_cumulative']"-->
-                     <!--selected-metric-names="'network_tx_cumulative'">-->
-      <!--</kd-graph-card>-->
-    <!--</dd>-->
-    <!--<dt translate></dt>-->
-    <!--<dd class="chart">-->
-      <!--<kd-graph-card ng-if="nodeCardCtrl.hasMetrics('network_rx_cumulative')" class="graph-card"-->
-                     <!--graph-title="Data Received"-->
-                     <!--metrics="nodeCardCtrl.metricsData['network_rx_cumulative']"-->
-                     <!--selected-metric-names="'network_rx_cumulative'">-->
-      <!--</kd-graph-card>-->
-    <!--</dd>-->
-  </dl>
-</gallery-card>
+      </dd>
+    </dl>
+  </gallery-card>
+
+
+</div>
