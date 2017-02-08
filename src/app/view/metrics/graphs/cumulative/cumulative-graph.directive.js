@@ -72,7 +72,22 @@
           tickFormat: function (d) {
             var duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asHours());
             if (duration === 0) {
-              return 'NOW';
+              duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+              if (duration === 0 || duration === 1) {
+                if (that.data[0].values.length < 10) {
+                  // been running for 10 minutes
+                  if (duration === 0) {
+                    return 'NOW';
+                  } else {
+                    return duration + 'MIN';
+                  }
+                }
+                return '';
+              }
+              return duration + 'MIN';
+            } else if (duration <= 2) {
+              duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+              return duration + 'MIN';
             }
             return duration + 'HR';
           },

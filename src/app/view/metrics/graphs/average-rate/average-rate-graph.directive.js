@@ -61,7 +61,22 @@
           tickFormat: function (d) {
             var duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asHours());
             if (duration === 0) {
-              return 'NOW';
+              duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+              if (duration === 0 || duration === 1) {
+                if (that.data[0].values.length < 10) {
+                  // been running for 10 minutes
+                  if (duration === 0) {
+                    return 'NOW';
+                  } else {
+                    return duration + 'MIN';
+                  }
+                }
+                return '';
+              }
+              return duration + 'MIN';
+            } else if (duration <= 2) {
+              duration = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+              return duration + 'MIN';
             }
             return duration + 'HR';
           },
@@ -71,17 +86,17 @@
         },
         yAxis: {
           axisLabel: this.yLabel,
-          axisLabelDistance: -35,
+          axisLabelDistance: -30,
           showMaxMin: false,
           orient: 'right',
           tickFormat: function (d) {
-            return parseFloat(d).toFixed(0);
+            return parseFloat(d).toFixed(1);
           },
           dispatch: {
             renderEnd: function () {
               var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
-                var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 80;
+                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
                 var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
               }
@@ -118,7 +133,6 @@
 
       function convertToPercentage(dataPoints) {
         var transformedDp = [];
-
         var average = 0;
         _.each(dataPoints, function (dataPoint) {
           average += dataPoint.y;
