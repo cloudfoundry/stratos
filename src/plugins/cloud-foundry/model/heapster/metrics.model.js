@@ -13,27 +13,15 @@
 
   registerVcsModel.$inject = [
     '$q',
-    '$interval',
     'app.model.modelManager',
     'app.api.apiManager'
   ];
 
-  function registerVcsModel($q, $interval, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.metrics', new MetricsModel($q, $interval, apiManager));
+  function registerVcsModel($q, modelManager, apiManager) {
+    modelManager.register('cloud-foundry.model.metrics', new MetricsModel($q, apiManager));
   }
 
-  /**
-   * @memberof cloud-foundry.model.vcs
-   * @name VcsModel
-   * @param {object} $q - the Angular $q service
-   * @param {app.api.apiManager} apiManager - the application API manager
-   * @property {object} $q - the Angular $q service
-   * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {Array} vcsClients - the list of VCS clients
-   * @property {Array} supportedVcsInstances - the list of supported VCS instances
-   * @class
-   */
-  function MetricsModel($q, $interval, apiManager) {
+  function MetricsModel($q, apiManager) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.metricsData = {};

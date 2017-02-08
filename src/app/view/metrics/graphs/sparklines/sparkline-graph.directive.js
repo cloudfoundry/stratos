@@ -94,7 +94,7 @@
       var scaled = _.map(shifted,
         function (point) {
           return [point[0] / xScale, point[1] / yScale];
-        })
+        });
 
       return _.map(scaled,
         function (point) {

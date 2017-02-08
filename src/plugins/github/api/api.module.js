@@ -97,7 +97,7 @@
      * @memberof cloud-foundry.api.github.GithubApi
      * @description Build and return the Github API request
      * @param {object} params - additional params to send
-     * @param {object} oAptions - additional options to send
+     * @param {object} options - additional options to send
      * @returns {object} The request
      * @private
      */

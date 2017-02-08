@@ -326,6 +326,8 @@
     return errorText;
   }
 
+  /* eslint-disable complexity */
+
   function getSensibleTime(timeInMilis) {
 
     var seconds = Math.floor(timeInMilis / 1000 % 60);
@@ -365,5 +367,5 @@
 
     return timeString;
   }
-
+  /* eslint-enable complexity */
 })();
