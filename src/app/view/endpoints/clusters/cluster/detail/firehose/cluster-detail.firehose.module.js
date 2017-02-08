@@ -79,6 +79,8 @@
     $animate.enabled(false, theElement);
 
     vm.textFilter = {
+      toMatch: '',
+      regex: false,
       matchCase: false,
       highlightMatches: true
     };
@@ -312,20 +314,59 @@
         filtered = jsonString;
       }
 
-      if (vm.textFilter.toMatch) {
-        var matchIndex, toMatch, compareTo, escapeMatch;
+      if (vm.textFilter.toMatch.length > 0) {
+        var toMatch, compareTo, escapeMatch, getNextMatch, regex;
+
+        var matchIndex = 0;
+        var matchLength = 0;
 
         var sanitized = filtered.replace(ANSI_ESCAPE_MATCHER, '');
 
-        if (vm.textFilter.matchCase) {
-          toMatch = vm.textFilter.toMatch;
-          compareTo = sanitized;
+        if (vm.textFilter.regex) {
+          try {
+            regex = new RegExp(vm.textFilter.toMatch, vm.textFilter.matchCase ? 'g' : 'gi');
+          } catch (error) {
+            // Invalid Regex string
+            // TODO: show red validation error
+            return '';
+          }
+
+          getNextMatch = function () {
+            if (matchIndex >= sanitized.length - 1) {
+              matchIndex = -1;
+              return matchIndex;
+            }
+            var matches = regex.exec(sanitized);
+            if (matches === null) {
+              matchIndex = -1;
+              return matchIndex;
+            }
+            matchLength = matches[0].length;
+            matchIndex = matches.index;
+            if (matchLength < 1) {
+              regex.lastIndex++;
+            }
+            return matchIndex;
+          };
+
         } else {
-          toMatch = vm.textFilter.toMatch.toLowerCase();
-          compareTo = sanitized.toLowerCase();
+          if (vm.textFilter.matchCase) {
+            toMatch = vm.textFilter.toMatch;
+            compareTo = sanitized;
+          } else {
+            toMatch = vm.textFilter.toMatch.toLowerCase();
+            compareTo = sanitized.toLowerCase();
+          }
+
+          getNextMatch = function () {
+            matchIndex = compareTo.indexOf(toMatch, matchIndex + matchLength);
+            matchLength = vm.textFilter.toMatch.length;
+            return matchIndex;
+          };
+
         }
-        matchIndex = compareTo.indexOf(toMatch);
-        if (matchIndex < 0) {
+
+        if (getNextMatch() < 0) {
           return '';
         }
 
@@ -346,10 +387,14 @@
         var finalString = '';
         var leftToParse = filtered;
 
-        var matchLength = vm.textFilter.toMatch.length;
         var afterLastMatch = 0;
 
         while (matchIndex >= 0) {
+          if (matchLength < 1) {
+            // Special case where a regex matched zero characters, nothing to highlight
+            getNextMatch();
+            continue;
+          }
           var before = leftToParse.slice(0, mappedIndices[matchIndex] - afterLastMatch);
           var allBefore = filtered.slice(0, mappedIndices[matchIndex]);
           var matched = filtered.slice(mappedIndices[matchIndex], mappedIndices[matchIndex + matchLength]);
@@ -382,7 +427,7 @@
           leftToParse = leftToParse.slice(mappedIndices[matchIndex + matchLength] - afterLastMatch);
           afterLastMatch = mappedIndices[matchIndex + matchLength];
 
-          matchIndex = sanitized.toLowerCase().indexOf(toMatch, matchIndex + matchLength);
+          getNextMatch();
         }
 
         return finalString + leftToParse;

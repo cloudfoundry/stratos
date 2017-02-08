@@ -91,38 +91,93 @@
       flex-flow: column nowrap;
 
       .text-filter {
-        height: 50px;
+        flex: 0 0 50px;
         margin-bottom: 10px;
         display: flex;
         flex-flow: row nowrap;
-        align-items: center;
-        background-color: white;
-        box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.3);
-        padding: 5px;
 
-        .text-filter-icon {
-          font-size: 20px;
-          margin-left: 10px;
-          pointer-events:none;
-          color: $dove-gray2;
-          font-weight: 600;
-        }
-
-        .text-filter-input {
+        .search-box {
           flex: 1;
-          height: 40px;
-          padding: 0 12px;
-          border: 0;
-          outline: none;
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
           background-color: white;
+          box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.3);
+          padding: 5px;
+          font-size: 20px;
+
+          .text-filter-icon {
+            margin-left: 10px;
+            pointer-events: none;
+            color: $dove-gray2;
+            font-weight: 600;
+          }
+
+          .regex-marker {
+            font-weight: 500;
+            color: $dove-gray;
+            &.opening {
+              padding: 0 4px 0 12px;
+            }
+            &.closing {
+              padding: 0 12px 0 4px;
+            }
+          }
+
+          .text-filter-input {
+            flex: 1;
+            font-weight: 500;
+            height: 40px;
+            padding: 0;
+            border: 0;
+            outline: none;
+            background-color: white;
+          }
+
+          .clear-text-filter-icon {
+            cursor: pointer;
+            margin-right: 10px;
+            color: $dove-gray2;
+            font-weight: 600;
+          }
         }
 
-        .clear-text-filter-icon {
-          cursor: pointer;
-          margin-right: 10px;
-          font-size: 20px;
-          color: $dove-gray2;
-          font-weight: 600;
+        .search-options {
+          margin-left: 16px;
+          display: flex;
+          flex-flow: column nowrap;
+          justify-content: center;
+          checkbox-input {
+            margin-top: 1px;
+            margin-bottom: 1px;
+
+            .checkbox-input {
+              color: $silver-sand;
+            }
+            .checkbox-input:not(.checked) {
+              &:hover {
+                color: $seashell;
+              }
+              &:focus {
+                color: $silver-sand;
+              }
+            }
+
+            .checkbox-input .checkbox-input-button {
+              height: 16px;
+              width: 16px;
+              &:before {
+                font-size: 16px;
+              }
+            }
+            .checkbox-input-label {
+              color: #DCDCCC;
+              user-select: none;
+              margin-top: -1px;
+              font-size: 16px;
+              font-weight: 500;
+            }
+          }
         }
       }
 
@@ -167,7 +222,6 @@
             .checkbox-input .checkbox-input-button {
               height: 16px;
               width: 16px;
-              color: #DCDCCC;
               &:before {
                 font-size: 16px;
               }
@@ -185,24 +239,38 @@
             }
 
             // Colourise checkboxes
-            &.api-filter .checkbox-input-button {
-              color: ansi-colour('magenta', false);
-            }
-            &.apps-filter .checkbox-input-button {
-              color: ansi-colour('green', false);
+            .checkbox-input {
+              color: $silver-sand;
             }
 
-            &.metrics-filter .checkbox-input-button {
-              color: ansi-colour('blue', false);
+            @mixin colorize-checkbox($color) {
+              .checkbox-input {
+                &:hover {
+                  color: ansi-colour($color, false);
+                }
+                &.checked > .checkbox-input-button {
+                  color: ansi-colour($color, false);
+                }
+              }
             }
-            &.counters-filter .checkbox-input-button {
-              color: ansi-colour('yellow', false);
+
+            &.apps-filter > {
+              @include colorize-checkbox('green');
             }
-            &.errors-filter .checkbox-input-button {
-              color: ansi-colour('red', false);
+            &.api-filter > {
+              @include colorize-checkbox('magenta');
             }
-            &.container-metrics-filter .checkbox-input-button {
-              color: ansi-colour('cyan', false);
+            &.metrics-filter > {
+              @include colorize-checkbox('blue');
+            }
+            &.counters-filter > {
+              @include colorize-checkbox('yellow');
+            }
+            &.errors-filter > {
+              @include colorize-checkbox('red');
+            }
+            &.container-metrics-filter > {
+              @include colorize-checkbox('cyan');
             }
           }
         }

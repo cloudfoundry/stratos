@@ -23,9 +23,25 @@
 
     <div class="firehose-header-bottom">
       <div class="text-filter">
-        <i class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></i>
-        <input class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" ng-trim="false" type="text">
-        <i ng-click="firehoseCtrl.textFilter.toMatch = undefined" class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></i>
+        <div class="search-box">
+          <span class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></span>
+          <span class="regex-marker opening" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
+          <input class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" ng-trim="false" type="text">
+          <span class="regex-marker closing" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
+          <span ng-click="firehoseCtrl.textFilter.toMatch = ''"
+             class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></span>
+        </div>
+        <div class="search-options">
+          <checkbox-input ng-model="firehoseCtrl.textFilter.highlightMatches"
+                          input-label="{{'Highlight Matches' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-model="firehoseCtrl.textFilter.matchCase"
+                          input-label="{{'Match Case' | translate}}">
+          </checkbox-input>
+          <checkbox-input ng-model="firehoseCtrl.textFilter.regex"
+                          input-label="{{'Regex' | translate}}">
+          </checkbox-input>
+        </div>
       </div>
       <div class="type-filters">
         <div class="filters-controls">
@@ -36,27 +52,27 @@
         </div>
 
         <div class="firehose-filters">
-          <checkbox-input ng-class="{'apps-filter': firehoseCtrl.hoseFilters.apps}"
+          <checkbox-input class="apps-filter"
                           ng-model="firehoseCtrl.hoseFilters.apps"
                           input-label="{{'Apps' | translate}}">
           </checkbox-input>
-          <checkbox-input ng-class="{'api-filter': firehoseCtrl.hoseFilters.api}"
+          <checkbox-input class="api-filter"
                           ng-model="firehoseCtrl.hoseFilters.api"
                           input-label="{{'API' | translate}}">
           </checkbox-input>
-          <checkbox-input ng-class="{'metrics-filter': firehoseCtrl.hoseFilters.metrics}"
+          <checkbox-input class="metrics-filter"
                           ng-model="firehoseCtrl.hoseFilters.metrics"
                           input-label="{{'Metrics' | translate}}">
           </checkbox-input>
-          <checkbox-input ng-class="{'counters-filter': firehoseCtrl.hoseFilters.counters}"
+          <checkbox-input class="counters-filter"
                           ng-model="firehoseCtrl.hoseFilters.counters"
                           input-label="{{'Counters' | translate}}">
           </checkbox-input>
-          <checkbox-input ng-class="{'container-metrics-filter': firehoseCtrl.hoseFilters.containerMetrics}"
+          <checkbox-input class="container-metrics-filter"
                           ng-model="firehoseCtrl.hoseFilters.containerMetrics"
                           input-label="{{'Container Metrics' | translate}}">
           </checkbox-input>
-          <checkbox-input ng-class="{'errors-filter': firehoseCtrl.hoseFilters.errors}"
+          <checkbox-input class="errors-filter"
                           ng-model="firehoseCtrl.hoseFilters.errors"
                           input-label="{{'Errors' | translate}}">
           </checkbox-input>
