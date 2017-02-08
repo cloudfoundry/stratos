@@ -126,6 +126,7 @@
       var activeEndpointsKeys = [];
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var userAccount = modelManager.retrieve('app.model.account');
       var endpoints = dashboardService.endpoints;
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
@@ -141,6 +142,7 @@
         var eKey = endpointPrefix + serviceInstance.guid;
         var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
         var reuse = !!endpoint;
+        var hide = false;
         if (!reuse) {
           endpoint = {
             key: eKey
@@ -154,11 +156,15 @@
               break;
             case 'hsm':
               endpoint.type = 'Helion Service Manager';
+              // Only Console admins can see HSM endpoints
+              hide = !userAccount.isAdmin();
               break;
             default:
               endpoint.type = gettext('Unknown');
           }
-          endpoints.push(endpoint);
+          if (!hide) {
+            endpoints.push(endpoint);
+          }
         } else {
           delete endpoint.error;
         }
