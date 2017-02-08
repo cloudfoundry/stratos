@@ -164,6 +164,16 @@
       that.$timeout.cancel(that.pollTimer);
     });
 
+    $scope.$watch(function () {
+      return that.hsmModel.hideCompletedComponents;
+    }, function () {
+      that._filterComponents();
+    });
+
+    if (angular.isUndefined(that.hsmModel.hideCompletedComponents)) {
+      that.hsmModel.hideCompletedComponents = true;
+    }
+
     this.fetch().then(function () {
       that.poll();
     });
@@ -206,6 +216,7 @@
       var that = this;
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
+        that._filterComponents();
         that._setStateIndicator();
         that._sortUpgrades();
       }).catch(function (err) {
@@ -220,6 +231,18 @@
           that._setStateIndicator();
         }
       });
+    },
+
+    _filterComponents: function () {
+      var that = this;
+      if (!that.instance) {
+        this.components = [];
+      } else {
+        this.components = _.filter(that.instance.components, function (item) {
+          var inactive = item.state.phase === 'Failed' || item.state.phase === 'Succeeded';
+          return that.hsmModel.hideCompletedComponents ? !inactive : true;
+        });
+      }
     },
 
     _sortUpgrades: function () {
