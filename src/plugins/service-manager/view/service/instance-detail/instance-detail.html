@@ -30,11 +30,13 @@
               </dd>
               <dt translate>SDL Version</dt>
               <dd>
+                <a ui-sref="sm.endpoint.service.sdl({id: instanceCtrl.instance.service_id, product: instanceCtrl.instance.product_version , sdl: instanceCtrl.instance.sdl_version})">
                 {{ instanceCtrl.instance.sdl_version }}
+                </a>
               </dd>
               <dt translate>Service ID</dt>
               <dd>
-                <a ui-sref="sm.endpoint.service({id: instanceCtrl.instance.service_id })">
+                <a ui-sref="sm.endpoint.service.detail({id: instanceCtrl.instance.service_id })">
                 {{ instanceCtrl.instance.service_id }}
                 </a>
               </dd>
@@ -50,10 +52,12 @@
               <dd ng-if="svcsCtrl.initialized">
                 {{ smCtrl.getEndpoint() }}
               </dd>
+              <!--
               <dt translate>HSM Interactions</dt>
               <dd>
                 <a ng-click="svcsCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
               </dd>
+              -->
               <dt ng-if="svcsCtrl.initialized" translate>Account Username</dt>
               <dd ng-if="svcsCtrl.initialized">
                 {{ svcsCtrl.userName }}
@@ -87,7 +91,7 @@
       </li>
       <li class="nav-item" ui-sref-active="active">
         <a class="nav-link" ui-sref="sm.endpoint.instance.services">
-          <span translate>Services</span>
+          <span translate>Service Locations</span>
           <span class="tab-count-indicator">({{instanceCtrl.instance.service_locations.length || 0}})</span>
         </a>
       </li>
@@ -104,19 +108,16 @@
         </a>
       </li>
       <li class="nav-item" ui-sref-active="active">
-        <a class="nav-link" ui-sref="sm.endpoint.instance.upgrades">
-          <span translate>Upgrades</span>
+        <a class="nav-link" ui-sref="sm.endpoint.instance.versions">
+          <span translate>Versions</span>
+          <!--
           <span class="tab-count-indicator">({{instanceCtrl.instance.available_upgrades ? instanceCtrl.instance.available_upgrades.length : '0' }})</span>
+          -->
         </a>
       </li>
     </ul>
     <ui-view></ui-view>
   </div>
   </div>
-  <!--
-  <cluster-actions ng-show="clusterController.hasActions"
-                  has-actions="clusterController.hasActions"
-                  class="col-md-3 col-sm-1 col-xs-1"></cluster-actions>
-                  -->
 </div>
 

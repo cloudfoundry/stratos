@@ -80,9 +80,9 @@
     });
 
     // Upgrades Tab
-    $stateProvider.state('sm.endpoint.instance.upgrades', {
-      url: '/upgrades',
-      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-upgrades.html',
+    $stateProvider.state('sm.endpoint.instance.versions', {
+      url: '/versions',
+      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-versions.html',
       ncyBreadcrumb: {
         label: '{{ instanceCtrl.id || "..." }}',
         parent: 'sm.endpoint.detail.instances'
@@ -102,19 +102,23 @@
     '$q',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'service-manager.view.manage-instance.dialog',
+    'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog) {
+  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog, manageInstanceDialog, versionUtils) {
     var that = this;
 
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.confirmDialog = confirmDialog;
     this.$timeout = $timeout;
     this.$q = $q;
+    this.$state = $state;
+    this.versionUtils = versionUtils;
+
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
@@ -131,15 +135,24 @@
     this.memoryUsageData = {};
 
     this.actions = [
-      {name: 'Upgrade Instance'},
-      {name: 'Configure Instance'},
-      {
-        name: 'Delete Instance',
+      { id: 'upgrade', name: 'Upgrade Instance',
+        execute: function () {
+          return that.upgradeInstance(that.id);
+        }
+      },
+      { id: 'configure', name: 'Configure Instance',
+        execute: function () {
+          return that.configureInstance(that.id);
+        }
+      },
+      { id: 'delete', name: 'Delete Instance',
         execute: function () {
           return that.deleteInstance(that.id);
         }
       }
     ];
+
+    this.actionsMap = _.keyBy(this.actions, 'id');
 
     this.highlight = function (id, on) {
       if (on) {
@@ -157,10 +170,18 @@
     this.fetch().then(function () {
       that.poll();
     });
-
   }
 
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
+
+    updateActions: function () {
+      var isBusy = this.deleting || this.deleted || this.interestingState;
+      this.actionsMap.configure.disabled = isBusy;
+      this.actionsMap.delete.disabled = isBusy;
+
+      var hasUpgrades = this.instance && this.instance.available_upgrades && this.instance.available_upgrades.length > 0;
+      this.actionsMap.upgrade.disabled = isBusy || !hasUpgrades;
+    },
 
     poll: function (fetchNow) {
       var that = this;
@@ -190,6 +211,7 @@
         that.instance = data;
         that._fetchInstanceMetrics(that.instance);
         that._setStateIndicator();
+        that._sortUpgrades();
       }).catch(function (err) {
         if (that.deleting) {
           that.deleted = true;
@@ -201,6 +223,14 @@
           that.instance.state = '404';
           that._setStateIndicator();
         }
+      });
+    },
+
+    _sortUpgrades: function () {
+      var that = this;
+      this.versionUtils.sortByProperty(this.instance.available_upgrades, 'product_version', true);
+      _.each(this.instance.available_upgrades, function (product) {
+        that.versionUtils.sortByProperty(product.sdl_versions, 'sdl_version', true);
       });
     },
 
@@ -219,8 +249,12 @@
           that.stateIndicator = 'busy';
           that.interestingState = true;
           break;
+        case 'modifying':
+          that.stateIndicator = 'busy';
+          that.interestingState = true;
+          break;
         case 'deleted':
-          that.stateIndicator = 'tentative';
+          that.stateIndicator = 'deleted';
           break;
         case 'degraded':
           that.stateIndicator = 'warning';
@@ -231,6 +265,7 @@
         default:
           that.stateIndicator = 'tentative';
       }
+      this.updateActions();
     },
 
     deleteInstance: function (id) {
@@ -254,7 +289,20 @@
       });
     },
 
-    updateCpuUsage: function (componentName) {
+    upgradeInstance: function () {
+      var that = this;
+      that.manageInstanceDialog.show('upgrade', that.guid, null, that.instance).result.then(function () {
+        that.poll(true);
+      });
+    },
+
+    configureInstance: function () {
+      var that = this;
+      that.manageInstanceDialog.show('configure', that.guid, null, that.instance).result.then(function () {
+        that.poll(true);
+      });
+    }
+   updateCpuUsage: function (componentName) {
       var that = this;
       return this.metricsModel.getCpuUsageRate(this.metricsModel.makePodFilter(this.id, componentName))
         .then(function (metricsData) {
@@ -291,12 +339,52 @@
 
   UpgradeController.$inject = [
     '$state',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'service-manager.utils.version'
   ];
 
-  function UpgradeController($state, modelManager) {
+  function UpgradeController($state, modelManager, versionUtils) {
+    var that = this;
     var hsmModel = modelManager.retrieve('service-manager.model');
-    hsmModel.clearUpgrades($state.params.guid);
+    this.hsmModel = hsmModel;
+    this.versionUtils = versionUtils;
+    this.guid = $state.params.guid;
+    this.id = $state.params.id;
+
+    function processUpgrades() {
+      var upgrades = {};
+      _.each(hsmModel.instance.available_upgrades, function (productUpgrade) {
+        var pUpgrade = {};
+        upgrades[productUpgrade.product_version] = pUpgrade;
+        _.each(productUpgrade.sdl_versions, function (sdlUpgrade) {
+          pUpgrade[sdlUpgrade.sdl_version] = sdlUpgrade.is_latest;
+        });
+      });
+      return upgrades;
+    }
+
+    hsmModel.getInstances(this.guid).then(function (instances) {
+      var instance = _.find(instances, {instance_id: that.id});
+      var upgrades = processUpgrades(instance);
+      var serviceId = instance.service_id;
+      that.hsmModel.getService(that.guid, serviceId).then(function (data) {
+        that.versions = data.product_versions;
+        _.each(that.versions, function (product) {
+          product.versions = [];
+          _.each(product.sdl_versions, function (url, sdlVersion) {
+            var isUpgrade = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+            product.versions.push({
+              sdl_version: sdlVersion,
+              isUpgrade: !!isUpgrade,
+              isLatest: _.isBoolean(isUpgrade) && isUpgrade,
+              isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
+            });
+          });
+          versionUtils.sortByProperty(product.versions, 'sdl_version', true);
+        });
+        versionUtils.sortByProperty(that.versions, 'product_version', true);
+      });
+    });
   }
 
 })();

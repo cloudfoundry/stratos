@@ -27,8 +27,7 @@
     '$state',
     'app.model.modelManager',
     'app.api.apiManager',
-    'app.utils.utilsService',
-    'cloud-foundry.model.modelUtils'
+    'app.utils.utilsService'
   ];
 
   /**
@@ -38,15 +37,8 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
-   * @param {app.utils.utilsService} utils - the utils service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
-   * @property {Array} actions - collection of relevant actions that can be executed against cluster
-   * @property {number} orgCount - organisation count
-   * @property {number} userCount - user count
-   * @property {object} cardData - gallery-card directive data object
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    */
-  function ServiceManagerTileController($scope, $state, modelManager, apiManager, utils, modelUtils) {
+  function ServiceManagerTileController($scope, $state, modelManager, apiManager) {
     var that = this;
 
     this.$state = $state;
@@ -56,7 +48,6 @@
     this.organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.modelUtils = modelUtils;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceManagerModel = modelManager.retrieve('service-manager.model');
     this.instancesCount = null;
@@ -107,55 +98,6 @@
   }
 
   angular.extend(ServiceManagerTileController.prototype, {
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name setUserCount
-     * @description Determine the number of users associated with this cluster
-     */
-    setUserCount: function () {
-      this.userCount = 0;
-
-      if (!this.service.isConnected || this.userService.error ||
-        !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
-        this.userCount = undefined;
-        return;
-      }
-
-      var that = this;
-      this.userApi.ListAllUsers({'results-per-page': 1}, this.modelUtils.makeHttpConfig(this.service.guid))
-        .then(function (response) {
-          that.userCount = response.data.total_results;
-        })
-        .catch(function () {
-          that.userCount = undefined;
-        });
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name setOrganisationCount
-     * @description Determine the number of organisations associated with this cluster
-     */
-    setOrganisationCount: function () {
-      this.orgCount = 0;
-
-      if (!this.service.isConnected || this.userService.error) {
-        this.orgCount = undefined;
-        return;
-      }
-      var that = this;
-      this.organizationApi.ListAllOrganizations({'results-per-page': 1},
-        this.modelUtils.makeHttpConfig(this.service.guid))
-        .then(function (response) {
-          that.orgCount = response.data.total_results;
-        })
-        .catch(function () {
-          that.orgCount = undefined;
-        });
-    },
 
     /**
      * @namespace app.view.endpoints.clusters

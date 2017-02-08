@@ -17,7 +17,7 @@
       controllerAs: 'instancesCtrl',
       ncyBreadcrumb: {
         label: '{{ smCtrl.endpoint.name || "..." }}',
-        parent: 'sm.endpoint.detail'
+        parent: 'sm.tiles'
       }
     });
   }

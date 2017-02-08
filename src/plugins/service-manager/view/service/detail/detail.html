@@ -1,17 +1,19 @@
 <div class="cluster hsm">
   <span class="cluster-breadcrumb" ncy-breadcrumb></span>
   <div class="cluster-detail endpoints"  ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
-    <h3 translate>Service Manager : {{ smCtrl.endpoint.name }}</h3>
-
+    <div class="hsm-service-header">
+      <h3 translate>Service Manager : {{ smCtrl.endpoint.name }}</h3>
+      <div class="create-instance-btn">
+        <button class="btn btn-primary" translate
+          ng-click="smCtrl.createInstance()">
+          Create Instance
+          </button>      
+      </div>
+    </div>
     <div class="cluster-summary-tile">
       <div class="card panel panel-default">
         <div class="panel-heading action-header">
           <span translate>Summary</span>
-          <!--TODO: TEAMFOUR-936: Endpoints Dashboard: Add 'edit' cluster slide out-->
-          <!--<a class="btn btn-link">-->
-          <!--<i class="helion-icon helion-icon-Right_Arrow"></i>-->
-          <!--<span translate>Edit</span>-->
-          <!--</a>-->
         </div>
 
         <div class="panel-body cluster-summary-panel row">
@@ -41,10 +43,12 @@
               <dd ng-if="svcsCtrl.initialized">
                 {{ smCtrl.getEndpoint() }}
               </dd>
+              <!--
               <dt translate>HSM Interactions</dt>
               <dd>
                 <a ng-click="svcsCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
               </dd>
+              -->
               <dt ng-if="svcsCtrl.initialized" translate>Account Username</dt>
               <dd ng-if="svcsCtrl.initialized">
                 {{ svcsCtrl.userName }}
@@ -56,9 +60,18 @@
             </dl>
           </div>
         </div>
+        <div class="panel-body cluster-summary-panel row hsm-upgrade" ng-if="smCtrl.endpointHasUpgrades()">
+          <div>
+          <div class="upgrade-message">
+            <i class="helion-icon helion-icon-Upgrade"></i>
+            <span>Upgrade(s) are available for one or more instances</span>
+          </div>
+          <div class="upgrade-acknowledge">
+            <i ng-click="smCtrl.acknowledgeUpgrade()" class="helion-icon helion-icon-Close"></i>
+          </div>
+        </div>
       </div>
     </div>
-
 
     <ul class="application-nav nav nav-tabs col-sm-12">
       <li class="nav-item" ui-sref-active="active">

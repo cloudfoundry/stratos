@@ -7,7 +7,7 @@
       'service-manager.view.service',
       'service-manager.view.service.instance-detail',
       'service-manager.view.service.service-detail',
-      'service-manager.view.create-instance'
+      'service-manager.view.manage-instance'
     ])
     .config(registerRoute);
 
@@ -75,7 +75,7 @@
           });
 
           if (connectedInstances === 1) {
-            $state.go('sm.endpoint.detail.instances', {guid: serviceInstanceGuid});
+            $state.go('sm.endpoint.detail', {guid: serviceInstanceGuid});
           } else {
             $state.go('sm.tiles', {instancesListed: true});
           }
