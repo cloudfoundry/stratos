@@ -51,22 +51,35 @@
 
     // Model - key for each HSM Service (Endpoint guid)
     this.model = {};
+
+    // Last loaded instance
+    this.instance = {};
   }
 
   angular.extend(ServiceManagerModel.prototype, {
 
     getInstance: function (guid, id) {
-      return this.hsmApi.instance(guid, id);
-    },
-
-    getInstances: function (guid, noCache) {
       var that = this;
-      var loadPromise = this.hsmApi.instances(guid).then(function (data) {
-        that.model[guid] = that.model[guid] || {};
-        that.model[guid].instances = data;
-        that._checkUpgrade(guid);
+      return this.hsmApi.instance(guid, id).then(function (data) {
+        that.instance = data;
         return data;
       });
+    },
+
+    getInstances: function (guid, noCache, noFetch) {
+      var that = this;
+      var loadPromise;
+
+      if (noFetch && this.model[guid] && this.model[guid].instances) {
+        loadPromise = this.$q.resolve();
+      } else {
+        loadPromise = this.hsmApi.instances(guid).then(function (data) {
+          that.model[guid] = that.model[guid] || {};
+          that.model[guid].instances = data;
+          that._checkUpgrade(guid);
+          return data;
+        });
+      }
       return this.model[guid] && this.model[guid].instances && !noCache ? this.$q.resolve(this.model[guid].instances) : loadPromise;
     },
 
@@ -139,18 +152,20 @@
       var count = 0;
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
       var menuItem = menu.getMenuItem('sm.list');
-      _.each(this.upgrades, function (instances, guid) {
-        _.each(instances, function (value, id) {
-          count = that.hasUpgrade(guid, id) ? count + 1 : count;
+      if (menuItem) {
+        _.each(this.upgrades, function (instances, guid) {
+          _.each(instances, function (value, id) {
+            count = that.hasUpgrade(guid, id) ? count + 1 : count;
+          });
         });
-      });
 
-      if (count > 0) {
-        menuItem.badge = {
-          value: count
-        };
-      } else {
-        delete menuItem.badge;
+        if (count > 0) {
+          menuItem.badge = {
+            value: count
+          };
+        } else {
+          delete menuItem.badge;
+        }
       }
     },
 

@@ -6,8 +6,8 @@
 
 <table class="table"
         ng-if="instanceCtrl.instance.available_upgrades && instanceCtrl.instance.available_upgrades.length"
-        st-table="instanceCtrl.stTableInstanceUpgrades"
-        st-safe-src="instanceCtrl.instance.available_upgrades">
+        st-table="instanceUpgradeCtrl.stTableInstanceUpgrades"
+        st-safe-src="instanceUpgradeCtrl.versions">
   <thead>
   <tr>
     <th translate st-sort="procuct_version" st-sort-default="true" st-skip-natural="true">Product Version</th>
@@ -15,12 +15,13 @@
   </tr>
   </thead>
   <tbody>
-  <tr ng-repeat="upgrade in instanceCtrl.stTableInstanceUpgrades track by $index">
+  <tr ng-repeat="upgrade in instanceUpgradeCtrl.stTableInstanceUpgrades track by $index">
     <td>{{ upgrade.product_version }}</td>
     <td>
-      <div ng-class="{'sdl-latest-version' : sdl.is_latest}" class="upgrade-version" ng-repeat="sdl in upgrade.sdl_versions track by sdl.sdl_version">
+      <div ng-class="{'sdl-latest-version' : sdl.is_latest}" class="upgrade-version" ng-repeat="sdl in upgrade.versions track by sdl.sdl_version">
         <span>{{ sdl.sdl_version}}</span>
-        <span ng-if="sdl.is_latest">(Latest)</span>
+        <span ng-if="sdl.isLatest">(Latest)</span>
+        <span ng-if="sdl.isCurrent">(Current)</span>
       </div>
     </td>
   </tr>

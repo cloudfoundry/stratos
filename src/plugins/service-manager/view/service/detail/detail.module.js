@@ -47,5 +47,7 @@
     $scope.$on('$destroy', function () {
       that.removeStateChangeListener();
     });
+
+    this.hsmModel.getInstances($state.params.guid);
   }
 })();

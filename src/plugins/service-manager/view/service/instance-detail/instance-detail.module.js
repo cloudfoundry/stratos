@@ -80,9 +80,9 @@
     });
 
     // Upgrades Tab
-    $stateProvider.state('sm.endpoint.instance.upgrades', {
-      url: '/upgrades',
-      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-upgrades.html',
+    $stateProvider.state('sm.endpoint.instance.versions', {
+      url: '/versions',
+      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-versions.html',
       ncyBreadcrumb: {
         label: '{{ instanceCtrl.id || "..." }}',
         parent: 'sm.endpoint.detail.instances'
@@ -226,7 +226,6 @@
       var that = this;
       this.versionUtils.sortByProperty(this.instance.available_upgrades, 'product_version', true);
       _.each(this.instance.available_upgrades, function (product) {
-        //console.log(product);
         that.versionUtils.sortByProperty(product.sdl_versions, 'sdl_version', true);
       });
     },
@@ -251,7 +250,7 @@
           that.interestingState = true;
           break;
         case 'deleted':
-          that.stateIndicator = 'tentative';
+          that.stateIndicator = 'deleted';
           break;
         case 'degraded':
           that.stateIndicator = 'warning';
@@ -303,12 +302,52 @@
 
   UpgradeController.$inject = [
     '$state',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'service-manager.utils.version'
   ];
 
-  function UpgradeController($state, modelManager) {
+  function UpgradeController($state, modelManager, versionUtils) {
+    var that = this;
     var hsmModel = modelManager.retrieve('service-manager.model');
-    hsmModel.clearUpgrades($state.params.guid);
+    this.hsmModel = hsmModel;
+    this.versionUtils = versionUtils;
+    this.guid = $state.params.guid;
+    this.id = $state.params.id;
+
+    function processUpgrades() {
+      var upgrades = {};
+      _.each(hsmModel.instance.available_upgrades, function (productUpgrade) {
+        var pUpgrade = {};
+        upgrades[productUpgrade.product_version] = pUpgrade;
+        _.each(productUpgrade.sdl_versions, function (sdlUpgrade) {
+          pUpgrade[sdlUpgrade.sdl_version] = sdlUpgrade.is_latest;
+        });
+      });
+      return upgrades;
+    }
+
+    hsmModel.getInstances(this.guid).then(function (instances) {
+      var instance = _.find(instances, {instance_id: that.id});
+      var upgrades = processUpgrades(instance);
+      var serviceId = instance.service_id;
+      that.hsmModel.getService(that.guid, serviceId).then(function (data) {
+        that.versions = data.product_versions;
+        _.each(that.versions, function (product) {
+          product.versions = [];
+          _.each(product.sdl_versions, function (url, sdlVersion) {
+            var isUpgrade = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+            product.versions.push({
+              sdl_version: sdlVersion,
+              isUpgrade: !!isUpgrade,
+              isLatest: _.isBoolean(isUpgrade) && isUpgrade,
+              isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
+            });
+          });
+          versionUtils.sortByProperty(product.versions, 'sdl_version', true);
+        });
+        versionUtils.sortByProperty(that.versions, 'product_version', true);
+      });
+    });
   }
 
 })();

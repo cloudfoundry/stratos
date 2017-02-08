@@ -70,7 +70,7 @@
                         enable-button-mode="true"></actions-menu>
         -->
           <div ng-if="smCtrl.hasUpgrade(endpoint.instance_id, true) && !smCtrl.hasUpgrade(endpoint.instance_id)" class="upgrade-indicator">
-            <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+            <i ui-sref="sm.endpoint.instance.versions({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
           </div>
         </td>
       </tr>
@@ -78,8 +78,8 @@
         <td colspan="7" class="table-inline-message hsm-upgrade">
           <div>
             <div class="upgrade-message">
-              <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
-              <a ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})">Upgrade available</a>
+              <i ui-sref="sm.endpoint.instance.versions({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+              <a ui-sref="sm.endpoint.instance.versions({id: endpoint.instance_id})">Upgrade available</a>
             </div>
             <div class="upgrade-acknowledge">
               <i ng-click="smCtrl.acknowledgeUpgrade(endpoint.instance_id)" class="helion-icon helion-icon-Close"></i>

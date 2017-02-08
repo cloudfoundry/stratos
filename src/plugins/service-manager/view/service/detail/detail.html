@@ -43,10 +43,12 @@
               <dd ng-if="svcsCtrl.initialized">
                 {{ smCtrl.getEndpoint() }}
               </dd>
+              <!--
               <dt translate>HSM Interactions</dt>
               <dd>
                 <a ng-click="svcsCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
               </dd>
+              -->
               <dt ng-if="svcsCtrl.initialized" translate>Account Username</dt>
               <dd ng-if="svcsCtrl.initialized">
                 {{ svcsCtrl.userName }}
