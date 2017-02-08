@@ -1,7 +1,6 @@
 <div ng-init="data = asyncTaskDialogCtrl.context.data">
   <div>
-    <p translate>Unregistered service endpoints have been discovered in Helion Service Manager.
-      Would you like to now register them?</p>
+    <p>{{ data.description }}</p>
   </div>
   <form class="form-stacked center-block" name="data.form" role="form">
   <table class="table table-outlined table-selectable"

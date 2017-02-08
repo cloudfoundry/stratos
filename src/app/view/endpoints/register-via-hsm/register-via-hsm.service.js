@@ -7,60 +7,57 @@
 
   RegisterServiceViaHsmFactory.$inject = [
     '$q',
-    '$http',
-    '$sce',
+    '$interpolate',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     'app.utils.utilsService',
-    'app.view.registerService'
+    'app.view.registerService',
+    'app.view.credentialsDialog'
   ];
 
   /**
    * @name DiscoverRegisterServicesDialogFactory
    * @constructor
    * @param {object} $q - Angular $q service
-   * @param {object} $http - Angular $http service
-   * @param {object} $sce - Angular $sce service
+   * @param {object} $interpolate - Angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.view.registerService} registerService - Service that handles registering cnsi's
+   * @param {app.view.credentialsDialog} credentialsDialog - dialog/service that handles connecting to a cnsi
    */
-  function RegisterServiceViaHsmFactory($q, $http, $sce, modelManager, asyncTaskDialog, utilsService, registerService) {
+  function RegisterServiceViaHsmFactory($q, $interpolate, modelManager, asyncTaskDialog, utilsService, registerService,
+                                        credentialsDialog) {
 
-    //TODO: Tidy. for 4.0.1 on demo it's different than 4.1 in dev harness
-    // Collection of objects representing the services we'd like to discover. This links HSM service type,
-    // HSM service location and console cnsi type. The service location will provide the external url
+    // Collection of objects representing the services we'd like to discover. At the moment this is just HCF (pre and
+    // post 4.1 service types). HCE is a pain due to the reason described in getHCEEndpoint
     var servicesToDiscover = [
-      {
-        id: 'stackato.hpe.hce',
-        name: utilsService.getOemConfiguration().CODE_ENGINE,
-        type: 'hce',
-        serviceLocationName: 'hce-rest',
-        serviceLocationPort: 'https'
-      },
       {
         id: 'stackato.hpe.hcf',
         name: utilsService.getOemConfiguration().CLOUD_FOUNDRY,
-        type: 'hcf',
-        serviceLocationName: 'router',
-        serviceLocationPort: 'router2'
-      },
-      {
-        id: 'hsc-catalog.hpe.hce',
-        name: utilsService.getOemConfiguration().CODE_ENGINE,
-        type: 'hce',
-        serviceLocationName: 'hce-rest',
-        serviceLocationPort: 'https'
+        type: 'hcf'
       },
       {
         id: 'hsc-catalog.hpe.hcf',
         name: utilsService.getOemConfiguration().CLOUD_FOUNDRY,
-        type: 'hcf',
-        serviceLocationName: 'ha-proxy',
-        serviceLocationPort: 'ha-proxy2'
+        type: 'hcf'
       }
+      // {
+      //   id: 'stackato.hpe.hce',
+      //   name: utilsService.getOemConfiguration().CODE_ENGINE,
+      //   type: 'hce',
+      //   serviceLocationName: 'hce-rest',
+      //   serviceLocationPort: 'https'
+      // },
+      // {
+      //   id: 'hsc-catalog.hpe.hce',
+      //   name: utilsService.getOemConfiguration().CODE_ENGINE,
+      //   type: 'hce',
+      //   serviceLocationName: 'hce-rest',
+      //   serviceLocationPort: 'https'
+      // }
     ];
+
     var endpoints = [];
     var instanceNames = [];
     var existingEndpointNames = [];
@@ -69,12 +66,11 @@
     /**
      * @name getHCFEndpoint
      * @description Discover the hcf endpoint from the service instance domain param
-     * @param {object} instanceInfo -
+     * @param {object} instanceInfo - HSM response to getInstance
      * @returns {object} promise
      */
     function getHCFEndpoint(instanceInfo) {
       var domainParameter = _.find(instanceInfo.parameters, { name: 'DOMAIN' });
-      // TODO: safe to assume https?
       return domainParameter
         ? $q.resolve('https://api.' + domainParameter.value)
         : $q.reject('Cannot determine public url - missing domain parameter');
@@ -83,41 +79,21 @@
     /**
      * @name getHCEEndpoint
      * @description Discover the hcf endpoint from the service instance domain param
-     * @param {object} instanceInfo -
-     * @param {object} servicePublicUrl -
-     * @param {object=} skipSllVerification -
+     * @param {object} servicePublicUrl - Public URL for a service from a specific HSM service location
      * @returns {object} promise
      */
-    function getHCEEndpoint(instanceInfo, servicePublicUrl, skipSllVerification) {
-      //TODO: cannot get info due to CORS error. also, value provided is not of required type. hce doesn't seem to ...
-      //TODO: ... have any way to determine url. for now just use raw one
+    function getHCEEndpoint(servicePublicUrl) {
+      // In an ideal world we would make an info call to the public url info endpoint to retrieve the external public
+      // url, however code engine is not currently aware of it and the known public url is returned. If they do fix this
+      // the info call must be made in the portal to avoid CORS and air-gap issues
       return $q.resolve(servicePublicUrl);
-
-      // // var config = {};
-      // // config.url = servicePublicUrl + '/info';
-      // // config.method = 'GET';
-      // var url = servicePublicUrl + '/info';
-      // $sce.trustAsResourceUrl(url);
-      //
-      // return $http.jsonp(url, {jsonpCallbackParam: 'api_public_uri'})
-      //   .then(function (response) {
-      //     var publicUrl = _.get(response, 'data.api_public_uri');
-      //     return publicUrl ? publicUrl : $q.reject('Cannot determine public url from info call');
-      //   })
-      //   .catch(function (error) {
-      //     if (error.status === 403) {
-      //       //TODO: security issue
-      //       return getHCEEndpoint(instanceInfo, servicePublicUrl, true);
-      //     }
-      //     return $q.reject(error);
-      //   });
     }
 
     /**
      * @name findPublicUrl
      * @description Given a list of service locations find the required service and create a url from it
-     * @param {object} serviceLocations -
-     * @param {object} serviceToDiscover -
+     * @param {array} serviceLocations - array of HSM service_location's
+     * @param {object} serviceToDiscover - specific type of service we need to create the url from.
      * @returns {string?} url
      */
     function findPublicUrl(serviceLocations, serviceToDiscover) {
@@ -142,9 +118,9 @@
     /**
      * @name findCnsiEndpoints
      * @description Given a list of service locations find the required service and create a url from it
-     * @param {object} hsmCnsiGuid -
-     * @param {object} serviceInstances -
-     * @param {object} serviceToDiscover -
+     * @param {object} hsmCnsiGuid - the cnsi guid of the hsm to contact
+     * @param {array} serviceInstances - array HSM service instances
+     * @param {object} serviceToDiscover - specific type of service we need to find
      * @returns {object} promise
      */
     function findCnsiEndpoints(hsmCnsiGuid, serviceInstances, serviceToDiscover) {
@@ -158,7 +134,7 @@
         var promise = modelManager.retrieve('service-manager.model').getInstance(hsmCnsiGuid, match.instance_id)
           .then(function (instanceInfo) {
 
-            // Create the url for the candidate cnsi
+            // Create the endpoint url for the candidate cnsi
             var createEndpointPromise, publicUrl;
             switch (serviceToDiscover.type) {
               case 'hcf':
@@ -188,11 +164,11 @@
                 }
               })
               .catch(function () {
-                // Swallow error. Don't kill the chain if a single info request fails
+                // Swallow error. Don't stop the 'all' wait if a single info request fails
               });
           })
           .catch(function () {
-            // Swallow error. Don't kill the chain if a single instance request fails
+            // Swallow error. Don't stop the 'all' wait if a single info request fails
           });
         promises.push(promise);
       });
@@ -207,26 +183,25 @@
     /**
      * @name registerServiceEndpoints
      * @description Register the selected endpoints as cnsi's
+     * @param {object} hsmCredentials - username and password of HSM
      * @returns {object} promise
      */
-    function registerServiceEndpoints() {
+    function registerServiceEndpoints(hsmCredentials) {
       var promises = [];
       _.forEach(endpoints, function (endpoint) {
         delete endpoint.error;
         if (!endpoint.register) {
-          // user has not checked, skip
+          // user has not selected this endpoint, skip
           return;
         }
+        // First attempt to register the service
         var promise = registerService.register(endpoint.productName, endpoint.productType, endpoint.url, endpoint.name,
           endpoint.skipSll)
-          .then(function () {
-            // Remove any that have successfully added. Failures will be shown in the table
-            _.pull(endpoints, endpoint);
-          })
           .catch(function (response) {
-
+            // Has it failed due to an ssl error?
             var errorMessage = response.status === 403
-              ? response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.')
+              ? response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the ' +
+                'certificate issuer is trusted.')
               : gettext('There was a problem registering the endpoint. If this error persists, please contact the' +
                 'administrator.');
 
@@ -235,6 +210,25 @@
               status: 'error'
             };
             return $q.reject(response);
+          })
+          .then(function (serviceInstance) {
+            // Attempt to connect using the same credentials as the HSM
+            if (hsmCredentials && hsmCredentials.username && hsmCredentials.password) {
+              return modelManager.retrieve('app.model.serviceInstance.user').connect(serviceInstance.guid,
+                endpoint.name, hsmCredentials.username, hsmCredentials.password)
+                .then(function success() {
+                  credentialsDialog.notify(endpoint.name);
+                })
+                .catch(function () {
+                  // Not interested in failed connection attempt, the user can attempt this manually
+                });
+            }
+          })
+          .then(function (serviceInstance) {
+            // Remove any that have successfully added. Failures will be shown in the table. Do this last after the
+            // attempted connect, this avoids the dialog showing with no rows in the table
+            _.pull(endpoints, endpoint);
+            return serviceInstance;
           });
 
         promises.push(promise);
@@ -297,18 +291,25 @@
     }
 
     /**
-     * @name discoverAndShowSelection
-     * @description Discover applicable service endpoints from the given HSM and provide user with a way to optionally
-     * add them as console endpoints
-     * @param {string} hsmCnsiGuid - cnsi guid of a hsm
+     * @name discoverAndShowEndpoints
+     * @description Discover applicable service endpoints found in the given HSM and provide user with a way to
+     * optionally add them as console endpoints
+     * @param {string} hsmCnsiGuid - the cnsi guid of the hsm to contact
+     * @param {object} hsmCredentials - the username and password used to connect to HSM
      * @returns {object} promise - asyn detail view promise
      */
-    function discoverAndShowSelection(hsmCnsiGuid) {
+    function discoverAndShowEndpoints(hsmCnsiGuid, hsmCredentials) {
 
       endpoints.length = 0;
 
       return modelManager.retrieve('service-manager.model').getInstances(hsmCnsiGuid, true)
         .then(function (serviceInstances) {
+
+          // Define the existing set of cnsi's
+          var cnsis = modelManager.retrieve('app.model.serviceInstance').serviceInstances;
+          var hsmCnsiName = _.find(cnsis, { guid: hsmCnsiGuid }).name;
+          existingEndpointNames = registerService.createInstanceNames(cnsis);
+          existingEndpointUrls = _.map(cnsis, utilsService.getClusterEndpoint);
 
           // Discover a list of cnsi endpoints from HSM
           var findServicesPromises = [];
@@ -318,7 +319,8 @@
                 [].push.apply(endpoints, foundEndpoints);
               })
               .catch(function () {
-                // Silently skip, probably not found
+                // Silently skip, most probably it just doesn't exist in HSM. Importantly lets all promises finish
+                // within later $q.all
               });
             findServicesPromises.push(promise);
           });
@@ -326,20 +328,29 @@
           return $q.all(findServicesPromises)
             .then(function () {
 
-              var cnsis = modelManager.retrieve('app.model.serviceInstance').serviceInstances;
-              existingEndpointNames = registerService.createInstanceNames(cnsis);
-              existingEndpointUrls = _.map(cnsis, utilsService.getClusterEndpoint);
+              if (endpoints.length === 0) {
+                return $q.resolve({showNotification: true});
+              }
 
               buildEndpointNames();
               buildEndpointUrls();
 
-              if (endpoints.length === 0) {
-                return $q.resolve();
-              }
+              var textScope = {
+                hsmCnsiName: hsmCnsiName,
+                cloudFoundryName: utilsService.getOemConfiguration().CLOUD_FOUNDRY
+              };
+
+              var description = endpoints.length === 1
+                ? $interpolate(gettext('The HSM \'{{ hsmCnsiName }}\' has successfully been connected and ' +
+                  'the following unregistered {{ cloudFoundryName }} endpoint has been discovered. ' +
+                  'Would you like to now register it?'))(textScope)
+                : $interpolate(gettext('The HSM \'{{ hsmCnsiName }}\' has successfully been connected and ' +
+                  'the following unregistered {{ cloudFoundryName }} endpoints have been discovered. ' +
+                  'Would you like to now register them?'))(textScope);
 
               return asyncTaskDialog(
                 {
-                  title: gettext('Register Additional Endpoints'),
+                  title: $interpolate(gettext('Register {{ cloudFoundryName }} Endpoints'))(textScope),
                   templateUrl: 'app/view/endpoints/register-via-hsm/register-via-hsm.html',
                   buttonTitles: {
                     submit: gettext('Register'),
@@ -348,6 +359,7 @@
                 },
                 {
                   data: {
+                    description: description,
                     endpoints: endpoints,
                     instanceNames: instanceNames,
                     buildEndpointNames: buildEndpointNames,
@@ -371,7 +383,7 @@
                     return !valid;
                   }
                 },
-                registerServiceEndpoints
+                _.partial(registerServiceEndpoints, hsmCredentials)
               ).result.catch(function () {
                 // Ignore cancel/close as rejected promise
               });
@@ -380,7 +392,7 @@
 
     }
 
-    this.show = discoverAndShowSelection;
+    this.show = discoverAndShowEndpoints;
 
     return this;
   }

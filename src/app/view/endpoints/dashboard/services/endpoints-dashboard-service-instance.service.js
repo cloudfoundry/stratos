@@ -311,27 +311,33 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = credentialsDialog.show({
         activeServiceInstance: serviceInstance,
+        hideNotification: true,
         onConnectCancel: function () {
           if (that.dialog) {
             that.dialog.close();
             that.dialog = undefined;
           }
         },
-        onConnectSuccess: function () {
+        onConnectSuccess: function (userServiceInstance, credentials) {
 
-          // Note - Always close even in the case of the register vis hsm dialog.
+          // Note - Always close first, even in the case of the register via hsm dialog
           if (that.dialog) {
             that.dialog.close();
             that.dialog = undefined;
           }
 
-          var registerViaHsmPromise =
-            serviceInstance.cnsi_type === 'hsm' && modelManager.retrieve('app.model.account').isAdmin()
-            ? registerServiceViaHsm.show(serviceInstance.guid)
-            : $q.resolve();
+          var registerViaHsmPromise;
+          if (serviceInstance.cnsi_type === 'hsm' && modelManager.retrieve('app.model.account').isAdmin()) {
+            registerViaHsmPromise = registerServiceViaHsm.show(serviceInstance.guid, credentials);
+          } else {
+            registerViaHsmPromise = $q.resolve({showNotification: true});
+          }
 
           registerViaHsmPromise
-            .then(function () {
+            .then(function (result) {
+              if (result && result.showNotification) {
+                credentialsDialog.notify(serviceInstance.name);
+              }
               return updateInstances();
             })
             .then(function () {
