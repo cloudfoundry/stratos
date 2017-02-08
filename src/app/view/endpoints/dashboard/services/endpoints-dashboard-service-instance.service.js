@@ -17,7 +17,9 @@
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'helion.framework.widgets.dialog.confirm',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.registerServiceViaHsm'
+
   ];
 
   /**
@@ -37,10 +39,12 @@
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {app.event.eventService} eventService - the event service
+   * @param {app.view.registerServiceViaHsm} registerServiceViaHsm - service that will discover and optionally register
+   * services discovered in hsm
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog, eventService) {
+                                         notificationsService, credentialsDialog, confirmDialog, eventService, registerServiceViaHsm) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -313,33 +317,51 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = credentialsDialog.show({
         activeServiceInstance: serviceInstance,
+        hideNotification: true,
         onConnectCancel: function () {
           if (that.dialog) {
             that.dialog.close();
             that.dialog = undefined;
           }
         },
-        onConnectSuccess: function () {
+        onConnectSuccess: function (userServiceInstance, credentials) {
+
+          // Note - Always close first, even in the case of the register via hsm dialog
           if (that.dialog) {
             that.dialog.close();
             that.dialog = undefined;
           }
-          updateInstances().then(function () {
-            createEndpointEntries();
-            switch (serviceInstance.cnsi_type) {
-              case 'hcf':
-                // Initialise AuthModel for service
-                authModel.initializeForEndpoint(serviceInstance.guid);
-                break;
-              case 'hce':
-                $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
-                .then(function () {
-                  vcsService.createEndpointEntries();
-                });
-                break;
-            }
-            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
-          });
+
+          var registerViaHsmPromise;
+          if (serviceInstance.cnsi_type === 'hsm' && modelManager.retrieve('app.model.account').isAdmin()) {
+            registerViaHsmPromise = registerServiceViaHsm.show(serviceInstance.guid, credentials);
+          } else {
+            registerViaHsmPromise = $q.resolve({showNotification: true});
+          }
+
+          registerViaHsmPromise
+            .then(function (result) {
+              if (result && result.showNotification) {
+                credentialsDialog.notify(serviceInstance.name);
+              }
+              return updateInstances();
+            })
+            .then(function () {
+              createEndpointEntries();
+              switch (serviceInstance.cnsi_type) {
+                case 'hcf':
+                  // Initialise AuthModel for service
+                  authModel.initializeForEndpoint(serviceInstance.guid);
+                  break;
+                case 'hce':
+                  $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
+                    .then(function () {
+                      vcsService.createEndpointEntries();
+                    });
+                  break;
+              }
+              eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            });
         }
       });
     }
