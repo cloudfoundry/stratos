@@ -97,7 +97,8 @@
       extractCodeEngineError: extractCodeEngineError,
       getOemConfiguration: getOemConfiguration,
       coloredLog: coloredLog,
-      highlightLog: highlightLog
+      highlightLog: highlightLog,
+      getSensibleTime: getSensibleTime
     };
 
     /**
@@ -388,4 +389,46 @@
     return errorText;
   }
 
+  /* eslint-disable complexity */
+
+  function getSensibleTime(timeInMilis) {
+
+    var seconds = Math.floor(timeInMilis / 1000 % 60);
+    var minutes = Math.floor(timeInMilis / (1000 * 60) % 60);
+    var hours = Math.floor(timeInMilis / (1000 * 3600) % 24);
+    var days = Math.floor(timeInMilis / (1000 * 3600 * 24) % 30);
+    var months = Math.floor(timeInMilis / (1000 * 3600 * 24 * 30) % 12);
+
+    var timeString = '';
+    var monthsSet = false;
+
+    if (months > 0) {
+      timeString = months + 'm ';
+      monthsSet = true;
+    }
+    var daysSet = false;
+    if (days > 0 || monthsSet) {
+      timeString = timeString + days + 'd ';
+      daysSet = true;
+    }
+
+    if (hours > 0 || daysSet) {
+      timeString = timeString + hours + 'h ';
+    }
+
+    if (minutes > 0 || hours > 0 || daysSet) {
+      timeString = timeString + minutes + 'm ';
+    }
+
+    if (seconds > 0 || minutes > 0 || hours > 0 || daysSet) {
+      timeString = timeString + seconds + 's ';
+    } else {
+      if (seconds === 0 && minutes === 0 && hours === 0) {
+        timeString = gettext('Less than a second');
+      }
+    }
+
+    return timeString;
+  }
+  /* eslint-enable complexity */
 })();

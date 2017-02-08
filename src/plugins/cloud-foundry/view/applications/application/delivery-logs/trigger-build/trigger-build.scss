@@ -27,6 +27,19 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        .delivery-log-trigger-build-user {
+          display: flex;
+          align-items: center;
+          a {
+            flex-grow: 1;
+            max-width: 40%;
+            margin-right: 10px;
+          }
+          img {
+            max-width: 40px;
+          }
+        }
       }
     }
   }

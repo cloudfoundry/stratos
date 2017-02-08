@@ -65,6 +65,7 @@
     $rootScope.$on('$stateChangeSuccess', function (event, toState) { // eslint-disable-line angular/on-watch
       // Activate the correct menu entry or deactivate all menu entries if none match
       that.menu.currentState = _.get(toState, 'data.activeMenuState', '');
+
       // Scroll to the console-view's top after a state transition
       var consoleViewScrollPanel = angular.element(document).find('#console-view-scroll-panel');
       if (consoleViewScrollPanel[0]) {
@@ -75,6 +76,7 @@
   }
 
   angular.extend(NavigationModel.prototype, {
+
     /**
      * @function onLogin
      * @memberof app.model.NavigationModel
@@ -125,6 +127,18 @@
   Menu.prototype = [];
 
   angular.extend(Menu.prototype, {
+
+    /**
+     * @function getMenuItem
+     * @memberof app.model.navigation.Menu
+     * @description Gets the menu item with the specified name
+     * @param {string} name - the name/ID of the menu item
+     * @returns {object} Menu item for the specified item
+     */
+    getMenuItem: function (name) {
+      return _.find(this, {name: name});
+    },
+
     /**
      * @function addMenuItem
      * @memberof app.model.navigation.Menu
@@ -202,7 +216,7 @@
       _.each(sorted, function (item) {
         that.push(item);
       });
-      return this;
+      return item;
     },
 
     /**

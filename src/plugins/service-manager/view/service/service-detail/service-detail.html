@@ -1,0 +1,113 @@
+<div class="hsm cluster">
+  <span class="cluster-breadcrumb" ncy-breadcrumb></span>
+  <div class="cluster-detail endpoints"  ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
+    <div class="hsm-service-header">
+      <h3 translate>Service : {{ sCtrl.service.id }}</h3>
+      <div class="create-instance-btn">
+        <button class="btn btn-primary" translate
+          ng-click="smCtrl.createInstance(sCtrl.service.id)">
+          Create Instance
+          </button>      
+      </div>
+    </div>
+    <div class="cluster-summary-tile">
+      <div class="card panel panel-default">
+        <div class="hsm-service-heading panel-heading action-header">
+          <span translate>Summary</span>
+          <img class="hsm-service-icon" src="{{sCtrl.service.iconURL}}"/>
+        </div>
+
+        <div class="panel-body cluster-summary-panel row">
+          <div class="col-md-5">
+            <dl class="dl-horizontal">
+              <dt translate>Name</dt>
+              <dd>
+                {{ sCtrl.service.name }}
+              </dd>
+              <dt translate>Catalog ID</dt>
+              <dd>
+                {{ sCtrl.service.catalogId }}
+              </dd>
+              <dt translate>Type</dt>
+              <dd>
+                {{ sCtrl.service.type }}
+              </dd>
+              <dt translate>Vendor</dt>
+              <dd>
+                {{ sCtrl.service.vendor }}
+              </dd>
+            </dl>
+          </div>
+          <div class="col-md-7">
+            <dl class="dl-horizontal">
+              <dt translate>Labels</dt>
+              <dd>
+                <span class="hsm-label-category" ng-repeat="label in sCtrl.service.labels">{{ label }}</span>
+              </dd>
+              <dt translate>Categories</dt>
+              <dd>
+                <span class="hsm-label-category" ng-repeat="category in sCtrl.service.categories">{{ category }}</span>
+              </dd>
+              <!--
+              <dt ng-if="svcsCtrl.initialized" translate>INSTANCE ADDRESS</dt>
+              <dd ng-if="svcsCtrl.initialized">
+                {{ smCtrl.getEndpoint() }}
+              </dd>
+              -->
+              <!--
+              <dt translate>HSM Interactions</dt>
+              <dd>
+                <a ng-click="svcsCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
+              </dd>
+              -->
+              <dt translate>Description</dt>
+              <dd></dd>
+              <div class="hsm-description">
+                {{ sCtrl.service.description }}
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!--
+  <cluster-actions ng-show="clusterController.hasActions"
+                  has-actions="clusterController.hasActions"
+                  class="col-md-3 col-sm-1 col-xs-1"></cluster-actions>
+                  -->
+<h4>Versions</h4>
+<table class="table"
+        st-table="sCtrl.stTableServiceVersions"
+        st-safe-src="sCtrl.versions">
+  <thead>
+  <tr>
+    <th translate st-sort="product_version" st-sort-default="true" st-skip-natural="true">Product Version</th>
+    <th translate st-sort="sdl_version" st-skip-natural="true">SDL Version</th>
+  </tr>
+  <tr>
+    <th colspan="2" class="table-sort-filter">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input st-search=""
+                type="text" class="form-control"
+                placeholder="{{'Filter services' | translate}}"/>
+        </div>
+      </form>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="svc in sCtrl.stTableServiceVersions track by $index">
+      <td>{{ svc.product_version }}</td>
+      <td>
+        <a ui-sref="sm.endpoint.service.sdl({product: svc.product_version, sdl: svc.sdl_version})">
+        {{ svc.sdl_version }}</td>
+        </a>
+    </tr>
+  </tbody>
+</table>
+  </div>
+                  
+</div>
+

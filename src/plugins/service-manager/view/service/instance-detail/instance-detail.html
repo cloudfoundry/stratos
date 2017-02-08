@@ -1,0 +1,123 @@
+<div class="hsm cluster">
+  <span class="cluster-breadcrumb" ncy-breadcrumb></span>
+  <div class="cluster-detail endpoints"  ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
+    <div class="hsm-instance-header">
+      <h3 translate>Instance : {{ instanceCtrl.id }}</h3>
+      <app-state-icon class="action-target-state" state="instanceCtrl.stateIndicator"></app-state-icon>
+      <actions-menu class="application-nav-menu"
+          actions="instanceCtrl.actions"
+          menu-icon="helion-icon helion-icon-2x helion-icon-More"
+          menu-position="actions-menu-right">
+      </actions-menu>
+    </div>
+
+    <div ng-if="!instanceCtrl.notFound" class="cluster-summary-tile">
+      <div class="card panel panel-default">
+        <div class="panel-heading action-header">
+          <span translate>Summary</span>
+        </div>
+
+        <div class="panel-body cluster-summary-panel row">
+          <div class="col-md-5">
+            <dl class="dl-horizontal">
+              <dt translate>State</dt>
+              <dd class="hsm-state-label">
+                {{ instanceCtrl.instance.state }}
+              </dd>
+              <dt translate>Product Version</dt>
+              <dd>
+                {{ instanceCtrl.instance.product_version }}
+              </dd>
+              <dt translate>SDL Version</dt>
+              <dd>
+                <a ui-sref="sm.endpoint.service.sdl({id: instanceCtrl.instance.service_id, product: instanceCtrl.instance.product_version , sdl: instanceCtrl.instance.sdl_version})">
+                {{ instanceCtrl.instance.sdl_version }}
+                </a>
+              </dd>
+              <dt translate>Service ID</dt>
+              <dd>
+                <a ui-sref="sm.endpoint.service.detail({id: instanceCtrl.instance.service_id })">
+                {{ instanceCtrl.instance.service_id }}
+                </a>
+              </dd>
+            </dl>
+          </div>
+          <div class="col-md-7">
+            <dl class="dl-horizontal">
+              <dt translate>Last Updated</dt>
+              <dd>
+                {{ instanceCtrl.instance.last_updated | amDateFormat: 'L - LTS' }}
+              </dd>
+              <dt ng-if="svcsCtrl.initialized" translate>INSTANCE ADDRESS</dt>
+              <dd ng-if="svcsCtrl.initialized">
+                {{ smCtrl.getEndpoint() }}
+              </dd>
+              <!--
+              <dt translate>HSM Interactions</dt>
+              <dd>
+                <a ng-click="svcsCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
+              </dd>
+              -->
+              <dt ng-if="svcsCtrl.initialized" translate>Account Username</dt>
+              <dd ng-if="svcsCtrl.initialized">
+                {{ svcsCtrl.userName }}
+              </dd>
+              <dt ng-if="svcsCtrl.initialized" translate>Account Status</dt>
+              <dd ng-if="svcsCtrl.initialized" translate>
+                {{ svcsCtrl.isAdmin ? 'administrator' : 'user' }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="applications-empty" ng-if="instanceCtrl.deleted">
+      <div class="applications-msg" translate>Instance has been deleted.</div>
+    </div>
+
+    <div class="applications-empty" ng-if="instanceCtrl.notFound">
+      <div class="applications-msg" translate>Instance not found.</div>
+    </div>
+
+    <div ng-if="!instanceCtrl.deleted && !instanceCtrl.notFound">
+
+    <ul class="application-nav nav nav-tabs col-sm-12">
+      <li class="nav-item" ui-sref-active="active">
+        <a class="nav-link" ui-sref="sm.endpoint.instance.components">
+          <span translate>Components</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.components.length || 0}})</span>
+        </a>
+      </li>
+      <li class="nav-item" ui-sref-active="active">
+        <a class="nav-link" ui-sref="sm.endpoint.instance.services">
+          <span translate>Service Locations</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.service_locations.length || 0}})</span>
+        </a>
+      </li>
+      <li class="nav-item" ui-sref-active="active">
+        <a class="nav-link" ui-sref="sm.endpoint.instance.parameters">
+          <span translate>Parameters</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.parameters.length || 0}})</span>
+        </a>
+      </li>
+      <li class="nav-item" ui-sref-active="active">
+        <a class="nav-link" ui-sref="sm.endpoint.instance.scaling">
+          <span translate>Scaling</span>
+          <span class="tab-count-indicator">({{instanceCtrl.instance.scaling.length || 0}})</span>
+        </a>
+      </li>
+      <li class="nav-item" ui-sref-active="active">
+        <a class="nav-link" ui-sref="sm.endpoint.instance.versions">
+          <span translate>Versions</span>
+          <!--
+          <span class="tab-count-indicator">({{instanceCtrl.instance.available_upgrades ? instanceCtrl.instance.available_upgrades.length : '0' }})</span>
+          -->
+        </a>
+      </li>
+    </ul>
+    <ui-view></ui-view>
+  </div>
+  </div>
+</div>
+
