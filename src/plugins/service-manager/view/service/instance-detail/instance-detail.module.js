@@ -314,9 +314,9 @@
     this.guid = $state.params.guid;
     this.id = $state.params.id;
 
-    function processUpgrades() {
+    function processUpgrades(instance) {
       var upgrades = {};
-      _.each(hsmModel.instance.available_upgrades, function (productUpgrade) {
+      _.each(instance.available_upgrades, function (productUpgrade) {
         var pUpgrade = {};
         upgrades[productUpgrade.product_version] = pUpgrade;
         _.each(productUpgrade.sdl_versions, function (sdlUpgrade) {
@@ -334,12 +334,14 @@
         that.versions = data.product_versions;
         _.each(that.versions, function (product) {
           product.versions = [];
+          product.isUpgrade = _.has(upgrades, product.product_version);
           _.each(product.sdl_versions, function (url, sdlVersion) {
-            var isUpgrade = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+            var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
+            var isLatest = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
             product.versions.push({
               sdl_version: sdlVersion,
-              isUpgrade: !!isUpgrade,
-              isLatest: _.isBoolean(isUpgrade) && isUpgrade,
+              isUpgrade: isUpgrade,
+              isLatest: isLatest,
               isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
             });
           });
