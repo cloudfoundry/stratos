@@ -115,6 +115,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.confirmDialog = confirmDialog;
+    this.manageInstanceDialog = manageInstanceDialog;
     this.$timeout = $timeout;
     this.$q = $q;
     this.$state = $state;
@@ -171,6 +172,16 @@
       that.$timeout.cancel(that.pollTimer);
     });
 
+    $scope.$watch(function () {
+      return that.hsmModel.hideCompletedComponents;
+    }, function () {
+      that._filterComponents();
+    });
+
+    if (angular.isUndefined(that.hsmModel.hideCompletedComponents)) {
+      that.hsmModel.hideCompletedComponents = true;
+    }
+
     this.fetch().then(function () {
       that.poll();
     });
@@ -214,6 +225,7 @@
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
         that._fetchInstanceMetrics(that.instance);
+        that._filterComponents();
         that._setStateIndicator();
         that._sortUpgrades();
       }).catch(function (err) {
@@ -228,6 +240,18 @@
           that._setStateIndicator();
         }
       });
+    },
+
+    _filterComponents: function () {
+      var that = this;
+      if (!that.instance) {
+        this.components = [];
+      } else {
+        this.components = _.filter(that.instance.components, function (item) {
+          var inactive = item.state.phase === 'Failed' || item.state.phase === 'Succeeded';
+          return that.hsmModel.hideCompletedComponents ? !inactive : true;
+        });
+      }
     },
 
     _sortUpgrades: function () {
@@ -339,7 +363,6 @@
       });
       return this.$q.all(metricsPromises);
     }
-
   });
 
   UpgradeController.$inject = [
@@ -356,9 +379,9 @@
     this.guid = $state.params.guid;
     this.id = $state.params.id;
 
-    function processUpgrades() {
+    function processUpgrades(instance) {
       var upgrades = {};
-      _.each(hsmModel.instance.available_upgrades, function (productUpgrade) {
+      _.each(instance.available_upgrades, function (productUpgrade) {
         var pUpgrade = {};
         upgrades[productUpgrade.product_version] = pUpgrade;
         _.each(productUpgrade.sdl_versions, function (sdlUpgrade) {
@@ -376,12 +399,14 @@
         that.versions = data.product_versions;
         _.each(that.versions, function (product) {
           product.versions = [];
+          product.isUpgrade = _.has(upgrades, product.product_version);
           _.each(product.sdl_versions, function (url, sdlVersion) {
-            var isUpgrade = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+            var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
+            var isLatest = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
             product.versions.push({
               sdl_version: sdlVersion,
-              isUpgrade: !!isUpgrade,
-              isLatest: _.isBoolean(isUpgrade) && isUpgrade,
+              isUpgrade: isUpgrade,
+              isLatest: isLatest,
               isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
             });
           });

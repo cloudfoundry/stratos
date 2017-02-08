@@ -1,12 +1,12 @@
 <div class="applications-empty"
-  ng-if="!instanceCtrl.instance.available_upgrades || instanceCtrl.instance.available_upgrades.length === 0"
+  ng-if="!instanceUpgradeCtrl.versions || instanceUpgradeCtrl.versions.length === 0"
 >
-  <div class="applications-msg" translate>No available upgrades.</div>
+  <div class="applications-msg" translate>No versions available.</div>
 </div>
 
 <table class="table"
-        ng-if="instanceCtrl.instance.available_upgrades && instanceCtrl.instance.available_upgrades.length"
-        st-table="instanceUpgradeCtrl.stTableInstanceUpgrades"
+        ng-if="instanceUpgradeCtrl.versions && instanceUpgradeCtrl.versions.length"
+        st-table="instanceUpgradeCtrl.stTableInstanceVersions"
         st-safe-src="instanceUpgradeCtrl.versions">
   <thead>
   <tr>
@@ -15,11 +15,11 @@
   </tr>
   </thead>
   <tbody>
-  <tr ng-repeat="upgrade in instanceUpgradeCtrl.stTableInstanceUpgrades track by $index">
-    <td>{{ upgrade.product_version }}</td>
+  <tr ng-repeat="upgrade in instanceUpgradeCtrl.stTableInstanceVersions track by $index">
+    <td ng-class="{'sdl-upgrade-version': upgrade.isUpgrade}">{{ upgrade.product_version }}</td>
     <td>
       <div ng-class="{'sdl-latest-version' : sdl.is_latest}" class="upgrade-version" ng-repeat="sdl in upgrade.versions track by sdl.sdl_version">
-        <span>{{ sdl.sdl_version}}</span>
+        <span ng-class="{'sdl-upgrade-version': sdl.isUpgrade}">{{ sdl.sdl_version}}</span>
         <span ng-if="sdl.isLatest">(Latest)</span>
         <span ng-if="sdl.isCurrent">(Current)</span>
       </div>
