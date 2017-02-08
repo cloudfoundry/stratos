@@ -21,14 +21,11 @@
 
   SparklineGraphController.$inject = [
     '$interval',
-    '$state',
     '$scope',
-    '$q',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.model.modelManager'
   ];
 
-  function SparklineGraphController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function SparklineGraphController($interval, $scope, modelManager) {
 
     var that = this;
 
@@ -58,7 +55,7 @@
       }
     };
 
-    this.chartApi;
+    this.chartApi = null;
 
     this.data = [];
 
@@ -78,49 +75,31 @@
 
     polygonPoints: function () {
 
-      /**
-       *   const series = this.timeseries.map(({timestamp, value}) => [Date.parse(timestamp), value]);
-
-       const sorted = series.slice().sort((a, b) => a[0] - b[0]);
-       const xShift = Math.min(...sorted.map((pt) => pt[0]));
-       const shifted = sorted.map(([x, y]) => [x - xShift, y]);
-       const xScale = Math.max(...shifted.map((pt) => pt[0])) || 1;
-       const yScale = Math.max(...shifted.map((pt) => pt[1])) || 1;
-       const scaled = shifted.map(([x, y]) => [x / xScale, y / yScale]);
-
-       // Invert Y because SVG Y=0 is at the top, and we want low values
-       // of Y to be closer to the bottom of the graphic
-       return scaled.map(([x, y]) => `${x},${(1 - y)}`).join(' ');
-       */
-
-        // var series = _.map(this.timeseries, function (timestamp, value) {
-        //   return [Date.parse(timestamp), value];
-        // });
-      // var sortedSeries = this.timeseries.slice().sort(function (a, b) {
-      //     return a[0] - b[0];
-      //   });
-
       var xShift = _.min(_.map(this.timeseries, 'timestamp'));
 
-      var shifted = _.map(this.timeseries, function (dataPoint, i) {
+      var shifted = _.map(this.timeseries, function (dataPoint) {
         return [dataPoint.timestamp - xShift, dataPoint.value];
       });
 
-      var xScale = _.max(_.map(shifted, function (point) {
-          return point[0];
-        })) || 1;
+      var xScale = _.max(_.map(shifted,
+          function (point) {
+            return point[0];
+          })) || 1;
 
-      var yScale = _.max(_.map(shifted, function (point) {
-          return point[1];
-        })) || 1;
+      var yScale = _.max(_.map(shifted,
+          function (point) {
+            return point[1];
+          })) || 1;
 
-      var scaled = _.map(shifted, function (point) {
-        return [point[0] / xScale, point[1] / yScale];
-      })
+      var scaled = _.map(shifted,
+        function (point) {
+          return [point[0] / xScale, point[1] / yScale];
+        })
 
-      return _.map(scaled, function (point, i) {
-        return point[0] + ',' + (1 -  point[1]);
-      }).join(' ');
+      return _.map(scaled,
+        function (point) {
+          return point[0] + ',' + (1 - point[1]);
+        }).join(' ');
 
     }
 

@@ -24,14 +24,11 @@
 
   AverageRateGraphController.$inject = [
     '$interval',
-    '$state',
     '$scope',
-    '$q',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.model.modelManager'
   ];
 
-  function AverageRateGraphController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function AverageRateGraphController($interval, $scope, modelManager) {
 
     var that = this;
 
@@ -41,7 +38,7 @@
 
     var interval = $interval(function () {
       that.updateUtilization();
-    }, 60000);
+    }, 120000);
 
     $scope.$on('$destroy', function () {
       $interval.cancel(interval);
@@ -84,7 +81,7 @@
             renderEnd: function () {
               var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
-                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
+                var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 80;
                 var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
               }
@@ -98,7 +95,7 @@
       }
     };
 
-    this.chartApi;
+    this.chartApi = null;
 
     this.data = [{
       color: '#60799d',
@@ -110,14 +107,12 @@
       key: 'Average'
     }];
 
-
   }
 
   angular.extend(AverageRateGraphController.prototype, {
 
     updateUtilization: function () {
       var that = this;
-
 
       var movingAverage = [];
 
@@ -134,7 +129,7 @@
           result.push(
             {
               x: dataPoint.x,
-              y: ((dataPoint.y) * 100).toFixed(2),
+              y: (dataPoint.y * 100).toFixed(2)
             }
           );
           movingAverage.push({
@@ -148,11 +143,12 @@
 
       return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
         .then(function (metricsData) {
-          that.data = [{
-            color: '#60799d',
-            values: convertToPercentage(metricsData.dataPoints),
-            key: 'CPU Utilization'
-          },
+          that.data = [
+            {
+              color: '#60799d',
+              values: convertToPercentage(metricsData.dataPoints),
+              key: 'CPU Utilization'
+            },
             {
               color: '#60799d',
               values: movingAverage,
@@ -160,7 +156,7 @@
             }];
           that.chartApi.refresh();
         });
-    },
+    }
 
   });
 

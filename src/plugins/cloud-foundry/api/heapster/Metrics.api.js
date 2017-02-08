@@ -33,12 +33,12 @@
     this.getCpuUtilization = _metricsQuery('cpu_node_utilization_gauge');
     this.getMemoryUsage = _metricsQuery('memory_usage_gauge');
     this.getMemoryWorkingSetUsasge = _metricsQuery('memory_working_set_gauge');
-    this.getMetrics = function(metricName, filter){
-      return _metricsQuery(metricName)(filter);
-    }
     this.getMemoryUtilization = _metricsQuery('memory_node_utilization_gauge');
     this.updateNetworkDataReceived = _metricsQuery('network_rx_cumulative');
     this.updateNetworkDataTransmitted = _metricsQuery('network_tx_cumulative');
+    this.getMetrics = function (metricName, filter) {
+      return _metricsQuery(metricName)(filter);
+    };
 
     function _metricsQuery(metrics) {
       return function (filter, time) {

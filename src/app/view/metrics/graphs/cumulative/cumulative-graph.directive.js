@@ -25,14 +25,11 @@
 
   CumulativeChartController.$inject = [
     '$interval',
-    '$state',
     '$scope',
-    '$q',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.model.modelManager'
   ];
 
-  function CumulativeChartController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function CumulativeChartController($interval, $scope, modelManager) {
 
     var that = this;
 
@@ -43,7 +40,7 @@
 
     var interval = $interval(function () {
       that.updateChart();
-    }, 60000);
+    }, 120000);
 
     $scope.$on('$destroy', function () {
       $interval.cancel(interval);
@@ -64,7 +61,7 @@
         ],
         showLegend: false,
         duration: 300,
-        isArea:true,
+        isArea: true,
         useInteractiveGuideline: true,
         clipVoronoi: false,
         y: function (d) {
@@ -105,18 +102,18 @@
               var id = '#' + that.metric + '_' + that.nodeName + '_cchart';
               var selectedElement = d3.select(id + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
-                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 105;
+                var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 105;
                 var yAxis = d3.select(id + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
               }
 
             }
           }
-        },
+        }
       }
     };
 
-    this.chartApi;
+    this.chartApi = null;
 
     this.data = [
       {
@@ -141,7 +138,7 @@
               label: 'Data Transmitted',
               color: '#60798D'
             }];
-         });
+        });
     }
 
   });

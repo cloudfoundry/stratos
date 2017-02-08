@@ -46,7 +46,7 @@
       that.updateNetworkDataReceived();
       that.updateMemoryUtilization();
       that.updateNodeUptime();
-    }, 30000);
+    }, 120000);
 
     this.cardData = {
       title: this.nodeName

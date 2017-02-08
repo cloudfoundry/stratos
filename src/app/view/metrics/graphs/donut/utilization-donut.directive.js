@@ -25,14 +25,11 @@
 
   UtilizationDonutController.$inject = [
     '$interval',
-    '$state',
     '$scope',
-    '$q',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.model.modelManager'
   ];
 
-  function UtilizationDonutController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function UtilizationDonutController($interval, $scope, modelManager) {
 
     var that = this;
 
@@ -43,12 +40,11 @@
 
     var interval = $interval(function () {
       that.updateUtilization();
-    }, 60000);
+    }, 120000);
 
     $scope.$on('$destroy', function () {
       $interval.cancel(interval);
     });
-
 
     $scope.$watch(function () {
       return that.metricLimit;
@@ -94,11 +90,11 @@
             }
           },
           arcsRadius: [{
-            inner: 0.7,
-            outer: 1.0
-          }, {
-            inner: 0.8,
+            inner: 0.6,
             outer: 0.9
+          }, {
+            inner: 0.7,
+            outer: 0.8
           }
           ],
           color: function (d) {
@@ -109,7 +105,7 @@
       }
     };
 
-    this.chartApi;
+    this.chartApi = null;
 
     this.data = [
       {
@@ -135,23 +131,52 @@
       return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
         .then(function (metricsData) {
 
-          var value = (metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100);
+          var value = metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100;
 
-          that.options.chart.title = (value.toFixed(2)) + '%';
+          var arcColour = '#2ad2c9';
+          var cssClass = 'normal-title';
+          if (value > 75) {
+            arcColour = '#ffd042';
+            cssClass = 'warning-title';
+
+          } else if (value > 90) {
+            arcColour = '#ff454f';
+            cssClass = 'critical-title';
+          }
+
+          var svg = d3.select('#' + that.metric + '_' + that.nodeName + '_dnt');
+          var donut = svg.selectAll('g.nv-pie').filter(
+            function (d, i) {
+              return i === 1;
+            });
+
+          // check if title already exists
+          var title = donut.select('text#title');
+          if (title[0] && title[0][0]) {
+            // Change title
+            title.text(value.toFixed(2) + '%')
+              .attr('class', cssClass);
+          } else {
+            // Insert title
+            donut.insert('text', 'g')
+              .text(value.toFixed(2) + '%')
+              .attr('class', cssClass)
+              .attr('text-anchor', 'middle')
+              .attr('id', 'title');
+          }
 
           that.data = [
             {
               value: value,
-              label: 'UTILIZED ' + (value.toFixed(2)) + '%',
-              color: '#4dc1be'
+              label: 'UTILIZED ' + value.toFixed(2) + '%',
+              color: arcColour
             },
             {
-              value: (100 - value),
+              value: 100 - value,
               label: 'LIMIT ' + that.metricLimit,
               color: '#60798D',
               idle: true
             }];
-
 
         });
     }

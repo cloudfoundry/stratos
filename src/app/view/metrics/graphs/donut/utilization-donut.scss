@@ -1,0 +1,18 @@
+.util-donut {
+
+  .normal-title {
+    font-weight: bold;
+    fill: $turquoise;
+    font-size: 18px;
+  }
+  .warning-title {
+    font-weight: bold;
+    fill: $sunglow;
+    font-size: 18px;
+  }
+  .critical-title {
+    font-weight: bold;
+    fill: $carnation;
+    font-size: 18px;
+  }
+}

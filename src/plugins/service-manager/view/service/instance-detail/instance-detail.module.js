@@ -113,6 +113,7 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.confirmDialog = confirmDialog;
     this.$timeout = $timeout;
     this.$q = $q;
@@ -135,17 +136,20 @@
     this.memoryUsageData = {};
 
     this.actions = [
-      { id: 'upgrade', name: 'Upgrade Instance',
+      {
+        id: 'upgrade', name: 'Upgrade Instance',
         execute: function () {
           return that.upgradeInstance(that.id);
         }
       },
-      { id: 'configure', name: 'Configure Instance',
+      {
+        id: 'configure', name: 'Configure Instance',
         execute: function () {
           return that.configureInstance(that.id);
         }
       },
-      { id: 'delete', name: 'Delete Instance',
+      {
+        id: 'delete', name: 'Delete Instance',
         execute: function () {
           return that.deleteInstance(that.id);
         }
@@ -301,8 +305,9 @@
       that.manageInstanceDialog.show('configure', that.guid, null, that.instance).result.then(function () {
         that.poll(true);
       });
-    }
-   updateCpuUsage: function (componentName) {
+    },
+
+    updateCpuUsage: function (componentName) {
       var that = this;
       return this.metricsModel.getCpuUsageRate(this.metricsModel.makePodFilter(this.id, componentName))
         .then(function (metricsData) {
