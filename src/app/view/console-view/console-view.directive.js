@@ -3,24 +3,37 @@
 
   angular
     .module('app.view')
-    .directive('consoleView', consoleView);
+    .directive('consoleView', ConsoleView);
 
-  consoleView.$inject = [
+  ConsoleView.$inject = [
     'app.basePath'
   ];
 
   /**
-   * @namespace app.view.consoleView
+   * @namespace app.view.ConsoleView
    * @memberof app.view
-   * @name consoleView
+   * @name ConsoleView
    * @description A console view directive
    * @param {string} path - the application base path
    * @returns {object} The console view directive definition object
    */
-  function consoleView(path) {
+  function ConsoleView(path) {
     return {
-      templateUrl: path + 'view/console-view/console-view.html'
+      templateUrl: path + 'view/console-view/console-view.html',
+      controller: ConsoleViewController,
+      controllerAs: 'consoleViewCtrl'
     };
+
+  }
+
+  ConsoleViewController.$inject = ['$rootScope'];
+
+  function ConsoleViewController($rootScope) {
+    var vm = this;
+
+    vm.noScroll = function () {
+      return $rootScope.consoleViewNoScroll;
+    }
   }
 
 })();

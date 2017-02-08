@@ -33,8 +33,11 @@ console-view {
   }
 
   > .container-fluid {
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
+    &.no-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
   }
 
 }

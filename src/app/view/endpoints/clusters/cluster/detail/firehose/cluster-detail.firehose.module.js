@@ -29,6 +29,7 @@
     'app.utils.utilsService',
     'app.view.localStorage',
     '$scope',
+    '$rootScope',
     '$stateParams',
     '$location',
     '$log',
@@ -37,7 +38,7 @@
   ];
 
   function ClusterFirehoseController(base64, utils, localStorage,
-                                     $scope, $stateParams, $location, $log, $document, $animate) {
+                                     $scope, $rootScope, $stateParams, $location, $log, $document, $animate) {
     var vm = this;
 
     /* eslint-disable no-control-regex */
@@ -133,7 +134,9 @@
     vm.jsonFilter = jsonFilter;
 
     $document.on('keydown', keyHandler);
+    $rootScope.consoleViewNoScroll = true;
     $scope.$on('$destroy', function () {
+      $rootScope.consoleViewNoScroll = false;
       $document.off('keydown', keyHandler);
     });
     $scope.$watchCollection(function () {
