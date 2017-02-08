@@ -33,6 +33,7 @@
 
     function init() {
       return metricsModel.getNodes().then(function (nodes) {
+        nodes = nodes.sort();
         that.nodesList = nodes;
       });
     }
