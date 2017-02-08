@@ -348,3 +348,13 @@ form.file-drop-active {
 .sdl-upgrade-version {
   font-weight: bold;
 }
+
+.hide-components {
+  .checkbox-input {
+    text-align: right;
+    float: right;
+    text-transform: none;
+    font-weight: normal;
+    margin-right: 12px;
+  }
+}
