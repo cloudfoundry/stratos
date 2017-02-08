@@ -22,7 +22,6 @@
       }
     });
 
-    // Abstract detail route
     $stateProvider.state('sm.endpoint.service.detail', {
       url: '/detail',
       templateUrl: 'plugins/service-manager/view/service/service-detail/service-detail.html',

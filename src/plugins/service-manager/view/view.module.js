@@ -75,7 +75,7 @@
           });
 
           if (connectedInstances === 1) {
-            $state.go('sm.endpoint.detail', {guid: serviceInstanceGuid});
+            $state.go('sm.endpoint.detail.instances', {guid: serviceInstanceGuid});
           } else {
             $state.go('sm.tiles', {instancesListed: true});
           }
