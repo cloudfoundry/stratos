@@ -133,11 +133,12 @@
 
       function convertToPercentage(dataPoints) {
         var transformedDp = [];
-        var average = 0;
-        _.each(dataPoints, function (dataPoint) {
-          average += dataPoint.y;
-        });
-        average = average / dataPoints.length;
+        var average = _.mean(_.map(dataPoints, 'y'));
+        var maxValue = _.max(_.map(dataPoints, 'y')) * 100;
+        var minValue = _.min(_.map(dataPoints, 'y')) * 100;
+
+        that.options.chart.yDomain = [minValue * 0.75, maxValue + 1.25];
+        // average = average / dataPoints.length;
         average = (average * 100).toFixed(2);
         _.transform(dataPoints, function (result, dataPoint) {
           result.push(
