@@ -81,7 +81,8 @@
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
       getOemConfiguration: getOemConfiguration,
-      getSensibleTime: getSensibleTime
+      getSensibleTime: getSensibleTime,
+      timeTickFormatter: timeTickFormatter
     };
 
     /**
@@ -368,4 +369,20 @@
     return timeString;
   }
   /* eslint-enable complexity */
+
+  function timeTickFormatter(d){
+    console.log(arguments)
+    var hours = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asHours());
+    if (hours === 0) {
+      var minutes = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+      if (minutes === 0 ) {
+        return '>1 MIN';
+      }
+      return minutes + 'MIN';
+    } else if (hours <= 2) {
+      hours = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
+      return hours + 'MIN';
+    }
+    return hours + 'HR';
+  }
 })();
