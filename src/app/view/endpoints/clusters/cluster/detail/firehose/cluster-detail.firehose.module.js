@@ -33,12 +33,11 @@
     '$location',
     '$log',
     '$document',
-    '$timeout',
     '$animate'
   ];
 
   function ClusterFirehoseController(base64, utils, localStorage,
-                                     $scope, $stateParams, $location, $log, $document, $timeout, $animate) {
+                                     $scope, $stateParams, $location, $log, $document, $animate) {
     var vm = this;
 
     /* eslint-disable no-control-regex */
@@ -78,6 +77,8 @@
     var theElement = angular.element('#firehose-container')[0];
     $animate.enabled(false, theElement);
 
+    var textFilterRegex;
+
     vm.textFilter = {
       toMatch: '',
       regex: false,
@@ -116,7 +117,8 @@
       $stateParams.guid + '/firehose';
 
     // Comment this out to test firehose stream in gulp dev (connect directly to the portal)
-    vm.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.guid + '/firehose';
+    // vm.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.guid + '/firehose';
+    // vm.websocketUrl = protocol + '://' + 'jbramary.gbr.hp.com:3003/v1/' + $stateParams.guid + '/firehose';
 
     vm.autoScrollOn = true; // auto-scroll by default
 
@@ -143,6 +145,34 @@
       localStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
     });
 
+    $scope.$watch(function () {
+      return vm.textFilter.toMatch;
+    }, function () {
+      updateRegex();
+    });
+
+    $scope.$watch(function () {
+      return vm.textFilter.regex;
+    }, function () {
+      updateRegex();
+    });
+
+    $scope.$watch(function () {
+      return vm.textFilter.matchCase;
+    }, function () {
+      updateRegex();
+    });
+
+    function updateRegex() {
+      try {
+        textFilterRegex = new RegExp(vm.textFilter.toMatch, vm.textFilter.matchCase ? 'g' : 'gi');
+      } catch (error) {
+        // Invalid Regex pattern!
+        // We could show red validation error
+        textFilterRegex = null;
+      }
+    }
+
     function buildOriginString(cfEvent, colour, bold) {
       return buildTimestampString(cfEvent) + ': ' +
         coloredLog('[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + ']', colour, bold);
@@ -152,6 +182,23 @@
       // CF timestamps are in nanoseconds
       var msStamp = Math.round(cfEvent.timestamp / 1000000);
       return moment(msStamp).format('HH:mm:ss.SSS');
+    }
+
+    function emphasizeName(dottedString, colour) {
+      var metricName = dottedString;
+      var lastDot = metricName.lastIndexOf('.');
+      if (lastDot > -1) {
+        // Weird bug where sometimes the name ends with a dot
+        if (lastDot === dottedString.length - 1) {
+          return coloredLog(metricName.slice(0, -1), colour, true);
+        }
+        var prefix = metricName.slice(0, lastDot + 1);
+        var name = metricName.slice(lastDot + 1);
+        metricName = prefix + coloredLog(name, colour, true);
+      } else {
+        metricName = coloredLog(metricName, colour, true);
+      }
+      return metricName;
     }
 
     function handleApiEvent(cfEvent) {
@@ -182,23 +229,6 @@
       var messageSource = coloredLog('[' + message.source_type + '.' + message.source_instance + ']', 'green', true);
       var messageString = coloredLog(base64.decode(message.message), colour, false) + '\n';
       return buildOriginString(cfEvent, 'green') + ' ' + messageSource + ' ' + messageString;
-    }
-
-    function emphasizeName(dottedString, colour) {
-      var metricName = dottedString;
-      var lastDot = metricName.lastIndexOf('.');
-      if (lastDot > -1) {
-        // Weird bug where sometimes the name ends with a dot
-        if (lastDot === dottedString.length - 1) {
-          return coloredLog(metricName.slice(0, -1), colour, true);
-        }
-        var prefix = metricName.slice(0, lastDot + 1);
-        var name = metricName.slice(lastDot + 1);
-        metricName = prefix + coloredLog(name, colour, true);
-      } else {
-        metricName = coloredLog(metricName, colour, true);
-      }
-      return metricName;
     }
 
     function handleMetricEvent(cfEvent) {
@@ -283,6 +313,130 @@
       return mappedIndices;
     }
 
+    // Determine which colour and bold modes are active where the highlight ends
+    function getPreviousModes(toEndOfMatch) {
+      var escapeMatch;
+      var boldOn = null;
+      var prevColour = null;
+      var lastColourMatches = null;
+
+      ANSI_ESCAPE_MATCHER.lastIndex = 0;
+      while ((escapeMatch = ANSI_ESCAPE_MATCHER.exec(toEndOfMatch)) !== null) {
+        lastColourMatches = escapeMatch;
+      }
+      if (lastColourMatches !== null) {
+        boldOn = lastColourMatches[1].indexOf('1') === 0;
+        if (lastColourMatches[1] === '1') {
+          prevColour = null;
+        } else {
+          if (boldOn) {
+            prevColour = lastColourMatches[1][3];
+          } else {
+            prevColour = lastColourMatches[1][1];
+          }
+        }
+      }
+
+      return {
+        bold: boldOn,
+        colour: prevColour
+      };
+    }
+
+    function matchAndHighlight(message) {
+      // bail early if the current regex pattern is invalid
+      if (vm.textFilter.regex && textFilterRegex === null) {
+        return '';
+      }
+
+      var toMatch, compareTo, getNextMatch;
+      var matchIndex = 0;
+      var matchLength = 0;
+      var sanitized = message.replace(ANSI_ESCAPE_MATCHER, '');
+
+      if (vm.textFilter.regex) {
+        // Regex mode
+        textFilterRegex.lastIndex = 0;
+
+        getNextMatch = function () {
+          if (matchIndex >= sanitized.length - 1) {
+            matchIndex = -1;
+            return matchIndex;
+          }
+          var matches = textFilterRegex.exec(sanitized);
+          if (matches === null) {
+            matchIndex = -1;
+            return matchIndex;
+          }
+          matchLength = matches[0].length;
+          matchIndex = matches.index;
+          if (matchLength < 1) {
+            // if we matched zero characters, bump the regex index forward to avoid getting stuck
+            textFilterRegex.lastIndex++;
+          }
+          return matchIndex;
+        };
+
+      } else {
+        // Substring match mode
+        matchLength = vm.textFilter.toMatch.length;
+        if (vm.textFilter.matchCase) {
+          toMatch = vm.textFilter.toMatch;
+          compareTo = sanitized;
+        } else {
+          toMatch = vm.textFilter.toMatch.toLowerCase();
+          compareTo = sanitized.toLowerCase();
+        }
+
+        getNextMatch = function () {
+          matchIndex = compareTo.indexOf(toMatch, matchIndex + matchLength);
+          return matchIndex;
+        };
+      }
+
+      if (getNextMatch() < 0) {
+        return '';
+      }
+
+      if (!vm.textFilter.highlightMatches) {
+        // It's a match and we are not highlighting, just return message as-is
+        return message;
+      }
+
+      // It's a match and we are highlighting, need to find and highlight *all* matches
+
+      // Map each character in sanitized to indices in message
+      var mappedIndices = mapSanitizedIndices(message);
+      var finalString = '';
+      var leftToParse = message;
+      var afterLastMatch = 0;
+
+      while (matchIndex >= 0) {
+        if (matchLength < 1) {
+          // Special case where a regex matched zero characters, nothing to highlight
+          getNextMatch();
+          continue;
+        }
+        var before = leftToParse.slice(0, mappedIndices[matchIndex] - afterLastMatch);
+        var allBefore = message.slice(0, mappedIndices[matchIndex]);
+        var matched = message.slice(mappedIndices[matchIndex], mappedIndices[matchIndex + matchLength]);
+        var toEndOfMatch = allBefore + matched;
+
+        var sanitizedMatch = sanitized.slice(matchIndex, matchIndex + matchLength);
+
+        // Remember the previous foreground colour and bold (we know we don't use background colours)
+        var restoreModes = getPreviousModes(toEndOfMatch);
+        finalString += before + utils.highlightLog(sanitizedMatch, restoreModes.colour, restoreModes.bold);
+
+        leftToParse = leftToParse.slice(mappedIndices[matchIndex + matchLength] - afterLastMatch);
+        afterLastMatch = mappedIndices[matchIndex + matchLength];
+
+        getNextMatch();
+      }
+
+      return finalString + leftToParse;
+    }
+
     function jsonFilter(jsonString) {
       var filtered = jsonString;
       try {
@@ -314,127 +468,12 @@
         filtered = jsonString;
       }
 
-      if (vm.textFilter.toMatch.length > 0) {
-        var toMatch, compareTo, escapeMatch, getNextMatch, regex;
-
-        var matchIndex = 0;
-        var matchLength = 0;
-
-        var sanitized = filtered.replace(ANSI_ESCAPE_MATCHER, '');
-
-        if (vm.textFilter.regex) {
-          try {
-            regex = new RegExp(vm.textFilter.toMatch, vm.textFilter.matchCase ? 'g' : 'gi');
-          } catch (error) {
-            // Invalid Regex string
-            // TODO: show red validation error
-            return '';
-          }
-
-          getNextMatch = function () {
-            if (matchIndex >= sanitized.length - 1) {
-              matchIndex = -1;
-              return matchIndex;
-            }
-            var matches = regex.exec(sanitized);
-            if (matches === null) {
-              matchIndex = -1;
-              return matchIndex;
-            }
-            matchLength = matches[0].length;
-            matchIndex = matches.index;
-            if (matchLength < 1) {
-              regex.lastIndex++;
-            }
-            return matchIndex;
-          };
-
-        } else {
-          if (vm.textFilter.matchCase) {
-            toMatch = vm.textFilter.toMatch;
-            compareTo = sanitized;
-          } else {
-            toMatch = vm.textFilter.toMatch.toLowerCase();
-            compareTo = sanitized.toLowerCase();
-          }
-
-          getNextMatch = function () {
-            matchIndex = compareTo.indexOf(toMatch, matchIndex + matchLength);
-            matchLength = vm.textFilter.toMatch.length;
-            return matchIndex;
-          };
-
-        }
-
-        if (getNextMatch() < 0) {
-          return '';
-        }
-
-        if (!vm.textFilter.highlightMatches) {
-          // It's a match and we are not highlighting, just return filtered as-is
-          return filtered;
-        }
-
-        // It's a match and we are highlighting, need to find and highlight *all* matches
-
-        // Map each character in sanitized to indices in filtered
-        var mappedIndices = mapSanitizedIndices(filtered);
-
-        // console.log('Filtered: ' + filtered);
-        // console.log('Sanitized: ' + sanitized);
-        // console.log('Mapped indices: ', JSON.stringify(mappedIndices, null, 4));
-
-        var finalString = '';
-        var leftToParse = filtered;
-
-        var afterLastMatch = 0;
-
-        while (matchIndex >= 0) {
-          if (matchLength < 1) {
-            // Special case where a regex matched zero characters, nothing to highlight
-            getNextMatch();
-            continue;
-          }
-          var before = leftToParse.slice(0, mappedIndices[matchIndex] - afterLastMatch);
-          var allBefore = filtered.slice(0, mappedIndices[matchIndex]);
-          var matched = filtered.slice(mappedIndices[matchIndex], mappedIndices[matchIndex + matchLength]);
-          var toEndOfMatch = allBefore + matched;
-
-          var sanitizedMatch = sanitized.slice(matchIndex, matchIndex + matchLength);
-
-          // Remember the previous foreground colour and bold (we know we don't use background colours)
-          var boldOn = null;
-          var prevColour = null;
-          var lastColourMatches = null;
-          ANSI_ESCAPE_MATCHER.lastIndex = 0;
-          while ((escapeMatch = ANSI_ESCAPE_MATCHER.exec(toEndOfMatch)) !== null) {
-            lastColourMatches = escapeMatch;
-          }
-          if (lastColourMatches !== null) {
-            boldOn = lastColourMatches[1].indexOf('1') === 0;
-            if (lastColourMatches[1] === '1') {
-              prevColour = null;
-            } else {
-              if (boldOn) {
-                prevColour = lastColourMatches[1][3];
-              } else {
-                prevColour = lastColourMatches[1][1];
-              }
-            }
-          }
-          finalString += before + utils.highlightLog(sanitizedMatch, prevColour, boldOn);
-
-          leftToParse = leftToParse.slice(mappedIndices[matchIndex + matchLength] - afterLastMatch);
-          afterLastMatch = mappedIndices[matchIndex + matchLength];
-
-          getNextMatch();
-        }
-
-        return finalString + leftToParse;
+      if (vm.textFilter.toMatch.length <= 0) {
+        return filtered;
       }
-      return filtered;
-    }
 
+      return matchAndHighlight(filtered);
+    }
   }
 
 })();

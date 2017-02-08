@@ -32,6 +32,7 @@
    * @constructor
    * @param {object} base64 - base64 service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.utilsService} utils - our utils service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $location - the Angular $location service
    * @param {object} $log - the Angular $log service
@@ -48,7 +49,7 @@
       $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
 
     // Comment this out to test log stream in gulp dev
-    this.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
+    // this.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
 
     this.autoScrollOn = true; // auto-scroll by default
 
