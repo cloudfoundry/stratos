@@ -14,7 +14,8 @@
         metric: '@',
         yLabel: '@',
         nodeName: '@',
-        metricLimit: '@'
+        metricLimit: '@',
+        noLegend: '@'
       },
       controller: UtilizationDonutController,
       controllerAs: 'utilizationDonutCtrl',
@@ -65,6 +66,8 @@
         donut: true,
         donutRatio: 0.99,
         showLabels: false,
+        showLegend: this.noLegend === 'true' ? false : true,
+
         x: function (d) {
           return d.label;
         },
@@ -106,7 +109,6 @@
         duration: 500
       }
     };
-
     this.chartApi = null;
 
     this.data = [
@@ -130,7 +132,7 @@
     updateUtilization: function () {
       var that = this;
 
-      return this.metricsModel.getMetrics(this.metric, this.filter )
+      return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
 
           var value = metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100;

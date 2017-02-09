@@ -16,104 +16,100 @@
         {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
       </dd>
 
-    <!--</dl>-->
-  <!--</gallery-card>-->
+      <div class="donuts" ng-if="!nodeCardCtrl.showDetail">
+        <div class="donut-div">
+          <span class="centered">CPU Utilization</span>
+          <utilization-donut metric="cpu_node_utilization_gauge"
+                             filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                             y-label="CPU Utilization (%)"
+                             node-name="{{nodeCardCtrl.nodeName}}"
+                             metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
+                             no-legend="true"
+          ></utilization-donut>
+        </div>
+        <div class="donut-div">
+          <span class="centered">Memory Utilization</span>
+          <utilization-donut metric="memory_node_utilization_gauge"
+                             filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                             y-label="Memory Utilization (%)"
+                             node-name="{{nodeCardCtrl.nodeName}}"
+                             metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
+                             no-legend="true"
+          ></utilization-donut>
+        </div>
+      </div>
+      <button ng-if="!nodeCardCtrl.showDetail" type="button" class="btn btn-primary" ng-click="nodeCardCtrl.expand(true)">Show More</button>
+      <div ng-if="nodeCardCtrl.showDetail">
+        <dd class="chart">
+          <div class="charts ">
+            <div class="donut-space">
+              <utilization-donut metric="cpu_node_utilization_gauge"
+                                 filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                                 y-label="CPU Utilization (%)"
+                                 node-name="{{nodeCardCtrl.nodeName}}"
+                                 metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
+              ></utilization-donut>
+            </div>
 
-  <!--<gallery-card class="namespace-card"-->
-                <!--card-data="nodeCardCtrl.getCardData()">-->
+            <div class="consume-space">
 
-    <!--<dl class="dl-horizontal">-->
+              <average-rate-graph metric="cpu_node_utilization_gauge"
+                                  filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                                  y-label="CPU Utilization (%)"
+                                  node-name="{{nodeCardCtrl.nodeName}}"
+              ></average-rate-graph>
+            </div>
+          </div>
+        </dd>
 
-      <dd class="chart">
-        <div class="charts ">
-          <div class="donut-space">
-            <utilization-donut metric="cpu_node_utilization_gauge"
-                               filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                               y-label="CPU Utilization (%)"
-                               node-name="{{nodeCardCtrl.nodeName}}"
-                               metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
-            ></utilization-donut>
+        <dd class="chart">
+          <div class="charts ">
+            <div class="donut-space">
+              <utilization-donut metric="memory_node_utilization_gauge"
+                                 filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                                 y-label="Memory Utilization (%)"
+                                 node-name="{{nodeCardCtrl.nodeName}}"
+                                 metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
+              ></utilization-donut>
+            </div>
+
+            <div class="consume-space">
+
+              <average-rate-graph metric="memory_node_utilization_gauge"
+                                  filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                                  y-label="Memory Utilization (%)"
+                                  node-name="{{nodeCardCtrl.nodeName}}"
+                                  metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
+              ></average-rate-graph>
+            </div>
+          </div>
+        </dd>
+
+        <dd class="chart">
+          <div>
+
+            <cumulative-chart metric="network_tx_cumulative"
+                              filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                              y-label="Data Transmitted"
+                              node-name="{{nodeCardCtrl.nodeName}}"
+            ></cumulative-chart>
           </div>
 
-          <div class="consume-space">
+        </dd>
 
-            <average-rate-graph metric="cpu_node_utilization_gauge"
-                                filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                                y-label="CPU Utilization (%)"
-                                node-name="{{nodeCardCtrl.nodeName}}"
-            ></average-rate-graph>
-          </div>
-        </div>
-      </dd>
-    </dl>
-  <!--</gallery-card>-->
+        <dd class="chart">
+          <div>
 
-  <!--<gallery-card class="namespace-card"-->
-                <!--card-data="nodeCardCtrl.getCardData()">-->
-
-    <!--<dl class="dl-horizontal">-->
-
-      <dd class="chart">
-        <div class="charts ">
-          <div class="donut-space">
-            <utilization-donut metric="memory_node_utilization_gauge"
-                               filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                               y-label="Memory Utilization (%)"
-                               node-name="{{nodeCardCtrl.nodeName}}"
-                               metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
-            ></utilization-donut>
+            <cumulative-chart metric="network_rx_cumulative"
+                              filter="{{ nodeCardCtrl.getNodeFilter() }}"
+                              y-label="Data Received"
+                              node-name="{{nodeCardCtrl.nodeName}}"
+            ></cumulative-chart>
           </div>
 
-          <div class="consume-space">
-
-            <average-rate-graph metric="memory_node_utilization_gauge"
-                                filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                                y-label="Memory Utilization (%)"
-                                node-name="{{nodeCardCtrl.nodeName}}"
-                                metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
-            ></average-rate-graph>
-          </div>
-        </div>
-      </dd>
-    <!--</dl>-->
-  <!--</gallery-card>-->
-
-  <!--<gallery-card class="namespace-card"-->
-                <!--card-data="nodeCardCtrl.getCardData()">-->
-
-    <!--<dl class="dl-horizontal">-->
-
-      <dd class="chart">
-        <div>
-
-          <cumulative-chart metric="network_tx_cumulative"
-                            filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                            y-label="Data Transmitted"
-                            node-name="{{nodeCardCtrl.nodeName}}"
-          ></cumulative-chart>
-        </div>
-
-      </dd>
-    <!--</dl>-->
-  <!--</gallery-card>-->
-
-  <!--<gallery-card class="namespace-card"-->
-                <!--card-data="nodeCardCtrl.getCardData()">-->
-
-    <!--<dl class="dl-horizontal">-->
-
-
-      <dd class="chart">
-        <div>
-
-          <cumulative-chart metric="network_rx_cumulative"
-                            filter="{{ nodeCardCtrl.getNodeFilter() }}"
-                            y-label="Data Received"
-                            node-name="{{nodeCardCtrl.nodeName}}"
-          ></cumulative-chart>
-        </div>
-
-      </dd>
+        </dd>
+      </div>
+      <button ng-if="nodeCardCtrl.showDetail" type="button" class="btn btn-primary" ng-click="nodeCardCtrl.expand(false)">Show Less</button>
     </dl>
   </gallery-card>
 

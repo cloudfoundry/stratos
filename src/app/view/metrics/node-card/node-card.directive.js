@@ -38,6 +38,7 @@
     this.metricsData = {};
     this.cpuLimit = 0;
     this.memoryLimit = 0;
+    this.showDetail = false;
 
     var interval = $interval(function () {
       that.updateCpuUtilization();
@@ -128,6 +129,10 @@
 
     getNodeFilter: function () {
       return this.metricsModel.makeNodeNameFilter(this.nodeName);
+    },
+
+    expand: function (expandDetail) {
+      this.showDetail = expandDetail;
     },
 
     hasMetrics: function (metricName) {
