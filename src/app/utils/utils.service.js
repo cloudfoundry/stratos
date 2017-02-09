@@ -255,7 +255,7 @@
     }
 
     function sanitizeString(string) {
-      return string.replace(/\./g, '_');
+      return string.replace(/\.|#/g, '_');
     }
 
     function getOemConfiguration() {
