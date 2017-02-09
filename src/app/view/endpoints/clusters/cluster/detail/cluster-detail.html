@@ -69,7 +69,7 @@
         Users
       </a>
     </li>
-    <li class="nav-item" ui-sref-active="active">
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>
         Firehose
       </a>
