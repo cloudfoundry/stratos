@@ -126,6 +126,10 @@
       });
     },
 
+    getNodeFilter: function () {
+      return this.metricsModel.makeNodeNameFilter(this.nodeName);
+    },
+
     hasMetrics: function (metricName) {
       return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
     },

@@ -95,7 +95,7 @@
           },
           dispatch: {
             renderEnd: function () {
-              var id = '#' + that.metric + '_' + that.nodeName + '_cchart';
+              var id = '#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName) + '_cchart';
               var selectedElement = d3.select(id + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 105;
@@ -126,7 +126,7 @@
     updateChart: function () {
       var that = this;
 
-      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
+      return this.metricsModel.getMetrics(this.metric, this.filter )
         .then(function (metricsData) {
           that.data = [
             {

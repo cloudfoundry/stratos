@@ -4,7 +4,8 @@
   angular
     .module('app.utils')
     .factory('app.utils.utilsService', utilsServiceFactory)
-    .filter('mbToHumanSize', mbToHumanSizeFilter);
+    .filter('mbToHumanSize', mbToHumanSizeFilter)
+    .filter('sanitizeString', sanitizeStringFilter);
 
   utilsServiceFactory.$inject = [
     '$q',
@@ -82,7 +83,8 @@
       extractCodeEngineError: extractCodeEngineError,
       getOemConfiguration: getOemConfiguration,
       getSensibleTime: getSensibleTime,
-      timeTickFormatter: timeTickFormatter
+      timeTickFormatter: timeTickFormatter,
+      sanitizeString: sanitizeString
     };
 
     /**
@@ -252,6 +254,10 @@
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
 
+    function sanitizeString(string) {
+      return string.replace(/\./g, '_');
+    }
+
     function getOemConfiguration() {
       return $window.env.OEM_CONFIG;
     }
@@ -264,6 +270,16 @@
   function mbToHumanSizeFilter(utilsService) {
     return function (input) {
       return utilsService.mbToHumanSize(input);
+    };
+  }
+
+  sanitizeStringFilter.$inject = [
+    'app.utils.utilsService'
+  ];
+
+  function sanitizeStringFilter(utilsService) {
+    return function (input) {
+      return utilsService.sanitizeString(input);
     };
   }
 
@@ -368,14 +384,14 @@
 
     return timeString;
   }
+
   /* eslint-enable complexity */
 
-  function timeTickFormatter(d){
-    console.log(arguments)
+  function timeTickFormatter(d) {
     var hours = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asHours());
     if (hours === 0) {
       var minutes = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
-      if (minutes === 0 ) {
+      if (minutes === 0) {
         return '>1 MIN';
       }
       return minutes + 'MIN';

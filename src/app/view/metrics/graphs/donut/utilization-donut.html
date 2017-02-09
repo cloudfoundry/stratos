@@ -2,7 +2,7 @@
   <nvd3 options="utilizationDonutCtrl.options"
         data="utilizationDonutCtrl.data"
         api="utilizationDonutCtrl.chartApi"
-        id="{{utilizationDonutCtrl.metric}}_{{utilizationDonutCtrl.nodeName}}_dnt"
+        id="{{utilizationDonutCtrl.metric}}_{{utilizationDonutCtrl.nodeName | sanitizeString}}_dnt"
   >
   </nvd3>
 </div>

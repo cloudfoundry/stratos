@@ -26,14 +26,16 @@
   UtilizationDonutController.$inject = [
     '$interval',
     '$scope',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.utils.utilsService'
   ];
 
-  function UtilizationDonutController($interval, $scope, modelManager) {
+  function UtilizationDonutController($interval, $scope, modelManager, utilsService) {
 
     var that = this;
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.utilsService = utilsService;
 
     this.metricData = {};
     this.updateUtilization();
@@ -128,7 +130,7 @@
     updateUtilization: function () {
       var that = this;
 
-      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
+      return this.metricsModel.getMetrics(this.metric, this.filter )
         .then(function (metricsData) {
 
           var value = metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100;
@@ -144,7 +146,7 @@
             cssClass = 'critical-title';
           }
 
-          var svg = d3.select('#' + that.metric + '_' + that.nodeName + '_dnt');
+          var svg = d3.select('#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName) + '_dnt');
           var donut = svg.selectAll('g.nv-pie').filter(
             function (d, i) {
               return i === 1;

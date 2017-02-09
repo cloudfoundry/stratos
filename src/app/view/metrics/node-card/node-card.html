@@ -28,7 +28,7 @@
         <div class="charts ">
           <div class="donut-space">
             <utilization-donut metric="cpu_node_utilization_gauge"
-                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               filter="{{ nodeCardCtrl.getNodeFilter() }}"
                                y-label="CPU Utilization (%)"
                                node-name="{{nodeCardCtrl.nodeName}}"
                                metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
@@ -38,7 +38,7 @@
           <div class="consume-space">
 
             <average-rate-graph metric="cpu_node_utilization_gauge"
-                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                filter="{{ nodeCardCtrl.getNodeFilter() }}"
                                 y-label="CPU Utilization (%)"
                                 node-name="{{nodeCardCtrl.nodeName}}"
             ></average-rate-graph>
@@ -57,7 +57,7 @@
         <div class="charts ">
           <div class="donut-space">
             <utilization-donut metric="memory_node_utilization_gauge"
-                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               filter="{{ nodeCardCtrl.getNodeFilter() }}"
                                y-label="Memory Utilization (%)"
                                node-name="{{nodeCardCtrl.nodeName}}"
                                metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
@@ -67,7 +67,7 @@
           <div class="consume-space">
 
             <average-rate-graph metric="memory_node_utilization_gauge"
-                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                filter="{{ nodeCardCtrl.getNodeFilter() }}"
                                 y-label="Memory Utilization (%)"
                                 node-name="{{nodeCardCtrl.nodeName}}"
                                 metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
@@ -87,7 +87,7 @@
         <div>
 
           <cumulative-chart metric="network_tx_cumulative"
-                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            filter="{{ nodeCardCtrl.getNodeFilter() }}"
                             y-label="Data Transmitted"
                             node-name="{{nodeCardCtrl.nodeName}}"
           ></cumulative-chart>
@@ -107,7 +107,7 @@
         <div>
 
           <cumulative-chart metric="network_rx_cumulative"
-                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            filter="{{ nodeCardCtrl.getNodeFilter() }}"
                             y-label="Data Received"
                             node-name="{{nodeCardCtrl.nodeName}}"
           ></cumulative-chart>

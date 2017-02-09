@@ -74,10 +74,11 @@
           },
           dispatch: {
             renderEnd: function () {
-              var selectedElement = d3.select('#' + that.metric + '_' + that.nodeName + ' svg');
+              var elementName = '#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName);
+              var selectedElement = d3.select( elementName + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
-                var width = parseInt(selectedElement.style('width').replace(/px/, '')) - 80;
-                var yAxis = d3.select('#' + that.metric + '_' + that.nodeName + ' svg .nv-y');
+                var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 80;
+                var yAxis = d3.select(elementName + ' svg .nv-y');
                 yAxis.attr('transform', 'translate(' + width + ',0)');
               }
 
@@ -136,8 +137,9 @@
         return transformedDp;
       }
 
-      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
+      return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
+
           that.data = [
             {
               color: '#60799d',

@@ -2,7 +2,7 @@
   <nvd3 options="cumulativeChartCtrl.options"
         data="cumulativeChartCtrl.data"
         api="cumulativeChartCtrl.chartApi"
-        id="{{cumulativeChartCtrl.metric}}_{{cumulativeChartCtrl.nodeName}}_cchart"
+        id="{{cumulativeChartCtrl.metric}}_{{cumulativeChartCtrl.nodeName | sanitizeString}}_cchart"
   >
   </nvd3>
 </diV>
