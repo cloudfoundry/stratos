@@ -4,7 +4,7 @@
     <div class="hsm-instance-header">
       <h3 translate>Instance : {{ instanceCtrl.id }}</h3>
       <app-state-icon class="action-target-state" state="instanceCtrl.stateIndicator"></app-state-icon>
-      <actions-menu class="application-nav-menu"
+      <actions-menu ng-if="smCtrl.hsmModel.canWrite()" class="application-nav-menu"
           actions="instanceCtrl.actions"
           menu-icon="helion-icon helion-icon-2x helion-icon-More"
           menu-position="actions-menu-right">

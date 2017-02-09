@@ -58,6 +58,12 @@
 
   angular.extend(ServiceManagerModel.prototype, {
 
+    // Can the user perform destructive/write opterations and/or create new instances in HSM?
+    // Implemtned as method here so we can base this off of the user in the future
+    canWrite: function () {
+      return false;
+    },
+
     getInstance: function (guid, id) {
       var that = this;
       return this.hsmApi.instance(guid, id).then(function (data) {
