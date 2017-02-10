@@ -10,10 +10,7 @@
   function ServiceManagerTile() {
     return {
       bindToController: {
-        service: '=',
-        connect: '=',
-        disconnect: '=',
-        unregister: '='
+        service: '='
       },
       controller: ServiceManagerTileController,
       controllerAs: 'tileCtrl',
@@ -26,7 +23,6 @@
     '$scope',
     '$state',
     'app.model.modelManager',
-    'app.api.apiManager',
     'app.utils.utilsService'
   ];
 
@@ -36,20 +32,12 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.api.apiManager} apiManager - the API management service
+   * @param {app.utils.utilsService} utils - the console utils service
    */
-  function ServiceManagerTileController($scope, $state, modelManager, apiManager) {
+  function ServiceManagerTileController($scope, $state, modelManager, utils) {
     var that = this;
 
     this.$state = $state;
-    // Need to fetch the total number of organizations and users. To avoid fetching all items, only fetch 1 and read
-    // list metadata total_results. In order to do this we must go via the api, not the model.
-    this.userApi = apiManager.retrieve('cloud-foundry.api.Users');
-    this.organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.serviceManagerModel = modelManager.retrieve('service-manager.model');
     this.instancesCount = null;
     this.servicesCount = null;
     this.userService = {};
@@ -80,21 +68,21 @@
     };
 
     function init() {
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var serviceManagerModel = modelManager.retrieve('service-manager.model');
       $scope.$watch(function () { return that.service; }, function (newVal) {
         if (!newVal) {
           return;
         }
-        that.userService = that.userServiceInstanceModel.serviceInstances[that.service.guid] || {};
-        that.serviceManagerModel.getModel(that.service.guid).then(function (model) {
+        that.userService = userServiceInstanceModel.serviceInstances[that.service.guid] || {};
+        serviceManagerModel.getModel(that.service.guid).then(function (model) {
           that.instancesCount = model.instances.length;
           that.servicesCount = model.services.length;
         });
       });
     }
 
-    // Ensure the parent state is fully initialised before we start our own init
-    //utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
-    init();
+    utils.chainStateResolve('sm.tiles', $state, init);
   }
 
   angular.extend(ServiceManagerTileController.prototype, {

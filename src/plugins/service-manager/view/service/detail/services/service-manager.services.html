@@ -43,7 +43,7 @@
           inline-message-link="{ ref: neil.route, params: { guid: guid } }"
           table-inline-status="{{ endpoint.error.status }}">
         <td>
-          <a ng-click="servicesCtrl.open(endpoint)">{{ endpoint.id }}</a>
+          <a ui-sref="sm.endpoint.service.detail({id: endpoint.id})">{{ endpoint.id }}</a>
         </td>
         <td>{{ endpoint.name }}</td>
         <td>
@@ -65,11 +65,4 @@
       </tr>
       </tbody>
     </table>
-
-<!--
-
-  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
-    <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
-  </div>
-  -->
 </div>

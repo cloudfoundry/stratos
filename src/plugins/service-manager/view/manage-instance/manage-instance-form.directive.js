@@ -181,13 +181,17 @@
       this.sdlChanged();
     },
 
+    isParamRequired: function (param) {
+      return param.required && !param.generator && !(param.default || _.isString(param.default));
+    },
+
     sdlChanged: function () {
       var that = this;
       if (this.data.sdl) {
         this.hsmModel.getServiceSdl(this.data.guid, this.service.id, this.data.product, this.data.sdl).then(function (sdl) {
           that.parameters = sdl.parameters;
           _.each(that.parameters, function (param) {
-            param.notSupplied = param.required && !param.generator && !param.secret && !param.default;
+            param.notSupplied = that.isParamRequired(param);
           });
           that.showAllParams(false);
         });
@@ -200,7 +204,7 @@
       var that = this;
       if (!showAll) {
         that.shownParams = _.filter(that.parameters, function (param) {
-          return param.required && !param.generator && !param.secret && !param.default;
+          return that.isParamRequired(param);
         });
       } else {
         that.shownParams = that.parameters;

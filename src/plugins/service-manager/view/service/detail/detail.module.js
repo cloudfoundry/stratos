@@ -48,6 +48,5 @@
       that.removeStateChangeListener();
     });
 
-    this.hsmModel.getInstances($state.params.guid);
   }
 })();

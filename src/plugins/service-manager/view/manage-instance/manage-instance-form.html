@@ -121,7 +121,7 @@
     <div ng-repeat="p in ciFormCtrl.shownParams" class="form-group" focusable-input>
       <label class="control-label" translate>{{p.name}}</label>
       <input
-        type="text"
+        type="{{ p.secret ? 'password' : 'text' }}"
         class="form-control"
         ng-model="ciFormCtrl.data.params[p.name]"
         placeholder="{{p.default || p.example}}"

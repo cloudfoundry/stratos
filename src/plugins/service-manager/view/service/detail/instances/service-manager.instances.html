@@ -29,24 +29,17 @@
       <tbody>
       <tr ng-repeat="endpoint in svcsCtrl.stTableInstances track by endpoint.instance_id">
         <td >
-          <a ng-click="instancesCtrl.open(endpoint)">{{ endpoint.instance_id }}</a>
+          <a ui-sref="sm.endpoint.instance.components({id: endpoint.instance_id})">{{ endpoint.instance_id }}</a>
         </td>
-        <td ng-switch="endpoint.state" class="endpoint-table-connected">
-          <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-switch-when="running"></span>
-          <div ng-switch-when="error"
-                uib-popover="{{ 'Disconnected' | translate }}"
+        <td class="endpoint-table-connected" ng-init="state = smCtrl.hsmModel.instanceStateIndicator(endpoint.state)">
+          <bounce-spinner classes="bounce-spinner-sm" ng-if="state === 'busy'"></bounce-spinner>
+          <span ng-if="state !== 'busy'"
+                class="helion-icon helion-icon-lg {{ state | appStateIcon | smallToLargeIcon}}"
+                uib-popover="{{ endpoint.state }}"
                 popover-trigger="'mouseenter'"
                 popover-placement="top-left"
-                popover-popup-delay="1000">
-            <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
-          </div>
-          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                ng-switch-when="expired"></span>
-          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                ng-switch-when="pending"></span>
-          <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                ng-switch-when="complicated"></span>
+                popover-popup-delay="1000"
+                popover-class="first-letter-uppercase"></span>
         </td>
 
         <td>

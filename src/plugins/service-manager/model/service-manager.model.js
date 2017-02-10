@@ -12,19 +12,22 @@
 
   registerServiceManagerModel.$inject = [
     '$q',
+    '$timeout',
     'app.model.modelManager',
     'app.api.apiManager',
     'app.event.eventService'
   ];
 
-  function registerServiceManagerModel($q, modelManager, apiManager, eventService) {
-    modelManager.register('service-manager.model', new ServiceManagerModel($q, apiManager, modelManager, eventService));
+  function registerServiceManagerModel($q, $timeout, modelManager, apiManager, eventService) {
+    modelManager.register('service-manager.model', new ServiceManagerModel($q, $timeout, apiManager, modelManager,
+      eventService));
   }
 
   /**
    * @memberof cloud-foundry.model.hce
    * @name ServiceManagerModel
    * @param {object} $q - the Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the application event service
@@ -35,8 +38,9 @@
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function ServiceManagerModel($q, apiManager, modelManager, eventService) {
+  function ServiceManagerModel($q, $timeout, apiManager, modelManager, eventService) {
     this.$q = $q;
+    this.$timeout = $timeout;
     this.apiManager = apiManager;
     this.eventService = eventService;
     this.modelManager = modelManager;
@@ -58,16 +62,49 @@
 
   angular.extend(ServiceManagerModel.prototype, {
 
-    // Can the user perform destructive/write opterations and/or create new instances in HSM?
-    // Implemtned as method here so we can base this off of the user in the future
+    // Can the user perform destructive/write operations and/or create new instances in HSM?
+    // Implemented as method here so we can base this off of the user in the future
     canWrite: function () {
       return false;
+    },
+
+    instanceStateIndicator: function (instanceState) {
+      switch (instanceState) {
+        case 'running':
+          return 'ok';
+        case 'creating':
+          return 'busy';
+        case 'deleting':
+          return 'busy';
+        case 'modifying':
+          return 'busy';
+        case 'deleted':
+          return 'deleted';
+        case 'degraded':
+          return 'warning';
+        case 'failed':
+          return 'error';
+        case '404':
+          return 'error';
+      }
+
+      return 'tentative';
     },
 
     getInstance: function (guid, id) {
       var that = this;
       return this.hsmApi.instance(guid, id).then(function (data) {
         that.instance = data;
+        // Also update the root instances collection
+        var instances = _.get(that, 'model[' + guid + '].instances');
+        if (instances) {
+          for (var i = 0; i < instances.length; i++) {
+            if (instances[i].instance_id === data.instance_id) {
+              instances[i] = data;
+              break;
+            }
+          }
+        }
         return data;
       });
     },
@@ -81,7 +118,7 @@
       } else {
         loadPromise = this.hsmApi.instances(guid).then(function (data) {
           that.model[guid] = that.model[guid] || {};
-          that.model[guid].instances = data;
+          that.model[guid].instances = _.sortBy(data, 'instance_id');
           that._checkUpgrade(guid);
           return data;
         });
@@ -97,7 +134,7 @@
       var that = this;
       var loadPromise = this.hsmApi.services(guid).then(function (data) {
         that.model[guid] = that.model[guid] || {};
-        that.model[guid].services = data;
+        that.model[guid].services = _.sortBy(data, 'id');
         return data;
       });
       return this.model[guid] && this.model[guid].services && !noCache ? this.$q.resolve(this.model[guid].services) : loadPromise;
@@ -128,21 +165,48 @@
     },
 
     createInstance: function (guid, id, productVersion, sdlVersion, instanceId, params) {
-      return this.hsmApi.createInstance(guid, id, productVersion, sdlVersion, instanceId, params);
+      var that = this;
+      return this.hsmApi.createInstance(guid, id, productVersion, sdlVersion, instanceId, params)
+        .then(function (response) {
+          // Async update the model instances collection
+          that.getInstance(guid, response.instance_id).then(function (instance) {
+            that.model[guid].instances.push(instance);
+          });
+          return response;
+        })
+        .catch(function (response) {
+          if (response.status === 500) {
+            // Sometimes the request can fail but the actual action can start. In these cases update the core instances
+            // collection just in case
+            that.$timeout(function () {
+              that.getInstances(guid);
+            }, 5000);
+          }
+          return that.$q.reject(response);
+        });
     },
 
     deleteInstance : function (guid, id) {
-      return this.hsmApi.deleteInstance(guid, id);
+      var that = this;
+      return this.hsmApi.deleteInstance(guid, id).then(function (response) {
+        // Update the model instances collection
+        _.remove(that.model[guid].instances, { instance_id: id });
+        return response;
+      });
     },
 
     configureInstance: function (serviceManagerGuid, instance, params) {
-      return this.hsmApi.configureInstance(serviceManagerGuid, instance, params);
+      var that = this;
+      return this.hsmApi.configureInstance(serviceManagerGuid, instance, params).then(function (response) {
+        // Async update the model instances collection
+        that.getInstance(serviceManagerGuid, instance.instance_id);
+        return response;
+      });
     },
 
     getHsmEndpoints: function () {
       var userServices = this.modelManager.retrieve('app.model.serviceInstance.user');
-      var hsmServices = _.filter(userServices.serviceInstances, {cnsi_type: 'hsm'});
-      return hsmServices;
+      return _.filter(userServices.serviceInstances, {cnsi_type: 'hsm'});
     },
 
     getUpgradeCount: function () {
