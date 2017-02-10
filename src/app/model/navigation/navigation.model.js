@@ -216,6 +216,11 @@
       _.each(sorted, function (item) {
         that.push(item);
       });
+
+      item.svgIcon = item.icon.indexOf('svg://') === 0;
+      if (item.svgIcon) {
+        item.icon = '/svg/' + item.icon.substr(6);
+      }
       return item;
     },
 

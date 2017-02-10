@@ -3,7 +3,10 @@
       ng-if="!menuItem.hidden"
       ng-class="{ 'navitem-bottom': menuItem.alignBottom, active: navigationCtrl.navigationModel.menu.currentState === menuItem.baseState }">
     <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.href" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">
-      <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
+      <div class="navitem-icon">
+        <i ng-if="!menuItem.svgIcon" class="helion-icon {{ menuItem.icon }}"></i>
+        <svg-image ng-if="menuItem.svgIcon" src="{{menuItem.icon}}"></svg-image>
+      </div>
       <span class="navitem-label" >{{ menuItem.text }}</span>
     </a>
     <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.onClick" ng-click="menuItem.onClick()">

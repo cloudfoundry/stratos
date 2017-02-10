@@ -85,7 +85,7 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', gettext('Service Manager'), 1, 'helion-icon-System');
+      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', gettext('Service Manager'), 1, 'svg://Service_manager.svg');
       //
       // Hide to start with until we know if we have HSM Services connected
       this.menuItem.hidden = true;
