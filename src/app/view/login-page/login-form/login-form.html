@@ -1,6 +1,6 @@
 <form name="loginForm" role="form" class="form-stacked login-form center-block"
   ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''">
-  <h1 class="text-center">{{ OEM_CONFIG.PRODUCT_NAME }} {{ OEM_CONFIG.PRODUCT_VERSION }}</h1>
+  <h1 class="text-center" translate>login.title</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>login.username</label>
     <input type="text" class="form-control"

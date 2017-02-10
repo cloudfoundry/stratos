@@ -11,10 +11,32 @@
   // Consts
   var PLUGIN_NAME = 'gulp-i18n';
 
+  //var REPLACE_REGEX = /\[\[:@(.*)]]/g;
+  var REPLACE_REGEX = /\[\[(@:.*?)\]\]/g;
+
   module.exports = function (prettyPrint) {
     // Translations
     var translations = {};
     var firstFiles = {};
+
+    function replace(obj, current) {
+      _.each(current, function (v, k) {
+        if (_.isObject(v)) {
+          replace(obj, v);
+        } else {
+          // Should be simple key -> value
+          var productKeys = v.match(REPLACE_REGEX);
+          if (productKeys && productKeys.length) {
+            _.each(productKeys, function (r) {
+              var i18nKey = r.substr(4);
+              i18nKey = i18nKey.substr(0, i18nKey.length - 2);
+              v = v.replace(r, _.get(obj, i18nKey));
+              current[k] = v;
+            });
+          }
+        }
+      });
+    }
 
     function endStream(cb) {
       var that = this;
@@ -23,6 +45,7 @@
         return cb();
       }
       _.each(translations, function (v, locale) {
+        replace(v, v);
         var res = prettyPrint ? JSON.stringify(v, undefined, 2) : JSON.stringify(v);
         var file = new gutil.File({
           cwd: firstFiles[locale].cwd,
@@ -30,6 +53,8 @@
           path: path.join(firstFiles[locale].base, 'locale-' + locale + '.json'),
           contents: new Buffer(res)
         });
+
+       // console.log(res);
         that.push(file);
       });
 

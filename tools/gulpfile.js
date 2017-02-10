@@ -47,6 +47,7 @@
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
+  var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
 
   var usePlumber = true;
   var server;
@@ -270,7 +271,9 @@
   });
 
   gulp.task('i18n', function () {
-    return gulp.src(config.i18nFiles)
+    var i18nSource = config.i18nFiles;
+    i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
+    return gulp.src(i18nSource)
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
