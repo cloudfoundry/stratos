@@ -14,7 +14,7 @@
   .delivery-log-trigger-build-commits {
     flex: 1 1 auto;
     display: flex;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     table {
       th {
