@@ -20,8 +20,8 @@
     <td>
       <div ng-class="{'sdl-latest-version' : sdl.is_latest}" class="upgrade-version" ng-repeat="sdl in upgrade.versions track by sdl.sdl_version">
         <span ng-class="{'sdl-upgrade-version': sdl.isUpgrade}">{{ sdl.sdl_version}}</span>
-        <span ng-if="sdl.isLatest">(Latest)</span>
-        <span ng-if="sdl.isCurrent">(Current)</span>
+        <span ng-if="sdl.isLatest" translate>(Latest)</span>
+        <span ng-if="sdl.isCurrent" translate>(Current)</span>
       </div>
     </td>
   </tr>

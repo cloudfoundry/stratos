@@ -130,17 +130,17 @@
     this.interestingState = false;
 
     this.actions = [
-      { id: 'upgrade', name: 'Upgrade Instance',
+      { id: 'upgrade', name: gettext('Upgrade Instance'),
         execute: function () {
           return that.upgradeInstance(that.id);
         }
       },
-      { id: 'configure', name: 'Configure Instance',
+      { id: 'configure', name: gettext('Configure Instance'),
         execute: function () {
           return that.configureInstance(that.id);
         }
       },
-      { id: 'delete', name: 'Delete Instance',
+      { id: 'delete', name: gettext('Delete Instance'),
         execute: function () {
           return that.deleteInstance(that.id);
         }
@@ -275,12 +275,12 @@
       var dialog = this.confirmDialog({
         title: gettext('Delete Instance'),
         description: function () {
-          return 'Are you sure that you want to delete instance "' + id + '" ?';
+          return gettext('Are you sure that you want to delete instance "' + id + '" ?');
         },
         moment: moment,
         buttonText: {
           yes: gettext('Delete'),
-          no: 'Cancel'
+          no: gettext('Cancel')
         }
       });
       dialog.result.then(function () {

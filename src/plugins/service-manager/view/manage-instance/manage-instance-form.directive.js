@@ -81,7 +81,6 @@
     }
 
     if (this.data.mode === 'upgrade') {
-      //this.serviceChanged(this.data.productVersion, this.data.sdlVersion);
       this.getUpgradeMetadata();
     }
 
@@ -104,13 +103,21 @@
         deferred.reject(reader.result);
       };
 
-      reader.readAsText(file, encoding);
+      try {
+        reader.readAsText(file, encoding);
+      } catch (exception) {
+        deferred.reject(exception);
+      }
+
       return deferred.promise;
     },
 
     read: function () {
       var that = this;
       this.readInstanceFile(this.instanceFile).then(function (text) {
+        // Possible improvement - Add general error handling + messages to cover unexpected file content/syntax or
+        // missing required properties. At the moment these silently fail.
+
         // Exceptions will get caught later down the promise chain
         var json = angular.fromJson(text);
         if (json.instance_id) {

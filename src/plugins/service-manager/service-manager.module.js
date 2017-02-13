@@ -1,15 +1,6 @@
 (function () {
   'use strict';
 
-  // angular
-  //   .module('service-manager', [
-  //     'cloud-foundry.api',
-  //     'cloud-foundry.event',
-  //     'cloud-foundry.model',
-  //     'cloud-foundry.view'
-  //   ])
-  //   .run(register);
-
   angular
     .module('service-manager', [
       'service-manager.api',
