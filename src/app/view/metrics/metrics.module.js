@@ -57,8 +57,8 @@
   angular.extend(Metrics.prototype, {
 
     onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('metrics', 'metrics.dashboard', gettext('Kubernetes'), 4, 'helion-icon-Resources');
+      // var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      // menu.addMenuItem('metrics', 'metrics.dashboard', gettext('Kubernetes'), 4, 'helion-icon-Resources');
       this.initialized.resolve();
     }
 
