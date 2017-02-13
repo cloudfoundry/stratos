@@ -159,6 +159,11 @@
               // Only Console admins can see HSM endpoints
               hide = !userAccount.isAdmin();
               break;
+            case 'hcp':
+              endpoint.type = 'Helion Control Plane';
+              // Only Console admins can see HCP endpoints
+              hide = !userAccount.isAdmin();
+              break;
             default:
               endpoint.type = gettext('Unknown');
           }

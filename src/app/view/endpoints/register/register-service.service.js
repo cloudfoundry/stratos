@@ -87,6 +87,14 @@
                         step.nameOfUrlInput = 'hsmUrl';
                         step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
                         break;
+                      case 'hcp':
+                        scope.endpoint = 'Control Plane';
+                        step.product = 'Control Plane';
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
+                        step.nameOfNameInput = 'hcpName';
+                        step.nameOfUrlInput = 'hcpUrl';
+                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
+                        break;
                       default:
                         step.product = gettext('Endpoint');
                         step.title = gettext('Register Endpoint');
