@@ -155,7 +155,7 @@
               endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
               break;
             case 'hsm':
-              endpoint.type = 'Helion Service Manager';
+              endpoint.type = utilsService.getOemConfiguration().SERVICE_MANAGER;
               // Only Console admins can see HSM endpoints
               hide = !userAccount.isAdmin();
               break;

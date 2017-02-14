@@ -46,12 +46,12 @@
       <li class="media register-type-hsm">
         <div class="media-left media-middle">
           <div class="media-object">
-            <img ng-src="/svg/CodeEngine_Black.svg"/>
+            <svg-image src="/svg/Service_manager.svg"></svg-image>
           </div>
         </div>
         <div class="media-body">
-          <h4 class="media-heading" translate>Service Manager</h4>
-          <p translate>Service Manage allows you to view, manage and upgrade the services deployed in the Control Plane</p>
+          <h4 class="media-heading" translate>{{ OEM_CONFIG.SERVICE_MANAGER }}</h4>
+          <p translate>{{ OEM_CONFIG.SERVICE_MANAGER }} allows you to view the services deployed in the Control Plane</p>
           <div class="media-right pull-right">
             <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hsm';wizardCtrl.next()" translate>
               Register
