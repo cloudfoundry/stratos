@@ -287,6 +287,7 @@
     checkForUpgrades: function () {
       var that = this;
       var promises = [];
+      this.upgrades = {};
 
       _.each(this.getHsmEndpoints(), function (hsm) {
         var p = that.getInstances(hsm.guid).then(function (data) {

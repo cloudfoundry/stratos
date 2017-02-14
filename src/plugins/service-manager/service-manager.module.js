@@ -15,20 +15,22 @@
     '$location',
     'app.event.eventService',
     'app.model.modelManager',
-    'app.view.notificationsService'
+    'app.view.notificationsService',
+    'app.utils.utilsService'
   ];
 
-  function register($state, $location, eventService, modelManager, notificationService) {
-    return new ServiceManager($state, $location, eventService, modelManager, notificationService);
+  function register($state, $location, eventService, modelManager, notificationService, utils) {
+    return new ServiceManager($state, $location, eventService, modelManager, notificationService, utils);
   }
 
-  function ServiceManager($state, $location, eventService, modelManager, notificationService) {
+  function ServiceManager($state, $location, eventService, modelManager, notificationService, utils) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
     this.notificationService = notificationService;
+    this.utils = utils;
     this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });
@@ -76,7 +78,8 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', gettext('Service Manager'), 1, 'svg://Service_manager.svg');
+      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', this.utils.getOemConfiguration().SERVICE_MANAGER, 1,
+        'svg://Service_manager.svg');
       //
       // Hide to start with until we know if we have HSM Services connected
       this.menuItem.hidden = true;
