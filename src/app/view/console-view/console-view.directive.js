@@ -3,21 +3,21 @@
 
   angular
     .module('app.view')
-    .directive('consoleView', ConsoleView);
+    .directive('consoleView', consoleView);
 
-  ConsoleView.$inject = [
+  consoleView.$inject = [
     'app.basePath'
   ];
 
   /**
-   * @namespace app.view.ConsoleView
+   * @namespace app.view.consoleView
    * @memberof app.view
-   * @name ConsoleView
+   * @name consoleView
    * @description A console view directive
    * @param {string} path - the application base path
    * @returns {object} The console view directive definition object
    */
-  function ConsoleView(path) {
+  function consoleView(path) {
     return {
       templateUrl: path + 'view/console-view/console-view.html',
       controller: ConsoleViewController,
