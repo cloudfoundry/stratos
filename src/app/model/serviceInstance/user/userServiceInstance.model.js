@@ -97,6 +97,8 @@
         });
     },
 
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 11, left in to improve readability.
     /**
      * @function list
      * @memberof app.model.serviceInstance.user.UserServiceInstance
@@ -151,6 +153,7 @@
       });
 
     },
+    /* eslint-enable complexity */
 
     /**
      * @function onConnect
