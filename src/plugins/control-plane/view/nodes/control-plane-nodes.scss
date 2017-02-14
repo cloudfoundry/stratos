@@ -1,0 +1,28 @@
+.nodes-piechart {
+
+  .ring-chart-ok{
+    background-color: $nodes-piechart-ready !important;
+  }
+  .arcOk{
+    stroke: $nodes-piechart-ready;
+    stroke-width: 6px;
+  }
+
+  .ring-chart-unknown{
+    background-color: $nodes-piechart-unknown !important;
+  }
+  .arcUnknown{
+    stroke: $nodes-piechart-unknown;
+    stroke-width: 6px;
+  }
+
+
+  .ring-chart-warning{
+    background-color: $nodes-piechart-not-ready !important;
+  }
+  .arcWarning{
+    stroke: $nodes-piechart-not-ready;
+    stroke-width: 6px;
+  }
+
+}

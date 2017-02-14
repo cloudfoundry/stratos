@@ -72,3 +72,8 @@ $detail-view-transition-duration:         0.5s !default;
 $detail-view-shrink-transition-duration:  0.25s !default;
 $detail-view-width:                       75% !default;
 $detail-view-inset:                       24px !default;
+
+// Metrics
+$nodes-piechart-ready: $turquoise;
+$nodes-piechart-not-ready: $charcoal;
+$nodes-piechart-unknown:  #ffd042;

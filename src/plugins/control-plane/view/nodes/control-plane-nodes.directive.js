@@ -2,15 +2,14 @@
   'use strict';
 
   angular
-    .module('service-manager.view.tiles')
-    .directive('controlPlaneNodes', ControlPlaneNodes);
+    .module('control-plane.view.tiles')
+    .directive('controlPlaneNodes', controlPlaneNodes);
 
-  ControlPlaneNodes.$inject = [];
-
-  function ControlPlaneNodes() {
+  function controlPlaneNodes() {
     return {
       bindToController: {
-        nodes: '='
+        nodes: '=',
+        guid: '@'
       },
       controller: ControlPlaneNodesController,
       controllerAs: 'controlPlaneNodesCtrl',
@@ -20,41 +19,58 @@
   }
 
   ControlPlaneNodesController.$inject = [
-    '$scope'
+    '$interval',
+    '$scope',
+    'app.model.modelManager',
+    'app.utils.utilsService'
   ];
 
-  /**
-   * @name ControlPlaneNodesController
-   * @constructor
-   */
-  function ControlPlaneNodesController($scope) {
+  function ControlPlaneNodesController($interval, $scope, modelManager, utilsService) {
+
     var that = this;
 
-
-    this.labels = {
-      ok: 'READY',
-      unknown: 'NOT READY',
-      critical: 'Unknown',
-      total: 'NODES',
-      totalOne: 'NODE'
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.utilsService = utilsService;
+    this.data = {
+      ok: 0,
+      unknown: 0,
+      warning: 0
     };
 
-    this.data = {ok: 0, unknown: 0, critical: 0}
-    function _getInstances(instanceState) {
+    this.labels = {
+      ok: 'Ready',
+      unknown: 'Unknown',
+      warning: 'Not Ready',
+      total: 'Nodes',
+      totalOne: 'Node'
+    };
+
+    function getCount(label) {
       return _.reduce(that.nodes, function (sum, node) {
-        return node.spec.status === instanceState ? sum + 1 : sum;
+        return node.spec.status === label ? sum + 1 : sum;
       }, 0);
     }
+
+    function updateChart() {
+
+      _.each(that.labels, function (label, key) {
+        if (key === 'total' || key === 'totalOne') {
+          return;
+        }
+        that.data[key] = getCount(label);
+      });
+    }
+
+    $scope.$on('$destroy', function () {
+      $interval.cancel(interval);
+    });
 
     $scope.$watch(function () {
       return that.nodes;
     }, function () {
-      that.data = {
-        ok: _getInstances('Ready'),
-        unknown: _getInstances('Not Ready'),
-        critical: _getInstances('Unknown')
-      };
+      updateChart();
     });
+
   }
 
   angular.extend(ControlPlaneNodesController.prototype, {});

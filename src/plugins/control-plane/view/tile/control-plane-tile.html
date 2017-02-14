@@ -12,13 +12,10 @@
     <dt translate>SERVICE INSTANCES</dt>
     <dd class="cluster-tile-account"translate>
       {{ controlPlaneTileCtrl.instances.length }}</dd>
-    <dt translate>Total Nodes</dt>
-    <dd class="cluster-tile-account"translate>
-      {{ controlPlaneTileCtrl.nodes.length }}</dd>
-    <dt class="indent" translate>Kubernetes Nodes</dt>
+    <dt  translate>Kubernetes Nodes</dt>
     <dd class="cluster-tile-account"translate>
       {{ controlPlaneTileCtrl.getKubernetesNodeCount() }}</dd>
-    <dt class="indent" translate>GlusterFS Nodes</dt>
+    <dt  translate>GlusterFS Nodes</dt>
     <dd class="cluster-tile-account"translate>
       {{ controlPlaneTileCtrl.getGlusterFsNodeCount() }}</dd>
   </dl>
@@ -28,5 +25,5 @@
     {{ ' to this endpoint.' | translate }}<br>
     <span translate="">ENDPOINT URL</span> {{controlPlaneTileCtrl.service.api_endpoint.Host}}<br>
   </div>
- <control-plane-nodes class="centered" nodes="controlPlaneTileCtrl.nodes"></control-plane-nodes>
+ <control-plane-nodes class="centered" nodes="controlPlaneTileCtrl.nodes" guid="{{service.guid}}"></control-plane-nodes>
 </gallery-card>
