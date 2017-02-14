@@ -12,6 +12,7 @@ type CNSIType string
 const (
 	CNSIHCF CNSIType = "hcf"
 	CNSIHCE CNSIType = "hce"
+	CNSIHSM CNSIType = "hsm"
 )
 
 // CNSIRecord - <TBD>

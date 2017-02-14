@@ -28,6 +28,10 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 			clientID = p.Config.HCEClient
 		}
 
+		if cnsi.CNSIType == cnsis.CNSIHSM {
+			clientID = p.Config.HSMClient
+		}
+
 		if got401 || expTime.Before(time.Now()) {
 			refreshedTokenRec, err := p.refreshToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {

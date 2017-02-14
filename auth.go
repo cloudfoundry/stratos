@@ -219,6 +219,11 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 		clientID = p.Config.HCEClient
 	}
 
+	if cnsiRecord.CNSIType == cnsis.CNSIHSM {
+		clientID = p.Config.HSMClient
+	}
+
+
 	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, clientID, "", tokenEndpoint)
 
 	if err != nil {

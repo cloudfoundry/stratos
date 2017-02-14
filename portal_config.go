@@ -10,6 +10,7 @@ type portalConfig struct {
 	ConsoleClient               string   `ucp:"CONSOLE_CLIENT"`
 	ConsoleClientSecret         string   `ucp:"CONSOLE_CLIENT_SECRET"`
 	HCEClient                   string   `ucp:"HCE_CLIENT"`
+	HSMClient                   string   `ucp:"HSM_CLIENT"`
 	HCFClient                   string   `ucp:"HCF_CLIENT"`
 	HCFClientSecret             string   `ucp:"HCF_CLIENT_SECRET"`
 	HCPIdentityScheme           string   `ucp:"HCP_IDENTITY_SCHEME"`

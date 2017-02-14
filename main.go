@@ -428,6 +428,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Register clusters
 	adminGroup.POST("/register/hcf", p.registerHCFCluster)
 	adminGroup.POST("/register/hce", p.registerHCECluster)
+	adminGroup.POST("/register/hsm", p.registerHSMEndpoint)
 
 	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
 	adminGroup.POST("/unregister", p.unregisterCluster)

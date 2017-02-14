@@ -56,6 +56,7 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	// initialize the Endpoints maps
 	s.Endpoints[cnsis.CNSIHCF] = make(map[string]*Endpoint)
 	s.Endpoints[cnsis.CNSIHCE] = make(map[string]*Endpoint)
+	s.Endpoints[cnsis.CNSIHSM] = make(map[string]*Endpoint)
 
 	// get the CNSI Endpoints
 	cnsiList, _ := p.buildCNSIList(c)

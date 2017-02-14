@@ -234,7 +234,8 @@ func GetCNSIType(cnsi string) (CNSIType, error) {
 	switch cnsi {
 	case
 		"hcf",
-		"hce":
+		"hce",
+		"hsm":
 		return CNSIType(cnsi), nil
 	}
 	return newType, errors.New("Invalid string passed to GetCNSIType.")

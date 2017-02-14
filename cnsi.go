@@ -29,6 +29,12 @@ type hceInfo struct {
 	AuthorizationEndpoint string `json:"auth_endpoint"`
 }
 
+type hsmInfo struct {
+	AuthorizationEndpoint string `json:"auth_url"`
+}
+
+type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (cnsis.CNSIRecord, error);
+
 func isSSLRelatedError(err error) (bool, string) {
 	if urlErr, ok := err.(*url.Error); ok {
 		if x509Err, ok := urlErr.Err.(x509.UnknownAuthorityError); ok {
@@ -45,6 +51,18 @@ func isSSLRelatedError(err error) (bool, string) {
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
+	return p.registerEndpoint(c, getHCFv2Info)
+}
+
+func (p *portalProxy) registerHCECluster(c echo.Context) error {
+	return p.registerEndpoint(c, getHCEInfo)
+}
+
+func (p *portalProxy) registerHSMEndpoint(c echo.Context) error {
+	return p.registerEndpoint(c, getHSMInfo)
+}
+
+func (p *portalProxy) registerEndpoint(c echo.Context, fetchInfo InfoFunc) error {
 	logger.Debug("registerHCFCluster")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
@@ -81,7 +99,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		)
 	}
 
-	v2InfoResponse, err := getHCFv2Info(apiEndpoint, skipSSLValidation)
+	newCNSI, err := fetchInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
 		if ok, detail := isSSLRelatedError(err); ok {
 			return newHTTPShadowError(
@@ -99,90 +117,9 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	guid := uuid.NewV4().String()
 
-	// save data to temporary map
-	newCNSI := cnsis.CNSIRecord{
-		Name:                   cnsiName,
-		CNSIType:               cnsis.CNSIHCF,
-		APIEndpoint:            apiEndpointURL,
-		TokenEndpoint:          v2InfoResponse.TokenEndpoint,
-		AuthorizationEndpoint:  v2InfoResponse.AuthorizationEndpoint,
-		DopplerLoggingEndpoint: v2InfoResponse.DopplerLoggingEndpoint,
-		SkipSSLValidation:      skipSSLValidation,
-	}
-
-	err = p.setCNSIRecord(guid, newCNSI)
-	if err != nil {
-		return err
-	}
-
-	// set the guid on the object so it's returned in the response
-	newCNSI.GUID = guid
-	jsonString, err := json.Marshal(newCNSI)
-	if err != nil {
-		return err
-	}
-
-	//c.String(http.StatusCreated, guid)
-	c.Response().WriteHeader(http.StatusCreated)
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-
-	return nil
-}
-
-func (p *portalProxy) registerHCECluster(c echo.Context) error {
-	logger.Debug("registerHCECluster")
-	cnsiName := c.FormValue("cnsi_name")
-	apiEndpoint := c.FormValue("api_endpoint")
-	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
-	if err != nil {
-		logger.Errorf("Failed to parse skip_ssl_validation value: %s", err)
-		// default to false
-		skipSSLValidation = false
-	}
-
-	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Needs CNSI Name and API Endpoint",
-			"CNSI Name or Endpoint were not provided when trying to register an HCE Cluster")
-	}
-
-	apiEndpointURL, err := url.Parse(apiEndpoint)
-	if err != nil {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get API Endpoint",
-			"Failed to get API Endpoint: %v", err)
-	}
-
-	infoResponse, err := getHCEInfo(apiEndpoint, skipSSLValidation)
-	if err != nil {
-		if ok, detail := isSSLRelatedError(err); ok {
-			return newHTTPShadowError(
-				http.StatusForbidden,
-				"SSL error - " + detail,
-				"There is a problem with the server Certificate -  %s",
-				detail)
-		}
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get endpoint 'info'",
-			"Failed to get api endpoint 'info': %v",
-			err)
-	}
-
-	guid := uuid.NewV4().String()
-
-	// save data to temporary map
-	newCNSI := cnsis.CNSIRecord{
-		Name:                  cnsiName,
-		CNSIType:              cnsis.CNSIHCE,
-		APIEndpoint:           apiEndpointURL,
-		TokenEndpoint:         infoResponse.AuthorizationEndpoint,
-		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
-		SkipSSLValidation:     skipSSLValidation,
-	}
+	newCNSI.Name = cnsiName;
+	newCNSI.APIEndpoint = apiEndpointURL;
+	newCNSI.SkipSSLValidation = skipSSLValidation;
 
 	err = p.setCNSIRecord(guid, newCNSI)
 	if err != nil {
@@ -324,13 +261,16 @@ func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) 
 	return jsonString, nil
 }
 
-func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (v2Info, error) {
+func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (cnsis.CNSIRecord, error) {
 	logger.Debug("getHCFv2Info")
-	var v2InfoReponse v2Info
+	var v2InfoResponse v2Info
+	var newCNSI cnsis.CNSIRecord 
+
+	newCNSI.CNSIType = cnsis.CNSIHCF
 
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
-		return v2InfoReponse, err
+		return newCNSI, err
 	}
 
 	uri.Path = "v2/info"
@@ -340,7 +280,7 @@ func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (v2Info, error) {
 	}
 	res, err := h.Get(uri.String())
 	if err != nil {
-		return v2InfoReponse, err
+		return newCNSI, err
 	}
 
 	if res.StatusCode != 200 {
@@ -348,24 +288,31 @@ func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (v2Info, error) {
 		io.Copy(buf, res.Body)
 		defer res.Body.Close()
 
-		return v2InfoReponse, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+		return newCNSI, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
 
 	dec := json.NewDecoder(res.Body)
-	if err = dec.Decode(&v2InfoReponse); err != nil {
-		return v2InfoReponse, err
+	if err = dec.Decode(&v2InfoResponse); err != nil {
+		return newCNSI, err
 	}
 
-	return v2InfoReponse, nil
+	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
+	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
+	newCNSI.DopplerLoggingEndpoint = v2InfoResponse.DopplerLoggingEndpoint
+
+	return newCNSI, nil
 }
 
-func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (hceInfo, error) {
+func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (cnsis.CNSIRecord, error) {
 	logger.Debug("getHCEInfo")
-	var infoReponse hceInfo
+	var infoResponse hceInfo
+	var newCNSI cnsis.CNSIRecord 
+
+	newCNSI.CNSIType = cnsis.CNSIHCE
 
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
-		return infoReponse, err
+		return newCNSI, err
 	}
 
 	uri.Path = "info"
@@ -375,7 +322,7 @@ func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (hceInfo, error) {
 	}
 	res, err := h.Get(uri.String())
 	if err != nil {
-		return infoReponse, err
+		return newCNSI, err
 	}
 
 	if res.StatusCode != 200 {
@@ -383,16 +330,61 @@ func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (hceInfo, error) {
 		io.Copy(buf, res.Body)
 		defer res.Body.Close()
 
-		return infoReponse, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+		return newCNSI, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
 
 	dec := json.NewDecoder(res.Body)
-	if err = dec.Decode(&infoReponse); err != nil {
-		return infoReponse, err
+	if err = dec.Decode(&infoResponse); err != nil {
+		return newCNSI, err
 	}
 
-	return infoReponse, nil
+	newCNSI.TokenEndpoint = infoResponse.AuthorizationEndpoint
+	newCNSI.AuthorizationEndpoint = infoResponse.AuthorizationEndpoint
+
+	return newCNSI, nil
 }
+
+func getHSMInfo(apiEndpoint string, skipSSLValidation bool) (cnsis.CNSIRecord, error) {
+	logger.Debug("getHSMInfo")
+	var infoResponse hsmInfo
+	var newCNSI cnsis.CNSIRecord 
+
+	newCNSI.CNSIType = cnsis.CNSIHSM
+
+	uri, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return newCNSI, err
+	}
+
+	uri.Path = "v1/info"
+	h := httpClient
+	if skipSSLValidation {
+		h = httpClientSkipSSL
+	}
+	res, err := h.Get(uri.String())
+	if err != nil {
+		return newCNSI, err
+	}
+
+	if res.StatusCode != 200 {
+		buf := &bytes.Buffer{}
+		io.Copy(buf, res.Body)
+		defer res.Body.Close()
+
+		return newCNSI, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+	}
+
+	dec := json.NewDecoder(res.Body)
+	if err = dec.Decode(&infoResponse); err != nil {
+		return newCNSI, err
+	}
+
+	newCNSI.TokenEndpoint = infoResponse.AuthorizationEndpoint
+	newCNSI.AuthorizationEndpoint = infoResponse.AuthorizationEndpoint
+
+	return newCNSI, nil
+}
+
 
 func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, error) {
 	logger.Debug("getCNSIRecord")
