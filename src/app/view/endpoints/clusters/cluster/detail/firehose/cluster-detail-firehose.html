@@ -23,21 +23,18 @@
 
     <div class="firehose-header-bottom">
       <div class="text-filter">
-        <div class="search-box">
+        <div class="search-box" ng-focus="firehoseCtrl.focusTextFilter()" tabindex="0">
           <span class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></span>
           <span class="regex-marker opening" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
-          <input class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" ng-trim="false" type="text">
+
+          <div class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" contenteditable="true"></div>
+
           <span class="regex-marker closing" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
+          <div class="space-absorber"></div>
           <span ng-click="firehoseCtrl.textFilter.toMatch = ''"
              class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></span>
         </div>
         <div class="search-options">
-          <checkbox-input ng-model="firehoseCtrl.textFilter.highlightMatches"
-                          input-label="{{'Highlight Matches' | translate}}">
-          </checkbox-input>
-          <checkbox-input ng-model="firehoseCtrl.textFilter.matchCase"
-                          input-label="{{'Match Case' | translate}}">
-          </checkbox-input>
           <checkbox-input ng-model="firehoseCtrl.textFilter.regex"
                           input-label="{{'Regex' | translate}}">
           </checkbox-input>

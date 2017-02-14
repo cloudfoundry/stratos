@@ -82,9 +82,7 @@
 
     vm.textFilter = {
       toMatch: '',
-      regex: false,
-      matchCase: false,
-      highlightMatches: true
+      regex: false
     };
 
     vm.showAll = function (onOff) {
@@ -119,7 +117,6 @@
 
     // Comment this out to test firehose stream in gulp dev (connect directly to the portal)
     // vm.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.guid + '/firehose';
-    // vm.websocketUrl = protocol + '://' + 'jbramary.gbr.hp.com:3003/v1/' + $stateParams.guid + '/firehose';
 
     vm.autoScrollOn = true; // auto-scroll by default
 
@@ -132,6 +129,10 @@
     };
 
     vm.jsonFilter = jsonFilter;
+
+    vm.focusTextFilter = function () {
+      angular.element('.text-filter-input').focus();
+    };
 
     $document.on('keydown', keyHandler);
     $rootScope.consoleViewNoScroll = true;
@@ -158,17 +159,14 @@
       return vm.textFilter.regex;
     }, function () {
       updateRegex();
-    });
-
-    $scope.$watch(function () {
-      return vm.textFilter.matchCase;
-    }, function () {
-      updateRegex();
+      if (vm.textFilter.regex) {
+        vm.focusTextFilter();
+      }
     });
 
     function updateRegex() {
       try {
-        textFilterRegex = new RegExp(vm.textFilter.toMatch, vm.textFilter.matchCase ? 'g' : 'gi');
+        textFilterRegex = new RegExp(vm.textFilter.toMatch, 'gi');
       } catch (error) {
         // Invalid Regex pattern!
         // We could show red validation error
@@ -383,13 +381,8 @@
       } else {
         // Substring match mode
         matchLength = vm.textFilter.toMatch.length;
-        if (vm.textFilter.matchCase) {
-          toMatch = vm.textFilter.toMatch;
-          compareTo = sanitized;
-        } else {
-          toMatch = vm.textFilter.toMatch.toLowerCase();
-          compareTo = sanitized.toLowerCase();
-        }
+        toMatch = vm.textFilter.toMatch.toLowerCase();
+        compareTo = sanitized.toLowerCase();
 
         getNextMatch = function () {
           matchIndex = compareTo.indexOf(toMatch, matchIndex + matchLength);
@@ -401,12 +394,7 @@
         return '';
       }
 
-      if (!vm.textFilter.highlightMatches) {
-        // It's a match and we are not highlighting, just return message as-is
-        return message;
-      }
-
-      // It's a match and we are highlighting, need to find and highlight *all* matches
+      // There is at least one match, let's find and highlight *all* matches
 
       // Map each character in sanitized to indices in message
       var mappedIndices = mapSanitizedIndices(message);
