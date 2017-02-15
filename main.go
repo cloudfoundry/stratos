@@ -384,6 +384,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.GET("/cnsis", p.listCNSIs)
 	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
 
+	// Firehose Stream
+	sessionGroup.GET("/:cnsiGuid/firehose", p.firehose)
+
 	// Applications Log Streams
 	sessionGroup.GET("/:cnsiGuid/apps/:appGuid/stream", p.appStream)
 
