@@ -180,15 +180,9 @@
       callForAllProviders('createEndpointEntries');
       _updateWelcomeMessage();
 
-      // Pre-sort the array by reverse type to avoid initial smart-table flicker
+      // Pre-sort the array to avoid initial smart-table flicker
       that.endpoints.sort(function (e1, e2) {
-        if (e1.type < e2.type) {
-          return 1;
-        }
-        if (e1.type > e2.type) {
-          return -1;
-        }
-        return 0;
+        return e1.type !== e2.type ? e1.type.localeCompare(e2.type) : e1.name.localeCompare(e2.name);
       });
 
       that.initialised = true;

@@ -49,32 +49,13 @@
     create: function (type, url, name, skipSslValidation) {
       var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      var promise = type === 'hcf'
-        ? serviceInstanceApi.create(url, name, !!skipSslValidation)
-        : serviceInstanceApi.createHce(url, name, !!skipSslValidation);
+      type = type || 'hcf';
+
+      var promise = serviceInstanceApi.create(url, name, !!skipSslValidation, type);
       return promise.then(function (response) {
         that.serviceInstances.push(response.data);
         return response.data;
       });
-    },
-
-    /**
-     * @function createHce
-     * @memberof app.model.serviceInstance.ServiceInstance
-     * @description Create an HCE service instance
-     * @param {string} url - the service instance API endpoint
-     * @param {string} name - the service instance friendly name
-     * @param {boolean} skipSslValidation - whether to skip SSL validation for this endpoint
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    createHce: function (url, name, skipSslValidation) {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.createHce(url, name, !!skipSslValidation)
-        .then(function (response) {
-          that.serviceInstances.push(response.data);
-        });
     },
 
     /**
