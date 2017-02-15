@@ -33,7 +33,9 @@
           var text = (e.originalEvent || e).clipboardData.getData('text/plain');
 
           // insert text manually
+          /* eslint-disable angular/document-service */
           document.execCommand('insertHTML', false, text);
+          /* eslint-enable angular/document-service */
         });
 
         read(); // initialize
