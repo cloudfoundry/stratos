@@ -116,6 +116,9 @@
           "name": "HCF_CLIENT"
         },
         {
+          "name": "HSM_CLIENT"
+        },
+        {
           "name": "ALLOWED_ORIGINS"
         },
         {
@@ -584,6 +587,14 @@
       "name": "HCF_CLIENT",
       "description": "HCF client",
       "default": "cf",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "HSM_CLIENT",
+      "description": "HSM client",
+      "default": "hsm",
       "data_type": "string",
       "required": true,
       "secret": false
