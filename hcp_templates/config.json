@@ -12,6 +12,12 @@
       "sdl_versions": [
         ">=1.0.0"
       ]
+    },
+    {
+      "product_version": "4.1.0",
+      "sdl_versions": [
+        ">=1.0.0"
+      ]
     }
   ]
 }
