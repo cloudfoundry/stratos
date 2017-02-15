@@ -1,0 +1,121 @@
+<div>
+  <gallery-card class="namespace-card"
+                card-data="nodeCardCtrl.getCardData()">
+
+    <dl class="dl-horizontal">
+      <dt translate>Uptime</dt>
+      <dd>
+        {{ nodeCardCtrl.nodeUptime }}
+      </dd>
+      <dt translate>CPU Limit</dt>
+      <dd>
+        {{ nodeCardCtrl.cpuLimit }} Milli-cores
+      </dd>
+      <dt translate>Memory Limit</dt>
+      <dd>
+        {{ nodeCardCtrl.memoryLimit | mbToHumanSize}}
+      </dd>
+
+    <!--</dl>-->
+  <!--</gallery-card>-->
+
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+      <dd class="chart">
+        <div class="charts ">
+          <div class="donut-space">
+            <utilization-donut metric="cpu_node_utilization_gauge"
+                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               y-label="CPU Utilization (%)"
+                               node-name="{{nodeCardCtrl.nodeName}}"
+                               metric-limit="{{nodeCardCtrl.cpuLimit}} MC"
+            ></utilization-donut>
+          </div>
+
+          <div class="consume-space">
+
+            <average-rate-graph metric="cpu_node_utilization_gauge"
+                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                y-label="CPU Utilization (%)"
+                                node-name="{{nodeCardCtrl.nodeName}}"
+            ></average-rate-graph>
+          </div>
+        </div>
+      </dd>
+    </dl>
+  <!--</gallery-card>-->
+
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+      <dd class="chart">
+        <div class="charts ">
+          <div class="donut-space">
+            <utilization-donut metric="memory_node_utilization_gauge"
+                               filter="nodename={{nodeCardCtrl.nodeName}}"
+                               y-label="Memory Utilization (%)"
+                               node-name="{{nodeCardCtrl.nodeName}}"
+                               metric-limit="{{nodeCardCtrl.memoryLimit.toFixed(2)}} MB"
+            ></utilization-donut>
+          </div>
+
+          <div class="consume-space">
+
+            <average-rate-graph metric="memory_node_utilization_gauge"
+                                filter="nodename={{nodeCardCtrl.nodeName}}"
+                                y-label="Memory Utilization (%)"
+                                node-name="{{nodeCardCtrl.nodeName}}"
+                                metric-limit="{{ nodeCardCtrl.memoryLimit | mbToHumanSize}}"
+            ></average-rate-graph>
+          </div>
+        </div>
+      </dd>
+    <!--</dl>-->
+  <!--</gallery-card>-->
+
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+      <dd class="chart">
+        <div>
+
+          <cumulative-chart metric="network_tx_cumulative"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="Data Transmitted"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+          ></cumulative-chart>
+        </div>
+
+      </dd>
+    <!--</dl>-->
+  <!--</gallery-card>-->
+
+  <!--<gallery-card class="namespace-card"-->
+                <!--card-data="nodeCardCtrl.getCardData()">-->
+
+    <!--<dl class="dl-horizontal">-->
+
+
+      <dd class="chart">
+        <div>
+
+          <cumulative-chart metric="network_rx_cumulative"
+                            filter="nodename={{nodeCardCtrl.nodeName}}"
+                            y-label="Data Received"
+                            node-name="{{nodeCardCtrl.nodeName}}"
+          ></cumulative-chart>
+        </div>
+
+      </dd>
+    </dl>
+  </gallery-card>
+
+
+</div>

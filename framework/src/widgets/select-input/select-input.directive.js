@@ -191,7 +191,7 @@
     setLabel: function (modelValue) {
       if (angular.isDefined(modelValue) && modelValue !== null) {
         var initialValue = _.find(this.inputOptions, {value: modelValue});
-        this.modelLabel = initialValue.label;
+        this.modelLabel = initialValue ? initialValue.label : null;
       } else {
         this.modelLabel = null;
       }

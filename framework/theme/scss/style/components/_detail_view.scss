@@ -22,6 +22,21 @@ $detail-view-margin: $hpe-unit-space * 4;
       }
     }
   }
+  &.detail-view-two-fields {
+
+    > .modal-dialog {
+      width: $detail_view_two_fields_width;
+      left: 100%;
+    }
+
+    &.fade.in {
+      .modal-dialog {
+        left: calc(100% - #{$detail_view_two_fields_width});
+        transition: left 0.25s ease-out;
+      }
+    }
+  }
+  
 
 
   .detail-view-content {

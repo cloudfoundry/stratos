@@ -16,7 +16,8 @@
     'app.error.errorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'app.event.eventService'
   ];
 
   /**
@@ -35,10 +36,11 @@
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.event.eventService} eventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog) {
+                                         notificationsService, credentialsDialog, confirmDialog, eventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -95,6 +97,24 @@
         });
     }
 
+    function _setEndpointVisit(isValid, serviceInstance, endpoint) {
+      // Some service types have more detail available
+      if (isValid) {
+        switch (serviceInstance.cnsi_type) {
+          case 'hcf':
+            endpoint.visit = function () {
+              return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+            };
+            break;
+          case 'hsm':
+            endpoint.visit = function () {
+              return $state.href('sm.endpoint.detail.instances', {guid: serviceInstance.guid});
+            };
+            break;
+        }
+      }
+    }
+
     /**
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.cnsiService
@@ -106,6 +126,7 @@
       var activeEndpointsKeys = [];
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var userAccount = modelManager.retrieve('app.model.account');
       var endpoints = dashboardService.endpoints;
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
@@ -121,21 +142,37 @@
         var eKey = endpointPrefix + serviceInstance.guid;
         var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
         var reuse = !!endpoint;
+        var hide = false;
         if (!reuse) {
           endpoint = {
-            key: eKey,
-            type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getOemConfiguration().CLOUD_FOUNDRY : utilsService.getOemConfiguration().CODE_ENGINE
+            key: eKey
           };
-          endpoints.push(endpoint);
+          switch (serviceInstance.cnsi_type) {
+            case 'hcf':
+              endpoint.type = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+              break;
+            case 'hce':
+              endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
+              break;
+            case 'hsm':
+              endpoint.type = 'Helion Service Manager';
+              // Only Console admins can see HSM endpoints
+              hide = !userAccount.isAdmin();
+              break;
+            default:
+              endpoint.type = gettext('Unknown');
+          }
+          if (!hide) {
+            endpoints.push(endpoint);
+          }
         } else {
           delete endpoint.error;
         }
         activeEndpointsKeys.push(endpoint.key);
 
         endpoint.actions = _createInstanceActions(isValid, hasExpired);
-        endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
-          return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-        } : undefined;
+        endpoint.visit = undefined;
+        _setEndpointVisit(isValid, serviceInstance, endpoint);
         endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
         endpoint.actionsTarget = serviceInstance;
         endpoint.name = serviceInstance.name;
@@ -301,6 +338,7 @@
                 });
                 break;
             }
+            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         }
       });
@@ -334,6 +372,7 @@
                 });
               break;
           }
+          eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
         });
     }
   }

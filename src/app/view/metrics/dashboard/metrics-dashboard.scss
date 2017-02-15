@@ -1,0 +1,28 @@
+.metrics-table {
+
+
+  @media (max-width: 1024px) {
+    .node-cards {
+      flex-direction: column;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .node-cards {
+      flex-direction: row;
+    }
+  }
+
+  padding-top: 24px;
+  display: flex;
+  .node-cards {
+    padding-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    div:last-child {
+    //  padding-right: 12px;
+    }
+    width: 100%;
+  }
+
+}

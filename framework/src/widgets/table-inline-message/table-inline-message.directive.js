@@ -23,15 +23,37 @@
       bindToController: {
         message: '@',
         status: '@',
+        link: '@?',
         colSpan: '@?'
       },
-      controller: function () {
-        this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
-      },
+      controller: InlineMessageController,
       controllerAs: 'tableInlineMessageCtrl',
       scope: {},
       templateUrl: path + 'widgets/table-inline-message/table-inline-message.html'
     };
   }
 
+  InlineMessageController.$inject = [
+    '$state'
+  ];
+
+  function InlineMessageController($state) {
+
+    this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
+
+    this.openLink = function () {
+      var link = this.link;
+      var parts = link.split('/');
+      var params = {};
+      var state = parts[0];
+      if (parts.length > 1) {
+        _.each(parts[1].split(','), function (p) {
+          var kv = p.split(':');
+          params[kv[0]] = kv[1];
+        });
+      }
+
+      $state.go(state, params);
+    };
+  }
 })();

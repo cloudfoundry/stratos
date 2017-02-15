@@ -1,0 +1,360 @@
+.hsm .cluster-detail {
+  width: 100% !important;
+}
+
+.product-version {
+  margin-right: 12px;
+  background-color: #f7f7f7;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+
+.hsm-label-category {
+  margin-left: 12px;
+  background-color: #f7f7f7;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.upgrade-version {
+  margin: 4px 0px;
+}
+
+.tab-count-indicator {
+  color: #aaa;
+  margin-left: 4px;
+}
+
+.sdl-latest-version {
+  font-weight: bold;
+}
+
+.card.panel .panel-body .dl-horizontal > dd.hsm-state-label {
+  text-transform: uppercase;
+}
+
+.hsm-instance-header, .hsm-service-header {
+  display: flex;
+  align-items: center;
+  margin: $hpe-unit-space 0;
+
+  h3 {
+    display: inline-block;
+    margin: 0;
+    height: auto;
+  }
+
+  app-state-icon {
+    height: auto;
+    line-height: 1;
+    margin-left: $hpe-unit-space * 0.5;
+  }
+}
+
+.hsm-service-header {
+  h3 {
+    flex: 1;
+  }
+
+  button {
+    font-size: 16px;
+    height: auto;
+    padding: 4px 24px;
+  }
+}
+
+.hpe-popover-alert.popover.hpe-popover-alert-info {
+  a {
+    color: #fff;
+    text-decoration: none;
+
+    &:hover {
+      color: #eee;
+    }
+  }
+}
+
+.product-version {
+  &.hilight {
+    background-color: $brand-primary;
+    color: #fff;
+  }
+
+  &.pointer {
+    cursor: pointer;
+  }
+}
+
+.content {
+  table.table > thead > tr {
+    > th.table-sort-filter {
+      padding: $hpe-unit-space * 0.5;
+
+      .form-group {
+        width: auto;
+        text-align: left;
+        height: $hpe-unit-space * 1.5;
+
+        i {
+          position: absolute;
+          margin-left: -12px;
+          height: $hpe-unit-space * 1.5;;
+          vertical-align: middle;
+          line-height: $hpe-unit-space * 1.5;;
+          font-size: 18px;
+        }
+
+        input {
+          height: 100%;
+          padding: 0;
+          margin: 0;
+          margin-left: $hpe-unit-space;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+
+  table.table > tbody > tr > td.hsm-actions {
+    a {
+      color: #01a982;
+      &:hover, &:focus {
+        text-decoration: none;
+        color: #555;
+      }
+    }
+
+    .add-icon {
+      border: 2px solid #01a982;
+      font-size: 12px;
+      border-radius: 50%;
+      padding: 4px;
+      margin-left: 6px;
+      font-size: 14px;
+    }
+  }
+}
+
+.hsm-service-heading {
+  display: flex;
+
+  > span {
+    flex: 1;
+  }
+
+  > img {
+    height: 48px;
+  }
+}
+
+.hsm-description {
+  text-transform: none;
+  font-weight: 500;
+}
+
+fieldset.fieldset-horizontal {
+  display: block;
+
+  .form-group {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: -1px;
+    float: left;
+  }
+
+}
+
+.full-width-field {
+  .form-group {
+    width: 100%;
+  }
+}
+
+.two-width-fields {
+  .form-group {
+    width: 647px;
+  }
+}
+
+table tr td.table-inline-message {
+  .popover.hpe-popover-alert-upgrade {
+    > .arrow {
+      display: none;
+    }
+
+    > .popover-content {
+      border-top: 1px solid #eee;
+      margin: 0px 24px;
+      padding: 12px 0;
+
+      a {
+        color: #888;
+        &:hover, &:focus {
+          text-decoration: none;
+          color: #01a982;
+        }
+      }
+    }
+  }
+}
+
+table.table > tbody > tr > td.table-inline-message.hsm-upgrade, div.hsm-upgrade {
+  padding: 0;
+  margin: 0;
+  text-align: left;
+
+  > div {
+    display: flex;
+    margin: 0;
+    border-top: 1px solid #eee;
+    padding: 12px 0;    
+
+    > div.upgrade-message {
+      text-align: left;
+      flex: 1;
+      color: #888;
+      display: flex;
+      align-items: center;
+
+      > i.helion-icon {
+        font-size: 18px;
+        margin-right: 8px;
+        cursor: pointer;
+        &:hover, &:focus {
+          color: #01a982;
+        }
+      }
+
+      a {
+        color: #888;
+        &:hover, &:focus {
+          text-decoration: none;
+          color: #01a982;
+        }
+      }
+    }
+
+    > div.upgrade-acknowledge {
+      > i {
+        font-size: 16px;
+      }
+      color: #888;
+      cursor: pointer;
+      &:hover, &:focus {
+        color: #01a982;
+      }
+    }
+  }
+}
+
+div.hsm-upgrade > div {
+  padding-bottom: 0px;
+}
+
+.upgrade-indicator {
+  > i {
+    font-size: 16px;
+  }
+  color: #888;
+  cursor: pointer;
+  &:hover, &:focus {
+    color: #01a982;
+  }
+}
+
+form.hsm-filter-box {
+  margin-bottom: $hpe-unit-space * 0.5;
+  width: $hpe-unit-space * 15;
+
+  .form-group {
+    width: auto;
+    text-align: left;
+    height: $hpe-unit-space * 1.5;
+
+    i {
+      position: absolute;
+      margin-left: -12px;
+      height: $hpe-unit-space * 1.5;;
+      vertical-align: middle;
+      line-height: $hpe-unit-space * 1.5;;
+      font-size: 18px;          
+    }
+
+    input {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      margin-left: $hpe-unit-space;
+      font-weight: normal;
+    }
+  }
+}
+
+fieldset.fieldset-horizontal .form-group.file-drop-active {
+  border-color: red;
+  background-color: green;
+  opacity: 0.75;
+}
+
+.hsm-file-drop-target {
+  display: flex;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 53px;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+
+    > div {
+      border: 1px dashed #ccc;
+        padding: 4px 8px;
+        margin-right: 6px;
+        color: #666;
+    }
+
+    &.file-drop-active > div {
+      border-color: $hpe-primary;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+}
+
+form.file-drop-active {
+  opacity: 0.5;
+}
+
+#hsm-choose-instance-file {
+  display: none;
+}
+
+.hsm-create-instance-intro {
+  display: flex;
+
+  > div {
+    margin-left: $hpe-unit-space * 0.5;
+  }
+}
+
+.hsm-params-selector {
+  display: flex;
+  align-items: center;
+
+  > h4 {
+    flex: 1;
+  }
+}
+
+.sdl-upgrade-version {
+  font-weight: bold;
+}
+
+.hide-components {
+  .checkbox-input {
+    text-align: right;
+    float: right;
+    text-transform: none;
+    font-weight: normal;
+    margin-right: 12px;
+  }
+}

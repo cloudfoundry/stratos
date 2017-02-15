@@ -10,6 +10,8 @@
   ];
 
   function registerRoute($stateProvider) {
+
+    // Cloud Foundry
     $stateProvider.state('endpoint.clusters.router', {
       url: '',
       template: '<ui-view/>',
