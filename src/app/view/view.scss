@@ -5,7 +5,7 @@
 @import "console-view/console-view";
 @import "console-error/console-error";
 @import "endpoints/endpoints";
-@import "metrics/metrics";
+@import "../../plugins/control-plane/view/metrics/metrics";
 
 .form-buttons {
   margin-top: 40px;

@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.metrics')
+    .module('control-plane.view.metrics.dashboard')
     .directive('cumulativeChart', cumulativeChart);
 
   cumulativeChart.$inject = ['app.basePath'];
@@ -19,7 +19,7 @@
       controller: CumulativeChartController,
       controllerAs: 'cumulativeChartCtrl',
       scope: {},
-      templateUrl: path + 'view/metrics/graphs/cumulative/cumulative-graph.html'
+      templateUrl: 'plugins/control-plane/view/metrics/graphs/cumulative/cumulative-graph.html'
     };
   }
 

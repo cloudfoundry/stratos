@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.metrics')
+    .module('control-plane.view.metrics.dashboard')
     .directive('averageRateGraph', averageRateGraph);
 
   averageRateGraph.$inject = ['app.basePath'];
@@ -18,7 +18,7 @@
       controller: AverageRateGraphController,
       controllerAs: 'averageRateGraphCtrl',
       scope: {},
-      templateUrl: path + 'view/metrics/graphs/average-rate/average-rate-graph.html'
+      templateUrl: 'plugins/control-plane/view/metrics/graphs/average-rate/average-rate-graph.html'
     };
   }
 

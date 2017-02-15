@@ -2,7 +2,12 @@
   'use strict';
 
   angular
-    .module('app.view.metrics.dashboard', [])
+    .module('control-plane.view.metrics.dashboard', [
+      'control-plane.view.metrics.dashboard.summary',
+      'control-plane.view.metrics.dashboard.cpu-summary',
+      'control-plane.view.metrics.dashboard.memory-summary',
+      'control-plane.view.metrics.dashboard.data-traffic-summary'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,9 +15,9 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('metrics.dashboard', {
+    $stateProvider.state('cp.metrics.dashboard', {
       url: '',
-      templateUrl: 'app/view/metrics/dashboard/metrics-dashboard.html',
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/metrics-dashboard.html',
       controller: MetricsDashBoardController,
       controllerAs: 'metricsDashboardCtrl'
     });
@@ -38,7 +43,7 @@
       });
     }
 
-    utilsService.chainStateResolve('metrics.dashboard', $state, init);
+    utilsService.chainStateResolve('cp.metrics.dashboard', $state, init);
 
   }
 

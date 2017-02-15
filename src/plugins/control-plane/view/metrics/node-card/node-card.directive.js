@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.metrics')
+    .module('control-plane.view.metrics.dashboard')
     .directive('nodeCard', nodeCard);
 
   nodeCard.$inject = ['app.basePath'];

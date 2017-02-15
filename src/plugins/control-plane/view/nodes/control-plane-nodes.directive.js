@@ -19,13 +19,12 @@
   }
 
   ControlPlaneNodesController.$inject = [
-    '$interval',
     '$scope',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function ControlPlaneNodesController($interval, $scope, modelManager, utilsService) {
+  function ControlPlaneNodesController($scope, modelManager, utilsService) {
 
     var that = this;
 
@@ -61,9 +60,6 @@
       });
     }
 
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
 
     $scope.$watch(function () {
       return that.nodes;

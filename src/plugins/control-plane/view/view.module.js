@@ -3,7 +3,8 @@
 
   angular
     .module('control-plane.view', [
-      'control-plane.view.tiles'
+      'control-plane.view.tiles',
+      'control-plane.view.metrics'
     ])
     .config(registerRoute);
 
@@ -23,8 +24,8 @@
     });
 
     $stateProvider.state('cp.list', {
-      url: '/cp',
-      template: '<ui-view/>',
+      url: '',
+      // template: '<ui-view/>',
       controller: ControlPlaneRouterController,
       controllerAs: 'cpRouterCtrl',
       ncyBreadcrumb: {
@@ -68,7 +69,7 @@
         });
     }
 
-    utils.chainStateResolve('sm.list', $state, init);
+    utils.chainStateResolve('cp.list', $state, init);
   }
 
   angular.extend(ControlPlaneRouterController.prototype, {});

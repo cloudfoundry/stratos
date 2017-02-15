@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.metrics')
+    .module('control-plane.view.metrics.dashboard')
     .directive('utilizationDonut', utilizationDonut);
 
   utilizationDonut.$inject = ['app.basePath'];
@@ -20,7 +20,7 @@
       controller: UtilizationDonutController,
       controllerAs: 'utilizationDonutCtrl',
       scope: {},
-      templateUrl: path + 'view/metrics/graphs/donut/utilization-donut.html'
+      templateUrl: 'plugins/control-plane/view/metrics/graphs/donut/utilization-donut.html'
     };
   }
 

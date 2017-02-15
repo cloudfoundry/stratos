@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('service-manager.view.tiles')
+    .module('control-plane.view.tiles')
     .directive('controlPlaneTile', ControlPlaneTile);
 
   ControlPlaneTile.$inject = [];
@@ -106,8 +106,9 @@
 
 
     summary: function () {
-
+      this.$state.go('cp.metrics.dashboard.summary', {guid: this.service.guid});
     },
+
     getKubernetesNodeCount: function () {
       return _.reduce(this.nodes, function (sum, node) {
         return node.spec.profile.indexOf('kubernetes') !== -1 ? sum + 1 : sum;

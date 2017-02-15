@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.metrics')
+    .module('control-plane.view.metrics.dashboard')
     .directive('sparklineGraph', sparklineGraph);
 
   sparklineGraph.$inject = ['app.basePath'];
@@ -15,7 +15,7 @@
       controller: SparklineGraphController,
       controllerAs: 'sparklineGraphCtrl',
       scope: {},
-      templateUrl: path + 'view/metrics/graphs/sparklines/sparkline.html'
+      templateUrl: 'plugins/control-plane/view/metrics/graphs/sparklines/sparkline.html'
     };
   }
 
