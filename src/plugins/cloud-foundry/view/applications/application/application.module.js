@@ -111,6 +111,10 @@
         that.startUpdate();
       });
     });
+    // When a pipeline is createdm, update the app summary and pipeline metadata
+    this.removePipelineCreatedListener = this.eventService.$on(this.eventService.events.DELIVERY_PIPELINE_CREATED, function () {
+      that.updatePipelineMetadata();
+    });
 
     this.appActions = [
       {
@@ -201,6 +205,7 @@
     $scope.$on('$destroy', function () {
       that.removeModalStartListener();
       that.removeModalEndListener();
+      that.removePipelineCreatedListener();
       that.scopeDestroyed = true;
       that.stopUpdate();
     });
@@ -288,6 +293,23 @@
       // Only block on fetching the app summary, anything else is not required by child states... or is but watches for
       // value change
       return haveApplication ? this.$q.resolve() : appSummaryPromise;
+    },
+
+    /**
+     * @function updatePipelineMetadata
+     * @description Update the Delivery Pipeline metadata
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    updatePipelineMetadata: function () {
+      var that = this;
+      return this.model.getAppSummary(this.cnsiGuid, this.id, false)
+        .then(function () {
+          return that.model.updateDeliveryPipelineMetadata(true)
+            .then(function (response) {
+              return that.onUpdateDeliveryPipelineMetadata(response);
+            });
+        });
     },
 
     /**

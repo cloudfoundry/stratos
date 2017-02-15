@@ -2,24 +2,25 @@
   'use strict';
 
   var events = {
-    LOGIN                   : 'LOGIN',
-    LOGIN_FAILED            : 'LOGIN_FAILED',
-    LOGIN_TIMEOUT           : 'LOGIN_TIMEOUT',
-    LOGOUT                  : 'LOGOUT',
-    HTTP_401                : 'HTTP_401',
-    HTTP_403                : 'HTTP_403',
-    HTTP_404                : 'HTTP_404',
-    HTTP_500                : 'HTTP_500',
-    HTTP_502                : 'HTTP_502', // Bad gateway, node server is down
-    HTTP_5XX_ON_LOGIN       : 'HTTP_5XX_ON_LOGIN',
-    REDIRECT                : 'REDIRECT',
-    TRANSFER                : 'TRANSFER',
-    ROLES_UPDATED           : 'ROLES_UPDATED',
-    MODAL_INTERACTION_START : 'MODAL_INTERACTION_START',
-    MODAL_INTERACTION_END   : 'MODAL_INTERACTION_END',
-    APP_ERROR_NOTIFY        : 'APP_ERROR_NOTIFY',
-    APP_ERROR_CLEAR         : 'APP_ERROR_CLEAR',
-    VCS_OAUTH_CANCELLED     : 'vcs.OAUTH_CANCELLED'
+    LOGIN                     : 'LOGIN',
+    LOGIN_FAILED              : 'LOGIN_FAILED',
+    LOGIN_TIMEOUT             : 'LOGIN_TIMEOUT',
+    LOGOUT                    : 'LOGOUT',
+    HTTP_401                  : 'HTTP_401',
+    HTTP_403                  : 'HTTP_403',
+    HTTP_404                  : 'HTTP_404',
+    HTTP_500                  : 'HTTP_500',
+    HTTP_502                  : 'HTTP_502', // Bad gateway, node server is down
+    HTTP_5XX_ON_LOGIN         : 'HTTP_5XX_ON_LOGIN',
+    REDIRECT                  : 'REDIRECT',
+    TRANSFER                  : 'TRANSFER',
+    ROLES_UPDATED             : 'ROLES_UPDATED',
+    MODAL_INTERACTION_START   : 'MODAL_INTERACTION_START',
+    MODAL_INTERACTION_END     : 'MODAL_INTERACTION_END',
+    APP_ERROR_NOTIFY          : 'APP_ERROR_NOTIFY',
+    APP_ERROR_CLEAR           : 'APP_ERROR_CLEAR',
+    VCS_OAUTH_CANCELLED       : 'vcs.OAUTH_CANCELLED',
+    DELIVERY_PIPELINE_CREATED : 'DELIVERY_PIPELINE_CREATED'
   };
 
   angular
