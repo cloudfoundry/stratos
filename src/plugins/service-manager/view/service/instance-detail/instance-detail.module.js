@@ -159,6 +159,7 @@
 
     // Poll for updates
     $scope.$on('$destroy', function () {
+      that.scopeDestroyed = true;
       that.$timeout.cancel(that.pollTimer);
     });
 
@@ -191,6 +192,10 @@
     },
 
     poll: function (fetchNow) {
+      if (this.scopeDestroyed) {
+        return;
+      }
+
       var that = this;
       if (that.deleted || that.notFound) {
         return;
@@ -357,7 +362,7 @@
         product.isUpgrade = _.has(upgrades, product.product_version);
         _.each(product.sdl_versions, function (url, sdlVersion) {
           var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
-          var isLatest = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+          var isLatest = product.latest === sdlVersion;
           product.versions.push({
             sdl_version: sdlVersion,
             isUpgrade: isUpgrade,
