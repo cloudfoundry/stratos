@@ -1,0 +1,93 @@
+<div id="firehose-container" class="panel panel-default summary firehose-container" ng-class="{fullscreen: firehoseCtrl.fullScreen}">
+
+  <div class="panel-heading action-header firehose-header">
+
+    <div class="firehose-header-top">
+      <div class="firehose-status">
+        <div class="log-stream-title" translate>Firehose Stream</div>
+        <span ng-if="firehoseCtrl.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
+              ng-class="{
+                'helion-icon-Active_S text-primary': firehoseCtrl.streamingStatus === 1,
+                'helion-icon-Critical_S text-danger': firehoseCtrl.streamingStatus === 3
+              }"></span>
+        <bounce-spinner ng-if="firehoseCtrl.streamingStatus === 2"
+                        class="app-log-stream-indicator" classes="bounce-spinner-sm"></bounce-spinner>
+      </div>
+
+      <div class="view-controls">
+        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
+        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+      </div>
+
+    </div>
+
+    <div class="firehose-header-bottom">
+      <div class="text-filter">
+        <div class="search-box" ng-focus="firehoseCtrl.focusTextFilter()" tabindex="0">
+          <span class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></span>
+          <span class="regex-marker opening" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
+
+          <div class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" contenteditable="true"></div>
+
+          <span class="regex-marker closing" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
+          <div class="space-absorber"></div>
+          <span ng-click="firehoseCtrl.textFilter.toMatch = ''"
+             class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></span>
+        </div>
+        <div class="search-options">
+          <checkbox-input ng-model="firehoseCtrl.textFilter.regex"
+                          input-label="{{'Regex' | translate}}">
+          </checkbox-input>
+        </div>
+      </div>
+      <div class="type-filters">
+        <div class="filters-controls">
+          <span class="controls-label">Select:</span>
+          <span class="control" ng-click="firehoseCtrl.showAll(true)">All</span>
+          <span class="separator">|</span>
+          <span class="control" ng-click="firehoseCtrl.showAll(false)">None</span>
+        </div>
+
+        <div class="firehose-filters">
+          <checkbox-input class="apps-filter"
+                          ng-model="firehoseCtrl.hoseFilters.apps"
+                          input-label="{{'Apps' | translate}}">
+          </checkbox-input>
+          <checkbox-input class="api-filter"
+                          ng-model="firehoseCtrl.hoseFilters.api"
+                          input-label="{{'API' | translate}}">
+          </checkbox-input>
+          <checkbox-input class="metrics-filter"
+                          ng-model="firehoseCtrl.hoseFilters.metrics"
+                          input-label="{{'Metrics' | translate}}">
+          </checkbox-input>
+          <checkbox-input class="counters-filter"
+                          ng-model="firehoseCtrl.hoseFilters.counters"
+                          input-label="{{'Counters' | translate}}">
+          </checkbox-input>
+          <checkbox-input class="container-metrics-filter"
+                          ng-model="firehoseCtrl.hoseFilters.containerMetrics"
+                          input-label="{{'Container Metrics' | translate}}">
+          </checkbox-input>
+          <checkbox-input class="errors-filter"
+                          ng-model="firehoseCtrl.hoseFilters.errors"
+                          input-label="{{'Errors' | translate}}">
+          </checkbox-input>
+        </div>
+
+        <div class="btn btn-link" ng-click="firehoseCtrl.autoScroll()">
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <span translate>Scroll to bottom</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <log-viewer class="log-viewer"
+              auto-scroll-on="firehoseCtrl.autoScrollOn"
+              websocket-url="firehoseCtrl.websocketUrl"
+              colorize="true"
+              filter="firehoseCtrl.jsonFilter"
+              streaming="firehoseCtrl.streamingStatus"
+              capacity-bytes="10485760"></log-viewer>
+</div>
