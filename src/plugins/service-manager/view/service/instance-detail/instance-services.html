@@ -1,0 +1,37 @@
+<table class="table"
+        st-table="svcsCtrl.stTableInstanceServices"
+        st-safe-src="instanceCtrl.instance.service_locations">
+  <thead>
+  <tr>
+    <th translate st-sort="name" st-sort-default="true" st-skip-natural="true">Service Name</th>
+    <th translate st-sort="port_name" st-skip-natural="true">Port Name</th>
+    <th translate st-sort="internal_location" st-skip-natural="true">Internal Location</th>
+    <th translate st-sort="public" st-skip-natural="true">Public</th>
+    <th translate st-sort="pubic_location" st-skip-natural="true">Public Location</th>
+  </tr>
+  <tr>
+    <th colspan="5" class="table-sort-filter">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input st-search=""
+                type="text" class="form-control"
+                placeholder="{{'Filter services' | translate}}"/>
+        </div>
+      </form>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="svc in svcsCtrl.stTableInstanceServices track by $index">
+    <td>{{ svc.service_name }}</td>
+    <td>{{ svc.port_name }}</td>
+    <td>{{ svc.internal_location }}:{{ svc.internal_port }}</td>
+    <td>{{ svc.public }}</td>
+    <td>
+      <span ng-if="svc.public">{{ svc.public_location }}:{{ svc.public_port }}</span>
+      <span ng-if="!svc.public">-</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
