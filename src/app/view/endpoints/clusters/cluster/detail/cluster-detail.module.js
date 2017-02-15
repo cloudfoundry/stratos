@@ -4,7 +4,8 @@
   angular
     .module('app.view.endpoints.clusters.cluster.detail', [
       'app.view.endpoints.clusters.cluster.detail.organizations',
-      'app.view.endpoints.clusters.cluster.detail.users'
+      'app.view.endpoints.clusters.cluster.detail.users',
+      'app.view.endpoints.clusters.cluster.detail.firehose'
     ])
     .config(registerRoute);
 

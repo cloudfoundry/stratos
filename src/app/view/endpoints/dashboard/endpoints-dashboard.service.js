@@ -22,6 +22,7 @@
     var codeEngineVcs = [];
     return {
       endpoints: [],
+      fetchedCodeEngineVcses: false,
       clear: clear,
       refreshCodeEngineVcses: refreshCodeEngineVcses,
       isCodeEngineVcs: isCodeEngineVcs
@@ -29,10 +30,12 @@
 
     function clear() {
       this.endpoints.length = 0;
+      this.fetchedCodeEngineVcses = false;
       codeEngineVcs.length = 0;
     }
 
     function refreshCodeEngineVcses() {
+      var that = this;
       var promises = [];
       var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
@@ -49,6 +52,7 @@
           var vcses = allCeVcses[i];
           Array.prototype.push.apply(codeEngineVcs, vcses);
         }
+        that.fetchedCodeEngineVcses = true;
       });
 
     }
