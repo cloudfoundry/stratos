@@ -21,7 +21,7 @@
     border-bottom-color: #666;
 
     &.panel-heading.action-header {
-      height: initial;
+      height: auto;
       min-height: 96px;
       padding: 0;
     }
@@ -98,6 +98,7 @@
 
         .search-box {
           flex: 1;
+          overflow: hidden;
           display: flex;
           flex-flow: row nowrap;
           align-items: center;
@@ -132,8 +133,10 @@
             padding: 10px 0;
             border: 0;
             outline: none;
-            min-width: 10px;
+            min-width: 2px;
             color: $dove-gray2;
+            white-space: nowrap;
+            overflow: hidden;
 
             &::selection {
               background: $gossamer;
