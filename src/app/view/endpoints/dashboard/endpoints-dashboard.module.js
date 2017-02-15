@@ -182,7 +182,7 @@
 
       // Pre-sort the array to avoid initial smart-table flicker
       that.endpoints.sort(function (e1, e2) {
-        return (e1.type !== e2.type) ? e1.type.localeCompare(e2.type) : e1.name.localeCompare(e2.name);
+        return e1.type !== e2.type ? e1.type.localeCompare(e2.type) : e1.name.localeCompare(e2.name);
       });
 
       that.initialised = true;

@@ -78,7 +78,8 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', this.utils.getOemConfiguration().SERVICE_MANAGER, 1,
+      // Keep the short label of HSM to ensure nav bar text does not wrap
+      this.menuItem = menu.addMenuItem('sm.list', 'sm.list', gettext('Service Manager'), 1,
         'svg://Service_manager.svg');
       //
       // Hide to start with until we know if we have HSM Services connected
