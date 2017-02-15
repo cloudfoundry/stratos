@@ -33,7 +33,7 @@
 
     vm.noScroll = function () {
       return $rootScope.consoleViewNoScroll;
-    }
+    };
   }
 
 })();
