@@ -23,29 +23,8 @@
     });
   }
 
-  MetricsDashBoardController.$inject = [
-    '$q',
-    '$scope',
-    '$state',
-    'app.model.modelManager',
-    'app.utils.utilsService'
-  ];
+  MetricsDashBoardController.$inject = [];
 
-  function MetricsDashBoardController($q, $scope, $state, modelManager, utilsService) {
-
-    var that = this;
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-
-    function init() {
-      return metricsModel.getNodes().then(function (nodes) {
-        nodes = nodes.sort();
-        that.nodesList = nodes;
-      });
-    }
-
-    utilsService.chainStateResolve('cp.metrics.dashboard', $state, init);
-
+  function MetricsDashBoardController() {
   }
-
-})
-();
+})();

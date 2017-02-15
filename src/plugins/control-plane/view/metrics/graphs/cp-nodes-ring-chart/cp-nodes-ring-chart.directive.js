@@ -3,7 +3,7 @@
 
   angular
     .module('control-plane.view.tiles')
-    .directive('controlPlaneNodes', controlPlaneNodes);
+    .directive('cpNodesRingChart', controlPlaneNodes);
 
   function controlPlaneNodes() {
     return {
@@ -14,7 +14,7 @@
       controller: ControlPlaneNodesController,
       controllerAs: 'controlPlaneNodesCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/nodes/control-plane-nodes.html'
+      templateUrl: 'plugins/control-plane/view/metrics/graphs/cp-nodes-ring-chart/cp-nodes-ring-chart.html'
     };
   }
 

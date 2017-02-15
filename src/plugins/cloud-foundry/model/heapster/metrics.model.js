@@ -132,10 +132,10 @@
         });
     },
 
-    updateNetworkDataTransmitted: function (filter) {
+    getNetworkDataTransmitted: function (filter) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
-        .updateNetworkDataTransmitted(filter)
+        .getNetworkDataTransmitted(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
             return that.$q.reject(res.data.error);
@@ -145,10 +145,10 @@
         });
     },
 
-    updateNetworkDataReceived: function (filter) {
+    getNetworkDataReceived: function (filter) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
-        .updateNetworkDataReceived(filter)
+        .getNetworkDataReceived(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
             return that.$q.reject(res.data.error);
@@ -158,38 +158,74 @@
         });
     },
 
+
+    _getMostRecentDataPoint: function (data) {
+      var getLastMetricReading = data.latestTimestamp;
+
+      var lastReading = _.find(data.metrics, {timestamp: getLastMetricReading});
+
+      if (lastReading || _.has(lastReading, 'value')) {
+        lastReading = lastReading.value
+      } else {
+        lastReading = undefined;
+      }
+      return lastReading;
+
+    },
     getNodeCpuLimit: function (nodeName) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeCpuLimit(nodeName)
         .then(function (res) {
-          var getLastMetricReading = res.data.latestTimestamp;
-          var lastReading = _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          var lastReading = that._getMostRecentDataPoint(res.data);
           _.set(that.metricsData, nodeName + '.cpuLimit', lastReading);
           return lastReading;
         });
-    },
+    }
+    ,
 
     getNodeMemoryLimit: function (nodeName) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeMemoryLimit(nodeName)
         .then(function (res) {
-          var getLastMetricReading = res.data.latestTimestamp;
-          var lastReading = _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          var lastReading = that._getMostRecentDataPoint(res.data);
           _.set(that.metricsData, nodeName + '.memoryLimit', lastReading);
           return lastReading;
         });
-    },
+    }
+    ,
 
     getNodeUptime: function (nodeName) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.metrics')
         .getNodeUptime(nodeName)
         .then(function (res) {
-          var getLastMetricReading = res.data.latestTimestamp;
-          return _.find(res.data.metrics, {timestamp: getLastMetricReading}).value;
+          return that._getMostRecentDataPoint(res.data);
         });
-    },
+    }
+    ,
+
+    getNetworkRxRate: function (nodeName) {
+      var that = this;
+
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNetworkRxRate(nodeName)
+        .then(function (res) {
+          return that._getMostRecentDataPoint(res.data);
+        });
+    }
+    ,
+
+    getNetworkTxRate: function (nodeName) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+        .getNetworkTxRate(nodeName)
+        .then(function (res) {
+          return that._getMostRecentDataPoint(res.data);
+        });
+    }
+    ,
 
     _addOpenTsdbMetrics: function (data, metricName) {
 
@@ -219,17 +255,21 @@
       };
 
       return cumulativeMetricObj;
-    },
+    }
+    ,
 
     makeNameSpaceFilter: function (namespaceName) {
       return '{namespace_name=' + namespaceName + '}';
-    },
+    }
+    ,
     makePodFilter: function (namespaceName, podName) {
       return '{namespace_name=' + namespaceName + ',pod_name=' + podName + '}';
-    },
+    }
+    ,
     makeNodeNameFilter: function (nodeName) {
       return '{nodename=' + nodeName + '}';
-    },
+    }
+    ,
 
     retrieveNamespaceInformation: function () {
       var that = this;
@@ -264,11 +304,13 @@
         that.namespaceInformation = obj;
         return obj;
       });
-    },
+    }
+    ,
 
     _isErrorResponse: function (res) {
       return _.has(res, 'data.error');
     }
-  });
+  })
+  ;
 
 })();

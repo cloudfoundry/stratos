@@ -3,19 +3,19 @@
 
   angular
     .module('control-plane.view.metrics.dashboard')
-    .directive('nodeCard', nodeCard);
+    .directive('nodeSummaryCard', nodeSummaryCard);
 
-  nodeCard.$inject = ['app.basePath'];
+  nodeSummaryCard.$inject = ['app.basePath'];
 
-  function nodeCard() {
+  function nodeSummaryCard() {
     return {
       bindToController: {
         node: '='
       },
       controller: NodeCardController,
-      controllerAs: 'nodeCardCtrl',
+      controllerAs: 'nodeSummaryCardCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/node-card/node-card.html'
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/node-summary-card/node-summary-card.html'
     };
   }
 
@@ -39,8 +39,14 @@
     this.cpuLimit = 0;
     this.memoryLimit = 0;
     this.showDetail = false;
+    this.dataTxRate = 0;
+    this.dataRxRate = 0;
+
     this.nodeName = this.node.spec.hostname;
-    // NOTE: Hack for dev_harness
+    this.availabilityZone = this.node.spec.zone || 'Dev Harness';
+
+
+    //FIXME: Hack for dev_harness
     if (this.nodeName === '192.168.200.2') {
       this.nodeName = 'kubernetes-master';
     }
@@ -51,9 +57,8 @@
     var interval = $interval(function () {
       that.updateCpuUtilization();
       that.updateMemoryUtilization();
-      that.updateNetworkDataTransmitted();
-      that.updateNetworkDataReceived();
-      that.updateMemoryUtilization();
+      that.updateNetworkDataTransmittedRate();
+      that.updateNetworkDataReceivedRate();
       that.updateNodeUptime();
     }, 120000);
 
@@ -70,8 +75,8 @@
       return $q.all([that.updateCpuUtilization(),
         that.updateMemoryUtilization(),
         that.updateNodeUptime(),
-        that.updateNetworkDataTransmitted(),
-        that.updateNetworkDataReceived(),
+        that.updateNetworkDataTransmittedRate(),
+        that.updateNetworkDataReceivedRate(),
         that.fetchLimitMetrics()]);
     }
 
@@ -100,19 +105,19 @@
         });
     },
 
-    updateNetworkDataTransmitted: function () {
+    updateNetworkDataTransmittedRate: function () {
       var that = this;
-      return this.metricsModel.updateNetworkDataTransmitted(this.metricsModel.makeNodeNameFilter(this.nodeName))
+      return this.metricsModel.getNetworkTxRate(this.nodeName)
         .then(function (metricsData) {
-          that.metricsData[metricsData.metricName] = [metricsData];
+          that.metricsData.dataTxRate = metricsData;
         });
     },
 
-    updateNetworkDataReceived: function () {
+    updateNetworkDataReceivedRate: function () {
       var that = this;
-      return this.metricsModel.updateNetworkDataReceived(this.metricsModel.makeNodeNameFilter(this.nodeName))
+      return this.metricsModel.getNetworkRxRate(this.nodeName)
         .then(function (metricsData) {
-          that.metricsData[metricsData.metricName] = [metricsData];
+          that.metricsData.dataRxRate = metricsData;
         });
     },
 
@@ -137,10 +142,6 @@
 
     getNodeFilter: function () {
       return this.metricsModel.makeNodeNameFilter(this.nodeName);
-    },
-
-    expand: function (expandDetail) {
-      this.showDetail = expandDetail;
     },
 
     hasMetrics: function (metricName) {

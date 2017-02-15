@@ -7,7 +7,7 @@
     <dt translate>ENDPOINT URL</dt>
     <dd class="cluster-tile-endpoint">{{controlPlaneTileCtrl.service.api_endpoint.Host}}</dd>
     <dt ng-if="controlPlaneTileCtrl.stackatoInfo.info.endpoints.hcp[controlPlaneTileCtrl.service.guid]" translate>ACCOUNT STATUS</dt>
-    <dd class="cluster-tile-account" ng-if="controlPlaneTileCtrl.stackatoInfo.info.endpoints.hcp[controlPlaneTileCtrl.service.guid]" translate>
+    <dd class="cluster-tile-account" ng-if="controlPlaneTilpeCtrl.stackatoInfo.info.endpoints.hcp[controlPlaneTileCtrl.service.guid]" translate>
       {{ controlPlaneTileCtrl.stackatoInfo.info.endpoints.hcp[controlPlaneTileCtrl.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
     <dt translate>SERVICE INSTANCES</dt>
     <dd class="cluster-tile-account"translate>
@@ -25,5 +25,5 @@
     {{ ' to this endpoint.' | translate }}<br>
     <span translate="">ENDPOINT URL</span> {{controlPlaneTileCtrl.service.api_endpoint.Host}}<br>
   </div>
- <control-plane-nodes class="centered" nodes="controlPlaneTileCtrl.nodes" guid="{{service.guid}}"></control-plane-nodes>
+ <cp-nodes-ring-chart class="centered" nodes="controlPlaneTileCtrl.nodes" guid="{{service.guid}}"></cp-nodes-ring-chart>
 </gallery-card>

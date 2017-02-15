@@ -1,0 +1,51 @@
+<div>
+  <gallery-card class="namespace-card"
+                card-data="nodeSummaryCardCtrl.getCardData()">
+
+    <dl class="dl-horizontal">
+      <div class="donuts" ng-if="!nodeSummaryCardCtrl.showDetail">
+        <div class="donut-div">
+          <span class="centered">CPU Utilization</span>
+          <utilization-donut metric="cpu_node_utilization_gauge"
+                             filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
+                             y-label="CPU Utilization (%)"
+                             node-name="{{nodeSummaryCardCtrl.nodeName}}"
+                             metric-limit="{{nodeSummaryCardCtrl.cpuLimit}} MC"
+                             no-legend="true"
+          ></utilization-donut>
+        </div>
+        <div class="donut-div">
+          <span class="centered">Memory Utilization</span>
+          <utilization-donut metric="memory_node_utilization_gauge"
+                             filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
+                             y-label="Memory Utilization (%)"
+                             node-name="{{nodeSummaryCardCtrl.nodeName}}"
+                             metric-limit="{{nodeSummaryCardCtrl.memoryLimit.toFixed(2)}} MB"
+                             no-legend="true"
+          ></utilization-donut>
+        </div>
+      </div>
+
+      <dt translate>Uptime</dt>
+      <dd>
+        {{ nodeSummaryCardCtrl.nodeUptime }}
+      </dd>
+      <dt translate>Availability Zone</dt>
+      <dd>
+        {{ nodeSummaryCardCtrl.availabilityZone }}
+      </dd>
+      <dt translate>Data Transmitted Rate</dt>
+      <dd>
+        {{ nodeSummaryCardCtrl.metricsData.dataTxRate || mbToHumanSize}} B/s
+      </dd>
+      <dt translate>Data Received Rate</dt>
+      <dd>
+        {{ nodeSummaryCardCtrl.metricsData.dataRxRate || mbToHumanSize }} B/s
+      </dd>
+
+
+    </dl>
+  </gallery-card>
+
+
+</div>

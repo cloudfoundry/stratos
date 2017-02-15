@@ -28,14 +28,18 @@
     this.getNodeUptime = getNodeUptime;
     this.getNodeCpuLimit = getNodeCpuLimit;
     this.getNodeMemoryLimit = getNodeMemoryLimit;
+    this.getNetworkRxRate = getNetworkRxRate;
+    this.getNetworkTxRate = getNetworkTxRate;
     this.getNodes = getNodes;
     this.getCpuUsage = _metricsQuery('cpu_usage_rate_gauge');
     this.getCpuUtilization = _metricsQuery('cpu_node_utilization_gauge');
     this.getMemoryUsage = _metricsQuery('memory_usage_gauge');
     this.getMemoryWorkingSetUsasge = _metricsQuery('memory_working_set_gauge');
     this.getMemoryUtilization = _metricsQuery('memory_node_utilization_gauge');
-    this.updateNetworkDataReceived = _metricsQuery('network_rx_cumulative');
-    this.updateNetworkDataTransmitted = _metricsQuery('network_tx_cumulative');
+    this.getNetworkDataReceived = _metricsQuery('network_rx_cumulative');
+    this.getNetworkDataTransmitted = _metricsQuery('network_tx_cumulative');
+    this.getNetworkDataReceivedRate = _metricsQuery('network_rx_rate');
+    this.getNetworkDataTransmittedRate = _metricsQuery('network_tx_rate_gauge');
     this.getMetrics = function (metricName, filter) {
       return _metricsQuery(metricName)(filter);
     };
@@ -48,6 +52,11 @@
         var url = metricsUrl + 'api/query?start=' + time + '&m=sum:' + metrics + (filter ? filter : '');
         return $http.get(url);
       };
+    }
+
+    function heapsterNodeQuery(nodeName, metricName) {
+      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/' + metricName;
+      return $http.get(url);
     }
 
     function getNamespaceNames() {
@@ -67,18 +76,21 @@
     }
 
     function getNodeCpuLimit(nodeName) {
-      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/cpu/node_capacity';
-      return $http.get(url);
+      return heapsterNodeQuery(nodeName, 'cpu/node_capacity');
     }
 
     function getNodeMemoryLimit(nodeName) {
-      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/memory/node_capacity';
-      return $http.get(url);
+      return heapsterNodeQuery(nodeName, 'memory/node_capacity');
     }
 
     function getNodeUptime(nodeName) {
-      var url = metricsUrl + 'api/v1/model/nodes/' + nodeName + '/metrics/uptime';
-      return $http.get(url);
+      return heapsterNodeQuery(nodeName, 'uptime');
+    }
+    function getNetworkRxRate(nodeName) {
+      return heapsterNodeQuery(nodeName, 'network/rx_rate');
+    }
+    function getNetworkTxRate(nodeName) {
+      return heapsterNodeQuery(nodeName, 'network/tx_rate');
     }
 
   }

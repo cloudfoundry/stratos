@@ -1,0 +1,17 @@
+<div class="hcp-summary">
+
+  <div class="row">
+    <nodes-status-card nodes="metricsSummaryCtrl.nodes" guid="{{ metricsSummaryCtrl.guid }}"></nodes-status-card>
+    <!--<node-count-card></node-count-card>-->
+  </div>
+
+  <div>
+    <!--- Filter thingie see list.html--->
+  </div>
+
+  <div class="node-cards">
+    <div class="node-card" ng-repeat="node in metricsSummaryCtrl.kubernetesNodes">
+      <node-summary-card node="node"></node-summary-card>
+    </div>
+  </div>
+</div>

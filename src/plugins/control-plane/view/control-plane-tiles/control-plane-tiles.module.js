@@ -12,7 +12,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cp.tiles', {
       url: '/tiles',
-      templateUrl: 'plugins/control-plane/view/tiles/control-plane-tiles.html',
+      templateUrl: 'plugins/control-plane/view/control-plane-tiles/control-plane-tiles.html',
       controller: ControlPlaneTilesController,
       controllerAs: 'cpTilesCtrl',
       params: {
@@ -71,7 +71,7 @@
       return that.refreshClusterModel();
     }
 
-    utils.chainStateResolve('sm.tiles', $state, init);
+    utils.chainStateResolve('cp.tiles', $state, init);
 
   }
 

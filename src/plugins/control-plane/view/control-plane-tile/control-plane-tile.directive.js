@@ -18,7 +18,7 @@
       controller: ControlPlaneTileController,
       controllerAs: 'controlPlaneTileCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/tile/control-plane-tile.html'
+      templateUrl: 'plugins/control-plane/view/control-plane-tile/control-plane-tile.html'
     };
   }
 
@@ -94,6 +94,10 @@
       return $q.all(promises).then(function (data) {
         that.instances = data[0];
         that.nodes = data[1];
+        // var nodePromises = [];
+        // _.each(nodes, function (node) {
+        //   nodePromises.push(that.controlPlaneModel.getComputeNode(that.service.guid, node.id));
+        // });
       });
 
     }

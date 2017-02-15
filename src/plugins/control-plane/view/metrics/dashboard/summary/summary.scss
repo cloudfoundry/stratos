@@ -1,0 +1,18 @@
+.hcp-summary{
+  @media (max-width: 1024px) {
+    .node-cards {
+      flex-direction: column;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .node-cards {
+      flex-direction: row;
+    }
+  }
+  .node-cards{
+    display:flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+  }
+}
