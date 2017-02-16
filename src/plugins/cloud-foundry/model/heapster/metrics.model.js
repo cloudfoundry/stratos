@@ -158,8 +158,7 @@
         });
     },
 
-
-    _getMostRecentDataPoint: function (data) {
+      _getMostRecentDataPoint: function (data) {
       var getLastMetricReading = data.latestTimestamp;
 
       var lastReading = _.find(data.metrics, {timestamp: getLastMetricReading});
@@ -229,7 +228,13 @@
 
     _addOpenTsdbMetrics: function (data, metricName) {
 
-      var responseData = data[0];
+      var dataSeriesArray = data;
+      if (data.length > 1) {
+        dataSeriesArray = this.mergeSeries(dataSeriesArray);
+      }
+
+      var responseData = dataSeriesArray[0];
+
       var dataPoints = [];
       // For spark lines
       var timeSeries = [];
@@ -248,28 +253,44 @@
 
       var cumulativeMetricObj = {
         metricName: metricName,
-        aggregation: 'sum',
+        aggregation: 'max',
         dataPoints: dataPoints,
         timeSeries: timeSeries,
         lastUpdate: Date.now()
       };
 
       return cumulativeMetricObj;
-    }
-    ,
+    },
 
     makeNameSpaceFilter: function (namespaceName) {
       return '{namespace_name=' + namespaceName + '}';
-    }
-    ,
+    },
     makePodFilter: function (namespaceName, podName) {
       return '{namespace_name=' + namespaceName + ',pod_name=' + podName + '}';
-    }
-    ,
+    },
     makeNodeNameFilter: function (nodeName) {
       return '{nodename=' + nodeName + '}';
-    }
-    ,
+    },
+
+    mergeSeries: function (metricsDataArray) {
+
+      var dpsArray = _.map(metricsDataArray, 'dps');
+      var keys = _.keys(dpsArray[0]);
+
+      if (!_.isEqual(keys, _.keys(dpsArray[1]))) {
+        console.log('Keys are not equal!');
+      }
+
+      var mergedDpsArray = {};
+      _.each(keys, function (key) {
+        var values = _.map(dpsArray, key);
+        mergedDpsArray[key] = _.sum(values);
+      });
+
+      var metricsDataObject = metricsDataArray[0];
+      metricsDataObject.dps = mergedDpsArray;
+      return [metricsDataObject];
+    },
 
     retrieveNamespaceInformation: function () {
       var that = this;

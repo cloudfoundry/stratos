@@ -387,7 +387,7 @@
     if (hours === 0) {
       var minutes = Math.floor(moment.duration(moment().diff(moment(d * 1000))).asMinutes());
       if (minutes === 0) {
-        return '>1 MIN';
+        return '<1 MIN';
       }
       return minutes + 'MIN';
     } else if (hours <= 2) {

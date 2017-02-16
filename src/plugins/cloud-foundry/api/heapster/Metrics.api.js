@@ -49,7 +49,7 @@
         if (!time) {
           time = '24h-ago';
         }
-        var url = metricsUrl + 'api/query?start=' + time + '&m=sum:' + metrics + (filter ? filter : '');
+        var url = metricsUrl + 'api/query?start=' + time + '&m=max:' + metrics + (filter ? filter : '');
         return $http.get(url);
       };
     }

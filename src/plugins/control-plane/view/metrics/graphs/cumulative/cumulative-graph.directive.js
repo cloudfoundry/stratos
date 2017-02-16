@@ -126,7 +126,7 @@
     updateChart: function () {
       var that = this;
 
-      return this.metricsModel.getMetrics(this.metric, this.filter )
+      return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
           that.data = [
             {
