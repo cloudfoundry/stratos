@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   color: $checkbox-input-color;
+  cursor: pointer;
   outline: none;
 
   &:not(.checked) {
@@ -42,11 +43,9 @@
     content: $checkbox-button-unchecked-icon;
     font-family: $checkbox-button-font-family;
     font-size: $checkbox-input-size;
-    cursor: pointer;
   }
 
   .checkbox-input-label {
-    cursor: pointer;
     margin-left: 5px;
   }
 }

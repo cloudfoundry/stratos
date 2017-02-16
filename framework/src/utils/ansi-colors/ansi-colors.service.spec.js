@@ -61,101 +61,101 @@
       expected.push(' ESC[40m   | <span class="ansi-black ansi-background-black"> [30m  </span><span ' +
         'class="ansi-red ansi-background-black"> [31m  </span><span class="ansi-green ansi-background-black"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-black"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-black"> [34m  </span><span class="ansi-purple ansi-background-black"> [35m  ' +
+        'ansi-background-black"> [34m  </span><span class="ansi-magenta ansi-background-black"> [35m  ' +
         '</span><span class="ansi-cyan ansi-background-black"> [36m  </span><span class="ansi-white ' +
         'ansi-background-black"> [37m  </span>');
       expected.push(' ESC[40m   | <span class="intense ansi-black ansi-background-black"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-black"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-black"> [1;32m</span><span class="intense ansi-yellow ansi-background-black"> ' +
         '[1;33m</span><span class="intense ansi-blue ansi-background-black"> [1;34m</span><span ' +
-        'class="intense ansi-purple ansi-background-black"> [1;35m</span><span class="intense ansi-cyan ' +
+        'class="intense ansi-magenta ansi-background-black"> [1;35m</span><span class="intense ansi-cyan ' +
         'ansi-background-black"> [1;36m</span><span class="intense ansi-white ansi-background-black"> ' +
         '[1;37m</span>');
       expected.push(' ESC[41m   | <span class="ansi-black ansi-background-red"> [30m  </span><span class="ansi-red ' +
         'ansi-background-red"> [31m  </span><span class="ansi-green ansi-background-red"> [32m  </span><span ' +
         'class="ansi-yellow ansi-background-red"> [33m  </span><span class="ansi-blue ansi-background-red"> ' +
-        '[34m  </span><span class="ansi-purple ansi-background-red"> [35m  </span><span class="ansi-cyan ' +
+        '[34m  </span><span class="ansi-magenta ansi-background-red"> [35m  </span><span class="ansi-cyan ' +
         'ansi-background-red"> [36m  </span><span class="ansi-white ansi-background-red"> [37m  </span>');
       expected.push(' ESC[41m   | <span class="intense ansi-black ansi-background-red"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-red"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-red"> [1;32m</span><span class="intense ansi-yellow ansi-background-red"> ' +
         '[1;33m</span><span class="intense ansi-blue ansi-background-red"> [1;34m</span><span ' +
-        'class="intense ansi-purple ansi-background-red"> [1;35m</span><span class="intense ansi-cyan' +
+        'class="intense ansi-magenta ansi-background-red"> [1;35m</span><span class="intense ansi-cyan' +
         ' ansi-background-red"> [1;36m</span><span class="intense ansi-white ansi-background-red"> [1;37m</span>');
       expected.push(' ESC[42m   | <span class="ansi-black ansi-background-green"> [30m  </span><span ' +
         'class="ansi-red ansi-background-green"> [31m  </span><span class="ansi-green ansi-background-green"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-green"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-green"> [34m  </span><span class="ansi-purple ansi-background-green"> [35m  </span>' +
+        'ansi-background-green"> [34m  </span><span class="ansi-magenta ansi-background-green"> [35m  </span>' +
         '<span class="ansi-cyan ansi-background-green"> [36m  </span><span class="ansi-white ' +
         'ansi-background-green"> [37m  </span>');
       expected.push(' ESC[42m   | <span class="intense ansi-black ansi-background-green"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-green"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-green"> [1;32m</span><span class="intense ansi-yellow ansi-background-green"> ' +
         '[1;33m</span><span class="intense ansi-blue ansi-background-green"> [1;34m</span><span ' +
-        'class="intense ansi-purple ansi-background-green"> [1;35m</span><span class="intense ansi-cyan ' +
+        'class="intense ansi-magenta ansi-background-green"> [1;35m</span><span class="intense ansi-cyan ' +
         'ansi-background-green"> [1;36m</span><span class="intense ansi-white ansi-background-green"> ' +
         '[1;37m</span>');
       expected.push(' ESC[43m   | <span class="ansi-black ansi-background-yellow"> [30m  </span><span ' +
         'class="ansi-red ansi-background-yellow"> [31m  </span><span class="ansi-green ansi-background-yellow"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-yellow"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-yellow"> [34m  </span><span class="ansi-purple ansi-background-yellow"> [35m  </span>' +
+        'ansi-background-yellow"> [34m  </span><span class="ansi-magenta ansi-background-yellow"> [35m  </span>' +
         '<span class="ansi-cyan ansi-background-yellow"> [36m  </span><span class="ansi-white ' +
         'ansi-background-yellow"> [37m  </span>');
       expected.push(' ESC[43m   | <span class="intense ansi-black ansi-background-yellow"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-yellow"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-yellow"> [1;32m</span><span class="intense ansi-yellow ansi-background-yellow"> ' +
         '[1;33m</span><span class="intense ansi-blue ansi-background-yellow"> [1;34m</span><span class="intense ' +
-        'ansi-purple ansi-background-yellow"> [1;35m</span><span class="intense ansi-cyan ' +
+        'ansi-magenta ansi-background-yellow"> [1;35m</span><span class="intense ansi-cyan ' +
         'ansi-background-yellow"> [1;36m</span><span class="intense ansi-white ansi-background-yellow"> [1;37m' +
         '</span>');
       expected.push(' ESC[44m   | <span class="ansi-black ansi-background-blue"> [30m  </span><span ' +
         'class="ansi-red ansi-background-blue"> [31m  </span><span class="ansi-green ansi-background-blue"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-blue"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-blue"> [34m  </span><span class="ansi-purple ansi-background-blue"> [35m  </span>' +
+        'ansi-background-blue"> [34m  </span><span class="ansi-magenta ansi-background-blue"> [35m  </span>' +
         '<span class="ansi-cyan ansi-background-blue"> [36m  </span><span class="ansi-white ' +
         'ansi-background-blue"> [37m  </span>');
       expected.push(' ESC[44m   | <span class="intense ansi-black ansi-background-blue"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-blue"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-blue"> [1;32m</span><span class="intense ansi-yellow ansi-background-blue"> [1;33m' +
         '</span><span class="intense ansi-blue ansi-background-blue"> [1;34m</span><span class="intense ' +
-        'ansi-purple ansi-background-blue"> [1;35m</span><span class="intense ansi-cyan ansi-background-blue"> ' +
+        'ansi-magenta ansi-background-blue"> [1;35m</span><span class="intense ansi-cyan ansi-background-blue"> ' +
         '[1;36m</span><span class="intense ansi-white ansi-background-blue"> [1;37m</span>');
-      expected.push(' ESC[45m   | <span class="ansi-black ansi-background-purple"> [30m  </span><span class' +
-        '="ansi-red ansi-background-purple"> [31m  </span><span class="ansi-green ansi-background-purple"> ' +
-        '[32m  </span><span class="ansi-yellow ansi-background-purple"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-purple"> [34m  </span><span class="ansi-purple ansi-background-purple"> [35m  </span>' +
-        '<span class="ansi-cyan ansi-background-purple"> [36m  </span><span class="ansi-white ' +
-        'ansi-background-purple"> [37m  </span>');
-      expected.push(' ESC[45m   | <span class="intense ansi-black ansi-background-purple"> [1;30m</span><span ' +
-        'class="intense ansi-red ansi-background-purple"> [1;31m</span><span class="intense ansi-green ' +
-        'ansi-background-purple"> [1;32m</span><span class="intense ansi-yellow ansi-background-purple"> ' +
-        '[1;33m</span><span class="intense ansi-blue ansi-background-purple"> [1;34m</span><span class="intense ' +
-        'ansi-purple ansi-background-purple"> [1;35m</span><span class="intense ansi-cyan ' +
-        'ansi-background-purple"> [1;36m</span><span class="intense ansi-white ansi-background-purple"> ' +
+      expected.push(' ESC[45m   | <span class="ansi-black ansi-background-magenta"> [30m  </span><span class' +
+        '="ansi-red ansi-background-magenta"> [31m  </span><span class="ansi-green ansi-background-magenta"> ' +
+        '[32m  </span><span class="ansi-yellow ansi-background-magenta"> [33m  </span><span class="ansi-blue ' +
+        'ansi-background-magenta"> [34m  </span><span class="ansi-magenta ansi-background-magenta"> [35m  </span>' +
+        '<span class="ansi-cyan ansi-background-magenta"> [36m  </span><span class="ansi-white ' +
+        'ansi-background-magenta"> [37m  </span>');
+      expected.push(' ESC[45m   | <span class="intense ansi-black ansi-background-magenta"> [1;30m</span><span ' +
+        'class="intense ansi-red ansi-background-magenta"> [1;31m</span><span class="intense ansi-green ' +
+        'ansi-background-magenta"> [1;32m</span><span class="intense ansi-yellow ansi-background-magenta"> ' +
+        '[1;33m</span><span class="intense ansi-blue ansi-background-magenta"> [1;34m</span><span class="intense ' +
+        'ansi-magenta ansi-background-magenta"> [1;35m</span><span class="intense ansi-cyan ' +
+        'ansi-background-magenta"> [1;36m</span><span class="intense ansi-white ansi-background-magenta"> ' +
         '[1;37m</span>');
       expected.push(' ESC[46m   | <span class="ansi-black ansi-background-cyan"> [30m  </span><span ' +
         'class="ansi-red ansi-background-cyan"> [31m  </span><span class="ansi-green ansi-background-cyan"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-cyan"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-cyan"> [34m  </span><span class="ansi-purple ansi-background-cyan"> [35m  </span>' +
+        'ansi-background-cyan"> [34m  </span><span class="ansi-magenta ansi-background-cyan"> [35m  </span>' +
         '<span class="ansi-cyan ansi-background-cyan"> [36m  </span><span class="ansi-white ' +
         'ansi-background-cyan"> [37m  </span>');
       expected.push(' ESC[46m   | <span class="intense ansi-black ansi-background-cyan"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-cyan"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-cyan"> [1;32m</span><span class="intense ansi-yellow ansi-background-cyan"> [1;33m' +
         '</span><span class="intense ansi-blue ansi-background-cyan"> [1;34m</span><span class="intense ' +
-        'ansi-purple ansi-background-cyan"> [1;35m</span><span class="intense ansi-cyan ansi-background-cyan">' +
+        'ansi-magenta ansi-background-cyan"> [1;35m</span><span class="intense ansi-cyan ansi-background-cyan">' +
         ' [1;36m</span><span class="intense ansi-white ansi-background-cyan"> [1;37m</span>');
       expected.push(' ESC[47m   | <span class="ansi-black ansi-background-white"> [30m  </span><span ' +
         'class="ansi-red ansi-background-white"> [31m  </span><span class="ansi-green ansi-background-white"> ' +
         '[32m  </span><span class="ansi-yellow ansi-background-white"> [33m  </span><span class="ansi-blue ' +
-        'ansi-background-white"> [34m  </span><span class="ansi-purple ansi-background-white"> [35m  </span>' +
+        'ansi-background-white"> [34m  </span><span class="ansi-magenta ansi-background-white"> [35m  </span>' +
         '<span class="ansi-cyan ansi-background-white"> [36m  </span><span class="ansi-white ' +
         'ansi-background-white"> [37m  </span>');
       expected.push(' ESC[47m   | <span class="intense ansi-black ansi-background-white"> [1;30m</span><span ' +
         'class="intense ansi-red ansi-background-white"> [1;31m</span><span class="intense ansi-green ' +
         'ansi-background-white"> [1;32m</span><span class="intense ansi-yellow ansi-background-white"> ' +
         '[1;33m</span><span class="intense ansi-blue ansi-background-white"> [1;34m</span><span class="intense ' +
-        'ansi-purple ansi-background-white"> [1;35m</span><span class="intense ansi-cyan ansi-background-white">' +
+        'ansi-magenta ansi-background-white"> [1;35m</span><span class="intense ansi-cyan ansi-background-white">' +
         ' [1;36m</span><span class="intense ansi-white ansi-background-white"> [1;37m</span>');
 
       expect(input.length).toEqual(expected.length);
