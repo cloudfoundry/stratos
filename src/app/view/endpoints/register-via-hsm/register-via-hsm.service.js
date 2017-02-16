@@ -337,14 +337,15 @@
 
               var textScope = {
                 hsmCnsiName: hsmCnsiName,
-                cloudFoundryName: utilsService.getOemConfiguration().CLOUD_FOUNDRY
+                cloudFoundryName: utilsService.getOemConfiguration().CLOUD_FOUNDRY,
+                hsmName: utilsService.getOemConfiguration().SERVICE_MANAGER
               };
 
               var description = endpoints.length === 1
-                ? $interpolate(gettext('The HSM \'{{ hsmCnsiName }}\' has successfully been connected and ' +
+                ? $interpolate(gettext('The {{ hsmName }} \'{{ hsmCnsiName }}\' has successfully been connected and ' +
                   'the following unregistered {{ cloudFoundryName }} endpoint has been discovered. ' +
                   'Would you like to now register it?'))(textScope)
-                : $interpolate(gettext('The HSM \'{{ hsmCnsiName }}\' has successfully been connected and ' +
+                : $interpolate(gettext('The {{ hsmName }} \'{{ hsmCnsiName }}\' has successfully been connected and ' +
                   'the following unregistered {{ cloudFoundryName }} endpoints have been discovered. ' +
                   'Would you like to now register them?'))(textScope);
 
