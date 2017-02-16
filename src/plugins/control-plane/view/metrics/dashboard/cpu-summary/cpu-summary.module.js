@@ -2,7 +2,9 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.cpu-summary', [])
+    .module('control-plane.view.metrics.dashboard.cpu-summary', [
+      'control-plane.view.metrics.dashboard.cpu-summary.cards'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [

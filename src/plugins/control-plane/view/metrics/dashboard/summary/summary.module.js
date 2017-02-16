@@ -2,7 +2,10 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.summary', [])
+    .module('control-plane.view.metrics.dashboard.summary', [
+      'control-plane.view.metrics.dashboard.summary.card',
+      'control-plane.view.metrics.dashboard.summary.list'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -37,6 +40,8 @@
     this.guid = $stateParams.guid;
     this.nodes = [];
     this.kubernetesNodes = [];
+
+    this.showCardLayout = true;
 
     function init() {
       return controlPlaneModel.getComputeNodes(that.guid)

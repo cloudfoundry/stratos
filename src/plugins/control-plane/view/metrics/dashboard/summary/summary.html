@@ -6,12 +6,9 @@
   </div>
 
   <div>
-    <!--- Filter thingie see list.html--->
+    <summary-control-bar></summary-control-bar>
   </div>
 
-  <div class="node-cards">
-    <div class="node-card" ng-repeat="node in metricsSummaryCtrl.kubernetesNodes">
-      <node-summary-card node="node"></node-summary-card>
-    </div>
-  </div>
+  <ui-view></ui-view>
+</div>
 </div>

@@ -1,0 +1,6 @@
+
+<div class="network-card">
+  <div class="network-card" ng-repeat="node in dataTrafficSummaryCtrl.kubernetesNodes">
+    <network-card node="{{ node.spec.hostname }}" title="{{  node.spec.hostname }}"></network-card>
+  </div>
+</div>

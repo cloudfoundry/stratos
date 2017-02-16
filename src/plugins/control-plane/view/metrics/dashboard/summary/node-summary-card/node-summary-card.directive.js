@@ -46,14 +46,6 @@
     this.availabilityZone = this.node.spec.zone || 'Dev Harness';
 
 
-    //FIXME: Hack for dev_harness
-    if (this.nodeName === '192.168.200.2') {
-      this.nodeName = 'kubernetes-master';
-    }
-    if (this.nodeName === '192.168.200.3') {
-      this.nodeName = 'kubernetes-node';
-    }
-
     var interval = $interval(function () {
       that.updateCpuUtilization();
       that.updateMemoryUtilization();

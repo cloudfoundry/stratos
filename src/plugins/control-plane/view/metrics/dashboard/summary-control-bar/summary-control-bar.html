@@ -1,0 +1,46 @@
+<div class="application-control-bar">
+  <div class="panel panel-default">
+    <div class="panel-body application-main-controls">
+      <div class="application-search-box">
+        <form>
+          <div class="form-group search-field" focusable-input>
+            <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Filter"></i>
+            <input type="text" class="form-control" id="applications-text" name="applications-text"
+                   ng-model="summaryControlBarCtrl.filter.text"
+                   ng-model-options='{ debounce: 100 }'
+                   ng-change="summaryControlBarCtrl.setText()"
+                   placeholder=""/>
+          </div>
+        </form>
+      </div>
+      <div class="app-total-control">
+        <form class="form-horizontal">
+          <div class=" form-group">
+            <label class="control-label" translate>Sort</label>
+            <search-box
+              ng-model="summaryControlBarCtrl.filter.currentFilter"
+              input-options="summaryControlBarCtrl.filter.filters"
+              ng-change="summaryControlBarCtrl.setCluster()"
+              search-icon="helion-icon helion-icon-Drop_caret"
+            >
+            </search-box>
+          </div>
+        </form>
+      </div>
+      <div class="view-buttons">
+        <button class="btn btn-link btn-border-less"
+                ng-class="!summaryControlBarCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+                type="button" ng-click="summaryControlBarCtrl.goToGalleryView(false)"
+                ng-disabled="!summaryControlBarCtrl.filter.text && !summaryControlBarCtrl.model.hasApps">
+          <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
+        </button>
+        <button class="btn btn-link btn-border-less"
+                ng-class="summaryControlBarCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+                type="button" ng-click="summaryControlBarCtrl.goToGalleryView(true)"
+                ng-disabled="!summaryControlBarCtrl.filter.text && !summaryControlBarCtrl.model.hasApps">
+          <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
+        </button>
+      </div>
+     </div>
+   </div>
+</div>

@@ -1,0 +1,5 @@
+<div class="cpu-cards">
+  <div class="cpu-card" ng-repeat="node in cardsViewCtrl.nodes">
+    <cpu-card node="{{ node.spec.hostname }}" show-utilization-donut="true" title="{{  node.spec.hostname }}"></cpu-card>
+  </div>
+</div>

@@ -95,7 +95,7 @@
           },
           dispatch: {
             renderEnd: function () {
-              var id = '#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName) + '_cchart';
+              var id = '#' + that.metric + '_' + that.getNodeName() + '_cchart';
               var selectedElement = d3.select(id + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 105;
@@ -122,6 +122,15 @@
   }
 
   angular.extend(CumulativeChartController.prototype, {
+
+    getNodeName: function () {
+
+      if (this.nodeName === '*') {
+        return 'all';
+      } else {
+        return this.utilsService.sanitizeString(this.nodeName);
+      }
+    },
 
     updateChart: function () {
       var that = this;

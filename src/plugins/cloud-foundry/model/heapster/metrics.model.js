@@ -92,6 +92,12 @@
           return that._addOpenTsdbMetrics(res.data, metricsName);
         });
     },
+    getLatestMetricDataPoint: function (metricsName, filter) {
+      return this.getMetrics(metricsName, filter)
+        .then(function (metricsData) {
+          return _.last(metricsData.dataPoints).y;
+        });
+    },
 
     getMemoryUsage: function (filter) {
       var that = this;
@@ -158,7 +164,7 @@
         });
     },
 
-      _getMostRecentDataPoint: function (data) {
+    _getMostRecentDataPoint: function (data) {
       var getLastMetricReading = data.latestTimestamp;
 
       var lastReading = _.find(data.metrics, {timestamp: getLastMetricReading});

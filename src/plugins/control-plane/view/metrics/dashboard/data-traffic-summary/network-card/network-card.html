@@ -1,0 +1,17 @@
+<div>
+  <gallery-card class="namespace-card"
+                card-data="cpuCardCtrl.getCardData()">
+
+    <cumulative-chart metric="network_tx_cumulative"
+                      filter="{{ networkCardCtrl.getNodeFilter() }}"
+                      y-label="Data Received"
+                      node-name="{{networkCardCtrl.node}}"
+    ></cumulative-chart>
+
+    <cumulative-chart metric="network_rx_cumulative"
+                      filter="{{ networkCardCtrl.getNodeFilter() }}"
+                      y-label="Data Received"
+                      node-name="{{networkCardCtrl.node}}"
+    ></cumulative-chart>
+  </gallery-card>
+</div>
