@@ -60,7 +60,10 @@
     });
 
     function init() {
-      if (angular.isUndefined(that.spaceDetail().instances)) {
+      // Update service instances if service instances have not
+      // been initialised or have been externally updated
+      if (angular.isUndefined(that.spaceDetail().instances) ||
+        that.spaceDetail().details.totalServiceInstances !== that.spaceDetail().instances.length) {
         return that.update();
       }
       that.updateLocalServiceInstances();
