@@ -265,32 +265,6 @@
     }
 
     /**
-     * @name buildEndpointNames
-     * @description Each entry in the endpoint table will need a unique set of endpoint names to disallow.
-     */
-    function buildEndpointUrls() {
-      _.forEach(endpoints, function (endpoint) {
-        if (endpoint.endpointUrls) {
-          endpoint.endpointUrls.length = 0;
-        } else {
-          endpoint.endpointUrls = [];
-        }
-
-        // Candidate urls from table of endpoints that are checked
-        var candidateUrls = _.map(_.filter(endpoints, { register: true}), 'url');
-        // Ensure we do not include the candidate endpoint url in it's own unique items list
-        var index = _.indexOf(candidateUrls, endpoint.url);
-        if (index > -1) {
-          _.pullAt(candidateUrls, index);
-        }
-
-        [].push.apply(endpoint.endpointUrls, existingEndpointUrls);
-        [].push.apply(endpoint.endpointUrls, candidateUrls);
-
-      });
-    }
-
-    /**
      * @name discoverAndShowEndpoints
      * @description Discover applicable service endpoints found in the given HSM and provide user with a way to
      * optionally add them as console endpoints
@@ -333,7 +307,6 @@
               }
 
               buildEndpointNames();
-              buildEndpointUrls();
 
               var textScope = {
                 hsmCnsiName: hsmCnsiName,
@@ -363,8 +336,7 @@
                     description: description,
                     endpoints: endpoints,
                     instanceNames: instanceNames,
-                    buildEndpointNames: buildEndpointNames,
-                    buildEndpointUrls: buildEndpointUrls
+                    buildEndpointNames: buildEndpointNames
                   },
                   hideErrorMsg: true,
                   invalidityCheck: function (data) {
@@ -376,7 +348,7 @@
                       if (!endpoint.register) {
                         continue;
                       }
-                      valid = data.form[endpoint.key + 'name'].$valid && data.form[endpoint.key + 'url'].$valid;
+                      valid = data.form[endpoint.key + 'name'].$valid;
                       if (!valid) {
                         return true;
                       }

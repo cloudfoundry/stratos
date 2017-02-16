@@ -41,22 +41,7 @@
         </div>
       </td>
       <td>{{ endpoint.productName }}</td>
-      <td>
-        <div class="form-group" focusable-input
-             ng-class="{'has-error': (data.form[endpoint.key + 'url'].$invalid && data.form[endpoint.key + 'url'].$dirty) || data.form[endpoint.key + 'url'].$error.helionUnique}">
-          <label class="control-label" translate></label>
-          <span class="control-message">
-          <span translate ng-if="data.form[endpoint.key + 'url'].$error.required">Url is required</span>
-          <span translate ng-if="data.form[endpoint.key + 'url'].$error.helionUnique">Url is not unique</span>
-          </span>
-          <input type="text" name="{{endpoint.key + 'url'}}" class="form-control"
-                 ng-model="endpoint.url"
-                 ng-change="data.buildEndpointUrls()"
-                 helion-unique items="endpoint.endpointUrls"
-                 ignore-case
-                 required/>
-        </div>
-      </td>
+      <td>{{ endpoint.url }}</td>
       <td>
         <checkbox-input ng-model="endpoint.skipSll"
                         input-label="{{'Skip SSL validation for the endpoint' | translate}}">
