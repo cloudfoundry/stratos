@@ -46,6 +46,11 @@
 
       // Fetch details for every space
       _.forEach(_.get(that.organizationModel, that.spacesPath), function (space) {
+        // For each space reset routes and serviceInstances, in order to refetch them
+        var spaceGuid = space.metadata.guid;
+        _.unset(that.spaceModel, 'spaces.' + that.clusterGuid + '.' + spaceGuid + '.routes');
+        _.unset(that.spaceModel, 'spaces.' + that.clusterGuid + '.' + spaceGuid + '.instances');
+
         var promiseForDetails = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
           //Swallow errors for individual spaces
           $log.error('Failed to fetch details for space - ' + space.entity.name);
