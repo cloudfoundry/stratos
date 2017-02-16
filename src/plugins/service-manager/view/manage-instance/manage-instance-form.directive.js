@@ -81,7 +81,6 @@
     }
 
     if (this.data.mode === 'upgrade') {
-      //this.serviceChanged(this.data.productVersion, this.data.sdlVersion);
       this.getUpgradeMetadata();
     }
 
@@ -104,13 +103,21 @@
         deferred.reject(reader.result);
       };
 
-      reader.readAsText(file, encoding);
+      try {
+        reader.readAsText(file, encoding);
+      } catch (exception) {
+        deferred.reject(exception);
+      }
+
       return deferred.promise;
     },
 
     read: function () {
       var that = this;
       this.readInstanceFile(this.instanceFile).then(function (text) {
+        // Possible improvement - Add general error handling + messages to cover unexpected file content/syntax or
+        // missing required properties. At the moment these silently fail.
+
         // Exceptions will get caught later down the promise chain
         var json = angular.fromJson(text);
         if (json.instance_id) {
@@ -181,13 +188,17 @@
       this.sdlChanged();
     },
 
+    isParamRequired: function (param) {
+      return param.required && !param.generator && !(param.default || _.isString(param.default));
+    },
+
     sdlChanged: function () {
       var that = this;
       if (this.data.sdl) {
         this.hsmModel.getServiceSdl(this.data.guid, this.service.id, this.data.product, this.data.sdl).then(function (sdl) {
           that.parameters = sdl.parameters;
           _.each(that.parameters, function (param) {
-            param.notSupplied = param.required && !param.generator && !param.secret && !param.default;
+            param.notSupplied = that.isParamRequired(param);
           });
           that.showAllParams(false);
         });
@@ -200,7 +211,7 @@
       var that = this;
       if (!showAll) {
         that.shownParams = _.filter(that.parameters, function (param) {
-          return param.required && !param.generator && !param.secret && !param.default;
+          return that.isParamRequired(param);
         });
       } else {
         that.shownParams = that.parameters;

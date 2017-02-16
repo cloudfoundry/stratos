@@ -80,9 +80,9 @@
     });
 
     // Upgrades Tab
-    $stateProvider.state('sm.endpoint.instance.upgrades', {
-      url: '/upgrades',
-      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-upgrades.html',
+    $stateProvider.state('sm.endpoint.instance.versions', {
+      url: '/versions',
+      templateUrl: 'plugins/service-manager/view/service/instance-detail/instance-versions.html',
       ncyBreadcrumb: {
         label: '{{ instanceCtrl.id || "..." }}',
         parent: 'sm.endpoint.detail.instances'
@@ -95,19 +95,17 @@
   ServiceManagerInstanceDetailController.$inject = [
     '$scope',
     '$timeout',
-    '$stateParams',
-    '$log',
-    'app.utils.utilsService',
     '$state',
-    '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    '$stateParams',
+    'app.utils.utilsService',
     'app.model.modelManager',
     'helion.framework.widgets.dialog.confirm',
     'service-manager.view.manage-instance.dialog',
     'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog, manageInstanceDialog, versionUtils) {
+  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, utils, modelManager,
+                                                  confirmDialog, manageInstanceDialog, versionUtils) {
     var that = this;
 
     this.initialized = false;
@@ -132,17 +130,17 @@
     this.interestingState = false;
 
     this.actions = [
-      { id: 'upgrade', name: 'Upgrade Instance',
+      { id: 'upgrade', name: gettext('Upgrade Instance'),
         execute: function () {
           return that.upgradeInstance(that.id);
         }
       },
-      { id: 'configure', name: 'Configure Instance',
+      { id: 'configure', name: gettext('Configure Instance'),
         execute: function () {
           return that.configureInstance(that.id);
         }
       },
-      { id: 'delete', name: 'Delete Instance',
+      { id: 'delete', name: gettext('Delete Instance'),
         execute: function () {
           return that.deleteInstance(that.id);
         }
@@ -164,6 +162,16 @@
       that.$timeout.cancel(that.pollTimer);
     });
 
+    $scope.$watch(function () {
+      return that.hsmModel.hideCompletedComponents;
+    }, function () {
+      that._filterComponents();
+    });
+
+    if (angular.isUndefined(that.hsmModel.hideCompletedComponents)) {
+      that.hsmModel.hideCompletedComponents = true;
+    }
+
     this.fetch().then(function () {
       that.poll();
     });
@@ -172,9 +180,11 @@
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
 
     updateActions: function () {
-      var isBusy = this.deleting || this.deleted || this.interestingState;
+      var isDelete = this.deleting || this.deleted || this.instance.state === 'deleting' ||
+        this.instance.state === 'deleted';
+      var isBusy = isDelete || this.interestingState;
       this.actionsMap.configure.disabled = isBusy;
-      this.actionsMap.delete.disabled = isBusy;
+      this.actionsMap.delete.disabled = isDelete;
 
       var hasUpgrades = this.instance && this.instance.available_upgrades && this.instance.available_upgrades.length > 0;
       this.actionsMap.upgrade.disabled = isBusy || !hasUpgrades;
@@ -206,6 +216,7 @@
       var that = this;
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
+        that._filterComponents();
         that._setStateIndicator();
         that._sortUpgrades();
       }).catch(function (err) {
@@ -222,45 +233,39 @@
       });
     },
 
+    _filterComponents: function () {
+      var that = this;
+      if (!that.instance) {
+        this.components = [];
+      } else {
+        this.components = _.filter(that.instance.components, function (item) {
+          var inactive = item.state.phase === 'Failed' || item.state.phase === 'Succeeded';
+          return that.hsmModel.hideCompletedComponents ? !inactive : true;
+        });
+      }
+    },
+
     _sortUpgrades: function () {
       var that = this;
       this.versionUtils.sortByProperty(this.instance.available_upgrades, 'product_version', true);
       _.each(this.instance.available_upgrades, function (product) {
-        //console.log(product);
         that.versionUtils.sortByProperty(product.sdl_versions, 'sdl_version', true);
       });
     },
 
     _setStateIndicator: function () {
-      var that = this;
-      that.interestingState = false;
+      this.stateIndicator = this.hsmModel.instanceStateIndicator(this.instance.state);
+      this.interestingState = false;
       switch (this.instance.state) {
-        case 'running':
-          that.stateIndicator = 'ok';
-          break;
         case 'creating':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
         case 'deleting':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
         case 'modifying':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
-        case 'deleted':
-          that.stateIndicator = 'tentative';
-          break;
-        case 'degraded':
-          that.stateIndicator = 'warning';
-          break;
-        case '404':
-          that.stateIndicator = 'error';
-          break;
-        default:
-          that.stateIndicator = 'tentative';
       }
       this.updateActions();
     },
@@ -270,12 +275,12 @@
       var dialog = this.confirmDialog({
         title: gettext('Delete Instance'),
         description: function () {
-          return 'Are you sure that you want to delete instance "' + id + '" ?';
+          return gettext('Are you sure that you want to delete instance "' + id + '" ?');
         },
         moment: moment,
         buttonText: {
           yes: gettext('Delete'),
-          no: 'Cancel'
+          no: gettext('Cancel')
         }
       });
       dialog.result.then(function () {
@@ -303,12 +308,70 @@
 
   UpgradeController.$inject = [
     '$state',
-    'app.model.modelManager'
+    '$q',
+    'app.model.modelManager',
+    'app.utils.utilsService',
+    'service-manager.utils.version'
   ];
 
-  function UpgradeController($state, modelManager) {
-    var hsmModel = modelManager.retrieve('service-manager.model');
-    hsmModel.clearUpgrades($state.params.guid);
+  function UpgradeController($state, $q, modelManager, utils, versionUtils) {
+    var that = this;
+
+    this.versionUtils = versionUtils;
+    this.guid = $state.params.guid;
+    this.id = $state.params.id;
+
+    function processUpgrades(instance) {
+      var upgrades = {};
+      _.each(instance.available_upgrades, function (productUpgrade) {
+        var pUpgrade = {};
+        upgrades[productUpgrade.product_version] = pUpgrade;
+        _.each(productUpgrade.sdl_versions, function (sdlUpgrade) {
+          pUpgrade[sdlUpgrade.sdl_version] = sdlUpgrade.is_latest;
+        });
+      });
+      return upgrades;
+    }
+
+    function init() {
+      that.hsmModel = modelManager.retrieve('service-manager.model');
+
+      var instances = that.hsmModel.model[that.guid].instances;
+      var instance = _.find(instances, {instance_id: that.id});
+
+      if (!instance) {
+        return $q.reject('Instance with id \'' + that.id + '\' not found: ');
+      }
+
+      var upgrades = processUpgrades(instance);
+      var services = that.hsmModel.model[that.guid].services;
+      var service = _.find(services, {id: instance.service_id});
+
+      if (!service) {
+        return $q.reject('Service with id \'' + instance.service_id + '\' not found: ');
+      }
+
+      that.versions = service.product_versions;
+      _.each(that.versions, function (product) {
+        product.versions = [];
+        product.isUpgrade = _.has(upgrades, product.product_version);
+        _.each(product.sdl_versions, function (url, sdlVersion) {
+          var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
+          var isLatest = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
+          product.versions.push({
+            sdl_version: sdlVersion,
+            isUpgrade: isUpgrade,
+            isLatest: isLatest,
+            isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
+          });
+        });
+        versionUtils.sortByProperty(product.versions, 'sdl_version', true);
+      });
+      versionUtils.sortByProperty(that.versions, 'product_version', true);
+    }
+
+    utils.chainStateResolve('sm.endpoint.instance.versions', $state, init);
+
   }
 
 })();

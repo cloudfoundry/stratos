@@ -27,64 +27,44 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat-start="endpoint in svcsCtrl.stTableInstances track by endpoint.instance_id">
+      <tr ng-repeat="instance in svcsCtrl.stTableInstances track by instance.instance_id">
         <td >
-          <a ng-click="instancesCtrl.open(endpoint)">{{ endpoint.instance_id }}</a>
+          <a ui-sref="sm.endpoint.instance.components({id: instance.instance_id})">{{ instance.instance_id }}</a>
         </td>
-        <td ng-switch="endpoint.state" class="endpoint-table-connected">
-          <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-switch-when="running"></span>
-          <div ng-switch-when="error"
-                uib-popover="{{ 'Disconnected' | translate }}"
+        <td class="endpoint-table-connected" ng-init="state = smCtrl.hsmModel.instanceStateIndicator(instance.state)">
+          <bounce-spinner classes="bounce-spinner-sm" ng-if="state === 'busy'"></bounce-spinner>
+          <span ng-if="state !== 'busy'"
+                class="helion-icon helion-icon-lg {{ state | appStateIcon | smallToLargeIcon}}"
+                uib-popover="{{ instance.state }}"
                 popover-trigger="'mouseenter'"
                 popover-placement="top-left"
-                popover-popup-delay="1000">
-            <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
-          </div>
-          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                ng-switch-when="expired"></span>
-          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                ng-switch-when="pending"></span>
-          <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                ng-switch-when="complicated"></span>
+                popover-popup-delay="1000"
+                popover-class="first-letter-uppercase"></span>
         </td>
 
         <td>
-          <a ui-sref="sm.endpoint.service.detail({id:  endpoint.service_id })">
-          {{  endpoint.service_id }}
+          <a ui-sref="sm.endpoint.service.detail({id: instance.service_id })">
+          {{  instance.service_id }}
           </a>
         </td>
-        <td>{{ endpoint.product_version }}</td>
+        <td>{{ instance.product_version }}</td>
         <td>
-          <a ui-sref="sm.endpoint.service.sdl({id: endpoint.service_id, product: endpoint.product_version, sdl: endpoint.sdl_version})">
-          {{ endpoint.sdl_version }}
+          <a ui-sref="sm.endpoint.service.sdl({id: instance.service_id, product: instance.product_version, sdl: instance.sdl_version})">
+          {{ instance.sdl_version }}
           </a>
         </td>
-        <td>{{ endpoint.vendor }}</td>
+        <td>{{ instance.vendor }}</td>
         <td>
           <!--
-          <actions-menu actions="endpoint.actions"
-                        action-target="endpoint.actionsTarget"
+          <actions-menu actions="instance.actions"
+                        action-target="instance.actionsTarget"
                         menu-icon="helion-icon helion-icon-More"
                         menu-position="actions-menu-right"
                         enable-button-mode="true"></actions-menu>
         -->
-          <div ng-if="smCtrl.hasUpgrade(endpoint.instance_id, true) && !smCtrl.hasUpgrade(endpoint.instance_id)" class="upgrade-indicator">
-            <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+          <div ng-if="smCtrl.hasUpgrade(instance.instance_id, true)" class="upgrade-indicator">
+            <i ui-sref="sm.endpoint.instance.versions({id: instance.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
           </div>
-        </td>
-      </tr>
-      <tr ng-if="smCtrl.hasUpgrade(endpoint.instance_id)" ng-repeat-end>
-        <td colspan="7" class="table-inline-message hsm-upgrade">
-          <div>
-            <div class="upgrade-message">
-              <i ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
-              <a ui-sref="sm.endpoint.instance.upgrades({id: endpoint.instance_id})">Upgrade available</a>
-            </div>
-            <div class="upgrade-acknowledge">
-              <i ng-click="smCtrl.acknowledgeUpgrade(endpoint.instance_id)" class="helion-icon helion-icon-Close"></i>
-            </div>
-          <div>
         </td>
       </tr>
       </tbody>

@@ -1,7 +1,7 @@
 <form name="form.createInstanceForm" file-drop="ciFormCtrl.instanceFile">
 
   <div class="hsm-create-instance-intro">
-    <p>
+    <p translate>
       You can upload a pre-prepared instance JSON file, by either selecting the file below or by
       dragging and dropping it onto this area.
     </p>
@@ -25,7 +25,7 @@
   </div>
 
   <div ng-if="ciFormCtrl.data.mode === 'upgrade'">
-    <h4>Choose Product Version and SDL Version to upgrade to</h4>
+    <h4 translate>Choose Product Version and SDL Version to upgrade to</h4>
     <fieldset class="fieldset-horizontal">
       <div class="form-group" focusable-input>
         <label class="control-label" translate>Product Version</label>
@@ -68,7 +68,7 @@
     </div>
     </fieldset>
 
-    <h4>Choose Product Version, SDL Version and an Instance ID</h4>
+    <h4 translate>Choose Product Version, SDL Version and an Instance ID</h4>
     <fieldset class="fieldset-horizontal">
       <div class="form-group" focusable-input>
         <label class="control-label" translate>Product Version</label>
@@ -111,7 +111,7 @@
   <div class="hsm-params-selector">
     <h4 translate>Service Parameters</h4>
     <div ng-if="ciFormCtrl.data.mode === 'create'">
-      <span>Show:</span>
+      <span translate>Show:</span>
       <a translate ng-click="ciFormCtrl.showAllParams(false)">Required</a>
       <a translate ng-click="ciFormCtrl.showAllParams(true)">All</a>
     </div>
@@ -119,9 +119,9 @@
 
   <fieldset class="two-width-fields">
     <div ng-repeat="p in ciFormCtrl.shownParams" class="form-group" focusable-input>
-      <label class="control-label" translate>{{p.name}}</label>
+      <label class="control-label">{{p.name}}</label>
       <input
-        type="text"
+        type="{{ p.secret ? 'password' : 'text' }}"
         class="form-control"
         ng-model="ciFormCtrl.data.params[p.name]"
         placeholder="{{p.default || p.example}}"
@@ -129,7 +129,7 @@
       />
     </div>
   </fieldset>
-  <div ng-if="ciFormCtrl.shownParams.length === 0">
+  <div ng-if="ciFormCtrl.shownParams.length === 0" translate>
     This service does not have any parameters that must be provided.
   </div>
   </div>

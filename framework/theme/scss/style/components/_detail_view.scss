@@ -36,7 +36,7 @@ $detail-view-margin: $hpe-unit-space * 4;
       }
     }
   }
-  
+
 
 
   .detail-view-content {
@@ -160,8 +160,8 @@ $detail-view-margin: $hpe-unit-space * 4;
       padding-top: $hpe-unit-space * 3 / 4;
       background: $white;
 
-      .btn:not(:last-child) {
-        margin-right: $hpe-unit-space / 2;
+      .btn {
+        margin-left: $hpe-unit-space / 2;
       }
     }
   }

@@ -68,10 +68,16 @@
   }
 
   function sort(array) {
+    if (!array) {
+      return;
+    }
     return array.sort(compare);
   }
 
   function sortByProperty(array, property, reverse) {
+    if (!array) {
+      return;
+    }
     return array.sort(compareByProperty(property, reverse));
   }
 

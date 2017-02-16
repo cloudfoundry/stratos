@@ -30,10 +30,4 @@
     this.$state = $state;
   }
 
-  angular.extend(ServiceManagerInstancesController.prototype, {
-    open: function (endpoint) {
-      this.$state.go('sm.endpoint.instance.components', {id: endpoint.instance_id});
-    }
-  });
-
 })();

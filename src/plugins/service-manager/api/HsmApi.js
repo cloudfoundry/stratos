@@ -174,6 +174,10 @@
       });
 
       return this._request('PUT', 'instances/' + instance.instance_id, guid, instanceRequest, httpConfigOptions);
+    },
+
+    info: function (guids, httpConfigOptions) {
+      return this._get('info', guids, _.set(httpConfigOptions || {}, 'headers.x-cnap-passthrough', 'false'));
     }
 
   });

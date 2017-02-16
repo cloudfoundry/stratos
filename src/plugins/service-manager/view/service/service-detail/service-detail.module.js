@@ -22,7 +22,6 @@
       }
     });
 
-    // Abstract detail route
     $stateProvider.state('sm.endpoint.service.detail', {
       url: '/detail',
       templateUrl: 'plugins/service-manager/view/service/service-detail/service-detail.html',
@@ -48,15 +47,13 @@
 
   ServiceManagerServiceDetailController.$inject = [
     '$stateParams',
-    '$log',
-    'app.utils.utilsService',
     '$state',
     '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.utils.utilsService',
     'app.model.modelManager'
   ];
 
-  function ServiceManagerServiceDetailController($stateParams, $log, utils, $state, $q, rolesService, modelManager) {
+  function ServiceManagerServiceDetailController($stateParams, $state, $q, utils, modelManager) {
     var that = this;
 
     this.initialized = false;
@@ -71,12 +68,18 @@
     };
 
     var guid = $state.params.guid;
-    var id = $state.params.id;
+    this.id = $state.params.id;
 
-    this.id = id;
+    function init() {
+      that.hsmModel = modelManager.retrieve('service-manager.model');
 
-    this.hsmModel.getService(guid, id).then(function (data) {
-      that.service = data;
+      var services = that.hsmModel.model[guid].services;
+      that.service = _.find(services, {id: that.id});
+
+      if (!that.service) {
+        return $q.reject('Service with id \'' + that.id + '\' not found: ');
+      }
+
       that.versions = [];
       _.each(that.service.product_versions, function (product) {
         _.each(product.sdl_versions, function (sdl, sdlVersion) {
@@ -87,24 +90,9 @@
           });
         });
       });
+    }
 
-      /*
-
-      var product = data.product_versions[0];
-      var pv = product.product_version;
-      var sv = product.latest;
-
-      that.hsmModel.getServiceSdl(guid, id, pv, sv).then(function (sdl) {
-        console.log('GOT SDL');
-        console.log(sdl);
-      });
-
-      that.hsmModel.getServiceProduct(guid, id, pv).then(function (sdl) {
-        console.log('GOT PRODUCT');
-        console.log(sdl);
-      });
-      */
-    });
+    utils.chainStateResolve('sm.endpoint.service.detail', $state, init);
   }
 
 })();

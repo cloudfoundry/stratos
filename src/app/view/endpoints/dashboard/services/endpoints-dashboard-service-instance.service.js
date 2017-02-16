@@ -130,6 +130,7 @@
       var activeEndpointsKeys = [];
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var userAccount = modelManager.retrieve('app.model.account');
       var endpoints = dashboardService.endpoints;
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
@@ -145,6 +146,7 @@
         var eKey = endpointPrefix + serviceInstance.guid;
         var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
         var reuse = !!endpoint;
+        var hide = false;
         if (!reuse) {
           endpoint = {
             key: eKey
@@ -157,12 +159,16 @@
               endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
               break;
             case 'hsm':
-              endpoint.type = 'Helion Service Manager';
+              endpoint.type = utilsService.getOemConfiguration().SERVICE_MANAGER;
+              // Only Console admins can see HSM endpoints
+              hide = !userAccount.isAdmin();
               break;
             default:
               endpoint.type = gettext('Unknown');
           }
-          endpoints.push(endpoint);
+          if (!hide) {
+            endpoints.push(endpoint);
+          }
         } else {
           delete endpoint.error;
         }
@@ -284,25 +290,31 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-          serviceInstanceModel.remove(serviceInstance).then(function () {
-            notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
-              name: serviceInstance.name
+          modelManager.retrieve('app.model.serviceInstance').remove(serviceInstance)
+            .then(function () {
+              notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
+                name: serviceInstance.name
+              });
+              updateInstances().then(function () {
+                createEndpointEntries();
+                switch (serviceInstance.cnsi_type) {
+                  case 'hcf':
+                    authModel.remove(serviceInstance.guid);
+                    break;
+                  case 'hce':
+                    dashboardService.refreshCodeEngineVcses().then(function () {
+                      vcsService.createEndpointEntries();
+                    });
+                    break;
+                }
+              });
+            })
+            .then(function () {
+              // Ensure that the user service instance list is updated before sending change notification
+              return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
+                eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+              });
             });
-            updateInstances().then(function () {
-              createEndpointEntries();
-              switch (serviceInstance.cnsi_type) {
-                case 'hcf':
-                  authModel.remove(serviceInstance.guid);
-                  break;
-                case 'hce':
-                  dashboardService.refreshCodeEngineVcses().then(function () {
-                    vcsService.createEndpointEntries();
-                  });
-                  break;
-              }
-            });
-          });
         }
       });
     }
@@ -388,7 +400,12 @@
                 });
               break;
           }
-          eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+        })
+        .then(function () {
+          // Ensure that the user service instance list is updated before sending change notification
+          return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
+            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+          });
         });
     }
   }

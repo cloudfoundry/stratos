@@ -47,5 +47,6 @@
     $scope.$on('$destroy', function () {
       that.removeStateChangeListener();
     });
+
   }
 })();
