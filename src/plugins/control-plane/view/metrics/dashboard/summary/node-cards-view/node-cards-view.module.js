@@ -27,35 +27,19 @@
     '$q',
     '$state',
     '$stateParams',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function CardsViewController($q, $state, $stateParams, modelManager, utilsService) {
+  function CardsViewController($q, $state, $stateParams, utilsService, metricsDataService) {
 
     var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
     this.nodes = [];
 
     function init() {
-      return controlPlaneModel.getComputeNodes(that.guid)
-        .then(function (nodes) {
-
-          that.nodes = _.filter(nodes, function (node) {
-            return node.spec.profile !== 'gluster';
-          });
-
-          _.each(that.nodes, function (node) {
-            if (node.spec.hostname === '192.168.200.2') {
-              node.spec.hostname = 'kubernetes-master';
-            }
-            if (node.spec.hostname === '192.168.200.3') {
-              node.spec.hostname = 'kubernetes-node';
-            }
-          });
-        });
+      that.nodes = metricsDataService.getNodes(that.guid, true);
+      return $q.resolve();
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary.cards', $state, init);

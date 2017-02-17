@@ -8,7 +8,6 @@
   function nodesStatusCard() {
     return {
       bindToController: {
-        nodes: '=',
         guid: '@'
       },
       controller: NodesStatusCardController,
@@ -22,18 +21,23 @@
     '$q',
     '$state',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function NodesStatusCardController($q, $state, modelManager, utilsService) {
+  function NodesStatusCardController($q, $state, modelManager, utilsService, metricsDataService) {
 
+    var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
 
+    this.nodes = [];
     this.cardData = {
       title: gettext('Summary')
     };
 
     function init() {
+      that.nodes = metricsDataService.getNodes(that.guid);
+
       return $q.resolve();
     }
 

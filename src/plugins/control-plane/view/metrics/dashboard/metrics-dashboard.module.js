@@ -11,20 +11,38 @@
     .config(registerRoute);
 
   registerRoute.$inject = [
-    '$stateProvider'
+    '$stateProvider',
+
   ];
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cp.metrics.dashboard', {
       url: '',
+      params: {
+        guid: ''
+      },
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/metrics-dashboard.html',
       controller: MetricsDashBoardController,
       controllerAs: 'metricsDashboardCtrl'
     });
   }
 
-  MetricsDashBoardController.$inject = [];
+  MetricsDashBoardController.$inject = [
+    '$state',
+    '$stateParams',
+    'control-plane.metrics.metrics-data-service',
+    'app.utils.utilsService'
+  ];
 
-  function MetricsDashBoardController() {
+  function MetricsDashBoardController($state, $stateParams, metricsDataService, utilsService) {
+
+    var guid = $stateParams.guid;
+
+    function init() {
+      return metricsDataService.fetchComputeNodes(guid);
+    }
+
+    utilsService.chainStateResolve('cp.metrics.dashboard', $state, init);
+
   }
 })();

@@ -10,7 +10,8 @@
   function summaryControlBar() {
     return {
       bindToController: {
-        summaryName: '@'
+        summaryName: '@',
+        guid: '@'
       },
       controller: SummaryControlBar,
       controllerAs: 'summaryControlBarCtrl',

@@ -25,13 +25,15 @@
   }
 
   MemorySummaryController.$inject = [
+    '$q',
     '$state',
     '$stateParams',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function MemorySummaryController($state, $stateParams, modelManager, utilsService) {
+  function MemorySummaryController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
@@ -39,34 +41,13 @@
     var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
-    this.nodes = [];
-    this.kubernetesNodes = [];
 
     this.totalMemoryUsageTile = gettext('Total Memory Usage');
 
     function init() {
-      return controlPlaneModel.getComputeNodes(that.guid)
-        .then(function (nodes) {
-          that.nodes = nodes;
-
-          that.kubernetesNodes = _.filter(nodes, function (node) {
-            return node.spec.profile !== 'gluster';
-          });
-
-          // hack for dev-harness
-          _.each(that.kubernetesNodes, function (node) {
-            if (node.spec.hostname === '192.168.200.2') {
-              node.spec.hostname = 'kubernetes-master';
-            }
-            if (node.spec.hostname === '192.168.200.3') {
-              node.spec.hostname = 'kubernetes-node';
-            }
-          });
-        });
-
+      return $q.resolve();
     }
-
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
+    utilsService.chainStateResolve('cp.metrics.dashboard.memory-summary', $state, init);
 
   }
 

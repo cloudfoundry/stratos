@@ -1,13 +1,15 @@
 <div class="hcp-summary">
 
   <div class="row">
-    <nodes-status-card nodes="metricsSummaryCtrl.nodes" guid="{{ metricsSummaryCtrl.guid }}"></nodes-status-card>
+    <nodes-status-card guid="{{ metricsSummaryCtrl.guid }}"></nodes-status-card>
     <!--<node-count-card></node-count-card>-->
   </div>
 
   <div>
     <summary-control-bar
-      summary-name="summary">
+     summary-name="summary"
+     guid="{{ metricsSummaryCtrl.guid }}"
+    >
     </summary-control-bar>
   </div>
 

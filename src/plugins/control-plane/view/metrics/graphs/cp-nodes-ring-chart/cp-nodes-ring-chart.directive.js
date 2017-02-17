@@ -20,15 +20,13 @@
 
   ControlPlaneNodesController.$inject = [
     '$scope',
-    'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function ControlPlaneNodesController($scope, modelManager, utilsService) {
+  function ControlPlaneNodesController($scope, utilsService) {
 
     var that = this;
 
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
     this.data = {
       ok: 0,
@@ -59,7 +57,6 @@
         that.data[key] = getCount(label);
       });
     }
-
 
     $scope.$watch(function () {
       return that.nodes;

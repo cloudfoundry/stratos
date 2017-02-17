@@ -28,10 +28,11 @@
     '$state',
     '$stateParams',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function CardsListController($q, $state, $stateParams, modelManager, utilsService) {
+  function CardsListController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
@@ -39,7 +40,6 @@
     this.guid = $stateParams.guid;
     this.$q = $q;
     this.nodes = [];
-
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
@@ -52,22 +52,10 @@
     ];
 
     function init() {
-      return controlPlaneModel.getComputeNodes(that.guid)
-        .then(function (nodes) {
 
-          that.nodes = _.filter(nodes, function (node) {
-            return node.spec.profile !== 'gluster';
-          });
+      that.nodes = metricsDataService.getNodes(that.guid, true);
 
-          _.each(that.nodes, function (node) {
-            if (node.spec.hostname === '192.168.200.2') {
-              node.spec.hostname = 'kubernetes-master';
-            }
-            if (node.spec.hostname === '192.168.200.3') {
-              node.spec.hostname = 'kubernetes-node';
-            }
-          });
-        })
+      return $q.resolve()
         .then(function () {
           // Enrich nodes information
 

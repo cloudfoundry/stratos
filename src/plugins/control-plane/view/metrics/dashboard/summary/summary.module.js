@@ -25,41 +25,21 @@
   }
 
   MetricsSummaryController.$inject = [
+    '$q',
     '$state',
     '$stateParams',
-    'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function MetricsSummaryController($state, $stateParams, modelManager, utilsService) {
+  function MetricsSummaryController($q, $state, $stateParams, utilsService) {
     var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
-    this.nodes = [];
-    this.kubernetesNodes = [];
 
     this.showCardLayout = true;
 
-    this.switchToListView = function (switchView) {
-      if (switchView) {
-        $state.go('cp.metrics.dashboard.summary.list');
-      } else {
-        $state.go('cp.metrics.dashboard.summary.cards');
-      }
-    };
-
     function init() {
-      return controlPlaneModel.getComputeNodes(that.guid)
-        .then(function (nodes) {
-          that.nodes = nodes;
-
-          that.kubernetesNodes = _.filter(nodes, function (node) {
-            return node.spec.profile !== 'gluster';
-          });
-        });
+      return $q.resolve();
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);

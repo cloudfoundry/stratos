@@ -25,47 +25,28 @@
   }
 
   CpuSummaryController.$inject = [
+    '$q',
     '$state',
     '$stateParams',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function CpuSummaryController($state, $stateParams, modelManager, utilsService) {
+  function CpuSummaryController($q, $state, $stateParams, modelManager, utilsService) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
     var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
-    this.nodes = [];
-    this.kubernetesNodes = [];
 
     this.totalCpuUsageTile = gettext('Total CPU Usage');
 
     function init() {
-      return controlPlaneModel.getComputeNodes(that.guid)
-        .then(function (nodes) {
-          that.nodes = nodes;
-
-          that.kubernetesNodes = _.filter(nodes, function (node) {
-            return node.spec.profile !== 'gluster';
-          });
-
-          // hack for dev-harness
-          _.each(that.kubernetesNodes, function (node) {
-            if (node.spec.hostname === '192.168.200.2') {
-              node.spec.hostname = 'kubernetes-master';
-            }
-            if (node.spec.hostname === '192.168.200.3') {
-              node.spec.hostname = 'kubernetes-node';
-            }
-          });
-        });
-
+      return $q.resolve();
     }
 
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
+    utilsService.chainStateResolve('cp.metrics.dashboard.cpu-summary', $state, init);
 
   }
 
