@@ -2,7 +2,10 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.data-traffic-summary', [])
+    .module('control-plane.view.metrics.dashboard.data-traffic-summary', [
+      'control-plane.view.metrics.dashboard.data-traffic-summary.cards',
+      'control-plane.view.metrics.dashboard.data-traffic-summary.list'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [

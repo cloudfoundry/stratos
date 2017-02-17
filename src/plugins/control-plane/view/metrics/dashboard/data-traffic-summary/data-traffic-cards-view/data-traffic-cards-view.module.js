@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.cpu-summary.cards', [])
+    .module('control-plane.view.metrics.dashboard.data-traffic-summary.cards', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cp.metrics.dashboard.cpu-summary.cards', {
+    $stateProvider.state('cp.metrics.dashboard.data-traffic-summary.cards', {
       url: '/tiles',
       params: {
         guid: ''
@@ -18,7 +18,7 @@
       controller: CardsViewController,
       controllerAs: 'cardsViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-cards-view/cpu-cards-view.html'
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-cards-view/data-traffic-cards-view.html'
 
     });
   }

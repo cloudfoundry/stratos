@@ -43,6 +43,14 @@
 
     this.showCardLayout = true;
 
+    this.switchToListView = function (switchView) {
+      if (switchView) {
+        $state.go('cp.metrics.dashboard.summary.list');
+      } else {
+        $state.go('cp.metrics.dashboard.summary.cards');
+      }
+    };
+
     function init() {
       return controlPlaneModel.getComputeNodes(that.guid)
         .then(function (nodes) {

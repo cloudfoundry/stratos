@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.summary.list', [])
+    .module('control-plane.view.metrics.dashboard.memory-summary.list', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,20 +10,20 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cp.metrics.dashboard.summary.list', {
+    $stateProvider.state('cp.metrics.dashboard.memory-summary.list', {
       url: '/list',
       params: {
         guid: ''
       },
-      controller: CpuListViewController,
-      controllerAs: 'cpuListViewCtrl',
+      controller: ListViewController,
+      controllerAs: 'listViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/cards-list/cards-list.html'
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-list-view/memory-list-view.html'
 
     });
   }
 
-  CpuListViewController.$inject = [
+  ListViewController.$inject = [
     '$q',
     '$state',
     '$stateParams',
@@ -31,7 +31,7 @@
     'app.utils.utilsService'
   ];
 
-  function CpuListViewController($q, $state, $stateParams, modelManager, utilsService) {
+  function ListViewController($q, $state, $stateParams, modelManager, utilsService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
@@ -43,8 +43,8 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
-      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
+      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true},
     ];
 
     function init() {
@@ -71,14 +71,13 @@
           _.each(that.nodes, function (node, key) {
 
             var metricPromises = [];
-            // cpu
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
+            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2);
+                that.nodes[key].metrics.memory_usage = (metrics[0] * 100).toFixed(2);
               });
 
             allMetricPromises.push(promises);
@@ -92,6 +91,6 @@
 
   }
 
-  angular.extend(CpuListViewController.prototype, {});
+  angular.extend(ListViewController.prototype, {});
 
 })();

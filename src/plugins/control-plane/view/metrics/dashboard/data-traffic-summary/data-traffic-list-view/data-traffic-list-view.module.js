@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.summary.list', [])
+    .module('control-plane.view.metrics.dashboard.data-traffic-summary.list', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cp.metrics.dashboard.summary.list', {
+    $stateProvider.state('cp.metrics.dashboard.data-traffic-summary.list', {
       url: '/list',
       params: {
         guid: ''
@@ -18,7 +18,7 @@
       controller: CpuListViewController,
       controllerAs: 'cpuListViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/cards-list/cards-list.html'
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-list-view/data-traffic-list-view.html'
 
     });
   }
@@ -44,7 +44,7 @@
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
       {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
-      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
     ];
 
     function init() {

@@ -10,8 +10,7 @@
   function summaryControlBar() {
     return {
       bindToController: {
-        node: '@',
-        showUtilizationDonut: '='
+        summaryName: '@'
       },
       controller: SummaryControlBar,
       controllerAs: 'summaryControlBarCtrl',
@@ -38,13 +37,13 @@
     this.utilsService = utilsService;
     this.metricsData = {};
     this.memoryLimit = 0;
+    this.showCardLayout = true;
 
     this.model = {
       filteredApplications: [],
       unfilteredApplicationCount: 0,
-      showCardLayout: true,
       hasApps: false
-    }
+    };
 
     this.filter = {
       cnsiGuid: 'all',
@@ -98,7 +97,7 @@
       }
     },
 
-    yTickFormatter: function (d, utilsService){
+    yTickFormatter: function (d, utilsService) {
       return utilsService.mbToHumanSize(parseInt(d) / (1024 * 1024)).replace('GB', '');
     },
 
@@ -107,19 +106,24 @@
     },
 
     // New stuff
-    setText: function(){
+    setText: function () {
       // TODO
       console.log('set text called');
     },
     // New stuff
-    resetFilter: function(){
+    resetFilter: function () {
       // TODO
       console.log('resresetFilter text called');
     },
 
-    goToGalleryView: function (showCardLayout) {
-      this.model.showCardLayout = showCardLayout;
-      return this.$state.go('cf.applications.list.gallery-view');
+    switchToListView: function (switchView) {
+      if (switchView) {
+        this.$state.go('cp.metrics.dashboard.' + this.summaryName + '.list');
+        this.showCardLayout = false;
+      } else {
+        this.$state.go('cp.metrics.dashboard.' +  this.summaryName + '.cards');
+        this.showCardLayout = true;
+      }
     }
   });
 

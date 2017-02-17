@@ -3,7 +3,8 @@
 
   angular
     .module('control-plane.view.metrics.dashboard.cpu-summary', [
-      'control-plane.view.metrics.dashboard.cpu-summary.cards'
+      'control-plane.view.metrics.dashboard.cpu-summary.cards',
+      'control-plane.view.metrics.dashboard.cpu-summary.list'
     ])
     .config(registerRoute);
 

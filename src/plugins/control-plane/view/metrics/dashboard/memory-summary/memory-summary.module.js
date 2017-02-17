@@ -2,7 +2,10 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.memory-summary', [])
+    .module('control-plane.view.metrics.dashboard.memory-summary', [
+      'control-plane.view.metrics.dashboard.memory-summary.list',
+      'control-plane.view.metrics.dashboard.memory-summary.cards'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -67,10 +70,6 @@
 
   }
 
-  angular.extend(MemorySummaryController.prototype, {
-
-
-
-  });
+  angular.extend(MemorySummaryController.prototype, {});
 
 })();

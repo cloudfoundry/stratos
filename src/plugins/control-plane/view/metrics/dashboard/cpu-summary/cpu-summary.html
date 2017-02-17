@@ -4,7 +4,9 @@
     <cpu-card node="*" show-utilization-donut="false" title="{{ cpuSummaryCtrl.totalCpuUsageTile }}"></cpu-card>
   </div>
   <div>
-    <summary-control-bar></summary-control-bar>
+    <summary-control-bar
+      summary-name="cpu-summary">
+    </summary-control-bar>
   </div>
 
   <ui-view></ui-view>

@@ -1,13 +1,13 @@
-<div ng-if="cpuListViewCtrl.nodes.length"
+<div ng-if="listViewCtrl.nodes.length"
      class="cp-table">
   <table class="table"
-         st-table="cpuListViewCtrl.stNodes"
-         st-safe-src="cpuListViewCtrl.nodes"
-         st-binding="cpuListViewCtrl.table">
+         st-table="listViewCtrl.stNodes"
+         st-safe-src="listViewCtrl.nodes"
+         st-binding="listViewCtrl.table">
     <thead>
     <tr>
       <th class="column"
-          ng-repeat="column in cpuListViewCtrl.tableColumns"
+          ng-repeat="column in listViewCtrl.tableColumns"
           st-skip-natural="true"
           ng-class="{'column-no-sort': column.noSort}"
           st-sort="{{ column.noSort ? '' : column.value }}"
@@ -23,11 +23,11 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="node in cpuListViewCtrl.stNodes">
+    <tr ng-repeat="node in listViewCtrl.stNodes">
       <td class="table-view-app-name">
         {{ node.spec.hostname }}
       </td>
-      <td>{{ node.metrics.cpu_usage }}</td>
+      <td>{{ node.metrics.memory_usage }}</td>
       <td>sparkline</td>
     </tr>
     </tbody>

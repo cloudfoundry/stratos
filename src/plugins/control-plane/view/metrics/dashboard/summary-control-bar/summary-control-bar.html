@@ -29,15 +29,13 @@
       </div>
       <div class="view-buttons">
         <button class="btn btn-link btn-border-less"
-                ng-class="!summaryControlBarCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
-                type="button" ng-click="summaryControlBarCtrl.goToGalleryView(false)"
-                ng-disabled="!summaryControlBarCtrl.filter.text && !summaryControlBarCtrl.model.hasApps">
+                ng-class="!summaryControlBarCtrl.showCardLayout ? 'btn-active': 'btn-disabled'"
+                type="button" ng-click="summaryControlBarCtrl.switchToListView(true)">
           <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
         </button>
         <button class="btn btn-link btn-border-less"
-                ng-class="summaryControlBarCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
-                type="button" ng-click="summaryControlBarCtrl.goToGalleryView(true)"
-                ng-disabled="!summaryControlBarCtrl.filter.text && !summaryControlBarCtrl.model.hasApps">
+                ng-class="summaryControlBarCtrl.showCardLayout ? 'btn-active': 'btn-disabled'"
+                type="button" ng-click="summaryControlBarCtrl.switchToListView(false)">
           <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
         </button>
       </div>
