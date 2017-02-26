@@ -18,9 +18,9 @@
           <div class=" form-group">
             <label class="control-label" translate>Sort</label>
             <search-box
-              ng-model="summaryControlBarCtrl.filter.currentFilter"
-              input-options="summaryControlBarCtrl.filter.filters"
-              ng-change="summaryControlBarCtrl.setCluster()"
+              ng-model="summaryControlBarCtrl.currentFilter"
+              input-options="summaryControlBarCtrl.filters"
+              ng-change="summaryControlBarCtrl.sort()"
               search-icon="helion-icon helion-icon-Drop_caret"
             >
             </search-box>

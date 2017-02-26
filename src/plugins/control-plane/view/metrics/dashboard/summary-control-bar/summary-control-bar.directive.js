@@ -11,7 +11,8 @@
     return {
       bindToController: {
         summaryName: '@',
-        guid: '@'
+        guid: '@',
+        groupName: '@'
       },
       controller: SummaryControlBar,
       controllerAs: 'summaryControlBarCtrl',
@@ -26,19 +27,21 @@
     '$scope',
     '$q',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function SummaryControlBar($interval, $state, $scope, $q, modelManager, utilsService) {
+  function SummaryControlBar($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.$state = $state;
     this.$q = $q;
     this.utilsService = utilsService;
-    this.metricsData = {};
-    this.memoryLimit = 0;
     this.showCardLayout = true;
+    this.metricsDataService = metricsDataService;
+
+    this.currentFilter =
 
     this.model = {
       filteredApplications: [],
@@ -58,11 +61,10 @@
       title: this.node
     };
     function init() {
-      if (that.showUtilizationDonut) {
-        return that.fetchLimitMetrics();
-      } else {
-        return $q.resolve;
-      }
+
+      that.currentFilter = metricsDataService.getCurrentSortFilter(that.groupName);
+      that.filters = metricsDataService.getSortFilters(that.groupName);
+      return $q.resolve();
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
@@ -115,6 +117,13 @@
     resetFilter: function () {
       // TODO
       console.log('resresetFilter text called');
+    },
+
+    sort: function(){
+
+      console.log(this.currentFilter)
+      this.metricsDataService.set
+      // TODO
     },
 
     switchToListView: function (switchView) {

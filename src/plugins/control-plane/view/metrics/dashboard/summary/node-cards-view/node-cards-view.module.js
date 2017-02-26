@@ -28,18 +28,33 @@
     '$state',
     '$stateParams',
     'app.utils.utilsService',
+    'app.model.modelManager',
     'control-plane.metrics.metrics-data-service'
   ];
 
-  function CardsViewController($q, $state, $stateParams, utilsService, metricsDataService) {
+  function CardsViewController($q, $state, $stateParams, utilsService, modelManager, metricsDataService) {
 
     var that = this;
     this.guid = $stateParams.guid;
     this.nodes = [];
+    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+
 
     function init() {
       that.nodes = metricsDataService.getNodes(that.guid, true);
-      return $q.resolve();
+
+      var promises = [];
+      _.each(that.nodes, function (node) {
+        var hostname = node.spec.hostname;
+        // Add cpu utilization data
+        promises.push(metricsDataService.addNodeMetric(that.guid,
+          hostname,
+          'cpu_node_utilization_gauge',
+          metricsModel.makeNodeNameFilter(hostname)
+        ));
+
+      });
+      return $q.all(promises);
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary.cards', $state, init);

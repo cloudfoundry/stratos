@@ -23,7 +23,9 @@
 
     // model information
     var model = modelManager.retrieve('cloud-foundry.model.application');
-    var metricsData = {}
+    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    var metricsData = {};
+    var sortFilters = {};
 
 
     function fetchComputeNodes(controlPlaneGuid) {
@@ -38,7 +40,7 @@
           metricsData[controlPlaneGuid].nodes = nodes;
 
           // hack for dev-harness
-          _.each(nodes , function (node) {
+          _.each(nodes, function (node) {
             if (node.spec.hostname === '192.168.200.2') {
               node.spec.hostname = 'kubernetes-master';
             }
@@ -50,7 +52,6 @@
           metricsData[controlPlaneGuid].kubernetesNodes = _.filter(nodes, function (node) {
             return node.spec.profile !== 'gluster';
           });
-
 
 
         });
@@ -66,10 +67,49 @@
       // failure case
     }
 
+    function setSortFilters(group, filters, defaultFilter) {
+
+      if (_.has(sortFilters, group)) {
+      } else {
+        sortFilters[group] = {
+          filters: filters,
+          currentFilter: defaultFilter
+        };
+      }
+    }
+
+    function getCurrentSortFilter(group) {
+      return sortFilters[group].currentFilter;
+    }
+
+    function getSortFilters(group) {
+      return sortFilters[group].filters;
+    }
+
+    function setCurrentSortFilter(group, value) {
+      sortFilters[group].currentFilter = value;
+    }
+
+    function addNodeMetric(controlPlaneGuid, hostname, metricName, filter) {
+      return metricsModel.getLatestMetricDataPoint(metricName, filter)
+        .then(function (value) {
+
+          // var node = _.find(model[controlPlaneGuid].nodes, function(node){
+          //
+          // })
+
+        })
+    }
+
     return {
       fetchComputeNodes: fetchComputeNodes,
       getNodes: getNodes,
-      metricsData: metricsData
+      metricsData: metricsData,
+      setSortFilters: setSortFilters,
+      getCurrentSortFilter: getCurrentSortFilter,
+      getSortFilters: getSortFilters,
+      setCurrentSortFilter: setCurrentSortFilter,
+      addNodeMetric: addNodeMetric
     };
 
   }

@@ -29,10 +29,11 @@
     '$state',
     '$stateParams',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function CpuSummaryController($q, $state, $stateParams, modelManager, utilsService) {
+  function CpuSummaryController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
@@ -42,7 +43,24 @@
 
     this.totalCpuUsageTile = gettext('Total CPU Usage');
 
+    this.sortFilters = [
+      {
+        label: gettext('Hostname'),
+        value: 'spec.hostname'
+      },
+      {
+        label: gettext('Utilization'),
+        value: 'metric.cpu_utilization'
+      }
+    ];
+
+    this.defaultFilter = {
+      label: gettext('Hostname'),
+      value: 'spec.hostname'
+    };
+
     function init() {
+      metricsDataService.setSortFilters('cpu', that.sortFilters, that.defaultFilter);
       return $q.resolve();
     }
 

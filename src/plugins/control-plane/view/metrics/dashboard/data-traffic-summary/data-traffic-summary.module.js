@@ -45,7 +45,28 @@
 
     this.totalNetworkUsage = gettext('Total Network Traffic');
 
+    this.sortFilters = [
+      {
+        label: gettext('Hostname'),
+        value: 'spec.hostname'
+      },
+      {
+        label: gettext('Data Transmitted Rate'),
+        value: 'metric.dataTxRate'
+      },
+      {
+        label: gettext('Data Received Rate'),
+        value: 'metric.dataRxRate'
+      }
+    ];
+
+    this.defaultFilter = {
+      label: gettext('Hostname'),
+      value: 'spec.hostname'
+    };
+
     function init() {
+      metricsDataService.setSortFilters('data-traffic', that.sortFilters, that.defaultFilter);
       return $q.resolve();
     }
 

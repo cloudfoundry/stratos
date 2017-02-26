@@ -44,9 +44,27 @@
 
     this.totalMemoryUsageTile = gettext('Total Memory Usage');
 
+    this.sortFilters = [
+      {
+        label: gettext('Hostname'),
+        value: 'spec.hostname'
+      },
+      {
+        label: gettext('Utilization'),
+        value: 'metric.memory_utilization'
+      }
+    ];
+
+    this.defaultFilter = {
+      label: gettext('Hostname'),
+      value: 'spec.hostname'
+    };
+
     function init() {
+      metricsDataService.setSortFilters('memory', that.sortFilters, that.defaultFilter);
       return $q.resolve();
     }
+
     utilsService.chainStateResolve('cp.metrics.dashboard.memory-summary', $state, init);
 
   }
