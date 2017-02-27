@@ -46,6 +46,7 @@
       var promises = [];
       _.each(that.nodes, function (node) {
         var hostname = node.spec.hostname;
+
         // Add cpu utilization data
         promises.push(metricsDataService.addNodeMetric(that.guid,
           hostname,
@@ -54,7 +55,7 @@
         ));
 
       });
-      return $q.all(promises);
+      return $q.all(promises).catch(_.noop);
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary.cards', $state, init);

@@ -71,7 +71,6 @@
       value: 'spec.hostname'
     };
 
-
     function init() {
 
       metricsDataService.setSortFilters('nodes', that.sortFilters, that.defaultFilter);

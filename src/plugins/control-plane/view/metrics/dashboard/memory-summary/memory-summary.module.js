@@ -42,8 +42,6 @@
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
 
-    this.totalMemoryUsageTile = gettext('Total Memory Usage');
-
     this.sortFilters = [
       {
         label: gettext('Hostname'),

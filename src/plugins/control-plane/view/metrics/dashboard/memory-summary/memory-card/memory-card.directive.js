@@ -12,7 +12,9 @@
     return {
       bindToController: {
         node: '@',
-        showUtilizationDonut: '='
+        showUtilizationDonut: '=',
+        title: '@',
+        metricsNodeName: '@'
       },
       controller: MemoryCardController,
       controllerAs: 'memoryCardCtrl',
@@ -49,7 +51,7 @@
     // }
 
     this.cardData = {
-      title: this.node
+      title: this.title
     };
     function init() {
       if (that.showUtilizationDonut) {
@@ -69,7 +71,7 @@
     },
 
     getNodeFilter: function () {
-      return this.metricsModel.makeNodeNameFilter(this.node);
+      return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
     },
 
     hasMetrics: function (metricName) {
@@ -78,7 +80,7 @@
 
     fetchLimitMetrics: function () {
       var that = this;
-      this.metricsModel.getNodeMemoryLimit(this.node).then(function (memoryLimit) {
+      this.metricsModel.getNodeMemoryLimit(this.metricsNodeName).then(function (memoryLimit) {
         that.memoryLimit = parseInt(memoryLimit, 10) / (1024 * 1024);
       });
     },

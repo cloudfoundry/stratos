@@ -59,7 +59,7 @@
 
             var metricPromises = [];
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {

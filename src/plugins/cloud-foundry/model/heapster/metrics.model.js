@@ -274,7 +274,11 @@
     makePodFilter: function (namespaceName, podName) {
       return '{namespace_name=' + namespaceName + ',pod_name=' + podName + '}';
     },
+
     makeNodeNameFilter: function (nodeName) {
+      // get hostname
+      // var index = nodeName.indexOf('.');
+      // var hostName = index === -1 ? nodeName : nodeName.substring(0, index);
       return '{nodename=' + nodeName + '}';
     },
 
@@ -283,9 +287,9 @@
       var dpsArray = _.map(metricsDataArray, 'dps');
       var keys = _.keys(dpsArray[0]);
 
-      if (!_.isEqual(keys, _.keys(dpsArray[1]))) {
-        console.log('Keys are not equal!');
-      }
+      // if (!_.isEqual(keys, _.keys(dpsArray[1]))) {
+      //   console.log('Keys are not equal!');
+      // }
 
       var mergedDpsArray = {};
       _.each(keys, function (key) {

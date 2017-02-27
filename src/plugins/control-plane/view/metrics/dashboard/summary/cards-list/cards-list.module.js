@@ -65,20 +65,20 @@
             var metricPromises = [];
             // cpu
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // memory_usage
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // uptime
-            metricPromises.push(that.metricsModel.getNodeUptime(node.spec.hostname));
+            metricPromises.push(that.metricsModel.getNodeUptime(node.spec.metricsNodeName));
             // availabilityZone
             metricPromises.push(that.$q.resolve(node.spec.zone));
             // dataTx
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_tx_rate_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // dataRx
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_rx_rate_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {

@@ -11,6 +11,7 @@
     return {
       bindToController: {
         node: '@',
+        metricsNodeName: '@',
         title: '@'
       },
       controller: NetworkCardController,
@@ -60,7 +61,7 @@
     },
 
     getNodeFilter: function () {
-      return this.metricsModel.makeNodeNameFilter(this.node);
+      return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
     },
 
     hasMetrics: function (metricName) {
@@ -69,7 +70,7 @@
 
     fetchLimitMetrics: function () {
       var that = this;
-      this.metricsModel.getNodeCpuLimit(this.node).then(function (cpuLimit) {
+      this.metricsModel.getNodeCpuLimit(this.metricsNodeName).then(function (cpuLimit) {
         that.cpuLimit = cpuLimit;
       });
     },

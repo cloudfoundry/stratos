@@ -43,8 +43,10 @@
     this.dataRxRate = 0;
 
     this.nodeName = this.node.spec.hostname;
-    this.availabilityZone = this.node.spec.zone || 'Dev Harness';
+    this.metricsNodeName = this.node.spec.metricsNodeName;
 
+
+    this.availabilityZone = this.node.spec.zone || 'Dev Harness';
 
     var interval = $interval(function () {
       that.updateCpuUtilization();
@@ -83,7 +85,7 @@
 
     updateCpuUtilization: function () {
       var that = this;
-      return this.metricsModel.getCpuUtilization(this.metricsModel.makeNodeNameFilter(this.nodeName))
+      return this.metricsModel.getCpuUtilization(this.metricsModel.makeNodeNameFilter(this.metricsNodeName))
         .then(function (metricsData) {
           that.metricsData[metricsData.metricName] = [metricsData];
         });
@@ -91,7 +93,7 @@
 
     updateMemoryUtilization: function () {
       var that = this;
-      return this.metricsModel.getMemoryUtilization(this.metricsModel.makeNodeNameFilter(this.nodeName))
+      return this.metricsModel.getMemoryUtilization(this.metricsModel.makeNodeNameFilter(this.metricsNodeName))
         .then(function (metricsData) {
           that.metricsData[metricsData.metricName] = [metricsData];
         });
@@ -99,7 +101,7 @@
 
     updateNetworkDataTransmittedRate: function () {
       var that = this;
-      return this.metricsModel.getNetworkTxRate(this.nodeName)
+      return this.metricsModel.getNetworkTxRate(this.metricsNodeName)
         .then(function (metricsData) {
           that.metricsData.dataTxRate = metricsData;
         });
@@ -107,7 +109,7 @@
 
     updateNetworkDataReceivedRate: function () {
       var that = this;
-      return this.metricsModel.getNetworkRxRate(this.nodeName)
+      return this.metricsModel.getNetworkRxRate(this.metricsNodeName)
         .then(function (metricsData) {
           that.metricsData.dataRxRate = metricsData;
         });
@@ -123,8 +125,8 @@
 
     fetchLimitMetrics: function () {
       var that = this;
-      var promises = [this.metricsModel.getNodeCpuLimit(this.nodeName),
-        this.metricsModel.getNodeMemoryLimit(this.nodeName)];
+      var promises = [this.metricsModel.getNodeCpuLimit(this.metricsNodeName),
+        this.metricsModel.getNodeMemoryLimit(this.metricsNodeName)];
       this.$q.all(promises).then(function (limits) {
         that.cpuLimit = limits[0];
         // Memory limit is in bytes, convert to Mb for the filter
@@ -133,7 +135,7 @@
     },
 
     getNodeFilter: function () {
-      return this.metricsModel.makeNodeNameFilter(this.nodeName);
+      return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
     },
 
     hasMetrics: function (metricName) {

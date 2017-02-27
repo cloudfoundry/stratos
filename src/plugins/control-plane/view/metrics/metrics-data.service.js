@@ -37,6 +37,18 @@
             metricsData[controlPlaneGuid] = {};
 
           }
+
+          // Add metricNodeName property
+          nodes = _.each(nodes, function (node) {
+
+            if (node.spec.profile.indexOf('node') !== -1) {
+              node.spec.metricsNodeName = node.spec.hostname;
+            } else {
+              var index = node.spec.hostname.indexOf('.');
+              node.spec.metricsNodeName = node.spec.hostname.substring(0, index);
+            }
+          });
+
           metricsData[controlPlaneGuid].nodes = nodes;
 
           // hack for dev-harness
@@ -52,7 +64,6 @@
           metricsData[controlPlaneGuid].kubernetesNodes = _.filter(nodes, function (node) {
             return node.spec.profile !== 'gluster';
           });
-
 
         });
     }
@@ -101,6 +112,14 @@
         })
     }
 
+    function getMetricsNodeName(guid, nodeName) {
+
+       var nodes = getNodes(guid);
+      var node = _.find(nodes, {spec: {nodename: nodeName}});
+
+      return node.spec.metricsNodeName;
+    }
+
     return {
       fetchComputeNodes: fetchComputeNodes,
       getNodes: getNodes,
@@ -109,7 +128,8 @@
       getCurrentSortFilter: getCurrentSortFilter,
       getSortFilters: getSortFilters,
       setCurrentSortFilter: setCurrentSortFilter,
-      addNodeMetric: addNodeMetric
+      addNodeMetric: addNodeMetric,
+      getMetricsNodeName: getMetricsNodeName
     };
 
   }

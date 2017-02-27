@@ -43,8 +43,6 @@
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
 
-    this.totalNetworkUsage = gettext('Total Network Traffic');
-
     this.sortFilters = [
       {
         label: gettext('Hostname'),

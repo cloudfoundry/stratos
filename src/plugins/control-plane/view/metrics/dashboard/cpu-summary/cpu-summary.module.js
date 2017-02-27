@@ -41,7 +41,7 @@
     var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
 
-    this.totalCpuUsageTile = gettext('Total CPU Usage');
+    this.totalCpuUsageTile = gettext('');
 
     this.sortFilters = [
       {

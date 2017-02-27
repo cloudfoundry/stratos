@@ -11,7 +11,9 @@
     return {
       bindToController: {
         node: '@',
-        showUtilizationDonut: '='
+        metricsNodeName: '@',
+        showUtilizationDonut: '=',
+        title: '@'
       },
       controller: CpuCardController,
       controllerAs: 'cpuCardCtrl',
@@ -26,10 +28,12 @@
     '$scope',
     '$q',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
+
   ];
 
-  function CpuCardController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function CpuCardController($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
@@ -40,8 +44,10 @@
     this.cpuLimit = 0;
 
     this.cardData = {
-      title: this.node
+      title: this.title
     };
+
+
     function init() {
       if (that.showUtilizationDonut) {
         return that.fetchLimitMetrics();
@@ -60,7 +66,7 @@
     },
 
     getNodeFilter: function () {
-      return this.metricsModel.makeNodeNameFilter(this.node);
+      return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
     },
 
     hasMetrics: function (metricName) {
@@ -69,7 +75,7 @@
 
     fetchLimitMetrics: function () {
       var that = this;
-      this.metricsModel.getNodeCpuLimit(this.node).then(function (cpuLimit) {
+      this.metricsModel.getNodeCpuLimit(this.metricsNodeName).then(function (cpuLimit) {
         that.cpuLimit = cpuLimit;
       });
     },
