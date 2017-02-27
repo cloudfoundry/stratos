@@ -97,6 +97,7 @@
     '$timeout',
     '$state',
     '$stateParams',
+    '$q',
     'app.utils.utilsService',
     'app.model.modelManager',
     'helion.framework.widgets.dialog.confirm',
@@ -104,7 +105,7 @@
     'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, utils, modelManager,
+  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, $q, utils, modelManager,
                                                   confirmDialog, manageInstanceDialog, versionUtils) {
     var that = this;
 
