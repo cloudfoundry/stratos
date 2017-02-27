@@ -63,7 +63,7 @@
     function init() {
 
       that.currentFilter = metricsDataService.getCurrentSortFilter(that.groupName);
-      that.filters = metricsDataService.getSortFilters(that.groupName);
+      that.filters = metricsDataService.getSortFilters(that.groupName) || [];
       return $q.resolve();
     }
 
