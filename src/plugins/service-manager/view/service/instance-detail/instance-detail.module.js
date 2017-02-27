@@ -95,19 +95,17 @@
   ServiceManagerInstanceDetailController.$inject = [
     '$scope',
     '$timeout',
-    '$stateParams',
-    '$log',
-    'app.utils.utilsService',
     '$state',
-    '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    '$stateParams',
+    'app.utils.utilsService',
     'app.model.modelManager',
     'helion.framework.widgets.dialog.confirm',
     'service-manager.view.manage-instance.dialog',
     'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $stateParams, $log, utils, $state, $q, rolesService, modelManager, confirmDialog, manageInstanceDialog, versionUtils) {
+  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, utils, modelManager,
+                                                  confirmDialog, manageInstanceDialog, versionUtils) {
     var that = this;
 
     this.initialized = false;
@@ -137,17 +135,17 @@
     this.memoryUsageData = {};
 
     this.actions = [
-      { id: 'upgrade', name: 'Upgrade Instance',
+      { id: 'upgrade', name: gettext('Upgrade Instance'),
         execute: function () {
           return that.upgradeInstance(that.id);
         }
       },
-      { id: 'configure', name: 'Configure Instance',
+      { id: 'configure', name: gettext('Configure Instance'),
         execute: function () {
           return that.configureInstance(that.id);
         }
       },
-      { id: 'delete', name: 'Delete Instance',
+      { id: 'delete', name: gettext('Delete Instance'),
         execute: function () {
           return that.deleteInstance(that.id);
         }
@@ -166,6 +164,7 @@
 
     // Poll for updates
     $scope.$on('$destroy', function () {
+      that.scopeDestroyed = true;
       that.$timeout.cancel(that.pollTimer);
     });
 
@@ -187,15 +186,21 @@
   angular.extend(ServiceManagerInstanceDetailController.prototype, {
 
     updateActions: function () {
-      var isBusy = this.deleting || this.deleted || this.interestingState;
+      var isDelete = this.deleting || this.deleted || this.instance.state === 'deleting' ||
+        this.instance.state === 'deleted';
+      var isBusy = isDelete || this.interestingState;
       this.actionsMap.configure.disabled = isBusy;
-      this.actionsMap.delete.disabled = isBusy;
+      this.actionsMap.delete.disabled = isDelete;
 
       var hasUpgrades = this.instance && this.instance.available_upgrades && this.instance.available_upgrades.length > 0;
       this.actionsMap.upgrade.disabled = isBusy || !hasUpgrades;
     },
 
     poll: function (fetchNow) {
+      if (this.scopeDestroyed) {
+        return;
+      }
+
       var that = this;
       if (that.deleted || that.notFound) {
         return;
@@ -260,35 +265,18 @@
     },
 
     _setStateIndicator: function () {
-      var that = this;
-      that.interestingState = false;
+      this.stateIndicator = this.hsmModel.instanceStateIndicator(this.instance.state);
+      this.interestingState = false;
       switch (this.instance.state) {
-        case 'running':
-          that.stateIndicator = 'ok';
-          break;
         case 'creating':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
         case 'deleting':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
         case 'modifying':
-          that.stateIndicator = 'busy';
-          that.interestingState = true;
+          this.interestingState = true;
           break;
-        case 'deleted':
-          that.stateIndicator = 'deleted';
-          break;
-        case 'degraded':
-          that.stateIndicator = 'warning';
-          break;
-        case '404':
-          that.stateIndicator = 'error';
-          break;
-        default:
-          that.stateIndicator = 'tentative';
       }
       this.updateActions();
     },
@@ -298,12 +286,12 @@
       var dialog = this.confirmDialog({
         title: gettext('Delete Instance'),
         description: function () {
-          return 'Are you sure that you want to delete instance "' + id + '" ?';
+          return gettext('Are you sure that you want to delete instance "' + id + '" ?');
         },
         moment: moment,
         buttonText: {
           yes: gettext('Delete'),
-          no: 'Cancel'
+          no: gettext('Cancel')
         }
       });
       dialog.result.then(function () {
@@ -364,14 +352,15 @@
 
   UpgradeController.$inject = [
     '$state',
+    '$q',
     'app.model.modelManager',
+    'app.utils.utilsService',
     'service-manager.utils.version'
   ];
 
-  function UpgradeController($state, modelManager, versionUtils) {
+  function UpgradeController($state, $q, modelManager, utils, versionUtils) {
     var that = this;
-    var hsmModel = modelManager.retrieve('service-manager.model');
-    this.hsmModel = hsmModel;
+
     this.versionUtils = versionUtils;
     this.guid = $state.params.guid;
     this.id = $state.params.id;
@@ -388,30 +377,45 @@
       return upgrades;
     }
 
-    hsmModel.getInstances(this.guid).then(function (instances) {
+    function init() {
+      that.hsmModel = modelManager.retrieve('service-manager.model');
+
+      var instances = that.hsmModel.model[that.guid].instances;
       var instance = _.find(instances, {instance_id: that.id});
+
+      if (!instance) {
+        return $q.reject('Instance with id \'' + that.id + '\' not found: ');
+      }
+
       var upgrades = processUpgrades(instance);
-      var serviceId = instance.service_id;
-      that.hsmModel.getService(that.guid, serviceId).then(function (data) {
-        that.versions = data.product_versions;
-        _.each(that.versions, function (product) {
-          product.versions = [];
-          product.isUpgrade = _.has(upgrades, product.product_version);
-          _.each(product.sdl_versions, function (url, sdlVersion) {
-            var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
-            var isLatest = upgrades[product.product_version] && upgrades[product.product_version][sdlVersion];
-            product.versions.push({
-              sdl_version: sdlVersion,
-              isUpgrade: isUpgrade,
-              isLatest: isLatest,
-              isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
-            });
+      var services = that.hsmModel.model[that.guid].services;
+      var service = _.find(services, {id: instance.service_id});
+
+      if (!service) {
+        return $q.reject('Service with id \'' + instance.service_id + '\' not found: ');
+      }
+
+      that.versions = service.product_versions;
+      _.each(that.versions, function (product) {
+        product.versions = [];
+        product.isUpgrade = _.has(upgrades, product.product_version);
+        _.each(product.sdl_versions, function (url, sdlVersion) {
+          var isUpgrade = upgrades[product.product_version] && _.has(upgrades[product.product_version], sdlVersion);
+          var isLatest = product.latest === sdlVersion;
+          product.versions.push({
+            sdl_version: sdlVersion,
+            isUpgrade: isUpgrade,
+            isLatest: isLatest,
+            isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
           });
-          versionUtils.sortByProperty(product.versions, 'sdl_version', true);
         });
-        versionUtils.sortByProperty(that.versions, 'product_version', true);
+        versionUtils.sortByProperty(product.versions, 'sdl_version', true);
       });
-    });
+      versionUtils.sortByProperty(that.versions, 'product_version', true);
+    }
+
+    utils.chainStateResolve('sm.endpoint.instance.versions', $state, init);
+
   }
 
 })();

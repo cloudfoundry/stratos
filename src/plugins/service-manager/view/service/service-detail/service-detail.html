@@ -3,11 +3,11 @@
   <div class="cluster-detail endpoints"  ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
     <div class="hsm-service-header">
       <h3 translate>Service : {{ sCtrl.service.id }}</h3>
-      <div class="create-instance-btn">
+      <div ng-if="smCtrl.hsmModel.canWrite()" class="create-instance-btn">
         <button class="btn btn-primary" translate
           ng-click="smCtrl.createInstance(sCtrl.service.id)">
           Create Instance
-          </button>      
+          </button>
       </div>
     </div>
     <div class="cluster-summary-tile">
@@ -108,6 +108,6 @@
   </tbody>
 </table>
   </div>
-                  
+
 </div>
 

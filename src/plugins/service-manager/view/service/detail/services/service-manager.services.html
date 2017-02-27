@@ -43,7 +43,7 @@
           inline-message-link="{ ref: neil.route, params: { guid: guid } }"
           table-inline-status="{{ endpoint.error.status }}">
         <td>
-          <a ng-click="servicesCtrl.open(endpoint)">{{ endpoint.id }}</a>
+          <a ui-sref="sm.endpoint.service.detail({id: endpoint.id})">{{ endpoint.id }}</a>
         </td>
         <td>{{ endpoint.name }}</td>
         <td>
@@ -51,7 +51,7 @@
         </td>
         <td>{{ endpoint.vendor }}</td>
         <td class="hsm-actions">
-          <a ng-click="smCtrl.createInstance(endpoint.id)">
+          <a ng-if="smCtrl.hsmModel.canWrite()" ng-click="smCtrl.createInstance(endpoint.id)">
             <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon ng-scope"></i>
           </a>
           <!--
@@ -65,11 +65,4 @@
       </tr>
       </tbody>
     </table>
-
-<!--
-
-  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
-    <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
-  </div>
-  -->
 </div>

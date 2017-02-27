@@ -3,7 +3,7 @@
     <div class="cluster-detail endpoints" ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
         <div class="hsm-service-header">
             <h3 translate>Service : {{ sdlCtrl.service.id }} : SDL {{ sdlCtrl.pv }} ({{ sdlCtrl.sv }})</h3>
-            <div class="create-instance-btn">
+            <div ng-if="smCtrl.hsmModel.canWrite()" class="create-instance-btn">
                 <button class="btn btn-primary" translate ng-click="smCtrl.createInstance(sdlCtrl.service.id, sdlCtrl.pv, sdlCtrl.sv )">
           Create Instance
           </button>

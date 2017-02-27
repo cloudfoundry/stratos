@@ -148,6 +148,14 @@ navbar > .main-nav-menu {
               font-size: 26px;
             }
           }
+
+          > svg {
+            width: 32px;
+            vertical-align: middle;
+
+            .st0 {fill:#FFF}
+	          .st1 {stroke: #FFF}
+          }
         }
 
         .navitem-label {

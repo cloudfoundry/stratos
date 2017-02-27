@@ -155,12 +155,12 @@
               endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
               break;
             case 'hsm':
-              endpoint.type = 'Helion Service Manager';
+              endpoint.type = utilsService.getOemConfiguration().SERVICE_MANAGER;
               // Only Console admins can see HSM endpoints
               hide = !userAccount.isAdmin();
               break;
             case 'hcp':
-              endpoint.type = 'Helion Control Plane';
+              endpoint.type = utilsService.getOemConfiguration().CONTROL_PLANE;
               // Only Console admins can see HCP endpoints
               hide = !userAccount.isAdmin();
               break;
@@ -291,26 +291,32 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-          serviceInstanceModel.remove(serviceInstance).then(function () {
-            notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
-              name: serviceInstance.name
+          modelManager.retrieve('app.model.serviceInstance').remove(serviceInstance)
+            .then(function () {
+              notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
+                name: serviceInstance.name
+              });
+              updateInstances().then(function () {
+                createEndpointEntries();
+                switch (serviceInstance.cnsi_type) {
+                  case 'hcf':
+                    authModel.remove(serviceInstance.guid);
+                    break;
+                  case 'hce':
+                    dashboardService.refreshCodeEngineVcses().then(function () {
+                      vcsService.createEndpointEntries();
+                    });
+                    break;
+                }
+              });
+            })
+            .then(function () {
+              // Ensure that the user service instance list is updated before sending change notification
+              return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
+                eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+              });
             });
-            updateInstances().then(function () {
-              createEndpointEntries();
-              switch (serviceInstance.cnsi_type) {
-                case 'hcf':
-                  authModel.remove(serviceInstance.guid);
-                  break;
-                case 'hce':
-                  dashboardService.refreshCodeEngineVcses().then(function () {
-                    vcsService.createEndpointEntries();
-                  });
-                  break;
-              }
-            });
-          });
-        }
+         }
       });
     }
 
@@ -377,7 +383,12 @@
                 });
               break;
           }
-          eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+        })
+        .then(function () {
+          // Ensure that the user service instance list is updated before sending change notification
+          return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
+            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+          });
         });
     }
   }

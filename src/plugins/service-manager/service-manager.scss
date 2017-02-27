@@ -47,7 +47,7 @@
   app-state-icon {
     height: auto;
     line-height: 1;
-    margin-left: $hpe-unit-space * 0.5;
+    margin-left:  $hpe-unit-space * 0.5;
   }
 }
 
@@ -207,7 +207,7 @@ table.table > tbody > tr > td.table-inline-message.hsm-upgrade, div.hsm-upgrade 
     display: flex;
     margin: 0;
     border-top: 1px solid #eee;
-    padding: 12px 0;    
+    padding: 12px 0;
 
     > div.upgrade-message {
       text-align: left;
@@ -219,10 +219,6 @@ table.table > tbody > tr > td.table-inline-message.hsm-upgrade, div.hsm-upgrade 
       > i.helion-icon {
         font-size: 18px;
         margin-right: 8px;
-        cursor: pointer;
-        &:hover, &:focus {
-          color: #01a982;
-        }
       }
 
       a {
@@ -277,7 +273,7 @@ form.hsm-filter-box {
       height: $hpe-unit-space * 1.5;;
       vertical-align: middle;
       line-height: $hpe-unit-space * 1.5;;
-      font-size: 18px;          
+      font-size: 18px;
     }
 
     input {

@@ -3,6 +3,7 @@
   "PRODUCT_CONSOLE": "SUSE Cloud Foundry Console",
   "PRODUCT_NAME": "SUSE Cloud Foundry",
   "COMPANY_NAME": "SUSE (a Micro Focus Company)",
+  "CONTROL_PLANE": "SUSE Control Plane",
   "COMPANY_HREF": "http://www.suse.com",
   "TERMS_OF_USE": "Legal",
   "TERMS_OF_USE_HREF": "https://www.suse.com/company/legal/",

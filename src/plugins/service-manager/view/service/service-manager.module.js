@@ -27,37 +27,39 @@
 
   ServiceManagerController.$inject = [
     '$stateParams',
-    '$log',
-    'app.utils.utilsService',
     '$state',
-    '$q',
+    'app.utils.utilsService',
     'app.model.modelManager',
     'service-manager.view.manage-instance.dialog'
   ];
 
-  function ServiceManagerController($stateParams, $log, utils, $state, $q, modelManager, manageInstanceDialog) {
+  function ServiceManagerController($stateParams, $state, utils, modelManager, manageInstanceDialog) {
     var that = this;
 
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.$state = $state;
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.manageInstanceDialog = manageInstanceDialog;
-
-    this.hsmModel = modelManager.retrieve('service-manager.model');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.getEndpoint = function () {
       return utils.getClusterEndpoint(that.endpoint);
     };
 
-    this.stackatoInfo.getStackatoInfo().then(function (info) {
-      that.endpoint = info.endpoints.hsm[that.guid];
+    function init() {
+      that.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      that.hsmModel = modelManager.retrieve('service-manager.model');
+      that.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
-      that.hsmModel.getModel(that.guid).then(function (model) {
-        that.model = model;
+      return that.stackatoInfo.getStackatoInfo().then(function (info) {
+        that.endpoint = info.endpoints.hsm[that.guid];
+
+        return that.hsmModel.getModel(that.guid).then(function (model) {
+          that.model = model;
+        });
       });
-    });
+    }
+
+    utils.chainStateResolve('sm.endpoint', $state, init);
   }
 
   angular.extend(ServiceManagerController.prototype, {
@@ -72,12 +74,13 @@
 
     createInstance: function (serviceId, productVersion, sdlVersion) {
       var that = this;
-      this.hsmModel.getServices(that.guid).then(function (services) {
-        that.manageInstanceDialog.show('create', that.guid, _.keyBy(services, 'id'), serviceId, productVersion, sdlVersion).result.then(function (instance) {
+
+      that.manageInstanceDialog.show('create', that.guid, _.keyBy(that.hsmModel.model[that.guid].services, 'id'),
+        serviceId, productVersion, sdlVersion).result
+        .then(function (instance) {
           // Open the instance once it has been created
           that.$state.go('sm.endpoint.instance.components', {guid: that.guid, id: instance.instance_id});
         });
-      });
     },
 
     acknowledgeUpgrade: function (instanceId) {

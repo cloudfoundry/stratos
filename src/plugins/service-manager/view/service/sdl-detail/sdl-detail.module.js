@@ -27,14 +27,13 @@
 
   ServiceManagerSdlDetailController.$inject = [
     '$stateParams',
-    '$log',
-    'app.utils.utilsService',
     '$state',
     '$q',
+    'app.utils.utilsService',
     'app.model.modelManager'
   ];
 
-  function ServiceManagerSdlDetailController($stateParams, $log, utils, $state, $q, modelManager) {
+  function ServiceManagerSdlDetailController($stateParams, $state, $q, utils, modelManager) {
     var that = this;
     that.loading = true;
 
@@ -44,20 +43,31 @@
     this.pv = $stateParams.product;
     this.sv = $stateParams.sdl;
 
-    this.hsmModel = modelManager.retrieve('service-manager.model');
+    function init() {
+      that.hsmModel = modelManager.retrieve('service-manager.model');
 
-    this.hsmModel.getService(that.guid, that.id).then(function (data) {
-      that.service = data;
-      return that.hsmModel.getServiceSdl(that.guid, that.id, that.pv, that.sv).then(function (sdl) {
-        return that.hsmModel.getTemplate(that.guid, sdl).then(function (template) {
-          that.template = template;
+      var services = that.hsmModel.model[that.guid].services;
+      that.service = _.find(services, {id: that.id});
+
+      if (!that.service) {
+        return $q.reject('Service with id \'' + that.id + '\' not found: ');
+      }
+
+      return that.hsmModel.getServiceSdl(that.guid, that.id, that.pv, that.sv)
+        .then(function (sdl) {
+          return that.hsmModel.getTemplate(that.guid, sdl).then(function (template) {
+            that.template = template;
+          });
+        })
+        .finally(function () {
+          that.initialized = true;
+          that.loading = false;
+          that.json = that.template;
         });
-      });
-    }).finally(function () {
-      that.initialized = true;
-      that.loading = false;
-      that.json = that.template;
-    });
+    }
+
+    utils.chainStateResolve('sm.endpoint.service.sdl', $state, init);
+
   }
 
   angular.extend(ServiceManagerSdlDetailController.prototype, {

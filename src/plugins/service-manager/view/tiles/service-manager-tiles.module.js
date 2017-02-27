@@ -21,7 +21,7 @@
         instancesListed: false
       },
       ncyBreadcrumb: {
-        label: gettext('Service Manager'),
+        label: '{{ OEM_CONFIG.SERVICE_MANAGER }}',
         parent: 'endpoint.dashboard'
       },
       data: {
@@ -68,7 +68,7 @@
     this.state = '';
 
     function init() {
-      return that.refreshClusterModel();
+      return that.refreshEndpointModel();
     }
 
     utils.chainStateResolve('sm.tiles', $state, init);
@@ -77,12 +77,11 @@
 
   angular.extend(ServiceManagerTilesController.prototype, {
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name createClusterList
-     * @description Create the list of clusters + determine their connected status
+     * @memberof service-manager.view.tiles
+     * @name createEndpointList
+     * @description Create the list of Service Manager Endpoints + determine their connected status
      */
-    createClusterList: function () {
+    createEndpointList: function () {
       var that = this;
       this.serviceInstances = {};
       var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, {cnsi_type: 'hsm'});
@@ -99,13 +98,12 @@
     },
 
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name refreshClusterList
-     * @description Update the core model data + create the cluster list
-     * @returns {promise} refresh cluster promise
+     * @memberof service-manager.view.tiles
+     * @name refreshEndpointModel
+     * @description Update the core model data + create the list of Service Manager Endpoints
+     * @returns {promise} refresh endpoints promise
      */
-    refreshClusterModel: function () {
+    refreshEndpointModel: function () {
       var that = this;
       this.updateState(true, false);
 
@@ -115,7 +113,7 @@
       }
       return this.$q.all(promises)
         .then(function () {
-          that.createClusterList();
+          that.createEndpointList();
         })
         .catch(function () {
           that.updateState(false, true);
@@ -123,16 +121,15 @@
     },
 
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
+     * @memberof service-manager.view.tiles
      * @name updateState
-     * @description Determine the state of the model (contains clusters/doesn't contain clusters/loading/failed to load)
+     * @description Determine the state of the model
      * @param {boolean} loading true if loading async data
      * @param {boolean} loadError true if the async load of data failed
      */
     updateState: function (loading, loadError) {
-      var hasClusters = _.get(_.keys(this.serviceInstances), 'length', 0) > 0;
-      if (hasClusters) {
+      var hasEndpoints = _.get(_.keys(this.serviceInstances), 'length', 0) > 0;
+      if (hasEndpoints) {
         this.state = '';
       } else if (loading) {
         this.state = 'loading';

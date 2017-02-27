@@ -43,7 +43,8 @@
             TERMS_OF_USE: 'Terms of Use',
             PRIVACY: 'Privacy',
             CODE_ENGINE: 'Helion Code Engine',
-            CLOUD_FOUNDRY: 'Cloud Foundry'
+            CLOUD_FOUNDRY: 'Cloud Foundry',
+            CONTROL_PLANE: 'Helion Control Plane'
           };
         }
       }
