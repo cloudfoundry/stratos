@@ -41,7 +41,7 @@
     this.showCardLayout = true;
     this.metricsDataService = metricsDataService;
 
-    this.currentFilter =
+    that.filters = [];
 
     this.model = {
       filteredApplications: [],
