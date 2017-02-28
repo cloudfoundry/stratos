@@ -1,0 +1,20 @@
+.memory-card {
+
+  .memory-gallery-card {
+    .card {
+      width: 100%;
+
+      .card-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+
+        .line-graph{
+          flex-grow: 2;
+        }
+      }
+
+    }
+  }
+
+}
