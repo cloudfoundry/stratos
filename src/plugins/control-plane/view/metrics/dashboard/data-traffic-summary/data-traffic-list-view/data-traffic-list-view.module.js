@@ -18,8 +18,10 @@
       controller: DataTrafficListViewController,
       controllerAs: 'dataTrafficListCtl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-list-view/data-traffic-list-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-list-view/data-traffic-list-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

@@ -18,8 +18,10 @@
       controller: CpuListViewController,
       controllerAs: 'cpuListViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-list-view/cpu-list-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-list-view/cpu-list-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

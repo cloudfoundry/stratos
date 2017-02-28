@@ -18,8 +18,10 @@
       controller: ListViewController,
       controllerAs: 'listViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-list-view/memory-list-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-list-view/memory-list-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

@@ -13,7 +13,10 @@
       controller: NodesStatusCardController,
       controllerAs: 'nodesStatusCardCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/nodes-status-card/nodes-status-card.html'
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/nodes-status-card/nodes-status-card.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     };
   }
 

@@ -20,7 +20,11 @@
       },
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-summary.html',
       controller: MemorySummaryController,
-      controllerAs: 'memorySummaryCtrl'
+      controllerAs: 'memorySummaryCtrl',
+      ncyBreadcrumb: {
+        label: '{{metricsDashboardCtrl.endpoint.name}}',
+        parent: 'cp.tiles'
+      }
     });
   }
 

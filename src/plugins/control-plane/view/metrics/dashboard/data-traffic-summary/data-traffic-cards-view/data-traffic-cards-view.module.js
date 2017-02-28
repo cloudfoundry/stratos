@@ -18,8 +18,10 @@
       controller: CardsViewController,
       controllerAs: 'cardsViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-cards-view/data-traffic-cards-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-cards-view/data-traffic-cards-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

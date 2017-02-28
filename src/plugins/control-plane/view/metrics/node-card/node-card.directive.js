@@ -72,7 +72,9 @@
         that.updateNodeUptime(),
         that.updateNetworkDataTransmitted(),
         that.updateNetworkDataReceived(),
-        that.fetchLimitMetrics()]);
+        that.fetchLimitMetrics()]).catch(function (err) {
+          console.log(err);
+        });
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);

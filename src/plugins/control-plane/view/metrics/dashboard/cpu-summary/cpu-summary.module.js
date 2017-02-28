@@ -20,7 +20,11 @@
       },
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-summary.html',
       controller: CpuSummaryController,
-      controllerAs: 'cpuSummaryCtrl'
+      controllerAs: 'cpuSummaryCtrl',
+      ncyBreadcrumb: {
+        label: '{{metricsDashboardCtrl.endpoint.name}}',
+        parent: 'cp.tiles'
+      }
     });
   }
 

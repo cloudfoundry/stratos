@@ -18,8 +18,10 @@
       controller: CardsViewController,
       controllerAs: 'cardsViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-cards-view/memory-cards-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/memory-summary/memory-cards-view/memory-cards-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

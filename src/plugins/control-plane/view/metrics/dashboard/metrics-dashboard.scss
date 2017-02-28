@@ -3,7 +3,7 @@
 
 .metrics-dashboard {
 
-  padding-top: 24px;
+  padding-top: 0px;
   display: flex;
   flex-direction: column;
 
@@ -17,4 +17,9 @@
   //  width: 100%;
   //}
 
+  .metrics-nav {
+    margin-bottom: $hpe-unit-space * 0.5;
+  }
+
 }
+

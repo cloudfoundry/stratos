@@ -18,8 +18,10 @@
       controller: CardsListController,
       controllerAs: 'cardsListCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/cards-list/cards-list.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/cards-list/cards-list.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 

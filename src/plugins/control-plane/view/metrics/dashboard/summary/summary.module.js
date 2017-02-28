@@ -20,7 +20,11 @@
       },
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/summary/summary.html',
       controller: MetricsSummaryController,
-      controllerAs: 'metricsSummaryCtrl'
+      controllerAs: 'metricsSummaryCtrl',
+      ncyBreadcrumb: {
+        label: '{{metricsDashboardCtrl.endpoint.name}}',
+        parent: 'cp.tiles'
+      }
     });
   }
 

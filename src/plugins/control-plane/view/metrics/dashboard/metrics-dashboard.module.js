@@ -11,7 +11,7 @@
     .config(registerRoute);
 
   registerRoute.$inject = [
-    '$stateProvider',
+    '$stateProvider'
 
   ];
 
@@ -31,18 +31,24 @@
     '$state',
     '$stateParams',
     'control-plane.metrics.metrics-data-service',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'app.model.modelManager'
   ];
 
-  function MetricsDashBoardController($state, $stateParams, metricsDataService, utilsService) {
-
+  function MetricsDashBoardController($state, $stateParams, metricsDataService, utilsService, modelManager) {
+    var that = this;
     var guid = $stateParams.guid;
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.guid = guid;
 
     function init() {
-      return metricsDataService.fetchComputeNodes(guid);
+      return metricsDataService.fetchComputeNodes(guid).finally(function () {
+        return that.stackatoInfo.getStackatoInfo().then(function (info) {
+          that.endpoint = info.endpoints.hcp[that.guid];
+        });
+      });
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard', $state, init);
-
   }
 })();

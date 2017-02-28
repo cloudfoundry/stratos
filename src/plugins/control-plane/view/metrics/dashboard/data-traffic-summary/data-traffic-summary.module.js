@@ -20,7 +20,11 @@
       },
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-summary.html',
       controller: DataTrafficSummaryController,
-      controllerAs: 'dataTrafficSummaryCtrl'
+      controllerAs: 'dataTrafficSummaryCtrl',
+      ncyBreadcrumb: {
+        label: '{{metricsDashboardCtrl.endpoint.name}}',
+        parent: 'cp.tiles'
+      }
     });
   }
 

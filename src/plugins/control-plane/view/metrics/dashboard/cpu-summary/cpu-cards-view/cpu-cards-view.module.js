@@ -18,8 +18,10 @@
       controller: CardsViewController,
       controllerAs: 'cardsViewCtrl',
       scope: {},
-      templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-cards-view/cpu-cards-view.html'
-
+      templateUrl: 'plugins/control-plane/view/metrics/dashboard/cpu-summary/cpu-cards-view/cpu-cards-view.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 
