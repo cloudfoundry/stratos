@@ -57,7 +57,7 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      this.menuItem = menu.addMenuItem('cp.list', 'cp.list', gettext('Control Plane'), 1, 'helion-icon-System');
+      this.menuItem = menu.addMenuItem('cp.list', 'cp.list', gettext('Control Plane'), 1, 'helion-icon-Resources');
       //
       // Hide to start with until we know if we have HCP instances connected
       this.menuItem.hidden = true;

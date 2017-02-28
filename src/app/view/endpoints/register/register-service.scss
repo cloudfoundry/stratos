@@ -37,6 +37,14 @@
           .media-object {
             width: 77px;
           }
+
+          .media-icon-center {
+            text-align: center;
+            > i {
+              font-size: 44pt;
+            }
+          }
+
           &.register-type-hce {
             .media-left {
               .media-object {
