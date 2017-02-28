@@ -48,21 +48,21 @@
 
     this.availabilityZone = this.node.spec.zone || 'Dev Harness';
 
-    var interval = $interval(function () {
-      that.updateCpuUtilization();
-      that.updateMemoryUtilization();
-      that.updateNetworkDataTransmittedRate();
-      that.updateNetworkDataReceivedRate();
-      that.updateNodeUptime();
-    }, 120000);
+    // var interval = $interval(function () {
+    //   that.updateCpuUtilization();
+    //   that.updateMemoryUtilization();
+    //   that.updateNetworkDataTransmittedRate();
+    //   that.updateNetworkDataReceivedRate();
+    //   that.updateNodeUptime();
+    // }, 120000);
 
     this.cardData = {
       title: this.nodeName
     };
 
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
+    // $scope.$on('$destroy', function () {
+    //   $interval.cancel(interval);
+    // });
 
     function init() {
       // prefetch cpu-usage and memory data

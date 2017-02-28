@@ -33,13 +33,13 @@
 
     this.updateChart();
 
-    var interval = $interval(function () {
-      that.updateChart();
-    }, 60000);
-
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
+    // var interval = $interval(function () {
+    //   that.updateChart();
+    // }, 60000);
+    //
+    // $scope.$on('$destroy', function () {
+    //   $interval.cancel(interval);
+    // });
 
     this.options = {
       chart: {

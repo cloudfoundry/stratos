@@ -48,22 +48,22 @@
       this.nodeName = 'kubernetes-node';
     }
 
-    var interval = $interval(function () {
-      that.updateCpuUtilization();
-      that.updateMemoryUtilization();
-      that.updateNetworkDataTransmitted();
-      that.updateNetworkDataReceived();
-      that.updateMemoryUtilization();
-      that.updateNodeUptime();
-    }, 120000);
+    // var interval = $interval(function () {
+    //   that.updateCpuUtilization();
+    //   that.updateMemoryUtilization();
+    //   that.updateNetworkDataTransmitted();
+    //   that.updateNetworkDataReceived();
+    //   that.updateMemoryUtilization();
+    //   that.updateNodeUptime();
+    // }, 120000);
 
     this.cardData = {
       title: this.nodeName
     };
 
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
+    // $scope.$on('$destroy', function () {
+    //   $interval.cancel(interval);
+    // });
 
     function init() {
       // prefetch cpu-usage and memory data

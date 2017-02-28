@@ -41,13 +41,13 @@
     this.metricData = {};
     this.updateUtilization();
 
-    var interval = $interval(function () {
-      that.updateUtilization();
-    }, 120000);
-
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
+    // var interval = $interval(function () {
+    //   that.updateUtilization();
+    // }, 120000);
+    //
+    // $scope.$on('$destroy', function () {
+    //   $interval.cancel(interval);
+    // });
 
     $scope.$watch(function () {
       return that.metricLimit;
