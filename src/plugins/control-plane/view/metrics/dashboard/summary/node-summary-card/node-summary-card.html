@@ -5,7 +5,7 @@
     <dl class="dl-horizontal">
       <div class="donuts" ng-if="!nodeSummaryCardCtrl.showDetail">
         <div class="donut-div">
-          <span class="centered">CPU Utilization</span>
+          <span>CPU Utilization</span>
           <utilization-donut metric="cpu_node_utilization_gauge"
                              filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
                              y-label="CPU Utilization (%)"
@@ -15,7 +15,7 @@
           ></utilization-donut>
         </div>
         <div class="donut-div">
-          <span class="centered">Memory Utilization</span>
+          <span>Memory Utilization</span>
           <utilization-donut metric="memory_node_utilization_gauge"
                              filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
                              y-label="Memory Utilization (%)"

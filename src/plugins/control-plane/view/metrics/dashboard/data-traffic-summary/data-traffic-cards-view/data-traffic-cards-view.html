@@ -1,6 +1,8 @@
-
 <div class="network-card">
-  <div class="network-card" ng-repeat="node in cardsViewCtrl.nodes">
-    <network-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}" title="{{  node.spec.hostname }}"></network-card>
+  <div class="tile-layout-container">
+    <div class="network-card tile-layout-parent" ng-repeat="node in cardsViewCtrl.nodes">
+      <network-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
+                    title="{{  node.spec.hostname }}"></network-card>
+    </div>
   </div>
 </div>

@@ -1,0 +1,78 @@
+@mixin tile-layout($tiles-container, $tiles-max-width, $tiles-layout-steps) {
+
+  @for $i from 2 through $tiles-layout-steps {
+    @media (min-width: $i * $tiles-max-width) {
+      .navbar-icons-only .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+        flex: 0 0 percentage(1/$i);
+      }
+    }
+
+    @media (min-width: $main-nav-width + $i * $tiles-max-width) {
+      .navbar-normal .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+        flex: 0 0 percentage(1/$i);
+      }
+    }
+  }
+
+  // Ensure the last card in every row doesn't have right-padding
+  @for $i from $tiles-layout-steps - 1 through 1 {
+    @media (min-width: $i * $tiles-max-width) and (max-width: $tiles-max-width + $i * $tiles-max-width - 1) {
+      .navbar-icons-only .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+        &:nth-child(#{$i}n) {
+          padding-right: 0;
+        }
+        &:nth-child(#{$i}n+1) {
+          padding-left: 0;
+        }
+      }
+    }
+
+    @media (min-width: $main-nav-width + $i * $tiles-max-width) and (max-width: $main-nav-width + $tiles-max-width + $i * $tiles-max-width - 1) {
+      .navbar-normal .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+        &:nth-child(#{$i}n) {
+          padding-right: 0;
+        }
+        &:nth-child(#{$i}n+1) {
+          padding-left: 0;
+        }
+      }
+    }
+  }
+
+  @media (min-width: $tiles-layout-steps * $tiles-max-width) {
+    .navbar-icons-only .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+      &:nth-child(#{$tiles-layout-steps}n) {
+        padding-right: 0;
+      }
+      &:nth-child(#{$tiles-layout-steps}n+1) {
+        padding-left: 0;
+      }
+    }
+  }
+
+  @media (min-width: $main-nav-width + $tiles-layout-steps * $tiles-max-width) {
+    .navbar-normal .#{$tiles-container} div.tile-layout-container div.tile-layout-parent {
+      &:nth-child(#{$tiles-layout-steps}n) {
+        padding-right: 0;
+      }
+      &:nth-child(#{$tiles-layout-steps}n+1) {
+        padding-left: 0;
+      }
+    }
+  }
+
+  // Provide a uniform gallery card layout
+  .#{$tiles-container} .tile-layout-container {
+
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+
+    .tile-layout-parent {
+      padding-right: 10px;
+      padding-left: 10px;
+
+      flex: 1 1 100%;
+    }
+  }
+}

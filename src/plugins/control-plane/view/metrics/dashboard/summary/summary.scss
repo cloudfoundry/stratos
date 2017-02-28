@@ -1,19 +1,7 @@
 @import "node-cards-view/node-cards-view";
 @import "cards-list/cards-list";
 @import "node-summary-card/node-summary-card";
+
 .hcp-summary{
-
   padding: 12px;
-  @media (max-width: 1024px) {
-    .node-cards {
-      flex-direction: column;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .node-cards {
-      flex-direction: row;
-    }
-  }
-
 }

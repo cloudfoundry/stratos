@@ -1,0 +1,10 @@
+@include tile-layout('cards-view', 400px, 5);
+node-summary-card {
+  .donuts .donut-div {
+    display: flex;
+    flex-direction: column;
+    span {
+      align-self: center;
+    }
+  }
+}

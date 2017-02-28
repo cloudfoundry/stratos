@@ -1,6 +1,8 @@
 <div class="memory-cards">
-  <div class="memory-card" ng-repeat="node in cardsViewCtrl.nodes">
-
-    <memory-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}" show-utilization-donut="true" title="{{  node.spec.hostname }}"></memory-card>
+  <div class="tile-layout-container">
+    <div class="memory-card tile-layout-parent" ng-repeat="node in cardsViewCtrl.nodes">
+      <memory-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
+                   show-utilization-donut="true" title="{{  node.spec.hostname }}"></memory-card>
+    </div>
   </div>
 </div>

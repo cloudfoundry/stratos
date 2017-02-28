@@ -33,7 +33,8 @@
   }
 }
 
-// Take into account the app nav menu mode exapnded or icons only
+// Take into account the app nav menu mode expanded or icons only
+// TODO: Use the new 'tile-layout' mixin and remove below
 
 $cluster-gallery-card-max-width: 420px;
 $cluster-gallery-card-layout-steps: 5;

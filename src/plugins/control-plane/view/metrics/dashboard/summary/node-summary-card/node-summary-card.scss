@@ -8,11 +8,8 @@
     flex-direction: row;
     .donut-div {
       flex-grow: 1;
-      display: inline-block;
-      .centered {
-        width: 65%;
-        float: right;
-      }
+      display: flex;
+      flex-direction: column;
     }
   }
   .charts {
