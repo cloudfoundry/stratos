@@ -42,14 +42,6 @@
     this.metricsData = {};
     this.memoryLimit = 0;
 
-    // // NOTE: Hack for dev_harness
-    // if (this.node === '192.168.200.2') {
-    //   this.node = 'kubernetes-master';
-    // }
-    // if (this.node === '192.168.200.3') {
-    //   this.node = 'kubernetes-node';
-    // }
-
     this.cardData = {
       title: this.title
     };
@@ -81,7 +73,7 @@
     fetchLimitMetrics: function () {
       var that = this;
       this.metricsModel.getNodeMemoryLimit(this.metricsNodeName).then(function (memoryLimit) {
-        that.memoryLimit = parseInt(memoryLimit, 10) / (1024 * 1024);
+        that.memoryLimit = parseFloat(memoryLimit, 10) / (1024 * 1024 * 1024);
       });
     },
 
@@ -98,9 +90,6 @@
      return utilsService.mbToHumanSize(parseInt(d) / (1024 * 1024)).replace('GB', '');
     },
 
-    namespaceDetails: function () {
-      this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
-    }
   });
 
 })();

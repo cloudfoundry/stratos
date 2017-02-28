@@ -15,7 +15,9 @@
         yLabel: '@',
         nodeName: '@',
         metricLimit: '@',
-        noLegend: '@'
+        metricUnit: '@',
+        noLegend: '@',
+        intUnit: '@'
       },
       controller: UtilizationDonutController,
       controllerAs: 'utilizationDonutCtrl',
@@ -54,8 +56,7 @@
     }, function () {
       if (that.chartApi) {
         // Update limit as soon as metric limit is available
-        var element = _.find(that.data, {idle: true});
-        element.label = 'LIMIT ' + that.metricLimit;
+        that._updateLegend();
       }
     });
 
@@ -115,7 +116,8 @@
       {
         value: 0.0,
         label: 'UTILIZED',
-        color: '#4dc1be'
+        color: '#4dc1be',
+        idle: false
       },
       {
         value: 1.00,
@@ -128,6 +130,30 @@
   }
 
   angular.extend(UtilizationDonutController.prototype, {
+
+
+    _updateLegend: function (utilValue, idleValue, utilColor, idleColor) {
+
+      var idleElement = _.find(this.data, {idle: true});
+      var valueElement = _.find(this.data, {idle: false});
+      var utilizedValue = parseFloat((utilValue || valueElement.value) / 100) * parseInt(this.metricLimit, 10);
+
+      utilizedValue = !this.intUnit ? utilizedValue.toFixed(2) : Math.ceil(utilizedValue);
+
+      this.data = [
+        {
+          value: utilValue || valueElement.value,
+          label: 'UTILIZED ' + utilizedValue + ' ' + this.metricUnit,
+          color: utilColor || valueElement.color,
+          idle: false
+        },
+        {
+          value: idleValue || idleElement.value,
+          label: 'LIMIT ' + this.metricLimit + ' ' + this.metricUnit,
+          color: idleColor || idleElement.color,
+          idle: true
+        }];
+    },
 
     updateUtilization: function () {
       var that = this;
@@ -169,19 +195,7 @@
               .attr('id', 'title');
           }
 
-          that.data = [
-            {
-              value: value,
-              label: 'UTILIZED ' + value.toFixed(2) + '%',
-              color: arcColour
-            },
-            {
-              value: 100 - value,
-              label: 'LIMIT ' + that.metricLimit,
-              color: '#60798D',
-              idle: true
-            }];
-
+          that._updateLegend(value, 100 - value, arcColour, '#60798D');
         });
     }
 

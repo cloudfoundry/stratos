@@ -8,8 +8,10 @@
         <utilization-donut metric="cpu_node_utilization_gauge"
                            filter="{{ cpuCardCtrl.getNodeFilter() }}"
                            y-label="CPU Utilization (%)"
-                           node-name="{{cpuCardCtrl.node}}"
-                           metric-limit="{{cpuCardCtrl.cpuLimit.toFixed(2)}} MC"
+                           node-name="{{ cpuCardCtrl.node }}"
+                           metric-limit="{{ cpuCardCtrl.cpuLimit }}"
+                           metric-unit="MC"
+                           int-unit="true"
                            no-legend="false"
         ></utilization-donut>
       </div>
