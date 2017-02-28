@@ -4,16 +4,17 @@
     <network-card node="*" metrics-node-name="*" title="{{ 'Total Network Traffic' | translate }}"></network-card>
   </div>
 
-  <div>
+  <div class="row">
     <summary-control-bar
       summary-name="data-traffic-summary"
       guid="{{ dataTrafficSummaryCtrl.guid }}"
       group-name="data-traffic"
-      >
+    >
     </summary-control-bar>
   </div>
 
-
-  <ui-view></ui-view>
+  <div class="row">
+    <ui-view></ui-view>
+  </div>
 
 </div>

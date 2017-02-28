@@ -1,17 +1,20 @@
 <div class="hcp-cp-summary">
 
   <div class="row">
-    <cpu-card node="*" metrics-node-name="*" show-utilization-donut="false" title="{{ 'Total CPU Usage' | translate }}"></cpu-card>
+    <cpu-card node="*" metrics-node-name="*" show-utilization-donut="false"
+              title="{{ 'Total CPU Usage' | translate }}"></cpu-card>
   </div>
-  <div>
+  <div class="row">
     <summary-control-bar
       summary-name="cpu-summary"
       guid="{{ cpuSummaryCtrl.guid }}"
       group-name="cpu"
-      >
+    >
     </summary-control-bar>
   </div>
 
-  <ui-view></ui-view>
+  <div class="row">
+    <ui-view></ui-view>
+  </div>
 
 </div>

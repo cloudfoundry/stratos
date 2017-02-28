@@ -2,6 +2,8 @@
 @import "cards-list/cards-list";
 @import "node-summary-card/node-summary-card";
 .hcp-summary{
+
+  padding: 12px;
   @media (max-width: 1024px) {
     .node-cards {
       flex-direction: column;
@@ -13,9 +15,5 @@
       flex-direction: row;
     }
   }
-  .node-cards{
-    display:flex;
-    flex-flow: row wrap;
-    justify-content: space-around;
-  }
+
 }

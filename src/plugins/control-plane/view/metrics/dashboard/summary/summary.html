@@ -5,14 +5,16 @@
     <!--<node-count-card></node-count-card>-->
   </div>
 
-  <div>
+  <div class="row">
     <summary-control-bar
-     summary-name="summary"
-     guid="{{ metricsSummaryCtrl.guid }}"
-     group-name="nodes"
-     >
+      summary-name="summary"
+      guid="{{ metricsSummaryCtrl.guid }}"
+      group-name="nodes"
+    >
     </summary-control-bar>
   </div>
 
-  <ui-view></ui-view>
+  <div class="row">
+    <ui-view></ui-view>
+  </div>
 </div>

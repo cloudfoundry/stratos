@@ -1,19 +1,21 @@
 <div class="hcp-memory-summary">
 
   <div class="row">
-    <memory-card node="*" metrics-node-name="*" show-utilization-donut="false" title="{{ 'Total Memory Usage' | translate }}"></memory-card>
+    <memory-card node="*" metrics-node-name="*" show-utilization-donut="false"
+                 title="{{ 'Total Memory Usage' | translate }}"></memory-card>
   </div>
 
-  <div>
+  <div class="row">
     <summary-control-bar
       summary-name="memory-summary"
       guid="{{ memorySummaryCtrl.guid }}"
       group-name="memory"
-      >
+    >
     </summary-control-bar>
   </div>
 
-
-  <ui-view></ui-view>
+  <div class="row">
+    <ui-view></ui-view>
+  </div>
 
 </div>

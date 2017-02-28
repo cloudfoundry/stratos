@@ -40,11 +40,9 @@
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
     this.$q = $q;
     this.nodes = [];
-
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},

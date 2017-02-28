@@ -1,0 +1,136 @@
+.metrics-control-bar{
+  //.panel {
+  //  margin: 0 16px 16px 16px
+  //}
+
+  .panel-body {
+    padding: $hpe-unit-space * 0.5;
+  }
+
+ .panel-body:not(:first-child) {
+    padding-top: 0;
+  }
+
+  .control-label-outside {
+    height: $hpe-input-height;
+    margin-bottom: 0;
+    line-height: $hpe-input-height;
+    margin-right: 12px;
+  }
+
+  .applications-filter {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-cf-filters {
+      display: flex;
+      flex: 3 3 auto;
+
+      .form-group {
+        width: initial;
+        flex: 1 1 0px;
+      }
+    }
+
+    .apps-sorting {
+      flex: 1 1 auto;
+      max-width: $hpe-input-width;
+      min-width: $hpe-unit-space * 7;
+      margin: 0;
+      padding: 0;
+
+      .applications-sorting {
+        .form-group {
+          width: initial;
+        }
+      }
+    }
+  }
+
+  .metrics-main-controls {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-options-control {
+      flex: 0 1 auto;
+      align-self: center;
+      text-align: center;
+      min-width: $hpe-unit-space * 4;
+      margin-left: $hpe-unit-space * 0.5;
+
+      .reset-link {
+        user-select: none;
+      }
+    }
+
+    .metrics-sort-control {
+      .form-group {
+        width: auto;
+        flex-grow: 1;
+        min-width: $hpe-unit-space * 6;
+      }
+    }
+
+    .app-count {
+      display: flex;
+
+      .app-count-number {
+        flex: 1 1 auto;
+      }
+
+      .app-count-reset {
+        flex: 0 1 auto;
+      }
+    }
+
+    .view-buttons {
+      flex: 0 1 auto;
+      align-self: center;
+      margin: 0 0 0 $hpe-unit-space * 0.5;
+      display: flex;
+      height: $hpe-input-height;
+      flex-direction: column;
+
+      button:not([disabled]):focus, button:not([disabled]):hover {
+        outline: none;
+        color: $hpe-primary;
+      }
+
+      .btn {
+        padding: 0;
+        margin: 0;
+        height: $hpe-input-height/2;
+      }
+      .btn-active {
+        color: $hpe-primary;
+      }
+      .btn-disabled {
+        color: $actions-menu-item-disabled-fg;
+      }
+    }
+  }
+
+  .metrics-search-box {
+    flex: 1 1 auto;
+
+    .search-field {
+      width: auto;
+      margin-right: 12px;
+    }
+
+    form #applications-text {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      margin-left: $hpe-unit-space;
+    }
+
+    .metrics-search-box-icon {
+      position: absolute;
+      margin-left: -12px;
+      height: $hpe-input-height;
+      vertical-align: middle;
+      line-height: $hpe-input-height;
+    }
+  }
+}
