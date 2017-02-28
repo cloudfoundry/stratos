@@ -1,6 +1,7 @@
 @import "summary/summary";
 @import "memory-summary/memory-summary";
 @import "cpu-summary/cpu-summary";
+@import "data-traffic-summary/data-traffic-summary";
 @import "summary-control-bar/summary-control-bar";
 
 .metrics-dashboard {
@@ -8,16 +9,6 @@
   padding-top: 0px;
   display: flex;
   flex-direction: column;
-
-  //.node-cards {
-  //  padding-top: 24px;
-  //  display: flex;
-  //  flex-wrap: wrap;
-  //  div:last-child {
-  //  //  padding-right: 12px;
-  //  }
-  //  width: 100%;
-  //}
 
   .metrics-nav {
     margin-bottom: $hpe-unit-space * 0.5;

@@ -1,17 +1,19 @@
-<div>
-  <gallery-card class="namespace-card"
+<div class="network-card">
+  <gallery-card class="network-gallery-card"
                 card-data="networkCardCtrl.getCardData()">
 
-    <cumulative-chart metric="network_tx_cumulative"
-                      filter="{{ networkCardCtrl.getNodeFilter() }}"
-                      y-label="Data Received"
-                      node-name="{{networkCardCtrl.node}}"
-    ></cumulative-chart>
+    <div class="card-content">
+      <cumulative-chart class="data-chart" metric="network_tx_cumulative"
+                        filter="{{ networkCardCtrl.getNodeFilter() }}"
+                        y-label="Data Transmitted"
+                        node-name="{{networkCardCtrl.node}}"
+      ></cumulative-chart>
 
-    <cumulative-chart metric="network_rx_cumulative"
-                      filter="{{ networkCardCtrl.getNodeFilter() }}"
-                      y-label="Data Received"
-                      node-name="{{networkCardCtrl.node}}"
-    ></cumulative-chart>
+      <cumulative-chart class="data-chart" metric="network_rx_cumulative"
+                        filter="{{ networkCardCtrl.getNodeFilter() }}"
+                        y-label="Data Received"
+                        node-name="{{networkCardCtrl.node}}"
+      ></cumulative-chart>
+    </div>
   </gallery-card>
 </div>
