@@ -44,8 +44,10 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
-      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
+      {name: gettext('Data Transmitted'), value: 'metrics.dataTxData', noSort: true},
+      {name: gettext('Transmission Rate'), value: 'metrics.dataTxRate', descendingFirst: true},
+      {name: gettext('Data Received'), value: 'metrics.dataRxData', descendingFirst: true},
+      {name: gettext('Receive Rate'), value: 'metrics.dataRxRate', descendingFirst: true}
     ];
 
     function init() {
@@ -58,14 +60,25 @@
           _.each(that.nodes, function (node, key) {
 
             var metricPromises = [];
-            // cpu
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
+            // network Rx
+            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_rx_cumulative',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            // network Rx rate
+            metricPromises.push(that.metricsModel.getNetworkRxRate(node.spec.metricsNodeName));
+            // network Tx
+            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_tx_cumulative',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            // network Tx rate
+            metricPromises.push(that.metricsModel.getNetworkTxRate(node.spec.metricsNodeName));
+
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2);
+                that.nodes[key].metrics.dataRxData = metrics[0];
+                that.nodes[key].metrics.dataRxRate = utilsService.bytesToHumanSize(metrics[1]) + '/s';
+                that.nodes[key].metrics.dataTxData = metrics[2];
+                that.nodes[key].metrics.dataTxRate = utilsService.bytesToHumanSize(metrics[3]) + '/s';
               });
 
             allMetricPromises.push(promises);

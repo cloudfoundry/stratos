@@ -27,8 +27,10 @@
       <td class="table-view-app-name">
         {{ node.spec.hostname }}
       </td>
-      <td>{{ node.metrics.cpu_usage }}</td>
       <td>sparkline</td>
+      <td>{{ node.metrics.dataTxRate }}</td>
+      <td>sparkline</td>
+      <td>{{ node.metrics.dataRxRate }}</td>
     </tr>
     </tbody>
   </table>
