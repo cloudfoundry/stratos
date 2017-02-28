@@ -55,9 +55,9 @@
 
     utilsService.chainStateResolve('sm.endpoint.detail.instances', $state, init);
 
-    $interval(function () {
-      that._fetchInstanceMetrics();
-    }, 60000);
+    // $interval(function () {
+    //   that._fetchInstanceMetrics();
+    // }, 60000);
 
   }
 
