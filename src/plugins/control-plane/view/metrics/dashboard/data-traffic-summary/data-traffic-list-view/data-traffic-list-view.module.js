@@ -53,7 +53,7 @@
     ];
 
     function init() {
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
       return $q.resolve()
         .then(function () {
           // Enrich nodes information

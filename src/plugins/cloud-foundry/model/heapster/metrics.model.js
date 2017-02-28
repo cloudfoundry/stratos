@@ -287,13 +287,13 @@
       var dpsArray = _.map(metricsDataArray, 'dps');
       var keys = _.keys(dpsArray[0]);
 
-      // if (!_.isEqual(keys, _.keys(dpsArray[1]))) {
-      //   console.log('Keys are not equal!');
-      // }
-
       var mergedDpsArray = {};
       _.each(keys, function (key) {
         var values = _.map(dpsArray, key);
+        if (values.length !== dpsArray.length) {
+          // Skip dps since not nodes have data at this time
+          return;
+        }
         mergedDpsArray[key] = _.sum(values);
       });
 

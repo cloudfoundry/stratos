@@ -46,6 +46,7 @@
 
     function _metricsQuery(metrics) {
       return function (filter, time) {
+
         if (!time) {
           time = '24h-ago';
         }

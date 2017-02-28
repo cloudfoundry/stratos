@@ -44,7 +44,7 @@
     this.nodes = [];
 
     function init() {
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
       return $q.resolve();
     }
 

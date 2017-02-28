@@ -45,17 +45,17 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Memory Usage / %'), value: 'metrics.memory_usage', noSort: true},
-      {name: gettext('CPU Usage / %'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
+      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', descendingFirst: true},
       {name: gettext('Up Time'), value: 'metrics.upTime', descendingFirst: true},
       {name: gettext('Avail Zone'), value: 'metrics.availabilityZone', descendingFirst: true},
-      {name: gettext('Data Transmitted'), value: 'metrics.dataTx', descendingFirst: true},
-      {name: gettext('Data Received'), value: 'metrics.dataRx', descendingFirst: true}
+      {name: gettext('Data Tx'), value: 'metrics.dataTx', descendingFirst: true},
+      {name: gettext('Data Rx'), value: 'metrics.dataRx', descendingFirst: true}
     ];
 
     function init() {
 
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
 
       return $q.resolve()
         .then(function () {
@@ -85,8 +85,8 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2);
-                that.nodes[key].metrics.memory_usage = (metrics[1] * 100).toFixed(2);
+                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2) + ' %';
+                that.nodes[key].metrics.memory_usage = (metrics[1] * 100).toFixed(2) + ' %';
                 that.nodes[key].metrics.upTime = utilsService.getSensibleTime(metrics[2]);
                 that.nodes[key].metrics.availabilityZone = metrics[3];
                 that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize((metrics[4]).toFixed(2)) + '/s';

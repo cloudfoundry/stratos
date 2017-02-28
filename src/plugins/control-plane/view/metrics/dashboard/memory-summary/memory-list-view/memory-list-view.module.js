@@ -38,20 +38,18 @@
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
     this.$q = $q;
     this.nodes = [];
 
-
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
       {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
-      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true},
+      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true}
     ];
 
     function init() {
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
       return $q.resolve()
         .then(function () {
           // Enrich nodes information
@@ -68,7 +66,7 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.memory_usage = (metrics[0] * 100).toFixed(2);
+                that.nodes[key].metrics.memory_usage = (metrics[0] * 100).toFixed(2) + ' %';
                 that.nodes[key].metrics.memoryUsageData = metrics[1].timeSeries;
               });
 

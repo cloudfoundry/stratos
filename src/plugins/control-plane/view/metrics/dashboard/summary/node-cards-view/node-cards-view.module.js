@@ -43,7 +43,7 @@
 
 
     function init() {
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
 
       var promises = [];
       _.each(that.nodes, function (node) {

@@ -51,7 +51,7 @@
     ];
 
     function init() {
-      that.nodes = metricsDataService.getNodes(that.guid, true);
+      that.nodes = metricsDataService.getNodes(that.guid);
       return $q.resolve()
         .then(function () {
           // Enrich nodes information
@@ -69,7 +69,7 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2);
+                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2) + ' %';
                 that.nodes[key].metrics.cpuUsageData = metrics[1].timeSeries;
               });
 
