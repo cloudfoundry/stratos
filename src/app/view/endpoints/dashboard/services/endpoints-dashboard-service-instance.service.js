@@ -111,6 +111,11 @@
               return $state.href('sm.endpoint.detail.instances', {guid: serviceInstance.guid});
             };
             break;
+          case 'hcp':
+            endpoint.visit = function () {
+              return $state.href('cp.metrics.dashboard.summary.cards', {guid: serviceInstance.guid});
+            };
+            break;
         }
       }
     }
