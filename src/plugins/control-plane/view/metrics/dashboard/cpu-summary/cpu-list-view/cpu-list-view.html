@@ -28,7 +28,12 @@
         {{ node.spec.hostname }}
       </td>
       <td>{{ node.metrics.cpu_usage }}</td>
-      <td>sparkline</td>
+      <td>
+        <sparkline-graph ng-if="node.metrics.cpuUsageData.length > 0"
+                         timeseries="node.metrics.cpuUsageData"
+        >
+        </sparkline-graph>
+      </td>
     </tr>
     </tbody>
   </table>

@@ -49,7 +49,7 @@
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
       {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
-      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
     ];
 
     function init() {
@@ -64,12 +64,15 @@
             var metricPromises = [];
             // cpu
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.hostname)));
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            metricPromises.push(that.metricsModel.getMetrics('cpu_node_utilization_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
                 that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2);
+                that.nodes[key].metrics.cpuUsageData = metrics[1].timeSeries;
               });
 
             allMetricPromises.push(promises);

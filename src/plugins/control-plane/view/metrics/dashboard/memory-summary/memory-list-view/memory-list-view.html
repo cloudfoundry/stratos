@@ -28,7 +28,13 @@
         {{ node.spec.hostname }}
       </td>
       <td>{{ node.metrics.memory_usage }}</td>
-      <td>sparkline</td>
+      <td>
+        <sparkline-graph ng-if="node.metrics.memoryUsageData.length > 0"
+                         timeseries="node.metrics.memoryUsageData"
+        >
+        </sparkline-graph>
+
+      </td>
     </tr>
     </tbody>
   </table>
