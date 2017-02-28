@@ -15,15 +15,15 @@
       params: {
         guid: ''
       },
-      controller: CpuListViewController,
-      controllerAs: 'cpuListViewCtrl',
+      controller: DataTrafficListViewController,
+      controllerAs: 'dataTrafficListCtl',
       scope: {},
       templateUrl: 'plugins/control-plane/view/metrics/dashboard/data-traffic-summary/data-traffic-list-view/data-traffic-list-view.html'
 
     });
   }
 
-  CpuListViewController.$inject = [
+  DataTrafficListViewController.$inject = [
     '$q',
     '$state',
     '$stateParams',
@@ -32,7 +32,7 @@
     'control-plane.metrics.metrics-data-service'
   ];
 
-  function CpuListViewController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
+  function DataTrafficListViewController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
@@ -61,12 +61,12 @@
 
             var metricPromises = [];
             // network Rx
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_rx_cumulative',
+            metricPromises.push(that.metricsModel.getMetrics('network_rx_cumulative',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // network Rx rate
             metricPromises.push(that.metricsModel.getNetworkRxRate(node.spec.metricsNodeName));
             // network Tx
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_tx_cumulative',
+            metricPromises.push(that.metricsModel.getMetrics('network_tx_cumulative',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // network Tx rate
             metricPromises.push(that.metricsModel.getNetworkTxRate(node.spec.metricsNodeName));
@@ -75,9 +75,9 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.dataRxData = metrics[0];
+                that.nodes[key].metrics.dataRxData = metrics[0] && metrics[0].timeSeries;
                 that.nodes[key].metrics.dataRxRate = utilsService.bytesToHumanSize(metrics[1]) + '/s';
-                that.nodes[key].metrics.dataTxData = metrics[2];
+                that.nodes[key].metrics.dataTxData = metrics[2] && metrics[2].timeSeries;
                 that.nodes[key].metrics.dataTxRate = utilsService.bytesToHumanSize(metrics[3]) + '/s';
               });
 
@@ -92,6 +92,6 @@
 
   }
 
-  angular.extend(CpuListViewController.prototype, {});
+  angular.extend(DataTrafficListViewController.prototype, {});
 
 })();
