@@ -1,23 +1,25 @@
-<div>
-  <gallery-card class="namespace-card"
+<div class="cpu-card">
+  <gallery-card class="cpu-gallery-card"
                 card-data="cpuCardCtrl.getCardData()">
 
-    <div class="donut-div" ng-if="cpuCardCtrl.showUtilizationDonut">
-      <span class="centered">CPU Utilization</span>
-      <utilization-donut metric="cpu_node_utilization_gauge"
-                         filter="{{ cpuCardCtrl.getNodeFilter() }}"
-                         y-label="CPU Utilization (%)"
-                         node-name="{{cpuCardCtrl.node}}"
-                         metric-limit="{{cpuCardCtrl.cpuLimit.toFixed(2)}} MC"
-                         no-legend="false"
-      ></utilization-donut>
-    </div>
+    <div class="card-content">
+      <div class="donut-div" ng-if="cpuCardCtrl.showUtilizationDonut">
+        <span class="centered">CPU Utilization</span>
+        <utilization-donut metric="cpu_node_utilization_gauge"
+                           filter="{{ cpuCardCtrl.getNodeFilter() }}"
+                           y-label="CPU Utilization (%)"
+                           node-name="{{cpuCardCtrl.node}}"
+                           metric-limit="{{cpuCardCtrl.cpuLimit.toFixed(2)}} MC"
+                           no-legend="false"
+        ></utilization-donut>
+      </div>
 
-    <line-graph metric="cpu_usage_rate_gauge"
-                filter="{{ cpuCardCtrl.getNodeFilter() }}"
-                y-label="CPU Utilization (MC)"
-                node-name="{{ cpuCardCtrl.getNodeName() }}"
-                y-tick-formatter="cpuCardCtrl.yTickFormatter"
-    ></line-graph>
+      <line-graph class="line-graph" metric="cpu_usage_rate_gauge"
+                  filter="{{ cpuCardCtrl.getNodeFilter() }}"
+                  y-label="CPU Utilization (MC)"
+                  node-name="{{ cpuCardCtrl.getNodeName() }}"
+                  y-tick-formatter="cpuCardCtrl.yTickFormatter"
+      ></line-graph>
+    </div>
   </gallery-card>
 </div>
