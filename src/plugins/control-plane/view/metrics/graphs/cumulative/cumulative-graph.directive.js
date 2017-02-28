@@ -40,13 +40,13 @@
     this.metricData = {};
     this.updateChart();
 
-    var interval = $interval(function () {
-      that.updateChart();
-    }, 120000);
-
-    $scope.$on('$destroy', function () {
-      $interval.cancel(interval);
-    });
+    // var interval = $interval(function () {
+    //   that.updateChart();
+    // }, 120000);
+    //
+    // $scope.$on('$destroy', function () {
+    //   $interval.cancel(interval);
+    // });
 
     this.options = {
       chart: {
