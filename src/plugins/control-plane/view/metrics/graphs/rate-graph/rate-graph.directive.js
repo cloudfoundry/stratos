@@ -135,7 +135,7 @@
     updateChart: function () {
       var that = this;
       this.options.chart.noData = 'Loading data ...';
-      
+
       return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
           that.data = [

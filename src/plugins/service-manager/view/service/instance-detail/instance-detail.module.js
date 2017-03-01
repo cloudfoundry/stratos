@@ -135,6 +135,8 @@
     this.cpuUsageData = {};
     this.memoryUsageData = {};
 
+    this.hasMetrics = false;
+
     this.actions = [
       { id: 'upgrade', name: gettext('Upgrade Instance'),
         execute: function () {
@@ -227,7 +229,9 @@
       var that = this;
       return this.hsmModel.getInstance(this.guid, this.id).then(function (data) {
         that.instance = data;
-        that._fetchInstanceMetrics(that.instance);
+        if (!that.hasMetrics) {
+          that._fetchInstanceMetrics(that.instance);
+        }
         that._filterComponents();
         that._setStateIndicator();
         that._sortUpgrades();
@@ -242,6 +246,8 @@
           that.instance.state = '404';
           that._setStateIndicator();
         }
+      }).finally(function () {
+        that.hasMetrics = true;
       });
     },
 
