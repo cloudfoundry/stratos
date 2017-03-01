@@ -9,14 +9,14 @@
       summary-name="data-traffic-summary"
       guid="{{ dataTrafficRateSummaryCtrl.guid }}"
       group-name="data-traffic" ,
-      show-card-layout="dataTrafficRateSummaryCtrl.metricsDataService.dataTraffic.showCardLayout"
+      show-card-layout="dataTrafficRateSummaryCtrl.metricsDataService.dataTrafficRate.showCardLayout"
     >
     </summary-control-bar>
   </div>
 
   <div class="row">
     <div class="data-traffic-view">
-      <div ng-if="!dataTrafficRateSummaryCtrl.metricsDataService.dataTraffic.showCardLayout">
+      <div ng-if="!dataTrafficRateSummaryCtrl.metricsDataService.dataTrafficRate.showCardLayout">
         <div ng-if="dataTrafficRateSummaryCtrl.nodes.length"
              class="metrics-table">
           <table class="table"
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <div ng-if="dataTrafficRateSummaryCtrl.metricsDataService.dataTraffic.showCardLayout">
+      <div ng-if="dataTrafficRateSummaryCtrl.metricsDataService.dataTrafficRate.showCardLayout">
         <div class="network-card">
           <div class="tile-layout-container">
             <div class="network-card tile-layout-parent" ng-repeat="node in dataTrafficRateSummaryCtrl.nodes">
