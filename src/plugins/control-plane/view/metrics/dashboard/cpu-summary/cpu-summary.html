@@ -23,7 +23,7 @@
           <div class="tile-layout-container">
             <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.nodes">
               <cpu-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
-                        show-utilization-donut="true" title="{{  node.spec.hostname }}"  cpu-limit="{{  node.cpuLimit }}"></cpu-card>
+                        show-utilization-donut="true" title="{{  node.spec.hostname }}"  cpu-limit="{{  node.metrics.cpuLimit }}"></cpu-card>
             </div>
           </div>
         </div>
