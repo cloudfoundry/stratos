@@ -48,16 +48,6 @@
       title: this.title
     };
 
-
-    function init() {
-      if (that.showUtilizationDonut) {
-        return that.fetchLimitMetrics();
-      } else {
-        return $q.resolve;
-      }
-    }
-
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
   }
 
   angular.extend(CpuCardController.prototype, {
@@ -73,10 +63,6 @@
     hasMetrics: function (metricName) {
       return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
     },
-
-    fetchLimitMetrics: function () {
-      var that = this;
-     },
 
     getNodeName: function () {
 
