@@ -38,14 +38,12 @@
       </dd>
       <dt translate>Data Transmitted Rate</dt>
       <dd>
-        {{ nodeSummaryCardCtrl.metricsData.dataTxRate || mbToHumanSize}} B/s
+        {{ nodeSummaryCardCtrl.node.metrics.dataTx}}
       </dd>
       <dt translate>Data Received Rate</dt>
       <dd>
-        {{ nodeSummaryCardCtrl.metricsData.dataRxRate || mbToHumanSize }} B/s
+        {{ nodeSummaryCardCtrl.node.metrics.dataRx}}
       </dd>
-
-
     </dl>
   </gallery-card>
 

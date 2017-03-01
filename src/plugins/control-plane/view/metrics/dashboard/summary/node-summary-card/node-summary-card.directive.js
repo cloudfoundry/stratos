@@ -39,12 +39,9 @@
     this.cpuLimit = 0;
     this.memoryLimit = 0;
     this.showDetail = false;
-    this.dataTxRate = 0;
-    this.dataRxRate = 0;
 
     this.nodeName = this.node.spec.hostname;
     this.metricsNodeName = this.node.spec.metricsNodeName;
-
 
     this.availabilityZone = this.node.spec.zone || 'Dev Harness';
 
@@ -69,8 +66,6 @@
       return $q.all([that.updateCpuUtilization(),
         that.updateMemoryUtilization(),
         that.updateNodeUptime(),
-        that.updateNetworkDataTransmittedRate(),
-        that.updateNetworkDataReceivedRate(),
         that.fetchLimitMetrics()]);
     }
 
@@ -96,22 +91,6 @@
       return this.metricsModel.getMemoryUtilization(this.metricsModel.makeNodeNameFilter(this.metricsNodeName))
         .then(function (metricsData) {
           that.metricsData[metricsData.metricName] = [metricsData];
-        });
-    },
-
-    updateNetworkDataTransmittedRate: function () {
-      var that = this;
-      return this.metricsModel.getNetworkTxRate(this.metricsNodeName)
-        .then(function (metricsData) {
-          that.metricsData.dataTxRate = metricsData;
-        });
-    },
-
-    updateNetworkDataReceivedRate: function () {
-      var that = this;
-      return this.metricsModel.getNetworkRxRate(this.metricsNodeName)
-        .then(function (metricsData) {
-          that.metricsData.dataRxRate = metricsData;
         });
     },
 
