@@ -68,10 +68,10 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Data Transmitted'), value: 'metrics.dataTxData', noSort: true},
-      {name: gettext('Transmission Rate'), value: 'metrics.dataTxRate', descendingFirst: true},
-      {name: gettext('Data Received'), value: 'metrics.dataRxData', descendingFirst: true},
-      {name: gettext('Receive Rate'), value: 'metrics.dataRxRate', descendingFirst: true}
+      {name: gettext('Data Tx'), value: 'metrics.dataTxData', noSort: true},
+      {name: gettext('Tx Rate'), value: 'metrics.dataTxRate', descendingFirst: true},
+      {name: gettext('Data Rx'), value: 'metrics.dataRxData', noSort: true},
+      {name: gettext('Rx Rate'), value: 'metrics.dataRxRate', descendingFirst: true}
     ];
 
     function init() {

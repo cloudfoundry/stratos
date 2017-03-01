@@ -83,7 +83,7 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
+      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', descendingFirst: true},
       {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', descendingFirst: true},
       {name: gettext('Up Time'), value: 'metrics.upTime', descendingFirst: true},
       {name: gettext('Avail Zone'), value: 'metrics.availabilityZone', descendingFirst: true},

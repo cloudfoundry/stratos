@@ -46,8 +46,8 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
-      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true}
+      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', descendingFirst: true},
+      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', noSort: true}
     ];
 
     this.metricsDataService = metricsDataService;

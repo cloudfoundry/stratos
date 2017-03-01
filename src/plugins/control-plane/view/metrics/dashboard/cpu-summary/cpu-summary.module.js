@@ -61,8 +61,8 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
-      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
+      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', noSort: true}
     ];
 
     if (!_.has(metricsDataService, 'cpuSummary.showCardLayout')) {

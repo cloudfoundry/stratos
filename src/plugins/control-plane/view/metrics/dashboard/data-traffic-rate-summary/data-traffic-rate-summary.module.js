@@ -70,7 +70,7 @@
       {name: gettext('Node'), value: 'spec.hostname'},
       {name: gettext('Data Tx Rate'), value: 'metrics.dataTxData', noSort: true},
       {name: gettext('Current Tx Rate'), value: 'metrics.dataTxRate', descendingFirst: true},
-      {name: gettext('Data Rx Rate'), value: 'metrics.dataRxData', descendingFirst: true},
+      {name: gettext('Data Rx Rate'), value: 'metrics.dataRxData', noSort: true},
       {name: gettext('Current Rx Rate'), value: 'metrics.dataRxRate', descendingFirst: true}
     ];
 
