@@ -117,7 +117,7 @@
 
     updateNodeUptime: function () {
       var that = this;
-      this.metricsModel.getNodeUptime(this.nodeName)
+      this.metricsModel.getNodeUptime(this.metricsNodeName)
         .then(function (uptime) {
           that.nodeUptime = that.utilsService.getSensibleTime(uptime);
         });
