@@ -12,14 +12,14 @@
       summary-name="summary"
       guid="{{ metricsSummaryCtrl.guid }}"
       group-name="nodes"
-      show-card-layout="metricsSummaryCtrl.showCardLayout"
+      show-card-layout="metricsSummaryCtrl.metricsDataService.summary.showCardLayout"
     >
     </summary-control-bar>
   </div>
 
   <div class="row">
     <div class="summary-content">
-      <div class="list-view" ng-if="!metricsSummaryCtrl.showCardLayout">
+      <div class="list-view" ng-if="!metricsSummaryCtrl.metricsDataService.summary.showCardLayout">
         <div ng-if="metricsSummaryCtrl.nodes.length"
              class="metrics-table">
           <table class="table"
@@ -62,7 +62,7 @@
 
       </div>
 
-      <div class="card-view" ng-if="metricsSummaryCtrl.showCardLayout">
+      <div class="card-view" ng-if="metricsSummaryCtrl.metricsDataService.summary.showCardLayout">
         <div class="cards-view">
           <div class="tile-layout-container">
             <div class="card tile-layout-parent" ng-repeat="node in metricsSummaryCtrl.nodes">

@@ -50,6 +50,11 @@
       {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true}
     ];
 
+    this.metricsDataService = metricsDataService;
+    if (!_.has(metricsDataService, 'memorySummary.showCardLayout')) {
+      this.metricsDataService.memorySummary = {};
+      this.metricsDataService.memorySummary.showCardLayout = true;
+    }
 
     this.sortFilters = [
       {

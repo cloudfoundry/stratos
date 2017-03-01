@@ -2,8 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.data-traffic-summary', [
-    ])
+    .module('control-plane.view.metrics.dashboard.data-traffic-summary', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -41,7 +40,7 @@
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
-    this.showCardLayout = true;
+    this.metricsDataService = metricsDataService;
     this.sortFilters = [
       {
         label: gettext('Hostname'),
@@ -62,7 +61,10 @@
       value: 'spec.hostname'
     };
 
-    this.showCardLayout = true;
+    if (!_.has(metricsDataService, 'dataTraffic.showCardLayout')) {
+      this.metricsDataService.dataTraffic = {};
+      this.metricsDataService.dataTraffic.showCardLayout = true;
+    }
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},

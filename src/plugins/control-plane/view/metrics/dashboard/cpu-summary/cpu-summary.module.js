@@ -41,7 +41,7 @@
 
     this.guid = $stateParams.guid;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    this.showCardLayout = true;
+    this.metricsDataService = metricsDataService;
 
     this.sortFilters = [
       {
@@ -65,6 +65,10 @@
       {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
     ];
 
+    if (!_.has(metricsDataService, 'cpuSummary.showCardLayout')) {
+      this.metricsDataService.cpuSummary = {};
+      this.metricsDataService.cpuSummary.showCardLayout = true;
+    }
 
     function init() {
       metricsDataService.setSortFilters('cpu', that.sortFilters, that.defaultFilter);

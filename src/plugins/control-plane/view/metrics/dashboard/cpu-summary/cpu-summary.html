@@ -9,7 +9,7 @@
       summary-name="cpu-summary"
       guid="{{ cpuSummaryCtrl.guid }}"
       group-name="cpu",
-      show-card-layout="cpuSummaryCtrl.showCardLayout"
+      show-card-layout="cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout"
     >
     </summary-control-bar>
   </div>
@@ -18,7 +18,7 @@
     <div class="cpu-summary-content">
 
 
-      <div class="card-view" ng-if="cpuSummaryCtrl.showCardLayout">
+      <div class="card-view" ng-if="cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout">
         <div class="cpu-cards">
           <div class="tile-layout-container">
             <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.nodes">
@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <div class="list-view" ng-if="!cpuSummaryCtrl.showCardLayout">
+      <div class="list-view" ng-if="!cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout">
         <div ng-if="cpuSummaryCtrl.nodes.length"
              class="metrics-table">
           <table class="table"

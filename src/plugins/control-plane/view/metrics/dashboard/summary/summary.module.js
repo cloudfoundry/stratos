@@ -42,6 +42,13 @@
 
     this.showCardLayout = true;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsDataService = metricsDataService;
+
+    if (!_.has(metricsDataService, 'summary.showCardLayout')) {
+      this.metricsDataService.summary = {};
+      this.metricsDataService.summary.showCardLayout = true;
+    }
+
 
     this.sortFilters = [
       {

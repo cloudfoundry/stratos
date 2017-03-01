@@ -10,14 +10,14 @@
       summary-name="memory-summary"
       guid="{{ memorySummaryCtrl.guid }}"
       group-name="memory"
-      show-card-layout="memorySummaryCtrl.showCardLayout"
+      show-card-layout="memorySummaryCtrl.metricsDataService.memorySummary.showCardLayout"
     >
     </summary-control-bar>
   </div>
 
   <div class="row">
     <div class="memory-content">
-      <div class="list-view" ng-if="!memorySummaryCtrl.showCardLayout">
+      <div class="list-view" ng-if="!memorySummaryCtrl.metricsDataService.memorySummary.showCardLayout">
         <div ng-if="memorySummaryCtrl.nodes.length"
              class="metrics-table">
           <table class="table"
@@ -63,7 +63,7 @@
       </div>
 
 
-      <div class="card-view" ng-if="memorySummaryCtrl.showCardLayout">
+      <div class="card-view" ng-if="memorySummaryCtrl.metricsDataService.memorySummary.showCardLayout">
         <div class="memory-cards">
           <div class="tile-layout-container">
             <div class="memory-card tile-layout-parent" ng-repeat="node in memorySummaryCtrl.nodes">
