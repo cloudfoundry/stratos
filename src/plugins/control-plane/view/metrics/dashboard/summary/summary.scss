@@ -1,7 +1,6 @@
-@import "node-cards-view/node-cards-view";
-@import "cards-list/cards-list";
 @import "node-summary-card/node-summary-card";
 @import "node-count-card/node-count-card";
+@include tile-layout('cards-view', 400px, 5);
 
 .summary-cards {
   display: flex;
@@ -15,3 +14,12 @@
   }
 }
 
+node-summary-card {
+  .donuts .donut-div {
+    display: flex;
+    flex-direction: column;
+    span {
+      align-self: center;
+    }
+  }
+}

@@ -1,3 +1,2 @@
-@import "data-traffic-cards-view/data-traffic-cards-view";
-@import "data-traffic-list-view/data-traffic-list-view";
 @import "network-card/network-card";
+@include tile-layout('cpu-network-card', 900px, 2);

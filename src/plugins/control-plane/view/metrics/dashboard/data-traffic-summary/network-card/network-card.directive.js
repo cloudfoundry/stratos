@@ -32,7 +32,6 @@
 
   function NetworkCardController($interval, $state, $scope, $q, modelManager, utilsService) {
 
-    var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.$state = $state;
     this.$q = $q;
@@ -43,11 +42,6 @@
     this.cardData = {
       title: this.title
     };
-    function init() {
-        return $q.resolve;
-    }
-
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
   }
 
   angular.extend(NetworkCardController.prototype, {

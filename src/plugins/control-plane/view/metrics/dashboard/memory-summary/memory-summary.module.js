@@ -3,8 +3,6 @@
 
   angular
     .module('control-plane.view.metrics.dashboard.memory-summary', [
-      'control-plane.view.metrics.dashboard.memory-summary.list',
-      'control-plane.view.metrics.dashboard.memory-summary.cards'
     ])
     .config(registerRoute);
 
@@ -41,10 +39,17 @@
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
+    this.showCardLayout = true;
+
+    this.tableColumns = [
+      {name: gettext('Node'), value: 'spec.hostname'},
+      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
+      {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', descendingFirst: true}
+    ];
+
 
     this.sortFilters = [
       {
@@ -64,7 +69,32 @@
 
     function init() {
       metricsDataService.setSortFilters('memory', that.sortFilters, that.defaultFilter);
-      return $q.resolve();
+      that.nodes = metricsDataService.getNodes(that.guid);
+      return $q.resolve()
+        .then(function () {
+          // Enrich nodes information
+
+          var allMetricPromises = [];
+          _.each(that.nodes, function (node, key) {
+
+            var metricPromises = [];
+            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            metricPromises.push(that.metricsModel.getMetrics('memory_node_utilization_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+
+            var promises = $q.all(metricPromises)
+              .then(function (metrics) {
+                that.nodes[key].metrics = {};
+                that.nodes[key].metrics.memory_usage = (metrics[0] * 100).toFixed(2) + ' %';
+                that.nodes[key].metrics.memoryUsageData = metrics[1].timeSeries;
+              });
+
+            allMetricPromises.push(promises);
+
+          });
+          return allMetricPromises;
+        });
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.memory-summary', $state, init);

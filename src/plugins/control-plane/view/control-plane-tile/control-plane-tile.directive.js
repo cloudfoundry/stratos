@@ -110,7 +110,7 @@
 
 
     summary: function () {
-      this.$state.go('cp.metrics.dashboard.summary.cards', {guid: this.service.guid});
+      this.$state.go('cp.metrics.dashboard.summary', {guid: this.service.guid});
     },
 
     getKubernetesNodeCount: function () {

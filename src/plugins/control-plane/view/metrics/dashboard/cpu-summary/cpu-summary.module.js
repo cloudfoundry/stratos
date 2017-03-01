@@ -3,8 +3,6 @@
 
   angular
     .module('control-plane.view.metrics.dashboard.cpu-summary', [
-      'control-plane.view.metrics.dashboard.cpu-summary.cards',
-      'control-plane.view.metrics.dashboard.cpu-summary.list'
     ])
     .config(registerRoute);
 
@@ -41,11 +39,9 @@
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.guid = $stateParams.guid;
-
-    this.totalCpuUsageTile = gettext('');
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.showCardLayout = true;
 
     this.sortFilters = [
       {
@@ -63,9 +59,44 @@
       value: 'spec.hostname'
     };
 
+    this.tableColumns = [
+      {name: gettext('Node'), value: 'spec.hostname'},
+      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', noSort: true},
+      {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', descendingFirst: true}
+    ];
+
+
     function init() {
       metricsDataService.setSortFilters('cpu', that.sortFilters, that.defaultFilter);
-      return $q.resolve();
+      that.nodes = metricsDataService.getNodes(that.guid);
+      return $q.resolve()
+        .then(function () {
+          // Enrich nodes information
+
+          var allMetricPromises = [];
+          _.each(that.nodes, function (node, key) {
+
+            var metricPromises = [];
+            // cpu
+            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            metricPromises.push(that.metricsModel.getMetrics('cpu_node_utilization_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            metricPromises.push(that.metricsModel.getNodeCpuLimit(node.spec.metricsNodeName));
+
+            var promises = $q.all(metricPromises)
+              .then(function (metrics) {
+                that.nodes[key].metrics = {};
+                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2) + ' %';
+                that.nodes[key].metrics.cpuUsageData = metrics[1].timeSeries;
+                that.nodes[key].cpuLimit = metrics[2];
+              });
+
+            allMetricPromises.push(promises);
+
+          });
+          return allMetricPromises;
+        });
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.cpu-summary', $state, init);

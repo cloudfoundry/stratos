@@ -13,7 +13,8 @@
         node: '@',
         metricsNodeName: '@',
         showUtilizationDonut: '=',
-        title: '@'
+        title: '@',
+        cpuLimit: '@'
       },
       controller: CpuCardController,
       controllerAs: 'cpuCardCtrl',
@@ -75,10 +76,7 @@
 
     fetchLimitMetrics: function () {
       var that = this;
-      this.metricsModel.getNodeCpuLimit(this.metricsNodeName).then(function (cpuLimit) {
-        that.cpuLimit = cpuLimit;
-      });
-    },
+     },
 
     getNodeName: function () {
 

@@ -1,3 +1,5 @@
-@import "cpu-cards-view/cpu-cards-view";
 @import "cpu-card/cpu-card";
-@import "cpu-list-view/cpu-lis-view";
+@include tile-layout('cpu-cards', 900px, 2);
+
+
+

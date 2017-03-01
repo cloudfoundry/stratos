@@ -11,7 +11,8 @@
                              y-label="CPU Utilization (%)"
                              node-name="{{nodeSummaryCardCtrl.nodeName}}"
                              metric-limit="{{nodeSummaryCardCtrl.cpuLimit}} MC"
-                             no-legend="true"
+                             no-legend="true",
+                             color-scheme="true"
           ></utilization-donut>
         </div>
         <div class="donut-div">
@@ -21,7 +22,8 @@
                              y-label="Memory Utilization (%)"
                              node-name="{{nodeSummaryCardCtrl.nodeName}}"
                              metric-limit="{{nodeSummaryCardCtrl.memoryLimit.toFixed(2)}} MB"
-                             no-legend="true"
+                             no-legend="true" ,
+                             color-scheme="true"
           ></utilization-donut>
         </div>
       </div>

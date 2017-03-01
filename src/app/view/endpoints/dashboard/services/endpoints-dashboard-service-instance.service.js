@@ -113,7 +113,7 @@
             break;
           case 'hcp':
             endpoint.visit = function () {
-              return $state.href('cp.metrics.dashboard.summary.cards', {guid: serviceInstance.guid});
+              return $state.href('cp.metrics.dashboard.summary', {guid: serviceInstance.guid});
             };
             break;
         }

@@ -8,13 +8,71 @@
     <summary-control-bar
       summary-name="cpu-summary"
       guid="{{ cpuSummaryCtrl.guid }}"
-      group-name="cpu"
+      group-name="cpu",
+      show-card-layout="cpuSummaryCtrl.showCardLayout"
     >
     </summary-control-bar>
   </div>
 
   <div class="row">
-    <ui-view></ui-view>
+    <div class="cpu-summary-content">
+
+
+      <div class="card-view" ng-if="cpuSummaryCtrl.showCardLayout">
+        <div class="cpu-cards">
+          <div class="tile-layout-container">
+            <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.nodes">
+              <cpu-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
+                        show-utilization-donut="true" title="{{  node.spec.hostname }}"></cpu-card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-view" ng-if="!cpuSummaryCtrl.showCardLayout">
+        <div ng-if="cpuSummaryCtrl.nodes.length"
+             class="metrics-table">
+          <table class="table"
+                 st-table="cpuSummaryCtrl.stNodes"
+                 st-safe-src="cpuSummaryCtrl.nodes"
+                 st-binding="cpuSummaryCtrl.table">
+            <thead>
+            <tr>
+              <th class="column"
+                  ng-repeat="column in cpuSummaryCtrl.tableColumns"
+                  st-skip-natural="true"
+                  ng-class="{'column-no-sort': column.noSort}"
+                  st-sort="{{ column.noSort ? '' : column.value }}"
+                  st-descending-first="{{ column.descendingFirst ? 'true' : '' }}">
+                <div class="column-div">
+                  <div class="column-text" translate>{{ column.name }}</div>
+                  <div class="smart-separator"></div>
+                  <div class="column-no-sort"></div>
+                  <div class="column-sorter-asc"></div>
+                  <div class="column-sorter-desc"></div>
+                </div>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="node in cpuSummaryCtrl.stNodes">
+              <td class="table-view-app-name">
+                {{ node.spec.hostname }}
+              </td>
+              <td>{{ node.metrics.cpu_usage }}</td>
+              <td>
+                <sparkline-graph ng-if="node.metrics.cpuUsageData.length > 0"
+                                 timeseries="node.metrics.cpuUsageData"
+                >
+                </sparkline-graph>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 </div>

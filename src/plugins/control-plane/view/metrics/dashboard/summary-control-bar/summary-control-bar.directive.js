@@ -12,7 +12,8 @@
       bindToController: {
         summaryName: '@',
         guid: '@',
-        groupName: '@'
+        groupName: '@',
+        showCardLayout: '='
       },
       controller: SummaryControlBar,
       controllerAs: 'summaryControlBarCtrl',
@@ -38,7 +39,6 @@
     this.$state = $state;
     this.$q = $q;
     this.utilsService = utilsService;
-    this.showCardLayout = true;
     this.metricsDataService = metricsDataService;
 
     that.filters = [];
@@ -119,7 +119,7 @@
       console.log('resresetFilter text called');
     },
 
-    sort: function(){
+    sort: function () {
 
       console.log(this.currentFilter)
       this.metricsDataService.set
@@ -127,14 +127,9 @@
     },
 
     switchToListView: function (switchView) {
-      if (switchView) {
-        this.$state.go('cp.metrics.dashboard.' + this.summaryName + '.list');
-        this.showCardLayout = false;
-      } else {
-        this.$state.go('cp.metrics.dashboard.' +  this.summaryName + '.cards');
-        this.showCardLayout = true;
-      }
+      this.showCardLayout = !switchView;
     }
   });
 
-})();
+})
+();

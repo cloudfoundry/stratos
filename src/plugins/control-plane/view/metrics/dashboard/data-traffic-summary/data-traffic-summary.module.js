@@ -3,8 +3,6 @@
 
   angular
     .module('control-plane.view.metrics.dashboard.data-traffic-summary', [
-      'control-plane.view.metrics.dashboard.data-traffic-summary.cards',
-      'control-plane.view.metrics.dashboard.data-traffic-summary.list'
     ])
     .config(registerRoute);
 
@@ -28,7 +26,6 @@
     });
   }
 
-
   DataTrafficSummaryController.$inject = [
     '$q',
     '$state',
@@ -39,14 +36,12 @@
   ];
 
   function DataTrafficSummaryController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
-    var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    var controlPlaneModel = modelManager.retrieve('control-plane.model');
+    var that = this;
+    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
-
+    this.showCardLayout = true;
     this.sortFilters = [
       {
         label: gettext('Hostname'),
@@ -67,9 +62,52 @@
       value: 'spec.hostname'
     };
 
+    this.showCardLayout = true;
+
+    this.tableColumns = [
+      {name: gettext('Node'), value: 'spec.hostname'},
+      {name: gettext('Data Transmitted'), value: 'metrics.dataTxData', noSort: true},
+      {name: gettext('Transmission Rate'), value: 'metrics.dataTxRate', descendingFirst: true},
+      {name: gettext('Data Received'), value: 'metrics.dataRxData', descendingFirst: true},
+      {name: gettext('Receive Rate'), value: 'metrics.dataRxRate', descendingFirst: true}
+    ];
+
     function init() {
       metricsDataService.setSortFilters('data-traffic', that.sortFilters, that.defaultFilter);
-      return $q.resolve();
+      that.nodes = metricsDataService.getNodes(that.guid);
+      console.log(that.nodes);
+      return $q.resolve().then(function () {
+        // Enrich nodes information
+
+        var allMetricPromises = [];
+        _.each(that.nodes, function (node, key) {
+
+          var metricPromises = [];
+          // network Rx
+          metricPromises.push(that.metricsModel.getMetrics('network_rx_cumulative',
+            that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+          // network Rx rate
+          metricPromises.push(that.metricsModel.getNetworkRxRate(node.spec.metricsNodeName));
+          // network Tx
+          metricPromises.push(that.metricsModel.getMetrics('network_tx_cumulative',
+            that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+          // network Tx rate
+          metricPromises.push(that.metricsModel.getNetworkTxRate(node.spec.metricsNodeName));
+
+          var promises = $q.all(metricPromises)
+            .then(function (metrics) {
+              that.nodes[key].metrics = {};
+              that.nodes[key].metrics.dataRxData = metrics[0] && metrics[0].timeSeries;
+              that.nodes[key].metrics.dataRxRate = utilsService.bytesToHumanSize(metrics[1]) + '/s';
+              that.nodes[key].metrics.dataTxData = metrics[2] && metrics[2].timeSeries;
+              that.nodes[key].metrics.dataTxRate = utilsService.bytesToHumanSize(metrics[3]) + '/s';
+            });
+
+          allMetricPromises.push(promises);
+
+        });
+        return allMetricPromises;
+      });
     }
 
     utilsService.chainStateResolve('cp.metrics.dashboard.data-traffic-summary', $state, init);
