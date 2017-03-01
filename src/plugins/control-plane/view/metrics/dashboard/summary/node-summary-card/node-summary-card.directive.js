@@ -62,16 +62,6 @@
     // $scope.$on('$destroy', function () {
     //   $interval.cancel(interval);
     // });
-
-    function init() {
-      // prefetch cpu-usage and memory data
-      return $q.all([that.updateCpuUtilization(),
-        that.updateMemoryUtilization(),
-        that.updateNodeUptime(),
-        that.fetchLimitMetrics()]);
-    }
-
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
   }
 
   angular.extend(NodeCardController.prototype, {
@@ -80,52 +70,10 @@
       return this.cardData;
     },
 
-    updateCpuUtilization: function () {
-      var that = this;
-      return this.metricsModel.getCpuUtilization(this.metricsModel.makeNodeNameFilter(this.metricsNodeName))
-        .then(function (metricsData) {
-          that.metricsData[metricsData.metricName] = [metricsData];
-        });
-    },
-
-    updateMemoryUtilization: function () {
-      var that = this;
-      return this.metricsModel.getMemoryUtilization(this.metricsModel.makeNodeNameFilter(this.metricsNodeName))
-        .then(function (metricsData) {
-          that.metricsData[metricsData.metricName] = [metricsData];
-        });
-    },
-
-    updateNodeUptime: function () {
-      var that = this;
-      this.metricsModel.getNodeUptime(this.metricsNodeName)
-        .then(function (uptime) {
-          that.nodeUptime = that.utilsService.getSensibleTime(uptime);
-        });
-    },
-
-    fetchLimitMetrics: function () {
-      var that = this;
-      var promises = [this.metricsModel.getNodeCpuLimit(this.metricsNodeName),
-        this.metricsModel.getNodeMemoryLimit(this.metricsNodeName)];
-      this.$q.all(promises).then(function (limits) {
-        that.cpuLimit = limits[0];
-        // Memory limit is in bytes, convert to Mb for the filter
-        that.memoryLimit = parseInt(limits[1], 10) / (1024 * 1024);
-      });
-    },
-
     getNodeFilter: function () {
       return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
-    },
-
-    hasMetrics: function (metricName) {
-      return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
-    },
-
-    namespaceDetails: function () {
-      this.$state.go('metrics.dashboard.namespace.details', {nodeName: this.nodeName});
     }
+
   });
 
 })();
