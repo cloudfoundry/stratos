@@ -120,6 +120,41 @@
       return node.spec.metricsNodeName;
     }
 
+    function getNodeTypeForNode(node) {
+      var profile = (node && node.spec) ? node.spec.profile : undefined;
+      return getNodeType(profile);
+    }
+
+    function getNodeType(profile) {
+      var nodeType;
+      switch (profile) {
+        case 'kubernetes_node':
+          nodeType = {
+            name: 'Kubernetes Node',
+            className: 'color-0'
+          };
+          break;
+        case 'kubernetes_master':
+          nodeType = {
+            name: 'Kubernetes Master',
+            className: 'color-1'
+          };
+          break;
+        case 'gluster':
+          nodeType = {
+            name: 'Gluster',
+            className: 'color-2'
+          };
+          break;
+        default:
+          nodeType = {
+            name: 'Unknown',
+            className: 'color-unknown'
+          };
+      }
+      return nodeType;
+    }
+
     return {
       fetchComputeNodes: fetchComputeNodes,
       getNodes: getNodes,
@@ -129,7 +164,9 @@
       getSortFilters: getSortFilters,
       setCurrentSortFilter: setCurrentSortFilter,
       addNodeMetric: addNodeMetric,
-      getMetricsNodeName: getMetricsNodeName
+      getMetricsNodeName: getMetricsNodeName,
+      getNodeTypeForNode: getNodeTypeForNode,
+      getNodeType: getNodeType
     };
 
   }

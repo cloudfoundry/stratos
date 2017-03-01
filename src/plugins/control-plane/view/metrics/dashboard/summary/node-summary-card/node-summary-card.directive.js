@@ -25,10 +25,11 @@
     '$scope',
     '$q',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function NodeCardController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function NodeCardController($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
@@ -54,7 +55,8 @@
     // }, 120000);
 
     this.cardData = {
-      title: this.nodeName
+      title: this.nodeName,
+      type: metricsDataService.getNodeTypeForNode(this.node)
     };
 
     // $scope.$on('$destroy', function () {

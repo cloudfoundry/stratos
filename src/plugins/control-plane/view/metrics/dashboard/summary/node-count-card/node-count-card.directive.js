@@ -33,6 +33,7 @@
 
     var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsDataService = metricsDataService;
 
     this.cardData = {
       title: 'Node Types'
@@ -54,9 +55,9 @@
     processNodes: function (nodes) {
       this.nodeTypes = [];
       var total = 0;
-      total += this._processNode(nodes, 'Kubernetes Node', 'kubernetes_node');
-      total += this._processNode(nodes, 'Kubernetes Master', 'kubernetes_master');
-      total += this._processNode(nodes, 'Gluster FS', 'gluster');
+      total += this._processNode(nodes, 'kubernetes_node');
+      total += this._processNode(nodes, 'kubernetes_master');
+      total += this._processNode(nodes, 'gluster');
 
       if (total !== nodes.length) {
         this.nodeTypes.push({
@@ -68,15 +69,16 @@
       }
     },
 
-    _processNode: function (nodes, label, profile) {
+    _processNode: function (nodes, profile) {
       var matching = _.filter(nodes, function (n) {
         return n.spec.profile === profile;
       });
 
+      var nodeType = this.metricsDataService.getNodeType(profile);
       this.nodeTypes.push({
-        label: label,
+        label: nodeType.name,
         count: matching.length,
-        className: 'color-' + this.nodeTypes.length,
+        className: nodeType.className,
         width: matching.length / nodes.length * 100
       });
 
