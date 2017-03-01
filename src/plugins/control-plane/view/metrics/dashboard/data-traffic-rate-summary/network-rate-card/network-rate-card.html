@@ -1,0 +1,19 @@
+<div class="network-rate-card">
+  <gallery-card class="network-gallery-card"
+                card-data="networkRateCardCtrl.getCardData()">
+
+    <div class="card-content">
+      <rate-graph class="data-chart" metric="network_tx_rate_gauge"
+                        filter="{{ networkRateCardCtrl.getNodeFilter() }}"
+                        y-label="Data Tx Rate"
+                        node-name="{{networkRateCardCtrl.node}}"
+      ></rate-graph>
+
+      <rate-graph class="data-chart" metric="network_rx_rate_gauge"
+                        filter="{{ networkRateCardCtrl.getNodeFilter() }}"
+                        y-label="Data Rx Rate"
+                        node-name="{{networkRateCardCtrl.node}}"
+      ></rate-graph>
+    </div>
+  </gallery-card>
+</div>

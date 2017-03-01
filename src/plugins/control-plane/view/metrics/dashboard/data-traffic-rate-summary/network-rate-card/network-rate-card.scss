@@ -1,0 +1,18 @@
+.network-rate-card {
+
+  .network-gallery-card {
+    .card {
+      width: 100%;
+
+      .card-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+
+        .data-chart{
+          flex-grow: 1;
+        }
+      }
+    }
+  }
+}
