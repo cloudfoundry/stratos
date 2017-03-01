@@ -1,0 +1,16 @@
+<gallery-card class="node-count-card" card-data="nodeCountCardCtrl.cardData">
+
+<div class="node-line-chart">
+  <div ng-repeat="item in nodeCountCardCtrl.nodeTypes" class="node-line-chart-item" ng-class="item.className"
+    style="width: {{ item.width }}%">
+  </div>
+</div>
+
+<dl class="dl-horizontal node-count-card-label" ng-repeat="item in nodeCountCardCtrl.nodeTypes">
+  <dt>
+    <div class="node-count-card-index" ng-class="item.className"></div>
+    <span translate>{{item.label}}</span>
+  </dt>
+  <dd>{{ item.count }}</dd>
+</dl>
+</gallery-card>

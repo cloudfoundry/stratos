@@ -1,3 +1,17 @@
 @import "node-cards-view/node-cards-view";
 @import "cards-list/cards-list";
 @import "node-summary-card/node-summary-card";
+@import "node-count-card/node-count-card";
+
+.summary-cards {
+  display: flex;
+
+  > * {
+    flex: 1 1 0;
+
+    &:first-child {
+      margin-right: 24px;
+    }
+  }
+}
+

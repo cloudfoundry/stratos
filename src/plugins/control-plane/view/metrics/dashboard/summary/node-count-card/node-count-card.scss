@@ -1,0 +1,67 @@
+.node-count-card {
+  display: flex;
+  height: 100%;
+
+  > div.card {
+    width: 100%;
+  }
+  
+  .node-line-chart {
+    width: 100%;
+    background-color: #fff;
+    margin: $hpe-unit-space * 0.5 0 $hpe-unit-space 0;
+    display: flex;
+    align-items: center;
+
+    .node-line-chart-item {
+      display: inline-block;
+
+      &:last-child {
+        height: 2px;
+      }
+      &:nth-last-child(1) {
+        height: 4px;
+      }
+      &:nth-last-child(2) {
+        height: 6px;
+      }
+      &:nth-last-child(3) {
+        height: 7px;
+      }
+    }
+  }
+
+  .dl-horizontal.node-count-card-label {
+    font-size: 16px;
+
+    > dt {
+      display: flex;
+      align-items: center;
+      width: 200px;
+
+      .node-count-card-index {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        margin-right: $hpe-unit-space * 0.5;
+      }
+    }
+  }
+
+  .color-0 {
+    background-color: #2bd1c8;
+  }
+
+  .color-1 {
+    background: #767676;
+  }
+
+  .color-2 {
+    background: #ccc;
+  }
+
+  .color-unknown {
+    background: #ddd042;
+  }
+}
