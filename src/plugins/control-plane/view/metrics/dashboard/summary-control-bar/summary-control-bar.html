@@ -6,8 +6,8 @@
           <div class="form-group search-field" focusable-input>
             <i class="metrics-search-box-icon helion-icon helion-icon-lg helion-icon-Filter"></i>
             <input type="text" class="form-control" id="applications-text" name="applications-text"
-                   ng-model="summaryControlBarCtrl.filter.text"
-                   ng-model-options='{ debounce: 100 }'
+                   ng-model="summaryControlBarCtrl.currentFilter.text"
+                   ng-model-options='{ debounce: 500 }'
                    ng-change="summaryControlBarCtrl.setText()"
                    placeholder=""/>
           </div>

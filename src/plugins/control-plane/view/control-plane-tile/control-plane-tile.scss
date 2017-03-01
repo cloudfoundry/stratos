@@ -1,9 +1,12 @@
 .control-plane-tile {
-  .indent {
-    padding-left: 12px !important;
-  }
-  .centered {
-    //float: right;
-    //width: 75%;
+  cp-nodes-ring-chart {
+    .nodes-piechart {
+      padding-top: 12px;
+    }
+    .ring-chart {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
   }
 }

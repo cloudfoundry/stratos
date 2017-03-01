@@ -13,7 +13,10 @@
         summaryName: '@',
         guid: '@',
         groupName: '@',
-        showCardLayout: '='
+        showCardLayout: '=',
+        collection: '=',
+        filteredCollection: '=',
+        filteredProperties: '='
       },
       controller: SummaryControlBar,
       controllerAs: 'summaryControlBarCtrl',
@@ -43,27 +46,12 @@
 
     that.filters = [];
 
-    this.model = {
-      filteredApplications: [],
-      unfilteredApplicationCount: 0,
-      hasApps: false
-    };
-
-    this.filter = {
-      cnsiGuid: 'all',
-      filters: [],
-      text: []
-
-    }
-
-
     this.cardData = {
       title: this.node
     };
     function init() {
-
       that.currentFilter = metricsDataService.getCurrentSortFilter(that.groupName);
-      that.filters = metricsDataService.getSortFilters(that.groupName) || [];
+      that.setText();
       return $q.resolve();
     }
 
@@ -92,9 +80,8 @@
     },
 
     getNodeName: function () {
-
       if (this.node === '*') {
-        return 'all'
+        return 'all';
       } else {
         return this.node;
       }
@@ -108,11 +95,38 @@
       this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
     },
 
+    findInCore: function (value) {
+
+    },
+
+    findInObject: function (object) {
+
+    },
+
     // New stuff
     setText: function () {
-      // TODO
-      console.log('set text called');
+      var that = this;
+      this.metricsDataService.setCurrentSortFilter(this.groupName, this.currentFilter);
+      if (!this.currentFilter.text || this.currentFilter.text.length === 0) {
+        this.filteredCollection = [].concat(this.collection || []);
+      } else {
+        this.filteredCollection = _.filter(this.collection, function (object) {
+          var filteredProperties = that.filteredProperties || [];
+          for (var i = 0; i < filteredProperties.length; i++) {
+            var value = _.get(object, filteredProperties[i]);
+            if (_.isNumber(value)) {
+              value = value.toString();
+            }
+            if (_.isString(value)) {
+              return value.indexOf(that.currentFilter.text) >= 0;
+            }
+          }
+          return false;
+        });
+      }
+
     },
+
     // New stuff
     resetFilter: function () {
       // TODO
@@ -120,14 +134,15 @@
     },
 
     sort: function () {
-
-      console.log(this.currentFilter)
-      this.metricsDataService.set
       // TODO
     },
 
     switchToListView: function (switchView) {
       this.showCardLayout = !switchView;
+      if (!this.showCardLayout) {
+        // st table won't update it's collection if it's not shown, so force an update when we switch to it
+        this.setText();
+      }
     }
   });
 

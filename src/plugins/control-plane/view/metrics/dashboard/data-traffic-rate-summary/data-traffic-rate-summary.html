@@ -8,8 +8,11 @@
     <summary-control-bar
       summary-name="data-traffic-summary"
       guid="{{ dataTrafficRateSummaryCtrl.guid }}"
-      group-name="data-traffic" ,
+      group-name="data-traffic-rate" ,
       show-card-layout="dataTrafficRateSummaryCtrl.metricsDataService.dataTrafficRate.showCardLayout"
+      collection="dataTrafficRateSummaryCtrl.nodes"
+      filtered-collection="dataTrafficRateSummaryCtrl.filteredNodes"
+      filtered-properties="['spec.hostname']"
     >
     </summary-control-bar>
   </div>
@@ -21,7 +24,7 @@
              class="metrics-table">
           <table class="table"
                  st-table="dataTrafficRateSummaryCtrl.stNodes"
-                 st-safe-src="dataTrafficRateSummaryCtrl.nodes"
+                 st-safe-src="dataTrafficRateSummaryCtrl.filteredNodes"
                  st-binding="dataTrafficRateSummaryCtrl.table">
             <thead>
             <tr>
@@ -71,7 +74,7 @@
       <div ng-if="dataTrafficRateSummaryCtrl.metricsDataService.dataTrafficRate.showCardLayout">
         <div class="network-card">
           <div class="tile-layout-container">
-            <div class="network-card tile-layout-parent" ng-repeat="node in dataTrafficRateSummaryCtrl.nodes">
+            <div class="network-card tile-layout-parent" ng-repeat="node in dataTrafficRateSummaryCtrl.filteredNodes">
               <network-rate-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
                             title="{{  node.spec.hostname }}"></network-rate-card>
             </div>

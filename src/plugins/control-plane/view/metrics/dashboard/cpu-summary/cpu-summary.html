@@ -10,6 +10,9 @@
       guid="{{ cpuSummaryCtrl.guid }}"
       group-name="cpu",
       show-card-layout="cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout"
+      collection="cpuSummaryCtrl.nodes"
+      filtered-collection="cpuSummaryCtrl.filteredNodes"
+      filtered-properties="['spec.hostname']"
     >
     </summary-control-bar>
   </div>
@@ -21,7 +24,7 @@
       <div class="card-view" ng-if="cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout">
         <div class="cpu-cards">
           <div class="tile-layout-container">
-            <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.nodes">
+            <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.filteredNodes">
               <cpu-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
                         show-utilization-donut="true" title="{{  node.spec.hostname }}"  cpu-limit="{{  node.metrics.cpuLimit }}"></cpu-card>
             </div>
@@ -34,7 +37,7 @@
              class="metrics-table">
           <table class="table"
                  st-table="cpuSummaryCtrl.stNodes"
-                 st-safe-src="cpuSummaryCtrl.nodes"
+                 st-safe-src="cpuSummaryCtrl.filteredNodes"
                  st-binding="cpuSummaryCtrl.table">
             <thead>
             <tr>

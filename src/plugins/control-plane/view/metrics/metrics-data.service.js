@@ -26,7 +26,7 @@
     var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     var metricsData = {};
     var sortFilters = {};
-
+    var searchText = '';
 
     function fetchComputeNodes(controlPlaneGuid) {
       var controlPlaneModel = modelManager.retrieve('control-plane.model');
@@ -86,11 +86,14 @@
           filters: filters,
           currentFilter: defaultFilter
         };
+        sortFilters[group].currentFilter.text = searchText;
       }
     }
 
     function getCurrentSortFilter(group) {
-      return sortFilters[group].currentFilter;
+      var filter = sortFilters[group].currentFilter;
+      filter.text = searchText;
+      return filter;
     }
 
     function getSortFilters(group) {
@@ -99,6 +102,7 @@
 
     function setCurrentSortFilter(group, value) {
       sortFilters[group].currentFilter = value;
+      setSearchText(_.get(value, 'text'));
     }
 
     function addNodeMetric(controlPlaneGuid, hostname, metricName, filter) {
@@ -155,6 +159,14 @@
       return nodeType;
     }
 
+    function setSearchText(text) {
+      searchText = text
+    }
+
+    function getSearchText() {
+      return searchText;
+    }
+
     return {
       fetchComputeNodes: fetchComputeNodes,
       getNodes: getNodes,
@@ -166,7 +178,9 @@
       addNodeMetric: addNodeMetric,
       getMetricsNodeName: getMetricsNodeName,
       getNodeTypeForNode: getNodeTypeForNode,
-      getNodeType: getNodeType
+      getNodeType: getNodeType,
+      setSearchText: setSearchText,
+      getSearchText: getSearchText
     };
 
   }

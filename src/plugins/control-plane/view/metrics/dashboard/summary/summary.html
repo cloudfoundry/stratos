@@ -13,6 +13,9 @@
       guid="{{ metricsSummaryCtrl.guid }}"
       group-name="nodes"
       show-card-layout="metricsSummaryCtrl.metricsDataService.summary.showCardLayout"
+      collection="metricsSummaryCtrl.nodes"
+      filtered-collection="metricsSummaryCtrl.filteredNodes"
+      filtered-properties="['spec.hostname','metrics.availabilityZone', 'metrics.dataRx', 'metrics.dataTx']"
     >
     </summary-control-bar>
   </div>
@@ -24,7 +27,7 @@
              class="metrics-table">
           <table class="table"
                  st-table="metricsSummaryCtrl.stNodes"
-                 st-safe-src="metricsSummaryCtrl.nodes"
+                 st-safe-src="metricsSummaryCtrl.filteredNodes"
                  st-binding="metricsSummaryCtrl.table">
             <thead>
             <tr>
@@ -75,7 +78,7 @@
       <div class="card-view" ng-if="metricsSummaryCtrl.metricsDataService.summary.showCardLayout">
         <div class="cards-view">
           <div class="tile-layout-container">
-            <div class="card tile-layout-parent" ng-repeat="node in metricsSummaryCtrl.nodes">
+            <div class="card tile-layout-parent" ng-repeat="node in metricsSummaryCtrl.filteredNodes">
               <node-summary-card node="node"></node-summary-card>
             </div>
           </div>
