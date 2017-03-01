@@ -41,10 +41,7 @@
     this.nodeTypes = [];
 
     function init() {
-      console.log('INIT');
       that.nodes = metricsDataService.getNodes(that.guid);
-
-      console.log(that.nodes);
       that.processNodes(that.nodes);
       return $q.resolve();
     }
@@ -55,7 +52,6 @@
   angular.extend(NodeCardCountController.prototype, {
 
     processNodes: function (nodes) {
-      console.log('processNodes');
       this.nodeTypes = [];
       var total = 0;
       total += this._processNode(nodes, 'Kubernetes Node', 'kubernetes_node');
@@ -70,16 +66,12 @@
           width: (nodes.length - total) / nodes.length * 100
         });
       }
-
-      console.log(this.nodeTypes);
     },
 
     _processNode: function (nodes, label, profile) {
       var matching = _.filter(nodes, function (n) {
         return n.spec.profile === profile;
       });
-
-      console.log(label + '   ' + matching.length);
 
       this.nodeTypes.push({
         label: label,
