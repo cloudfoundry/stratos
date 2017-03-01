@@ -75,7 +75,6 @@
     function init() {
       metricsDataService.setSortFilters('data-traffic', that.sortFilters, that.defaultFilter);
       that.nodes = metricsDataService.getNodes(that.guid);
-      console.log(that.nodes);
       return $q.resolve().then(function () {
         // Enrich nodes information
 

@@ -276,9 +276,6 @@
     },
 
     makeNodeNameFilter: function (nodeName) {
-      // get hostname
-      // var index = nodeName.indexOf('.');
-      // var hostName = index === -1 ? nodeName : nodeName.substring(0, index);
       return '{nodename=' + nodeName + '}';
     },
 
@@ -290,53 +287,18 @@
       var mergedDpsArray = {};
       _.each(keys, function (key) {
         var values = _.map(dpsArray, key);
+        values = _.without(values, undefined);
         if (values.length !== dpsArray.length) {
           // Skip dps since not nodes have data at this time
           return;
         }
-        mergedDpsArray[key] = _.sum(values);
+        mergedDpsArray[key] =  _.sum(values);
       });
 
       var metricsDataObject = metricsDataArray[0];
       metricsDataObject.dps = mergedDpsArray;
       return [metricsDataObject];
     },
-
-    retrieveNamespaceInformation: function () {
-      var that = this;
-      return this.getNamespaceNames().then(function (namespaceNames) {
-
-        var promises = [];
-        _.each(namespaceNames, function (namespace) {
-
-          promises.push(that.getPodsByNamespace(namespace)
-            .then(function (pods) {
-              var podsList = [];
-              _.each(pods, function (pod) {
-                podsList.push({
-                  podName: pod
-                });
-              });
-              return podsList;
-            })
-            .then(function (podsList) {
-              return {
-                namespaceName: namespace,
-                pods: podsList
-              };
-            }));
-        });
-        return that.$q.all(promises);
-      }).then(function (namespaceList) {
-        var obj = {};
-        _.each(namespaceList, function (namespace) {
-          obj[namespace.namespaceName] = namespace;
-        });
-        that.namespaceInformation = obj;
-        return obj;
-      });
-    }
-    ,
 
     _isErrorResponse: function (res) {
       return _.has(res, 'data.error');
