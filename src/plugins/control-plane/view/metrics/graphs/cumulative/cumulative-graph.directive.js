@@ -148,7 +148,7 @@
         }).catch(function () {
           that.options.chart.noData = 'No data available';
           that.data = [];
-          if(that.chartApi) {
+          if (that.chartApi) {
             that.chartApi.refresh();
           }
         });

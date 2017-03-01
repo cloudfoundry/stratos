@@ -38,7 +38,6 @@
     this.utilsService = utilsService;
 
     this.metricData = {};
-    this.updateChart();
 
     // var interval = $interval(function () {
     //   that.updateChart();
@@ -108,6 +107,8 @@
       }
     };
 
+    this.updateChart();
+
     this.chartApi = null;
 
     this.data = [
@@ -133,7 +134,8 @@
 
     updateChart: function () {
       var that = this;
-
+      this.options.chart.noData = 'Loading data ...';
+      
       return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
           that.data = [
@@ -142,6 +144,12 @@
               label: 'Data Transmitted',
               color: '#60798D'
             }];
+        }).catch(function () {
+          that.options.chart.noData = 'No data available';
+          that.data = [];
+          if (that.chartApi) {
+            that.chartApi.refresh();
+          }
         });
     }
 

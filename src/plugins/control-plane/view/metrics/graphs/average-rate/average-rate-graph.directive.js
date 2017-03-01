@@ -35,7 +35,6 @@
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
-    this.updateUtilization();
 
     // var interval = $interval(function () {
     //   that.updateUtilization();
@@ -91,6 +90,8 @@
       }
     };
 
+    this.updateUtilization();
+
     this.chartApi = null;
 
     this.data = [{
@@ -109,6 +110,7 @@
 
     updateUtilization: function () {
       var that = this;
+      this.options.chart.noData = 'Loading data ...';
 
       var movingAverage = [];
 
@@ -139,7 +141,6 @@
 
       return this.metricsModel.getMetrics(this.metric, this.filter)
         .then(function (metricsData) {
-
           that.data = [
             {
               color: '#60799d',
@@ -152,6 +153,12 @@
               key: 'Average'
             }];
           that.chartApi.refresh();
+        }).catch(function () {
+          that.options.chart.noData = 'No data available';
+          that.data = [];
+          if (that.chartApi) {
+            that.chartApi.refresh();
+          }
         });
     }
 
