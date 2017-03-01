@@ -47,7 +47,13 @@
               <td class="table-view-app-name">
                 {{ node.spec.hostname }}
               </td>
-              <td>{{ node.metrics.memory_usage }}</td>
+              <td>
+                <percent-gauge
+                  value="{{ node.metrics.memory_usage }}"
+                  value-text="{{ memorySummaryCtrl.getMemoryUsageValue(node) }} / {{ memorySummaryCtrl.fetchMemoryLimit(node) }}">
+                </percent-gauge>
+
+              </td>
               <td>
                 <sparkline-graph ng-if="node.metrics.memoryUsageData.length > 0"
                                  timeseries="node.metrics.memoryUsageData"

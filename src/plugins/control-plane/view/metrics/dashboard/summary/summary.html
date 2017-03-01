@@ -49,8 +49,18 @@
               <td class="table-view-app-name">
                 {{ node.spec.hostname }}
               </td>
-              <td>{{ node.metrics.memory_usage }}</td>
-              <td>{{ node.metrics.cpu_usage }}</td>
+              <td>
+                <percent-gauge
+                               value="{{ node.metrics.memory_usage }}"
+                               value-text="{{ metricsSummaryCtrl.getMemoryUsageValue(node) }} / {{ metricsSummaryCtrl.fetchMemoryLimit(node) }}">
+                </percent-gauge>
+              </td>
+              <td>
+                <percent-gauge
+                  value="{{ node.metrics.cpu_usage }}"
+                  value-text="{{ metricsSummaryCtrl.getCpuUsageValue(node) }} MC / {{ node.metrics.cpuLimit }} MC">
+                </percent-gauge>
+              </td>
               <td>{{ node.metrics.upTime }}</td>
               <td>{{ node.metrics.availabilityZone }}</td>
               <td>{{ node.metrics.dataTx }}</td>

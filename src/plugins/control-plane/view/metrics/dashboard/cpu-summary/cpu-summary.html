@@ -59,7 +59,12 @@
               <td class="table-view-app-name">
                 {{ node.spec.hostname }}
               </td>
-              <td>{{ node.metrics.cpu_usage }}</td>
+              <td>
+                <percent-gauge
+                  value="{{ node.metrics.cpu_usage }}"
+                  value-text="{{ cpuSummaryCtrl.getCpuUsageValue(node) }} MC / {{ node.metrics.cpuLimit }} MC">
+                </percent-gauge>
+              </td>
               <td>
                 <sparkline-graph ng-if="node.metrics.cpuUsageData.length > 0"
                                  timeseries="node.metrics.cpuUsageData"

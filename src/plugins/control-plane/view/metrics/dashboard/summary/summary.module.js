@@ -2,8 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.summary', [
-    ])
+    .module('control-plane.view.metrics.dashboard.summary', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -43,12 +42,12 @@
     this.showCardLayout = true;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.metricsDataService = metricsDataService;
+    this.utilsService = utilsService;
 
     if (!_.has(metricsDataService, 'summary.showCardLayout')) {
       this.metricsDataService.summary = {};
       this.metricsDataService.summary.showCardLayout = true;
     }
-
 
     this.sortFilters = [
       {
@@ -82,7 +81,6 @@
       value: 'spec.hostname'
     };
 
-
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
       {name: gettext('Memory Usage'), value: 'metrics.memory_usage', noSort: true},
@@ -109,9 +107,13 @@
             // cpu
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            // cpu limit
+            metricPromises.push(that.metricsModel.getNodeCpuLimit(node.spec.metricsNodeName));
             // memory_usage
             metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            // memory limit
+            metricPromises.push(that.metricsModel.getNodeMemoryLimit(node.spec.metricsNodeName));
             // uptime
             metricPromises.push(that.metricsModel.getNodeUptime(node.spec.metricsNodeName));
             // availabilityZone
@@ -126,12 +128,14 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2) + ' %';
-                that.nodes[key].metrics.memory_usage = (metrics[1] * 100).toFixed(2) + ' %';
-                that.nodes[key].metrics.upTime = utilsService.getSensibleTime(metrics[2]);
-                that.nodes[key].metrics.availabilityZone = metrics[3];
-                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize((metrics[4]).toFixed(2)) + '/s';
-                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize((metrics[5]).toFixed(2)) + '/s';
+                that.nodes[key].metrics.cpu_usage = metrics[0].toFixed(2);
+                that.nodes[key].metrics.cpuLimit = metrics[1];
+                that.nodes[key].metrics.memory_usage = metrics[2].toFixed(2);
+                that.nodes[key].metrics.memoryLimit = metrics[3];
+                that.nodes[key].metrics.upTime = utilsService.getSensibleTime(metrics[4]);
+                that.nodes[key].metrics.availabilityZone = metrics[5];
+                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize((metrics[6]).toFixed(2)) + '/s';
+                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize((metrics[7]).toFixed(2)) + '/s';
               });
 
             allMetricPromises.push(promises);
@@ -145,6 +149,20 @@
 
   }
 
-  angular.extend(MetricsSummaryController.prototype, {});
+  angular.extend(MetricsSummaryController.prototype, {
+
+    getMemoryUsageValue: function (node) {
+      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memory_usage) * node.metrics.memoryLimit);
+    },
+
+    fetchMemoryLimit: function (node) {
+      return this.utilsService.bytesToHumanSize(node.metrics.memoryLimit);
+    },
+
+    getCpuUsageValue: function (node) {
+      return parseFloat(node.metrics.cpu_usage) * node.metrics.cpuLimit;
+    }
+
+  });
 
 })();

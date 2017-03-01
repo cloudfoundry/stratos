@@ -87,12 +87,14 @@
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             metricPromises.push(that.metricsModel.getMetrics('memory_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
+            metricPromises.push(that.metricsModel.getNodeMemoryLimit(node.spec.metricsNodeName));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.memory_usage = (metrics[0] * 100).toFixed(2) + ' %';
+                that.nodes[key].metrics.memory_usage = metrics[0].toFixed(2);
                 that.nodes[key].metrics.memoryUsageData = metrics[1].timeSeries;
+                that.nodes[key].metrics.memoryLimit = metrics[2];
               });
 
             allMetricPromises.push(promises);
@@ -106,6 +108,15 @@
 
   }
 
-  angular.extend(MemorySummaryController.prototype, {});
+  angular.extend(MemorySummaryController.prototype, {
+
+    getMemoryUsageValue: function (node) {
+      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memory_usage) * node.metrics.memoryLimit);
+    },
+
+    fetchMemoryLimit: function (node) {
+      return this.utilsService.bytesToHumanSize(node.metrics.memoryLimit);
+    }
+  });
 
 })();

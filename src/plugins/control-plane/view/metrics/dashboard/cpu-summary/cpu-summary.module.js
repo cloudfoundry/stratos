@@ -91,9 +91,9 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = (metrics[0] * 100).toFixed(2) + ' %';
+                that.nodes[key].metrics.cpu_usage = metrics[0].toFixed(2);
                 that.nodes[key].metrics.cpuUsageData = metrics[1].timeSeries;
-                that.nodes[key].cpuLimit = metrics[2];
+                that.nodes[key].metrics.cpuLimit = metrics[2];
               });
 
             allMetricPromises.push(promises);
@@ -107,6 +107,14 @@
 
   }
 
-  angular.extend(CpuSummaryController.prototype, {});
+  angular.extend(CpuSummaryController.prototype, {
+    getCpuUsageValue: function (node) {
+      return Math.ceil(parseFloat(node.metrics.cpu_usage) * node.metrics.cpuLimit);
+    },
+
+    fetchCpuLimit: function (node) {
+      return node.metrics.cpuLimit;
+    }
+  });
 
 })();
