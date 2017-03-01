@@ -2,6 +2,14 @@
 @import "node-count-card/node-count-card";
 @include tile-layout('cards-view', 400px, 5);
 
+.hcp-summary {
+    .row:first-of-type {
+      min-height: 265px;
+      gallery-card {
+        height:265px;
+      }
+    }
+}
 .summary-cards {
   display: flex;
 

@@ -1,5 +1,9 @@
 @import "cpu-card/cpu-card";
 @include tile-layout('cpu-cards', 900px, 2);
 
-
+.hcp-cp-summary {
+  .row:first-of-type {
+    min-height: 317px;
+  }
+}
 
