@@ -36,8 +36,10 @@
    * @constructor
    * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
+   * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
+   * @param {object} utilsService - utils service
    */
   function ControlPlaneTileController($scope, $state, $q, modelManager, apiManager, utilsService) {
     var that = this;
@@ -107,7 +109,6 @@
   }
 
   angular.extend(ControlPlaneTileController.prototype, {
-
 
     summary: function () {
       this.$state.go('cp.metrics.dashboard.summary', {guid: this.service.guid});

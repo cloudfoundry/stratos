@@ -6,7 +6,7 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('memoryCard', memoryCard);
 
-  memoryCard.$inject = ['app.basePath'];
+  //memoryCard.$inject = ['app.basePath'];
 
   function memoryCard() {
     return {
@@ -80,15 +80,15 @@
     getNodeName: function () {
 
       if (this.node === '*') {
-        return 'all'
+        return 'all';
       } else {
         return this.node;
       }
     },
 
-    yTickFormatter: function (d, utilsService){
-     return utilsService.mbToHumanSize(parseInt(d) / (1024 * 1024)).replace('GB', '');
-    },
+    yTickFormatter: function (d, utilsService) {
+      return utilsService.mbToHumanSize(parseInt(d, 10) / (1024 * 1024)).replace('GB', '');
+    }
 
   });
 

@@ -135,8 +135,8 @@
                 that.nodes[key].metrics.memoryLimit = metrics[3];
                 that.nodes[key].metrics.upTime = utilsService.getSensibleTime(metrics[4]);
                 that.nodes[key].metrics.availabilityZone = metrics[5];
-                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize((metrics[6]).toFixed(2)) + '/s';
-                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize((metrics[7]).toFixed(2)) + '/s';
+                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize(metrics[6].toFixed(2)) + '/s';
+                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize(metrics[7].toFixed(2)) + '/s';
               });
 
             allMetricPromises.push(promises);

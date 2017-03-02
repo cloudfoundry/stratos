@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('sparklineGraph', sparklineGraph);
 
-  sparklineGraph.$inject = ['app.basePath'];
+  //sparklineGraph.$inject = ['app.basePath'];
 
-  function sparklineGraph(path) {
+  function sparklineGraph() {
     return {
       bindToController: {
         timeseries: '='
@@ -27,7 +27,7 @@
 
   function SparklineGraphController($interval, $scope, modelManager) {
 
-    var that = this;
+    //var that = this;
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
 

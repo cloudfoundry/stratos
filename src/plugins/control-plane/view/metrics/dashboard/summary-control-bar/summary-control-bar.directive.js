@@ -5,7 +5,7 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('summaryControlBar', summaryControlBar);
 
-  summaryControlBar.$inject = ['app.basePath'];
+  //summaryControlBar.$inject = ['app.basePath'];
 
   function summaryControlBar() {
     return {
@@ -88,20 +88,20 @@
     },
 
     yTickFormatter: function (d, utilsService) {
-      return utilsService.mbToHumanSize(parseInt(d) / (1024 * 1024)).replace('GB', '');
+      return utilsService.mbToHumanSize(parseInt(d, 10) / (1024 * 1024)).replace('GB', '');
     },
 
     namespaceDetails: function () {
       this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
     },
 
-    findInCore: function (value) {
+    // findInCore: function (value) {
 
-    },
+    // },
 
-    findInObject: function (object) {
+    // findInObject: function (object) {
 
-    },
+    // },
 
     // New stuff
     setText: function () {
@@ -129,12 +129,16 @@
 
     // New stuff
     resetFilter: function () {
+      /* eslint-disable no-warning-comments */
       // TODO
-      console.log('resresetFilter text called');
+      // console.log('resresetFilter text called');
+      /* eslint-enable no-warning-comments */
     },
 
     sort: function () {
+      /* eslint-disable no-warning-comments */
       // TODO
+      /* eslint-enable no-warning-comments */
     },
 
     switchToListView: function (switchView) {

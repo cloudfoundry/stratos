@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('averageRateGraph', averageRateGraph);
 
-  averageRateGraph.$inject = ['app.basePath'];
+  //averageRateGraph.$inject = ['app.basePath'];
 
-  function averageRateGraph(path) {
+  function averageRateGraph() {
     return {
       bindToController: {
         filter: '@',
@@ -74,7 +74,7 @@
           dispatch: {
             renderEnd: function () {
               var elementName = '#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName);
-              var selectedElement = d3.select( elementName + ' svg');
+              var selectedElement = d3.select(elementName + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 80;
                 var yAxis = d3.select(elementName + ' svg .nv-y');

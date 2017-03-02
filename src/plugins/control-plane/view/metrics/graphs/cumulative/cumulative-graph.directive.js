@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('cumulativeChart', cumulativeChart);
 
-  cumulativeChart.$inject = ['app.basePath'];
+  //cumulativeChart.$inject = ['app.basePath'];
 
-  function cumulativeChart(path) {
+  function cumulativeChart() {
     return {
       bindToController: {
         filter: '@',

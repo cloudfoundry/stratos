@@ -7,19 +7,10 @@
 
   metricsDataServiceFactory.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
-    'helion.framework.widgets.dialog.confirm',
-    '$interval',
-    '$interpolate',
-    '$rootScope',
-    '$window',
-    '$log',
-    '$document'
+    'app.model.modelManager'
   ];
 
-  function metricsDataServiceFactory(eventService, modelManager, confirmDialog,
-                                     $interval, $interpolate, $rootScope, $window, $log, $document) {
-
+  function metricsDataServiceFactory(eventService, modelManager) {
 
     // model information
     var model = modelManager.retrieve('cloud-foundry.model.application');
@@ -40,7 +31,6 @@
 
           // Add metricNodeName property
           nodes = _.each(nodes, function (node) {
-
             if (node.spec.profile.indexOf('node') !== -1) {
               node.spec.metricsNodeName = node.spec.hostname;
             } else {
@@ -71,7 +61,7 @@
     function getNodes(controlPlaneGuid, getKubernetesNodes) {
 
       if (getKubernetesNodes) {
-        return metricsData[controlPlaneGuid].kubernetesNodes
+        return metricsData[controlPlaneGuid].kubernetesNodes;
       } else {
         return metricsData[controlPlaneGuid].nodes;
       }
@@ -79,9 +69,7 @@
     }
 
     function setSortFilters(group, filters, defaultFilter) {
-
-      if (_.has(sortFilters, group)) {
-      } else {
+      if (!_.has(sortFilters, group)) {
         sortFilters[group] = {
           filters: filters,
           currentFilter: defaultFilter
@@ -107,25 +95,23 @@
 
     function addNodeMetric(controlPlaneGuid, hostname, metricName, filter) {
       return metricsModel.getLatestMetricDataPoint(metricName, filter)
-        .then(function (value) {
+        .then(function () {
 
           // var node = _.find(model[controlPlaneGuid].nodes, function(node){
           //
           // })
 
-        })
+        });
     }
 
     function getMetricsNodeName(guid, nodeName) {
-
-       var nodes = getNodes(guid);
+      var nodes = getNodes(guid);
       var node = _.find(nodes, {spec: {nodename: nodeName}});
-
       return node.spec.metricsNodeName;
     }
 
     function getNodeTypeForNode(node) {
-      var profile = (node && node.spec) ? node.spec.profile : undefined;
+      var profile = node && node.spec ? node.spec.profile : undefined;
       return getNodeType(profile);
     }
 
@@ -160,7 +146,7 @@
     }
 
     function setSearchText(text) {
-      searchText = text
+      searchText = text;
     }
 
     function getSearchText() {
@@ -182,7 +168,6 @@
       setSearchText: setSearchText,
       getSearchText: getSearchText
     };
-
   }
 
 })();

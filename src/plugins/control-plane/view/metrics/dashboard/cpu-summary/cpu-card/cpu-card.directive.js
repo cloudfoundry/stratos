@@ -5,7 +5,7 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('cpuCard', cpuCard);
 
-  cpuCard.$inject = ['app.basePath'];
+  //cpuCard.$inject = ['app.basePath'];
 
   function cpuCard() {
     return {
@@ -29,14 +29,12 @@
     '$scope',
     '$q',
     'app.model.modelManager',
-    'app.utils.utilsService',
-    'control-plane.metrics.metrics-data-service'
-
+    'app.utils.utilsService'
   ];
 
-  function CpuCardController($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
+  function CpuCardController($interval, $state, $scope, $q, modelManager, utilsService) {
 
-    var that = this;
+    //var that = this;
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.$state = $state;
     this.$q = $q;
@@ -47,7 +45,6 @@
     this.cardData = {
       title: this.title
     };
-
   }
 
   angular.extend(CpuCardController.prototype, {
@@ -73,8 +70,8 @@
       }
     },
 
-    yTickFormatter: function (d){
-     return d;
+    yTickFormatter: function (d) {
+      return d;
     },
 
     namespaceDetails: function () {

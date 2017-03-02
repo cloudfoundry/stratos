@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('utilizationDonut', utilizationDonut);
 
-  utilizationDonut.$inject = ['app.basePath'];
+  //utilizationDonut.$inject = ['app.basePath'];
 
-  function utilizationDonut(path) {
+  function utilizationDonut() {
     return {
       bindToController: {
         filter: '@',
@@ -67,7 +67,7 @@
         donut: true,
         donutRatio: 0.99,
         showLabels: false,
-        showLegend: this.noLegend === 'true' ? false : true,
+        showLegend: this.noLegend !== 'true',
 
         x: function (d) {
           return d.label;
@@ -130,7 +130,6 @@
   }
 
   angular.extend(UtilizationDonutController.prototype, {
-
 
     _updateLegend: function (utilValue, idleValue, utilColor, idleColor) {
 

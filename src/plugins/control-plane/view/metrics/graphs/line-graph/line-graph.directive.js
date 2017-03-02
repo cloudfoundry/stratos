@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('lineGraph', lineGraph);
 
-  lineGraph.$inject = ['app.basePath'];
+  //lineGraph.$inject = ['app.basePath'];
 
-  function lineGraph(path) {
+  function lineGraph() {
     return {
       bindToController: {
         filter: '@',
@@ -116,7 +116,7 @@
       function calculateAverage(dataPoints) {
 
         var average = _.mean(_.map(dataPoints, 'y'));
-        var maxValue = _.max(_.map(dataPoints, 'y')) ;
+        var maxValue = _.max(_.map(dataPoints, 'y'));
         var minValue = _.min(_.map(dataPoints, 'y'));
 
         that.options.chart.yDomain = [minValue * 0.75, maxValue + 1.25];
@@ -125,9 +125,9 @@
           return {
             x: dataPoint.x,
             y: average
-          }
+          };
         });
-        return movingAverage
+        return movingAverage;
       }
 
       return this.metricsModel.getMetrics(this.metric, this.filter)
@@ -147,7 +147,7 @@
         }).catch(function () {
           that.options.chart.noData = 'No data available';
           that.data = [];
-          if(that.chartApi) {
+          if (that.chartApi) {
             that.chartApi.refresh();
           }
         });

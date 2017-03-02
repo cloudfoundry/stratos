@@ -170,7 +170,7 @@
       var lastReading = _.find(data.metrics, {timestamp: getLastMetricReading});
 
       if (lastReading || _.has(lastReading, 'value')) {
-        lastReading = lastReading.value
+        lastReading = lastReading.value;
       } else {
         lastReading = undefined;
       }
@@ -186,8 +186,7 @@
           _.set(that.metricsData, nodeName + '.cpuLimit', lastReading);
           return lastReading;
         });
-    }
-    ,
+    },
 
     getNodeMemoryLimit: function (nodeName) {
       var that = this;
@@ -198,8 +197,7 @@
           _.set(that.metricsData, nodeName + '.memoryLimit', lastReading);
           return lastReading;
         });
-    }
-    ,
+    },
 
     getNodeUptime: function (nodeName) {
       var that = this;
@@ -208,8 +206,7 @@
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);
         });
-    }
-    ,
+    },
 
     getNetworkRxRate: function (nodeName) {
       var that = this;
@@ -219,8 +216,7 @@
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);
         });
-    }
-    ,
+    },
 
     getNetworkTxRate: function (nodeName) {
       var that = this;
@@ -229,8 +225,7 @@
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);
         });
-    }
-    ,
+    },
 
     _addOpenTsdbMetrics: function (data, metricName) {
 
@@ -292,7 +287,7 @@
           // Skip dps since not nodes have data at this time
           return;
         }
-        mergedDpsArray[key] =  _.sum(values);
+        mergedDpsArray[key] = _.sum(values);
       });
 
       var metricsDataObject = metricsDataArray[0];
@@ -303,7 +298,6 @@
     _isErrorResponse: function (res) {
       return _.has(res, 'data.error');
     }
-  })
-  ;
+  });
 
 })();

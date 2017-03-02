@@ -5,9 +5,9 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('rateGraph', rateGraph);
 
-  rateGraph.$inject = ['app.basePath'];
+  //rateGraph.$inject = ['app.basePath'];
 
-  function rateGraph(path) {
+  function rateGraph() {
     return {
       bindToController: {
         filter: '@',
@@ -82,7 +82,7 @@
           showMaxMin: false,
           tickFormat: function (y) {
 
-            var kbData = y / (1024);
+            var kbData = y / 1024;
             var mbData = y / (1024 * 1024);
 
             if (kbData > 1000) {
