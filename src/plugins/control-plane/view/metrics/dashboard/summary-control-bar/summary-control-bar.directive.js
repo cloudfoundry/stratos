@@ -117,8 +117,8 @@
             if (_.isNumber(value)) {
               value = value.toString();
             }
-            if (_.isString(value)) {
-              return value.indexOf(that.currentFilter.text) >= 0;
+            if (_.isString(value) && value.indexOf(that.currentFilter.text) >= 0) {
+              return true;
             }
           }
           return false;
