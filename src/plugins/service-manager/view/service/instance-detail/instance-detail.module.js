@@ -112,7 +112,7 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.confirmDialog = confirmDialog;
     this.manageInstanceDialog = manageInstanceDialog;
     this.$timeout = $timeout;

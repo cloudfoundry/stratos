@@ -6,8 +6,6 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('memoryCard', memoryCard);
 
-  //memoryCard.$inject = ['app.basePath'];
-
   function memoryCard() {
     return {
       bindToController: {
@@ -24,20 +22,17 @@
   }
 
   MemoryCardController.$inject = [
-    '$interval',
     '$state',
-    '$scope',
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function MemoryCardController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function MemoryCardController($state, $q, modelManager, utilsService) {
 
     var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
-    this.$q = $q;
     this.utilsService = utilsService;
     this.metricsData = {};
     this.memoryLimit = 0;

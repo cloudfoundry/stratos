@@ -40,7 +40,7 @@
     this.guid = $stateParams.guid;
 
     this.showCardLayout = true;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.metricsDataService = metricsDataService;
     this.utilsService = utilsService;
 

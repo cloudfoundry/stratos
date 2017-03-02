@@ -51,17 +51,13 @@
               </td>
               <td>
                 <sparkline-graph ng-if="node.metrics.dataRxData.length > 0"
-                                 timeseries="node.metrics.dataRxData"
-                >
-
+                                 timeseries="node.metrics.dataRxData">
                 </sparkline-graph>
               </td>
               <td>{{ node.metrics.dataTxRate }}</td>
               <td>
                 <sparkline-graph ng-if="node.metrics.dataTxData.length > 0"
-                                 timeseries="node.metrics.dataTxData"
-                >
-
+                                 timeseries="node.metrics.dataTxData">
                 </sparkline-graph>
               </td>
               <td>{{ node.metrics.dataRxRate }}</td>

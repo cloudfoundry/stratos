@@ -37,7 +37,7 @@
   function DataTrafficRateSummaryController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
 
     var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
     this.metricsDataService = metricsDataService;

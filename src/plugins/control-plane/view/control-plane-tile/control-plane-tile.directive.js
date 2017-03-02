@@ -10,10 +10,7 @@
   function ControlPlaneTile() {
     return {
       bindToController: {
-        service: '=',
-        connect: '=',
-        disconnect: '=',
-        unregister: '='
+        service: '='
       },
       controller: ControlPlaneTileController,
       controllerAs: 'controlPlaneTileCtrl',
@@ -27,7 +24,6 @@
     '$state',
     '$q',
     'app.model.modelManager',
-    'app.api.apiManager',
     'app.utils.utilsService'
   ];
 
@@ -38,16 +34,12 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.api.apiManager} apiManager - the API management service
    * @param {object} utilsService - utils service
    */
-  function ControlPlaneTileController($scope, $state, $q, modelManager, apiManager, utilsService) {
+  function ControlPlaneTileController($scope, $state, $q, modelManager, utilsService) {
     var that = this;
 
     this.$state = $state;
-    // Need to fetch the total number of organizations and users. To avoid fetching all items, only fetch 1 and read
-    // list metadata total_results. In order to do this we must go via the api, not the model.
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.controlPlaneModel = modelManager.retrieve('control-plane.model');
     this.instances = null;
@@ -96,10 +88,6 @@
       return $q.all(promises).then(function (data) {
         that.instances = data[0];
         that.nodes = data[1];
-        // var nodePromises = [];
-        // _.each(nodes, function (node) {
-        //   nodePromises.push(that.controlPlaneModel.getComputeNode(that.service.guid, node.id));
-        // });
       });
 
     }

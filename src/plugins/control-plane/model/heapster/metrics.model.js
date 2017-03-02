@@ -2,36 +2,35 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model.heapster
-   * @memberOf cloud-foundry.model
-   * @name vcs
-   * @description VCS model
+   * @namespace control-plane.model.metrics
+   * @memberOf control-plane.model
+   * @name metrics
+   * @description Heapster Metrics
    */
   angular
-    .module('cloud-foundry.model')
-    .run(registerVcsModel);
+    .module('control-plane.model')
+    .run(registerMetricsModel);
 
-  registerVcsModel.$inject = [
+  registerMetricsModel.$inject = [
     '$q',
     'app.model.modelManager',
     'app.api.apiManager'
   ];
 
-  function registerVcsModel($q, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.metrics', new MetricsModel($q, apiManager));
+  function registerMetricsModel($q, modelManager, apiManager) {
+    modelManager.register('control-plane.model.metrics', new MetricsModel($q, apiManager));
   }
 
   function MetricsModel($q, apiManager) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.metricsData = {};
-    this.namespaceInformation = {};
   }
 
   angular.extend(MetricsModel.prototype, {
 
     getNamespaceNames: function () {
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNamespaceNames()
         .then(function (res) {
           return res.data;
@@ -39,7 +38,7 @@
     },
 
     getNodes: function () {
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNodes()
         .then(function (res) {
           return res.data;
@@ -47,7 +46,7 @@
     },
 
     getPodsByNamespace: function (namespaceName) {
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getPodsByNamespace(namespaceName)
         .then(function (res) {
           return res.data;
@@ -56,7 +55,7 @@
 
     getCpuUsageRate: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getCpuUsage(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -69,7 +68,7 @@
 
     getCpuUtilization: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getCpuUtilization(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -82,7 +81,7 @@
 
     getMetrics: function (metricsName, filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getMetrics(metricsName, filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -101,7 +100,7 @@
 
     getMemoryUsage: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getMemoryUsage(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -114,7 +113,7 @@
 
     getMemoryWorkingSetUsasge: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getMemoryWorkingSetUsasge(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -127,7 +126,7 @@
 
     getMemoryUtilization: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getMemoryUtilization(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -140,7 +139,7 @@
 
     getNetworkDataTransmitted: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNetworkDataTransmitted(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -153,7 +152,7 @@
 
     getNetworkDataReceived: function (filter) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNetworkDataReceived(filter)
         .then(function (res) {
           if (that._isErrorResponse(res)) {
@@ -179,7 +178,7 @@
     },
     getNodeCpuLimit: function (nodeName) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNodeCpuLimit(nodeName)
         .then(function (res) {
           var lastReading = that._getMostRecentDataPoint(res.data);
@@ -190,7 +189,7 @@
 
     getNodeMemoryLimit: function (nodeName) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNodeMemoryLimit(nodeName)
         .then(function (res) {
           var lastReading = that._getMostRecentDataPoint(res.data);
@@ -201,7 +200,7 @@
 
     getNodeUptime: function (nodeName) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNodeUptime(nodeName)
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);
@@ -211,7 +210,7 @@
     getNetworkRxRate: function (nodeName) {
       var that = this;
 
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNetworkRxRate(nodeName)
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);
@@ -220,7 +219,7 @@
 
     getNetworkTxRate: function (nodeName) {
       var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.metrics')
+      return this.apiManager.retrieve('control-plane.api.metrics')
         .getNetworkTxRate(nodeName)
         .then(function (res) {
           return that._getMostRecentDataPoint(res.data);

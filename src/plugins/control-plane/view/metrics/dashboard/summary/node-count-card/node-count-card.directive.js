@@ -20,19 +20,17 @@
   }
 
   NodeCardCountController.$inject = [
-    '$interval',
     '$state',
-    '$scope',
     '$q',
     'app.model.modelManager',
     'control-plane.metrics.metrics-data-service',
     'app.utils.utilsService'
   ];
 
-  function NodeCardCountController($interval, $state, $scope, $q, modelManager, metricsDataService, utilsService) {
+  function NodeCardCountController($state, $q, modelManager, metricsDataService, utilsService) {
 
     var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.metricsDataService = metricsDataService;
 
     this.cardData = {

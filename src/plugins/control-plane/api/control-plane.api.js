@@ -82,9 +82,9 @@
       return this._get('tasks', guid, httpConfigOptions);
 
     },
+
     usage: function (guid, httpConfigOptions) {
       return this._get('usage', guid, httpConfigOptions);
-
     }
 
   });

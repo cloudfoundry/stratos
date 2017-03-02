@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.api')
+    .module('control-plane.api')
     .run(registerVcsApi);
 
   registerVcsApi.$inject = [
@@ -12,7 +12,7 @@
   ];
 
   function registerVcsApi($http, $httpParamSerializer, apiManager) {
-    apiManager.register('cloud-foundry.api.metrics', new MetricsApi($http, $httpParamSerializer));
+    apiManager.register('control-plane.api.metrics', new MetricsApi($http, $httpParamSerializer));
   }
 
   function MetricsApi($http, $httpParamSerializer) {
@@ -46,7 +46,6 @@
 
     function _metricsQuery(metrics) {
       return function (filter, time) {
-
         if (!time) {
           time = '24h-ago';
         }
@@ -63,7 +62,6 @@
     function getNamespaceNames() {
       var url = metricsUrl + 'api/v1/model/namespaces/';
       return $http.get(url);
-
     }
 
     function getPodsByNamespace(namespaceName) {

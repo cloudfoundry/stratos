@@ -20,26 +20,18 @@
   }
 
   NodeCardController.$inject = [
-    '$interval',
-    '$state',
-    '$scope',
-    '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
     'control-plane.metrics.metrics-data-service'
   ];
 
-  function NodeCardController($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
+  function NodeCardController(modelManager, utilsService, metricsDataService) {
 
-    //var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
-    this.$state = $state;
-    this.$q = $q;
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.utilsService = utilsService;
     this.metricsData = {};
     this.cpuLimit = 0;
     this.memoryLimit = 0;
-    this.showDetail = false;
 
     this.nodeName = this.node.spec.hostname;
     this.metricsNodeName = this.node.spec.metricsNodeName;

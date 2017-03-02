@@ -37,7 +37,7 @@
 
     this.$state = $state;
     this.$q = $q;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
 
     this.instances = [];
     var guid = $stateParams.guid;

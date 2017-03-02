@@ -19,11 +19,13 @@
     <dd class="cluster-tile-account"translate>
       {{ controlPlaneTileCtrl.getGlusterFsNodeCount() }}</dd>
   </dl>
+  <cp-nodes-ring-chart
+    ng-if="controlPlaneTileCtrl.service.isConnected"
+    nodes="controlPlaneTileCtrl.nodes" guid="{{service.guid}}"></cp-nodes-ring-chart>
   <div ng-if="!controlPlaneTileCtrl.service.isConnected" class="text-center">
     <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
-    <a class="" ng-click="controlPlaneTileCtrl.connect(controlPlaneTileCtrl.service)" translate>Connect</a>
-    {{ ' to this endpoint.' | translate }}<br>
+    <p>Not Connected</p>
     <span translate="">ENDPOINT URL</span> {{controlPlaneTileCtrl.service.api_endpoint.Host}}<br>
   </div>
- <cp-nodes-ring-chart class="" nodes="controlPlaneTileCtrl.nodes" guid="{{service.guid}}"></cp-nodes-ring-chart>
+
 </gallery-card>

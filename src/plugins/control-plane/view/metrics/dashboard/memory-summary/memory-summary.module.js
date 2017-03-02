@@ -37,9 +37,7 @@
 
   function MemorySummaryController($q, $state, $stateParams, modelManager, utilsService, metricsDataService) {
     var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.utilsService = utilsService;
     this.guid = $stateParams.guid;
     this.showCardLayout = true;

@@ -62,8 +62,6 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
     this.state = '';
 
@@ -77,8 +75,8 @@
 
   angular.extend(ControlPlaneTilesController.prototype, {
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
+     * @namespace control-plane.view.tiles
+     * @memberof control-plane.view.tiles
      * @name createClusterList
      * @description Create the list of clusters + determine their connected status
      */
@@ -99,8 +97,8 @@
     },
 
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
+     * @namespace control-plane.view.tiles
+     * @memberof control-plane.view.tiles
      * @name refreshClusterList
      * @description Update the core model data + create the cluster list
      * @returns {promise} refresh cluster promise
@@ -123,8 +121,8 @@
     },
 
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
+     * @namespace control-plane.view.tiles
+     * @memberof control-plane.view.tiles
      * @name updateState
      * @description Determine the state of the model (contains clusters/doesn't contain clusters/loading/failed to load)
      * @param {boolean} loading true if loading async data

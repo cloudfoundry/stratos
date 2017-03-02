@@ -1,7 +1,6 @@
 <div class="network-rate-card">
   <gallery-card class="network-gallery-card"
                 card-data="networkRateCardCtrl.getCardData()">
-
     <div class="card-content">
       <div class="summary-data">
         <dl class="dl-horizontal">
@@ -25,14 +24,14 @@
       </div>
       <rate-graph class="data-chart"
                   points="networkRateCardCtrl.txRateDataPoints"
-                  y-label="Data Tx Rate"
+                  y-label="{{ 'Data Tx Rate' | translate }}"
                   node-name="{{networkRateCardCtrl.node}}"
                   metric-name="tx"
       ></rate-graph>
 
       <rate-graph class="data-chart"
                   points="networkRateCardCtrl.rxRateDataPoints"
-                  y-label="Data Rx Rate"
+                  y-label="{{ 'Data Rx Rate' | translate }}"
                   node-name="{{networkRateCardCtrl.node}}"
                   metric-name="rx"
       ></rate-graph>

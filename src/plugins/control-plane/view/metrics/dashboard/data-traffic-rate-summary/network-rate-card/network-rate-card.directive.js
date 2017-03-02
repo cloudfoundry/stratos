@@ -23,15 +23,14 @@
 
   NetworkRateCardController.$inject = [
     '$state',
-    '$scope',
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function NetworkRateCardController($state, $scope, $q, modelManager, utilsService) {
+  function NetworkRateCardController($state, $q, modelManager, utilsService) {
 
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
     this.$q = $q;
     this.utilsService = utilsService;
@@ -42,7 +41,6 @@
     };
     this._fetchData();
   }
-
 
   angular.extend(NetworkRateCardController.prototype, {
 

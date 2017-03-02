@@ -12,7 +12,6 @@
 
   registerRoute.$inject = [
     '$stateProvider'
-
   ];
 
   function registerRoute($stateProvider) {

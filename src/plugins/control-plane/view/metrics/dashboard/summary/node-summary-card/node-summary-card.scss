@@ -1,6 +1,4 @@
 .node-summary-card {
-  //padding-right: 12px;
-  //height: 200px;
   flex-grow: 1;
 
   .donuts {
@@ -12,13 +10,15 @@
       flex-direction: column;
     }
   }
-  .charts {
-    width: 100%;
-  }
-  .chart {
-    margin-left: 0 !important;
-    padding-top: 12px !important;
-  }
+
+  //.charts {
+  //  width: 100%;
+  //}
+  //
+  //.chart {
+  //  margin-left: 0 !important;
+  //  padding-top: 12px !important;
+  //}
 
   .consume-space {
     width: 75%;
@@ -29,7 +29,6 @@
     float: left;
     width: 25%;
   }
-
 
 }
 

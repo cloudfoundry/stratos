@@ -5,7 +5,7 @@
   > div.card {
     width: 100%;
   }
-  
+
   .dl-horizontal.node-count-card-label {
     font-size: 16px;
 
@@ -25,18 +25,18 @@
   }
 
   .color-0 {
-    background-color: #2bd1c8;
+    background-color: $turquoise;
   }
 
   .color-1 {
-    background: #767676;
+    background: $charcoal;
   }
 
   .color-2 {
-    background: #ccc;
+    background: $rule;
   }
 
   .color-unknown {
-    background: #ddd042;
+    background: $sunglow;
   }
 }

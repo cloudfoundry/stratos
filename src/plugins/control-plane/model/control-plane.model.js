@@ -2,9 +2,9 @@
   'use strict';
 
   /**
-   * @namespace service-manager.model
-   * @name service-manager.model
-   * @description Helion Service Manager model
+   * @namespace control-plane.model
+   * @name control-plane.model
+   * @description Helion Control Plane model
    */
   angular
     .module('control-plane.model', [])
@@ -29,17 +29,8 @@
 
     this.hcpApi = this.apiManager.retrieve('control-plane.api.HcpApi');
 
-    // Instances that have upgrades available
-    this.upgrades = {};
-
-    // Upgrades to ignore
-    this.ignoreUpgrades = {};
-
-    // Model - key for each HSM Service (Endpoint guid)
     this.model = {};
 
-    // Last loaded instance
-    this.instance = {};
   }
 
   angular.extend(ControlPlaneModel.prototype, {
@@ -59,6 +50,8 @@
 
         return this.model[guid] && this.model[guid][propertyName] && !noCache ? this.$q.resolve(this.model[guid][propertyName]) : loadPromise;
       }
+
+      return loadPromise;
     },
 
     getComputeNode: function (guid, id) {

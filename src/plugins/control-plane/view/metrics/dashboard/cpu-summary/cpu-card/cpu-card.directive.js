@@ -5,8 +5,6 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('cpuCard', cpuCard);
 
-  //cpuCard.$inject = ['app.basePath'];
-
   function cpuCard() {
     return {
       bindToController: {
@@ -24,21 +22,14 @@
   }
 
   CpuCardController.$inject = [
-    '$interval',
     '$state',
-    '$scope',
-    '$q',
-    'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.model.modelManager'
   ];
 
-  function CpuCardController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function CpuCardController($state, modelManager) {
 
-    //var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
-    this.$q = $q;
-    this.utilsService = utilsService;
     this.metricsData = {};
     this.cpuLimit = 0;
 

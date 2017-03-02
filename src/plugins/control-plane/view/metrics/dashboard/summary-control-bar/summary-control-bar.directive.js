@@ -5,8 +5,6 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('summaryControlBar', summaryControlBar);
 
-  //summaryControlBar.$inject = ['app.basePath'];
-
   function summaryControlBar() {
     return {
       bindToController: {
@@ -26,19 +24,17 @@
   }
 
   SummaryControlBar.$inject = [
-    '$interval',
     '$state',
-    '$scope',
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
     'control-plane.metrics.metrics-data-service'
   ];
 
-  function SummaryControlBar($interval, $state, $scope, $q, modelManager, utilsService, metricsDataService) {
+  function SummaryControlBar($state, $q, modelManager, utilsService, metricsDataService) {
 
     var that = this;
-    this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
     this.$q = $q;
     this.utilsService = utilsService;
@@ -95,21 +91,13 @@
       this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
     },
 
-    // findInCore: function (value) {
-
-    // },
-
-    // findInObject: function (object) {
-
-    // },
-
-    // New stuff
     setText: function () {
       var that = this;
       this.metricsDataService.setCurrentSortFilter(this.groupName, this.currentFilter);
       if (!this.currentFilter.text || this.currentFilter.text.length === 0) {
         this.filteredCollection = [].concat(this.collection || []);
       } else {
+        var searchText = that.currentFilter.text.toLowerCase();
         this.filteredCollection = _.filter(this.collection, function (object) {
           var filteredProperties = that.filteredProperties || [];
           for (var i = 0; i < filteredProperties.length; i++) {
@@ -117,14 +105,13 @@
             if (_.isNumber(value)) {
               value = value.toString();
             }
-            if (_.isString(value) && value.indexOf(that.currentFilter.text) >= 0) {
+            if (_.isString(value) && value.toLowerCase().indexOf(searchText) >= 0) {
               return true;
             }
           }
           return false;
         });
       }
-
     },
 
     // New stuff

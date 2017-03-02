@@ -46,7 +46,7 @@
      *
      * https://docs.angularjs.org/guide/production
      */
-    $compileProvider.debugInfoEnabled(true);
+    $compileProvider.debugInfoEnabled(false);
 
     $logProvider.debugEnabled(false);
   }

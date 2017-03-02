@@ -4,10 +4,9 @@
 
     <div class="card-content">
       <div class="donut-div" ng-if="memoryCardCtrl.showUtilizationDonut">
-        <!--<span class="centered">Memory Utilization</span>-->
         <utilization-donut metric="memory_node_utilization_gauge"
                            filter="{{ memoryCardCtrl.getNodeFilter() }}"
-                           y-label="Memory Utilization (%)"
+                           y-label="{{ 'Memory Utilization (%)' | translate }}"
                            node-name="{{memoryCardCtrl.node}}"
                            metric-limit="{{memoryCardCtrl.memoryLimit.toFixed(2)}}"
                            metric-unit="GB"
@@ -17,7 +16,7 @@
 
       <line-graph class="line-graph" metric="memory_usage_gauge"
                   filter="{{ memoryCardCtrl.getNodeFilter() }}"
-                  y-label="Memory Utilization (GB)"
+                  y-label="{{ 'Memory Utilization (GB)' | translate }}"
                   node-name="{{ memoryCardCtrl.getNodeName() }}"
                   y-tick-formatter="memoryCardCtrl.yTickFormatter"
       ></line-graph>

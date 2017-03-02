@@ -16,6 +16,7 @@
   </dl>
   <div ng-if="!clusterTile.service.isConnected" class="text-center">
     <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
+    // TODO: This is broken, no connect is passed in
     <a class="" ng-click="clusterTile.connect(clusterTile.service)" translate>Connect</a>
       {{ ' to this endpoint.' | translate }}<br>
     <span translate="">ENDPOINT URL</span> {{clusterTile.service.api_endpoint.Host}}<br>

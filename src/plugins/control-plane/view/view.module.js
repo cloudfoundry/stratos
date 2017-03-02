@@ -25,7 +25,6 @@
 
     $stateProvider.state('cp.list', {
       url: '',
-      // template: '<ui-view/>',
       controller: ControlPlaneRouterController,
       controllerAs: 'cpRouterCtrl',
       ncyBreadcrumb: {

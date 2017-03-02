@@ -14,8 +14,8 @@
   function metricsDataServiceFactory(eventService, modelManager, utilsService) {
 
     // model information
-    var model = modelManager.retrieve('cloud-foundry.model.application');
-    var metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
+    var model = modelManager.retrieve('control-plane.model.application');
+    var metricsModel = modelManager.retrieve('control-plane.model.metrics');
     var metricsData = {};
     var sortFilters = {};
     var searchText = '';

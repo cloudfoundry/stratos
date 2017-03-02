@@ -10,29 +10,21 @@
     .run(register);
 
   register.$inject = [
-    '$state',
-    '$location',
     'app.event.eventService',
     'app.model.modelManager',
     'app.view.notificationsService'
   ];
 
-  function register($state, $location, eventService, modelManager, notificationService) {
-    return new ControlPlane($state, $location, eventService, modelManager, notificationService);
+  function register(eventService, modelManager) {
+    return new ControlPlane(eventService, modelManager);
   }
 
-  function ControlPlane($state, $location, eventService, modelManager, notificationService) {
+  function ControlPlane(eventService, modelManager) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
-    this.notificationService = notificationService;
-    this.$state = $state;
-    this.$location = $location;
     this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
-    });
-    this.eventService.$on(this.eventService.events.LOGOUT, function () {
-      that.onLoggedOut();
     });
 
     this.eventService.$on(this.eventService.events.ENDPOINT_CONNECT_CHANGE, function () {
@@ -52,8 +44,6 @@
     onLoggedIn: function () {
       this.registerNavigation();
       this.update();
-    },
-    onLoggedOut: function () {
     },
 
     registerNavigation: function () {
