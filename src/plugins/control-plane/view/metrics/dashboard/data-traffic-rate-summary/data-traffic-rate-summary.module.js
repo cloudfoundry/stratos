@@ -10,8 +10,8 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cp.metrics.dashboard.data-traffic-rate-summary', {
-      url: '/data-traffic-rate',
+    $stateProvider.state('cp.metrics.dashboard.network-traffic-rate-summary', {
+      url: '/network-traffic',
       params: {
         guid: ''
       },
@@ -112,7 +112,7 @@
       });
     }
 
-    utilsService.chainStateResolve('cp.metrics.dashboard.data-traffic-summary', $state, init);
+    utilsService.chainStateResolve('cp.metrics.dashboard.network-traffic-rate-summary', $state, init);
 
   }
 

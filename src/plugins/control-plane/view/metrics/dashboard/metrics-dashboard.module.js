@@ -6,7 +6,6 @@
       'control-plane.view.metrics.dashboard.summary',
       'control-plane.view.metrics.dashboard.cpu-summary',
       'control-plane.view.metrics.dashboard.memory-summary',
-      'control-plane.view.metrics.dashboard.data-traffic-summary',
       'control-plane.view.metrics.dashboard.data-traffic-rate-summary'
     ])
     .config(registerRoute);

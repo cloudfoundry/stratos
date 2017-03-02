@@ -3,16 +3,38 @@
                 card-data="networkRateCardCtrl.getCardData()">
 
     <div class="card-content">
-      <rate-graph class="data-chart" metric="network_tx_rate_gauge"
-                        filter="{{ networkRateCardCtrl.getNodeFilter() }}"
-                        y-label="Data Tx Rate"
-                        node-name="{{networkRateCardCtrl.node}}"
+      <div class="summary-data">
+        <dl class="dl-horizontal">
+          <dt translate>Total Network Rx</dt>
+          <dd>
+            {{ networkRateCardCtrl.rxCumulative }}
+          </dd>
+          <dt translate>Total Network Tx</dt>
+          <dd>
+            {{ networkRateCardCtrl.txCumulative }}
+          </dd>
+          <dt translate>Network Rx Rate</dt>
+          <dd>
+            {{ networkRateCardCtrl.getLatestPoint(networkRateCardCtrl.rxRate) }}
+          </dd>
+          <dt translate>Network Tx Ratee</dt>
+          <dd>
+            {{ networkRateCardCtrl.getLatestPoint(networkRateCardCtrl.txRate) }}
+          </dd>
+        </dl>
+      </div>
+      <rate-graph class="data-chart"
+                  points="networkRateCardCtrl.txRateDataPoints"
+                  y-label="Data Tx Rate"
+                  node-name="{{networkRateCardCtrl.node}}"
+                  metric-name="tx"
       ></rate-graph>
 
-      <rate-graph class="data-chart" metric="network_rx_rate_gauge"
-                        filter="{{ networkRateCardCtrl.getNodeFilter() }}"
-                        y-label="Data Rx Rate"
-                        node-name="{{networkRateCardCtrl.node}}"
+      <rate-graph class="data-chart"
+                  points="networkRateCardCtrl.rxRateDataPoints"
+                  y-label="Data Rx Rate"
+                  node-name="{{networkRateCardCtrl.node}}"
+                  metric-name="rx"
       ></rate-graph>
     </div>
   </gallery-card>

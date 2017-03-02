@@ -1,8 +1,0 @@
-@import "network-card/network-card";
-@include tile-layout('cpu-network-card', 900px, 2);
-
-.hcp-network-summary {
-  .row:first-of-type {
-    min-height: 317px;
-  }
-}

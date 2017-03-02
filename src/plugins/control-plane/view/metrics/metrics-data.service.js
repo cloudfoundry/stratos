@@ -7,10 +7,11 @@
 
   metricsDataServiceFactory.$inject = [
     'app.event.eventService',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.utils.utilsService'
   ];
 
-  function metricsDataServiceFactory(eventService, modelManager) {
+  function metricsDataServiceFactory(eventService, modelManager, utilsService) {
 
     // model information
     var model = modelManager.retrieve('cloud-foundry.model.application');
@@ -31,6 +32,7 @@
 
           // Add metricNodeName property
           nodes = _.each(nodes, function (node) {
+
             if (node.spec.profile.indexOf('node') !== -1) {
               node.spec.metricsNodeName = node.spec.hostname;
             } else {
@@ -107,6 +109,7 @@
     function getMetricsNodeName(guid, nodeName) {
       var nodes = getNodes(guid);
       var node = _.find(nodes, {spec: {nodename: nodeName}});
+
       return node.spec.metricsNodeName;
     }
 
@@ -153,6 +156,15 @@
       return searchText;
     }
 
+    function getNodeName(nodeName) {
+
+      if (nodeName === '*') {
+        return 'all';
+      } else {
+        return utilsService.sanitizeString(nodeName);
+      }
+    }
+
     return {
       fetchComputeNodes: fetchComputeNodes,
       getNodes: getNodes,
@@ -166,8 +178,10 @@
       getNodeTypeForNode: getNodeTypeForNode,
       getNodeType: getNodeType,
       setSearchText: setSearchText,
-      getSearchText: getSearchText
+      getSearchText: getSearchText,
+      getNodeName: getNodeName
     };
+
   }
 
 })();

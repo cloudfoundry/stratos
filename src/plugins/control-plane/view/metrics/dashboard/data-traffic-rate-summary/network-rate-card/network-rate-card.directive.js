@@ -22,7 +22,6 @@
   }
 
   NetworkRateCardController.$inject = [
-    '$interval',
     '$state',
     '$scope',
     '$q',
@@ -30,19 +29,20 @@
     'app.utils.utilsService'
   ];
 
-  function NetworkRateCardController($interval, $state, $scope, $q, modelManager, utilsService) {
+  function NetworkRateCardController($state, $scope, $q, modelManager, utilsService) {
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.$state = $state;
     this.$q = $q;
     this.utilsService = utilsService;
-    this.metricsData = {};
-    this.cpuLimit = 0;
+    this.cumulativeData = {};
 
     this.cardData = {
       title: this.title
     };
+    this._fetchData();
   }
+
 
   angular.extend(NetworkRateCardController.prototype, {
 
@@ -58,22 +58,55 @@
       return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
     },
 
-    getNodeName: function () {
-
-      if (this.node === '*') {
-        return 'all';
-      } else {
-        return this.node;
-      }
-    },
-
     yTickFormatter: function (d) {
       return d;
     },
 
-    namespaceDetails: function () {
-      this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
+    _fetchData: function () {
+
+      var that = this;
+      var metricPromises = [];
+
+      // Rx Cumulative
+      metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_rx_cumulative',
+        this.metricsModel.makeNodeNameFilter(this.metricsNodeName)));
+
+      // Tx Cumulative
+      metricPromises.push(that.metricsModel.getLatestMetricDataPoint('network_tx_cumulative',
+        this.metricsModel.makeNodeNameFilter(this.metricsNodeName)));
+
+      // Tx Rate
+      metricPromises.push(that.metricsModel.getMetrics('network_rx_rate_gauge',
+        this.metricsModel.makeNodeNameFilter(this.metricsNodeName)));
+
+      // Tx Rate
+      metricPromises.push(that.metricsModel.getMetrics('network_tx_rate_gauge',
+        this.metricsModel.makeNodeNameFilter(this.metricsNodeName)));
+
+      this.$q.all(metricPromises)
+        .then(function (metricValues) {
+          that.rxCumulative = that.utilsService.bytesToHumanSize(metricValues[0]);
+          that.txCumulative = that.utilsService.bytesToHumanSize(metricValues[1]);
+          that.rxRate = metricValues[2];
+          that.rxRateDataPoints = that.rxRate.dataPoints;
+          that.txRate = metricValues[3];
+          that.txRateDataPoints = that.txRate.dataPoints;
+        })
+        .catch(function () {
+          // Set these to null to update the charts
+          that.rxRateDataPoints = null;
+          that.rxRateDataPoints = null;
+        });
+    },
+
+    getLatestPoint: function (metric) {
+      if (metric) {
+        return this.utilsService.bytesToHumanSize(_.last(metric.dataPoints).y) + '/s';
+      }
+      return null;
+
     }
+
   });
 
 })();

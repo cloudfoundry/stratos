@@ -5,16 +5,13 @@
     .module('control-plane.view.metrics.dashboard')
     .directive('rateGraph', rateGraph);
 
-  //rateGraph.$inject = ['app.basePath'];
-
   function rateGraph() {
     return {
       bindToController: {
-        filter: '@',
-        metric: '@',
+        points: '=',
+        metricName: '@',
         yLabel: '@',
-        nodeName: '@',
-        metricLimit: '@'
+        nodeName: '@'
       },
       controller: RateChartController,
       controllerAs: 'rateChartCtrl',
@@ -27,25 +24,39 @@
     '$interval',
     '$scope',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'control-plane.metrics.metrics-data-service'
   ];
 
-  function RateChartController($interval, $scope, modelManager, utilsService) {
+  function RateChartController($interval, $scope, modelManager, utilsService, metricsDataService) {
 
     var that = this;
 
     this.metricsModel = modelManager.retrieve('cloud-foundry.model.metrics');
     this.utilsService = utilsService;
+    this.metricsDataService = metricsDataService;
 
-    this.metricData = {};
+    $scope.$watch(function () {
+      return that.points;
+    }, function () {
 
-    // var interval = $interval(function () {
-    //   that.updateChart();
-    // }, 120000);
-    //
-    // $scope.$on('$destroy', function () {
-    //   $interval.cancel(interval);
-    // });
+      if (_.isUndefined(that.points)) {
+        that.options.chart.noData = 'Loading data ...';
+        return;
+      }
+      if (_.isNull(that.points)) {
+        that.options.chart.noData = 'No data available';
+        that.data = [];
+      } else {
+        that.data = [
+          {
+            values: that.points,
+            label: that.yLabel,
+            color: '#60798D'
+          }
+        ];
+      }
+    });
 
     this.options = {
       chart: {
@@ -82,7 +93,7 @@
           showMaxMin: false,
           tickFormat: function (y) {
 
-            var kbData = y / 1024;
+            var kbData = y / (1024);
             var mbData = y / (1024 * 1024);
 
             if (kbData > 1000) {
@@ -93,7 +104,7 @@
           },
           dispatch: {
             renderEnd: function () {
-              var id = '#' + that.metric + '_' + that.getNodeName() + '_cchart';
+              var id = '#' + that.metricName + '_' + metricsDataService.getNodeName(that.nodeName) + '_cchart';
               var selectedElement = d3.select(id + ' svg');
               if (selectedElement.length > 0 && selectedElement[0][0]) {
                 var width = parseInt(selectedElement.style('width').replace(/px/, ''), 10) - 105;
@@ -107,52 +118,14 @@
       }
     };
 
-    this.updateChart();
-
     this.chartApi = null;
 
-    this.data = [
-      {
-        values: [],
-        label: 'UTILIZED',
-        color: '#60798D'
-      }
-    ];
+    this.options.chart.noData = 'Loading data ...';
+
+    this.data = [];
 
   }
 
-  angular.extend(RateChartController.prototype, {
-
-    getNodeName: function () {
-
-      if (this.nodeName === '*') {
-        return 'all';
-      } else {
-        return this.utilsService.sanitizeString(this.nodeName);
-      }
-    },
-
-    updateChart: function () {
-      var that = this;
-      this.options.chart.noData = 'Loading data ...';
-
-      return this.metricsModel.getMetrics(this.metric, this.filter)
-        .then(function (metricsData) {
-          that.data = [
-            {
-              values: metricsData.dataPoints,
-              label: 'Data Transmitted',
-              color: '#60798D'
-            }];
-        }).catch(function () {
-          that.options.chart.noData = 'No data available';
-          that.data = [];
-          if (that.chartApi) {
-            that.chartApi.refresh();
-          }
-        });
-    }
-
-  });
+  angular.extend(RateChartController.prototype, {});
 
 })();
