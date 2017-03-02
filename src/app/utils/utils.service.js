@@ -192,7 +192,7 @@
         return precisionIfUseful(sizeB / 1048576) + ' MB';
       }
       if (sizeB >= 1024) {
-        return precisionIfUseful(sizeB / 1024) + ' kB';
+        return precisionIfUseful(sizeB / 1024) + ' KB';
       }
       return precisionIfUseful(sizeB) + ' B';
     }

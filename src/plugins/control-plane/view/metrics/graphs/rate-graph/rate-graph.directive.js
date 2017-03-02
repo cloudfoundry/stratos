@@ -97,9 +97,9 @@
             var mbData = y / (1024 * 1024);
 
             if (kbData > 1000) {
-              return mbData.toFixed(1) + ' Mb/s';
+              return mbData.toFixed(1) + ' MB/s';
             } else {
-              return kbData.toFixed(0) + ' Kb/s';
+              return kbData.toFixed(0) + ' KB/s';
             }
           },
           dispatch: {
