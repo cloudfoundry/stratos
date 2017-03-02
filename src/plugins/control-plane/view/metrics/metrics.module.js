@@ -18,7 +18,7 @@
       abstract: true,
       template: '<ui-view/>',
       data: {
-        activeMenuState: 'metrics'
+        activeMenuState: 'cp.list'
       }
     });
   }
