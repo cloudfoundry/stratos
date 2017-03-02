@@ -6,31 +6,6 @@
     width: 100%;
   }
   
-  .node-line-chart {
-    width: 100%;
-    background-color: #fff;
-    margin: $hpe-unit-space * 0.5 0 $hpe-unit-space 0;
-    display: flex;
-    align-items: center;
-
-    .node-line-chart-item {
-      display: inline-block;
-
-      &:last-child {
-        height: 2px;
-      }
-      &:nth-last-child(1) {
-        height: 4px;
-      }
-      &:nth-last-child(2) {
-        height: 6px;
-      }
-      &:nth-last-child(3) {
-        height: 8px;
-      }
-    }
-  }
-
   .dl-horizontal.node-count-card-label {
     font-size: 16px;
 
