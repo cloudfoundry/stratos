@@ -1,0 +1,98 @@
+<div class="hcp-network-rate-summary">
+
+  <div class="row">
+    <network-rate-card
+      node="*"
+      metrics-data="networkTrafficCtrl.all.metrics"
+      metrics-node-name="*"
+      title="{{ 'Total Network Traffic Rate' | translate }}"
+    >
+    </network-rate-card>
+  </div>
+
+  <div class="row">
+    <summary-control-bar
+      summary-name="data-traffic-summary"
+      guid="{{ networkTrafficCtrl.guid }}"
+      group-name="data-traffic-rate" ,
+      show-card-layout="networkTrafficCtrl.metricsDataService.dataTrafficRate.showCardLayout"
+      collection="networkTrafficCtrl.nodes"
+      filtered-collection="networkTrafficCtrl.filteredNodes"
+      filtered-properties="['spec.hostname','spec.profile']"
+    >
+    </summary-control-bar>
+  </div>
+
+  <div class="row">
+    <div class="data-traffic-view">
+      <div ng-if="!networkTrafficCtrl.metricsDataService.dataTrafficRate.showCardLayout">
+        <div ng-if="networkTrafficCtrl.nodes.length"
+             class="metrics-table">
+          <table class="table"
+                 st-table="networkTrafficCtrl.stNodes"
+                 st-safe-src="networkTrafficCtrl.filteredNodes"
+                 st-binding="networkTrafficCtrl.table">
+            <thead>
+            <tr>
+              <th class="column"
+                  ng-repeat="column in networkTrafficCtrl.tableColumns"
+                  st-skip-natural="true"
+                  ng-class="{'column-no-sort': column.noSort}"
+                  st-sort="{{ column.noSort ? '' : column.value }}"
+                  st-descending-first="{{ column.descendingFirst ? 'true' : '' }}">
+                <div class="column-div">
+                  <div class="column-text" translate>{{ column.name }}</div>
+                  <div class="smart-separator"></div>
+                  <div class="column-no-sort"></div>
+                  <div class="column-sorter-asc"></div>
+                  <div class="column-sorter-desc"></div>
+                </div>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="node in networkTrafficCtrl.stNodes">
+              <td class="table-view-app-name">
+                {{ node.spec.hostname }}
+              </td>
+              <td>{{ node.metrics.txCumulative }}</td>
+              <td>
+                <sparkline-graph ng-if="node.metrics.txRate.timeSeries.length > 0"
+                                 timeseries="node.metrics.txRate">
+                </sparkline-graph>
+              </td>
+              <td>{{ node.metrics.txRate.latestDataPoint  }}</td>
+              <td>{{ node.metrics.rxCumulative }}</td>
+              <td>
+                <sparkline-graph ng-if="node.metrics.rxRate.timeSeries.length > 0"
+                                 timeseries="node.metrics.rxRate">
+                </sparkline-graph>
+              </td>
+              <td>{{ node.metrics.rxRate.latestDataPoint  }}</td>
+
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div ng-if="networkTrafficCtrl.metricsDataService.dataTrafficRate.showCardLayout">
+        <div class="network-card">
+          <div class="tile-layout-container">
+            <div class="network-card tile-layout-parent" ng-repeat="node in networkTrafficCtrl.filteredNodes">
+              <network-rate-card
+                node="{{ node.spec.hostname }}"
+                metrics-data="node.metrics"
+                metrics-node-name="{{ node.spec.metricsNodeName }}"
+                title="{{  node.spec.hostname }}">
+
+              </network-rate-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

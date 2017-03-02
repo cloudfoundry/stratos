@@ -2,8 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.memory-summary', [
-    ])
+    .module('control-plane.view.metrics.dashboard.memory-summary', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -44,7 +43,7 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', descendingFirst: true},
+      {name: gettext('Memory Usage'), value: 'metrics.memoryUtilization.latestDataPoint', descendingFirst: true},
       {name: gettext('Memory Spark Line'), value: 'metrics.memory_usage', noSort: true}
     ];
 
@@ -53,6 +52,11 @@
       this.metricsDataService.memorySummary = {};
       this.metricsDataService.memorySummary.showCardLayout = true;
     }
+
+    //all
+    that.all = {
+      metrics: {}
+    };
 
     this.sortFilters = [
       {
@@ -82,23 +86,37 @@
           _.each(that.nodes, function (node, key) {
 
             var metricPromises = [];
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             metricPromises.push(that.metricsModel.getMetrics('memory_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             metricPromises.push(that.metricsModel.getNodeMemoryLimit(node.spec.metricsNodeName));
-
+            metricPromises.push(that.metricsModel.getMetrics('memory_usage_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.memory_usage = metrics[0].toFixed(2);
-                that.nodes[key].metrics.memoryUsageData = metrics[1].timeSeries;
-                that.nodes[key].metrics.memoryLimit = metrics[2];
+                that.nodes[key].metrics.memoryUtilization = metrics[0];
+                that.nodes[key].metrics.memoryLimit = metrics[1];
+                that.nodes[key].metrics.memoryUsage = metrics[2];
+
+              })
+              .catch(function () {
+                that.nodes[key].metrics.memoryUtilization = null;
+                that.nodes[key].metrics.memoryLimit = null;
+                that.nodes[key].metrics.memoryUsage = null;
+                that.all.metrics.memoryUsage = null;
               });
 
             allMetricPromises.push(promises);
 
           });
+
+          var allPromises = that.metricsModel.getMetrics('memory_usage_gauge',
+            that.metricsModel.makeNodeNameFilter('*'))
+            .then(function (metric) {
+              that.all.metrics.memoryUsage = metric;
+            });
+          allMetricPromises.push(allPromises);
+
           return allMetricPromises;
         });
     }
@@ -110,7 +128,7 @@
   angular.extend(MemorySummaryController.prototype, {
 
     getMemoryUsageValue: function (node) {
-      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memory_usage) * node.metrics.memoryLimit);
+      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memoryUtilization.latestDataPoint) * node.metrics.memoryLimit);
     },
 
     fetchMemoryLimit: function (node) {

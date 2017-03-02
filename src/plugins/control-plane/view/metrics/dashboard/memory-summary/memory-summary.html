@@ -1,8 +1,13 @@
 <div class="hcp-memory-summary">
 
   <div class="row">
-    <memory-card node="*" metrics-node-name="*" show-utilization-donut="false"
-                 title="{{ 'Total Memory Usage' | translate }}"></memory-card>
+    <memory-card
+      node="*"
+      node-metrics="memorySummaryCtrl.all.metrics"
+      metrics-node-name="*"
+      show-utilization-donut="false"
+      title="{{ 'Total Memory Usage' | translate }}"
+    ></memory-card>
   </div>
 
   <div class="row">
@@ -52,13 +57,15 @@
               </td>
               <td>
                 <percent-gauge
-                  value="{{ node.metrics.memory_usage }}"
+                  value="{{ node.metrics.memoryUtilization.latestDataPoint }}"
                   value-text="{{ memorySummaryCtrl.getMemoryUsageValue(node) }} / {{ memorySummaryCtrl.fetchMemoryLimit(node) }}">
                 </percent-gauge>
+
               </td>
               <td>
-                <sparkline-graph ng-if="node.metrics.memoryUsageData.length > 0"
-                                 timeseries="node.metrics.memoryUsageData">
+                <sparkline-graph ng-if="node.metrics.memoryUtilization.timeSeries.length > 0"
+                                 timeseries="node.metrics.memoryUtilization"
+                >
                 </sparkline-graph>
 
               </td>
@@ -72,8 +79,13 @@
         <div class="memory-cards">
           <div class="tile-layout-container">
             <div class="memory-card tile-layout-parent" ng-repeat="node in memorySummaryCtrl.filteredNodes">
-              <memory-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
-                           show-utilization-donut="true" title="{{  node.spec.hostname }}"></memory-card>
+              <memory-card
+                node="{{ node.spec.hostname }}"
+                metrics-node-name="{{ node.spec.metricsNodeName }}"
+                show-utilization-donut="true"
+                title="{{  node.spec.hostname }}"
+                node-metrics="node.metrics"
+              ></memory-card>
             </div>
           </div>
         </div>

@@ -31,15 +31,6 @@
 
     this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
 
-    this.updateChart();
-
-    // var interval = $interval(function () {
-    //   that.updateChart();
-    // }, 60000);
-    //
-    // $scope.$on('$destroy', function () {
-    //   $interval.cancel(interval);
-    // });
 
     this.options = {
       chart: {
@@ -63,21 +54,12 @@
 
   angular.extend(SparklineGraphController.prototype, {
 
-    updateChart: function () {
-      var that = this;
-
-      return this.metricsModel.getMetrics(this.metric, '{' + this.filter + '}')
-        .then(function (metricsData) {
-          that.data = metricsData.dataPoints;
-          that.chartApi.refresh();
-        });
-    },
-
     polygonPoints: function () {
 
-      var xShift = _.min(_.map(this.timeseries, 'timestamp'));
+      var timeSeries = _.isArray(this.timeseries) ? this.timeseries : this.timeseries.timeSeries;
+      var xShift = _.min(_.map(timeSeries, 'timestamp'));
 
-      var shifted = _.map(this.timeseries, function (dataPoint) {
+      var shifted = _.map(timeSeries, function (dataPoint) {
         return [dataPoint.timestamp - xShift, dataPoint.value];
       });
 

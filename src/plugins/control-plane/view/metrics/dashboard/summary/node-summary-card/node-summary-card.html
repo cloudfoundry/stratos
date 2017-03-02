@@ -6,23 +6,26 @@
       <div class="donuts">
         <div class="donut-div">
           <span>CPU Utilization</span>
-          <utilization-donut metric="cpu_node_utilization_gauge"
+          <utilization-donut metric="cpu"
+                             value="nodeSummaryCardCtrl.node.metrics.cpuUtilization.latestDataPointPercentage"
                              filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
                              y-label="CPU Utilization (%)"
                              node-name="{{nodeSummaryCardCtrl.nodeName}}"
-                             metric-limit="{{nodeSummaryCardCtrl.node.metrics.cpuLimit}} MC"
-                             no-legend="true",
+                             metric-limit="{{nodeSummaryCardCtrl.node.metrics.cpuLimit}}"
+                             metric-unit="MC"
+                             no-legend="true"
                              color-scheme="true"
           ></utilization-donut>
         </div>
         <div class="donut-div">
           <span>Memory Utilization</span>
-          <utilization-donut metric="memory_node_utilization_gauge"
+          <utilization-donut metric="memory"
+                             value="nodeSummaryCardCtrl.node.metrics.memoryUtilization.latestDataPointPercentage"
                              filter="{{ nodeSummaryCardCtrl.getNodeFilter() }}"
                              y-label="Memory Utilization (%)"
                              node-name="{{nodeSummaryCardCtrl.nodeName}}"
-                             metric-limit="{{nodeSummaryCardCtrl.node.metrics.memoryLimit .toFixed(2)}} MB"
-                             no-legend="true" ,
+                             metric-limit="{{nodeSummaryCardCtrl.node.metrics.memoryLimit .toFixed(2)}}"
+                             no-legend="true"
                              color-scheme="true"
           ></utilization-donut>
         </div>

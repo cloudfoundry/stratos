@@ -12,7 +12,7 @@
         metricsNodeName: '@',
         showUtilizationDonut: '=',
         title: '@',
-        cpuLimit: '@'
+        nodeMetrics: '='
       },
       controller: CpuCardController,
       controllerAs: 'cpuCardCtrl',
@@ -22,20 +22,20 @@
   }
 
   CpuCardController.$inject = [
+    '$q',
     '$state',
     'app.model.modelManager'
   ];
 
-  function CpuCardController($state, modelManager) {
+  function CpuCardController($q, $state, modelManager) {
 
     this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
-    this.metricsData = {};
-    this.cpuLimit = 0;
-
+    this.$q = $q;
     this.cardData = {
       title: this.title
     };
+
   }
 
   angular.extend(CpuCardController.prototype, {
@@ -46,10 +46,6 @@
 
     getNodeFilter: function () {
       return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
-    },
-
-    hasMetrics: function (metricName) {
-      return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
     },
 
     getNodeName: function () {
@@ -63,11 +59,8 @@
 
     yTickFormatter: function (d) {
       return d;
-    },
-
-    namespaceDetails: function () {
-      this.$state.go('metrics.dashboard.namespace.details', {node: this.node});
     }
+
   });
 
 })();

@@ -10,7 +10,7 @@
   function utilizationDonut() {
     return {
       bindToController: {
-        filter: '@',
+        value: '=',
         metric: '@',
         yLabel: '@',
         nodeName: '@',
@@ -27,36 +27,31 @@
   }
 
   UtilizationDonutController.$inject = [
-    '$interval',
     '$scope',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function UtilizationDonutController($interval, $scope, modelManager, utilsService) {
+  function UtilizationDonutController($scope, modelManager, utilsService) {
 
     var that = this;
 
     this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.utilsService = utilsService;
-
-    this.metricData = {};
-    this.updateUtilization();
-
-    // var interval = $interval(function () {
-    //   that.updateUtilization();
-    // }, 120000);
-    //
-    // $scope.$on('$destroy', function () {
-    //   $interval.cancel(interval);
-    // });
+    this.arcColour = '#2ad2c9';
 
     $scope.$watch(function () {
-      return that.metricLimit;
+      return that.value;
     }, function () {
-      if (that.chartApi) {
-        // Update limit as soon as metric limit is available
-        that._updateLegend();
+      if (that.value) {
+        if (that.value > 75) {
+          that.arcColour = '#ffd042';
+
+        } else if (that.value > 90) {
+          that.arcColour = '#ff454f';
+        }
+
+        that._updateChart(that.value, (100 - that.value), '#60798D');
       }
     });
 
@@ -64,11 +59,16 @@
       chart: {
         type: 'pieChart',
         height: 200,
+        width: 160,
         donut: true,
         donutRatio: 0.99,
         showLabels: false,
         showLegend: this.noLegend !== 'true',
-
+        dispatch: {
+          renderEnd: function () {
+            that._addTitle();
+          }
+        },
         x: function (d) {
           return d.label;
         },
@@ -112,92 +112,72 @@
     };
     this.chartApi = null;
 
-    this.data = [
-      {
-        value: 0.0,
-        label: 'UTILIZED',
-        color: '#4dc1be',
-        idle: false
-      },
-      {
-        value: 1.00,
-        label: 'LIMIT',
-        color: '#60798D',
-        idle: true
-      }
-    ];
+    this.data = [];
 
   }
 
   angular.extend(UtilizationDonutController.prototype, {
 
-    _updateLegend: function (utilValue, idleValue, utilColor, idleColor) {
+    _updateChart: function (utilValue, idleValue, idleColor) {
 
       var idleElement = _.find(this.data, {idle: true});
       var valueElement = _.find(this.data, {idle: false});
       var utilizedValue = parseFloat((utilValue || valueElement.value) / 100) * parseInt(this.metricLimit, 10);
 
       utilizedValue = !this.intUnit ? utilizedValue.toFixed(2) : Math.ceil(utilizedValue);
+      var limit = this.metricLimit;
+      if (this.metric === 'memory') {
+        utilizedValue = this.utilsService.bytesToHumanSize(utilizedValue);
+        limit = this.utilsService.bytesToHumanSize(limit);
+      }
 
       this.data = [
         {
           value: utilValue || valueElement.value,
-          label: 'UTILIZED ' + utilizedValue + ' ' + this.metricUnit,
-          color: utilColor || valueElement.color,
+          label: 'UTILIZED ' + utilizedValue + ' ' + (this.metricUnit || ''),
+          color: this.arcColour || valueElement.color,
           idle: false
         },
         {
           value: idleValue || idleElement.value,
-          label: 'LIMIT ' + this.metricLimit + ' ' + this.metricUnit,
+          label: 'LIMIT ' + limit + ' ' + (this.metricUnit || ''),
           color: idleColor || idleElement.color,
           idle: true
         }];
     },
 
-    updateUtilization: function () {
-      var that = this;
+    _addTitle: function () {
+      var cssClass = 'normal-title';
+      if (this.value > 75) {
+        this.arcColour = '#ffd042';
+        cssClass = 'warning-title';
 
-      return this.metricsModel.getMetrics(this.metric, this.filter)
-        .then(function (metricsData) {
+      } else if (this.value > 90) {
+        this.arcColour = '#ff454f';
+        cssClass = 'critical-title';
+      }
 
-          var value = metricsData.dataPoints[metricsData.dataPoints.length - 1].y * 100;
-
-          var arcColour = '#2ad2c9';
-          var cssClass = 'normal-title';
-          if (value > 75) {
-            arcColour = '#ffd042';
-            cssClass = 'warning-title';
-
-          } else if (value > 90) {
-            arcColour = '#ff454f';
-            cssClass = 'critical-title';
-          }
-
-          var svg = d3.select('#' + that.metric + '_' + that.utilsService.sanitizeString(that.nodeName) + '_dnt');
-          var donut = svg.selectAll('g.nv-pie').filter(
-            function (d, i) {
-              return i === 1;
-            });
-
-          // check if title already exists
-          var title = donut.select('text#title');
-          if (title[0] && title[0][0]) {
-            // Change title
-            title.text(value.toFixed(2) + '%')
-              .attr('class', cssClass);
-          } else {
-            // Insert title
-            donut.insert('text', 'g')
-              .text(value.toFixed(2) + '%')
-              .attr('class', cssClass)
-              .attr('text-anchor', 'middle')
-              .attr('id', 'title');
-          }
-
-          that._updateLegend(value, 100 - value, arcColour, '#60798D');
+      var svg = d3.select('#' + this.metric + '_' + this.utilsService.sanitizeString(this.nodeName) + '_dnt');
+      var donut = svg.selectAll('g.nv-pie').filter(
+        function (d, i) {
+          return i === 1;
         });
-    }
 
+      // check if title already exists
+      var title = donut.select('text#title');
+      if (title[0] && title[0][0]) {
+        // Change title
+        title.text(this.value.toFixed(2) + '%')
+          .attr('class', cssClass);
+      } else {
+        // Insert title
+        donut.insert('text', 'g')
+          .text(this.value.toFixed(2) + '%')
+          .attr('class', cssClass)
+          .attr('text-anchor', 'middle')
+          .attr('id', 'title');
+      }
+    }
   });
 
 })();

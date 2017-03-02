@@ -54,13 +54,13 @@
               </td>
               <td>
                 <percent-gauge
-                               value="{{ node.metrics.memory_usage }}"
+                               value="{{ node.metrics.memoryUtilization.latestDataPoint }}"
                                value-text="{{ metricsSummaryCtrl.getMemoryUsageValue(node) }} / {{ metricsSummaryCtrl.fetchMemoryLimit(node) }}">
                 </percent-gauge>
               </td>
               <td>
                 <percent-gauge
-                  value="{{ node.metrics.cpu_usage }}"
+                  value="{{ node.metrics.cpuUtilization.latestDataPoint }}"
                   value-text="{{ metricsSummaryCtrl.getCpuUsageValue(node) }} MC / {{ node.metrics.cpuLimit }} MC">
                 </percent-gauge>
               </td>

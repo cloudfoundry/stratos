@@ -1,15 +1,19 @@
 <div class="hcp-cp-summary">
 
   <div class="row">
-    <cpu-card node="*" metrics-node-name="*" show-utilization-donut="false"
-              title="{{ 'Total CPU Usage' | translate }}"></cpu-card>
+    <cpu-card
+      node="*"
+      node-metrics="cpuSummaryCtrl.all.metrics"
+      metrics-node-name="*"
+      show-utilization-donut="false"
+      title="{{ 'Total CPU Usage' | translate }}"
+    ></cpu-card>
   </div>
-
   <div class="row">
     <summary-control-bar
       summary-name="cpu-summary"
       guid="{{ cpuSummaryCtrl.guid }}"
-      group-name="cpu",
+      group-name="cpu" ,
       show-card-layout="cpuSummaryCtrl.metricsDataService.cpuSummary.showCardLayout"
       collection="cpuSummaryCtrl.nodes"
       filtered-collection="cpuSummaryCtrl.filteredNodes"
@@ -24,8 +28,12 @@
         <div class="cpu-cards">
           <div class="tile-layout-container">
             <div class="cpu-card tile-layout-parent" ng-repeat="node in cpuSummaryCtrl.filteredNodes">
-              <cpu-card node="{{ node.spec.hostname }}" metrics-node-name="{{ node.spec.metricsNodeName }}"
-                        show-utilization-donut="true" title="{{  node.spec.hostname }}"  cpu-limit="{{  node.metrics.cpuLimit }}"></cpu-card>
+              <cpu-card node="{{ node.spec.hostname }}"
+                        metrics-node-name="{{ node.spec.metricsNodeName }}"
+                        show-utilization-donut="true"
+                        title="{{  node.spec.hostname }}"
+                        node-metrics="node.metrics"
+              ></cpu-card>
             </div>
           </div>
         </div>
@@ -63,12 +71,14 @@
               </td>
               <td>
                 <percent-gauge
-                  value="{{ node.metrics.cpu_usage }}"
+                  value="{{ node.metrics.cpuUtilization.latestDataPoint }}"
                   value-text="{{ cpuSummaryCtrl.getCpuUsageValue(node) }} MC / {{ node.metrics.cpuLimit }} MC">
                 </percent-gauge>
               </td>
               <td>
-                <sparkline-graph ng-if="node.metrics.cpuUsageData.length > 0" timeseries="node.metrics.cpuUsageData">
+                <sparkline-graph ng-if="node.metrics.cpuUtilization.timeSeries.length > 0"
+                                 timeseries="node.metrics.cpuUtilization"
+                >
                 </sparkline-graph>
               </td>
             </tr>
@@ -76,6 +86,8 @@
           </table>
         </div>
       </div>
+
     </div>
   </div>
+
 </div>

@@ -83,12 +83,12 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('Memory Usage'), value: 'metrics.memory_usage', descendingFirst: true},
-      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', descendingFirst: true},
-      {name: gettext('Up Time'), value: 'metrics.upTime', descendingFirst: true},
+      {name: gettext('Memory Usage'), value: 'metrics.memoryUtilization.latestDataPoint', descendingFirst: true},
+      {name: gettext('CPU Usage'), value: 'metrics.cpuUtilization.latestDataPoint', descendingFirst: true},
+      {name: gettext('Up Time'), value: 'metrics.upTimeValue', descendingFirst: true},
       {name: gettext('Avail Zone'), value: 'metrics.availabilityZone', descendingFirst: true},
-      {name: gettext('Data Tx'), value: 'metrics.dataTx', descendingFirst: true},
-      {name: gettext('Data Rx'), value: 'metrics.dataRx', descendingFirst: true}
+      {name: gettext('Data Tx'), value: 'metrics.dataTxValue', descendingFirst: true},
+      {name: gettext('Data Rx'), value: 'metrics.dataRxValue', descendingFirst: true}
     ];
 
     function init() {
@@ -106,12 +106,12 @@
 
             var metricPromises = [];
             // cpu
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
+            metricPromises.push(that.metricsModel.getMetrics('cpu_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // cpu limit
             metricPromises.push(that.metricsModel.getNodeCpuLimit(node.spec.metricsNodeName));
             // memory_usage
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('memory_node_utilization_gauge',
+            metricPromises.push(that.metricsModel.getMetrics('memory_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             // memory limit
             metricPromises.push(that.metricsModel.getNodeMemoryLimit(node.spec.metricsNodeName));
@@ -129,14 +129,17 @@
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = metrics[0].toFixed(2);
+                that.nodes[key].metrics.cpuUtilization = metrics[0];
                 that.nodes[key].metrics.cpuLimit = metrics[1];
-                that.nodes[key].metrics.memory_usage = metrics[2].toFixed(2);
+                that.nodes[key].metrics.memoryUtilization = metrics[2];
                 that.nodes[key].metrics.memoryLimit = metrics[3];
                 that.nodes[key].metrics.upTime = utilsService.getSensibleTime(metrics[4]);
+                that.nodes[key].metrics.upTimeValue = metrics[4];
                 that.nodes[key].metrics.availabilityZone = metrics[5];
-                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize(metrics[6].toFixed(2)) + '/s';
-                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize(metrics[7].toFixed(2)) + '/s';
+                that.nodes[key].metrics.dataTx = utilsService.bytesToHumanSize(metrics[6]) + '/s';
+                that.nodes[key].metrics.dataTxValue =metrics[6];
+                that.nodes[key].metrics.dataRx = utilsService.bytesToHumanSize(metrics[7]) + '/s';
+                that.nodes[key].metrics.dataRxValue = metrics[7];
               });
 
             allMetricPromises.push(promises);
@@ -153,7 +156,7 @@
   angular.extend(MetricsSummaryController.prototype, {
 
     getMemoryUsageValue: function (node) {
-      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memory_usage) * node.metrics.memoryLimit);
+      return this.utilsService.bytesToHumanSize(parseFloat(node.metrics.memoryUtilization.latestDataPoint) * node.metrics.memoryLimit);
     },
 
     fetchMemoryLimit: function (node) {
@@ -161,7 +164,7 @@
     },
 
     getCpuUsageValue: function (node) {
-      return parseFloat(node.metrics.cpu_usage) * node.metrics.cpuLimit;
+      return Math.ceil(parseFloat(node.metrics.cpuUtilization.latestDataPoint) * node.metrics.cpuLimit);
     }
 
   });

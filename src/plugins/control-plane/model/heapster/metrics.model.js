@@ -255,6 +255,8 @@
         metricName: metricName,
         aggregation: 'max',
         dataPoints: dataPoints,
+        latestDataPoint: _.last(dataPoints).y,
+        latestDataPointPercentage: _.last(dataPoints).y * 100,
         timeSeries: timeSeries,
         lastUpdate: Date.now()
       };

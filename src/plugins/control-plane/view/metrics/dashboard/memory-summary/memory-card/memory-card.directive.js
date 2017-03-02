@@ -12,7 +12,8 @@
         node: '@',
         showUtilizationDonut: '=',
         title: '@',
-        metricsNodeName: '@'
+        metricsNodeName: '@',
+        nodeMetrics: '='
       },
       controller: MemoryCardController,
       controllerAs: 'memoryCardCtrl',
@@ -34,21 +35,11 @@
     this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.$state = $state;
     this.utilsService = utilsService;
-    this.metricsData = {};
-    this.memoryLimit = 0;
 
     this.cardData = {
       title: this.title
     };
-    function init() {
-      if (that.showUtilizationDonut) {
-        return that.fetchLimitMetrics();
-      } else {
-        return $q.resolve;
-      }
-    }
 
-    utilsService.chainStateResolve('cp.metrics.dashboard.summary', $state, init);
   }
 
   angular.extend(MemoryCardController.prototype, {
@@ -59,17 +50,6 @@
 
     getNodeFilter: function () {
       return this.metricsModel.makeNodeNameFilter(this.metricsNodeName);
-    },
-
-    hasMetrics: function (metricName) {
-      return _.has(this.metricsData, metricName) && _.first(this.metricsData[metricName]).dataPoints.length > 0;
-    },
-
-    fetchLimitMetrics: function () {
-      var that = this;
-      this.metricsModel.getNodeMemoryLimit(this.metricsNodeName).then(function (memoryLimit) {
-        that.memoryLimit = parseFloat(memoryLimit, 10) / (1024 * 1024 * 1024);
-      });
     },
 
     getNodeName: function () {

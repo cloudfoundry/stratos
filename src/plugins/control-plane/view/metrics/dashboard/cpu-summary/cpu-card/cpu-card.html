@@ -4,22 +4,26 @@
 
     <div class="card-content">
       <div class="donut-div" ng-if="cpuCardCtrl.showUtilizationDonut">
-        <utilization-donut metric="cpu_node_utilization_gauge"
+        <utilization-donut value="cpuCardCtrl.nodeMetrics.cpuUtilization.latestDataPointPercentage"
+                           metric="cpu"
                            filter="{{ cpuCardCtrl.getNodeFilter() }}"
                            y-label="{{ 'CPU Utilization (%)' | translate }}"
                            node-name="{{ cpuCardCtrl.node }}"
-                           metric-limit="{{ cpuCardCtrl.cpuLimit }}"
+                           metric-limit="{{ cpuCardCtrl.nodeMetrics.cpuLimit }}"
                            metric-unit="MC"
                            int-unit="true"
                            no-legend="false"
         ></utilization-donut>
       </div>
 
-      <line-graph class="line-graph" metric="cpu_usage_rate_gauge"
-                  filter="{{ cpuCardCtrl.getNodeFilter() }}"
-                  y-label="{{ 'CPU Utilization (MC)' | translate }}"
-                  node-name="{{ cpuCardCtrl.getNodeName() }}"
-                  y-tick-formatter="cpuCardCtrl.yTickFormatter"
+      <line-graph
+        class="line-graph"
+        metric="cpu_usage_rate_gauge"
+        metrics-data="cpuCardCtrl.nodeMetrics.cpuUsageData"
+        filter="{{ cpuCardCtrl.getNodeFilter() }}"
+        y-label="{{ 'CPU Utilization (MC)' | translate }}"
+        node-name="{{ cpuCardCtrl.getNodeName() }}"
+        y-tick-formatter="cpuCardCtrl.yTickFormatter"
       ></line-graph>
     </div>
   </gallery-card>

@@ -10,11 +10,13 @@
   function lineGraph() {
     return {
       bindToController: {
+        series: '=',
         filter: '@',
         metric: '@',
         yLabel: '@',
         nodeName: '@',
-        yTickFormatter: '&'
+        yTickFormatter: '&',
+        metricsData: '='
       },
       controller: LineGraphController,
       controllerAs: 'lineGraphCtrl',
@@ -24,26 +26,35 @@
   }
 
   LineGraphController.$inject = [
-    '$interval',
     '$scope',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function LineGraphController($interval, $scope, modelManager, utilsService) {
+  function LineGraphController($scope, modelManager, utilsService) {
 
     var that = this;
 
     this.metricsModel = modelManager.retrieve('control-plane.model.metrics');
     this.utilsService = utilsService;
 
-    // var interval = $interval(function () {
-    //   that.updateUtilization();
-    // }, 120000);
-    //
-    // $scope.$on('$destroy', function () {
-    //   $interval.cancel(interval);
-    // });
+    $scope.$watchCollection(function () {
+      return [that.metricsData, that.chartApi];
+    }, function () {
+
+      if (!_.isUndefined(that.metricsData)) {
+        if (_.isNull(that.metricsData)) {
+          that.options.chart.noData = 'No data available';
+          that.data = [];
+          if (that.chartApi) {
+            that.chartApi.refresh();
+          }
+        } else {
+          that._updateChart();
+        }
+      }
+    });
+
     this.options = {
       chart: {
         type: 'lineChart',
@@ -85,33 +96,23 @@
             }
           }
         },
-        // yDomain: [0,100],
         showLegend: false,
         interpolate: 'basis'
       }
     };
-
-    this.updateUtilization();
+    this.options.chart.noData = 'Loading data ...';
 
     this.chartApi = null;
 
-    this.data = [{
-      color: '#60799d',
-      values: [],
-      key: 'CPU Utilization'
-    }, {
-      color: '#60799d',
-      values: [],
-      key: 'Average'
-    }];
+    this.data = [];
 
   }
 
   angular.extend(LineGraphController.prototype, {
 
-    updateUtilization: function () {
+    _updateChart: function () {
+
       var that = this;
-      this.options.chart.noData = 'Loading data ...';
 
       function calculateAverage(dataPoints) {
 
@@ -121,36 +122,25 @@
 
         that.options.chart.yDomain = [minValue * 0.75, maxValue + 1.25];
 
-        var movingAverage = _.map(dataPoints, function (dataPoint) {
+        return _.map(dataPoints, function (dataPoint) {
           return {
             x: dataPoint.x,
             y: average
           };
         });
-        return movingAverage;
       }
 
-      return this.metricsModel.getMetrics(this.metric, this.filter)
-        .then(function (metricsData) {
-          that.data = [
-            {
-              color: '#60799d',
-              values: metricsData.dataPoints,
-              key: 'CPU Utilization'
-            },
-            {
-              color: '#60799d',
-              values: calculateAverage(metricsData.dataPoints),
-              key: 'Average'
-            }];
-          that.chartApi.refresh();
-        }).catch(function () {
-          that.options.chart.noData = 'No data available';
-          that.data = [];
-          if (that.chartApi) {
-            that.chartApi.refresh();
-          }
-        });
+      this.data = [
+        {
+          color: '#60799d',
+          values: this.metricsData.dataPoints,
+          key: 'CPU Utilization'
+        },
+        {
+          color: '#60799d',
+          values: calculateAverage(this.metricsData.dataPoints),
+          key: 'Average'
+        }];
     }
 
   });

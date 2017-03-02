@@ -2,8 +2,7 @@
   'use strict';
 
   angular
-    .module('control-plane.view.metrics.dashboard.cpu-summary', [
-    ])
+    .module('control-plane.view.metrics.dashboard.cpu-summary', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -53,6 +52,9 @@
       }
     ];
 
+    that.all = {
+      metrics: {}
+    };
     this.defaultFilter = {
       label: gettext('Hostname'),
       value: 'spec.hostname'
@@ -60,7 +62,7 @@
 
     this.tableColumns = [
       {name: gettext('Node'), value: 'spec.hostname'},
-      {name: gettext('CPU Usage'), value: 'metrics.cpu_usage', descendingFirst: true},
+      {name: gettext('CPU Usage'), value: 'metrics.cpuUtilization.latestDataPoint', descendingFirst: true},
       {name: gettext('CPU Spark Line'), value: 'metrics.cpu_usage', noSort: true}
     ];
 
@@ -82,23 +84,30 @@
 
             var metricPromises = [];
             // cpu
-            metricPromises.push(that.metricsModel.getLatestMetricDataPoint('cpu_node_utilization_gauge',
-              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             metricPromises.push(that.metricsModel.getMetrics('cpu_node_utilization_gauge',
               that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
             metricPromises.push(that.metricsModel.getNodeCpuLimit(node.spec.metricsNodeName));
+            metricPromises.push(that.metricsModel.getMetrics('cpu_usage_rate_gauge',
+              that.metricsModel.makeNodeNameFilter(node.spec.metricsNodeName)));
 
             var promises = $q.all(metricPromises)
               .then(function (metrics) {
                 that.nodes[key].metrics = {};
-                that.nodes[key].metrics.cpu_usage = metrics[0].toFixed(2);
-                that.nodes[key].metrics.cpuUsageData = metrics[1].timeSeries;
-                that.nodes[key].metrics.cpuLimit = metrics[2];
+                that.nodes[key].metrics.cpuUtilization = metrics[0];
+                that.nodes[key].metrics.cpuLimit = metrics[1];
+                that.nodes[key].metrics.cpuUsageData = metrics[2];
               });
 
             allMetricPromises.push(promises);
-
           });
+
+          var allPromises = that.metricsModel.getMetrics('cpu_usage_rate_gauge',
+            that.metricsModel.makeNodeNameFilter('*'))
+            .then(function (metric) {
+              that.all.metrics.cpuUsageData = metric;
+            });
+          allMetricPromises.push(allPromises);
+
           return allMetricPromises;
         });
     }
@@ -109,7 +118,7 @@
 
   angular.extend(CpuSummaryController.prototype, {
     getCpuUsageValue: function (node) {
-      return Math.ceil(parseFloat(node.metrics.cpu_usage) * node.metrics.cpuLimit);
+      return Math.ceil(parseFloat(node.metrics.cpuUtilization.latestDataPoint) * node.metrics.cpuLimit);
     },
 
     fetchCpuLimit: function (node) {
