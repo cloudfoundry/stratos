@@ -25,6 +25,7 @@
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
+    this.notificationService = notificationService;
     this.$state = $state;
     this.$location = $location;
     this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {

@@ -321,7 +321,7 @@
                 eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
               });
             });
-         }
+        }
       });
     }
 

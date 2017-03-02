@@ -61,11 +61,11 @@
             }
           });
 
-          // if (connectedInstances === 1) {
-          // $state.go('cp.endpoint.detail.instances', {guid: serviceInstanceGuid});
-          // } else {
-          $state.go('cp.tiles', {instancesListed: true});
-          // }
+          if (connectedInstances === 1) {
+            $state.go('cp.metrics.dashboard.summary', {guid: serviceInstanceGuid});
+          } else {
+            $state.go('cp.tiles', {instancesListed: true});
+          }
         });
     }
 
