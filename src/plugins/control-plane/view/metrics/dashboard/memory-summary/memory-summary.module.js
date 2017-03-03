@@ -100,6 +100,7 @@
 
               })
               .catch(function () {
+                that.nodes[key].metrics = that.nodes[key].metrics || {};
                 that.nodes[key].metrics.memoryUtilization = null;
                 that.nodes[key].metrics.memoryLimit = null;
                 that.nodes[key].metrics.memoryUsage = null;

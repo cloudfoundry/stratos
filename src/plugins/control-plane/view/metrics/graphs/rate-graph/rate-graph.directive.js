@@ -39,7 +39,6 @@
     $scope.$watch(function () {
       return that.points;
     }, function () {
-
       if (_.isUndefined(that.points)) {
         that.options.chart.noData = 'Loading data ...';
         return;
@@ -47,6 +46,9 @@
       if (_.isNull(that.points)) {
         that.options.chart.noData = 'No data available';
         that.data = [];
+        if (that.chartApi) {
+          that.chartApi.refresh();
+        }
       } else {
         that.data = [
           {

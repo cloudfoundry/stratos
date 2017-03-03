@@ -96,6 +96,11 @@
                 that.nodes[key].metrics.cpuUtilization = metrics[0];
                 that.nodes[key].metrics.cpuLimit = metrics[1];
                 that.nodes[key].metrics.cpuUsageData = metrics[2];
+              }).catch(function () {
+                that.nodes[key].metrics = {};
+                that.nodes[key].metrics.cpuUtilization = null;
+                that.nodes[key].metrics.cpuLimit = null;
+                that.nodes[key].metrics.cpuUsageData = null;
               });
 
             allMetricPromises.push(promises);
@@ -105,6 +110,8 @@
             that.metricsModel.makeNodeNameFilter('*'))
             .then(function (metric) {
               that.all.metrics.cpuUsageData = metric;
+            }).catch(function () {
+              that.all.metrics.cpuUsageData = null;
             });
           allMetricPromises.push(allPromises);
 

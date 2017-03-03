@@ -6,19 +6,19 @@
         <dl class="dl-horizontal">
           <dt translate>Total Network Rx</dt>
           <dd>
-            {{ networkRateCardCtrl.metricsData.rxCumulative }}
+            {{ networkRateCardCtrl.metricsData.rxCumulative || 'N/A'}}
           </dd>
           <dt translate>Total Network Tx</dt>
           <dd>
-            {{ networkRateCardCtrl.metricsData.txCumulative }}
+            {{ networkRateCardCtrl.metricsData.txCumulative || 'N/A'}}
           </dd>
           <dt translate>Network Rx Rate</dt>
           <dd>
-            {{ networkRateCardCtrl.metricsData.rxRate.latestDataPoint }}
+            {{ networkRateCardCtrl.metricsData.rxRate.latestDataPoint || 'N/A'}}
           </dd>
           <dt translate>Network Tx Rate</dt>
           <dd>
-            {{ networkRateCardCtrl.metricsData.txRate.latestDataPoint }}
+            {{ networkRateCardCtrl.metricsData.txRate.latestDataPoint || 'N/A'}}
           </dd>
         </dl>
       </div>

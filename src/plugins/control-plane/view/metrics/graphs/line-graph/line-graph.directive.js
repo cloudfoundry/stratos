@@ -41,7 +41,6 @@
     $scope.$watchCollection(function () {
       return [that.metricsData, that.chartApi];
     }, function () {
-
       if (!_.isUndefined(that.metricsData)) {
         if (_.isNull(that.metricsData)) {
           that.options.chart.noData = 'No data available';
@@ -59,7 +58,6 @@
       chart: {
         type: 'lineChart',
         height: 200,
-        noData: 'This is not the chart you are looking for',
         margin: {
           top: 20,
           right: 60,

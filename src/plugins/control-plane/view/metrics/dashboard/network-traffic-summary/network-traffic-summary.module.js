@@ -120,6 +120,21 @@
               that.nodes[key].metrics.txRate = metrics[3];
               that.nodes[key].metrics.txRate.latestDataPointValue = metrics[3].latestDataPoint;
               that.nodes[key].metrics.txRate.latestDataPoint = utilsService.bytesToHumanSize(metrics[3].latestDataPoint) + '/s';
+            }).catch(function () {
+              that.nodes[key].metrics = {};
+              that.nodes[key].metrics.rxCumulative = null;
+              that.nodes[key].metrics.rxCumulativeValue = null;
+              that.nodes[key].metrics.txCumulative = null;
+              that.nodes[key].metrics.txCumulativeValue = null;
+
+              that.nodes[key].metrics.rxRate = {};
+              that.nodes[key].metrics.rxRate.dataPoints = null;
+              that.nodes[key].metrics.rxRate.latestDataPointValue = null;
+              that.nodes[key].metrics.rxRate.latestDataPoint = null;
+              that.nodes[key].metrics.txRate = {};
+              that.nodes[key].metrics.txRate.latestDataPointValue = null;
+              that.nodes[key].metrics.txRate.latestDataPoint = null;
+              that.nodes[key].metrics.txRate.dataPoints = null;
             });
 
           allMetricPromises.push(promises);
@@ -154,6 +169,18 @@
             that.all.metrics.rxRate.latestDataPoint = utilsService.bytesToHumanSize(metrics[2].latestDataPoint) + '/s';
             that.all.metrics.txRate = metrics[3];
             that.all.metrics.txRate.latestDataPoint = utilsService.bytesToHumanSize(metrics[3].latestDataPoint) + '/s';
+          }).catch(function () {
+            that.all.metrics.rxCumulative = null;
+            that.all.metrics.rxCumulativeValue = null;
+            that.all.metrics.txCumulative = null;
+            that.all.metrics.txCumulativeValue = null;
+
+            that.all.metrics.rxRate = {};
+            that.all.metrics.rxRate.dataPoints = null;
+            that.all.metrics.rxRate.latestDataPoint = null;
+            that.all.metrics.txRate = {};
+            that.all.metrics.txRate.dataPoints = null;
+            that.all.metrics.txRate.latestDataPoint = null;
           });
 
         allMetricPromises.push(promisesForAll);
