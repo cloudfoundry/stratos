@@ -42,7 +42,9 @@
   var partials = config.partials;
 
   // Default OEM Config
-  var defaultBrandFolder = '../oem/brands/hpe/';
+  var DEFAULT_BRAND = 'suse';
+
+  var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
   var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
@@ -202,7 +204,7 @@
   });
 
   // Compile SCSS to CSS
-  gulp.task('css', ['inject:scss'], function () {
+  gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
       .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
@@ -264,6 +266,15 @@
       .src(paths.src + 'framework.tmpl.scss')
       .pipe(wiredep(config.bowerDev))
       .pipe(rename('framework.scss'))
+      .pipe(gulp.dest(paths.src));
+  });
+
+  gulp.task('scss:set-brand', function () {
+    return gulp
+      .src(paths.src + 'index.tmpl.scss')
+      .pipe(gulpreplace('@@BRAND@@', DEFAULT_BRAND))
+      .pipe(wiredep(config.bowerDev))
+      .pipe(rename('index.scss'))
       .pipe(gulp.dest(paths.src));
   });
 
