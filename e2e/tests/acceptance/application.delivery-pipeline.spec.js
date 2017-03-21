@@ -432,5 +432,5 @@
 
       });
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCFHCE);
 })();
