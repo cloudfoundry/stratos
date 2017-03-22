@@ -8,7 +8,8 @@
   ManageUsersFactory.$inject = [
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
-    'app.view.endpoints.clusters.cluster.rolesService'
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'organization-model'
   ];
 
   /**
@@ -18,10 +19,10 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} rolesService - our roles service, used to create/handle data from roles tables
+   * @param {object} organizationModel - the organization-model service
    */
-  function ManageUsersFactory(modelManager, asyncTaskDialog, rolesService) {
+  function ManageUsersFactory(modelManager, asyncTaskDialog, rolesService, organizationModel) {
 
-    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var selectedRoles = {};

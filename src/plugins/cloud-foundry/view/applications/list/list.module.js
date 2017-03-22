@@ -31,7 +31,8 @@
     'app.event.eventService',
     'app.error.errorService',
     'app.utils.utilsService',
-    'helion.framework.widgets.detailView'
+    'helion.framework.widgets.detailView',
+    'organization-model'
   ];
 
   /**
@@ -48,6 +49,7 @@
    * @param {app.error.errorService} errorService - the error service
    * @param {object} utils - the utils service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {object} organizationModel - the organization-model service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} $state - the UI router $state service
    * @property {object} $timeout - the angular $timeout service
@@ -56,7 +58,7 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils, detailView) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils, detailView, organizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
@@ -79,6 +81,7 @@
       spaceGuid: 'all'
     };
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.organizationModel = organizationModel;
 
     this.paginationProperties = {
       callback: function (page) {
@@ -245,8 +248,7 @@
       var that = this;
       this.organizations.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all') {
-        var orgModel = this.modelManager.retrieve('cloud-foundry.model.organization');
-        return orgModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
+        return this.organizationModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
           .then(function (newOrgs) {
             var orgs = _.map(newOrgs, that._selectMapping);
             [].push.apply(that.organizations, orgs);
@@ -280,8 +282,7 @@
       this.spaces.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all' &&
         this.model.filterParams.orgGuid !== 'all') {
-        var orgModel = this.modelManager.retrieve('cloud-foundry.model.organization');
-        return orgModel.listAllSpacesForOrganization(
+        return this.organizationModel.listAllSpacesForOrganization(
           this.model.filterParams.cnsiGuid,
           this.model.filterParams.orgGuid
         )

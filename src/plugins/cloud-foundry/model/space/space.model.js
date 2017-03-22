@@ -14,11 +14,12 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'cloud-foundry.model.service.serviceUtils',
-    'cloud-foundry.model.modelUtils'
+    'cloud-foundry.model.modelUtils',
+    'organization-model'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils));
+  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils, organizationModel) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel));
   }
 
   /**
@@ -29,12 +30,13 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @param {object} serviceUtils - the service utils service
+   * @param {object} modelUtils - a service containing general hcf model helpers
+   * @param {object} organizationModel - the organization-model service
+   * @property {object} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, serviceUtils, modelUtils) {
+  function Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.modelManager = modelManager;
@@ -42,7 +44,7 @@
     this.modelUtils = modelUtils;
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.data = {};
-
+    this.organizationModel = organizationModel;
   }
 
   angular.extend(Space.prototype, {
@@ -728,7 +730,7 @@
     },
 
     _getOrganizationModel: function () {
-      return this.modelManager.retrieve('cloud-foundry.model.organization');
+      return this.organizationModel;
     }
 
   });
