@@ -21,6 +21,7 @@
   ApplicationLogStreamController.$inject = [
     'base64',
     'app.model.modelManager',
+    'app.utils.utilsService',
     '$stateParams',
     '$location',
     '$log'
@@ -31,18 +32,24 @@
    * @constructor
    * @param {object} base64 - base64 service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.utilsService} utils - our utils service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $location - the Angular $location service
    * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationLogStreamController(base64, modelManager, $stateParams, $location, $log) {
+  function ApplicationLogStreamController(base64, modelManager, utils, $stateParams, $location, $log) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+
+    var coloredLog = utils.coloredLog;
 
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
     this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
       $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
+
+    // Comment this out to test log stream in gulp dev
+    // this.websocketUrl = protocol + '://' + $location.host() + ':3003/v1/' + $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
 
     this.autoScrollOn = true; // auto-scroll by default
 
@@ -57,46 +64,31 @@
     this.jsonFilter = function (jsonString) {
       try {
         var messageObj = angular.fromJson(jsonString);
-        var messageString = base64.decode(messageObj.message) + '\n';
-
-        var colour;
-        switch (messageObj.source_type) {
-          case 'APP':
-            colour = 'red';
-            break;
-          default:
-            colour = 'yellow';
-        }
-        var messageSource = coloredLog('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', colour);
+        var msgColour, sourceColour, bold;
 
         // CF timestamps are in nanoseconds
         var msStamp = Math.round(messageObj.timestamp / 1000000);
-        var timeStamp = coloredLog(moment(msStamp).format('YYYY-MM-DD HH:mm:ss'), 'blue');
+        var timeStamp = moment(msStamp).format('HH:mm:ss.SSS');
 
-        return messageSource + ' ' + timeStamp + ': ' + messageString;
+        if (/APP/.test(messageObj.source_type)) {
+          sourceColour = 'green';
+        } else {
+          sourceColour = 'yellow';
+        }
+        var messageSource = coloredLog('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', sourceColour, true);
+
+        if (messageObj.message_type === 2) {
+          msgColour = 'red';
+          bold = true;
+        }
+        var messageString = coloredLog(base64.decode(messageObj.message), msgColour, bold) + '\n';
+
+        return timeStamp + ': ' + messageSource + ' ' + messageString;
       } catch (error) {
         $log.error('Failed to filter jsonMessage from WebSocket: ', jsonString);
         return jsonString;
       }
     };
-
-    var colorCodes = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'];
-    function coloredLog(message, color, background) {
-      var colorCode = color ? colorCodes.indexOf(color) : false;
-      var backgroundCode = background ? colorCodes.indexOf(background) : false;
-      var ret = '';
-      if (color) {
-        ret += '\x1B[3' + colorCode + 'm';
-      }
-      if (background) {
-        ret += '\x1B[4' + backgroundCode + 'm';
-      }
-      ret += message;
-      if (color || background) {
-        ret += '\x1B[0m';
-      }
-      return ret;
-    }
 
   }
 

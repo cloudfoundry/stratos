@@ -28,6 +28,7 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.registerService',
+    'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.cnsiService',
     'app.view.endpoints.dashboard.vcsService'
   ];
@@ -42,19 +43,21 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.view.registerService} registerService register service to display the core slide out
+   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints
    * @param {app.view.endpoints.dashboard.vcsService} vcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
   function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
-                                        cnsiService, vcsService) {
+                                        dashboardService, cnsiService, vcsService) {
     var that = this;
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
     var endpointsProviders = [cnsiService, vcsService];
 
-    this.endpoints = [];
+    this.endpoints = dashboardService.endpoints;
+    dashboardService.clear();
 
     /*
      * Call method on all service providers, forwarding the passed arguments
@@ -174,18 +177,12 @@
     }
 
     function _updateEndpointsFromCache() {
-      callForAllProviders('createEndpointEntries', that.endpoints);
+      callForAllProviders('createEndpointEntries');
       _updateWelcomeMessage();
 
-      // Pre-sort the array by reverse type to avoid initial smart-table flicker
+      // Pre-sort the array to avoid initial smart-table flicker
       that.endpoints.sort(function (e1, e2) {
-        if (e1.type < e2.type) {
-          return 1;
-        }
-        if (e1.type > e2.type) {
-          return -1;
-        }
-        return 0;
+        return e1.type !== e2.type ? e1.type.localeCompare(e2.type) : e1.name.localeCompare(e2.name);
       });
 
       that.initialised = true;
@@ -207,7 +204,10 @@
           that.listError = true;
         })
         .then(function () {
-          return _updateEndpointsFromCache(that.endpoints);
+          return dashboardService.refreshCodeEngineVcses();
+        })
+        .then(function () {
+          _updateEndpointsFromCache();
         })
         .finally(function () {
           that.intialised = true;

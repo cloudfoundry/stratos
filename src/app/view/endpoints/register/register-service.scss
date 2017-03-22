@@ -4,7 +4,7 @@
 
     .register-content-left {
       padding-bottom: $hpe-unit-space;
-      padding-right: $hpe-unit-space;
+      padding-right: 1.5 * $hpe-unit-space;
 
       p:last-of-type {
         margin-bottom: 0;
@@ -48,9 +48,12 @@
               }
             }
           }
-
-          .media-body {
-            width: 0;
+          &.register-type-hsm {
+            svg {
+              width: 72px;
+              .st0 {fill:#000}
+              .st1 {stroke: #000}
+            }
           }
 
           .media-right {

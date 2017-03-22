@@ -1,7 +1,13 @@
 <div ng-if="!clusterUsersController.stateInitialised" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
-<div ng-if="clusterUsersController.stateInitialised"
+<div ng-if="clusterUsersController.stateInitialised && clusterUsersController.users.length === 0"
+     class="panel panel-default cluster-empty-list">
+  <div class="panel-body" translate>
+    There are no visible users
+  </div>
+</div>
+<div ng-if="clusterUsersController.stateInitialised && clusterUsersController.users.length > 0"
      class="cluster-users-table"
      st-table="clusterUsersController.visibleUsers"
      st-safe-src="clusterUsersController.users">
@@ -31,7 +37,7 @@
           <th ng-if="clusterUsersController.haveShownAnAction">
             <checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input>
           </th>
-          <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
+          <th class="sortable" translate st-sort-default="true" st-skip-natural="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
           <th translate>Organization Roles</th>
           <th translate ng-if="clusterUsersController.haveShownAnAction">ACTION</th>
         </tr>

@@ -88,7 +88,6 @@
         createBasicController(content);
 
         expect(assignUsersController.options).toBeDefined();
-        expect(assignUsersController.assigning).toBeDefined();
         expect(assignUsersController.actions).toBeDefined();
         expect(assignUsersController.data).toBeDefined();
         expect(assignUsersController.userInput).toBeDefined();
@@ -302,6 +301,44 @@
           });
         });
 
+        describe('on wizard final step next', function () {
+
+          it('roles service success', function () {
+            var selectedOrgGuid = org2.details.org.metadata.guid;
+            var roles = { a: 1};
+
+            spyOn(rolesService, 'assignUsers').and.callFake(function (inClusterguid, inUsersByGuid, inSelectedOrgRoles) {
+              // Also test we get the correct input as calculated via onNext
+              expect(inClusterguid).toEqual(clusterGuid);
+              expect(inUsersByGuid).toEqual(_.keyBy(users, 'metadata.guid'));
+              expect(inSelectedOrgRoles).toEqual(_.set({}, selectedOrgGuid, roles));
+              return $q.resolve();
+            });
+
+            _.set(assignUsersController, 'userInput.org.details.org.metadata.guid', selectedOrgGuid);
+            _.set(assignUsersController, 'userInput.roles.' + selectedOrgGuid, roles);
+            _.set(assignUsersController, 'userInput.selectedUsers', users);
+
+            assignUsersController.options.workflow.steps[1].onNext().catch(function () {
+              fail('onNext should have returned resolve promise');
+            });
+
+            $scope.$digest();
+          });
+
+          it('roles service failure', function () {
+            spyOn(rolesService, 'assignUsers').and.callFake(function () {
+              return $q.reject();
+            });
+
+            assignUsersController.options.workflow.steps[1].onNext().then(function () {
+              fail('onNext should have returned rejected promise');
+            });
+
+            $scope.$digest();
+          });
+        });
+
         describe('actions', function () {
 
           beforeEach(function () {
@@ -314,61 +351,14 @@
             expect(assignUsersController.$uibModalInstance.dismiss).toHaveBeenCalled();
           });
 
-          describe('finish', function () {
+          it('finish', function () {
+            spyOn(assignUsersController.$uibModalInstance, 'close');
 
-            it('assigning - do not execute', function () {
-              spyOn(rolesService, 'assignUsers');
-              assignUsersController.assigning = true;
-              assignUsersController.actions.finish();
-              expect(rolesService.assignUsers).not.toHaveBeenCalled();
-            });
+            assignUsersController.actions.finish();
 
-            it('assigning - success', function () {
-              var selectedOrgGuid = org2.details.org.metadata.guid;
-              var roles = { a: 1};
+            $scope.$digest();
 
-              spyOn(rolesService, 'assignUsers').and.callFake(function (inClusterguid, inUsersByGuid, inSelectedOrgRoles) {
-                expect(inClusterguid).toEqual(clusterGuid);
-                expect(inUsersByGuid).toEqual(_.keyBy(users, 'metadata.guid'));
-                expect(inSelectedOrgRoles).toEqual(_.set({}, selectedOrgGuid, roles));
-                return $q.resolve();
-              });
-              spyOn(assignUsersController.$uibModalInstance, 'close');
-
-              _.set(assignUsersController, 'userInput.org.details.org.metadata.guid', selectedOrgGuid);
-              _.set(assignUsersController, 'userInput.roles.' + selectedOrgGuid, roles);
-              _.set(assignUsersController, 'userInput.selectedUsers', users);
-
-              assignUsersController.actions.finish();
-              expect(assignUsersController.assigning).toBeTruthy();
-
-              $scope.$digest();
-
-              expect(assignUsersController.assigning).toBeFalsy();
-              expect(assignUsersController.$uibModalInstance.close).toHaveBeenCalled();
-            });
-
-            it('assigning - success', function () {
-              var selectedOrgGuid = org2.details.org.metadata.guid;
-              var roles = { a: 1};
-
-              spyOn(rolesService, 'assignUsers').and.callFake(function () {
-                return $q.reject();
-              });
-              spyOn(assignUsersController.$uibModalInstance, 'close');
-
-              _.set(assignUsersController, 'userInput.org.details.org.metadata.guid', selectedOrgGuid);
-              _.set(assignUsersController, 'userInput.roles.' + selectedOrgGuid, roles);
-              _.set(assignUsersController, 'userInput.selectedUsers', users);
-
-              assignUsersController.actions.finish();
-              expect(assignUsersController.assigning).toBeTruthy();
-
-              $scope.$digest();
-
-              expect(assignUsersController.assigning).toBeFalsy();
-              expect(assignUsersController.$uibModalInstance.close).not.toHaveBeenCalled();
-            });
+            expect(assignUsersController.$uibModalInstance.close).toHaveBeenCalled();
           });
         });
       });

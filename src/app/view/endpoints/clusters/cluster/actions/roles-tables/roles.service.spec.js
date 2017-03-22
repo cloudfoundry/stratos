@@ -25,6 +25,9 @@
     var user = {
       metadata: {
         guid: userGuid
+      },
+      entity: {
+        username: 'auser'
       }
     };
 

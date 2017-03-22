@@ -18,7 +18,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Helion Cloud Foundry'
+      type: 'Cloud Foundry'
     };
 
     beforeEach(module('templates'));
@@ -43,7 +43,7 @@
             TERMS_OF_USE: 'Terms of Use',
             PRIVACY: 'Privacy',
             CODE_ENGINE: 'Helion Code Engine',
-            CLOUD_FOUNDRY: 'Helion Cloud Foundry'
+            CLOUD_FOUNDRY: 'Cloud Foundry'
           };
         }
       }
@@ -73,6 +73,7 @@
       modelManager = $injector.get('app.model.modelManager');
       var registerService = $injector.get('app.view.registerService');
       var utils = $injector.get('app.utils.utilsService');
+      var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
       var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
       var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
 
@@ -87,7 +88,7 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService, vcsService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, dashboardService, serviceInstanceService, vcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

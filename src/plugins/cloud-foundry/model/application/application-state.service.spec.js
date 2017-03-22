@@ -70,8 +70,9 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
-        expect(_.keys(res.actions).length).toBe(1);
+        expect(_.keys(res.actions).length).toBe(2);
         expect(res.actions.delete).toBe(true);
+        expect(res.actions.cli).toBe(true);
       });
 
       it('User stopped app', function () {
@@ -89,8 +90,9 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
-        expect(_.keys(res.actions).length).toBe(1);
+        expect(_.keys(res.actions).length).toBe(2);
         expect(res.actions.delete).toBe(true);
+        expect(res.actions.cli).toBe(true);
       });
 
       it('During push', function () {

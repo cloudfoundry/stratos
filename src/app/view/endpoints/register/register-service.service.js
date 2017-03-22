@@ -28,9 +28,13 @@
    */
   function ServiceRegistrationFactory($q, $interpolate, modelManager, utilsService, notificationsService, detailView) {
 
-    function createInstances(serviceInstances, filter) {
+    function createInstanceUrls(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
       return _.map(filteredInstances, utilsService.getClusterEndpoint);
+    }
+
+    function createInstanceNames(serviceInstances) {
+      return _.map(serviceInstances, 'name');
     }
 
     return {
@@ -47,7 +51,7 @@
               lastStepCommit: true,
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
-              title: gettext('Register an endpoint'),
+              title: gettext('Register an Endpoint'),
               allowBack: function () {
                 return allowBack;
               },
@@ -75,6 +79,14 @@
                         step.nameOfUrlInput = 'hceUrl';
                         step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
                         break;
+                      case 'hsm':
+                        scope.endpoint = utilsService.getOemConfiguration().SERVICE_MANAGER;
+                        step.product = utilsService.getOemConfiguration().SERVICE_MANAGER;
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
+                        step.nameOfNameInput = 'hsmName';
+                        step.nameOfUrlInput = 'hsmUrl';
+                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
+                        break;
                       default:
                         step.product = gettext('Endpoint');
                         step.title = gettext('Register Endpoint');
@@ -83,7 +95,8 @@
                         break;
                     }
                     step.urlValidationExpr = utilsService.urlValidationExpression;
-                    step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                    step.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                    step.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
                   },
                   onEnter: function () {
                     allowBack = false;
@@ -105,8 +118,7 @@
                       return serviceInstance;
                     }).catch(function (response) {
                       if (response.status === 403) {
-                        return $q.reject(gettext('Endpoint uses a certificate signed by an unknown authority.' +
-                          ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                        return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
                       }
                       return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
                         'is correct and try again. If this error persists, please contact the administrator.'));

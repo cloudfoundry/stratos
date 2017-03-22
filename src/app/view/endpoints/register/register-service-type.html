@@ -43,6 +43,23 @@
           </div>
         </div>
       </li>
+      <li class="media register-type-hsm">
+        <div class="media-left media-middle">
+          <div class="media-object">
+            <svg-image src="/svg/Service_manager.svg"></svg-image>
+          </div>
+        </div>
+        <div class="media-body">
+          <h4 class="media-heading" translate>{{ OEM_CONFIG.SERVICE_MANAGER }}</h4>
+          <p translate>{{ OEM_CONFIG.SERVICE_MANAGER }} allows you to view the services deployed in the Control Plane</p>
+          <div class="media-right pull-right">
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hsm';wizardCtrl.next()" translate>
+              Register
+              <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+            </button>
+          </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>

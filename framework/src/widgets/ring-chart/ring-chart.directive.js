@@ -71,24 +71,15 @@
     $scope.$watchCollection('data', function (newData) {
       that.data = newData;
       if (that.data) {
-        that.updateData();
+        that._updateData();
       }
     });
   }
 
   angular.extend(RingChartController.prototype, {
 
-    updateData: function () {
+    _updateData: function () {
       var that = this;
-      if (_.isUndefined(this.data)) {
-        this.data = {
-          ok: 0,
-          warning: 0,
-          critical: 0,
-          unknown: 0
-        };
-      }
-
       var total = _.reduce(this.data, function (total, item) {
         return total + item;
       }, 0);
@@ -103,7 +94,7 @@
     },
 
     hasMetric: function (metric) {
-      return !_.isUndefined(this.data[metric]);
+      return this.data && !_.isUndefined(this.data[metric]);
     },
 
     getPath: function (metric) {

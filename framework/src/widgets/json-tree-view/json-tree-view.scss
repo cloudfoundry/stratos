@@ -1,0 +1,33 @@
+json-tree-view {
+  font-size: 11pt;
+  font-family: "Source Code Pro", monospace;
+}
+
+.json-view-item, .json-view-array, .json-view-object {
+  display: inline;
+
+  json-tree-view {
+    display: block;
+    margin-left: 12px;
+  }
+}
+
+.json-view-key {
+  color: #007B47;
+}
+
+.json-view-string {
+  color: red;
+}
+
+.json-view-number {
+  color: #0000DD;
+}
+
+.json-view-bool {
+  color: #0000DD;
+}
+
+.json-view-array-wtih-values {
+  display: inline;
+}

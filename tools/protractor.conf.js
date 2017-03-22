@@ -7,8 +7,14 @@
     '../e2e/tests/acceptance/login-page.spec.js',
     '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
     '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
+    '../e2e/tests/acceptance/endpoints-pat.spec.js',
     '../e2e/tests/acceptance/applications.add-app.spec.js',
-    '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js'
+    '../e2e/tests/acceptance/application.delivery-pipeline.spec.js',
+    '../e2e/tests/acceptance/application.spec.js',
+    '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
+    '../e2e/tests/acceptance/application-wall.spec.js',
+    '../e2e/tests/acceptance/navbar.spec.js',
+    '../e2e/tests/acceptance/log-stream.spec.js'
   ];
 
   exports.config = {
@@ -102,6 +108,23 @@
             }
           }
         }
+      },
+      github: {
+        valid: {
+          tokenName: 'e2e-test',
+          newTokenName: 'e2e-test-renamed',
+          token: 'a50928e2a0f83fc3786661217c878a2d791e56a6'
+        },
+        repository: 'node-env',
+        invalid: {
+          tokenName: 'invalid-e2e-test',
+          token: '0d3d0e1c098676c1f366f18a2836ebcddb3cde69 '
+        }
+
+      },
+      pipelineDetails: {
+        branchNames: ['e2e-1', 'e2e-2', 'e2e-3', 'e2e-4', 'e2e-5'],
+        buildContainer: 'NodeJS build container'
       }
     },
 

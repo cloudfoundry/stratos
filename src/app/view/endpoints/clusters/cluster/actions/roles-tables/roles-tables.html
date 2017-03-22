@@ -12,7 +12,7 @@
       <table class="table table-outlined table-selectable">
         <thead>
         <tr>
-          <th st-sort="details.org.entity.name" st-sort-default="true" translate>ORGANIZATION</th>
+          <th st-sort="details.org.entity.name" st-sort-default="true" st-skip-natural="true" translate>ORGANIZATION</th>
           <th ng-repeat="(key, role) in rolesTablesCtrl.config.orgRoles">{{role}}</th>
           <th></th>
         </tr>
@@ -43,7 +43,7 @@
       <table class="table table-outlined table-selectable">
         <thead>
         <tr>
-          <th st-sort="label" st-sort-default="true" translate>SPACE</th>
+          <th st-sort="label" st-sort-default="true" st-skip-natural="true" translate>SPACE</th>
           <th
             ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles"
             ng-if="role || !rolesTablesCtrl.config.disableOrg">{{role}}</th>

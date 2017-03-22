@@ -229,7 +229,8 @@
 
                     return that.$q.reject(message);
                   });
-              }
+              },
+              OEM_CONFIG: that.utils.getOemConfiguration()
             },
             {
               ready: true,
@@ -266,7 +267,8 @@
               templateUrl: path + 'deploy.html',
               formName: 'application-pipeline-deploy-form',
               nextBtnText: gettext('Finished code change'),
-              isLastStep: true
+              isLastStep: true,
+              OEM_CONFIG: that.utils.getOemConfiguration()
             }
           ]
         };

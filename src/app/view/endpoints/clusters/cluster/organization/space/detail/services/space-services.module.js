@@ -63,13 +63,11 @@
       if (angular.isUndefined(that.spaceDetail().instances)) {
         return that.update();
       }
-
       that.updateLocalServiceInstances();
-
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
   }
 
   angular.extend(SpaceServicesController.prototype, {

@@ -6,11 +6,14 @@
       ng-click="applicationSummaryCtrl.newlyCreated = false">
     </button>
   </div>
-  <div class="new-app-nextsteps" ng-if="appCtrl.ready && (applicationSummaryCtrl.canSetupPipeline || !applicationSummaryCtrl.hideManageServices)">
+  <div class="new-app-nextsteps" ng-if="appCtrl.ready">
     <span translate>You may want to:</span>
     <ul>
       <li ng-if="applicationSummaryCtrl.canSetupPipeline" >
         <a id="new-app-setup-pipeline" translate ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id, showSetup: true})">Setup a Delivery Pipeline for your application</a>
+      </li>
+      <li>
+        <a id="new-app-deploy-cli" translate ng-click="appCtrl.showCliInstructions()">Deploy your application using the CLI</a>
       </li>
       <li ng-if="!applicationSummaryCtrl.hideManageServices">
         <a id="new-app-add-services" translate ui-sref="cf.applications.application.services({guid: appCtrl.id})">Add services to your application</a>
@@ -190,7 +193,7 @@
   </div>
 </div>
 
-<div>
+<div class="summary-routes">
   <div class="action-header">
     <span translate>Routes</span>
     <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()" ng-hide="!appCtrl.ready || applicationSummaryCtrl.hideAddRoutes">
@@ -228,7 +231,7 @@
   </div>
 </div>
 
-<div>
+<div class="summary-service-instances">
   <div class="action-header">
     <span translate>Service Instances</span>
     <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})"
