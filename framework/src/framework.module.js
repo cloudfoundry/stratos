@@ -10,5 +10,5 @@
       'angular-websocket',
       'ngAnimate',
       'toastr'
-    ])
+    ]);
 })();
