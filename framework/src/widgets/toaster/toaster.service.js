@@ -8,7 +8,6 @@
   // See: https://github.com/Foxandxss/angular-toastr for the underlying library that is used
 
   toasterServiceFactory.$inject = [
-    'helion.framework.basePath',
     '$q',
     '$timeout',
     'toastrConfig',
@@ -20,7 +19,6 @@
    * @memberof helion.framework.widgets
    * @name toaster
    * @description A service for sjhow toast-style notifications
-   * @param {string} path - the framework base path
    * @param {object} $q - the Angular promise service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} toasterConfig - the toasterConfig object for the toastr library
@@ -30,7 +28,7 @@
    *  toaster.error('Example error toast notification');
    * @returns {object} The toaster notification service
    */
-  function toasterServiceFactory(path, $q, $timeout, toasterConfig, toastr) {
+  function toasterServiceFactory($q, $timeout, toasterConfig, toastr) {
     // Set our defaults for the toastr library
     angular.extend(toasterConfig, {
       autoDismiss: false,
@@ -44,8 +42,8 @@
         warning: 'toast-warning'
       },
       templates: {
-        toast: path + 'widgets/toaster/toast.html',
-        progressbar: path + 'widgets/toaster/progressbar.html'
+        toast: 'widgets/toaster/toast.html',
+        progressbar: 'widgets/toaster/progressbar.html'
       },
       messageClass: 'toast-message',
       progressBar: false,

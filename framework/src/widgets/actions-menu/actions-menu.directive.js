@@ -6,7 +6,6 @@
     .directive('actionsMenu', actionsMenu);
 
   actionsMenu.$inject = [
-    'helion.framework.basePath',
     '$document'
   ];
 
@@ -20,7 +19,6 @@
    * that will be called on click. If an action target is
    * provided, the action's execute function will be called with
    * the target as an argument.
-   * @param {string} path - the framework base path
    * @param {object} $document - jQuery wrapper for window.document
    * @example
    * var actions = [
@@ -31,7 +29,7 @@
    * </actions-menu>
    * @returns {object} The actions-menu directive definition object
    */
-  function actionsMenu(path, $document) {
+  function actionsMenu($document) {
     return {
       bindToController: {
         actionTarget: '=?',
@@ -74,7 +72,7 @@
       },
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/actions-menu/actions-menu.html'
+      templateUrl: 'widgets/actions-menu/actions-menu.html'
     };
 
     function handleClick(event, scope, ctrl) {

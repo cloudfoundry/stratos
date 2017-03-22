@@ -5,19 +5,14 @@
     .module('helion.framework.widgets')
     .directive('radioInput', radioInput);
 
-  radioInput.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * @namespace helion.framework.widgets.radioInput
    * @memberof helion.framework.widgets
    * @name radioInput
    * @description A radio input directive with custom style
-   * @param {string} path - the framework base path
    * @returns {object} The radio-input directive definition object
    */
-  function radioInput(path) {
+  function radioInput() {
     return {
       bindToController: {
         inputDisabled: '=?',
@@ -30,7 +25,7 @@
       require: ['radioInput', 'ngModel'],
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/radio-input/radio-input.html'
+      templateUrl: 'widgets/radio-input/radio-input.html'
     };
 
     function link(scope, element, attrs, ctrls) {

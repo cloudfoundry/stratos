@@ -5,19 +5,14 @@
     .module('helion.framework.widgets')
     .directive('checkboxInput', checkboxInput);
 
-  checkboxInput.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * @namespace helion.framework.widgets.checkboxInput
    * @memberof helion.framework.widgets
    * @name checkboxInput
    * @description A checkbox input directive with custom style
-   * @param {string} path - the framework base path
    * @returns {object} The checkbox-input directive definition object
    */
-  function checkboxInput(path) {
+  function checkboxInput() {
     return {
       bindToController: {
         inputDisabled: '=?',
@@ -30,7 +25,7 @@
       require: ['checkboxInput', 'ngModel'],
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/checkbox-input/checkbox-input.html'
+      templateUrl: 'widgets/checkbox-input/checkbox-input.html'
     };
 
     function link(scope, element, attrs, ctrls) {

@@ -5,8 +5,6 @@
     .module('helion.framework.widgets')
     .directive('galleryCard', galleryCard);
 
-  galleryCard.$inject = ['helion.framework.basePath'];
-
   /**
    * @namespace helion.framework.widgets.galleryCard
    * @memberof helion.framework.widgets
@@ -15,14 +13,13 @@
    * an actions dropdown, main content, and a status notification bar.
    * The main content is transcluded. The card data should include
    * a `title` value.
-   * @param {string} path - the framework base path
    * @example
    * <gallery-card card-data="myController.cardData"
    *  card-actions-icon="helion-icon helion-icon-View">
    * </gallery-card>
    * @returns {object} The gallery-card directive definition object
    */
-  function galleryCard(path) {
+  function galleryCard() {
     return {
       bindToController: {
         cardActions: '=?',
@@ -35,7 +32,7 @@
       controller: GalleryCardController,
       controllerAs: 'galleryCardCtrl',
       scope: {},
-      templateUrl: path + 'widgets/gallery-card/gallery-card.html',
+      templateUrl: 'widgets/gallery-card/gallery-card.html',
       transclude: true
     };
   }

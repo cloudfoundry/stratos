@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('ringChart', ringChart);
 
-  ringChart.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * Note: This widget is derived from the ops Console Ring Chart widge.
    * This has been heavily modified/refactored.
@@ -19,14 +15,13 @@
    * @memberof helion.framework.widgets
    * @name ringChart
    * @description A rint chart  directive that displays a ring chart.
-   * @param {string} path - the framework base path
    * @example
    * var labels = { ok: 'Ok', error: 'Error', 'warning: 'Warning', unknown: 'Unknown', total: 'Items', totalOne: 'Item' };
    * var data = { ok: 2, critical: 2, warning: 3, unknown: 4};
    * <ring-chart data="data" labels="labels"></ring-chart>"
    * @returns {object} The ring chart directive definition object
    */
-  function ringChart(path) {
+  function ringChart() {
     return {
       restrict: 'E',
       bindToController: {
@@ -38,7 +33,7 @@
       },
       controller: RingChartController,
       controllerAs: 'rcCtrl',
-      templateUrl: path + 'widgets/ring-chart/ring-chart.html'
+      templateUrl: 'widgets/ring-chart/ring-chart.html'
     };
   }
 

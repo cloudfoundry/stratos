@@ -5,9 +5,7 @@
     .module('helion.framework.widgets')
     .directive('tabbedNav', tabbedNav);
 
-  tabbedNav.$inject = ['helion.framework.basePath'];
-
-  function tabbedNav(path) {
+  function tabbedNav() {
     return {
       bindToController: {
         routes: '=',
@@ -17,7 +15,7 @@
       controllerAs: 'tabbedNavCtrl',
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/tabbed-nav/tabbed-nav.html'
+      templateUrl: 'widgets/tabbed-nav/tabbed-nav.html'
     };
   }
 

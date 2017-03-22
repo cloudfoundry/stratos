@@ -5,13 +5,10 @@
     .module('helion.framework.widgets')
     .directive('flyout', flyout);
 
-  flyout.$inject = ['helion.framework.basePath'];
-
   /**
    * @name flyout
    * @description A flyout directive that slides in from
    * the right.
-   * @param {string} path - the framework base path
    * @returns {*}
    * @example
    * <flyout flyout-active="showFlyout">
@@ -21,7 +18,7 @@
    *   <ng-include src="'my.template.html'"></ng-include>
    * </flyout>
    */
-  function flyout(path) {
+  function flyout() {
     return {
       link: link,
       restrict: 'E',
@@ -29,7 +26,7 @@
         flyoutActive: '=',
         flyoutCloseIcon: '=?'
       },
-      templateUrl: path + 'widgets/flyout/flyout.html',
+      templateUrl: 'widgets/flyout/flyout.html',
       transclude: true,
       controller: FlyoutController
     };

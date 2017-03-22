@@ -5,17 +5,12 @@
     .module('helion.framework.widgets')
     .directive('paginator', paginator);
 
-  paginator.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * @namespace helion.framework.widgets.paginator
    * @memberof helion.framework.widgets
    * @name paginator
    * @description A paginator directive
    * For detailed information on UX design: https://app.frontify.com/screen/866758
-   * @param {string} path - the framework base path
    * @returns {object} The paginator directive definition object
    * @example
    *
@@ -53,14 +48,14 @@
    </paginator>
    ```
    */
-  function paginator(path) {
+  function paginator() {
     return {
       bindToController: {
         properties: '='
       },
       controller: PaginatorController,
       controllerAs: 'paginatorCtrl',
-      templateUrl: path + 'widgets/paginator/paginator.html',
+      templateUrl: 'widgets/paginator/paginator.html',
       scope: {}
     };
   }

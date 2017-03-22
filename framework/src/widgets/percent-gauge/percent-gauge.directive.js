@@ -5,19 +5,14 @@
     .module('helion.framework.widgets')
     .directive('percentGauge', percentGauge);
 
-  percentGauge.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * @namespace helion.framework.widgets.percentGauge
    * @memberof helion.framework.widgets
    * @name percentGauge
    * @description A small widget displaying a percentage as a progress bar.
-   * @param {string} path - host path
    * @returns {object} The percent-gauge directive definition object
    */
-  function percentGauge(path) {
+  function percentGauge() {
     return {
       restrict: 'E',
       bindToController: {
@@ -29,7 +24,7 @@
       },
       controller: PercentGaugeController,
       controllerAs: 'pgCtrl',
-      templateUrl: path + 'widgets/percent-gauge/percent-gauge.html',
+      templateUrl: 'widgets/percent-gauge/percent-gauge.html',
       scope: {}
     };
   }

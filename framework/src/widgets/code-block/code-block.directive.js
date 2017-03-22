@@ -5,21 +5,18 @@
     .module('helion.framework.widgets')
     .directive('codeBlock', codeBlock);
 
-  codeBlock.$inject = ['helion.framework.basePath'];
-
   /**
    * @namespace helion.framework.widgets.codeBlock
    * @memberof helion.framework.widgets
    * @name codeBlock
    * @description A coe block card directive that includes a copy icon to copy the text contents to the clipboard.
-   * @param {string} path - the framework base path
    * @example
    * <code-block theme="light" hide-copy="true">
    * // This is presented in the code
    * </code-block>
    * @returns {object} The code block directive definition object
    */
-  function codeBlock(path) {
+  function codeBlock() {
     return {
       bindToController: {
         theme: '@',
@@ -28,7 +25,7 @@
       controller: CodeBlockController,
       controllerAs: 'codeBlockCtrl',
       scope: {},
-      templateUrl: path + 'widgets/code-block/code-block.html',
+      templateUrl: 'widgets/code-block/code-block.html',
       transclude: true
     };
   }

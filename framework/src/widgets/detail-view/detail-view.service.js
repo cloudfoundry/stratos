@@ -21,13 +21,12 @@
 
   serviceFactory.$inject = [
     '$uibModal',
-    'helion.framework.basePath',
     '$document',
     'helion.framework.utils.dialogEvents',
     '$timeout'
   ];
 
-  function serviceFactory($uibModal, path, $document, dialogEvents, $timeout) {
+  function serviceFactory($uibModal, $document, dialogEvents, $timeout) {
 
     var detailViewContainer;
 
@@ -77,7 +76,7 @@
         appendTo: detailViewContainer,
         controller: config.controller || DetailViewController,
         controllerAs: config.controllerAs || 'detailViewCtrl',
-        templateUrl: config.detailViewTemplateUrl || path + 'widgets/detail-view/detail-view.html',
+        templateUrl: config.detailViewTemplateUrl || 'widgets/detail-view/detail-view.html',
         resolve: {
           context: function () {
             return context;

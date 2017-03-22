@@ -11,7 +11,4 @@
       'ngAnimate',
       'toastr'
     ])
-    // UI Framework is not integrated, so the path can be set to be empty
-    .constant('helion.framework.basePath', '');
-
 })();

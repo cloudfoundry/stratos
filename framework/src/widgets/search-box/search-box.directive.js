@@ -33,7 +33,6 @@
   }
 
   searchBox.$inject = [
-    'helion.framework.basePath',
     '$document'
   ];
 
@@ -42,7 +41,6 @@
    * @memberof helion.framework.widgets
    * @name searchBox
    * @description a searchable input box.
-   * @param {string} path - the framework base path
    * @param {object} $document - the Angular $document service
    * @example
    * var options = [
@@ -54,7 +52,7 @@
    * </search-box>
    * @returns {object} the selected result
    */
-  function searchBox(path, $document) {
+  function searchBox($document) {
     return {
       bindToController: {
         addAction: '=?',
@@ -69,7 +67,7 @@
       require: ['searchBox', 'ngModel'],
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/search-box/search-box.html'
+      templateUrl: 'widgets/search-box/search-box.html'
     };
 
     function link(scope, element, attrs, ctrls) {

@@ -6,11 +6,10 @@
     .directive('globalSpinner', globalSpinner);
 
   globalSpinner.$inject = [
-    'helion.framework.basePath',
     '$document'
   ];
 
-  function globalSpinner(path, $document) {
+  function globalSpinner($document) {
     return {
       bindToController: {
         classes: '@?',
@@ -29,7 +28,7 @@
         });
       },
       scope: {},
-      templateUrl: path + 'widgets/global-spinner/global-spinner.html',
+      templateUrl: 'widgets/global-spinner/global-spinner.html',
       transclude: true
     };
   }

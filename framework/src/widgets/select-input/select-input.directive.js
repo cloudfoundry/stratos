@@ -6,7 +6,6 @@
     .directive('selectInput', selectInput);
 
   selectInput.$inject = [
-    'helion.framework.basePath',
     '$document'
   ];
 
@@ -16,7 +15,6 @@
    * @name selectInput
    * @description A select input directive that displays
    * a select input field with a dropdown menu with options.
-   * @param {string} path - the framework base path
    * @param {object} $document - the Angular $document service
    * @example
    * var options = [
@@ -28,7 +26,7 @@
    * </select-input>
    * @returns {object} The select-input directive definition object
    */
-  function selectInput(path, $document) {
+  function selectInput($document) {
     return {
       bindToController: {
         addAction: '=?',
@@ -43,7 +41,7 @@
       require: ['selectInput', 'ngModel'],
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/select-input/select-input.html'
+      templateUrl: 'widgets/select-input/select-input.html'
     };
 
     function link(scope, element, attrs, ctrls) {

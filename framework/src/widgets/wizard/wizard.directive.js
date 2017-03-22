@@ -5,19 +5,14 @@
     .module('helion.framework.widgets')
     .directive('wizard', wizard);
 
-  wizard.$inject = [
-    'helion.framework.basePath'
-  ];
-
   /**
    * @namespace helion.framework.widgets.wizard
    * @memberof helion.framework.widgets
    * @name wizard
    * @description A wizard directive
-   * @param {string} path - the framework base path
    * @returns {object} The wizard directive definition object
    */
-  function wizard(path) {
+  function wizard() {
     return {
       bindToController: {
         actions: '=',
@@ -25,7 +20,7 @@
       },
       controller: WizardController,
       controllerAs: 'wizardCtrl',
-      templateUrl: path + 'widgets/wizard/wizard.html',
+      templateUrl: 'widgets/wizard/wizard.html',
       scope: {}
     };
   }

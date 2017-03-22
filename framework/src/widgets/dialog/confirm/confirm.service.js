@@ -25,11 +25,10 @@
 
   serviceFactory.$inject = [
     '$uibModal',
-    'helion.framework.basePath',
     'helion.framework.utils.dialogEvents'
   ];
 
-  function serviceFactory($uibModal, path, dialogEvents) {
+  function serviceFactory($uibModal, dialogEvents) {
     return confirmDialog;
 
     function confirmDialog(confirmDialogContext) {
@@ -37,7 +36,7 @@
       confirmDialogContext.modalInstance = $uibModal.open({
         controller: ConfirmController,
         controllerAs: 'confirmCtrl',
-        templateUrl: path + 'widgets/dialog/confirm/confirm.html',
+        templateUrl: 'widgets/dialog/confirm/confirm.html',
         resolve: {
           confirmDialogContext: function () {
             return confirmDialogContext;

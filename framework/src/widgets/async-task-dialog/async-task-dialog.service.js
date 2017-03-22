@@ -20,7 +20,6 @@
     .controller('AsyncTaskDialogController', AsyncTaskDialogController);
 
   serviceFactory.$inject = [
-    'helion.framework.basePath',
     'helion.framework.widgets.detailView',
     '$timeout'
   ];
@@ -30,12 +29,11 @@
    * @name serviceFactory
    * @description Factory for async task dialogs
    * @memberof helion.framework.widgets.asyncTaskDialog
-   * @param {string} path basePath
    * @param {helion.framework.widgets.detailView} detailView detailView
    * @param {function} $timeout - angular $timeout servie
    * @returns {helion.framework.widgets.asyncTaskDialog}  asyncTaskDialog dialog instance
    */
-  function serviceFactory(path, detailView, $timeout) {
+  function serviceFactory(detailView, $timeout) {
 
     /**
      * @name asyncDialog
@@ -52,7 +50,7 @@
 
       config.controller = AsyncTaskDialogController;
       config.controllerAs = 'asyncTaskDialogCtrl';
-      config.detailViewTemplateUrl = path + 'widgets/async-task-dialog/async-task-dialog.html';
+      config.detailViewTemplateUrl = 'widgets/async-task-dialog/async-task-dialog.html';
 
       context.buttonTitles = {
         submit: gettext(config.buttonTitles && config.buttonTitles.submit) || gettext('Done'),

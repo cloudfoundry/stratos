@@ -6,18 +6,16 @@
     .directive('jsonTreeView', jsonTreeView);
 
   jsonTreeView.$inject = [
-    'helion.framework.basePath',
     'RecursionHelper'
   ];
 
   /**
    * @name jsonTreeView
    * @description A directive that displays JSON.
-   * @param {string} path - the framework base path
    * @param {object} RecursionHelper - RecursionHelper
    * @returns {object} The json-tree-view directive definition object
    */
-  function jsonTreeView(path, RecursionHelper) {
+  function jsonTreeView(RecursionHelper) {
     return {
       bindToController: {
         json: '='
@@ -26,7 +24,7 @@
       controllerAs: 'jtvCtrl',
       restrict: 'E',
       scope: {},
-      templateUrl: path + 'widgets/json-tree-view/json-tree-view.html',
+      templateUrl: 'widgets/json-tree-view/json-tree-view.html',
       compile: function (element) {
         return RecursionHelper.compile(element);
       }
