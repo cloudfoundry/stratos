@@ -360,5 +360,5 @@
         });
       });
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCFHCE);
 })();
