@@ -80,6 +80,7 @@
             testOrgName: 'e2e',
             testSpaceName: 'e2e'
           }
+        }
       },
       github: {
         valid: {
