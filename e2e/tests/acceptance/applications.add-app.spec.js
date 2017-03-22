@@ -2,9 +2,8 @@
 (function () {
   'use strict';
 
+  var appSetupHelper = require('../../po/app-setup.po');
   var helpers = require('../../po/helpers.po');
-  var resetTo = require('../../po/resets.po');
-  var loginPage = require('../../po/login-page.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
   var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
@@ -13,9 +12,16 @@
   var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
   var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('../../po/models/cf-model.po');
-  var proxyModel = require('../../po/models/proxy-model.po');
-  var searchBox = require('../../po/widgets/input-search-box.po');
   var inputText = require('../../po/widgets/input-text.po');
+  var orgsAndSpaces = require('../../po/endpoints/endpoints-org-spaces.po');
+  var navbar = require('../../po/navbar.po');
+  var Q = require('../../../tools/node_modules/q');
+  var table = require('../../po/widgets/table.po');
+  var actionMenu = require('../../po/widgets/actions-menu.po');
+  var confirmModal = require('../../po/widgets/confirmation-modal.po');
+
+  // Service to use when adding a service to the app
+  var SERVICE_NAME = 'app-autoscaler';
 
   describe('Applications - Add application', function () {
 
@@ -29,139 +35,33 @@
      * THE ORDER OF TESTS IN THIS FILE IS IMPORTANT
      */
 
-    var testApp, testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
-      organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace;
+    var testConfig, testApp;
     var testTime = (new Date()).getTime();
-    var hcfFromConfig = helpers.getHcfs().hcf1;
-
-    function getSearchBoxes() {
-      return element.all(by.css('.application-cf-filters .form-group'));
-    }
+    var appsToDelete = [];
 
     beforeAll(function () {
-      // Setup the test environment. This will ensure....
-      // - The required hcf is registered and connected (for both admin and non-admin users)
-      // - The app wall is showing
-      // - The app wall has the required hcf, organization and space filters set correctly
-
+      // Setup the test environment.
       // Reset all cnsi that exist in params
-      var promise = resetTo.resetAllCnsi()
-        .then(function () {
-          // Connect the test non-admin user to all cnsis in params
-          return resetTo.connectAllCnsi(helpers.getUser(), helpers.getPassword(), false);
-        })
-        .then(function () {
-          // Connect the test admin user to all cnsis in params (required to ensure correct permissions are set when
-          // creating orgs + spaces)
-          return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
-        })
-        .then(function () {
-          // Fetch the e2e org and space names
-          testOrgName = hcfFromConfig.testOrgName;
-          testSpaceName = hcfFromConfig.testSpaceName;
-          expect(testOrgName).toBeDefined();
-          expect(testSpaceName).toBeDefined();
-          // Fetch the cnsi metadata
-          return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
-            registeredCnsi = JSON.parse(response);
-            testCluster = _.find(registeredCnsi, {name: hcfFromConfig.register.cnsi_name});
-            expect(testCluster).toBeDefined();
-          });
-        })
-        .then(function () {
-          // Set up/find the required organization and space
-
-          // Fetch the hcf admin + non-admin user guids. This will be used for org + space roles
-          return cfModel.fetchUsers(testCluster.guid)
-            .then(function (users) {
-              testUser = _.find(users, {entity: {username: hcfFromConfig.user.username}});
-              testAdminUser = _.find(users, {entity: {username: hcfFromConfig.admin.username}});
-              expect(testUser).toBeDefined();
-              expect(testAdminUser).toBeDefined();
-            }).then(function () {
-              // Add required test organisation if it does not exist
-              // POSSIBLE IMPROVEMENT - Ensure both admin + non-admin have correct roles
-              return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, testAdminUser.metadata.guid,
-                testUser.metadata.guid);
-            })
-            .then(function (organization) {
-              // Add required test space if it does not exist
-              // POSSIBLE IMPROVEMENT - Ensure both admin + non-admin have correct roles
-              return cfModel.addSpaceIfMissing(testCluster.guid, organization.metadata.guid, testOrgName, testSpaceName,
-                testAdminUser.metadata.guid, testUser.metadata.guid);
-            });
-        })
-        .then(function () {
-          // Load the browser and navigate to app wall
-          helpers.setBrowserNormal();
-          helpers.loadApp();
-          // Log in as a standard non-admin user
-          loginPage.loginAsNonAdmin();
-          return galleryWall.showApplications();
-        })
-        .then(function () {
-          expect(galleryWall.isApplicationWall()).toBeTruthy();
-        })
-        .then(function () {
-          // Select the required HCF cluster
-          clusterSearchBox = searchBox.wrap(getSearchBoxes().get(0));
-          expect(clusterSearchBox.isDisplayed()).toBe(true);
-          expect(clusterSearchBox).toBeDefined();
-          expect(clusterSearchBox.getOptionsCount()).toBeGreaterThan(1);
-          return clusterSearchBox.selectOptionByLabel(testCluster.name);
-        })
-        .then(function () {
-          // Get the selected cluster
-          return clusterSearchBox.getValue().then(function (text) {
-            selectedCluster = text;
-            expect(selectedCluster).toEqual(testCluster.name);
-          });
-        })
-        .then(function () {
-          // Select the required e2e organization
-          organizationSearchBox = searchBox.wrap(getSearchBoxes().get(1));
-          expect(organizationSearchBox).toBeDefined();
-          expect(organizationSearchBox.getOptionsCount()).toBeGreaterThan(1);
-          return organizationSearchBox.selectOptionByLabel(testOrgName);
-        })
-        .then(function () {
-          // Get the selected organization
-          return organizationSearchBox.getValue().then(function (text) {
-            selectedOrg = text;
-            expect(selectedOrg).toEqual(testOrgName);
-          });
-        })
-        .then(function () {
-          // Select the required e2e space
-          spaceSearchBox = searchBox.wrap(getSearchBoxes().get(2));
-          expect(spaceSearchBox).toBeDefined();
-          expect(spaceSearchBox.getOptionsCount()).toBeGreaterThan(1);
-          return spaceSearchBox.selectOptionByLabel(testSpaceName);
-        })
-        .then(function () {
-          // Get the selected space
-          return spaceSearchBox.getValue().then(function (text) {
-            selectedSpace = text;
-            expect(selectedSpace).toEqual(testSpaceName);
-          });
-        });
-
-      // Ensure we don't continue until everything is set up
-      return browser.driver.wait(promise);
+      return appSetupHelper.appSetup().then(function (setup) {
+        testConfig = setup;
+      });
     });
 
     // Cleanup of test application created by tests
+    afterAll(function () {
+      // Delete the apps at the end of all of the tests
+      return Q.all(_.map(appsToDelete, function (appName) {
+        return appSetupHelper.deleteApp(appName);
+      }));
+    });
+
     beforeEach(function () {
       testApp = undefined;
     });
 
     afterEach(function () {
       if (testApp) {
-        var promise = cfModel.deleteAppIfExisting(testCluster.guid, testApp.entity.name, helpers.getUser(), helpers.getPassword())
-          .catch(function (error) {
-            fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (testApp.entity.name || 'unknown') + '\'. Error:', error);
-          });
-        browser.driver.wait(promise);
+        appsToDelete.push(testApp);
       }
     });
 
@@ -170,7 +70,7 @@
     });
 
     it('Add Application button shows fly out with correct values', function () {
-      var selectedHcf = _.find(registeredCnsi, {name: selectedCluster});
+      var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
       var domain = selectedHcf.api_endpoint.Host.substring(4);
 
       galleryWall.addApplication().then(function () {
@@ -183,13 +83,13 @@
         });
 
         addAppHcfApp.hcf().getValue().then(function (text) {
-          expect(text).toBe(selectedCluster);
+          expect(text).toBe(testConfig.selectedCluster);
         });
         addAppHcfApp.organization().getValue().then(function (text) {
-          expect(text).toBe(selectedOrg);
+          expect(text).toBe(testConfig.selectedOrg);
         });
         addAppHcfApp.space().getValue().then(function (text) {
-          expect(text).toBe(selectedSpace);
+          expect(text).toBe(testConfig.selectedSpace);
         });
 
         addAppHcfApp.domain().getValue().then(function (text) {
@@ -243,7 +143,7 @@
 
       addAppWizard.getWizard().next();
       helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
-        return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+        return cfModel.fetchApp(testConfig.testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
           .then(function (app) {
             testApp = app;
             expect(app).toBeTruthy();
@@ -258,7 +158,7 @@
 
       // Should now have reached the application page
       expect(application.getHeader().isDisplayed()).toBe(true);
-      expect(application.getHeader().getText()).toBe(appName.toUpperCase());
+      expect(application.getHeader().getText()).toBe(appName);
       expect(application.getActiveTab().getText()).toBe('Summary');
       expect(application.isIncomplete()).toBe(true);
       expect(application.isNewlyCreated()).toBe(true);
@@ -269,34 +169,31 @@
 
       browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
 
-      element.all(by.css('service-card .service-actions button.btn.btn-link')).then(function (addServiceButtons) {
-        expect(addServiceButtons.length).toBeGreaterThan(0);
-        addServiceButtons[0].click();
+      addAppService.addService(SERVICE_NAME);
 
-        var serviceWizard = addAppService.getServiceWizard();
-        expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      var serviceWizard = addAppService.getServiceWizard();
+      expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-        expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
-        serviceWizard.getCreateNewName().addText(serviceName);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+      serviceWizard.getCreateNewName().addText(serviceName);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-        serviceName = serviceName.replace(/\./g, '_');
-        serviceWizard.getCreateNewName().clear();
-        serviceWizard.getCreateNewName().addText(serviceName);
-        expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+      serviceName = serviceName.replace(/\./g, '_');
+      serviceWizard.getCreateNewName().clear();
+      serviceWizard.getCreateNewName().addText(serviceName);
+      expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
 
-        serviceWizard.getWizard().next();
-        expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
-        serviceWizard.getWizard().next().then(function () {
-          cfModel.fetchServiceExist(testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
-            .then(function (service) {
-              expect(service).toBeTruthy();
-            })
-            .catch(function () {
-              fail('Failed to determine if service exists');
-            });
-        });
+      serviceWizard.getWizard().next();
+      expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
+      serviceWizard.getWizard().next().then(function () {
+        cfModel.fetchServiceExist(testConfig.testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
+          .then(function (service) {
+            expect(service).toBeTruthy();
+          })
+          .catch(function () {
+            fail('Failed to determine if service exists');
+          });
       });
 
       // Go to the delivery pipeline tab
@@ -308,6 +205,25 @@
       expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
       deliveryPipeline.getSetupWizard().cancel();
 
+      application.showSummary();
+      application.invokeAction('CLI Instructions');
+
+      // cf push acceptance.e2e.1484149644648
+      // Check copy to clipboard
+      element.all(by.css('code-block .hpe-copy')).get(2).click();
+      element(by.css('button.close')).click();
+
+      galleryWall.showApplications();
+
+      // Check that the text from the CLI Instructions was copied to the clipboard
+      galleryWall.addApplication();
+      expect(addAppHcfApp.name().getValue()).toBe('');
+      var inputField = element(by.id('add-app-workflow-application-name'));
+      inputField.click();
+      inputField.sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'v'));
+      expect(addAppHcfApp.name().getValue()).toBe('cf push ' + appName);
+
+      addAppWizard.getWizard().cancel();
       galleryWall.showApplications();
     });
 
@@ -327,7 +243,7 @@
       addAppHcfApp.host().addText(hostName);
       addAppWizard.getWizard().next();
       helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
-        return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+        return cfModel.fetchApp(testConfig.testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
           .then(function (app) {
             testApp = app;
             expect(app).toBeTruthy();
@@ -370,6 +286,79 @@
       expect(addAppWizard.isDisplayed()).toBeTruthy();
       expect(addAppWizard.getTitle()).toBe('Add Application');
       addAppWizard.getWizard().cancel();
+    });
+
+    describe('check application on the cf endpoints dashboard', function () {
+
+      var serviceName = 'acceptance_e2e_service_' + testTime;
+
+      beforeAll(function () {
+        // Load the app again - keep the cookies so we don't have to login
+        // This is a workaround for a Bug
+        helpers.loadApp(true);
+        navbar.goToView('endpoint.clusters');
+        orgsAndSpaces.goToOrg('e2e');
+        orgsAndSpaces.goToSpace('e2e');
+      });
+
+      it('should show the org/space view and its tabs', function () {
+        // Walk through each of the tabs on the space page
+        application.getTabs().then(function (tabs) {
+          _.each(tabs, function (tab) {
+            tab.click();
+          });
+        });
+      });
+
+      it('should contain the service that was created', function () {
+        // Go to Services tab
+        application.getTabs().get(1).click();
+        // Check that we have at least one service
+        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
+        serviceInstances.getRows().then(function (rows) {
+          expect(rows.length).toBeGreaterThan(0);
+        });
+        // Table should contain our service
+        var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
+          return elem.getText().then(function (text) {
+            return text === serviceName;
+          });
+        }).first();
+        expect(column).toBeDefined();
+      });
+
+      it('should allow the serice to be detached and then deleted', function () {
+        // Go to Services tab
+        application.getTabs().get(1).click();
+        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
+        serviceInstances.getData().then(function (rows) {
+          var index = _.findIndex(rows, function (row) {
+            return row[0] === serviceName;
+          });
+
+          // Detach Service
+          var columnMenu = actionMenu.wrap(serviceInstances.getItem(index, 4));
+          columnMenu.click();
+          columnMenu.clickItem(1);
+          expect(confirmModal.getTitle()).toBe('Detach Service');
+          confirmModal.commit();
+          helpers.checkAndCloseToast(/Service instance successfully detached/);
+
+          // Delete Service
+          columnMenu.click();
+          columnMenu.clickItem(0);
+          expect(confirmModal.getTitle()).toBe('Delete Service');
+          confirmModal.commit();
+          helpers.checkAndCloseToast(/Service instance successfully deleted/);
+          if (rows.length === 1) {
+            expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no service instances');
+          } else {
+            serviceInstances.getData().then(function (newRows) {
+              expect(newRows.length).toBe(rows.length - 1);
+            });
+          }
+        });
+      });
     });
   });
 })();

@@ -1,24 +1,33 @@
+/* eslint-disable angular/json-functions */
 (function () {
   'use strict';
 
-  var utils = require('../../utils');
+  var helpers = require('../../po/helpers.po');
+  var applicationWall = require('../../po/applications/applications.po');
 
-  describe('Application wall', function () {
-    beforeAll(function () {
-      utils.loadE2eClient();
-    });
+  var appWallConfig3 = require('../../client/e2e/app-wall/3-apps.js');
+  var appWallConfig500 = require('../../client/e2e/app-wall/500-apps.js');
+  var appWallConfigNoClusters = require('../../client/e2e/app-wall/no-clusters.js');
+  var appWallConfigNoApps = require('../../client/e2e/app-wall/no-apps.js');
 
-    afterAll(function () {
-      utils.unloadE2eClient();
-    });
+  var ngMockE2E = require('../../po/ng-mock-e2e.po');
 
-    describe('When cluster is not ready', function () {
+  describe('Application Wall', function () {
+
+    describe('When there are no CF Endpoints', function () {
       beforeAll(function () {
-        utils.loadWith('app-wall/no-clusters');
+        ngMockE2E.init();
+        appWallConfigNoClusters(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
       });
 
-      it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 0 )');
+      afterAll(function () {
+        ngMockE2E.unload();
+      });
+
+      it('The page should have title "Applications"', function () {
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
       });
 
       it('should show application message: "You cannot view any applications."', function () {
@@ -27,34 +36,47 @@
         expect(msgElem.getText()).toBe('You cannot view any applications.');
       });
 
-      it('should not see ADD APPLICATION botton.', function () {
+      it('should not see ADD APPLICATION botton', function () {
         expect(element(by.css('.btn.btn-primary')).isPresent()).not.toBeTruthy();
       });
     });
 
-    describe('When there is no applications', function () {
+    describe('When there are no applications', function () {
       beforeAll(function () {
-        utils.loadWith('app-wall/no-apps');
+        ngMockE2E.init();
+        appWallConfigNoApps(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
       });
 
-      it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 0 )');
+      afterAll(function () {
+        ngMockE2E.unload();
       });
 
+      it('The page should have title "Applications"', function () {
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+      });
+
+      /*
       it('should show application message: "You have no applications and cannot add any."', function () {
         var msgElem = element(by.css('.applications-msg'));
         expect(msgElem.isPresent()).toBeTruthy();
         expect(msgElem.getText()).toBe('You have no applications and cannot add any.');
       });
+      */
     });
 
     describe('When there are 3 applications in total, user', function () {
       beforeAll(function () {
-        utils.loadWith('app-wall/3-apps');
+        ngMockE2E.init();
+        // Configure HTTP responses for all wall with 3 apps
+        appWallConfig3(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
       });
 
-      it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 3 )');
+      afterAll(function () {
+        ngMockE2E.unload();
       });
 
       it('should see an ADD APPLICATION button.', function () {
@@ -71,49 +93,82 @@
         expect(element(by.css('.paginator')).isPresent()).toBe(false);
       });
 
-      it('should see 3 applications on the wall, and ordered correctly', function () {
+      it('should see 3 applications on the wall', function () {
+        applicationWall.setSortOrder('App Name');
         element.all(by.css('.app-gallery-card')).then(function (items) {
           expect(items.length).toBe(3);
-          expect(items[0].element(by.css('.gallery-card-title')).getText()).toBe('abc');
-          expect(items[1].element(by.css('.gallery-card-title')).getText()).toBe('opq');
-          expect(items[2].element(by.css('.gallery-card-title')).getText()).toBe('xyz');
+        });
+
+        expect(applicationWall.getAppCount()).toBe('3');
+      });
+
+      describe('app sorting', function () {
+
+        it('should be able to sort by name, a-z', function () {
+          applicationWall.setSortOrder('App Name');
+          element.all(by.css('.app-gallery-card')).then(function (items) {
+            expect(items.length).toBe(3);
+            expect(items[0].element(by.css('.gallery-card-title')).getText()).toBe('abc');
+            expect(items[1].element(by.css('.gallery-card-title')).getText()).toBe('opq');
+            expect(items[2].element(by.css('.gallery-card-title')).getText()).toBe('xyz');
+          });
+        });
+
+        it('should be able to sort by name, z-a', function () {
+          applicationWall.setSortOrder('App Name');
+          applicationWall.toggleSortDirection();
+          element.all(by.css('.app-gallery-card')).then(function (items) {
+            expect(items.length).toBe(3);
+            expect(items[2].element(by.css('.gallery-card-title')).getText()).toBe('abc');
+            expect(items[1].element(by.css('.gallery-card-title')).getText()).toBe('opq');
+            expect(items[0].element(by.css('.gallery-card-title')).getText()).toBe('xyz');
+          });
         });
       });
     });
 
     describe('When there are 500 applications in total, user', function () {
       beforeAll(function () {
-        utils.loadWith('app-wall/500-apps');
+        ngMockE2E.init();
+        // Configure HTTP responses for all wall with 500 apps
+        appWallConfig500(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
       });
 
-      it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 500 )');
+      afterAll(function () {
+        ngMockE2E.unload();
       });
 
-      it('should see paginator.', function () {
+      it('The page should have title "Applications"', function () {
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(applicationWall.getAppCount()).toBe('500');
+      });
+
+      it('should see paginator', function () {
         expect(element(by.css('.paginator')).isPresent()).toBe(true);
       });
 
-      it('should see 11 pages available to navigate.', function () {
+      it('should see 11 pages available to navigate', function () {
         element.all(by.css('.paginator .page-links span')).then(function (items) {
           expect(items[6].getText()).toBe('11');
         });
       });
 
-      it('should see 48 applications on the wall.', function () {
+      it('should see 48 applications on the wall', function () {
         element.all(by.css('.app-gallery-card')).then(function (items) {
           expect(items.length).toBe(48);
         });
       });
 
-      it('should see the current page is page 1.', function () {
+      it('should see the current page is page 1', function () {
         element.all(by.css('.paginator .page-links .current')).then(function (items) {
           expect(items.length).toBe(1);
           expect(items[0].getText()).toBe('1');
         });
       });
 
-      it('should see other buttons in paginator populated correctly.', function () {
+      it('should see other buttons in paginator populated correctly', function () {
         element.all(by.css('.paginator .page-links span')).then(function (items) {
           expect(items.length).toBe(7);
           expect(items[0].getText()).toBe('1');
@@ -143,20 +198,20 @@
           element(by.css('.btn-link.btn-next')).click();
         });
 
-        it('should see 48 applications on the wall.', function () {
+        it('should see 48 applications on the wall', function () {
           element.all(by.css('.app-gallery-card')).then(function (items) {
             expect(items.length).toBe(48);
           });
         });
 
-        it('should see the current page is page 11.', function () {
+        it('should see the current page is page 11', function () {
           element.all(by.css('.paginator .page-links .current')).then(function (items) {
             expect(items.length).toBe(1);
             expect(items[0].getText()).toBe('2');
           });
         });
 
-        it('should see other buttons in paginator populated correctly.', function () {
+        it('should see other buttons in paginator populated correctly', function () {
           element.all(by.css('.paginator .page-links span')).then(function (items) {
             expect(items.length).toBe(7);
             expect(items[0].getText()).toBe('1');
@@ -236,5 +291,35 @@
         });
       });
     });
+
+    describe('Changing the view', function () {
+      beforeAll(function () {
+        ngMockE2E.init();
+        // Configure HTTP responses for all wall with 500 apps
+        appWallConfig500(ngMockE2E.$httpBackend);
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+        applicationWall.setGridView();
+      });
+
+      afterAll(function () {
+        ngMockE2E.unload();
+      });
+
+      it('Should show the grid view by default', function () {
+        // Reload the app to make sure the grid view is maintained
+        helpers.loadApp();
+        expect(applicationWall.isGridView()).toBe(true);
+        expect(applicationWall.isListView()).toBe(false);
+      });
+
+      it('Should allow changing to the list view', function () {
+        expect(applicationWall.isGridView()).toBe(true);
+        applicationWall.setListView();
+        expect(applicationWall.isGridView()).toBe(false);
+        expect(applicationWall.isListView()).toBe(true);
+      });
+    });
   });
 })();
+

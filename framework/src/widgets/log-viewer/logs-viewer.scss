@@ -1,8 +1,8 @@
 @import 'ansi-colours';
 
 .log-container {
-    color: #DCDCCC;
-    background-color: #2C2C2C;
+    color: ansi-colour('default-foreground', false);
+    background-color: ansi-colour('default-background', false);
     line-height: 20px;
     font-size: 11.25pt;
     font-family: "Source Code Pro", monospace;

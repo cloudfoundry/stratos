@@ -2,7 +2,8 @@
   <div ng-class="tableInlineMessageCtrl.statusClass" class="hpe-popover-alert popover bottom in">
     <div class="arrow"></div>
     <div class="popover-content">
-      {{ tableInlineMessageCtrl.message }}
+      <span ng-if="!tableInlineMessageCtrl.link">{{ tableInlineMessageCtrl.message }}</span>
+      <a ng-click="tableInlineMessageCtrl.openLink()" ng-if="tableInlineMessageCtrl.link">{{ tableInlineMessageCtrl.message }}</a>
     </div>
   </div>
 </td>

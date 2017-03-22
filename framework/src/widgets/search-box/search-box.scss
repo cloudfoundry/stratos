@@ -2,8 +2,12 @@ search-box {
   display: block;
   position: relative;
 
-  &:hover, label:hover {
+  &:hover, label:hover, input:hover {
     cursor: pointer;
+  }
+
+  .open input:hover {
+    cursor: auto;
   }
 
   .search-box {

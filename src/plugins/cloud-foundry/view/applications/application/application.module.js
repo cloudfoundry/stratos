@@ -319,6 +319,7 @@
     /**
      * @function update
      * @description update application
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     update: function () {
@@ -390,6 +391,7 @@
         this.hceCnsi = pipeline.hceCnsi;
         return this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
           .then(function (response) {
+            pipeline.forbidden = false;
             var project = response.data;
             if (!_.isNil(project)) {
               // Don't need to fetch VCS data every time if project hasn't changed
@@ -405,6 +407,15 @@
             } else {
               that.model.application.project = null;
             }
+          })
+          .catch(function (response) {
+            pipeline.forbidden = response.status === 403;
+            pipeline.valid = false;
+            that.model.application.project = null;
+            return that.$q.reject(response);
+          })
+          .finally(function () {
+            that.updateActions();
           });
       } else {
         this.model.application.project = null;
@@ -481,13 +492,20 @@
         return true;
       } else if (id === 'launch') {
         hideAction = false;
-      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
-        // check user is a space developer
-        var spaceGuid = this.model.application.summary.space_guid;
-        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
-          this.authModel.resources.application,
-          this.authModel.actions.update,
-          spaceGuid);
+      } else {
+        // Check permissions
+        if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
+          // Hide delete if user has no HCE project permissions
+          hideAction = true;
+        } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+          // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+          var spaceGuid = this.model.application.summary.space_guid;
+          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+            this.authModel.resources.application,
+            this.authModel.actions.update,
+            spaceGuid);
+        }
+
       }
       return this.model.application.state.actions[id] !== true || hideAction;
     },
@@ -507,17 +525,32 @@
     },
 
     /**
+     * @function showCliInstructions
+     * @description Show the CLI Instructions slide-in
+     */
+    showCliInstructions: function () {
+      var cliAction = _.find(this.appActions, {id: 'cli'});
+      if (cliAction && !cliAction.disabled && !cliAction.hidden) {
+        cliAction.execute();
+      }
+    },
+
+    /**
      * @function onAppStateChange
      * @description invoked when the application state changes, so we can update action visibility
      */
     onAppStateChange: function () {
+      this.updateActions();
+      this.onAppRoutesChange();
+    },
+
+    updateActions: function () {
       var that = this;
       angular.forEach(this.appActions, function (appAction) {
         appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
       this.visibleActions = _.find(this.appActions, { hidden: false });
-      this.onAppRoutesChange();
     },
 
     /**

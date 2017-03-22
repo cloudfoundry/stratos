@@ -54,7 +54,7 @@
       titleClass: 'toast-title',
       toastClass: 'toast',
       maxOpened: 3,
-      positionClass: 'toast-top-right'
+      positionClass: 'toast-top-center'
     });
 
     return {

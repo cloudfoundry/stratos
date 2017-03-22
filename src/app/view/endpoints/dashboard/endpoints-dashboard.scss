@@ -46,3 +46,9 @@
     }
   }
 }
+
+// Override the confirm-dialog fixed sizing to give us more room
+.confirm-dialog.unregister-vcs-dialog > .modal-dialog > .modal-content {
+  width: 500px;
+  height: 430px;
+}

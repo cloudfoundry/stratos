@@ -3,6 +3,8 @@
 
   module.exports = {
 
+    showSummary: showSummary,
+    showLogView: showLogView,
     showServices: showServices,
     showDeliveryPipeline: showDeliveryPipeline,
     showDeliveryLogs: showDeliveryLogs,
@@ -11,7 +13,14 @@
     isIncomplete: isIncomplete,
 
     getHeader: getHeader,
-    getActiveTab: getActiveTab
+    getActiveTab: getActiveTab,
+    getTabs: getTabs,
+
+    // Summary Tab
+    addRoute: addRoute,
+    editApplication: editApplication,
+
+    invokeAction: invokeAction
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -19,6 +28,14 @@
     // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
   };
+
+  function showSummary() {
+    applicationAction(0).click();
+  }
+
+  function showLogView() {
+    applicationAction(1).click();
+  }
 
   function showServices() {
     applicationAction(2).click();
@@ -56,6 +73,27 @@
     return element(by.css('ul.application-nav.nav > li.nav-item.active > a'));
   }
 
+  function getTabs() {
+    return element.all(by.css('ul.application-nav.nav > li.nav-item > a'));
+  }
+
+  function addRoute() {
+    return element(by.css('.summary-routes .action-header a.btn.btn-link')).click();
+  }
+
+  function editApplication() {
+    return element(by.css('.summary .action-header a.btn.btn-link')).click();
+  }
+
+  function invokeAction(actionName) {
+    var actions = element.all(by.css('ul.application-action-col > li > button'));
+    var matchingAction = actions.filter(function (elem) {
+      return elem.getText().then(function (text) {
+        return text === actionName;
+      });
+    }).first();
+    return matchingAction.click();
+  }
 })();
 
 // function servicePanelsAddServiceButtons() {

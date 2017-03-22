@@ -67,7 +67,7 @@
         '*NONE*': {
           label: gettext('Incomplete'),
           indicator: 'warning',
-          actions: 'delete'
+          actions: 'delete, cli'
         }
       },
       STARTED: {

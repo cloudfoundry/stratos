@@ -1,0 +1,21 @@
+<div ng-repeat="(key, value) in jtvCtrl.json">
+  <span ng-if="!jtvCtrl.array" class="json-view-key">{{key}} : </span>
+  <div class="json-view-item" ng-switch="jtvCtrl.getTypeOf(value)">
+    <div class="json-view-object" ng-switch-when="object">
+      <span>{</span>
+        <json-tree-view json="value"></json-tree-view>
+      <div>}</div>
+    </div>
+    <div class="json-view-array" ng-switch-when="array">
+      <div ng-if="value.length" class="json-view-array-wtih-values">
+        <span>[</span>
+          <json-tree-view json="value"></json-tree-view>
+        <div>]</div>
+      </div>
+      <span ng-if="!value.length">[]</span>
+    </div>
+    <span ng-switch-when="bool" class="json-view-bool">{{ value }}</span>
+    <span ng-switch-when="number" class="json-view-number">{{ value }}</span>
+    <span ng-switch-default="string" class="json-view-string">"{{ value }}"</span>
+  </div>
+</div>

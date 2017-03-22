@@ -30,17 +30,15 @@
   var templateCache = require('gulp-angular-templatecache');
   var wiredep = require('wiredep').stream;
   var path = require('path');
+  var fork = require('child_process').fork;
 
   var config = require('./gulp.config')();
   var paths = config.paths;
   var assetFiles = config.assetFiles;
   var themeFiles = config.themeFiles;
   var jsSourceFiles = config.jsSourceFiles;
-  var jsLibs = config.jsLibs;
   var plugins = config.plugins;
-  var jsFiles = config.jsFiles;
   var scssFiles = config.scssFiles;
-  var cssFiles = config.cssFiles;
   var partials = config.partials;
 
   // Default OEM Config
@@ -51,6 +49,7 @@
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
 
   var usePlumber = true;
+  var server;
 
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
@@ -63,6 +62,10 @@
   // Pull in the gulp tasks for oem support
   var oem = require('./oem.gulp.js');
   oem(config);
+
+  // Pull in the gulp tasks for oem support
+  var e2e = require('./e2e.gulp.js');
+  e2e(config);
 
   // Clear the 'dist' folder
   gulp.task('clean:dist', function (next) {
@@ -111,7 +114,7 @@
   gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
     var sourceFiles = jsSourceFiles;
     if (!gutil.env.devMode) {
-      sourceFiles = jsSourceFiles.concat(jsLibs);
+      sourceFiles = jsSourceFiles.concat(config.jsLibs);
     }
     var sources = gulp.src(sourceFiles, {base: paths.src});
     return sources
@@ -148,7 +151,7 @@
   });
 
   gulp.task('copy:framework:js', function () {
-    return gulp.src(jsLibs)
+    return gulp.src(config.jsLibs)
       .pipe(sort())
       .pipe(angularFilesort())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
@@ -242,10 +245,10 @@
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
         plugins
-        .concat(jsFiles)
+        .concat(config.jsFiles)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
-        .concat(cssFiles), {read: false});
+        .concat(config.cssFiles), {read: false});
 
     return gulp
       .src(paths.dist + 'index.html')
@@ -318,7 +321,7 @@
     gulp.watch(partials, ['copy:html', callback]);
     gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
-    gulp.watch(jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
+    gulp.watch(config.jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
 
   });
 
@@ -366,17 +369,40 @@
 
     browserSync.init({
       server: {
-        baseDir: '../dist',
+        baseDir: paths.browserSyncDist,
         middleware: middleware
       },
       notify: false,
       ghostMode: false,
       open: false,
-      port: 3100,
+      port: config.browserSyncPort,
       https: https
     }, function () {
       callback();
     });
+  });
+
+  gulp.task('browsersync:stop', function (cb) {
+    browserSync.exit();
+    cb();
+  });
+
+  gulp.task('start-server', function () {
+    var options = {};
+    options.env = _.clone(process.env);
+    options.env.NODE_ENV = 'development';
+    options.env.client_folder = paths.browserSyncDist;
+    options.env.client_port = config.browserSyncPort;
+    options.env.client_logging = config.disableServerLogging || false;
+
+    server = fork('./server.js', [], options);
+  });
+
+  gulp.task('stop-server', function () {
+    if (server) {
+      server.kill();
+      server = undefined;
+    }
   });
 
   gulp.task('dev-default', function (next) {
@@ -407,7 +433,7 @@
   });
 
   gulp.task('run-default', ['default'], function () {
-    runSequence('browsersync', 'watch');
+    runSequence('start-server');
   });
 
   gulp.task('default', function (next) {

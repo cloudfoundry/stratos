@@ -76,11 +76,11 @@
         <table class="table" >
           <thead>
           <tr>
-            <th st-sort="message" translate>MESSAGE</th>
-            <th st-sort="result.label" translate>STATUS</th>
-            <th st-sort="reason.mCreatedDate" st-sort-default="reverse" translate>TIME</th>
-            <th st-sort="reason.author" translate>COMMIT AUTHOR</th>
-            <th st-sort="reason.type" translate>REASON</th>
+            <th st-sort="message" st-skip-natural="true" translate>MESSAGE</th>
+            <th st-sort="result.label" st-skip-natural="true" translate>STATUS</th>
+            <th st-sort="reason.mCreatedDate" st-skip-natural="true" st-descending-first="true" st-sort-default="reverse" translate>TIME</th>
+            <th st-sort="reason.author" st-skip-natural="true" translate>COMMIT AUTHOR</th>
+            <th st-sort="reason.type" st-skip-natural="true" translate>REASON</th>
           </tr>
           </thead>
           <tbody>

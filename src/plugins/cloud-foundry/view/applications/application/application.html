@@ -1,5 +1,5 @@
 <div ng-class="{ 'col-md-9 col-sm-12': appCtrl.visibleActions !== false}">
-  <div class="application-header font-semi-bold text-uppercase">
+  <div class="application-header font-semi-bold">
     {{ appCtrl.model.application.summary.name }}
     <app-state-icon class="action-target-state" state="appCtrl.model.application.state.indicator"></app-state-icon>
     <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
@@ -56,7 +56,7 @@
     ng-show="appCtrl.ready"
     ng-if="appCtrl.visibleActions">
   <li ng-repeat="appAction in appCtrl.appActions">
-    <button class="btn btn-link btn-border-less"
+    <button class="no-focus btn btn-link btn-border-less"
       ng-disabled="appAction.disabled"
       ng-hide="appAction.hidden"
       ng-click="appAction.execute()">

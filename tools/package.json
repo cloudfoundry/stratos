@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp clean:dist && gulp",
+    "precoverage": "npm run update-webdriver",
+    "coverage": "npm test && gulp e2e:run && gulp coverage-combine",
     "lint": "gulp lint",
     "gate-check": "gulp lint && npm test",
     "test-backend": "node test_server.js",
@@ -47,6 +49,7 @@
     "gulp-eslint": "^3.0.1",
     "gulp-if": "^2.0.0",
     "gulp-inject-string": "^1.1.0",
+    "gulp-istanbul": "^1.1.1",
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
@@ -54,6 +57,7 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "http-proxy": "^1.15.1",
+    "istanbul-combine": "^0.3.0",
     "jasmine-core": "^2.4.1",
     "jasmine-reporters": "^2.2.0",
     "jasmine-spec-reporter": "^2.7.0",
@@ -75,6 +79,7 @@
     "randomstring": "^1.1.5",
     "request": "^2.69.0",
     "shelljs": "^0.5.3",
+    "toSrc": "^0.1.4",
     "transformer-proxy": "^0.3.3"
   }
 }

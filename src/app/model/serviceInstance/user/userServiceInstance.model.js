@@ -97,6 +97,8 @@
         });
     },
 
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 11, left in to improve readability.
     /**
      * @function list
      * @memberof app.model.serviceInstance.user.UserServiceInstance
@@ -109,6 +111,7 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
       var hceInfoApi = this.apiManager.retrieve('cloud-foundry.api.HceInfoApi');
+      var hsmApi = this.apiManager.retrieve('service-manager.api.HsmApi');
 
       return serviceInstanceApi.list().then(function (response) {
         var items = response.data;
@@ -116,16 +119,20 @@
         var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
         var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
         var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
+        var hsmGuids = _.map(_.filter(items, {cnsi_type: 'hsm'}) || [], 'guid') || [];
 
         var tasks = [];
-        // call /v2/info to refresh tokens, then list
+        // make a request on each service type to refresh the oauth token
         if (hcfGuids.length > 0) {
           tasks.push(cfInfoApi.GetInfo({}, hcfCfg).then(function (response) {
-            return response.data ? response.data : {};
+            return response.data || {};
           }));
         }
         if (hceGuids.length > 0) {
           tasks.push(hceInfoApi.info(hceGuids.join(',')));
+        }
+        if (hsmGuids.length > 0) {
+          tasks.push(hsmApi.info(hsmGuids.join(',')));
         }
 
         if (tasks.length === 0) {
@@ -146,6 +153,7 @@
       });
 
     },
+    /* eslint-enable complexity */
 
     /**
      * @function onConnect

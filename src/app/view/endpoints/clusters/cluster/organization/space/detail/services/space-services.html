@@ -17,8 +17,8 @@
           ng-class="{'table-actionable' : spaceSrvsCtrl.canDeleteOrUnbind}">
           <thead>
           <tr>
-            <th st-sort="entity.name" st-sort-default="true" translate>SERVICE INSTANCES</th>
-            <th st-sort="entity.type" translate>TYPE</th>
+            <th st-sort="entity.name" st-sort-default="true" st-skip-natural="true" translate>SERVICE INSTANCES</th>
+            <th st-sort="entity.type" st-skip-natural="true" translate>TYPE</th>
             <th translate>PLAN</th>
             <th translate>APPLICATION ATTACHED</th>
             <th translate ng-if="spaceSrvsCtrl.canDeleteOrUnbind">ACTION</th>

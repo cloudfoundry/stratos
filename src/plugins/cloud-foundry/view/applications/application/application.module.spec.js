@@ -81,6 +81,27 @@
       $httpBackend.flush();
     }
 
+    function allActionsHidden(hidden) {
+      var actions = ['start', 'stop', 'restart', 'delete'];
+      _.each(actions, function (actionId) {
+        // Set state action
+        controller.model.application.state.actions[actionId] = true;
+        expect(controller.isActionHidden(actionId)).toBe(hidden);
+      });
+    }
+
+    function allActionsHiddenExcludingDelete(hidden) {
+      controller.model.application.pipeline.forbidden = true;
+      var actions = ['start', 'stop', 'restart'];
+      _.each(actions, function (actionId) {
+        // Set state action
+        controller.model.application.state.actions[actionId] = true;
+        expect(controller.isActionHidden(actionId)).toBe(hidden);
+      });
+      controller.model.application.state.actions.delete = true;
+      expect(controller.isActionHidden('delete')).toBe(true);
+    }
+
     afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
@@ -100,14 +121,9 @@
         expect(controller.hideVariables).toBe(false);
       });
 
-      it('should have all actions enabled', function () {
-        // Set state action
-        var actions = ['start', 'stop', 'restart', 'delete'];
-        _.each(actions, function (actionId) {
-          controller.model.application.state.actions[actionId] = true;
-          expect(controller.isActionHidden(actionId)).toBe(false);
-        });
-      });
+      it('should have all actions enabled', _.partial(allActionsHidden, false));
+
+      it('should have all actions enabled except delete', _.partial(allActionsHiddenExcludingDelete, false));
 
       it('should be able to view view application', function () {
 
@@ -202,14 +218,9 @@
         expect(controller.hideDeliveryPipelineData).toBe(true);
       });
 
-      it('should have all actions disabled', function () {
-        // Set state action
-        var actions = ['start', 'stop', 'restart', 'delete'];
-        _.each(actions, function (actionId) {
-          controller.model.application.state.actions[actionId] = true;
-          expect(controller.isActionHidden(actionId)).toBe(true);
-        });
-      });
+      it('should have all actions disabled', _.partial(allActionsHidden, true));
+
+      it('should have all actions disabled except delete', _.partial(allActionsHiddenExcludingDelete, true));
     });
 
     describe('dev user', function () {
@@ -230,14 +241,9 @@
         expect(controller.hideDeliveryPipelineData).toBe(false);
       });
 
-      it('should have all actions enabled', function () {
-        // Set state action
-        var actions = ['start', 'stop', 'restart', 'delete'];
-        _.each(actions, function (actionId) {
-          controller.model.application.state.actions[actionId] = true;
-          expect(controller.isActionHidden(actionId)).toBe(false);
-        });
-      });
+      it('should have all actions enabled', _.partial(allActionsHidden, false));
+
+      it('should have all actions enabled except delete', _.partial(allActionsHiddenExcludingDelete, false));
     });
   });
 })();

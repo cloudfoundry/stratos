@@ -90,8 +90,9 @@
     this.appPage = 1;
 
     // Sorting options
-    this.currentSortOption = undefined;
-    this.sortAscending = undefined;
+    // Default to sorting with the newest applications first
+    this.currentSortOption = 'metadata.created_at';
+    this.sortAscending = false;
   }
 
   angular.extend(Application.prototype, {
@@ -112,6 +113,7 @@
         pipeline: {
           fetching: false,
           valid: false,
+          forbidden: false,
           hceCnsi: undefined,
           hceServiceGuid: undefined,
           projectId: undefined
