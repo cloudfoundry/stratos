@@ -44,6 +44,14 @@
     getUser: getUser,
     getPassword: getPassword,
 
+    skipIfNoHCF: skipIfNoHCF,
+    skipIfNoHCE: skipIfNoHCE,
+    skipIfNoHCFHCE: skipIfNoHCFHCE,
+    skipIfNoSecondHCF: skipIfNoSecondHCF,
+    skipIfNoAppWithLogStrean: skipIfNoAppWithLogStrean,
+
+    getAppNameWithLogStream: getAppNameWithLogStream,
+
     getGithubTokenName: getGithubTokenName,
     getGithubNewTokenName: getGithubNewTokenName,
     getGithubToken: getGithubToken,
@@ -464,6 +472,31 @@
         // no disabled attribute --> enabled button
         return true;
       });
+  }
+
+  // Test skip helpers
+  function skipIfNoHCF() {
+    return !getHcfs() || !getHcfs().hcf1;
+  }
+
+  function skipIfNoHCE() {
+    return !getHces() || !getHces().hce1;
+  }
+
+  function skipIfNoHCFHCE() {
+    return skipIfNoHCF() || skipIfNoHCE();
+  }
+
+  function skipIfNoSecondHCF() {
+    return !getHcfs() || !getHcfs().hcf2;
+  }
+
+  function skipIfNoAppWithLogStrean() {
+    return !browser.params.appWithLogStream;
+  }
+
+  function getAppNameWithLogStream() {
+    return browser.params.appWithLogStream;
   }
 
 })();

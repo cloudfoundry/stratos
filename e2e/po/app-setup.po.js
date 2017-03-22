@@ -22,8 +22,8 @@
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
     organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, appSetupPromise, testHceCluster;
-  var hcfFromConfig = helpers.getHcfs().hcf1;
-  var hceFromConfig = helpers.getHces().hce1;
+  var hcfFromConfig = helpers.getHcfs() ? helpers.getHcfs().hcf1 : undefined;
+  var hceFromConfig = helpers.getHces() ? helpers.getHces().hce1 : undefined;
 
   function getSearchBoxes() {
     return element.all(by.css('.application-cf-filters .form-group'));

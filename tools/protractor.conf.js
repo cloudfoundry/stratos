@@ -17,6 +17,8 @@
     '../e2e/tests/acceptance/log-stream.spec.js'
   ];
 
+  var skipPlugin = require('../e2e/po/skip-plugin.js');
+
   exports.config = {
 
     suites: {
@@ -58,6 +60,7 @@
       },
       skipSSlValidation: true,
       caCert: 'ssl/stackatoCA.pem',
+      appWithLogStream: 'node-env',
       cnsi: {
         hcf: {
           hcf1: {
@@ -129,6 +132,9 @@
     },
 
     onPrepare: function () {
+
+      skipPlugin.install(jasmine);
+
       // // Not quite sure we need this, could be helpful.
       // var jasmineReporters = require('jasmine-reporters');
       // jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
@@ -162,10 +168,11 @@
         displayPendingSummary: false,
         displayStacktrace: 'specs'
       }));
+      jasmine.getEnv().addReporter(skipPlugin.reporter());
     },
 
     jasmineNodeOpts: {
-      // disable default jasmine report (using jasmine-spec-reporter
+      // disable default jasmine report (using jasmine-spec-reporter)
       print: function () {
       }
     }

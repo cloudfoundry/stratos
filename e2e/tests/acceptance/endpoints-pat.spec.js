@@ -231,5 +231,5 @@
 
       });
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCE);
 })();
