@@ -24,7 +24,7 @@
    */
   angular
     .module('green-box-console', angularModules.concat(otherModules, ['app'],
-      ['cloud-foundry', 'github']
+      ['cloud-foundry', 'github', 'service-manager']
     ), config);
 
   config.$inject = [
