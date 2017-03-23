@@ -70,7 +70,7 @@
     });
 
     it('Add Application button shows fly out with correct values', function () {
-      var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
+      //var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
       //var domain = selectedHcf.api_endpoint.Host.substring(4);
 
       galleryWall.addApplication().then(function () {
@@ -233,7 +233,7 @@
       galleryWall.showApplications();
     });
 
-    describe('Delivery Pipeline', function() {
+    describe('Delivery Pipeline', function () {
       it('Create an application and allow user to choose to setup a pipeline', function () {
         var appName = 'acceptance.e2e.' + testTime + '_2';
         var hostName = appName.replace(/\./g, '_');
