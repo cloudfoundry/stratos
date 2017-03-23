@@ -18,6 +18,15 @@
   ];
 
   var skipPlugin = require('../e2e/po/skip-plugin.js');
+  var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+
+  var reporter = new HtmlScreenshotReporter({
+    dest: '../out/e2e-failures',
+    filename: 'test-report.html',
+    ignoreSkippedSpecs: true,
+    captureOnlyFailedSpecs: true,
+    showQuickLinks: true
+  });
 
   exports.config = {
 
@@ -101,6 +110,12 @@
       }
     },
 
+    beforeLaunch: function () {
+      return new Promise(function (resolve) {
+        reporter.beforeLaunch(resolve);
+      });
+    },
+
     onPrepare: function () {
 
       skipPlugin.install(jasmine);
@@ -129,6 +144,7 @@
         }]);
       };
 
+
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
       // Optional. Really nice to see the progress of the tests while executing
@@ -138,7 +154,14 @@
         displayPendingSummary: false,
         displayStacktrace: 'specs'
       }));
+      jasmine.getEnv().addReporter(reporter);
       jasmine.getEnv().addReporter(skipPlugin.reporter());
+    },
+
+    afterLaunch: function (exitCode) {
+      return new Promise(function (resolve) {
+        reporter.afterLaunch(resolve.bind(this, exitCode));
+      });
     },
 
     jasmineNodeOpts: {
