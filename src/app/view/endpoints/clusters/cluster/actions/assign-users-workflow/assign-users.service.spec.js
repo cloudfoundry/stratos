@@ -3,7 +3,7 @@
 
   describe('Assign Users test', function () {
     var assignUsersService, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
-      rolesService, $stateParams, $q, $timeout, $controller, stackatoInfo;
+      rolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, organizationModel;
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';
@@ -32,6 +32,7 @@
       modelManager = $injector.get('app.model.modelManager');
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
       $stateParams = $injector.get('$stateParams');
+      organizationModel = $injector.get('organization-model');
       $q = $injector.get('$q');
       $timeout = $injector.get('$timeout');
 
@@ -184,7 +185,6 @@
             $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: users });
 
             // Initial set of organizations
-            var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
             _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
           });
 

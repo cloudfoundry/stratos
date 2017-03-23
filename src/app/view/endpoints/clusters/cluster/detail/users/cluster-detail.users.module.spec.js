@@ -4,7 +4,7 @@
   describe('cluster detail (users) module', function () {
 
     var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-      rolesService, eventService, userSelection;
+      rolesService, eventService, userSelection, orgModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -67,7 +67,7 @@
     function createController() {
       var ClusterUsersController = $state.get('endpoint.clusters.cluster.detail.users').controller;
       $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-        rolesService, eventService, userSelection);
+        rolesService, eventService, userSelection, orgModel);
     }
 
     beforeEach(inject(function ($injector) {
@@ -84,6 +84,7 @@
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
       eventService = $injector.get('app.event.eventService');
       userSelection = $injector.get('app.view.userSelection');
+      orgModel = $injector.get('organization-model');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -104,7 +105,7 @@
       });
 
       // Initial set of organizations
-      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      var organizationModel = $injector.get('organization-model');
       _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
 
       spyOn(rolesService, 'listUsers').and.callFake(function (inClusterGuid) {

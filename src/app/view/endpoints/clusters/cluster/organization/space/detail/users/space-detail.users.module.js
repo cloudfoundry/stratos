@@ -35,11 +35,12 @@
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService',
-    'app.view.userSelection'
+    'app.view.userSelection',
+    'organization-model'
   ];
 
-  function SpaceUsersController($scope, $state, $stateParams, $log, $q,
-                                modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers, rolesService,
+                                eventService, userSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -48,7 +49,7 @@
     this.users = [];
     this.removingSpace = {};
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');

@@ -31,12 +31,12 @@
     '$q',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
-    'app.view.userSelection'
+    'app.view.userSelection',
+    'organization-model'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection) {
+  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection, organizationModel) {
     var that = this;
-    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 

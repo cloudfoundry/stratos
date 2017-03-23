@@ -200,7 +200,7 @@
         });
 
         // Initial set of organizations
-        var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+        var organizationModel = $injector.get('organization-model');
         _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
 
         // Initial set of spaces
