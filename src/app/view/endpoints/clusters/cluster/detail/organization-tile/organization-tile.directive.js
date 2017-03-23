@@ -21,7 +21,7 @@
   }
 
   OrganizationTileController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     '$state',
     '$q',
     '$scope',

@@ -25,7 +25,7 @@
   /* eslint-enable angular/no-directive-replace */
 
   SelectVcsTokenController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken'
   ];

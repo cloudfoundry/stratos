@@ -38,7 +38,7 @@
 
   CredentialsFormController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.notificationsService'
   ];
 

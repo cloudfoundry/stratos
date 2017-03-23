@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       model = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
       //mockInstancesApi = mock.cloudFoundryAPI.ServiceInstances;
     }));

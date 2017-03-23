@@ -26,7 +26,7 @@
   ClustersRouterController.$inject = [
     '$q',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService'
   ];
 

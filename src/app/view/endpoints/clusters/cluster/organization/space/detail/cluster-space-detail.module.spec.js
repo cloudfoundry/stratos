@@ -15,7 +15,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var $state = $injector.get('$state');
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;

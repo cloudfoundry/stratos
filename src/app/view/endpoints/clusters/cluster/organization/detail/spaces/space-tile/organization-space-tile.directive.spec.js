@@ -55,7 +55,7 @@
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
 
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
 
       var organizationModel = $injector.get('organization-model');
       _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));

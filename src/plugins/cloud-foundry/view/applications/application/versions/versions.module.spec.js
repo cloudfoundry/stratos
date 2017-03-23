@@ -21,7 +21,7 @@
       $scope = $injector.get('$rootScope').$new();
       $httpBackend = $injector.get('$httpBackend');
 
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       confirmDialog = function (specs) {
         return specs.callback();
       };

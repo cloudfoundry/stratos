@@ -29,7 +29,7 @@
     '$stateParams',
     '$q',
     '$scope',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'cloud-foundry.model.application.stateService'
   ];

@@ -28,7 +28,7 @@
 
       $timeout = _$timeout_;
       $log = _$log_;
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
 
       var viewEvent = $injector.get('viewEventDetailView');
       promise = viewEvent.open(event, guid);

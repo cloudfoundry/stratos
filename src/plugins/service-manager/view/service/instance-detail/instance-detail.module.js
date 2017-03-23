@@ -98,7 +98,7 @@
     '$state',
     '$stateParams',
     'app.utils.utilsService',
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.dialog.confirm',
     'service-manager.view.manage-instance.dialog',
     'service-manager.utils.version'
@@ -314,7 +314,7 @@
   UpgradeController.$inject = [
     '$state',
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'service-manager.utils.version'
   ];

@@ -36,7 +36,7 @@
 
         var $log = $injector.get('$log');
         var $q = $injector.get('$q');
-        var modelManager = $injector.get('app.model.modelManager');
+        var modelManager = $injector.get('modelManager');
         var utils = $injector.get('app.utils.utilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
@@ -169,7 +169,7 @@
         $stateParams.organization = organizationGuid;
         $stateParams.space = spaceGuid;
         $q = $injector.get('$q');
-        modelManager = $injector.get('app.model.modelManager');
+        modelManager = $injector.get('modelManager');
         utils = $injector.get('app.utils.utilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');

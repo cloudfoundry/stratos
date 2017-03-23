@@ -11,9 +11,9 @@
     .run(registerPrivateDomainModel);
 
   registerPrivateDomainModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils'
+    'modelManager',
+    'apiManager',
+    'modelUtils'
   ];
 
   function registerPrivateDomainModel(modelManager, apiManager, modelUtils) {

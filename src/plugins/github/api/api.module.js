@@ -7,7 +7,7 @@
 
   registerGithubApi.$inject = [
     '$http',
-    'app.api.apiManager',
+    'apiManager',
     'GITHUB_ENDPOINTS'
   ];
 

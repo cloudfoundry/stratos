@@ -7,7 +7,7 @@
 
   dashboardService.$inject = [
     '$q',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

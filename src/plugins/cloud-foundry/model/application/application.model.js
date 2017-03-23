@@ -13,11 +13,11 @@
 
   registerApplicationModel.$inject = [
     'app.config',
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'cloud-foundry.model.application.stateService',
     '$q',
-    'cloud-foundry.model.modelUtils',
+    'modelUtils',
     'app.utils.utilsService'
   ];
 

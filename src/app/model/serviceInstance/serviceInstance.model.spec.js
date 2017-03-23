@@ -9,7 +9,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $httpParamSerializer = $injector.get('$httpParamSerializer');
 
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       serviceInstance = modelManager.retrieve('app.model.serviceInstance');
 
       mockData = [

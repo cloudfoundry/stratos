@@ -12,7 +12,7 @@
     .run(registerStackatoInfoModel);
 
   registerStackatoInfoModel.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'stackatoInfoService'
   ];
 

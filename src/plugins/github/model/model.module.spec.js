@@ -17,7 +17,7 @@
     }));
 
     beforeEach(inject(function ($injector) {
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       $httpBackend = $injector.get('$httpBackend');
       $rootScope = $injector.get('$rootScope');
       that = modelManager.retrieve('github.model');

@@ -34,7 +34,7 @@
 
   AssignUsersWorkflowController.$inject = [
     '$scope',
-    'app.model.modelManager',
+    'modelManager',
     'context',
     'app.view.endpoints.clusters.cluster.rolesService',
     'organization-model',

@@ -28,7 +28,7 @@
     '$scope',
     '$q',
     '$window',
-    'app.model.modelManager',
+    'modelManager',
     'service-manager.utils.version'
   ];
 

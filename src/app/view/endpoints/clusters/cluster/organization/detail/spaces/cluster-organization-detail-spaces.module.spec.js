@@ -19,7 +19,7 @@
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
       var $state = $injector.get('$state');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var utils = $injector.get('app.utils.utilsService');
 
       var ClusterDetailSpacesController = $state.get('endpoint.clusters.cluster.organization.detail.spaces').controller;

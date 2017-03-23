@@ -28,8 +28,8 @@
   }
 
   AddNotificationTargetController.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     '$q',
     '$uibModalInstance'
   ];

@@ -46,7 +46,7 @@
       $interpolate = $injector.get('$interpolate');
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
       registerVcsToken = $injector.get('app.view.vcs.registerVcsToken');
       PAT_DELIMITER = $injector.get('PAT_DELIMITER');

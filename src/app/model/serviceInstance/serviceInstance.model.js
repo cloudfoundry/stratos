@@ -12,8 +12,8 @@
     .run(registerServiceInstanceModel);
 
   registerServiceInstanceModel.$inject = [
-    'app.api.apiManager',
-    'app.model.modelManager'
+    'apiManager',
+    'modelManager'
   ];
 
   function registerServiceInstanceModel(apiManager, modelManager) {

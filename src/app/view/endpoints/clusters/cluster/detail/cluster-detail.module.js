@@ -32,11 +32,11 @@
     '$scope',
     '$state',
     '$q',
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
-    'cloud-foundry.model.modelUtils',
+    'modelUtils',
     'organization-model'
   ];
 

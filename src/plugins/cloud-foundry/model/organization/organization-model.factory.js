@@ -13,13 +13,6 @@
     .module('cloud-foundry.model')
     .factory('organization-model', organizationModel);
 
-  organizationModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils',
-    '$q'
-  ];
-
   function organizationModel(modelManager, apiManager, modelUtils, $q) {
 
     var organizations = {};

@@ -8,7 +8,7 @@
   registerVcsApi.$inject = [
     '$http',
     '$httpParamSerializer',
-    'app.api.apiManager'
+    'apiManager'
   ];
 
   function registerVcsApi($http, $httpParamSerializer, apiManager) {

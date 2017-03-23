@@ -24,7 +24,7 @@
 
   SettingsController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**
@@ -46,7 +46,7 @@
   angular.extend(SettingsController.prototype, {});
 
   register.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService'
   ];
 

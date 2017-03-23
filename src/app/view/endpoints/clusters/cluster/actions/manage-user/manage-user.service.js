@@ -6,7 +6,7 @@
     .factory('app.view.endpoints.clusters.cluster.manageUsers', ManageUsersFactory);
 
   ManageUsersFactory.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.rolesService',
     'organization-model'

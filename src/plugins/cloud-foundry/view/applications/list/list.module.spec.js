@@ -21,7 +21,7 @@
       $state = $injector.get('$state');
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       eventService = $injector.get('app.event.eventService');
       var errorService = $injector.get('app.error.errorService');
       var utils = $injector.get('app.utils.utilsService');
@@ -172,7 +172,7 @@
         injector = $injector;
 
         $q = $injector.get('$q');
-        modelManager = $injector.get('app.model.modelManager');
+        modelManager = $injector.get('modelManager');
         userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
 
         orgModel = $injector.get('organization-model');

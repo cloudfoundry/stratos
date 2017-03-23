@@ -26,7 +26,7 @@
   }
 
   NavigationController.$inject = [
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

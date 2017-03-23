@@ -3,7 +3,7 @@
 
   angular
     .module('app.model')
-    .factory('app.model.modelManager', modelManagerFactory);
+    .factory('modelManager', modelManagerFactory);
 
   modelManagerFactory.$inject = [];
 

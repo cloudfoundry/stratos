@@ -22,7 +22,7 @@
       $scope = $injector.get('$rootScope').$new();
       $httpBackend = $injector.get('$httpBackend');
       $state = $injector.get('$state');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
 
       var $compile = $injector.get('$compile');
 

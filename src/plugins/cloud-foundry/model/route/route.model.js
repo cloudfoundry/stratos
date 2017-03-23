@@ -10,9 +10,9 @@
     .run(registerRouteModel);
 
   registerRouteModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils'
+    'modelManager',
+    'apiManager',
+    'modelUtils'
   ];
 
   function registerRouteModel(modelManager, apiManager, modelUtils) {

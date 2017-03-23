@@ -14,7 +14,7 @@
   registerUserServiceInstanceApi.$inject = [
     '$http',
     '$httpParamSerializer',
-    'app.api.apiManager'
+    'apiManager'
   ];
 
   function registerUserServiceInstanceApi($http, $httpParamSerializer, apiManager) {

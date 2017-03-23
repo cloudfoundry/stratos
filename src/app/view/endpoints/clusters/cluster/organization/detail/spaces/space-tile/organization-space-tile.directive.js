@@ -24,7 +24,7 @@
     '$stateParams',
     '$scope',
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
     'app.utils.utilsService',

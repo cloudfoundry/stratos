@@ -78,7 +78,7 @@
       $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       $q = $injector.get('$q');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       utils = $injector.get('app.utils.utilsService');
       manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');

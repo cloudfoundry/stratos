@@ -25,7 +25,7 @@
   RolesTablesController.$inject = [
     '$scope',
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.clusters.cluster.rolesService'
   ];
 

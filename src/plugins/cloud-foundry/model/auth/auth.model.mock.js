@@ -106,7 +106,7 @@
       opts.userGuid = opts.userGuid || 'userGuid';
 
       var $httpBackend = $injector.get('$httpBackend');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       setupStackatoInfo(isAdmin, opts.userGuid, opts.cnsiGuid, modelManager);
       setupFeatureFlagsRequest($httpBackend);
       if (isAdmin) {

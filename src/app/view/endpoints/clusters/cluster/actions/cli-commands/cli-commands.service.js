@@ -6,7 +6,7 @@
     .factory('app.view.endpoints.clusters.cluster.cliCommands', CliCommandsFactory);
 
   CliCommandsFactory.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.detailView'
   ];
 

@@ -24,7 +24,7 @@
   ManageServicesController.$inject = [
     '$q',
     '$scope',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'helion.framework.widgets.detailView',
     'cloud-foundry.view.applications.services.serviceInstanceService'

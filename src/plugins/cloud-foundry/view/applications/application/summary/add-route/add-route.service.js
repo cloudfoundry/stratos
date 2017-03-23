@@ -6,7 +6,7 @@
     .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory);
 
   AddRouteServiceFactory.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 

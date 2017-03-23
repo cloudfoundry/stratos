@@ -9,7 +9,7 @@
     '$q',
     '$state',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
     'app.utils.utilsService',

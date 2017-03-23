@@ -7,7 +7,7 @@
 
   registerApi.$inject = [
     '$http',
-    'app.api.apiManager'
+    'apiManager'
   ];
 
   function registerApi($http, apiManager) {

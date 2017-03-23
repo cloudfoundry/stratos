@@ -27,7 +27,7 @@
     '$q',
     '$state',
     '$stateParams',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService'
   ];
 

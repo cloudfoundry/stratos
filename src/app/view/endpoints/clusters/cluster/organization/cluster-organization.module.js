@@ -23,7 +23,7 @@
   }
 
   ClusterOrgController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'organization-model',
     '$stateParams',

@@ -7,7 +7,7 @@
    */
   angular
     .module('cloud-foundry.model')
-    .factory('cloud-foundry.model.modelUtils', modelUtilsServiceFactory);
+    .factory('modelUtils', modelUtilsServiceFactory);
 
   modelUtilsServiceFactory.$inject = [
     '$q',

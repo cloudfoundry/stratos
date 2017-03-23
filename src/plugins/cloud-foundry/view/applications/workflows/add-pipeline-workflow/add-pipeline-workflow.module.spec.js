@@ -16,7 +16,7 @@
       this.addPipelineWorkflowPrototype = $injector.get('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype');
 
       function F() {
-        this.modelManager = $injector.get('app.model.modelManager');
+        this.modelManager = $injector.get('modelManager');
         this.eventService = $injector.get('app.event.eventService');
         this.$q = $injector.get('$q');
         this.utils = $injector.get('app.utils.utilsService');
@@ -541,7 +541,7 @@
       var $q, vcsModel, modelManager;
 
       beforeEach(inject(function ($injector) {
-        modelManager = $injector.get('app.model.modelManager');
+        modelManager = $injector.get('modelManager');
         vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
         $q = $injector.get('$q');
       }));

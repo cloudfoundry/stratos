@@ -30,7 +30,7 @@
     '$q',
     '$stateParams',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'organization-model'
   ];

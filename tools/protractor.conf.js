@@ -144,7 +144,6 @@
         }]);
       };
 
-
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
       // Optional. Really nice to see the progress of the tests while executing

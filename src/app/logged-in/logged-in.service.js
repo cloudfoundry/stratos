@@ -7,7 +7,7 @@
 
   loggedInServiceFactory.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.dialog.confirm',
     '$interval',
     '$interpolate',

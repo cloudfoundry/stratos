@@ -20,7 +20,7 @@
 
   ApplicationLogStreamController.$inject = [
     'base64',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     '$stateParams',
     '$location',

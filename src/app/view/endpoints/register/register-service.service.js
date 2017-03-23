@@ -8,7 +8,7 @@
   ServiceRegistrationFactory.$inject = [
     '$q',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
     'helion.framework.widgets.detailView'

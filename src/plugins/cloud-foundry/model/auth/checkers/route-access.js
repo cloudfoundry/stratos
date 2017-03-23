@@ -12,7 +12,7 @@
     .run(register);
 
   register.$inject = [
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function register(modelManager) {

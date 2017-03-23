@@ -10,7 +10,7 @@
     beforeEach(module('green-box-console'));
 
     function initController($injector, mockAuthModel, role) {
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
       var $scope = $injector.get('$rootScope');

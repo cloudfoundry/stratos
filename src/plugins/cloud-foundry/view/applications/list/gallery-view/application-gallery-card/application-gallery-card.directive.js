@@ -24,7 +24,7 @@
   ApplicationGalleryCardController.$inject = [
     '$state',
     '$scope',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function ApplicationGalleryCardController($state, $scope, modelManager) {

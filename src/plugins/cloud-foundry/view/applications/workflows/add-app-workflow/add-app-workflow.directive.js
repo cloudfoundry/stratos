@@ -28,7 +28,7 @@
   }
 
   AddAppWorkflowController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.utils.utilsService',
     'app.view.vcs.manageVcsTokens',

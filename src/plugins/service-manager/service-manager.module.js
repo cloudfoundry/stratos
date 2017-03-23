@@ -14,7 +14,7 @@
     '$state',
     '$location',
     'app.event.eventService',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.notificationsService',
     'app.utils.utilsService'
   ];

@@ -3,34 +3,35 @@
   'use strict';
 
   var _ = require('lodash');
+  var angularFilesort = require('gulp-angular-filesort');
+  var autoprefixer = require('gulp-autoprefixer');
+  var browserSync = require('browser-sync').create();
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var eslint = require('gulp-eslint');
   var file = require('gulp-file');
+  var fork = require('child_process').fork;
   var gettext = require('gulp-angular-gettext');
   var gulp = require('gulp');
+  var gulpBowerFiles = require('bower-files');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
   var gulpreplace = require('gulp-replace');
+  var gutil = require('gulp-util');
+  var ngAnnotate = require('gulp-ng-annotate');
+  var nodeUrl = require('url');
+  var path = require('path');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
+  var request = require('request');
   var runSequence = require('run-sequence');
-  var autoprefixer = require('gulp-autoprefixer');
   var sass = require('gulp-sass');
   var sh = require('shelljs');
-  var browserSync = require('browser-sync').create();
-  var gutil = require('gulp-util');
-  var nodeUrl = require('url');
-  var utils = require('./gulp.utils');
-  var request = require('request');
-  var uglify = require('gulp-uglify');
   var sort = require('gulp-sort');
-  var angularFilesort = require('gulp-angular-filesort');
-  var gulpBowerFiles = require('bower-files');
   var templateCache = require('gulp-angular-templatecache');
+  var uglify = require('gulp-uglify');
+  var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
-  var path = require('path');
-  var fork = require('child_process').fork;
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -122,6 +123,9 @@
     return sources
       .pipe(sort())
       .pipe(angularFilesort())
+      .pipe(ngAnnotate({
+        single_quotes: true
+      }))
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.dist));

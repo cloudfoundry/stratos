@@ -3,7 +3,7 @@
 
   angular
     .module('app.api')
-    .factory('app.api.apiManager', apiManagerFactory);
+    .factory('apiManager', apiManagerFactory);
 
   /**
    * @memberof app.api

@@ -13,7 +13,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var appModel = modelManager.retrieve('cloud-foundry.model.application');
 
       var mockAppsApi = mock.cloudFoundryAPI.Apps;

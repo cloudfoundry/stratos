@@ -6,7 +6,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
-      var apiManager = $injector.get('app.api.apiManager');
+      var apiManager = $injector.get('apiManager');
       $httpBackend = $injector.get('$httpBackend');
       that = apiManager.retrieve('github.api');
     }));

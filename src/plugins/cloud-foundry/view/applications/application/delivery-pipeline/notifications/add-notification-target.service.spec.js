@@ -47,8 +47,8 @@
 
     beforeEach(inject(function ($injector) {
 
-      var modelManager = $injector.get('app.model.modelManager');
-      var apiManager = $injector.get('app.api.apiManager');
+      var modelManager = $injector.get('modelManager');
+      var apiManager = $injector.get('apiManager');
       var $q = $injector.get('$q');
       $uibModalInstance = {
         close: angular.noop,

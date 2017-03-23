@@ -21,7 +21,7 @@
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
       var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var userSelection = $injector.get('app.view.userSelection');
       var organizationModel = $injector.get('organization-model');
 

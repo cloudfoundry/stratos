@@ -27,8 +27,8 @@
 
   registerVcsModel.$inject = [
     '$q',
-    'app.model.modelManager',
-    'app.api.apiManager'
+    'modelManager',
+    'apiManager'
   ];
 
   function registerVcsModel($q, modelManager, apiManager) {

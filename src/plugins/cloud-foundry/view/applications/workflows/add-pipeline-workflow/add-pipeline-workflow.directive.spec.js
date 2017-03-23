@@ -13,7 +13,7 @@
       $scope.testDismiss = function () {};
       $scope.testClose = function () {};
 
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var application = modelManager.retrieve('cloud-foundry.model.application').application;
       application.summary = {
         routes: [{}]

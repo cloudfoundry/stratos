@@ -30,7 +30,7 @@
   register.$inject = [
     '$q',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.utils.utilsService'
   ];

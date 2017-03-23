@@ -70,7 +70,7 @@
       var $state = $injector.get('$state');
       $scope = $injector.get('$rootScope').$new();
 
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       var registerService = $injector.get('app.view.registerService');
       var utils = $injector.get('app.utils.utilsService');
       var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');

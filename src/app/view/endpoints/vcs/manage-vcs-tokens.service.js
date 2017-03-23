@@ -9,7 +9,7 @@
     '$q',
     '$timeout',
     'PAT_DELIMITER',
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',

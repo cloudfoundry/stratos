@@ -76,7 +76,7 @@
     }));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
 
       var organizationModel = $injector.get('organization-model');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);

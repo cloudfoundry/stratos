@@ -8,7 +8,7 @@
   RoutesServiceFactory.$inject = [
     '$q',
     '$log',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];

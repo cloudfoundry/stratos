@@ -6,7 +6,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       navigationModel = modelManager.retrieve('app.model.navigation');
     }));
 
