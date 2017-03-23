@@ -21,7 +21,7 @@
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
 
   var reporter = new HtmlScreenshotReporter({
-    dest: 'tests/screenshots',
+    dest: '../out/e2e-failures',
     filename: 'test-report.html',
     ignoreSkippedSpecs: true,
     captureOnlyFailedSpecs: true,
@@ -144,7 +144,6 @@
         }]);
       };
 
-      jasmine.getEnv().addReporter(reporter);
 
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
@@ -155,6 +154,7 @@
         displayPendingSummary: false,
         displayStacktrace: 'specs'
       }));
+      jasmine.getEnv().addReporter(reporter);
       jasmine.getEnv().addReporter(skipPlugin.reporter());
     },
 
