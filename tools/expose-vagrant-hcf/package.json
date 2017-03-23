@@ -1,0 +1,11 @@
+{
+  "name": "expose-vagrant-hcf",
+  "version": "1.0.0",
+  "description": "Expose a local Cloud Foundry cluster running inside Vagrant to the LAN",
+  "dependencies": {
+    "express": "^4.12.4",
+    "lodash": "^4.17.4",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {}
+}

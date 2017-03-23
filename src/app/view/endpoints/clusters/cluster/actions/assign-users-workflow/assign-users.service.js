@@ -37,6 +37,7 @@
     'app.model.modelManager',
     'context',
     'app.view.endpoints.clusters.cluster.rolesService',
+    'organization-model',
     '$stateParams',
     '$q',
     '$timeout',
@@ -52,13 +53,14 @@
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
    * roles table.
+   * @param {object} organizationModel - the organization-model service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController($scope, modelManager, context, rolesService, $stateParams, $q, $timeout,
-                                         $uibModalInstance) {
+  function AssignUsersWorkflowController($scope, modelManager, context, rolesService, organizationModel,
+                                         $stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
@@ -67,7 +69,7 @@
 
     context = context || {};
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');

@@ -29,7 +29,8 @@
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'organization-model'
   ];
 
   /**
@@ -45,10 +46,11 @@
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      cliCommands, confirmDialog, asyncTaskDialog) {
+                                      cliCommands, confirmDialog, asyncTaskDialog, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -58,7 +60,7 @@
     this.$state = $state;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

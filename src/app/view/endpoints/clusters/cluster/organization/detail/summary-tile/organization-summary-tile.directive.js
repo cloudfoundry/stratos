@@ -31,7 +31,8 @@
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'organization-model'
   ];
 
   /**
@@ -47,14 +48,16 @@
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} organizationModel - the organization-model service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
-                                             notificationsService, cliCommands, confirmDialog, asyncTaskDialog) {
+                                             notificationsService, cliCommands, confirmDialog, asyncTaskDialog,
+                                             organizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];

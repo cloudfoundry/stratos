@@ -21,6 +21,8 @@
       var utils = $injector.get('app.utils.utilsService');
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
+      var modelUtils = $injector.get('cloud-foundry.model.modelUtils');
+      var organizationModel = $injector.get('organization-model');
 
       var cliCommands = $injector.get('app.view.endpoints.clusters.cluster.cliCommands');
 
@@ -31,7 +33,7 @@
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
-      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands);
+      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands, modelUtils, organizationModel);
 
     }));
 

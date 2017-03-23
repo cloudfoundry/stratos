@@ -15,17 +15,19 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('app.model.modelManager');
+      var utils = $injector.get('app.utils.utilsService');
+      var organizationModel = $injector.get('organization-model');
+
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
 
       var $state = $injector.get('$state');
-      var utils = $injector.get('app.utils.utilsService');
       var $q = $injector.get('$q');
       var $log = $injector.get('$log');
 
       var ClusterOrgController = $state.get('endpoint.clusters.cluster.organization').controller;
-      $controller = new ClusterOrgController(modelManager, $stateParams, $state, utils, $q, $log);
+      $controller = new ClusterOrgController(modelManager, utils, organizationModel, $stateParams, $state, $q, $log);
 
     }));
 

@@ -85,17 +85,23 @@ fi
 
 echo "@import \"../dist/scss/index.scss\";" >> ./tmp/index.scss
 
+# If node_modules not present, do an npm install
+
+if [ ! -d ./node_modules ]; then
+  npm install
+fi
+
 # Generate/patch required files
 echo "Compiling stylesheet, generating index.html and stackato-config.js"
 gulp oem
 if [ $? -ne 0 ]; then
   echo "${red}Error generating files${reset}"
+else  
+  # Copy generated/patched files to the dest folder
+  cp ./tmp/index.css ${DEST_FOLDER}
+  cp ./tmp/stackato-config.js ${DEST_FOLDER}
+  cp ./tmp/index.html ${DEST_FOLDER}
 fi
-
-# Copy generated/patched files to the dest folder
-cp ./tmp/index.css ${DEST_FOLDER}
-cp ./tmp/stackato-config.js ${DEST_FOLDER}
-cp ./tmp/index.html ${DEST_FOLDER}
 
 if [ ! -z ${GENERATE_PATCH_SCRIPT} ]; then
 

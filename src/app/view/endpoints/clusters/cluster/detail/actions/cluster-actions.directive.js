@@ -33,7 +33,8 @@
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.userSelection',
-    'app.view.notificationsService'
+    'app.view.notificationsService',
+    'organization-model'
   ];
 
   /**
@@ -48,12 +49,12 @@
    * @param {object} assignUsersService - service that allows assigning roles to users
    * @param {object} userSelection - service centralizing user selection
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function ClusterActionsController(modelManager, $state, $q, $stateParams,
-                                    utils, asyncTaskDialog, assignUsersService, userSelection, notificationsService) {
+  function ClusterActionsController(modelManager, $state, $q, $stateParams, utils, asyncTaskDialog,
+                                    assignUsersService, userSelection, notificationsService, organizationModel) {
     var that = this;
-    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

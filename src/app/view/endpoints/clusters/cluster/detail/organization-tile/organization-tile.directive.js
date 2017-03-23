@@ -29,7 +29,8 @@
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'organization-model'
   ];
 
   /**
@@ -44,14 +45,15 @@
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
-                                      assignUsers, notificationsService, confirmDialog, asyncTaskDialog) {
+                                      assignUsers, notificationsService, confirmDialog, asyncTaskDialog, organizationModel) {
     var that = this;
     this.$state = $state;
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     // Present memory usage

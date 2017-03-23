@@ -23,6 +23,7 @@
       var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
       var modelManager = $injector.get('app.model.modelManager');
       var userSelection = $injector.get('app.view.userSelection');
+      var organizationModel = $injector.get('organization-model');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -31,7 +32,7 @@
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster').controller;
-      $controller = new ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection);
+      $controller = new ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection, organizationModel);
 
     }));
 

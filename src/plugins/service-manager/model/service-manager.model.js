@@ -126,9 +126,11 @@
       return this.model[guid] && this.model[guid].instances && !noCache ? this.$q.resolve(this.model[guid].instances) : loadPromise;
     },
 
+    /* eslint-disable angular/no-service-method */
     getService: function (guid, id) {
       return this.hsmApi.service(guid, id);
     },
+    /* eslint-enable angular/no-service-method */
 
     getServices: function (guid, noCache) {
       var that = this;
