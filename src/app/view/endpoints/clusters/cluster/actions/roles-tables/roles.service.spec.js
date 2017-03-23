@@ -89,7 +89,7 @@
       testModelOrg = _.cloneDeep(modelOrg);
       testModelSpace = _.cloneDeep(modelSpace);
 
-      organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      organizationModel = $injector.get('organization-model');
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     }));
 

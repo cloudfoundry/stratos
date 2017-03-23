@@ -29,7 +29,8 @@
     'app.view.notificationsService',
     'app.utils.utilsService',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'organization-model'
   ];
 
   /**
@@ -45,10 +46,12 @@
    * @param {object} utils - our utils service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, assignUsers,
-                                           notificationsService, utils, confirmDialog, asyncTaskDialog) {
+                                           notificationsService, utils, confirmDialog, asyncTaskDialog,
+                                           organizationModel) {
     var that = this;
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -59,7 +62,7 @@
     this.spaceGuid = this.space.metadata.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var isAdmin = this.user.admin;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

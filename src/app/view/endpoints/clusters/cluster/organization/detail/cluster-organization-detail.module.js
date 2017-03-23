@@ -23,19 +23,19 @@
   }
 
   ClusterOrgDetailController.$inject = [
-    'app.model.modelManager',
+    'app.utils.utilsService',
+    'organization-model',
     '$state',
     '$stateParams',
-    '$q',
-    'app.utils.utilsService'
+    '$q'
   ];
 
-  function ClusterOrgDetailController(modelManager, $state, $stateParams, $q, utils) {
+  function ClusterOrgDetailController(utils, organizationModel, $state, $stateParams, $q) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
 
     function init() {
       that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];

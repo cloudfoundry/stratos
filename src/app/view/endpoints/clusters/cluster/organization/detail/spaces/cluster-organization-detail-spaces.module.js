@@ -31,16 +31,17 @@
     '$stateParams',
     '$state',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'organization-model'
   ];
 
-  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils) {
+  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = organizationModel;
 
     this.stateInitialised = false;
 

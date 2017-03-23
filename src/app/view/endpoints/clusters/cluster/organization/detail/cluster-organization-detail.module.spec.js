@@ -14,16 +14,17 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var modelManager = $injector.get('app.model.modelManager');
+      var utils = $injector.get('app.utils.utilsService');
+      var organizationModel = $injector.get('organization-model');
+
       var $state = $injector.get('$state');
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
       var $q = $injector.get('$q');
-      var utils = $injector.get('app.utils.utilsService');
 
       var ClusterOrgDetailController = $state.get('endpoint.clusters.cluster.organization.detail').controller;
-      $controller = new ClusterOrgDetailController(modelManager, $state, $stateParams, $q, utils);
+      $controller = new ClusterOrgDetailController(utils, organizationModel, $state, $stateParams, $q);
     }));
 
     afterEach(function () {

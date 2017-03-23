@@ -65,7 +65,7 @@
         hcf: {
           hcf1: {
             register: {
-              api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+              api_endpoint: 'https://api.10.4.21.240.nip.io:8443',
               cnsi_name: 'hcf',
               skip_ssl_validation: 'true'
             },
@@ -79,36 +79,6 @@
             },
             testOrgName: 'e2e',
             testSpaceName: 'e2e'
-          },
-          hcf2: {
-            register: {
-              api_endpoint: 'https://api.hcf.hscdemo.stacktest.io',
-              cnsi_name: 'hcf demo',
-              skip_ssl_validation: 'true'
-            },
-            admin: {
-              username: 'admin',
-              password: 'hscadmin'
-            },
-            user: {
-              username: 'e2e',
-              password: 'changeme'
-            },
-            testOrgName: 'e2e',
-            testSpaceName: 'e2e'
-          }
-        },
-        hce: {
-          hce1: {
-            register: {
-              api_endpoint: 'https://hce.hscdemo.stacktest.io',
-              cnsi_name: 'hce',
-              skip_ssl_validation: 'true'
-            },
-            admin: {
-              username: 'hceadmin',
-              password: 'hscadmin'
-            }
           }
         }
       },

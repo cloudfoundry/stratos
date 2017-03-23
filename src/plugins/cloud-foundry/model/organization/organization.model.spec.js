@@ -8,8 +8,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      var modelManager = $injector.get('app.model.modelManager');
-      organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      organizationModel = $injector.get('organization-model');
     }));
 
     afterEach(function () {
