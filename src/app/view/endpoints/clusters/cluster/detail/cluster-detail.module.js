@@ -4,7 +4,8 @@
   angular
     .module('app.view.endpoints.clusters.cluster.detail', [
       'app.view.endpoints.clusters.cluster.detail.organizations',
-      'app.view.endpoints.clusters.cluster.detail.users'
+      'app.view.endpoints.clusters.cluster.detail.users',
+      'app.view.endpoints.clusters.cluster.detail.firehose'
     ])
     .config(registerRoute);
 
@@ -35,10 +36,12 @@
     'app.api.apiManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
-    'cloud-foundry.model.modelUtils'
+    'cloud-foundry.model.modelUtils',
+    'organization-model'
   ];
 
-  function ClusterDetailController($stateParams, $scope, $state, $q, modelManager, apiManager, utils, cliCommands, modelUtils) {
+  function ClusterDetailController($stateParams, $scope, $state, $q,
+                                   modelManager, apiManager, utils, cliCommands, modelUtils, organizationModel) {
     var that = this;
     this.guid = $stateParams.guid;
     this.cliCommands = cliCommands;
@@ -50,7 +53,6 @@
     this.orgCount = $stateParams.orgCount;
     this.service = {};
     this.userService = {};
-    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var userApi = apiManager.retrieve('cloud-foundry.api.Users');
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -85,7 +87,6 @@
     function init() {
       that.organizations = [];
 
-      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       var user = stackatoInfo.info.endpoints.hcf[that.guid].user;
       that.userService = userServiceInstanceModel.serviceInstances[that.guid] || {};

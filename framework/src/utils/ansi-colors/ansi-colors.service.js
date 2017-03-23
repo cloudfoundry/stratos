@@ -23,7 +23,7 @@
       32: 'green',
       33: 'yellow',
       34: 'blue',
-      35: 'purple',
+      35: 'magenta',
       36: 'cyan',
       37: 'white'
     };

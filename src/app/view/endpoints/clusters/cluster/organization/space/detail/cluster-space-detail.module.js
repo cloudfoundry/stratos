@@ -44,6 +44,8 @@
 
     function init() {
       that.stateInitialised = true;
+      that.spaceModel.uncacheAllServiceInstancesForSpace(that.clusterGuid, that.spaceGuid);
+      that.spaceModel.uncacheRoutesForSpace(that.clusterGuid, that.spaceGuid);
       return $q.resolve();
     }
 

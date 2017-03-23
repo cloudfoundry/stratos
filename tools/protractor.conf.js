@@ -17,6 +17,7 @@
     '../e2e/tests/acceptance/log-stream.spec.js'
   ];
 
+  var skipPlugin = require('../e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
 
   var reporter = new HtmlScreenshotReporter({
@@ -68,11 +69,12 @@
       },
       skipSSlValidation: true,
       caCert: 'ssl/stackatoCA.pem',
+      appWithLogStream: 'node-env',
       cnsi: {
         hcf: {
           hcf1: {
             register: {
-              api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+              api_endpoint: 'https://api.10.4.21.240.nip.io:8443',
               cnsi_name: 'hcf',
               skip_ssl_validation: 'true'
             },
@@ -86,36 +88,6 @@
             },
             testOrgName: 'e2e',
             testSpaceName: 'e2e'
-          },
-          hcf2: {
-            register: {
-              api_endpoint: 'https://api.hcf.hscdemo.stacktest.io',
-              cnsi_name: 'hcf demo',
-              skip_ssl_validation: 'true'
-            },
-            admin: {
-              username: 'admin',
-              password: 'hscadmin'
-            },
-            user: {
-              username: 'e2e',
-              password: 'changeme'
-            },
-            testOrgName: 'e2e',
-            testSpaceName: 'e2e'
-          }
-        },
-        hce: {
-          hce1: {
-            register: {
-              api_endpoint: 'https://hce.hscdemo.stacktest.io',
-              cnsi_name: 'hce',
-              skip_ssl_validation: 'true'
-            },
-            admin: {
-              username: 'hceadmin',
-              password: 'hscadmin'
-            }
           }
         }
       },
@@ -145,6 +117,9 @@
     },
 
     onPrepare: function () {
+
+      skipPlugin.install(jasmine);
+
       // // Not quite sure we need this, could be helpful.
       // var jasmineReporters = require('jasmine-reporters');
       // jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
@@ -180,6 +155,7 @@
         displayPendingSummary: false,
         displayStacktrace: 'specs'
       }));
+      jasmine.getEnv().addReporter(skipPlugin.reporter());
     },
 
     afterLaunch: function (exitCode) {
@@ -189,7 +165,7 @@
     },
 
     jasmineNodeOpts: {
-      // disable default jasmine report (using jasmine-spec-reporter
+      // disable default jasmine report (using jasmine-spec-reporter)
       print: function () {
       }
     }

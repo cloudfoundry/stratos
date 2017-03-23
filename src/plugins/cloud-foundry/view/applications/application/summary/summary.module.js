@@ -142,8 +142,12 @@
     ];
 
     function init() {
-      // Filter out the stackato hce service
-      that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
+      $scope.$watchCollection(function () {
+        return that.model.application.summary.services;
+      }, function () {
+        // Filter out the stackato hce service
+        that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
+      });
 
       that.canSetupPipeline = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
 

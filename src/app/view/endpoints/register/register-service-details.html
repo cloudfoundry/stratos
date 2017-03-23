@@ -18,6 +18,12 @@
     <p translate>When registering, choose a unique, recognizable name so that your developers can easily
       know which {{ OEM_CONFIG.CODE_ENGINE }} endpoint they are working with.</p>
   </div>
+  <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hsm'">
+    <p translate>{{ OEM_CONFIG.SERVICE_MANAGER }} supports the full lifecycle for deploying, managing and upgrading services deployed in the Control Plane.</p>
+    <p translate>Register an existing {{ OEM_CONFIG.SERVICE_MANAGER }} to allow Console administrators to view services.</p>
+    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
+      know which {{ OEM_CONFIG.SERVICE_MANAGER }} endpoint they are working with.</p>
+  </div>
   <div class="register-content-right">
     <h4>{{step.title}}</h4>
     <div>

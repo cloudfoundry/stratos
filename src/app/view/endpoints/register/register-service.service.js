@@ -79,6 +79,14 @@
                         step.nameOfUrlInput = 'hceUrl';
                         step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
                         break;
+                      case 'hsm':
+                        scope.endpoint = utilsService.getOemConfiguration().SERVICE_MANAGER;
+                        step.product = utilsService.getOemConfiguration().SERVICE_MANAGER;
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
+                        step.nameOfNameInput = 'hsmName';
+                        step.nameOfUrlInput = 'hsmUrl';
+                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
+                        break;
                       default:
                         step.product = gettext('Endpoint');
                         step.title = gettext('Register Endpoint');

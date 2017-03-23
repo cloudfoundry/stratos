@@ -14,11 +14,12 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'cloud-foundry.model.service.serviceUtils',
-    'cloud-foundry.model.modelUtils'
+    'cloud-foundry.model.modelUtils',
+    'organization-model'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils));
+  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils, organizationModel) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel));
   }
 
   /**
@@ -29,12 +30,13 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @param {object} serviceUtils - the service utils service
+   * @param {object} modelUtils - a service containing general hcf model helpers
+   * @param {object} organizationModel - the organization-model service
+   * @property {object} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, serviceUtils, modelUtils) {
+  function Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.modelManager = modelManager;
@@ -42,7 +44,7 @@
     this.modelUtils = modelUtils;
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.data = {};
-
+    this.organizationModel = organizationModel;
   }
 
   angular.extend(Space.prototype, {
@@ -84,15 +86,18 @@
      * @public
      */
     onListAllAppsForSpace: function (cnsiGuid, guid, apps) {
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.apps', apps);
+      // Avoid flicker in endpoints dashboard by pre-sorting apps
+      var sortedApps = _.sortBy(apps, function (a) { return -a.metadata.created_at; });
+
+      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.apps', sortedApps);
 
       // Ensures we also update inlined data for getDetails to pick up
       var cachedSpace = _.get(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
       if (angular.isDefined(cachedSpace)) {
-        cachedSpace.entity.apps = apps;
+        cachedSpace.entity.apps = sortedApps;
       }
 
-      return apps;
+      return sortedApps;
     },
 
     /**
@@ -211,6 +216,19 @@
     },
 
     /**
+     * @function uncacheAllServiceInstancesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description uncache all service instances for a space
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
+     * @public
+     */
+    uncacheAllServiceInstancesForSpace: function (cnsiGuid, guid) {
+      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.instances');
+      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances');
+    },
+
+    /**
      * @function listAllRoutesForSpace
      * @memberof cloud-foundry.model.space
      * @description Lost all routes for service
@@ -254,9 +272,24 @@
      * @public
      */
     onListAllRoutesForSpace: function (cnsiGuid, guid, routes) {
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes', routes);
+      // Pre-sort routes to avoid smart-table flicker in the endpoints dashboard
+      var sortedRoutes = _.sortBy(routes, function (r) { return r.entity.host.toLowerCase(); });
+      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes', sortedRoutes);
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', (routes || []).length);
       return routes;
+    },
+
+    /**
+     * @function uncacheRoutesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description Uncache routes for a space
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
+     * @public
+     */
+    uncacheRoutesForSpace: function (cnsiGuid, guid) {
+      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes');
+      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes');
     },
 
     /**
@@ -697,7 +730,7 @@
     },
 
     _getOrganizationModel: function () {
-      return this.modelManager.retrieve('cloud-foundry.model.organization');
+      return this.organizationModel;
     }
 
   });

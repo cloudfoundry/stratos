@@ -70,8 +70,8 @@
     });
 
     it('Add Application button shows fly out with correct values', function () {
-      var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
-      var domain = selectedHcf.api_endpoint.Host.substring(4);
+      //var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
+      //var domain = selectedHcf.api_endpoint.Host.substring(4);
 
       galleryWall.addApplication().then(function () {
         expect(addAppWizard.isDisplayed()).toBeTruthy();
@@ -92,9 +92,11 @@
           expect(text).toBe(testConfig.selectedSpace);
         });
 
-        addAppHcfApp.domain().getValue().then(function (text) {
-          expect(text).toBe(domain);
-        });
+        // Domain that is configured might be different from the HCF endpoint that was registered
+        // addAppHcfApp.domain().getValue().then(function (text) {
+        //   expect(text).toBe(domain);
+        // });
+
         addAppHcfApp.host().getValue().then(function (text) {
           expect(text).toBe('');
         });
@@ -199,11 +201,15 @@
       // Go to the delivery pipeline tab
       application.showDeliveryPipeline();
       expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
-      expect(deliveryPipeline.setupPipelineButton().isPresent()).toBe(true);
-      deliveryPipeline.setupPipelineButton().click();
-      expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
-      expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
-      deliveryPipeline.getSetupWizard().cancel();
+
+      // Skip if there is no Code Engine available
+      if (!helpers.skipIfNoHCE()) {
+        expect(deliveryPipeline.setupPipelineButton().isPresent()).toBe(true);
+        deliveryPipeline.setupPipelineButton().click();
+        expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
+        expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
+        deliveryPipeline.getSetupWizard().cancel();
+      }
 
       application.showSummary();
       application.invokeAction('CLI Instructions');
@@ -227,49 +233,51 @@
       galleryWall.showApplications();
     });
 
-    it('Create an application and allow user to choose to setup a pipeline', function () {
-      var appName = 'acceptance.e2e.' + testTime + '_2';
-      var hostName = appName.replace(/\./g, '_');
-      var until = protractor.ExpectedConditions;
-      browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
-      galleryWall.addApplication();
+    describe('Delivery Pipeline', function () {
+      it('Create an application and allow user to choose to setup a pipeline', function () {
+        var appName = 'acceptance.e2e.' + testTime + '_2';
+        var hostName = appName.replace(/\./g, '_');
+        var until = protractor.ExpectedConditions;
+        browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
+        galleryWall.addApplication();
 
-      expect(addAppWizard.isDisplayed()).toBeTruthy();
-      browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
-      // Wait until form control is available
-      browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
-      addAppHcfApp.name().addText(appName);
-      addAppHcfApp.host().clear();
-      addAppHcfApp.host().addText(hostName);
-      addAppWizard.getWizard().next();
-      helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
-        return cfModel.fetchApp(testConfig.testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
-          .then(function (app) {
-            testApp = app;
-            expect(app).toBeTruthy();
-          })
-          .catch(function () {
-            fail('Failed to determine if app exists');
-          });
+        expect(addAppWizard.isDisplayed()).toBeTruthy();
+        browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
+        // Wait until form control is available
+        browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
+        addAppHcfApp.name().addText(appName);
+        addAppHcfApp.host().clear();
+        addAppHcfApp.host().addText(hostName);
+        addAppWizard.getWizard().next();
+        helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
+          return cfModel.fetchApp(testConfig.testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+            .then(function (app) {
+              testApp = app;
+              expect(app).toBeTruthy();
+            })
+            .catch(function () {
+              fail('Failed to determine if app exists');
+            });
+        });
+
+        // Wait for dialog to close
+        browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
+        // Should now have reached the application page
+        expect(application.getHeader().isDisplayed()).toBe(true);
+        expect(application.isNewlyCreated()).toBe(true);
+
+        // Pipeline
+        expect(element(by.id('new-app-setup-pipeline')).isDisplayed()).toBe(true);
+        element(by.id('new-app-setup-pipeline')).click();
+        expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
+        expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
+        expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
+        deliveryPipeline.getSetupWizard().cancel();
+
+        // Back to app wall when we are done
+        galleryWall.showApplications();
       });
-
-      // Wait for dialog to close
-      browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
-      // Should now have reached the application page
-      expect(application.getHeader().isDisplayed()).toBe(true);
-      expect(application.isNewlyCreated()).toBe(true);
-
-      // Pipeline
-      expect(element(by.id('new-app-setup-pipeline')).isDisplayed()).toBe(true);
-      element(by.id('new-app-setup-pipeline')).click();
-      expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
-      expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
-      expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
-      deliveryPipeline.getSetupWizard().cancel();
-
-      // Back to app wall when we are done
-      galleryWall.showApplications();
-    });
+    }).skipWhen(helpers.skipIfNoHCE);
 
     it('Should show add application button when no applications shown on app wall', function () {
       galleryWall.showApplications();
@@ -342,13 +350,14 @@
           columnMenu.clickItem(1);
           expect(confirmModal.getTitle()).toBe('Detach Service');
           confirmModal.commit();
+          helpers.checkAndCloseToast(/Service instance successfully detached/);
 
           // Delete Service
           columnMenu.click();
           columnMenu.clickItem(0);
           expect(confirmModal.getTitle()).toBe('Delete Service');
           confirmModal.commit();
-
+          helpers.checkAndCloseToast(/Service instance successfully deleted/);
           if (rows.length === 1) {
             expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no service instances');
           } else {
@@ -359,5 +368,5 @@
         });
       });
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCF);
 })();
