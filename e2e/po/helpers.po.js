@@ -17,8 +17,8 @@
   var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 
   var cnsis = browser.params.cnsi;
-  var hcfs = cnsis.hcf;
-  var hces = cnsis.hce;
+  var hcfs = cnsis.hcf || {};
+  var hces = cnsis.hce || {};
   var adminUser = browser.params.credentials.admin.username;
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;

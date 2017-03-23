@@ -88,7 +88,8 @@
         return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
           registeredCnsi = JSON.parse(response);
           testCluster = _.find(registeredCnsi, {name: hcfFromConfig.register.cnsi_name});
-          testHceCluster = _.find(registeredCnsi, {name: hceFromConfig.register.cnsi_name});
+          // HCE can be optional
+          testHceCluster = hceFromConfig ? _.find(registeredCnsi, {name: hceFromConfig.register.cnsi_name}) : undefined;
           expect(testCluster).toBeDefined();
         });
       })
