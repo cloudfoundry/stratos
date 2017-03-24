@@ -34,6 +34,9 @@
   function checkSkipped(suite) {
     var skipped = 0;
     _.each(suite.suites, function (s) {
+      if (!s.disabled) {
+        s.disabled = suite.disabled || false;
+      }
       skipped += checkSkipped(s);
     });
     if (suite.disabled) {
@@ -41,6 +44,25 @@
     }
     suite.skipped = skipped;
     return skipped;
+  }
+
+  function report(suite, level) {
+    var spaces = level * INDENT;
+    var fileName = suite.file ? colorize('cyan', '(' + suite.file + ')') : '';
+
+    console.log(_.padStart('', spaces) + suite.name + '  ' + fileName);
+    level++;
+    spaces = level * INDENT;
+
+    var color = suite.disabled ? 'yellow' : 'green';
+
+    _.each(suite.tests, function (t) {
+      console.log(_.padStart('', spaces) + colorize(color, t));
+    });
+
+    _.each(suite.suites, function (s) {
+      report(s, level);
+    });
   }
 
   var root = newTestRecord('ROOT');
@@ -109,6 +131,8 @@
 
   // Calculate number of skipped tests
   checkSkipped(root);
+
+  report(root, 0);
 
   console.log('\n' + colorize('cyan', _.padEnd('Test File', 72)) + colorize('green', 'Tests') + '    ' + colorize('yellow', 'Skipped') + '\n');
 
