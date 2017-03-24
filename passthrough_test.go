@@ -7,281 +7,294 @@ import (
 	"testing"
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
+	. "github.com/smartystreets/goconvey/convey"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
 func TestPassthroughDoRequest(t *testing.T) {
 	t.Parallel()
 
-	mockHCFServer := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
-	defer mockHCFServer.Close()
+	Convey("Passthrough request tests", t, func() {
+		mockHCFServer := setupMockServer(t,
+			msRoute("/v2/info"),
+			msMethod("GET"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockV2InfoResponse)))
+		defer mockHCFServer.Close()
 
-	uri, err := url.Parse(mockHCFServer.URL + "/v2/info")
-	if err != nil {
-		t.Fatal(err)
-	}
-	mockCNSIRequest := CNSIRequest{
-		GUID:     mockHCFGUID,
-		UserGUID: mockUserGUID,
-		Method:   "GET",
-		URL:      uri,
-	}
+		uri, err := url.Parse(mockHCFServer.URL + "/v2/info")
+		So(err, ShouldBeNil)
 
-	var mockTokenRecord = tokens.TokenRecord{
-		AuthToken:    mockUAAToken,
-		RefreshToken: mockUAAToken,
-		TokenExpiry:  mockTokenExpiry,
-	}
-	// pp.CNSIs[mockCNSIGuid] = mockCNSI
-
-	// setup mocks
-	req := setupMockReq("POST", "", map[string]string{})
-	_, _, _, pp, db, mock := setupHTTPTest(req)
-	defer db.Close()
-
-	mock.ExpectQuery(selectAnyFromTokens).
-		WithArgs(mockHCFGUID, mockUserGUID).
-		WillReturnRows(expectNoRows())
-
-	// set up the database expectation for pp.setCNSITokenRecord
-	mock.ExpectExec(insertIntoTokens).
-		//	WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, mockTokenRecord.TokenExpiry).
-		WillReturnResult(sqlmock.NewResult(1, 1))
-
-	err = pp.setCNSITokenRecord(mockHCFGUID, mockUserGUID, mockTokenRecord)
-	if err != nil {
-		t.Errorf("Unable to set CNSI Token record: %s", err)
-	}
-
-	/*	// verify expectations met
-		if dberr := mock.ExpectationsWereMet(); dberr != nil {
-			t.Errorf("There were unfulfilled expectations: %s", dberr)
+		mockCNSIRequest := CNSIRequest{
+			GUID:     mockHCFGUID,
+			UserGUID: mockUserGUID,
+			Method:   "GET",
+			URL:      uri,
 		}
-	*/
-	// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
-	done := make(chan *CNSIRequest)
 
-	// Set up database expectation for pp.doOauthFlowRequest
-	//  p.getCNSIRequestRecords(cnsiRequest) ->
-	//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
-	//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
-	mock.ExpectQuery(selectAnyFromTokens).
-		WithArgs(mockHCFGUID, mockUserGUID).
-		WillReturnRows(expectTokenRow())
+		var mockTokenRecord = tokens.TokenRecord{
+			AuthToken:    mockUAAToken,
+			RefreshToken: mockUAAToken,
+			TokenExpiry:  mockTokenExpiry,
+		}
+		// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
-	//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
-	mock.ExpectQuery(selectAnyFromCNSIs).
-		WithArgs(mockHCFGUID).
-		WillReturnRows(expectHCFRow())
+		// setup mocks
+		req := setupMockReq("POST", "", map[string]string{})
+		_, _, _, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
 
-	go pp.doRequest(&mockCNSIRequest, done)
+		mock.ExpectQuery(selectAnyFromTokens).
+			WithArgs(mockHCFGUID, mockUserGUID).
+			WillReturnRows(expectNoRows())
 
-	newCNSIRequest := <-done
+		// set up the database expectation for pp.setCNSITokenRecord
+		mock.ExpectExec(insertIntoTokens).
+		//	WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, mockTokenRecord.TokenExpiry).
+			WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// verify expectations met
-	if dberr := mock.ExpectationsWereMet(); dberr != nil {
-		t.Errorf("There were unfulfilled expectations: %s", dberr)
-	}
+		err = pp.setCNSITokenRecord(mockHCFGUID, mockUserGUID, mockTokenRecord)
 
-	if newCNSIRequest.Error != nil {
-		t.Error(newCNSIRequest.Error)
-	}
+		Convey("Should be able to set CNSI token records", func() {
+			So(err, ShouldBeNil)
+		})
 
-	if string(newCNSIRequest.Response) != jsonMust(mockV2InfoResponse) {
-		t.Errorf("Expected %v, got %v", jsonMust(mockV2InfoResponse), string(newCNSIRequest.Response))
-	}
+		Convey("should have all expectations met when savign token", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+		// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
+		done := make(chan *CNSIRequest)
+
+		// Set up database expectation for pp.doOauthFlowRequest
+		//  p.getCNSIRequestRecords(cnsiRequest) ->
+		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
+		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
+		mock.ExpectQuery(selectAnyFromTokens).
+			WithArgs(mockHCFGUID, mockUserGUID).
+			WillReturnRows(expectEncryptedTokenRow(pp.Config.EncryptionKeyInBytes))
+
+		//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
+		mock.ExpectQuery(selectAnyFromCNSIs).
+			WithArgs(mockHCFGUID).
+			WillReturnRows(expectHCFRow())
+
+		go pp.doRequest(&mockCNSIRequest, done)
+
+		newCNSIRequest := <-done
+
+		// verify expectations met
+		Convey("should have all expectations met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+		Convey("should not have a new CNSI Request error", func() {
+			So(newCNSIRequest.Error, ShouldBeNil)
+		})
+
+		Convey("CNSI Request must be identical to expected response", func() {
+			So(B2S(newCNSIRequest.Response), ShouldEqual, jsonMust(mockV2InfoResponse))
+		})
+	})
+}
+
+func B2S(bs []byte) string {
+	return string(bs[:])
 }
 
 func TestPassthroughGetEchoURL(t *testing.T) {
 	t.Parallel()
+	Convey("should have correct URI", t, func() {
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
 
-	uri := getEchoURL(ctx)
+		uri := getEchoURL(ctx)
 
-	if uri.String() != mockURLString {
-		t.Errorf("Did not get expected uri - expected: %s got %v", mockURLString, uri.String())
-	}
+		So(uri.String(), ShouldEqual, mockURLString)
+	})
+
 }
 
 func TestPassthroughGetEchoHeaders(t *testing.T) {
 	t.Parallel()
 
-	fakeHeaderKey := "Content-Type"
-	fakeHeaderValue := "application/x-www-form-urlencoded"
+	Convey("Should have correct headers", t, func() {
+		fakeHeaderKey := "Content-Type"
+		fakeHeaderValue := "application/x-www-form-urlencoded"
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
 
-	req.Header.Set(fakeHeaderKey, fakeHeaderValue)
+		req.Header.Set(fakeHeaderKey, fakeHeaderValue)
 
-	header := getEchoHeaders(ctx)
+		header := getEchoHeaders(ctx)
 
-	_, ok := header[fakeHeaderKey]
-	if !ok {
-		t.Error("Expected key not found in header")
-	}
+		_, ok := header[fakeHeaderKey]
 
-	if header[fakeHeaderKey][0] != fakeHeaderValue {
-		t.Errorf("Did not get expected headers - %v", header)
-	}
+		So(ok, ShouldNotBeNil)
+
+		So(header[fakeHeaderKey][0], ShouldEqual, fakeHeaderValue)
+	})
 }
 
 func TestPassthroughMakeRequestURI(t *testing.T) {
 	t.Parallel()
 
-	fakeURL := "http://localhost/v1/proxy/v2/info/"
+	Convey("Creation of request URI should succeed", t, func() {
+		fakeURL := "http://localhost/v1/proxy/v2/info/"
 
-	req := setupMockReq("GET", fakeURL, nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
+		req := setupMockReq("GET", fakeURL, nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
 
-	uri := makeRequestURI(ctx)
+		uri := makeRequestURI(ctx)
 
-	if uri.String() != fakeURL {
-		t.Errorf("Failed to make a request uri: %s", uri)
-	}
+		So(uri.String(), ShouldEqual, fakeURL)
+	})
 }
 
 func TestPassthroughGetPortalUserGUID(t *testing.T) {
 	t.Parallel()
 
-	var fakeUserGUID = "fake-users-guid"
+	Convey("User ID from portal should be correct", t, func() {
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
-	ctx.Set("user_id", fakeUserGUID)
+		var fakeUserGUID = "fake-users-guid"
 
-	userGUID, err := getPortalUserGUID(ctx)
-	if err != nil {
-		t.Errorf("Failed to get portal user GUID from session: %v", err)
-	}
-	if userGUID != fakeUserGUID {
-		t.Errorf("User ID from portal [%s] doesn't match expected [%s]", userGUID, fakeUserGUID)
-	}
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
+		ctx.Set("user_id", fakeUserGUID)
+
+		userGUID, err := getPortalUserGUID(ctx)
+		So(err, ShouldBeNil)
+		So(userGUID, ShouldEqual, fakeUserGUID)
+	})
 }
 
 func TestPassthroughGetPortalUserGUIDWhenCorruptedSession(t *testing.T) {
 	t.Parallel()
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
+	Convey("should fail to get portal user Guid from invalid session", t, func() {
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
 
-	_, err := getPortalUserGUID(ctx)
-	if err == nil {
-		t.Error("Should have failed to get portal user GUID from session.")
-	}
+		_, err := getPortalUserGUID(ctx)
+		So(err, ShouldNotBeNil)
+	})
 }
 
 func TestPassthroughGetRequestParts(t *testing.T) {
 	t.Parallel()
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _, db, _ := setupHTTPTest(req)
-	defer db.Close()
+	Convey("passthrough get request parts should not error", t, func() {
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, _, db, _ := setupHTTPTest(req)
+		defer db.Close()
 
-	_, _, err := getRequestParts(ctx)
+		_, _, err := getRequestParts(ctx)
 
-	if err != nil {
-		t.Errorf("Error: %v", err)
-	}
+		So(err, ShouldBeNil)
+	})
 }
 
 func TestPassthroughBuildCNSIRequest(t *testing.T) {
 	t.Parallel()
 
-	expectedCNSIRequest := CNSIRequest{
-		GUID:     mockHCFGUID,
-		UserGUID: "user1",
-		Method:   "GET",
-		Body:     nil,
-		Header:   nil,
-	}
+	Convey("Passthrough request should succeed", t, func() {
+		expectedCNSIRequest := CNSIRequest{
+			GUID:     mockHCFGUID,
+			UserGUID: "user1",
+			Method:   "GET",
+			Body:     nil,
+			Header:   nil,
+		}
 
-	var cr CNSIRequest
+		var cr CNSIRequest
 
-	req := setupMockReq("GET", "", nil)
-	_, _, ctx, pp, db, mock := setupHTTPTest(req)
-	defer db.Close()
-	r := ctx.Request()
+		req := setupMockReq("GET", "", nil)
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+		r := ctx.Request()
 
-	var ur *url.URL
-	ur, _ = url.Parse(mockAPIEndpoint)
+		var ur *url.URL
+		ur, _ = url.Parse(mockAPIEndpoint)
 
-	//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
-	mock.ExpectQuery(selectAnyFromCNSIs).
-		WithArgs(mockHCFGUID).
-		WillReturnRows(expectHCFRow())
+		//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
+		mock.ExpectQuery(selectAnyFromCNSIs).
+			WithArgs(mockHCFGUID).
+			WillReturnRows(expectHCFRow())
 
-	cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
-	if err != nil {
-		t.Errorf("Couldn't build CNSI request: %s", err)
-	}
+		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
 
-	// verify expectations met
-	if dberr := mock.ExpectationsWereMet(); dberr != nil {
-		t.Errorf("There were unfulfilled expectations: %s", dberr)
-	}
+		So(err, ShouldBeNil)
 
-	if cr.GUID != expectedCNSIRequest.GUID ||
-		cr.UserGUID != expectedCNSIRequest.UserGUID ||
-		cr.Method != expectedCNSIRequest.Method {
-		t.Error("Invalid return from buildCNSIRequest.")
-	}
+		Convey("All expecations should be met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+		Convey("Request GUID should equal expected GUID", func() {
+			So(cr.GUID, ShouldEqual, expectedCNSIRequest.GUID)
+		})
+
+		Convey("Request Method should equal expected Method", func() {
+			So(cr.Method, ShouldEqual, expectedCNSIRequest.Method)
+		})
+
+		Convey("Request UserGUID should equal expected UserGUID", func() {
+			So(cr.UserGUID, ShouldEqual, expectedCNSIRequest.UserGUID)
+		})
+	})
 }
 
 func TestValidateCNSIListWithValidGUID(t *testing.T) {
 	t.Parallel()
 
-	var cnsiGUIDList []string
-	cnsiGUIDList = append(cnsiGUIDList, "valid-guid-abc123")
+	Convey("should succeed with valid CNSI Guid", t, func() {
 
-	req := setupMockReq("GET", "", nil)
-	_, _, _, pp, db, mock := setupHTTPTest(req)
-	defer db.Close()
+		var cnsiGUIDList []string
+		cnsiGUIDList = append(cnsiGUIDList, "valid-guid-abc123")
 
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
-		AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint, true)
-	mock.ExpectQuery(selectAnyFromCNSIs).
-		WithArgs("valid-guid-abc123").
-		WillReturnRows(expectedCNSIRecordRow)
+		req := setupMockReq("GET", "", nil)
+		_, _, _, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
 
-	err := pp.validateCNSIList(cnsiGUIDList)
-	if err != nil {
-		t.Errorf("Unable to validate CNSI GUID list. %+v\n", err)
-	}
+		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
+			AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint, true)
+		mock.ExpectQuery(selectAnyFromCNSIs).
+			WithArgs("valid-guid-abc123").
+			WillReturnRows(expectedCNSIRecordRow)
+		So(pp.validateCNSIList(cnsiGUIDList), ShouldBeNil)
+		Convey("should have all expectations met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+	})
 
-	if dberr := mock.ExpectationsWereMet(); dberr != nil {
-		t.Errorf("There were unfulfilled expectations: %s", dberr)
-	}
 }
 
 func TestValidateCNSIListWithInvalidGUID(t *testing.T) {
 	t.Parallel()
 
-	var cnsiGUIDList []string
-	cnsiGUIDList = append(cnsiGUIDList, "fake-guid-abc123")
+	Convey("should fail with invalid CNSI Guid", t, func() {
+		var cnsiGUIDList []string
+		cnsiGUIDList = append(cnsiGUIDList, "fake-guid-abc123")
 
-	req := setupMockReq("GET", "", nil)
-	_, _, _, pp, db, mock := setupHTTPTest(req)
-	defer db.Close()
+		req := setupMockReq("GET", "", nil)
+		_, _, _, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
 
-	// Mock a database error
-	mock.ExpectQuery(selectAnyFromCNSIs).
-		WillReturnError(errors.New("Unknown Database Error"))
+		// Mock a database error
+		mock.ExpectQuery(selectAnyFromCNSIs).
+			WillReturnError(errors.New("Unknown Database Error"))
+		So(pp.validateCNSIList(cnsiGUIDList), ShouldNotBeNil)
 
-	err := pp.validateCNSIList(cnsiGUIDList)
-	if err == nil {
-		t.Error("Unepected success - attempt to rerieve non-existent CNSI GUID should have failed.")
-	}
+		Convey("should have all expectations met", func() {
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+	})
+
 }

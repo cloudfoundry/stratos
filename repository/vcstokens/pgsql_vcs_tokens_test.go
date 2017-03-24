@@ -8,9 +8,7 @@ import (
 	// "time"
 
 	"github.com/hpcloud/portal-proxy/repository/crypto"
-
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -53,7 +51,7 @@ func TestPgsqlVCSTokens(t *testing.T) {
 		SkipConvey("if successful", func() {
 
 			// General setup
-			mockTokenRecord := VcsTokenRecord{UserGUID: mockUserGUID, Endpoint: mockAPIEndpoint, AccessToken: mockToken}
+			mockTokenRecord := VcsTokenRecord{UserGuid: mockUserGUID,  Token: mockToken}
 
 			// Database Expectations
 			mock.ExpectExec(insertVCSTokens).
@@ -62,7 +60,7 @@ func TestPgsqlVCSTokens(t *testing.T) {
 
 			Convey("there should be no error returned", func() {
 				repository, _ := NewPgsqlVcsTokenRepository(db)
-				err := repository.SaveVCSToken(mockTokenRecord, mockEncryptionKey)
+				err := repository.SaveVcsToken(&mockTokenRecord, mockEncryptionKey)
 				So(err, ShouldBeNil)
 
 				dberr := mock.ExpectationsWereMet()

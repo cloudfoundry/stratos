@@ -158,6 +158,13 @@ func expectTokenRow() sqlmock.Rows {
 		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
 }
 
+func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
+
+	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry)
+}
+
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
 	res := httptest.NewRecorder()
 	e, ctx := setupEchoContext(res, req)
@@ -243,6 +250,7 @@ const (
 	mockAuthEndpoint    = "https://login.127.0.0.1"
 	mockTokenEndpoint   = "https://uaa.127.0.0.1"
 	mockDopplerEndpoint = "https://doppler.127.0.0.1"
+	mockProxyVersion    = 20161117141922
 
 	stringHCFType = "hcf"
 	stringHCEType = "hce"
@@ -252,10 +260,12 @@ const (
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
 	insertIntoCNSIs     = `INSERT INTO cnsis`
+	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
 )
 
 var rowFieldsForToken = []string{"auth_token", "refresh_token", "token_expiry"}
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}
+var rowFieldsForVersionId = []string{"id", "version_id", "is_applied", "tstamp"}
 
 var mockEncryptionKey = make([]byte, 32)
 var mockEncryptedToken, _ = crypto.EncryptToken(mockEncryptionKey, mockUAAToken)

@@ -1,5 +1,5 @@
 // Uncomment the next line to disable the package when running the GoConvey UI:
-IGNORE
+//IGNORE
 
 // Uncomment the next line to limit testing to the specified test function name pattern:
 //-run=TestAssertionsAreAvailableFromConveyPackage

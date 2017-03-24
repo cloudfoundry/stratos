@@ -3,14 +3,10 @@ package main
 import (
 	"errors"
 	"net/http"
-	"os"
 
 	"github.com/labstack/echo"
 	"github.com/hpcloud/portal-proxy/repository/goose-db-version"
 )
-
-// Allow us to mock out os.Getenv
-var osGetEnv = os.Getenv
 
 // Versions - response returned to caller from a getVersions action
 type Versions struct {
