@@ -11,7 +11,7 @@
       duration: 1000
     };
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module(function ($provide) {
       var mock = function (config, context) {

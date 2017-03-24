@@ -5,7 +5,7 @@
     var notifications, toaster;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(inject(function ($injector) {
       notifications = $injector.get('app.view.notificationsService');

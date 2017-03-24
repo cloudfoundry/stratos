@@ -6,7 +6,7 @@
     var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, notificationsService,
       modelManager, vcsTokenManager, registerVcsToken, PAT_DELIMITER, $httpBackend, account, utils, $q;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module({
       'app.utils.utilsService': {
         chainStateResolve: function (state, $state, init) {

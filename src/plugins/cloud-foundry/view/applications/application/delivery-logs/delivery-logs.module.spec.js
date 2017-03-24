@@ -6,7 +6,7 @@
     var controller, $stateParams, $q, $log, moment, $state, $rootScope, hceModel, cnsiModel, modelManager,
       $httpBackend, viewEvent, viewExecution, triggerBuild;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
 
     // Define some common properties used throughout tests

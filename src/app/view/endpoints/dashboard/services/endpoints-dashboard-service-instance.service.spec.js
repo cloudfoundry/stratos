@@ -6,7 +6,7 @@
     var $httpBackend, service, modelManager, dashboardService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('app.view.endpoints.dashboard'));
 
     beforeEach(inject(function ($injector) {

@@ -4,7 +4,7 @@
   describe('github.api - ', function () {
     var that, $httpBackend;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       var apiManager = $injector.get('app.api.apiManager');
       $httpBackend = $injector.get('$httpBackend');

@@ -21,11 +21,11 @@
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
 
   /**
-   * @namespace green-box-console
-   * @name green-box-console
+   * @namespace console
+   * @name console
    */
   angular
-    .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config);
+    .module('console', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
   config.$inject = [
     '$compileProvider',

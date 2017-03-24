@@ -27,7 +27,7 @@
     ];
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(inject(function ($injector) {
       usersSelection = $injector.get('app.view.userSelection');

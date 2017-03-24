@@ -12,7 +12,7 @@
     var spaceGuid = '0063f106-074b-415a-94ee-5cf3afd7db5c';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     function createController($injector, type) {
       $httpBackend = $injector.get('$httpBackend');

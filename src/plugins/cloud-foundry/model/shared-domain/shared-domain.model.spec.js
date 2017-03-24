@@ -4,7 +4,7 @@
   describe('cloud-foundry shared domain model', function () {
     var $httpBackend, sharedDomainModel;
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('app.model.modelManager');

@@ -4,7 +4,7 @@
   describe('navigation model', function () {
     var navigationModel;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       var modelManager = $injector.get('app.model.modelManager');
       navigationModel = modelManager.retrieve('app.model.navigation');

@@ -5,7 +5,7 @@
     var $httpBackend, element;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var $compile = $injector.get('$compile');

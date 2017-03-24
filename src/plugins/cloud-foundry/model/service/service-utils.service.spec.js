@@ -5,7 +5,7 @@
     var serviceUtils;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       serviceUtils = $injector.get('cloud-foundry.model.service.serviceUtils');
     }));

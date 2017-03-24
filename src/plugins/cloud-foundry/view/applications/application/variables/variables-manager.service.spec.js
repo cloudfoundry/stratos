@@ -4,7 +4,7 @@
   describe('variables manager service', function () {
     var $controller, $q, modelManager, dialogContext, dialog;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module(function ($provide) {
       var mock = function (config, context) {
         dialogContext = context;
