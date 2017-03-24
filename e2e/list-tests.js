@@ -32,18 +32,38 @@
   }
 
   function checkSkipped(suite) {
-    var skipped = 0;
+    suite.disabled = suite.disabled || false;
+    suite.skipped = 0;
     _.each(suite.suites, function (s) {
-      skipped += checkSkipped(s);
+      s.disabled = s.disabled || suite.disabled;
+      suite.skipped += checkSkipped(s);
+      if (s.disabled) {
+        suite.skipped += s.tests.length;
+      }
     });
-    if (suite.disabled) {
-      skipped += suite.total;
-    }
-    suite.skipped = skipped;
-    return skipped;
+    return suite.skipped;
   }
 
-  var root = newTestRecord('ROOT');
+  function report(suite, level) {
+    var spaces = level * INDENT;
+    var fileName = suite.file ? colorize('cyan', '(' + suite.file + ')') : '';
+
+    console.log(_.padStart('', spaces) + suite.name + '  ' + fileName);
+    level++;
+    spaces = level * INDENT;
+
+    var color = suite.disabled ? 'yellow' : 'green';
+
+    _.each(suite.tests, function (t) {
+      console.log(_.padStart('', spaces) + colorize(color, t));
+    });
+
+    _.each(suite.suites, function (s) {
+      report(s, level);
+    });
+  }
+
+  var root = newTestRecord('e2e Tests');
   currentTest = root;
 
   console.log('Listing tests');
@@ -73,7 +93,6 @@
       currentTest.file = currentFile;
       console.log(colorize('cyan', 'Processing test file: ' + currentFile));
     }
-    console.log(_.padStart('', spaces) + name);
     // Add this suite to the parent
     current.suites.push(currentTest);
     spaces += INDENT;
@@ -94,7 +113,6 @@
   global.afterEach = function () {};
 
   global.it = function (name) {
-    console.log(_.padStart('', spaces) + colorize('green', name));
     currentTest.tests.push(name);
     currentTest.total++;
   };
@@ -109,6 +127,8 @@
 
   // Calculate number of skipped tests
   checkSkipped(root);
+
+  report(root, 0);
 
   console.log('\n' + colorize('cyan', _.padEnd('Test File', 72)) + colorize('green', 'Tests') + '    ' + colorize('yellow', 'Skipped') + '\n');
 
