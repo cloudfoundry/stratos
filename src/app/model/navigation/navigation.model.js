@@ -220,7 +220,6 @@
       item.svgIcon = item.icon.indexOf('svg://') === 0;
       if (item.svgIcon) {
         item.icon = 'svg/' + item.icon.substr(6);
-        console.log(item.icon);
       }
       return item;
     },
