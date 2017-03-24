@@ -104,7 +104,9 @@
   }
 
   gulp.task('oem:clean', function (next) {
-    del(paths.oem + 'scss/*', {force: true}, next);
+    del(paths.oem + 'dist', {force: true}, function () {
+      del(paths.oem + 'tmp', {force: true}, next);
+    });
   });
 
   gulp.task('oem', ['oem:clean'], function (done) {

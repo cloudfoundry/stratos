@@ -39,7 +39,6 @@
   var jsSourceFiles = config.jsSourceFiles;
   var plugins = config.plugins;
   var scssFiles = config.scssFiles;
-  var templatePaths = config.templatePaths;
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -77,7 +76,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(templatePaths, {base: paths.src})
+      .src(config.templatePaths, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -125,19 +124,10 @@
       .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
-  // gulp.task('copy:framework:js', function () {
-  //   return gulp.src(config.jsLibs)
-  //     .pipe(sort())
-  //     .pipe(angularFilesort())
-  //     .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
-  //     .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-  //     .pipe(gulp.dest(paths.frameworkDist));
-  // });
-
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat('console-libs.js'))
+      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
@@ -169,13 +159,6 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'translations' folder to 'dist'
-  gulp.task('copy:translations', function () {
-    return gulp
-      .src(config.translate.json + '**/*')
-      .pipe(gulp.dest(config.translate.dist));
-  });
-
   // Compile SCSS to CSS
   gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
@@ -195,11 +178,7 @@
     return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
-        standalone: true,
-        transformUrl: function (url) {
-          console.log(url);
-          return url;
-        }
+        standalone: true
       }))
       .pipe(uglify())
       .pipe(gulp.dest(paths.dist));
@@ -279,38 +258,15 @@
       .pipe(gulp.dest(paths.src + 'plugins'));
   });
 
-  // Generate the POT file to be translated
-  gulp.task('translate:extract', function () {
-    /* eslint-disable no-warning-comments */
-    //TODO: Need to include framework templates + js
-    /* eslint-enable  no-warning-comments */
-    var sources = config.partials
-      .concat(config.jsSourceFiles);
-
-    return gulp.src(sources)
-      .pipe(gettext.extract(config.translate.pot))
-      .pipe(gulp.dest(config.paths.translations));
-  });
-
-  // Convert translated PO files into JSON format
-  gulp.task('translate:compile', function () {
-    return gulp.src(config.translate.po)
-      .pipe(gettext.compile(config.translate.options))
-      .pipe(gulp.dest(config.translate.js));
-  });
-
   // Gulp watch JavaScript, SCSS and HTML source files
   gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.frameworkScssFiles], ['css', callback]);
-    gulp.watch(partials, ['copy:html', callback]);
-    gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
+    gulp.watch(config.templatePaths, ['copy:html', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
-    gulp.watch(config.jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
-
   });
 
   gulp.task('browsersync', function (callback) {
@@ -332,7 +288,7 @@
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       /* For web proxy support - set options in dev_config - e.g.
        "options": {
-       "proxy": "http://proxy.sdc.hp.com:8080"
+       "proxy": "http://[PROXY_HOST]:[PROXY_PORT]"
        }
        */
 
@@ -400,7 +356,6 @@
     runSequence(
       'clean',
       'plugin',
-      'translate:compile',
       'copy:js',
       'copy:lib',
       'css',
@@ -427,7 +382,6 @@
     runSequence(
       'clean',
       'plugin',
-      'translate:compile',
       'copy:js',
       'copy:lib',
       'css',
@@ -436,7 +390,7 @@
       'copy:assets',
       'copy:theme',
       'inject:index',
-      //'oem',
+      'oem',
       next
     );
   });

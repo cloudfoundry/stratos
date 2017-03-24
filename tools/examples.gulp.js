@@ -26,7 +26,7 @@
 
   // Build the examples
   gulp.task('examples:dist', function (next) {
-    paths.dist = '../framework/examples/dist/';
+    paths.dist = './examples/dist/';
     paths.frameworkDist = paths.dist + 'lib/';
     gutil.env.devMode = false;
     config.scssSourceFiles = [
@@ -35,7 +35,7 @@
 
     runSequence(
       'examples:clean',
-      'copy:framework:js',
+      'copy:js',
       'copy:bowerjs',
       'css',
       'examples:copy:theme',
@@ -72,12 +72,20 @@
   });
 
   // Copy the Examples HTML file to dist
-  gulp.task('examples:copy:html', function () {
+  gulp.task('examples:copy:html', ['examples:copy:html:framework'], function () {
     return gulp.src([
       paths.examples + 'index.html',
       paths.examples + 'theme_preview.html'
     ]).pipe(gulp.dest(paths.examplesDist));
   });
+
+  // Copy the Framework HTML file to dist
+  gulp.task('examples:copy:html:framework', function () {
+    return gulp.src([
+      paths.src + '**/framework/**/*.html',
+    ]).pipe(gulp.dest(paths.examplesDist));
+  });
+  
 
   // Copy the Examples HTML file to dist
   gulp.task('examples:copy:templates', function () {
@@ -104,13 +112,12 @@
   // Gulp watch JavaScript, SCSS and HTML source files
   gulp.task('examples:watch', function () {
     // Watch source and use correct task to update dist
-    gulp.watch(config.jsLibs, ['copy:framework:js']);
+    gulp.watch(config.jsSourceFiles, ['copy:js']);
     gulp.watch(config.examplesHtml, ['examples:copy:html']);
     gulp.watch(config.paths.theme + '**/*', ['examples:copy:theme']);
-    gulp.watch(config.frameworkHtml, ['examples:copy:theme']);
-    gulp.watch(paths.framework + 'src/**/*.html', ['examples:copy:templates']);
-    gulp.watch(paths.framework + 'src/**/*.scss', ['css']);
-    gulp.watch(paths.framework + 'theme/**/*.scss', ['css']);
+    gulp.watch(config.frameworkHtml, ['examples:copy:html:framework']);
+    gulp.watch(paths.examples + '**/*.html', ['examples:copy:html']);
+    gulp.watch(paths.theme + '**/*.scss', ['css']);
 
     // Watch dist for changes and reload with browsersync
     gulp.watch([
@@ -120,7 +127,7 @@
 
   gulp.task('examples:icons-preview', function () {
     var html = '\n';
-    var iconScssFile = paths.framework + 'theme/fonts/helion-icons/variables.scss';
+    var iconScssFile = paths.theme + 'fonts/helion-icons/variables.scss';
     var lineReader = require('readline').createInterface({
       input: require('fs').createReadStream(iconScssFile)
     });

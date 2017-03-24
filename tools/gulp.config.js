@@ -12,11 +12,9 @@
       instrumented: '../tmp/instrumented/',
       oem: '../oem/',
       theme: '../theme/',
-      framework: '../framework/',
-      frameworkDist: '../dist/framework/',
-      examples: '../framework/examples/',
-      examplesScripts: '../framework/examples/scripts/',
-      examplesDist: '../framework/examples/dist/',
+      examples: './examples/',
+      examplesScripts: './examples/scripts/',
+      examplesDist: './examples/dist/',
       browserSyncDist: '../dist'
     };
 
@@ -83,7 +81,7 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + 'framework/**/*.html',
+        paths.src + '**/framework/**/*.html',
         paths.src + '../theme/**/*.svg',
         '!' + paths.src + '../theme/fonts/**/*.svg'
       ],
@@ -104,14 +102,9 @@
 
       jsFile: 'console-console.js',
 
-      jsTemplatesFile: 'console-templates.js',
+      jsLibsFile: 'console-libs.js',
 
-      jsLibs: [
-        paths.framework + 'src/**/*.module.js',
-        paths.framework + 'src/**/*.js',
-        '!' + paths.framework + 'src/**/*.spec.js',
-        '!' + paths.framework + 'src/**/*.mock.js'
-      ],
+      jsTemplatesFile: 'console-templates.js',
 
       jsSourceFiles: [
         paths.src + '*.js',
@@ -131,20 +124,18 @@
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        paths.src + 'framework/**/*.js',
         '!' + paths.src + 'config.js',
         '!' + paths.src + 'app/**/*.mock.js',
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
         '!' + paths.src + 'plugins/cloud-foundry/api/hce/**/*.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js'
-      ],
-
-      frameworkFilesToInstrument: [
-        '!' + paths.framework + 'src/**/*.spec.js',
-        '!' + paths.framework + 'src/**/*.mock.js',
-        '!' + paths.framework + 'src/utils/wheel-handler/*.js',
-        '!' + paths.framework + 'src/widgets/ring-chart/*.js'
+        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js',
+        '!' + paths.src + 'framework/**/*.spec.js',
+        '!' + paths.src + 'framework/**/*.mock.js',
+        '!' + paths.src + 'framework/utils/wheel-handler/*.js',
+        '!' + paths.src + 'framework/widgets/ring-chart/*.js'
       ],
 
       // Sacrifice all inclusive with exclusions for explicit declaration of directories saves ~10s per run
@@ -162,17 +153,8 @@
         paths.e2e + '**/*.js'
       ],
 
-      frameworkFiles: [
-        paths.framework + 'theme/**/*',
-        paths.examples + 'scripts/**/*'
-      ],
-
-      frameworkTemplates: [
-        paths.framework + 'src/**/*.html'
-      ],
-
-      frameworkScssFiles: [
-        paths.framework + '**/*.scss'
+      themeScssFiles: [
+        paths.theme + '**/*.scss'
       ],
 
       scssFiles: [
