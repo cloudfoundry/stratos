@@ -32,18 +32,16 @@
   }
 
   function checkSkipped(suite) {
-    var skipped = 0;
+    suite.disabled = suite.disabled || false;
+    suite.skipped = 0;
     _.each(suite.suites, function (s) {
-      if (!s.disabled) {
-        s.disabled = suite.disabled || false;
+      s.disabled = s.disabled || suite.disabled;
+      suite.skipped += checkSkipped(s);
+      if (s.disabled) {
+        suite.skipped += s.tests.length;
       }
-      skipped += checkSkipped(s);
     });
-    if (suite.disabled) {
-      skipped += suite.total;
-    }
-    suite.skipped = skipped;
-    return skipped;
+    return suite.skipped;
   }
 
   function report(suite, level) {
@@ -65,7 +63,7 @@
     });
   }
 
-  var root = newTestRecord('ROOT');
+  var root = newTestRecord('e2e Tests');
   currentTest = root;
 
   console.log('Listing tests');
@@ -95,7 +93,6 @@
       currentTest.file = currentFile;
       console.log(colorize('cyan', 'Processing test file: ' + currentFile));
     }
-    console.log(_.padStart('', spaces) + name);
     // Add this suite to the parent
     current.suites.push(currentTest);
     spaces += INDENT;
@@ -116,7 +113,6 @@
   global.afterEach = function () {};
 
   global.it = function (name) {
-    console.log(_.padStart('', spaces) + colorize('green', name));
     currentTest.tests.push(name);
     currentTest.total++;
   };
