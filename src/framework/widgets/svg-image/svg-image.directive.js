@@ -11,6 +11,7 @@
     return {
       restrict: 'E',
       link: function (scope, element, attrs) {
+        console.log('Requesting: ' + attrs.src);
         $templateRequest(attrs.src).then(function (data) {
           var svg = angular.element(data);
           for (var i = svg.length - 1; i >= 0; i--) {

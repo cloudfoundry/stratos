@@ -20,11 +20,11 @@ $radio-button-font-family       : "helion-icons" !default;
 $radio-button-unchecked-icon    : "\e9f9" !default; // helion-icon-Radial_button
 $radio-button-checked-icon      : "\ea74" !default; // helion-icon-Radial_Black
 
-@import "../framework/theme.scss";
+@import "../theme/theme.scss";
 
 
 // Libs - auto-populated by wiredep from bower.json
 // bower:scss
 // endbower
 
-@import "../framework/framework.scss";
+@import "./framework/framework.scss";

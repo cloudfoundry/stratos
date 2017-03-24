@@ -39,7 +39,7 @@
   var jsSourceFiles = config.jsSourceFiles;
   var plugins = config.plugins;
   var scssFiles = config.scssFiles;
-  var partials = config.partials;
+  var templatePaths = config.templatePaths;
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -69,15 +69,15 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clear the 'dist' folder
-  gulp.task('clean:dist', function (next) {
+  // Clean
+  gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
 
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(partials, {base: paths.src})
+      .src(templatePaths, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -88,36 +88,9 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  gulp.task('copy:framework:templates', function () {
-    return gulp.src(config.frameworkTemplates)
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('js:combine', ['copy:js'], function () {
-    return gulp.src([
-      paths.frameworkDist + config.jsFrameworkFile,
-      paths.dist + config.jsFile
-    ], {base: paths.dist})
-      .pipe(concat(config.jsFile))
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('postbuild', function (next) {
-    if (gutil.env.devMode) {
-      del(paths.frameworkDist + config.jsFrameworkFile, {force: true}, next);
-    } else {
-      del(paths.frameworkDist, {force: true}, function () {
-        del(paths.dist + 'scss', {force: true}, next);
-      });
-    }
-  });
-
   // Copy JavaScript source files to 'dist'
-  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
+  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
     var sourceFiles = jsSourceFiles;
-    if (!gutil.env.devMode) {
-      sourceFiles = jsSourceFiles.concat(config.jsLibs);
-    }
     var sources = gulp.src(sourceFiles, {base: paths.src});
     return sources
       .pipe(sort())
@@ -139,7 +112,7 @@
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
-      .pipe(rename('stackato-config.js'))
+      .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -148,23 +121,23 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(uglify())
-      .pipe(rename('stackato-config.js'))
+      .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
-  gulp.task('copy:framework:js', function () {
-    return gulp.src(config.jsLibs)
-      .pipe(sort())
-      .pipe(angularFilesort())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulp.dest(paths.frameworkDist));
-  });
+  // gulp.task('copy:framework:js', function () {
+  //   return gulp.src(config.jsLibs)
+  //     .pipe(sort())
+  //     .pipe(angularFilesort())
+  //     .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
+  //     .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+  //     .pipe(gulp.dest(paths.frameworkDist));
+  // });
 
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat('stackato-libs.js'))
+      .pipe(gutil.env.devMode ? gutil.noop() : concat('console-libs.js'))
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
@@ -221,14 +194,18 @@
   gulp.task('template-cache', function () {
     return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
-        module: 'stackato-templates',
-        standalone: true
+        module: 'console-templates',
+        standalone: true,
+        transformUrl: function (url) {
+          console.log(url);
+          return url;
+        }
       }))
       .pipe(uglify())
       .pipe(gulp.dest(paths.dist));
   });
 
-  // In dev we do not use the cached templates, so we beed ab empty angular module
+  // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
   gulp.task('dev-template-cache', function () {
     return gulp.src('./' + config.jsTemplatesFile)
@@ -421,10 +398,9 @@
     delete config.bower.exclude;
     usePlumber = false;
     runSequence(
-      'clean:dist',
+      'clean',
       'plugin',
       'translate:compile',
-      'copy:framework:templates',
       'copy:js',
       'copy:lib',
       'css',
@@ -432,7 +408,6 @@
       'copy:html',
       'copy:assets',
       'copy:theme',
-      'postbuild',
       'inject:index',
       next
     );
@@ -450,20 +425,18 @@
   gulp.task('default', function (next) {
     usePlumber = false;
     runSequence(
-      'clean:dist',
+      'clean',
       'plugin',
       'translate:compile',
-      'copy:framework:templates',
-      'js:combine',
+      'copy:js',
       'copy:lib',
       'css',
       'template-cache',
       'copy:html',
       'copy:assets',
       'copy:theme',
-      'postbuild',
       'inject:index',
-      'oem',
+      //'oem',
       next
     );
   });
