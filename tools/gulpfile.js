@@ -7,7 +7,6 @@
   var del = require('delete');
   var eslint = require('gulp-eslint');
   var file = require('gulp-file');
-  var gettext = require('gulp-angular-gettext');
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');

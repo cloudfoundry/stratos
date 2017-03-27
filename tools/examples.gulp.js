@@ -82,10 +82,9 @@
   // Copy the Framework HTML file to dist
   gulp.task('examples:copy:html:framework', function () {
     return gulp.src([
-      paths.src + '**/framework/**/*.html',
+      paths.src + '**/framework/**/*.html'
     ]).pipe(gulp.dest(paths.examplesDist));
   });
-  
 
   // Copy the Examples HTML file to dist
   gulp.task('examples:copy:templates', function () {
