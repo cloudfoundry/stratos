@@ -15,7 +15,7 @@
     '$http',
     '$httpParamSerializer',
     '$q',
-    'app.api.apiManager'
+    'apiManager'
   ];
 
   function registerAccountApi($http, $httpParamSerializer, $q, apiManager) {

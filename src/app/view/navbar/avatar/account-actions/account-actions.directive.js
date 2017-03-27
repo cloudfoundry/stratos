@@ -26,7 +26,7 @@
   }
 
   AccountActionsController.$inject = [
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

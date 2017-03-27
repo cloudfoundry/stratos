@@ -9,7 +9,7 @@
     '$log',
     '$q',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',

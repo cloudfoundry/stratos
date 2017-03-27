@@ -9,7 +9,7 @@
     '$q',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.notificationsService',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

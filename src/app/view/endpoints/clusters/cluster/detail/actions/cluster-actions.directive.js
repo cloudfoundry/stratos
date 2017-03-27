@@ -25,7 +25,7 @@
   }
 
   ClusterActionsController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     '$state',
     '$q',
     '$stateParams',

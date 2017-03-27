@@ -22,7 +22,7 @@
   ServiceManagerTileController.$inject = [
     '$scope',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService'
   ];
 

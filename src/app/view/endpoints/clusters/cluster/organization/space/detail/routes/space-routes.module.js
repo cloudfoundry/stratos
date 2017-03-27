@@ -30,7 +30,7 @@
     '$q',
     '$log',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.clusters.routesService',
     'app.utils.utilsService'
   ];

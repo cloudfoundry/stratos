@@ -27,7 +27,7 @@
     '$timeout',
     '$q',
     '$window',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.error.errorService',
     'app.utils.utilsService',
