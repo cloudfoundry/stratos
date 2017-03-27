@@ -26,7 +26,7 @@
 
   ApplicationDeliveryPipelineController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
     'helion.framework.widgets.dialog.confirm',

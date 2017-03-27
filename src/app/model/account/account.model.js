@@ -12,8 +12,8 @@
     .run(registerAccountModel);
 
   registerAccountModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     '$q'
   ];
 

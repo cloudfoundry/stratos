@@ -11,10 +11,10 @@
 
   registerSpaceModel.$inject = [
     '$q',
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'cloud-foundry.model.service.serviceUtils',
-    'cloud-foundry.model.modelUtils',
+    'modelUtils',
     'organization-model'
   ];
 

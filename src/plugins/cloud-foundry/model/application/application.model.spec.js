@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       applicationModel = modelManager.retrieve('cloud-foundry.model.application');
       $timeout = $injector.get('$timeout');
     }));

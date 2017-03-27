@@ -91,7 +91,7 @@
     function createController($injector) {
       $httpBackend = $injector.get('$httpBackend');
       service = $injector.get('app.view.endpoints.dashboard.cnsiService');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
     }
 

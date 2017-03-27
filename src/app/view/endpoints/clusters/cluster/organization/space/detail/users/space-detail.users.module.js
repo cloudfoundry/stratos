@@ -30,7 +30,7 @@
     '$stateParams',
     '$log',
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',

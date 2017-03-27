@@ -13,8 +13,8 @@
 
   registerUserServiceInstanceModel.$inject = [
     '$q',
-    'app.api.apiManager',
-    'app.model.modelManager'
+    'apiManager',
+    'modelManager'
   ];
 
   function registerUserServiceInstanceModel($q, apiManager, modelManager) {
