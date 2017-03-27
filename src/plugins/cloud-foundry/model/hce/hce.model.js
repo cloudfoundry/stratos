@@ -12,8 +12,8 @@
     .run(registerHceModel);
 
   registerHceModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'app.event.eventService',
     '$log'
   ];

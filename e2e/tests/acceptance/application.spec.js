@@ -324,5 +324,5 @@
       });
 
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCF);
 })();

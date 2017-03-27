@@ -17,7 +17,8 @@
     "test": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
     "watch": "gulp watch",
-    "watch:test": "karma start karma.conf.js"
+    "watch:test": "karma start karma.conf.js",
+    "list-e2e": "node ../e2e/list-tests.js protractor.conf.js"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +29,7 @@
     "gulp-concat-util": "^0.5.4",
     "gulp-file": "^0.2.0",
     "gulp-inject": "^3.0.0",
+    "gulp-ng-annotate": "^2.0.0",
     "gulp-sass": "^2.1.1",
     "run-sequence": "^1.1.5",
     "wiredep": "^3.0.0"
@@ -75,6 +77,7 @@
     "phantomjs-prebuilt": "2.1.11",
     "prompt": "^0.2.14",
     "protractor": "^4.0.0",
+    "protractor-jasmine2-screenshot-reporter": "^0.3.3",
     "q": "^1.4.1",
     "randomstring": "^1.1.5",
     "request": "^2.69.0",

@@ -26,7 +26,7 @@
   }
 
   AvatarController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     '$scope',
     '$document',
     '$timeout'

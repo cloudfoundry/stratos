@@ -369,7 +369,7 @@
 
         describe('Register hce', function () {
           registerTests('hce');
-        });
+        }).skipWhen(helpers.skipIfNoHCE);
 
         describe('Register hcf', function () {
           registerTests('hcf');
@@ -431,7 +431,11 @@
               })
               .then(function () {
                 // The new row count should be two less than when we started (row had an additional 'disconnected' error)
-                expect(helpers.getTableRows(endpointsPage.getEndpointTable()).count()).toBe(endpointCount - 2);
+                endpointsPage.getEndpointTable().isPresent().then(function (haveTable) {
+                  if (haveTable) {
+                    expect(helpers.getTableRows(endpointsPage.getEndpointTable()).count()).toBe(endpointCount - 2);
+                  }
+                });
               });
           });
         });
@@ -607,5 +611,5 @@
 
     });
 
-  });
+  }).skipWhen(helpers.skipIfNoHCF);
 })();

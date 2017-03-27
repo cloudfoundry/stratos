@@ -3,34 +3,34 @@
   'use strict';
 
   var _ = require('lodash');
+  var angularFilesort = require('gulp-angular-filesort');
+  var autoprefixer = require('gulp-autoprefixer');
+  var browserSync = require('browser-sync').create();
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var eslint = require('gulp-eslint');
   var file = require('gulp-file');
-  var gettext = require('gulp-angular-gettext');
+  var fork = require('child_process').fork;
   var gulp = require('gulp');
+  var gulpBowerFiles = require('bower-files');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
   var gulpreplace = require('gulp-replace');
+  var gutil = require('gulp-util');
+  var ngAnnotate = require('gulp-ng-annotate');
+  var nodeUrl = require('url');
+  var path = require('path');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
+  var request = require('request');
   var runSequence = require('run-sequence');
-  var autoprefixer = require('gulp-autoprefixer');
   var sass = require('gulp-sass');
   var sh = require('shelljs');
-  var browserSync = require('browser-sync').create();
-  var gutil = require('gulp-util');
-  var nodeUrl = require('url');
-  var utils = require('./gulp.utils');
-  var request = require('request');
-  var uglify = require('gulp-uglify');
   var sort = require('gulp-sort');
-  var angularFilesort = require('gulp-angular-filesort');
-  var gulpBowerFiles = require('bower-files');
   var templateCache = require('gulp-angular-templatecache');
+  var uglify = require('gulp-uglify');
+  var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
-  var path = require('path');
-  var fork = require('child_process').fork;
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -39,10 +39,11 @@
   var jsSourceFiles = config.jsSourceFiles;
   var plugins = config.plugins;
   var scssFiles = config.scssFiles;
-  var partials = config.partials;
 
   // Default OEM Config
-  var defaultBrandFolder = '../oem/brands/hpe/';
+  var DEFAULT_BRAND = 'suse';
+
+  var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
   var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
@@ -67,15 +68,15 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clear the 'dist' folder
-  gulp.task('clean:dist', function (next) {
+  // Clean
+  gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
 
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(partials, {base: paths.src})
+      .src(config.templatePaths, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -86,40 +87,16 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  gulp.task('copy:framework:templates', function () {
-    return gulp.src(config.frameworkTemplates)
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('js:combine', ['copy:js'], function () {
-    return gulp.src([
-      paths.frameworkDist + config.jsFrameworkFile,
-      paths.dist + config.jsFile
-    ], {base: paths.dist})
-      .pipe(concat(config.jsFile))
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('postbuild', function (next) {
-    if (gutil.env.devMode) {
-      del(paths.frameworkDist + config.jsFrameworkFile, {force: true}, next);
-    } else {
-      del(paths.frameworkDist, {force: true}, function () {
-        del(paths.dist + 'scss', {force: true}, next);
-      });
-    }
-  });
-
   // Copy JavaScript source files to 'dist'
-  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
+  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
     var sourceFiles = jsSourceFiles;
-    if (!gutil.env.devMode) {
-      sourceFiles = jsSourceFiles.concat(config.jsLibs);
-    }
     var sources = gulp.src(sourceFiles, {base: paths.src});
     return sources
       .pipe(sort())
       .pipe(angularFilesort())
+      .pipe(ngAnnotate({
+        single_quotes: true
+      }))
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.dist));
@@ -137,7 +114,7 @@
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
-      .pipe(rename('stackato-config.js'))
+      .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -146,23 +123,14 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(uglify())
-      .pipe(rename('stackato-config.js'))
+      .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.oem + 'dist'));
-  });
-
-  gulp.task('copy:framework:js', function () {
-    return gulp.src(config.jsLibs)
-      .pipe(sort())
-      .pipe(angularFilesort())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulp.dest(paths.frameworkDist));
   });
 
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat('stackato-libs.js'))
+      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
@@ -194,15 +162,8 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'translations' folder to 'dist'
-  gulp.task('copy:translations', function () {
-    return gulp
-      .src(config.translate.json + '**/*')
-      .pipe(gulp.dest(config.translate.dist));
-  });
-
   // Compile SCSS to CSS
-  gulp.task('css', ['inject:scss'], function () {
+  gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
       .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
@@ -219,14 +180,14 @@
   gulp.task('template-cache', function () {
     return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
-        module: 'stackato-templates',
+        module: 'console-templates',
         standalone: true
       }))
       .pipe(uglify())
       .pipe(gulp.dest(paths.dist));
   });
 
-  // In dev we do not use the cached templates, so we beed ab empty angular module
+  // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
   gulp.task('dev-template-cache', function () {
     return gulp.src('./' + config.jsTemplatesFile)
@@ -267,6 +228,15 @@
       .pipe(gulp.dest(paths.src));
   });
 
+  gulp.task('scss:set-brand', function () {
+    return gulp
+      .src(paths.src + 'index.tmpl.scss')
+      .pipe(gulpreplace('@@BRAND@@', DEFAULT_BRAND))
+      .pipe(wiredep(config.bowerDev))
+      .pipe(rename('index.scss'))
+      .pipe(gulp.dest(paths.src));
+  });
+
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
     return gulp
@@ -291,38 +261,15 @@
       .pipe(gulp.dest(paths.src + 'plugins'));
   });
 
-  // Generate the POT file to be translated
-  gulp.task('translate:extract', function () {
-    /* eslint-disable no-warning-comments */
-    //TODO: Need to include framework templates + js
-    /* eslint-enable  no-warning-comments */
-    var sources = config.partials
-      .concat(config.jsSourceFiles);
-
-    return gulp.src(sources)
-      .pipe(gettext.extract(config.translate.pot))
-      .pipe(gulp.dest(config.paths.translations));
-  });
-
-  // Convert translated PO files into JSON format
-  gulp.task('translate:compile', function () {
-    return gulp.src(config.translate.po)
-      .pipe(gettext.compile(config.translate.options))
-      .pipe(gulp.dest(config.translate.js));
-  });
-
   // Gulp watch JavaScript, SCSS and HTML source files
   gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.frameworkScssFiles], ['css', callback]);
-    gulp.watch(partials, ['copy:html', callback]);
-    gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
+    gulp.watch(config.templatePaths, ['copy:html', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
-    gulp.watch(config.jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
-
   });
 
   gulp.task('browsersync', function (callback) {
@@ -344,7 +291,7 @@
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       /* For web proxy support - set options in dev_config - e.g.
        "options": {
-       "proxy": "http://proxy.sdc.hp.com:8080"
+       "proxy": "http://[PROXY_HOST]:[PROXY_PORT]"
        }
        */
 
@@ -410,10 +357,8 @@
     delete config.bower.exclude;
     usePlumber = false;
     runSequence(
-      'clean:dist',
+      'clean',
       'plugin',
-      'translate:compile',
-      'copy:framework:templates',
       'copy:js',
       'copy:lib',
       'css',
@@ -421,7 +366,6 @@
       'copy:html',
       'copy:assets',
       'copy:theme',
-      'postbuild',
       'inject:index',
       next
     );
@@ -439,18 +383,15 @@
   gulp.task('default', function (next) {
     usePlumber = false;
     runSequence(
-      'clean:dist',
+      'clean',
       'plugin',
-      'translate:compile',
-      'copy:framework:templates',
-      'js:combine',
+      'copy:js',
       'copy:lib',
       'css',
       'template-cache',
       'copy:html',
       'copy:assets',
       'copy:theme',
-      'postbuild',
       'inject:index',
       'oem',
       next

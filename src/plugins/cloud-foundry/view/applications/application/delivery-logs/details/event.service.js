@@ -41,7 +41,7 @@
     '$log',
     'context',
     'content',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

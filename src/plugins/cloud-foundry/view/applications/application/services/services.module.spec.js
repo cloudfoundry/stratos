@@ -9,7 +9,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var eventService = $injector.get('app.event.eventService');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');

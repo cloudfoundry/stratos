@@ -37,8 +37,8 @@
       $httpBackend = $injector.get('$httpBackend');
       manageUsersService = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
 
-      var modelManager = $injector.get('app.model.modelManager');
-      organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      var modelManager = $injector.get('modelManager');
+      organizationModel = $injector.get('organization-model');
       authModel = modelManager.retrieve('cloud-foundry.model.auth');
     }));
 

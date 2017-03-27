@@ -13,8 +13,8 @@
   registerServiceManagerModel.$inject = [
     '$q',
     '$timeout',
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'app.event.eventService'
   ];
 

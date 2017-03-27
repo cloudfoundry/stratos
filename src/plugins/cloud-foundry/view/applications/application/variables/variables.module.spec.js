@@ -10,7 +10,7 @@
     beforeEach(inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $q = $injector.get('$q');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
       var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
@@ -34,7 +34,7 @@
 
     describe('no variables checks', function () {
       beforeEach(inject(function ($injector) {
-        var modelManager = $injector.get('app.model.modelManager');
+        var modelManager = $injector.get('modelManager');
         var model = modelManager.retrieve('cloud-foundry.model.application');
         model.application = {variables: undefined};
       }));
@@ -46,7 +46,7 @@
 
     describe('with variables checks', function () {
       beforeEach(inject(function ($injector) {
-        var modelManager = $injector.get('app.model.modelManager');
+        var modelManager = $injector.get('modelManager');
         //variables.environment_json
         var model = modelManager.retrieve('cloud-foundry.model.application');
         model.application = {

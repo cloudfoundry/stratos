@@ -30,7 +30,7 @@
     '$stateParams',
     '$q',
     '$filter',
-    'app.model.modelManager',
+    'modelManager',
     'cloud-foundry.view.applications.services.serviceInstanceService',
     'app.utils.utilsService'
   ];

@@ -30,7 +30,7 @@
     '$state',
     '$q',
     'app.utils.utilsService',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function ServiceManagerSdlDetailController($stateParams, $state, $q, utils, modelManager) {

@@ -12,7 +12,7 @@
     .run(registerModel);
 
   registerModel.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.logged-in.loggedInService',
     '$state',
@@ -219,7 +219,7 @@
 
       item.svgIcon = item.icon.indexOf('svg://') === 0;
       if (item.svgIcon) {
-        item.icon = '/svg/' + item.icon.substr(6);
+        item.icon = 'svg/' + item.icon.substr(6);
       }
       return item;
     },

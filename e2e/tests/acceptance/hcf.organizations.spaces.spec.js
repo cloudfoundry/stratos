@@ -90,5 +90,5 @@
       cliCommands.click();
       element(by.css('.detail-view-close.close')).click();
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCF);
 })();

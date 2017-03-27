@@ -18,7 +18,7 @@
 
   ApplicationsSortingController.$inject = [
     '$scope',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

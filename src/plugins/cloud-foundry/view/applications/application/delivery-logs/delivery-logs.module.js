@@ -24,7 +24,7 @@
     '$q',
     '$log',
     'moment',
-    'app.model.modelManager',
+    'modelManager',
     'viewEventDetailView',
     'viewExecutionDetailView',
     'triggerBuildDetailView'
