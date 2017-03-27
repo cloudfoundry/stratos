@@ -29,7 +29,7 @@
       };
 
       $scope = $injector.get('$rootScope').$new();
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
       $stateParams = $injector.get('$stateParams');
       organizationModel = $injector.get('organization-model');

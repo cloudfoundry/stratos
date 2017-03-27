@@ -26,7 +26,7 @@
     '$state',
     '$stateParams',
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',

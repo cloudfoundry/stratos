@@ -28,7 +28,7 @@
     '$q',
     '$scope',
     '$filter',
-    'app.model.modelManager',
+    'modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
     'app.utils.utilsService',

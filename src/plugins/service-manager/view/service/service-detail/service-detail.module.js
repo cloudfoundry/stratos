@@ -50,7 +50,7 @@
     '$state',
     '$q',
     'app.utils.utilsService',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function ServiceManagerServiceDetailController($stateParams, $state, $q, utils, modelManager) {

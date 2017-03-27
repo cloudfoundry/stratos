@@ -31,7 +31,7 @@
     '$q',
     '$state',
     'app.utils.utilsService',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.logged-in.loggedInService'
   ];

@@ -12,7 +12,7 @@
     .run(registerModel);
 
   registerModel.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'app.logged-in.loggedInService',
     '$state',

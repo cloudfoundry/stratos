@@ -25,7 +25,7 @@
     '$q',
     '$scope',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService',
     'app.view.registerService',
     'app.view.endpoints.dashboard.dashboardService',

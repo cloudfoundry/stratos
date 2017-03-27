@@ -8,7 +8,7 @@
 
   ManageInstanceDialogFactory.$inject = [
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 

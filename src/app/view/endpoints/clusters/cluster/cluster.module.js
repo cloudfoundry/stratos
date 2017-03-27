@@ -30,7 +30,7 @@
     '$state',
     '$q',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.userSelection',
     'organization-model'
   ];

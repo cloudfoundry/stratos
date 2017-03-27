@@ -9,7 +9,7 @@
     '$q',
     '$rootScope',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
