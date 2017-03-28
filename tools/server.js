@@ -60,7 +60,7 @@
   server.listen(port, function () {
     console.log('\x1b[32mConsole HTTPS Server started listening on port %d\x1b[0m', port);
     console.log('\x1b[32mServing application from %s\x1b[0m', appFolder);
-    console.log('\x1b[32mProxying Console Back-end API requets to %s\x1b[0m', target);
+    console.log('\x1b[32mProxying Console Back-end API requests to %s\x1b[0m', target);
   });
 
 })();
