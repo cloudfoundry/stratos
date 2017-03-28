@@ -51,6 +51,9 @@
 
 .btn-link {
   cursor: pointer;
+  &:hover {
+    color: darken($brand-primary, 10%);
+  }
   &[disabled],
   fieldset[disabled] & {
     &:hover,
