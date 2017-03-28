@@ -1,0 +1,19 @@
+{
+  "product": {
+    "name": "SUSE Cloud Foundry",
+    "console": "SUSE Cloud Foundry Console",
+    "cf": "Cloud Foundry",
+    "ce": "Code Engine"
+  },
+  "company": {
+    "name": "SUSE (a Micro Focus Company)",
+    "TERMS_OF_USE": "Legal",
+    "TERMS_OF_USE_HREF": "https://www.suse.com/company/legal/",
+    "PRIVACY_HREF": "", 
+    "PRODUCT_FAMILY_HREF": "",
+    "COMPANY_HREF": "http://www.suse.com",
+    "PRODUCT_CONSOLE": "SUSE Cloud Foundry Console",
+    "CODE_ENGINE": "Code Engine",
+    "CLOUD_FOUNDRY": "Cloud Foundry"
+  }
+}
