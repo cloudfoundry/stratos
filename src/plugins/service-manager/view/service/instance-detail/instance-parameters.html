@@ -1,0 +1,43 @@
+<!--
+        <div class="application-search-box">
+          <form>
+            <div class="form-group search-field" focusable-input>
+              <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+              <input type="text" class="form-control" id="applications-text" name="applications-text"
+                    ng-model="instanceCtrl.params.filter"
+                    ng-model-options='{ debounce: 100 }'
+                    ng-change="instanceCtrl.setParamsFilterText()"
+                    placeholder="{{'Search by name' | translate}}"/>
+            </div>
+          </form>
+        </div>
+
+-->
+<table class="table"
+        st-table="instanceCtrl.stTableInstanceParameters"
+        st-safe-src="instanceCtrl.instance.parameters">
+  <thead>
+  <tr>
+    <th translate st-sort="name" st-sort-default="true" st-skip-natural="true">Name</th>
+    <th translate st-sort="value" st-skip-natural="true">Value</th>
+  </tr>
+  <tr>
+    <th colspan="5" class="table-sort-filter">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input st-search=""
+                type="text" class="form-control"
+                placeholder="{{'Filter parameters' | translate}}"/>
+        </div>
+      </form>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="params in instanceCtrl.stTableInstanceParameters track by $index">
+    <td>{{ params.name }}</td>
+    <td>{{ params.value }}</td>
+  </tr>
+  </tbody>
+</table>

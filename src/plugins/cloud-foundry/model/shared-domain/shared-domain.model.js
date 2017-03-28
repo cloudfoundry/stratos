@@ -11,9 +11,9 @@
     .run(registerSharedDomainModel);
 
   registerSharedDomainModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils'
+    'modelManager',
+    'apiManager',
+    'modelUtils'
   ];
 
   function registerSharedDomainModel(modelManager, apiManager, modelUtils) {

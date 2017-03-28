@@ -12,9 +12,9 @@
     .run(registerServiceBindingModel);
 
   registerServiceBindingModel.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils'
+    'modelManager',
+    'apiManager',
+    'modelUtils'
   ];
 
   function registerServiceBindingModel(modelManager, apiManager, modelUtils) {

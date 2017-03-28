@@ -16,7 +16,7 @@
 
     beforeEach(inject(function ($injector) {
       $q = $injector.get('$q');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       var appModel = modelManager.retrieve('cloud-foundry.model.application');
       appModel.application.variables = {
         environment_json: {

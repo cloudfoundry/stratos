@@ -25,8 +25,8 @@
 
   NotificationTargetController.$inject = [
     '$scope',
-    'app.api.apiManager',
-    'app.model.modelManager',
+    'apiManager',
+    'modelManager',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 

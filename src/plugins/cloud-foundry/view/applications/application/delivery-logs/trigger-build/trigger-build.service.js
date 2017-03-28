@@ -43,7 +43,7 @@
     'app.view.vcs.manageVcsTokens',
     'context',
     'content',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

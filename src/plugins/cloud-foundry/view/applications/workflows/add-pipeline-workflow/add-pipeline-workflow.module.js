@@ -229,7 +229,8 @@
 
                     return that.$q.reject(message);
                   });
-              }
+              },
+              OEM_CONFIG: that.utils.getOemConfiguration()
             },
             {
               ready: true,

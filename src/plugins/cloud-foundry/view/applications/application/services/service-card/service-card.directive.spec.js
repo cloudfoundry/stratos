@@ -14,7 +14,7 @@
       $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
 
       if (mockAuthModel) {
         var authModel = modelManager.retrieve('cloud-foundry.model.auth');

@@ -1,0 +1,304 @@
+.firehose-container {
+
+  display: flex;
+  flex-flow: column nowrap;
+  height: calc(100vh - 460px);
+
+  &.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: $zindex-navbar-fixed + 1;
+  }
+
+  .firehose-header {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+
+    border-bottom-color: #666;
+
+    &.panel-heading.action-header {
+      height: auto;
+      min-height: 96px;
+      padding: 0;
+    }
+
+    .firehose-header-top {
+      padding: $hpe-unit-space / 2 3 * $hpe-unit-space / 4;
+      flex: 1 1 auto;
+      display: flex;
+      flex-flow: row nowrap;
+
+      border-bottom: 1px solid $gray-light;
+
+      .firehose-status {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+
+        .log-stream-title {
+          margin-right: $padding-small-horizontal;
+          height: 21px;
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+        }
+
+        .app-log-stream-indicator {
+          width: 45px;
+        }
+      }
+
+      .view-controls {
+        flex: 1 0 auto;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: flex-end;
+        align-items: center;
+        .btn.btn-link {
+          height: 21px;
+          border: 0;
+          margin: 0 10px;
+        }
+
+        .fullscreen-toggle {
+          $transition: 15ms;
+          position: relative;
+          top: 0;
+          left: 0;
+          cursor: pointer;
+          margin-left: $padding-base-horizontal;
+          transition: top $transition, left $transition, text-shadow $transition;
+          &:hover {
+            top: -1px;
+            left: -1px;
+            color: $hpe-primary-fg;
+            text-shadow: 1px 1px 1px rgba($hpe-primary-fg, 0.2);
+          }
+        }
+      }
+
+    }
+
+    .firehose-header-bottom {
+      background-color: #444;
+      color: #DCDCCC;
+      padding: $hpe-unit-space / 2 $padding-base-horizontal $hpe-unit-space / 2 $padding-base-horizontal;
+      display: flex;
+      flex-flow: column nowrap;
+
+      .text-filter {
+        flex: 0 0 50px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-flow: row nowrap;
+
+        .search-box {
+          flex: 1;
+          overflow: hidden;
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          background-color: white;
+          box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.3);
+          padding: 5px;
+          font-size: 20px;
+          cursor: text;
+
+          .text-filter-icon {
+            margin-left: 10px;
+            pointer-events: none;
+            color: $dove-gray2;
+            font-weight: 600;
+          }
+
+          .regex-marker {
+            font-weight: 500;
+            color: $dove-gray;
+            &.opening {
+              padding: 0 4px 0 12px;
+            }
+            &.closing {
+              padding: 0 12px 0 4px;
+            }
+          }
+
+          .text-filter-input {
+            flex: 0 1 auto;
+            height: 40px;
+            font-weight: 500;
+            padding: 10px 0;
+            border: 0;
+            outline: none;
+            min-width: 2px;
+            color: $dove-gray2;
+            white-space: nowrap;
+            overflow: hidden;
+
+            &::selection {
+              background: $gossamer;
+              color: white;
+            }
+          }
+
+          .space-absorber {
+            flex: 1;
+          }
+
+          .clear-text-filter-icon {
+            cursor: pointer;
+            margin-right: 10px;
+            color: $dove-gray2;
+            font-weight: 600;
+          }
+        }
+
+        .search-options {
+          margin-left: 16px;
+          display: flex;
+          flex-flow: column nowrap;
+          justify-content: center;
+          checkbox-input {
+            margin-top: $padding-xs-vertical;
+            margin-bottom: $padding-xs-vertical;
+
+            .checkbox-input {
+              color: $silver-sand;
+            }
+            .checkbox-input:not(.checked) {
+              &:hover {
+                color: $seashell;
+              }
+              &:focus {
+                color: $silver-sand;
+              }
+            }
+
+            .checkbox-input .checkbox-input-button {
+              height: 16px;
+              width: 16px;
+              &:before {
+                font-size: 16px;
+              }
+            }
+            .checkbox-input-label {
+              color: #DCDCCC;
+              user-select: none;
+              margin-top: -1px;
+              font-size: 16px;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+
+      .type-filters {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+
+        .filters-controls {
+          display: flex;
+          font-weight: 500;
+          margin-right: $padding-base-horizontal;
+          user-select: none;
+          cursor: default;
+          span.controls-label {
+            margin-right: $padding-small-horizontal;
+          }
+          span.control {
+            cursor: pointer;
+            color: $gossamer;
+            &:hover {
+              color: lighten($hpe-primary, 10%);
+              text-decoration: underline;
+            }
+          }
+          span.separator {
+            margin-left: $padding-small-horizontal / 2;
+            margin-right: $padding-small-horizontal / 2;
+          }
+        }
+
+        .firehose-filters {
+          align-items: center;
+          display: flex;
+          flex-flow: row wrap;
+          flex: 1;
+
+          checkbox-input {
+            margin-top: $padding-xs-vertical;
+            margin-bottom: $padding-xs-vertical;
+
+            .checkbox-input .checkbox-input-button {
+              height: 16px;
+              width: 16px;
+              &:before {
+                font-size: 16px;
+              }
+            }
+            .checkbox-input-label {
+              color: #DCDCCC;
+              user-select: none;
+              margin-top: -1px;
+              font-size: 16px;
+              font-weight: 500;
+            }
+
+            &:not(:last-child) {
+              margin-right: $padding-base-horizontal;
+            }
+
+            // Colourise checkboxes
+            .checkbox-input {
+              color: $silver-sand;
+            }
+
+            @mixin colorize-checkbox($color) {
+              .checkbox-input {
+                &:hover {
+                  color: ansi-colour($color, false);
+                }
+                &.checked > .checkbox-input-button {
+                  color: ansi-colour($color, false);
+                }
+              }
+            }
+
+            &.apps-filter > {
+              @include colorize-checkbox('green');
+            }
+            &.api-filter > {
+              @include colorize-checkbox('magenta');
+            }
+            &.metrics-filter > {
+              @include colorize-checkbox('blue');
+            }
+            &.counters-filter > {
+              @include colorize-checkbox('yellow');
+            }
+            &.errors-filter > {
+              @include colorize-checkbox('red');
+            }
+            &.container-metrics-filter > {
+              @include colorize-checkbox('cyan');
+            }
+          }
+        }
+
+        .btn-link:hover {
+          color: lighten($hpe-primary, 10%);
+        }
+      }
+
+    }
+  }
+
+  .log-viewer {
+    flex: 1;
+  }
+
+}

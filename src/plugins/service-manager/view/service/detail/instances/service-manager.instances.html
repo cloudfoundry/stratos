@@ -1,0 +1,72 @@
+<div ng-if="!smCtrl.model.instances && smCtrl.model.instances !== false"
+     class="cluster-loading message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterDetailController.organizations === false" class="cluster-loading col-md-9 col-sm-12">
+  <div translate>An error occurred retrieving instances</div>
+</div>
+<div class="cluster-gallery-card-container" ng-if="smCtrl.model.instances">
+  <div ng-if="smCtrl.model.instances.length < 1"
+       class="panel panel-default cluster-empty-list">
+    <div class="panel-body" translate>
+      You have no instances
+    </div>
+  </div>
+    <table ng-if="smCtrl.model.instances.length" class="table table-actionable"
+            st-table="svcsCtrl.stTableInstances"
+            st-safe-src="smCtrl.model.instances">
+      <thead>
+      <tr>
+        <th translate st-sort="instance_id" st-sort-default="true" st-skip-natural="true">Instance ID</th>
+        <th translate st-sort="state" st-skip-natural="true">State</th>
+        <th translate st-sort="service_id" st-skip-natural="true">Service ID</th>
+        <th translate st-sort="product_version" st-skip-natural="true">Product Version</th>
+        <th translate st-sort="sdl_version" st-skip-natural="true">SDL Version</th>
+        <th translate st-sort="vendor" st-skip-natural="true">Vendor</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="instance in svcsCtrl.stTableInstances track by instance.instance_id">
+        <td >
+          <a ui-sref="sm.endpoint.instance.components({id: instance.instance_id})">{{ instance.instance_id }}</a>
+        </td>
+        <td class="endpoint-table-connected" ng-init="state = smCtrl.hsmModel.instanceStateIndicator(instance.state)">
+          <bounce-spinner classes="bounce-spinner-sm" ng-if="state === 'busy'"></bounce-spinner>
+          <span ng-if="state !== 'busy'"
+                class="helion-icon helion-icon-lg {{ state | appStateIcon | smallToLargeIcon}}"
+                uib-popover="{{ instance.state }}"
+                popover-trigger="'mouseenter'"
+                popover-placement="top-left"
+                popover-popup-delay="1000"
+                popover-class="first-letter-uppercase"></span>
+        </td>
+
+        <td>
+          <a ui-sref="sm.endpoint.service.detail({id: instance.service_id })">
+          {{  instance.service_id }}
+          </a>
+        </td>
+        <td>{{ instance.product_version }}</td>
+        <td>
+          <a ui-sref="sm.endpoint.service.sdl({id: instance.service_id, product: instance.product_version, sdl: instance.sdl_version})">
+          {{ instance.sdl_version }}
+          </a>
+        </td>
+        <td>{{ instance.vendor }}</td>
+        <td>
+          <!--
+          <actions-menu actions="instance.actions"
+                        action-target="instance.actionsTarget"
+                        menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right"
+                        enable-button-mode="true"></actions-menu>
+        -->
+          <div ng-if="smCtrl.hasUpgrade(instance.instance_id, true)" class="upgrade-indicator">
+            <i ui-sref="sm.endpoint.instance.versions({id: instance.instance_id})" class="helion-icon helion-icon-Upgrade"></i>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+</div>

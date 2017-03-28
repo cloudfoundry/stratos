@@ -25,10 +25,10 @@
   ClusterTileController.$inject = [
     '$scope',
     '$state',
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'app.utils.utilsService',
-    'cloud-foundry.model.modelUtils'
+    'modelUtils'
   ];
 
   /**

@@ -13,14 +13,16 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var modelManager = $injector.get('app.model.modelManager');
-      var apiManager = $injector.get('app.api.apiManager');
+      var modelManager = $injector.get('modelManager');
+      var apiManager = $injector.get('apiManager');
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       var $scope = $injector.get('$rootScope').$new();
       var utils = $injector.get('app.utils.utilsService');
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
+      var modelUtils = $injector.get('modelUtils');
+      var organizationModel = $injector.get('organization-model');
 
       var cliCommands = $injector.get('app.view.endpoints.clusters.cluster.cliCommands');
 
@@ -31,7 +33,7 @@
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
-      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands);
+      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands, modelUtils, organizationModel);
 
     }));
 

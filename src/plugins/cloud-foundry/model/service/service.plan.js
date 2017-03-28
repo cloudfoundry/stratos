@@ -12,9 +12,9 @@
     .run(registerServicePlan);
 
   registerServicePlan.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'cloud-foundry.model.modelUtils'
+    'modelManager',
+    'apiManager',
+    'modelUtils'
   ];
 
   function registerServicePlan(modelManager, apiManager, modelUtils) {

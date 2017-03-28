@@ -39,6 +39,9 @@
         case 'error':
           icon = 'helion-icon-Critical_S text-danger';
           break;
+        case 'deleted':
+          icon = 'helion-icon-Trash text-success';
+          break;
         default:
           icon = '';
       }

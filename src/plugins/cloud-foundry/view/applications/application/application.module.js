@@ -28,7 +28,7 @@
   }
 
   ApplicationController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'helion.framework.widgets.dialog.confirm',
     'app.utils.utilsService',

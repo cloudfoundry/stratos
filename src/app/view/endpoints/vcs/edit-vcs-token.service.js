@@ -8,7 +8,7 @@
   EditVcsTokenService.$inject = [
     '$q',
     'helion.framework.widgets.asyncTaskDialog',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   /**

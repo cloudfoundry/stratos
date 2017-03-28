@@ -31,7 +31,7 @@
 
   ServiceCardController.$inject = [
     '$scope',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'cloud-foundry.view.applications.services.serviceInstanceService'
   ];

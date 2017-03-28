@@ -40,19 +40,19 @@
       return browser.executeScript('return $(".log-container").scrollTop()');
     }
 
-    it('Should stream the log of the "node-env" app', function () {
+    it('Should stream the log of an app', function () {
       // If the node-env app can not be found, this test will just be skipped
       // It does not currently cause a failure in that case
       galleryWall.showApplications();
       galleryWall.resetFilters();
       var appNameSearchBox = inputText.wrap(galleryWall.appNameSearch());
       appNameSearchBox.clear();
-      appNameSearchBox.addText('node-env');
+      appNameSearchBox.addText(helpers.getAppNameWithLogStream());
 
       element.all(by.css('application-gallery-card .panel-heading.linked')).then(function (apps) {
         if (apps.length !== 1) {
           // Can't find the app, or too many - so skip the test
-          pending('Can not test log stream - can not find the "node-env" application');
+          pending('Can not test log stream - can not find the application: ' + helpers.getAppNameWithLogStream());
         } else {
           // Go into the app view for the app
           apps[0].click();
@@ -66,7 +66,7 @@
     describe('with a log streaming', function () {
       beforeAll(function () {
         if (!haveAppWithLogStream) {
-          pending('Can not test log stream - can not find the "node-env" application');
+          pending('Can not test log stream - can not find the application: ' + helpers.getAppNameWithLogStream());
         }
       });
 
@@ -108,6 +108,6 @@
       });
       */
     });
-  });
+  }).skipWhen(helpers.skipIfNoAppWithLogStrean);
 })();
 

@@ -11,7 +11,7 @@
 
   serviceFactory.$inject = [
     '$q',
-    'app.model.modelManager',
+    'modelManager',
     'helion.framework.widgets.detailView'
   ];
 
@@ -82,7 +82,7 @@
   }
 
   ApplicationVariablesDialogController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     '$uibModalInstance',
     'context'
   ];

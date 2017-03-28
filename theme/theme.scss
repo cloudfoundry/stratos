@@ -1,0 +1,10 @@
+// Fake the font name for the glyphicons to be the helion icon font
+$icon-font-name: "/helion-icons";
+$icon-font-path: '/fonts/helion-icons/fonts' !default;
+
+// Fonts and theme
+@import "fonts/helion-icons/variables";
+@import "scss/theme/index";
+
+// Mixins
+@import "scss/mixin/index";

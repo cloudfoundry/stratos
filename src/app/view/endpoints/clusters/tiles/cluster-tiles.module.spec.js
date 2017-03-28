@@ -72,7 +72,7 @@
       $scope = $injector.get('$rootScope').$new();
       $stateParams = $injector.get('$stateParams');
 
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       utilsService = $injector.get('app.utils.utilsService');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');

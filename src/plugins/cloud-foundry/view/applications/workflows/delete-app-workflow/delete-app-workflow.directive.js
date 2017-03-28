@@ -29,7 +29,7 @@
 
   DeleteAppWorkflowController.$inject = [
     '$filter',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     '$q',
     '$interpolate',

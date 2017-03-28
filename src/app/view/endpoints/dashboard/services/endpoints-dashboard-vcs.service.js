@@ -9,7 +9,7 @@
     '$q',
     '$rootScope',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
@@ -181,7 +181,10 @@
         }];
       }
       var currentUserAccount = modelManager.retrieve('app.model.account');
-      if (currentUserAccount.isAdmin() && !dashboardService.isCodeEngineVcs(endpoint)) {
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+      var noHces = !_.find(userServiceInstanceModel.serviceInstances, {cnsi_type: 'hce', valid: true});
+      if (currentUserAccount.isAdmin() && (noHces || dashboardService.fetchedCodeEngineVcses && !dashboardService.isCodeEngineVcs(endpoint))) {
         endpoint.actions.push({
           name: gettext('Unregister'),
           execute: function (endpoint) {

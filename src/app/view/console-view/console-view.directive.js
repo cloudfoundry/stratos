@@ -19,7 +19,20 @@
    */
   function consoleView(path) {
     return {
-      templateUrl: path + 'view/console-view/console-view.html'
+      templateUrl: path + 'view/console-view/console-view.html',
+      controller: ConsoleViewController,
+      controllerAs: 'consoleViewCtrl'
+    };
+
+  }
+
+  ConsoleViewController.$inject = ['$rootScope'];
+
+  function ConsoleViewController($rootScope) {
+    var vm = this;
+
+    vm.noScroll = function () {
+      return $rootScope.consoleViewNoScroll;
     };
   }
 

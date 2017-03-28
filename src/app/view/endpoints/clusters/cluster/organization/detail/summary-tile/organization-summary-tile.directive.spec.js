@@ -94,9 +94,7 @@
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
 
-      var modelManager = $injector.get('app.model.modelManager');
-
-      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      var organizationModel = $injector.get('organization-model');
       _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, modelOrganization);
       _.set(organizationModel, 'organizationNames.' + clusterGuid, [organizationGuid]);
 

@@ -148,12 +148,43 @@ navbar > .main-nav-menu {
               font-size: 26px;
             }
           }
+
+          > svg {
+            width: 32px;
+            vertical-align: middle;
+
+            .st0 {fill:#FFF}
+	          .st1 {stroke: #FFF}
+          }
         }
 
         .navitem-label {
           vertical-align: middle;
           text-transform: uppercase;
           letter-spacing: 1px;
+        }
+      }
+
+      .menu-item-badge {
+        position: absolute;
+        left: 32px;
+        margin: 6px;
+        width: 24px;
+        height: 24px;
+        background-color: #00b0d7;
+        color: #fff;
+        text-align: center;
+        line-height: 24px;
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: 700;
+        pointer-events: none;
+        padding: 0;
+        opacity: 0;
+        transition: opacity 0.6s linear;
+
+        &.badge-active {
+          opacity: 1;
         }
       }
     }

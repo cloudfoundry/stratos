@@ -1,0 +1,28 @@
+<div class="hsm cluster">
+    <span class="cluster-breadcrumb" ncy-breadcrumb></span>
+    <div class="cluster-detail endpoints" ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
+        <div class="hsm-service-header">
+            <h3 translate>Service : {{ sdlCtrl.service.id }} : SDL {{ sdlCtrl.pv }} ({{ sdlCtrl.sv }})</h3>
+            <div ng-if="smCtrl.hsmModel.canWrite()" class="create-instance-btn">
+                <button class="btn btn-primary" translate ng-click="smCtrl.createInstance(sdlCtrl.service.id, sdlCtrl.pv, sdlCtrl.sv )">
+          Create Instance
+          </button>
+            </div>
+        </div>
+      <form class="hsm-filter-box">
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input ng-model-options="{ debounce: 200 }"
+                 ng-model="sdlCtrl.filter" ng-change="sdlCtrl.filterSDL()" type="text" class="form-control"
+                 placeholder="{{'Search in template' | translate}}"/>
+        </div>
+      </form>
+        
+        <div ng-if="sdlCtrl.loading" class="message-box message-box-no-bg">
+            <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+        </div>
+        <div ng-if="!sdlCtrl.loading">
+            <json-tree-view json="sdlCtrl.json"></json-tree-view>
+        </div>
+    </div>
+</div>

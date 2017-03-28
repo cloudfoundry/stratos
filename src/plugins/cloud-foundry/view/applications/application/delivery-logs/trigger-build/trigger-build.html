@@ -53,8 +53,15 @@
               <radio-input ng-model="detailViewCtrl.selectedCommit" input-value="commit"></radio-input>
             </td>
             <td>{{ commit.commit.message }}</td>
-            <td>{{ commit.author.login }}</td>
-            <td>{{ commit.sha | limitTo:8}}</td>
+            <td>
+              <div class="delivery-log-trigger-build-user">
+                <a ng-href="{{ commit.author.html_url }}" rel="noopener noreferrer" target="_blank">{{ commit.author.login }}</a>
+                <img ng-if="commit.author.avatar_url" ng-src="{{ commit.author.avatar_url }}"/>
+              </div>
+            </td>
+            <td>
+              <a ng-href="{{ commit.html_url }}" rel="noopener noreferrer" target="_blank">{{ commit.sha | limitTo:8}}</a>
+            </td>
           </tr>
           </tbody>
         </table>

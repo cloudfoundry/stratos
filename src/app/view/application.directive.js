@@ -29,7 +29,7 @@
 
   ApplicationController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
+    'modelManager',
     'app.basePath',
     'app.view.upgradeCheck',
     'app.logged-in.loggedInService',

@@ -21,10 +21,12 @@
       $state = $injector.get('$state');
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       eventService = $injector.get('app.event.eventService');
       var errorService = $injector.get('app.error.errorService');
       var utils = $injector.get('app.utils.utilsService');
+      var organizationModel = $injector.get('organization-model');
+      var detailView = $injector.get('helion.framework.widgets.detailView');
       var $window = $injector.get('$window');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -50,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils, detailView, organizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
@@ -170,10 +172,10 @@
         injector = $injector;
 
         $q = $injector.get('$q');
-        modelManager = $injector.get('app.model.modelManager');
+        modelManager = $injector.get('modelManager');
         userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
 
-        orgModel = modelManager.retrieve('cloud-foundry.model.organization');
+        orgModel = $injector.get('organization-model');
       }));
 
       describe('Single cluster/org/space', function () {

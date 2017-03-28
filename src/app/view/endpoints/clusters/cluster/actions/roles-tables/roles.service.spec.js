@@ -71,7 +71,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       $uibModal = $injector.get('$uibModal');
       $q = $injector.get('$q');
 
@@ -89,7 +89,7 @@
       testModelOrg = _.cloneDeep(modelOrg);
       testModelSpace = _.cloneDeep(modelSpace);
 
-      organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      organizationModel = $injector.get('organization-model');
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     }));
 

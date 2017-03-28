@@ -10,6 +10,8 @@
   ];
 
   function registerRoute($stateProvider) {
+
+    // Cloud Foundry
     $stateProvider.state('endpoint.clusters.router', {
       url: '',
       template: '<ui-view/>',
@@ -24,7 +26,7 @@
   ClustersRouterController.$inject = [
     '$q',
     '$state',
-    'app.model.modelManager',
+    'modelManager',
     'app.utils.utilsService'
   ];
 

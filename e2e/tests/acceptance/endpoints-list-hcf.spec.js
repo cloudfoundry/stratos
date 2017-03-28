@@ -92,5 +92,5 @@
       });
 
     });
-  });
+  }).skipWhen(helpers.skipIfNoHCF);
 })();

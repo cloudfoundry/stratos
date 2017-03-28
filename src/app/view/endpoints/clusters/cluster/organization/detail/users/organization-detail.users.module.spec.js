@@ -30,14 +30,14 @@
         $stateParams.guid = clusterGuid;
         $stateParams.organization = organizationGuid;
         var $q = $injector.get('$q');
-        var modelManager = $injector.get('app.model.modelManager');
+        var modelManager = $injector.get('modelManager');
         var utils = $injector.get('app.utils.utilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
         var eventService = $injector.get('app.event.eventService');
         var userSelection = $injector.get('app.view.userSelection');
+        var organizationModel = $injector.get('organization-model');
 
-        var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, { details: {guid: organizationGuid } });
 
         var spaceGuid = 'spaceGuid';
@@ -59,7 +59,7 @@
 
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection);
+          rolesService, eventService, userSelection, organizationModel);
       }
 
       describe('as admin', function () {
@@ -129,7 +129,7 @@
 
     describe('Standard user table tests', function () {
 
-      var $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService, eventService, userSelection;
+      var $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService, eventService, userSelection, orgModel;
 
       var users = [
         {
@@ -219,7 +219,7 @@
       function createController() {
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection);
+          rolesService, eventService, userSelection, orgModel);
       }
 
       beforeEach(inject(function ($injector) {
@@ -230,12 +230,13 @@
         $stateParams.guid = clusterGuid;
         $stateParams.organization = organizationGuid;
         $q = $injector.get('$q');
-        modelManager = $injector.get('app.model.modelManager');
+        modelManager = $injector.get('modelManager');
         utils = $injector.get('app.utils.utilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
         eventService = $injector.get('app.event.eventService');
         userSelection = $injector.get('app.view.userSelection');
+        orgModel = $injector.get('organization-model');
 
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
         _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -255,7 +256,7 @@
         });
 
         // Initial set of organizations
-        var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+        var organizationModel = $injector.get('organization-model');
         _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
 
         // Initial set of spaces
