@@ -3,6 +3,7 @@
 
   angular
     .module('helion.framework', [
+      'ncy-angular-breadcrumb',
       'helion.framework.filters',
       'helion.framework.utils',
       'helion.framework.validators',

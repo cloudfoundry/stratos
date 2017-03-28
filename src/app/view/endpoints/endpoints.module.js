@@ -22,7 +22,7 @@
         activeMenuState: 'endpoints'
       },
       ncyBreadcrumb: {
-        label: gettext('Endpoints')
+        label: 'endpoints'
       }
     });
   }
