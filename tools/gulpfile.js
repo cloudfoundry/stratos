@@ -73,6 +73,9 @@
     del(paths.dist + '**/*', {force: true}, next);
   });
 
+  // Legacy
+  gulp.task('clean:dist', ['clean']);
+
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
