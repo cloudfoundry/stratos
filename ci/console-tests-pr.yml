@@ -2,7 +2,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: jtarchie/pr
+    repository: irfanhabib/pr
 
 resources:
 - name: stratos-deploy
@@ -24,6 +24,7 @@ resources:
     repo: hpcloud/stratos-ui
     uri: git@github.com:hpcloud/stratos-ui.git
     private_key: {{github-private-key}}
+    exclude_label: suse
 
 jobs:
 - name: console-tests
@@ -53,7 +54,7 @@ jobs:
       file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
     - task: run-e2e-tests
       privileged: true
-      timeout: 10m
+      timeout: 15m
       file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
       on_success:
         put: stratos-ui
