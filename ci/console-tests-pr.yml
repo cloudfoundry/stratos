@@ -9,13 +9,13 @@ resources:
   type: git
   source:
     uri: git@github.com:hpcloud/stratos-deploy.git
-    branch: master
+    branch: suse
     private_key: {{github-private-key}}
 - name: portal-proxy
   type: git
   source:
     uri: git@github.com:hpcloud/portal-proxy.git
-    branch: master
+    branch: suse
     private_key: {{github-private-key}}
 - name: stratos-ui
   type: pull-request
@@ -24,7 +24,7 @@ resources:
     repo: hpcloud/stratos-ui
     uri: git@github.com:hpcloud/stratos-ui.git
     private_key: {{github-private-key}}
-    exclude_label: suse
+    label: suse
 
 jobs:
 - name: console-tests
