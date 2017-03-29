@@ -9,7 +9,7 @@
 
     beforeEach(inject(function ($injector) {
       var $state = $injector.get('$state');
-      var eventService = $injector.get('app.event.eventService');
+      var eventService = $injector.get('app.utils.eventService');
       var modelManager = $injector.get('modelManager');
       var AccountSettingsController = $state.get('account-settings').controller;
       controller = new AccountSettingsController(eventService, modelManager);

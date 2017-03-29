@@ -14,7 +14,7 @@
       $element = angular.element(markup);
       $compile($element)($scope);
       $scope.$apply();
-      eventService = $injector.get('app.event.eventService');
+      eventService = $injector.get('app.utils.eventService');
       appErrorBarCtrl = $element.controller('appErrorBar');
     }));
 

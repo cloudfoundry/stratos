@@ -67,11 +67,11 @@
         //'framework/src/**/*.mock.js',
 
         'src/index.module.js',
+
         'src/app/**/*.module.js',
-        'src/app/**/!(*.mock|*.spec).js',
-        'src/app/**/*.mock.js',
-        'src/app/**/*.spec.js',
+        'src/app/**/*.js',
         'src/app/**/*.html',
+        
         'src/plugins/**/*.module.js',
         'src/plugins/**/!(*.mock|*.spec).js',
         'src/plugins/**/*.mock.js',

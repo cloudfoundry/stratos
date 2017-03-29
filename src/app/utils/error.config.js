@@ -2,13 +2,14 @@
   'use strict';
 
   /**
-   * @namespace app.error
+   * @namespace app.utils
    * @memberof app
    * @name error
    * @description The error module for components that support application errors to be set and cleared
    */
   angular
-    .module('app.error', [], config);
+    .module('app.utils')
+    .config(config);
 
   config.$inject = [
     '$httpProvider'
@@ -20,7 +21,7 @@
 
   interceptor.$inject = [
     '$q',
-    'app.error.errorService',
+    'app.utils.errorService',
     'app.view.upgradeCheck'
   ];
 

@@ -24,8 +24,8 @@
   };
 
   angular
-    .module('app.event')
-    .factory('app.event.eventService', eventServiceFactory);
+    .module('app.utils')
+    .factory('app.utils.eventService', eventServiceFactory);
 
   eventServiceFactory.$inject = [
     '$rootScope',
@@ -33,8 +33,8 @@
   ];
 
   /**
-   * @namespace app.event.eventService
-   * @memberof app.event
+   * @namespace app.utils.eventService
+   * @memberof app.utils
    * @name eventService
    * @description The event bus service
    * @param {object} $rootScope - the $rootScope

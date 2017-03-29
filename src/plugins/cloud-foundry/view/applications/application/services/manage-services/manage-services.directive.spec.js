@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      eventService = $injector.get('app.event.eventService');
+      eventService = $injector.get('app.utils.eventService');
 
       // mock UI router $stateParams
       var $stateParams = $injector.get('$stateParams');

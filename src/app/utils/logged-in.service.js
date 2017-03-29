@@ -2,11 +2,11 @@
   'use strict';
 
   angular
-    .module('app.logged-in')
-    .factory('app.logged-in.loggedInService', loggedInServiceFactory);
+    .module('app.utils')
+    .factory('app.utils.loggedInService', loggedInServiceFactory);
 
   loggedInServiceFactory.$inject = [
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager',
     'helion.framework.widgets.dialog.confirm',
     '$interval',

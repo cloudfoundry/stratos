@@ -20,7 +20,7 @@
 
   interceptor.$inject = [
     '$q',
-    'app.event.eventService'
+    'app.utils.eventService'
   ];
 
   /**

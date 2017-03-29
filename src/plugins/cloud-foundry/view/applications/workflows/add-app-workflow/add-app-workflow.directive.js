@@ -29,7 +29,7 @@
 
   AddAppWorkflowController.$inject = [
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'app.utils.utilsService',
     'app.view.vcs.manageVcsTokens',
     'organization-model',
@@ -44,7 +44,7 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the Event management service
+   * @param {app.utils.eventService} eventService - the Event management service
    * @param {app.utils.utilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} organizationModel - the organization-model service
@@ -58,7 +58,7 @@
    * @property {object} $timeout - the Angular $timeout service
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.event.eventService} eventService - the Event management service
+   * @property {app.utils.eventService} eventService - the Event management service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model

@@ -13,8 +13,8 @@
 
   registerModel.$inject = [
     'modelManager',
-    'app.event.eventService',
-    'app.logged-in.loggedInService',
+    'app.utils.eventService',
+    'app.utils.loggedInService',
     '$state',
     '$rootScope',
     '$log'
@@ -33,12 +33,12 @@
    * @memberof app.model
    * @name NavigationModel
    * @constructor
-   * @param {app.event.eventService} eventService - the event bus service
-   * @param {app.logged-in.loggedInService} loggedInService - the logged-in service
+   * @param {app.utils.eventService} eventService - the event bus service
+   * @param {app.utils.loggedInService} loggedInService - the logged-in service
    * @param {object} $state - ui-router $state service
    * @param {object} $rootScope - Angular rootScope object
    * @param {object} $log - angular log service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.utils.eventService} eventService - the event bus service
    * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
    */

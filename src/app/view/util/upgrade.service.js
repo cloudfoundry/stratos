@@ -19,7 +19,7 @@
     $httpProvider.interceptors.push('app.view.upgradeCheck');
   }
 
-  upgradeCheckFactory.$inject = ['$q', 'app.event.eventService'];
+  upgradeCheckFactory.$inject = ['$q', 'app.utils.eventService'];
 
   /**
   * @namespace app.view.upgradeCheck

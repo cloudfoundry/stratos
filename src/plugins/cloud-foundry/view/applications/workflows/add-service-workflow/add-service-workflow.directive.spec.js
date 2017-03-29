@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      eventService = $injector.get('app.event.eventService');
+      eventService = $injector.get('app.utils.eventService');
 
       var markup = '<add-service-workflow></add-service-workflow>';
       var element = angular.element(markup);

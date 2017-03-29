@@ -27,7 +27,7 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('modelManager');
-      var eventService = $injector.get('app.event.eventService');
+      var eventService = $injector.get('app.utils.eventService');
       var utils = $injector.get('app.utils.utilsService');
       var cliCommands = $injector.get('cloud-foundry.view.applications.application.summary.cliCommands');
 

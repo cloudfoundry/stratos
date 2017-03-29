@@ -34,7 +34,7 @@
         var utils = $injector.get('app.utils.utilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        var eventService = $injector.get('app.event.eventService');
+        var eventService = $injector.get('app.utils.eventService');
         var userSelection = $injector.get('app.view.userSelection');
         var organizationModel = $injector.get('organization-model');
 
@@ -234,7 +234,7 @@
         utils = $injector.get('app.utils.utilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        eventService = $injector.get('app.event.eventService');
+        eventService = $injector.get('app.utils.eventService');
         userSelection = $injector.get('app.view.userSelection');
         orgModel = $injector.get('organization-model');
 

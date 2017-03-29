@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      errorService = $injector.get('app.error.errorService');
+      errorService = $injector.get('app.utils.errorService');
     }));
 
     it('should set system error message', function () {

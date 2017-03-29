@@ -56,7 +56,7 @@
       var eventService;
 
       beforeEach(inject(function ($injector) {
-        eventService = $injector.get('app.event.eventService');
+        eventService = $injector.get('app.utils.eventService');
       }));
 
       var eventData = {

@@ -21,8 +21,8 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $interval = $injector.get('$interval');
-      loggedInService = $injector.get('app.logged-in.loggedInService');
-      eventService = $injector.get('app.event.eventService');
+      loggedInService = $injector.get('app.utils.loggedInService');
+      eventService = $injector.get('app.utils.eventService');
       $document = $injector.get('$document');
       $q = $injector.get('$q');
       modelManager = $injector.get('modelManager');
