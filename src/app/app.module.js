@@ -8,8 +8,6 @@
   angular
     .module('app', [
       'app.api',
-      'app.utils',
-      'app.utils',
       'app.model',
       'app.view',
       'app.utils'
