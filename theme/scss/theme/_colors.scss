@@ -5,9 +5,9 @@
 // -----------
 
 // Primary
-$gossamer:              #01a982; // HPE Green
-$mine-shaft:            #333333; // HPE Black
-$white:                 #ffffff; // HPE White
+$gossamer:              #01a982; // Green
+$mine-shaft:            #333333; // Black
+$white:                 #ffffff; // White
 
 // Neutrals
 $slate:                 #425563; // Limed Spruce
@@ -42,15 +42,15 @@ $seashell:              $silver;
 $mortar:                $purple;
 
 // Status Colors
-$status-alert:          $seashell;
-$status-okay:           $gossamer;
-$status-success:        $gossamer;
-$status-warning:        $sunglow;
-$status-unknown:        $rule;
-$status-critical:       $carnation;
-$status-open:           $turquoise;
-$status-acknowledged:   #877b75;
-$status-resolved:       $silver-sand;
+$status-alert:          $seashell !default;
+$status-okay:           $gossamer !default;
+$status-success:        $gossamer !default;
+$status-warning:        $sunglow !default;
+$status-unknown:        $rule !default;
+$status-critical:       $carnation !default;
+$status-open:           $turquoise !default;
+$status-acknowledged:   #877b75 !default;
+$status-resolved:       $silver-sand !default;
 
 
 // HPE semantic names
