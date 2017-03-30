@@ -5,8 +5,6 @@
     .module('helion.framework.widgets')
     .directive('listTable', listTable);
 
-  listTable.$inject = ['helion.framework.basePath'];
-
   /**
    * @namespace helion.framework.widgets.listTable
    * @memberof helion.framework.widgets
@@ -19,7 +17,6 @@
    * Required: Use `st-table` attribute to pass in the displayed
    * row collection.
    *
-   * @param {string} path - the framework base path
    * @returns {object} The table directive definition object
    * @example
    *
