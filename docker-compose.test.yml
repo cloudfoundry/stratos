@@ -34,7 +34,7 @@ services:
       service: proxy
     links:
       - goose
-
+      - uaa:uaa
 
   nginx:
     extends:
@@ -43,3 +43,7 @@ services:
     links:
       - proxy
 
+  uaa:
+    extends:
+      file: common.yml
+      service: uaa
