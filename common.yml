@@ -78,3 +78,11 @@ services:
         - USER_NAME
     volumes:
       - ../stratos-ui:/usr/src/app
+
+  uaa:
+    extends: buildCommon
+    build:
+      context: ./uaa
+      dockerfile: Dockerfile.dev
+
+      

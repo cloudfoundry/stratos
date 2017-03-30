@@ -63,16 +63,19 @@ function env_vars {
 
 }
 
+function uaa_downloads {
+    # Download tomcat and uaa war files required for the UAA docker image build
+    ./uaa/prepare.sh
+}
+
 function build {
-
     echo "===== Building the portal proxy"
-
     export USER_ID=$(id -u)
     export GROUP_ID=$(id -g)
     export USER_NAME=$(id -nu)
     echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
 
-    pushd ${PROXY_DIR}/tools/
+    pushd ${PROXY_DIR}tools/
     ./build_portal_proxy.sh
     popd
 
@@ -120,6 +123,7 @@ env_vars
 if [ "$CLEAN" = true ] ; then
     clean
 fi
+uaa_downloads
 build
 docker ps
 popd
