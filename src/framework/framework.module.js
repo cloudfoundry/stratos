@@ -11,7 +11,6 @@
       'angular-websocket',
       'ngAnimate',
       'toastr'
-    ])
-    .constant('helion.framework.basePath', 'framework/');
+    ]);
 
 })();
