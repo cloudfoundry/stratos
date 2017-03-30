@@ -47,8 +47,6 @@
     mkdir(plugininName);
     cd(plugininName);
 
-    createPluginConfigFile();
-
     // Create `helion.my-app.scss`
     createRootScssFile(plugininName + '.scss');
 
@@ -63,16 +61,6 @@
     });
 
     createModuleFile('.', plugininName, plugininName, ['api', 'event', 'model', 'view']);
-
-    function createPluginConfigFile() {
-      var code = [
-        '  env && env.registerApplication\n      && env.registerApplication(' +
-        [plugininName, plugininName, 'plugins/' + plugininName]
-          .map(asString).join(', ') + ');'
-      ];
-
-      createJavaScriptFile('plugin.config.js', code);
-    }
 
     /**
      * Create an Angular module file, in given folder, with given file name,
