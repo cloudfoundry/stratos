@@ -2,7 +2,8 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: irfanhabib/pr
+    repository: 10.4.21.241:5000/irfanhabib/pr
+    insecure_registries: ["10.4.21.241:5000"]
 
 resources:
 - name: stratos-deploy
@@ -43,7 +44,7 @@ jobs:
   - do:
     - task: run-unit-tests
       privileged: true
-      timeout: 5m
+      timeout: 10m
       file: stratos-deploy/ci/tasks/stratos-ui/run-unit-tests.yml
       on_failure:
         put: stratos-ui

@@ -2,7 +2,10 @@
 platform: linux
 image_resource:
   type: docker-image
-  source: {repository: "stackatodev/hsc-console-proxy-builder", tag: "latest"}
+  source:
+    repository: "10.4.21.241:5000/stackatodev/hsc-console-proxy-builder"
+    tag: "latest"
+    insecure_registries: ["10.4.21.241:5000"]
 inputs:
 - name: portal-proxy
 - name: stratos-deploy

@@ -7,7 +7,10 @@ inputs:
 - name: stratos-ui
 image_resource:
   type: docker-image
-  source: {repository: "stackatotest/hsc-dcind", tag: "latest"}
+  source:
+    repository: "10.4.21.241:5000/stackatotest/hsc-dcind"
+    tag: "latest"
+    insecure_registries: ["10.4.21.241:5000"]
 run:
   path: sh
   args:
