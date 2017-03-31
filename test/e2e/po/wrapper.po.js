@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var _ = require('../../tools/node_modules/lodash');
+  var _ = require('../../../tools/node_modules/lodash');
 
   module.exports = function (_module) {
     if (!_module.exports.wrap) {

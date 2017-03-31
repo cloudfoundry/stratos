@@ -78,8 +78,8 @@
         'src/plugins/**/*.spec.js',
         'src/plugins/**/*.html',
 
-        'test/**/*.mock.js',
-        'test/**/*.spec.js'
+        'test/unit/**/*.mock.js',
+        'test/unit/**/*.spec.js'
       ],
 
       frameworks: ['wiredep', 'jasmine'],

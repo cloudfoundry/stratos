@@ -3,8 +3,8 @@
   'use strict';
 
   var helpers = require('./helpers.po');
-  var _ = require('../../tools/node_modules/lodash');
-  var Q = require('../../tools/node_modules/q');
+  var _ = require('../../../tools/node_modules/lodash');
+  var Q = require('../../../tools/node_modules/q');
 
   module.exports = {
 

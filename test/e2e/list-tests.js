@@ -3,7 +3,7 @@
   'use strict';
 
   var path = require('path');
-  var _ = require('../tools/node_modules/lodash');
+  var _ = require('../../tools/node_modules/lodash');
   var skipPlugin = require('./po/skip-plugin.js');
 
   var currentFile, currentTest;

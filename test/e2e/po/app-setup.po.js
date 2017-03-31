@@ -6,7 +6,7 @@
   var resetTo = require('./resets.po');
   var loginPage = require('./login-page.po');
   var galleryWall = require('./applications/applications.po');
-  var _ = require('../../tools/node_modules/lodash');
+  var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('./models/cf-model.po');
   var vcsModel = require('./models/vcs-model.po');
   var proxyModel = require('./models/proxy-model.po');

@@ -2,8 +2,8 @@
 (function () {
   'use strict';
 
-  var toSrc = require('../../tools/node_modules/toSrc');
-  var _ = require('../../tools/node_modules/lodash');
+  var toSrc = require('../../../tools/node_modules/toSrc');
+  var _ = require('../../../tools/node_modules/lodash');
   var angularMocks = require('./angular-mocks.po');
 
   var ngMockE2E = {

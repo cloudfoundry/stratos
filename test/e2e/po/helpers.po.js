@@ -2,12 +2,12 @@
 (function () {
   'use strict';
 
-  var sh = require('../../tools/node_modules/shelljs');
-  var request = require('../../tools/node_modules/request');
+  var sh = require('../../../tools/node_modules/shelljs');
+  var request = require('../../../tools/node_modules/request');
   var path = require('path');
   var fs = require('fs');
-  var Q = require('../../tools/node_modules/q');
-  var _ = require('../../tools/node_modules/lodash');
+  var Q = require('../../../tools/node_modules/q');
+  var _ = require('../../../tools/node_modules/lodash');
 
   // Get host IP
   var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
