@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  var _ = require('../../../../tools/node_modules/lodash');
+  var Q = require('../../../../tools/node_modules/q');
   var appSetupHelper = require('../../po/app-setup.po');
   var helpers = require('../../po/helpers.po');
   var galleryWall = require('../../po/applications/applications.po');
@@ -10,12 +12,10 @@
   var addAppService = require('../../po/applications/add-application-services.po');
   var application = require('../../po/applications/application.po');
   var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
-  var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('../../po/models/cf-model.po');
   var inputText = require('../../po/widgets/input-text.po');
   var orgsAndSpaces = require('../../po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../po/navbar.po');
-  var Q = require('../../../tools/node_modules/q');
   var table = require('../../po/widgets/table.po');
   var actionMenu = require('../../po/widgets/actions-menu.po');
   var confirmModal = require('../../po/widgets/confirmation-modal.po');

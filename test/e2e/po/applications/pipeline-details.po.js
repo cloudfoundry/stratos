@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var Q = require('../../../tools/node_modules/q');
+  var Q = require('../../../../tools/node_modules/q');
 
   module.exports = {
     enterPipelineDetails: enterPipelineDetails,

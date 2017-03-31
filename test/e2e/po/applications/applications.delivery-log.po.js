@@ -3,7 +3,7 @@
 
   var helpers = require('../helpers.po');
 
-  var Q = require('../../../tools/node_modules/q');
+  var Q = require('../../../../tools/node_modules/q');
 
   module.exports = {
     getSummaryAt: getSummaryAt,

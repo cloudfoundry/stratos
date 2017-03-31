@@ -2,6 +2,7 @@
 (function () {
   'use strict';
 
+  var _ = require('../../../../tools/node_modules/lodash');
   var appSetupHelper = require('../../po/app-setup.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
@@ -18,7 +19,6 @@
   var postDeployAction = require('../../po/applications/add-post-deploy.po');
 
   var helpers = require('../../po/helpers.po');
-  var _ = require('../../../tools/node_modules/lodash');
 
   describe('Application Delivery Pipeline', function () {
     //var testConfig;

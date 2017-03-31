@@ -10,7 +10,7 @@
   var renameVcsToken = require('../../po/applications/rename-vcs-token.po');
   var manageVcsToken = require('../../po/applications/manage-vcs-token.po');
 
-  var Q = require('../../../tools/node_modules/q');
+  var Q = require('../../../../tools/node_modules/q');
 
   describe('Endpoints Personal Access Tokens test', function () {
 
