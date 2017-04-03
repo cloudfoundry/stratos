@@ -70,6 +70,6 @@ $ npm run gate-check
 ### Generate documentation (experimental)
 Locally, run the following command to generate documentation in the `docs/src` folder. You can then view the documentation by pointing your browser to the `index.html` file of that `docs/src` folder.
 ```
-cd tools
+cd tools 
 ./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
 ```
