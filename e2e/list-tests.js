@@ -6,7 +6,7 @@
   var _ = require('../tools/node_modules/lodash');
   var skipPlugin = require('./po/skip-plugin.js');
 
-  var currentFile, currentTest;
+  var currentFile, curr;
   var spaces;
   var INDENT = 4;
 

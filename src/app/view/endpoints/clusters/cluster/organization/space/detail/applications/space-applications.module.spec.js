@@ -39,7 +39,7 @@
       $stateParams.space = spaceGuid;
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope').$new();
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       utils = $injector.get('app.utils.utilsService');
       appStateService = $injector.get('cloud-foundry.model.application.stateService');
 

@@ -23,7 +23,7 @@
         dir: reportPath,
         reporters: [
           { type: 'html', subdir: 'unit' },
-         { type: 'json', subdir: '_json', file: 'unit-coverage.json' }
+          { type: 'json', subdir: '_json', file: 'unit-coverage.json' }
         ]
       },
 
@@ -31,15 +31,14 @@
         'src/lib/jquery/dist/jquery.js',
         'src/lib/angular-mocks/angular-mocks.js',
         'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
-        'tools/stackato-templates.js',
+        'tools/console-templates.js',
 
         'src/config.js',
         'src/plugins/*/plugin.config.js',
 
-        'framework/**/*.html',
-        'framework/theme/**/*.svg',
+        'theme/**/*.svg',
         {
-          pattern: 'framework/theme/images/*.png',
+          pattern: 'theme/images/*.png',
           watched: false,
           included: false,
           served: true,
@@ -60,11 +59,12 @@
           nocache: false
         },
 
-        'framework/src/**/*.module.js',
-        'framework/src/**/!(*.mock|*.spec).js',
         // Ignore for now - suppresses warning when running tests as we don't have any mocks'
+        'src/framework/**/*.module.js',
+        'src/framework/**/!(*.mock|*.spec).js',
+        'src/framework/**/*.spec.js',
+        'src/framework/**/*.html',
         //'framework/src/**/*.mock.js',
-        'framework/src/**/*.spec.js',
 
         'src/index.module.js',
         'src/app/**/*.module.js',
@@ -87,10 +87,8 @@
         cacheIdFromPath: function (filePath) {
           if (filePath.indexOf('src/') === 0) {
             return filePath.substr(4);
-          } else if (filePath.indexOf('framework/src/') === 0) {
-            return filePath.substr(14);
-          } else if (filePath.indexOf('framework/theme/') === 0) {
-            return filePath.substr(16);
+          } else if (filePath.indexOf('theme/') === 0) {
+            return filePath.substr(6);
           } else {
             return filePath;
           }
@@ -112,9 +110,9 @@
       ],
 
       preprocessors: {
-        'framework/theme/**/*.svg': ['ng-html2js'],
-        'framework/src/**/*.html': ['ng-html2js'],
-        'framework/src/**/!(*.mock|*.spec).js': ['coverage'],
+        'theme/**/*.svg': ['ng-html2js'],
+        'src/framework/**/*.html': ['ng-html2js'],
+        'src/framework/**/!(*.mock|*.spec).js': ['coverage'],
         'src/app/**/*.html': ['ng-html2js'],
         'src/app/**/!(*.mock|*.spec).js': ['coverage'],
         'src/plugins/**/*.html': ['ng-html2js'],

@@ -29,7 +29,7 @@
     '$stateParams',
     '$state',
     'app.utils.utilsService',
-    'app.model.modelManager',
+    'modelManager',
     'service-manager.view.manage-instance.dialog'
   ];
 

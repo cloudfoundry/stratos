@@ -9,7 +9,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $httpParamSerializer = $injector.get('$httpParamSerializer');
 
-      var apiManager = $injector.get('app.api.apiManager');
+      var apiManager = $injector.get('apiManager');
       serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     }));
 

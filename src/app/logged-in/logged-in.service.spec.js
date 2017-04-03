@@ -25,7 +25,7 @@
       eventService = $injector.get('app.event.eventService');
       $document = $injector.get('$document');
       $q = $injector.get('$q');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
     }));
 
     afterEach(function () {

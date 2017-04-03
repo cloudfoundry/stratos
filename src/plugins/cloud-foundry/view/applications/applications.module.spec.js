@@ -14,7 +14,7 @@
       var $q = $injector.get('$q');
       var $state = $injector.get('$state');
       var utils = $injector.get('app.utils.utilsService');
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       eventService = $injector.get('app.event.eventService');
       var loggedInService = $injector.get('app.logged-in.loggedInService');
 

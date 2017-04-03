@@ -27,7 +27,7 @@
     '$state',
     '$rootScope',
     '$scope',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function ServiceManagerDetailController($state, $rootScope, $scope, modelManager) {

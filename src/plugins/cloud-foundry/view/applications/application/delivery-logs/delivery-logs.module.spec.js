@@ -53,7 +53,7 @@
       $q = _$q_;
       $log = _$log_;
       moment = _moment_;
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       viewEvent = _viewEventDetailView_;
       viewExecution = _viewExecutionDetailView_;
       triggerBuild = _triggerBuildDetailView_;

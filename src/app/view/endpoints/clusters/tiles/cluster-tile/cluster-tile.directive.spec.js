@@ -30,13 +30,13 @@
       $state = $injector.get('$state');
       $compile = $injector.get('$compile');
       $scope = $injector.get('$rootScope').$new();
-      var modelManager = $injector.get('app.model.modelManager');
+      var modelManager = $injector.get('modelManager');
       $scope.service = angular.fromJson(angular.toJson(initialService));
       $scope.connect = angular.noop;
       $scope.disconnect = angular.noop;
       $scope.unregister = angular.noop;
 
-      var apiManager = $injector.get('app.api.apiManager');
+      var apiManager = $injector.get('apiManager');
       cfAPIUsers = apiManager.retrieve('cloud-foundry.api.Users');
       cfAPIOrg = apiManager.retrieve('cloud-foundry.api.Organizations');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

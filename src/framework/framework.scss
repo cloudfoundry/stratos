@@ -1,0 +1,20 @@
+// Fake the font name for the glyphicons to be the helion icon font
+$icon-font-name: "/helion-icons";
+
+// Fonts and theme
+@import "../../theme/fonts/index";
+@import "../../theme/scss/theme/index";
+
+// Libs - auto-populated by wiredep from bower.json
+// bower:scss
+// endbower
+
+// Theme styles
+@import "../../theme/scss/mixin/index";
+@import "../../theme/scss/style/index";
+
+// SpinKit style
+@import "../../theme/scss/SpinKit/spinners/7-three-bounce.scss";
+
+// The actual styles for the widgets (as opposed to the theme variables)
+@import "widgets/widgets";

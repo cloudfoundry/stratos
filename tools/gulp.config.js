@@ -11,12 +11,10 @@
       e2e: '../e2e/',
       instrumented: '../tmp/instrumented/',
       oem: '../oem/',
-      theme: '../framework/theme/',
-      framework: '../framework/',
-      frameworkDist: '../dist/framework/',
-      examples: '../framework/examples/',
-      examplesScripts: '../framework/examples/scripts/',
-      examplesDist: '../framework/examples/dist/',
+      theme: '../theme/',
+      examples: './examples/',
+      examplesScripts: './examples/scripts/',
+      examplesDist: './examples/dist/',
       browserSyncDist: '../dist'
     };
 
@@ -83,8 +81,9 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + '../framework/src/**/*.html',
-        paths.src + '../framework/theme/**/*.svg'
+        paths.src + '**/framework/**/*.html',
+        paths.src + '../theme/**/*.svg',
+        '!' + paths.src + '../theme/fonts/**/*.svg'
       ],
 
       jsFiles: [
@@ -101,50 +100,42 @@
         '!' + paths.dist + '**/*.spec.js'
       ],
 
-      jsFile: 'stackato-console.js',
+      jsFile: 'console-console.js',
 
-      jsTemplatesFile: 'stackato-templates.js',
+      jsLibsFile: 'console-libs.js',
 
-      jsFrameworkFile: 'stackato-framework.js',
-
-      jsLibs: [
-        paths.framework + 'src/**/*.module.js',
-        paths.framework + 'src/**/*.js',
-        '!' + paths.framework + 'src/**/*.spec.js',
-        '!' + paths.framework + 'src/**/*.mock.js'
-      ],
+      jsTemplatesFile: 'console-templates.js',
 
       jsSourceFiles: [
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        paths.src + 'framework/**/*.js',
         '!' + paths.src + 'config.js',
         '!' + paths.src + 'app/**/*.mock.js',
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
-        '!' + paths.src + 'plugins/**/*.spec.js'
+        '!' + paths.src + 'plugins/**/*.spec.js',
+        '!' + paths.src + 'framework/**/*.mock.js',
+        '!' + paths.src + 'framework/**/*.spec.js'
       ],
 
       sourceFilesToInstrument: [
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        paths.src + 'framework/**/*.js',
         '!' + paths.src + 'config.js',
         '!' + paths.src + 'app/**/*.mock.js',
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
         '!' + paths.src + 'plugins/cloud-foundry/api/hce/**/*.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js'
-      ],
-
-      frameworkFilesToInstrument: [
-        paths.framework + 'src/**/*.module.js',
-        paths.framework + 'src/**/*.js',
-        '!' + paths.framework + 'src/**/*.spec.js',
-        '!' + paths.framework + 'src/**/*.mock.js',
-        '!' + paths.framework + 'src/utils/wheel-handler/*.js',
-        '!' + paths.framework + 'src/widgets/ring-chart/*.js'
+        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js',
+        '!' + paths.src + 'framework/**/*.spec.js',
+        '!' + paths.src + 'framework/**/*.mock.js',
+        '!' + paths.src + 'framework/utils/wheel-handler/*.js',
+        '!' + paths.src + 'framework/widgets/ring-chart/*.js'
       ],
 
       // Sacrifice all inclusive with exclusions for explicit declaration of directories saves ~10s per run
@@ -152,27 +143,18 @@
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        paths.src + 'framework/**/*.js',
         '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*',
         paths.tools + '*.js',
         paths.tools + 'test-backend/*.js',
         paths.tools + 'test-backend/api/**/*.js',
         paths.tools + 'test-backend/config/**/*.js',
         paths.tools + 'test-backend/data/**/*.js',
-        paths.e2e + '**/*.js',
-        paths.framework + 'src/**/*.js'
+        paths.e2e + '**/*.js'
       ],
 
-      frameworkFiles: [
-        paths.framework + 'theme/**/*',
-        paths.examples + 'scripts/**/*'
-      ],
-
-      frameworkTemplates: [
-        paths.framework + 'src/**/*.html'
-      ],
-
-      frameworkScssFiles: [
-        paths.framework + '**/*.scss'
+      themeScssFiles: [
+        paths.theme + '**/*.scss'
       ],
 
       scssFiles: [
@@ -183,11 +165,6 @@
 
       scssSourceFiles: [
         paths.src + 'index.scss'
-      ],
-
-      partials: [
-        paths.src + 'app/**/*.html',
-        paths.src + 'plugins/**/*.html'
       ],
 
       paths: paths,

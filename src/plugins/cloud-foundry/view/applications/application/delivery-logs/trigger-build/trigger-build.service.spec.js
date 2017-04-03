@@ -48,7 +48,7 @@
       $q = _$q_;
       $timeout = _$timeout_;
 
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
       hceModel = modelManager.retrieve('cloud-foundry.model.hce');
       hceModel.data.vcsInstance = vcsInstance;

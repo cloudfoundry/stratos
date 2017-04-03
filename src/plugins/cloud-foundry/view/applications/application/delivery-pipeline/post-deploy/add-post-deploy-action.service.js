@@ -6,8 +6,8 @@
     .factory('cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService', postDeployAction);
 
   postDeployAction.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
+    'modelManager',
+    'apiManager',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 

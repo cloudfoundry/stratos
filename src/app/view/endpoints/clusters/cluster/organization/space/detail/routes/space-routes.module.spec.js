@@ -42,7 +42,7 @@
       $q = $injector.get('$q');
       $log = $injector.get('$log');
       $state = $injector.get('$state');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       routesService = $injector.get('app.view.endpoints.clusters.routesService');
       utils = $injector.get('app.utils.utilsService');
 

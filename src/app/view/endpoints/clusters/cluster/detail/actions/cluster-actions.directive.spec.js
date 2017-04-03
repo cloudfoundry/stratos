@@ -82,7 +82,7 @@
 
         $q = $injector.get('$q');
 
-        var modelManager = $injector.get('app.model.modelManager');
+        var modelManager = $injector.get('modelManager');
         organizationModel = $injector.get('organization-model');
         _.set(organizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization.details.guid, modelOrganization);
         _.set(organizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization2.details.guid, modelOrganization2);

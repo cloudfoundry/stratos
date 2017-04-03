@@ -8,7 +8,7 @@
     beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('modelManager');
       vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     }));
 

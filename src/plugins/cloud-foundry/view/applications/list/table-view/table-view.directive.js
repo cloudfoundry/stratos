@@ -43,7 +43,7 @@
 
   TableViewController.$inject = [
     '$scope',
-    'app.model.modelManager'
+    'modelManager'
   ];
 
   function TableViewController($scope, modelManager) {

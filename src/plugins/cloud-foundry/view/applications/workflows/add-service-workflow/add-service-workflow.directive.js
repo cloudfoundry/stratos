@@ -25,7 +25,7 @@
     '$q',
     '$scope',
     '$interpolate',
-    'app.model.modelManager',
+    'modelManager',
     'app.event.eventService',
     'helion.framework.widgets.detailView'
   ];

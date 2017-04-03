@@ -211,9 +211,9 @@
           }
           span.control {
             cursor: pointer;
-            color: $gossamer;
+            color: $brand-primary;
             &:hover {
-              color: lighten($hpe-primary, 10%);
+              color: lighten($brand-primary, 15%);
               text-decoration: underline;
             }
           }
@@ -290,7 +290,7 @@
         }
 
         .btn-link:hover {
-          color: lighten($hpe-primary, 10%);
+          color: lighten($brand-primary, 15%);
         }
       }
 

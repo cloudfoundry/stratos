@@ -19,7 +19,7 @@
   }
 
   ApplicationVariablesController.$inject = [
-    'app.model.modelManager',
+    'modelManager',
     '$stateParams',
     'cloud-foundry.view.applications.application.variables.manager'
   ];
