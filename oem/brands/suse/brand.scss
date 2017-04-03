@@ -12,3 +12,5 @@ $brand-primary: $suse-primary;
 // Hide welcome text panel on the login page
 $login-page-text-panel-display: none;
 
+// The normal status-okay green is close to suse primary, so just use it instead
+$status-okay: $suse-primary;
