@@ -7,7 +7,7 @@
   var skipPlugin = require('./po/skip-plugin.js');
 
   var currentFile, currentTest;
-  var spaces = 0;
+  var spaces;
   var INDENT = 4;
 
   var ansi = {
