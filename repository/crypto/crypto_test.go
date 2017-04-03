@@ -17,6 +17,8 @@ var (
 	FakeKeyName    = "fake-key-name"
 	FakeKeyValue   = `B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF`
 	FakeKey        = []byte(FakeKeyValue)
+	FakeEncryptionKey = make([]byte, 32)
+
 )
 
 func TestAESEncryptDecrypt(t *testing.T) {
@@ -56,10 +58,33 @@ func TestAESEncryptDecrypt(t *testing.T) {
 
 	})
 
-	SkipConvey("TestEncryptToken", t, func() {
+	Convey("TestEncryptToken", t, func() {
+
+		Convey("should fail with an invalid key", func() {
+			_, err := EncryptToken(nil, FakeKeyValue)
+			So(err, ShouldNotBeNil)
+		})
+
+		Convey("should succeed", func() {
+			b, err := EncryptToken(FakeEncryptionKey, FakeKeyValue)
+			So(err, ShouldBeNil)
+			So(b, ShouldNotBeNil)
+
+		})
 	})
 
-	SkipConvey("TestDecryptToken", t, func() {
+	Convey("TestDecryptToken", t, func() {
+
+		Convey("should fail with an invalid key", func() {
+			_, err := DecryptToken(nil, nil)
+			So(err, ShouldNotBeNil)
+		})
+
+		Convey("should succeed", func() {
+			b, err := DecryptToken(FakeEncryptionKey, FakeEncryptionKey)
+			So(err, ShouldBeNil)
+			So(b, ShouldNotBeNil)
+		})
 	})
 }
 
