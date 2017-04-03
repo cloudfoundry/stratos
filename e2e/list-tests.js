@@ -6,7 +6,7 @@
   var _ = require('../tools/node_modules/lodash');
   var skipPlugin = require('./po/skip-plugin.js');
 
-  var currentFile, currentTest, spaces;
+  var currentFile, currentTest;
   var INDENT = 4;
 
   var ansi = {
@@ -94,9 +94,7 @@
     }
     // Add this suite to the parent
     current.suites.push(currentTest);
-    spaces += INDENT;
     fn();
-    spaces -= INDENT;
     current.total += currentTest.total;
     currentTest = current;
 
