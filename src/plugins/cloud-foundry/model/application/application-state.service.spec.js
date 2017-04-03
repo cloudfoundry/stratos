@@ -5,7 +5,7 @@
     var $httpBackend, appStateService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       appStateService = $injector.get('cloud-foundry.model.application.stateService');

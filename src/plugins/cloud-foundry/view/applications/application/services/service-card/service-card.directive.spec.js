@@ -8,7 +8,7 @@
     var spaceGuid = 'spaceGuid';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     function initController($injector, mockAuthModel, role) {
       $compile = $injector.get('$compile');

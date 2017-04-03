@@ -7,7 +7,7 @@
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');

@@ -4,7 +4,7 @@
   describe('app details - log-stream view', function () {
     var $httpBackend, appLogStreamController;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');

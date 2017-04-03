@@ -5,7 +5,7 @@
     var $httpBackend, $scope, eventService, mockApp, mockService, addServiceWorkflowCtrl;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');

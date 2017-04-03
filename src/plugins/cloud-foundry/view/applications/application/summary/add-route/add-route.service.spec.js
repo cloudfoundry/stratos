@@ -28,7 +28,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module(function ($exceptionHandlerProvider) {
       $exceptionHandlerProvider.mode('log');
     }));

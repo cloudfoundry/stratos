@@ -61,7 +61,7 @@
     var userGuid = 'userGuid';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module({
       'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
         return {

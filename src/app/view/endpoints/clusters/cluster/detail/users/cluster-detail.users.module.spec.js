@@ -7,7 +7,7 @@
       rolesService, eventService, userSelection, orgModel;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     var clusterGuid = 'clusterGuid';
 

@@ -5,7 +5,7 @@
     var $httpBackend, privateDomainModel;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');

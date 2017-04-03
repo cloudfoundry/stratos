@@ -7,7 +7,7 @@
     // var $http, stackatoInfoService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     var clusterGuid = 'clusterGuid';
 

@@ -5,7 +5,7 @@
   describe('github.model - ', function () {
     var that, $httpBackend, $rootScope;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module('ng', function ($exceptionHandlerProvider) {

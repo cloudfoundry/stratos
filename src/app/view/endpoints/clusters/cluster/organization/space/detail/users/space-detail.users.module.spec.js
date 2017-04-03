@@ -6,7 +6,7 @@
     var $controller, $httpBackend, $scope;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';

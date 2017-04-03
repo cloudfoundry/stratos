@@ -4,7 +4,7 @@
   describe('secondsToMs filter', function () {
     var secondsToMsFilter;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       secondsToMsFilter = $injector.get('secondsToMsFilter');
     }));

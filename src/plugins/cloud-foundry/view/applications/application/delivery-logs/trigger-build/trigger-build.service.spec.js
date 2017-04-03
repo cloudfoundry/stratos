@@ -24,7 +24,7 @@
       sha: '1234'
     };
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module('ng', function ($exceptionHandlerProvider) {
       // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely

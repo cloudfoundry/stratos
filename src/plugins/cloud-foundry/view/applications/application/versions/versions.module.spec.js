@@ -6,7 +6,7 @@
     var controller, $stateParams, $q, $timeout, $state, $scope, $httpBackend,
       $interpolate, modelManager, confirmDialog, utilsService, notificationsService;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('cloud-foundry.view.applications.application.versions'));
 
     beforeEach(inject(function ($injector, _$q_, _$interpolate_, _$stateParams_, _$timeout_, _$state_) {

@@ -4,7 +4,7 @@
   describe('service model', function () {
     var $httpBackend, mockServicesApi, serviceModel;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module('cloud-foundry'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');

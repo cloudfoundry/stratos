@@ -4,7 +4,7 @@
   describe('user service instance model', function () {
     var $httpBackend, $httpParamSerializer, userServiceInstance, mockData;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $httpParamSerializer = $injector.get('$httpParamSerializer');

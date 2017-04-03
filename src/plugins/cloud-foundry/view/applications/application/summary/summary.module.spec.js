@@ -7,7 +7,7 @@
 
     var cnsiGuid = 'cnsiGuid';
     var spaceGuid = 'spaceGuid';
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
 
     function initController($injector, mockAuthModel, role) {
       var modelManager = $injector.get('modelManager');

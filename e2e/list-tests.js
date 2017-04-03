@@ -94,9 +94,7 @@
     }
     // Add this suite to the parent
     current.suites.push(currentTest);
-    spaces += INDENT;
     fn();
-    spaces -= INDENT;
     current.total += currentTest.total;
     currentTest = current;
 

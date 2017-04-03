@@ -5,7 +5,7 @@
     var element, $httpBackend, controller, setupPipelineSpy;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(module({
       'app.event.eventService': {
         $emit: function () {

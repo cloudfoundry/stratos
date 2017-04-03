@@ -4,7 +4,7 @@
   describe('prettyJson  filter', function () {
     var prettyJsonFilter;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console'));
     beforeEach(inject(function ($injector) {
       prettyJsonFilter = $injector.get('prettyJsonFilter');
     }));
