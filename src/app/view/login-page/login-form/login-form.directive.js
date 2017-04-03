@@ -28,7 +28,7 @@
   LoginFormController.$inject = [
     '$scope',
     '$timeout',
-    'app.event.eventService'
+    'appEventEventService'
   ];
 
   /**
@@ -38,32 +38,32 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {appEventEventService} appEventEventService - the event bus service
    * @property {object} $timeout - the Angular $timeout service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {appEventEventService} appEventEventService - the event bus service
    * @property {boolean} loggingIn - flag indicating app is still authenticating
    * @property {object} loginTimeout - the promise returned by $timeout for loggingIn
    */
-  function LoginFormController($scope, $timeout, eventService) {
+  function LoginFormController($scope, $timeout, appEventEventService) {
     var that = this;
     this.$timeout = $timeout;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.loggingIn = false;
     this.loginTimeout = null;
 
-    var logInListener = this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+    var logInListener = this.appEventEventService.$on(this.appEventEventService.events.LOGGED_IN, function () {
       that.loggingIn = false;
     });
-    var logOutListener = this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
+    var logOutListener = this.appEventEventService.$on(this.appEventEventService.events.LOGIN_FAILED, function () {
       that.clearPassword();
     });
-    var logTimeoutListener = this.eventService.$on(this.eventService.events.LOGIN_TIMEOUT, function () {
+    var logTimeoutListener = this.appEventEventService.$on(this.appEventEventService.events.LOGIN_TIMEOUT, function () {
       that.clearPassword();
     });
-    var http500Listener = this.eventService.$on(this.eventService.events.HTTP_5XX_ON_LOGIN, function () {
+    var http500Listener = this.appEventEventService.$on(this.appEventEventService.events.HTTP_5XX_ON_LOGIN, function () {
       that.clearPassword();
     });
-    var httpFailureListener = this.eventService.$on(this.eventService.events['HTTP_-1'], function () {
+    var httpFailureListener = this.appEventEventService.$on(this.appEventEventService.events['HTTP_-1'], function () {
       that.clearPassword();
     });
 

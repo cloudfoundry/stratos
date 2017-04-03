@@ -29,8 +29,8 @@
 
   AddPipelineWorkflowController.$inject = [
     'modelManager',
-    'app.event.eventService',
-    'app.utils.utilsService',
+    'appEventEventService',
+    'appUtilsUtilsService',
     'app.view.vcs.manageVcsTokens',
     '$scope',
     '$q',
@@ -43,25 +43,25 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the Event management service
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appEventEventService} appEventEventService - the Event management service
+   * @param {appUtilsUtilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.event.eventService} eventService - the Event management service
-   * @property {app.utils.utilsService} utils - the utils service
+   * @property {appEventEventService} appEventEventService - the Event management service
+   * @property {appUtilsUtilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, utils, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, appEventEventService, utils, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.utils = utils;
     this.manageVcsTokens = manageVcsTokens;
     this.$scope = $scope;

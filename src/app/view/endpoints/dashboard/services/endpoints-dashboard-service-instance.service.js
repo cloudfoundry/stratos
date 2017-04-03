@@ -12,12 +12,12 @@
     'modelManager',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'app.error.errorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'helion.framework.widgets.dialog.confirm',
-    'app.event.eventService'
+    'appEventEventService'
   ];
 
   /**
@@ -31,16 +31,16 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
-   * @param {app.utils.utilsService} utilsService - the utils service
+   * @param {appUtilsUtilsService} utilsService - the utils service
    * @param {app.error.errorService} errorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
-   * @param {app.event.eventService} eventService - the event service
+   * @param {appEventEventService} appEventEventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog, eventService) {
+                                         notificationsService, credentialsDialog, confirmDialog, appEventEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -308,7 +308,7 @@
             .then(function () {
               // Ensure that the user service instance list is updated before sending change notification
               return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
-                eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+                appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
               });
             });
         }
@@ -344,7 +344,7 @@
                 });
                 break;
             }
-            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         }
       });
@@ -382,7 +382,7 @@
         .then(function () {
           // Ensure that the user service instance list is updated before sending change notification
           return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
-            eventService.$emit(eventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         });
     }

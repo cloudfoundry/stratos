@@ -28,7 +28,7 @@
     'modelManager',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',
-    'app.utils.utilsService'
+    'appUtilsUtilsService'
   ];
 
   /**

@@ -49,7 +49,7 @@
     '$stateParams',
     '$state',
     '$q',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'modelManager'
   ];
 

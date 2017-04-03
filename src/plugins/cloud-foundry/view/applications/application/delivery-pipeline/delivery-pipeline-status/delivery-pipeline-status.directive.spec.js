@@ -7,7 +7,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'app.event.eventService': {
+      appEventEventService: {
         $emit: function () {
         },
         $on: angular.noop,

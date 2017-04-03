@@ -31,7 +31,7 @@
 
   PageFooterController.$inject = [
     '$scope',
-    'app.utils.utilsService'
+    'appUtilsUtilsService'
   ];
 
   function PageFooterController($scope, utilsService) {

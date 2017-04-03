@@ -3,10 +3,10 @@
 
   angular
     .module('app.logged-in')
-    .factory('app.logged-in.loggedInService', loggedInServiceFactory);
+    .factory('appLoggedInLoggedInService', loggedInServiceFactory);
 
   loggedInServiceFactory.$inject = [
-    'app.event.eventService',
+    'appEventEventService',
     'modelManager',
     'helion.framework.widgets.dialog.confirm',
     '$interval',
@@ -18,10 +18,10 @@
   ];
 
   /**
-   * @namespace app.loggedIn.loggedInService
+   * @namespace app.loggedIn.appLoggedInLoggedInService
    * @memberof app.loggedIn
    * @name loggedInServiceFactory
-   * @param {object} eventService - Event Service
+   * @param {object} appEventEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} confirmDialog - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
@@ -32,7 +32,7 @@
    * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(eventService, modelManager, confirmDialog,
+  function loggedInServiceFactory(appEventEventService, modelManager, confirmDialog,
                                   $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
@@ -118,7 +118,7 @@
         return;
       }
       var now = moment();
-      var sessionExpiresOn = _getAccountModel().accountData.sessionExpiresOn;
+      var sessionExpiresOn = _getAccountModel().getAccountData().sessionExpiresOn;
       var safeExpire = moment(sessionExpiresOn).subtract(moment.duration(autoLogoutDelta));
       var delta = safeExpire.diff(now);
       var aboutToExpire = delta < warnBeforeLogout;
@@ -142,12 +142,12 @@
       userInteracted();
     });
 
-    eventService.$on(eventService.events.LOGIN, function () {
+    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
       loggedIn = true;
       sessionChecker = $interval(checkSession, checkSessionInterval);
     });
 
-    eventService.$on(eventService.events.LOGOUT, function () {
+    appEventEventService.$on(appEventEventService.events.LOGOUT, function () {
       loggedIn = false;
       if (angular.isDefined(sessionChecker)) {
         $interval.cancel(sessionChecker);

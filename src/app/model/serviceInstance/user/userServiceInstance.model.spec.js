@@ -28,10 +28,8 @@
     });
 
     it('should have initial properties defined', function () {
-      expect(userServiceInstance.$q).toBeDefined();
-      expect(userServiceInstance.apiManager).toBeDefined();
       expect(userServiceInstance.serviceInstances).toEqual({});
-      expect(userServiceInstance.numValid).toBe(0);
+      expect(userServiceInstance.getNumValid()).toBe(0);
     });
 
     it('should POST correct data on connect()', function () {
@@ -61,7 +59,7 @@
       userServiceInstance.list().then(function (response) {
         expect(response).toEqual(expectedData);
         expect(userServiceInstance.serviceInstances).toEqual(expectedData);
-        expect(userServiceInstance.numValid).toBe(0);
+        expect(userServiceInstance.getNumValid()).toBe(0);
       });
 
       $httpBackend.flush();
@@ -74,7 +72,7 @@
       userServiceInstance.list().then(function (response) {
         expect(response).toEqual({});
         expect(userServiceInstance.serviceInstances).toEqual({});
-        expect(userServiceInstance.numValid).toBe(0);
+        expect(userServiceInstance.getNumValid()).toBe(0);
       });
 
       $httpBackend.flush();
@@ -90,7 +88,7 @@
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstance.list().then(function () {
-        expect(userServiceInstance.numValid).toBe(1);
+        expect(userServiceInstance.getNumValid()).toBe(1);
         expect(userServiceInstance.serviceInstances.c1.valid).toBe(true);
       });
 
@@ -108,7 +106,7 @@
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstance.list().then(function () {
-        expect(userServiceInstance.numValid).toBe(0);
+        expect(userServiceInstance.getNumValid()).toBe(0);
         expect(userServiceInstance.serviceInstances.c1.valid).toBe(false);
       });
 
@@ -123,7 +121,7 @@
         expect(error.status).toBe(403);
         expect(error.data).toEqual({});
         expect(userServiceInstance.serviceInstances).toEqual({});
-        expect(userServiceInstance.numValid).toBe(0);
+        expect(userServiceInstance.getNumValid()).toBe(0);
       });
 
       $httpBackend.flush();
@@ -143,7 +141,7 @@
         expect(Object.keys(response).length).toBe(2);
         expect(response.c1).toBeDefined();
         expect(response.c2).toBeDefined();
-        expect(userServiceInstance.numValid).toBe(1);
+        expect(userServiceInstance.getNumValid()).toBe(1);
       });
 
       $httpBackend.flush();

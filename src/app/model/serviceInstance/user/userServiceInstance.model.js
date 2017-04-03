@@ -11,14 +11,8 @@
     .module('app.model')
     .run(registerUserServiceInstanceModel);
 
-  registerUserServiceInstanceModel.$inject = [
-    '$q',
-    'apiManager',
-    'modelManager'
-  ];
-
-  function registerUserServiceInstanceModel($q, apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, apiManager));
+  function registerUserServiceInstanceModel($q, appUtilsUtilsService, apiManager, modelManager) {
+    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, appUtilsUtilsService, apiManager));
   }
 
   /**
@@ -26,20 +20,27 @@
    * @memberof app.model.serviceInstance.user
    * @name app.model.serviceInstance.user.UserServiceInstance
    * @param {object} $q - the Angular Promise service
+   * @param {appUtilsUtilsService} utilsService - utils service
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {object} serviceInstances - the service instances available to user
-   * @property {number} numValid - the number of valid user service instances
-   * @class
+   * @returns {object} UserServiceInstance
    */
-  function UserServiceInstance($q, apiManager) {
-    this.$q = $q;
-    this.apiManager = apiManager;
-    this.serviceInstances = {};
-    this.numValid = 0;
-  }
+  function UserServiceInstance($q, utilsService, apiManager) {
+    var serviceInstances = {};
+    var numValid = 0;
 
-  angular.extend(UserServiceInstance.prototype, {
+    return {
+      serviceInstances: serviceInstances,
+      getNumValid: getNumValid,
+      connect: connect,
+      verify: verify,
+      disconnect: disconnect,
+      list: list
+    };
+
+    function getNumValid() {
+      return numValid;
+    }
+
     /**
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstance
@@ -51,15 +52,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (guid, name, username, password) {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
+    function connect(guid, name, username, password) {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.connect(guid, username, password)
         .then(function (response) {
-          that.onConnect(guid, name, response);
+          onConnect(guid, name, response);
           return response;
         });
-    },
+    }
 
     /**
      * @function verify
@@ -71,13 +71,13 @@
      * @returns {promise}
      * @public
      */
-    verify: function (guid, username, password) {
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
+    function verify(guid, username, password) {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.verify(guid, username, password)
         .then(function (response) {
           return response;
         });
-    },
+    }
 
     /**
      * @function disconnect
@@ -87,15 +87,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (guid) {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
+    function disconnect(guid) {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.disconnect(guid)
         .then(function (response) {
-          that.onDisconnect(guid);
+          onDisconnect(guid);
           return response;
         });
-    },
+    }
 
     /* eslint-disable complexity */
     // NOTE - Complexity of 11, left in to improve readability.
@@ -106,12 +105,11 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    list: function () {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
-      var hceInfoApi = this.apiManager.retrieve('cloud-foundry.api.HceInfoApi');
-      var hsmApi = this.apiManager.retrieve('service-manager.api.HsmApi');
+    function list() {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
+      var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
+      var hceInfoApi = apiManager.retrieve('cloud-foundry.api.HceInfoApi');
+      var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');
 
       return serviceInstanceApi.list().then(function (response) {
         var items = response.data;
@@ -136,23 +134,26 @@
         }
 
         if (tasks.length === 0) {
-          that.onList(response);
-          return that.serviceInstances;
+          onList(response);
+          return serviceInstances;
         } else {
           // Swallow errors - we don't want one failure to fail everything
-          return that.$q.all(tasks).catch(angular.noop).then(function (infoResults) {
+          return $q.all(tasks).catch(angular.noop).then(function (infoResults) {
             return serviceInstanceApi.list().then(function (listResponse) {
-              that.onList(listResponse, infoResults);
-              return that.serviceInstances;
+              onList(listResponse, infoResults);
+              return serviceInstances;
             }).catch(function () {
-              that.serviceInstances = {};
-              that.numValid = 0;
+              _.forIn(serviceInstances, function (value, key) {
+                delete serviceInstances[key];
+              });
+              numValid = 0;
             });
           });
         }
       });
 
-    },
+    }
+
     /* eslint-enable complexity */
 
     /**
@@ -165,18 +166,18 @@
      * @returns {void}
      * @private
      */
-    onConnect: function (guid, name, response) {
+    function onConnect(guid, name, response) {
       var newCnsi = response.data;
       newCnsi.guid = guid;
       newCnsi.name = name;
       newCnsi.valid = true;
 
-      if (angular.isUndefined(this.serviceInstances[guid])) {
-        this.serviceInstances[guid] = newCnsi;
+      if (angular.isUndefined(serviceInstances[guid])) {
+        serviceInstances[guid] = newCnsi;
       } else {
-        angular.extend(this.serviceInstances[guid], newCnsi);
+        angular.extend(serviceInstances[guid], newCnsi);
       }
-    },
+    }
 
     /**
      * @function onDisconnect
@@ -186,14 +187,13 @@
      * @returns {void}
      * @private
      */
-    onDisconnect: function (guid) {
-      if (angular.isDefined(this.serviceInstances[guid])) {
-        delete this.serviceInstances[guid];
+    function onDisconnect(guid) {
+      if (angular.isDefined(serviceInstances[guid])) {
+        delete serviceInstances[guid];
       }
-    },
+    }
 
-    onList: function (response, infoResults) {
-      var that = this;
+    function onList(response, infoResults) {
       var items = response.data;
 
       // check token expirations
@@ -204,8 +204,11 @@
         }
       });
 
-      this.serviceInstances = _.keyBy(items, 'guid');
-      this.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
+      utilsService.replaceProperties(serviceInstances, _.keyBy(items, 'guid'));
+
+      numValid = _.sumBy(items, function (o) {
+        return o.valid ? 1 : 0;
+      }) || 0;
 
       // Add in the metadata about error status of endpoints
       if (infoResults) {
@@ -213,11 +216,11 @@
           // info calls were non-passthrough - so we should have a map of guids to responses
           _.each(data, function (cnsiData, cnsiGuid) {
             // Record error status
-            that.serviceInstances[cnsiGuid].error = !!cnsiData.error;
+            serviceInstances[cnsiGuid].error = !!cnsiData.error;
           });
         });
       }
     }
-  });
+  }
 
 })();

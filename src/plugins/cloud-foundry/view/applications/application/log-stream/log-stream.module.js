@@ -21,7 +21,7 @@
   ApplicationLogStreamController.$inject = [
     'base64',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     '$stateParams',
     '$location',
     '$log'
@@ -32,7 +32,7 @@
    * @constructor
    * @param {object} base64 - base64 service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.utilsService} utils - our utils service
+   * @param {appUtilsUtilsService} utils - our utils service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $location - the Angular $location service
    * @param {object} $log - the Angular $log service

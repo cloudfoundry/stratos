@@ -16,7 +16,7 @@
   }
 
   /**
-   * @memberof cloud-foundry.api.github
+   * @memberof github.api
    * @name GithubApi
    * @param {object} $http - the Angular $http service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
@@ -34,7 +34,7 @@
   angular.extend(GithubApi.prototype, {
     /**
      * @function repos
-     * @memberof cloud-foundry.api.github.GithubApi
+     * @memberof github.api.GithubApi
      * @description Get repos user owns or has admin rights to
      * @param {object} params - additional params to send
      * @param {object} options - additional request options
@@ -48,7 +48,7 @@
 
     /**
      * @function branches
-     * @memberof cloud-foundry.api.github.GithubApi
+     * @memberof github.api.GithubApi
      * @description Get branches a repo
      * @param {string} repo - the repo full name
      * @param {object} params - additional params to send
@@ -63,7 +63,7 @@
 
     /**
      * @function getBranch
-     * @memberof cloud-foundry.api.github.GithubApi
+     * @memberof github.api.GithubApi
      * @description Get specified branch
      * @param {string} repo - the repo full name
      * @param {string} branch - the branch name
@@ -79,7 +79,7 @@
 
     /**
      * @function commits
-     * @memberof cloud-foundry.api.github.GithubApi
+     * @memberof github.api.GithubApi
      * @description Get commits for a repo
      * @param {string} repo - the repo full name
      * @param {object} params - additional params to send
@@ -94,7 +94,7 @@
 
     /**
      * @function _buildRequest
-     * @memberof cloud-foundry.api.github.GithubApi
+     * @memberof github.api.GithubApi
      * @description Build and return the Github API request
      * @param {object} params - additional params to send
      * @param {object} options - additional options to send

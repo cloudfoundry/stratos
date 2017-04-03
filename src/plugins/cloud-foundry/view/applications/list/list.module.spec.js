@@ -3,7 +3,7 @@
 
   describe('list module', function () {
 
-    var $controller, $httpBackend, $scope, eventService, $state;
+    var $controller, $httpBackend, $scope, appEventEventService, $state;
 
     var cnsiGuid = 'cnsiGuid';
     // Matches org from ListAllOrganizations
@@ -22,9 +22,9 @@
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var modelManager = $injector.get('modelManager');
-      eventService = $injector.get('app.event.eventService');
+      appEventEventService = $injector.get('appEventEventService');
       var errorService = $injector.get('app.error.errorService');
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsUtilsService');
       var organizationModel = $injector.get('organization-model');
       var detailView = $injector.get('helion.framework.widgets.detailView');
       var $window = $injector.get('$window');
@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, eventService, errorService, utils, detailView, organizationModel);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventEventService, errorService, utils, detailView, organizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');

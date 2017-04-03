@@ -31,7 +31,7 @@
     'modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'app.view.endpoints.clusters.routesService',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService'
@@ -49,7 +49,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appUtilsUtilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -58,7 +58,7 @@
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @property {app.utils.utilsService} utils - the utils service
+   * @property {appUtilsUtilsService} utils - the utils service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.view.notificationsService} notificationsService - the toast notification service
    */

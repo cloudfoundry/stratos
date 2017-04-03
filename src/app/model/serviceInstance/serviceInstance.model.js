@@ -11,11 +11,6 @@
     .module('app.model')
     .run(registerServiceInstanceModel);
 
-  registerServiceInstanceModel.$inject = [
-    'apiManager',
-    'modelManager'
-  ];
-
   function registerServiceInstanceModel(apiManager, modelManager) {
     modelManager.register('app.model.serviceInstance', new ServiceInstance(apiManager));
   }
@@ -25,16 +20,19 @@
    * @memberof app.model.serviceInstance
    * @name app.model.serviceInstance.ServiceInstance
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @property {app.api.apiManager} apiManager - the application API manager
    * @property {array} serviceInstances - the service instances available to user
    * @class
    */
   function ServiceInstance(apiManager) {
-    this.apiManager = apiManager;
-    this.serviceInstances = [];
-  }
+    var serviceInstances = [];
 
-  angular.extend(ServiceInstance.prototype, {
+    return {
+      serviceInstances: serviceInstances,
+      create: create,
+      remove: remove,
+      list: list
+    };
+
     /**
      * @function create
      * @memberof app.model.serviceInstance.ServiceInstance
@@ -46,17 +44,16 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (type, url, name, skipSslValidation) {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+    function create(type, url, name, skipSslValidation) {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
       type = type || 'hcf';
 
       var promise = serviceInstanceApi.create(url, name, !!skipSslValidation, type);
       return promise.then(function (response) {
-        that.serviceInstances.push(response.data);
+        serviceInstances.push(response.data);
         return response.data;
       });
-    },
+    }
 
     /**
      * @function disconnect
@@ -66,15 +63,13 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    remove: function (serviceInstance) {
-      var that = this;
-
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+    function remove(serviceInstance) {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
       return serviceInstanceApi.remove(serviceInstance.guid)
         .then(function () {
-          that.list();
+          list();
         });
-    },
+    }
 
     /**
      * @function list
@@ -83,22 +78,21 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    list: function () {
-      var that = this;
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+    function list() {
+      var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
       return serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data || [];
-          that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+          serviceInstances.length = 0;
+          [].push.apply(serviceInstances, _.sortBy(items, 'name'));
 
-          var hcfOnly = _.filter(that.serviceInstances, { cnsi_type: 'hcf' }) || [];
+          var hcfOnly = _.filter(serviceInstances, { cnsi_type: 'hcf' }) || [];
 
           return {
             numAvailable: hcfOnly.length
           };
         });
     }
-  });
+  }
 
 })();

@@ -23,7 +23,7 @@
     '$scope',
     '$state',
     'modelManager',
-    'app.utils.utilsService'
+    'appUtilsUtilsService'
   ];
 
   /**
@@ -32,7 +32,7 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.utilsService} utils - the console utils service
+   * @param {appUtilsUtilsService} utils - the console utils service
    */
   function ServiceManagerTileController($scope, $state, modelManager, utils) {
     var that = this;

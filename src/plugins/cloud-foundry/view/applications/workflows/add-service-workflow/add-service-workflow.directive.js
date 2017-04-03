@@ -26,7 +26,7 @@
     '$scope',
     '$interpolate',
     'modelManager',
-    'app.event.eventService',
+    'appEventEventService',
     'helion.framework.widgets.detailView'
   ];
 
@@ -38,7 +38,7 @@
    * @param {object} $scope - the Angular $scope service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.event.eventService} eventService - the event management service
+   * @param {appEventEventService} appEventEventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view widget
    * @property {object} $q - the Angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
@@ -52,11 +52,11 @@
    * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, eventService, detailView) {
+  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventEventService, detailView) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.detailView = detailView;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -77,7 +77,7 @@
       }
     };
 
-    var startWorkflowEvent = this.eventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
+    var startWorkflowEvent = this.appEventEventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
       that.reset(config);
       that.modal = that.startWorkflow();
       that._loadServiceInstances();
@@ -364,7 +364,7 @@
               appName: that.data.app.summary.name
             };
             var message = that.$interpolate(successMsg)(context);
-            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
             that.modal.close();
           }, function () {
             return that._onServiceBindingError();

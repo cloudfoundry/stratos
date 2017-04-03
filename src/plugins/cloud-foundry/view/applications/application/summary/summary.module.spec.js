@@ -19,7 +19,7 @@
       var $q = $injector.get('$q');
       var addRoutesService = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
       var editAppService = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsUtilsService');
       var routesService = $injector.get('app.view.endpoints.clusters.routesService');
 
       $stateParams.cnsiGuid = cnsiGuid;

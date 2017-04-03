@@ -10,7 +10,7 @@
     '$q',
     '$interpolate',
     'modelManager',
-    'app.event.eventService',
+    'appEventEventService',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
     'organization-model'
@@ -25,7 +25,7 @@
    * @param {object} $q - the angular $q service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {appEventEventService} appEventEventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service
@@ -46,7 +46,7 @@
    * selected
    */
   function RolesService($log, $q, $interpolate,
-                        modelManager, eventService, notificationsService, confirmDialog, organizationModel) {
+                        modelManager, appEventEventService, notificationsService, confirmDialog, organizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -701,7 +701,7 @@
         return $q.all(promises)
           .then(function () {
             // If all async requests have finished invalidate any cache associated with roles
-            eventService.$emit(eventService.events.ROLES_UPDATED);
+            appEventEventService.$emit(appEventEventService.events.ROLES_UPDATED);
 
             // If something has failed return a failed promise
             if (failures.length > 0) {

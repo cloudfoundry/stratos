@@ -45,8 +45,8 @@
 
       // property definitions
 
-      it('should have properties `eventService` defined', function () {
-        expect(applicationCtrl.eventService).toBeDefined();
+      it('should have properties `appEventEventService` defined', function () {
+        expect(applicationCtrl.appEventEventService).toBeDefined();
       });
 
       it('should have properties `modelManager` defined', function () {

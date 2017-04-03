@@ -27,7 +27,7 @@
     'modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'

@@ -29,8 +29,8 @@
 
   AddAppWorkflowController.$inject = [
     'modelManager',
-    'app.event.eventService',
-    'app.utils.utilsService',
+    'appEventEventService',
+    'appUtilsUtilsService',
     'app.view.vcs.manageVcsTokens',
     'organization-model',
     '$interpolate',
@@ -44,8 +44,8 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the Event management service
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appEventEventService} appEventEventService - the Event management service
+   * @param {appUtilsUtilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} organizationModel - the organization-model service
    * @param {object} $interpolate - the Angular $interpolate service
@@ -58,7 +58,7 @@
    * @property {object} $timeout - the Angular $timeout service
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.event.eventService} eventService - the Event management service
+   * @property {appEventEventService} appEventEventService - the Event management service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -71,7 +71,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, utils, manageVcsTokens, organizationModel,
+  function AddAppWorkflowController(modelManager, appEventEventService, utils, manageVcsTokens, organizationModel,
                                     $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -79,7 +79,7 @@
     this.$timeout = $timeout;
     this.addingApplication = false;
     this.modelManager = modelManager;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.utils = utils;
     this.manageVcsTokens = manageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -232,7 +232,7 @@
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
                     var msg = gettext("A new application and route have been created for '{{ appName }}'");
-                    that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
+                    that.appEventEventService.$emit('cf.events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });
                   }, function (error) {
@@ -254,7 +254,7 @@
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
         this.options = {
-          eventService: this.eventService,
+          appEventEventService: this.appEventEventService,
           subflow: null,
           serviceInstances: [],
           services: [],
@@ -308,7 +308,7 @@
               return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
             });
 
-          that.eventService.$emit('cf.events.NEW_APP_CREATED');
+          that.appEventEventService.$emit('cf.events.NEW_APP_CREATED');
 
           return that.$q.all([summaryPromise, routePromise]).then(function () {
             that.userInput.application = that.appModel.application;
@@ -504,7 +504,7 @@
           newlyCreated: true
         };
 
-        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
+        this.appEventEventService.$emit(this.appEventEventService.events.REDIRECT, 'cf.applications.application.summary', params);
       },
 
       startWorkflow: function () {

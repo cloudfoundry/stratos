@@ -9,7 +9,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'app.utils.utilsService': {
+      appUtilsUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         }

@@ -97,7 +97,7 @@
     '$timeout',
     '$state',
     '$stateParams',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'modelManager',
     'helion.framework.widgets.dialog.confirm',
     'service-manager.view.manage-instance.dialog',
@@ -315,7 +315,7 @@
     '$state',
     '$q',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'service-manager.utils.version'
   ];
 

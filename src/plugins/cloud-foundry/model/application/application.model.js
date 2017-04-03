@@ -18,7 +18,7 @@
     'cloud-foundry.model.application.stateService',
     '$q',
     'modelUtils',
-    'app.utils.utilsService'
+    'appUtilsUtilsService'
   ];
 
   function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils, utils) {
@@ -35,7 +35,7 @@
    * @param {object} appStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appUtilsUtilsService} utils - the utils service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -43,7 +43,7 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
-   * @property {app.utils.utilsService} utils - the utils service
+   * @property {appUtilsUtilsService} utils - the utils service
    * @class
    */
   function Application(config, apiManager, modelManager, appStateService, $q, modelUtils, utils) {

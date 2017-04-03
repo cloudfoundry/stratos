@@ -37,10 +37,10 @@
         var $log = $injector.get('$log');
         var $q = $injector.get('$q');
         var modelManager = $injector.get('modelManager');
-        var utils = $injector.get('app.utils.utilsService');
+        var utils = $injector.get('appUtilsUtilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        var eventService = $injector.get('app.event.eventService');
+        var appEventEventService = $injector.get('appEventEventService');
         var userSelection = $injector.get('app.view.userSelection');
 
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -59,7 +59,7 @@
 
         var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
         $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection);
+          rolesService, appEventEventService, userSelection);
       }
 
       describe('as admin', function () {
@@ -98,7 +98,7 @@
     });
 
     describe('Standard user table tests', function () {
-      var $state, $stateParams, $log, $q, modelManager, utils, manageUsers, rolesService, eventService, userSelection;
+      var $state, $stateParams, $log, $q, modelManager, utils, manageUsers, rolesService, appEventEventService, userSelection;
 
       var users = [
         {
@@ -156,7 +156,7 @@
       function createController() {
         var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
         $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection);
+          rolesService, appEventEventService, userSelection);
       }
 
       beforeEach(inject(function ($injector) {
@@ -170,10 +170,10 @@
         $stateParams.space = spaceGuid;
         $q = $injector.get('$q');
         modelManager = $injector.get('modelManager');
-        utils = $injector.get('app.utils.utilsService');
+        utils = $injector.get('appUtilsUtilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        eventService = $injector.get('app.event.eventService');
+        appEventEventService = $injector.get('appEventEventService');
         userSelection = $injector.get('app.view.userSelection');
 
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

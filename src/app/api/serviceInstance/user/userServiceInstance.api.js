@@ -11,12 +11,6 @@
     .module('app.api')
     .run(registerUserServiceInstanceApi);
 
-  registerUserServiceInstanceApi.$inject = [
-    '$http',
-    '$httpParamSerializer',
-    'apiManager'
-  ];
-
   function registerUserServiceInstanceApi($http, $httpParamSerializer, apiManager) {
     apiManager.register('app.api.serviceInstance.user',
       new UserServiceInstanceApi($http, $httpParamSerializer));
@@ -33,11 +27,14 @@
    * @class
    */
   function UserServiceInstanceApi($http, $httpParamSerializer) {
-    this.$http = $http;
-    this.$httpParamSerializer = $httpParamSerializer;
-  }
 
-  angular.extend(UserServiceInstanceApi.prototype, {
+    return {
+      connect: connect,
+      verify: verify,
+      disconnect: disconnect,
+      list: list
+    };
+
     /**
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
@@ -48,7 +45,7 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (guid, username, password) {
+    function connect(guid, username, password) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -59,10 +56,10 @@
         username: username,
         password: password
       };
-      var data = this.$httpParamSerializer(loginData);
+      var data = $httpParamSerializer(loginData);
 
-      return this.$http.post('/pp/v1/auth/login/cnsi', data, config);
-    },
+      return $http.post('/pp/v1/auth/login/cnsi', data, config);
+    }
 
     /**
      * @function verify
@@ -74,7 +71,7 @@
      * @returns {promise}
      * @public
      */
-    verify: function (guid, username, password) {
+    function verify(guid, username, password) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -85,10 +82,10 @@
         username: username,
         password: password
       };
-      var data = this.$httpParamSerializer(loginData);
+      var data = $httpParamSerializer(loginData);
 
-      return this.$http.post('/pp/v1/auth/login/cnsi/verify', data, config);
-    },
+      return $http.post('/pp/v1/auth/login/cnsi/verify', data, config);
+    }
 
     /**
      * @function disconnect
@@ -98,19 +95,19 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (guid) {
+    function disconnect(guid) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
       var disconnectData = {cnsi_guid: guid};
-      var data = this.$httpParamSerializer(disconnectData);
+      var data = $httpParamSerializer(disconnectData);
       /* eslint-disable */
       // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
       /* eslint-enable */
-      return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
-    },
+      return $http.post('/pp/v1/auth/logout/cnsi', data, config);
+    }
 
     /**
      * @function list
@@ -119,9 +116,9 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    list: function () {
-      return this.$http.get('/pp/v1/cnsis/registered');
+    function list() {
+      return $http.get('/pp/v1/cnsis/registered');
     }
-  });
+  }
 
 })();

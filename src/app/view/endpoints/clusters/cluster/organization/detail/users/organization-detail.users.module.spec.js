@@ -31,10 +31,10 @@
         $stateParams.organization = organizationGuid;
         var $q = $injector.get('$q');
         var modelManager = $injector.get('modelManager');
-        var utils = $injector.get('app.utils.utilsService');
+        var utils = $injector.get('appUtilsUtilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        var eventService = $injector.get('app.event.eventService');
+        var appEventEventService = $injector.get('appEventEventService');
         var userSelection = $injector.get('app.view.userSelection');
         var organizationModel = $injector.get('organization-model');
 
@@ -59,7 +59,7 @@
 
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection, organizationModel);
+          rolesService, appEventEventService, userSelection, organizationModel);
       }
 
       describe('as admin', function () {
@@ -129,7 +129,7 @@
 
     describe('Standard user table tests', function () {
 
-      var $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService, eventService, userSelection, orgModel;
+      var $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService, appEventEventService, userSelection, orgModel;
 
       var users = [
         {
@@ -219,7 +219,7 @@
       function createController() {
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, eventService, userSelection, orgModel);
+          rolesService, appEventEventService, userSelection, orgModel);
       }
 
       beforeEach(inject(function ($injector) {
@@ -231,10 +231,10 @@
         $stateParams.organization = organizationGuid;
         $q = $injector.get('$q');
         modelManager = $injector.get('modelManager');
-        utils = $injector.get('app.utils.utilsService');
+        utils = $injector.get('appUtilsUtilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
         rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-        eventService = $injector.get('app.event.eventService');
+        appEventEventService = $injector.get('appEventEventService');
         userSelection = $injector.get('app.view.userSelection');
         orgModel = $injector.get('organization-model');
 

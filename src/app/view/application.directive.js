@@ -28,11 +28,11 @@
   }
 
   ApplicationController.$inject = [
-    'app.event.eventService',
+    'appEventEventService',
     'modelManager',
     'app.basePath',
     'app.view.upgradeCheck',
-    'app.logged-in.loggedInService',
+    'appLoggedInLoggedInService',
     'app.view.localStorage',
     '$timeout',
     '$state',
@@ -46,11 +46,11 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {appEventEventService} appEventEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.basePath} path - the base path serving our app (i.e. /app)
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
-   * @param {object} loggedInService - the Logged In Service
+   * @param {object} appLoggedInLoggedInService - the Logged In Service
    * @param {object} localStorage - the Local Storage In Service
    * @param {object} $timeout - Angular $timeout service
    * @param {$state} $state - Angular ui-router $state service
@@ -58,11 +58,11 @@
    * @param {$window} $window - Angular $window service
    * @param {$rootScope} $rootScope - Angular $rootScope service
    * @param {$scope} $scope - Angular $scope service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {appEventEventService} appEventEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.basePath} path - the base path serving our app (i.e. /app)
    * @property {app.view.upgradeCheck} upgradeCheck - the upgrade check service
-   * @property {object} loggedInService - the Logged In Service
+   * @property {object} appLoggedInLoggedInService - the Logged In Service
    * @property {$state} $state - Angular ui-router $state service
    * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
@@ -70,15 +70,15 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService, localStorage,
+  function ApplicationController(appEventEventService, modelManager, path, upgradeCheck, appLoggedInLoggedInService, localStorage,
                                  $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
 
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.modelManager = modelManager;
     this.path = path;
     this.upgradeCheck = upgradeCheck;
-    this.loggedInService = loggedInService;
+    this.appLoggedInLoggedInService = appLoggedInLoggedInService;
 
     this.$state = $state;
     this.$window = $window;
@@ -225,13 +225,13 @@
             if (noHCFInstances) {
               // No HCF instances, so the system is not setup and the user can't fix this
               that.continueLogin = false;
-              that.eventService.$emit(that.eventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+              that.appEventEventService.$emit(that.appEventEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
             } else {
               var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
-                if (userServiceInstanceModel.numValid === 0) {
+                if (userServiceInstanceModel.getNumValid() === 0) {
                   that.redirectState = 'endpoint.dashboard';
                 }
               });
@@ -253,10 +253,10 @@
             // When we notify listeners that login has completed, in some cases we don't want them
             // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
             // So, we pass this flag to tell them login happenned, but that they should not redirect
-            that.eventService.$emit(that.eventService.events.LOGIN, !!that.redirectState);
+            that.appEventEventService.$emit(that.appEventEventService.events.LOGIN, !!that.redirectState);
             // We need to dpo this after the login events are handled, so that ui-router states we might go to are registered
             if (that.redirectState) {
-              that.eventService.$emit(that.eventService.events.REDIRECT, that.redirectState);
+              that.appEventEventService.$emit(that.appEventEventService.events.REDIRECT, that.redirectState);
             }
           }
         });
@@ -274,7 +274,7 @@
     onLoginFailed: function (response) {
       if (response.status === -1) {
         // handle the case when the server never responds
-        this.eventService.$emit(this.eventService.events.LOGIN_TIMEOUT);
+        this.appEventEventService.$emit(this.appEventEventService.events.LOGIN_TIMEOUT);
         this.serverFailedToRespond = true;
         this.serverErrorOnLogin = false;
         this.failedLogin = false;
@@ -286,13 +286,13 @@
         }
 
         // handle 5xx errors when attempting to login
-        this.eventService.$emit(this.eventService.events.HTTP_5XX_ON_LOGIN);
+        this.appEventEventService.$emit(this.appEventEventService.events.HTTP_5XX_ON_LOGIN);
         this.serverFailedToRespond = false;
         this.serverErrorOnLogin = true;
         this.failedLogin = false;
       } else {
         // general authentication failed
-        this.eventService.$emit(this.eventService.events.LOGIN_FAILED);
+        this.appEventEventService.$emit(this.appEventEventService.events.LOGIN_FAILED);
         this.serverFailedToRespond = false;
         this.serverErrorOnLogin = false;
         this.failedLogin = true;
@@ -341,7 +341,7 @@
      * @private
      */
     onLoggedOut: function () {
-      this.eventService.$emit(this.eventService.events.LOGOUT);
+      this.appEventEventService.$emit(this.appEventEventService.events.LOGOUT);
       this.loggedIn = false;
     }
   });

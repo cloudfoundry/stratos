@@ -5,7 +5,7 @@
     .factory('app.error.errorService', errorServiceFactory);
 
   errorServiceFactory.$inject = [
-    'app.event.eventService'
+    'appEventEventService'
   ];
 
   /**
@@ -13,10 +13,10 @@
    * @memberof app.error
    * @name errorService
    * @description The application error service
-   * @param {object} eventService - the event service
+   * @param {object} appEventEventService - the event service
    * @returns {object} the error service
    */
-  function errorServiceFactory(eventService) {
+  function errorServiceFactory(appEventEventService) {
     var hasError = false;
     var appErrorMessage, systemErrorMessage;
 
@@ -29,11 +29,11 @@
       _update: function () {
         var hasErrorMsg = this.getError();
         if (hasError && !hasErrorMsg) {
-          eventService.$broadcast(eventService.events.APP_ERROR_CLEAR);
+          appEventEventService.$broadcast(appEventEventService.events.APP_ERROR_CLEAR);
         }
         hasError = !!hasErrorMsg;
         if (hasError) {
-          eventService.$broadcast(eventService.events.APP_ERROR_NOTIFY, hasErrorMsg);
+          appEventEventService.$broadcast(appEventEventService.events.APP_ERROR_NOTIFY, hasErrorMsg);
         }
       },
 

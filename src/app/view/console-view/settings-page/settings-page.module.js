@@ -23,20 +23,20 @@
   }
 
   SettingsController.$inject = [
-    'app.event.eventService',
+    'appEventEventService',
     'modelManager'
   ];
 
   /**
    * @name SettingsController
    * @constructor
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {appEventEventService} appEventEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {appEventEventService} appEventEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the model management service
    */
-  function SettingsController(eventService, modelManager) {
-    this.eventService = eventService;
+  function SettingsController(appEventEventService, modelManager) {
+    this.appEventEventService = appEventEventService;
     this.modelManager = modelManager;
 
     this.model = modelManager.retrieve('app.model.account');
@@ -47,17 +47,17 @@
 
   register.$inject = [
     'modelManager',
-    'app.event.eventService'
+    'appEventEventService'
   ];
 
-  function register(modelManager, eventService) {
-    return new UserSettings(modelManager, eventService);
+  function register(modelManager, appEventEventService) {
+    return new UserSettings(modelManager, appEventEventService);
   }
 
-  function UserSettings(modelManager, eventService) {
+  function UserSettings(modelManager, appEventEventService) {
     var that = this;
     this.modelManager = modelManager;
-    eventService.$on(eventService.events.LOGIN, function () {
+    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
       that.onLoggedIn();
     });
   }

@@ -25,7 +25,7 @@
   }
 
   ApplicationDeliveryPipelineController.$inject = [
-    'app.event.eventService',
+    'appEventEventService',
     'modelManager',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
@@ -33,7 +33,7 @@
     'app.view.notificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'helion.framework.widgets.detailView',
     'PAT_DELIMITER',
     '$interpolate',
@@ -47,7 +47,7 @@
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
-   * @param {app.event.eventService} eventService - the application event bus
+   * @param {appEventEventService} appEventEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token
@@ -55,7 +55,7 @@
    * @param {app.view.notificationsService} notificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
-   * @param {app.utils.utilsService} utils - the console utils service
+   * @param {appUtilsUtilsService} utils - the console utils service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
@@ -68,7 +68,7 @@
    * @property {string} id - the application GUID
    * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, registerVcsToken, confirmDialog, notificationsService,
+  function ApplicationDeliveryPipelineController(appEventEventService, modelManager, vcsTokenManager, registerVcsToken, confirmDialog, notificationsService,
                                                  addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
@@ -87,7 +87,7 @@
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.vcsTokenManager = vcsTokenManager;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -249,7 +249,7 @@
             // show notification for successful binding
             var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
-            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
             return that.model.updateDeliveryPipelineMetadata();
           })

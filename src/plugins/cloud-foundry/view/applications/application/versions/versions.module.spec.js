@@ -28,7 +28,7 @@
       notificationsService = {
         notify: angular.noop
       };
-      utilsService = $injector.get('app.utils.utilsService');
+      utilsService = $injector.get('appUtilsUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       _.set(authModel, 'principal.guid.isAllowed.apply', _.noop);

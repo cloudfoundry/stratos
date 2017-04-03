@@ -2,7 +2,7 @@
   'use strict';
 
   describe('add-service-workflow directive', function () {
-    var $httpBackend, $scope, eventService, mockApp, mockService, addServiceWorkflowCtrl;
+    var $httpBackend, $scope, appEventEventService, mockApp, mockService, addServiceWorkflowCtrl;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      eventService = $injector.get('app.event.eventService');
+      appEventEventService = $injector.get('appEventEventService');
 
       var markup = '<add-service-workflow></add-service-workflow>';
       var element = angular.element(markup);
@@ -67,7 +67,7 @@
         cnsiGuid: 'guid',
         service: mockService
       };
-      eventService.$emit(event, config);
+      appEventEventService.$emit(event, config);
 
       $scope.$apply();
       $httpBackend.flush();
@@ -125,7 +125,7 @@
           cnsiGuid: 'guid',
           service: mockService
         };
-        eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
+        appEventEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
       });
 
       it('should add new service instance', function () {
@@ -279,7 +279,7 @@
           cnsiGuid: 'guid',
           service: mockService
         };
-        eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
+        appEventEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
         addServiceWorkflowCtrl.options.activeTab = 1;
         addServiceWorkflowCtrl.modal = {
           close: angular.noop

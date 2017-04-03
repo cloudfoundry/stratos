@@ -22,14 +22,6 @@
       expect(serviceInstanceApi).toBeDefined();
     });
 
-    it('should have `$http` property defined', function () {
-      expect(serviceInstanceApi.$http).toBeDefined();
-    });
-
-    it('should have `$httpParamSerializer` property defined', function () {
-      expect(serviceInstanceApi.$httpParamSerializer).toBeDefined();
-    });
-
     it('should send POST request for create', function () {
       var data = { api_endpoint: 'url', cnsi_name: 'name' };
       $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, '');

@@ -28,7 +28,6 @@
     });
 
     it('should have initial properties defined', function () {
-      expect(serviceInstance.apiManager).toBeDefined();
       expect(serviceInstance.serviceInstances).toEqual([]);
     });
 

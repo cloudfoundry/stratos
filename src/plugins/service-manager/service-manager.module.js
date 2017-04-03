@@ -13,32 +13,32 @@
   register.$inject = [
     '$state',
     '$location',
-    'app.event.eventService',
+    'appEventEventService',
     'modelManager',
     'app.view.notificationsService',
-    'app.utils.utilsService'
+    'appUtilsUtilsService'
   ];
 
-  function register($state, $location, eventService, modelManager, notificationService, utils) {
-    return new ServiceManager($state, $location, eventService, modelManager, notificationService, utils);
+  function register($state, $location, appEventEventService, modelManager, notificationService, utils) {
+    return new ServiceManager($state, $location, appEventEventService, modelManager, notificationService, utils);
   }
 
-  function ServiceManager($state, $location, eventService, modelManager, notificationService, utils) {
+  function ServiceManager($state, $location, appEventEventService, modelManager, notificationService, utils) {
     var that = this;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
     this.notificationService = notificationService;
     this.utils = utils;
-    this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
+    this.appEventEventService.$on(this.appEventEventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });
-    this.eventService.$on(this.eventService.events.LOGOUT, function () {
+    this.appEventEventService.$on(this.appEventEventService.events.LOGOUT, function () {
       that.onLoggedOut();
     });
 
-    this.eventService.$on(this.eventService.events.ENDPOINT_CONNECT_CHANGE, function () {
+    this.appEventEventService.$on(this.appEventEventService.events.ENDPOINT_CONNECT_CHANGE, function () {
       that.update();
     });
   }

@@ -25,7 +25,7 @@
     '$state',
     '$q',
     '$scope',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',

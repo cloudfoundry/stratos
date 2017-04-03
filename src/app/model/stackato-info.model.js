@@ -11,30 +11,29 @@
     .module('app.model')
     .run(registerStackatoInfoModel);
 
-  registerStackatoInfoModel.$inject = [
-    'modelManager',
-    'stackatoInfoService'
-  ];
-
-  function registerStackatoInfoModel(modelManager, stackatoInfoService) {
-    modelManager.register('app.model.stackatoInfo', new StackatoInfo(stackatoInfoService));
+  function registerStackatoInfoModel(modelManager, appUtilsUtilsService, stackatoInfoService) {
+    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsUtilsService, stackatoInfoService));
   }
 
   /**
    * @namespace app.model.userInfo.UserInfo
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
+   * @param {appUtilsUtilsService} utilsService - utils service
    * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
-   * @property {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class
    */
-  function StackatoInfo(stackatoInfoService) {
-    this.stackatoInfo = stackatoInfoService;
-    this.info = {};
-  }
+  function StackatoInfo(utilsService, stackatoInfoService) {
+    var info = {};
 
-  angular.extend(StackatoInfo.prototype, {
+    return {
+      info: info,
+      getStackatoInfo: getStackatoInfo,
+      version: version,
+      onStackatoInfo: onStackatoInfo
+    };
+
     /**
      * @function getStackatoInfo
      * @memberof app.model.stackatoInfo.StackatoInfo
@@ -42,14 +41,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    getStackatoInfo: function () {
-      var that = this;
-      return this.stackatoInfo.stackatoInfo()
+    function getStackatoInfo() {
+      return stackatoInfoService.stackatoInfo()
         .then(function (response) {
-          that.onStackatoInfo(response);
-          return that.info;
+          onStackatoInfo(response);
+          return info;
         });
-    },
+    }
 
     /**
      * @function version
@@ -58,9 +56,9 @@
      * @returns {promise} A promise object
      * @public
      */
-    version: function () {
-      return this.stackatoInfo.version();
-    },
+    function version() {
+      return stackatoInfoService.version();
+    }
 
     /**
      * @function onLoggedIn
@@ -69,10 +67,10 @@
      * @param {object} response - the HTTP response object
      * @private
      */
-    onStackatoInfo: function (response) {
-      this.info = response.data;
+    function onStackatoInfo(response) {
+      utilsService.replaceProperties(info, response.data);
     }
 
-  });
+  }
 
 })();

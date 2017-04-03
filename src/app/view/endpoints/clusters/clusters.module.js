@@ -29,15 +29,15 @@
     '$q',
     '$state',
     'modelManager',
-    'app.event.eventService',
-    'app.utils.utilsService'
+    'appEventEventService',
+    'appUtilsUtilsService'
   ];
 
-  function register($q, $state, modelManager, eventService, utils) {
-    return new Clusters($q, $state, modelManager, eventService, utils);
+  function register($q, $state, modelManager, appEventEventService, utils) {
+    return new Clusters($q, $state, modelManager, appEventEventService, utils);
   }
 
-  function Clusters($q, $state, modelManager, eventService, utils) {
+  function Clusters($q, $state, modelManager, appEventEventService, utils) {
     var that = this;
 
     this.initialized = $q.defer();
@@ -48,7 +48,7 @@
       return that.initialized.promise;
     }
 
-    eventService.$on(eventService.events.LOGIN, function () {
+    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
       that.onLoggedIn();
     });
 

@@ -39,25 +39,25 @@
         expect($controller).toBeDefined();
       });
 
-      it('should have properties `eventService` defined', function () {
-        expect($controller.eventService).toBeDefined();
+      it('should have properties `appEventEventService` defined', function () {
+        expect($controller.appEventEventService).toBeDefined();
       });
 
       it('`clearPassword` should called when events.LOGIN_FAILED triggered', function () {
         spyOn($controller, 'clearPassword');
-        $controller.eventService.$emit($controller.eventService.events.LOGIN_FAILED);
+        $controller.appEventEventService.$emit($controller.appEventEventService.events.LOGIN_FAILED);
         expect($controller.clearPassword).toHaveBeenCalled();
       });
 
       it('`clearPassword` should called when events.HTTP_5XX_ON_LOGIN triggered', function () {
         spyOn($controller, 'clearPassword');
-        $controller.eventService.$emit($controller.eventService.events.HTTP_5XX_ON_LOGIN);
+        $controller.appEventEventService.$emit($controller.appEventEventService.events.HTTP_5XX_ON_LOGIN);
         expect($controller.clearPassword).toHaveBeenCalled();
       });
 
       it('`clearPassword` should called when events[\'HTTP_-1\'] triggered', function () {
         spyOn($controller, 'clearPassword');
-        $controller.eventService.$emit($controller.eventService.events['HTTP_-1']);
+        $controller.appEventEventService.$emit($controller.appEventEventService.events['HTTP_-1']);
         expect($controller.clearPassword).toHaveBeenCalled();
       });
 

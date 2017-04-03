@@ -32,7 +32,7 @@
   ServiceCardController.$inject = [
     '$scope',
     'modelManager',
-    'app.event.eventService',
+    'appEventEventService',
     'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
@@ -43,9 +43,9 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.event.eventService} eventService - the event management service
+   * @param {appEventEventService} appEventEventService - the event management service
    * @param {object} serviceInstanceService - the service instance service
-   * @property {app.event.eventService} eventService - the event management service
+   * @property {appEventEventService} appEventEventService - the event management service
    * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
@@ -53,9 +53,9 @@
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from this service card
    */
-  function ServiceCardController($scope, modelManager, eventService, serviceInstanceService) {
+  function ServiceCardController($scope, modelManager, appEventEventService, serviceInstanceService) {
     var that = this;
-    this.eventService = eventService;
+    this.appEventEventService = appEventEventService;
     this.serviceInstanceService = serviceInstanceService;
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -168,7 +168,7 @@
         service: this.service
       };
 
-      this.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
+      this.appEventEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
     },
 
     /**
@@ -202,7 +202,7 @@
         service: this.service
       };
 
-      this.eventService.$emit('cf.events.START_MANAGE_SERVICES', config);
+      this.appEventEventService.$emit('cf.events.START_MANAGE_SERVICES', config);
     },
 
     /**

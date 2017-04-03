@@ -19,18 +19,18 @@
     $httpProvider.interceptors.push('app.view.upgradeCheck');
   }
 
-  upgradeCheckFactory.$inject = ['$q', 'app.event.eventService'];
+  upgradeCheckFactory.$inject = ['$q', 'appEventEventService'];
 
   /**
   * @namespace app.view.upgradeCheck
   * @memberof app.view
   * @name app.model.upgradeCheck
   * @param {object} $q - the Angular Promise service
-  * @param {object} eventService - the event bus service
+  * @param {object} appEventEventService - the event bus service
   * @description The utlity will intercept all HTTP responses and check for 503/upgrade responses
   * @returns {object} The upgrade check service
   */
-  function upgradeCheckFactory($q, eventService) {
+  function upgradeCheckFactory($q, appEventEventService) {
     /**
     * @function isUpgrading
     * @memberof app.view.upgradeCheck
@@ -58,7 +58,7 @@
         // Must be a 503 with the Retry-After header and mst be do a Portal Proxy URL
         if (isUpgrading(rejection)) {
             // This indicates upgrade in progress, so change state to an upgrade error page
-          eventService.$emit(eventService.events.TRANSFER, 'error-page', {error: 'upgrading', hideAccount: true});
+          appEventEventService.$emit(appEventEventService.events.TRANSFER, 'error-page', {error: 'upgrading', hideAccount: true});
         }
         // Always return the rejection as it was
         return $q.reject(rejection);

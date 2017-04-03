@@ -20,7 +20,7 @@
 
   interceptor.$inject = [
     '$q',
-    'app.event.eventService'
+    'appEventEventService'
   ];
 
   /**
@@ -31,16 +31,16 @@
    * See https://docs.angularjs.org/api/ng/service/$http for details
    *
    * @param {object} $q - the $q service for promise/deferred objects
-   * @param {object} eventService - the event bus service
+   * @param {object} appEventEventService - the event bus service
    * @returns {object} The response error function
    */
-  function interceptor($q, eventService) {
+  function interceptor($q, appEventEventService) {
     return {
       responseError: responseError
     };
 
     function responseError(response) {
-      eventService.$emit('HTTP_' + response.status, response);
+      appEventEventService.$emit('HTTP_' + response.status, response);
       return $q.reject(response);
     }
   }

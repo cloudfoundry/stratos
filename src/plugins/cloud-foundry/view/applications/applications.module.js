@@ -30,10 +30,10 @@
     '$scope',
     '$q',
     '$state',
-    'app.utils.utilsService',
+    'appUtilsUtilsService',
     'modelManager',
-    'app.event.eventService',
-    'app.logged-in.loggedInService'
+    'appEventEventService',
+    'appLoggedInLoggedInService'
   ];
 
   /**
@@ -44,16 +44,16 @@
    * @param {object} $state - the UI router $state service
    * @param {object} utils - the utils service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.event.eventService} eventService - the event bus service
-   * @param {object} loggedInService - Logged In Service
+   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {object} appLoggedInLoggedInService - Logged In Service
    * @constructor
    */
-  function ApplicationsController($scope, $q, $state, utils, modelManager, eventService, loggedInService) {
+  function ApplicationsController($scope, $q, $state, utils, modelManager, appEventEventService, appLoggedInLoggedInService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
     var initialized = $q.defer();
 
-    if (loggedInService.isLoggedIn()) {
+    if (appLoggedInLoggedInService.isLoggedIn()) {
       initialized.resolve();
     }
 
@@ -70,7 +70,7 @@
       initialized.resolve();
     }
 
-    var logInListener = eventService.$on(eventService.events.LOGIN, function () {
+    var logInListener = appEventEventService.$on(appEventEventService.events.LOGIN, function () {
       onLoggedIn();
     });
 
