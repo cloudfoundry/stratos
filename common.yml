@@ -80,9 +80,7 @@ services:
       - ../stratos-ui:/usr/src/app
 
   uaa:
-    extends: buildCommon
-    build:
-      context: ./uaa
-      dockerfile: Dockerfile.dev
+    extends: imageCommon
+    image: susetest/uaa:latest
 
       

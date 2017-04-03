@@ -5,12 +5,15 @@ inputs:
 - name: portal-proxy-output
   path: src/github.com/hpcloud/portal-proxy
 - name: stratos-ui
+# Parameterised task files are currently not supported in Concourse
+# Once that is implemented we can refactor the following into a variable
 image_resource:
   type: docker-image
   source:
-    repository: "10.4.21.241:5000/stackatotest/hsc-dcind"
-    tag: "latest"
-    insecure_registries: ["10.4.21.241:5000"]
+   repository:  10.4.21.241:5000/stackatotest/hsc-dcind
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
 run:
   path: sh
   args:
@@ -22,9 +25,12 @@ run:
       export GOPATH=$PWD
       cd stratos-deploy
       # Load images from image
-      for image in $(ls /docker-images); do
-        docker load -i /docker-images/${image};
+      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
+        docker pull ${REGISTRY_NAME}/$image
+        docker tag  ${REGISTRY_NAME}/$image $image
       done
+      mkdir uaa/tmp
+      cp /tarballs/* ./uaa/tmp/
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
       docker logs -f stratosdeploy_ui_1

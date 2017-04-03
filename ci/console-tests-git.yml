@@ -3,18 +3,18 @@ resources:
   type: git
   source:
     uri: git@github.com:hpcloud/stratos-deploy.git
-    branch: master
+    branch: {{stratos-deploy-branch}}
     private_key: {{github-private-key}}
 - name: portal-proxy
   type: git
   source:
     uri: git@github.com:hpcloud/portal-proxy.git
-    branch: master
+    branch:  {{portal-proxy-branch}}
     private_key: {{github-private-key}}
 - name: stratos-ui
   type: git
   source:
-    branch: master
+    branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:hpcloud/stratos-ui.git
 
@@ -34,5 +34,7 @@ jobs:
       file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
     - task: run-e2e-tests
       privileged: true
+      params:
+       REGISTRY_NAME: {{insecure-registry}}
       timeout: 10m
       file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml

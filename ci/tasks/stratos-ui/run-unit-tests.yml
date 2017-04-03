@@ -2,12 +2,14 @@
 platform: linux
 inputs:
 - name: stratos-ui
+# Parameterised task files are currently not supported in Concourse
+# Once that is implemented we can refactor the following into a variable
 image_resource:
   type: docker-image
   source:
-    repository: "10.4.21.241:5000/stackatotest/hsc-concourse"
-    tag: "latest"
-    insecure_registries: ["10.4.21.241:5000"]
+   repository:  10.4.21.241:5000/stackatotest/hsc-concourse
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
 
 run:
   path: sh
