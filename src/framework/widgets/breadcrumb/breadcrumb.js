@@ -13,5 +13,5 @@
     $breadcrumbProvider.setOptions({
       templateUrl: 'framework/widgets/breadcrumb/breadcrumb-template.html'
     });
-  };
+  }
 })();
