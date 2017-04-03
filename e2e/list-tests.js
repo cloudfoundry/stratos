@@ -6,8 +6,7 @@
   var _ = require('../tools/node_modules/lodash');
   var skipPlugin = require('./po/skip-plugin.js');
 
-  var currentFile, curr;
-  var spaces;
+  var currentFile, currentTest, spaces;
   var INDENT = 4;
 
   var ansi = {
