@@ -3,7 +3,7 @@
 
   describe('cluster space detail (applications) module', function () {
 
-    var $controller, $httpBackend, $state, $stateParams, $q, $scope, modelManager, utils, appStateService, spaceModel;
+    var $controller, $httpBackend, $state, $stateParams, $q, $scope, modelManager, appUtilsService, appStateService, spaceModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -40,7 +40,7 @@
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope').$new();
       modelManager = $injector.get('modelManager');
-      utils = $injector.get('appUtilsService');
+      appUtilsService = $injector.get('appUtilsService');
       appStateService = $injector.get('cloud-foundry.model.application.stateService');
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -49,7 +49,7 @@
 
     function createController() {
       var SpaceapplicationsController = $state.get('endpoint.clusters.cluster.organization.space.detail.applications').controller;
-      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService);
+      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, appStateService);
     }
 
     afterEach(function () {

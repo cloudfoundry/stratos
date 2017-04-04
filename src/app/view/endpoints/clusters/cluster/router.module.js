@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.router', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     // Cloud Foundry
@@ -23,13 +19,6 @@
     });
   }
 
-  ClustersRouterController.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appUtilsService'
-  ];
-
   /**
    * @name ClustersRouterController
    * @description Redirects the user to either the Organizations Detail page or
@@ -37,10 +26,10 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @constructor
    */
-  function ClustersRouterController($q, $state, modelManager, utils) {
+  function ClustersRouterController($q, $state, modelManager, appUtilsService) {
     var that = this;
     this.modelManager = modelManager;
 
@@ -72,7 +61,7 @@
         });
     }
 
-    utils.chainStateResolve('endpoint.clusters.router', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.router', $state, init);
 
   }
 

@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      notifications = $injector.get('app.view.notificationsService');
+      notifications = $injector.get('appNotificationsService');
       toaster = $injector.get('helion.framework.widgets.toaster');
     }));
 

@@ -10,11 +10,11 @@
     .factory('viewExecutionDetailView', viewExecutionDetailView);
 
   viewExecutionDetailView.$inject = [
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     'viewEventDetailView'
   ];
 
-  function viewExecutionDetailView(detailView, viewEventDetailView) {
+  function viewExecutionDetailView(frameworkDetailView, viewEventDetailView) {
     return {
       /**
        * @function open
@@ -26,7 +26,7 @@
        * @public
        **/
       open: function (execution, events, cnsiGuid) {
-        return detailView({
+        return frameworkDetailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/execution.html',
           title: execution.message
         }, {

@@ -3,8 +3,8 @@
 
   describe('cluster detail (users) module', function () {
 
-    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-      rolesService, appEventService, userSelection, orgModel;
+    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+      appClusterRolesService, appEventService, appUserSelection, orgModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -66,8 +66,8 @@
 
     function createController() {
       var ClusterUsersController = $state.get('endpoint.clusters.cluster.detail.users').controller;
-      $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-        rolesService, appEventService, userSelection, orgModel);
+      $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+        appClusterRolesService, appEventService, appUserSelection, orgModel);
     }
 
     beforeEach(inject(function ($injector) {
@@ -79,11 +79,11 @@
       $stateParams.guid = clusterGuid;
       $q = $injector.get('$q');
       modelManager = $injector.get('modelManager');
-      utils = $injector.get('appUtilsService');
+      appUtilsService = $injector.get('appUtilsService');
       manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
-      rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
+      appClusterRolesService = $injector.get('appClusterRolesService');
       appEventService = $injector.get('appEventService');
-      userSelection = $injector.get('app.view.userSelection');
+      appUserSelection = $injector.get('appUserSelection');
       orgModel = $injector.get('organization-model');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -108,7 +108,7 @@
       var organizationModel = $injector.get('organization-model');
       _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
 
-      spyOn(rolesService, 'listUsers').and.callFake(function (inClusterGuid) {
+      spyOn(appClusterRolesService, 'listUsers').and.callFake(function (inClusterGuid) {
         expect(inClusterGuid).toEqual(clusterGuid);
         return $q.resolve(users);
       });
@@ -252,7 +252,7 @@
       expect($controller.userActions[users[0].metadata.guid][0].execute(users[0])).toBeDefined();
 
       // Remove all roles
-      spyOn(rolesService, 'removeAllRoles').and.callFake(function (inClusterGuid, inUsers) {
+      spyOn(appClusterRolesService, 'removeAllRoles').and.callFake(function (inClusterGuid, inUsers) {
         expect(inClusterGuid).toEqual(clusterGuid);
         expect(inUsers).toEqual([users[0]]);
         return 'defined';
@@ -289,7 +289,7 @@
       $controller.selectedUsers[users[0].metadata.guid] = true;
       $controller.selectedUsers[users[1].metadata.guid] = false;
 
-      spyOn(rolesService, 'removeAllRoles').and.callFake(function (inClusterGuid, inUsers) {
+      spyOn(appClusterRolesService, 'removeAllRoles').and.callFake(function (inClusterGuid, inUsers) {
         expect(inClusterGuid).toEqual(clusterGuid);
         expect(inUsers).toEqual([users[0]]);
         return 'defined';

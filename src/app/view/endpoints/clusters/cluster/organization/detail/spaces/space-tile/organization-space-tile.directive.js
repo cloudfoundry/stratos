@@ -26,10 +26,10 @@
     '$q',
     'modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'appUtilsService',
     'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'organization-model'
   ];
 
@@ -42,15 +42,15 @@
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.view.endpoints.clusters.cluster.assignUsers} assignUsers - our assign users slide out service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {object} utils - our utils service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {object} appUtilsService - our appUtilsService service
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, assignUsers,
-                                           notificationsService, utils, frameworkDialogConfirm, asyncTaskDialog,
+                                           appNotificationsService, appUtilsService, frameworkDialogConfirm, frameworkAsyncTaskDialog,
                                            organizationModel) {
     var that = this;
 
@@ -79,7 +79,7 @@
 
       var spaceDetail = that.spaceDetail();
 
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
+      that.memory = appUtilsService.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
       // Update these counts per tile, meaning the core getSpaceDetails does not block in the case of 100s of
       // spaces but instead shows list and updates when async data returns
@@ -114,7 +114,7 @@
       name: gettext('Rename Space'),
       disabled: true,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Rename Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
@@ -141,7 +141,7 @@
               return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                 {name: spaceData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
                     {name: spaceData.name});
                   cardData.title = spaceData.name;
                 });
@@ -169,7 +169,7 @@
           callback: function () {
             return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
               .then(function () {
-                notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
                   {name: that.spaceDetail().details.space.entity.name});
               });
           }
@@ -232,7 +232,7 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
 
   }
 

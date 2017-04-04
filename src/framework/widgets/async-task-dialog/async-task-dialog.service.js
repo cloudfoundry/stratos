@@ -2,10 +2,10 @@
   'use strict';
 
   /**
-   * @name helion.framework.widgets.asyncTaskDialog
+   * @name helion.framework.widgets.frameworkAsyncTaskDialog
    * @example:
    *  ```
-   *  asyncTaskDialog({
+   *  frameworkAsyncTaskDialog({
    *    title: 'Async Task Dialog Title',
    *    templateUrl: 'html/template/path.html'
    *    },
@@ -16,11 +16,11 @@
    */
   angular
     .module('helion.framework.widgets')
-    .factory('helion.framework.widgets.asyncTaskDialog', serviceFactory)
+    .factory('frameworkAsyncTaskDialog', serviceFactory)
     .controller('AsyncTaskDialogController', AsyncTaskDialogController);
 
   serviceFactory.$inject = [
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     '$timeout'
   ];
 
@@ -28,17 +28,17 @@
    *
    * @name serviceFactory
    * @description Factory for async task dialogs
-   * @memberof helion.framework.widgets.asyncTaskDialog
-   * @param {helion.framework.widgets.detailView} detailView detailView
+   * @memberof frameworkAsyncTaskDialog
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView frameworkDetailView
    * @param {function} $timeout - angular $timeout servie
-   * @returns {helion.framework.widgets.asyncTaskDialog}  asyncTaskDialog dialog instance
+   * @returns {frameworkAsyncTaskDialog}  frameworkAsyncTaskDialog dialog instance
    */
-  function serviceFactory(detailView, $timeout) {
+  function serviceFactory(frameworkDetailView, $timeout) {
 
     /**
      * @name asyncDialog
      * @description Constructor for asyncDialog
-     * @memberof helion.framework.widgets.asyncTaskDialog
+     * @memberof frameworkAsyncTaskDialog
      * @param {Object} config config properties
      * @param {Object} context Context of dialog
      * @param {function} submitAction Async task to carry out
@@ -74,7 +74,7 @@
       context.showErrorBar = false;
 
       context.submitAction = submitAction;
-      var uibModal = detailView(
+      var uibModal = frameworkDetailView(
         config,
         context
       );
@@ -91,15 +91,15 @@
 
       if (angular.isDefined(initPromise)) {
         uibModal.opened.then(function () {
-          context.asyncTaskDialog.setSpinner(true);
+          context.frameworkAsyncTaskDialog.setSpinner(true);
         });
 
         uibModal.rendered.then(function () {
-          context.asyncTaskDialog.disableAllInput();
+          context.frameworkAsyncTaskDialog.disableAllInput();
           var promise = angular.isFunction(initPromise) ? initPromise() : initPromise;
           promise.finally(function () {
-            context.asyncTaskDialog.setSpinner(false);
-            context.asyncTaskDialog.enableAllInput();
+            context.frameworkAsyncTaskDialog.setSpinner(false);
+            context.frameworkAsyncTaskDialog.enableAllInput();
           });
         });
       }
@@ -120,7 +120,7 @@
   /**
    * @name AsyncTaskDialogController
    * @description Async task Dialog controller
-   * @namespace helion.framework.widgets.asyncTaskDialog
+   * @namespace frameworkAsyncTaskDialog
    * @param {Object} $scope Angular scope
    * @param {Object} context context of dialog
    * @param {Object} content content of dialog
@@ -136,7 +136,7 @@
     // Set form name attribute to form.myForm
     this.$scope.form = {};
 
-    this.context.asyncTaskDialog = {
+    this.context.frameworkAsyncTaskDialog = {
       disableAllInput: _.bind(this._disableAllInput, this),
       enableAllInput: _.bind(this._enableAllInput, this),
       setSpinner: _.bind(this._setSpinner, this)
@@ -149,7 +149,7 @@
     /**
      * @name invokeAction
      * @description invokes the asyn task
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @returns {Promise}
      */
     invokeAction: function () {
@@ -192,7 +192,7 @@
      * @name _disableAllInput
      * @description disables all input and button fields in the dialog
      * when an action async task is executing
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @private
      */
     _disableAllInput: function () {
@@ -208,7 +208,7 @@
     /**
      * @name _enableAllInput
      * @description enables all input and button fields in the dialog
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @private
      */
     _enableAllInput: function () {
@@ -225,7 +225,7 @@
      * @name disableMargin
      * @description Helper function used to disable top
      * margin for footer when an action is being carried out
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
     disableMargin: function () {
@@ -235,7 +235,7 @@
     /**
      * @name hasErrorMessage
      * @description Helper function to determine if there is a custom error message
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
     hasErrorMessage: function () {
@@ -245,7 +245,7 @@
     /**
      * @name isFormInvalid
      * @description Helper function to determine is form (if present) is invalid
-     * @namespace helion.framework.widgets.asyncTaskDialog
+     * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
     isFormInvalid: function () {

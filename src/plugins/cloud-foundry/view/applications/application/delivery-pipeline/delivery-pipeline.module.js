@@ -30,11 +30,11 @@
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
     'frameworkDialogConfirm',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'appUtilsService',
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     'PAT_DELIMITER',
     '$interpolate',
     '$stateParams',
@@ -52,11 +52,11 @@
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
-   * @param {app.view.notificationsService} notificationsService The toasts notifications service
+   * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
-   * @param {appUtilsService} utils - the console utils service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
@@ -66,10 +66,10 @@
    * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
-   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
-  function ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager, registerVcsToken, frameworkDialogConfirm, notificationsService,
-                                                 addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
+  function ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager, registerVcsToken, frameworkDialogConfirm, appNotificationsService,
+                                                 addNotificationService, postDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
@@ -82,7 +82,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -93,7 +93,7 @@
     this.$scope = $scope;
     this.$log = $log;
     this.frameworkDialogConfirm = frameworkDialogConfirm;
-    this.notificationsService = notificationsService;
+    this.appNotificationsService = appNotificationsService;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
     this.PAT_DELIMITER = PAT_DELIMITER;
@@ -138,7 +138,7 @@
       return $q.all(promises);
     }
 
-    utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
+    appUtilsService.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
 
     this.notificationTargetActions = [
       {
@@ -215,7 +215,7 @@
      * @description Show the delivvery pipeline workflow in a slide-in
      **/
     this.setupPipeline = function () {
-      that.detailView(
+      that.frameworkDetailView(
         {
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
         }
@@ -396,7 +396,7 @@
           return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
             that.model.application.project = res.data;
             var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
-            that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
+            that.appNotificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
               {name: newTokenName});
           });
         }

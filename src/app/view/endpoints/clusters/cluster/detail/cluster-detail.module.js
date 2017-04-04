@@ -9,10 +9,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail', {
       url: '',
@@ -27,21 +23,8 @@
     });
   }
 
-  ClusterDetailController.$inject = [
-    '$stateParams',
-    '$scope',
-    '$state',
-    '$q',
-    'modelManager',
-    'apiManager',
-    'appUtilsService',
-    'app.view.endpoints.clusters.cluster.cliCommands',
-    'modelUtils',
-    'organization-model'
-  ];
-
   function ClusterDetailController($stateParams, $scope, $state, $q,
-                                   modelManager, apiManager, utils, cliCommands, modelUtils, organizationModel) {
+                                   modelManager, apiManager, appUtilsService, cliCommands, modelUtils, organizationModel) {
     var that = this;
     this.guid = $stateParams.guid;
     this.cliCommands = cliCommands;
@@ -66,7 +49,7 @@
         that.totalApps += orgDetails.totalApps;
         totalMemoryMb += orgDetails.memUsed;
       });
-      that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
+      that.totalMemoryUsed = appUtilsService.mbToHumanSize(totalMemoryMb);
     };
 
     function updateFromModel() {
@@ -81,7 +64,7 @@
     }
 
     this.showCliCommands = function () {
-      cliCommands.show(utils.getClusterEndpoint(that.userService), this.userName, that.guid);
+      cliCommands.show(appUtilsService.getClusterEndpoint(that.userService), this.userName, that.guid);
     };
 
     function init() {
@@ -111,7 +94,7 @@
       return $q.resolve(that.organizations);
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
 
     function update(value) {
       // Can be `0` if user quickly navigates from the Clusters tile page

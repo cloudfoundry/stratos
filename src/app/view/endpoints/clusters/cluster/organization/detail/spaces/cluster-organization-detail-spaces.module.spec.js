@@ -20,10 +20,10 @@
       $stateParams.organization = organizationGuid;
       var $state = $injector.get('$state');
       var modelManager = $injector.get('modelManager');
-      var utils = $injector.get('appUtilsService');
+      var appUtilsService = $injector.get('appUtilsService');
 
       var ClusterDetailSpacesController = $state.get('endpoint.clusters.cluster.organization.detail.spaces').controller;
-      $controller = new ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils);
+      $controller = new ClusterDetailSpacesController($q, $stateParams, $state, modelManager, appUtilsService);
     }));
 
     afterEach(function () {

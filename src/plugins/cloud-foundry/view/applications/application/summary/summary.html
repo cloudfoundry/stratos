@@ -72,12 +72,12 @@
 
         <dt translate>MEMORY</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.memory)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.memory)}}
         </dd>
 
         <dt translate>DISK QUOTA</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
         </dd>
 
       </dl>

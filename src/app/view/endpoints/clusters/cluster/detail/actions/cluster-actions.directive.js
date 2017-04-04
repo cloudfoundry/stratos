@@ -30,10 +30,10 @@
     '$q',
     '$stateParams',
     'appUtilsService',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.userSelection',
-    'app.view.notificationsService',
+    'appUserSelection',
+    'appNotificationsService',
     'organization-model'
   ];
 
@@ -44,16 +44,16 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $stateParams - the ui-router $stateParams service
-   * @param {object} utils - our utils service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} appUtilsService - our appUtilsService service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} assignUsersService - service that allows assigning roles to users
-   * @param {object} userSelection - service centralizing user selection
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} appUserSelection - service centralizing user selection
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function ClusterActionsController(modelManager, $state, $q, $stateParams, utils, asyncTaskDialog,
-                                    assignUsersService, userSelection, notificationsService, organizationModel) {
+  function ClusterActionsController(modelManager, $state, $q, $stateParams, appUtilsService, frameworkAsyncTaskDialog,
+                                    assignUsersService, appUserSelection, appNotificationsService, organizationModel) {
     var that = this;
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -80,7 +80,7 @@
       name: gettext('Create Organization'),
       disabled: false,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Create Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
@@ -100,7 +100,7 @@
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
               return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
-                notificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
+                appNotificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
                   {name: orgData.name});
               });
             } else {
@@ -188,7 +188,7 @@
           }
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Create Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-space.html',
@@ -215,7 +215,7 @@
             }
             return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate)
               .then(function () {
-                notificationsService.notify('success', toCreate.length > 1
+                appNotificationsService.notify('success', toCreate.length > 1
                   ? gettext('Spaces \'{{names}}\' successfully created')
                   : gettext('Space \'{{name}}\' successfully created'), {name: toCreate[0], names: toCreate.join(',')});
               });
@@ -231,7 +231,7 @@
       execute: function () {
         return assignUsersService.assign({
           clusterGuid: that.clusterGuid,
-          selectedUsers: userSelection.getSelectedUsers(that.clusterGuid)
+          selectedUsers: appUserSelection.getSelectedUsers(that.clusterGuid)
         });
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
@@ -285,7 +285,7 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve(this.stateName, $state, init);
+    appUtilsService.chainStateResolve(this.stateName, $state, init);
   }
 
   UniqueSpaceName.$inject = [];

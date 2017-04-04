@@ -32,17 +32,17 @@
    * @constructor
    * @param {object} base64 - base64 service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - our utils service
+   * @param {app.utils.appUtilsService} appUtilsService - our appUtilsService service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $location - the Angular $location service
    * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationLogStreamController(base64, modelManager, utils, $stateParams, $location, $log) {
+  function ApplicationLogStreamController(base64, modelManager, appUtilsService, $stateParams, $location, $log) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var coloredLog = utils.coloredLog;
+    var coloredLog = appUtilsService.coloredLog;
 
     var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
     this.websocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +

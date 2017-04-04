@@ -30,7 +30,7 @@
     '$q'
   ];
 
-  function ClusterOrgDetailController(utils, organizationModel, $state, $stateParams, $q) {
+  function ClusterOrgDetailController(appUtilsService, organizationModel, $state, $stateParams, $q) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -43,7 +43,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
   angular.extend(ClusterOrgDetailController.prototype, {

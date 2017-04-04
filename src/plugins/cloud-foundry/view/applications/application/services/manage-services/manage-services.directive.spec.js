@@ -58,7 +58,7 @@
       it('should be defined and initialized', function () {
         expect(manageServicesCtrl).toBeDefined();
         expect(manageServicesCtrl.$q).toBeDefined();
-        expect(manageServicesCtrl.detailView).toBeDefined();
+        expect(manageServicesCtrl.frameworkDetailView).toBeDefined();
         expect(manageServicesCtrl.serviceInstanceService).toBeDefined();
         expect(manageServicesCtrl.appModel).toBeDefined();
         expect(manageServicesCtrl.modal).toBe(null);

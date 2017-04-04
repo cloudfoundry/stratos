@@ -5,16 +5,8 @@
     .module('app.view.endpoints.clusters')
     .factory('app.view.endpoints.clusters.routesService', RoutesServiceFactory);
 
-  RoutesServiceFactory.$inject = [
-    '$q',
-    '$log',
-    'modelManager',
-    'app.view.notificationsService',
-    'frameworkDialogConfirm'
-  ];
-
-  function RoutesServiceFactory($q, $log, modelManager, notificationsService, frameworkDialogConfirm) {
-    return new RoutesService($q, $log, modelManager, notificationsService, frameworkDialogConfirm);
+  function RoutesServiceFactory($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
+    return new RoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm);
   }
 
   /**
@@ -23,14 +15,14 @@
    * @param {object} $q - the angular $log service
    * @param {object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog service
    */
-  function RoutesService($q, $log, modelManager, notificationsService, frameworkDialogConfirm) {
+  function RoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
     this.$q = $q;
     this.$log = $log;
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
-    this.notificationsService = notificationsService;
+    this.appNotificationsService = appNotificationsService;
     this.frameworkDialogConfirm = frameworkDialogConfirm;
   }
 
@@ -79,7 +71,7 @@
         callback: function () {
           return that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
-              that.notificationsService.notify('success', gettext('Route successfully unmapped'));
+              that.appNotificationsService.notify('success', gettext('Route successfully unmapped'));
               deferred.resolve(1);
             })
             .catch(function (error) {
@@ -133,9 +125,9 @@
           return that.$q.all(promises)
             .then(function () {
               if (failures > 0) {
-                that.notificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
+                that.appNotificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
               } else {
-                that.notificationsService.notify('success', gettext('Route successfully unmapped'));
+                that.appNotificationsService.notify('success', gettext('Route successfully unmapped'));
               }
               deferred.resolve(appGuids.length - failures);
             }).catch(function (error) {
@@ -178,7 +170,7 @@
             async: false
           })
           .then(function () {
-            that.notificationsService.notify('success', gettext('Route successfully deleted'));
+            that.appNotificationsService.notify('success', gettext('Route successfully deleted'));
             deferred.resolve();
           })
           .catch(function (error) {

@@ -3,7 +3,7 @@
 
   describe('Assign Users test', function () {
     var assignUsersService, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
-      rolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, organizationModel;
+      appClusterRolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, organizationModel;
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';
@@ -30,7 +30,7 @@
 
       $scope = $injector.get('$rootScope').$new();
       modelManager = $injector.get('modelManager');
-      rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
+      appClusterRolesService = $injector.get('appClusterRolesService');
       $stateParams = $injector.get('$stateParams');
       organizationModel = $injector.get('organization-model');
       $q = $injector.get('$q');
@@ -54,7 +54,7 @@
         $scope: $scope,
         modelManager: modelManager,
         context: context || {},
-        rolesService: rolesService,
+        appClusterRolesService: appClusterRolesService,
         $stateParams: $stateParams,
         $q: $q,
         $timeout: $timeout,
@@ -70,7 +70,7 @@
       expect(assignUsersController).toBeDefined();
     });
 
-    it('should pass correct content spec to detailView', function () {
+    it('should pass correct content spec to frameworkDetailView', function () {
       // This will call initialiseSelect, so ensure it has all the shizzle to run
       _.set(stackatoInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
       // User services list
@@ -188,7 +188,7 @@
             _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
           });
 
-          it('should pass correct content spec to detailView', function () {
+          it('should pass correct content spec to frameworkDetailView', function () {
             // Allow all orgs
             var authModel = modelManager.retrieve('cloud-foundry.model.auth');
             spyOn(authModel, 'isOrgOrSpaceActionableByResource').and.callFake(function (inClusterguid) {
@@ -307,7 +307,7 @@
             var selectedOrgGuid = org2.details.org.metadata.guid;
             var roles = { a: 1};
 
-            spyOn(rolesService, 'assignUsers').and.callFake(function (inClusterguid, inUsersByGuid, inSelectedOrgRoles) {
+            spyOn(appClusterRolesService, 'assignUsers').and.callFake(function (inClusterguid, inUsersByGuid, inSelectedOrgRoles) {
               // Also test we get the correct input as calculated via onNext
               expect(inClusterguid).toEqual(clusterGuid);
               expect(inUsersByGuid).toEqual(_.keyBy(users, 'metadata.guid'));
@@ -327,7 +327,7 @@
           });
 
           it('roles service failure', function () {
-            spyOn(rolesService, 'assignUsers').and.callFake(function () {
+            spyOn(appClusterRolesService, 'assignUsers').and.callFake(function () {
               return $q.reject();
             });
 

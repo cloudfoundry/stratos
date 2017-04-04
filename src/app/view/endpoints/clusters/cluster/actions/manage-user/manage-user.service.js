@@ -5,38 +5,31 @@
     .module('app.view.endpoints.clusters.cluster')
     .factory('app.view.endpoints.clusters.cluster.manageUsers', ManageUsersFactory);
 
-  ManageUsersFactory.$inject = [
-    'modelManager',
-    'helion.framework.widgets.asyncTaskDialog',
-    'app.view.endpoints.clusters.cluster.rolesService',
-    'organization-model'
-  ];
-
   /**
    * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} asyncTaskDialog - our async dialog service
-   * @param {object} rolesService - our roles service, used to create/handle data from roles tables
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
+   * @param {object} appClusterRolesService - our roles service, used to create/handle data from roles tables
    * @param {object} organizationModel - the organization-model service
    */
-  function ManageUsersFactory(modelManager, asyncTaskDialog, rolesService, organizationModel) {
+  function ManageUsersFactory(modelManager, frameworkAsyncTaskDialog, appClusterRolesService, organizationModel) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var selectedRoles = {};
 
     var removeFromOrg = function (orgGuid) {
-      rolesService.clearOrg(selectedRoles[orgGuid]);
+      appClusterRolesService.clearOrg(selectedRoles[orgGuid]);
     };
 
     var containsRoles = function (orgGuid) {
-      return rolesService.orgContainsRoles(selectedRoles[orgGuid]);
+      return appClusterRolesService.orgContainsRoles(selectedRoles[orgGuid]);
     };
 
     var clearAllOrgs = function () {
-      rolesService.clearOrgs(selectedRoles);
+      appClusterRolesService.clearOrgs(selectedRoles);
     };
 
     /**
@@ -77,10 +70,10 @@
 
       // Make the actual user role changes
       var updateUsers = function () {
-        return rolesService.updateUsers(clusterGuid, users, selectedRoles);
+        return appClusterRolesService.updateUsers(clusterGuid, users, selectedRoles);
       };
 
-      return asyncTaskDialog(
+      return frameworkAsyncTaskDialog(
         {
           title: users.length < 2
             ? gettext('Manager User: ') + users[0].entity.username
@@ -98,8 +91,8 @@
           selectedRoles: selectedRoles,
           tableConfig: {
             clusterGuid: clusterGuid,
-            orgRoles: rolesService.organizationRoles,
-            spaceRoles: rolesService.spaceRoles,
+            orgRoles: appClusterRolesService.organizationRoles,
+            spaceRoles: appClusterRolesService.spaceRoles,
             users: users,
             removeFromOrg: removeFromOrg,
             containsRoles: containsRoles,

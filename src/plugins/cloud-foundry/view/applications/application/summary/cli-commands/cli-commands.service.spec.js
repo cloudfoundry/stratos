@@ -13,7 +13,7 @@
         detailViewCalled = true;
         return {rendered: $q.resolve(), result: $q.reject()};
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     beforeEach(inject(function ($injector, _$q_) {
@@ -25,7 +25,7 @@
       expect(cliCommandsFactory).toBeDefined();
     });
 
-    it('should invoke detailView', function () {
+    it('should invoke frameworkDetailView', function () {
       cliCommandsFactory.show({
         organization: {
           entity: {

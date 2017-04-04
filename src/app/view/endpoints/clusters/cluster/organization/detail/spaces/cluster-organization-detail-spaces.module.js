@@ -35,7 +35,7 @@
     'organization-model'
   ];
 
-  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils, organizationModel) {
+  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, appUtilsService, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -50,7 +50,7 @@
       return $q.resolve();
     }
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
   }
 
   angular.extend(ClusterDetailSpacesController.prototype, {

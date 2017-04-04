@@ -26,7 +26,7 @@
     '$scope',
     'modelManager',
     'appEventService',
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
@@ -38,20 +38,20 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event management service
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
    * @param {object} serviceInstanceService - the service instance service
    * @property {object} $q - the Angular $q service
-   * @property {helion.framework.widgets.detailView} detailView - the detail view service
+   * @property {frameworkDetailView} frameworkDetailView - the detail view service
    * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {object} modal - the detail view modal instance
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($q, $scope, modelManager, appEventService, detailView, serviceInstanceService) {
+  function ManageServicesController($q, $scope, modelManager, appEventService, frameworkDetailView, serviceInstanceService) {
     var that = this;
     this.$q = $q;
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.serviceInstanceService = serviceInstanceService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.modal = null;
@@ -165,7 +165,7 @@
         title: gettext('Manage Service Instances')
       };
 
-      return this.detailView(config, this);
+      return this.frameworkDetailView(config, this);
     }
   });
 

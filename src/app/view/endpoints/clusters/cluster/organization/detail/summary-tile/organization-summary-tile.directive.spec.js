@@ -59,7 +59,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
+      frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {
           content: content,
           context: context,
@@ -69,7 +69,7 @@
       frameworkDialogConfirm: function (spec) {
         return spec.callback();
       },
-      'app.view.notificationsService': {
+      appNotificationsService: {
         notify: function () {
           notificationCalled = true;
         }
@@ -147,7 +147,7 @@
         expect(controller.clusterGuid).toBe(clusterGuid);
         expect(controller.organizationGuid).toBe(organizationGuid);
         expect(controller.organization).toBeDefined();
-        expect(controller.utils).toBeDefined();
+        expect(controller.appUtilsService).toBeDefined();
         expect(controller.showCliCommands).toBeDefined();
         expect(controller.cardData).toBeDefined();
         expect(controller.getEndpoint).toBeDefined();

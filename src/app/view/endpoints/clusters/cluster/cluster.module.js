@@ -9,10 +9,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster', {
       url: '/:guid',
@@ -23,19 +19,7 @@
     });
   }
 
-  ClusterController.$inject = [
-    '$stateParams',
-    '$log',
-    'appUtilsService',
-    '$state',
-    '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
-    'modelManager',
-    'app.view.userSelection',
-    'organization-model'
-  ];
-
-  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection, organizationModel) {
+  function ClusterController($stateParams, $log, appUtilsService, $state, $q, appClusterRolesService, modelManager, appUserSelection, organizationModel) {
     var that = this;
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -44,10 +28,10 @@
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
-    userSelection.deselectAllUsers(this.guid);
+    appUserSelection.deselectAllUsers(this.guid);
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
+      return appUtilsService.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
     };
 
     function init() {
@@ -92,7 +76,7 @@
 
       orgPromise.then(function () {
         // Background load of users list
-        rolesService.listUsers(that.guid, true);
+        appClusterRolesService.listUsers(that.guid, true);
       });
 
       return $q.all([
@@ -104,7 +88,7 @@
         });
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster', $state, init);
   }
 
 })();

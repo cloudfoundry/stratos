@@ -42,14 +42,14 @@
    * @param {object} $state - the UI router $state service
    * @param  {$stateParams} $stateParams - UI Router state params
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @property {object} $q - the angular $q service
    * @property {object} $state - the UI router $state service
    * @property  {$stateParams} $stateParams - UI Router state params
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {appUtilsService} utils - the utils service
+   * @property {appUtilsService} appUtilsService - the appUtilsService service
    */
-  function ClusterTilesController($q, $state, $stateParams, modelManager, utils) {
+  function ClusterTilesController($q, $state, $stateParams, modelManager, appUtilsService) {
     var that = this;
     this.modelManager = modelManager;
 
@@ -68,7 +68,7 @@
       return that.refreshClusterModel();
     }
 
-    utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
   }
 

@@ -10,10 +10,6 @@
     .config(registerRoute)
     .run(register);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters', {
       url: '/cluster',
@@ -25,19 +21,11 @@
     });
   }
 
-  register.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appEventService',
-    'appUtilsService'
-  ];
-
-  function register($q, $state, modelManager, appEventService, utils) {
-    return new Clusters($q, $state, modelManager, appEventService, utils);
+  function register($q, $state, modelManager, appEventService, appUtilsService) {
+    return new Clusters($q, $state, modelManager, appEventService, appUtilsService);
   }
 
-  function Clusters($q, $state, modelManager, appEventService, utils) {
+  function Clusters($q, $state, modelManager, appEventService, appUtilsService) {
     var that = this;
 
     this.initialized = $q.defer();
@@ -52,7 +40,7 @@
       that.onLoggedIn();
     });
 
-    utils.chainStateResolve('endpoint.clusters', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters', $state, init);
   }
 
   angular.extend(Clusters.prototype, {

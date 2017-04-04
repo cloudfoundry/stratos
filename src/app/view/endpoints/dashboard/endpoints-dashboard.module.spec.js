@@ -61,7 +61,7 @@
         registerServiceCalled = true;
         return {rendered: $q.resolve(), result: $q.reject()};
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     afterEach(function () {
@@ -78,7 +78,7 @@
 
       modelManager = $injector.get('modelManager');
       var registerService = $injector.get('app.view.registerService');
-      var utils = $injector.get('appUtilsService');
+      var appUtilsService = $injector.get('appUtilsService');
       var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
       var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
       var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
@@ -97,7 +97,7 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, dashboardService, serviceInstanceService, vcsService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, registerService, dashboardService, serviceInstanceService, vcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

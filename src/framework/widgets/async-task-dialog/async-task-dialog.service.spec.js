@@ -25,7 +25,7 @@
 
     beforeEach(inject(function ($injector) {
       var $rootScope = $injector.get('$rootScope');
-      asynTaskDialog = $injector.get('helion.framework.widgets.asyncTaskDialog');
+      asynTaskDialog = $injector.get('frameworkAsyncTaskDialog');
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var content = {
@@ -42,7 +42,7 @@
       $rootScope.$digest();
     }));
 
-    it('asyncTaskDialog is defined as function', function () {
+    it('frameworkAsyncTaskDialog is defined as function', function () {
       expect(angular.isFunction(asynTaskDialog)).toBe(true);
     });
   });

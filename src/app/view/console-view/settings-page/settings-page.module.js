@@ -6,10 +6,6 @@
     .config(registerRoute)
     .run(register);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('account-settings', {
       url: '/account/settings',
@@ -21,11 +17,6 @@
       }
     });
   }
-
-  SettingsController.$inject = [
-    'appEventService',
-    'modelManager'
-  ];
 
   /**
    * @name SettingsController
@@ -44,11 +35,6 @@
   }
 
   angular.extend(SettingsController.prototype, {});
-
-  register.$inject = [
-    'modelManager',
-    'appEventService'
-  ];
 
   function register(modelManager, appEventService) {
     return new UserSettings(modelManager, appEventService);

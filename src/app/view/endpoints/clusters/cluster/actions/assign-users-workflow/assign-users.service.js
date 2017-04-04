@@ -6,11 +6,7 @@
     .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory)
     .controller('app.view.endpoints.clusters.cluster.assignUsersController', AssignUsersWorkflowController);
 
-  AssignUserFactory.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
-
-  function AssignUserFactory(detailView) {
+  function AssignUserFactory(frameworkDetailView) {
     return {
       /**
        * @memberof app.view.endpoints.clusters.cluster.assignUsers
@@ -19,7 +15,7 @@
        * @param {object} context - the context for the modal. Used to pass in data
        */
       assign: function (context) {
-        return detailView(
+        return frameworkDetailView(
           {
             detailViewTemplateUrl:
               'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
@@ -36,7 +32,7 @@
     '$scope',
     'modelManager',
     'context',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    'appClusterRolesService',
     'organization-model',
     '$stateParams',
     '$q',
@@ -51,7 +47,7 @@
    * @param {object} $scope - the angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
-   * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
+   * @param {object} appClusterRolesService - the console roles service. Aids in selecting, assigning and removing roles with the
    * roles table.
    * @param {object} organizationModel - the organization-model service
    * @param {object} $stateParams - the angular $stateParams service
@@ -59,7 +55,7 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController($scope, modelManager, context, rolesService, organizationModel,
+  function AssignUsersWorkflowController($scope, modelManager, context, appClusterRolesService, organizationModel,
                                          $stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
@@ -117,7 +113,7 @@
           .value();
 
         // Fetch a list of all users for this cluster
-        return rolesService.listUsers(that.data.clusterGuid)
+        return appClusterRolesService.listUsers(that.data.clusterGuid)
           .then(function (users) {
             return _.filter(users, function (user) {
               return user.entity.username;
@@ -146,7 +142,7 @@
         orgWatch = $scope.$watch(function () {
           return that.userInput.roles[org.details.guid].organization;
         }, function () {
-          rolesService.updateRoles(that.userInput.roles[org.details.guid]);
+          appClusterRolesService.updateRoles(that.userInput.roles[org.details.guid]);
         }, true);
       } else if (orgWatch) {
         orgWatch();
@@ -232,7 +228,7 @@
                 return user.metadata.guid;
               });
 
-              return rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles);
+              return appClusterRolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles);
             },
             isLastStep: true,
             actions: {
@@ -255,8 +251,8 @@
             table: {
               config: {
                 clusterGuid: context.clusterGuid,
-                orgRoles: rolesService.organizationRoles,
-                spaceRoles: rolesService.spaceRoles,
+                orgRoles: appClusterRolesService.organizationRoles,
+                spaceRoles: appClusterRolesService.spaceRoles,
                 disableOrg: true
               },
               roles: that.userInput.roles

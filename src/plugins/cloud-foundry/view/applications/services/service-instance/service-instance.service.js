@@ -10,8 +10,8 @@
     '$interpolate',
     '$q',
     'modelManager',
-    'app.view.notificationsService',
-    'helion.framework.widgets.detailView',
+    'appNotificationsService',
+    'frameworkDetailView',
     'frameworkDialogConfirm'
   ];
 
@@ -23,12 +23,12 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog
    * @returns {object} A service instance factory
    */
-  function serviceInstanceFactory($log, $interpolate, $q, modelManager, notificationsService, detailView,
+  function serviceInstanceFactory($log, $interpolate, $q, modelManager, appNotificationsService, frameworkDetailView,
                                   frameworkDialogConfirm) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -117,9 +117,9 @@
             return $q.all(promises)
               .then(function () {
                 if (failedCount > 0) {
-                  notificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
+                  appNotificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
                 } else {
-                  notificationsService.notify('success', gettext('Service instance successfully detached'));
+                  appNotificationsService.notify('success', gettext('Service instance successfully detached'));
                 }
 
                 if (angular.isDefined(callbackFunc)) {
@@ -173,7 +173,7 @@
             };
             return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params)
               .then(function () {
-                notificationsService.notify('success', gettext('Service instance successfully deleted'));
+                appNotificationsService.notify('success', gettext('Service instance successfully deleted'));
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
@@ -213,7 +213,7 @@
               var context = {
                 variables: instanceVars
               };
-              detailView(config, context);
+              frameworkDetailView(config, context);
             }
           });
       }

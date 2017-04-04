@@ -24,9 +24,9 @@
       var modelManager = $injector.get('modelManager');
       appEventService = $injector.get('appEventService');
       var errorService = $injector.get('appErrorService');
-      var utils = $injector.get('appUtilsService');
+      var appUtilsService = $injector.get('appUtilsService');
       var organizationModel = $injector.get('organization-model');
-      var detailView = $injector.get('helion.framework.widgets.detailView');
+      var frameworkDetailView = $injector.get('frameworkDetailView');
       var $window = $injector.get('$window');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, utils, detailView, organizationModel);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, organizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');

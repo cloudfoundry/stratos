@@ -10,10 +10,10 @@
     .factory('triggerBuildDetailView', triggerBuildDetailView);
 
   triggerBuildDetailView.$inject = [
-    'helion.framework.widgets.detailView'
+    'frameworkDetailView'
   ];
 
-  function triggerBuildDetailView(detailView) {
+  function triggerBuildDetailView(frameworkDetailView) {
     return {
       /**
        * @function open
@@ -24,7 +24,7 @@
        * @public
        **/
       open: function (project, cnsiGuid) {
-        return detailView({
+        return frameworkDetailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
           title: gettext('Select a Commit'),
           controller: TriggerBuildsDetailViewController
@@ -53,8 +53,8 @@
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
    * @param {object} $q - the angular $q service
    * @param {object} vcsTokenManager - the VCS token manager
-   * @param {object} context - parameter object passed in to DetailView
-   * @param {object} content - configuration object passed in to DetailView
+   * @param {object} context - parameter object passed in to frameworkDetailView
+   * @param {object} content - configuration object passed in to frameworkDetailView
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager) {

@@ -33,7 +33,7 @@
     'frameworkDialogConfirm',
     'appUtilsService',
     'cloud-foundry.view.applications.application.summary.cliCommands',
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     '$stateParams',
     '$scope',
     '$window',
@@ -49,9 +49,9 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} frameworkDialogConfirm - the confirm dialog service
-   * @param {object} utils - the utils service
+   * @param {object} appUtilsService - the appUtilsService service
    * @param {object} cliCommands - the cliCommands dialog service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
@@ -70,7 +70,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -79,7 +79,7 @@
     this.$interpolate = $interpolate;
     this.appEventService = appEventService;
     this.confirmDialog = frameworkDialogConfirm;
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -99,7 +99,7 @@
     that.hideVariables = true;
     that.hideDeliveryPipelineData = true;
     // Wait for parent state to be fully initialised
-    utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
+    appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
     // When a modal interaction starts, stop the background polling
     this.removeModalStartListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_START, function () {
@@ -445,7 +445,7 @@
     },
 
     complexDeleteAppDialog: function (guids) {
-      this.detailView(
+      this.frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')

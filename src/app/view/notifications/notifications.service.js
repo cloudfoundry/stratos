@@ -3,7 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.notificationsService', notificationsFactory);
+    .factory('appNotificationsService', notificationsFactory);
 
   notificationsFactory.$inject = [
     '$interpolate',
@@ -24,7 +24,7 @@
     var service = {
       /**
        * @function notify
-       * @memberof app.view.notificationsService
+       * @memberof appNotificationsService
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message

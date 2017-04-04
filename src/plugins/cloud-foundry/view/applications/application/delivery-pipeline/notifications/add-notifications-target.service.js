@@ -7,14 +7,14 @@
     .controller('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationTargetController', AddNotificationTargetController);
 
   AddNotificationTargetServiceFactory.$inject = [
-    'helion.framework.widgets.detailView'
+    'frameworkDetailView'
   ];
 
-  function AddNotificationTargetServiceFactory(detailView) {
+  function AddNotificationTargetServiceFactory(frameworkDetailView) {
 
     return {
       add: function () {
-        return detailView(
+        return frameworkDetailView(
           {
             controller: AddNotificationTargetController,
             controllerAs: 'addNotificationTargetCtrl',

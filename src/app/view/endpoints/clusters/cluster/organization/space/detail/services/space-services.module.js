@@ -36,7 +36,7 @@
   ];
 
   function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,
-                                   utils) {
+                                   appUtilsService) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -67,7 +67,7 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
   }
 
   angular.extend(SpaceServicesController.prototype, {

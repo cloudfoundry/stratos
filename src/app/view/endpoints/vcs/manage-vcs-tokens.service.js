@@ -10,9 +10,9 @@
     '$timeout',
     'PAT_DELIMITER',
     'modelManager',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'frameworkDialogConfirm',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'app.view.vcs.registerVcsToken',
     'app.view.vcs.editVcsToken'
   ];
@@ -24,14 +24,14 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {app.model.modelManager} modelManager The console model manager service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm The framework confirmation dialog
-   * @param {app.view.notificationsService} notificationsService The toasts notifications service
+   * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {app.view.registerVcsToken} registerVcsToken Service to register new VCS tokens
    * @param {app.view.editVcsToken} editVcsToken Service to rename VCS tokens
    * @returns {object} The ManageVcsTokensService with a manage method that opens slide out containing the manage tokens UI
    */
-  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, asyncTaskDialog, frameworkDialogConfirm, notificationsService, registerVcsToken, editVcsToken) {
+  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog, frameworkDialogConfirm, appNotificationsService, registerVcsToken, editVcsToken) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
@@ -73,7 +73,7 @@
         if (newName === oldName) {
           return;
         }
-        notificationsService.notify('success', gettext("Personal Access Token '{{ name }}' successfully renamed to '{{ newName }}'"),
+        appNotificationsService.notify('success', gettext("Personal Access Token '{{ name }}' successfully renamed to '{{ newName }}'"),
           {
             name: oldName,
             newName: newName
@@ -97,7 +97,7 @@
         callback: function () {
           return vcsModel.deleteVcsToken(token.token.guid)
             .then(function () {
-              notificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
+              appNotificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
                 {name: token.token.name});
               // After a successful delete, no need to fetch as the cache is already up to date
               return context.refreshTokens(false);
@@ -168,7 +168,7 @@
         // Refresh before managing
         return context.refreshTokens(true).then(function () {
 
-          return asyncTaskDialog(
+          return frameworkAsyncTaskDialog(
             {
               title: gettext(title),
               templateUrl: 'app/view/endpoints/vcs/manage-vcs-tokens.html',

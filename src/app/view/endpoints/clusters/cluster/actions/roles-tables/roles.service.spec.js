@@ -3,7 +3,7 @@
 
   describe('roles service', function () {
 
-    var $httpBackend, rolesService, modelManager, $uibModal, $q, organizationModel, spaceModel, authModel, testModelOrg,
+    var $httpBackend, appClusterRolesService, modelManager, $uibModal, $q, organizationModel, spaceModel, authModel, testModelOrg,
       testModelSpace;
 
     var clusterGuid = 'clusterGuid';
@@ -70,7 +70,7 @@
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
+      appClusterRolesService = $injector.get('appClusterRolesService');
       modelManager = $injector.get('modelManager');
       $uibModal = $injector.get('$uibModal');
       $q = $injector.get('$q');
@@ -103,20 +103,20 @@
     });
 
     it('should be defined', function () {
-      expect(rolesService).toBeDefined();
-      expect(rolesService.canRemoveOrgRole).toBeDefined();
-      expect(rolesService.removeOrgRole).toBeDefined();
-      expect(rolesService.removeSpaceRole).toBeDefined();
-      expect(rolesService.removeAllRoles).toBeDefined();
-      expect(rolesService.removeFromOrganization).toBeDefined();
-      expect(rolesService.removeFromSpace).toBeDefined();
-      expect(rolesService.assignUsers).toBeDefined();
-      expect(rolesService.updateUsers).toBeDefined();
-      expect(rolesService.clearOrg).toBeDefined();
-      expect(rolesService.clearOrgs).toBeDefined();
-      expect(rolesService.orgContainsRoles).toBeDefined();
-      expect(rolesService.updateRoles).toBeDefined();
-      expect(rolesService.listUsers).toBeDefined();
+      expect(appClusterRolesService).toBeDefined();
+      expect(appClusterRolesService.canRemoveOrgRole).toBeDefined();
+      expect(appClusterRolesService.removeOrgRole).toBeDefined();
+      expect(appClusterRolesService.removeSpaceRole).toBeDefined();
+      expect(appClusterRolesService.removeAllRoles).toBeDefined();
+      expect(appClusterRolesService.removeFromOrganization).toBeDefined();
+      expect(appClusterRolesService.removeFromSpace).toBeDefined();
+      expect(appClusterRolesService.assignUsers).toBeDefined();
+      expect(appClusterRolesService.updateUsers).toBeDefined();
+      expect(appClusterRolesService.clearOrg).toBeDefined();
+      expect(appClusterRolesService.clearOrgs).toBeDefined();
+      expect(appClusterRolesService.orgContainsRoles).toBeDefined();
+      expect(appClusterRolesService.updateRoles).toBeDefined();
+      expect(appClusterRolesService.listUsers).toBeDefined();
     });
 
     function expectChangeOrgRole(add, role) {
@@ -154,7 +154,7 @@
     describe('canRemoveOrgRole', function () {
 
       it('can remove roles other than org_user ', function () {
-        expect(rolesService.canRemoveOrgRole(roleNames.org.org_manager, clusterGuid, orgGuid, userGuid)).toBeTruthy();
+        expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_manager, clusterGuid, orgGuid, userGuid)).toBeTruthy();
       });
 
       it('cannot remove role if non-org_user roles exist', function () {
@@ -164,7 +164,7 @@
 
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid, {});
-        expect(rolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
+        expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
       });
 
       it('cannot remove role if user has space roles', function () {
@@ -177,7 +177,7 @@
 
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, testModelSpace);
-        expect(rolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
+        expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
       });
 
       it('can remove role if user has no space roles', function () {
@@ -189,7 +189,7 @@
 
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, testModelSpace);
-        expect(rolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeTruthy();
+        expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeTruthy();
       });
 
     });
@@ -215,7 +215,7 @@
 
         expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
 
-        rolesService.removeOrgRole(clusterGuid, orgGuid, user, roleNames.org.org_user)
+        appClusterRolesService.removeOrgRole(clusterGuid, orgGuid, user, roleNames.org.org_user)
           .then(function () {
             expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
           })
@@ -250,7 +250,7 @@
 
         expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([roleNames.space.space_developer]);
 
-        rolesService.removeSpaceRole(clusterGuid, orgGuid, spaceGuid, user, roleNames.space.space_developer)
+        appClusterRolesService.removeSpaceRole(clusterGuid, orgGuid, spaceGuid, user, roleNames.space.space_developer)
           .then(function () {
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([]);
           })
@@ -306,7 +306,7 @@
         _.set(newRoles, orgGuid + '.organization.' + roleNames.org.org_user, true);
         _.set(newRoles, orgGuid + '.spaces.' + spaceGuid + '.' + roleNames.space.space_developer, true);
 
-        rolesService.assignUsers(clusterGuid, selectedUsers, newRoles)
+        appClusterRolesService.assignUsers(clusterGuid, selectedUsers, newRoles)
           .then(function () {
             expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([roleNames.space.space_developer]);
@@ -356,7 +356,7 @@
         _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, testModelSpace);
         expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([roleNames.space.space_developer]);
 
-        rolesService.removeAllRoles(clusterGuid, [user])
+        appClusterRolesService.removeAllRoles(clusterGuid, [user])
           .then(function () {
             expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([]);
@@ -394,7 +394,7 @@
 
         expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user, roleNames.org.org_manager]);
 
-        rolesService.removeFromOrganization(clusterGuid, orgGuid, [user])
+        appClusterRolesService.removeFromOrganization(clusterGuid, orgGuid, [user])
           .then(function () {
             expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
           })
@@ -436,7 +436,7 @@
 
         expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([roleNames.space.space_developer, roleNames.space.space_manager]);
 
-        rolesService.removeFromSpace(clusterGuid, orgGuid, spaceGuid, [user])
+        appClusterRolesService.removeFromSpace(clusterGuid, orgGuid, spaceGuid, [user])
           .then(function () {
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([]);
           })
@@ -469,9 +469,9 @@
           return thisCall;
         });
 
-        expect(rolesService.listUsers(clusterGuid)).toEqual(promiseForUsers);
-        expect(rolesService.listUsers(clusterGuid, false)).toEqual(promiseForUsers);
-        expect(rolesService.listUsers(clusterGuid, true)).not.toEqual(promiseForUsers);
+        expect(appClusterRolesService.listUsers(clusterGuid)).toEqual(promiseForUsers);
+        expect(appClusterRolesService.listUsers(clusterGuid, false)).toEqual(promiseForUsers);
+        expect(appClusterRolesService.listUsers(clusterGuid, true)).not.toEqual(promiseForUsers);
       });
 
       it('user is not admin', function () {
@@ -498,13 +498,13 @@
           return $q.resolve([ clonedUser ]);
         });
 
-        rolesService.listUsers(clusterGuid).then(function (inUsers) {
+        appClusterRolesService.listUsers(clusterGuid).then(function (inUsers) {
           expect(inUsers).toEqual(users);
         });
-        rolesService.listUsers(clusterGuid, false).then(function (inUsers) {
+        appClusterRolesService.listUsers(clusterGuid, false).then(function (inUsers) {
           expect(inUsers).toEqual(users);
         });
-        rolesService.listUsers(clusterGuid, true).then(function (inUsers) {
+        appClusterRolesService.listUsers(clusterGuid, true).then(function (inUsers) {
           expect(inUsers).not.toEqual(users);
         });
 

@@ -31,11 +31,11 @@
         $stateParams.organization = organizationGuid;
         var $q = $injector.get('$q');
         var modelManager = $injector.get('modelManager');
-        var utils = $injector.get('appUtilsService');
+        var appUtilsService = $injector.get('appUtilsService');
         var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
-        var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
+        var appClusterRolesService = $injector.get('appClusterRolesService');
         var appEventService = $injector.get('appEventService');
-        var userSelection = $injector.get('app.view.userSelection');
+        var appUserSelection = $injector.get('appUserSelection');
         var organizationModel = $injector.get('organization-model');
 
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, { details: {guid: organizationGuid } });
@@ -58,8 +58,8 @@
         }
 
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
-        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, appEventService, userSelection, organizationModel);
+        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+          appClusterRolesService, appEventService, appUserSelection, organizationModel);
       }
 
       describe('as admin', function () {
@@ -129,7 +129,7 @@
 
     describe('Standard user table tests', function () {
 
-      var $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService, appEventService, userSelection, orgModel;
+      var $state, $stateParams, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService, appEventService, appUserSelection, orgModel;
 
       var users = [
         {
@@ -218,8 +218,8 @@
 
       function createController() {
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
-        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-          rolesService, appEventService, userSelection, orgModel);
+        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+          appClusterRolesService, appEventService, appUserSelection, orgModel);
       }
 
       beforeEach(inject(function ($injector) {
@@ -231,11 +231,11 @@
         $stateParams.organization = organizationGuid;
         $q = $injector.get('$q');
         modelManager = $injector.get('modelManager');
-        utils = $injector.get('appUtilsService');
+        appUtilsService = $injector.get('appUtilsService');
         manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
-        rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
+        appClusterRolesService = $injector.get('appClusterRolesService');
         appEventService = $injector.get('appEventService');
-        userSelection = $injector.get('app.view.userSelection');
+        appUserSelection = $injector.get('appUserSelection');
         orgModel = $injector.get('organization-model');
 
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -263,7 +263,7 @@
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
         _.set(spaceModel, 'spaces.' + clusterGuid, spaces);
 
-        spyOn(rolesService, 'listUsers').and.callFake(function (inClusterGuid) {
+        spyOn(appClusterRolesService, 'listUsers').and.callFake(function (inClusterGuid) {
           expect(inClusterGuid).toEqual(clusterGuid);
           return $q.resolve(users);
         });
@@ -387,7 +387,7 @@
         expect($controller.userActions[0].execute(users[0])).toBeDefined();
 
         // Remove from org
-        spyOn(rolesService, 'removeFromOrganization').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterRolesService, 'removeFromOrganization').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[0]]);
@@ -425,7 +425,7 @@
         $controller.selectedUsers[users[0].metadata.guid] = true;
         $controller.selectedUsers[users[1].metadata.guid] = false;
 
-        spyOn(rolesService, 'removeFromOrganization').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterRolesService, 'removeFromOrganization').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[0]]);
@@ -442,15 +442,15 @@
 
         delete $controller.selectAllUsers;
 
-        spyOn(userSelection, 'selectUsers');
-        spyOn(userSelection, 'deselectAllUsers').and.callFake(function (inClusterGuid) {
+        spyOn(appUserSelection, 'selectUsers');
+        spyOn(appUserSelection, 'deselectAllUsers').and.callFake(function (inClusterGuid) {
           expect(inClusterGuid).toEqual(clusterGuid);
         });
 
         $controller.selectAllChanged();
 
-        expect(userSelection.selectUsers).not.toHaveBeenCalled();
-        expect(userSelection.deselectAllUsers).toHaveBeenCalled();
+        expect(appUserSelection.selectUsers).not.toHaveBeenCalled();
+        expect(appUserSelection.deselectAllUsers).toHaveBeenCalled();
 
       });
 
@@ -458,15 +458,15 @@
         createController();
         $scope.$digest();
 
-        spyOn(userSelection, 'selectUsers').and.callFake(function (inClusterGuid) {
+        spyOn(appUserSelection, 'selectUsers').and.callFake(function (inClusterGuid) {
           expect(inClusterGuid).toEqual(clusterGuid);
         });
-        spyOn(userSelection, 'deselectAllUsers');
+        spyOn(appUserSelection, 'deselectAllUsers');
 
         $controller.selectAllChanged();
 
-        expect(userSelection.selectUsers).toHaveBeenCalled();
-        expect(userSelection.deselectAllUsers).not.toHaveBeenCalled();
+        expect(appUserSelection.selectUsers).toHaveBeenCalled();
+        expect(appUserSelection.deselectAllUsers).not.toHaveBeenCalled();
 
       });
 

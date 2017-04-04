@@ -33,14 +33,14 @@
     'modelManager',
     'appUtilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    'appClusterRolesService',
     'appEventService',
-    'app.view.userSelection',
+    'appUserSelection',
     'organization-model'
   ];
 
-  function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers, rolesService,
-                                appEventService, userSelection, organizationModel) {
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService,
+                                appEventService, appUserSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -53,11 +53,11 @@
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.rolesService = rolesService;
+    this.appClusterRolesService = appClusterRolesService;
 
     this.userRoles = {};
 
-    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.selectedUsers = appUserSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
@@ -89,12 +89,12 @@
     }
 
     var debouncedUpdateSelection = _.debounce(function () {
-      userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
+      appUserSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
     }, 100);
 
     function refreshAllSelected() {
-      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+      that.selectAllUsers = appUserSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
         // Ignore system users
         return user.entity.username;
       }));
@@ -156,7 +156,7 @@
       name: gettext('Remove from Organization'),
       disabled: true,
       execute: function (aUser) {
-        return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
+        return appClusterRolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
           [aUser]);
       }
     };
@@ -164,7 +164,7 @@
       name: gettext('Remove from Space'),
       disabled: true,
       execute: function (aUser) {
-        return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
+        return appClusterRolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
           that.space.details.space.metadata.guid, [aUser]);
       }
     };
@@ -205,7 +205,7 @@
         refreshAllSelected();
       });
 
-      return rolesService.listUsers(that.guid)
+      return appClusterRolesService.listUsers(that.guid)
         .then(function (users) {
           that.users = users;
         })
@@ -221,12 +221,12 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+        appUserSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
           // Never select system users
           return user.entity.username;
         }));
       } else {
-        userSelection.deselectAllUsers(that.guid);
+        appUserSelection.deselectAllUsers(that.guid);
       }
     };
 
@@ -237,7 +237,7 @@
         return;
       }
       this.removingSpace[pillKey] = true;
-      rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
+      appClusterRolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
         .finally(function () {
           that.removingSpace[pillKey] = false;
         });
@@ -260,12 +260,12 @@
 
     this.removeFromOrganization = function () {
       var space = that.space.details.space;
-      return rolesService.removeFromOrganization(that.guid, space.entity.organization_guid, guidsToUsers());
+      return appClusterRolesService.removeFromOrganization(that.guid, space.entity.organization_guid, guidsToUsers());
     };
 
     this.removeFromSpace = function () {
       var space = that.space.details.space;
-      return rolesService.removeFromSpace(that.guid, space.entity.organization_guid, space.metadata.guid,
+      return appClusterRolesService.removeFromSpace(that.guid, space.entity.organization_guid, space.metadata.guid,
         guidsToUsers());
     };
 
@@ -274,7 +274,7 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);
 
     $scope.$on('$destroy', rolesUpdatedListener);
   }

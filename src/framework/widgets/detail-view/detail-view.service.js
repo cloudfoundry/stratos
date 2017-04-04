@@ -2,10 +2,10 @@
   'use strict';
 
   /**
-   * @name helion.framework.widgets.detailView
+   * @name frameworkDetailView
    * @example:
    *  ```
-   *  detailView({
+   *  frameworkDetailView({
    *    title: 'Detail View Title',
    *    templateUrl: 'html/template/path.html'
    *    },
@@ -17,7 +17,7 @@
   angular
     .module('helion.framework.widgets')
     .directive('detailViewTemplate', detailViewTemplate)
-    .factory('helion.framework.widgets.detailView', serviceFactory);
+    .factory('frameworkDetailView', serviceFactory);
 
   serviceFactory.$inject = [
     '$uibModal',
@@ -32,9 +32,9 @@
 
     var openDetailViewCount = 0;
 
-    return detailView;
+    return frameworkDetailView;
 
-    function detailView(config, context) {
+    function frameworkDetailView(config, context) {
       var needGlass = openDetailViewCount === 0;
       var element = $document[0].createElement('div');
       var body = angular.element($document[0].body);

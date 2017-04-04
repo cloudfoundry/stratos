@@ -6,7 +6,7 @@
     .factory('cloud-foundry.view.applications.application.summary.cliCommands', CliCommandsFactory);
 
   CliCommandsFactory.$inject = [
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     'appUtilsService'
   ];
 
@@ -15,10 +15,10 @@
    * @name CliCommandsFactory
    * @description Factory to provide a way to show the cli commands for App Summary
    * @constructor
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
-   * @param {object} utils - Utils service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
+   * @param {object} appUtilsService - appUtilsService service
    */
-  function CliCommandsFactory(detailView, utils) {
+  function CliCommandsFactory(frameworkDetailView, appUtilsService) {
 
     return {
       /**
@@ -33,13 +33,13 @@
       show: function (appModel, username) {
         var incomplete = appModel.state && appModel.state.label === 'Incomplete';
         var templateName = incomplete ? 'cli-commands-deploy.html' : 'cli-commands.html';
-        return detailView(
+        return frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/' + templateName,
             title: incomplete ? gettext('Deploy Using CLI') : gettext('CLI Commands')
           },
           {
-            apiEndpoint: utils.getClusterEndpoint(appModel.cluster),
+            apiEndpoint: appUtilsService.getClusterEndpoint(appModel.cluster),
             orgName: appModel.organization.entity.name,
             spaceName: appModel.space.entity.name,
             appName: appModel.summary.name,

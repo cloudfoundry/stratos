@@ -15,7 +15,7 @@
     '$location',
     'appEventService',
     'modelManager',
-    'app.view.notificationsService'
+    'appNotificationsService'
   ];
 
   function register($state, $location, appEventService, modelManager, notificationService) {

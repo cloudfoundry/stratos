@@ -71,7 +71,7 @@
       expect(addNotificationTargetController).toBeDefined();
     });
 
-    it('should pass correct content spec to detailView', function () {
+    it('should pass correct content spec to frameworkDetailView', function () {
       var modalObj = addNotificationTargetService.add();
       expect(modalObj.opened).toBeDefined();
     });

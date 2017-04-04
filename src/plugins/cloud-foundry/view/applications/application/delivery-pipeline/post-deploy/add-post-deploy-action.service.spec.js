@@ -7,7 +7,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
+      frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {
           content: content,
           context: context,
@@ -38,7 +38,7 @@
       expect(postDeployActionFactory).toBeDefined();
     });
 
-    it('should pass correct content spec to asyncTaskDialog', function () {
+    it('should pass correct content spec to frameworkAsyncTaskDialog', function () {
       var modalObj = postDeployActionFactory.add(hceCnsi, hceProjectId);
       expect(modalObj.content.title).toBeDefined();
       expect(modalObj.content.templateUrl).toBeDefined();

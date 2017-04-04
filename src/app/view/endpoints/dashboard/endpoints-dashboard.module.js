@@ -41,14 +41,14 @@
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {appUtilsService} utilsService - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.registerService} registerService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints
    * @param {app.view.endpoints.dashboard.vcsService} vcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
+  function EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, registerService,
                                         dashboardService, cnsiService, vcsService) {
     var that = this;
 
@@ -152,7 +152,7 @@
       });
     }
 
-    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+    appUtilsService.chainStateResolve('endpoint.dashboard', $state, init);
 
     function _updateWelcomeMessage() {
       // Show the welcome message if either...

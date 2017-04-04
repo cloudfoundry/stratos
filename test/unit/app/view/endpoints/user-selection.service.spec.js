@@ -30,7 +30,7 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      usersSelection = $injector.get('app.view.userSelection');
+      usersSelection = $injector.get('appUserSelection');
       $httpBackend = $injector.get('$httpBackend');
     }));
 

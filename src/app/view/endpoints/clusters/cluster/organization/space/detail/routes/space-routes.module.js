@@ -35,7 +35,7 @@
     'appUtilsService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, appUtilsService) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -68,7 +68,7 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
   }
 
   angular.extend(SpaceRoutesController.prototype, {

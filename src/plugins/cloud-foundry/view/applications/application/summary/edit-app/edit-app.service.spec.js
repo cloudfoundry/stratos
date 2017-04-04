@@ -10,7 +10,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
+      frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {
           content: content,
           context: context,

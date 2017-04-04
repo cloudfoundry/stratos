@@ -3,21 +3,10 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.rolesService', RolesService);
-
-  RolesService.$inject = [
-    '$log',
-    '$q',
-    '$interpolate',
-    'modelManager',
-    'appEventService',
-    'app.view.notificationsService',
-    'frameworkDialogConfirm',
-    'organization-model'
-  ];
+    .factory('appClusterRolesService', appClusterRolesService);
 
   /**
-   * @name RolesService
+   * @name appClusterRolesService
    * @description Service to handle the data required/created by roles tables. This includes the ability to reach out
    * and update HCF roles. Covers functionality used by Assign/Manage/Change users slide outs and Users tables.
    * @constructor
@@ -26,7 +15,7 @@
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
@@ -45,8 +34,8 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, $interpolate,
-                        modelManager, appEventService, notificationsService, frameworkDialogConfirm, organizationModel) {
+  function appClusterRolesService($log, $q, $interpolate,
+                        modelManager, appEventService, appNotificationsService, frameworkDialogConfirm, organization-model) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -143,7 +132,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.removeOrgRole
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.removeOrgRole
      * @description Remove user from a specific organization role
      * @param {string} clusterGuid - HCF service guid
      * @param {string} orgGuid - the organizations guid
@@ -163,7 +152,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.removeSpaceRole
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.removeSpaceRole
      * @description Remove user from a specific space role
      * @param {string} clusterGuid - HCF service guid
      * @param {string} orgGuid - the organizations guid
@@ -184,7 +173,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.removeAllRoles
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.removeAllRoles
      * @description Remove users from all organizations and spaces in a cluster
      * @param {string} clusterGuid - HCF service guid
      * @param {Array} users - Array of HCF user objects to be removed from the space
@@ -204,7 +193,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.removeFromOrganization
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.removeFromOrganization
      * @description Remove users from an organization and it's spaces
      * @param {string} clusterGuid - HCF service guid
      * @param {string} orgGuid - the organizations guid
@@ -225,7 +214,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.removeFromSpace
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.removeFromSpace
      * @description Remove users from a space
      * @param {string} clusterGuid - HCF service guid
      * @param {string} orgGuid - the organizations guid
@@ -251,7 +240,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.assignUsers
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.assignUsers
      * @description Assign organization and space roles for the users supplied. does not cover
      * removing roles. If successful refresh the cache of the affected organizations and spaces
      * @param {string} clusterGuid - HCF service guid
@@ -294,7 +283,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.updateUsers
      * @description Update (assign or remove) organization and space roles for the users supplied
      * @param {string} clusterGuid - HCF service guid
      * @param {Array} selectedUsers - collection of users to apply roles to
@@ -311,7 +300,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrg
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.clearOrg
      * @description Clear the organisation + space roles of the organization provided
      * @param {object} org - organization to clear. Format as below.
      *  organization[roleKey] = truthy
@@ -325,7 +314,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrgs
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.clearOrgs
      * @description clearOrgs Clear all organisation and their space roles from the selection provided
      * @param {object} orgs - object organization to clear. Format as below.
      *  [orgGuid]organization[roleKey] = truthy
@@ -339,7 +328,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.orgContainsRoles
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.orgContainsRoles
      * @description Determine if the organisation provided and it's spaces has any roles selected
      * @param {object} org - organization to test. Format as below.
      *  organization[roleKey] = truthy
@@ -376,7 +365,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateRoles
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.updateRoles
      * @description Ensure that the provided roles pass org_user rules. Specifically user must be org_user if any other
      * role is assigned
      * @param {object} roles - roles to check. Format as below.
@@ -394,7 +383,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.listUsers
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.listUsers
      * @description Fetch a list of users in all organizations the connected user can see. For a cluster admin this is
      * done in a single call to listAllUsers, for non-cluster admin this is done via a call to each organization they
      * can see
@@ -656,7 +645,7 @@
     }
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsersOrgsAndSpaces
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.updateUsersOrgsAndSpaces
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
      * the affected organizations and spaces.
      * IMPORTANT!!!!!! This is the conduit for changes that all external calls should flow through. It gates the process
@@ -677,7 +666,7 @@
       var delta = rolesDelta(oldRolesByUser, newRolesByUser, clusterGuid);
 
       if (!delta) {
-        notificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));
+        appNotificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));
         that.changingRoles = false;
         return $q.reject();
       }
@@ -722,7 +711,7 @@
               return $q.reject(errorMessage);
             } else {
               // Otherwise notify success, hurrah
-              notificationsService.notify('success', confirmationConfig.successMessage);
+              appNotificationsService.notify('success', confirmationConfig.successMessage);
             }
           });
       };
@@ -733,7 +722,7 @@
     }
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgsAndSpaces
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.updateUserOrgsAndSpaces
      * @description As per updateUsersOrgsAndSpaces, except for a single user. This should not be called separately only
      * via updateUsersOrgsAndSpaces.
      * @param {string} clusterGuid - HCF service guid
@@ -754,7 +743,7 @@
     }
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgAndSpaces
+     * @name app.view.endpoints.clusters.cluster.appClusterRolesService.updateUserOrgAndSpaces
      * @description As per updateUserOrgsAndSpaces, except for a single org. This should not be called separately only
      * via updateUsersOrgsAndSpaces.
      * @param {string} clusterGuid - HCF service guid

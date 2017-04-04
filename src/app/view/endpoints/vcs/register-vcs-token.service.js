@@ -7,8 +7,8 @@
 
   RegisterVcsTokenService.$inject = [
     '$q',
-    'helion.framework.widgets.asyncTaskDialog',
-    'app.view.notificationsService',
+    'frameworkAsyncTaskDialog',
+    'appNotificationsService',
     'modelManager'
   ];
 
@@ -16,12 +16,12 @@
    * @name RegisterVcsTokenService
    * @description Register token for a VCS
    * @param {object} $q - the Angular $q service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
-   * @param {app.view.notificationsService} notificationsService - the Console toast notification service
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
+   * @param {app.view.appNotificationsService} appNotificationsService - the Console toast notification service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @returns {object} The RegisterVcsTokenService with an registerToken method that opens slide out containing the register form
    */
-  function RegisterVcsTokenService($q, asyncTaskDialog, notificationsService, modelManager) {
+  function RegisterVcsTokenService($q, frameworkAsyncTaskDialog, appNotificationsService, modelManager) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -48,7 +48,7 @@
           tokenNames: tokenNames
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Register a GitHub Personal Access Token'),
             templateUrl: 'app/view/endpoints/vcs/register-vcs-token.html',
@@ -62,7 +62,7 @@
           function (data) {
             return vcsModel.registerVcsToken(vcs.guid, data.name, data.value)
               .then(function () {
-                notificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully registered'),
+                appNotificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully registered'),
                   {name:  data.name});
               }, function (res) {
                 if (res.status < 500) {

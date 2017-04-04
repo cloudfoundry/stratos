@@ -53,7 +53,7 @@
     'modelManager'
   ];
 
-  function ServiceManagerServiceDetailController($stateParams, $state, $q, utils, modelManager) {
+  function ServiceManagerServiceDetailController($stateParams, $state, $q, appUtilsService, modelManager) {
     var that = this;
 
     this.initialized = false;
@@ -64,7 +64,7 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.endpoint);
+      return appUtilsService.getClusterEndpoint(that.endpoint);
     };
 
     var guid = $state.params.guid;
@@ -92,7 +92,7 @@
       });
     }
 
-    utils.chainStateResolve('sm.endpoint.service.detail', $state, init);
+    appUtilsService.chainStateResolve('sm.endpoint.service.detail', $state, init);
   }
 
 })();

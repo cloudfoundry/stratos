@@ -7,17 +7,17 @@
     .controller('HceSelectController', HceSelectController);
 
   hceSelectFactory.$inject = [
-    'helion.framework.widgets.detailView'
+    'frameworkDetailView'
   ];
 
   /**
    * @function hceSelectFactory
    * @memberof cloud-foundry.view.applications.application.delivery-pipeline
    * @description HCE Selection modal dialog factory
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
    * @constructor
    */
-  function hceSelectFactory(detailView) {
+  function hceSelectFactory(frameworkDetailView) {
     return {
 
       /**
@@ -30,7 +30,7 @@
        */
       show: function (hceCnsis, selectedHceCnsi) {
 
-        return detailView(
+        return frameworkDetailView(
           {
             controller: HceSelectController,
             controllerAs: 'HceSelectCtrl',

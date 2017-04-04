@@ -38,7 +38,7 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
@@ -46,7 +46,7 @@
    * @property {object} cardData - gallery-card directive data object
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    */
-  function ClusterTileController($scope, $state, modelManager, apiManager, utils, modelUtils) {
+  function ClusterTileController($scope, $state, modelManager, apiManager, appUtilsService, modelUtils) {
     var that = this;
 
     this.$state = $state;
@@ -99,7 +99,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
   }
 
   angular.extend(ClusterTileController.prototype, {

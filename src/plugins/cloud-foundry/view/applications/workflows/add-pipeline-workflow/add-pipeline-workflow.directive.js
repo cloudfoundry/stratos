@@ -44,7 +44,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
@@ -52,17 +52,17 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.utils.appEventService} appEventService - the Event management service
-   * @property {appUtilsService} utils - the utils service
+   * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, appEventService, utils, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.appEventService = appEventService;
-    this.utils = utils;
+    this.appUtilsService = appUtilsService;
     this.manageVcsTokens = manageVcsTokens;
     this.$scope = $scope;
     this.$q = $q;

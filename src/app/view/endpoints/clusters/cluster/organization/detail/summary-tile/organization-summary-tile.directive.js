@@ -28,10 +28,10 @@
     '$q',
     'modelManager',
     'appUtilsService',
-    'app.view.notificationsService',
-    'app.view.endpoints.clusters.cluster.cliCommands',
+    'appNotificationsService',
+    'appClusterCliCommands',
     'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'organization-model'
   ];
 
@@ -43,15 +43,15 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appUtilsService} utils - the console utils service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
+   * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {appClusterCliCommands} cliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    */
-  function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
-                                             notificationsService, cliCommands, frameworkDialogConfirm, asyncTaskDialog,
+  function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, appUtilsService,
+                                             appNotificationsService, cliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog,
                                              organizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
@@ -63,14 +63,14 @@
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-    this.utils = utils;
+    this.appUtilsService = appUtilsService;
 
     this.cardData = {
       title: gettext('Summary')
     };
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
+      return appUtilsService.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
     };
 
     this.keys = function (obj) {
@@ -90,7 +90,7 @@
       name: gettext('Edit Organization'),
       disabled: true,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Edit Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
@@ -115,7 +115,7 @@
               return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
                 {name: orgData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
                     {name: orgData.name});
                 });
             } else {
@@ -144,7 +144,7 @@
             var name = that.organization.details.org.entity.name;
             return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
               .then(function () {
-                notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
                   {name: name});
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
@@ -185,7 +185,7 @@
         return;
       }
       // Present memory usage
-      that.memory = that.utils.sizeUtilization(that.organization.details.memUsed, that.organization.details.memQuota);
+      that.memory = that.appUtilsService.sizeUtilization(that.organization.details.memUsed, that.organization.details.memQuota);
 
     });
 
@@ -210,7 +210,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
 })();

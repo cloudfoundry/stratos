@@ -9,10 +9,6 @@
     .config(registerRoute)
     .run(register);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint', {
       url: '/endpoint',
@@ -27,19 +23,11 @@
     });
   }
 
-  register.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appEventService',
-    'appUtilsService'
-  ];
-
-  function register($q, $state, modelManager, appEventService, utils) {
-    return new Endpoints($q, $state, modelManager, appEventService, utils);
+  function register($q, $state, modelManager, appEventService, appUtilsService) {
+    return new Endpoints($q, $state, modelManager, appEventService, appUtilsService);
   }
 
-  function Endpoints($q, $state, modelManager, appEventService, utils) {
+  function Endpoints($q, $state, modelManager, appEventService, appUtilsService) {
     var that = this;
 
     this.initialized = $q.defer();
@@ -54,7 +42,7 @@
       that.onLoggedIn();
     });
 
-    utils.chainStateResolve('endpoint', $state, init);
+    appUtilsService.chainStateResolve('endpoint', $state, init);
   }
 
   angular.extend(Endpoints.prototype, {

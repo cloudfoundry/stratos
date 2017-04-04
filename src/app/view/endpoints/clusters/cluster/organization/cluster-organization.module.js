@@ -32,7 +32,7 @@
     '$log'
   ];
 
-  function ClusterOrgController(modelManager, utils, organizationModel, $stateParams, $state, $q, $log) {
+  function ClusterOrgController(modelManager, appUtilsService, organizationModel, $stateParams, $state, $q, $log) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -67,7 +67,7 @@
       return $q.all(initPromises);
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);
   }
 
 })();

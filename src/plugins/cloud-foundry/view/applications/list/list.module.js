@@ -31,7 +31,7 @@
     'appEventService',
     'appErrorService',
     'appUtilsService',
-    'helion.framework.widgets.detailView',
+    'frameworkDetailView',
     'organization-model'
   ];
 
@@ -47,8 +47,8 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.utils.appErrorService} appErrorService - the error service
-   * @param {object} utils - the utils service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {object} appUtilsService - the appUtilsService service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} organizationModel - the organization-model service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} $state - the UI router $state service
@@ -58,14 +58,14 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.utils.appErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, utils, detailView, organizationModel) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, appUtilsService, frameworkDetailView, organizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
     this.$timeout = $timeout;
     this.$q = $q;
     this.modelManager = modelManager;
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.appEventService = appEventService;
@@ -145,7 +145,7 @@
         });
     }
 
-    utils.chainStateResolve('cf.applications.list', $state, init);
+    appUtilsService.chainStateResolve('cf.applications.list', $state, init);
 
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
@@ -533,7 +533,7 @@
      * @description Shows the Add Application dialog
      */
     addApplication: function () {
-      this.detailView(
+      this.frameworkDetailView(
         {
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
           dialog: true,

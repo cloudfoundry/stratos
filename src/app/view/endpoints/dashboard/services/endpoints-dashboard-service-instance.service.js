@@ -14,7 +14,7 @@
     'app.view.endpoints.dashboard.vcsService',
     'appUtilsService',
     'appErrorService',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'app.view.credentialsDialog',
     'frameworkDialogConfirm',
     'appEventService'
@@ -31,16 +31,16 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
-   * @param {appUtilsService} utilsService - the utils service
-   * @param {app.utils.appErrorService} appErrorService - service to show custom errors below title bar
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.appUtilsService.appErrorService} appErrorService - service to show custom errors below title bar
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
-   * @param {app.utils.appEventService} appEventService - the event service
+   * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorService,
-                                         notificationsService, credentialsDialog, frameworkDialogConfirm, appEventService) {
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, appUtilsService, appErrorService,
+                                         appNotificationsService, credentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -149,13 +149,13 @@
           };
           switch (serviceInstance.cnsi_type) {
             case 'hcf':
-              endpoint.type = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+              endpoint.type = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
               break;
             case 'hce':
-              endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
+              endpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
               break;
             case 'hsm':
-              endpoint.type = utilsService.getOemConfiguration().SERVICE_MANAGER;
+              endpoint.type = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
               // Only Console admins can see HSM endpoints
               hide = !userAccount.isAdmin();
               break;
@@ -173,7 +173,7 @@
         endpoint.actions = _createInstanceActions(isValid, hasExpired);
         endpoint.visit = undefined;
         _setEndpointVisit(isValid, serviceInstance, endpoint);
-        endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
+        endpoint.url = appUtilsService.getClusterEndpoint(serviceInstance);
         endpoint.actionsTarget = serviceInstance;
         endpoint.name = serviceInstance.name;
 
@@ -288,7 +288,7 @@
         callback: function () {
           modelManager.retrieve('app.model.serviceInstance').remove(serviceInstance)
             .then(function () {
-              notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
+              appNotificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
                 name: serviceInstance.name
               });
               updateInstances().then(function () {
@@ -355,14 +355,14 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
-          notificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
+          appNotificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
             timeOut: 10000,
             name: serviceInstance.name
           });
           return $q.reject(error);
         })
         .then(function () {
-          notificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
+          appNotificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
             name: serviceInstance.name
           });
           createEndpointEntries();

@@ -27,11 +27,6 @@
   angular
     .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
-  config.$inject = [
-    '$compileProvider',
-    '$logProvider'
-  ];
-
   function config($compileProvider, $logProvider) {
 
     /**

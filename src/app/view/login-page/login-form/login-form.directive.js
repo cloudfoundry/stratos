@@ -38,7 +38,7 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {app.utils.appEventService} appEventService - the event bus service
+   * @param {app.appUtilsService.appEventService} appEventService - the event bus service
    * @property {object} $timeout - the Angular $timeout service
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {boolean} loggingIn - flag indicating app is still authenticating

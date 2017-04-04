@@ -39,7 +39,7 @@
   CredentialsFormController.$inject = [
     'appEventService',
     'modelManager',
-    'app.view.notificationsService'
+    'appNotificationsService'
   ];
 
   /**
@@ -49,20 +49,20 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {app.utils.appEventService} appEventService - the application event bus
+   * @param {app.appUtilsService.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @property {app.utils.appEventService} appEventService - the application event bus
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @property {app.appUtilsService.appEventService} appEventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
    * @property {boolean} serverErrorOnRegister - an error flag for a server error
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController(appEventService, modelManager, notificationsService) {
+  function CredentialsFormController(appEventService, modelManager, appNotificationsService) {
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.appEventService = appEventService;
-    this.notificationsService = notificationsService;
+    this.appNotificationsService = appNotificationsService;
     this.authenticating = false;
     this.failedRegister = false;
     this.serverErrorOnRegister = false;
@@ -95,7 +95,7 @@
       this.authenticating = true;
       this.userServiceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
-          that.notificationsService.notify('success', gettext("Successfully connected to '") + that.cnsi.name + "'");
+          that.appNotificationsService.notify('success', gettext("Successfully connected to '") + that.cnsi.name + "'");
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
             that.onSubmit({ serviceInstance: response.data });

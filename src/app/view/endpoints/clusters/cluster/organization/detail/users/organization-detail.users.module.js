@@ -34,14 +34,14 @@
     'modelManager',
     'appUtilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
-    'app.view.endpoints.clusters.cluster.rolesService',
+    'appClusterRolesService',
     'appEventService',
-    'app.view.userSelection',
+    'appUserSelection',
     'organization-model'
   ];
 
-  function OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService,
-                                       appEventService, userSelection, organizationModel) {
+  function OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService,
+                                       appEventService, appUserSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -54,12 +54,12 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-    this.rolesService = rolesService;
+    this.appClusterRolesService = appClusterRolesService;
 
     this.userRoles = {};
     this.userActions = {};
 
-    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.selectedUsers = appUserSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
 
     function refreshUsers() {
@@ -140,12 +140,12 @@
     };
 
     var debouncedUpdateSelection = _.debounce(function () {
-      userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
+      appUserSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
     }, 100);
 
     function refreshAllSelected() {
-      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+      that.selectAllUsers = appUserSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
         // Ignore system users
         return user.entity.username;
       }));
@@ -162,7 +162,7 @@
       name: gettext('Remove from Organization'),
       disabled: true,
       execute: function (aUser) {
-        return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
+        return appClusterRolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
       }
     };
 
@@ -199,7 +199,7 @@
         return _.keys(that.organizationModel.organizations[that.guid][that.organizationGuid].spaces).length;
       }, refreshUsers);
 
-      return rolesService.listUsers(that.guid)
+      return appClusterRolesService.listUsers(that.guid)
         .then(function (users) {
           that.users = users;
         })
@@ -215,12 +215,12 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+        appUserSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
           // Never select system users
           return user.entity.username;
         }));
       } else {
-        userSelection.deselectAllUsers(that.guid);
+        appUserSelection.deselectAllUsers(that.guid);
       }
     };
 
@@ -236,7 +236,7 @@
         return;
       }
       this.removingSpace[pillKey] = true;
-      rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
+      appClusterRolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
         .finally(function () {
           that.removingSpace[pillKey] = false;
         });
@@ -258,7 +258,7 @@
     };
 
     this.removeFromOrganization = function () {
-      return rolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
+      return appClusterRolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
     };
 
     var rolesUpdatedListener = appEventService.$on(appEventService.events.ROLES_UPDATED, function () {
@@ -266,7 +266,7 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
 
     $scope.$on('$destroy', rolesUpdatedListener);
   }

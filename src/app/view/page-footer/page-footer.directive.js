@@ -34,8 +34,8 @@
     'appUtilsService'
   ];
 
-  function PageFooterController($scope, utilsService) {
-    this.OEM_CONFIG = utilsService.getOemConfiguration();
+  function PageFooterController($scope, appUtilsService) {
+    this.OEM_CONFIG = appUtilsService.getOemConfiguration();
   }
 
 })();

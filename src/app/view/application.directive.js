@@ -23,21 +23,6 @@
     };
   }
 
-  ApplicationController.$inject = [
-    'appEventService',
-    'modelManager',
-    'appBasePath',
-    'appUpgradeCheck',
-    'appLoggedInService',
-    'app.view.localStorage',
-    '$timeout',
-    '$state',
-    '$stateParams',
-    '$window',
-    '$rootScope',
-    '$scope'
-  ];
-
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
@@ -47,7 +32,7 @@
    * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLoggedInService - the Logged In Service
-   * @param {object} localStorage - the Local Storage In Service
+   * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} $timeout - Angular $timeout service
    * @param {$state} $state - Angular ui-router $state service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
@@ -66,7 +51,7 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLoggedInService, localStorage,
+  function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLoggedInService, appLocalStorage,
                                  $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
 
@@ -99,12 +84,12 @@
     });
 
     // Read back and persist the state of the navigation bar to local storage
-    this.navbarIconsOnly = localStorage.getItem('navbarIconsOnly', 'false') === 'true';
+    this.navbarIconsOnly = appLocalStorage.getItem('navbarIconsOnly', 'false') === 'true';
     $scope.$watch(function () {
       return that.navbarIconsOnly;
     }, function (nv, ov) {
       if (nv !== ov) {
-        localStorage.setItem('navbarIconsOnly', nv);
+        appLocalStorage.setItem('navbarIconsOnly', nv);
       }
     });
   }

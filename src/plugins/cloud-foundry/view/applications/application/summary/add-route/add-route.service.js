@@ -7,7 +7,7 @@
 
   AddRouteServiceFactory.$inject = [
     'modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'frameworkAsyncTaskDialog'
   ];
 
   /**
@@ -15,10 +15,10 @@
    * @description Factory for getting the Add Route Dialog
    * @memberof cloud-foundry.view.applications.application.summary
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} asyncTaskDialog - async dialog service
+   * @param {object} frameworkAsyncTaskDialog - async dialog service
    * @constructor
    */
-  function AddRouteServiceFactory(modelManager, asyncTaskDialog) {
+  function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog) {
     var that = this;
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     return {
@@ -28,7 +28,7 @@
        * @description Display Add Route Dialog
        * @param {String} cnsiGuid - CNSI GUID
        * @param {String} applicationId - Application GUID
-       * @returns {*} asyncTaskDialog
+       * @returns {*} frameworkAsyncTaskDialog
        */
       add: function (cnsiGuid, applicationId) {
         // Create a map of domain names -> domain guids
@@ -120,7 +120,7 @@
           domainMap: _.mapKeys(domains, function (domain) { return domain.value; })
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Add a Route'),
             templateUrl: 'plugins/cloud-foundry/view/applications/' +

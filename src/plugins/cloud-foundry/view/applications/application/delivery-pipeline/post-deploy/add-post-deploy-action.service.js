@@ -8,7 +8,7 @@
   postDeployAction.$inject = [
     'modelManager',
     'apiManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'frameworkAsyncTaskDialog'
   ];
 
   /**
@@ -17,9 +17,9 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.api.apiManager} apiManager - the API management service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog - Async Task Dialog service
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
-  function postDeployAction(modelManager, apiManager, asyncTaskDialog) {
+  function postDeployAction(modelManager, apiManager, frameworkAsyncTaskDialog) {
 
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -34,7 +34,7 @@
        * @description Display Edit App Dialog
        * @param {String} cnsiGuid - CNSI GUID
        * @param {String} hceProjectId - HCE Project ID
-       * @returns {*} asyncTaskDialog
+       * @returns {*} frameworkAsyncTaskDialog
        */
       add: function (cnsiGuid, hceProjectId) {
 
@@ -75,7 +75,7 @@
           actionName: null
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Add Post Deploy Action'),
             templateUrl: 'plugins/cloud-foundry/view/applications/' +

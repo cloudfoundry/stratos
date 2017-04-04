@@ -27,7 +27,7 @@
     '$state',
     'modelManager',
     'frameworkDialogConfirm',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'appUtilsService'
   ];
 
@@ -42,8 +42,8 @@
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkDialogConfirm - the confirm dialog service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {object} utilsService - Utils service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {object} appUtilsService - appUtilsService service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} versionModel - the Cloud Foundry Application Versions Model
@@ -51,7 +51,7 @@
    * @property {string} id - the application GUID
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, frameworkDialogConfirm, notificationsService, utilsService) {
+  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, frameworkDialogConfirm, appNotificationsService, appUtilsService) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -60,7 +60,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.frameworkDialogConfirm = frameworkDialogConfirm;
-    this.notificationsService = notificationsService;
+    this.appNotificationsService = appNotificationsService;
     this.$timeout = $timeout;
 
     this.isBusy = false;
@@ -109,7 +109,7 @@
       return that.$q.resolve();
     }
 
-    utilsService.chainStateResolve('cf.applications.application.versions', $state, init);
+    appUtilsService.chainStateResolve('cf.applications.application.versions', $state, init);
 
   }
 
@@ -145,7 +145,7 @@
         callback: function () {
           return that.versionModel.rollback(that.cnsiGuid, that.id, v.guid).then(function () {
             var message = gettext('Application was successfully rolled back');
-            that.notificationsService.notify('success', message);
+            that.appNotificationsService.notify('success', message);
             that.refreshVersions();
           }).catch(function () {
             return that.$q.reject(gettext('Failed to rollback to previous version'));

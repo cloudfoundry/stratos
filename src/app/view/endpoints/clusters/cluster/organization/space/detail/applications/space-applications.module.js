@@ -34,7 +34,7 @@
     'cloud-foundry.model.application.stateService'
   ];
 
-  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService) {
+  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, appStateService) {
     var that = this;
 
     var clusterGuid = $stateParams.guid;
@@ -71,6 +71,6 @@
       });
     };
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.applications', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.applications', $state, init);
   }
 })();

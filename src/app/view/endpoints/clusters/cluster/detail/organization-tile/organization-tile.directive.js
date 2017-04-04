@@ -27,9 +27,9 @@
     '$scope',
     'appUtilsService',
     'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'organization-model'
   ];
 
@@ -40,16 +40,16 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
-   * @param {object} utils - our utils service
+   * @param {object} appUtilsService - our appUtilsService service
    * @param {object} assignUsers - our assign users slide out service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
-                                      assignUsers, notificationsService, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, appUtilsService, // eslint-disable-line complexity
+                                      assignUsers, appNotificationsService, frameworkDialogConfirm, frameworkAsyncTaskDialog, organizationModel) {
     var that = this;
     this.$state = $state;
 
@@ -57,7 +57,7 @@
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     // Present memory usage
-    this.memory = utils.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
+    this.memory = appUtilsService.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
 
     // Present instances utilisation
     var instancesUsed = this.organization.instances;
@@ -135,7 +135,7 @@
       name: gettext('Edit Organization'),
       disabled: !canEditOrg,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Edit Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
@@ -160,7 +160,7 @@
               return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
                 {name: orgData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
                     {name: orgData.name});
                 });
             } else {
@@ -188,7 +188,7 @@
             var orgName = organizationName();
             return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
               .then(function () {
-                notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
                   {name: orgName});
               });
           }

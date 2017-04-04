@@ -21,9 +21,9 @@
     'appUtilsService'
   ];
 
-  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils, utils) {
+  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils, appUtilsService) {
     modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager,
-      appStateService, $q, modelUtils, utils));
+      appStateService, $q, modelUtils, appUtilsService));
   }
 
   /**
@@ -35,7 +35,7 @@
    * @param {object} appStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -43,10 +43,10 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
-   * @property {appUtilsService} utils - the utils service
+   * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @class
    */
-  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils, utils) {
+  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils, appUtilsService) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
@@ -55,7 +55,7 @@
     this.pageSize = config.pagination.pageSize;
     this.loadingLimit = config.loadingLimit;
     this.modelUtils = modelUtils;
-    this.utils = utils;
+    this.appUtilsService = appUtilsService;
 
     this.data = {
       applications: [],

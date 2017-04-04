@@ -26,10 +26,10 @@
     '$q',
     'modelManager',
     'appUtilsService',
-    'app.view.notificationsService',
-    'app.view.endpoints.clusters.cluster.cliCommands',
+    'appNotificationsService',
+    'appClusterCliCommands',
     'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
+    'frameworkAsyncTaskDialog',
     'organization-model'
   ];
 
@@ -41,16 +41,16 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appUtilsService} utils - the utils service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.appClusterCliCommands} cliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      cliCommands, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
+  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, appUtilsService, appNotificationsService,
+                                      cliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -77,7 +77,7 @@
       name: gettext('Rename Space'),
       disabled: true,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Rename Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
@@ -104,7 +104,7 @@
               return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                 {name: spaceData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
                     {name: spaceData.name});
                 });
             } else {
@@ -131,7 +131,7 @@
           callback: function () {
             return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
               .then(function () {
-                notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
                   {name: that.spaceDetail().details.space.entity.name});
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
@@ -142,7 +142,7 @@
     };
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
+      return appUtilsService.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
     };
 
     this.showCliCommands = function () {
@@ -191,7 +191,7 @@
     function init() {
       that.userName = user.name;
       spaceDetail = that.spaceDetail();
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
+      that.memory = appUtilsService.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
       // If navigating to/reloading the space details page these will be missing. Do these here instead of in
       // getSpaceDetails to avoid blocking state init when there are 100s of spaces
@@ -219,7 +219,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
 
   }
 

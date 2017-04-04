@@ -13,7 +13,7 @@
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'frameworkDialogConfirm'
   ];
 
@@ -27,11 +27,11 @@
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {object} manageVcsTokens - the manage VCS tokens service
    * @param {object} registerVcsToken - register a new VCS token
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, notificationsService, frameworkDialogConfirm) {
+  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -234,7 +234,7 @@
         },
         callback: function () {
           return vcsModel.unregisterVcs(endpoint.vcs.guid).then(function () {
-            notificationsService.notify('success', gettext('Successfully unregistered VCS endpoint \'{{name}}\''), {
+            appNotificationsService.notify('success', gettext('Successfully unregistered VCS endpoint \'{{name}}\''), {
               name: endpoint.vcs.label
             });
             updateInstances().then(function () {
