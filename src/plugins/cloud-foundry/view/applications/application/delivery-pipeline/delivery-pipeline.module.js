@@ -47,7 +47,7 @@
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
-   * @param {appEventEventService} appEventEventService - the application event bus
+   * @param {app.event.appEventEventService} appEventEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token

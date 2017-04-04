@@ -32,11 +32,11 @@
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {appUtilsUtilsService} utilsService - the utils service
-   * @param {appErrorErrorService} appErrorErrorService - service to show custom errors below title bar
+   * @param {app.error.appErrorErrorService} appErrorErrorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirmation dialog service
-   * @param {appEventEventService} appEventEventService - the event service
+   * @param {app.event.appEventEventService} appEventEventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorErrorService,

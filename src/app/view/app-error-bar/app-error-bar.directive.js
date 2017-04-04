@@ -31,8 +31,8 @@
    * @description Controller for the Application Error Bar directive
    * @constructor
    * @param {object} $scope - the Angular $scope
-   * @param {appEventEventService} appEventEventService - the event Service
-   * @property {appEventEventService} appEventEventService - the event Service
+   * @param {app.event.appEventEventService} appEventEventService - the event Service
+   * @property {app.event.appEventEventService} appEventEventService - the event Service
    * @property {string} messgae - the error message to display
    */
   function AppErrorBarController($scope, appEventEventService) {

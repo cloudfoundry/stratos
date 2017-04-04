@@ -25,7 +25,7 @@
    * @param {object} $q - the angular $q service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service

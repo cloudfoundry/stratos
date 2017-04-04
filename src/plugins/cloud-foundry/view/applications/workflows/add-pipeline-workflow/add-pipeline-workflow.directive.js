@@ -43,7 +43,7 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appEventEventService} appEventEventService - the Event management service
+   * @param {app.event.appEventEventService} appEventEventService - the Event management service
    * @param {appUtilsUtilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
@@ -51,7 +51,7 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {appEventEventService} appEventEventService - the Event management service
+   * @property {app.event.appEventEventService} appEventEventService - the Event management service
    * @property {appUtilsUtilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service

@@ -30,7 +30,7 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {cloud-foundry.model.space} model - the Cloud Foundry space model
    * @property {cloud-foundry.model.application} model - the Cloud Foundry application model

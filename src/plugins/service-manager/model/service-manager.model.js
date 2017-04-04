@@ -30,11 +30,11 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appEventEventService} appEventEventService - the application event service
+   * @param {app.event.appEventEventService} appEventEventService - the application event service
    * @property {object} $q - the Angular $q service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {appEventEventService} appEventEventService - the application event service
+   * @property {app.event.appEventEventService} appEventEventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */

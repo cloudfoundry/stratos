@@ -26,10 +26,10 @@
    * @memberof cloud-foundry.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {appEventEventService} appEventEventService - the application event service
+   * @param {app.event.appEventEventService} appEventEventService - the application event service
    * @param {object} $log - Angular $log service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {appEventEventService} appEventEventService - the application event service
+   * @property {app.event.appEventEventService} appEventEventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */

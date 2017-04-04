@@ -24,7 +24,7 @@
    * @memberof app.model
    * @name NavigationModel
    * @constructor
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {appLoggedInLoggedInService} appLoggedInLoggedInService - the logged-in service
    * @param {object} $state - ui-router $state service
    * @param {object} $rootScope - Angular rootScope object

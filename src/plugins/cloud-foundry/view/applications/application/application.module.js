@@ -47,7 +47,7 @@
    * @name ApplicationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {object} frameworkWidgetsDialogConfirm - the confirm dialog service
    * @param {object} utils - the utils service
    * @param {object} cliCommands - the cliCommands dialog service
@@ -64,7 +64,7 @@
    * @property {object} $q - the Angular $q service
    * @property {object} $interval - the Angular $interval service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {appEventEventService} appEventEventService - the event bus service
+   * @property {app.event.appEventEventService} appEventEventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application

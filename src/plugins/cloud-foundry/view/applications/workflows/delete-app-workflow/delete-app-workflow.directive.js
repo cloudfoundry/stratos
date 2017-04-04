@@ -42,11 +42,11 @@
    * @constructor
    * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appEventEventService} appEventEventService - the Event management service
+   * @param {app.event.appEventEventService} appEventEventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {appUtilsUtilsService} utils - the utils service
-   * @property {appEventEventService} appEventEventService - the Event management service
+   * @property {app.event.appEventEventService} appEventEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {appUtilsUtilsService} utils - the utils service

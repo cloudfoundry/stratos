@@ -30,9 +30,9 @@
   /**
    * @name SettingsController
    * @constructor
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @property {appEventEventService} appEventEventService - the event bus service
+   * @property {app.event.appEventEventService} appEventEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the model management service
    */
   function SettingsController(appEventEventService, modelManager) {

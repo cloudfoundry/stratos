@@ -37,7 +37,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appEventEventService} appEventEventService - the event management service
+   * @param {app.event.appEventEventService} appEventEventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
    * @param {object} serviceInstanceService - the service instance service
    * @property {object} $q - the Angular $q service

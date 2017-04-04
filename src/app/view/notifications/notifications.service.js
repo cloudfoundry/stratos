@@ -16,7 +16,7 @@
    * @name notifications
    * @description A notifications service
    * @param {object} $interpolate - the angular $interpolate service
-   * @param {appEventEventService} appEventEventService - the application event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the application event bus service
    * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @returns {object} A service instance factory
    */

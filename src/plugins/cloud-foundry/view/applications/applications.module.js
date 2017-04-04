@@ -44,7 +44,7 @@
    * @param {object} $state - the UI router $state service
    * @param {object} utils - the utils service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {object} appLoggedInLoggedInService - Logged In Service
    * @constructor
    */

@@ -42,7 +42,7 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
-   * @param {appEventEventService} appEventEventService - the event bus service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appViewUpgradeCheck} appViewUpgradeCheck - the upgrade check service
@@ -54,7 +54,7 @@
    * @param {$window} $window - Angular $window service
    * @param {$rootScope} $rootScope - Angular $rootScope service
    * @param {$scope} $scope - Angular $scope service
-   * @property {appEventEventService} appEventEventService - the event bus service
+   * @property {app.event.appEventEventService} appEventEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @property {app.view.appViewUpgradeCheck} upgradeCheck - the upgrade check service

@@ -43,9 +43,9 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {appEventEventService} appEventEventService - the event management service
+   * @param {app.event.appEventEventService} appEventEventService - the event management service
    * @param {object} serviceInstanceService - the service instance service
-   * @property {appEventEventService} appEventEventService - the event management service
+   * @property {app.event.appEventEventService} appEventEventService - the event management service
    * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)

@@ -49,10 +49,10 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {appEventEventService} appEventEventService - the application event bus
+   * @param {app.event.appEventEventService} appEventEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @property {appEventEventService} appEventEventService - the application event bus
+   * @property {app.event.appEventEventService} appEventEventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
    * @property {boolean} serverErrorOnRegister - an error flag for a server error
