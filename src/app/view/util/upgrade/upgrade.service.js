@@ -3,28 +3,28 @@
 
   angular
   .module('app.view')
-  .factory('app.view.upgradeCheck', upgradeCheckFactory)
+  .factory('appViewUpgradeCheck', upgradeCheckFactory)
   .config(upgradeCheckInterceptor);
 
   upgradeCheckInterceptor.$inject = ['$httpProvider'];
 
   /**
-  * @namespace app.view.upgradeCheck
+  * @namespace appViewUpgradeCheck
   * @memberof app.view
-  * @name app.model.upgradeCheck
+  * @name app.view.appViewUpgradeCheck
   * @param {object} $httpProvider - angular's $httpProvider object
   * @description Installs the Upgrade Cherk interceptor into the http chain.
   */
   function upgradeCheckInterceptor($httpProvider) {
-    $httpProvider.interceptors.push('app.view.upgradeCheck');
+    $httpProvider.interceptors.push('appViewUpgradeCheck');
   }
 
   upgradeCheckFactory.$inject = ['$q', 'appEventEventService'];
 
   /**
-  * @namespace app.view.upgradeCheck
+  * @namespace appViewUpgradeCheck
   * @memberof app.view
-  * @name app.model.upgradeCheck
+  * @name app.view.appViewUpgradeCheck
   * @param {object} $q - the Angular Promise service
   * @param {object} appEventEventService - the event bus service
   * @description The utlity will intercept all HTTP responses and check for 503/upgrade responses
@@ -33,7 +33,7 @@
   function upgradeCheckFactory($q, appEventEventService) {
     /**
     * @function isUpgrading
-    * @memberof app.view.upgradeCheck
+    * @memberof app.view.appViewUpgradeCheck
     * @param {object} response - $http reponse object
     * @description Checks if the supplied response indicates an upgrade in progress
     * @returns {boolean} Flag indicating if upgrade in progress
@@ -48,7 +48,7 @@
 
       /**
       * @function responseError
-      * @memberof app.view.upgradeCheck
+      * @memberof app.view.appViewUpgradeCheck
       * @param {object} rejection - $http reponse object
       * @description HTTP Interceptor function for processing respons errors
       * @returns {promise} For onward error processing

@@ -13,10 +13,10 @@
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
     'appUtilsUtilsService',
-    'app.error.errorService',
+    'appErrorErrorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'appEventEventService'
   ];
 
@@ -32,15 +32,15 @@
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {appUtilsUtilsService} utilsService - the utils service
-   * @param {app.error.errorService} errorService - service to show custom errors below title bar
+   * @param {appErrorErrorService} appErrorErrorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirmation dialog service
    * @param {appEventEventService} appEventEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,
-                                         notificationsService, credentialsDialog, confirmDialog, appEventEventService) {
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorErrorService,
+                                         notificationsService, credentialsDialog, frameworkWidgetsDialogConfirm, appEventEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -86,12 +86,12 @@
           // (otherwise we need to add additional 'errored' line to tiles)
           if (!userServicesCount || errors.length === 0) {
             // If there are no services or no errors continue as normal
-            errorService.clearAppError();
+            appErrorErrorService.clearAppError();
           } else if (errors.length === 1) {
             var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-            errorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
+            appErrorErrorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
           } else if (errors.length > 1) {
-            errorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
+            appErrorErrorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
           }
 
         });
@@ -238,7 +238,7 @@
      * @public
      */
     function clear() {
-      errorService.clearAppError();
+      appErrorErrorService.clearAppError();
     }
 
     function _createInstanceActions(isConnected, expired) {
@@ -276,7 +276,7 @@
 
     function _unregister(serviceInstance) {
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      confirmDialog({
+      frameworkWidgetsDialogConfirm({
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\'?'))({name: serviceInstance.name}),
         errorMessage: gettext('Failed to unregister endpoint'),

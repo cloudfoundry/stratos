@@ -30,7 +30,7 @@
     'appUtilsUtilsService',
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'
   ];
@@ -46,12 +46,12 @@
    * @param {appUtilsUtilsService} utils - the console utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
-   * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} frameworkWidgetsDialogConfirm - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
-                                             notificationsService, cliCommands, confirmDialog, asyncTaskDialog,
+                                             notificationsService, cliCommands, frameworkWidgetsDialogConfirm, asyncTaskDialog,
                                              organizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
@@ -130,7 +130,7 @@
       name: gettext('Delete Organization'),
       disabled: true,
       execute: function () {
-        confirmDialog({
+        frameworkWidgetsDialogConfirm({
           title: gettext('Delete Organization'),
           description: gettext('Are you sure you want to delete organization') +
           " '" + that.organization.details.org.entity.name + "'?",

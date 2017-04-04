@@ -5,33 +5,29 @@
     .module('app.view')
     .directive('application', application);
 
-  application.$inject = [
-    'app.basePath'
-  ];
-
   /**
    * @namespace app.view.application
    * @memberof app.view
    * @name application
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @property {app.view.application.ApplicationController} controller - the application controller
    * @property {string} controllerAs - the application controller identifier
    * @property {string} templateUrl - the application template filepath
    * @returns {object} The application directive definition object
    */
-  function application(path) {
+  function application(appBasePath) {
     return {
       controller: ApplicationController,
       controllerAs: 'applicationCtrl',
-      templateUrl: path + 'view/application.html'
+      templateUrl: appBasePath + 'view/application.html'
     };
   }
 
   ApplicationController.$inject = [
     'appEventEventService',
     'modelManager',
-    'app.basePath',
-    'app.view.upgradeCheck',
+    'appBasePath',
+    'appViewUpgradeCheck',
     'appLoggedInLoggedInService',
     'app.view.localStorage',
     '$timeout',
@@ -48,8 +44,8 @@
    * @name ApplicationController
    * @param {appEventEventService} appEventEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.basePath} path - the base path serving our app (i.e. /app)
-   * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
+   * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
+   * @param {app.view.appViewUpgradeCheck} appViewUpgradeCheck - the upgrade check service
    * @param {object} appLoggedInLoggedInService - the Logged In Service
    * @param {object} localStorage - the Local Storage In Service
    * @param {object} $timeout - Angular $timeout service
@@ -60,8 +56,8 @@
    * @param {$scope} $scope - Angular $scope service
    * @property {appEventEventService} appEventEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
-   * @property {app.basePath} path - the base path serving our app (i.e. /app)
-   * @property {app.view.upgradeCheck} upgradeCheck - the upgrade check service
+   * @property {app.basePath} appBasePath - the base path serving our app (i.e. /app)
+   * @property {app.view.appViewUpgradeCheck} upgradeCheck - the upgrade check service
    * @property {object} appLoggedInLoggedInService - the Logged In Service
    * @property {$state} $state - Angular ui-router $state service
    * @property {$window} $window - Angular $window service
@@ -70,14 +66,14 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventEventService, modelManager, path, upgradeCheck, appLoggedInLoggedInService, localStorage,
+  function ApplicationController(appEventEventService, modelManager, appBasePath, appViewUpgradeCheck, appLoggedInLoggedInService, localStorage,
                                  $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
 
     this.appEventEventService = appEventEventService;
     this.modelManager = modelManager;
-    this.path = path;
-    this.upgradeCheck = upgradeCheck;
+    this.appBasePath = appBasePath;
+    this.upgradeCheck = appViewUpgradeCheck;
     this.appLoggedInLoggedInService = appLoggedInLoggedInService;
 
     this.$state = $state;

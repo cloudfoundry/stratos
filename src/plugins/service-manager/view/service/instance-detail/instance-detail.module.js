@@ -99,19 +99,19 @@
     '$stateParams',
     'appUtilsUtilsService',
     'modelManager',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'service-manager.view.manage-instance.dialog',
     'service-manager.utils.version'
   ];
 
   function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, utils, modelManager,
-                                                  confirmDialog, manageInstanceDialog, versionUtils) {
+                                                  frameworkWidgetsDialogConfirm, manageInstanceDialog, versionUtils) {
     var that = this;
 
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.confirmDialog = confirmDialog;
+    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
     this.manageInstanceDialog = manageInstanceDialog;
     this.$timeout = $timeout;
     this.$state = $state;
@@ -277,7 +277,7 @@
 
     deleteInstance: function (id) {
       var that = this;
-      var dialog = this.confirmDialog({
+      var dialog = this.frameworkWidgetsDialogConfirm({
         title: gettext('Delete Instance'),
         description: function () {
           return gettext('Are you sure that you want to delete instance "' + id + '" ?');

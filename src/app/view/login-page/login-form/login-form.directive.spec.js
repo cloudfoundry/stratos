@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(module(function ($provide) {
-      $provide.provider('app.basePath', function () {
+      $provide.provider('appBasePath', function () {
         this.$get = function () {
           return 'app/';
         };

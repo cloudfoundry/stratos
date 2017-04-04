@@ -12,7 +12,7 @@
     'modelManager',
     'app.view.notificationsService',
     'helion.framework.widgets.detailView',
-    'helion.framework.widgets.dialog.confirm'
+    'frameworkWidgetsDialogConfirm'
   ];
 
   /**
@@ -25,11 +25,11 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog
+   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirm dialog
    * @returns {object} A service instance factory
    */
   function serviceInstanceFactory($log, $interpolate, $q, modelManager, notificationsService, detailView,
-                                  confirmDialog) {
+                                  frameworkWidgetsDialogConfirm) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -49,7 +49,7 @@
        */
       unbindServiceFromApp: function (cnsiGuid, appGuid, serviceBindingGuid, serviceInstanceName, callbackFunc) {
         var msgStr = gettext('Are you sure you want to detach {{name}}?');
-        return confirmDialog({
+        return frameworkWidgetsDialogConfirm({
           title: gettext('Detach Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
@@ -90,7 +90,7 @@
        */
       unbindServiceFromApps: function (cnsiGuid, serviceBindings, serviceInstanceName, callbackFunc) {
         var msgStr = gettext('Are you sure you want to detach {{name}}?');
-        return confirmDialog({
+        return frameworkWidgetsDialogConfirm({
           title: gettext('Detach Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
@@ -157,7 +157,7 @@
        */
       deleteService: function (cnsiGuid, serviceInstanceGuid, serviceInstanceName, callbackFunc) {
         var msgStr = gettext('Are you sure you want to delete {{name}}?');
-        return confirmDialog({
+        return frameworkWidgetsDialogConfirm({
           title: gettext('Delete Service'),
           description: $interpolate(msgStr)({name: serviceInstanceName}),
           errorMessage: gettext('There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.'),

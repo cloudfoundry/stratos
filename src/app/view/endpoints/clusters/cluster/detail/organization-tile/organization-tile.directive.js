@@ -28,7 +28,7 @@
     'appUtilsUtilsService',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'
   ];
@@ -43,13 +43,13 @@
    * @param {object} utils - our utils service
    * @param {object} assignUsers - our assign users slide out service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} frameworkWidgetsDialogConfirm - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
-                                      assignUsers, notificationsService, confirmDialog, asyncTaskDialog, organizationModel) {
+                                      assignUsers, notificationsService, frameworkWidgetsDialogConfirm, asyncTaskDialog, organizationModel) {
     var that = this;
     this.$state = $state;
 
@@ -175,7 +175,7 @@
       name: gettext('Delete Organization'),
       disabled: !canDeleteOrg,
       execute: function () {
-        return confirmDialog({
+        return frameworkWidgetsDialogConfirm({
           title: gettext('Delete Organization'),
           description: gettext('Are you sure you want to delete organization') + " '" + organizationName() + "'?",
           submitCommit: true,

@@ -5,7 +5,7 @@
     .module('app.view')
     .directive('credentialsForm', credentialsForm);
 
-  credentialsForm.$inject = ['app.basePath'];
+  credentialsForm.$inject = ['appBasePath'];
 
   /**
    * @namespace app.view.credentialsForm
@@ -14,7 +14,7 @@
    * @description A credentials-form directive that allows
    * user to enter a username and password to register
    * accessible CNSIs.
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @example
    * <credentials-form cnsi="ctrl.serviceToRegister"
    *   on-cancel="ctrl.registerCancelled()"
@@ -22,7 +22,7 @@
    * </credentials-form>
    * @returns {object} The credentials-form directive definition object
    */
-  function credentialsForm(path) {
+  function credentialsForm(appBasePath) {
     return {
       bindToController: {
         cnsi: '=',
@@ -32,7 +32,7 @@
       controller: CredentialsFormController,
       controllerAs: 'credentialsFormCtrl',
       scope: {},
-      templateUrl: path + 'view/endpoints/credentials/credentials-form.html'
+      templateUrl: appBasePath + 'view/endpoints/credentials/credentials-form.html'
     };
   }
 

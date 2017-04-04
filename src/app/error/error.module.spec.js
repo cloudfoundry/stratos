@@ -11,7 +11,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $http = $injector.get('$http');
       stackatoInfoService = $injector.get('stackatoInfoService');
-      errorService = $injector.get('app.error.errorService');
+      errorService = $injector.get('appErrorErrorService');
       spyOn(errorService, 'clearSystemError').and.callThrough();
       spyOn(errorService, 'setSystemError').and.callThrough();
     }));

@@ -5,32 +5,25 @@
     .module('app.view')
     .directive('appErrorBar', appErrorBar);
 
-  appErrorBar.$inject = ['app.basePath'];
-
   /**
    * @namespace app.view.clusterRegistration
    * @memberof app.view
    * @name clusterRegistration
    * @description A cluster-registration directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The cluster-registration directive definition object
    */
-  function appErrorBar(path) {
+  function appErrorBar(appBasePath) {
     return {
       bindToController: {
         displayed: '='
       },
       controller: AppErrorBarController,
       controllerAs: 'appErrorBarCtrl',
-      templateUrl: path + 'view/app-error-bar/app-error-bar.html',
+      templateUrl: appBasePath + 'view/app-error-bar/app-error-bar.html',
       scope: {}
     };
   }
-
-  AppErrorBarController.$inject = [
-    '$scope',
-    'appEventEventService'
-  ];
 
   /**
    * @name AppErrorBarController

@@ -12,7 +12,7 @@
     'modelManager',
     'appEventEventService',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'organization-model'
   ];
 
@@ -27,7 +27,7 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {appEventEventService} appEventEventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations
@@ -46,7 +46,7 @@
    * selected
    */
   function RolesService($log, $q, $interpolate,
-                        modelManager, appEventEventService, notificationsService, confirmDialog, organizationModel) {
+                        modelManager, appEventEventService, notificationsService, frameworkWidgetsDialogConfirm, organizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -727,7 +727,7 @@
           });
       };
 
-      return confirmDialog(confirmationConfig).result.finally(function () {
+      return frameworkWidgetsDialogConfirm(confirmationConfig).result.finally(function () {
         that.changingRoles = false;
       });
     }

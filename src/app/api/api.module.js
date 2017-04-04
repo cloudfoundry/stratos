@@ -10,18 +10,9 @@
   angular
     .module('app.api', [], config);
 
-  config.$inject = [
-    '$httpProvider'
-  ];
-
   function config($httpProvider) {
     $httpProvider.interceptors.push(interceptor);
   }
-
-  interceptor.$inject = [
-    '$q',
-    'appEventEventService'
-  ];
 
   /**
    * @name interceptor

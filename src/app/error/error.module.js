@@ -10,18 +10,14 @@
   angular
     .module('app.error', [], config);
 
-  config.$inject = [
-    '$httpProvider'
-  ];
-
   function config($httpProvider) {
     $httpProvider.interceptors.push(interceptor);
   }
 
   interceptor.$inject = [
     '$q',
-    'app.error.errorService',
-    'app.view.upgradeCheck'
+    'appErrorErrorService',
+    'appViewUpgradeCheck'
   ];
 
   /**
@@ -32,11 +28,11 @@
    * See https://docs.angularjs.org/api/ng/service/$http for details
    *
    * @param {object} $q - the $q service for promise/deferred objects
-   * @param {object} errorService - the error service
-   * @param {object} upgradeCheck - the upgrade check service
+   * @param {object} appErrorErrorService - the error service
+   * @param {object} appViewUpgradeCheck - the upgrade check service
    * @returns {object} The response error function
    */
-  function interceptor($q, errorService, upgradeCheck) {
+  function interceptor($q, appErrorErrorService, appViewUpgradeCheck) {
 
     var commsErrorMsg = gettext('The Console encountered a problem communicating with the server. Please try again.');
     return {
@@ -45,16 +41,16 @@
     };
 
     function response(response) {
-      errorService.clearSystemError();
+      appErrorErrorService.clearSystemError();
       return response;
     }
 
     function responseError(response) {
       // Network failure
       if (response.status === -1) {
-        errorService.setSystemError(commsErrorMsg);
-      } else if (response.status === 503 && !upgradeCheck.isUpgrading(response)) {
-        errorService.setSystemError(commsErrorMsg);
+        appErrorErrorService.setSystemError(commsErrorMsg);
+      } else if (response.status === 503 && !appViewUpgradeCheck.isUpgrading(response)) {
+        appErrorErrorService.setSystemError(commsErrorMsg);
       }
       return $q.reject(response);
     }

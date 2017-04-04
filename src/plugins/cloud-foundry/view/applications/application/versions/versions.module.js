@@ -26,7 +26,7 @@
     '$timeout',
     '$state',
     'modelManager',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkWidgetsDialogConfirm',
     'app.view.notificationsService',
     'appUtilsUtilsService'
   ];
@@ -41,7 +41,7 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} frameworkWidgetsDialogConfirm - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} utilsService - Utils service
    * @property {object} $q - angular $q service
@@ -49,9 +49,9 @@
    * @property {object} versionModel - the Cloud Foundry Application Versions Model
    * @property {string} cnsiGuid - the HCF Endpoint GUID
    * @property {string} id - the application GUID
-   * @property {object} confirmDialog - the confirm dialog service
+   * @property {object} frameworkWidgetsDialogConfirm - the confirm dialog service
    */
-  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, confirmDialog, notificationsService, utilsService) {
+  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, frameworkWidgetsDialogConfirm, notificationsService, utilsService) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -59,7 +59,7 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
-    this.confirmDialog = confirmDialog;
+    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
     this.notificationsService = notificationsService;
     this.$timeout = $timeout;
 
@@ -134,7 +134,7 @@
       var that = this;
       var confirmMessage = gettext('Are you sure you want to rollback to version "{{version}} ?');
       confirmMessage = that.$interpolate(confirmMessage)({version: v.guid});
-      this.confirmDialog({
+      this.frameworkWidgetsDialogConfirm({
         title: gettext('Rollback Application to previous Version'),
         description: confirmMessage,
         submitCommit: true,

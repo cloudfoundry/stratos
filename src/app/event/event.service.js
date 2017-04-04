@@ -27,18 +27,13 @@
     .module('app.event')
     .factory('appEventEventService', eventServiceFactory);
 
-  eventServiceFactory.$inject = [
-    '$rootScope',
-    'helion.framework.utils.dialogEvents'
-  ];
-
   /**
    * @namespace appEventEventService
    * @memberof app.event
    * @name appEventEventService
    * @description The event bus service
    * @param {object} $rootScope - the $rootScope
-   * @param {object} dialogEvents - UI Framework's Dialog Events service
+   * @param {object} frameworkUtilsDialogEvents - UI Framework's Dialog Events service
    * @property {object} events - the default set of events (i.e. HTTP status codes)
    * @returns {object} the event bus
    * @example
@@ -48,11 +43,11 @@
    * // emit an event
    * appEventEventService.$emit(events.HTTP_401);
    */
-  function eventServiceFactory($rootScope, dialogEvents) {
+  function eventServiceFactory($rootScope, frameworkUtilsDialogEvents) {
     var appEventEventService = $rootScope.$new();
     appEventEventService.events = events;
     // Configure the dialog events service to send events using this event service (scope)
-    dialogEvents.configure({ scope: appEventEventService });
+    frameworkUtilsDialogEvents.configure({ scope: appEventEventService });
     return appEventEventService;
   }
 

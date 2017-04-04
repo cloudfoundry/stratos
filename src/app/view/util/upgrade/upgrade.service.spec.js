@@ -21,7 +21,7 @@
       $timeout = $injector.get('$timeout');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?page=1&results-per-page=48').respond(200, {guid: {}});
-      upgradeCheck = $injector.get('app.view.upgradeCheck');
+      upgradeCheck = $injector.get('appViewUpgradeCheck');
     }));
 
     afterEach(function () {

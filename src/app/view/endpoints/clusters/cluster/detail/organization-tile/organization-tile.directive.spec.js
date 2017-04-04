@@ -70,7 +70,7 @@
           actionTask: actionTask
         };
       },
-      'helion.framework.widgets.dialog.confirm': function (spec) {
+      frameworkWidgetsDialogConfirm: function (spec) {
         return spec.callback();
       }
     }));

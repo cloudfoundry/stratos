@@ -2,16 +2,12 @@
   'use strict';
   angular
     .module('app.error')
-    .factory('app.error.errorService', errorServiceFactory);
-
-  errorServiceFactory.$inject = [
-    'appEventEventService'
-  ];
+    .factory('appErrorErrorService', errorServiceFactory);
 
   /**
-   * @namespace app.error.errorService
+   * @namespace appErrorErrorService
    * @memberof app.error
-   * @name errorService
+   * @name appErrorErrorService
    * @description The application error service
    * @param {object} appEventEventService - the event service
    * @returns {object} the error service
@@ -23,7 +19,7 @@
     return {
       /**
        * @function _update
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Updates the error based on combination of system and application level error messages
        */
       _update: function () {
@@ -39,7 +35,7 @@
 
       /**
        * @function getError
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Gets the current error message
        * @returns {string} The current error message or undefined if there is no system or application error set
        */
@@ -49,7 +45,7 @@
 
       /**
        * @function clearSystemError
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Clear the system-level error
        */
       clearSystemError: function () {
@@ -59,7 +55,7 @@
 
       /**
        * @function setSystemError
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Set the system-level error.
        * @param {string} msg - the error message to set
        */
@@ -72,7 +68,7 @@
 
       /**
        * @function clearAppError
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Clear the application-level error
        */
       clearAppError: function () {
@@ -82,7 +78,7 @@
 
       /**
        * @function setAppError
-       * @memberOf app.error.errorService
+       * @memberOf app.error.appErrorErrorService
        * @description Set the application-level error. There is no default error message for application errors.
        * @param {string} msg - the error message to set
        */

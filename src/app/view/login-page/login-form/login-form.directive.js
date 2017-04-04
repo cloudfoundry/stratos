@@ -6,7 +6,7 @@
     .directive('loginForm', loginForm);
 
   loginForm.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,14 +14,14 @@
    * @memberof app.view
    * @name loginForm
    * @description A login-form directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The login form directive definition object
    */
-  function loginForm(path) {
+  function loginForm(appBasePath) {
     return {
       controller: LoginFormController,
       controllerAs: 'loginFormCtrl',
-      templateUrl: path + 'view/login-page/login-form/login-form.html'
+      templateUrl: appBasePath + 'view/login-page/login-form/login-form.html'
     };
   }
 

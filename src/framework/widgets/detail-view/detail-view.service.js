@@ -22,11 +22,11 @@
   serviceFactory.$inject = [
     '$uibModal',
     '$document',
-    'helion.framework.utils.dialogEvents',
+    'frameworkUtilsDialogEvents',
     '$timeout'
   ];
 
-  function serviceFactory($uibModal, $document, dialogEvents, $timeout) {
+  function serviceFactory($uibModal, $document, frameworkUtilsDialogEvents, $timeout) {
 
     var detailViewContainer;
 
@@ -92,11 +92,11 @@
         windowClass: windowClass,
         windowTopClass: 'detail-view-top'
       });
-      dialogEvents.notifyOpened();
+      frameworkUtilsDialogEvents.notifyOpened();
       openDetailViewCount++;
       modal.closed.then(function () {
         openDetailViewCount--;
-        dialogEvents.notifyClosed();
+        frameworkUtilsDialogEvents.notifyClosed();
 
         if (openDetailViewCount === 0) {
           body.removeClass('detail-view-open');
@@ -186,4 +186,3 @@
   }
 
 })();
-

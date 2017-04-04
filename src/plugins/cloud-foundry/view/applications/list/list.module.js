@@ -29,7 +29,7 @@
     '$window',
     'modelManager',
     'appEventEventService',
-    'app.error.errorService',
+    'appErrorErrorService',
     'appUtilsUtilsService',
     'helion.framework.widgets.detailView',
     'organization-model'
@@ -45,8 +45,8 @@
    * @param {object} $q - the angular $q promise service
    * @param {object} $window - the angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appEventEventService} appEventEventService - the event bus service
-   * @param {app.error.errorService} errorService - the error service
+   * @param {app.event.appEventEventService} appEventEventService - the event bus service
+   * @param {app.error.appErrorErrorService} appErrorErrorService - the error service
    * @param {object} utils - the utils service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {object} organizationModel - the organization-model service
@@ -55,10 +55,10 @@
    * @property {object} $timeout - the angular $timeout service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
-   * @property {appEventEventService} appEventEventService - the event bus service
-   * @property {app.error.errorService} errorService - the error service
+   * @property {app.event.appEventEventService} appEventEventService - the event bus service
+   * @property {app.error.appErrorErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventEventService, errorService, utils, detailView, organizationModel) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventEventService, appErrorErrorService, utils, detailView, organizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
@@ -69,7 +69,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.appEventEventService = appEventEventService;
-    this.errorService = errorService;
+    this.errorService = appErrorErrorService;
     this.loading = true;
     this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];

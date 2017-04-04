@@ -6,13 +6,6 @@
     .factory('appUtilsUtilsService', utilsServiceFactory)
     .filter('mbToHumanSize', mbToHumanSizeFilter);
 
-  utilsServiceFactory.$inject = [
-    '$q',
-    '$timeout',
-    '$log',
-    '$window'
-  ];
-
   /**
    * @namespace appUtilsUtilsService
    * @memberof app.utils
@@ -319,13 +312,9 @@
     }
   }
 
-  mbToHumanSizeFilter.$inject = [
-    'appUtilsUtilsService'
-  ];
-
-  function mbToHumanSizeFilter(utilsService) {
+  function mbToHumanSizeFilter(appUtilsUtilsService) {
     return function (input) {
-      return utilsService.mbToHumanSize(input);
+      return appUtilsUtilsService.mbToHumanSize(input);
     };
   }
 

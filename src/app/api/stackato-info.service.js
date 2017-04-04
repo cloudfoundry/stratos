@@ -8,10 +8,6 @@
     .module('app')
     .factory('stackatoInfoService', StackatoInfoService);
 
-  StackatoInfoService.$inject = [
-    '$http'
-  ];
-
   /**
    * @memberof app
    * @name app.stackatoInfoService

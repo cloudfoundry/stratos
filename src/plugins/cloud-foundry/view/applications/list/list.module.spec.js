@@ -23,7 +23,7 @@
       var $q = $injector.get('$q');
       var modelManager = $injector.get('modelManager');
       appEventEventService = $injector.get('appEventEventService');
-      var errorService = $injector.get('app.error.errorService');
+      var errorService = $injector.get('appErrorErrorService');
       var utils = $injector.get('appUtilsUtilsService');
       var organizationModel = $injector.get('organization-model');
       var detailView = $injector.get('helion.framework.widgets.detailView');

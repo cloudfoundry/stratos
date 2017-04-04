@@ -5,25 +5,13 @@
     .module('app.logged-in')
     .factory('appLoggedInLoggedInService', loggedInServiceFactory);
 
-  loggedInServiceFactory.$inject = [
-    'appEventEventService',
-    'modelManager',
-    'helion.framework.widgets.dialog.confirm',
-    '$interval',
-    '$interpolate',
-    '$rootScope',
-    '$window',
-    '$log',
-    '$document'
-  ];
-
   /**
    * @namespace app.loggedIn.appLoggedInLoggedInService
    * @memberof app.loggedIn
    * @name loggedInServiceFactory
    * @param {object} appEventEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} confirmDialog - the confirmation dialog service
+   * @param {object} frameworkWidgetsDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
    * @param {object} $interpolate - the angular $interpolate Service
    * @param {object} $rootScope - the angular $rootScope Service
@@ -32,7 +20,7 @@
    * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(appEventEventService, modelManager, confirmDialog,
+  function loggedInServiceFactory(appEventEventService, modelManager, frameworkWidgetsDialogConfirm,
                                   $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
@@ -86,7 +74,7 @@
         return moment.duration(delta).format('m[m] s[s]');
       };
 
-      dialog = confirmDialog({
+      dialog = frameworkWidgetsDialogConfirm({
         title: gettext('Are you still there?'),
         description: function () {
           return $interpolate(gettext('You have been inactive for a while. For your protection, ' +

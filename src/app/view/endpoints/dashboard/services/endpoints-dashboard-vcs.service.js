@@ -14,7 +14,7 @@
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm'
+    'frameworkWidgetsDialogConfirm'
   ];
 
   /**
@@ -28,10 +28,10 @@
    * @param {object} manageVcsTokens - the manage VCS tokens service
    * @param {object} registerVcsToken - register a new VCS token
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, notificationsService, confirmDialog) {
+  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, notificationsService, frameworkWidgetsDialogConfirm) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -218,7 +218,7 @@
     function _unregister(endpoint) {
       var scope = $rootScope.$new();
       scope.name = endpoint.name;
-      confirmDialog({
+      frameworkWidgetsDialogConfirm({
         title: gettext('Unregister VCS'),
         description: $interpolate(gettext('Please ensure that you have removed VCS <span class="font-semi-bold">{{name}}</span> from ' +
           '{{ OEM_CONFIG.CODE_ENGINE }} before proceeding. <br><br>' +
