@@ -29,7 +29,7 @@
 
   AddPipelineWorkflowController.$inject = [
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'app.utils.utilsService',
     'app.view.vcs.manageVcsTokens',
     '$scope',
@@ -43,7 +43,7 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the Event management service
+   * @param {app.utils.eventService} eventService - the Event management service
    * @param {app.utils.utilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
@@ -51,7 +51,7 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.event.eventService} eventService - the Event management service
+   * @property {app.utils.eventService} eventService - the Event management service
    * @property {app.utils.utilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service

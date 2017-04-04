@@ -10,7 +10,7 @@
     '$q',
     '$interpolate',
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
     'organization-model'
@@ -25,7 +25,7 @@
    * @param {object} $q - the angular $q service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service

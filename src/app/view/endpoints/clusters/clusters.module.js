@@ -29,7 +29,7 @@
     '$q',
     '$state',
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'app.utils.utilsService'
   ];
 

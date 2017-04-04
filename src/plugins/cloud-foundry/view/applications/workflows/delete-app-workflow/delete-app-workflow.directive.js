@@ -30,7 +30,7 @@
   DeleteAppWorkflowController.$inject = [
     '$filter',
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     '$q',
     '$interpolate',
     'app.utils.utilsService'
@@ -42,11 +42,11 @@
    * @constructor
    * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the Event management service
+   * @param {app.utils.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.utils.utilsService} utils - the utils service
-   * @property {app.event.eventService} eventService - the Event management service
+   * @property {app.utils.eventService} eventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {app.utils.utilsService} utils - the utils service

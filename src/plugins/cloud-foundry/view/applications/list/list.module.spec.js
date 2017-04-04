@@ -22,8 +22,8 @@
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var modelManager = $injector.get('modelManager');
-      eventService = $injector.get('app.event.eventService');
-      var errorService = $injector.get('app.error.errorService');
+      eventService = $injector.get('app.utils.eventService');
+      var errorService = $injector.get('app.utils.errorService');
       var utils = $injector.get('app.utils.utilsService');
       var organizationModel = $injector.get('organization-model');
       var detailView = $injector.get('helion.framework.widgets.detailView');

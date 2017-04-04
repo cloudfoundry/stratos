@@ -28,11 +28,11 @@
   }
 
   ApplicationController.$inject = [
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager',
     'app.basePath',
     'app.view.upgradeCheck',
-    'app.logged-in.loggedInService',
+    'app.utils.loggedInService',
     'app.view.localStorage',
     '$timeout',
     '$state',
@@ -46,7 +46,7 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.basePath} path - the base path serving our app (i.e. /app)
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
@@ -58,7 +58,7 @@
    * @param {$window} $window - Angular $window service
    * @param {$rootScope} $rootScope - Angular $rootScope service
    * @param {$scope} $scope - Angular $scope service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.utils.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.basePath} path - the base path serving our app (i.e. /app)
    * @property {app.view.upgradeCheck} upgradeCheck - the upgrade check service
