@@ -32,7 +32,7 @@
   ServiceCardController.$inject = [
     '$scope',
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
@@ -43,9 +43,9 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.event.eventService} eventService - the event management service
+   * @param {app.utils.eventService} eventService - the event management service
    * @param {object} serviceInstanceService - the service instance service
-   * @property {app.event.eventService} eventService - the event management service
+   * @property {app.utils.eventService} eventService - the event management service
    * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)

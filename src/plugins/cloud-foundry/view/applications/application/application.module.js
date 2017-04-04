@@ -29,7 +29,7 @@
 
   ApplicationController.$inject = [
     'modelManager',
-    'app.event.eventService',
+    'app.utils.eventService',
     'helion.framework.widgets.dialog.confirm',
     'app.utils.utilsService',
     'cloud-foundry.view.applications.application.summary.cliCommands',
@@ -47,7 +47,7 @@
    * @name ApplicationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @param {object} confirmDialog - the confirm dialog service
    * @param {object} utils - the utils service
    * @param {object} cliCommands - the cliCommands dialog service
@@ -64,7 +64,7 @@
    * @property {object} $q - the Angular $q service
    * @property {object} $interval - the Angular $interval service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.utils.eventService} eventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application

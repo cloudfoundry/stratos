@@ -35,7 +35,7 @@
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.event.eventService',
+    'app.utils.eventService',
     'app.view.userSelection',
     'organization-model'
   ];

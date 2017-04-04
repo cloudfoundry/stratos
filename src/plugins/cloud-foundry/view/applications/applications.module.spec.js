@@ -15,8 +15,8 @@
       var $state = $injector.get('$state');
       var utils = $injector.get('app.utils.utilsService');
       var modelManager = $injector.get('modelManager');
-      eventService = $injector.get('app.event.eventService');
-      var loggedInService = $injector.get('app.logged-in.loggedInService');
+      eventService = $injector.get('app.utils.eventService');
+      var loggedInService = $injector.get('app.utils.loggedInService');
 
       authService = modelManager.retrieve('cloud-foundry.model.auth');
       spyOn(authService, 'initialize');

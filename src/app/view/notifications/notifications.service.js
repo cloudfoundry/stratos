@@ -7,7 +7,7 @@
 
   notificationsFactory.$inject = [
     '$interpolate',
-    'app.event.eventService',
+    'app.utils.eventService',
     'helion.framework.widgets.toaster'
   ];
 
@@ -16,7 +16,7 @@
    * @name notifications
    * @description A notifications service
    * @param {object} $interpolate - the angular $interpolate service
-   * @param {app.event.eventService} eventService - the application event bus service
+   * @param {app.utils.eventService} eventService - the application event bus service
    * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @returns {object} A service instance factory
    */

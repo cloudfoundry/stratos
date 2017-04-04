@@ -13,11 +13,11 @@
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
     'app.utils.utilsService',
-    'app.error.errorService',
+    'app.utils.errorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'helion.framework.widgets.dialog.confirm',
-    'app.event.eventService'
+    'app.utils.eventService'
   ];
 
   /**
@@ -32,11 +32,11 @@
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {app.utils.utilsService} utilsService - the utils service
-   * @param {app.error.errorService} errorService - service to show custom errors below title bar
+   * @param {app.utils.errorService} errorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
-   * @param {app.event.eventService} eventService - the event service
+   * @param {app.utils.eventService} eventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, errorService,

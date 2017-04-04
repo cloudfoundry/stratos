@@ -10,7 +10,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
-      var eventService = $injector.get('app.event.eventService');
+      var eventService = $injector.get('app.utils.eventService');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
 

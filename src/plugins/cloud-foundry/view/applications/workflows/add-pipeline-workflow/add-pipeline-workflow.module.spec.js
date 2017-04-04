@@ -17,7 +17,7 @@
 
       function F() {
         this.modelManager = $injector.get('modelManager');
-        this.eventService = $injector.get('app.event.eventService');
+        this.eventService = $injector.get('app.utils.eventService');
         this.$q = $injector.get('$q');
         this.utils = $injector.get('app.utils.utilsService');
         this.$scope = $injector.get('$rootScope').$new();

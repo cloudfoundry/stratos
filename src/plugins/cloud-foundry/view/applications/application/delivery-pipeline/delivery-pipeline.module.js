@@ -25,7 +25,7 @@
   }
 
   ApplicationDeliveryPipelineController.$inject = [
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
@@ -47,7 +47,7 @@
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
-   * @param {app.event.eventService} eventService - the application event bus
+   * @param {app.utils.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token

@@ -23,16 +23,16 @@
   }
 
   SettingsController.$inject = [
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager'
   ];
 
   /**
    * @name SettingsController
    * @constructor
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.utils.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the model management service
    */
   function SettingsController(eventService, modelManager) {
@@ -47,7 +47,7 @@
 
   register.$inject = [
     'modelManager',
-    'app.event.eventService'
+    'app.utils.eventService'
   ];
 
   function register(modelManager, eventService) {
