@@ -22,6 +22,7 @@
   var runSequence = require('run-sequence');
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
+  var ngAnnotate = require('gulp-ng-annotate');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -65,15 +66,11 @@
   gulp.task('e2e:instrument-source', function () {
     var sources = gulp.src(config.sourceFilesToInstrument, {base: paths.src});
     return sources
+      .pipe(ngAnnotate({
+        single_quotes: true
+      }))
       .pipe(istanbul(config.istanbul))
       .pipe(gulp.dest(paths.instrumented));
-  });
-
-  gulp.task('e2e:instrument-framework', function () {
-    var sources = gulp.src(config.frameworkFilesToInstrument);
-    return sources
-      .pipe(istanbul(config.istanbul))
-      .pipe(gulp.dest(paths.instrumented + 'framework/'));
   });
 
   gulp.task('e2e:run', ['e2e:clean:dist'], function () {
@@ -84,7 +81,6 @@
       'dev-default',
       'e2e:pre-instrument',
       'e2e:instrument-source',
-      'e2e:instrument-framework',
       'start-server',
       'e2e:tests',
       'stop-server',
