@@ -3,7 +3,7 @@
 
   describe('cluster space detail (routes) module', function () {
 
-    var $controller, $httpBackend, $scope, $stateParams, $q, $log, $state, modelManager, routesService, appUtilsService;
+    var $controller, $httpBackend, $scope, $stateParams, $q, $log, $state, modelManager, appClusterRoutesService, appUtilsService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -43,7 +43,7 @@
       $log = $injector.get('$log');
       $state = $injector.get('$state');
       modelManager = $injector.get('modelManager');
-      routesService = $injector.get('app.view.endpoints.clusters.routesService');
+      appClusterRoutesService = $injector.get('appClusterRoutesService');
       appUtilsService = $injector.get('appUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -56,7 +56,7 @@
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, space);
 
       var SpaceRoutesController = $state.get('endpoint.clusters.cluster.organization.space.detail.routes').controller;
-      $controller = new SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, appUtilsService);
+      $controller = new SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, appClusterRoutesService, appUtilsService);
     }
 
     afterEach(function () {

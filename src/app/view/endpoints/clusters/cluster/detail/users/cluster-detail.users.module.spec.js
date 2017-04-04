@@ -3,7 +3,7 @@
 
   describe('cluster detail (users) module', function () {
 
-    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers,
       appClusterRolesService, appEventService, appUserSelection, orgModel;
 
     beforeEach(module('templates'));
@@ -66,7 +66,7 @@
 
     function createController() {
       var ClusterUsersController = $state.get('endpoint.clusters.cluster.detail.users').controller;
-      $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+      $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers,
         appClusterRolesService, appEventService, appUserSelection, orgModel);
     }
 
@@ -80,11 +80,11 @@
       $q = $injector.get('$q');
       modelManager = $injector.get('modelManager');
       appUtilsService = $injector.get('appUtilsService');
-      manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+      appClusterManageUsers = $injector.get('appClusterManageUsers');
       appClusterRolesService = $injector.get('appClusterRolesService');
       appEventService = $injector.get('appEventService');
       appUserSelection = $injector.get('appUserSelection');
-      orgModel = $injector.get('organization-model');
+      orgModel = $injector.get('cfOrganizationModel');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -105,8 +105,8 @@
       });
 
       // Initial set of organizations
-      var organizationModel = $injector.get('organization-model');
-      _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      _.set(cfOrganizationModel, 'organizations.' + clusterGuid, organizations);
 
       spyOn(appClusterRolesService, 'listUsers').and.callFake(function (inClusterGuid) {
         expect(inClusterGuid).toEqual(clusterGuid);
@@ -241,7 +241,7 @@
       $scope.$digest();
 
       // Manage Roles
-      spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, something, inUsers) {
+      spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, something, inUsers) {
         expect(inClusterGuid).toEqual(clusterGuid);
         expect(something).toBeFalsy();
         expect(inUsers).toEqual([users[0]]);
@@ -268,7 +268,7 @@
       $controller.selectedUsers[users[0].metadata.guid] = false;
       $controller.selectedUsers[users[1].metadata.guid] = true;
 
-      spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, something, inUsers) {
+      spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, something, inUsers) {
         expect(inClusterGuid).toEqual(clusterGuid);
         expect(something).toBeFalsy();
         expect(inUsers).toEqual([users[1]]);

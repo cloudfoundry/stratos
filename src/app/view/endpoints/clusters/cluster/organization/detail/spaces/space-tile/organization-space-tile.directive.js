@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space')
     .directive('organizationSpaceTile', OrganizationSpaceTile);
 
-  OrganizationSpaceTile.$inject = [];
-
   function OrganizationSpaceTile() {
     return {
       bindToController: {
@@ -19,20 +17,6 @@
     };
   }
 
-  OrganizationSpaceTileController.$inject = [
-    '$state',
-    '$stateParams',
-    '$scope',
-    '$q',
-    'modelManager',
-    'app.view.endpoints.clusters.cluster.assignUsers',
-    'appNotificationsService',
-    'appUtilsService',
-    'frameworkDialogConfirm',
-    'frameworkAsyncTaskDialog',
-    'organization-model'
-  ];
-
   /**
    * @name OrganizationSpaceTileController
    * @constructor
@@ -41,17 +25,17 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.view.endpoints.clusters.cluster.assignUsers} assignUsers - our assign users slide out service
+   * @param {appClusterAssignUsers} appClusterAssignUsers - our assign users slide out service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} appUtilsService - our appUtilsService service
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, assignUsers,
+  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, appClusterAssignUsers,
                                            appNotificationsService, appUtilsService, frameworkDialogConfirm, frameworkAsyncTaskDialog,
-                                           organizationModel) {
+                                           cfOrganizationModel) {
     var that = this;
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -62,7 +46,7 @@
     this.spaceGuid = this.space.metadata.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var isAdmin = this.user.admin;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -128,7 +112,7 @@
           {
             data: {
               name: that.spaceDetail().details.space.entity.name,
-              spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
+              spaceNames: _.map(that.cfOrganizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
                 return space.entity.name;
               })
             }
@@ -180,7 +164,7 @@
       name: gettext('Assign User(s)'),
       disabled: true,
       execute: function () {
-        assignUsers.assign({
+        appClusterAssignUsers.assign({
           clusterGuid: that.clusterGuid,
           organizationGuid: that.organizationGuid,
           spaceGuid: that.spaceGuid
@@ -209,7 +193,7 @@
 
       // User Assignment
       var canAssign = authModel.isOrgOrSpaceActionableByResource(that.clusterGuid,
-          that.organizationModel.organizations[that.clusterGuid][that.organizationGuid],
+          that.cfOrganizationModel.organizations[that.clusterGuid][that.organizationGuid],
           authModel.actions.update);
       if (canAssign || isAdmin) {
         assignAction.disabled = false;
@@ -247,7 +231,7 @@
     },
 
     orgDetails: function () {
-      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
+      return this.cfOrganizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
     }
 
   });

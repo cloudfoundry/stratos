@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail.users', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.users', {
       url: '/users',
@@ -24,23 +20,8 @@
     });
   }
 
-  SpaceUsersController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$log',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers',
-    'appClusterRolesService',
-    'appEventService',
-    'appUserSelection',
-    'organization-model'
-  ];
-
-  function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService,
-                                appEventService, appUserSelection, organizationModel) {
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService,
+                                appEventService, appUserSelection, cfOrganizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -49,7 +30,7 @@
     this.users = [];
     this.removingSpace = {};
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -149,7 +130,7 @@
       name: gettext('Manage Roles'),
       disabled: true,
       execute: function (aUser) {
-        return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
+        return appClusterManageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
       }
     };
     var removeFromOrg = {
@@ -255,7 +236,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers()).result;
+      return appClusterManageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {

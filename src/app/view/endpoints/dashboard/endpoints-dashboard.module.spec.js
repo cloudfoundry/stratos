@@ -80,7 +80,7 @@
       var registerService = $injector.get('app.view.registerService');
       var appUtilsService = $injector.get('appUtilsService');
       var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
-      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
+      var cfServiceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
       var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
 
       // Patch user account model
@@ -97,7 +97,7 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, registerService, dashboardService, serviceInstanceService, vcsService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, registerService, dashboardService, cfServiceInstanceService, vcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

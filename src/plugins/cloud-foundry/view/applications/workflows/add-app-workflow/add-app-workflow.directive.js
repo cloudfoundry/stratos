@@ -32,7 +32,7 @@
     'appEventService',
     'appUtilsService',
     'app.view.vcs.manageVcsTokens',
-    'organization-model',
+    'cfOrganizationModel',
     '$interpolate',
     '$scope',
     '$q',
@@ -47,7 +47,7 @@
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
@@ -67,11 +67,11 @@
    * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
-   * @property {object} organizationModel - the organization model
+   * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, manageVcsTokens, organizationModel,
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, manageVcsTokens, cfOrganizationModel,
                                     $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -88,7 +88,7 @@
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -368,7 +368,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.organizations.length = 0;
 
-        return this.organizationModel.listAllOrganizations(cnsiGuid)
+        return this.cfOrganizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
             // Filter out organizations in which user does not
             // have any space where they aren't a developer
@@ -408,7 +408,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.spaces.length = 0;
 
-        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
+        return this.cfOrganizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
           .then(function (spaces) {
 
             // Filter out spaces in which user is not a Space Developer

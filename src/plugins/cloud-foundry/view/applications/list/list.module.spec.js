@@ -25,7 +25,7 @@
       appEventService = $injector.get('appEventService');
       var errorService = $injector.get('appErrorService');
       var appUtilsService = $injector.get('appUtilsService');
-      var organizationModel = $injector.get('organization-model');
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
       var frameworkDetailView = $injector.get('frameworkDetailView');
       var $window = $injector.get('$window');
 
@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, organizationModel);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
@@ -175,7 +175,7 @@
         modelManager = $injector.get('modelManager');
         userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
 
-        orgModel = $injector.get('organization-model');
+        orgModel = $injector.get('cfOrganizationModel');
       }));
 
       describe('Single cluster/org/space', function () {

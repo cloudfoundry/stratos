@@ -10,10 +10,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail', {
       url: '',
@@ -22,14 +18,6 @@
       controllerAs: 'clusterSpaceController'
     });
   }
-
-  ClusterSpaceController.$inject = [
-    '$q',
-    '$state',
-    '$stateParams',
-    'modelManager',
-    'appUtilsService'
-  ];
 
   function ClusterSpaceController($q, $state, $stateParams, modelManager, appUtilsService) {
     var that = this;

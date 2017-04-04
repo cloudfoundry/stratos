@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.tiles', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.tiles', {
       url: '/list',
@@ -26,14 +22,6 @@
       }
     });
   }
-
-  ClusterTilesController.$inject = [
-    '$q',
-    '$state',
-    '$stateParams',
-    'modelManager',
-    'appUtilsService'
-  ];
 
   /**
    * @name ClusterTilesController

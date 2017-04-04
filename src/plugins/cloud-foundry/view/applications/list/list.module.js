@@ -32,7 +32,7 @@
     'appErrorService',
     'appUtilsService',
     'frameworkDetailView',
-    'organization-model'
+    'cfOrganizationModel'
   ];
 
   /**
@@ -49,7 +49,7 @@
    * @param {app.utils.appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} $state - the UI router $state service
    * @property {object} $timeout - the angular $timeout service
@@ -58,7 +58,7 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.utils.appErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, appUtilsService, frameworkDetailView, organizationModel) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, appUtilsService, frameworkDetailView, cfOrganizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
@@ -81,7 +81,7 @@
       spaceGuid: 'all'
     };
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
 
     this.paginationProperties = {
       callback: function (page) {
@@ -248,7 +248,7 @@
       var that = this;
       this.organizations.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all') {
-        return this.organizationModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
+        return this.cfOrganizationModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
           .then(function (newOrgs) {
             var orgs = _.map(newOrgs, that._selectMapping);
             [].push.apply(that.organizations, orgs);
@@ -282,7 +282,7 @@
       this.spaces.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all' &&
         this.model.filterParams.orgGuid !== 'all') {
-        return this.organizationModel.listAllSpacesForOrganization(
+        return this.cfOrganizationModel.listAllSpacesForOrganization(
           this.model.filterParams.cnsiGuid,
           this.model.filterParams.orgGuid
         )

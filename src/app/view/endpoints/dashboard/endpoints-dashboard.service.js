@@ -5,11 +5,6 @@
     .module('app.view.endpoints.dashboard')
     .factory('app.view.endpoints.dashboard.dashboardService', dashboardService);
 
-  dashboardService.$inject = [
-    '$q',
-    'modelManager'
-  ];
-
   /**
    * @namespace app.view.endpoints.dashboard.dashboardService
    * @memberof app.view.endpoints.dashboard

@@ -17,7 +17,7 @@
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the framework confirm dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations
    * @property {object} spaceRoles - Lists space roles and their translations
@@ -35,7 +35,7 @@
    * selected
    */
   function appClusterRolesService($log, $q, $interpolate,
-                        modelManager, appEventService, appNotificationsService, frameworkDialogConfirm, organization-model) {
+                        modelManager, appEventService, appNotificationsService, frameworkDialogConfirm, cfOrganizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -49,10 +49,10 @@
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
-      org_manager: gettext('Org ') + organizationModel.organizationRoleToString('org_manager'),
-      org_auditor: gettext('Org ') + organizationModel.organizationRoleToString('org_auditor'),
-      billing_manager: organizationModel.organizationRoleToString('billing_manager'),
-      org_user: gettext('Org ') + organizationModel.organizationRoleToString('org_user')
+      org_manager: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_manager'),
+      org_auditor: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_auditor'),
+      billing_manager: cfOrganizationModel.organizationRoleToString('billing_manager'),
+      org_user: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_user')
     };
     this.spaceRoles = {
       space_manager: gettext('Space ') + spaceModel.spaceRoleToString('space_manager'),
@@ -65,17 +65,17 @@
     var rolesToFunctions = {
       org: {
         add: {
-          org_manager: _.bind(organizationModel.associateManagerWithOrganization, organizationModel),
-          org_auditor: _.bind(organizationModel.associateAuditorWithOrganization, organizationModel),
-          billing_manager: _.bind(organizationModel.associateBillingManagerWithOrganization, organizationModel),
-          org_user: _.bind(organizationModel.associateUserWithOrganization, organizationModel)
+          org_manager: _.bind(cfOrganizationModel.associateManagerWithOrganization, cfOrganizationModel),
+          org_auditor: _.bind(cfOrganizationModel.associateAuditorWithOrganization, cfOrganizationModel),
+          billing_manager: _.bind(cfOrganizationModel.associateBillingManagerWithOrganization, cfOrganizationModel),
+          org_user: _.bind(cfOrganizationModel.associateUserWithOrganization, cfOrganizationModel)
 
         },
         remove: {
-          org_manager: _.bind(organizationModel.removeManagerFromOrganization, organizationModel),
-          org_auditor: _.bind(organizationModel.removeAuditorFromOrganization, organizationModel),
-          billing_manager: _.bind(organizationModel.removeBillingManagerFromOrganization, organizationModel),
-          org_user: _.bind(organizationModel.removeUserFromOrganization, organizationModel)
+          org_manager: _.bind(cfOrganizationModel.removeManagerFromOrganization, cfOrganizationModel),
+          org_auditor: _.bind(cfOrganizationModel.removeAuditorFromOrganization, cfOrganizationModel),
+          billing_manager: _.bind(cfOrganizationModel.removeBillingManagerFromOrganization, cfOrganizationModel),
+          org_user: _.bind(cfOrganizationModel.removeUserFromOrganization, cfOrganizationModel)
         }
       },
       space: {
@@ -108,7 +108,7 @@
 
       var hasOtherRoles, spaceGuid;
 
-      var org = organizationModel.organizations[clusterGuid][orgGuid];
+      var org = cfOrganizationModel.organizations[clusterGuid][orgGuid];
       var orgRoles = org.roles[userGuid];
       if (orgRoles && orgRoles.length > 0 && (orgRoles.length > 1 || orgRoles[0] !== 'org_user')) {
         hasOtherRoles = true;
@@ -400,8 +400,8 @@
         promiseForUsers = usersModel.listAllUsers(clusterGuid);
       } else {
         var allUsersP = [];
-        _.forEach(organizationModel.organizations[clusterGuid], function (org) {
-          allUsersP.push(organizationModel.retrievingRolesOfAllUsersInOrganization(clusterGuid, org.details.guid));
+        _.forEach(cfOrganizationModel.organizations[clusterGuid], function (org) {
+          allUsersP.push(cfOrganizationModel.retrievingRolesOfAllUsersInOrganization(clusterGuid, org.details.guid));
         });
         promiseForUsers = $q.all(allUsersP).then(function (results) {
           var allUsers = {};
@@ -446,7 +446,7 @@
      */
     function createCurrentRoles(users, clusterGuid, singleOrgGuid, singleSpaceGuid) {
       var rolesByUser = {};
-      _.forEach(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
+      _.forEach(cfOrganizationModel.organizations[clusterGuid], function (org, orgGuid) {
         if (!singleOrgGuid || singleOrgGuid === orgGuid) {
           _.forEach(org.roles, function (roles, userGuid) {
             if (_.find(users, {metadata: {guid: userGuid}})) {
@@ -834,7 +834,7 @@
           var cachePromises = [];
           // Refresh org cache
           if (_.keys(newOrgRoles.organization).length > 0) {
-            cachePromises.push(organizationModel.refreshOrganizationUserRoles(clusterGuid, orgGuid));
+            cachePromises.push(cfOrganizationModel.refreshOrganizationUserRoles(clusterGuid, orgGuid));
           }
 
           // Refresh space caches

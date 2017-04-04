@@ -2,13 +2,13 @@
   'use strict';
 
   describe('cloud-foundry organization model', function () {
-    var $httpBackend, organizationModel;
+    var $httpBackend, cfOrganizationModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      organizationModel = $injector.get('organization-model');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
     }));
 
     afterEach(function () {
@@ -22,7 +22,7 @@
       $httpBackend.whenGET(ListAllOrganizations.url).respond(200, ListAllOrganizations.response['200'].body);
       $httpBackend.expectGET(ListAllOrganizations.url);
       expect(result).not.toBeDefined();
-      organizationModel.listAllOrganizations('guid', {}).then(function (resources) {
+      cfOrganizationModel.listAllOrganizations('guid', {}).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();
@@ -37,7 +37,7 @@
       $httpBackend.whenGET(ListAllSpacesForOrganization.url).respond(200, ListAllSpacesForOrganization.response['200'].body);
       $httpBackend.expectGET(ListAllSpacesForOrganization.url);
       expect(result).not.toBeDefined();
-      organizationModel.listAllSpacesForOrganization('guid', 123).then(function (resources) {
+      cfOrganizationModel.listAllSpacesForOrganization('guid', 123).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();

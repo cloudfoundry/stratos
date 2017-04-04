@@ -3,14 +3,14 @@
 
   angular
     .module('app.view.endpoints.clusters')
-    .factory('app.view.endpoints.clusters.routesService', RoutesServiceFactory);
+    .factory('appClusterRoutesService', RoutesServiceFactory);
 
   function RoutesServiceFactory($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
-    return new RoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm);
+    return new appClusterRoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm);
   }
 
   /**
-   * @name RoutesService
+   * @name appClusterRoutesService
    * @constructor
    * @param {object} $q - the angular $log service
    * @param {object} $log - the angular $log service
@@ -18,7 +18,7 @@
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog service
    */
-  function RoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
+  function appClusterRoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
     this.$q = $q;
     this.$log = $log;
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
@@ -26,7 +26,7 @@
     this.frameworkDialogConfirm = frameworkDialogConfirm;
   }
 
-  angular.extend(RoutesService.prototype, {
+  angular.extend(appClusterRoutesService.prototype, {
 
     /**
      * @function getRouteId

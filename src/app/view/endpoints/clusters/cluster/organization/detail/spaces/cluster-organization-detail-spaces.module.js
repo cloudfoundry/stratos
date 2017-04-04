@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.spaces', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail.spaces', {
       url: '/spaces',
@@ -17,7 +13,7 @@
       controllerAs: 'clusterDetailSpacesController',
       ncyBreadcrumb: {
         label: '{{' +
-        'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
+        'clusterOrgController.cfOrganizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.detail.organizations';
@@ -26,22 +22,13 @@
     });
   }
 
-  ClusterDetailSpacesController.$inject = [
-    '$q',
-    '$stateParams',
-    '$state',
-    'modelManager',
-    'appUtilsService',
-    'organization-model'
-  ];
-
-  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, appUtilsService, organizationModel) {
+  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, appUtilsService, cfOrganizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
 
     this.stateInitialised = false;
 
@@ -55,7 +42,7 @@
 
   angular.extend(ClusterDetailSpacesController.prototype, {
     spaces: function () {
-      var org = this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid) || {};
+      var org = this.cfOrganizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid) || {};
       return org.spaces;
     },
 

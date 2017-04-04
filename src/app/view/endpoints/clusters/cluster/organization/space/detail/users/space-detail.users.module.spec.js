@@ -38,7 +38,7 @@
         var $q = $injector.get('$q');
         var modelManager = $injector.get('modelManager');
         var appUtilsService = $injector.get('appUtilsService');
-        var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+        var appClusterManageUsers = $injector.get('appClusterManageUsers');
         var appClusterRolesService = $injector.get('appClusterRolesService');
         var appEventService = $injector.get('appEventService');
         var appUserSelection = $injector.get('appUserSelection');
@@ -58,7 +58,7 @@
         $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({resources: []});
 
         var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
-        $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, manageUsers,
+        $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, appClusterManageUsers,
           appClusterRolesService, appEventService, appUserSelection);
       }
 
@@ -98,7 +98,7 @@
     });
 
     describe('Standard user table tests', function () {
-      var $state, $stateParams, $log, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService, appEventService, appUserSelection;
+      var $state, $stateParams, $log, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService, appEventService, appUserSelection;
 
       var users = [
         {
@@ -155,7 +155,7 @@
 
       function createController() {
         var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
-        $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, manageUsers,
+        $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, appClusterManageUsers,
           appClusterRolesService, appEventService, appUserSelection);
       }
 
@@ -171,7 +171,7 @@
         $q = $injector.get('$q');
         modelManager = $injector.get('modelManager');
         appUtilsService = $injector.get('appUtilsService');
-        manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+        appClusterManageUsers = $injector.get('appClusterManageUsers');
         appClusterRolesService = $injector.get('appClusterRolesService');
         appEventService = $injector.get('appEventService');
         appUserSelection = $injector.get('appUserSelection');
@@ -200,8 +200,8 @@
         });
 
         // Initial set of organizations
-        var organizationModel = $injector.get('organization-model');
-        _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
+        var cfOrganizationModel = $injector.get('cfOrganizationModel');
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid, organizations);
 
         // Initial set of spaces
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -316,7 +316,7 @@
         $scope.$digest();
 
         // Manage Roles
-        spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[0]]);
@@ -354,7 +354,7 @@
         $controller.selectedUsers[users[0].metadata.guid] = false;
         $controller.selectedUsers[users[1].metadata.guid] = true;
 
-        spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[1]]);

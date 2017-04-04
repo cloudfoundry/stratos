@@ -5,8 +5,6 @@
     .module('app.view')
     .directive('credentialsForm', credentialsForm);
 
-  credentialsForm.$inject = ['appBasePath'];
-
   /**
    * @namespace app.view.credentialsForm
    * @memberof app.view
@@ -35,12 +33,6 @@
       templateUrl: appBasePath + 'view/endpoints/credentials/credentials-form.html'
     };
   }
-
-  CredentialsFormController.$inject = [
-    'appEventService',
-    'modelManager',
-    'appNotificationsService'
-  ];
 
   /**
    * @namespace app.view.credentialsForm.CredentialsFormController

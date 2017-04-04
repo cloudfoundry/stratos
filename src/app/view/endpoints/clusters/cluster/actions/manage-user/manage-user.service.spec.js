@@ -3,7 +3,7 @@
 
   describe('Manager Users test', function () {
 
-    var $httpBackend, manageUsersService, organizationModel, authModel;
+    var $httpBackend, manageUsersService, cfOrganizationModel, authModel;
 
     var constants = {
       clusterGuid: 'clusterGuid',
@@ -35,10 +35,10 @@
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      manageUsersService = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+      manageUsersService = $injector.get('appClusterManageUsers');
 
       var modelManager = $injector.get('modelManager');
-      organizationModel = $injector.get('organization-model');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
       authModel = modelManager.retrieve('cloud-foundry.model.auth');
     }));
 
@@ -54,7 +54,7 @@
 
     it('intialise', function () {
       // Set these to exercise more of the init. Should consider moving/better way of doing this in the future
-      _.set(organizationModel, 'organizations.' + constants.clusterGuid, constants.organizations);
+      _.set(cfOrganizationModel, 'organizations.' + constants.clusterGuid, constants.organizations);
       _.set(authModel, 'principal.' + constants.clusterGuid + '.isAllowed.apply', _.noop);
 
       var modalObj = manageUsersService.show(constants.clusterGuid, constants.organizationGuid, constants.users);

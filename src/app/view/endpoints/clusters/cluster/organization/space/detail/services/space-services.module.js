@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail.services', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.services', {
       url: '/services',
@@ -24,18 +20,7 @@
     });
   }
 
-  SpaceServicesController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$q',
-    '$filter',
-    'modelManager',
-    'cloud-foundry.view.applications.services.serviceInstanceService',
-    'appUtilsService'
-  ];
-
-  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,
+  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, cfServiceInstanceService,
                                    appUtilsService) {
     var that = this;
 
@@ -43,7 +28,7 @@
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.serviceInstanceService = serviceInstanceService;
+    this.cfServiceInstanceService = cfServiceInstanceService;
     this.serviceInstances = [];
     this.$filter = $filter;
 
@@ -98,7 +83,7 @@
           name: gettext('Delete Service'),
           disabled: false,
           execute: function (serviceInstance) {
-            that.serviceInstanceService.deleteService(that.clusterGuid, serviceInstance.metadata.guid,
+            that.cfServiceInstanceService.deleteService(that.clusterGuid, serviceInstance.metadata.guid,
               serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
           }
         },
@@ -106,7 +91,7 @@
           name: gettext('Detach Service'),
           disabled: true,
           execute: function (serviceInstance) {
-            that.serviceInstanceService.unbindServiceFromApps(that.clusterGuid, serviceInstance.entity.service_bindings,
+            that.cfServiceInstanceService.unbindServiceFromApps(that.clusterGuid, serviceInstance.entity.service_bindings,
               serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
           }
         }

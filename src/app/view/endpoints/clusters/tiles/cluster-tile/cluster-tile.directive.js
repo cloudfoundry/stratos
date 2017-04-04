@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.tiles')
     .directive('clusterTile', ClusterTile);
 
-  ClusterTile.$inject = [];
-
   function ClusterTile() {
     return {
       bindToController: {
@@ -21,15 +19,6 @@
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tile/cluster-tile.html'
     };
   }
-
-  ClusterTileController.$inject = [
-    '$scope',
-    '$state',
-    'modelManager',
-    'apiManager',
-    'appUtilsService',
-    'modelUtils'
-  ];
 
   /**
    * @name ClusterTileController

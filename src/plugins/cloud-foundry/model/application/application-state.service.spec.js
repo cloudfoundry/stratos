@@ -2,13 +2,13 @@
   'use strict';
 
   describe('application state service', function () {
-    var $httpBackend, appStateService;
+    var $httpBackend, cfAppStateService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      appStateService = $injector.get('cloud-foundry.model.application.stateService');
+      cfAppStateService = $injector.get('cfAppStateService');
     }));
 
     afterEach(function () {
@@ -17,7 +17,7 @@
     });
 
     it('getAppSummary', function () {
-      expect(appStateService).not.toBe(null);
+      expect(cfAppStateService).not.toBe(null);
     });
 
     describe('check friendly names and indicators', function () {
@@ -48,7 +48,7 @@
 
       it('Busted push', function () {
         var testData = makeTestData('ANY', 'FAILED', ['RUNNING']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Staging Failed');
         expect(_.keys(res.actions).length).toBe(1);
@@ -58,7 +58,7 @@
       it('Updating app', function () {
         var testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
         testData.summary.package_updated_at = 'some date';
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline while Updating');
         expect(_.keys(res.actions).length).toBe(1);
@@ -67,7 +67,7 @@
 
       it('Incomplete app', function () {
         var testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
         expect(_.keys(res.actions).length).toBe(2);
@@ -77,7 +77,7 @@
 
       it('User stopped app', function () {
         var testData = makeTestData('STOPPED', 'STAGED', ['RUNNING', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline');
         expect(_.keys(res.actions).length).toBe(3);
@@ -87,7 +87,7 @@
 
       it('Incomplete', function () {
         var testData = makeTestData('STOPPED', undefined, ['RUNNING', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
         expect(_.keys(res.actions).length).toBe(2);
@@ -97,7 +97,7 @@
 
       it('During push', function () {
         var testData = makeTestData('STARTED', 'PENDING', ['RUNNING', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Staging App');
         expect(_.keys(res.actions).length).toBe(1);
@@ -106,7 +106,7 @@
 
       it('After successful push', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['STARTING']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Starting App');
@@ -117,7 +117,7 @@
 
       it('Starting', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['STARTING', 'RUNNING']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
 
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Deployed');
@@ -129,13 +129,13 @@
 
       it('Running!', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Online');
@@ -147,13 +147,13 @@
 
       it('Borked, usually due to app code', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Crashed');
 
         testData = makeTestData('STARTED', 'STAGED', ['CRASHED', 'CRASHED']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Crashed');
@@ -164,13 +164,13 @@
 
       it('Borked, usually due to starting timeouts', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Starting App');
 
         testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Starting App');
@@ -181,13 +181,13 @@
 
       it('Borked, usually due to starting timeouts', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Crashing');
 
         testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT', 'CRASHED', 'CRASHED']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Crashing');
@@ -198,13 +198,13 @@
 
       it('Borked, usually due to platform issues', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Partially Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING', 'CRASHED', 'CRASHED']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Partially Online');
@@ -216,13 +216,13 @@
 
       it('Borked, usually due to platform issues (2)', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'UNKNOWN']);
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Partially Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING', 'UNKNOWN', 'UNKNOWN']);
-        res = appStateService.get(testData.summary, testData.instances);
+        res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Partially Online');
@@ -234,7 +234,7 @@
 
       it('Started, but no stats available', function () {
         var testData = makeTestData('STARTED', 'STAGED');
-        var res = appStateService.get(testData.summary, undefined);
+        var res = cfAppStateService.get(testData.summary, undefined);
         expect(res.indicator).toBe('tentative');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).not.toBeDefined();
@@ -242,7 +242,7 @@
 
       it('Started, but have instance counf set to 0', function () {
         var testData = makeTestData('STARTED', 'STAGED');
-        var res = appStateService.get(testData.summary, testData.instances);
+        var res = cfAppStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('tentative');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).not.toBeDefined();

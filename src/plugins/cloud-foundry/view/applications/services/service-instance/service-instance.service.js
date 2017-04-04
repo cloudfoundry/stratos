@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.services')
-    .factory('cloud-foundry.view.applications.services.serviceInstanceService', serviceInstanceFactory);
+    .factory('cfServiceInstanceService', serviceInstanceFactory);
 
   serviceInstanceFactory.$inject = [
     '$log',
@@ -17,7 +17,7 @@
 
   /**
    * @memberof cloud-foundry.view.applications.services
-   * @name serviceInstanceService
+   * @name cfServiceInstanceService
    * @description A service instance common service
    * @param {object} $log - the Angular $log service
    * @param {object} $interpolate - the Angular $interpolate service
@@ -37,7 +37,7 @@
     return {
       /**
        * @function unbindServiceFromApp
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Unbind service instance from application
        * @param {string} cnsiGuid - the CNSI guid
        * @param {string} appGuid - the application GUID
@@ -77,7 +77,7 @@
 
       /**
        * @function unbindServiceFromApps
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Unbind service instance from applications
        * @param {string} cnsiGuid - the CNSI guid
        * @param {Array} serviceBindings - collection of service bindings to unbind. The inline relation of properties
@@ -146,7 +146,7 @@
 
       /**
        * @function deleteService
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Delete a service instance.
        * @param {string} cnsiGuid - the CNSI guid
        * @param {string} serviceInstanceGuid - the service instance GUID
@@ -189,7 +189,7 @@
 
       /**
        * @function viewEnvVariables
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description view the environment variables of an app
        * @param {string} cnsiGuid - the CNSI guid
        * @param {object} appSummary - the application summary data

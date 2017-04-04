@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.users', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail.users', {
       url: '/users',
@@ -17,7 +13,7 @@
       controllerAs: 'organizationUsersController',
       ncyBreadcrumb: {
         label: '{{' +
-        'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
+        'clusterOrgController.cfOrganizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.detail.users';
@@ -26,22 +22,8 @@
     });
   }
 
-  OrganizationUsersController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers',
-    'appClusterRolesService',
-    'appEventService',
-    'appUserSelection',
-    'organization-model'
-  ];
-
-  function OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService,
-                                       appEventService, appUserSelection, organizationModel) {
+  function OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService,
+                                       appEventService, appUserSelection, cfOrganizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -49,7 +31,7 @@
     this.users = [];
     this.removingSpace = {};
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -155,7 +137,7 @@
       name: gettext('Manage Roles'),
       disabled: true,
       execute: function (aUser) {
-        return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
+        return appClusterManageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
       }
     };
     var removeFromOrg = {
@@ -196,7 +178,7 @@
       });
 
       $scope.$watch(function () {
-        return _.keys(that.organizationModel.organizations[that.guid][that.organizationGuid].spaces).length;
+        return _.keys(that.cfOrganizationModel.organizations[that.guid][that.organizationGuid].spaces).length;
       }, refreshUsers);
 
       return appClusterRolesService.listUsers(that.guid)
@@ -254,7 +236,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.organizationGuid, guidsToUsers()).result;
+      return appClusterManageUsers.show(that.guid, that.organizationGuid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {

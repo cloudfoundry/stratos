@@ -32,7 +32,7 @@
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
     'appUtilsService',
-    'app.view.endpoints.clusters.routesService',
+    'appClusterRoutesService',
     'frameworkDialogConfirm',
     'appNotificationsService'
   ];
@@ -50,7 +50,7 @@
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
+   * @param {appClusterRoutesService} appClusterRoutesService - the Service management service
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
@@ -63,12 +63,12 @@
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
                                         modelManager, addRoutesService, editAppService, appUtilsService,
-                                        routesService, frameworkDialogConfirm, appNotificationsService) {
+                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService) {
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.routesService = routesService;
+    this.appClusterRoutesService = appClusterRoutesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
@@ -98,7 +98,7 @@
         name: gettext('Unmap from App'),
         disabled: false,
         execute: function (route) {
-          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
+          appClusterRoutesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
             that.update();
           });
         }
@@ -107,7 +107,7 @@
         name: gettext('Delete Route'),
         disabled: false,
         execute: function (route) {
-          routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
+          appClusterRoutesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
             that.update();
           });
         }

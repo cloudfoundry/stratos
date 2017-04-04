@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.detail')
     .directive('organizationSummaryTile', OrganizationSummaryTile);
 
-  OrganizationSummaryTile.$inject = [];
-
   function OrganizationSummaryTile() {
     return {
       bindToController: {
@@ -21,20 +19,6 @@
     };
   }
 
-  OrganizationSummaryTileController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'appNotificationsService',
-    'appClusterCliCommands',
-    'frameworkDialogConfirm',
-    'frameworkAsyncTaskDialog',
-    'organization-model'
-  ];
-
   /**
    * @name OrganizationSummaryTileController
    * @constructor
@@ -45,22 +29,22 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {appClusterCliCommands} cliCommands - service to show cli command slide out
+   * @param {appClusterCliCommands} appClusterCliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, appUtilsService,
-                                             appNotificationsService, cliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog,
-                                             organizationModel) {
+                                             appNotificationsService, appClusterCliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog,
+                                             cfOrganizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
-    this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
+    this.organization = this.cfOrganizationModel.organizations[this.clusterGuid][this.organizationGuid];
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.appUtilsService = appUtilsService;
@@ -78,7 +62,7 @@
     };
 
     this.showCliCommands = function () {
-      cliCommands.show(that.getEndpoint(), that.userName, that.clusterGuid, that.organization);
+      appClusterCliCommands.show(that.getEndpoint(), that.userName, that.clusterGuid, that.organization);
     };
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -112,7 +96,7 @@
               if (that.organization.details.org.entity.name === orgData.name) {
                 return $q.resolve();
               }
-              return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
+              return that.cfOrganizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
                 {name: orgData.name})
                 .then(function () {
                   appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
@@ -142,7 +126,7 @@
           errorMessage: gettext('Failed to delete organization'),
           callback: function () {
             var name = that.organization.details.org.entity.name;
-            return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
+            return that.cfOrganizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
               .then(function () {
                 appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
                   {name: name});
@@ -195,7 +179,7 @@
       }
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.organizationModel.organizationRolesToStrings(roles);
+      that.roles = that.cfOrganizationModel.organizationRolesToStrings(roles);
     });
 
     function init() {

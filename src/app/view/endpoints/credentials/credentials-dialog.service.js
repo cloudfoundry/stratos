@@ -5,10 +5,6 @@
     .module('app.view')
     .factory('app.view.credentialsDialog', CredentialsDialogFactory);
 
-  CredentialsDialogFactory.$inject = [
-    'frameworkDetailView'
-  ];
-
   function CredentialsDialogFactory(frameworkDetailView) {
     return {
       /**

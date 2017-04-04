@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.detail.users', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.users', {
       url: '/users',
@@ -24,28 +20,14 @@
     });
   }
 
-  ClusterUsersController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers',
-    'appClusterRolesService',
-    'appEventService',
-    'appUserSelection',
-    'organization-model'
-  ];
-
-  function ClusterUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService,
-                                  appEventService, appUserSelection, organizationModel) {
+  function ClusterUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService,
+                                  appEventService, appUserSelection, cfOrganizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.users = [];
     this.removingOrg = {};
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.appClusterRolesService = appClusterRolesService;
@@ -70,7 +52,7 @@
       // For each user, get her roles in all organizations
       _.forEach(that.users, function (aUser) {
         var aUserRoles = {};
-        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
+        _.forEach(that.cfOrganizationModel.organizations[that.guid], function (org) {
           var roles = org.roles[aUser.metadata.guid];
           if (angular.isDefined(roles)) {
             aUserRoles[org.details.org.metadata.guid] = roles;
@@ -83,9 +65,9 @@
         _.forEach(aUserRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
-              org: that.organizationModel.organizations[that.guid][orgGuid],
+              org: that.cfOrganizationModel.organizations[that.guid][orgGuid],
               role: role,
-              roleLabel: that.organizationModel.organizationRoleToString(role)
+              roleLabel: that.cfOrganizationModel.organizationRoleToString(role)
             });
             unEditableOrg = unEditableOrg ||
                 !that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, orgGuid);
@@ -154,7 +136,7 @@
       });
 
       $scope.$watch(function () {
-        return _.keys(that.organizationModel.organizations[that.guid]).length;
+        return _.keys(that.cfOrganizationModel.organizations[that.guid]).length;
       }, refreshUsers);
 
       return appClusterRolesService.listUsers(that.guid)
@@ -186,7 +168,7 @@
           name: gettext('Manage Roles'),
           disabled: true,
           execute: function (aUser) {
-            return manageUsers.show(that.guid, false, [aUser]).result;
+            return appClusterManageUsers.show(that.guid, false, [aUser]).result;
           }
         },
         {
@@ -242,7 +224,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, false, guidsToUsers(that.selectedUsers));
+      return appClusterManageUsers.show(that.guid, false, guidsToUsers(that.selectedUsers));
     };
 
     this.removeAllRoles = function () {

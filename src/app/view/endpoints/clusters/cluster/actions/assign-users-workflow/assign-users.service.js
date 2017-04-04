@@ -3,13 +3,13 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory)
+    .factory('appClusterAssignUsers', AssignUserFactory)
     .controller('app.view.endpoints.clusters.cluster.assignUsersController', AssignUsersWorkflowController);
 
   function AssignUserFactory(frameworkDetailView) {
     return {
       /**
-       * @memberof app.view.endpoints.clusters.cluster.assignUsers
+       * @memberof appClusterAssignUsers
        * @name assign
        * @constructor
        * @param {object} context - the context for the modal. Used to pass in data
@@ -28,18 +28,6 @@
     };
   }
 
-  AssignUsersWorkflowController.$inject = [
-    '$scope',
-    'modelManager',
-    'context',
-    'appClusterRolesService',
-    'organization-model',
-    '$stateParams',
-    '$q',
-    '$timeout',
-    '$uibModalInstance'
-  ];
-
   /**
    * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
@@ -49,13 +37,13 @@
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} appClusterRolesService - the console roles service. Aids in selecting, assigning and removing roles with the
    * roles table.
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController($scope, modelManager, context, appClusterRolesService, organizationModel,
+  function AssignUsersWorkflowController($scope, modelManager, context, appClusterRolesService, cfOrganizationModel,
                                          $stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
@@ -65,7 +53,7 @@
 
     context = context || {};
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -97,7 +85,7 @@
       return (context.initPromise || that.$q.when()).then(function () {
         // Omit any org that we don't have permissions to either edit org or at least one child space
         // Create a collection to support the organization drop down
-        var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
+        var organizations = _.omitBy(that.cfOrganizationModel.organizations[that.data.clusterGuid], function (org) {
           return !that.authModel.isOrgOrSpaceActionableByResource(that.data.clusterGuid, org, that.authModel.actions.update);
         });
 

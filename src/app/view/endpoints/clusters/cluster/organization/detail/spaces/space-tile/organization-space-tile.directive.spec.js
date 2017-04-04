@@ -57,8 +57,8 @@
 
       var modelManager = $injector.get('modelManager');
 
-      var organizationModel = $injector.get('organization-model');
-      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));

@@ -24,10 +24,10 @@
   }
 
   function ClusterDetailController($stateParams, $scope, $state, $q,
-                                   modelManager, apiManager, appUtilsService, cliCommands, modelUtils, organizationModel) {
+                                   modelManager, apiManager, appUtilsService, appClusterCliCommands, modelUtils, cfOrganizationModel) {
     var that = this;
     this.guid = $stateParams.guid;
-    this.cliCommands = cliCommands;
+    this.appClusterCliCommands = appClusterCliCommands;
 
     this.$scope = $scope;
 
@@ -54,7 +54,7 @@
 
     function updateFromModel() {
       that.organizations.length = 0;
-      _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
+      _.forEach(cfOrganizationModel.organizations[that.guid], function (orgDetail) {
         that.organizations.push(orgDetail.details);
       });
       that.organizations.sort(function (o1, o2) { // Sort organizations by created date
@@ -64,7 +64,7 @@
     }
 
     this.showCliCommands = function () {
-      cliCommands.show(appUtilsService.getClusterEndpoint(that.userService), this.userName, that.guid);
+      appClusterCliCommands.show(appUtilsService.getClusterEndpoint(that.userService), this.userName, that.guid);
     };
 
     function init() {
@@ -83,7 +83,7 @@
       }
       // Start watching for further model changes after parent init chain completes
       $scope.$watchCollection(function () {
-        return organizationModel.organizations[that.guid];
+        return cfOrganizationModel.organizations[that.guid];
       }, function () {
         updateFromModel();
       });

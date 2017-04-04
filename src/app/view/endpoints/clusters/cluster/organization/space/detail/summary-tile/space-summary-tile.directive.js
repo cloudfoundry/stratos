@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail')
     .directive('spaceSummaryTile', SpaceSummaryTile);
 
-  SpaceSummaryTile.$inject = [];
-
   function SpaceSummaryTile() {
     return {
       bindToController: {
@@ -19,20 +17,6 @@
     };
   }
 
-  SpaceSummaryTileController.$inject = [
-    '$state',
-    '$scope',
-    '$stateParams',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'appNotificationsService',
-    'appClusterCliCommands',
-    'frameworkDialogConfirm',
-    'frameworkAsyncTaskDialog',
-    'organization-model'
-  ];
-
   /**
    * @name SpaceSummaryTileController
    * @constructor
@@ -43,14 +27,14 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {app.view.endpoints.clusters.cluster.appClusterCliCommands} cliCommands - service to show cli command slide out
+   * @param {app.view.endpoints.clusters.cluster.appClusterCliCommands} appClusterCliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, appUtilsService, appNotificationsService,
-                                      cliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog, organizationModel) {
+                                      appClusterCliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -60,7 +44,7 @@
     this.$state = $state;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -91,7 +75,7 @@
           {
             data: {
               name: that.spaceDetail().details.space.entity.name,
-              spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
+              spaceNames: _.map(that.cfOrganizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
                 return space.entity.name;
               })
             }
@@ -146,8 +130,8 @@
     };
 
     this.showCliCommands = function () {
-      cliCommands.show(this.getEndpoint(), this.userName, that.clusterGuid,
-        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid],
+      appClusterCliCommands.show(this.getEndpoint(), this.userName, that.clusterGuid,
+        that.cfOrganizationModel.organizations[that.clusterGuid][that.organizationGuid],
         that.spaceDetail());
     };
 

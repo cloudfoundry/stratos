@@ -22,9 +22,9 @@
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
       var modelUtils = $injector.get('modelUtils');
-      var organizationModel = $injector.get('organization-model');
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
 
-      var cliCommands = $injector.get('appClusterCliCommands');
+      var appClusterCliCommands = $injector.get('appClusterCliCommands');
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -33,7 +33,7 @@
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
-      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,appUtilsService, cliCommands, modelUtils, organizationModel);
+      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,appUtilsService, appClusterCliCommands, modelUtils, cfOrganizationModel);
 
     }));
 

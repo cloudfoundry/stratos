@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail.routes', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.routes', {
       url: '/routes',
@@ -24,18 +20,7 @@
     });
   }
 
-  SpaceRoutesController.$inject = [
-    '$scope',
-    '$stateParams',
-    '$q',
-    '$log',
-    '$state',
-    'modelManager',
-    'app.view.endpoints.clusters.routesService',
-    'appUtilsService'
-  ];
-
-  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, appUtilsService) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, appClusterRoutesService, appUtilsService) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -43,7 +28,7 @@
     this.$q = $q;
     this.$log = $log;
     this.modelManager = modelManager;
-    this.routesService = routesService;
+    this.appClusterRoutesService = appClusterRoutesService;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
@@ -91,7 +76,7 @@
           name: gettext('Delete Route'),
           disabled: false,
           execute: function (route) {
-            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid).then(function () {
+            that.appClusterRoutesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid).then(function () {
               that.update(route);
             });
           }
@@ -102,10 +87,10 @@
           execute: function (route) {
             var promise;
             if (route.entity.apps.length > 1) {
-              promise = that.routesService.unmapAppsRoute(that.clusterGuid, route.entity, route.metadata.guid,
+              promise = that.appClusterRoutesService.unmapAppsRoute(that.clusterGuid, route.entity, route.metadata.guid,
                 _.map(route.entity.apps, 'metadata.guid'));
             } else {
-              promise = that.routesService.unmapAppRoute(that.clusterGuid, route.entity, route.metadata.guid,
+              promise = that.appClusterRoutesService.unmapAppRoute(that.clusterGuid, route.entity, route.metadata.guid,
                 route.entity.apps[0].metadata.guid);
             }
             promise.then(function (changeCount) {

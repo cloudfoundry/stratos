@@ -3,7 +3,7 @@
 
   describe('roles service', function () {
 
-    var $httpBackend, appClusterRolesService, modelManager, $uibModal, $q, organizationModel, spaceModel, authModel, testModelOrg,
+    var $httpBackend, appClusterRolesService, modelManager, $uibModal, $q, cfOrganizationModel, spaceModel, authModel, testModelOrg,
       testModelSpace;
 
     var clusterGuid = 'clusterGuid';
@@ -89,7 +89,7 @@
       testModelOrg = _.cloneDeep(modelOrg);
       testModelSpace = _.cloneDeep(modelSpace);
 
-      organizationModel = $injector.get('organization-model');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     }));
 
@@ -97,7 +97,7 @@
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
 
-      delete organizationModel.organizations;
+      delete cfOrganizationModel.organizations;
       delete spaceModel.spaces;
       delete authModel.principal;
     });
@@ -162,7 +162,7 @@
         testModelOrg.roles[userGuid].push(roleNames.org.org_user);
         testModelOrg.roles[userGuid].push(roleNames.org.org_manager);
 
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid, {});
         expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
       });
@@ -175,7 +175,7 @@
         testModelSpace.roles[userGuid].length = 0;
         testModelSpace.roles[userGuid].push(roleNames.space.space_developer);
 
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, testModelSpace);
         expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeFalsy();
       });
@@ -187,7 +187,7 @@
 
         testModelSpace.roles[userGuid].length = 0;
 
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
         _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, testModelSpace);
         expect(appClusterRolesService.canRemoveOrgRole(roleNames.org.org_user, clusterGuid, orgGuid, userGuid)).toBeTruthy();
       });
@@ -211,13 +211,13 @@
         // Set up pre-change model
         testModelOrg.roles[userGuid].length = 0;
         testModelOrg.roles[userGuid].push(roleNames.org.org_user);
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
 
-        expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
+        expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
 
         appClusterRolesService.removeOrgRole(clusterGuid, orgGuid, user, roleNames.org.org_user)
           .then(function () {
-            expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
+            expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
           })
           .catch(function () {
             fail('removeOrgRole should have succeeded');
@@ -268,10 +268,10 @@
       it('assign single org and space roles to empty org + space', function () {
         // Set up org where user has no roles
         testModelOrg.roles[userGuid].length = 0;
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
-        // _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, );
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        // _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, );
 
-        expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
+        expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
 
         // Set up space where user has no roles
         testModelSpace.roles[userGuid].length = 0;
@@ -308,7 +308,7 @@
 
         appClusterRolesService.assignUsers(clusterGuid, selectedUsers, newRoles)
           .then(function () {
-            expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
+            expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([roleNames.space.space_developer]);
           })
           .catch(function () {
@@ -346,8 +346,8 @@
         // Set up pre-change model
         testModelOrg.roles[userGuid].length = 0;
         testModelOrg.roles[userGuid].push(roleNames.org.org_user);
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
-        expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
         _.set(testModelOrg, 'spaces.' + spaceGuid, space);
 
         // Set up pre-change model
@@ -358,7 +358,7 @@
 
         appClusterRolesService.removeAllRoles(clusterGuid, [user])
           .then(function () {
-            expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
+            expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
             expect(spaceModel.spaces[clusterGuid][spaceGuid].roles[user.metadata.guid]).toEqual([]);
           })
           .catch(function () {
@@ -390,13 +390,13 @@
         testModelOrg.roles[userGuid].length = 0;
         testModelOrg.roles[userGuid].push(roleNames.org.org_user);
         testModelOrg.roles[userGuid].push(roleNames.org.org_manager);
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
 
-        expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user, roleNames.org.org_manager]);
+        expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user, roleNames.org.org_manager]);
 
         appClusterRolesService.removeFromOrganization(clusterGuid, orgGuid, [user])
           .then(function () {
-            expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
+            expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([]);
           })
           .catch(function () {
             fail('removeFromOrganization should have succeeded');
@@ -424,8 +424,8 @@
         // Set up pre-change model
         testModelOrg.roles[userGuid].length = 0;
         testModelOrg.roles[userGuid].push(roleNames.org.org_user);
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
-        expect(organizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        expect(cfOrganizationModel.organizations[clusterGuid][orgGuid].roles[user.metadata.guid]).toEqual([roleNames.org.org_user]);
         _.set(testModelOrg, 'spaces.' + spaceGuid, space);
 
         // Set up pre-change model
@@ -480,9 +480,9 @@
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
         _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', false);
 
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
 
-        spyOn(organizationModel, 'retrievingRolesOfAllUsersInOrganization').and.callFake(function (inClusterGuid, inOrgGuid) {
+        spyOn(cfOrganizationModel, 'retrievingRolesOfAllUsersInOrganization').and.callFake(function (inClusterGuid, inOrgGuid) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(orgGuid);
 

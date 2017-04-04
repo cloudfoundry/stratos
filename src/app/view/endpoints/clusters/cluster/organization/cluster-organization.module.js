@@ -8,10 +8,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization', {
       url: '/:organization',
@@ -22,31 +18,21 @@
     });
   }
 
-  ClusterOrgController.$inject = [
-    'modelManager',
-    'appUtilsService',
-    'organization-model',
-    '$stateParams',
-    '$state',
-    '$q',
-    '$log'
-  ];
-
-  function ClusterOrgController(modelManager, appUtilsService, organizationModel, $stateParams, $state, $q, $log) {
+  function ClusterOrgController(modelManager, appUtilsService, cfOrganizationModel, $stateParams, $state, $q, $log) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
 
     function init() {
       var initPromises = [];
 
       // Fetch details for every space
-      _.forEach(_.get(that.organizationModel, that.spacesPath), function (space) {
+      _.forEach(_.get(that.cfOrganizationModel, that.spacesPath), function (space) {
         var promiseForDetails = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
           //Swallow errors for individual spaces
           $log.error('Failed to fetch details for space - ' + space.entity.name);
@@ -55,10 +41,10 @@
       });
 
       // List all services for the org
-      var promiseForServices = that.organizationModel
+      var promiseForServices = that.cfOrganizationModel
         .listAllServicesForOrganization(that.clusterGuid, that.organizationGuid)
         .then(function (services) {
-          that.organizationModel.cacheOrganizationServices(that.clusterGuid, that.organizationGuid, services);
+          that.cfOrganizationModel.cacheOrganizationServices(that.clusterGuid, that.organizationGuid, services);
           return services;
         });
 

@@ -7,7 +7,7 @@
    */
   angular
     .module('cloud-foundry.model')
-    .factory('cloud-foundry.model.application.stateService', stateServiceFactory);
+    .factory('cfAppStateService', stateServiceFactory);
 
   stateServiceFactory.$inject = [];
 
@@ -164,7 +164,7 @@
 
     /**
      * @function get
-     * @memberof cloud-foundry.model.application.stateService
+     * @memberof cloud-foundry.model.application.cfAppStateService
      * @description Get the application state metadata for an application based on its summary and
      * optionally its instance metadata.
      * @param {object} summary - the application summary metadata (either from summary or entity)
@@ -230,7 +230,7 @@
 
     /**
      * @function getPackageState
-     * @memberof cloud-foundry.model.application.stateService
+     * @memberof cloud-foundry.model.application.cfAppStateService
      * @description Gets the package state based on the application summary metadata
      * @param {string} appState - the application state
      * @param {object} summary - the application summary
@@ -247,7 +247,7 @@
 
     /**
      * @function getCounts
-     * @memberof cloud-foundry.model.application.stateService
+     * @memberof cloud-foundry.model.application.cfAppStateService
      * @description Get an object with the instance counts for running, crashed and failing
      * @param {object} summary - the application summary
      * @param {object} appInstances - the application instances metadata (from the app stats API call)
@@ -281,7 +281,7 @@
 
     /**
      * @function getCount
-     * @memberof cloud-foundry.model.application.stateService
+     * @memberof cloud-foundry.model.application.cfAppStateService
      * @description Get a count either from a value if supplied or by filterine app instance metadata
      * @param {number} value - the value to use directly or undefined if not available
      * @param {object} appInstances - the application instances metadata (from the app stats API call)
@@ -303,7 +303,7 @@
 
     /**
      * @function formatCount
-     * @memberof cloud-foundry.model.application.stateService
+     * @memberof cloud-foundry.model.application.cfAppStateService
      * @description Format a numeric count into a string to be used for state matching
      * @param {number} value - the value to use directly or undefined if not available
      * @returns {string} String representation of value for state matching

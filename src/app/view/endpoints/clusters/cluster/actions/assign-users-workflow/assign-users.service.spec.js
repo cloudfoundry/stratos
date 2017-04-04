@@ -2,8 +2,8 @@
   'use strict';
 
   describe('Assign Users test', function () {
-    var assignUsersService, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
-      appClusterRolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, organizationModel;
+    var appClusterAssignUsers, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
+      appClusterRolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, cfOrganizationModel;
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';
@@ -32,7 +32,7 @@
       modelManager = $injector.get('modelManager');
       appClusterRolesService = $injector.get('appClusterRolesService');
       $stateParams = $injector.get('$stateParams');
-      organizationModel = $injector.get('organization-model');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
       $q = $injector.get('$q');
       $timeout = $injector.get('$timeout');
 
@@ -40,7 +40,7 @@
 
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
-      assignUsersService = $injector.get('app.view.endpoints.clusters.cluster.assignUsers');
+      appClusterAssignUsers = $injector.get('appClusterAssignUsers');
 
     }));
 
@@ -63,8 +63,8 @@
     }
 
     it('should be defined', function () {
-      expect(assignUsersService).toBeDefined();
-      expect(assignUsersService.assign).toBeDefined();
+      expect(appClusterAssignUsers).toBeDefined();
+      expect(appClusterAssignUsers.assign).toBeDefined();
 
       createBasicController();
       expect(assignUsersController).toBeDefined();
@@ -76,7 +76,7 @@
       // User services list
       $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
 
-      var modalObj = assignUsersService.assign(content);
+      var modalObj = appClusterAssignUsers.assign(content);
 
       $httpBackend.flush();
 
@@ -185,7 +185,7 @@
             $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: users });
 
             // Initial set of organizations
-            _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
+            _.set(cfOrganizationModel, 'organizations.' + clusterGuid, organizations);
           });
 
           it('should pass correct content spec to frameworkDetailView', function () {

@@ -16,7 +16,7 @@
 
       var modelManager = $injector.get('modelManager');
       var appUtilsService = $injector.get('appUtilsService');
-      var organizationModel = $injector.get('organization-model');
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
 
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
@@ -27,7 +27,7 @@
       var $log = $injector.get('$log');
 
       var ClusterOrgController = $state.get('endpoint.clusters.cluster.organization').controller;
-      $controller = new ClusterOrgController(modelManager, appUtilsService, organizationModel, $stateParams, $state, $q, $log);
+      $controller = new ClusterOrgController(modelManager, appUtilsService, cfOrganizationModel, $stateParams, $state, $q, $log);
 
     }));
 

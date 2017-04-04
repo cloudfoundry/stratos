@@ -3,7 +3,7 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.manageUsers', ManageUsersFactory);
+    .factory('appClusterManageUsers', ManageUsersFactory);
 
   /**
    * @memberof app.view.endpoints.clusters.cluster
@@ -12,9 +12,9 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} appClusterRolesService - our roles service, used to create/handle data from roles tables
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
-  function ManageUsersFactory(modelManager, frameworkAsyncTaskDialog, appClusterRolesService, organizationModel) {
+  function ManageUsersFactory(modelManager, frameworkAsyncTaskDialog, appClusterRolesService, cfOrganizationModel) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
@@ -43,7 +43,7 @@
     this.show = function (clusterGuid, organizationGuid, users) {
 
       selectedRoles = {};
-      var organizations = _.omitBy(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
+      var organizations = _.omitBy(cfOrganizationModel.organizations[clusterGuid], function (org, orgGuid) {
         // Is it the single org we're looking for?
         if (organizationGuid) {
           return organizationGuid !== orgGuid;

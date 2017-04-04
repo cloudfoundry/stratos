@@ -9,8 +9,6 @@
   // Define contextData here so it's available to both directives
   var contextData;
 
-  ClusterActions.$inject = [];
-
   function ClusterActions() {
     return {
       restrict: 'E',
@@ -24,19 +22,6 @@
     };
   }
 
-  ClusterActionsController.$inject = [
-    'modelManager',
-    '$state',
-    '$q',
-    '$stateParams',
-    'appUtilsService',
-    'frameworkAsyncTaskDialog',
-    'app.view.endpoints.clusters.cluster.assignUsers',
-    'appUserSelection',
-    'appNotificationsService',
-    'organization-model'
-  ];
-
   /**
    * @name OrganizationTileController
    * @constructor
@@ -46,14 +31,14 @@
    * @param {object} $stateParams - the ui-router $stateParams service
    * @param {object} appUtilsService - our appUtilsService service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
-   * @param {object} assignUsersService - service that allows assigning roles to users
+   * @param {object} appClusterAssignUsers - service that allows assigning roles to users
    * @param {object} appUserSelection - service centralizing user selection
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function ClusterActionsController(modelManager, $state, $q, $stateParams, appUtilsService, frameworkAsyncTaskDialog,
-                                    assignUsersService, appUserSelection, appNotificationsService, organizationModel) {
+                                    appClusterAssignUsers, appUserSelection, appNotificationsService, cfOrganizationModel) {
     var that = this;
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -70,7 +55,7 @@
     }
 
     function getExistingSpaceNames(orgGuid) {
-      var orgSpaces = organizationModel.organizations[that.clusterGuid][orgGuid].spaces;
+      var orgSpaces = cfOrganizationModel.organizations[that.clusterGuid][orgGuid].spaces;
       return _.map(orgSpaces, function (space) {
         return space.entity.name;
       });
@@ -94,12 +79,12 @@
           {
             data: {
               // Make the form invalid if the name is already taken
-              organizationNames: organizationModel.organizationNames[that.clusterGuid]
+              organizationNames: cfOrganizationModel.organizationNames[that.clusterGuid]
             }
           },
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
-              return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
+              return cfOrganizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
                 appNotificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
                   {name: orgData.name});
               });
@@ -122,10 +107,10 @@
 
         // Context-sensitively pre-select the correct organization
         if ($stateParams.organization) {
-          selectedOrg = organizationModel.organizations[that.clusterGuid][$stateParams.organization];
+          selectedOrg = cfOrganizationModel.organizations[that.clusterGuid][$stateParams.organization];
         } else {
           // Pre-select the most recently created organization
-          var sortedOrgs = _.sortBy(organizationModel.organizations[that.clusterGuid], function (org) {
+          var sortedOrgs = _.sortBy(cfOrganizationModel.organizations[that.clusterGuid], function (org) {
             return -org.details.created_at;
           });
           selectedOrg = sortedOrgs[0];
@@ -167,7 +152,7 @@
 
         contextData = {
           organization: selectedOrg,
-          organizations: _.map(organizationModel.organizations[that.clusterGuid], function (org) {
+          organizations: _.map(cfOrganizationModel.organizations[that.clusterGuid], function (org) {
             return {
               label: getOrgName(org),
               value: org
@@ -229,7 +214,7 @@
       name: gettext('Assign User(s)'),
       disabled: false,
       execute: function () {
-        return assignUsersService.assign({
+        return appClusterAssignUsers.assign({
           clusterGuid: that.clusterGuid,
           selectedUsers: appUserSelection.getSelectedUsers(that.clusterGuid)
         });
@@ -287,8 +272,6 @@
 
     appUtilsService.chainStateResolve(this.stateName, $state, init);
   }
-
-  UniqueSpaceName.$inject = [];
 
   // private validator to ensure there are no duplicates within the list of new names
   function UniqueSpaceName() {

@@ -78,9 +78,9 @@
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
 
-      var organizationModel = $injector.get('organization-model');
-      _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
-      _.set(organizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      _.set(cfOrganizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
+      _.set(cfOrganizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
 
       var authModelOpts = {
         role: 'admin',

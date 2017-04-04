@@ -32,13 +32,13 @@
         var $q = $injector.get('$q');
         var modelManager = $injector.get('modelManager');
         var appUtilsService = $injector.get('appUtilsService');
-        var manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+        var appClusterManageUsers = $injector.get('appClusterManageUsers');
         var appClusterRolesService = $injector.get('appClusterRolesService');
         var appEventService = $injector.get('appEventService');
         var appUserSelection = $injector.get('appUserSelection');
-        var organizationModel = $injector.get('organization-model');
+        var cfOrganizationModel = $injector.get('cfOrganizationModel');
 
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, { details: {guid: organizationGuid } });
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, { details: {guid: organizationGuid } });
 
         var spaceGuid = 'spaceGuid';
 
@@ -58,8 +58,8 @@
         }
 
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
-        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
-          appClusterRolesService, appEventService, appUserSelection, organizationModel);
+        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers,
+          appClusterRolesService, appEventService, appUserSelection, cfOrganizationModel);
       }
 
       describe('as admin', function () {
@@ -129,7 +129,7 @@
 
     describe('Standard user table tests', function () {
 
-      var $state, $stateParams, $q, modelManager, appUtilsService, manageUsers, appClusterRolesService, appEventService, appUserSelection, orgModel;
+      var $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService, appEventService, appUserSelection, orgModel;
 
       var users = [
         {
@@ -218,7 +218,7 @@
 
       function createController() {
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
-        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, manageUsers,
+        $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, appUtilsService, appClusterManageUsers,
           appClusterRolesService, appEventService, appUserSelection, orgModel);
       }
 
@@ -232,11 +232,11 @@
         $q = $injector.get('$q');
         modelManager = $injector.get('modelManager');
         appUtilsService = $injector.get('appUtilsService');
-        manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
+        appClusterManageUsers = $injector.get('appClusterManageUsers');
         appClusterRolesService = $injector.get('appClusterRolesService');
         appEventService = $injector.get('appEventService');
         appUserSelection = $injector.get('appUserSelection');
-        orgModel = $injector.get('organization-model');
+        orgModel = $injector.get('cfOrganizationModel');
 
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
         _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
@@ -256,8 +256,8 @@
         });
 
         // Initial set of organizations
-        var organizationModel = $injector.get('organization-model');
-        _.set(organizationModel, 'organizations.' + clusterGuid, organizations);
+        var cfOrganizationModel = $injector.get('cfOrganizationModel');
+        _.set(cfOrganizationModel, 'organizations.' + clusterGuid, organizations);
 
         // Initial set of spaces
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -376,7 +376,7 @@
         $scope.$digest();
 
         // Manage Roles
-        spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[0]]);
@@ -404,7 +404,7 @@
         $controller.selectedUsers[users[0].metadata.guid] = false;
         $controller.selectedUsers[users[1].metadata.guid] = true;
 
-        spyOn(manageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
+        spyOn(appClusterManageUsers, 'show').and.callFake(function (inClusterGuid, inOrgGuid, inUsers) {
           expect(inClusterGuid).toEqual(clusterGuid);
           expect(inOrgGuid).toEqual(organizationGuid);
           expect(inUsers).toEqual([users[1]]);

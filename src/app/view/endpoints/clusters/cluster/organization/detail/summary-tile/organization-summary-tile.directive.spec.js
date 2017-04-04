@@ -94,9 +94,9 @@
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
 
-      var organizationModel = $injector.get('organization-model');
-      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, modelOrganization);
-      _.set(organizationModel, 'organizationNames.' + clusterGuid, [organizationGuid]);
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, modelOrganization);
+      _.set(cfOrganizationModel, 'organizationNames.' + clusterGuid, [organizationGuid]);
 
       var spaceGuid = 'spaceGuid';
       var authModelOpts = {

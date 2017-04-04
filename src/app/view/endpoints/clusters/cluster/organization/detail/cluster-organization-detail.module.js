@@ -8,10 +8,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail', {
       url: '',
@@ -22,23 +18,15 @@
     });
   }
 
-  ClusterOrgDetailController.$inject = [
-    'appUtilsService',
-    'organization-model',
-    '$state',
-    '$stateParams',
-    '$q'
-  ];
-
-  function ClusterOrgDetailController(appUtilsService, organizationModel, $state, $stateParams, $q) {
+  function ClusterOrgDetailController(appUtilsService, cfOrganizationModel, $state, $stateParams, $q) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
 
     function init() {
-      that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];
+      that.organizationNames = that.cfOrganizationModel.organizationNames[that.clusterGuid];
       return $q.resolve();
     }
 
@@ -48,7 +36,7 @@
 
   angular.extend(ClusterOrgDetailController.prototype, {
     organization: function () {
-      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
+      return this.cfOrganizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
     }
   });
 })();

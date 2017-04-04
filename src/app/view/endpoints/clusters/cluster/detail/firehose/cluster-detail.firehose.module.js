@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.detail.firehose', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.firehose', {
       url: '/firehose',
@@ -23,19 +19,6 @@
       }
     });
   }
-
-  ClusterFirehoseController.$inject = [
-    'base64',
-    'appUtilsService',
-    'appLocalStorage',
-    '$scope',
-    '$rootScope',
-    '$stateParams',
-    '$location',
-    '$log',
-    '$document',
-    '$animate'
-  ];
 
   function ClusterFirehoseController(base64, appUtilsService, appLocalStorage,
                                      $scope, $rootScope, $stateParams, $location, $log, $document, $animate) {

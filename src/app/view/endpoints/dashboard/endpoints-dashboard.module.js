@@ -5,10 +5,6 @@
     .module('app.view.endpoints.dashboard', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.dashboard', {
       url: '',
