@@ -97,7 +97,7 @@
     '$timeout',
     '$state',
     '$stateParams',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'modelManager',
     'frameworkWidgetsDialogConfirm',
     'service-manager.view.manage-instance.dialog',
@@ -315,7 +315,7 @@
     '$state',
     '$q',
     'modelManager',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'service-manager.utils.version'
   ];
 

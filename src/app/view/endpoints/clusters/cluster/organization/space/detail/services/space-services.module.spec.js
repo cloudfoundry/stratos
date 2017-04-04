@@ -43,7 +43,7 @@
       $filter = $injector.get('$filter');
       modelManager = $injector.get('modelManager');
       serviceInstanceService = $injector.get('cloud-foundry.view.applications.services.serviceInstanceService');
-      utils = $injector.get('appUtilsUtilsService');
+      utils = $injector.get('appUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);

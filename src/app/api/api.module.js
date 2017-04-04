@@ -22,16 +22,16 @@
    * See https://docs.angularjs.org/api/ng/service/$http for details
    *
    * @param {object} $q - the $q service for promise/deferred objects
-   * @param {object} appEventEventService - the event bus service
+   * @param {object} appEventService - the event bus service
    * @returns {object} The response error function
    */
-  function interceptor($q, appEventEventService) {
+  function interceptor($q, appEventService) {
     return {
       responseError: responseError
     };
 
     function responseError(response) {
-      appEventEventService.$emit('HTTP_' + response.status, response);
+      appEventService.$emit('HTTP_' + response.status, response);
       return $q.reject(response);
     }
   }

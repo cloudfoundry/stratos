@@ -18,7 +18,7 @@
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       var $scope = $injector.get('$rootScope').$new();
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
       var modelUtils = $injector.get('modelUtils');

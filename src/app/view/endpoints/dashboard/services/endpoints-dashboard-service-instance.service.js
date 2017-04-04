@@ -12,12 +12,12 @@
     'modelManager',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.vcsService',
-    'appUtilsUtilsService',
-    'appErrorErrorService',
+    'appUtilsService',
+    'appErrorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'frameworkWidgetsDialogConfirm',
-    'appEventEventService'
+    'appEventService'
   ];
 
   /**
@@ -31,16 +31,16 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
-   * @param {appUtilsUtilsService} utilsService - the utils service
-   * @param {app.error.appErrorErrorService} appErrorErrorService - service to show custom errors below title bar
+   * @param {appUtilsService} utilsService - the utils service
+   * @param {app.utils.appErrorService} appErrorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirmation dialog service
-   * @param {app.event.appEventEventService} appEventEventService - the event service
+   * @param {app.utils.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorErrorService,
-                                         notificationsService, credentialsDialog, frameworkWidgetsDialogConfirm, appEventEventService) {
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorService,
+                                         notificationsService, credentialsDialog, frameworkWidgetsDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -86,12 +86,12 @@
           // (otherwise we need to add additional 'errored' line to tiles)
           if (!userServicesCount || errors.length === 0) {
             // If there are no services or no errors continue as normal
-            appErrorErrorService.clearAppError();
+            appErrorService.clearAppError();
           } else if (errors.length === 1) {
             var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-            appErrorErrorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
+            appErrorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
           } else if (errors.length > 1) {
-            appErrorErrorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
+            appErrorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
           }
 
         });
@@ -238,7 +238,7 @@
      * @public
      */
     function clear() {
-      appErrorErrorService.clearAppError();
+      appErrorService.clearAppError();
     }
 
     function _createInstanceActions(isConnected, expired) {
@@ -308,7 +308,7 @@
             .then(function () {
               // Ensure that the user service instance list is updated before sending change notification
               return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
-                appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
+                appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
               });
             });
         }
@@ -344,7 +344,7 @@
                 });
                 break;
             }
-            appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         }
       });
@@ -382,7 +382,7 @@
         .then(function () {
           // Ensure that the user service instance list is updated before sending change notification
           return modelManager.retrieve('app.model.serviceInstance.user').list().then(function () {
-            appEventEventService.$emit(appEventEventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
           });
         });
     }

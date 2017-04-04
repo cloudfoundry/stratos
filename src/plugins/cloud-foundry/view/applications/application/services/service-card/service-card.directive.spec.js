@@ -148,11 +148,11 @@
 
         describe('addService', function () {
           it('should emit cf.events.START_ADD_SERVICE_WORKFLOW event', function () {
-            spyOn(serviceCardCtrl.appEventEventService, '$emit');
+            spyOn(serviceCardCtrl.appEventService, '$emit');
             serviceCardCtrl.addService();
-            expect(serviceCardCtrl.appEventEventService.$emit).toHaveBeenCalled();
+            expect(serviceCardCtrl.appEventService.$emit).toHaveBeenCalled();
 
-            var args = serviceCardCtrl.appEventEventService.$emit.calls.mostRecent().args;
+            var args = serviceCardCtrl.appEventService.$emit.calls.mostRecent().args;
             expect(args[0]).toBe('cf.events.START_ADD_SERVICE_WORKFLOW');
           });
         });
@@ -181,11 +181,11 @@
 
         describe('manageInstances', function () {
           it('should emit cf.events.START_MANAGE_SERVICES event', function () {
-            spyOn(serviceCardCtrl.appEventEventService, '$emit');
+            spyOn(serviceCardCtrl.appEventService, '$emit');
             serviceCardCtrl.manageInstances();
-            expect(serviceCardCtrl.appEventEventService.$emit).toHaveBeenCalled();
+            expect(serviceCardCtrl.appEventService.$emit).toHaveBeenCalled();
 
-            var args = serviceCardCtrl.appEventEventService.$emit.calls.mostRecent().args;
+            var args = serviceCardCtrl.appEventService.$emit.calls.mostRecent().args;
             expect(args[0]).toBe('cf.events.START_MANAGE_SERVICES');
           });
         });

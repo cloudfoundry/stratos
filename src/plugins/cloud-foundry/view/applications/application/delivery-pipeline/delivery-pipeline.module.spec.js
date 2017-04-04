@@ -8,7 +8,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      appUtilsUtilsService: {
+      appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         }
@@ -63,7 +63,7 @@
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
       notificationsService = $injector.get('app.view.notificationsService');
-      utils = $injector.get('appUtilsUtilsService');
+      utils = $injector.get('appUtilsService');
     }));
 
     function createController() {
@@ -107,14 +107,14 @@
         }
       };
 
-      var appEventEventService = {
+      var appEventService = {
         $emit: angular.noop
       };
 
       $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
-      controller = new ApplicationDeliveryPipelineController(appEventEventService, modelManager, vcsTokenManager,
+      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager,
         registerVcsToken, confirmDialog, notificationsService, addNotificationService,
         postDeployActionService, utils, detailView, PAT_DELIMITER,
         $interpolate, $stateParams, $rootScope.$new(), $q, $state);

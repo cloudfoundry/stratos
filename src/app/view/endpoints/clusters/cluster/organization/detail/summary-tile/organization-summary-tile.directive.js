@@ -27,7 +27,7 @@
     '$stateParams',
     '$q',
     'modelManager',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
     'frameworkWidgetsDialogConfirm',
@@ -43,7 +43,7 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appUtilsUtilsService} utils - the console utils service
+   * @param {appUtilsService} utils - the console utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} frameworkWidgetsDialogConfirm - our confirmation dialog service

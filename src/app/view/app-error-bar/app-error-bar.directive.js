@@ -31,22 +31,22 @@
    * @description Controller for the Application Error Bar directive
    * @constructor
    * @param {object} $scope - the Angular $scope
-   * @param {app.event.appEventEventService} appEventEventService - the event Service
-   * @property {app.event.appEventEventService} appEventEventService - the event Service
+   * @param {app.utils.appEventService} appEventService - the event Service
+   * @property {app.utils.appEventService} appEventService - the event Service
    * @property {string} messgae - the error message to display
    */
-  function AppErrorBarController($scope, appEventEventService) {
+  function AppErrorBarController($scope, appEventService) {
     var that = this;
-    this.appEventEventService = appEventEventService;
+    this.appEventService = appEventService;
     this.message = undefined;
     this.displayed = false;
 
-    this.removeSetListener = appEventEventService.$on(appEventEventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
+    this.removeSetListener = appEventService.$on(appEventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
       that.message = msg;
       that.displayed = true;
     });
 
-    this.removeClearListener = appEventEventService.$on(appEventEventService.events.APP_ERROR_CLEAR, function () {
+    this.removeClearListener = appEventService.$on(appEventService.events.APP_ERROR_CLEAR, function () {
       that.displayed = false;
       that.message = undefined;
     });

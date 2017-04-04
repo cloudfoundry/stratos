@@ -15,7 +15,7 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('modelManager');
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
       var organizationModel = $injector.get('organization-model');
 
       var $stateParams = $injector.get('$stateParams');

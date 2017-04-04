@@ -30,10 +30,10 @@
   DeleteAppWorkflowController.$inject = [
     '$filter',
     'modelManager',
-    'appEventEventService',
+    'appEventService',
     '$q',
     '$interpolate',
-    'appUtilsUtilsService'
+    'appUtilsService'
   ];
 
   /**
@@ -42,22 +42,22 @@
    * @constructor
    * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.appEventEventService} appEventEventService - the Event management service
+   * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
-   * @param {appUtilsUtilsService} utils - the utils service
-   * @property {app.event.appEventEventService} appEventEventService - the Event management service
+   * @param {appUtilsService} utils - the utils service
+   * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {appUtilsUtilsService} utils - the utils service
+   * @property {appUtilsService} utils - the utils service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {boolean} deletingApplication - a flag indicating if the workflow in progress
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController($filter, modelManager, appEventEventService, $q, $interpolate, utils) {
-    this.appEventEventService = appEventEventService;
+  function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, utils) {
+    this.appEventService = appEventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
     this.utils = utils;
@@ -407,8 +407,8 @@
         // show notification for successful binding
         var successMsg = gettext("'{{appName}}' has been deleted");
         var message = that.$interpolate(successMsg)({appName: appName});
-        that.appEventEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
-        that.appEventEventService.$emit(that.appEventEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+        that.appEventService.$emit(that.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         that.dismissDialog();
       })
       .catch(function () {

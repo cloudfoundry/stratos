@@ -11,8 +11,8 @@
     .module('app.model')
     .run(registerUserServiceInstanceModel);
 
-  function registerUserServiceInstanceModel($q, appUtilsUtilsService, apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, appUtilsUtilsService, apiManager));
+  function registerUserServiceInstanceModel($q, appUtilsService, apiManager, modelManager) {
+    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, appUtilsService, apiManager));
   }
 
   /**
@@ -20,7 +20,7 @@
    * @memberof app.model.serviceInstance.user
    * @name app.model.serviceInstance.user.UserServiceInstance
    * @param {object} $q - the Angular Promise service
-   * @param {appUtilsUtilsService} utilsService - utils service
+   * @param {appUtilsService} utilsService - utils service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} UserServiceInstance
    */

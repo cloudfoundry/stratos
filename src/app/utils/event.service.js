@@ -25,12 +25,12 @@
 
   angular
     .module('app.utils')
-    .factory('appEventEventService', eventServiceFactory);
+    .factory('appEventService', eventServiceFactory);
 
   /**
-   * @namespace appEventEventService
+   * @namespace appEventService
    * @memberof app.utils
-   * @name appEventEventService
+   * @name appEventService
    * @description The event bus service
    * @param {object} $rootScope - the $rootScope
    * @param {object} frameworkUtilsDialogEvents - UI Framework's Dialog Events service
@@ -38,17 +38,17 @@
    * @returns {object} the event bus
    * @example
    * // subscribe to an event
-   * appEventEventService.$on(events.HTTP_401, handler);
+   * appEventService.$on(events.HTTP_401, handler);
    *
    * // emit an event
-   * appEventEventService.$emit(events.HTTP_401);
+   * appEventService.$emit(events.HTTP_401);
    */
   function eventServiceFactory($rootScope, frameworkUtilsDialogEvents) {
-    var appEventEventService = $rootScope.$new();
-    appEventEventService.events = events;
+    var appEventService = $rootScope.$new();
+    appEventService.events = events;
     // Configure the dialog events service to send events using this event service (scope)
-    frameworkUtilsDialogEvents.configure({ scope: appEventEventService });
-    return appEventEventService;
+    frameworkUtilsDialogEvents.configure({ scope: appEventService });
+    return appEventService;
   }
 
 })();

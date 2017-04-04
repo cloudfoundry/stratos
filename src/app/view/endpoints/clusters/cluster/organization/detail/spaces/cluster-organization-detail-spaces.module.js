@@ -31,7 +31,7 @@
     '$stateParams',
     '$state',
     'modelManager',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'organization-model'
   ];
 

@@ -11,34 +11,38 @@
     .module('app.model')
     .run(registerModel);
 
-  function registerModel(modelManager, appEventEventService, appLoggedInLoggedInService, $state, $rootScope, $log) {
+  function registerModel(modelManager, appEventService, appLoggedInService, $state, $rootScope, $log) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new NavigationModel(appEventEventService, appLoggedInLoggedInService, $state, $rootScope, $log));
+    modelManager.register('app.model.navigation', new NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log));
   }
 
   /**
    * @namespace app.model.NavigationModel
    * @memberof app.model
    * @name NavigationModel
+   * @param {app.utils.appEventService} appEventService - the application event service
+   * @param {app.utils.appLoggedInService} appLoggedInService - the application logged in service
+   * @param {$state} $state - the Angular $state service
+   * @param {$rootScope} $rootScope - the Angular $rootScope service
+   * @param {$log} $log - the Angular $log service
    * @constructor
-
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationModel(appEventEventService, appLoggedInLoggedInService, $state, $rootScope, $log) {
+  function NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log) {
     var menu = new Menu($log);
-    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
+    appEventService.$on(appEventService.events.LOGIN, function () {
       onLogin();
     });
-    appEventEventService.$on(appEventEventService.events.LOGOUT, function () {
+    appEventService.$on(appEventService.events.LOGOUT, function () {
       onLogout();
     });
-    appEventEventService.$on(appEventEventService.events.REDIRECT, function (event, state, params) {
+    appEventService.$on(appEventService.events.REDIRECT, function (event, state, params) {
       onAutoNav(event, state, params);
     });
-    appEventEventService.$on(appEventEventService.events.TRANSFER, function (event, state, params) {
+    appEventService.$on(appEventService.events.TRANSFER, function (event, state, params) {
       $state.go(state, params, {location: false});
     });
 
@@ -53,7 +57,7 @@
       if (consoleViewScrollPanel[0]) {
         consoleViewScrollPanel[0].scrollTop = 0;
       }
-      appLoggedInLoggedInService.userInteracted();
+      appLoggedInService.userInteracted();
     });
 
     return {

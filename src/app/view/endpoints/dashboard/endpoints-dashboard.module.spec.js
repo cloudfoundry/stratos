@@ -24,7 +24,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      appUtilsUtilsService: {
+      appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         },
@@ -78,7 +78,7 @@
 
       modelManager = $injector.get('modelManager');
       var registerService = $injector.get('app.view.registerService');
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
       var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
       var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
       var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');

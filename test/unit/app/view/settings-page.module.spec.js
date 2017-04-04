@@ -9,10 +9,10 @@
 
     beforeEach(inject(function ($injector) {
       var $state = $injector.get('$state');
-      var appEventEventService = $injector.get('appEventEventService');
+      var appEventService = $injector.get('appEventService');
       var modelManager = $injector.get('modelManager');
       var AccountSettingsController = $state.get('account-settings').controller;
-      controller = new AccountSettingsController(appEventEventService, modelManager);
+      controller = new AccountSettingsController(appEventService, modelManager);
     }));
 
     it('should be defined', function () {

@@ -2,7 +2,7 @@
   'use strict';
 
   describe('manage-services directive', function () {
-    var $httpBackend, $scope, appEventEventService, mockAppsApi, mockApp, mockService, badMockService, manageServicesCtrl;
+    var $httpBackend, $scope, appEventService, mockAppsApi, mockApp, mockService, badMockService, manageServicesCtrl;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      appEventEventService = $injector.get('appEventEventService');
+      appEventService = $injector.get('appEventService');
 
       // mock UI router $stateParams
       var $stateParams = $injector.get('$stateParams');
@@ -86,7 +86,7 @@
           cnsiGuid: 'guid',
           service: mockService
         };
-        appEventEventService.$emit(event, config);
+        appEventService.$emit(event, config);
 
         $scope.$apply();
         $httpBackend.flush();

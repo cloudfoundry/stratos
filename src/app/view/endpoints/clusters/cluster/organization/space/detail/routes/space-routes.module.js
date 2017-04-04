@@ -32,7 +32,7 @@
     '$state',
     'modelManager',
     'app.view.endpoints.clusters.routesService',
-    'appUtilsUtilsService'
+    'appUtilsService'
   ];
 
   function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {

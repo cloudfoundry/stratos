@@ -29,8 +29,8 @@
 
   AddAppWorkflowController.$inject = [
     'modelManager',
-    'appEventEventService',
-    'appUtilsUtilsService',
+    'appEventService',
+    'appUtilsService',
     'app.view.vcs.manageVcsTokens',
     'organization-model',
     '$interpolate',
@@ -44,8 +44,8 @@
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.appEventEventService} appEventEventService - the Event management service
-   * @param {appUtilsUtilsService} utils - the utils service
+   * @param {app.utils.appEventService} appEventService - the Event management service
+   * @param {appUtilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} organizationModel - the organization-model service
    * @param {object} $interpolate - the Angular $interpolate service
@@ -58,7 +58,7 @@
    * @property {object} $timeout - the Angular $timeout service
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.event.appEventEventService} appEventEventService - the Event management service
+   * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -71,7 +71,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, appEventEventService, utils, manageVcsTokens, organizationModel,
+  function AddAppWorkflowController(modelManager, appEventService, utils, manageVcsTokens, organizationModel,
                                     $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -79,7 +79,7 @@
     this.$timeout = $timeout;
     this.addingApplication = false;
     this.modelManager = modelManager;
-    this.appEventEventService = appEventEventService;
+    this.appEventService = appEventService;
     this.utils = utils;
     this.manageVcsTokens = manageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -232,7 +232,7 @@
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
                     var msg = gettext("A new application and route have been created for '{{ appName }}'");
-                    that.appEventEventService.$emit('cf.events.NOTIFY_SUCCESS', {
+                    that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });
                   }, function (error) {
@@ -254,7 +254,7 @@
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
         this.options = {
-          appEventEventService: this.appEventEventService,
+          appEventService: this.appEventService,
           subflow: null,
           serviceInstances: [],
           services: [],
@@ -308,7 +308,7 @@
               return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
             });
 
-          that.appEventEventService.$emit('cf.events.NEW_APP_CREATED');
+          that.appEventService.$emit('cf.events.NEW_APP_CREATED');
 
           return that.$q.all([summaryPromise, routePromise]).then(function () {
             that.userInput.application = that.appModel.application;
@@ -504,7 +504,7 @@
           newlyCreated: true
         };
 
-        this.appEventEventService.$emit(this.appEventEventService.events.REDIRECT, 'cf.applications.application.summary', params);
+        this.appEventService.$emit(this.appEventService.events.REDIRECT, 'cf.applications.application.summary', params);
       },
 
       startWorkflow: function () {

@@ -23,7 +23,7 @@
       $stateParams.space = spaceGuid;
 
       var $q = $injector.get('$q');
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
 
       var ClusterSpaceController = $state.get('endpoint.clusters.cluster.organization.space.detail').controller;
       $controller = new ClusterSpaceController($q, $state, $stateParams, modelManager, utils);

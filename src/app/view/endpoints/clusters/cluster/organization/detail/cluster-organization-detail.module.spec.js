@@ -14,7 +14,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
       var organizationModel = $injector.get('organization-model');
 
       var $state = $injector.get('$state');

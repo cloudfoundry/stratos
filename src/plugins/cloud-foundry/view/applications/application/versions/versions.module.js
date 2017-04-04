@@ -28,7 +28,7 @@
     'modelManager',
     'frameworkWidgetsDialogConfirm',
     'app.view.notificationsService',
-    'appUtilsUtilsService'
+    'appUtilsService'
   ];
 
   /**

@@ -17,7 +17,7 @@
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       var $log = $injector.get('$log');
-      var utils = $injector.get('appUtilsUtilsService');
+      var utils = $injector.get('appUtilsService');
       var $state = $injector.get('$state');
       var $q = $injector.get('$q');
       var rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');

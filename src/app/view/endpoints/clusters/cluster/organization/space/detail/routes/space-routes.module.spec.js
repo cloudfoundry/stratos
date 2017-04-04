@@ -44,7 +44,7 @@
       $state = $injector.get('$state');
       modelManager = $injector.get('modelManager');
       routesService = $injector.get('app.view.endpoints.clusters.routesService');
-      utils = $injector.get('appUtilsUtilsService');
+      utils = $injector.get('appUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);

@@ -32,7 +32,7 @@
     '$filter',
     'modelManager',
     'cloud-foundry.view.applications.services.serviceInstanceService',
-    'appUtilsUtilsService'
+    'appUtilsService'
   ];
 
   function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,

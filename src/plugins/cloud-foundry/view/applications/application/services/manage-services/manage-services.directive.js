@@ -25,7 +25,7 @@
     '$q',
     '$scope',
     'modelManager',
-    'appEventEventService',
+    'appEventService',
     'helion.framework.widgets.detailView',
     'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
@@ -37,7 +37,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.event.appEventEventService} appEventEventService - the event management service
+   * @param {app.utils.appEventService} appEventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
    * @param {object} serviceInstanceService - the service instance service
    * @property {object} $q - the Angular $q service
@@ -48,7 +48,7 @@
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($q, $scope, modelManager, appEventEventService, detailView, serviceInstanceService) {
+  function ManageServicesController($q, $scope, modelManager, appEventService, detailView, serviceInstanceService) {
     var that = this;
     this.$q = $q;
     this.detailView = detailView;
@@ -59,7 +59,7 @@
     this.serviceInstances = [];
     this.serviceBindings = {};
 
-    var manageServicesEvent = appEventEventService.$on('cf.events.START_MANAGE_SERVICES', function (event, config) {
+    var manageServicesEvent = appEventService.$on('cf.events.START_MANAGE_SERVICES', function (event, config) {
       that.$q.when(that.reset(config)).then(function () {
         that.modal = that.startManageServices();
       });

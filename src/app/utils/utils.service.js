@@ -3,11 +3,11 @@
 
   angular
     .module('app.utils')
-    .factory('appUtilsUtilsService', utilsServiceFactory)
+    .factory('appUtilsService', utilsServiceFactory)
     .filter('mbToHumanSize', mbToHumanSizeFilter);
 
   /**
-   * @namespace appUtilsUtilsService
+   * @namespace appUtilsService
    * @memberof app.utils
    * @name utilsService
    * @description Various utility functions
@@ -96,7 +96,7 @@
 
     /**
      * @function retryRequest
-     * @memberOf appUtilsUtilsService
+     * @memberOf appUtilsService
      * @description Retries promise until max tries reached
      * @param {object} requestPromise - a function returning a promise object
      * @param {number} maxRetries - max retries
@@ -135,7 +135,7 @@
 
     /**
      * @function runInSequence
-     * @memberOf appUtilsUtilsService
+     * @memberOf appUtilsService
      * @description runs async functions in sequence
      * @param {object} funcStack - a stack containing async functions
      * @param {boolean} asQueue - optional, indicting to treat the funcStack as a queue
@@ -312,9 +312,9 @@
     }
   }
 
-  function mbToHumanSizeFilter(appUtilsUtilsService) {
+  function mbToHumanSizeFilter(appUtilsService) {
     return function (input) {
-      return appUtilsUtilsService.mbToHumanSize(input);
+      return appUtilsService.mbToHumanSize(input);
     };
   }
 

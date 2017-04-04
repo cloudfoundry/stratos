@@ -12,11 +12,11 @@
         var that = this;
         this.addingPipeline = false;
 
-        this.appEventEventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
+        this.appEventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
         });
 
-        this.appEventEventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+        this.appEventService.$on('cf.events.LOAD_MORE_REPOS', function () {
           that.loadMoreRepos();
         });
 

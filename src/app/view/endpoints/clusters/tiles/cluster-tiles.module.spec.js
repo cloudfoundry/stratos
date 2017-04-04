@@ -59,7 +59,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      appUtilsUtilsService: {
+      appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         }
@@ -73,7 +73,7 @@
       $stateParams = $injector.get('$stateParams');
 
       modelManager = $injector.get('modelManager');
-      utilsService = $injector.get('appUtilsUtilsService');
+      utilsService = $injector.get('appUtilsService');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

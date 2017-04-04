@@ -11,15 +11,15 @@
     .module('app.model')
     .run(registerStackatoInfoModel);
 
-  function registerStackatoInfoModel(modelManager, appUtilsUtilsService, stackatoInfoService) {
-    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsUtilsService, stackatoInfoService));
+  function registerStackatoInfoModel(modelManager, appUtilsService, stackatoInfoService) {
+    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsService, stackatoInfoService));
   }
 
   /**
    * @namespace app.model.userInfo.UserInfo
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
-   * @param {appUtilsUtilsService} utilsService - utils service
+   * @param {appUtilsService} utilsService - utils service
    * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class

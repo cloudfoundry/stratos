@@ -2,40 +2,40 @@
   'use strict';
   angular
     .module('app.utils')
-    .factory('appErrorErrorService', errorServiceFactory);
+    .factory('appErrorService', errorServiceFactory);
 
   /**
-   * @namespace appErrorErrorService
+   * @namespace appErrorService
    * @memberof app.utils
-   * @name appErrorErrorService
+   * @name appErrorService
    * @description The application error service
-   * @param {object} appEventEventService - the event service
+   * @param {object} appEventService - the event service
    * @returns {object} the error service
    */
-  function errorServiceFactory(appEventEventService) {
+  function errorServiceFactory(appEventService) {
     var hasError = false;
     var appErrorMessage, systemErrorMessage;
 
     return {
       /**
        * @function _update
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Updates the error based on combination of system and application level error messages
        */
       _update: function () {
         var hasErrorMsg = this.getError();
         if (hasError && !hasErrorMsg) {
-          appEventEventService.$broadcast(appEventEventService.events.APP_ERROR_CLEAR);
+          appEventService.$broadcast(appEventService.events.APP_ERROR_CLEAR);
         }
         hasError = !!hasErrorMsg;
         if (hasError) {
-          appEventEventService.$broadcast(appEventEventService.events.APP_ERROR_NOTIFY, hasErrorMsg);
+          appEventService.$broadcast(appEventService.events.APP_ERROR_NOTIFY, hasErrorMsg);
         }
       },
 
       /**
        * @function getError
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Gets the current error message
        * @returns {string} The current error message or undefined if there is no system or application error set
        */
@@ -45,7 +45,7 @@
 
       /**
        * @function clearSystemError
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Clear the system-level error
        */
       clearSystemError: function () {
@@ -55,7 +55,7 @@
 
       /**
        * @function setSystemError
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Set the system-level error.
        * @param {string} msg - the error message to set
        */
@@ -68,7 +68,7 @@
 
       /**
        * @function clearAppError
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Clear the application-level error
        */
       clearAppError: function () {
@@ -78,7 +78,7 @@
 
       /**
        * @function setAppError
-       * @memberOf app.error.appErrorErrorService
+       * @memberOf app.utils.appErrorService
        * @description Set the application-level error. There is no default error message for application errors.
        * @param {string} msg - the error message to set
        */

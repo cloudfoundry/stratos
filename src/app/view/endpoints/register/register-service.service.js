@@ -9,7 +9,7 @@
     '$q',
     '$interpolate',
     'modelManager',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'app.view.notificationsService',
     'helion.framework.widgets.detailView'
   ];
@@ -21,7 +21,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager The console model manager service
-   * @param {appUtilsUtilsService} utilsService - the console utils service
+   * @param {appUtilsService} utilsService - the console utils service
    * @param {app.view.notificationsService} notificationsService The console notification service
    * @param {helion.framework.widgets.detailView} detailView The framework async detail view
    * @returns {object} Object containing 'show' function

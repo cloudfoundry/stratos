@@ -3,13 +3,13 @@
 
   angular
     .module('app.utils')
-    .factory('appLoggedInLoggedInService', loggedInServiceFactory);
+    .factory('appLoggedInService', loggedInServiceFactory);
 
   /**
-   * @namespace app.loggedIn.appLoggedInLoggedInService
+   * @namespace app.loggedIn.appLoggedInService
    * @memberof app.loggedIn
    * @name loggedInServiceFactory
-   * @param {object} appEventEventService - Event Service
+   * @param {object} appEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkWidgetsDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
@@ -20,7 +20,7 @@
    * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(appEventEventService, modelManager, frameworkWidgetsDialogConfirm,
+  function loggedInServiceFactory(appEventService, modelManager, frameworkWidgetsDialogConfirm,
                                   $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
@@ -130,12 +130,12 @@
       userInteracted();
     });
 
-    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
+    appEventService.$on(appEventService.events.LOGIN, function () {
       loggedIn = true;
       sessionChecker = $interval(checkSession, checkSessionInterval);
     });
 
-    appEventEventService.$on(appEventEventService.events.LOGOUT, function () {
+    appEventService.$on(appEventService.events.LOGOUT, function () {
       loggedIn = false;
       if (angular.isDefined(sessionChecker)) {
         $interval.cancel(sessionChecker);

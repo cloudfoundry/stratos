@@ -2,13 +2,13 @@
   'use strict';
 
   describe('navigation model', function () {
-    var navigationModel, appEventEventService, $state;
+    var navigationModel, appEventService, $state;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       var modelManager = $injector.get('modelManager');
       navigationModel = modelManager.retrieve('app.model.navigation');
-      appEventEventService = $injector.get('appEventEventService');
+      appEventService = $injector.get('appEventService');
       $state = $injector.get('$state');
     }));
 
@@ -26,25 +26,25 @@
 
     it('`onLogin` should called when events.LOGGED_IN triggered', function () {
       spyOn(navigationModel.menu, 'reset');
-      appEventEventService.$emit(appEventEventService.events.LOGIN);
+      appEventService.$emit(appEventService.events.LOGIN);
       expect(navigationModel.menu.reset).toHaveBeenCalled();
     });
 
     it('`onLogout` should called when events.LOGGED_OUT triggered', function () {
       spyOn(navigationModel.menu, 'reset');
-      appEventEventService.$emit(appEventEventService.events.LOGOUT);
+      appEventService.$emit(appEventService.events.LOGOUT);
       expect(navigationModel.menu.reset).toHaveBeenCalled();
     });
 
     it('`onAutoNav` should called when events.REDIRECT triggered', function () {
       spyOn($state, 'go');
-      appEventEventService.$emit(appEventEventService.events.REDIRECT, 'cf.applications');
+      appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications');
       expect($state.go).toHaveBeenCalledWith('cf.applications', undefined);
     });
 
     it('`$state.go` should be called when events.REDIRECT triggered', function () {
       spyOn($state, 'go');
-      appEventEventService.$emit(appEventEventService.events.REDIRECT, 'cf.applications');
+      appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications');
       expect($state.go).toHaveBeenCalledWith('cf.applications', undefined);
       // TEAMFOUR-366 - the menu is now updated using a $rootScope stateChangeSuccess handler
       // expect(navigationModel.menu.currentState).toBe('cf.applications');

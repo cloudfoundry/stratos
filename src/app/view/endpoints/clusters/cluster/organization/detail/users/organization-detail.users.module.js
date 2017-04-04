@@ -32,16 +32,16 @@
     '$stateParams',
     '$q',
     'modelManager',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'appEventEventService',
+    'appEventService',
     'app.view.userSelection',
     'organization-model'
   ];
 
   function OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService,
-                                       appEventEventService, userSelection, organizationModel) {
+                                       appEventService, userSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -261,7 +261,7 @@
       return rolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
     };
 
-    var rolesUpdatedListener = appEventEventService.$on(appEventEventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = appEventService.$on(appEventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 

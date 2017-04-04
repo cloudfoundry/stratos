@@ -31,15 +31,15 @@
     '$q',
     '$state',
     'modelManager',
-    'appEventEventService',
-    'appUtilsUtilsService'
+    'appEventService',
+    'appUtilsService'
   ];
 
-  function register($q, $state, modelManager, appEventEventService, utils) {
-    return new Endpoints($q, $state, modelManager, appEventEventService, utils);
+  function register($q, $state, modelManager, appEventService, utils) {
+    return new Endpoints($q, $state, modelManager, appEventService, utils);
   }
 
-  function Endpoints($q, $state, modelManager, appEventEventService, utils) {
+  function Endpoints($q, $state, modelManager, appEventService, utils) {
     var that = this;
 
     this.initialized = $q.defer();
@@ -50,7 +50,7 @@
       return that.initialized.promise;
     }
 
-    appEventEventService.$on(appEventEventService.events.LOGIN, function () {
+    appEventService.$on(appEventService.events.LOGIN, function () {
       that.onLoggedIn();
     });
 

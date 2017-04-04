@@ -31,7 +31,7 @@
     'modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.routesService',
     'frameworkWidgetsDialogConfirm',
     'app.view.notificationsService'
@@ -49,7 +49,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
-   * @param {appUtilsUtilsService} utils - the utils service
+   * @param {appUtilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
    * @param {helion.framework.widgets.dialog.frameworkWidgetsDialogConfirm} frameworkWidgetsDialogConfirm - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -58,7 +58,7 @@
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.frameworkWidgetsDialogConfirm} frameworkWidgetsDialogConfirm - the confirm dialog service
-   * @property {appUtilsUtilsService} utils - the utils service
+   * @property {appUtilsService} utils - the utils service
    * @property {app.view.notificationsService} notificationsService - the toast notification service
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,

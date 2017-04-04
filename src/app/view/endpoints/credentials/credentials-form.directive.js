@@ -37,7 +37,7 @@
   }
 
   CredentialsFormController.$inject = [
-    'appEventEventService',
+    'appEventService',
     'modelManager',
     'app.view.notificationsService'
   ];
@@ -49,19 +49,19 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {app.event.appEventEventService} appEventEventService - the application event bus
+   * @param {app.utils.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @property {app.event.appEventEventService} appEventEventService - the application event bus
+   * @property {app.utils.appEventService} appEventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
    * @property {boolean} serverErrorOnRegister - an error flag for a server error
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController(appEventEventService, modelManager, notificationsService) {
+  function CredentialsFormController(appEventService, modelManager, notificationsService) {
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.appEventEventService = appEventEventService;
+    this.appEventService = appEventService;
     this.notificationsService = notificationsService;
     this.authenticating = false;
     this.failedRegister = false;

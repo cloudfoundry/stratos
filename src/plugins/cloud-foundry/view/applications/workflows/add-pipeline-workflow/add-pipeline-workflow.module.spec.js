@@ -17,9 +17,9 @@
 
       function F() {
         this.modelManager = $injector.get('modelManager');
-        this.appEventEventService = $injector.get('appEventEventService');
+        this.appEventService = $injector.get('appEventService');
         this.$q = $injector.get('$q');
-        this.utils = $injector.get('appUtilsUtilsService');
+        this.utils = $injector.get('appUtilsService');
         this.$scope = $injector.get('$rootScope').$new();
         this.$timeout = $injector.get('$timeout');
         this.userInput = {
@@ -100,13 +100,13 @@
 
       it('should listen cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
         spyOn(this.instance, 'startWorkflow');
-        this.instance.appEventEventService.$emit('cf.events.START_ADD_PIPELINE_WORKFLOW');
+        this.instance.appEventService.$emit('cf.events.START_ADD_PIPELINE_WORKFLOW');
         expect(this.instance.startWorkflow).toHaveBeenCalled();
       });
 
       it('should listen cf.events.LOAD_MORE_REPOS', function () {
         spyOn(this.instance, 'loadMoreRepos');
-        this.instance.appEventEventService.$emit('cf.events.LOAD_MORE_REPOS');
+        this.instance.appEventService.$emit('cf.events.LOAD_MORE_REPOS');
         expect(this.instance.loadMoreRepos).toHaveBeenCalled();
       });
 

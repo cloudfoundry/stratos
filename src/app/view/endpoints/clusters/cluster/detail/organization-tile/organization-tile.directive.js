@@ -25,7 +25,7 @@
     '$state',
     '$q',
     '$scope',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
     'frameworkWidgetsDialogConfirm',

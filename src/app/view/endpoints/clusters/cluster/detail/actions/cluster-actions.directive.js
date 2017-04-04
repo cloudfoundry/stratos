@@ -29,7 +29,7 @@
     '$state',
     '$q',
     '$stateParams',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.userSelection',

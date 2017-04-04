@@ -29,7 +29,7 @@
     '$stateParams',
     '$state',
     '$q',
-    'appUtilsUtilsService',
+    'appUtilsService',
     'modelManager'
   ];
 

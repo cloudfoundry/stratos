@@ -27,7 +27,7 @@
     '$q',
     '$state',
     'modelManager',
-    'appUtilsUtilsService'
+    'appUtilsService'
   ];
 
   /**
@@ -37,7 +37,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsUtilsService} utils - the utils service
+   * @param {appUtilsService} utils - the utils service
    * @constructor
    */
   function ClustersRouterController($q, $state, modelManager, utils) {
