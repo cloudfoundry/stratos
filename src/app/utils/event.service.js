@@ -33,7 +33,7 @@
    * @name appEventService
    * @description The event bus service
    * @param {object} $rootScope - the $rootScope
-   * @param {object} frameworkUtilsDialogEvents - UI Framework's Dialog Events service
+   * @param {object} frameworkDialogEvents - UI Framework's Dialog Events service
    * @property {object} events - the default set of events (i.e. HTTP status codes)
    * @returns {object} the event bus
    * @example
@@ -43,11 +43,11 @@
    * // emit an event
    * appEventService.$emit(events.HTTP_401);
    */
-  function eventServiceFactory($rootScope, frameworkUtilsDialogEvents) {
+  function eventServiceFactory($rootScope, frameworkDialogEvents) {
     var appEventService = $rootScope.$new();
     appEventService.events = events;
     // Configure the dialog events service to send events using this event service (scope)
-    frameworkUtilsDialogEvents.configure({ scope: appEventService });
+    frameworkDialogEvents.configure({ scope: appEventService });
     return appEventService;
   }
 

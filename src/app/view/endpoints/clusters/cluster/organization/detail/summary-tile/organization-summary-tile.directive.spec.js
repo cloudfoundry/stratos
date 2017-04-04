@@ -66,7 +66,7 @@
           actionTask: actionTask
         };
       },
-      frameworkWidgetsDialogConfirm: function (spec) {
+      frameworkDialogConfirm: function (spec) {
         return spec.callback();
       },
       'app.view.notificationsService': {

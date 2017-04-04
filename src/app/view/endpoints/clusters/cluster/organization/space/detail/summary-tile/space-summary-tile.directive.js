@@ -28,7 +28,7 @@
     'appUtilsService',
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
-    'frameworkWidgetsDialogConfirm',
+    'frameworkDialogConfirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'
   ];
@@ -44,13 +44,13 @@
    * @param {appUtilsService} utils - the utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
-   * @param {object} frameworkWidgetsDialogConfirm - our confirmation dialog service
+   * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      cliCommands, frameworkWidgetsDialogConfirm, asyncTaskDialog, organizationModel) {
+                                      cliCommands, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -118,7 +118,7 @@
       name: gettext('Delete Space'),
       disabled: true,
       execute: function () {
-        return frameworkWidgetsDialogConfirm({
+        return frameworkDialogConfirm({
           title: gettext('Delete Space'),
           description: gettext('Are you sure you want to delete space') +
           " '" + that.spaceDetail().details.space.entity.name + "'?",

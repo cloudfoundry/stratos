@@ -30,7 +30,7 @@
   ApplicationController.$inject = [
     'modelManager',
     'appEventService',
-    'frameworkWidgetsDialogConfirm',
+    'frameworkDialogConfirm',
     'appUtilsService',
     'cloud-foundry.view.applications.application.summary.cliCommands',
     'helion.framework.widgets.detailView',
@@ -48,7 +48,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
-   * @param {object} frameworkWidgetsDialogConfirm - the confirm dialog service
+   * @param {object} frameworkDialogConfirm - the confirm dialog service
    * @param {object} utils - the utils service
    * @param {object} cliCommands - the cliCommands dialog service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
@@ -68,9 +68,9 @@
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
-   * @property {object} frameworkWidgetsDialogConfirm - the confirm dialog service
+   * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkWidgetsDialogConfirm, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -78,7 +78,7 @@
     this.$interval = $interval;
     this.$interpolate = $interpolate;
     this.appEventService = appEventService;
-    this.confirmDialog = frameworkWidgetsDialogConfirm;
+    this.confirmDialog = frameworkDialogConfirm;
     this.detailView = detailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
@@ -458,7 +458,7 @@
 
     simpleDeleteAppDialog: function () {
       var that = this;
-      this.frameworkWidgetsDialogConfirm({
+      this.frameworkDialogConfirm({
         title: gettext('Delete Application'),
         description: gettext('Are you sure you want to delete ') + this.model.application.summary.name + '?',
         submitCommit: true,

@@ -33,7 +33,7 @@
     'cloud-foundry.view.applications.application.summary.editApp',
     'appUtilsService',
     'app.view.endpoints.clusters.routesService',
-    'frameworkWidgetsDialogConfirm',
+    'frameworkDialogConfirm',
     'app.view.notificationsService'
   ];
 
@@ -51,19 +51,19 @@
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {appUtilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
-   * @param {helion.framework.widgets.dialog.frameworkWidgetsDialogConfirm} frameworkWidgetsDialogConfirm - the confirm dialog service
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
-   * @property {helion.framework.widgets.dialog.frameworkWidgetsDialogConfirm} frameworkWidgetsDialogConfirm - the confirm dialog service
+   * @property {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @property {appUtilsService} utils - the utils service
    * @property {app.view.notificationsService} notificationsService - the toast notification service
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
                                         modelManager, addRoutesService, editAppService, utils,
-                                        routesService, frameworkWidgetsDialogConfirm, notificationsService) {
+                                        routesService, frameworkDialogConfirm, notificationsService) {
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -73,7 +73,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
     this.editAppService = editAppService;
-    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
+    this.frameworkDialogConfirm = frameworkDialogConfirm;
     this.notificationsService = notificationsService;
     this.utils = utils;
     this.$log = $log;
@@ -119,7 +119,7 @@
         name: gettext('Terminate'),
         disabled: false,
         execute: function (instanceIndex) {
-          that.frameworkWidgetsDialogConfirm({
+          that.frameworkDialogConfirm({
             title: gettext('Terminate Instance'),
             description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
             errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),

@@ -22,11 +22,11 @@
   serviceFactory.$inject = [
     '$uibModal',
     '$document',
-    'frameworkUtilsDialogEvents',
+    'frameworkDialogEvents',
     '$timeout'
   ];
 
-  function serviceFactory($uibModal, $document, frameworkUtilsDialogEvents, $timeout) {
+  function serviceFactory($uibModal, $document, frameworkDialogEvents, $timeout) {
 
     var detailViewContainer;
 
@@ -92,11 +92,11 @@
         windowClass: windowClass,
         windowTopClass: 'detail-view-top'
       });
-      frameworkUtilsDialogEvents.notifyOpened();
+      frameworkDialogEvents.notifyOpened();
       openDetailViewCount++;
       modal.closed.then(function () {
         openDetailViewCount--;
-        frameworkUtilsDialogEvents.notifyClosed();
+        frameworkDialogEvents.notifyClosed();
 
         if (openDetailViewCount === 0) {
           body.removeClass('detail-view-open');

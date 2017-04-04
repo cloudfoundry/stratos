@@ -42,21 +42,21 @@
 
   FlyoutController.$inject = [
     '$scope',
-    'frameworkUtilsDialogEvents'
+    'frameworkDialogEvents'
   ];
 
   /**
    * @name FlyoutController
    * @description Controller for a flyout to support Dialog Events
    * @param {object} $scope - angualr $scope
-   * @param {object} frameworkUtilsDialogEvents - Dialog Events service
+   * @param {object} frameworkDialogEvents - Dialog Events service
    */
-  function FlyoutController($scope, frameworkUtilsDialogEvents) {
+  function FlyoutController($scope, frameworkDialogEvents) {
     $scope.$watch('flyoutActive', function (nv, ov) {
       if (!ov && nv === true) {
-        frameworkUtilsDialogEvents.notifyOpened();
+        frameworkDialogEvents.notifyOpened();
       } else if (ov === true && nv === false) {
-        frameworkUtilsDialogEvents.notifyClosed();
+        frameworkDialogEvents.notifyClosed();
       }
     });
   }

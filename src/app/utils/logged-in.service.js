@@ -11,7 +11,7 @@
    * @name loggedInServiceFactory
    * @param {object} appEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} frameworkWidgetsDialogConfirm - the confirmation dialog service
+   * @param {object} frameworkDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
    * @param {object} $interpolate - the angular $interpolate Service
    * @param {object} $rootScope - the angular $rootScope Service
@@ -20,7 +20,7 @@
    * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(appEventService, modelManager, frameworkWidgetsDialogConfirm,
+  function loggedInServiceFactory(appEventService, modelManager, frameworkDialogConfirm,
                                   $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
@@ -74,7 +74,7 @@
         return moment.duration(delta).format('m[m] s[s]');
       };
 
-      dialog = frameworkWidgetsDialogConfirm({
+      dialog = frameworkDialogConfirm({
         title: gettext('Are you still there?'),
         description: function () {
           return $interpolate(gettext('You have been inactive for a while. For your protection, ' +

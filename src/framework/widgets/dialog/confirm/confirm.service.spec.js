@@ -13,7 +13,7 @@
       $rootScope = $injector.get('$rootScope');
       $q = $injector.get('$q');
       $sce = $injector.get('$sce');
-      confirmDialog = $injector.get('frameworkWidgetsDialogConfirm');
+      confirmDialog = $injector.get('frameworkDialogConfirm');
       confirmDialogContext = {
         noHtmlEscape: true,
         title: $sce.trustAsHtml('Are you sure?'),

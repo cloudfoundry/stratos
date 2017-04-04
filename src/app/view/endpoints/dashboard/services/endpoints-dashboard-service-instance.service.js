@@ -16,7 +16,7 @@
     'appErrorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
-    'frameworkWidgetsDialogConfirm',
+    'frameworkDialogConfirm',
     'appEventService'
   ];
 
@@ -35,12 +35,12 @@
    * @param {app.utils.appErrorService} appErrorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
-   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.utils.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorService,
-                                         notificationsService, credentialsDialog, frameworkWidgetsDialogConfirm, appEventService) {
+                                         notificationsService, credentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -276,7 +276,7 @@
 
     function _unregister(serviceInstance) {
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      frameworkWidgetsDialogConfirm({
+      frameworkDialogConfirm({
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\'?'))({name: serviceInstance.name}),
         errorMessage: gettext('Failed to unregister endpoint'),

@@ -10,11 +10,11 @@
     '$log',
     'modelManager',
     'app.view.notificationsService',
-    'frameworkWidgetsDialogConfirm'
+    'frameworkDialogConfirm'
   ];
 
-  function RoutesServiceFactory($q, $log, modelManager, notificationsService, frameworkWidgetsDialogConfirm) {
-    return new RoutesService($q, $log, modelManager, notificationsService, frameworkWidgetsDialogConfirm);
+  function RoutesServiceFactory($q, $log, modelManager, notificationsService, frameworkDialogConfirm) {
+    return new RoutesService($q, $log, modelManager, notificationsService, frameworkDialogConfirm);
   }
 
   /**
@@ -24,14 +24,14 @@
    * @param {object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} frameworkWidgetsDialogConfirm - the confirm dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog service
    */
-  function RoutesService($q, $log, modelManager, notificationsService, frameworkWidgetsDialogConfirm) {
+  function RoutesService($q, $log, modelManager, notificationsService, frameworkDialogConfirm) {
     this.$q = $q;
     this.$log = $log;
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
     this.notificationsService = notificationsService;
-    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
+    this.frameworkDialogConfirm = frameworkDialogConfirm;
   }
 
   angular.extend(RoutesService.prototype, {
@@ -67,7 +67,7 @@
       var that = this;
       var deferred = this.$q.defer();
 
-      this.frameworkWidgetsDialogConfirm({
+      this.frameworkDialogConfirm({
         title: gettext('Unmap Route from Application'),
         description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
         submitCommit: true,
@@ -110,7 +110,7 @@
 
       var deferred = this.$q.defer();
 
-      var dialog = this.frameworkWidgetsDialogConfirm({
+      var dialog = this.frameworkDialogConfirm({
         title: gettext('Unmap Route from Applications'),
         description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
@@ -163,7 +163,7 @@
       var that = this;
       var deferred = this.$q.defer();
 
-      var dialog = this.frameworkWidgetsDialogConfirm({
+      var dialog = this.frameworkDialogConfirm({
         title: gettext('Delete Route'),
         description: gettext('Are you sure you want to delete ') + this.getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),

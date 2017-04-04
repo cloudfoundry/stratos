@@ -3,7 +3,7 @@
 
   angular
     .module('helion.framework.utils')
-    .factory('frameworkUtilsDialogEvents', dialogEventService);
+    .factory('frameworkDialogEvents', dialogEventService);
 
   dialogEventService.$inject = [];
 
