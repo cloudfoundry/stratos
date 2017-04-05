@@ -4,20 +4,20 @@
 
   // Maintain Order
   var acceptanceTests = [
-    '../e2e/tests/acceptance/login-page.spec.js',
-    '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
-    '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
-    '../e2e/tests/acceptance/endpoints-pat.spec.js',
-    '../e2e/tests/acceptance/applications.add-app.spec.js',
-    '../e2e/tests/acceptance/application.delivery-pipeline.spec.js',
-    '../e2e/tests/acceptance/application.spec.js',
-    '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
-    '../e2e/tests/acceptance/application-wall.spec.js',
-    '../e2e/tests/acceptance/navbar.spec.js',
-    '../e2e/tests/acceptance/log-stream.spec.js'
+    '../test/e2e/tests/acceptance/login-page.spec.js',
+    '../test/e2e/tests/acceptance/endpoints-dashboard.spec.js',
+    '../test/e2e/tests/acceptance/endpoints-list-hcf.spec.js',
+    '../test/e2e/tests/acceptance/endpoints-pat.spec.js',
+    '../test/e2e/tests/acceptance/applications.add-app.spec.js',
+    '../test/e2e/tests/acceptance/application.delivery-pipeline.spec.js',
+    '../test/e2e/tests/acceptance/application.spec.js',
+    '../test/e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
+    '../test/e2e/tests/acceptance/application-wall.spec.js',
+    '../test/e2e/tests/acceptance/navbar.spec.js',
+    '../test/e2e/tests/acceptance/log-stream.spec.js'
   ];
 
-  var skipPlugin = require('../e2e/po/skip-plugin.js');
+  var skipPlugin = require('../test/e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
 
   var reporter = new HtmlScreenshotReporter({
@@ -31,9 +31,9 @@
   exports.config = {
 
     suites: {
-      all: '../e2e/tests/**/*.spec.js',
-      localhost: '../e2e/tests/localhost/**/*.spec.js',
-      other: '../e2e/tests/other/**/*.spec.js',
+      all: '../test/e2e/tests/**/*.spec.js',
+      localhost: '../test/e2e/tests/localhost/**/*.spec.js',
+      other: '../test/e2e/tests/other/**/*.spec.js',
       acceptance: acceptanceTests
     },
 

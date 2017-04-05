@@ -13,7 +13,7 @@
   register.$inject = [
     '$state',
     '$location',
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager',
     'app.view.notificationsService',
     'app.utils.utilsService'

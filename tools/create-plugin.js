@@ -108,7 +108,6 @@
    * //   angular
    * //     .module('helion.my-app', [
    * //       'helion.my-app.api',
-   * //       'helion.my-app.event',
    * //       'helion.my-app.model',
    * //       'helion.my-app.view'
    * //     ]);

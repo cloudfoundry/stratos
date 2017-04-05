@@ -28,7 +28,7 @@
   LoginFormController.$inject = [
     '$scope',
     '$timeout',
-    'app.event.eventService'
+    'app.utils.eventService'
   ];
 
   /**
@@ -38,9 +38,9 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @property {object} $timeout - the Angular $timeout service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.utils.eventService} eventService - the event bus service
    * @property {boolean} loggingIn - flag indicating app is still authenticating
    * @property {object} loginTimeout - the promise returned by $timeout for loggingIn
    */

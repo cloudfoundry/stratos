@@ -15,7 +15,7 @@
     '$timeout',
     'modelManager',
     'apiManager',
-    'app.event.eventService'
+    'app.utils.eventService'
   ];
 
   function registerServiceManagerModel($q, $timeout, modelManager, apiManager, eventService) {
@@ -30,11 +30,11 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.event.eventService} eventService - the application event service
+   * @param {app.utils.eventService} eventService - the application event service
    * @property {object} $q - the Angular $q service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {app.event.eventService} eventService - the application event service
+   * @property {app.utils.eventService} eventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */

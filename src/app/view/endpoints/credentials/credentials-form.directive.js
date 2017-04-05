@@ -37,7 +37,7 @@
   }
 
   CredentialsFormController.$inject = [
-    'app.event.eventService',
+    'app.utils.eventService',
     'modelManager',
     'app.view.notificationsService'
   ];
@@ -49,10 +49,10 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {app.event.eventService} eventService - the application event bus
+   * @param {app.utils.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @property {app.event.eventService} eventService - the application event bus
+   * @property {app.utils.eventService} eventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
    * @property {boolean} serverErrorOnRegister - an error flag for a server error

@@ -29,7 +29,7 @@
 
   AppErrorBarController.$inject = [
     '$scope',
-    'app.event.eventService',
+    'app.utils.eventService'
     '$translate'
   ];
 
@@ -39,9 +39,8 @@
    * @description Controller for the Application Error Bar directive
    * @constructor
    * @param {object} $scope - the Angular $scope
-   * @param {app.event.eventService} eventService - the event Service
+   * @param {app.utils.eventService} eventService - the event Service
    * @param {object} $translate - the i18n $translate service
-   * @property {app.event.eventService} eventService - the event Service
    * @property {string} messgae - the error message to display
    */
   function AppErrorBarController($scope, eventService, $translate) {

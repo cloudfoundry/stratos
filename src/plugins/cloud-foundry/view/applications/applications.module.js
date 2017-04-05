@@ -32,8 +32,8 @@
     '$state',
     'app.utils.utilsService',
     'modelManager',
-    'app.event.eventService',
-    'app.logged-in.loggedInService'
+    'app.utils.eventService',
+    'app.utils.loggedInService'
   ];
 
   /**
@@ -44,7 +44,7 @@
    * @param {object} $state - the UI router $state service
    * @param {object} utils - the utils service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.utils.eventService} eventService - the event bus service
    * @param {object} loggedInService - Logged In Service
    * @constructor
    */
