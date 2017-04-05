@@ -29,7 +29,7 @@
 
   AppErrorBarController.$inject = [
     '$scope',
-    'app.utils.eventService'
+    'app.utils.eventService',
     '$translate'
   ];
 
