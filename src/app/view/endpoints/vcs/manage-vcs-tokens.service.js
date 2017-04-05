@@ -3,19 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.vcs.manageVcsTokens', ManageVcsTokensService);
-
-  ManageVcsTokensService.$inject = [
-    '$q',
-    '$timeout',
-    'PAT_DELIMITER',
-    'modelManager',
-    'frameworkAsyncTaskDialog',
-    'frameworkDialogConfirm',
-    'appNotificationsService',
-    'app.view.vcs.registerVcsToken',
-    'app.view.vcs.editVcsToken'
-  ];
+    .factory('appManageVcsTokens', ManageVcsTokensService);
 
   /**
    * @name ManageVcsTokensService
@@ -27,11 +15,11 @@
    * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm The framework confirmation dialog
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
-   * @param {app.view.registerVcsToken} registerVcsToken Service to register new VCS tokens
-   * @param {app.view.editVcsToken} editVcsToken Service to rename VCS tokens
+   * @param {app.view.appRegisterVcsToken} appRegisterVcsToken Service to register new VCS tokens
+   * @param {app.view.appEditVcsToken} appEditVcsToken Service to rename VCS tokens
    * @returns {object} The ManageVcsTokensService with a manage method that opens slide out containing the manage tokens UI
    */
-  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog, frameworkDialogConfirm, appNotificationsService, registerVcsToken, editVcsToken) {
+  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog, frameworkDialogConfirm, appNotificationsService, appRegisterVcsToken, appEditVcsToken) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
@@ -69,7 +57,7 @@
 
     function _edit(token) {
       var oldName = token.token.name;
-      return editVcsToken.editToken(token).then(function (newName) {
+      return appEditVcsToken.editToken(token).then(function (newName) {
         if (newName === oldName) {
           return;
         }
@@ -148,7 +136,7 @@
         context.chosenToken = tokenGuid;
 
         context.registerNewToken = function () {
-          return registerVcsToken.registerToken(vcs).then(function () {
+          return appRegisterVcsToken.registerToken(vcs).then(function () {
             // Update tokens (need to fetch the new token)
             return context.refreshTokens(true);
           });

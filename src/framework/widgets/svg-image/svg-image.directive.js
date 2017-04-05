@@ -5,8 +5,6 @@
     .module('helion.framework.widgets')
     .directive('svgImage', svgImage);
 
-  svgImage.$inject = [ '$templateRequest' ];
-
   function svgImage($templateRequest) {
     return {
       restrict: 'E',

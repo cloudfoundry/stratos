@@ -2,25 +2,25 @@
   'use strict';
 
   describe('service utils service', function () {
-    var serviceUtils;
+    var cfServiceUtils;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
-      serviceUtils = $injector.get('cloud-foundry.model.service.serviceUtils');
+      cfServiceUtils = $injector.get('cfServiceUtils');
     }));
 
     it('should be defined', function () {
-      expect(serviceUtils).toBeDefined();
+      expect(cfServiceUtils).toBeDefined();
     });
 
     it('should have enhance function', function () {
-      expect(serviceUtils.enhance).toBeDefined();
+      expect(cfServiceUtils.enhance).toBeDefined();
     });
 
     it('should cope with null and undefined', function () {
-      expect(serviceUtils.enhance(null)).toBe(null);
-      expect(serviceUtils.enhance(undefined)).toBe(undefined);
+      expect(cfServiceUtils.enhance(null)).toBe(null);
+      expect(cfServiceUtils.enhance(undefined)).toBe(undefined);
     });
 
     it('should check bindable flag', function () {
@@ -30,7 +30,7 @@
         }
       };
 
-      serviceUtils.enhance(service);
+      cfServiceUtils.enhance(service);
       expect(service._bindTarget).not.toBeDefined();
     });
 
@@ -41,7 +41,7 @@
         }
       };
 
-      serviceUtils.enhance(service);
+      cfServiceUtils.enhance(service);
       expect(service._bindTarget).toBeDefined();
       expect(service._bindTarget).toBe('APP');
     });
@@ -54,7 +54,7 @@
         }
       };
 
-      serviceUtils.enhance(service);
+      cfServiceUtils.enhance(service);
       expect(service._bindTarget).toBeDefined();
       expect(service._bindTarget).toBe('APP');
     });
@@ -67,7 +67,7 @@
         }
       };
 
-      serviceUtils.enhance(service);
+      cfServiceUtils.enhance(service);
       expect(service._bindTarget).toBeDefined();
       expect(service._bindTarget).toBe('ROUTE');
     });
@@ -90,7 +90,7 @@
         }
       };
 
-      var enhanced = serviceUtils.enhance([service1, service2, service3]);
+      var enhanced = cfServiceUtils.enhance([service1, service2, service3]);
       expect(enhanced.length).toBeDefined();
       expect(enhanced.length).toBe(3);
       expect(enhanced[0]._bindTarget).toBeDefined();

@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.application.delivery-logs', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.delivery-logs', {
       url: '/delivery-logs',
@@ -17,18 +13,6 @@
       controllerAs: 'appDelLogsCtrl'
     });
   }
-
-  ApplicationDeliveryLogsController.$inject = [
-    '$scope',
-    '$stateParams',
-    '$q',
-    '$log',
-    'moment',
-    'modelManager',
-    'viewEventDetailView',
-    'viewExecutionDetailView',
-    'triggerBuildDetailView'
-  ];
 
   /**
    * @name ApplicationDeliveryLogsController

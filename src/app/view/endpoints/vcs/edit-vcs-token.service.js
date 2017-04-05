@@ -3,13 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.vcs.editVcsToken', EditVcsTokenService);
-
-  EditVcsTokenService.$inject = [
-    '$q',
-    'frameworkAsyncTaskDialog',
-    'modelManager'
-  ];
+    .factory('appEditVcsToken', EditVcsTokenService);
 
   /**
    * @name EditVcsTokenService

@@ -5,8 +5,6 @@
   .module('app.view')
   .factory('appLocalStorage', localStorageFactory);
 
-  localStorageFactory.$inject = ['$window'];
-
   /**
   * @namespace app.view.localStorageFactory
   * @memberof app.view

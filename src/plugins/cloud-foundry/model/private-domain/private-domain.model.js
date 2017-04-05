@@ -10,12 +10,6 @@
     .module('cloud-foundry.model')
     .run(registerPrivateDomainModel);
 
-  registerPrivateDomainModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerPrivateDomainModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.private-domain', new PrivateDomain(apiManager, modelUtils));
   }

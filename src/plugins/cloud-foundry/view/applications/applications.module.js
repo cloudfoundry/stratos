@@ -10,10 +10,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications', {
       url: '/applications',
@@ -25,16 +21,6 @@
       }
     });
   }
-
-  ApplicationsController.$inject = [
-    '$scope',
-    '$q',
-    '$state',
-    'appUtilsService',
-    'modelManager',
-    'appEventService',
-    'appLoggedInService'
-  ];
 
   /**
    * @name ApplicationsController

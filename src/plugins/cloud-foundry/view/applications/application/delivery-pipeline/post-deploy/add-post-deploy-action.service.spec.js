@@ -17,7 +17,7 @@
     }));
 
     beforeEach(inject(function ($injector) {
-      postDeployActionFactory = $injector.get('cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService');
+      postDeployActionFactory = $injector.get('cfPostDeployActionService');
       $httpBackend = $injector.get('$httpBackend');
 
       data = {

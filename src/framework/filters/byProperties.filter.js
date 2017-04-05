@@ -5,10 +5,6 @@
   angular.module('helion.framework.filters')
     .filter('byProperties', byProperties);
 
-  byProperties.$inject = [
-    '$filter'
-  ];
-
   /**
    * @namespace helion.framework.filters.byProperties
    * @memberof helion.framework.filters

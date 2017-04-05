@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('loginForm', loginForm);
 
-  loginForm.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.loginForm
    * @memberof app.view
@@ -24,12 +20,6 @@
       templateUrl: appBasePath + 'view/login-page/login-form/login-form.html'
     };
   }
-
-  LoginFormController.$inject = [
-    '$scope',
-    '$timeout',
-    'appEventService'
-  ];
 
   /**
    * @namespace app.view.loginForm.LoginFormController

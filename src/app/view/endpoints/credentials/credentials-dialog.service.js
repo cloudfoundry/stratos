@@ -3,13 +3,13 @@
 
   angular
     .module('app.view')
-    .factory('app.view.credentialsDialog', CredentialsDialogFactory);
+    .factory('appCredentialsDialog', CredentialsDialogFactory);
 
   function CredentialsDialogFactory(frameworkDetailView) {
     return {
       /**
        * @memberof app.view
-       * @name credentialsDialog
+       * @name appCredentialsDialog
        * @param {object} context - the context for the credentials dialog.
        * @returns {object} Dialog object for chaining promises and closing the dialog
        */

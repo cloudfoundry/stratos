@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline')
-    .factory('cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService', postDeployAction);
+    .factory('cfPostDeployActionService', postDeployAction);
 
   postDeployAction.$inject = [
     'modelManager',

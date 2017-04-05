@@ -16,15 +16,9 @@
    */
   angular
     .module('helion.framework.widgets')
+    .controller('detailViewController', detailViewController)
     .directive('detailViewTemplate', detailViewTemplate)
     .factory('frameworkDetailView', serviceFactory);
-
-  serviceFactory.$inject = [
-    '$uibModal',
-    '$document',
-    'frameworkDialogEvents',
-    '$timeout'
-  ];
 
   function serviceFactory($uibModal, $document, frameworkDialogEvents, $timeout) {
 
@@ -74,7 +68,7 @@
         backdropClass: 'detail-view-backdrop',
         openedClass: 'detail-view-open',
         appendTo: detailViewContainer,
-        controller: config.controller || DetailViewController,
+        controller: config.controller || 'detailViewController',
         controllerAs: config.controllerAs || 'detailViewCtrl',
         templateUrl: config.detailViewTemplateUrl || 'framework/widgets/detail-view/detail-view.html',
         resolve: {
@@ -137,27 +131,17 @@
     }
   }
 
-  DetailViewController.$inject = [
-    '$scope',
-    'context',
-    'content'
-  ];
-
   /**
    * @name DetailViewController
    * @param {object} $scope - the $scope service
    * @param {object} context - the context for the detail view
    * @param {object} content - the configuration for the content to place inside the detail view
    */
-  function DetailViewController($scope, context, content) {
+  function detailViewController($scope, context, content) {
     this.context = context;
     this.content = content;
     this.$scope = $scope;
   }
-
-  detailViewTemplate.$inject = [
-    '$compile'
-  ];
 
   /**
    * @namespace helion.framework.widgets.detailViewTemplate

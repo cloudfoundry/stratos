@@ -4,7 +4,7 @@
   describe('Delivery Pipeline', function () {
 
     var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, appNotificationsService,
-      modelManager, vcsTokenManager, registerVcsToken, PAT_DELIMITER, $httpBackend, account, appUtilsService, $q;
+      modelManager, appManageVcsTokens, appRegisterVcsToken, PAT_DELIMITER, $httpBackend, account, appUtilsService, $q;
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
@@ -47,8 +47,8 @@
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
       modelManager = $injector.get('modelManager');
-      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
-      registerVcsToken = $injector.get('app.view.vcs.registerVcsToken');
+      appManageVcsTokens = $injector.get('appManageVcsTokens');
+      appRegisterVcsToken = $injector.get('appRegisterVcsToken');
       PAT_DELIMITER = $injector.get('PAT_DELIMITER');
 
       // Some generic vars needed in tests
@@ -83,7 +83,7 @@
         };
       };
 
-      var addNotificationService = {
+      var cfAddNotificationService = {
         add: function () {
           return {
             result: {
@@ -95,7 +95,7 @@
         }
       };
 
-      var postDeployActionService = {
+      var cfPostDeployActionService = {
         add: function () {
           return {
             result: {
@@ -114,9 +114,9 @@
       $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
-      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager,
-        registerVcsToken, confirmDialog, appNotificationsService, addNotificationService,
-        postDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
+      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, appManageVcsTokens,
+        appRegisterVcsToken, confirmDialog, appNotificationsService, cfAddNotificationService,
+        cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
         $interpolate, $stateParams, $rootScope.$new(), $q, $state);
 
       $httpBackend.flush();

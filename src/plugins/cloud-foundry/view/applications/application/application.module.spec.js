@@ -29,7 +29,7 @@
       var modelManager = $injector.get('modelManager');
       var appEventService = $injector.get('appEventService');
       var appUtilsService = $injector.get('appUtilsService');
-      var cliCommands = $injector.get('cloud-foundry.view.applications.application.summary.cliCommands');
+      var cfAppCliCommands = $injector.get('cfAppCliCommands');
 
       var $scope = $injector.get('$rootScope').$new();
 
@@ -77,7 +77,7 @@
 
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, appEventService, confirmDialogMock,
-        appUtilsService, cliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
+        appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
       $httpBackend.flush();
     }
 
@@ -180,11 +180,11 @@
 
       it('should be able to view CLI instructions', function () {
 
-        spyOn(controller.cliCommands, 'show').and.callThrough();
+        spyOn(controller.cfAppCliCommands, 'show').and.callThrough();
 
         var startAction = controller.appActions[5];
         startAction.execute();
-        expect(controller.cliCommands.show).toHaveBeenCalled();
+        expect(controller.cfAppCliCommands.show).toHaveBeenCalled();
 
       });
 

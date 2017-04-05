@@ -5,8 +5,6 @@
     .module('helion.framework.utils')
     .directive('wheelHandler', WheelHandler);
 
-  WheelHandler.$inject = ['$parse'];
-
   /**
    * @name WheelHandler
    * @description A simple attribute directive to handle mouse wheel events

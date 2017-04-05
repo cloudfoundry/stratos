@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('jsonTreeView', jsonTreeView);
 
-  jsonTreeView.$inject = [
-    'RecursionHelper'
-  ];
-
   /**
    * @name jsonTreeView
    * @description A directive that displays JSON.
@@ -30,8 +26,6 @@
       }
     };
   }
-
-  JsonTreeViewController.$inject = ['$scope'];
 
   /**
    * @namespace helion.framework.widgets.ActionsMenuController

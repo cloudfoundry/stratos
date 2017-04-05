@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
-    .factory('cloud-foundry.view.applications.application.summary.cliCommands', CliCommandsFactory);
+    .factory('cfAppCliCommands', CliCommandsFactory);
 
   CliCommandsFactory.$inject = [
     'frameworkDetailView',

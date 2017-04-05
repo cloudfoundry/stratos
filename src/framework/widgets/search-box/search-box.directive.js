@@ -6,8 +6,6 @@
     .factory('searchBoxCloser', searchBoxCloser)
     .directive('searchBox', searchBox);
 
-  searchBoxCloser.$inject = [];
-
   /**
    * @description searchBox Closer Service can auto close the last opened search box
    * Useful when opening a search box using the keyboard alone (no click event involved)
@@ -31,10 +29,6 @@
       }
     };
   }
-
-  searchBox.$inject = [
-    '$document'
-  ];
 
   /**
    * @namespace helion.framework.widgets.searchBox
@@ -112,11 +106,6 @@
 
     }
   }
-
-  SearchBoxController.$inject = [
-    '$scope',
-    'searchBoxCloser'
-  ];
 
   /**
    * @namespace helion.framework.widgets.SearchBoxController

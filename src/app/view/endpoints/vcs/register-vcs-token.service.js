@@ -3,14 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.vcs.registerVcsToken', RegisterVcsTokenService);
-
-  RegisterVcsTokenService.$inject = [
-    '$q',
-    'frameworkAsyncTaskDialog',
-    'appNotificationsService',
-    'modelManager'
-  ];
+    .factory('appRegisterVcsToken', RegisterVcsTokenService);
 
   /**
    * @name RegisterVcsTokenService

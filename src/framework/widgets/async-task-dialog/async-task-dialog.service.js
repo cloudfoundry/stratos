@@ -19,11 +19,6 @@
     .factory('frameworkAsyncTaskDialog', serviceFactory)
     .controller('AsyncTaskDialogController', AsyncTaskDialogController);
 
-  serviceFactory.$inject = [
-    'frameworkDetailView',
-    '$timeout'
-  ];
-
   /**
    *
    * @name serviceFactory
@@ -109,13 +104,6 @@
 
     return asyncDialog;
   }
-
-  AsyncTaskDialogController.$inject = [
-    '$scope',
-    'context',
-    'content',
-    '$uibModalInstance'
-  ];
 
   /**
    * @name AsyncTaskDialogController

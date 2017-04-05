@@ -9,8 +9,6 @@
     .module('cloud-foundry.model')
     .factory('cfAppStateService', stateServiceFactory);
 
-  stateServiceFactory.$inject = [];
-
   /**
    * @function stateServiceFactory
    * @memberof cloud-foundry.model.application

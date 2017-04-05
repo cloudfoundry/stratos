@@ -18,7 +18,7 @@
 
     beforeEach(inject(function ($injector, _$q_) {
       $q = _$q_;
-      cliCommandsFactory = $injector.get('cloud-foundry.view.applications.application.summary.cliCommands');
+      cliCommandsFactory = $injector.get('cfAppCliCommands');
     }));
 
     it('should be defined', function () {

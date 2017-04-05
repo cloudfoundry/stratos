@@ -5,8 +5,6 @@
     .module('helion.framework.utils')
     .directive('autoFocus', AutoFocus);
 
-  AutoFocus.$inject = ['$timeout'];
-
   /**
    * A simple attribute directive to set focus on an element when linked
    * @param {Object} $timeout - the Angular $timeout service

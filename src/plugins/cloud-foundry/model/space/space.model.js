@@ -9,17 +9,8 @@
     .module('cloud-foundry.model')
     .run(registerSpaceModel);
 
-  registerSpaceModel.$inject = [
-    '$q',
-    'modelManager',
-    'apiManager',
-    'cloud-foundry.model.service.serviceUtils',
-    'modelUtils',
-    'cfOrganizationModel'
-  ];
-
-  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils, cfOrganizationModel) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils, cfOrganizationModel));
+  function registerSpaceModel($q, modelManager, apiManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel));
   }
 
   /**
@@ -30,17 +21,17 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @param {object} serviceUtils - the service utils service
+   * @param {object} cfServiceUtils - the service utils service
    * @param {object} modelUtils - a service containing general hcf model helpers
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {object} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, serviceUtils, modelUtils, cfOrganizationModel) {
+  function Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.modelManager = modelManager;
-    this.serviceUtils = serviceUtils;
+    this.cfServiceUtils = cfServiceUtils;
     this.modelUtils = modelUtils;
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.data = {};
@@ -161,7 +152,7 @@
      * @public
      */
     onListAllServicesForSpace: function (cnsiGuid, guid, services) {
-      this.serviceUtils.enhance(services);
+      this.cfServiceUtils.enhance(services);
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
       return services;
     },

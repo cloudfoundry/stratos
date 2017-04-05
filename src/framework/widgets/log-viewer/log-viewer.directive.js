@@ -6,12 +6,6 @@
     .module('helion.framework.widgets')
     .directive('logViewer', logViewer);
 
-  logViewer.$inject = [
-    'AnsiColorsService',
-    '$websocket',
-    '$log'
-  ];
-
   /**
    * @name logViewer
    * @memberOf helion.framework.widgets
@@ -64,8 +58,6 @@
       hPadding += parseFloat(getComputedStyle(logContainer).getPropertyValue('padding-right'));
       currentWidth = logContainer.clientWidth;
     }
-
-    LogViewerController.$inject = ['$scope', '$window'];
 
     function LogViewerController($scope, $window) {
       var logViewer = this;

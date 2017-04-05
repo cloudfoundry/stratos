@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('avatar', avatar);
 
-  avatar.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.avatar
    * @memberof app.view
@@ -24,13 +20,6 @@
       templateUrl: appBasePath + 'view/navbar/avatar/avatar.html'
     };
   }
-
-  AvatarController.$inject = [
-    'modelManager',
-    '$scope',
-    '$document',
-    '$timeout'
-  ];
 
   /**
    * @namespace app.view.AvatarController

@@ -4,8 +4,6 @@
   angular.module('helion.framework.filters')
     .filter('min', min);
 
-  min.$inject = [];
-
   /**
    * @namespace helion.framework.filters.min
    * @memberof helion.framework.filters

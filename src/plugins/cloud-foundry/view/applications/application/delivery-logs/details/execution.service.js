@@ -9,11 +9,6 @@
     .module('cloud-foundry.view.applications.application.delivery-logs')
     .factory('viewExecutionDetailView', viewExecutionDetailView);
 
-  viewExecutionDetailView.$inject = [
-    'frameworkDetailView',
-    'viewEventDetailView'
-  ];
-
   function viewExecutionDetailView(frameworkDetailView, viewEventDetailView) {
     return {
       /**

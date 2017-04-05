@@ -19,8 +19,6 @@
     };
   }
 
-  TabbedNavController.$inject = [];
-
   function TabbedNavController() {
   }
 

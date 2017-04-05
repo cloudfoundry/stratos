@@ -3,17 +3,17 @@
 
   angular
     .module('app.view.endpoints.dashboard')
-    .factory('app.view.endpoints.dashboard.dashboardService', dashboardService);
+    .factory('appEndpointsDashboardService', appEndpointsDashboardService);
 
   /**
-   * @namespace app.view.endpoints.dashboard.dashboardService
+   * @namespace app.view.endpoints.dashboard.appEndpointsDashboardService
    * @memberof app.view.endpoints.dashboard
-   * @name dashboardService
+   * @name appEndpointsDashboardService
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @returns {object} Endpoints Dashboard Service
    */
-  function dashboardService($q, modelManager) {
+  function appEndpointsDashboardService($q, modelManager) {
     var codeEngineVcs = [];
     return {
       endpoints: [],

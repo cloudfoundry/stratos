@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline')
-    .factory('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService', AddNotificationTargetServiceFactory)
+    .factory('cfAddNotificationService', AddNotificationTargetServiceFactory)
     .controller('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationTargetController', AddNotificationTargetController);
 
   AddNotificationTargetServiceFactory.$inject = [

@@ -3,7 +3,7 @@
 
   describe('toaster notification service', function () {
 
-    var toaster, $scope, $timeout, $sce;
+    var frameworkToaster, $scope, $timeout, $sce;
 
     beforeEach(module('templates'));
     beforeEach(module('helion.framework'));
@@ -11,17 +11,17 @@
     beforeEach(inject(function ($injector) {
       $scope = $injector.get('$rootScope');
       $timeout = $injector.get('$timeout');
-      toaster = $injector.get('helion.framework.widgets.toaster');
+      frameworkToaster = $injector.get('frameworkToaster');
       $sce = $injector.get('$sce');
     }));
 
     it('should be defined', function () {
-      expect(toaster).toBeDefined();
+      expect(frameworkToaster).toBeDefined();
     });
 
     it('success toast', function () {
-      expect(toaster.success).toBeDefined();
-      var toast = toaster.success('test message 1');
+      expect(frameworkToaster.success).toBeDefined();
+      var toast = frameworkToaster.success('test message 1');
       expect(toast).toBeDefined();
       expect(toast.scope).toBeDefined();
       expect(toast.scope.options.titleClass).toBe('toast-success');
@@ -29,8 +29,8 @@
     });
 
     it('warning toast', function () {
-      expect(toaster.warning).toBeDefined();
-      var toast = toaster.warning('test message 2');
+      expect(frameworkToaster.warning).toBeDefined();
+      var toast = frameworkToaster.warning('test message 2');
       expect(toast).toBeDefined();
       expect(toast.scope).toBeDefined();
       expect(toast.scope.options.titleClass).toBe('toast-warning');
@@ -38,8 +38,8 @@
     });
 
     it('error toast', function () {
-      expect(toaster.error).toBeDefined();
-      var toast = toaster.error('test message 3');
+      expect(frameworkToaster.error).toBeDefined();
+      var toast = frameworkToaster.error('test message 3');
       expect(toast).toBeDefined();
       expect(toast.scope).toBeDefined();
       expect(toast.scope.options.titleClass).toBe('toast-error');
@@ -47,8 +47,8 @@
     });
 
     it('custom toast', function () {
-      expect(toaster.show).toBeDefined();
-      var toast = toaster.show('test message 4', 'custom-icon');
+      expect(frameworkToaster.show).toBeDefined();
+      var toast = frameworkToaster.show('test message 4', 'custom-icon');
       expect(toast).toBeDefined();
       expect(toast.scope).toBeDefined();
       expect(toast.scope.options.titleClass).toBe('custom-icon');
@@ -56,8 +56,8 @@
     });
 
     it('busy toast', function (done) {
-      expect(toaster.busy).toBeDefined();
-      var toast = toaster.busy('test busy message');
+      expect(frameworkToaster.busy).toBeDefined();
+      var toast = frameworkToaster.busy('test busy message');
       expect(toast).toBeDefined();
       expect(toast.scope).toBeDefined();
       expect(toast.scope.options.titleClass).toBe('');

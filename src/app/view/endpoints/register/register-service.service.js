@@ -3,21 +3,12 @@
 
   angular
     .module('app.view')
-    .factory('app.view.registerService', ServiceRegistrationFactory);
-
-  ServiceRegistrationFactory.$inject = [
-    '$q',
-    '$interpolate',
-    'modelManager',
-    'appUtilsService',
-    'appNotificationsService',
-    'frameworkDetailView'
-  ];
+    .factory('appRegisterService', ServiceRegistrationFactory);
 
   /**
    * @name ServiceRegistrationFactory
    * @description Register a service via a slide out
-   * @namespace app.view.registerService.ServiceRegistrationService
+   * @namespace app.view.appRegisterService
    * @param {object} $q - the Angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager The console model manager service

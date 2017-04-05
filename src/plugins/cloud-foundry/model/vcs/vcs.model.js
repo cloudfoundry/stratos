@@ -25,12 +25,6 @@
     .module('cloud-foundry.model')
     .run(registerVcsModel);
 
-  registerVcsModel.$inject = [
-    '$q',
-    'modelManager',
-    'apiManager'
-  ];
-
   function registerVcsModel($q, modelManager, apiManager) {
     modelManager.register('cloud-foundry.model.vcs', new VcsModel($q, apiManager));
   }

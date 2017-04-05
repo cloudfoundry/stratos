@@ -3,35 +3,23 @@
 
   angular
     .module('app.view.endpoints.dashboard')
-    .factory('app.view.endpoints.dashboard.vcsService', vcsServiceFactory);
-
-  vcsServiceFactory.$inject = [
-    '$q',
-    '$rootScope',
-    '$interpolate',
-    'modelManager',
-    'app.view.endpoints.dashboard.dashboardService',
-    'app.view.vcs.manageVcsTokens',
-    'app.view.vcs.registerVcsToken',
-    'appNotificationsService',
-    'frameworkDialogConfirm'
-  ];
+    .factory('appEndpointsVcsService', vcsServiceFactory);
 
   /**
-   * @name vcsService
+   * @name appEndpointsVcsService
    * @description provide functionality to view and manage VCS endpoints in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $rootScope - the angular $rootScope service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
-   * @param {object} manageVcsTokens - the manage VCS tokens service
-   * @param {object} registerVcsToken - register a new VCS token
+   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {object} appManageVcsTokens - the manage VCS tokens service
+   * @param {object} appRegisterVcsToken - register a new VCS token
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, dashboardService, manageVcsTokens, registerVcsToken, appNotificationsService, frameworkDialogConfirm) {
+  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService, appManageVcsTokens, appRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -46,7 +34,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
@@ -57,7 +45,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
@@ -101,12 +89,12 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description convert the model service instances into endpoints entries
      * @public
      */
     function createEndpointEntries() {
-      var endpoints = dashboardService.endpoints;
+      var endpoints = appEndpointsDashboardService.endpoints;
       var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
       _.forEach(vcsModel.vcsClients, function (vcs) {
@@ -136,7 +124,7 @@
 
     function _cleanupStaleEndpoints(activeEndpointsKeys) {
 
-      var allEndpoints = dashboardService.endpoints;
+      var allEndpoints = appEndpointsDashboardService.endpoints;
 
       var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
         return anEndpoint.key.indexOf(endpointPrefix) === 0;
@@ -158,7 +146,7 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description clear any local data before leaving the dashboard
      * @public
      */
@@ -184,7 +172,8 @@
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
       var noHces = !_.find(userServiceInstanceModel.serviceInstances, {cnsi_type: 'hce', valid: true});
-      if (currentUserAccount.isAdmin() && (noHces || dashboardService.fetchedCodeEngineVcses && !dashboardService.isCodeEngineVcs(endpoint))) {
+      if (currentUserAccount.isAdmin() && (noHces || appEndpointsDashboardService.fetchedCodeEngineVcses &&
+        !appEndpointsDashboardService.isCodeEngineVcs(endpoint))) {
         endpoint.actions.push({
           name: gettext('Unregister'),
           execute: function (endpoint) {
@@ -202,13 +191,13 @@
     }
 
     function _manageTokens(endpoint) {
-      return manageVcsTokens.manage(endpoint.vcs).then(function () {
+      return appManageVcsTokens.manage(endpoint.vcs).then(function () {
         _createVcsActions(endpoint);
       });
     }
 
     function _addToken(endpoint) {
-      return registerVcsToken.registerToken(endpoint.vcs).then(function () {
+      return appRegisterVcsToken.registerToken(endpoint.vcs).then(function () {
         return _refreshTokens().then(function () {
           _createVcsActions(endpoint);
         });

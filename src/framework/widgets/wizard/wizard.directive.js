@@ -25,11 +25,6 @@
     };
   }
 
-  WizardController.$inject = [
-    '$scope',
-    '$q'
-  ];
-
   /**
    * @namespace helion.framework.widgets.wizard.WizardController
    * @memberof helion.framework.widgets

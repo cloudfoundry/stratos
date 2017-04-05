@@ -11,12 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerServiceModel);
 
-  registerServiceModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerServiceModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.featureFlags', new FeatureFlags(apiManager, modelUtils));
   }

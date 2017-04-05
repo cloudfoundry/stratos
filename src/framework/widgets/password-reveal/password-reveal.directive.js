@@ -5,8 +5,6 @@
     .module('helion.framework.widgets')
     .directive('passwordReveal', passwordReveal);
 
-  passwordReveal.$inject = ['$compile'];
-
   function passwordReveal($compile) {
     return {
       link: function (scope, element) {

@@ -9,27 +9,23 @@
    */
   angular
     .module('cloud-foundry.model')
+    .constant('appConfig', {
+      pagination: {
+        pageSize: 48
+      },
+      loadingLimit: 100
+    })
     .run(registerApplicationModel);
 
-  registerApplicationModel.$inject = [
-    'app.config',
-    'modelManager',
-    'apiManager',
-    'cfAppStateService',
-    '$q',
-    'modelUtils',
-    'appUtilsService'
-  ];
-
-  function registerApplicationModel(config, modelManager, apiManager, cfAppStateService, $q, modelUtils, appUtilsService) {
-    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager,
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appUtilsService) {
+    modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
       cfAppStateService, $q, modelUtils, appUtilsService));
   }
 
   /**
    * @memberOf cloud-foundry.model.application
    * @name Application
-   * @param {object} config - the global configuration object
+   * @param {appConfig} config - the global configuration object
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} cfAppStateService - the Application State service

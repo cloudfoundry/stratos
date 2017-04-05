@@ -6,8 +6,6 @@
     .service('AnsiColorsService', ansiColorsService);
   /* eslint-enable angular/no-service-method */
 
-  ansiColorsService.$inject = [];
-
   /**
    * @name ansiColorsService
    * @namespace helion.framework.utils.ansiColorsService

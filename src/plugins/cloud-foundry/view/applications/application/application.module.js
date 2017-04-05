@@ -14,10 +14,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application', {
       url: '/:cnsiGuid/app/:guid',
@@ -27,22 +23,6 @@
     });
   }
 
-  ApplicationController.$inject = [
-    'modelManager',
-    'appEventService',
-    'frameworkDialogConfirm',
-    'appUtilsService',
-    'cloud-foundry.view.applications.application.summary.cliCommands',
-    'frameworkDetailView',
-    '$stateParams',
-    '$scope',
-    '$window',
-    '$q',
-    '$interval',
-    '$interpolate',
-    '$state'
-  ];
-
   /**
    * @name ApplicationController
    * @constructor
@@ -50,7 +30,7 @@
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} frameworkDialogConfirm - the confirm dialog service
    * @param {object} appUtilsService - the appUtilsService service
-   * @param {object} cliCommands - the cliCommands dialog service
+   * @param {object} cfAppCliCommands - the cfAppCliCommands dialog service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
@@ -70,7 +50,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -87,7 +67,7 @@
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
-    this.cliCommands = cliCommands;
+    this.cfAppCliCommands = cfAppCliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
@@ -173,7 +153,7 @@
           if (that.stackatoInfo.info.endpoints) {
             username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
           }
-          that.cliCommands.show(that.model.application, username);
+          that.cfAppCliCommands.show(that.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'

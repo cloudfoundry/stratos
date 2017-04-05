@@ -4,12 +4,6 @@
   describe('detail service', function () {
     var frameworkDetailView, detailViewContent, detailViewContext, detailViewScope;
 
-    MockDetailViewController.$inject = [
-      'context',
-      'content',
-      '$scope'
-    ];
-
     function MockDetailViewController(context, content, $scope) {
       detailViewContent = content;
       detailViewContext = context;

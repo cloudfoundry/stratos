@@ -54,7 +54,7 @@
         close: angular.noop,
         dismiss: angular.noop
       };
-      addNotificationTargetService = $injector.get('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService');
+      addNotificationTargetService = $injector.get('cfAddNotificationService');
       var $controller = $injector.get('$controller');
       addNotificationTargetController = $controller('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationTargetController', {
         modelManager: modelManager,

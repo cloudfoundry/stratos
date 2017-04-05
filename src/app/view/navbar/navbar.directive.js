@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('navbar', navbar);
 
-  navbar.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.navbar
    * @memberof app.view

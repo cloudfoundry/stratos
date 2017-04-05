@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('accountActions', accountActions);
 
-  accountActions.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.accountActions
    * @memberof app.view
@@ -24,10 +20,6 @@
       templateUrl: appBasePath + 'view/navbar/avatar/account-actions/account-actions.html'
     };
   }
-
-  AccountActionsController.$inject = [
-    'modelManager'
-  ];
 
   /**
    * @namespace app.view.AccountActionsController

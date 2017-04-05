@@ -11,12 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerUserProvidedServiceInstanceModel);
 
-  registerUserProvidedServiceInstanceModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerUserProvidedServiceInstanceModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.user-provided-service-instance',
       new UserProvidedServiceInstance(apiManager, modelUtils));

@@ -13,12 +13,6 @@
       'app.utils'
     ])
     .constant('appBasePath', 'app/')
-    .constant('app.config', {
-      pagination: {
-        pageSize: 48
-      },
-      loadingLimit: 100
-    })
     .run(setTranslationLanguage)
     .run(setOEMTranslations);
 
