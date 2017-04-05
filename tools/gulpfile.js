@@ -85,6 +85,12 @@
       .pipe(gulp.dest(paths.dist));
   });
 
+  gulp.task('copy:svg', function () {
+    return gulp
+      .src(config.svgPaths, {base: paths.theme})
+      .pipe(gulp.dest(paths.dist));
+  });
+
   // Copy index.html to 'dist'
   gulp.task('copy:index', function () {
     return gulp
@@ -283,6 +289,7 @@
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
     gulp.watch(config.templatePaths, ['copy:html', callback]);
+    gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);
   });
@@ -380,6 +387,7 @@
       'i18n',
       'dev-template-cache',
       'copy:html',
+      'copy:svg',
       'copy:assets',
       'copy:theme',
       'inject:index',
@@ -407,6 +415,7 @@
       'i18n',
       'template-cache',
       'copy:html',
+      'copy:svg',
       'copy:assets',
       'copy:theme',
       'inject:index',

@@ -1,13 +1,11 @@
 <div class="register-service-details">
 
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hcf'">
-    <p translate><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank" translate>
-      {{ OEM_CONFIG.CLOUD_FOUNDRY }}</a> supports the full application lifecycle, from initial development, through testing to
-      deployment.</p>
-    <p translate>Register an existing {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoint to allow your development team to create and manage
-      their applications.</p>
-    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
-      know which {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoint they are working with.</p>
+    <p><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank" translate>cloud-foundry</a>
+     <span translate>cf.registration.p1</span>
+    </p>
+    <p translate>cf.registration.p2</p>
+    <p translate>cf.registration.p3</p>
   </div>
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hce'">
     <p translate>{{ OEM_CONFIG.CODE_ENGINE }} is a continuous delivery service for enterprise development teams that automates

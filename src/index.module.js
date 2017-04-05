@@ -56,7 +56,6 @@
     // Configure i18n
     $translateProvider.preferredLanguage('en');
     $translateProvider.fallbackLanguage('en');
-    //$translateProvider.addInterpolation('gettext');
     $translateProvider.useSanitizeValueStrategy(null);
 
     $translateProvider.useStaticFilesLoader({

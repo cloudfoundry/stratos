@@ -72,6 +72,7 @@
     </button>
 
     <button type="button"
+      translate
       class="btn btn-default back"
       ng-click="wizardCtrl.back()"
       ng-disabled="wizardCtrl.backBtnDisabled"
@@ -80,8 +81,8 @@
     </button>
 
     <button type="button"
-      class="btn next"
       translate
+      class="btn next"
       ng-class="{
                   'btn-primary': !wizardCtrl.stepCommit,
                   'btn-commit': wizardCtrl.stepCommit

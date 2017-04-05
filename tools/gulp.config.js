@@ -88,8 +88,11 @@
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
         paths.src + '**/framework/**/*.html',
-        paths.src + '../theme/**/*.svg',
-        '!' + paths.src + '../theme/fonts/**/*.svg'
+      ],
+
+      svgPaths: [
+        paths.theme + '**/*.svg',
+        '!' + paths.theme + 'fonts/**/*.svg'
       ],
 
       jsFiles: [
