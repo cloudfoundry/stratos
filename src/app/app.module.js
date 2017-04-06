@@ -13,7 +13,6 @@
       'app.utils'
     ])
     .constant('appBasePath', 'app/')
-      showLanguageSelection: false
     .run(setTranslationLanguage)
     .run(setOEMTranslations);
 

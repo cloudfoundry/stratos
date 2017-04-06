@@ -23,17 +23,17 @@
    * @param {object} $log - the angular $log service
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {viewEventDetailView} viewEvent - show event details slide out
-   * @param {viewExecutionDetailView} viewExecution - show execution details slide out
-   * @param {triggerBuildDetailView} viewTriggerBuild - show trigger builds slide out
+   * @param {viewEventDetailView} viewEventDetailView - show event details slide out
+   * @param {viewExecutionDetailView} viewExecutionDetailView - show execution details slide out
+   * @param {triggerBuildDetailView} triggerBuildDetailView - show trigger builds slide out
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} hceModel - the Code Engine Applications Model
    * @property {object} hasProject - true if a HCE project exists for this application, null if still determining
    * @property {object} last - contains the last successful build, test and deploy events
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, viewEvent,
-                                             viewExecution, viewTriggerBuild) {
+  function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, viewEventDetailView,
+                                             viewExecutionDetailView, triggerBuildDetailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -42,9 +42,9 @@
     this.id = $stateParams.guid;
     // Pass through anything needed by prototype extend
     this.views = {
-      viewEvent: viewEvent,
-      viewExecution: viewExecution,
-      viewTriggerBuild: viewTriggerBuild
+      viewEventDetailView: viewEventDetailView,
+      viewExecutionDetailView: viewExecutionDetailView,
+      triggerBuildDetailView: triggerBuildDetailView
     };
     this.$q = $q;
     this.moment = moment;
@@ -115,7 +115,7 @@
     triggerBuild: function () {
       var that = this;
       var pipeline = that.model.application.pipeline;
-      this.views.viewTriggerBuild.open(this.model.application.project, pipeline.hceCnsi.guid).then(function () {
+      this.views.triggerBuildDetailView.open(this.model.application.project, pipeline.hceCnsi.guid).then(function () {
         that.updateData();
       });
     },
@@ -136,7 +136,7 @@
           event.type !== that.eventTypes.PIPELINE_COMPLETED;
       });
 
-      this.views.viewExecution.open(rawExecution, filteredEvents, pipeline.hceCnsi.guid);
+      this.views.viewExecutionDetailView.open(rawExecution, filteredEvents, pipeline.hceCnsi.guid);
     },
 
     viewEventForExecution: function (execution) {
@@ -147,7 +147,7 @@
       }
 
       var pipeline = that.model.application.pipeline;
-      this.views.viewEvent.open(events[events.length - 1], pipeline.hceCnsi.guid);
+      this.views.viewEventDetailView.open(events[events.length - 1], pipeline.hceCnsi.guid);
     },
 
     /**

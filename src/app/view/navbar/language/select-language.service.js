@@ -3,26 +3,21 @@
 
   angular
     .module('app.view')
-    .factory('app.view.selectLanguage', selectLanguageFactory);
-
-  selectLanguageFactory.$inject = [
-    '$translate',
-    'helion.framework.widgets.asyncTaskDialog'
-  ];
+    .factory('appSelectLanguage', selectLanguageFactory);
 
   /**
    * @name selectLanguageFactory
    * @description Factory to get the Language Selection App dialog
    * @constructor
    * @param {object} $translate - the i18n $translate service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog - Async Task Dialog service
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
-  function selectLanguageFactory($translate, asyncTaskDialog) {
+  function selectLanguageFactory($translate, frameworkAsyncTaskDialog) {
     return {
       /**
        * @name show
        * @description Display Language Selection Dialog
-       * @returns {*} asyncTaskDialog
+       * @returns {*} frameworkAsyncTaskDialog
        */
       show: function () {
         var locales = [];
@@ -38,7 +33,7 @@
           return $translate.use(data.currentLocale);
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: 'language.select',
             templateUrl: 'app/view/navbar/language/select-language.html',

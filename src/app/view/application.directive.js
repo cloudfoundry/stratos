@@ -23,7 +23,6 @@
     };
   }
 
-    'app.view.selectLanguage',
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
@@ -33,7 +32,7 @@
    * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
-   * @param {object} selectLanguage - the Language Selection dialogService
+   * @param {object} appSelectLanguage - the Language Selection dialogService
    * @param {object} $timeout - Angular $timeout service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
@@ -44,7 +43,6 @@
    * @property {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @property {object} appLoggedInService - the Logged In Service
-   * @property {$state} $state - Angular ui-router $state service
    * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
@@ -52,10 +50,10 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLocalStorage,
-                                 selectLanguage, $timeout, $state, $stateParams, $window, $rootScope, $scope) {
+                                 appSelectLanguage, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
-    this.selectLanguage = selectLanguage;
+    this.appSelectLanguage = appSelectLanguage;
 
     vm.appBasePath = appBasePath;
     vm.appUpgradeCheck = appUpgradeCheck;
@@ -93,7 +91,6 @@
       }
     });
 
-
     /**
      * @function showLanguageSelection
      * @memberof app.view.application.ApplicationController
@@ -101,7 +98,7 @@
      * @public
      */
     function showLanguageSelection() {
-      this.selectLanguage.show();
+      this.appSelectLanguage.show();
     }
 
     /**

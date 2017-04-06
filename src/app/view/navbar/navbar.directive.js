@@ -3,6 +3,7 @@
 
   angular
     .module('app.view')
+    .constant('showLanguageSelection', false)
     .directive('navbar', navbar);
 
   /**
@@ -22,12 +23,8 @@
     };
   }
 
-  NavBarController.$inject = [
-    'app.config'
-  ];
-
-  function NavBarController(appConfig) {
-    this.showLanguageSelection = appConfig.showLanguageSelection || false;
+  function NavBarController(showLanguageSelection) {
+    this.showLanguageSelection = showLanguageSelection || false;
   }
 
 })();
