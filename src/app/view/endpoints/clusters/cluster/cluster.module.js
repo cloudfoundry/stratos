@@ -4,8 +4,7 @@
   angular
     .module('app.view.endpoints.clusters.cluster', [
       'app.view.endpoints.clusters.cluster.detail',
-      'app.view.endpoints.clusters.cluster.organization',
-      'ncy-angular-breadcrumb'
+      'app.view.endpoints.clusters.cluster.organization'
     ])
     .config(registerRoute);
 

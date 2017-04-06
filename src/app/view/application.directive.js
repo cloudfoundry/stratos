@@ -30,6 +30,7 @@
     'appUpgradeCheck',
     'appLoggedInService',
     'app.view.localStorage',
+    'app.view.selectLanguage',
     '$timeout',
     '$state',
     '$stateParams',
@@ -48,6 +49,7 @@
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLoggedInService - the Logged In Service
    * @param {object} localStorage - the Local Storage In Service
+   * @param {object} selectLanguage - the Language Selection dialogService
    * @param {object} $timeout - Angular $timeout service
    * @param {$state} $state - Angular ui-router $state service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
@@ -67,7 +69,7 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLoggedInService, localStorage,
-                                 $timeout, $state, $stateParams, $window, $rootScope, $scope) {
+                                 selectLanguage, $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
 
     this.appEventService = appEventService;
@@ -75,6 +77,7 @@
     this.appBasePath = appBasePath;
     this.upgradeCheck = appUpgradeCheck;
     this.appLoggedInService = appLoggedInService;
+    this.selectLanguage = selectLanguage;
 
     this.$state = $state;
     this.$window = $window;
@@ -110,6 +113,17 @@
   }
 
   angular.extend(ApplicationController.prototype, {
+
+    /**
+     * @function showLanguageSelection
+     * @memberof app.view.application.ApplicationController
+     * @description Shows the Language Selection dialog
+     * @public
+     */
+    showLanguageSelection: function () {
+      this.selectLanguage.show();
+    },
+
     /**
      * @function verifySession
      * @memberof app.view.application.ApplicationController

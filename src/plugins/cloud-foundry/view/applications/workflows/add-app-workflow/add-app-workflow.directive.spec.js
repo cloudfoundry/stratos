@@ -3,7 +3,7 @@
 
   /* eslint-disable angular/no-private-call */
   describe('add-app-workflow directive - ', function () {
-    var $httpBackend, $scope, that;
+    var $httpBackend, $scope, $translate, that;
 
     function getResolved() {
       return that.$q.resolve();
@@ -20,6 +20,7 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
+      $translate = $injector.get('$translate');
 
       $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, {});
       $httpBackend.expectGET('/pp/v1/cnsis/registered');
@@ -129,7 +130,7 @@
             }
           });
           expect(that.data.workflow).toBeDefined();
-          expect(that.data.workflow.title).toBe('Add Application');
+          expect($translate.instant(that.data.workflow.title)).toBe('Add Application');
           expect(that.data.workflow.steps.length).toBe(1);
           expect(that.options.serviceCategories).toEqual([{ label: gettext('All Services'), value: 'all' }]);
           expect(that.options.services).toEqual([]);
@@ -180,8 +181,8 @@
 
           it('should have right title and button labels', function () {
             expect(step.title).toBe(gettext('Name'));
-            expect(step.nextBtnText).toBe(gettext('Add'));
-            expect(step.cancelBtnText).toBe(gettext('Cancel'));
+            expect($translate.instant(step.nextBtnText)).toBe(gettext('Add'));
+            expect($translate.instant(step.cancelBtnText)).toBe(gettext('Cancel'));
             expect(step.showBusyOnNext).toBe(true);
           });
 

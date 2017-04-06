@@ -91,6 +91,6 @@
         endpointsHcf.isHcfEndpoints();
       });
 
-    });
+    }).skipWhen(helpers.skipIfOnlyOneHCF);
   }).skipWhen(helpers.skipIfNoHCF);
 })();
