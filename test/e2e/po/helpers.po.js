@@ -491,8 +491,13 @@
     return !getHcfs() || !getHcfs().hcf2;
   }
 
+  function skipIfOnlyOneHCF() {
+    return !getHcfs() || Object.keys(getHcfs()).length < 2;
+  }
+
   function skipIfNoAppWithLogStrean() {
-    return !browser.params.appWithLogStream;
+    var haveNcf = getHcfs() && Object.keys(getHcfs()).length > 0;
+    return !haveNcf || !browser.params.appWithLogStream;
   }
 
   function getAppNameWithLogStream() {

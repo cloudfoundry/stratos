@@ -87,7 +87,7 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + '**/framework/**/*.html',
+        paths.src + '**/framework/**/*.html'
       ],
 
       svgPaths: [
