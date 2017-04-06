@@ -130,12 +130,9 @@
     fsx.ensureDirSync(path.dirname(outputFile));
     var files = {};
     processFile(files, {}, file, outputFile);
-
-
     _.each(files, function (lines, filename) {
       writeFiles(filename, lines);
     });
-
     done();
   });
 
