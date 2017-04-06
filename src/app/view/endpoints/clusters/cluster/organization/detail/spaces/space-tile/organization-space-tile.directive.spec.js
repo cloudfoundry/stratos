@@ -116,7 +116,6 @@
         expect(controller.actions.length).toEqual(3);
         expect(controller.summary).toBeDefined();
         expect(controller.spaceDetail).toBeDefined();
-        expect(controller.orgDetails).toBeDefined();
       });
 
       it('should have rename space enabled', function () {

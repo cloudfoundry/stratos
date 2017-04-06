@@ -37,37 +37,35 @@
    * @constructor
    */
   function AvatarController(modelManager, $scope, $document, $timeout) {
-    this.accountModel = modelManager.retrieve('app.model.account');
-    this.$scope = $scope;
-    this.$document = $document;
-    this.$timeout = $timeout;
-    this.showingActions = false;
-  }
+    var vm = this;
 
-  angular.extend(AvatarController.prototype, {
+    vm.showingActions = false;
+    vm.accountModel = modelManager.retrieve('app.model.account');
+    vm.showActions = showActions;
+
     /**
      * @function showActions
      * @memberof AvatarController
      * @description show actions popover
      * @public
      */
-    showActions: function () {
-      var that = this;
-      this.showingActions = true;
-      this.$timeout(function () {
-        if (that.showingActions) {
-          that.$document.on('click', hide);
+    function showActions() {
+      vm.showingActions = true;
+      $timeout(function () {
+        if (vm.showingActions) {
+          $document.on('click', hide);
         } else {
-          that.$document.off('click', hide);
+          $document.off('click', hide);
         }
       }, 0);
 
       function hide() {
-        that.showingActions = false;
-        that.$document.off('click', hide);
-        that.$scope.$apply();
+        vm.showingActions = false;
+        $document.off('click', hide);
+        $scope.$apply();
       }
     }
-  });
+
+  }
 
 })();

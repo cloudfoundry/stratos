@@ -5,28 +5,26 @@
     .module('app.view.endpoints.clusters')
     .factory('appClusterRoutesService', RoutesServiceFactory);
 
-  function RoutesServiceFactory($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
-    return new appClusterRoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm);
+  function RoutesServiceFactory($q, modelManager, appNotificationsService, frameworkDialogConfirm) {
+    return new appClusterRoutesService($q, modelManager, appNotificationsService, frameworkDialogConfirm);
   }
 
   /**
    * @name appClusterRoutesService
    * @constructor
    * @param {object} $q - the angular $log service
-   * @param {object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog service
    */
-  function appClusterRoutesService($q, $log, modelManager, appNotificationsService, frameworkDialogConfirm) {
-    this.$q = $q;
-    this.$log = $log;
-    this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
-    this.appNotificationsService = appNotificationsService;
-    this.frameworkDialogConfirm = frameworkDialogConfirm;
-  }
+  function appClusterRoutesService($q, modelManager, appNotificationsService, frameworkDialogConfirm) {
 
-  angular.extend(appClusterRoutesService.prototype, {
+    return {
+      getRouteId: getRouteId,
+      unmapAppRoute: unmapAppRoute,
+      unmapAppsRoute: unmapAppsRoute,
+      deleteRoute: deleteRoute
+    };
 
     /**
      * @function getRouteId
@@ -34,7 +32,7 @@
      * @param {object} route route or route entity
      * @returns {string} route ID
      */
-    getRouteId: function (route) {
+    function getRouteId(route) {
       var routeEntity = _.get(route, 'entity', route);
       var domain = _.get(routeEntity, 'domain.entity', routeEntity.domain);
       var domainName = domain ? domain.name : gettext('Unknown');
@@ -43,7 +41,7 @@
       var port = routeEntity.port ? ':' + routeEntity.port : '';
 
       return host + domainName + port + routeEntity.path;
-    },
+    }
 
     /**
      * @function unmapRoute
@@ -55,13 +53,13 @@
      * @returns {promise} promise once execution completed. Returns count of successful unmaps. If rejected this could
      * mean confirm dialog was cancelled OR unmap failed
      */
-    unmapAppRoute: function (cnsiGuid, route, routeGuid, appGuid) {
-      var that = this;
-      var deferred = this.$q.defer();
+    function unmapAppRoute(cnsiGuid, route, routeGuid, appGuid) {
+      var routesModel = modelManager.retrieve('cloud-foundry.model.route');
+      var deferred = $q.defer();
 
-      this.frameworkDialogConfirm({
+      frameworkDialogConfirm({
         title: gettext('Unmap Route from Application'),
-        description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
+        description: gettext('Are you sure you want to unmap ') + getRouteId(route) + '?',
         submitCommit: true,
         buttonText: {
           yes: gettext('Unmap'),
@@ -69,9 +67,9 @@
         },
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
         callback: function () {
-          return that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
+          return routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
-              that.appNotificationsService.notify('success', gettext('Route successfully unmapped'));
+              appNotificationsService.notify('success', gettext('Route successfully unmapped'));
               deferred.resolve(1);
             })
             .catch(function (error) {
@@ -81,11 +79,11 @@
         }
       }).result.catch(function () {
         deferred.reject();
-        return that.$q.reject();
+        return $q.reject();
       });
 
       return deferred.promise;
-    },
+    }
 
     /**
      * @function unmapRoutes
@@ -97,14 +95,13 @@
      * @returns {promise} promise once execution completed. Returns count of successful unmaps. If rejected this could
      * mean confirm dialog was cancelled or ALL apps failed to unmap
      */
-    unmapAppsRoute: function (cnsiGuid, route, routeGuid, appGuids) {
-      var that = this;
+    function unmapAppsRoute(cnsiGuid, route, routeGuid, appGuids) {
+      var routesModel = modelManager.retrieve('cloud-foundry.model.route');
+      var deferred = $q.defer();
 
-      var deferred = this.$q.defer();
-
-      var dialog = this.frameworkDialogConfirm({
+      var dialog = frameworkDialogConfirm({
         title: gettext('Unmap Route from Applications'),
-        description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
+        description: gettext('Are you sure you want to unmap ') + getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
         submitCommit: true,
         buttonText: {
@@ -115,32 +112,32 @@
           var promises = [];
           var failures = 0;
           _.forEach(appGuids, function (appGuid) {
-            var promise = that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid).catch(function () {
+            var promise = routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid).catch(function () {
               // Semi-swallow error. This allows $q.all to resolve once all requests have completed, not reject on first
               // request to reject
               failures++;
             });
             promises.push(promise);
           });
-          return that.$q.all(promises)
+          return $q.all(promises)
             .then(function () {
               if (failures > 0) {
-                that.appNotificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
+                appNotificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
               } else {
-                that.appNotificationsService.notify('success', gettext('Route successfully unmapped'));
+                appNotificationsService.notify('success', gettext('Route successfully unmapped'));
               }
               deferred.resolve(appGuids.length - failures);
             }).catch(function (error) {
               deferred.reject(error);
-              return that.$q.reject();
+              return $q.reject();
             });
         }
       });
       return dialog.result.catch(function () {
         deferred.reject();
-        return that.$q.reject();
+        return $q.reject();
       });
-    },
+    }
 
     /**
      * @function deleteRoute
@@ -151,13 +148,13 @@
      * @returns {promise} promise once execution completed. This could mean confirm dialog was cancelled OR delete
      * failed
      */
-    deleteRoute: function (cnsiGuid, route, routeGuid) {
-      var that = this;
-      var deferred = this.$q.defer();
+    function deleteRoute(cnsiGuid, route, routeGuid) {
+      var routesModel = modelManager.retrieve('cloud-foundry.model.route');
+      var deferred = $q.defer();
 
-      var dialog = this.frameworkDialogConfirm({
+      var dialog = frameworkDialogConfirm({
         title: gettext('Delete Route'),
-        description: gettext('Are you sure you want to delete ') + this.getRouteId(route) + '?',
+        description: gettext('Are you sure you want to delete ') + getRouteId(route) + '?',
         errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
         submitCommit: true,
         buttonText: {
@@ -165,28 +162,28 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          return that.routesModel.deleteRoute(cnsiGuid, routeGuid, {
+          return routesModel.deleteRoute(cnsiGuid, routeGuid, {
             recursive: true,
             async: false
           })
-          .then(function () {
-            that.appNotificationsService.notify('success', gettext('Route successfully deleted'));
-            deferred.resolve();
-          })
-          .catch(function (error) {
-            // Deferred is only required for this error case (failure to execute callback).
-            deferred.reject(error);
-            // Also swallow error in rejected promise (most likely a failed http response) to ensure default error msg
-            // is used
-            return that.$q.reject();
-          });
+            .then(function () {
+              appNotificationsService.notify('success', gettext('Route successfully deleted'));
+              deferred.resolve();
+            })
+            .catch(function (error) {
+              // Deferred is only required for this error case (failure to execute callback).
+              deferred.reject(error);
+              // Also swallow error in rejected promise (most likely a failed http response) to ensure default error msg
+              // is used
+              return $q.reject();
+            });
         }
       });
       return dialog.result.catch(function () {
         deferred.reject();
-        return that.$q.reject();
+        return $q.reject();
       });
     }
-  });
+  }
 
 })();

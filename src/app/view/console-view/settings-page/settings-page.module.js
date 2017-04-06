@@ -34,25 +34,19 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
   }
 
-  angular.extend(SettingsController.prototype, {});
-
   function register(modelManager, appEventService) {
     return new UserSettings(modelManager, appEventService);
   }
 
   function UserSettings(modelManager, appEventService) {
-    var that = this;
-    this.modelManager = modelManager;
     appEventService.$on(appEventService.events.LOGIN, function () {
-      that.onLoggedIn();
+      onLoggedIn();
     });
-  }
 
-  angular.extend(UserSettings.prototype, {
-    onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function onLoggedIn() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('account-settings', 'account-settings', gettext('About'), 99, 'helion-icon-Unknown_L');
     }
-  });
+  }
 
 })();

@@ -19,24 +19,23 @@
   }
 
   function ClusterOrgDetailController(appUtilsService, cfOrganizationModel, $state, $stateParams, $q) {
-    var that = this;
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
+    var vm = this;
 
-    this.cfOrganizationModel = cfOrganizationModel;
-
-    function init() {
-      that.organizationNames = that.cfOrganizationModel.organizationNames[that.clusterGuid];
-      return $q.resolve();
-    }
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
+    vm.organizationNames = [];
+    vm.organization = organization;
 
     // Ensure the parent state is fully initialised before we start our own init
     appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
-  }
 
-  angular.extend(ClusterOrgDetailController.prototype, {
-    organization: function () {
-      return this.cfOrganizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
+    function init() {
+      vm.organizationNames = cfOrganizationModel.organizationNames[vm.clusterGuid];
+      return $q.resolve();
     }
-  });
+
+    function organization() {
+      return cfOrganizationModel.fetchOrganization(vm.clusterGuid, vm.organizationGuid);
+    }
+  }
 })();

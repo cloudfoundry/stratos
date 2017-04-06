@@ -26,30 +26,24 @@
   }
 
   function Clusters($q, $state, modelManager, appEventService, appUtilsService) {
-    var that = this;
 
-    this.initialized = $q.defer();
-
-    this.modelManager = modelManager;
+    var initialized = $q.defer();
 
     function init() {
-      return that.initialized.promise;
+      return initialized.promise;
     }
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      that.onLoggedIn();
+      onLoggedIn();
     });
 
     appUtilsService.chainStateResolve('endpoint.clusters', $state, init);
-  }
 
-  angular.extend(Clusters.prototype, {
-
-    onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function onLoggedIn() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', gettext('Cloud Foundry'), 1, 'helion-icon-Cloud');
-      this.initialized.resolve();
+      initialized.resolve();
     }
-  });
+  }
 
 })();

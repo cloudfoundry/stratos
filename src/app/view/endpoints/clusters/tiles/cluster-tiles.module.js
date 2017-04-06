@@ -38,50 +38,45 @@
    * @property {appUtilsService} appUtilsService - the appUtilsService service
    */
   function ClusterTilesController($q, $state, $stateParams, modelManager, appUtilsService) {
-    var that = this;
-    this.modelManager = modelManager;
+    var vm = this;
 
-    this.$q = $q;
-    this.$state = $state;
-    this.$stateParams = $stateParams;
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.serviceInstances = {};
-    this.state = '';
+    vm.currentUserAccount = modelManager.retrieve('app.model.account');
+    vm.serviceInstances = {};
+    vm.state = '';
+    vm.createClusterList = createClusterList;
+    vm.refreshClusterModel = refreshClusterModel;
+    vm.updateState = updateState;
 
-    function init() {
-      return that.refreshClusterModel();
-    }
+    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
-  }
+    function init() {
+      return refreshClusterModel();
+    }
 
-  angular.extend(ClusterTilesController.prototype, {
     /**
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
      * @name createClusterList
      * @description Create the list of clusters + determine their connected status
      */
-    createClusterList: function () {
-      var that = this;
-      this.serviceInstances = {};
-      var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+    function createClusterList() {
+      vm.serviceInstances = {};
+      var filteredInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
       _.forEach(filteredInstances, function (serviceInstance) {
         var cloned = angular.fromJson(angular.toJson(serviceInstance));
-        cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
+        cloned.isConnected = _.get(userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
 
         if (cloned.isConnected) {
           cloned.hasExpired = false;
-          that.serviceInstances[cloned.guid] = cloned;
+          vm.serviceInstances[cloned.guid] = cloned;
         }
       });
-      this.updateState(false, false);
-    },
+      updateState(false, false);
+    }
 
     /**
      * @namespace app.view.endpoints.clusters
@@ -90,22 +85,21 @@
      * @description Update the core model data + create the cluster list
      * @returns {promise} refresh cluster promise
      */
-    refreshClusterModel: function () {
-      var that = this;
-      this.updateState(true, false);
+    function refreshClusterModel() {
+      updateState(true, false);
 
-      var promises = [this.stackatoInfo.getStackatoInfo()];
-      if (!that.$stateParams.instancesListed) {
-        promises = promises.concat([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
+      var promises = [stackatoInfo.getStackatoInfo()];
+      if (!$stateParams.instancesListed) {
+        promises = promises.concat([serviceInstanceModel.list(), userServiceInstanceModel.list()]);
       }
-      return this.$q.all(promises)
+      return $q.all(promises)
         .then(function () {
-          that.createClusterList();
+          vm.createClusterList();
         })
         .catch(function () {
-          that.updateState(false, true);
+          updateState(false, true);
         });
-    },
+    }
 
     /**
      * @namespace app.view.endpoints.clusters
@@ -115,17 +109,17 @@
      * @param {boolean} loading true if loading async data
      * @param {boolean} loadError true if the async load of data failed
      */
-    updateState: function (loading, loadError) {
-      var hasClusters = _.get(_.keys(this.serviceInstances), 'length', 0) > 0;
+    function updateState(loading, loadError) {
+      var hasClusters = _.get(_.keys(vm.serviceInstances), 'length', 0) > 0;
       if (hasClusters) {
-        this.state = '';
+        vm.state = '';
       } else if (loading) {
-        this.state = 'loading';
+        vm.state = 'loading';
       } else if (loadError) {
-        this.state = 'loadError';
+        vm.state = 'loadError';
       } else {
-        this.state = 'noClusters';
+        vm.state = 'noClusters';
       }
     }
-  });
+  }
 })();

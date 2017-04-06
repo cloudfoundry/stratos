@@ -74,10 +74,13 @@
 
       expect($controller).toBeDefined();
       expect($controller.update).toBeDefined();
-      expect($controller.getInitialActions).toBeDefined();
+      expect($controller.serviceInstances).toBeDefined();
+      expect($controller.actionsPerSI).toBeDefined();
+      expect($controller.canDeleteOrUnbind).toBeDefined();
+      expect($controller.visibleServiceInstances).toBeDefined();
       expect($controller.createApplicationList).toBeDefined();
       expect($controller.spaceDetail).toBeDefined();
-      expect($controller.updateActions).toBeDefined();
+      expect($controller.update).toBeDefined();
     });
 
     it('initial state - cached services', function () {

@@ -22,31 +22,29 @@
     });
   }
 
-  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, appUtilsService, cfOrganizationModel) {
-    var that = this;
+  function ClusterDetailSpacesController($q, $stateParams, $state, appUtilsService, cfOrganizationModel) {
+    var vm = this;
 
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
+    vm.spaces = spaces;
+    vm.keys = _.keys;
 
-    this.cfOrganizationModel = cfOrganizationModel;
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
 
-    this.stateInitialised = false;
+    vm.stateInitialised = false;
 
-    function init() {
-      that.stateInitialised = true;
-      return $q.resolve();
-    }
     // Ensure the parent state is fully initialised before we start our own init
     appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
-  }
 
-  angular.extend(ClusterDetailSpacesController.prototype, {
-    spaces: function () {
-      var org = this.cfOrganizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid) || {};
+    function init() {
+      vm.stateInitialised = true;
+      return $q.resolve();
+    }
+
+    function spaces() {
+      var org = cfOrganizationModel.fetchOrganization(vm.clusterGuid, vm.organizationGuid) || {};
       return org.spaces;
-    },
+    }
 
-    keys: _.keys
-
-  });
+  }
 })();

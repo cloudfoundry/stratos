@@ -30,23 +30,22 @@
    * @constructor
    */
   function ClustersRouterController($q, $state, modelManager, appUtilsService) {
-    var that = this;
-    this.modelManager = modelManager;
 
-    this.$q = $q;
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+    appUtilsService.chainStateResolve('endpoint.clusters.router', $state, init);
 
     function init() {
 
-      return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
+      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list()])
         .then(function () {
 
           var connectedInstances = 0;
           var serviceInstanceGuid;
-          var hcfInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          var hcfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
           _.forEach(hcfInstances, function (hcfInstance) {
-            if (_.get(that.userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
+            if (_.get(userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
               serviceInstanceGuid = hcfInstance.guid;
               connectedInstances += 1;
             }
@@ -61,10 +60,6 @@
         });
     }
 
-    appUtilsService.chainStateResolve('endpoint.clusters.router', $state, init);
-
   }
-
-  angular.extend(ClustersRouterController.prototype, {});
 
 })();

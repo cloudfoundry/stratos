@@ -36,22 +36,24 @@
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    */
   function ClusterTileController($scope, $state, modelManager, apiManager, appUtilsService, modelUtils) {
-    var that = this;
+    var vm = this;
 
-    this.$state = $state;
+    vm.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    vm.orgCount = null;
+    vm.userCount = null;
+    vm.userService = {};
+    vm.getCardData = getCardData;
+    vm.summary = summary;
+    vm.setUserCount = setUserCount;
+    vm.setOrganisationCount = setOrganisationCount;
+
     // Need to fetch the total number of organizations and users. To avoid fetching all items, only fetch 1 and read
     // list metadata total_results. In order to do this we must go via the api, not the model.
-    this.userApi = apiManager.retrieve('cloud-foundry.api.Users');
-    this.organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.modelUtils = modelUtils;
+    var userApi = apiManager.retrieve('cloud-foundry.api.Users');
+    var organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.orgCount = null;
-    this.userCount = null;
-    this.userService = {};
-
     var cardData = {};
+
     var expiredStatus = {
       classes: 'danger',
       icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
@@ -64,34 +66,21 @@
       description: gettext('Cannot contact endpoint')
     };
 
-    cardData.title = this.service.name;
-    this.getCardData = function () {
-      if (this.userService.error) {
+    cardData.title = vm.service.name;
+
+    // Ensure the parent state is fully initialised before we start our own init
+    appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
+
+    function getCardData() {
+      if (vm.userService.error) {
         cardData.status = erroredStatus;
-      } else if (that.service.hasExpired) {
+      } else if (vm.service.hasExpired) {
         cardData.status = expiredStatus;
       } else {
         delete cardData.status;
       }
       return cardData;
-    };
-
-    function init() {
-      $scope.$watch(function () { return that.service; }, function (newVal) {
-        if (!newVal) {
-          return;
-        }
-        that.userService = userServiceInstanceModel.serviceInstances[that.service.guid] || {};
-        that.setOrganisationCount();
-        that.setUserCount();
-      });
     }
-
-    // Ensure the parent state is fully initialised before we start our own init
-    appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
-  }
-
-  angular.extend(ClusterTileController.prototype, {
 
     /**
      * @namespace app.view.endpoints.clusters
@@ -99,24 +88,23 @@
      * @name setUserCount
      * @description Determine the number of users associated with this cluster
      */
-    setUserCount: function () {
-      this.userCount = 0;
+    function setUserCount() {
+      vm.userCount = 0;
 
-      if (!this.service.isConnected || this.userService.error ||
-        !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
-        this.userCount = undefined;
+      if (!vm.service.isConnected || vm.userService.error ||
+        !vm.stackatoInfo.info.endpoints.hcf[vm.service.guid].user.admin) {
+        vm.userCount = undefined;
         return;
       }
 
-      var that = this;
-      this.userApi.ListAllUsers({'results-per-page': 1}, this.modelUtils.makeHttpConfig(this.service.guid))
+      userApi.ListAllUsers({'results-per-page': 1}, modelUtils.makeHttpConfig(vm.service.guid))
         .then(function (response) {
-          that.userCount = response.data.total_results;
+          vm.userCount = response.data.total_results;
         })
         .catch(function () {
-          that.userCount = undefined;
+          vm.userCount = undefined;
         });
-    },
+    }
 
     /**
      * @namespace app.view.endpoints.clusters
@@ -124,23 +112,33 @@
      * @name setOrganisationCount
      * @description Determine the number of organisations associated with this cluster
      */
-    setOrganisationCount: function () {
-      this.orgCount = 0;
+    function setOrganisationCount() {
+      vm.orgCount = 0;
 
-      if (!this.service.isConnected || this.userService.error) {
-        this.orgCount = undefined;
+      if (!vm.service.isConnected || vm.userService.error) {
+        vm.orgCount = undefined;
         return;
       }
-      var that = this;
-      this.organizationApi.ListAllOrganizations({'results-per-page': 1},
-        this.modelUtils.makeHttpConfig(this.service.guid))
+      organizationApi.ListAllOrganizations({'results-per-page': 1},
+        modelUtils.makeHttpConfig(vm.service.guid))
         .then(function (response) {
-          that.orgCount = response.data.total_results;
+          vm.orgCount = response.data.total_results;
         })
         .catch(function () {
-          that.orgCount = undefined;
+          vm.orgCount = undefined;
         });
-    },
+    }
+
+    function init() {
+      $scope.$watch(function () { return vm.service; }, function (newVal) {
+        if (!newVal) {
+          return;
+        }
+        vm.userService = userServiceInstanceModel.serviceInstances[vm.service.guid] || {};
+        setOrganisationCount();
+        setUserCount();
+      });
+    }
 
     /**
      * @namespace app.view.endpoints.clusters
@@ -148,10 +146,10 @@
      * @name summary
      * @description Navigate to the cluster summary page for this cluster
      */
-    summary: function () {
-      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid, orgCount: this.orgCount, userCount: this.userCount});
+    function summary() {
+      $state.go('endpoint.clusters.cluster.detail.organizations', {guid: vm.service.guid, orgCount: vm.orgCount, userCount: vm.userCount});
     }
 
-  });
+  }
 
 })();

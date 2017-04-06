@@ -28,31 +28,24 @@
   }
 
   function Endpoints($q, $state, modelManager, appEventService, appUtilsService) {
-    var that = this;
-
-    this.initialized = $q.defer();
-
-    this.modelManager = modelManager;
+    var initialized = $q.defer();
 
     function init() {
-      return that.initialized.promise;
+      return initialized.promise;
     }
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      that.onLoggedIn();
+      onLoggedIn();
     });
 
     appUtilsService.chainStateResolve('endpoint', $state, init);
-  }
 
-  angular.extend(Endpoints.prototype, {
-
-    onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function onLoggedIn() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 2, 'helion-icon-Inherit helion-icon-r270');
-      this.initialized.resolve();
+      initialized.resolve();
     }
 
-  });
+  }
 
 })();

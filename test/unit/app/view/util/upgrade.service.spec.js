@@ -2,7 +2,7 @@
   'use strict';
 
   describe('upgrade service', function () {
-    var $httpBackend, applicationCtrl, $state, upgradeCheck, $http, $stateParams, $timeout;
+    var $httpBackend, applicationCtrl, $state, appUpgradeCheck, $http, $stateParams, $timeout;
 
     var testAptEndpoint = {
       Scheme: 'https',
@@ -21,7 +21,7 @@
       $timeout = $injector.get('$timeout');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?page=1&results-per-page=48').respond(200, {guid: {}});
-      upgradeCheck = $injector.get('appUpgradeCheck');
+      appUpgradeCheck = $injector.get('appUpgradeCheck');
     }));
 
     afterEach(function () {
@@ -30,7 +30,7 @@
     });
 
     it('should be defined', function () {
-      expect(upgradeCheck).toBeDefined();
+      expect(appUpgradeCheck).toBeDefined();
     });
 
     describe('upgrade checking', function () {
@@ -48,27 +48,27 @@
 
       it('no match', function () {
         var response = generateResponse(400, '/github/url', false);
-        expect(upgradeCheck.isUpgrading(response)).toBe(false);
+        expect(appUpgradeCheck.isUpgrading(response)).toBe(false);
       });
 
       it('match status code', function () {
         var response = generateResponse(503, '/github/url', false);
-        expect(upgradeCheck.isUpgrading(response)).toBe(false);
+        expect(appUpgradeCheck.isUpgrading(response)).toBe(false);
       });
 
       it('match status code and header', function () {
         var response = generateResponse(503, '/github/url', true);
-        expect(upgradeCheck.isUpgrading(response)).toBe(false);
+        expect(appUpgradeCheck.isUpgrading(response)).toBe(false);
       });
 
       it('match status code and url', function () {
         var response = generateResponse(503, '/pp/v1/url', false);
-        expect(upgradeCheck.isUpgrading(response)).toBe(false);
+        expect(appUpgradeCheck.isUpgrading(response)).toBe(false);
       });
 
       it('match all', function () {
         var response = generateResponse(503, '/pp/v1/url', true);
-        expect(upgradeCheck.isUpgrading(response)).toBe(true);
+        expect(appUpgradeCheck.isUpgrading(response)).toBe(true);
       });
     });
 
@@ -130,7 +130,6 @@
 
         it('invoke `login` method - failure with server error', function () {
           applicationCtrl.loggedIn = false;
-          applicationCtrl.onLoggedOut();
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(500, {});
           $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
           applicationCtrl.login('dev', 'dev');

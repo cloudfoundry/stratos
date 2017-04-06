@@ -3,7 +3,7 @@
 
   describe('cluster space detail (routes) module', function () {
 
-    var $controller, $httpBackend, $scope, $stateParams, $q, $log, $state, modelManager, appClusterRoutesService, appUtilsService;
+    var $controller, $httpBackend, $scope, $stateParams, $q, $state, modelManager, appClusterRoutesService, appUtilsService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -40,7 +40,6 @@
       $stateParams.organization = organizationGuid;
       $stateParams.space = spaceGuid;
       $q = $injector.get('$q');
-      $log = $injector.get('$log');
       $state = $injector.get('$state');
       modelManager = $injector.get('modelManager');
       appClusterRoutesService = $injector.get('appClusterRoutesService');
@@ -56,7 +55,7 @@
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, space);
 
       var SpaceRoutesController = $state.get('endpoint.clusters.cluster.organization.space.detail.routes').controller;
-      $controller = new SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, appClusterRoutesService, appUtilsService);
+      $controller = new SpaceRoutesController($scope, $stateParams, $q, $state, modelManager, appClusterRoutesService, appUtilsService);
     }
 
     afterEach(function () {
@@ -73,10 +72,11 @@
       $httpBackend.flush();
 
       expect($controller).toBeDefined();
-      expect($controller.update).toBeDefined();
-      expect($controller.getInitialActions).toBeDefined();
+      expect($controller.appClusterRoutesService).toBeDefined();
+      expect($controller.visibleRoutes).toBeDefined();
+      expect($controller.actionsPerRoute).toBeDefined();
+      expect($controller.canDeleteOrUnmap).toBeDefined();
       expect($controller.appsToNames).toBeDefined();
-      expect($controller.updateActions).toBeDefined();
       expect($controller.spaceDetail).toBeDefined();
     });
 
