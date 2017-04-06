@@ -25,7 +25,6 @@
     };
   }
 
-    '$translate'
   /**
    * @name AppErrorBarController
    * @memberof app.view
@@ -33,7 +32,7 @@
    * @constructor
    * @param {object} $scope - the Angular $scope
    * @param {app.utils.appEventService} appEventService - the event Service
-   * @param {object} $translate - the i18n $translate service 
+   * @param {object} $translate - the i18n $translate service
    */
   function AppErrorBarController($scope, appEventService, $translate) {
     var that = this;
