@@ -32,17 +32,16 @@
    * @constructor
    * @param {object} $scope - the Angular $scope
    * @param {app.utils.appEventService} appEventService - the event Service
-   * @property {app.utils.appEventService} appEventService - the event Service
-   * @property {string} messgae - the error message to display
+   * @param {object} $translate - the i18n $translate service
    */
-  function AppErrorBarController($scope, appEventService) {
+  function AppErrorBarController($scope, appEventService, $translate) {
     var that = this;
     this.appEventService = appEventService;
     this.message = undefined;
     this.displayed = false;
 
     this.removeSetListener = appEventService.$on(appEventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
-      that.message = msg;
+      that.message = $translate.instant(msg);
       that.displayed = true;
     });
 

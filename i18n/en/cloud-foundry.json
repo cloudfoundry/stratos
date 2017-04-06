@@ -1,0 +1,17 @@
+{
+  "cf": {
+    "registration": {
+      "name": "@:cloud-foundry",
+      "p1": "[[@:cloud-foundry]] supports the full application lifecycle, from initial development, through testing to deployment.",
+      "p2": "Register an existing [[@:cf.registration.name]] endpoint to allow your development team to create and manage their applications.",
+      "p3": "When registering, choose a unique, recognizable name so that your developers can easily know which [[@:cf.registration.name]] endpoint they are working with.",
+      "tagline": "[[@:cloud-foundry]] supports the full application lifecycle, from initial development, through testing to deployment."
+    },
+    "cli": {
+      "commands": {
+        "title": "CLI Commands",
+        "deploy-title": "Deploy Using CLI"
+      }
+    }
+  }
+}

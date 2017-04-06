@@ -23,6 +23,7 @@
     };
   }
 
+    'app.view.selectLanguage',
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
@@ -32,6 +33,7 @@
    * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
+   * @param {object} selectLanguage - the Language Selection dialogService
    * @param {object} $timeout - Angular $timeout service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
@@ -50,12 +52,14 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLocalStorage,
-                                 $timeout, $stateParams, $window, $rootScope, $scope) {
+                                 selectLanguage, $timeout, $state, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
+    this.selectLanguage = selectLanguage;
 
     vm.appBasePath = appBasePath;
     vm.appUpgradeCheck = appUpgradeCheck;
+    vm.showLanguageSelection = showLanguageSelection;
     vm.loggedIn = false;
     vm.serverFailedToRespond = false;
     vm.showGlobalSpinner = false;
@@ -88,6 +92,17 @@
         appLocalStorage.setItem('navbarIconsOnly', nv);
       }
     });
+
+
+    /**
+     * @function showLanguageSelection
+     * @memberof app.view.application.ApplicationController
+     * @description Shows the Language Selection dialog
+     * @public
+     */
+    function showLanguageSelection() {
+      this.selectLanguage.show();
+    }
 
     /**
      * @function verifySession

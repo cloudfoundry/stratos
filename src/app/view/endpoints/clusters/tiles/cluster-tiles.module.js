@@ -17,7 +17,7 @@
         instancesListed: false
       },
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry'),
+        label: 'product.cf',
         parent: 'endpoint.dashboard'
       }
     });

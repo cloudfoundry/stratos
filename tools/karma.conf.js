@@ -29,6 +29,7 @@
 
       files: [
         'src/lib/jquery/dist/jquery.js',
+        'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
         'src/lib/angular-mocks/angular-mocks.js',
         'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
         'tools/console-templates.js',
@@ -37,6 +38,15 @@
         'src/plugins/*/plugin.config.js',
 
         'theme/**/*.svg',
+        'tools/unit-test-helpers.js',
+
+        {
+          pattern: 'dist/i18n/*.json',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
         {
           pattern: 'theme/images/*.png',
           watched: false,

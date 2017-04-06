@@ -31,12 +31,12 @@
        * @public
        */
       show: function (appModel, username) {
-        var incomplete = appModel.state && appModel.state.label === 'Incomplete';
+        var incomplete = appModel.state && appModel.state.label === 'app.state.incomplete';
         var templateName = incomplete ? 'cli-commands-deploy.html' : 'cli-commands.html';
         return frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/' + templateName,
-            title: incomplete ? gettext('Deploy Using CLI') : gettext('CLI Commands')
+            title: incomplete ? 'cf.cli.commands.deploy-title' : 'cf.cli.commands.title'
           },
           {
             apiEndpoint: appUtilsService.getClusterEndpoint(appModel.cluster),

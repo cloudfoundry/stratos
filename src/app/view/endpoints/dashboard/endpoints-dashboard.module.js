@@ -12,7 +12,7 @@
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl',
       ncyBreadcrumb: {
-        label: gettext('Endpoints')
+        label: 'endpoints'
       }
     });
   }

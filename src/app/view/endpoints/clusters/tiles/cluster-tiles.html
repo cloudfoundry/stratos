@@ -9,7 +9,7 @@
     </div>
     <div ng-switch-when="noClusters" class="applications-empty">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
-      <div class="applications-msg" translate>No connected {{ OEM_CONFIG.CLOUD_FOUNDRY }} endpoints.</div>
+      <div class="applications-msg" translate>errors.no-cf-connected</div>
       <div class="applications-cta" ng-show="clustersCtrl.currentUserAccount.isAdmin()">
         <a class="btn-link" ui-sref="endpoint.dashboard" translate>Use the Endpoints Dashboard</a>
         <span translate>to fix your connections or connect to new endpoints.</span>
@@ -20,9 +20,7 @@
     </div>
     <div ng-switch-default>
       <div class="header">
-        <div class="applications-header font-semi-bold pull-left" translate>
-          {{ OEM_CONFIG.CLOUD_FOUNDRY }}
-        </div>
+        <div class="applications-header font-semi-bold pull-left" translate>cloud-foundry</div>
       </div>
       <div class="cluster-gallery-card-container">
         <div class="cluster-gallery-card-parent clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersCtrl.serviceInstances">

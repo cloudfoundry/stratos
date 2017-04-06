@@ -21,7 +21,7 @@
         instancesListed: false
       },
       ncyBreadcrumb: {
-        label: '{{ OEM_CONFIG.SERVICE_MANAGER }}',
+        label: 'service-manager',
         parent: 'endpoint.dashboard'
       },
       data: {

@@ -4,27 +4,23 @@
       <div ng-if="errPageCtrl.error === 'notSetup'"
            class="endpoint-notification endpoint-notification-slim endpoint-notification-error panel panel-default alert">
           <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
-          <span translate>
-            In order to use the {{ OEM_CONFIG.CONSOLE }} you must connect to a registered service endpoint. Registered service
-            endpoints are provided by your system administrator. Please contact your administrator about registering
-            endpoints.
-          </span>
+          <span translate>errors.needs-registration</span>
       </div>
       <div class="console-error-block console-error">
         <div ng-if="errPageCtrl.error === 'notSetup'">
           <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
-          <div class="applications-msg" translate>There are no registered endpoints.</div>
-          <div class="applications-cta" translate>Please contact your administrator.</div>
+          <div class="applications-msg" translate>errors.nothing-registered</div>
+          <div class="applications-cta" translate>errors.contact-admin</div>
         </div>
         <div ng-if="errPageCtrl.error === 'unknown'">
           <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
-          <div class="applications-msg" translate>{{ OEM_CONFIG.PRODUCT_NAME }} encountered an unexpected error.</div>
-          <div class="applications-cta" translate>Please contact your administrator.</div>
+          <div class="applications-msg" translate>errors.unexpected</div>
+          <div class="applications-cta" translate>errors.ontact-admin</div>
         </div>
         <div ng-if="errPageCtrl.error === 'upgrading'">
           <div class="helion-icon helion-icon-3x helion-icon-Install"></div>
-          <div class="applications-msg" translate>The {{ OEM_CONFIG.CONSOLE }} is being upgraded.</div>
-          <div class="applications-cta" translate>Please wait for the upgrade to complete and then refresh or contact your administrator for further information.</div>
+          <div class="applications-msg" translate>errors.upgrading</div>
+          <div class="applications-cta" translate>errors.upgrade-wait</div>
         </div>
       </div>
     </div>
