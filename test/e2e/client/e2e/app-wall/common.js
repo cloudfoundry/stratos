@@ -33,6 +33,7 @@
   function expectGetTemplates($httpBackend) {
     $httpBackend.whenGET(/.+\.html$/).passThrough();
     $httpBackend.whenGET(/.+\.svg$/).passThrough();
+    $httpBackend.whenGET(/i18n.+\.json$/).passThrough();
   }
 
   function expectGetSessionVerifiedWithSuccess($httpBackend) {

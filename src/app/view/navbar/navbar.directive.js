@@ -19,8 +19,19 @@
    */
   function navbar(path) {
     return {
-      templateUrl: path + 'view/navbar/navbar.html'
+      templateUrl: path + 'view/navbar/navbar.html',
+      controller: NavBarController,
+      controllerAs: 'navBarCtrl',
+      bindToController: true
     };
+  }
+
+  NavBarController.$inject = [
+    'app.config'
+  ];
+
+  function NavBarController(appConfig) {
+    this.showLanguageSelection = appConfig.showLanguageSelection || false;
   }
 
 })();

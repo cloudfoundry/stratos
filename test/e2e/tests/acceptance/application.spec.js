@@ -204,7 +204,7 @@
               confirmModal.waitUntilNotPresent();
 
               if (rows.length === 1) {
-                expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no routes');
+                expect(element(by.css('.space-services-table .panel-body')).getText()).toBe('You have no routes');
               } else {
                 routes.getData().then(function (newRows) {
                   expect(newRows.length).toBe(rows.length - 1);

@@ -335,7 +335,7 @@
         expect(column).toBeDefined();
       });
 
-      it('should allow the serice to be detached and then deleted', function () {
+      it('should allow the service to be detached and then deleted', function () {
         // Go to Services tab
         application.getTabs().get(1).click();
         var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
@@ -359,7 +359,7 @@
           confirmModal.commit();
           helpers.checkAndCloseToast(/Service instance successfully deleted/);
           if (rows.length === 1) {
-            expect(element(by.css('.space-services-table .panel-body span')).getText()).toBe('You have no service instances');
+            expect(element(by.css('.space-services-table .panel-body')).getText()).toBe('You have no service instances');
           } else {
             serviceInstances.getData().then(function (newRows) {
               expect(newRows.length).toBe(rows.length - 1);

@@ -2,13 +2,14 @@
   'use strict';
 
   describe('application state service', function () {
-    var $httpBackend, appStateService;
+    var $httpBackend, appStateService, $translate;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       appStateService = $injector.get('cloud-foundry.model.application.stateService');
+      $translate = $injector.get('$translate');
     }));
 
     afterEach(function () {
@@ -50,7 +51,7 @@
         var testData = makeTestData('ANY', 'FAILED', ['RUNNING']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Staging Failed');
+        expect($translate.instant(res.label)).toBe('Staging Failed');
         expect(_.keys(res.actions).length).toBe(1);
         expect(res.actions.delete).toBe(true);
       });
@@ -60,7 +61,7 @@
         testData.summary.package_updated_at = 'some date';
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Offline while Updating');
+        expect($translate.instant(res.label)).toBe('Offline while Updating');
         expect(_.keys(res.actions).length).toBe(1);
         expect(res.actions.delete).toBe(true);
       });
@@ -69,7 +70,7 @@
         var testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Incomplete');
+        expect($translate.instant(res.label)).toBe('Incomplete');
         expect(_.keys(res.actions).length).toBe(2);
         expect(res.actions.delete).toBe(true);
         expect(res.actions.cli).toBe(true);
@@ -79,7 +80,7 @@
         var testData = makeTestData('STOPPED', 'STAGED', ['RUNNING', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Offline');
+        expect($translate.instant(res.label)).toBe('Offline');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.start).toBe(true);
         expect(res.actions.delete).toBe(true);
@@ -89,7 +90,7 @@
         var testData = makeTestData('STOPPED', undefined, ['RUNNING', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Incomplete');
+        expect($translate.instant(res.label)).toBe('Incomplete');
         expect(_.keys(res.actions).length).toBe(2);
         expect(res.actions.delete).toBe(true);
         expect(res.actions.cli).toBe(true);
@@ -99,7 +100,7 @@
         var testData = makeTestData('STARTED', 'PENDING', ['RUNNING', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
-        expect(res.label).toBe('Staging App');
+        expect($translate.instant(res.label)).toBe('Staging App');
         expect(_.keys(res.actions).length).toBe(1);
         expect(res.actions.delete).toBe(true);
       });
@@ -108,8 +109,8 @@
         var testData = makeTestData('STARTED', 'STAGED', ['STARTING']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Starting App');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Starting App');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.restart).toBe(true);
@@ -120,8 +121,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
 
         expect(res.indicator).toBe('busy');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Starting App');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Starting App');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.restart).toBe(true);
@@ -131,14 +132,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Online');
         expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -149,14 +150,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Crashed');
+        expect(res.label).toBe('app.state.deployed');
+        expect($translate.instant(res.subLabel)).toBe('Crashed');
 
         testData = makeTestData('STARTED', 'STAGED', ['CRASHED', 'CRASHED']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Crashed');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Crashed');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -166,14 +167,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Starting App');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Starting App');
 
         testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Starting App');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Starting App');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -183,14 +184,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Crashing');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Crashing');
 
         testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT', 'CRASHED', 'CRASHED']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Crashing');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Crashing');
         expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -200,14 +201,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Partially Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Partially Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING', 'CRASHED', 'CRASHED']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Partially Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Partially Online');
         expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -218,14 +219,14 @@
         var testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'UNKNOWN']);
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Partially Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Partially Online');
 
         testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING', 'UNKNOWN', 'UNKNOWN']);
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
-        expect(res.label).toBe('Deployed');
-        expect(res.subLabel).toBe('Partially Online');
+        expect($translate.instant(res.label)).toBe('Deployed');
+        expect($translate.instant(res.subLabel)).toBe('Partially Online');
         expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
@@ -236,7 +237,7 @@
         var testData = makeTestData('STARTED', 'STAGED');
         var res = appStateService.get(testData.summary, undefined);
         expect(res.indicator).toBe('tentative');
-        expect(res.label).toBe('Deployed');
+        expect($translate.instant(res.label)).toBe('Deployed');
         expect(res.subLabel).not.toBeDefined();
       });
 
@@ -244,7 +245,7 @@
         var testData = makeTestData('STARTED', 'STAGED');
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('tentative');
-        expect(res.label).toBe('Deployed');
+        expect($translate.instant(res.label)).toBe('Deployed');
         expect(res.subLabel).not.toBeDefined();
       });
     });

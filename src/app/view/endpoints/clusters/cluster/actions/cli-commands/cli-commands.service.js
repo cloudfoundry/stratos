@@ -50,7 +50,7 @@
         return detailView(
           {
             templateUrl: 'app/view/endpoints/clusters/cluster/actions/cli-commands/cli-commands.html',
-            title: gettext('CLI Commands')
+            title: 'cf.cli.commands.title'
           },
           {
             api: api,

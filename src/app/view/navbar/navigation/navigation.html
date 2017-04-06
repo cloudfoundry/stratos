@@ -7,11 +7,11 @@
         <i ng-if="!menuItem.svgIcon" class="helion-icon {{ menuItem.icon }}"></i>
         <svg-image ng-if="menuItem.svgIcon" src="{{menuItem.icon}}"></svg-image>
       </div>
-      <span class="navitem-label" >{{ menuItem.text }}</span>
+      <span class="navitem-label" translate>{{ menuItem.text }}</span>
     </a>
     <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.onClick" ng-click="menuItem.onClick()">
       <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
-      <span class="navitem-label" >{{ menuItem.text }}</span>
+      <span class="navitem-label" translate>{{ menuItem.text }}</span>
     </a>
     <div class="menu-item-badge" ng-class="{'badge-active': menuItem.badge}">{{ menuItem.badge.value || '' }}</div>
   </li>
