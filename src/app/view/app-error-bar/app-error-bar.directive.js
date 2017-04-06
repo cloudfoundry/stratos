@@ -29,7 +29,8 @@
 
   AppErrorBarController.$inject = [
     '$scope',
-    'app.utils.eventService'
+    'app.utils.eventService',
+    '$translate'
   ];
 
   /**
@@ -39,17 +40,17 @@
    * @constructor
    * @param {object} $scope - the Angular $scope
    * @param {app.utils.eventService} eventService - the event Service
-   * @property {app.utils.eventService} eventService - the event Service
+   * @param {object} $translate - the i18n $translate service
    * @property {string} messgae - the error message to display
    */
-  function AppErrorBarController($scope, eventService) {
+  function AppErrorBarController($scope, eventService, $translate) {
     var that = this;
     this.eventService = eventService;
     this.message = undefined;
     this.displayed = false;
 
     this.removeSetListener = eventService.$on(eventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
-      that.message = msg;
+      that.message = $translate.instant(msg);
       that.displayed = true;
     });
 

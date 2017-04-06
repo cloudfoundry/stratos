@@ -20,6 +20,7 @@
     paths = config.paths;
   };
 
+  var _ = require('lodash');
   var gulp = require('gulp');
   var gutil = require('gulp-util');
   var fs = require('fs');
@@ -73,9 +74,12 @@
     }
   }
 
-  function processFile(seen, scssFile, outputFile) {
+  function processFile(files, seen, scssFile, outputFile) {
     var outputFolder = path.dirname(outputFile);
-    fs.writeFileSync(outputFile, '', 'utf8');
+    //fs.writeFileSync(outputFile, '', 'utf8');
+
+    files[outputFile] = [];
+
     var splitImport = false;
     var base = path.dirname(scssFile);
     var lines = fs.readFileSync(scssFile, 'utf8').toString().split('\n');
@@ -91,16 +95,27 @@
         splitImport = tline.indexOf(';') === -1;
         var importFile = found[1];
         var meta = findFile(seen, base, importFile);
-        fs.appendFileSync(outputFile, '@import \"' + meta.outName + '\";' + endOfLine);
+        //fs.appendFileSync(outputFile, '@import \"' + meta.outName + '\";' + endOfLine);
+        files[outputFile].push('@import \"' + meta.outName + '\";' + endOfLine);
+
         if (!meta.done) {
-          processFile(seen, meta.file, path.join(outputFolder, meta.outName));
+          processFile(files, seen, meta.file, path.join(outputFolder, meta.outName));
         }
       } else {
         if (!(i === lines.length - 1 && tline.length === 0)) {
-          fs.appendFileSync(outputFile, line.toString() + endOfLine);
+          files[outputFile].push(line.toString() + endOfLine);
+          //fs.appendFileSync(outputFile, line.toString() + endOfLine);
         }
       }
     });
+  }
+
+  function writeFiles(filename, lines) {
+    var file = fs.createWriteStream(filename);
+    _.each(lines, function (line) {
+      file.write(line);
+    });
+    file.end();
   }
 
   gulp.task('oem:clean', function (next) {
@@ -113,7 +128,11 @@
     var file = paths.src + 'index_oem.scss';
     var outputFile = paths.oem + 'dist/scss/index.scss';
     fsx.ensureDirSync(path.dirname(outputFile));
-    processFile({}, file, outputFile);
+    var files = {};
+    processFile(files, {}, file, outputFile);
+    _.each(files, function (lines, filename) {
+      writeFiles(filename, lines);
+    });
     done();
   });
 

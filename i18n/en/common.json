@@ -1,0 +1,50 @@
+{
+  "applications": "Applications",
+  "cloud-foundry": "Cloud Foundry",
+  "code-engine": "Code Engine",
+  "service-manager": "Service Manager",
+  "console": "Console",
+  "endpoints": "Endpoints",
+  "privacy": "privacy",
+  "terms": "Terms of Use",
+  "console.version": "Console Version",
+  "org": "Org",
+  "space": "Space",
+  "endpoint": "Endpoint",
+
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "next": "Next",
+    "previous": "Previous",
+    "back": "Back",
+    "done": "Done",
+    "add": "Add",
+    "set": "Set"
+  },
+  "auth": {
+    "username": "Username",
+    "password": "Password"
+  },
+  "menu": {
+    "applications": "@:applications",
+    "cloud-foundry": "@:cloud-foundry",
+    "code-engine": "@:code-engine",
+    "endpoints": "@:endpoints",
+    "about": "@:about",
+    "language": "Language",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "language": {
+    "select": "Select Language"
+  },
+  "about": {
+    "about": "About",
+    "title": "[[@:product.name]] [[@:product.version]]"
+  },
+  "footer": {
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "copyright": "&copy; 2017 [[@:company.name]]"
+  }
+}

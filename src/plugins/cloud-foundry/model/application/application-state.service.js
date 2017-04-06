@@ -35,103 +35,103 @@
     var stateMetadata = {
       '?': {
         FAILED: {
-          label: gettext('Staging Failed'),
+          label: 'app.state.failed',
           indicator: 'error',
           actions: 'delete'
         }
       },
       PENDING: {
         '?': {
-          label: gettext('Pending'),
+          label: 'app.state.pending',
           indicator: 'busy',
           actions: 'delete'
         }
       },
       LOADING: {
         '?': {
-          label: gettext('Loading'),
+          label: 'app.state.loading',
           indicator: 'busy'
         }
       },
       STOPPED: {
         PENDING: {
-          label: gettext('Offline while Updating'),
+          label: 'app.state.updating',
           indicator: 'warning',
           actions: 'delete'
         },
         STAGED: {
-          label: gettext('Offline'),
+          label: 'app.state.offline',
           indicator: 'warning',
           actions: 'start,delete,cli'
         },
         '*NONE*': {
-          label: gettext('Incomplete'),
+          label: 'app.state.incomplete',
           indicator: 'warning',
           actions: 'delete, cli'
         }
       },
       STARTED: {
         NO_INSTANCES: {
-          label: gettext('Deployed'),
-          subLabel: gettext('No Instances'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.no-instances',
           indicator: 'ok',
           actions: 'stop,restart,cli'
         },
         PENDING: {
-          label: gettext('Staging App'),
+          label: 'app.state.staging',
           indicator: 'busy',
           actions: 'delete'
         },
         'STAGED(?,?,?)': {
-          label: gettext('Deployed'),
+          label: 'app.state.deployed',
           indicator: 'tentative',
           actions: 'stop,restart,cli'
         },
         'STAGED(0,0,0)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Starting App'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.starting',
           indicator: 'busy',
           actions: 'stop,restart,cli'
         },
         'STAGED(N,0,0,N)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Starting App'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.starting',
           indicator: 'busy',
           actions: 'stop,restart,cli'
         },
         'STAGED(N,0,0)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Online'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.online',
           indicator: 'ok',
           actions: 'stop,restart,launch,cli'
         },
         'STAGED(0,N,0)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Crashed'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.crashed',
           indicator: 'error',
           actions: 'stop,restart,cli'
         },
         'STAGED(0,0,N)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Starting App'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.starting',
           indicator: 'warning',
           actions: 'stop,restart,cli'
         },
         'STAGED(0,N,N)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Crashing'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.crashing',
           indicator: 'error',
           actions: 'stop,restart,cli'
         },
         'STAGED(N,N,0)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Partially Online'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.partial',
           indicator: 'warning',
           actions: 'stop,restart,launch,cli'
         },
         'STAGED(N,0,N)': {
-          label: gettext('Deployed'),
-          subLabel: gettext('Partially Online'),
+          label: 'app.state.deployed',
+          subLabel: 'app.state.partial',
           indicator: 'warning',
           actions: 'stop,restart,launch,cli'
         }
@@ -222,7 +222,7 @@
 
       // No match against the state table, so return unknown
       return {
-        label: gettext('Unknown'),
+        label: 'app.state.unknown',
         indicator: 'error',
         actions: {}
       };

@@ -15,7 +15,9 @@
       examples: './examples/',
       examplesScripts: './examples/scripts/',
       examplesDist: './examples/dist/',
-      browserSyncDist: '../dist'
+      browserSyncDist: '../dist',
+      i18n: '../i18n/',
+      i18nDist: '../dist/i18n/'
     };
 
     return {
@@ -64,6 +66,10 @@
         coverageVariable: '__coverage__'
       },
 
+      i18nFiles: [
+        paths.i18n + '**/*.json'
+      ],
+
       assetFiles: [
         paths.src + 'app/**/assets/**/*',
         paths.src + 'plugins/**/assets/**/*'
@@ -81,9 +87,12 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + '**/framework/**/*.html',
-        paths.src + '../theme/**/*.svg',
-        '!' + paths.src + '../theme/fonts/**/*.svg'
+        paths.src + '**/framework/**/*.html'
+      ],
+
+      svgPaths: [
+        paths.theme + '**/*.svg',
+        '!' + paths.theme + 'fonts/**/*.svg'
       ],
 
       jsFiles: [
