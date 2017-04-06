@@ -1,12 +1,12 @@
 <div
   ng-init="context = context || detailViewCtrl.context">
-  <p ><span translate>Use the </span><a translate href="https://github.com/cloudfoundry/cli" rel="noopener noreferrer" target="_blank">Cloud Foundry CLI</a>
+  <p ><span translate>Use the</span> <a translate href="https://github.com/cloudfoundry/cli" rel="noopener noreferrer" target="_blank">Cloud Foundry CLI</a>
   <span translate>to execute commands directly against a Cloud Foundry instance.</span></p>
   <div>
     <br>
     <h4 translate>Getting Started</h4>
     <p translate>Before starting follow these steps</p>
-    <p translate>1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
+    <p >1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
     <p >2. Set the api endpoint<code-block>cf api {{context.api || '[Cloud Foundry API endpoint]'}}</code-block></p>
     <p >3. Login<code-block hide-copy="true">$ cf login
 API endpoint: {{context.api || '[Cloud Foundry API endpoint]'}}
