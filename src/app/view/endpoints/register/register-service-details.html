@@ -1,26 +1,19 @@
 <div class="register-service-details">
 
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hcf'">
-    <p><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank" translate>cloud-foundry</a>
-     <span translate>cf.registration.p1</span>
-    </p>
+    <p translate>cf.registration.p1</p>
     <p translate>cf.registration.p2</p>
     <p translate>cf.registration.p3</p>
   </div>
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hce'">
-    <p translate>{{ OEM_CONFIG.CODE_ENGINE }} is a continuous delivery service for enterprise development teams that automates
-      build, test, and deploy cycles. Developers can push and merge changes into their source control system (e.g.
-      GitHub or GitHub Enterprise) and {{ OEM_CONFIG.CODE_ENGINE }} builds, tests, and deploys each change.</p>
-    <p translate>Register an existing {{ OEM_CONFIG.CODE_ENGINE }} endpoint to allow your development team to automate their
-      application development process.</p>
-    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
-      know which {{ OEM_CONFIG.CODE_ENGINE }} endpoint they are working with.</p>
+    <p translate>ce.registration.p1</p>
+    <p translate>ce.registration.p2</p>
+    <p translate>ce.registration.p3</p>
   </div>
   <div class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hsm'">
-    <p translate>{{ OEM_CONFIG.SERVICE_MANAGER }} supports the full lifecycle for deploying, managing and upgrading services deployed in the Control Plane.</p>
-    <p translate>Register an existing {{ OEM_CONFIG.SERVICE_MANAGER }} to allow Console administrators to view services.</p>
-    <p translate>When registering, choose a unique, recognizable name so that your developers can easily
-      know which {{ OEM_CONFIG.SERVICE_MANAGER }} endpoint they are working with.</p>
+    <p translate>sm.registration.p1</p>
+    <p translate>sm.registration.p2</p>
+    <p translate>sm.registration.p3</p>
   </div>
   <div class="register-content-right">
     <h4>{{step.title}}</h4>

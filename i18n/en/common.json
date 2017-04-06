@@ -42,5 +42,9 @@
   "about": {
     "about": "About",
     "title": "[[@:product.name]] [[@:product.version]]"
+  },
+  "footer": {
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "copyright": "&copy; 2017 [[@:company.name]]"
   }
 }

@@ -2,9 +2,10 @@
   "sm": {
     "registration": {
       "name": "@:service-manager",
-      "p1": "supports the full application lifecycle, from initial development, through testing to deployment.",
-      "p2": "Register an existing [[@:cf.registration.name]] endpoint to allow your development team to create and manage their applications.",
-      "p3": "When registering, choose a unique, recognizable name so that your developers can easily know which [[@:cf.registration.name]] endpoint they are working with."
+      "p1": "[[@:service-manager]] supports the full lifecycle for deploying, managing and upgrading services deployed in the Control Plane.",
+      "p2": "Register an existing [[@:service-manager]] to allow Console administrators to view services.",
+      "p3": "When registering, choose a unique, recognizable name so that your developers can easily know which [[@:service-manager]] endpoint they are working with.",
+      "tagline": "[[@:service-manager]] allows you to view the services deployed in the Control Plane."
     }
   }
 }

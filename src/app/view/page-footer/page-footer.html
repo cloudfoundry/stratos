@@ -2,9 +2,9 @@
 <a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.OEM_CONFIG.COMPANY_HREF | translate}}" target="_blank"><img class="hpe-logo" ng-src="{{ pageFooterCtrl.OEM_CONFIG.ABOUT_COMPANY_LOGO_HREF }}"/></a>
 <div class="copyright">
   <span ng-if="mode !== 'footer'" class="product-name font-semi-bold">
-    {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_NAME }} {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_VERSION }}
+    <span translate>footer.title</span>
   <span class="secondary">
-    <span ng-if="mode !== 'footer'">&copy; 2017 {{ pageFooterCtrl.OEM_CONFIG.COMPANY_NAME }}
+    <span ng-if="mode !== 'footer'" translate>footer.copyright</span>
   </span>
 </div>
 
