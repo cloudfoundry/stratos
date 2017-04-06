@@ -1,8 +1,8 @@
 {
   "product": {
     "version": "4.1",
-    "name": "Stackato",
-    "console": "Stackato Web Console",
+    "name": "Cloud Foundry",
+    "console": "Web Console",
     "cf": "Cloud Foundry",
     "ce": "Code Engine"
   },

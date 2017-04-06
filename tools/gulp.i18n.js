@@ -30,12 +30,20 @@
             _.each(productKeys, function (r) {
               var i18nKey = r.substr(4);
               i18nKey = i18nKey.substr(0, i18nKey.length - 2);
-              v = v.replace(r, _.get(obj, i18nKey));
+              v = v.replace(r, resolveKey(obj, i18nKey));
               current[k] = v;
             });
           }
         }
       });
+    }
+
+    function resolveKey(obj, key) {
+      var value = _.get(obj, key);
+      if (value.indexOf('@:') === 0) {
+        return resolveKey(obj, value.substr(2));
+      }
+      return value;
     }
 
     function endStream(cb) {
@@ -67,7 +75,34 @@
         firstFiles[locale] = file;
       }
       var json = JSON.parse(file.contents.toString());
-      _.defaultsDeep(translations[locale], json);
+      var existing = translations[locale];
+      merge(existing, json);
+    }
+
+    function merge(dest, src) {
+      _.each(src, function (v, k) {
+        //console.log(k);
+        if (dest[k]) {
+          if (_.isString(v) && _.isObject(dest[k])) {
+            // Need to check if dest[k][k] exists
+            dest[k][k] = v;
+          } else if (_.isObject(v) && _.isString(dest[k])) {
+            v[k] = dest[k];
+            dest[k] = v;
+          } else {
+            if (_.isString(v)) {
+              if (!dest[k]) {
+                dest[k] = v;
+              }
+            } else {
+             // Merge again
+              merge(dest[k], v);
+            }
+          }
+        } else {
+          dest[k] = v;
+        }
+      });
     }
 
     function bufferContents(file, enc, cb) {

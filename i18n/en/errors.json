@@ -1,5 +1,13 @@
 {
   "errors": {
-    "server_comms": "The Console encountered a problem communicating with the server. Please try again."
+    "server_comms": "The Console encountered a problem communicating with the server. Please try again.",
+    "needs-registration": "In order to use the [[@:product.console]] you must connect to a registered service endpoint. Registered service endpoints are provided by your system administrator. Please contact your administrator about registering endpoints.",
+    "unexpected": "[[@:product.name]] encountered an unexpected error.",
+    "upgrading": "The [[@:product.console]] is being upgraded.",
+    "contact-admin": "Please contact your administrator.",
+    "upgrade-wait": "Please wait for the upgrade to complete and then refresh or contact your administrator for further information.",
+    "nothing-registered": "There are no registered endpoints.",
+    "endpoint-retrieval": "The [[@:product.console]] could not retrieve Endpoint information.",
+    "no-cf-connected": "No connected [[@:cloud-foundry]] endpoints."
   }
 }
