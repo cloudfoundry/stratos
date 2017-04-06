@@ -27,7 +27,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.appManageVcsTokens} appManageVcsTokens - the VCS token manager
    * @param {app.view.vcs.appManageVcsTokens} appRegisterVcsToken - service to register a new VCS token
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {object} cfAddNotificationService - Service for adding new notifications
    * @param {object} cfPostDeployActionService - Service for adding a new post-deploy action

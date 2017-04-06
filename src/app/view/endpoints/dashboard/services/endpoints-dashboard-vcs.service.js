@@ -16,10 +16,11 @@
    * @param {object} appManageVcsTokens - the manage VCS tokens service
    * @param {object} appRegisterVcsToken - register a new VCS token
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService, appManageVcsTokens, appRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
+  function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService,
+                             appManageVcsTokens, appRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -98,7 +99,9 @@
       var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
       _.forEach(vcsModel.vcsClients, function (vcs) {
-        var endpoint = _.find(endpoints, function (e) { return e.guid === vcs.guid; });
+        var endpoint = _.find(endpoints, function (e) {
+          return e.guid === vcs.guid;
+        });
         var reuse = !!endpoint;
         if (!reuse) {
           endpoint = {
@@ -150,7 +153,8 @@
      * @description clear any local data before leaving the dashboard
      * @public
      */
-    function clear() {}
+    function clear() {
+    }
 
     function _createVcsActions(endpoint) {
       if (vcsModel.getTokensForVcs(endpoint.vcs).length > 0) {
@@ -212,7 +216,7 @@
         description: $interpolate(gettext('Please ensure that you have removed VCS <span class="font-semi-bold">{{name}}</span> from ' +
           '{{ OEM_CONFIG.CODE_ENGINE }} before proceeding. <br><br>' +
           'All tokens associated with this VCS will also be deleted.'
-          ))(scope),
+        ))(scope),
         errorMessage: gettext('Failed to unregister VCS endpoint'),
         submitCommit: true,
         noHtmlEscape: true,

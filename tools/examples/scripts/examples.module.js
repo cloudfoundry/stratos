@@ -13,20 +13,6 @@
     .constant('helionFrameworkExamples.basePath', 'scripts/')
     .controller('ExampleController', ExampleController);
 
-  ExampleController.$inject = [
-    '$location',
-    '$scope',
-    '$state',
-    '$timeout',
-    '$q',
-    '$log',
-    'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.detailView',
-    'helion.framework.widgets.toaster',
-    'helion.framework.widgets.asyncTaskDialog',
-    'helion.framework.utils.dialogEvents'
-  ];
-
   // provide gettext to widgets
   function expose(vars) {
     for (var key in vars) {
@@ -46,30 +32,22 @@
 
   /* eslint-disable no-alert */
 
-  function ExampleController($location, $scope, $state, $timeout, $q, $log, frameworkWidgetsDialogConfirm, detailView, toaster, asyncTaskDialog, dialogEvents) {
-    var that = this;
-    this.$location = $location;
-    this.$timeout = $timeout;
-    this.$q = $q;
-    this.$log = $log;
-    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
-    this.detailView = detailView;
-    this.asyncTaskDialog = asyncTaskDialog;
-    this.dialogEvents = dialogEvents;
-    this.toaster = toaster;
-    this.globalSpinnerActive = false;
-    this.singleSelectedRow = '';
-    this.multiSelectedRows = [];
-    this.uniqueValue = '';
-    this.ignoreCaseUniqueValue = '';
-    this.radioCheckedValue = '';
-    this.cbCheckedValue = {};
-    this.mockTableData = [
+  function ExampleController($location, $scope, $state, $timeout, $q, $log, frameworkDialogConfirm, frameworkDetailView,
+                             frameworkToaster, frameworkAsyncTaskDialog, frameworkDialogEvents) {
+    var vm = this;
+
+    vm.globalSpinnerActive = false;
+    vm.singleSelectedRow = '';
+    vm.uniqueValue = '';
+    vm.ignoreCaseUniqueValue = '';
+    vm.radioCheckedValue = '';
+    vm.cbCheckedValue = {};
+    vm.mockTableData = [
       {name: 'NodeJS', description: 'API component, NodeJS, docker container', az: 'US East'},
       {name: 'RoR', description: 'API component, Ruby on Rails 5, docker container', az: 'US West'}
     ];
-    this.mockTableDisplayData = [];
-    this.mockArrayData = [
+    vm.mockTableDisplayData = [];
+    vm.mockArrayData = [
       {
         title: 'App 1',
         link: '#focusable-input'
@@ -92,21 +70,18 @@
         }
       }
     ];
-
-    this.ringChartData = {
+    vm.ringChartData = {
       ok: 5,
       critical: 2,
       warning: 3,
       unknown: 6
     };
-
-    this.ringChartData2 = {
+    vm.ringChartData2 = {
       ok: 5,
       critical: 2,
       unknown: 6
     };
-
-    this.ringChartLabels = {
+    vm.ringChartLabels = {
       ok: 'OK',
       critical: 'Errors',
       warning: 'Warnings',
@@ -114,27 +89,24 @@
       total: 'Items',
       totalOne: 'Item'
     };
-
-    this.addTextColorAction = {
+    vm.addTextColorAction = {
       label: 'Add Text Color',
       execute: function () {
         alert('Add more text colors!');
       }
     };
-
-	this.autoPopulate = {
+    vm.autoPopulate = {
 		src: '',
 		dest: ''
 	};
-
-    this.actions = [
+    vm.actions = [
       {
         name: 'Start',
         icon: 'glyphicon glyphicon-play',
         execute: function (target) {
           alert('Start ' + target);
-          this.disabled = true;
-          that.actions[1].disabled = false;
+          vm.disabled = true;
+          vm.actions[1].disabled = false;
         }
       },
       {
@@ -142,22 +114,19 @@
         disabled: true,
         execute: function (target) {
           alert('Stop ' + target);
-          this.disabled = true;
-          that.actions[0].disabled = false;
+          vm.disabled = true;
+          vm.actions[0].disabled = false;
         }
       }
     ];
-    this.target = 'Target';
-
-    this.routes = [
+    vm.target = 'Target';
+    vm.routes = [
       {label: 'Tab 1', state: 'tab1'},
       {label: 'Tab 2', state: 'tab2'},
       {label: 'Tab 3', state: 'tab3'}
     ];
-    $state.transitionTo('tab1');
-
-    this.selectValue = null;
-    this.selectOptions = [
+    vm.selectValue = null;
+    vm.selectOptions = [
       {label: 'Black', value: 'black'},
       {label: 'Blue', value: 'blue'},
       {label: 'Cyan', value: 'cyan'},
@@ -166,9 +135,8 @@
       {label: 'Red', value: 'red', disabled: true},
       {label: 'Yellow', value: 'yellow'}
     ];
-
-    this.selectValueLong = 'long';
-    this.selectOptionsLong = [
+    vm.selectValueLong = 'long';
+    vm.selectOptionsLong = [
       {label: 'Black', value: 'black'},
       {label: 'Blue', value: 'blue'},
       {label: 'Cyan', value: 'cyan'},
@@ -178,14 +146,33 @@
       {label: 'Yellow', value: 'yellow'}
     ];
 
-    dialogEvents.configure({ scope: $scope });
+    vm.getLogText = getLogText;
+    vm.updateRingChartData = updateRingChartData;
+    vm.toggleStopAction = toggleStopAction;
+    vm.hideGlobalSpinner = hideGlobalSpinner;
+    vm.showGlobalSpinner = showGlobalSpinner;
+    vm.cardClicked = cardClicked;
+    vm.notificationClicked = notificationClicked;
+    vm.openConfirmModal = openConfirmModal;
+    vm.openConfirmModalWithError = openConfirmModalWithError;
+    vm.openDetailView = openDetailView;
+    vm.openDetailViewWizard = openDetailViewWizard;
+    vm.showToast = showToast;
+    vm.showToastNoAutoClose = showToastNoAutoClose;
+    vm.showCustomToast = showCustomToast;
+    vm.showBusyToast = showBusyToast;
+    vm.showAsyncTaskDialog = showAsyncTaskDialog;
+
+    $state.transitionTo('tab1');
+
+    frameworkDialogEvents.configure({ scope: $scope });
 
     $scope.$on('MODAL_INTERACTION_START', function () {
-      that.$log.info('MODAL_INTERACTION_START');
+      $log.info('MODAL_INTERACTION_START');
     });
 
     $scope.$on('MODAL_INTERACTION_END', function () {
-      that.$log.info('MODAL_INTERACTION_END');
+      $log.info('MODAL_INTERACTION_END');
     });
 
     var colorCodes = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'];
@@ -207,7 +194,7 @@
       return ret;
     }
 
-    this.getLogText = function () {
+    function getLogText() {
       var ret = '';
       ret += 'STDOUT: default color long wrapping line - default color ' +
         'long wrapping line - default color long wrapping line - default color long wrapping line\n\n';
@@ -233,37 +220,35 @@
 
       return ret;
     };
-  }
 
-  angular.extend(ExampleController.prototype, {
-    updateRingChartData: function () {
-      this.ringChartData.critical++;
-      this.ringChartData.ok++;
-    },
+    function updateRingChartData() {
+      ringChartData.critical++;
+      ringChartData.ok++;
+    }
 
-    toggleStopAction: function () {
-      this.actions[1].hidden = !this.actions[1].hidden;
-    },
+    function toggleStopAction() {
+      vm.actions[1].hidden = !vm.actions[1].hidden;
+    }
 
-    hideGlobalSpinner: function () {
-      this.globalSpinnerActive = false;
-    },
-    showGlobalSpinner: function () {
-      this.globalSpinnerActive = true;
-    },
+    function hideGlobalSpinner() {
+      vm.globalSpinnerActive = false;
+    }
+    function showGlobalSpinner() {
+      vm.globalSpinnerActive = true;
+    }
 
-    cardClicked: function (card) {
+    function cardClicked(card) {
       if (card && card.link) {
-        this.$location.url(card.link).replace();
+        $location.url(card.link).replace();
       }
-    },
-    notificationClicked: function (card) {
+    }
+    function notificationClicked(card) {
       if (card && card.status && card.status.link) {
-        this.$location.url(card.status.link).replace();
+        $location.url(card.status.link).replace();
       }
-    },
-    openConfirmModal: function () {
-      this.frameworkWidgetsDialogConfirm({
+    }
+    function openConfirmModal() {
+      frameworkDialogConfirm({
         title: 'Are you sure?',
         description: 'Please confirm.',
         busyDescription: 'Please wait',
@@ -275,10 +260,9 @@
           alert('Confirmed');
         }
       });
-    },
-    openConfirmModalWithError: function () {
-      var that = this;
-      this.frameworkWidgetsDialogConfirm({
+    }
+    function openConfirmModalWithError() {
+      frameworkDialogConfirm({
         title: 'Are you sure?',
         description: 'Please confirm.',
         busyDescription: 'Please wait',
@@ -288,71 +272,67 @@
           no: 'No'
         },
         callback: function () {
-          return that.$q.reject('Uh oh. Something went wrong.');
+          return $q.reject('Uh oh. Something went wrong.');
         }
       });
-    },
-    openDetailView: function () {
-      var that = this;
-      this.detailView(
+    }
+    function openDetailView() {
+      frameworkDetailView(
         {
           title: 'Example Detail View',
           templateUrl: 'scripts/detail-view/detail-view-example.html'
         },
         {
           open: function () {
-            that.openDetailView();
+            openDetailView();
           },
           showConfirmModal: function() {
-            that.openConfirmModal();
+            openConfirmModal();
           }
         });
-    },
-    openDetailViewWizard: function (title) {
-      var that = this;
-      this.detailView(
+    }
+    function openDetailViewWizard(title) {
+      frameworkDetailView(
         {
           title: title,
           template: '<my-workflow />'
         },
         {}
       );
-    },
-    showToast: function (type, message) {
-      this.toaster[type](message);
-    },
-    showToastNoAutoClose: function (type, message) {
-      this.toaster[type](message, {timeOut: 0});
-    },
-    showCustomToast: function (message, iconClass) {
-      this.toaster.show(message, iconClass);
-    },
-    showBusyToast: function (message) {
-      var that = this;
-      var toast = this.toaster.busy(message);
-      this.$timeout(function () {
+    }
+    function showToast(type, message) {
+      frameworkToaster[type](message);
+    }
+    function showToastNoAutoClose(type, message) {
+      frameworkToaster[type](message, {timeOut: 0});
+    }
+    function showCustomToast(message, iconClass) {
+      frameworkToaster.show(message, iconClass);
+    }
+    function showBusyToast(message) {
+      var toast = frameworkToaster.busy(message);
+      $timeout(function () {
         toast.close().then(function () {
-          that.toaster.success('Completed okay');
+          frameworkToaster.success('Completed okay');
         });
       }, 3000);
-    },
-    showAsyncTaskDialog: function () {
-      var that = this;
-      this.asyncTaskDialog(
+    }
+    function showAsyncTaskDialog() {
+      frameworkAsyncTaskDialog(
         {
           title: 'Example Async Task Dialog',
           templateUrl: 'scripts/async-task-dialog/async-task-dialog-example.html'
         },
         {},
         function () {
-          return that.$q(function (resolve) {
-            that.$timeout(function () {
+          return $q(function (resolve) {
+            $timeout(function () {
               resolve();
             }, 2000);
           });
         });
     }
-  });
+  }
 
 })(this);
 /* eslint-enable no-alert */

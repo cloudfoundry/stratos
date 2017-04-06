@@ -13,13 +13,15 @@
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm The framework confirmation dialog
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm The framework confirmation dialog
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {app.view.appRegisterVcsToken} appRegisterVcsToken Service to register new VCS tokens
    * @param {app.view.appEditVcsToken} appEditVcsToken Service to rename VCS tokens
    * @returns {object} The ManageVcsTokensService with a manage method that opens slide out containing the manage tokens UI
    */
-  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog, frameworkDialogConfirm, appNotificationsService, appRegisterVcsToken, appEditVcsToken) {
+  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog,
+                                  frameworkDialogConfirm, appNotificationsService, appRegisterVcsToken,
+                                  appEditVcsToken) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
