@@ -53,7 +53,6 @@
                                  appSelectLanguage, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
-    this.appSelectLanguage = appSelectLanguage;
 
     vm.appBasePath = appBasePath;
     vm.appUpgradeCheck = appUpgradeCheck;
@@ -66,6 +65,7 @@
     vm.serverErrorOnLogin = false;
     vm.hideNavigation = $stateParams.hideNavigation;
     vm.hideAccount = $stateParams.hideAccount;
+    vm.navbarIconsOnly = false;
 
     vm.login = login;
     vm.logout = logout;
@@ -82,9 +82,9 @@
     });
 
     // Read back and persist the state of the navigation bar to local storage
-    var navbarIconsOnly = appLocalStorage.getItem('navbarIconsOnly', 'false') === 'true';
+    vm.navbarIconsOnly = appLocalStorage.getItem('navbarIconsOnly', 'false') === 'true';
     $scope.$watch(function () {
-      return navbarIconsOnly;
+      return vm.navbarIconsOnly;
     }, function (nv, ov) {
       if (nv !== ov) {
         appLocalStorage.setItem('navbarIconsOnly', nv);
@@ -98,7 +98,7 @@
      * @public
      */
     function showLanguageSelection() {
-      this.appSelectLanguage.show();
+      appSelectLanguage.show();
     }
 
     /**
