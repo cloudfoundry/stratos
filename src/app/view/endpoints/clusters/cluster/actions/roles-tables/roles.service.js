@@ -453,20 +453,20 @@
               _.set(rolesByUser, userGuid + '.' + orgGuid + '.organization', _.keyBy(roles));
             }
           });
-        }
 
-        _.forEach(org.spaces, function (space) {
-          var spaceGuid = space.metadata.guid;
-          space = _.get(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, {});
-          _.forEach(space.roles, function (roles, userGuid) {
-            if (!singleSpaceGuid || singleSpaceGuid === spaceGuid) {
+          _.forEach(org.spaces, function (space) {
+            var spaceGuid = space.metadata.guid;
+            space = _.get(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, {});
+            _.forEach(space.roles, function (roles, userGuid) {
+              if (!singleSpaceGuid || singleSpaceGuid === spaceGuid) {
 
-              if (_.find(users, {metadata: {guid: userGuid}})) {
-                _.set(rolesByUser, userGuid + '.' + orgGuid + '.spaces.' + spaceGuid, _.keyBy(roles));
+                if (_.find(users, {metadata: {guid: userGuid}})) {
+                  _.set(rolesByUser, userGuid + '.' + orgGuid + '.spaces.' + spaceGuid, _.keyBy(roles));
+                }
               }
-            }
+            });
           });
-        });
+        }
       });
       return rolesByUser;
     }
@@ -555,20 +555,15 @@
       // Success and error messages
       var successMessage = multipleRoles ? gettext('Successfully updated user roles')
         : gettext('Successfully updated user role');
-      var errorMessage = multipleRoles ? gettext('Failed to update user roles')
-        : gettext('Failed to update user role');
       if (usernames.length > 1) {
         successMessage = multipleRoles ? gettext('Successfully updated users roles')
           : gettext('Successfully updated users role');
-        errorMessage = multipleRoles ? gettext('Failed to update users roles')
-          : gettext('Failed to update users role');
       }
 
       return {
         title: title,
         description: description,
         successMessage: successMessage,
-        errorMessage: errorMessage,
         buttonText: {
           yes: gettext('Yes'),
           no: gettext('No')

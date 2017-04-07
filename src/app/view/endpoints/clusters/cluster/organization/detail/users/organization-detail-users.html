@@ -54,10 +54,11 @@
                  ng-click="organizationUsersController.removeSpaceRole(user, spaceRole)"
                  ng-if="organizationUsersController.canRemoveSpaceRole(spaceRole.space.details.space.metadata.guid)"></i>
             </div>
-            <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0" translate>
+            <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0">
               <span ng-if="user.entity.username" translate>None assigned</span>
               <span ng-if="!user.entity.username" translate>Not Applicable</span>
             </div>
+
           </td>
           <td ng-if="organizationUsersController.canAction()">
             <actions-menu actions="organizationUsersController.userActions"
