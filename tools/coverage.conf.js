@@ -51,11 +51,11 @@
           _.each(results, function (r) {
             collector.add(r);
           });
-          istanbul.Report.create('html', {dir: '../out/coverage-report/e2e-html'})
+          istanbul.Report.create('html', {dir: '../coverage-report/e2e-html'})
             .writeReport(collector, true);
-          istanbul.Report.create('json', {dir: '../out/coverage-report/_json'})
+          istanbul.Report.create('json', {dir: '../coverage-report/_json'})
             .writeReport(collector, true);
-          fs.renameSync('../out/coverage-report/_json/coverage-final.json', '../out/coverage-report/_json/e2e-coverage.json');
+          fs.renameSync('../coverage-report/_json/coverage-final.json', '../coverage-report/_json/e2e-coverage.json');
           waitPlugin.resolve();
         });
       };

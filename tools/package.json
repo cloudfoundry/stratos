@@ -11,7 +11,7 @@
     "gate-check": "gulp lint && npm test",
     "test-backend": "node test_server.js",
     "pree2e": "npm run update-webdriver",
-    "e2e": "gulp e2e:run",
+    "e2e": "protractor protractor.conf.js",
     "preheadless-e2e": "npm run pree2e",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor protractor.conf.js",
     "pretest": "gulp i18n",

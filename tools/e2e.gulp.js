@@ -30,8 +30,8 @@
 
   gulp.task('coverage-combine', function (cb) {
     var opts = {
-      dir: '../out/coverage-report/combined',
-      pattern: '../out/coverage-report/_json/*.json',
+      dir: '../coverage-report/combined',
+      pattern: '../coverage-report/_json/*.json',
       print: 'summary',
       reporters: {
         html: {}

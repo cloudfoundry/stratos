@@ -5,7 +5,7 @@
 
   module.exports = function (config) {
 
-    var reportPath = path.resolve(__dirname, '..', 'out/coverage-report');
+    var reportPath = path.resolve(__dirname, '..', 'coverage-report');
 
     config.set({
 
