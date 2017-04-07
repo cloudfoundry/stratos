@@ -71,7 +71,7 @@
   function isWelcomeMessageAdmin() {
     var text = welcomeMessage().element(by.css('div:first-of-type'));
     return text.getText().then(function (text) {
-      return text.trim().indexOf('To enable developers to use this') === 0;
+      return text.trim().indexOf('To enable developers to use') === 0;
     });
   }
 

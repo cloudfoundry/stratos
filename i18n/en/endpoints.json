@@ -1,0 +1,10 @@
+{
+  "endpoints": {
+    "register": "Register",
+    "intro": {
+      "start": "To enable developers to use the [[@:console]] to interact with [[@:product.name]],",
+      "link": "please register endpoints.",
+      "end": "The process of registering these endpoints will make them discoverable for anyone who logs into the [[@:product.console]]. Once you register an endpoint, we recommend connecting it to your account so you can manage it."
+    }
+  }
+}

@@ -31,6 +31,7 @@
   var uglify = require('gulp-uglify');
   var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
+  var i18n = require('./gulp.i18n');
 
   var config = require('./gulp.config')();
   var paths = config.paths;
@@ -48,6 +49,7 @@
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
+  var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
 
   var usePlumber = true;
   var server;
@@ -80,6 +82,12 @@
   gulp.task('copy:html', function () {
     return gulp
       .src(config.templatePaths, {base: paths.src})
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  gulp.task('copy:svg', function () {
+    return gulp
+      .src(config.svgPaths, {base: paths.theme})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -249,6 +257,15 @@
       .pipe(eslint.failAfterError());
   });
 
+  gulp.task('i18n', function () {
+    var i18nSource = config.i18nFiles;
+    i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
+    return gulp.src(i18nSource)
+      .pipe(i18n(gutil.env.devMode))
+      //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulp.dest(paths.i18nDist));
+  });
+
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
     var CMD = 'cd ../src/plugins && ls */*.scss';
@@ -272,7 +289,9 @@
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
     gulp.watch(config.templatePaths, ['copy:html', callback]);
+    gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
+    gulp.watch(config.i18nFiles, ['i18n', callback]);
   });
 
   gulp.task('browsersync', function (callback) {
@@ -371,8 +390,10 @@
       'copy:js',
       'copy:lib',
       'css',
+      'i18n',
       'dev-template-cache',
       'copy:html',
+      'copy:svg',
       'copy:assets',
       'copy:theme',
       'inject:index',
@@ -397,8 +418,10 @@
       'copy:js',
       'copy:lib',
       'css',
+      'i18n',
       'template-cache',
       'copy:html',
+      'copy:svg',
       'copy:assets',
       'copy:theme',
       'inject:index',

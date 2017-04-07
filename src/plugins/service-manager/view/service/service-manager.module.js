@@ -6,8 +6,7 @@
       'service-manager.view.service.detail',
       'service-manager.view.service.detail.instances',
       'service-manager.view.service.detail.services',
-      'service-manager.view.service.sdl-detail',
-      'ncy-angular-breadcrumb'
+      'service-manager.view.service.sdl-detail'
     ])
     .config(registerRoute);
 
