@@ -266,7 +266,7 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-proxy Dockerfile.KUBE ${PORTAL_PROXY_PATH}
 }
 
 function buildPostgres {
@@ -309,7 +309,7 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.HCP ${__DIRNAME}/../stratos-ui/containers/nginx
+  buildAndPublishImage hsc-console Dockerfile.KUBE ${__DIRNAME}/../stratos-ui/containers/nginx
   echo "-- Building/publishing the container image for the facilitating OEM branding for Console"
   buildAndPublishImage hsc-console-oem-builder Dockerfile.oem ${__DIRNAME}/../stratos-ui/oem
 }
@@ -339,12 +339,12 @@ cleanup
 #   check the tag to be sure it hasn't been used before
 #   generate a new standard Console release tag
 if [ "${PROD_RELEASE}" == true ]; then
-  checkTag
+#  checkTag
   updateTagForRelease
   # Check all git repositories
-  checkMasterBranch ${__DIRNAME}
-  checkMasterBranch ${PORTAL_PROXY_PATH}
-  checkMasterBranch ${__DIRNAME}/../stratos-ui
+#  checkMasterBranch ${__DIRNAME}
+#  checkMasterBranch ${PORTAL_PROXY_PATH}
+#  checkMasterBranch ${__DIRNAME}/../stratos-ui
 fi
 
 # Build all of the components that make up the Console

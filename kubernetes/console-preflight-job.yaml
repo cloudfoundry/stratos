@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  labels:
+    app: preflight-job
+  name: preflight-job
+spec:
+ template:
+     metadata:
+       labels:
+         app: console
+         job: preflight
+     spec:
+       containers:
+         - env:
+           - name: UPGRADE_VOLUME
+             value: hsc-upgrade-volume
+           - name: UPGRADE_LOCK_FILENAME
+             value: upgrade.lock
+           - name: ENCRYPTION_KEY_VOLUME
+             value: hsc-encryption-key-volume
+           - name: ENCRYPTION_KEY_FILENAME
+             value: key
+           image: stackatodev/hsc-preflight-job:1.0.37-0-g1ae4b40
+           name: preflight-job
+           volumeMounts:
+           - mountPath: /hsc-upgrade-volume
+             name: hsc-upgrade-volume
+           - mountPath: /hsc-encryption-key-volume
+             name: hsc-encryption-key-volume
+       restartPolicy: Never
+       volumes:
+       - name: hsc-upgrade-volume
+         persistentVolumeClaim:
+           claimName: hsc-upgrade-volume
+       - name: hsc-encryption-key-volume
+         persistentVolumeClaim:
+           claimName: hsc-encryption-key-volume
