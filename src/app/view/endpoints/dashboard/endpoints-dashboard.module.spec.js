@@ -97,7 +97,8 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, appEndpointsVcsService);
+      controller = new EndpointsDashboardController($scope, $state, modelManager, appUtilsService,
+        appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, appEndpointsVcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

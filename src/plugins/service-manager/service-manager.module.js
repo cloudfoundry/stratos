@@ -6,7 +6,8 @@
       'service-manager.api',
       'service-manager.view',
       'service-manager.model',
-      'service-manager.utils'
+      'service-manager.utils',
+      'service-manager.service'
     ])
     .run(register);
 

@@ -6,18 +6,20 @@
     .factory('appRegisterService', ServiceRegistrationFactory);
 
   /**
-   * @name ServiceRegistrationFactory
+   * @name appRegisterService
    * @description Register a service via a slide out
-   * @namespace app.view.appRegisterService
+   * @namespace app.view
    * @param {object} $q - the Angular $q service
-   * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService The console notification service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView The framework async detail view
+   * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support
+   *  dashboard with cnsi type endpoints
    * @returns {object} Object containing 'show' function
    */
-  function ServiceRegistrationFactory($q, $interpolate, modelManager, appUtilsService, appNotificationsService, frameworkDetailView) {
+  function ServiceRegistrationFactory($q, modelManager, appUtilsService, appNotificationsService,
+                                      frameworkDetailView, appEndpointsCnsiService) {
 
     function createInstanceUrls(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
@@ -36,7 +38,7 @@
         var context = {
           wizardOptions: {
             scope: {
-              OEM_CONFIG: appUtilsService.getOemConfiguration()
+              endpoints: appEndpointsCnsiService.getEndpointsToRegister()
             },
             workflow: {
               lastStepCommit: true,
@@ -52,39 +54,6 @@
                   templateUrl: 'app/view/endpoints/register/register-service-type.html',
                   onNext: function () {
                     var step = context.wizardOptions.workflow.steps[1];
-                    var scope = {};
-                    switch (context.wizardOptions.userInput.type) {
-                      case 'hcf':
-                        scope.endpoint = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
-                        step.product = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
-                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
-                        step.nameOfNameInput = 'hcfName';
-                        step.nameOfUrlInput = 'hcfUrl';
-                        step.urlHint = $interpolate(gettext('{{ endpoint }} API endpoint'))(scope);
-                        break;
-                      case 'hce':
-                        scope.endpoint = appUtilsService.getOemConfiguration().CODE_ENGINE;
-                        step.product = appUtilsService.getOemConfiguration().CODE_ENGINE;
-                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
-                        step.nameOfNameInput = 'hceName';
-                        step.nameOfUrlInput = 'hceUrl';
-                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
-                        break;
-                      case 'hsm':
-                        scope.endpoint = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
-                        step.product = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
-                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
-                        step.nameOfNameInput = 'hsmName';
-                        step.nameOfUrlInput = 'hsmUrl';
-                        step.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
-                        break;
-                      default:
-                        step.product = gettext('Endpoint');
-                        step.title = gettext('Register Endpoint');
-                        step.typeLabel = gettext('Service Endpoint');
-                        step.urlHint = gettext('');
-                        break;
-                    }
                     step.urlValidationExpr = appUtilsService.urlValidationExpression;
                     step.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
                     step.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
@@ -101,11 +70,10 @@
                   nextBtnText: gettext('Register'),
                   onNext: function () {
                     var userInput = context.wizardOptions.userInput;
-                    var stepTwo = context.wizardOptions.workflow.steps[1];
                     return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
                       appNotificationsService.notify('success',
-                        gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                        {endpointType: stepTwo.product, name: userInput.name});
+                        gettext('Endpoint \'{{name}}\' successfully registered'),
+                        { name: userInput.name });
                       return serviceInstance;
                     }).catch(function (response) {
                       if (response.status === 403) {

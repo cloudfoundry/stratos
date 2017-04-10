@@ -131,7 +131,9 @@
         'src/plugins/**/*.html': ['ng-html2js'],
         'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
         'src/plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
-        'src/plugins/github/**/!(*.mock|*.spec).js': ['coverage']
+        'src/plugins/github/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/service-manager/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/code-engine/!(api)/**/!(*.mock|*.spec).js': ['coverage']
       },
 
       proxies: {

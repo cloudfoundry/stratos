@@ -60,7 +60,7 @@
      */
     function updateInstances() {
       return $q.all([_refreshTokens(), vcsModel.listVcsClients()]).then(function () {
-        // TODO: Refactor - We may need to wait for service instances to also have been updated before calling this
+        // Note - We may need to wait for service instances to also have been updated before calling this
         refreshCodeEngineVcses();
       });
     }
