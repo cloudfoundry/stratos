@@ -119,7 +119,7 @@
     done();
   });
 
-  // Copy JavScript config file to 'dist'- patch in the default OEM configuration
+  // Copy JavaScript config file to 'dist'- patch in the default OEM configuration
   gulp.task('copy:configjs', ['copy:configjs:oem'], function () {
     return gulp
       .src(paths.src + 'config.js')
