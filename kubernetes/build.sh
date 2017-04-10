@@ -1,43 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eu
 
 # set defaults
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
-DOCKER_ORG=stackatodev
+DOCKER_ORG=susetest
+
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:pr:t:" opt; do
+while getopts ":ho:r:t:" opt; do
   case $opt in
     h)
       echo
-      echo "***** HOW TO USE THIS SCRIPT *****"
+      echo "--- To build images of the Console: "
       echo
-      echo "--- Normal dev/test mode requires no parameters:"
-      echo
-      echo " ./build_and_tag.sh"
-      echo
-      echo
-      echo " This will generate a tag based on date and time and use the default HPE docker registry."
-      echo
-      echo
-      echo "--- Cut a release of the Console: "
-      echo
-      echo " ./build_and_test.sh -p -t 1.0.13"
-      echo
-      echo " This will create a production release based on the -p flag, and will tag the release"
-      echo " with a semantic version based on the version supplied via the -t flag. This version"
-      echo " will be combined with the latest git commit hash from the proxy repo for the full tag."
-      echo " "
-      echo " For now, the choice of the version tag must be supplied when you run the script. Look"
-      echo " at the last tag in the portal-proxy repo to understand what the next tag should be."
+      echo " ./build.sh -t 1.0.13"
       echo
       exit 0
       ;;
-    p)
-      PROD_RELEASE=true
-      ;;
-    r)
+     r)
       DOCKER_REGISTRY="${OPTARG}"
       ;;
     o)
@@ -65,6 +46,9 @@ echo "TAG: ${TAG}"
 
 echo
 echo "Starting build"
+
+
+# Copy values template
 
 
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -112,6 +96,9 @@ function buildAndPublishImage {
 
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
+
+  # Update values.yaml
+
   popd > /dev/null 2>&1
 }
 
@@ -124,27 +111,12 @@ function cleanup {
   # Cleanup prior to generating the UI container
   echo
   echo "-- Cleaning up ${__DIRNAME}/../stratos-ui"
-  rm -rf ${__DIRNAME}/../stratos-ui/dist
-  rm -rf ${__DIRNAME}/../stratos-ui/tools/node_modules
-  rm -rf ${__DIRNAME}/../stratos-ui/src/lib
+  rm -rf ${__DIRNAME}/../../stratos-ui/dist
+  rm -rf ${__DIRNAME}/../../stratos-ui/tools/node_modules
+  rm -rf ${__DIRNAME}/../../stratos-ui/src/lib
   echo
-  echo "-- Cleaning up ${__DIRNAME}/../stratos-ui/containers/nginx/dist"
-  rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
-}
-
-function checkTag {
-  pushd ${PORTAL_PROXY_PATH} > /dev/null 2>&1
-  TAG_EXISTS=$(git tag -l "${TAG}*")
-  case "${TAG_EXISTS}" in
-    "")
-    ;;
-    *)
-    echo
-    echo "Tag already exists in the portal-proxy git repo. Try again with a new tag."
-    exit 1
-    ;;
-  esac
-  popd > /dev/null 2>&1
+  echo "-- Cleaning up ${__DIRNAME}/../../stratos-ui/containers/nginx/dist"
+  rm -rf ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
 }
 
 function updateTagForRelease {
@@ -161,71 +133,6 @@ function updateTagForRelease {
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-0-g${GIT_HASH}"
   echo "New TAG: ${TAG}"
-  popd > /dev/null 2>&1
-}
-
-function checkMasterBranch {
-  pushd ${1} > /dev/null 2>&1
-  LOCATION=$(pwd -P)
-
-  echo -e "Checking git repository is clean and up to date: \0033[33m${LOCATION}\033[0m"
-
-  # Allow git commands to fail
-  set +e
-
-  # Ensure we are on master branch
-  echo -en "\tChecking repo is on master..."
-  BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  if [ "${BRANCH}" != "master" ]; then
-    echo >&2 -e "\n\033[31mYou must be on the master branch of all repos in order to cut a production release.\033[0m"
-    echo >&2 -e "But ${LOCATION} is on the \033[31m'${BRANCH}'\033[0m branch instead."
-    exit 1
-  fi
-  echo -e "\0033[32m [OK]\033[0m"
-
-  # Ensure the index is up to date before checking for uncommitted changes
-  git update-index --refresh > /dev/null 2>&1
-
-  # Disallow unstaged changes in the working tree
-  echo -en "\tChecking there are no unstaged changes..."
-  if ! git diff-files --quiet --ignore-submodules --; then
-    echo >&2 -e "\n\033[31mYou must not have unstaged changes in ${LOCATION}\033[0m"
-    git diff-files --name-status -r --ignore-submodules -- >&2
-    exit 1
-  fi
-  echo -e "\0033[32m [OK]\033[0m"
-
-  # Disallow uncommitted changes in the index
-  echo -en "\tChecking there are no uncommitted changes..."
-  if ! git diff-index --cached --quiet HEAD --ignore-submodules --; then
-    echo >&2 -e "\n\033[31mYou must not have uncommitted changes in ${LOCATION}\033[0m"
-    git diff-index --cached --name-status -r --ignore-submodules HEAD -- >&2
-    exit 1
-  fi
-  echo -e "\0033[32m [OK]\033[0m"
-
-  # Disallow untracked files
-  echo -en "\tChecking there are no untracked files..."
-  if [ $(git ls-files --exclude-standard --others --| wc -l) -ne 0 ]; then
-    echo >&2 -e "\n\033[31mYou must not have untracked files in ${LOCATION}\033[0m"
-    git status >&2
-    exit 1
-  fi
-  echo -e "\0033[32m [OK]\033[0m"
-
-  echo -en "\tChecking that your local master branch is up to date with upstream..."
-  # Ensure our remote is fetched
-  git fetch origin master > /dev/null 2>&1
-
-  # Ensure we are up to date with master branch
-  COMMITS=$(git rev-list HEAD...origin/master --count)
-  if [ ${COMMITS} -ne 0 ]; then
-    echo >&2 -e "\n\033[31mYour local master branch is out of sync with upstream: ${LOCATION}\033[0m"
-    exit 1
-  fi
-  echo -e "\0033[32m [OK]\033[0m"
-
-  set -e
   popd > /dev/null 2>&1
 }
 
@@ -266,7 +173,7 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-proxy Dockerfile.k8s ${PORTAL_PROXY_PATH}
 }
 
 function buildPostgres {
@@ -280,14 +187,14 @@ function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${PORTAL_PROXY_PATH}
 }
 
 function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job ${PORTAL_PROXY_PATH}
 }
 
 function buildUI {
@@ -296,7 +203,7 @@ function buildUI {
   echo "-- Provision the UI"
   docker run --rm \
     ${RUN_ARGS} \
-    -v ${__DIRNAME}/../stratos-ui:/usr/src/app \
+    -v ${__DIRNAME}/../../stratos-ui:/usr/src/app \
     -w /usr/src/app \
     node:6.9.1 \
     /bin/bash ./provision.sh
@@ -304,28 +211,16 @@ function buildUI {
   # Copy the artifacts from the above to the nginx container
   echo
   echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-ui/containers/nginx/dist
+  cp -R ${__DIRNAME}/../../stratos-ui/dist ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
 
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.HCP ${__DIRNAME}/../stratos-ui/containers/nginx
+  buildAndPublishImage hsc-console Dockerfile.k8s ${__DIRNAME}/../../stratos-ui/containers/nginx
   echo "-- Building/publishing the container image for the facilitating OEM branding for Console"
-  buildAndPublishImage hsc-console-oem-builder Dockerfile.oem ${__DIRNAME}/../stratos-ui/oem
+  buildAndPublishImage hsc-console-oem-builder Dockerfile.oem ${__DIRNAME}/../../stratos-ui/oem
 }
 
-function generateSDL {
-  echo
-  echo "-- Creating upgrade config, service & instance definitions"
-  mkdir -p ${__DIRNAME}/output
-  for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
-    ofile=${__DIRNAME}/output/$(basename ${FILE})
-    cat ${FILE} | sed "s@{{TAG}}@${TAG}@" | sed "s@{{REGISTRY}}@${DOCKER_REGISTRY}@" | sed "s@{{ORG}}@${DOCKER_ORG}@" > ${ofile}
-  done
-  echo "-- Done."
-}
-
-#
 # MAIN ------------------------------------------------------
 #
 
@@ -335,17 +230,7 @@ PORTAL_PROXY_PATH=${GOPATH}/src/github.com/hpcloud/portal-proxy
 # cleanup output, intermediate artifacts
 cleanup
 
-# If this is a prod release:
-#   check the tag to be sure it hasn't been used before
-#   generate a new standard Console release tag
-if [ "${PROD_RELEASE}" == true ]; then
-  checkTag
-  updateTagForRelease
-  # Check all git repositories
-  checkMasterBranch ${__DIRNAME}
-  checkMasterBranch ${PORTAL_PROXY_PATH}
-  checkMasterBranch ${__DIRNAME}/../stratos-ui
-fi
+updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
@@ -354,22 +239,11 @@ buildPreflightJob
 buildPostflightJob
 buildUI
 
-# Generate definitions
-generateSDL
-
-if [ "${PROD_RELEASE}" == true ]; then
-  echo
-  echo "-- Tag the portal-proxy GitHub repo"
-  pushGitTag ${PORTAL_PROXY_PATH}
-
-  echo
-  echo "-- Tag the stratos-ui GitHub repo "
-  pushGitTag ${__DIRNAME}/../stratos-ui
-
-  echo
-  echo "-- Tag the stratos-deploy GitHub repo"
-  pushGitTag ${__DIRNAME}
-fi
+# Patch Values.yaml file
+cp values.yaml.tmpl values.yaml
+sed -ie 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
+sed -ie 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
+sed -ie 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 
 # TBD - automate the creation of a new PR against catalog-templates repo
 #       see the HCP repo for an example.
@@ -380,5 +254,5 @@ echo "Build complete...."
 echo "Registry: ${DOCKER_REGISTRY}"
 echo "Org: ${DOCKER_ORG}"
 echo "Tag: ${TAG}"
-echo "SDL and config are located in ${__DIRNAME}/output/"
-echo
+echo "To deploy using Helm, execute the following: "
+echo "helm install console -f values.yaml --namespace console --name my-console"

@@ -1,0 +1,10 @@
+consoleVersion: 1.0.53-0-gbb71b6c
+dockerOrg: susetest
+dockerRegistry: docker.io
+images:
+  console: hsc-console
+  proxy: hsc-proxy
+  postgres: hsc-postgres
+  preflight: hsc-preflight-job
+  postflight: hsc-postflight-job
+
