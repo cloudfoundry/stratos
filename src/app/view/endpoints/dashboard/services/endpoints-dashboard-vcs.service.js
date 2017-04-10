@@ -26,11 +26,18 @@
 
     var endpointPrefix = 'vcs_';
 
+    var codeEngineVcs = [];
+
+    var fetchedCodeEngineVcses = false;
+
     return {
       haveInstances: haveInstances,
       updateInstances: updateInstances,
       createEndpointEntries: createEndpointEntries,
-      clear: clear
+      clear: clear,
+      fetchedCodeEngineVcses: false,
+      refreshCodeEngineVcses: refreshCodeEngineVcses,
+      isCodeEngineVcs: isCodeEngineVcs
     };
 
     /**
@@ -52,7 +59,10 @@
      * @public
      */
     function updateInstances() {
-      return $q.all([_refreshTokens(), vcsModel.listVcsClients()]);
+      return $q.all([_refreshTokens(), vcsModel.listVcsClients()]).then(function () {
+        // TODO: Refactor - We may need to wait for service instances to also have been updated before calling this
+        refreshCodeEngineVcses();
+      });
     }
 
     function getStatus(vcs) {
@@ -154,6 +164,36 @@
      * @public
      */
     function clear() {
+      fetchedCodeEngineVcses = false;
+      codeEngineVcs.length = 0;
+    }
+
+    function refreshCodeEngineVcses() {
+      var promises = [];
+      var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      _.forEach(userServiceInstanceModel.serviceInstances, function (ep) {
+        if (ep.cnsi_type === 'hce' && ep.valid) {
+          promises.push(hceModel.getVcses(ep.guid));
+        }
+      });
+
+      return $q.all(promises).then(function (allCeVcses) {
+        codeEngineVcs.length = 0;
+        for (var i = 0; i < allCeVcses.length; i++) {
+          var vcses = allCeVcses[i];
+          Array.prototype.push.apply(codeEngineVcs, vcses);
+        }
+        fetchedCodeEngineVcses = true;
+      });
+
+    }
+
+    function isCodeEngineVcs(ep) {
+      return !!_.find(codeEngineVcs, function (vcs) {
+        return vcs.browse_url === ep.vcs.browse_url && vcs.api_url === ep.vcs.api_url && vcs.label === ep.vcs.label;
+      });
     }
 
     function _createVcsActions(endpoint) {
@@ -176,8 +216,8 @@
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
       var noHces = !_.find(userServiceInstanceModel.serviceInstances, {cnsi_type: 'hce', valid: true});
-      if (currentUserAccount.isAdmin() && (noHces || appEndpointsDashboardService.fetchedCodeEngineVcses &&
-        !appEndpointsDashboardService.isCodeEngineVcs(endpoint))) {
+      if (currentUserAccount.isAdmin() && (noHces || fetchedCodeEngineVcses &&
+        !isCodeEngineVcs(endpoint))) {
         endpoint.actions.push({
           name: gettext('Unregister'),
           execute: function (endpoint) {

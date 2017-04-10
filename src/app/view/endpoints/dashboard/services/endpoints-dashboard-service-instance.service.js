@@ -24,8 +24,9 @@
    * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, appEndpointsDashboardService, appEndpointsVcsService, appUtilsService, appErrorService,
-                                         appNotificationsService, appCredentialsDialog, frameworkDialogConfirm, appEventService) {
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, appEndpointsDashboardService,
+                              appEndpointsVcsService, appUtilsService, appErrorService, appNotificationsService,
+                              appCredentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -104,7 +105,6 @@
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description convert the model service instances into endpoints entries
-     * @param {Array} endpoints - collection of existing endpoints
      * @public
      */
     function createEndpointEntries() {

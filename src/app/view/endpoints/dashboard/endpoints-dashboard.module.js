@@ -21,7 +21,6 @@
    * @namespace app.view.endpoints.dashboard
    * @memberof app.view.endpoints.dashboard
    * @name EndpointsDashboardController
-   * @param {object} $q - the Angular $q service
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
@@ -32,61 +31,33 @@
    * @param {app.view.endpoints.dashboard.appEndpointsVcsService} appEndpointsVcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, appRegisterService,
+  function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
                                         appEndpointsDashboardService, appEndpointsCnsiService, appEndpointsVcsService) {
-    var that = this;
+    var vm = this;
+
+    appEndpointsDashboardService.endpointsProviders.push(appEndpointsCnsiService);
+    appEndpointsDashboardService.endpointsProviders.push(appEndpointsVcsService);
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
-    var endpointsProviders = [appEndpointsCnsiService, appEndpointsVcsService];
+    vm.endpoints = appEndpointsDashboardService.endpoints;
+    vm.initialised = false;
+    vm.listError = false;
+    vm.register = register;
+    vm.hideWelcomeMessage = hideWelcomeMessage;
+    vm.isUserAdmin = isUserAdmin;
+    vm.reload = reload;
 
-    this.endpoints = appEndpointsDashboardService.endpoints;
-    appEndpointsDashboardService.clear();
+    appEndpointsDashboardService.refresh().then(function () {
+      _updateWelcomeMessage();
+      vm.initialised = true;
+    });
 
-    /*
-     * Call method on all service providers, forwarding the passed arguments
-     * If the called method returns a promise, we return a $q.all() on all the returned promises,
-     * otherwise we return an array of the returned values
-     * */
-    function callForAllProviders(method) {
-      Array.prototype.shift.apply(arguments);
-
-      var values = [];
-      var isPromise = null;
-
-      for (var i = 0; i < endpointsProviders.length; i++) {
-        if (!angular.isFunction(endpointsProviders[i][method])) {
-          throw new Error('callForAllProviders: service provider does not implement method: ' + method);
-        }
-        var ret = endpointsProviders[i][method].apply(this, arguments);
-        if (ret && angular.isFunction(ret.then)) {
-          if (isPromise === null) {
-            isPromise = true;
-          } else if (!isPromise) {
-            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
-          }
-          values.push(ret);
-        } else {
-          if (isPromise === null) {
-            isPromise = false;
-          } else if (isPromise) {
-            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
-          }
-          values.push(ret);
-        }
-      }
-      if (isPromise) {
-        return $q.all(values);
-      }
-      return values;
-    }
-
-    this.initialised = false;
-    this.listError = false;
+    appUtilsService.chainStateResolve('endpoint.dashboard', $state, init);
 
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
-      callForAllProviders('clear');
+      appEndpointsDashboardService.clear();
     });
 
     /**
@@ -95,11 +66,14 @@
      * @name register
      * @description Register a service endpoint
      */
-    this.register = function () {
-      appRegisterService.show($scope).then(function () {
-        _updateEndpoints();
-      });
-    };
+    function register() {
+      appRegisterService.show($scope)
+        .then(function () {
+          return appEndpointsDashboardService.update();
+        }).then(function () {
+          _updateWelcomeMessage();
+        });
+    }
 
     /**
      * @namespace app.view.endpoints.dashboard
@@ -107,9 +81,9 @@
      * @name hideWelcomeMessage
      * @description Hide Welcome message
      */
-    this.hideWelcomeMessage = function () {
-      this.showWelcomeMessage = false;
-    };
+    function hideWelcomeMessage() {
+      vm.showWelcomeMessage = false;
+    }
 
     /**
      * @function isUserAdmin
@@ -117,92 +91,39 @@
      * @description Is current user an admin?
      * @returns {Boolean}
      */
-    this.isUserAdmin = function () {
+    function isUserAdmin() {
       return currentUserAccount.isAdmin();
-    };
+    }
 
     /**
      * @function reload
      * @memberOf app.view.endpoints.dashboard
      * @description Reload the current view (used if there was an error loading the dashboard)
      */
-    this.reload = function () {
+    function reload() {
       $state.reload();
-    };
-
-    function init() {
-      _updateEndpoints().then(function () {
-        _updateWelcomeMessage();
-      });
     }
 
-    appUtilsService.chainStateResolve('endpoint.dashboard', $state, init);
+    function init() {
+      return appEndpointsDashboardService.update().then(function () {
+        vm.listError = false;
+        vm.intialised = true;
+        _updateWelcomeMessage();
+      }).catch(function () {
+        vm.listError = true;
+      });
+    }
 
     function _updateWelcomeMessage() {
       // Show the welcome message if either...
-      if (that.isUserAdmin()) {
+      if (vm.isUserAdmin()) {
         // The user is admin and there are no endpoints registered
-        that.showWelcomeMessage = that.endpoints.length === 0;
+        vm.showWelcomeMessage = vm.endpoints.length === 0;
       } else {
         // The user is not admin and there are no connected endpoints (note - they should never reach here if there
         // are no registered endpoints)
-        that.showWelcomeMessage = !_.find(that.endpoints, { connected: 'connected' });
+        vm.showWelcomeMessage = !_.find(vm.endpoints, {connected: 'connected'});
       }
-    }
-
-    function _haveCachedEndpoints() {
-      var ret = callForAllProviders('haveInstances');
-      for (var i = 0; i < ret.length; i++) {
-        if (ret[i]) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function _updateEndpointsFromCache() {
-      callForAllProviders('createEndpointEntries');
-      _updateWelcomeMessage();
-
-      // Pre-sort the array to avoid initial smart-table flicker
-      that.endpoints.sort(function (e1, e2) {
-        return e1.type !== e2.type ? e1.type.localeCompare(e2.type) : e1.name.localeCompare(e2.name);
-      });
-
-      that.initialised = true;
-    }
-
-    /**
-     * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard
-     * @description update the models supporting the endpoints dashboard and refresh the local endpoints list
-     * @returns {object} a promise
-     * @private
-     */
-    function _updateEndpoints() {
-      return callForAllProviders('updateInstances')
-        .then(function () {
-          that.listError = false;
-        })
-        .catch(function () {
-          that.listError = true;
-        })
-        .then(function () {
-          return appEndpointsDashboardService.refreshCodeEngineVcses();
-        })
-        .then(function () {
-          _updateEndpointsFromCache();
-        })
-        .finally(function () {
-          that.intialised = true;
-        });
-    }
-
-    if (_haveCachedEndpoints()) {
-      // serviceInstanceModel has previously been updated
-      // to decrease load time, we will use that data.
-      // we will still refresh the data asynchronously and the UI will update to reflect changes
-      _updateEndpointsFromCache();
     }
   }
 
