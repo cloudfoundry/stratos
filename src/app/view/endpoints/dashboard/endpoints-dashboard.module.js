@@ -28,15 +28,15 @@
    * @param {app.view.appRegisterService} appRegisterService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * @param {app.view.endpoints.dashboard.appEndpointsVcsService} appEndpointsVcsService - service to support dashboard with vcs type endpoints
+   * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @constructor
    */
   function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
-                                        appEndpointsDashboardService, appEndpointsCnsiService, appEndpointsVcsService) {
+                                        appEndpointsDashboardService, appEndpointsCnsiService, ceVCSEndpointService) {
     var vm = this;
 
     appEndpointsDashboardService.endpointsProviders.push(appEndpointsCnsiService);
-    appEndpointsDashboardService.endpointsProviders.push(appEndpointsVcsService);
+    appEndpointsDashboardService.endpointsProviders.push(ceVCSEndpointService);
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
 

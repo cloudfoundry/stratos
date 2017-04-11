@@ -31,7 +31,7 @@
     'modelManager',
     'appEventService',
     'appUtilsService',
-    'appManageVcsTokens',
+    'ceManageVcsTokens',
     '$scope',
     '$q',
     '$timeout',
@@ -45,7 +45,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {app.view.vcs.appManageVcsTokens} appManageVcsTokens - the VCS Token management service
+   * @param {ceManageVcsTokens} ceManageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -59,11 +59,11 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, appManageVcsTokens, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.appEventService = appEventService;
     this.appUtilsService = appUtilsService;
-    this.appManageVcsTokens = appManageVcsTokens;
+    this.ceManageVcsTokens = ceManageVcsTokens;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;

@@ -25,8 +25,8 @@
    * @constructor
    * @param {app.utils.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.view.vcs.appManageVcsTokens} appManageVcsTokens - the VCS token manager
-   * @param {app.view.vcs.appManageVcsTokens} appRegisterVcsToken - service to register a new VCS token
+   * @param {app.view.vcs.ceManageVcsTokens} ceManageVcsTokens - the VCS token manager
+   * @param {app.view.vcs.ceManageVcsTokens} ceRegisterVcsToken - service to register a new VCS token
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {object} cfAddNotificationService - Service for adding new notifications
@@ -44,13 +44,13 @@
    * @property {string} id - the application GUID
    * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
-  function ApplicationDeliveryPipelineController(appEventService, modelManager, appManageVcsTokens, appRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
+  function ApplicationDeliveryPipelineController(appEventService, modelManager, ceManageVcsTokens, ceRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
                                                  cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
-    this.appManageVcsTokens = appManageVcsTokens;
-    this.appRegisterVcsToken = appRegisterVcsToken;
+    this.ceManageVcsTokens = ceManageVcsTokens;
+    this.ceRegisterVcsToken = ceRegisterVcsToken;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
@@ -64,7 +64,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.appEventService = appEventService;
-    this.appManageVcsTokens = appManageVcsTokens;
+    this.ceManageVcsTokens = ceManageVcsTokens;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$log = $log;
@@ -307,7 +307,7 @@
         if (tokensForVcs.length > 0) {
           return that._manageTokens(vcs);
         } else {
-          return that.appRegisterVcsToken.registerToken(vcs).then(function () {
+          return that.ceRegisterVcsToken.registerToken(vcs).then(function () {
             return that._manageTokens(vcs);
           });
         }
@@ -359,16 +359,16 @@
       if (!this.project) {
         return undefined;
       }
-      return this.appManageVcsTokens.getPatGuid(this.project.name);
+      return this.ceManageVcsTokens.getPatGuid(this.project.name);
     },
 
     _manageTokens: function (vcs) {
       var that = this;
       var patGuid = that._getPatGuid();
-      return that.appManageVcsTokens.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+      return that.ceManageVcsTokens.manage(vcs, true, patGuid).then(function (newTokenGuid) {
         // If the token was changed. update the HCE project
         if (newTokenGuid !== patGuid) {
-          that.project.name = that.appManageVcsTokens.updateProjectName(that.project.name, newTokenGuid);
+          that.project.name = that.ceManageVcsTokens.updateProjectName(that.project.name, newTokenGuid);
           return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
             that.model.application.project = res.data;
             var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;

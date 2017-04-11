@@ -3,7 +3,8 @@
 
   angular
     .module('code-engine', [
-      'code-engine.service'
+      'code-engine.service',
+      'code-engine.view'
     ]);
 
 })();

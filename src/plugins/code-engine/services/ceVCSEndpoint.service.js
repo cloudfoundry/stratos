@@ -2,25 +2,25 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.dashboard')
-    .factory('appEndpointsVcsService', vcsServiceFactory);
+    .module('code-engine.service')
+    .factory('ceVCSEndpointService', vcsServiceFactory);
 
   /**
-   * @name appEndpointsVcsService
+   * @name ceVCSEndpointService
    * @description provide functionality to view and manage VCS endpoints in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $rootScope - the angular $rootScope service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {object} appManageVcsTokens - the manage VCS tokens service
-   * @param {object} appRegisterVcsToken - register a new VCS token
+   * @param {object} ceManageVcsTokens - the manage VCS tokens service
+   * @param {object} ceRegisterVcsToken - register a new VCS token
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
   function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService,
-                             appManageVcsTokens, appRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
+                             ceManageVcsTokens, ceRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -42,7 +42,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @memberOf service-manager.service.ceVCSEndpointService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
@@ -53,7 +53,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @memberOf service-manager.service.ceVCSEndpointService
      * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
@@ -100,7 +100,7 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @memberOf service-manager.service.ceVCSEndpointService
      * @description convert the model service instances into endpoints entries
      * @public
      */
@@ -159,7 +159,7 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @memberOf service-manager.service.ceVCSEndpointService
      * @description clear any local data before leaving the dashboard
      * @public
      */
@@ -235,13 +235,13 @@
     }
 
     function _manageTokens(endpoint) {
-      return appManageVcsTokens.manage(endpoint.vcs).then(function () {
+      return ceManageVcsTokens.manage(endpoint.vcs).then(function () {
         _createVcsActions(endpoint);
       });
     }
 
     function _addToken(endpoint) {
-      return appRegisterVcsToken.registerToken(endpoint.vcs).then(function () {
+      return ceRegisterVcsToken.registerToken(endpoint.vcs).then(function () {
         return _refreshTokens().then(function () {
           _createVcsActions(endpoint);
         });

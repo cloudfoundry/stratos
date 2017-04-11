@@ -7,7 +7,7 @@
   <div class="register-content-right">
     <h4 translate>Select an Endpoint Type</h4>
     <ul class="media-list hpe-add-option-list">
-      <li ng-repeat="endpoint in endpoints" class="media register-type-hsm" ng-class="endpoint.register.html.class">
+      <li ng-repeat="endpoint in endpoints" class="media" ng-class="[endpoint.register.html.class]">
         <div class="media-left media-middle">
           <div class="media-object">
             <svg-image ng-if='endpoint.register.html.type.svg' src="{{endpoint.register.html.type.svg}}"></svg-image>

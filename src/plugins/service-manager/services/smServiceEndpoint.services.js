@@ -46,8 +46,8 @@
             p3: 'sm.registration.p3',
             urlHint: 'sm.registration.urlHint'
           },
-          nameOfNameInput: 'hceName',
-          nameOfUrlInput: 'hceUrl'
+          nameOfNameInput: 'hsmName',
+          nameOfUrlInput: 'hsmUrl'
         }
       }
     };

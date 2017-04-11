@@ -21,13 +21,13 @@
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {app.view.endpoints.dashboard.appEndpointsVcsService} appEndpointsVcsService - service to support dashboard with vcs type endpoints
+   * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, appUtilsService, appEndpointsVcsService, appEndpointsDashboardService,
+  function endpointService(ceHideEndpoint, $q, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsCnsiService) {
 
     var service = {
@@ -69,14 +69,14 @@
 
     function unregister(serviceInstance) {
       return appEndpointsDashboardService.refreshCodeEngineVcses().then(function () {
-        appEndpointsVcsService.createEndpointEntries();
+        ceVCSEndpointService.createEndpointEntries();
       });
     }
 
     function connect(serviceInstance) {
-      $q.all([appEndpointsVcsService.updateInstances(), appEndpointsDashboardService.refreshCodeEngineVcses()])
+      $q.all([ceVCSEndpointService.updateInstances(), appEndpointsDashboardService.refreshCodeEngineVcses()])
         .then(function () {
-          appEndpointsVcsService.createEndpointEntries();
+          ceVCSEndpointService.createEndpointEntries();
         });
     }
 
@@ -84,7 +84,7 @@
       appEndpointsDashboardService.refreshCodeEngineVcses()
         .then(function () {
           // Note: we could optimize this with the createEndpointEntries above somehow
-          appEndpointsVcsService.createEndpointEntries();
+          ceVCSEndpointService.createEndpointEntries();
         });
     }
 
