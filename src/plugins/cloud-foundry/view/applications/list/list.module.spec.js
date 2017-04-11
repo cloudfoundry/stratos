@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
+s      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');

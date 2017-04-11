@@ -28,16 +28,16 @@
     del('../tmp', {force: true}, next);
   });
 
-  gulp.task('coverage-combine', function () {
+  gulp.task('coverage-combine', function (cb) {
     var opts = {
-      dir: '../coverage-report/combined',
-      pattern: '../coverage-report/_json/*.json',
+      dir: '../out/coverage-report/combined',
+      pattern: '../out/coverage-report/_json/*.json',
       print: 'summary',
       reporters: {
         html: {}
       }
     };
-    combine.sync(opts);
+    combine(opts, cb);
   });
 
   gulp.task('e2e:tests', function (cb) {

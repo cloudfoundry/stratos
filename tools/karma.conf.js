@@ -5,7 +5,7 @@
 
   module.exports = function (config) {
 
-    var reportPath = path.resolve(__dirname, '..', 'coverage-report');
+    var reportPath = path.resolve(__dirname, '..', 'out/coverage-report');
 
     config.set({
 
@@ -119,19 +119,20 @@
         'karma-jasmine',
         'karma-ng-html2js-preprocessor',
         'karma-coverage',
-        'karma-wiredep'
+        'karma-wiredep',
+        require('./karma-ngannotate')
       ],
 
       preprocessors: {
         'theme/**/*.svg': ['ng-html2js'],
         'src/framework/**/*.html': ['ng-html2js'],
-        'src/framework/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/framework/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/app/**/*.html': ['ng-html2js'],
-        'src/app/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/app/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/plugins/**/*.html': ['ng-html2js'],
-        'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
-        'src/plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
-        'src/plugins/github/**/!(*.mock|*.spec).js': ['coverage']
+        'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
+        'src/plugins/cloud-foundry/api/vcs/*.js': ['ngannotate', 'coverage'],
+        'src/plugins/github/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
       },
 
       proxies: {
