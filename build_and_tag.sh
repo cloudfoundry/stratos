@@ -280,14 +280,14 @@ function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${PORTAL_PROXY_PATH}
 }
 
 function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job ${PORTAL_PROXY_PATH}
 }
 
 function buildUI {
