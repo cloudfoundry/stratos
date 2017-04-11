@@ -1,4 +1,4 @@
-# Deploy Console in Kubernetes using Minkube and Helm
+# Deploy Console in Kubernetes using Minikube and Helm
 
 ## Pre-requisites
 This guide assumes that you have checked out the following repositories and places them at the same level as this project.
