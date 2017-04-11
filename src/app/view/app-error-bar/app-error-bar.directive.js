@@ -5,33 +5,25 @@
     .module('app.view')
     .directive('appErrorBar', appErrorBar);
 
-  appErrorBar.$inject = ['app.basePath'];
-
   /**
    * @namespace app.view.clusterRegistration
    * @memberof app.view
    * @name clusterRegistration
    * @description A cluster-registration directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The cluster-registration directive definition object
    */
-  function appErrorBar(path) {
+  function appErrorBar(appBasePath) {
     return {
       bindToController: {
         displayed: '='
       },
       controller: AppErrorBarController,
       controllerAs: 'appErrorBarCtrl',
-      templateUrl: path + 'view/app-error-bar/app-error-bar.html',
+      templateUrl: appBasePath + 'view/app-error-bar/app-error-bar.html',
       scope: {}
     };
   }
-
-  AppErrorBarController.$inject = [
-    '$scope',
-    'app.utils.eventService',
-    '$translate'
-  ];
 
   /**
    * @name AppErrorBarController
@@ -39,22 +31,21 @@
    * @description Controller for the Application Error Bar directive
    * @constructor
    * @param {object} $scope - the Angular $scope
-   * @param {app.utils.eventService} eventService - the event Service
+   * @param {app.utils.appEventService} appEventService - the event Service
    * @param {object} $translate - the i18n $translate service
-   * @property {string} messgae - the error message to display
    */
-  function AppErrorBarController($scope, eventService, $translate) {
+  function AppErrorBarController($scope, appEventService, $translate) {
     var that = this;
-    this.eventService = eventService;
+    this.appEventService = appEventService;
     this.message = undefined;
     this.displayed = false;
 
-    this.removeSetListener = eventService.$on(eventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
+    this.removeSetListener = appEventService.$on(appEventService.events.APP_ERROR_NOTIFY, function (ev, msg) {
       that.message = $translate.instant(msg);
       that.displayed = true;
     });
 
-    this.removeClearListener = eventService.$on(eventService.events.APP_ERROR_CLEAR, function () {
+    this.removeClearListener = appEventService.$on(appEventService.events.APP_ERROR_CLEAR, function () {
       that.displayed = false;
       that.message = undefined;
     });

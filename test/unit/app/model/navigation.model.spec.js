@@ -2,12 +2,14 @@
   'use strict';
 
   describe('navigation model', function () {
-    var navigationModel;
+    var navigationModel, appEventService, $state;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       var modelManager = $injector.get('modelManager');
       navigationModel = modelManager.retrieve('app.model.navigation');
+      appEventService = $injector.get('appEventService');
+      $state = $injector.get('$state');
     }));
 
     it('should be defined', function () {
@@ -16,56 +18,34 @@
 
     // property definitions
 
-    it('should have properties `eventService` defined', function () {
-      expect(navigationModel.eventService).toBeDefined();
-    });
-
-    it('should have properties `$state` defined', function () {
-      expect(navigationModel.$state).toBeDefined();
-    });
-
     it('should have properties `menu` defined', function () {
       expect(navigationModel.menu).toBeDefined();
-    });
-
-    // method definitions
-
-    it('should have method `onLogin` defined', function () {
-      expect(angular.isFunction(navigationModel.onLogin)).toBe(true);
-    });
-
-    it('should have method `onLogout` defined', function () {
-      expect(angular.isFunction(navigationModel.onLogout)).toBe(true);
-    });
-
-    it('should have method `onAutoNav` defined', function () {
-      expect(angular.isFunction(navigationModel.onAutoNav)).toBe(true);
     });
 
     // method invocation
 
     it('`onLogin` should called when events.LOGGED_IN triggered', function () {
-      spyOn(navigationModel, 'onLogin');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGIN);
-      expect(navigationModel.onLogin).toHaveBeenCalled();
+      spyOn(navigationModel.menu, 'reset');
+      appEventService.$emit(appEventService.events.LOGIN);
+      expect(navigationModel.menu.reset).toHaveBeenCalled();
     });
 
     it('`onLogout` should called when events.LOGGED_OUT triggered', function () {
-      spyOn(navigationModel, 'onLogout');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGOUT);
-      expect(navigationModel.onLogout).toHaveBeenCalled();
+      spyOn(navigationModel.menu, 'reset');
+      appEventService.$emit(appEventService.events.LOGOUT);
+      expect(navigationModel.menu.reset).toHaveBeenCalled();
     });
 
     it('`onAutoNav` should called when events.REDIRECT triggered', function () {
-      spyOn(navigationModel, 'onAutoNav');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
-      expect(navigationModel.onAutoNav).toHaveBeenCalledWith(jasmine.any(Object), 'cf.applications', undefined);
+      spyOn($state, 'go');
+      appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications');
+      expect($state.go).toHaveBeenCalledWith('cf.applications', undefined);
     });
 
     it('`$state.go` should be called when events.REDIRECT triggered', function () {
-      spyOn(navigationModel.$state, 'go');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
-      expect(navigationModel.$state.go).toHaveBeenCalledWith('cf.applications', undefined);
+      spyOn($state, 'go');
+      appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications');
+      expect($state.go).toHaveBeenCalledWith('cf.applications', undefined);
       // TEAMFOUR-366 - the menu is now updated using a $rootScope stateChangeSuccess handler
       // expect(navigationModel.menu.currentState).toBe('cf.applications');
     });

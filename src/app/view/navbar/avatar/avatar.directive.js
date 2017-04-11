@@ -6,7 +6,7 @@
     .directive('avatar', avatar);
 
   avatar.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,14 +14,14 @@
    * @memberof app.view
    * @name avatar
    * @description An avatar UI component directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The avatar directive definition object
    */
-  function avatar(path) {
+  function avatar(appBasePath) {
     return {
       controller: AvatarController,
       controllerAs: 'avatarCtrl',
-      templateUrl: path + 'view/navbar/avatar/avatar.html'
+      templateUrl: appBasePath + 'view/navbar/avatar/avatar.html'
     };
   }
 

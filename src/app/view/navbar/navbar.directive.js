@@ -6,7 +6,7 @@
     .directive('navbar', navbar);
 
   navbar.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,12 +14,12 @@
    * @memberof app.view
    * @name navbar
    * @description A navbar directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The navbar directive definition object
    */
-  function navbar(path) {
+  function navbar(appBasePath) {
     return {
-      templateUrl: path + 'view/navbar/navbar.html',
+      templateUrl: appBasePath + 'view/navbar/navbar.html',
       controller: NavBarController,
       controllerAs: 'navBarCtrl',
       bindToController: true

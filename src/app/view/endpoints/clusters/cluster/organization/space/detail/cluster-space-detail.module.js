@@ -28,7 +28,7 @@
     '$state',
     '$stateParams',
     'modelManager',
-    'app.utils.utilsService'
+    'appUtilsService'
   ];
 
   function ClusterSpaceController($q, $state, $stateParams, modelManager, utils) {

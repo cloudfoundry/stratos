@@ -34,7 +34,7 @@
     '$q',
     'modelManager',
     'apiManager',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
     'modelUtils',
     'organization-model'

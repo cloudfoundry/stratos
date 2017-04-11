@@ -6,7 +6,7 @@
     .directive('navigation', navigation);
 
   navigation.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,14 +14,14 @@
    * @memberof app.view
    * @name navigation
    * @description A navigation UI component directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The navigation directive definition object
    */
-  function navigation(path) {
+  function navigation(appBasePath) {
     return {
       controller: NavigationController,
       controllerAs: 'navigationCtrl',
-      templateUrl: path + 'view/navbar/navigation/navigation.html'
+      templateUrl: appBasePath + 'view/navbar/navigation/navigation.html'
     };
   }
 

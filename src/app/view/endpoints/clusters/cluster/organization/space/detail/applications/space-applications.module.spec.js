@@ -40,7 +40,7 @@
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope').$new();
       modelManager = $injector.get('modelManager');
-      utils = $injector.get('app.utils.utilsService');
+      utils = $injector.get('appUtilsService');
       appStateService = $injector.get('cloud-foundry.model.application.stateService');
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');

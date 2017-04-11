@@ -11,15 +11,8 @@
     .module('app.api')
     .run(registerAccountApi);
 
-  registerAccountApi.$inject = [
-    '$http',
-    '$httpParamSerializer',
-    '$q',
-    'apiManager'
-  ];
-
-  function registerAccountApi($http, $httpParamSerializer, $q, apiManager) {
-    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer, $q));
+  function registerAccountApi($http, $httpParamSerializer, apiManager) {
+    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer));
   }
 
   /**
@@ -28,19 +21,19 @@
    * @name app.api.account
    * @param {object} $http - the Angular $http service
    * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
-   * @param {object} $q - the Angular Promise service
    * @property {object} $http - the Angular $http service
    * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
-   * @property {object} $q - the Angular Promise service
    * @class
    */
-  function AccountApi($http, $httpParamSerializer, $q) {
-    this.$http = $http;
-    this.$httpParamSerializer = $httpParamSerializer;
-    this.$q = $q;
-  }
+  function AccountApi($http, $httpParamSerializer) {
 
-  angular.extend(AccountApi.prototype, {
+    return {
+      login: login,
+      logout: logout,
+      verifySession: verifySession,
+      userInfo: userInfo
+    };
+
     /**
      * @function login
      * @memberof app.api.account.AccountApi
@@ -50,15 +43,15 @@
      * @returns {object} A resolved/rejected promise
      * @public
      */
-    login: function (username, password) {
+    function login(username, password) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var data = this.$httpParamSerializer({ username: username, password: password });
-      return this.$http.post('/pp/v1/auth/login/uaa', data, config);
-    },
+      var data = $httpParamSerializer({ username: username, password: password });
+      return $http.post('/pp/v1/auth/login/uaa', data, config);
+    }
 
     /**
      * @function logout
@@ -67,9 +60,9 @@
      * @returns {object} A resolved/rejected promise
      * @public
      */
-    logout: function () {
-      return this.$http.post('/pp/v1/auth/logout');
-    },
+    function logout() {
+      return $http.post('/pp/v1/auth/logout');
+    }
 
     /**
      * @function verifySession
@@ -78,14 +71,14 @@
      * @returns {object} A resolved/rejected promise
      * @public
      */
-    verifySession: function () {
-      return this.$http.get('/pp/v1/auth/session/verify');
-    },
-
-    userInfo: function () {
-      return this.$http.get('/pp/v1/userinfo');
+    function verifySession() {
+      return $http.get('/pp/v1/auth/session/verify');
     }
 
-  });
+    function userInfo() {
+      return $http.get('/pp/v1/userinfo');
+    }
+
+  }
 
 })();

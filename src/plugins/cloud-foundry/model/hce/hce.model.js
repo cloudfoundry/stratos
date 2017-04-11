@@ -14,29 +14,29 @@
   registerHceModel.$inject = [
     'modelManager',
     'apiManager',
-    'app.utils.eventService',
+    'appEventService',
     '$log'
   ];
 
-  function registerHceModel(modelManager, apiManager, eventService, $log) {
-    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, eventService, $log));
+  function registerHceModel(modelManager, apiManager, appEventService, $log) {
+    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, appEventService, $log));
   }
 
   /**
    * @memberof cloud-foundry.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {app.utils.eventService} eventService - the application event service
+   * @param {app.utils.appEventService} appEventService - the application event service
    * @param {object} $log - Angular $log service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {app.utils.eventService} eventService - the application event service
+   * @property {app.utils.appEventService} appEventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function HceModel(apiManager, eventService, $log) {
+  function HceModel(apiManager, appEventService, $log) {
     var that = this;
     this.apiManager = apiManager;
-    this.eventService = eventService;
+    this.appEventService = appEventService;
     this.$log = $log;
     this.data = {
       buildContainers: [],
@@ -97,7 +97,7 @@
       that.staticNotificationData[key] = _.defaults(val, baseNotificationData);
     });
 
-    this.eventService.$on(this.eventService.events.LOGOUT, function () {
+    this.appEventService.$on(this.appEventService.events.LOGOUT, function () {
       that.onLogout();
     });
 

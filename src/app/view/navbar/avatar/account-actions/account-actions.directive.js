@@ -6,7 +6,7 @@
     .directive('accountActions', accountActions);
 
   accountActions.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,14 +14,14 @@
    * @memberof app.view
    * @name accountActions
    * @description An account-actions UI component directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The account actions directive definition object
    */
-  function accountActions(path) {
+  function accountActions(appBasePath) {
     return {
       controller: AccountActionsController,
       controllerAs: 'accountActionsCtrl',
-      templateUrl: path + 'view/navbar/avatar/account-actions/account-actions.html'
+      templateUrl: appBasePath + 'view/navbar/avatar/account-actions/account-actions.html'
     };
   }
 

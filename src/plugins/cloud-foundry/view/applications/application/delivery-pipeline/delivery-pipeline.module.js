@@ -25,15 +25,15 @@
   }
 
   ApplicationDeliveryPipelineController.$inject = [
-    'app.utils.eventService',
+    'appEventService',
     'modelManager',
     'app.view.vcs.manageVcsTokens',
     'app.view.vcs.registerVcsToken',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkDialogConfirm',
     'app.view.notificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
-    'app.utils.utilsService',
+    'appUtilsService',
     'helion.framework.widgets.detailView',
     'PAT_DELIMITER',
     '$interpolate',
@@ -47,15 +47,15 @@
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
-   * @param {app.utils.eventService} eventService - the application event bus
+   * @param {app.utils.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.view.notificationsService} notificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
-   * @param {app.utils.utilsService} utils - the console utils service
+   * @param {appUtilsService} utils - the console utils service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
@@ -68,7 +68,7 @@
    * @property {string} id - the application GUID
    * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, registerVcsToken, confirmDialog, notificationsService,
+  function ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager, registerVcsToken, frameworkDialogConfirm, notificationsService,
                                                  addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
@@ -87,12 +87,12 @@
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
-    this.eventService = eventService;
+    this.appEventService = appEventService;
     this.vcsTokenManager = vcsTokenManager;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$log = $log;
-    this.confirmDialog = confirmDialog;
+    this.frameworkDialogConfirm = frameworkDialogConfirm;
     this.notificationsService = notificationsService;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
@@ -144,7 +144,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          that.confirmDialog({
+          that.frameworkDialogConfirm({
             title: gettext('Delete Notification Target'),
             description: gettext('Are you sure you want to delete this notification target?'),
             submitCommit: true,
@@ -167,7 +167,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          that.confirmDialog({
+          that.frameworkDialogConfirm({
             title: gettext('Delete Post Deploy Task'),
             description: gettext('Are you sure you want to delete this post deploy task?'),
             submitCommit: true,
@@ -231,7 +231,7 @@
 
     deletePipeline: function () {
       var that = this;
-      this.confirmDialog({
+      this.frameworkDialogConfirm({
         title: 'Delete Pipeline',
         description: 'Are you sure you want to delete this pipeline?',
         submitCommit: true,
@@ -249,7 +249,7 @@
             // show notification for successful binding
             var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
-            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
             return that.model.updateDeliveryPipelineMetadata();
           })

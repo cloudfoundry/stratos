@@ -26,7 +26,7 @@
     '$scope',
     '$state',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.registerService',
     'app.view.endpoints.dashboard.dashboardService',
     'app.view.endpoints.dashboard.cnsiService',
@@ -41,7 +41,7 @@
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.utils.utilsService} utilsService - the utils service
+   * @param {appUtilsService} utilsService - the utils service
    * @param {app.view.registerService} registerService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints

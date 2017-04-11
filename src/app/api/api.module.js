@@ -10,18 +10,9 @@
   angular
     .module('app.api', [], config);
 
-  config.$inject = [
-    '$httpProvider'
-  ];
-
   function config($httpProvider) {
     $httpProvider.interceptors.push(interceptor);
   }
-
-  interceptor.$inject = [
-    '$q',
-    'app.utils.eventService'
-  ];
 
   /**
    * @name interceptor
@@ -31,16 +22,16 @@
    * See https://docs.angularjs.org/api/ng/service/$http for details
    *
    * @param {object} $q - the $q service for promise/deferred objects
-   * @param {object} eventService - the event bus service
+   * @param {object} appEventService - the event bus service
    * @returns {object} The response error function
    */
-  function interceptor($q, eventService) {
+  function interceptor($q, appEventService) {
     return {
       responseError: responseError
     };
 
     function responseError(response) {
-      eventService.$emit('HTTP_' + response.status, response);
+      appEventService.$emit('HTTP_' + response.status, response);
       return $q.reject(response);
     }
   }

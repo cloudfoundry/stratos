@@ -26,7 +26,7 @@
 
   ClusterFirehoseController.$inject = [
     'base64',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.localStorage',
     '$scope',
     '$rootScope',

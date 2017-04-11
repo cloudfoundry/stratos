@@ -33,8 +33,8 @@
         expect(element).toBeDefined();
       });
 
-      it('should have `eventService` property defined', function () {
-        expect(credentialsFormCtrl.eventService).toBeDefined();
+      it('should have `appEventService` property defined', function () {
+        expect(credentialsFormCtrl.appEventService).toBeDefined();
       });
 
       it('should have `_data` property initially empty', function () {

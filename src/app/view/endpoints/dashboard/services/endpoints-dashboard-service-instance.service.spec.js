@@ -10,7 +10,7 @@
     beforeEach(module('app.view.endpoints.dashboard'));
 
     beforeEach(inject(function ($injector) {
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsService');
       utils.getOemConfiguration = function () {
         return {
           CLOUD_FOUNDRY: 'Cloud Foundry',

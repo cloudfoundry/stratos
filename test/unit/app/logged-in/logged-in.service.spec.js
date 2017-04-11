@@ -2,7 +2,7 @@
   'use strict';
 
   describe('logged-in service', function () {
-    var loggedInService, eventService, $q, $document, $interval, $httpBackend, modelManager;
+    var appLoggedInService, appEventService, $q, $document, $interval, $httpBackend, modelManager;
     var mocks = {};
 
     angular.module('IntervalMockModule', []).factory('$interval', function () {
@@ -21,8 +21,8 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $interval = $injector.get('$interval');
-      loggedInService = $injector.get('app.utils.loggedInService');
-      eventService = $injector.get('app.utils.eventService');
+      appLoggedInService = $injector.get('appLoggedInService');
+      appEventService = $injector.get('appEventService');
       $document = $injector.get('$document');
       $q = $injector.get('$q');
       modelManager = $injector.get('modelManager');
@@ -34,24 +34,24 @@
     });
 
     it('should be defined', function () {
-      expect(loggedInService).toBeDefined();
-      expect(loggedInService.isLoggedIn).toBeDefined();
+      expect(appLoggedInService).toBeDefined();
+      expect(appLoggedInService.isLoggedIn).toBeDefined();
     });
 
     it('should not be logged in', function () {
-      expect(loggedInService.isLoggedIn()).toBe(false);
+      expect(appLoggedInService.isLoggedIn()).toBe(false);
     });
 
     it('should update last interaction time', function () {
-      loggedInService.userInteracted();
+      appLoggedInService.userInteracted();
     });
 
     it('should be logged in', function () {
       $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(200, {});
       $httpBackend.expectGET('/pp/v1/auth/session/verify');
-      eventService.$emit(eventService.events.LOGIN);
-      eventService.$apply();
-      expect(loggedInService.isLoggedIn()).toBe(true);
+      appEventService.$emit(appEventService.events.LOGIN);
+      appEventService.$apply();
+      expect(appLoggedInService.isLoggedIn()).toBe(true);
       expect(mocks.$interval).toHaveBeenCalled();
       $httpBackend.flush();
     });
@@ -59,12 +59,12 @@
     it('should be logged out', function () {
       $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(200, {});
       $httpBackend.expectGET('/pp/v1/auth/session/verify');
-      eventService.$emit(eventService.events.LOGIN);
-      eventService.$apply();
-      expect(loggedInService.isLoggedIn()).toBe(true);
-      eventService.$emit(eventService.events.LOGOUT);
-      eventService.$apply();
-      expect(loggedInService.isLoggedIn()).toBe(false);
+      appEventService.$emit(appEventService.events.LOGIN);
+      appEventService.$apply();
+      expect(appLoggedInService.isLoggedIn()).toBe(true);
+      appEventService.$emit(appEventService.events.LOGOUT);
+      appEventService.$apply();
+      expect(appLoggedInService.isLoggedIn()).toBe(false);
       $httpBackend.flush();
     });
 
@@ -85,8 +85,10 @@
               finally: function () {}
             };
           },
-          accountData: {
-            sessionExpiresOn: moment('2015-10-19')
+          getAccountData: function () {
+            return {
+              sessionExpiresOn: moment('2015-10-19')
+            };
           },
           verifySession: function () {
             return $q.reject();
@@ -104,10 +106,10 @@
         // Fake the last user interaction time
         var fakeUserInteractionTime = moment('2015-10-19').toDate();
         jasmine.clock().mockDate(fakeUserInteractionTime);
-        loggedInService.userInteracted();
+        appLoggedInService.userInteracted();
         jasmine.clock().mockDate(moment('2016-10-19').toDate());
-        eventService.$emit(eventService.events.LOGIN);
-        eventService.$apply();
+        appEventService.$emit(appEventService.events.LOGIN);
+        appEventService.$apply();
         // We should be logged out
       });
 
@@ -115,10 +117,10 @@
         // Fake the last user interaction time
         var fakeUserInteractionTime = moment().toDate();
         jasmine.clock().mockDate(fakeUserInteractionTime);
-        loggedInService.userInteracted();
+        appLoggedInService.userInteracted();
         jasmine.clock().mockDate(moment('2016-10-19').toDate());
-        eventService.$emit(eventService.events.LOGIN);
-        eventService.$apply();
+        appEventService.$emit(appEventService.events.LOGIN);
+        appEventService.$apply();
         // We should be logged out
       });
 

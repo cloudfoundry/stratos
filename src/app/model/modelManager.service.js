@@ -5,8 +5,6 @@
     .module('app.model')
     .factory('modelManager', modelManagerFactory);
 
-  modelManagerFactory.$inject = [];
-
   /**
    * @namespace app.model.modelManager
    * @memberof app.model

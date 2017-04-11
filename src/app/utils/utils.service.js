@@ -3,18 +3,11 @@
 
   angular
     .module('app.utils')
-    .factory('app.utils.utilsService', utilsServiceFactory)
+    .factory('appUtilsService', utilsServiceFactory)
     .filter('mbToHumanSize', mbToHumanSizeFilter);
 
-  utilsServiceFactory.$inject = [
-    '$q',
-    '$timeout',
-    '$log',
-    '$window'
-  ];
-
   /**
-   * @namespace app.utils.utilsService
+   * @namespace appUtilsService
    * @memberof app.utils
    * @name utilsService
    * @description Various utility functions
@@ -97,12 +90,13 @@
       extractCodeEngineError: extractCodeEngineError,
       getOemConfiguration: getOemConfiguration,
       coloredLog: coloredLog,
-      highlightLog: highlightLog
+      highlightLog: highlightLog,
+      replaceProperties: replaceProperties
     };
 
     /**
      * @function retryRequest
-     * @memberOf app.utils.utilsService
+     * @memberOf appUtilsService
      * @description Retries promise until max tries reached
      * @param {object} requestPromise - a function returning a promise object
      * @param {number} maxRetries - max retries
@@ -141,7 +135,7 @@
 
     /**
      * @function runInSequence
-     * @memberOf app.utils.utilsService
+     * @memberOf appUtilsService
      * @description runs async functions in sequence
      * @param {object} funcStack - a stack containing async functions
      * @param {boolean} asQueue - optional, indicting to treat the funcStack as a queue
@@ -318,13 +312,9 @@
     }
   }
 
-  mbToHumanSizeFilter.$inject = [
-    'app.utils.utilsService'
-  ];
-
-  function mbToHumanSizeFilter(utilsService) {
+  function mbToHumanSizeFilter(appUtilsService) {
     return function (input) {
-      return utilsService.mbToHumanSize(input);
+      return appUtilsService.mbToHumanSize(input);
     };
   }
 
@@ -386,6 +376,13 @@
     }
 
     return errorText;
+  }
+
+  function replaceProperties(destination, source) {
+    _.forIn(destination, function (value, key) {
+      delete destination[key];
+    });
+    _.assign(destination, source);
   }
 
 })();

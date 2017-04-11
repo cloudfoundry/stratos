@@ -30,16 +30,16 @@
     '$stateParams',
     '$q',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.utils.eventService',
+    'appEventService',
     'app.view.userSelection',
     'organization-model'
   ];
 
   function ClusterUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers, rolesService,
-                                  eventService, userSelection, organizationModel) {
+                                  appEventService, userSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -249,7 +249,7 @@
       return rolesService.removeAllRoles(that.guid, guidsToUsers(that.selectedUsers));
     };
 
-    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = appEventService.$on(appEventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 

@@ -53,10 +53,10 @@
 
     describe('events', function () {
 
-      var eventService;
+      var appEventService;
 
       beforeEach(inject(function ($injector) {
-        eventService = $injector.get('app.utils.eventService');
+        appEventService = $injector.get('appEventService');
       }));
 
       var eventData = {
@@ -66,31 +66,31 @@
 
       it('show busy toast', function () {
         spyOn(toaster, 'busy');
-        eventService.$emit('cf.events.NOTIFY_BUSY', eventData);
+        appEventService.$emit('cf.events.NOTIFY_BUSY', eventData);
         expect(toaster.busy).toHaveBeenCalled();
       });
 
       it('show error toast', function () {
         spyOn(toaster, 'error');
-        eventService.$emit('cf.events.NOTIFY_ERROR', eventData);
+        appEventService.$emit('cf.events.NOTIFY_ERROR', eventData);
         expect(toaster.error).toHaveBeenCalled();
       });
 
       it('show success toast', function () {
         spyOn(toaster, 'success');
-        eventService.$emit('cf.events.NOTIFY_SUCCESS', eventData);
+        appEventService.$emit('cf.events.NOTIFY_SUCCESS', eventData);
         expect(toaster.success).toHaveBeenCalled();
       });
 
       it('show warning toast', function () {
         spyOn(toaster, 'warning');
-        eventService.$emit('cf.events.NOTIFY_WARNING', eventData);
+        appEventService.$emit('cf.events.NOTIFY_WARNING', eventData);
         expect(toaster.warning).toHaveBeenCalled();
       });
 
       it('show custom toast', function () {
         spyOn(toaster, 'show');
-        eventService.$emit('cf.events.NOTIFY', eventData);
+        appEventService.$emit('cf.events.NOTIFY', eventData);
         expect(toaster.show).toHaveBeenCalled();
       });
 

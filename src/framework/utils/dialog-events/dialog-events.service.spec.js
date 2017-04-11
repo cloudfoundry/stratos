@@ -8,7 +8,7 @@
     beforeEach(module('helion.framework.utils'));
     beforeEach(inject(function ($injector) {
       $scope = $injector.get('$rootScope').$new();
-      dialogEvents = $injector.get('helion.framework.utils.dialogEvents');
+      dialogEvents = $injector.get('frameworkDialogEvents');
     }));
 
     it('shoule be available', function () {

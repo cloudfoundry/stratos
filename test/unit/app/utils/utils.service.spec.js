@@ -8,7 +8,7 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      utils = $injector.get('app.utils.utilsService');
+      utils = $injector.get('appUtilsService');
       mbToHumanSizeFilter = $injector.get('mbToHumanSizeFilter');
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope');

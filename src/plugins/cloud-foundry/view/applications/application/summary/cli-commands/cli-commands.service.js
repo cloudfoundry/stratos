@@ -7,7 +7,7 @@
 
   CliCommandsFactory.$inject = [
     'helion.framework.widgets.detailView',
-    'app.utils.utilsService'
+    'appUtilsService'
   ];
 
   /**

@@ -6,7 +6,7 @@
     .directive('pageFooter', pageFooter);
 
   pageFooter.$inject = [
-    'app.basePath'
+    'appBasePath'
   ];
 
   /**
@@ -14,12 +14,12 @@
    * @memberof app.view
    * @name pageFooter
    * @description A page footer directive
-   * @param {string} path - the application base path
+   * @param {string} appBasePath - the application base path
    * @returns {object} The pageFooter directive definition object
    */
-  function pageFooter(path) {
+  function pageFooter(appBasePath) {
     return {
-      templateUrl: path + 'view/page-footer/page-footer.html',
+      templateUrl: appBasePath + 'view/page-footer/page-footer.html',
       controller: PageFooterController,
       controllerAs: 'pageFooterCtrl',
       scope: {
@@ -31,7 +31,7 @@
 
   PageFooterController.$inject = [
     '$scope',
-    'app.utils.utilsService'
+    'appUtilsService'
   ];
 
   function PageFooterController($scope, utilsService) {

@@ -25,10 +25,10 @@
     '$stateParams',
     '$q',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.notificationsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkDialogConfirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'
   ];
@@ -41,16 +41,16 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appUtilsService} utils - the utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
-   * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      cliCommands, confirmDialog, asyncTaskDialog, organizationModel) {
+                                      cliCommands, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -118,7 +118,7 @@
       name: gettext('Delete Space'),
       disabled: true,
       execute: function () {
-        return confirmDialog({
+        return frameworkDialogConfirm({
           title: gettext('Delete Space'),
           description: gettext('Are you sure you want to delete space') +
           " '" + that.spaceDetail().details.space.entity.name + "'?",

@@ -9,7 +9,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsService');
       var $stateParams = $injector.get('$stateParams');
       var $location = $injector.get('$location');
       var $log = $injector.get('$log');

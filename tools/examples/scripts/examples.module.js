@@ -46,13 +46,13 @@
 
   /* eslint-disable no-alert */
 
-  function ExampleController($location, $scope, $state, $timeout, $q, $log, confirmDialog, detailView, toaster, asyncTaskDialog, dialogEvents) {
+  function ExampleController($location, $scope, $state, $timeout, $q, $log, frameworkWidgetsDialogConfirm, detailView, toaster, asyncTaskDialog, dialogEvents) {
     var that = this;
     this.$location = $location;
     this.$timeout = $timeout;
     this.$q = $q;
     this.$log = $log;
-    this.confirmDialog = confirmDialog;
+    this.frameworkWidgetsDialogConfirm = frameworkWidgetsDialogConfirm;
     this.detailView = detailView;
     this.asyncTaskDialog = asyncTaskDialog;
     this.dialogEvents = dialogEvents;
@@ -263,7 +263,7 @@
       }
     },
     openConfirmModal: function () {
-      this.confirmDialog({
+      this.frameworkWidgetsDialogConfirm({
         title: 'Are you sure?',
         description: 'Please confirm.',
         busyDescription: 'Please wait',
@@ -278,7 +278,7 @@
     },
     openConfirmModalWithError: function () {
       var that = this;
-      this.confirmDialog({
+      this.frameworkWidgetsDialogConfirm({
         title: 'Are you sure?',
         description: 'Please confirm.',
         busyDescription: 'Please wait',

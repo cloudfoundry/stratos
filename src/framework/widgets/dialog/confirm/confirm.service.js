@@ -2,10 +2,10 @@
   'use strict';
 
   /**
-   * @name helion.framework.widgets.dialog.confirm
+   * @name frameworkDialogConfirm
    * @example:
    *  ```
-   *  confirmDialog({
+   *  frameworkDialogConfirm({
    *    title: 'Are you sure?',
    *    description: 'Please confirm',
    *    noHtmlEscape: true
@@ -21,17 +21,17 @@
    */
   angular
     .module('helion.framework.widgets')
-    .factory('helion.framework.widgets.dialog.confirm', serviceFactory);
+    .factory('frameworkDialogConfirm', serviceFactory);
 
   serviceFactory.$inject = [
     '$uibModal',
-    'helion.framework.utils.dialogEvents'
+    'frameworkDialogEvents'
   ];
 
-  function serviceFactory($uibModal, dialogEvents) {
-    return confirmDialog;
+  function serviceFactory($uibModal, frameworkDialogEvents) {
+    return frameworkDialogConfirm;
 
-    function confirmDialog(confirmDialogContext) {
+    function frameworkDialogConfirm(confirmDialogContext) {
       confirmDialogContext = confirmDialogContext || {};
       confirmDialogContext.modalInstance = $uibModal.open({
         controller: ConfirmController,
@@ -45,9 +45,9 @@
         windowClass: 'confirm-dialog' + (confirmDialogContext.windowClass ? ' ' + confirmDialogContext.windowClass : '')
       });
       if (confirmDialogContext.modalInstance && confirmDialogContext.modalInstance.closed) {
-        dialogEvents.notifyOpened();
+        frameworkDialogEvents.notifyOpened();
         confirmDialogContext.modalInstance.closed.then(function () {
-          dialogEvents.notifyClosed();
+          frameworkDialogEvents.notifyClosed();
         });
       }
       // Return the modal instance so that promises can be directly attached by the caller

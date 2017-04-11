@@ -8,7 +8,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'app.utils.utilsService': {
+      appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         }
@@ -63,7 +63,7 @@
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
       notificationsService = $injector.get('app.view.notificationsService');
-      utils = $injector.get('app.utils.utilsService');
+      utils = $injector.get('appUtilsService');
     }));
 
     function createController() {
@@ -107,14 +107,14 @@
         }
       };
 
-      var eventService = {
+      var appEventService = {
         $emit: angular.noop
       };
 
       $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager,
+      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager,
         registerVcsToken, confirmDialog, notificationsService, addNotificationService,
         postDeployActionService, utils, detailView, PAT_DELIMITER,
         $interpolate, $stateParams, $rootScope.$new(), $q, $state);
@@ -124,8 +124,19 @@
       expect(controller).toBeDefined();
     }
 
+    function login(isAdmin) {
+      var user = 'user';
+      $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {
+        account: user,
+        admin: isAdmin
+      });
+      account.login('user','');
+      $httpBackend.flush();
+    }
+
     function createControllerWithPipelineMetadata() {
-      account.accountData = {isAdmin: true};
+      login(true);
+
       var application = {
         summary: {
           name: 'appName'
@@ -169,7 +180,7 @@
 
     describe('Check HCE status', function () {
       it('Non-admin user with no services', function () {
-        account.accountData = {isAdmin: false};
+        login(false);
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
@@ -178,7 +189,7 @@
       });
 
       it('Admin user with no services', function () {
-        account.accountData = {isAdmin: true};
+        login(true);
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
@@ -193,7 +204,7 @@
             valid: true
           }
         });
-        account.accountData = {isAdmin: true};
+        login(true);
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
@@ -220,7 +231,7 @@
             valid: false
           }
         });
-        account.accountData = {isAdmin: true};
+        login(true);
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);

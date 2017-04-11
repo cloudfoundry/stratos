@@ -25,7 +25,7 @@
   ClusterController.$inject = [
     '$stateParams',
     '$log',
-    'app.utils.utilsService',
+    'appUtilsService',
     '$state',
     '$q',
     'app.view.endpoints.clusters.cluster.rolesService',

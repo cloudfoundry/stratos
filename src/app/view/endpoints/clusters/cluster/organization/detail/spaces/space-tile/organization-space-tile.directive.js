@@ -27,8 +27,8 @@
     'modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.view.notificationsService',
-    'app.utils.utilsService',
-    'helion.framework.widgets.dialog.confirm',
+    'appUtilsService',
+    'frameworkDialogConfirm',
     'helion.framework.widgets.asyncTaskDialog',
     'organization-model'
   ];
@@ -44,13 +44,13 @@
    * @param {app.view.endpoints.clusters.cluster.assignUsers} assignUsers - our assign users slide out service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} utils - our utils service
-   * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, assignUsers,
-                                           notificationsService, utils, confirmDialog, asyncTaskDialog,
+                                           notificationsService, utils, frameworkDialogConfirm, asyncTaskDialog,
                                            organizationModel) {
     var that = this;
 
@@ -156,7 +156,7 @@
       name: gettext('Delete Space'),
       disabled: true,
       execute: function () {
-        return confirmDialog({
+        return frameworkDialogConfirm({
           title: gettext('Delete Space'),
           description: gettext('Are you sure you want to delete space') +
           " '" + that.spaceDetail().details.space.entity.name + "'?",

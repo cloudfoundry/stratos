@@ -5,10 +5,6 @@
     .module('app.view.error-page', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('error-page', {
       url: '/error',
@@ -22,10 +18,6 @@
       }
     });
   }
-
-  ErrorPageController.$inject = [
-    '$stateParams'
-  ];
 
   /**
    * @name ErrorPageController

@@ -11,71 +11,58 @@
     .module('app.model')
     .run(registerModel);
 
-  registerModel.$inject = [
-    'modelManager',
-    'app.utils.eventService',
-    'app.utils.loggedInService',
-    '$state',
-    '$rootScope',
-    '$log'
-  ];
-
-  function registerModel(modelManager, eventService, loggedInService, $state, $rootScope, $log) {
+  function registerModel(modelManager, appEventService, appLoggedInService, $state, $rootScope, $log) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new NavigationModel(eventService, loggedInService, $state, $rootScope, $log));
+    modelManager.register('app.model.navigation', new NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log));
   }
 
   /**
    * @namespace app.model.NavigationModel
    * @memberof app.model
    * @name NavigationModel
+   * @param {app.utils.appEventService} appEventService - the application event service
+   * @param {app.utils.appLoggedInService} appLoggedInService - the application logged in service
+   * @param {$state} $state - the Angular $state service
+   * @param {$rootScope} $rootScope - the Angular $rootScope service
+   * @param {$log} $log - the Angular $log service
    * @constructor
-   * @param {app.utils.eventService} eventService - the event bus service
-   * @param {app.utils.loggedInService} loggedInService - the logged-in service
-   * @param {object} $state - ui-router $state service
-   * @param {object} $rootScope - Angular rootScope object
-   * @param {object} $log - angular log service
-   * @property {app.utils.eventService} eventService - the event bus service
-   * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationModel(eventService, loggedInService, $state, $rootScope, $log) {
-    var that = this;
-    this.eventService = eventService;
-    this.$state = $state;
-    this.menu = new Menu($log);
-    this.eventService.$on(this.eventService.events.LOGIN, function () {
-      that.onLogin();
+  function NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log) {
+    var menu = new Menu($log);
+    appEventService.$on(appEventService.events.LOGIN, function () {
+      onLogin();
     });
-    this.eventService.$on(this.eventService.events.LOGOUT, function () {
-      that.onLogout();
+    appEventService.$on(appEventService.events.LOGOUT, function () {
+      onLogout();
     });
-    this.eventService.$on(this.eventService.events.REDIRECT, function (event, state, params) {
-      that.onAutoNav(event, state, params);
+    appEventService.$on(appEventService.events.REDIRECT, function (event, state, params) {
+      onAutoNav(event, state, params);
     });
-    this.eventService.$on(this.eventService.events.TRANSFER, function (event, state, params) {
-      that.$state.go(state, params, {location: false});
+    appEventService.$on(appEventService.events.TRANSFER, function (event, state, params) {
+      $state.go(state, params, {location: false});
     });
 
     // Install a global state change handler
     // The rootScope never gets destroyed so we can safely ignore the eslint error
     $rootScope.$on('$stateChangeSuccess', function (event, toState) { // eslint-disable-line angular/on-watch
       // Activate the correct menu entry or deactivate all menu entries if none match
-      that.menu.currentState = _.get(toState, 'data.activeMenuState', '');
+      menu.currentState = _.get(toState, 'data.activeMenuState', '');
 
       // Scroll to the console-view's top after a state transition
       var consoleViewScrollPanel = angular.element(document).find('#console-view-scroll-panel');
       if (consoleViewScrollPanel[0]) {
         consoleViewScrollPanel[0].scrollTop = 0;
       }
-      loggedInService.userInteracted();
+      appLoggedInService.userInteracted();
     });
-  }
 
-  angular.extend(NavigationModel.prototype, {
+    return {
+      menu: menu
+    };
 
     /**
      * @function onLogin
@@ -83,9 +70,9 @@
      * @description login event handler
      * @private
      */
-    onLogin: function () {
-      this.menu.reset();
-    },
+    function onLogin() {
+      menu.reset();
+    }
 
     /**
      * @function onLogout
@@ -93,9 +80,9 @@
      * @description logout event handler
      * @private
      */
-    onLogout: function () {
-      this.menu.reset();
-    },
+    function onLogout() {
+      menu.reset();
+    }
 
     /**
      * @function onAutoNav
@@ -106,10 +93,10 @@
      * @param {object} params - optional params
      * @private
      */
-    onAutoNav: function (event, state, params) {
-      this.$state.go(state, params);
+    function onAutoNav(event, state, params) {
+      $state.go(state, params);
     }
-  });
+  }
 
   /**
    * @namespace app.model.navigation.Menu
