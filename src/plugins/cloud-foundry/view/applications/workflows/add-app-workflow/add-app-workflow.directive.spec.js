@@ -487,7 +487,7 @@
           simulateUserInput();
           that.userInput.application = { summary: { guid: 'appGuid' } };
           var stateValue;
-          that.eventService.$on(that.eventService.events.REDIRECT, function (event, state) {
+          that.appEventService.$on(that.appEventService.events.REDIRECT, function (event, state) {
             stateValue = state;
           });
           that.notify();
@@ -498,7 +498,7 @@
           stopWatch();
           simulateUserInput();
           var stateValue;
-          that.eventService.$on(that.eventService.events.REDIRECT, function (event, state) {
+          that.appEventService.$on(that.appEventService.events.REDIRECT, function (event, state) {
             stateValue = state;
           });
           that.notify();

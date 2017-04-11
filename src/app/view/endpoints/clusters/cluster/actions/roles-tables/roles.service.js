@@ -10,9 +10,9 @@
     '$q',
     '$interpolate',
     'modelManager',
-    'app.utils.eventService',
+    'appEventService',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm',
+    'frameworkDialogConfirm',
     'organization-model'
   ];
 
@@ -25,9 +25,9 @@
    * @param {object} $q - the angular $q service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.utils.eventService} eventService - the event bus service
+   * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
+   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the framework confirm dialog service
    * @param {object} organizationModel - the organization-model service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations
@@ -46,7 +46,7 @@
    * selected
    */
   function RolesService($log, $q, $interpolate,
-                        modelManager, eventService, notificationsService, confirmDialog, organizationModel) {
+                        modelManager, appEventService, notificationsService, frameworkDialogConfirm, organizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -701,7 +701,7 @@
         return $q.all(promises)
           .then(function () {
             // If all async requests have finished invalidate any cache associated with roles
-            eventService.$emit(eventService.events.ROLES_UPDATED);
+            appEventService.$emit(appEventService.events.ROLES_UPDATED);
 
             // If something has failed return a failed promise
             if (failures.length > 0) {
@@ -727,7 +727,7 @@
           });
       };
 
-      return confirmDialog(confirmationConfig).result.finally(function () {
+      return frameworkDialogConfirm(confirmationConfig).result.finally(function () {
         that.changingRoles = false;
       });
     }

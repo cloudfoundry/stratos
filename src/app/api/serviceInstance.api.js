@@ -11,12 +11,6 @@
     .module('app.api')
     .run(registerServiceInstanceApi);
 
-  registerServiceInstanceApi.$inject = [
-    '$http',
-    '$httpParamSerializer',
-    'apiManager'
-  ];
-
   function registerServiceInstanceApi($http, $httpParamSerializer, apiManager) {
     apiManager.register('app.api.serviceInstance',
       new ServiceInstanceApi($http, $httpParamSerializer));
@@ -35,9 +29,13 @@
   function ServiceInstanceApi($http, $httpParamSerializer) {
     this.$http = $http;
     this.$httpParamSerializer = $httpParamSerializer;
-  }
 
-  angular.extend(ServiceInstanceApi.prototype, {
+    return {
+      create: create,
+      remove: remove,
+      list: list
+    };
+
     /**
      * @function create
      * @memberof app.api.serviceInstance.ServiceInstanceApi
@@ -49,16 +47,20 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (url, name, skipSslValidation, serviceType) {
+    function create(url, name, skipSslValidation, serviceType) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
       serviceType = serviceType || 'hcf';
-      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name, skip_ssl_validation: skipSslValidation });
-      return this.$http.post('/pp/v1/register/' + serviceType, data, config);
-    },
+      var data = $httpParamSerializer({
+        api_endpoint: url,
+        cnsi_name: name,
+        skip_ssl_validation: skipSslValidation
+      });
+      return $http.post('/pp/v1/register/' + serviceType, data, config);
+    }
 
     /**
      * @function remove
@@ -68,19 +70,19 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    remove: function (guid) {
+    function remove(guid) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
       var removalData = {cnsi_guid: guid};
-      var data = this.$httpParamSerializer(removalData);
+      var data = $httpParamSerializer(removalData);
       /* eslint-disable */
       // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
       /* eslint-enable */
-      return this.$http.post('/pp/v1/unregister', data, config);
-    },
+      return $http.post('/pp/v1/unregister', data, config);
+    }
 
     /**
      * @function list
@@ -89,9 +91,9 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    list: function () {
-      return this.$http.get('/pp/v1/cnsis');
+    function list() {
+      return $http.get('/pp/v1/cnsis');
     }
-  });
+  }
 
 })();

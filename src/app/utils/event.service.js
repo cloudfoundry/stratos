@@ -25,35 +25,30 @@
 
   angular
     .module('app.utils')
-    .factory('app.utils.eventService', eventServiceFactory);
-
-  eventServiceFactory.$inject = [
-    '$rootScope',
-    'helion.framework.utils.dialogEvents'
-  ];
+    .factory('appEventService', eventServiceFactory);
 
   /**
-   * @namespace app.utils.eventService
+   * @namespace appEventService
    * @memberof app.utils
-   * @name eventService
+   * @name appEventService
    * @description The event bus service
    * @param {object} $rootScope - the $rootScope
-   * @param {object} dialogEvents - UI Framework's Dialog Events service
+   * @param {object} frameworkDialogEvents - UI Framework's Dialog Events service
    * @property {object} events - the default set of events (i.e. HTTP status codes)
    * @returns {object} the event bus
    * @example
    * // subscribe to an event
-   * eventService.$on(events.HTTP_401, handler);
+   * appEventService.$on(events.HTTP_401, handler);
    *
    * // emit an event
-   * eventService.$emit(events.HTTP_401);
+   * appEventService.$emit(events.HTTP_401);
    */
-  function eventServiceFactory($rootScope, dialogEvents) {
-    var eventService = $rootScope.$new();
-    eventService.events = events;
+  function eventServiceFactory($rootScope, frameworkDialogEvents) {
+    var appEventService = $rootScope.$new();
+    appEventService.events = events;
     // Configure the dialog events service to send events using this event service (scope)
-    dialogEvents.configure({ scope: eventService });
-    return eventService;
+    frameworkDialogEvents.configure({ scope: appEventService });
+    return appEventService;
   }
 
 })();

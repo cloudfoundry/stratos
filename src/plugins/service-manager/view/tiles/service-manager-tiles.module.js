@@ -35,7 +35,7 @@
     '$state',
     '$stateParams',
     'modelManager',
-    'app.utils.utilsService'
+    'appUtilsService'
   ];
 
   /**
@@ -45,12 +45,12 @@
    * @param {object} $state - the UI router $state service
    * @param  {$stateParams} $stateParams - UI Router state params
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.utilsService} utils - the utils service
+   * @param {appUtilsService} utils - the utils service
    * @property {object} $q - the angular $q service
    * @property {object} $state - the UI router $state service
    * @property  {$stateParams} $stateParams - UI Router state params
    * @property {app.model.modelManager} modelManager - the Model management service
-   * @property {app.utils.utilsService} utils - the utils service
+   * @property {appUtilsService} utils - the utils service
    */
   function ServiceManagerTilesController($q, $state, $stateParams, modelManager, utils) {
     var that = this;

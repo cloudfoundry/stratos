@@ -3,7 +3,7 @@
 
   describe('space detail (users) module', function () {
 
-    var $controller, $httpBackend, $scope, authService, eventService;
+    var $controller, $httpBackend, $scope, authService, appEventService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -13,10 +13,10 @@
 
       var $q = $injector.get('$q');
       var $state = $injector.get('$state');
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsService');
       var modelManager = $injector.get('modelManager');
-      eventService = $injector.get('app.utils.eventService');
-      var loggedInService = $injector.get('app.utils.loggedInService');
+      appEventService = $injector.get('appEventService');
+      var appLoggedInService = $injector.get('appLoggedInService');
 
       authService = modelManager.retrieve('cloud-foundry.model.auth');
       spyOn(authService, 'initialize');
@@ -24,7 +24,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsController = $state.get('cf.applications').controller;
-      $controller = new ApplicationsController($scope, $q, $state, utils, modelManager, eventService, loggedInService);
+      $controller = new ApplicationsController($scope, $q, $state, utils, modelManager, appEventService, appLoggedInService);
 
       expect($controller).toBeDefined();
     }));
@@ -37,7 +37,7 @@
     it('init', function () {
       expect(authService.initialize).not.toHaveBeenCalled();
 
-      eventService.$emit(eventService.events.LOGIN);
+      appEventService.$emit(appEventService.events.LOGIN);
       $scope.$digest();
 
       expect(authService.initialize).toHaveBeenCalled();

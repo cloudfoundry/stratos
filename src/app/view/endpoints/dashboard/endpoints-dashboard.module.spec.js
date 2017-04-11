@@ -24,7 +24,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
-      'app.utils.utilsService': {
+      appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
         },
@@ -45,6 +45,12 @@
             CODE_ENGINE: 'Helion Code Engine',
             CLOUD_FOUNDRY: 'Cloud Foundry'
           };
+        },
+        replaceProperties: function (destination, source) {
+          _.forIn(destination, function (value, key) {
+            delete destination[key];
+          });
+          _.assign(destination, source);
         }
       }
     }));
@@ -72,16 +78,19 @@
 
       modelManager = $injector.get('modelManager');
       var registerService = $injector.get('app.view.registerService');
-      var utils = $injector.get('app.utils.utilsService');
+      var utils = $injector.get('appUtilsService');
       var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
       var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
       var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
-      userModel.accountData = {
-        isAdmin: isAdmin
-      };
+      var user = 'user';
+      $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {
+        account: user,
+        admin: isAdmin
+      });
+      userModel.login('user','');
 
       var items = [validService];
 
@@ -166,11 +175,8 @@
         createController($injector, true);
       }));
 
-      afterEach(function () {
-        $httpBackend.flush();
-      });
-
       it('should say if user is an admin', function () {
+        $httpBackend.flush();
         expect(controller.isUserAdmin()).toBe(true);
       });
     });

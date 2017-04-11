@@ -27,7 +27,7 @@
   ServiceManagerController.$inject = [
     '$stateParams',
     '$state',
-    'app.utils.utilsService',
+    'appUtilsService',
     'modelManager',
     'service-manager.view.manage-instance.dialog'
   ];

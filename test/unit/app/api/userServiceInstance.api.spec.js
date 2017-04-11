@@ -22,14 +22,6 @@
       expect(userServiceInstanceApi).toBeDefined();
     });
 
-    it('should have `$http` property defined', function () {
-      expect(userServiceInstanceApi.$http).toBeDefined();
-    });
-
-    it('should have `$httpParamSerializer` property defined', function () {
-      expect(userServiceInstanceApi.$httpParamSerializer).toBeDefined();
-    });
-
     it('should send POST request for connect', function () {
       var data = {
         cnsi_guid: 'cnsi_guid',

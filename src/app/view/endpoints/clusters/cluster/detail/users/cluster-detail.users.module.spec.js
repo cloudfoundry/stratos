@@ -4,7 +4,7 @@
   describe('cluster detail (users) module', function () {
 
     var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-      rolesService, eventService, userSelection, orgModel;
+      rolesService, appEventService, userSelection, orgModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -67,7 +67,7 @@
     function createController() {
       var ClusterUsersController = $state.get('endpoint.clusters.cluster.detail.users').controller;
       $controller = new ClusterUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
-        rolesService, eventService, userSelection, orgModel);
+        rolesService, appEventService, userSelection, orgModel);
     }
 
     beforeEach(inject(function ($injector) {
@@ -79,10 +79,10 @@
       $stateParams.guid = clusterGuid;
       $q = $injector.get('$q');
       modelManager = $injector.get('modelManager');
-      utils = $injector.get('app.utils.utilsService');
+      utils = $injector.get('appUtilsService');
       manageUsers = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
       rolesService = $injector.get('app.view.endpoints.clusters.cluster.rolesService');
-      eventService = $injector.get('app.utils.eventService');
+      appEventService = $injector.get('appEventService');
       userSelection = $injector.get('app.view.userSelection');
       orgModel = $injector.get('organization-model');
 

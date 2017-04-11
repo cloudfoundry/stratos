@@ -42,21 +42,21 @@
 
   FlyoutController.$inject = [
     '$scope',
-    'helion.framework.utils.dialogEvents'
+    'frameworkDialogEvents'
   ];
 
   /**
    * @name FlyoutController
    * @description Controller for a flyout to support Dialog Events
    * @param {object} $scope - angualr $scope
-   * @param {object} dialogEvents - Dialog Events service
+   * @param {object} frameworkDialogEvents - Dialog Events service
    */
-  function FlyoutController($scope, dialogEvents) {
+  function FlyoutController($scope, frameworkDialogEvents) {
     $scope.$watch('flyoutActive', function (nv, ov) {
       if (!ov && nv === true) {
-        dialogEvents.notifyOpened();
+        frameworkDialogEvents.notifyOpened();
       } else if (ov === true && nv === false) {
-        dialogEvents.notifyClosed();
+        frameworkDialogEvents.notifyClosed();
       }
     });
   }

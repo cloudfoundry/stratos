@@ -29,9 +29,9 @@
 
   ApplicationController.$inject = [
     'modelManager',
-    'app.utils.eventService',
-    'helion.framework.widgets.dialog.confirm',
-    'app.utils.utilsService',
+    'appEventService',
+    'frameworkDialogConfirm',
+    'appUtilsService',
     'cloud-foundry.view.applications.application.summary.cliCommands',
     'helion.framework.widgets.detailView',
     '$stateParams',
@@ -47,8 +47,8 @@
    * @name ApplicationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.eventService} eventService - the event bus service
-   * @param {object} confirmDialog - the confirm dialog service
+   * @param {app.utils.appEventService} appEventService - the event bus service
+   * @param {object} frameworkDialogConfirm - the confirm dialog service
    * @param {object} utils - the utils service
    * @param {object} cliCommands - the cliCommands dialog service
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
@@ -64,21 +64,21 @@
    * @property {object} $q - the Angular $q service
    * @property {object} $interval - the Angular $interval service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {app.utils.eventService} eventService - the event bus service
+   * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
-   * @property {object} confirmDialog - the confirm dialog service
+   * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
     this.$q = $q;
     this.$interval = $interval;
     this.$interpolate = $interpolate;
-    this.eventService = eventService;
-    this.confirmDialog = confirmDialog;
+    this.appEventService = appEventService;
+    this.confirmDialog = frameworkDialogConfirm;
     this.detailView = detailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
@@ -102,11 +102,11 @@
     utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
     // When a modal interaction starts, stop the background polling
-    this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+    this.removeModalStartListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_START, function () {
       that.stopUpdate();
     });
     // When a modal interaction ends, resume the background polling
-    this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+    this.removeModalEndListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_END, function () {
       that.update().finally(function () {
         that.startUpdate();
       });
@@ -458,7 +458,7 @@
 
     simpleDeleteAppDialog: function () {
       var that = this;
-      this.confirmDialog({
+      this.frameworkDialogConfirm({
         title: gettext('Delete Application'),
         description: gettext('Are you sure you want to delete ') + this.model.application.summary.name + '?',
         submitCommit: true,
@@ -472,8 +472,8 @@
             // show notification for successful binding
             var successMsg = gettext("'{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: appName});
-            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
-            that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+            that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventService.$emit(that.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }
       });

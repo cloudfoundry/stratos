@@ -3,27 +3,15 @@
 
   angular
     .module('app.utils')
-    .factory('app.utils.loggedInService', loggedInServiceFactory);
-
-  loggedInServiceFactory.$inject = [
-    'app.utils.eventService',
-    'modelManager',
-    'helion.framework.widgets.dialog.confirm',
-    '$interval',
-    '$interpolate',
-    '$rootScope',
-    '$window',
-    '$log',
-    '$document'
-  ];
+    .factory('appLoggedInService', loggedInServiceFactory);
 
   /**
-   * @namespace app.loggedIn.loggedInService
+   * @namespace app.loggedIn.appLoggedInService
    * @memberof app.loggedIn
    * @name loggedInServiceFactory
-   * @param {object} eventService - Event Service
+   * @param {object} appEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} confirmDialog - the confirmation dialog service
+   * @param {object} frameworkDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
    * @param {object} $interpolate - the angular $interpolate Service
    * @param {object} $rootScope - the angular $rootScope Service
@@ -32,7 +20,7 @@
    * @param {object} $document - the angular $document Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(eventService, modelManager, confirmDialog,
+  function loggedInServiceFactory(appEventService, modelManager, frameworkDialogConfirm,
                                   $interval, $interpolate, $rootScope, $window, $log, $document) {
 
     var loggedIn = false;
@@ -86,7 +74,7 @@
         return moment.duration(delta).format('m[m] s[s]');
       };
 
-      dialog = confirmDialog({
+      dialog = frameworkDialogConfirm({
         title: gettext('Are you still there?'),
         description: function () {
           return $interpolate(gettext('You have been inactive for a while. For your protection, ' +
@@ -118,7 +106,7 @@
         return;
       }
       var now = moment();
-      var sessionExpiresOn = _getAccountModel().accountData.sessionExpiresOn;
+      var sessionExpiresOn = _getAccountModel().getAccountData().sessionExpiresOn;
       var safeExpire = moment(sessionExpiresOn).subtract(moment.duration(autoLogoutDelta));
       var delta = safeExpire.diff(now);
       var aboutToExpire = delta < warnBeforeLogout;
@@ -142,12 +130,12 @@
       userInteracted();
     });
 
-    eventService.$on(eventService.events.LOGIN, function () {
+    appEventService.$on(appEventService.events.LOGIN, function () {
       loggedIn = true;
       sessionChecker = $interval(checkSession, checkSessionInterval);
     });
 
-    eventService.$on(eventService.events.LOGOUT, function () {
+    appEventService.$on(appEventService.events.LOGOUT, function () {
       loggedIn = false;
       if (angular.isDefined(sessionChecker)) {
         $interval.cancel(sessionChecker);

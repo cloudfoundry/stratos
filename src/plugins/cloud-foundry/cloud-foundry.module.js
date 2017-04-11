@@ -13,26 +13,26 @@
   register.$inject = [
     '$state',
     '$location',
-    'app.utils.eventService',
+    'appEventService',
     'modelManager',
     'app.view.notificationsService'
   ];
 
-  function register($state, $location, eventService, modelManager, notificationService) {
-    return new CloudFoundry($state, $location, eventService, modelManager, notificationService);
+  function register($state, $location, appEventService, modelManager, notificationService) {
+    return new CloudFoundry($state, $location, appEventService, modelManager, notificationService);
   }
 
-  function CloudFoundry($state, $location, eventService, modelManager, notificationService) {
+  function CloudFoundry($state, $location, appEventService, modelManager, notificationService) {
     var that = this;
-    this.eventService = eventService;
+    this.appEventService = appEventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
     this.notificationService = notificationService;
-    this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
+    this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });
-    this.eventService.$on(this.eventService.events.LOGOUT, function () {
+    this.appEventService.$on(this.appEventService.events.LOGOUT, function () {
       that.onLoggedOut();
     });
   }
@@ -44,7 +44,7 @@
       if (!preventRedirect) {
         // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
         if (this.$location.path() === '') {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+          this.appEventService.$emit(this.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         }
       }
     },

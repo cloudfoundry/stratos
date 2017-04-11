@@ -2,7 +2,7 @@
   'use strict';
 
   describe('app error bar directive', function () {
-    var $element, appErrorBarCtrl, $scope, eventService;
+    var $element, appErrorBarCtrl, $scope, appEventService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -14,7 +14,7 @@
       $element = angular.element(markup);
       $compile($element)($scope);
       $scope.$apply();
-      eventService = $injector.get('app.utils.eventService');
+      appEventService = $injector.get('appEventService');
       appErrorBarCtrl = $element.controller('appErrorBar');
     }));
 
@@ -28,7 +28,7 @@
       });
 
       it('should have properties', function () {
-        expect(appErrorBarCtrl.eventService).toBeDefined();
+        expect(appErrorBarCtrl.appEventService).toBeDefined();
         expect(appErrorBarCtrl.displayed).toBeDefined();
         expect(appErrorBarCtrl.removeSetListener).toBeDefined();
         expect(appErrorBarCtrl.removeClearListener).toBeDefined();
@@ -37,7 +37,7 @@
       });
 
       it('should receieve set error event', function () {
-        eventService.$broadcast(eventService.events.APP_ERROR_NOTIFY, 'TEST_MSG_1');
+        appEventService.$broadcast(appEventService.events.APP_ERROR_NOTIFY, 'TEST_MSG_1');
         $scope.$apply();
         expect(appErrorBarCtrl.displayed).toBe(true);
         expect(appErrorBarCtrl.message).toBeDefined();
@@ -45,10 +45,10 @@
       });
 
       it('should receieve clear error event', function () {
-        eventService.$broadcast(eventService.events.APP_ERROR_NOTIFY, 'TEST_MSG_2');
+        appEventService.$broadcast(appEventService.events.APP_ERROR_NOTIFY, 'TEST_MSG_2');
         $scope.$apply();
         expect(appErrorBarCtrl.displayed).toBe(true);
-        eventService.$broadcast(eventService.events.APP_ERROR_CLEAR);
+        appEventService.$broadcast(appEventService.events.APP_ERROR_CLEAR);
         $scope.$apply();
         expect(appErrorBarCtrl.displayed).toBe(false);
         expect(appErrorBarCtrl.message).not.toBeDefined();

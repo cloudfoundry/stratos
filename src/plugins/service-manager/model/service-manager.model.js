@@ -15,34 +15,34 @@
     '$timeout',
     'modelManager',
     'apiManager',
-    'app.utils.eventService'
+    'appEventService'
   ];
 
-  function registerServiceManagerModel($q, $timeout, modelManager, apiManager, eventService) {
+  function registerServiceManagerModel($q, $timeout, modelManager, apiManager, appEventService) {
     modelManager.register('service-manager.model', new ServiceManagerModel($q, $timeout, apiManager, modelManager,
-      eventService));
+      appEventService));
   }
 
   /**
-   * @memberof cloud-foundry.model.hce
+   * @memberof service-manager.model
    * @name ServiceManagerModel
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.eventService} eventService - the application event service
+   * @param {app.utils.appEventService} appEventService - the application event service
    * @property {object} $q - the Angular $q service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {app.utils.eventService} eventService - the application event service
+   * @property {app.utils.appEventService} appEventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function ServiceManagerModel($q, $timeout, apiManager, modelManager, eventService) {
+  function ServiceManagerModel($q, $timeout, apiManager, modelManager, appEventService) {
     this.$q = $q;
     this.$timeout = $timeout;
     this.apiManager = apiManager;
-    this.eventService = eventService;
+    this.appEventService = appEventService;
     this.modelManager = modelManager;
 
     this.hsmApi = this.apiManager.retrieve('service-manager.api.HsmApi');

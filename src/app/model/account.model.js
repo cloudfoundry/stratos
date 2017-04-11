@@ -11,12 +11,6 @@
     .module('app.model')
     .run(registerAccountModel);
 
-  registerAccountModel.$inject = [
-    'modelManager',
-    'apiManager',
-    '$q'
-  ];
-
   function registerAccountModel(modelManager, apiManager, $q) {
     modelManager.register('app.model.account', new Account(apiManager, $q));
   }
@@ -34,13 +28,21 @@
    * @class
    */
   function Account(apiManager, $q) {
-    this.apiManager = apiManager;
-    this.$q = $q;
-    this.loggedIn = false;
-    this.accountData = {};
-  }
+    var accountData = false;
 
-  angular.extend(Account.prototype, {
+    return {
+      getAccountData: getAccountData,
+      login: login,
+      logout: logout,
+      verifySession: verifySession,
+      isAdmin: isAdmin,
+      isLoggedIn: isLoggedIn
+    };
+
+    function getAccountData() {
+      return accountData;
+    }
+
     /**
      * @function login
      * @memberof app.model.account.Account
@@ -50,9 +52,8 @@
      * @returns {promise} A promise object
      * @public
      */
-    login: function (username, password) {
-      var that = this;
-      var accountApi = this.apiManager.retrieve('app.api.account');
+    function login(username, password) {
+      var accountApi = apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
           // Check that the response data is actually valid - data must be an object
@@ -60,11 +61,11 @@
           if (!angular.isObject(response.data)) {
             // Reject the promise and change the status code to indicate a server error
             response.status = 500;
-            return that.$q.reject(response);
+            return $q.reject(response);
           }
-          that.onLoggedIn(response);
+          onLoggedIn(response);
         });
-    },
+    }
 
     /**
      * @function logout
@@ -73,14 +74,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    logout: function () {
-      var that = this;
-      var accountApi = this.apiManager.retrieve('app.api.account');
+    function logout() {
+      var accountApi = apiManager.retrieve('app.api.account');
       return accountApi.logout()
         .then(function () {
-          that.onLoggedOut();
+          onLoggedOut();
         });
-    },
+    }
 
     /**
      * @function verifySession
@@ -89,22 +89,21 @@
      * @public
      * @returns {promise} A promise object
      */
-    verifySession: function () {
-      var accountApi = this.apiManager.retrieve('app.api.account');
+    function verifySession() {
+      var accountApi = apiManager.retrieve('app.api.account');
       var p = accountApi.verifySession();
-      var that = this;
 
       p.then(
         function (response) {
-          that.onLoggedIn(response);
+          onLoggedIn(response);
         },
         function () {
-          that.onLoggedOut();
+          onLoggedOut();
         }
       );
 
       return p;
-    },
+    }
 
     /**
      * @function isAdmin
@@ -113,9 +112,13 @@
      * @public
      * @returns {boolean} True if this user is an ITOps admin
      */
-    isAdmin: function () {
-      return this.accountData && this.accountData.isAdmin;
-    },
+    function isAdmin() {
+      return accountData && accountData.isAdmin;
+    }
+
+    function isLoggedIn() {
+      return !!accountData;
+    }
 
     /**
      * @function onLoggedIn
@@ -124,17 +127,16 @@
      * @param {object} response - the HTTP response object
      * @private
      */
-    onLoggedIn: function (response) {
-      this.loggedIn = true;
+    function onLoggedIn(response) {
       var sessionExpiresOnEpoch = response.headers()['x-cnap-session-expires-on'];
 
       var loginRes = response.data;
-      this.accountData = {
+      accountData = {
         username: loginRes.account,
         isAdmin: loginRes.admin,
         sessionExpiresOn: moment.unix(sessionExpiresOnEpoch)
       };
-    },
+    }
 
     /**
      * @function onLoggedOut
@@ -142,11 +144,10 @@
      * @description Logged-out handler at model layer
      * @private
      */
-    onLoggedOut: function () {
-      this.loggedIn = false;
-      delete this.accountData;
+    function onLoggedOut() {
+      accountData = false;
     }
 
-  });
+  }
 
 })();

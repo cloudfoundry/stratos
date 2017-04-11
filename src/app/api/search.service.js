@@ -7,10 +7,6 @@
     .module('app.api')
     .factory('app.api.searchService', serviceFactory);
 
-  serviceFactory.$inject = [
-    '$http'
-  ];
-
   /**
    * @memberof app.api
    * @name app.api.searchService

@@ -66,7 +66,7 @@
           actionTask: actionTask
         };
       },
-      'helion.framework.widgets.dialog.confirm': function (spec) {
+      frameworkDialogConfirm: function (spec) {
         return spec.callback();
       },
       'app.view.notificationsService': {

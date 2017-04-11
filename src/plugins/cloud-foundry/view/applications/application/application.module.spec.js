@@ -27,8 +27,8 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('modelManager');
-      var eventService = $injector.get('app.utils.eventService');
-      var utils = $injector.get('app.utils.utilsService');
+      var appEventService = $injector.get('appEventService');
+      var utils = $injector.get('appUtilsService');
       var cliCommands = $injector.get('cloud-foundry.view.applications.application.summary.cliCommands');
 
       var $scope = $injector.get('$rootScope').$new();
@@ -76,7 +76,7 @@
       $httpBackend.whenGET(userProvidedServiceRequest.url).respond(200, userProvidedServiceRequest.response['200']);
 
       var ApplicationController = $state.get('cf.applications.application').controller;
-      controller = new ApplicationController(modelManager, eventService, confirmDialogMock,
+      controller = new ApplicationController(modelManager, appEventService, confirmDialogMock,
         utils, cliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
       $httpBackend.flush();
     }
@@ -189,12 +189,12 @@
       });
 
       it('should stop polling when a modal interaction starts', function () {
-        controller.eventService.$emit(controller.eventService.events.MODAL_INTERACTION_START);
+        controller.appEventService.$emit(controller.appEventService.events.MODAL_INTERACTION_START);
         expect(_.isUndefined(controller.scheduledUpdate)).toBe(true);
       });
 
       it('should resume polling when a modal interaction starts', function () {
-        controller.eventService.$emit(controller.eventService.events.MODAL_INTERACTION_END);
+        controller.appEventService.$emit(controller.appEventService.events.MODAL_INTERACTION_END);
         $httpBackend.flush();
         expect(controller.scheduledUpdate).toBe('interval_created');
       });

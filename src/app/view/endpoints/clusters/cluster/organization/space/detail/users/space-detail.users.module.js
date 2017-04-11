@@ -31,16 +31,16 @@
     '$log',
     '$q',
     'modelManager',
-    'app.utils.utilsService',
+    'appUtilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.utils.eventService',
+    'appEventService',
     'app.view.userSelection',
     'organization-model'
   ];
 
   function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers, rolesService,
-                                eventService, userSelection, organizationModel) {
+                                appEventService, userSelection, organizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -269,7 +269,7 @@
         guidsToUsers());
     };
 
-    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = appEventService.$on(appEventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 
