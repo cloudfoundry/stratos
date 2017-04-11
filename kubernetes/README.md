@@ -33,7 +33,8 @@ helm init
 ## Deploy Console
 The following will deploy the console using Helm using the default values:
 ```
-helm install console --namespace console --name my-console
+$ cd kubernetes
+$ helm install console --namespace console --name my-console
 ```
 
 This will create a Console instance named `my-console` in a namespace called `console` in your local cluster.
