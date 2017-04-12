@@ -7,6 +7,9 @@ This guide assumes that you have checked out the following repositories and plac
 
 
 ## Setup Minkube
+
+**minimum supported version - 0.17.1**
+
 Minikube requires either Virtual Box or KVM installations. **There is a issue when using Virtual Box 5.1.18 which 
 results in Minikube failing to create the host-only network. The process in this guide uses Virtual Box 5.1.16**
 
@@ -22,7 +25,6 @@ minikube start
 ```
 
 ## Declare a persistent volume
-
 By default minkube does not have a persistent volume against which volumes for the containers can be created.
 The following will map a local folder to be used as a persistent volume for kubernetes.
 ```
@@ -31,8 +33,7 @@ kubectl create -f optional/console-pv.yaml
 ```
 
 ## Setup Helm
-- Download the Helm binary for your system from https://github.com/kubernetes/helm/releases. **Minimum supported version
-of v2.3.0**
+- Download the Helm binary for your system from https://github.com/kubernetes/helm/releases.
 For convenience the guide assumes that helm binary has been added to your PATH.
 - To install the Helm server (Tiller) in your Minikube setup, run the following:
 ```
