@@ -22,7 +22,6 @@
   function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog,
                                   frameworkDialogConfirm, appNotificationsService, ceRegisterVcsToken,
                                   ceEditVcsToken) {
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
       tokens: []
@@ -38,6 +37,7 @@
     };
 
     context.refreshTokens = function (fetchFresh) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       var oldLength = context.tokens.length;
       var promise;
       if (fetchFresh) {
@@ -85,6 +85,7 @@
         },
         errorMessage: gettext('Failed to delete Personal Access Token'),
         callback: function () {
+          var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
           return vcsModel.deleteVcsToken(token.token.guid)
             .then(function () {
               appNotificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
@@ -97,14 +98,17 @@
     }
 
     context.isCheckInProgress = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return _.isUndefined(vcsModel.invalidTokens[token.token.guid]);
     };
 
     context.isTokenValid = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return !vcsModel.invalidTokens[token.token.guid];
     };
 
     context.invalidReason = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return vcsModel.invalidTokens[token.token.guid] || '';
     };
 

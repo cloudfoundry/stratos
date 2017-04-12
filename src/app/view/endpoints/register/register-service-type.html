@@ -7,7 +7,8 @@
   <div class="register-content-right">
     <h4 translate>Select an Endpoint Type</h4>
     <ul class="media-list hpe-add-option-list">
-      <li ng-repeat="endpoint in endpoints" class="media" ng-class="[endpoint.register.html.class]">
+      <li ng-repeat="endpoint in endpoints | orderBy : 'label'" class="media"
+          ng-class="[endpoint.register.html.class]">
         <div class="media-left media-middle">
           <div class="media-object">
             <svg-image ng-if='endpoint.register.html.type.svg' src="{{endpoint.register.html.type.svg}}"></svg-image>
@@ -15,10 +16,10 @@
           </div>
         </div>
         <div class="media-body">
-          <h4 class="media-heading" translate>{{endpoint.register.html.type.name}}</h4>
+          <h4 class="media-heading">{{endpoint.label}}</h4>
           <p translate>{{endpoint.register.html.type.tagline}}</p>
           <div class="media-right pull-right">
-            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type=endpoint.cnsi_type;wizardCtrl.next()" translate>
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.endpoint=endpoint;wizardCtrl.next()" translate>
               Register
               <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
             </button>

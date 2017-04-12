@@ -12,6 +12,7 @@
    * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $interpolate - the angular $interpolate service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
@@ -22,7 +23,7 @@
    * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $interpolate, modelManager, appEndpointsDashboardService,
+  function cnsiServiceFactory($q, $interpolate, $translate, modelManager, appEndpointsDashboardService,
                               appUtilsService, appErrorService, appNotificationsService,
                               appCredentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
@@ -39,10 +40,16 @@
     };
 
     function getEndpointsToRegister() {
-      var filtered = _.filter(cnsiEndpointProviders, function (provider) {
-        return !provider.isHidden(modelManager.retrieve('app.model.account').isAdmin());
-      });
-      return _.keyBy(filtered, 'cnsi_type');
+      return _
+        .chain(cnsiEndpointProviders)
+        .filter(function (provider) {
+          return !provider.isHidden(modelManager.retrieve('app.model.account').isAdmin());
+        })
+        .forEach(function (endpoint) {
+          endpoint.label = endpoint.label || $translate.instant(endpoint.register.html.type.name);
+        })
+        .sort('label')
+        .value();
     }
 
     /**

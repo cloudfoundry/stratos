@@ -59,7 +59,7 @@
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.frameworkDetailView = frameworkDetailView;
-    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+    this.modelManager = modelManager;
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
@@ -93,6 +93,7 @@
     };
 
     function init() {
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       // Fetch HCE service metadata so that we can show the appropriate message
       that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
@@ -100,15 +101,15 @@
 
       var promises = [];
       // List VCS tokens if needed
-      if (!that.vcsModel.vcsTokensFetched) {
-        promises.push(that.vcsModel.listVcsTokens().then(function () {
-          that.vcsModel.checkTokensValidity();
+      if (!vcsModel.vcsTokensFetched) {
+        promises.push(vcsModel.listVcsTokens().then(function () {
+          vcsModel.checkTokensValidity();
         }));
       }
 
       // List VCS clients if needed
-      if (!that.vcsModel.vcsClientsFetched) {
-        promises.push(that.vcsModel.listVcsClients());
+      if (!vcsModel.vcsClientsFetched) {
+        promises.push(vcsModel.listVcsClients());
       }
 
       return $q.all(promises);
@@ -272,12 +273,13 @@
     },
 
     getTokenName: function () {
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       var patGuid = this._getPatGuid();
       if (_.isUndefined(patGuid)) {
         // the project uses a legacy OAuth token
         return LEGACY_TOKEN;
       }
-      var tokenInUse = this.vcsModel.getToken(patGuid);
+      var tokenInUse = vcsModel.getToken(patGuid);
       if (_.isUndefined(tokenInUse)) {
         // The user deleted the token from the Console...
         return DELETED_TOKEN;
@@ -286,24 +288,26 @@
     },
 
     isInvalidToken: function () {
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       var patGuid = this._getPatGuid();
       if (_.isUndefined(patGuid)) {
         // the project uses a legacy OAuth token
         return false;
       }
-      var tokenInUse = this.vcsModel.getToken(patGuid);
+      var tokenInUse = vcsModel.getToken(patGuid);
       if (_.isUndefined(tokenInUse)) {
         // The user deleted the token from the Console...
         return false;
       }
-      return this.vcsModel.invalidTokens[tokenInUse.token.guid];
+      return vcsModel.invalidTokens[tokenInUse.token.guid];
     },
 
     manageVcsTokens: function () {
       var that = this;
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       var vcs = that._getVcs();
       if (vcs) {
-        var tokensForVcs = that.vcsModel.getTokensForVcs(vcs);
+        var tokensForVcs = vcsModel.getTokensForVcs(vcs);
         if (tokensForVcs.length > 0) {
           return that._manageTokens(vcs);
         } else {
@@ -336,8 +340,9 @@
     },
 
     _getVcs: function () {
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       var vi = this.hceModel.data.vcsInstance;
-      return _.find(this.vcsModel.vcsClients, function (vc) {
+      return _.find(vcsModel.vcsClients, function (vc) {
         return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
       });
     },
@@ -363,6 +368,7 @@
     },
 
     _manageTokens: function (vcs) {
+      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
       var that = this;
       var patGuid = that._getPatGuid();
       return that.ceManageVcsTokens.manage(vcs, true, patGuid).then(function (newTokenGuid) {
@@ -371,7 +377,7 @@
           that.project.name = that.ceManageVcsTokens.updateProjectName(that.project.name, newTokenGuid);
           return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
             that.model.application.project = res.data;
-            var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
+            var newTokenName = vcsModel.getToken(newTokenGuid).token.name;
             that.appNotificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
               {name: newTokenName});
           });

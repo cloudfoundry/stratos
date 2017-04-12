@@ -341,8 +341,7 @@
                 registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
                   service.register.skip_ssl_validation)
                   .then(function () {
-                    var toastText = new RegExp("(?:Helion Code Engine|Cloud Foundry) endpoint '" +
-                      service.register.cnsi_name + "' successfully registered");
+                    var toastText = new RegExp("Endpoint '" + service.register.cnsi_name + "' successfully registered");
                     return helpers.checkAndCloseToast(toastText);
                   })
                   .then(function () {

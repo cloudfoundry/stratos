@@ -70,7 +70,7 @@
                   nextBtnText: gettext('Register'),
                   onNext: function () {
                     var userInput = context.wizardOptions.userInput;
-                    return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
+                    return serviceInstanceModel.create(userInput.endpoint.cnsi_type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
                       appNotificationsService.notify('success',
                         gettext('Endpoint \'{{name}}\' successfully registered'),
                         { name: userInput.name });
