@@ -5,7 +5,14 @@ This guide assumes that you have checked out the following repositories and plac
 - stratos-ui https://github.com/hpcloud/stratos-ui
 - portal-proxy https://github.com/hpcloud/portal-proxy
 
+
 ## Setup Minkube
+Minikube requires either Virtual Box or KVM installations. **There is a issue when using Virtual Box 5.1.18 which 
+results in Minikube failing to create the host-only network. The process in this guide uses Virtual Box 5.1.16**
+
+Minikube will bring up a VM which utilises the first namespace described in the host's resolv.config. **If you have 
+updated this from the default please ensure that the namespace can reach all required external and internal locations.**
+
 Follow instructions specified in https://github.com/kubernetes/minikube
 At the bare minimum you need to do the following
 - Install `kubectl`, follow the instructions specified in https://kubernetes.io/docs/tasks/kubectl/install/
@@ -19,11 +26,13 @@ minikube start
 By default minkube does not have a persistent volume against which volumes for the containers can be created.
 The following will map a local folder to be used as a persistent volume for kubernetes.
 ```
+cd kubernetes
 kubectl create -f optional/console-pv.yaml
 ```
 
 ## Setup Helm
-- Download the Helm binary for your system from https://github.com/kubernetes/helm/releases. 
+- Download the Helm binary for your system from https://github.com/kubernetes/helm/releases. **Minimum supported version
+of v2.3.0**
 For convenience the guide assumes that helm binary has been added to your PATH.
 - To install the Helm server (Tiller) in your Minikube setup, run the following:
 ```
@@ -43,7 +52,13 @@ To check the status of the instance use the following command:
 helm status my-console
 ```
 
-Once the instance is in `DEPLOYED` state, retrieve the Console UI node-port.
+Once the instance is in `DEPLOYED` state, retrieve the Console UI IP address.
+```
+$ minikube ip
+$ 192.168.99.100
+```
+
+Also the node-port
 ```
 $ helm status my-console | grep ui-ext
 console-ui-ext        10.0.0.162  <nodes>      80:30933/TCP,443:30941/TCP  1m  
