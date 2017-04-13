@@ -8,7 +8,7 @@ This guide assumes that you have checked out the following repositories and plac
 
 ## Setup Minkube
 
-**minimum supported version - 0.17.1**
+**minimum supported version - 0.18.0**
 
 Minikube requires either Virtual Box or KVM installations. **There is a issue when using Virtual Box 5.1.18 which 
 results in Minikube failing to create the host-only network. The process in this guide uses Virtual Box 5.1.16**
