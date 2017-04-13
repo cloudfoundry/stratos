@@ -2,7 +2,7 @@
   'use strict';
 
   describe('endpoint clusters', function () {
-    var $q, $state, $scope, modelManager, utilsService, clusterTilesCtrl, serviceInstanceModel,
+    var $q, $state, $scope, modelManager, appUtilsService, clusterTilesCtrl, serviceInstanceModel,
       userServiceInstanceModel, stackatoInfo, $stateParams;
 
     var hceService = {
@@ -73,7 +73,7 @@
       $stateParams = $injector.get('$stateParams');
 
       modelManager = $injector.get('modelManager');
-      utilsService = $injector.get('appUtilsService');
+      appUtilsService = $injector.get('appUtilsService');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -86,7 +86,7 @@
 
     function createCluster() {
       var ClusterTilesCtrl = $state.get('endpoint.clusters.tiles').controller;
-      clusterTilesCtrl = new ClusterTilesCtrl($q, $state, $stateParams, modelManager, utilsService);
+      clusterTilesCtrl = new ClusterTilesCtrl($q, $state, $stateParams, modelManager, appUtilsService);
     }
 
     describe('Init', function () {

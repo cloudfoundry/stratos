@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.spaces', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail.spaces', {
       url: '/spaces',
@@ -17,7 +13,7 @@
       controllerAs: 'clusterDetailSpacesController',
       ncyBreadcrumb: {
         label: '{{' +
-        'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
+        'clusterOrgController.cfOrganizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.detail.organizations';
@@ -26,40 +22,29 @@
     });
   }
 
-  ClusterDetailSpacesController.$inject = [
-    '$q',
-    '$stateParams',
-    '$state',
-    'modelManager',
-    'appUtilsService',
-    'organization-model'
-  ];
+  function ClusterDetailSpacesController($q, $stateParams, $state, appUtilsService, cfOrganizationModel) {
+    var vm = this;
 
-  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils, organizationModel) {
-    var that = this;
+    vm.spaces = spaces;
+    vm.keys = _.keys;
 
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
 
-    this.organizationModel = organizationModel;
+    vm.stateInitialised = false;
 
-    this.stateInitialised = false;
+    // Ensure the parent state is fully initialised before we start our own init
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
 
     function init() {
-      that.stateInitialised = true;
+      vm.stateInitialised = true;
       return $q.resolve();
     }
-    // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
-  }
 
-  angular.extend(ClusterDetailSpacesController.prototype, {
-    spaces: function () {
-      var org = this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid) || {};
+    function spaces() {
+      var org = cfOrganizationModel.fetchOrganization(vm.clusterGuid, vm.organizationGuid) || {};
       return org.spaces;
-    },
+    }
 
-    keys: _.keys
-
-  });
+  }
 })();

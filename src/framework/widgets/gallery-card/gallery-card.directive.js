@@ -37,8 +37,6 @@
     };
   }
 
-  GalleryCardController.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.GalleryCardController
    * @memberof helion.framework.widgets

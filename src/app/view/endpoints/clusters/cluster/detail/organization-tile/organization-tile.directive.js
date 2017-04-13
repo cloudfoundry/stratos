@@ -5,8 +5,6 @@
     .module('app.view.endpoints')
     .directive('organizationTile', OrganizationTile);
 
-  OrganizationTile.$inject = [];
-
   function OrganizationTile() {
     return {
       bindToController: true,
@@ -20,19 +18,6 @@
     };
   }
 
-  OrganizationTileController.$inject = [
-    'modelManager',
-    '$state',
-    '$q',
-    '$scope',
-    'appUtilsService',
-    'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.notificationsService',
-    'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
-    'organization-model'
-  ];
-
   /**
    * @name OrganizationTileController
    * @constructor
@@ -40,24 +25,24 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
-   * @param {object} utils - our utils service
-   * @param {object} assignUsers - our assign users slide out service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} appUtilsService - our appUtilsService service
+   * @param {object} appClusterAssignUsers - our assign users slide out service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
-                                      assignUsers, notificationsService, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, appUtilsService, // eslint-disable-line complexity
+                                      appClusterAssignUsers, appNotificationsService, frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
     this.$state = $state;
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     // Present memory usage
-    this.memory = utils.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
+    this.memory = appUtilsService.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
 
     // Present instances utilisation
     var instancesUsed = this.organization.instances;
@@ -72,7 +57,7 @@
     };
 
     function organizationName() {
-      var org = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid];
+      var org = that.cfOrganizationModel.organizations[that.organization.cnsiGuid][that.organization.guid];
       return org ? org.details.org.entity.name : '';
     }
 
@@ -84,17 +69,17 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.user = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
-    var spacesInOrg = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
+    var spacesInOrg = that.cfOrganizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
     var canDelete = _.keys(spacesInOrg).length === 0;
 
     $scope.$watchCollection(function () {
-      var org = that.organizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
+      var org = that.cfOrganizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
       if (org && org.roles && org.roles[that.user.guid]) {
         return org.roles[that.user.guid];
       }
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.organizationModel.organizationRolesToStrings(roles);
+      that.roles = that.cfOrganizationModel.organizationRolesToStrings(roles);
     });
 
     var canEditOrg = authModel.isAllowed(that.organization.cnsiGuid,
@@ -135,7 +120,7 @@
       name: gettext('Edit Organization'),
       disabled: !canEditOrg,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Edit Organization'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
@@ -157,10 +142,10 @@
               if (organizationName() === orgData.name) {
                 return $q.resolve();
               }
-              return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
+              return that.cfOrganizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
                 {name: orgData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
                     {name: orgData.name});
                 });
             } else {
@@ -186,9 +171,9 @@
           errorMessage: gettext('Failed to delete organization'),
           callback: function () {
             var orgName = organizationName();
-            return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
+            return that.cfOrganizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
               .then(function () {
-                notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                appNotificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
                   {name: orgName});
               });
           }
@@ -201,7 +186,7 @@
       name: gettext('Assign User(s)'),
       disabled: !canAssignUsers,
       execute: function () {
-        assignUsers.assign({
+        appClusterAssignUsers.assign({
           clusterGuid: that.organization.cnsiGuid,
           organizationGuid: that.organization.guid
         });

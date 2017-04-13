@@ -4,8 +4,6 @@
   angular.module('helion.framework.filters')
     .filter('max', max);
 
-  max.$inject = [];
-
   /**
    * @namespace helion.framework.filters.max
    * @memberof helion.framework.filters

@@ -26,8 +26,8 @@
     '$scope',
     'modelManager',
     'appEventService',
-    'helion.framework.widgets.detailView',
-    'cloud-foundry.view.applications.services.serviceInstanceService'
+    'frameworkDetailView',
+    'cfServiceInstanceService'
   ];
 
   /**
@@ -38,21 +38,21 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event management service
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @param {object} serviceInstanceService - the service instance service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
+   * @param {object} cfServiceInstanceService - the service instance service
    * @property {object} $q - the Angular $q service
-   * @property {helion.framework.widgets.detailView} detailView - the detail view service
-   * @property {object} serviceInstanceService - the service instance service
+   * @property {frameworkDetailView} frameworkDetailView - the detail view service
+   * @property {object} cfServiceInstanceService - the service instance service
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {object} modal - the detail view modal instance
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($q, $scope, modelManager, appEventService, detailView, serviceInstanceService) {
+  function ManageServicesController($q, $scope, modelManager, appEventService, frameworkDetailView, cfServiceInstanceService) {
     var that = this;
     this.$q = $q;
-    this.detailView = detailView;
-    this.serviceInstanceService = serviceInstanceService;
+    this.frameworkDetailView = frameworkDetailView;
+    this.cfServiceInstanceService = cfServiceInstanceService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.modal = null;
 
@@ -123,7 +123,7 @@
     detach: function (instance) {
       var that = this;
       var binding = this.serviceBindings[instance.guid];
-      return this.serviceInstanceService.unbindServiceFromApp(
+      return this.cfServiceInstanceService.unbindServiceFromApp(
         this.data.cnsiGuid,
         this.data.app.summary.guid,
         binding.metadata.guid,
@@ -145,7 +145,7 @@
      * @returns {promise} A promise object
      */
     viewEnvVariables: function (instance) {
-      return this.serviceInstanceService.viewEnvVariables(
+      return this.cfServiceInstanceService.viewEnvVariables(
         this.data.cnsiGuid,
         this.data.app.summary,
         this.data.service.entity.label,
@@ -165,7 +165,7 @@
         title: gettext('Manage Service Instances')
       };
 
-      return this.detailView(config, this);
+      return this.frameworkDetailView(config, this);
     }
   });
 

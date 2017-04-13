@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.router', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     // Cloud Foundry
@@ -23,13 +19,6 @@
     });
   }
 
-  ClustersRouterController.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appUtilsService'
-  ];
-
   /**
    * @name ClustersRouterController
    * @description Redirects the user to either the Organizations Detail page or
@@ -37,27 +26,26 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @constructor
    */
-  function ClustersRouterController($q, $state, modelManager, utils) {
-    var that = this;
-    this.modelManager = modelManager;
+  function ClustersRouterController($q, $state, modelManager, appUtilsService) {
 
-    this.$q = $q;
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+    appUtilsService.chainStateResolve('endpoint.clusters.router', $state, init);
 
     function init() {
 
-      return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
+      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list()])
         .then(function () {
 
           var connectedInstances = 0;
           var serviceInstanceGuid;
-          var hcfInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          var hcfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
           _.forEach(hcfInstances, function (hcfInstance) {
-            if (_.get(that.userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
+            if (_.get(userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
               serviceInstanceGuid = hcfInstance.guid;
               connectedInstances += 1;
             }
@@ -72,10 +60,6 @@
         });
     }
 
-    utils.chainStateResolve('endpoint.clusters.router', $state, init);
-
   }
-
-  angular.extend(ClustersRouterController.prototype, {});
 
 })();

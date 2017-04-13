@@ -58,8 +58,8 @@
       it('should be defined and initialized', function () {
         expect(manageServicesCtrl).toBeDefined();
         expect(manageServicesCtrl.$q).toBeDefined();
-        expect(manageServicesCtrl.detailView).toBeDefined();
-        expect(manageServicesCtrl.serviceInstanceService).toBeDefined();
+        expect(manageServicesCtrl.frameworkDetailView).toBeDefined();
+        expect(manageServicesCtrl.cfServiceInstanceService).toBeDefined();
         expect(manageServicesCtrl.appModel).toBeDefined();
         expect(manageServicesCtrl.modal).toBe(null);
         expect(manageServicesCtrl.serviceInstances).toEqual([]);
@@ -177,15 +177,15 @@
             }
           };
 
-          spyOn(manageServicesCtrl.serviceInstanceService, 'unbindServiceFromApp');
+          spyOn(manageServicesCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
         });
 
         it('should call unbindServiceFromApp', function () {
           var instance = manageServicesCtrl.serviceInstances[0];
           manageServicesCtrl.detach(instance);
-          expect(manageServicesCtrl.serviceInstanceService.unbindServiceFromApp)
+          expect(manageServicesCtrl.cfServiceInstanceService.unbindServiceFromApp)
             .toHaveBeenCalled();
-          var args = manageServicesCtrl.serviceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+          var args = manageServicesCtrl.cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
           expect(args[0]).toBe('guid');
           expect(args[1]).toBe('app_123');
           expect(args[2]).toBe('binding_123');
@@ -203,12 +203,12 @@
             service: mockService
           };
 
-          spyOn(manageServicesCtrl.serviceInstanceService, 'viewEnvVariables');
+          spyOn(manageServicesCtrl.cfServiceInstanceService, 'viewEnvVariables');
         });
 
         it('should show env variables in detail view', function () {
           manageServicesCtrl.viewEnvVariables({ name: 'instance_123' });
-          expect(manageServicesCtrl.serviceInstanceService.viewEnvVariables)
+          expect(manageServicesCtrl.cfServiceInstanceService.viewEnvVariables)
             .toHaveBeenCalledWith('guid', mockApp, 'label-19', {name: 'instance_123'});
         });
       });

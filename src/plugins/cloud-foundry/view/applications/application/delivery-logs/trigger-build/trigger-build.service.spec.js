@@ -2,7 +2,7 @@
   'use strict';
 
   describe('trigger build service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, vcsTokenManager, hceModel, $httpBackend, $uibModalInstance, $timeout;
+    var promise, dialogContext, $controller, $q, modelManager, appManageVcsTokens, hceModel, $httpBackend, $uibModalInstance, $timeout;
 
     var cnsi = 1234;
     var project = {
@@ -40,7 +40,7 @@
         $controller = config.controller;
         return $q.reject();
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     beforeEach(inject(function ($injector, $rootScope, _$httpBackend_, _$q_, _$timeout_) {
@@ -49,7 +49,7 @@
       $timeout = _$timeout_;
 
       modelManager = $injector.get('modelManager');
-      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
+      appManageVcsTokens = $injector.get('appManageVcsTokens');
       hceModel = modelManager.retrieve('cloud-foundry.model.hce');
       hceModel.data.vcsInstance = vcsInstance;
 
@@ -70,7 +70,7 @@
       describe('open', function () {
         it('Plumbing / Initial state', function () {
           /* eslint-disable no-new */
-          new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
+          new $controller($timeout, $uibModalInstance, $q, appManageVcsTokens, dialogContext, undefined, modelManager);
           /* eslint-enable no-new */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
@@ -82,8 +82,8 @@
       var controller;
 
       beforeEach(function () {
-        // $timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager
-        controller = new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
+        // $timeout, $uibModalInstance, $q, appManageVcsTokens, context, content, modelManager
+        controller = new $controller($timeout, $uibModalInstance, $q, appManageVcsTokens, dialogContext, undefined, modelManager);
         expect(controller).toBeDefined();
         expect(controller.selectedCommit).not.toBeDefined();
         expect(controller.fetchError).not.toBeDefined();

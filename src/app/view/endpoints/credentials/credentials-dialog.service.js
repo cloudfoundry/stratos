@@ -3,22 +3,18 @@
 
   angular
     .module('app.view')
-    .factory('app.view.credentialsDialog', CredentialsDialogFactory);
+    .factory('appCredentialsDialog', CredentialsDialogFactory);
 
-  CredentialsDialogFactory.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
-
-  function CredentialsDialogFactory(detailView) {
+  function CredentialsDialogFactory(frameworkDetailView) {
     return {
       /**
        * @memberof app.view
-       * @name credentialsDialog
+       * @name appCredentialsDialog
        * @param {object} context - the context for the credentials dialog.
        * @returns {object} Dialog object for chaining promises and closing the dialog
        */
       show: function (context) {
-        return detailView(
+        return frameworkDetailView(
           {
             templateUrl: 'app/view/endpoints/credentials/credentials-dialog.html',
             class: 'detail-view-thin'

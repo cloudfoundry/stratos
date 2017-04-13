@@ -33,7 +33,7 @@
     '$scope',
     'modelManager',
     'appEventService',
-    'cloud-foundry.view.applications.services.serviceInstanceService'
+    'cfServiceInstanceService'
   ];
 
   /**
@@ -44,19 +44,19 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
-   * @param {object} serviceInstanceService - the service instance service
+   * @param {object} cfServiceInstanceService - the service instance service
    * @property {app.utils.appEventService} appEventService - the event management service
-   * @property {object} serviceInstanceService - the service instance service
+   * @property {object} cfServiceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
    * @property {array} serviceBindings - the service instances bound to specified app
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from this service card
    */
-  function ServiceCardController($scope, modelManager, appEventService, serviceInstanceService) {
+  function ServiceCardController($scope, modelManager, appEventService, cfServiceInstanceService) {
     var that = this;
     this.appEventService = appEventService;
-    this.serviceInstanceService = serviceInstanceService;
+    this.cfServiceInstanceService = cfServiceInstanceService;
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
@@ -180,7 +180,7 @@
     detach: function () {
       if (this.serviceBindings.length === 1) {
         var serviceBinding = this.serviceBindings[0];
-        return this.serviceInstanceService.unbindServiceFromApp(
+        return this.cfServiceInstanceService.unbindServiceFromApp(
           this.cnsiGuid,
           this.app.summary.guid,
           serviceBinding.metadata.guid,

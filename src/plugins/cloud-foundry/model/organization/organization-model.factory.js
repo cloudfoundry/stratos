@@ -11,9 +11,9 @@
    */
   angular
     .module('cloud-foundry.model')
-    .factory('organization-model', organizationModel);
+    .factory('cfOrganizationModel', cfOrganizationModel);
 
-  function organizationModel(modelManager, apiManager, modelUtils, $q) {
+  function cfOrganizationModel(modelManager, apiManager, modelUtils, $q) {
 
     var organizations = {};
     var organizationNames = {};

@@ -7,10 +7,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf', {
       url: '/cf',

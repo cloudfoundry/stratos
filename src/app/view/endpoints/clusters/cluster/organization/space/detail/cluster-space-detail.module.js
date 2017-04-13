@@ -10,10 +10,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail', {
       url: '',
@@ -23,39 +19,30 @@
     });
   }
 
-  ClusterSpaceController.$inject = [
-    '$q',
-    '$state',
-    '$stateParams',
-    'modelManager',
-    'appUtilsService'
-  ];
+  function ClusterSpaceController($q, $state, $stateParams, modelManager, appUtilsService) {
+    var vm = this;
 
-  function ClusterSpaceController($q, $state, $stateParams, modelManager, utils) {
-    var that = this;
+    vm.space = space;
 
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
-    this.spaceGuid = $stateParams.space;
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
+    vm.spaceGuid = $stateParams.space;
+    vm.stateInitialised = false;
 
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
-    this.stateInitialised = false;
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+
+    function space() {
+      return spaceModel.fetchSpace(vm.clusterGuid, vm.spaceGuid);
+    }
 
     function init() {
-      that.stateInitialised = true;
-      that.spaceModel.uncacheAllServiceInstancesForSpace(that.clusterGuid, that.spaceGuid);
-      that.spaceModel.uncacheRoutesForSpace(that.clusterGuid, that.spaceGuid);
+      vm.stateInitialised = true;
+      spaceModel.uncacheAllServiceInstancesForSpace(vm.clusterGuid, vm.spaceGuid);
+      spaceModel.uncacheRoutesForSpace(vm.clusterGuid, vm.spaceGuid);
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
   }
-
-  angular.extend(ClusterSpaceController.prototype, {
-    space: function () {
-      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
-    }
-
-  });
 })();

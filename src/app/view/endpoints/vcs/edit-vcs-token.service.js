@@ -3,23 +3,17 @@
 
   angular
     .module('app.view')
-    .factory('app.view.vcs.editVcsToken', EditVcsTokenService);
-
-  EditVcsTokenService.$inject = [
-    '$q',
-    'helion.framework.widgets.asyncTaskDialog',
-    'modelManager'
-  ];
+    .factory('appEditVcsToken', EditVcsTokenService);
 
   /**
    * @name EditVcsTokenService
    * @description Edit a VCS token (for now only rename)
    * @param {object} $q The Angular $q service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
    * @param {app.model.modelManager} modelManager The console model manager service
    * @returns {object} The EditVcsTokenService with an editToken method that opens slide out containing the edit form
    */
-  function EditVcsTokenService($q, asyncTaskDialog, modelManager) {
+  function EditVcsTokenService($q, frameworkAsyncTaskDialog, modelManager) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     return {
       /**
@@ -44,7 +38,7 @@
           }
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Rename a GitHub Personal Access Token'),
             templateUrl: 'app/view/endpoints/vcs/edit-vcs-token.html',

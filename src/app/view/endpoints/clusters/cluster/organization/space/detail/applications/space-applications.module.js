@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail.applications', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.applications', {
       url: '/applications',
@@ -24,17 +20,7 @@
     });
   }
 
-  SpaceApplicationsController.$inject = [
-    '$state',
-    '$stateParams',
-    '$q',
-    '$scope',
-    'modelManager',
-    'appUtilsService',
-    'cloud-foundry.model.application.stateService'
-  ];
-
-  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService) {
+  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService) {
     var that = this;
 
     var clusterGuid = $stateParams.guid;
@@ -46,7 +32,7 @@
         return that.spaceDetail().apps;
       }, function (apps) {
         _.forEach(apps, function (application) {
-          application.state = appStateService.get(application.entity);
+          application.state = cfAppStateService.get(application.entity);
           var theMoment = moment(application.metadata.created_at);
           application.invertedCreatedTimestamp = -theMoment.unix();
           application.createdTimestampString = theMoment.format('L - LTS');
@@ -71,6 +57,6 @@
       });
     };
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.applications', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.applications', $state, init);
   }
 })();

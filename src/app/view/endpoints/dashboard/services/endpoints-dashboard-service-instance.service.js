@@ -3,44 +3,29 @@
 
   angular
     .module('app.view.endpoints.dashboard')
-    .factory('app.view.endpoints.dashboard.cnsiService', cnsiServiceFactory);
-
-  cnsiServiceFactory.$inject = [
-    '$q',
-    '$state',
-    '$interpolate',
-    'modelManager',
-    'app.view.endpoints.dashboard.dashboardService',
-    'app.view.endpoints.dashboard.vcsService',
-    'appUtilsService',
-    'appErrorService',
-    'app.view.notificationsService',
-    'app.view.credentialsDialog',
-    'frameworkDialogConfirm',
-    'appEventService'
-  ];
+    .factory('appEndpointsCnsiService', cnsiServiceFactory);
 
   /**
    * @namespace app.view.endpoints.dashboard
    * @memberOf app.view.endpoints.dashboard
-   * @name cnsiService
+   * @name appEndpointsCnsiService
    * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
-   * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
-   * @param {appUtilsService} utilsService - the utils service
-   * @param {app.utils.appErrorService} appErrorService - service to show custom errors below title bar
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
-   * @param {app.utils.appEventService} appEventService - the event service
+   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {app.model.modelManager} appEndpointsVcsService - service to view and manage VCS endpoints in the endpoints dashboard
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.appUtilsService.appErrorService} appErrorService - service to show custom errors below title bar
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {app.view.appCredentialsDialog} appCredentialsDialog - the credentials dialog service
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, dashboardService, vcsService, utilsService, appErrorService,
-                                         notificationsService, credentialsDialog, frameworkDialogConfirm, appEventService) {
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, appEndpointsDashboardService, appEndpointsVcsService, appUtilsService, appErrorService,
+                                         appNotificationsService, appCredentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
 
@@ -53,7 +38,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
@@ -65,7 +50,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description Refresh the cnsi service instances within the model
      * @returns {object} a promise
      * @public
@@ -117,7 +102,7 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
      * @public
@@ -127,7 +112,7 @@
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       var userAccount = modelManager.retrieve('app.model.account');
-      var endpoints = dashboardService.endpoints;
+      var endpoints = appEndpointsDashboardService.endpoints;
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
@@ -149,13 +134,13 @@
           };
           switch (serviceInstance.cnsi_type) {
             case 'hcf':
-              endpoint.type = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+              endpoint.type = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
               break;
             case 'hce':
-              endpoint.type = utilsService.getOemConfiguration().CODE_ENGINE;
+              endpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
               break;
             case 'hsm':
-              endpoint.type = utilsService.getOemConfiguration().SERVICE_MANAGER;
+              endpoint.type = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
               // Only Console admins can see HSM endpoints
               hide = !userAccount.isAdmin();
               break;
@@ -173,7 +158,7 @@
         endpoint.actions = _createInstanceActions(isValid, hasExpired);
         endpoint.visit = undefined;
         _setEndpointVisit(isValid, serviceInstance, endpoint);
-        endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
+        endpoint.url = appUtilsService.getClusterEndpoint(serviceInstance);
         endpoint.actionsTarget = serviceInstance;
         endpoint.name = serviceInstance.name;
 
@@ -212,7 +197,7 @@
 
     function _cleanupStaleEndpoints(activeEndpointsKeys) {
 
-      var allEndpoints = dashboardService.endpoints;
+      var allEndpoints = appEndpointsDashboardService.endpoints;
       var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
         return anEndpoint.key.indexOf(endpointPrefix) === 0;
       });
@@ -233,7 +218,7 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.cnsiService
+     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description clear any local data before leaving the dashboard
      * @public
      */
@@ -288,7 +273,7 @@
         callback: function () {
           modelManager.retrieve('app.model.serviceInstance').remove(serviceInstance)
             .then(function () {
-              notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
+              appNotificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
                 name: serviceInstance.name
               });
               updateInstances().then(function () {
@@ -298,8 +283,8 @@
                     authModel.remove(serviceInstance.guid);
                     break;
                   case 'hce':
-                    dashboardService.refreshCodeEngineVcses().then(function () {
-                      vcsService.createEndpointEntries();
+                    appEndpointsDashboardService.refreshCodeEngineVcses().then(function () {
+                      appEndpointsVcsService.createEndpointEntries();
                     });
                     break;
                 }
@@ -317,7 +302,7 @@
 
     function _connect(serviceInstance) {
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      that.dialog = credentialsDialog.show({
+      that.dialog = appCredentialsDialog.show({
         activeServiceInstance: serviceInstance,
         onConnectCancel: function () {
           if (that.dialog) {
@@ -338,9 +323,9 @@
                 authModel.initializeForEndpoint(serviceInstance.guid);
                 break;
               case 'hce':
-                $q.all([vcsService.updateInstances(), dashboardService.refreshCodeEngineVcses()])
+                $q.all([appEndpointsVcsService.updateInstances(), appEndpointsDashboardService.refreshCodeEngineVcses()])
                 .then(function () {
-                  vcsService.createEndpointEntries();
+                  appEndpointsVcsService.createEndpointEntries();
                 });
                 break;
             }
@@ -355,14 +340,14 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
-          notificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
+          appNotificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
             timeOut: 10000,
             name: serviceInstance.name
           });
           return $q.reject(error);
         })
         .then(function () {
-          notificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
+          appNotificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
             name: serviceInstance.name
           });
           createEndpointEntries();
@@ -371,10 +356,10 @@
               authModel.remove(serviceInstance.guid);
               break;
             case 'hce':
-              dashboardService.refreshCodeEngineVcses()
+              appEndpointsDashboardService.refreshCodeEngineVcses()
                 .then(function () {
                   // Note: we could optimize this with the createEndpointEntries above somehow
-                  vcsService.createEndpointEntries();
+                  appEndpointsVcsService.createEndpointEntries();
                 });
               break;
           }

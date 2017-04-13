@@ -4,7 +4,7 @@
   describe('cluster space detail (services) module', function () {
 
     var $controller, $httpBackend, $scope, $state, $stateParams, $q, $filter, modelManager,
-      serviceInstanceService, utils;
+      cfServiceInstanceService, appUtilsService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -42,8 +42,8 @@
       $q = $injector.get('$q');
       $filter = $injector.get('$filter');
       modelManager = $injector.get('modelManager');
-      serviceInstanceService = $injector.get('cloud-foundry.view.applications.services.serviceInstanceService');
-      utils = $injector.get('appUtilsService');
+      cfServiceInstanceService = $injector.get('cfServiceInstanceService');
+      appUtilsService = $injector.get('appUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);
@@ -56,7 +56,7 @@
 
       var SpaceServicesController = $state.get('endpoint.clusters.cluster.organization.space.detail.services').controller;
       $controller = new SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager,
-        serviceInstanceService, utils);
+        cfServiceInstanceService, appUtilsService);
     }
 
     afterEach(function () {
@@ -74,10 +74,13 @@
 
       expect($controller).toBeDefined();
       expect($controller.update).toBeDefined();
-      expect($controller.getInitialActions).toBeDefined();
+      expect($controller.serviceInstances).toBeDefined();
+      expect($controller.actionsPerSI).toBeDefined();
+      expect($controller.canDeleteOrUnbind).toBeDefined();
+      expect($controller.visibleServiceInstances).toBeDefined();
       expect($controller.createApplicationList).toBeDefined();
       expect($controller.spaceDetail).toBeDefined();
-      expect($controller.updateActions).toBeDefined();
+      expect($controller.update).toBeDefined();
     });
 
     it('initial state - cached services', function () {

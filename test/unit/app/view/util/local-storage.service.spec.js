@@ -21,7 +21,7 @@
       beforeEach(module('green-box-console'));
 
       beforeEach(inject(function ($injector) {
-        localStorage = $injector.get('app.view.localStorage');
+        localStorage = $injector.get('appLocalStorage');
       }));
 
       it('should not be supported', function () {
@@ -41,7 +41,7 @@
       beforeEach(module('green-box-console'));
 
       beforeEach(inject(function ($injector) {
-        localStorage = $injector.get('app.view.localStorage');
+        localStorage = $injector.get('appLocalStorage');
       }));
 
       it('should not be supported', function () {
@@ -66,7 +66,7 @@
       beforeEach(module('green-box-console'));
 
       beforeEach(inject(function ($injector) {
-        localStorage = $injector.get('app.view.localStorage');
+        localStorage = $injector.get('appLocalStorage');
       }));
 
       it('should be defined', function () {

@@ -9,7 +9,7 @@
   ManageInstanceDialogFactory.$inject = [
     '$q',
     'modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'frameworkAsyncTaskDialog'
   ];
 
   /**
@@ -17,9 +17,9 @@
    * @constructor
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    */
-  function ManageInstanceDialogFactory($q, modelManager, asyncTaskDialog) {
+  function ManageInstanceDialogFactory($q, modelManager, frameworkAsyncTaskDialog) {
 
     this.show = function (mode, serviceManagerGuid, services, serviceId, productVersion, sdlVersion) {
 
@@ -99,7 +99,7 @@
         });
       }
 
-      return asyncTaskDialog(
+      return frameworkAsyncTaskDialog(
         {
           title: title,
           templateUrl: 'plugins/service-manager/view/manage-instance/manage-instance.html',

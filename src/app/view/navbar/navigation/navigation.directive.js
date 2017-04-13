@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('navigation', navigation);
 
-  navigation.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.navigation
    * @memberof app.view
@@ -24,10 +20,6 @@
       templateUrl: appBasePath + 'view/navbar/navigation/navigation.html'
     };
   }
-
-  NavigationController.$inject = [
-    'modelManager'
-  ];
 
   /**
    * @namespace app.view.NavigationController

@@ -11,13 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerApplicationVersionsModel);
 
-  registerApplicationVersionsModel.$inject = [
-    '$q',
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerApplicationVersionsModel($q, modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.appVersions', new ApplicationVersions($q, apiManager, modelUtils));
   }

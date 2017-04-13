@@ -336,11 +336,11 @@
 
           beforeEach(function () {
             organizations = mock.cloudFoundryAPI.Organizations.ListAllOrganizations(123).response['200'].body.resources;
-            that.organizationModel.listAllOrganizations = function () {
+            that.cfOrganizationModel.listAllOrganizations = function () {
               return that.$q.resolve(organizations);
             };
             that.getDomains = getResolved;
-            spyOn(that.organizationModel, 'listAllOrganizations').and.callThrough();
+            spyOn(that.cfOrganizationModel, 'listAllOrganizations').and.callThrough();
             spyOn(that, 'getDomains').and.callThrough();
             stopWatch();
             simulateUserInput();
@@ -367,7 +367,7 @@
           });
 
           it('#getOrganizations - no organizations', function () {
-            that.organizationModel.listAllOrganizations = function () {
+            that.cfOrganizationModel.listAllOrganizations = function () {
               return that.$q.resolve([]); // empty array, no organizations
             };
             that.appModel.filterParams.orgGuid = 'not all';
@@ -386,11 +386,11 @@
 
           beforeEach(function () {
             spaces = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(123).response['200'].body.resources;
-            that.organizationModel.listAllSpacesForOrganization = function () {
+            that.cfOrganizationModel.listAllSpacesForOrganization = function () {
               return that.$q.resolve(spaces);
             };
             that.getDomains = getResolved;
-            spyOn(that.organizationModel, 'listAllSpacesForOrganization').and.callThrough();
+            spyOn(that.cfOrganizationModel, 'listAllSpacesForOrganization').and.callThrough();
             spyOn(that, 'getDomains').and.callThrough();
             stopWatch();
             simulateUserInput();
@@ -418,7 +418,7 @@
           });
 
           it('#getSpacesForOrganization - no space', function () {
-            that.organizationModel.listAllSpacesForOrganization = function () {
+            that.cfOrganizationModel.listAllSpacesForOrganization = function () {
               return that.$q.resolve([]); // empty array, no spaces
             };
             that.appModel.filterParams.spaceGuid = 'not all';

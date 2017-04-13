@@ -63,8 +63,6 @@
     }
   }
 
-  CheckboxInputController.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.CheckboxInputController
    * @memberof helion.framework.widgets

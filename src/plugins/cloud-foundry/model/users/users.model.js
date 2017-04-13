@@ -9,12 +9,6 @@
     .module('cloud-foundry.model')
     .run(registerUsersModel);
 
-  registerUsersModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerUsersModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.users', new Users(apiManager, modelUtils));
   }

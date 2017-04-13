@@ -9,11 +9,7 @@
     .module('cloud-foundry.view.applications.application.delivery-logs')
     .factory('triggerBuildDetailView', triggerBuildDetailView);
 
-  triggerBuildDetailView.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
-
-  function triggerBuildDetailView(detailView) {
+  function triggerBuildDetailView(frameworkDetailView) {
     return {
       /**
        * @function open
@@ -24,7 +20,7 @@
        * @public
        **/
       open: function (project, cnsiGuid) {
-        return detailView({
+        return frameworkDetailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
           title: gettext('Select a Commit'),
           controller: TriggerBuildsDetailViewController
@@ -36,28 +32,18 @@
     };
   }
 
-  TriggerBuildsDetailViewController.$inject = [
-    '$timeout',
-    '$uibModalInstance',
-    '$q',
-    'app.view.vcs.manageVcsTokens',
-    'context',
-    'content',
-    'modelManager'
-  ];
-
   /**
    * @name TriggerBuildsDetailViewController
    * @constructor
    * @param {object} $timeout - the angular timeout service
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
    * @param {object} $q - the angular $q service
-   * @param {object} vcsTokenManager - the VCS token manager
-   * @param {object} context - parameter object passed in to DetailView
-   * @param {object} content - configuration object passed in to DetailView
+   * @param {object} appManageVcsTokens - the VCS token manager
+   * @param {object} context - parameter object passed in to frameworkDetailView
+   * @param {object} content - configuration object passed in to frameworkDetailView
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, appManageVcsTokens, context, content, modelManager) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -66,7 +52,7 @@
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.$q = $q;
-    that.vcsTokenManager = vcsTokenManager;
+    that.appManageVcsTokens = appManageVcsTokens;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -101,7 +87,7 @@
     },
 
     _getPatGuid: function () {
-      return this.vcsTokenManager.getPatGuid(this.context.project.name);
+      return this.appManageVcsTokens.getPatGuid(this.context.project.name);
     },
 
     _checkPatAndBuild: function () {

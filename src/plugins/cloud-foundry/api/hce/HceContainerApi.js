@@ -6,11 +6,6 @@
     .module('cloud-foundry.api')
     .run(registerApi);
 
-  registerApi.$inject = [
-    '$http',
-    'apiManager'
-  ];
-
   function registerApi($http, apiManager) {
     apiManager.register('cloud-foundry.api.HceContainerApi', new HceContainerApi($http));
   }

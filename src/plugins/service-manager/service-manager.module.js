@@ -15,22 +15,22 @@
     '$location',
     'appEventService',
     'modelManager',
-    'app.view.notificationsService',
+    'appNotificationsService',
     'appUtilsService'
   ];
 
-  function register($state, $location, appEventService, modelManager, notificationService, utils) {
-    return new ServiceManager($state, $location, appEventService, modelManager, notificationService, utils);
+  function register($state, $location, appEventService, modelManager, appNotificationsService, appUtilsService) {
+    return new ServiceManager($state, $location, appEventService, modelManager, appNotificationsService, appUtilsService);
   }
 
-  function ServiceManager($state, $location, appEventService, modelManager, notificationService, utils) {
+  function ServiceManager($state, $location, appEventService, modelManager, appNotificationsService, appUtilsService) {
     var that = this;
     this.appEventService = appEventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
-    this.notificationService = notificationService;
-    this.utils = utils;
+    this.appNotificationsService = appNotificationsService;
+    this.appUtilsService = appUtilsService;
     this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });

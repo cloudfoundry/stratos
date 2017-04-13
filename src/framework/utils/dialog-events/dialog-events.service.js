@@ -5,8 +5,6 @@
     .module('helion.framework.utils')
     .factory('frameworkDialogEvents', dialogEventService);
 
-  dialogEventService.$inject = [];
-
   /**
    * @description Dialog Events Service
    * @returns {function} dialog events service

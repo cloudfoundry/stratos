@@ -31,8 +31,8 @@
     'modelManager',
     'appEventService',
     'appUtilsService',
-    'app.view.vcs.manageVcsTokens',
-    'organization-model',
+    'appManageVcsTokens',
+    'cfOrganizationModel',
     '$interpolate',
     '$scope',
     '$q',
@@ -45,9 +45,9 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
-   * @param {appUtilsService} utils - the utils service
-   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
-   * @param {object} organizationModel - the organization-model service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.view.vcs.appManageVcsTokens} appManageVcsTokens - the VCS Token management service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
@@ -67,11 +67,11 @@
    * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
-   * @property {object} organizationModel - the organization model
+   * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, appEventService, utils, manageVcsTokens, organizationModel,
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, appManageVcsTokens, cfOrganizationModel,
                                     $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -80,15 +80,15 @@
     this.addingApplication = false;
     this.modelManager = modelManager;
     this.appEventService = appEventService;
-    this.utils = utils;
-    this.manageVcsTokens = manageVcsTokens;
+    this.appUtilsService = appUtilsService;
+    this.appManageVcsTokens = appManageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -237,7 +237,7 @@
                     });
                   }, function (error) {
                     var msg = gettext('There was a problem creating your application. ');
-                    var cloudFoundryException = that.utils.extractCloudFoundryError(error);
+                    var cloudFoundryException = that.appUtilsService.extractCloudFoundryError(error);
                     if (cloudFoundryException || _.isString(error)) {
                       msg = gettext('The following exception occurred when creating your application: ') + (cloudFoundryException || error) + '. ';
                     }
@@ -346,7 +346,7 @@
             }
 
             var msg = gettext('There was a problem validating your route. ');
-            var cloudFoundryException = that.utils.extractCloudFoundryError(error);
+            var cloudFoundryException = that.appUtilsService.extractCloudFoundryError(error);
             if (cloudFoundryException || _.isString(error)) {
               msg = gettext('The following exception occurred when validating your route: ') + (cloudFoundryException || error) + '. ';
             }
@@ -368,7 +368,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.organizations.length = 0;
 
-        return this.organizationModel.listAllOrganizations(cnsiGuid)
+        return this.cfOrganizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
             // Filter out organizations in which user does not
             // have any space where they aren't a developer
@@ -408,7 +408,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.spaces.length = 0;
 
-        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
+        return this.cfOrganizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
           .then(function (spaces) {
 
             // Filter out spaces in which user is not a Space Developer

@@ -7,7 +7,7 @@
 
   editAppFactory.$inject = [
     'modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'frameworkAsyncTaskDialog'
   ];
 
   /**
@@ -15,9 +15,9 @@
    * @description Factory get Show Edit App dialog
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog - Async Task Dialog service
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
-  function editAppFactory(modelManager, asyncTaskDialog) {
+  function editAppFactory(modelManager, frameworkAsyncTaskDialog) {
     return {
 
       /**
@@ -25,7 +25,7 @@
        * @description Display Edit App Dialog
        * @param {String} cnsiGuid CNSI GUID
        * @param {String} appGuid  Application GUID
-       * @returns {*} asyncTaskDialog
+       * @returns {*} frameworkAsyncTaskDialog
        */
       display: function (cnsiGuid, appGuid) {
 
@@ -40,7 +40,7 @@
           instances: model.application.summary.instances
         };
 
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: 'Edit App',
             templateUrl: 'plugins/cloud-foundry/view/applications/' +

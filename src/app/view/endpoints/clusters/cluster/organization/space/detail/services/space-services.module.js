@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail.services', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.services', {
       url: '/services',
@@ -24,96 +20,83 @@
     });
   }
 
-  SpaceServicesController.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
-    '$q',
-    '$filter',
-    'modelManager',
-    'cloud-foundry.view.applications.services.serviceInstanceService',
-    'appUtilsService'
-  ];
+  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, cfServiceInstanceService,
+                                   appUtilsService) {
+    var vm = this;
 
-  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,
-                                   utils) {
-    var that = this;
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
+    vm.spaceGuid = $stateParams.space;
+    vm.serviceInstances = null;
+    vm.actionsPerSI = {};
+    vm.canDeleteOrUnbind = false;
+    vm.visibleServiceInstances = null;
+    vm.createApplicationList = createApplicationList;
+    vm.spaceDetail = spaceDetail;
+    vm.update = update;
 
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
-    this.spaceGuid = $stateParams.space;
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.serviceInstanceService = serviceInstanceService;
-    this.serviceInstances = [];
-    this.$filter = $filter;
-
-    this.actionsPerSI = {};
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
-      return that.visibleServiceInstances;
+      return vm.visibleServiceInstances;
     }, function (serviceInstances) {
       if (!serviceInstances) {
         return;
       }
-      that.updateActions(serviceInstances);
+      updateActions(serviceInstances);
     });
 
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
+
     function init() {
-      if (angular.isUndefined(that.spaceDetail().instances)) {
-        return that.update();
+      if (angular.isUndefined(spaceDetail().instances)) {
+        return update();
       }
-      that.updateLocalServiceInstances();
+      updateLocalServiceInstances();
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
-  }
-
-  angular.extend(SpaceServicesController.prototype, {
-
-    updateLocalServiceInstances: function () {
+    function updateLocalServiceInstances() {
       // Filter out the stackato hce service
-      this.serviceInstances = this.$filter('removeHceServiceInstance')(this.spaceDetail().instances);
-    },
+      vm.serviceInstances = $filter('removeHceServiceInstance')(spaceDetail().instances);
+    }
 
-    update: function (serviceInstance) {
-      var that = this;
-      return this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid, {
+    function update(serviceInstance) {
+      return spaceModel.listAllServiceInstancesForSpace(vm.clusterGuid, vm.spaceGuid, {
         return_user_provided_service_instances: true
       }).then(function () {
-        that.updateLocalServiceInstances();
+        updateLocalServiceInstances();
 
         if (serviceInstance) {
-          that.updateActions([serviceInstance]);
-          that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().instances).length);
+          updateActions([serviceInstance]);
+          spaceModel.updateServiceInstanceCount(vm.clusterGuid, vm.spaceGuid, _.keys(spaceDetail().instances).length);
         }
       });
-    },
+    }
 
-    getInitialActions: function () {
-      var that = this;
+    function getInitialActions() {
       return [
         {
           name: gettext('Delete Service'),
           disabled: false,
           execute: function (serviceInstance) {
-            that.serviceInstanceService.deleteService(that.clusterGuid, serviceInstance.metadata.guid,
-              serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
+            cfServiceInstanceService.deleteService(vm.clusterGuid, serviceInstance.metadata.guid,
+              serviceInstance.entity.name, _.bind(update, vm, serviceInstance));
           }
         },
         {
           name: gettext('Detach Service'),
           disabled: true,
           execute: function (serviceInstance) {
-            that.serviceInstanceService.unbindServiceFromApps(that.clusterGuid, serviceInstance.entity.service_bindings,
-              serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
+            cfServiceInstanceService.unbindServiceFromApps(vm.clusterGuid, serviceInstance.entity.service_bindings,
+              serviceInstance.entity.name, _.bind(update, vm, serviceInstance));
           }
         }
       ];
-    },
+    }
 
-    createApplicationList: function (serviceBindings) {
+    function createApplicationList(serviceBindings) {
       return _.chain(serviceBindings)
         .map(function (serviceBinding) {
           return serviceBinding.entity.app.entity.name;
@@ -121,28 +104,27 @@
         .sortBy()
         .value()
         .join(', ');
-    },
+    }
 
-    spaceDetail: function () {
-      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
-    },
+    function spaceDetail() {
+      return spaceModel.fetchSpace(vm.clusterGuid, vm.spaceGuid);
+    }
 
-    updateActions: function (serviceInstances) {
-      var that = this;
-      var space = that.spaceDetail().details.space;
-      var canDelete = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
-      var canUnbind = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
-      that.canDeleteOrUnbind = canDelete || canUnbind;
+    function updateActions(serviceInstances) {
+      var space = spaceDetail().details.space;
+      var canDelete = authModel.isAllowed(vm.clusterGuid, authModel.resources.managed_service_instance, authModel.actions.delete, space.metadata.guid);
+      var canUnbind = authModel.isAllowed(vm.clusterGuid, authModel.resources.managed_service_instance, authModel.actions.update, space.metadata.guid);
+      vm.canDeleteOrUnbind = canDelete || canUnbind;
       _.forEach(serviceInstances, function (si) {
-        if (that.canDeleteOrUnbind) {
-          that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
-          that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
-          that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
+        if (vm.canDeleteOrUnbind) {
+          vm.actionsPerSI[si.metadata.guid] = vm.actionsPerSI[si.metadata.guid] || getInitialActions();
+          vm.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
+          vm.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
         } else {
-          delete that.actionsPerSI[si.metadata.guid];
+          delete vm.actionsPerSI[si.metadata.guid];
         }
       });
     }
 
-  });
+  }
 })();

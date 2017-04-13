@@ -7,9 +7,7 @@
    */
   angular
     .module('cloud-foundry.model')
-    .factory('cloud-foundry.model.service.serviceUtils', serviceUtilsServiceFactory);
-
-  serviceUtilsServiceFactory.$inject = [];
+    .factory('cfServiceUtils', serviceUtilsServiceFactory);
 
   /**
    * @function serviceUtilsServiceFactory
@@ -25,7 +23,7 @@
 
     /**
      * @function serviceRequires
-     * @memberof cloud-foundry.model.service.serviceUtils
+     * @memberof cloud-foundry.model.service.cfServiceUtils
      * @description Check the service's 'requires' metadata to see if it needs the specified requirment
      * @param {object} service - service metadata to check
      * @param {string} requires - requirement to check for
@@ -41,7 +39,7 @@
 
     /**
      * @function enhanceService
-     * @memberof cloud-foundry.model.service.serviceUtils
+     * @memberof cloud-foundry.model.service.cfServiceUtils
      * @description Enhance the supplied service by extending the metadata
      * @param {object} service - service metadata to enhance
      * @returns {object} the service passed in (properties are added to the service object)
@@ -58,7 +56,7 @@
 
     /**
      * @function enhance
-     * @memberof cloud-foundry.model.service.serviceUtils
+     * @memberof cloud-foundry.model.service.cfServiceUtils
      * @description Enhance the supplied service or array of services by extending the metadata
      * @param {object} serviceOrList - service metadata or array of service metadatas to enhance
      * @returns {object} the service or service array passed in (properties are added to the service object/s)

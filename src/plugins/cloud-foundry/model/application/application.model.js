@@ -9,33 +9,29 @@
    */
   angular
     .module('cloud-foundry.model')
+    .constant('appConfig', {
+      pagination: {
+        pageSize: 48
+      },
+      loadingLimit: 100
+    })
     .run(registerApplicationModel);
 
-  registerApplicationModel.$inject = [
-    'app.config',
-    'modelManager',
-    'apiManager',
-    'cloud-foundry.model.application.stateService',
-    '$q',
-    'modelUtils',
-    'appUtilsService'
-  ];
-
-  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils, utils) {
-    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager,
-      appStateService, $q, modelUtils, utils));
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appUtilsService) {
+    modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
+      cfAppStateService, $q, modelUtils, appUtilsService));
   }
 
   /**
    * @memberOf cloud-foundry.model.application
    * @name Application
-   * @param {object} config - the global configuration object
+   * @param {appConfig} config - the global configuration object
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} appStateService - the Application State service
+   * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -43,19 +39,19 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
-   * @property {appUtilsService} utils - the utils service
+   * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @class
    */
-  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils, utils) {
+  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils, appUtilsService) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
-    this.appStateService = appStateService;
+    this.cfAppStateService = cfAppStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
     this.loadingLimit = config.loadingLimit;
     this.modelUtils = modelUtils;
-    this.utils = utils;
+    this.appUtilsService = appUtilsService;
 
     this.data = {
       applications: [],
@@ -150,19 +146,19 @@
       _.each(apps, function (app) {
         // Update the state for the app to give it an initial state while we wait for the API call to return
         var cacheId = app.clusterId + '#' + app.metadata.guid;
-        app.state = that.data.appStateMap[cacheId] || that.appStateService.get(app.entity);
+        app.state = that.data.appStateMap[cacheId] || that.cfAppStateService.get(app.entity);
 
         if (app.entity.state === 'STARTED') {
           // We need more information
           tasks.push(that.returnAppStats(app.clusterId, app.metadata.guid, null).then(function (stats) {
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
-            app.state = that.appStateService.get(app.entity, app.instances);
+            app.state = that.cfAppStateService.get(app.entity, app.instances);
             that.data.appStateMap[cacheId] = app.state;
             return stats.data;
           }));
         } else {
-          app.state = that.appStateService.get(app.entity);
+          app.state = that.cfAppStateService.get(app.entity);
         }
       });
       return tasks;
@@ -1120,7 +1116,7 @@
     },
 
     onAppStateChange: function () {
-      this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
+      this.application.state = this.cfAppStateService.get(this.application.summary, this.application.instances);
       var cacheId = this.application.summary.clusterId + '#' + this.application.summary.guid;
       this.data.appStateMap[cacheId] = this.application.state;
     }

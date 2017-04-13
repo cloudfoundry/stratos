@@ -9,7 +9,7 @@
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      serviceInstance = $injector.get('cloud-foundry.view.applications.services.serviceInstanceService');
+      serviceInstance = $injector.get('cfServiceInstanceService');
       $uibModal = $injector.get('$uibModal');
       $q = $injector.get('$q');
     }));

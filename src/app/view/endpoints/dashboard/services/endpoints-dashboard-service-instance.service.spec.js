@@ -3,15 +3,15 @@
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $httpBackend, service, modelManager, dashboardService;
+    var $httpBackend, service, modelManager, appEndpointsDashboardService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module('app.view.endpoints.dashboard'));
 
     beforeEach(inject(function ($injector) {
-      var utils = $injector.get('appUtilsService');
-      utils.getOemConfiguration = function () {
+      var appUtilsService = $injector.get('appUtilsService');
+      appUtilsService.getOemConfiguration = function () {
         return {
           CLOUD_FOUNDRY: 'Cloud Foundry',
           CODE_ENGINE: 'Helion Code Engine'
@@ -90,9 +90,9 @@
 
     function createController($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      service = $injector.get('app.view.endpoints.dashboard.cnsiService');
+      service = $injector.get('appEndpointsCnsiService');
       modelManager = $injector.get('modelManager');
-      dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
+      appEndpointsDashboardService = $injector.get('appEndpointsDashboardService');
     }
 
     describe('controller tests', function () {
@@ -152,7 +152,7 @@
 
           service.createEndpointEntries();
 
-          var result = dashboardService.endpoints;
+          var result = appEndpointsDashboardService.endpoints;
           expect(result.length).toBe(4);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {
@@ -170,7 +170,7 @@
           var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
           userServiceInstanceModel.serviceInstances = _.keyBy(services, 'guid');
 
-          dashboardService.endpoints = [{
+          appEndpointsDashboardService.endpoints = [{
             key: 'cnsi_1',
             guid: '1',
             valid: true,
@@ -191,7 +191,7 @@
           }];
           service.createEndpointEntries();
 
-          var result = dashboardService.endpoints;
+          var result = appEndpointsDashboardService.endpoints;
           expect(result.length).toBe(5);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {

@@ -11,11 +11,6 @@
     .module('cloud-foundry.model')
     .run(register);
 
-  register.$inject = [
-    'modelManager',
-    '$q'
-  ];
-
   function register(modelManager, $q) {
     modelManager.register('cloud-foundry.model.auth', new AuthModel(modelManager, $q));
   }

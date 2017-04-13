@@ -6,7 +6,6 @@
     .directive('contenteditable', contentEditable);
 
   // See: https://docs.angularjs.org/api/ng/type/ngModel.NgModelController#custom-control-example
-  contentEditable.$inject = ['$sce'];
   function contentEditable($sce) {
     return {
       restrict: 'A',

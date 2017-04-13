@@ -11,7 +11,7 @@
         $controller = config.controller;
         return $q.reject();
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     beforeEach(inject(function ($injector) {

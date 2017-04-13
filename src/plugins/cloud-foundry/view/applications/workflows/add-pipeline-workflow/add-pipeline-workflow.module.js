@@ -221,7 +221,7 @@
 
                     var message = gettext('There was a problem creating the pipeline.');
 
-                    var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
+                    var codeEngineErrorDetails = that.appUtilsService.extractCodeEngineError(error);
                     if (codeEngineErrorDetails || _.isString(error)) {
                       message = gettext('Failed to create the pipeline due to following exception: ') + (codeEngineErrorDetails || error);
                     }
@@ -230,7 +230,7 @@
                     return that.$q.reject(message);
                   });
               },
-              OEM_CONFIG: that.utils.getOemConfiguration()
+              OEM_CONFIG: that.appUtilsService.getOemConfiguration()
             },
             {
               ready: true,
@@ -268,7 +268,7 @@
               formName: 'application-pipeline-deploy-form',
               nextBtnText: gettext('Finished code change'),
               isLastStep: true,
-              OEM_CONFIG: that.utils.getOemConfiguration()
+              OEM_CONFIG: that.appUtilsService.getOemConfiguration()
             }
           ]
         };
@@ -441,7 +441,7 @@
         }).catch(function (error) {
           var message = gettext('There was a problem retrieving Code Engine VCS instances.');
 
-          var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
+          var codeEngineErrorDetails = that.appUtilsService.extractCodeEngineError(error);
           if (codeEngineErrorDetails || _.isString(error)) {
             message = gettext('Failed to retrieve Code Engine VCS instances due to following error: ') + (codeEngineErrorDetails || error);
           }
@@ -612,7 +612,7 @@
               });
           });
         }, function () {
-          return that.utils.retryRequest(function () {
+          return that.appUtilsService.retryRequest(function () {
             return that.hceModel.getProjectByName(that.userInput.hceCnsi.guid, that.userInput.projectName);
           })
           .then(function (project) {

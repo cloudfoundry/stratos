@@ -39,10 +39,6 @@
         expect($controller).toBeDefined();
       });
 
-      it('should have properties `appEventService` defined', function () {
-        expect($controller.appEventService).toBeDefined();
-      });
-
       it('`clearPassword` should called when events.LOGIN_FAILED triggered', function () {
         spyOn($controller, 'clearPassword');
         $controller.appEventService.$emit($controller.appEventService.events.LOGIN_FAILED);

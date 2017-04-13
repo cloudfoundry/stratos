@@ -6,8 +6,6 @@
   .factory('appUpgradeCheck', upgradeCheckFactory)
   .config(upgradeCheckInterceptor);
 
-  upgradeCheckInterceptor.$inject = ['$httpProvider'];
-
   /**
   * @namespace appUpgradeCheck
   * @memberof app.view
@@ -18,8 +16,6 @@
   function upgradeCheckInterceptor($httpProvider) {
     $httpProvider.interceptors.push('appUpgradeCheck');
   }
-
-  upgradeCheckFactory.$inject = ['$q', 'appEventService'];
 
   /**
   * @namespace appUpgradeCheck

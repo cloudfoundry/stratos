@@ -32,7 +32,7 @@
     'service-manager.view.manage-instance.dialog'
   ];
 
-  function ServiceManagerController($stateParams, $state, utils, modelManager, manageInstanceDialog) {
+  function ServiceManagerController($stateParams, $state, appUtilsService, modelManager, manageInstanceDialog) {
     var that = this;
 
     this.initialized = false;
@@ -41,7 +41,7 @@
     this.manageInstanceDialog = manageInstanceDialog;
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.endpoint);
+      return appUtilsService.getClusterEndpoint(that.endpoint);
     };
 
     function init() {
@@ -58,7 +58,7 @@
       });
     }
 
-    utils.chainStateResolve('sm.endpoint', $state, init);
+    appUtilsService.chainStateResolve('sm.endpoint', $state, init);
   }
 
   angular.extend(ServiceManagerController.prototype, {

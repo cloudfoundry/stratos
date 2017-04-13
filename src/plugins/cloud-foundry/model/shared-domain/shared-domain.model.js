@@ -10,12 +10,6 @@
     .module('cloud-foundry.model')
     .run(registerSharedDomainModel);
 
-  registerSharedDomainModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerSharedDomainModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.shared-domain', new SharedDomain(apiManager, modelUtils));
   }

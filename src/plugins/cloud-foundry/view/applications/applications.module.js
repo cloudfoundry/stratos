@@ -10,10 +10,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications', {
       url: '/applications',
@@ -26,29 +22,19 @@
     });
   }
 
-  ApplicationsController.$inject = [
-    '$scope',
-    '$q',
-    '$state',
-    'appUtilsService',
-    'modelManager',
-    'appEventService',
-    'appLoggedInService'
-  ];
-
   /**
    * @name ApplicationsController
    * @description   Controller for applications module
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {object} $state - the UI router $state service
-   * @param {object} utils - the utils service
+   * @param {object} appUtilsService - the appUtilsService service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} appLoggedInService - Logged In Service
    * @constructor
    */
-  function ApplicationsController($scope, $q, $state, utils, modelManager, appEventService, appLoggedInService) {
+  function ApplicationsController($scope, $q, $state, appUtilsService, modelManager, appEventService, appLoggedInService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
     var initialized = $q.defer();
@@ -64,7 +50,7 @@
       });
     }
 
-    utils.chainStateResolve('cf.applications', $state, init);
+    appUtilsService.chainStateResolve('cf.applications', $state, init);
 
     function onLoggedIn() {
       initialized.resolve();

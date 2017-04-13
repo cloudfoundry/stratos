@@ -30,12 +30,6 @@
     };
   }
 
-  CodeBlockController.$inject = [
-    '$window',
-    '$document',
-    '$timeout'
-  ];
-
   /**
    * @namespace helion.framework.widgets.CodeBlockController
    * @memberof helion.framework.widgets

@@ -3,13 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.notificationsService', notificationsFactory);
-
-  notificationsFactory.$inject = [
-    '$interpolate',
-    'appEventService',
-    'helion.framework.widgets.toaster'
-  ];
+    .factory('appNotificationsService', notificationsFactory);
 
   /**
    * @memberof cloud-foundry.view.applications.services
@@ -17,14 +11,14 @@
    * @description A notifications service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.utils.appEventService} appEventService - the application event bus service
-   * @param {helion.framework.widgets.toaster} toaster - the toast service
+   * @param {helion.framework.widgets.frameworkToaster} frameworkToaster - the toast service
    * @returns {object} A service instance factory
    */
-  function notificationsFactory($interpolate, appEventService, toaster) {
+  function notificationsFactory($interpolate, appEventService, frameworkToaster) {
     var service = {
       /**
        * @function notify
-       * @memberof app.view.notificationsService
+       * @memberof appNotificationsService
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message
@@ -49,15 +43,15 @@
         }
         switch (toastType) {
           case 'busy':
-            return toaster.busy(interpolatedMessage, toastOptions);
+            return frameworkToaster.busy(interpolatedMessage, toastOptions);
           case 'error':
-            return toaster.error(interpolatedMessage, toastOptions);
+            return frameworkToaster.error(interpolatedMessage, toastOptions);
           case 'success':
-            return toaster.success(interpolatedMessage, toastOptions);
+            return frameworkToaster.success(interpolatedMessage, toastOptions);
           case 'warning':
-            return toaster.warning(interpolatedMessage, toastOptions);
+            return frameworkToaster.warning(interpolatedMessage, toastOptions);
           default:
-            return toaster.show(interpolatedMessage, toastType, toastOptions);
+            return frameworkToaster.show(interpolatedMessage, toastType, toastOptions);
         }
       }
     };

@@ -22,8 +22,6 @@
 
   }
 
-  ConsoleViewController.$inject = ['$rootScope'];
-
   function ConsoleViewController($rootScope) {
     var vm = this;
 

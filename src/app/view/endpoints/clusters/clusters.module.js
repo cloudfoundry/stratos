@@ -10,10 +10,6 @@
     .config(registerRoute)
     .run(register);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters', {
       url: '/cluster',
@@ -25,43 +21,29 @@
     });
   }
 
-  register.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appEventService',
-    'appUtilsService'
-  ];
-
-  function register($q, $state, modelManager, appEventService, utils) {
-    return new Clusters($q, $state, modelManager, appEventService, utils);
+  function register($q, $state, modelManager, appEventService, appUtilsService) {
+    return new Clusters($q, $state, modelManager, appEventService, appUtilsService);
   }
 
-  function Clusters($q, $state, modelManager, appEventService, utils) {
-    var that = this;
+  function Clusters($q, $state, modelManager, appEventService, appUtilsService) {
 
-    this.initialized = $q.defer();
-
-    this.modelManager = modelManager;
+    var initialized = $q.defer();
 
     function init() {
-      return that.initialized.promise;
+      return initialized.promise;
     }
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      that.onLoggedIn();
+      onLoggedIn();
     });
 
-    utils.chainStateResolve('endpoint.clusters', $state, init);
-  }
+    appUtilsService.chainStateResolve('endpoint.clusters', $state, init);
 
-  angular.extend(Clusters.prototype, {
-
-    onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function onLoggedIn() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', 'menu.cloud-foundry', 1, 'helion-icon-Cloud');
-      this.initialized.resolve();
+      initialized.resolve();
     }
-  });
+  }
 
 })();

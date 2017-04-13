@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster')
     .directive('rolesTables', RolesTables);
 
-  RolesTables.$inject = [];
-
   function RolesTables() {
     return {
       bindToController: {
@@ -22,13 +20,6 @@
     };
   }
 
-  RolesTablesController.$inject = [
-    '$scope',
-    '$q',
-    'modelManager',
-    'app.view.endpoints.clusters.cluster.rolesService'
-  ];
-
   /**
    * @name RolesTablesController
    * @description Controller for a roles tables directive. Will optionally update the model cache
@@ -36,13 +27,13 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.view.endpoints.clusters.cluster.rolesService} rolesService - the console roles service. Aids in
+   * @param {app.view.endpoints.clusters.cluster.appClusterRolesService} appClusterRolesService - the console roles service. Aids in
    * selecting, assigning and removing roles with the roles table.
    */
-  function RolesTablesController($scope, $q, modelManager, rolesService) {
+  function RolesTablesController($scope, $q, modelManager, appClusterRolesService) {
     var that = this;
 
-    this.rolesService = rolesService;
+    this.appClusterRolesService = appClusterRolesService;
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     // If the organization changes, ensure we respond
@@ -54,7 +45,7 @@
     $scope.$watch(function () {
       return that.selection;
     }, function (selection) {
-      that.rolesService.updateRoles(selection);
+      that.appClusterRolesService.updateRoles(selection);
     }, true);
 
     function rolesToSelection(roles) {

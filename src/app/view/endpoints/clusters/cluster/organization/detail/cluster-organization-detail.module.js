@@ -8,10 +8,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail', {
       url: '',
@@ -22,33 +18,24 @@
     });
   }
 
-  ClusterOrgDetailController.$inject = [
-    'appUtilsService',
-    'organization-model',
-    '$state',
-    '$stateParams',
-    '$q'
-  ];
+  function ClusterOrgDetailController(appUtilsService, cfOrganizationModel, $state, $stateParams, $q) {
+    var vm = this;
 
-  function ClusterOrgDetailController(utils, organizationModel, $state, $stateParams, $q) {
-    var that = this;
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
+    vm.organizationNames = [];
+    vm.organization = organization;
 
-    this.organizationModel = organizationModel;
+    // Ensure the parent state is fully initialised before we start our own init
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
 
     function init() {
-      that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];
+      vm.organizationNames = cfOrganizationModel.organizationNames[vm.clusterGuid];
       return $q.resolve();
     }
 
-    // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
-  }
-
-  angular.extend(ClusterOrgDetailController.prototype, {
-    organization: function () {
-      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
+    function organization() {
+      return cfOrganizationModel.fetchOrganization(vm.clusterGuid, vm.organizationGuid);
     }
-  });
+  }
 })();

@@ -26,11 +26,11 @@
 
   SelectVcsTokenController.$inject = [
     'modelManager',
-    'app.view.vcs.manageVcsTokens',
-    'app.view.vcs.registerVcsToken'
+    'appManageVcsTokens',
+    'appRegisterVcsToken'
   ];
 
-  function SelectVcsTokenController(modelManager, manageVcsTokens, registerVcsToken) {
+  function SelectVcsTokenController(modelManager, appManageVcsTokens, appRegisterVcsToken) {
     var vm = this;
 
     vm.singleToken = singleToken;
@@ -63,7 +63,7 @@
 
     function manageTokens($event) {
       $event.stopPropagation();
-      manageVcsTokens.manage(vm.source.value).then(function () {
+      appManageVcsTokens.manage(vm.source.value).then(function () {
         // Avoid potential race condition when the last validity check is still in flight
         vcsModel.lastValidityCheck.then(function () {
 
@@ -80,7 +80,7 @@
 
     function addNewToken($event) {
       $event.stopPropagation();
-      registerVcsToken.registerToken(vm.source.value).then(function () {
+      appRegisterVcsToken.registerToken(vm.source.value).then(function () {
         // Refresh tokens
         return vcsModel.listVcsTokens().then(function () {
           return vcsModel.checkTokensValidity(vm.source.value).then(function () {

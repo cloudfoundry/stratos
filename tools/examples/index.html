@@ -958,7 +958,7 @@ frameworkWidgetsDialogConfirm({
            to close.</p>
         <p>The detailView service returns a promise that can be used to hook in methods for when the Detail View is closed
         or dismissed.</p>
-        <pre>// inject 'helion.framework.widgets.detailView' as 'detailView', and then
+        <pre>// inject 'frameworkDetailView' as 'detailView', and then
 detailView({
           title: 'Optional title',
           templateUrl: 'path/to/html/template/for/view.html'
@@ -1043,7 +1043,7 @@ detailView({
         <p>This is an AngularJS directive that can be used to show toast notifications.</p>
         <p>
           There are 3 standard notification types, a custom type (supporting a custom icon) and a busy indiactor. To use, inject
-          'helion.framework.widgets.toaster' as 'toaster', then you can use:
+          'frameworkToaster' as 'toaster', then you can use:
         </p>
         <pre>
           toaster.success('success message');
@@ -1091,7 +1091,7 @@ detailView({
         </h2>
         <p>This is an angular service that can be used to show a right-hand slide-in dialog. It extends the detail view and
         shows an indication when a task is running. The task that should be executed is supplied as a promise returning function.</p>
-        <pre>// inject 'helion.framework.widgets.asyncTaskDialog' as 'asyncTaskDialog', and then
+        <pre>// inject 'frameworkAsyncTaskDialog' as 'asyncTaskDialog', and then
 asyncTaskDialog({
           title: 'Optional title',
           templateUrl: 'path/to/html/template/for/view.html'

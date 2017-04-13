@@ -104,7 +104,7 @@
     'service-manager.utils.version'
   ];
 
-  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, utils, modelManager,
+  function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, appUtilsService, modelManager,
                                                   frameworkDialogConfirm, manageInstanceDialog, versionUtils) {
     var that = this;
 
@@ -121,7 +121,7 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.endpoint);
+      return appUtilsService.getClusterEndpoint(that.endpoint);
     };
 
     this.guid = $state.params.guid;
@@ -319,7 +319,7 @@
     'service-manager.utils.version'
   ];
 
-  function UpgradeController($state, $q, modelManager, utils, versionUtils) {
+  function UpgradeController($state, $q, modelManager, appUtilsService, versionUtils) {
     var that = this;
 
     this.versionUtils = versionUtils;
@@ -375,7 +375,7 @@
       versionUtils.sortByProperty(that.versions, 'product_version', true);
     }
 
-    utils.chainStateResolve('sm.endpoint.instance.versions', $state, init);
+    appUtilsService.chainStateResolve('sm.endpoint.instance.versions', $state, init);
 
   }
 

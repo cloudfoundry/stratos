@@ -2,7 +2,7 @@
   'use strict';
 
   describe('Routes Service test', function () {
-    var $httpBackend, routesService, $uibModal;
+    var $httpBackend, appClusterRoutesService, $uibModal;
 
     var host = 'host';
     var domain = 'domain';
@@ -28,7 +28,7 @@
     beforeEach(inject(function ($injector) {
       $uibModal = $injector.get('$uibModal');
 
-      routesService = $injector.get('app.view.endpoints.clusters.routesService');
+      appClusterRoutesService = $injector.get('appClusterRoutesService');
 
       $httpBackend = $injector.get('$httpBackend');
     }));
@@ -39,15 +39,15 @@
     });
 
     it('should be defined', function () {
-      expect(routesService).toBeDefined();
-      expect(routesService.getRouteId).toBeDefined();
-      expect(routesService.unmapAppRoute).toBeDefined();
-      expect(routesService.unmapAppsRoute).toBeDefined();
-      expect(routesService.deleteRoute).toBeDefined();
+      expect(appClusterRoutesService).toBeDefined();
+      expect(appClusterRoutesService.getRouteId).toBeDefined();
+      expect(appClusterRoutesService.unmapAppRoute).toBeDefined();
+      expect(appClusterRoutesService.unmapAppsRoute).toBeDefined();
+      expect(appClusterRoutesService.deleteRoute).toBeDefined();
     });
 
     it('getRouteId', function () {
-      var id = routesService.getRouteId(route);
+      var id = appClusterRoutesService.getRouteId(route);
       expect(id).toEqual(host + '.' + domain + ':' + port + path);
     });
 
@@ -61,7 +61,7 @@
       });
 
       $httpBackend.expectDELETE('/pp/v1/proxy/v2/routes/' + routeGuid + '/apps/' + appGuid).respond({});
-      routesService.unmapAppRoute(cnsiGuid, route, routeGuid, appGuid).catch(function () {
+      appClusterRoutesService.unmapAppRoute(cnsiGuid, route, routeGuid, appGuid).catch(function () {
         fail('unmapAppRoute should not have errored');
       });
 
@@ -80,7 +80,7 @@
 
       $httpBackend.expectDELETE('/pp/v1/proxy/v2/routes/' + routeGuid + '/apps/' + appGuids[0]).respond({});
       $httpBackend.expectDELETE('/pp/v1/proxy/v2/routes/' + routeGuid + '/apps/' + appGuids[1]).respond({});
-      routesService.unmapAppsRoute(cnsiGuid, route, routeGuid, appGuids).catch(function () {
+      appClusterRoutesService.unmapAppsRoute(cnsiGuid, route, routeGuid, appGuids).catch(function () {
         fail('unmapAppsRoutes should not have errored');
       });
 
@@ -98,7 +98,7 @@
       });
 
       $httpBackend.expectDELETE('/pp/v1/proxy/v2/routes/' + routeGuid + '?recursive=true').respond({});
-      routesService.deleteRoute(cnsiGuid, route, routeGuid, appGuid).catch(function () {
+      appClusterRoutesService.deleteRoute(cnsiGuid, route, routeGuid, appGuid).catch(function () {
         fail('deleteRoute should not have errored');
       });
 

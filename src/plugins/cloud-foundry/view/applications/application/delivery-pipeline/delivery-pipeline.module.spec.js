@@ -3,8 +3,8 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, notificationsService,
-      modelManager, vcsTokenManager, registerVcsToken, PAT_DELIMITER, $httpBackend, account, utils, $q;
+    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, appNotificationsService,
+      modelManager, appManageVcsTokens, appRegisterVcsToken, PAT_DELIMITER, $httpBackend, account, appUtilsService, $q;
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
@@ -47,8 +47,8 @@
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
       modelManager = $injector.get('modelManager');
-      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
-      registerVcsToken = $injector.get('app.view.vcs.registerVcsToken');
+      appManageVcsTokens = $injector.get('appManageVcsTokens');
+      appRegisterVcsToken = $injector.get('appRegisterVcsToken');
       PAT_DELIMITER = $injector.get('PAT_DELIMITER');
 
       // Some generic vars needed in tests
@@ -62,14 +62,14 @@
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
-      notificationsService = $injector.get('app.view.notificationsService');
-      utils = $injector.get('appUtilsService');
+      appNotificationsService = $injector.get('appNotificationsService');
+      appUtilsService = $injector.get('appUtilsService');
     }));
 
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
 
-      var detailView = function () {
+      var frameworkDetailView = function () {
         return {};
       };
 
@@ -83,7 +83,7 @@
         };
       };
 
-      var addNotificationService = {
+      var cfAddNotificationService = {
         add: function () {
           return {
             result: {
@@ -95,7 +95,7 @@
         }
       };
 
-      var postDeployActionService = {
+      var cfPostDeployActionService = {
         add: function () {
           return {
             result: {
@@ -114,9 +114,9 @@
       $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
-      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager,
-        registerVcsToken, confirmDialog, notificationsService, addNotificationService,
-        postDeployActionService, utils, detailView, PAT_DELIMITER,
+      controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, appManageVcsTokens,
+        appRegisterVcsToken, confirmDialog, appNotificationsService, cfAddNotificationService,
+        cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
         $interpolate, $stateParams, $rootScope.$new(), $q, $state);
 
       $httpBackend.flush();

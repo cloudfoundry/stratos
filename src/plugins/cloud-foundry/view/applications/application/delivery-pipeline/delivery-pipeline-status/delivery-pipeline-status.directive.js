@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications.application.delivery-pipeline')
     .directive('deliveryPipelineStatus', deliveryPipelineStatus);
 
-  deliveryPipelineStatus.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications
    * @name deliveryPipelineStatus
@@ -26,11 +24,6 @@
       bindToController: true
     };
   }
-
-  ApplicationSetupPipelineController.$inject = [
-    '$rootScope',
-    '$scope'
-  ];
 
   /**
    * @name ApplicationSetupPipelineController

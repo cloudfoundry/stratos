@@ -3,17 +3,14 @@
 
   angular
     .module('app.view.endpoints')
-    .factory('app.view.userSelection', userSelectionFactory);
-
-  userSelectionFactory.$inject = [];
+    .factory('appUserSelection', userSelectionFactory);
 
   /**
-   * @namespace app.view.userSelection
+   * @namespace app.view.endpoints
    * @memberof app.view
-   * @name utilsService
+   * @name appUtilsService
    * @description service centralizing user selection
-   * @param {object} $log - the Angular $log service
-   * @returns {object} the utils service
+   * @returns {object} the appUtilsService service
    */
   function userSelectionFactory() {
     var that = this;

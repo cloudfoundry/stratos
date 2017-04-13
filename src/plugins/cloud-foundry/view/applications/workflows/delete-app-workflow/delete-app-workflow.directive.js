@@ -45,22 +45,22 @@
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {appUtilsService} utils - the utils service
+   * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {boolean} deletingApplication - a flag indicating if the workflow in progress
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, utils) {
+  function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, appUtilsService) {
     this.appEventService = appEventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
-    this.utils = utils;
+    this.appUtilsService = appUtilsService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -209,7 +209,7 @@
         });
       });
 
-      return this.utils.runInSequence(funcStack);
+      return this.appUtilsService.runInSequence(funcStack);
     },
 
     /**
@@ -264,7 +264,7 @@
             });
           });
 
-          return that.utils.runInSequence(funcStack);
+          return that.appUtilsService.runInSequence(funcStack);
         });
     },
 
@@ -285,7 +285,7 @@
         });
       });
 
-      return this.utils.runInSequence(funcStack);
+      return this.appUtilsService.runInSequence(funcStack);
     },
 
     /**
@@ -348,7 +348,7 @@
         });
       });
 
-      return this.utils.runInSequence(funcStack);
+      return this.appUtilsService.runInSequence(funcStack);
     },
 
     /**

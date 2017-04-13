@@ -159,11 +159,11 @@
 
         describe('detach', function () {
           it('should call unbindServiceFromApp', function () {
-            spyOn(serviceCardCtrl.serviceInstanceService, 'unbindServiceFromApp');
+            spyOn(serviceCardCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
             serviceCardCtrl.detach();
-            expect(serviceCardCtrl.serviceInstanceService.unbindServiceFromApp)
+            expect(serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp)
               .toHaveBeenCalled();
-            var args = serviceCardCtrl.serviceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+            var args = serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
             expect(args[0]).toBe('guid');
             expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
             expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
@@ -171,10 +171,10 @@
           });
 
           it('should not call unbindServiceFromApp if no services attached', function () {
-            spyOn(serviceCardCtrl.serviceInstanceService, 'unbindServiceFromApp');
+            spyOn(serviceCardCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
             serviceCardCtrl.serviceBindings.length = 0;
             serviceCardCtrl.detach();
-            expect(serviceCardCtrl.serviceInstanceService.unbindServiceFromApp)
+            expect(serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp)
               .not.toHaveBeenCalled();
           });
         });

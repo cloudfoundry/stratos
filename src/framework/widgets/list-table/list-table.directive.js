@@ -48,8 +48,6 @@
     };
   }
 
-  ListTableController.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.ListTableController
    * @memberof helion.framework.widgets

@@ -19,8 +19,8 @@
       var $q = $injector.get('$q');
       var addRoutesService = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
       var editAppService = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
-      var utils = $injector.get('appUtilsService');
-      var routesService = $injector.get('app.view.endpoints.clusters.routesService');
+      var appUtilsService = $injector.get('appUtilsService');
+      var appClusterRoutesService = $injector.get('appClusterRoutesService');
 
       $stateParams.cnsiGuid = cnsiGuid;
       if (mockAuthModel) {
@@ -41,7 +41,7 @@
       _.set(appModel, 'application.summary.space_guid', spaceGuid);
 
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
-      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter, modelManager, addRoutesService, editAppService, utils, routesService);
+      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter, modelManager, addRoutesService, editAppService, appUtilsService, appClusterRoutesService);
 
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);

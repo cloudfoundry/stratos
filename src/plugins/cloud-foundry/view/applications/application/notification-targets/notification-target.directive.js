@@ -27,7 +27,7 @@
     '$scope',
     'apiManager',
     'modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'frameworkAsyncTaskDialog'
   ];
 
   /**
@@ -38,11 +38,11 @@
    * @param {object} $scope - angular $scope
    * @param {app.api.apiManager} apiManager - the API management service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog - Async Task Dialog service
+   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
-  function NotificationTargetController($scope, apiManager, modelManager, asyncTaskDialog) {
+  function NotificationTargetController($scope, apiManager, modelManager, frameworkAsyncTaskDialog) {
     this.$scope = $scope;
-    this.asyncTaskDialog = asyncTaskDialog;
+    this.frameworkAsyncTaskDialog = frameworkAsyncTaskDialog;
     this.hceNotificationApi = apiManager.retrieve('cloud-foundry.api.HceNotificationApi');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
@@ -77,7 +77,7 @@
         token: null
       };
 
-      return this.asyncTaskDialog(
+      return this.frameworkAsyncTaskDialog(
         {
           title: this.targetType.title,
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/' +

@@ -10,17 +10,9 @@
   angular
     .module('cloud-foundry.api', [], config);
 
-  config.$inject = [
-    '$httpProvider'
-  ];
-
   function config($httpProvider) {
     $httpProvider.interceptors.push(CFAPIInterceptor);
   }
-
-  CFAPIInterceptor.$inject = [
-    '$q'
-  ];
 
   function CFAPIInterceptor($q) {
     return {

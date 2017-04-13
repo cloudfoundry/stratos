@@ -19,12 +19,12 @@
    * @namespace app.model.userInfo.UserInfo
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
-   * @param {appUtilsService} utilsService - utils service
+   * @param {app.utils.appUtilsService} appUtilsService - utils service
    * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class
    */
-  function StackatoInfo(utilsService, stackatoInfoService) {
+  function StackatoInfo(appUtilsService, stackatoInfoService) {
     var info = {};
 
     return {
@@ -68,7 +68,7 @@
      * @private
      */
     function onStackatoInfo(response) {
-      utilsService.replaceProperties(info, response.data);
+      appUtilsService.replaceProperties(info, response.data);
     }
 
   }

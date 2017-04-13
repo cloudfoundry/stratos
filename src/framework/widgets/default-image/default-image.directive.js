@@ -5,8 +5,6 @@
     .module('helion.framework.widgets')
     .directive('defaultImage', defaultImage);
 
-  defaultImage.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.defaultImage
    * @memberof helion.framework.widgets

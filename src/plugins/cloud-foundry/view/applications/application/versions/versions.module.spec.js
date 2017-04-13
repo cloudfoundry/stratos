@@ -4,7 +4,7 @@
   describe('Versions module', function () {
 
     var controller, $stateParams, $q, $timeout, $state, $scope, $httpBackend,
-      $interpolate, modelManager, confirmDialog, utilsService, notificationsService;
+      $interpolate, modelManager, confirmDialog, appUtilsService, appNotificationsService;
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.versions'));
@@ -25,10 +25,10 @@
       confirmDialog = function (specs) {
         return specs.callback();
       };
-      notificationsService = {
+      appNotificationsService = {
         notify: angular.noop
       };
-      utilsService = $injector.get('appUtilsService');
+      appUtilsService = $injector.get('appUtilsService');
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       _.set(authModel, 'principal.guid.isAllowed.apply', _.noop);
@@ -43,7 +43,7 @@
       var VersionsController = $state.get('cf.applications.application.versions').controller;
       controller = new VersionsController($q, $interpolate, $stateParams,
         $scope, $timeout, $state, modelManager,
-        confirmDialog, notificationsService, utilsService);
+        confirmDialog, appNotificationsService, appUtilsService);
 
     }
 

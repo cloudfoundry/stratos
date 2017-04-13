@@ -5,10 +5,6 @@
     .module('app.view')
     .directive('pageFooter', pageFooter);
 
-  pageFooter.$inject = [
-    'appBasePath'
-  ];
-
   /**
    * @namespace app.view.pageFooter
    * @memberof app.view
@@ -29,13 +25,8 @@
     };
   }
 
-  PageFooterController.$inject = [
-    '$scope',
-    'appUtilsService'
-  ];
-
-  function PageFooterController($scope, utilsService) {
-    this.OEM_CONFIG = utilsService.getOemConfiguration();
+  function PageFooterController($scope, appUtilsService) {
+    this.OEM_CONFIG = appUtilsService.getOemConfiguration();
   }
 
 })();

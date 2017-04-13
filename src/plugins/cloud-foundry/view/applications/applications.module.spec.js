@@ -13,7 +13,7 @@
 
       var $q = $injector.get('$q');
       var $state = $injector.get('$state');
-      var utils = $injector.get('appUtilsService');
+      var appUtilsService = $injector.get('appUtilsService');
       var modelManager = $injector.get('modelManager');
       appEventService = $injector.get('appEventService');
       var appLoggedInService = $injector.get('appLoggedInService');
@@ -24,7 +24,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsController = $state.get('cf.applications').controller;
-      $controller = new ApplicationsController($scope, $q, $state, utils, modelManager, appEventService, appLoggedInService);
+      $controller = new ApplicationsController($scope, $q, $state, appUtilsService, modelManager, appEventService, appLoggedInService);
 
       expect($controller).toBeDefined();
     }));

@@ -3,32 +3,32 @@
 
   angular
     .module('cloud-foundry.view.applications.services')
-    .factory('cloud-foundry.view.applications.services.serviceInstanceService', serviceInstanceFactory);
+    .factory('cfServiceInstanceService', serviceInstanceFactory);
 
   serviceInstanceFactory.$inject = [
     '$log',
     '$interpolate',
     '$q',
     'modelManager',
-    'app.view.notificationsService',
-    'helion.framework.widgets.detailView',
+    'appNotificationsService',
+    'frameworkDetailView',
     'frameworkDialogConfirm'
   ];
 
   /**
    * @memberof cloud-foundry.view.applications.services
-   * @name serviceInstanceService
+   * @name cfServiceInstanceService
    * @description A service instance common service
    * @param {object} $log - the Angular $log service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirm dialog
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog
    * @returns {object} A service instance factory
    */
-  function serviceInstanceFactory($log, $interpolate, $q, modelManager, notificationsService, detailView,
+  function serviceInstanceFactory($log, $interpolate, $q, modelManager, appNotificationsService, frameworkDetailView,
                                   frameworkDialogConfirm) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -37,7 +37,7 @@
     return {
       /**
        * @function unbindServiceFromApp
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Unbind service instance from application
        * @param {string} cnsiGuid - the CNSI guid
        * @param {string} appGuid - the application GUID
@@ -77,7 +77,7 @@
 
       /**
        * @function unbindServiceFromApps
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Unbind service instance from applications
        * @param {string} cnsiGuid - the CNSI guid
        * @param {Array} serviceBindings - collection of service bindings to unbind. The inline relation of properties
@@ -117,9 +117,9 @@
             return $q.all(promises)
               .then(function () {
                 if (failedCount > 0) {
-                  notificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
+                  appNotificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
                 } else {
-                  notificationsService.notify('success', gettext('Service instance successfully detached'));
+                  appNotificationsService.notify('success', gettext('Service instance successfully detached'));
                 }
 
                 if (angular.isDefined(callbackFunc)) {
@@ -146,7 +146,7 @@
 
       /**
        * @function deleteService
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description Delete a service instance.
        * @param {string} cnsiGuid - the CNSI guid
        * @param {string} serviceInstanceGuid - the service instance GUID
@@ -173,7 +173,7 @@
             };
             return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params)
               .then(function () {
-                notificationsService.notify('success', gettext('Service instance successfully deleted'));
+                appNotificationsService.notify('success', gettext('Service instance successfully deleted'));
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
@@ -189,7 +189,7 @@
 
       /**
        * @function viewEnvVariables
-       * @memberof cloud-foundry.view.applications.services.serviceInstanceService
+       * @memberof cfServiceInstanceService
        * @description view the environment variables of an app
        * @param {string} cnsiGuid - the CNSI guid
        * @param {object} appSummary - the application summary data
@@ -213,7 +213,7 @@
               var context = {
                 variables: instanceVars
               };
-              detailView(config, context);
+              frameworkDetailView(config, context);
             }
           });
       }

@@ -29,8 +29,6 @@
     };
   }
 
-  PercentGaugeController.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.PercentGaugeController
    * @memberof helion.framework.widgets

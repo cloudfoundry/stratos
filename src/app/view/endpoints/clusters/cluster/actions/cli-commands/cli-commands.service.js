@@ -3,12 +3,7 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.cliCommands', CliCommandsFactory);
-
-  CliCommandsFactory.$inject = [
-    'modelManager',
-    'helion.framework.widgets.detailView'
-  ];
+    .factory('appClusterCliCommands', CliCommandsFactory);
 
   /**
    * @memberof app.view.endpoints.clusters.cluster
@@ -16,9 +11,9 @@
    * @description Factory to provide a way to show the cli commands for HCF
    * @constructor
    * @param {app.model.modelManager} modelManager - The console's modelManager service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
-  function CliCommandsFactory(modelManager, detailView) {
+  function CliCommandsFactory(modelManager, frameworkDetailView) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -47,7 +42,7 @@
           authModel.actions.update, space.details.space.metadata.guid, organization.details.org.metadata.guid)
           : isAdmin;
 
-        return detailView(
+        return frameworkDetailView(
           {
             templateUrl: 'app/view/endpoints/clusters/cluster/actions/cli-commands/cli-commands.html',
             title: 'cf.cli.commands.title'

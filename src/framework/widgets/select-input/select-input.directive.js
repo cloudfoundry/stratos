@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('selectInput', selectInput);
 
-  selectInput.$inject = [
-    '$document'
-  ];
-
   /**
    * @namespace helion.framework.widgets.selectInput
    * @memberof helion.framework.widgets
@@ -95,11 +91,6 @@
       }
     }
   }
-
-  SelectInputController.$inject = [
-    '$scope',
-    '$q'
-  ];
 
   /**
    * @namespace helion.framework.widgets.SelectInputController
