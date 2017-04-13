@@ -30,7 +30,7 @@
     var endpointPrefix = 'cnsi_';
     var cnsiEndpointProviders = {};
 
-    return {
+    var service = {
       getEndpointsToRegister: getEndpointsToRegister,
       haveInstances: haveInstances,
       updateInstances: updateInstances,
@@ -38,6 +38,10 @@
       clear: clear,
       cnsiEndpointProviders: cnsiEndpointProviders
     };
+
+    appEndpointsDashboardService.endpointsProviders.push(service);
+
+    return service;
 
     function getEndpointsToRegister() {
       return _
@@ -55,7 +59,7 @@
     /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description are there any cached service instances?
+     * @description Synchronous. Are there any cached service instances?
      * @returns {boolean}
      * @public
      */
@@ -209,7 +213,7 @@
     /**
      * @function clear
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description clear any local data before leaving the dashboard
+     * @description Synchronous. clear any local data before leaving the dashboard
      * @public
      */
     function clear() {

@@ -27,31 +27,28 @@
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.appRegisterService} appRegisterService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @constructor
    */
   function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
-                                        appEndpointsDashboardService, appEndpointsCnsiService, ceVCSEndpointService) {
+                                        appEndpointsDashboardService) {
     var vm = this;
-
-    appEndpointsDashboardService.endpointsProviders.push(appEndpointsCnsiService);
-    appEndpointsDashboardService.endpointsProviders.push(ceVCSEndpointService);
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
-    vm.endpoints = appEndpointsDashboardService.endpoints;
+    vm.endpoints = undefined;
     vm.initialised = false;
-    vm.listError = false;
     vm.register = register;
     vm.hideWelcomeMessage = hideWelcomeMessage;
     vm.isUserAdmin = isUserAdmin;
     vm.reload = reload;
 
-    appEndpointsDashboardService.refresh().then(function () {
-      _updateWelcomeMessage();
+    appEndpointsDashboardService.refreshFromCache();
+    if (appEndpointsDashboardService.endpoints.length !== 0) {
+      // Avoid flashing up 'no endpoints' ui before we've had a change to update from server in init()
+      vm.endpoints = appEndpointsDashboardService.endpoints;
       vm.initialised = true;
-    });
+      _updateWelcomeMessage();
+    }
 
     appUtilsService.chainStateResolve('endpoint.dashboard', $state, init);
 
@@ -70,7 +67,8 @@
       appRegisterService.show($scope)
         .then(function () {
           return appEndpointsDashboardService.update();
-        }).then(function () {
+        })
+        .then(function () {
           _updateWelcomeMessage();
         });
     }
@@ -105,13 +103,18 @@
     }
 
     function init() {
-      return appEndpointsDashboardService.update().then(function () {
-        vm.listError = false;
-        vm.intialised = true;
-        _updateWelcomeMessage();
-      }).catch(function () {
-        vm.listError = true;
-      });
+      vm.initialised = false;
+      return appEndpointsDashboardService.update()
+        .then(function () {
+          vm.listError = false;
+          vm.initialised = true;
+          if (!vm.endpoints) {
+            vm.endpoints = vm.endpoints || appEndpointsDashboardService.endpoints;
+          }
+          _updateWelcomeMessage();
+        }).catch(function () {
+          vm.listError = true;
+        });
     }
 
     function _updateWelcomeMessage() {

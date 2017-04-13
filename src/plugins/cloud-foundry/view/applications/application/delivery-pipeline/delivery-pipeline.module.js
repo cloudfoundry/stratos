@@ -93,7 +93,7 @@
     };
 
     function init() {
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = that.modelManager.retrieve('cloud-foundry.model.vcs');
       // Fetch HCE service metadata so that we can show the appropriate message
       that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;

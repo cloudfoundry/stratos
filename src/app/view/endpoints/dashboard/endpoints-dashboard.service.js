@@ -21,7 +21,7 @@
       endpoints: endpoints,
       endpointsProviders: endpointsProviders,
       clear: clear,
-      refresh: refresh,
+      refreshFromCache: refreshFromCache,
       update: updateEndpoints
     };
 
@@ -31,7 +31,7 @@
       });
     }
 
-    function refresh() {
+    function refreshFromCache() {
       return clear()
         .then(function () {
           return _haveCachedEndpoints();
@@ -43,7 +43,6 @@
             // we will still refresh the data asynchronously and the UI will update to reflect changes
             return _updateEndpointsFromCache();
           }
-          return $q.resolve();
         });
     }
 

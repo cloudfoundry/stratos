@@ -131,7 +131,7 @@
       });
 
       it('should be uninitialised', function () {
-        expect(controller.endpoints).toEqual([]);
+        expect(controller.endpoints).toBeUndefined();
         expect(controller.initialised).toBe(false);
         $httpBackend.flush();
       });
@@ -150,9 +150,8 @@
       it('initialisation fails', function () {
         $httpBackend.expect('GET', '/pp/v1/cnsis').respond(500, {});
         $httpBackend.flush();
-        expect(controller.initialised).toBe(true);
-        expect(controller.endpoints).toBeDefined();
-        expect(controller.endpoints.length).toBe(0);
+        expect(controller.initialised).toBe(false);
+        expect(controller.endpoints).toBeUndefined();
         expect(controller.listError).toBeTruthy();
       });
     });

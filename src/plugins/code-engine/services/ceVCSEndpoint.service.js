@@ -23,12 +23,9 @@
                              ceManageVcsTokens, ceRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var endpointPrefix = 'vcs_';
-
     var codeEngineVcs = [];
-
     var fetchedCodeEngineVcses = false;
-
-    return {
+    var service = {
       haveInstances: haveInstances,
       updateInstances: updateInstances,
       createEndpointEntries: createEndpointEntries,
@@ -38,10 +35,14 @@
       isCodeEngineVcs: isCodeEngineVcs
     };
 
+    appEndpointsDashboardService.endpointsProviders.push(service);
+
+    return service;
+
     /**
      * @function _updateEndpoints
      * @memberOf service-manager.service.ceVCSEndpointService
-     * @description are there any cached service instances?
+     * @description Synchronous. Are there any cached service instances?
      * @returns {boolean}
      * @public
      */
@@ -161,7 +162,7 @@
     /**
      * @function clear
      * @memberOf service-manager.service.ceVCSEndpointService
-     * @description clear any local data before leaving the dashboard
+     * @description Synchronous. clear any local data before leaving the dashboard
      * @public
      */
     function clear() {
