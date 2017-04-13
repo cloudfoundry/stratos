@@ -74,7 +74,7 @@ To login use the following credentials:
  - username: `admin`,
  - password: `hscadmin`
  
-## Build you own Console
+## Build the latest Console
 To publish the console to a private repository or a different organisation, use the `build.sh` script.
 This script will build the all the components and publish the images to a specified repository or organisation. The script will produce an overrides file which can be used with Helm when create the Console instance.
 
