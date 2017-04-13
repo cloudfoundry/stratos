@@ -66,7 +66,7 @@
   var oem = require('./oem.gulp.js');
   oem(config);
 
-  // Pull in the gulp tasks for oem support
+  // Pull in the gulp tasks for e2e tests
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
@@ -119,7 +119,7 @@
     done();
   });
 
-  // Copy JavScript config file to 'dist'- patch in the default OEM configuration
+  // Copy JavaScript config file to 'dist'- patch in the default OEM configuration
   gulp.task('copy:configjs', ['copy:configjs:oem'], function () {
     return gulp
       .src(paths.src + 'config.js')
@@ -317,6 +317,12 @@
        }
        */
 
+      // If talking to a local proxy directly, need to avoid double '/'
+      var target = nodeUrl.format(targetUrl);
+      if (_.endsWith(target, '/')) {
+        target = target.substr(0, target.length - 1);
+      }
+
       devOptions.options = devOptions.options || {};
       // Do NOT follow redirects - return them back to the browser
       devOptions.options.followRedirect = false;
@@ -324,7 +330,7 @@
       var proxyMiddleware = {
         route: '/pp',
         handle: function (req, res) {
-          var url = nodeUrl.format(targetUrl) + req.url;
+          var url = target + req.url;
           var method = (req.method + '        ').substring(0, 8);
           gutil.log(method, req.url);
           req.pipe(proxiedRequest(url)).pipe(res);
