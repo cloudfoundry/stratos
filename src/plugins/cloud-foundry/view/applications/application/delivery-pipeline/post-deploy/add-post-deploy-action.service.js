@@ -23,7 +23,7 @@
 
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.hceSecurityApi = apiManager.retrieve('cloud-foundry.api.HceSecurityApi');
+    this.hceSecurityApi = apiManager.retrieve('code-engine.api.HceSecurityApi');
 
     var that = this;
 

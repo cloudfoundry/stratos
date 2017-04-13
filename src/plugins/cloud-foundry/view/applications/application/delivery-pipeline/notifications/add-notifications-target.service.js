@@ -49,7 +49,7 @@
 
     this.$q = $q;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.hceNotificationApi = apiManager.retrieve('cloud-foundry.api.HceNotificationApi');
+    this.hceNotificationApi = apiManager.retrieve('code-engine.api.HceNotificationApi');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.project = this.model.application.project;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
