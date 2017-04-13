@@ -61,7 +61,7 @@
         registerServiceCalled = true;
         return {rendered: $q.resolve(), result: $q.reject()};
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     afterEach(function () {
@@ -77,11 +77,11 @@
       $scope = $injector.get('$rootScope').$new();
 
       modelManager = $injector.get('modelManager');
-      var registerService = $injector.get('app.view.registerService');
-      var utils = $injector.get('appUtilsService');
-      var dashboardService = $injector.get('app.view.endpoints.dashboard.dashboardService');
-      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
-      var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
+      var appRegisterService = $injector.get('appRegisterService');
+      var appUtilsService = $injector.get('appUtilsService');
+      var appEndpointsDashboardService = $injector.get('appEndpointsDashboardService');
+      var cfServiceInstanceService = $injector.get('appEndpointsCnsiService');
+      var appEndpointsVcsService = $injector.get('appEndpointsVcsService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -97,7 +97,7 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, dashboardService, serviceInstanceService, vcsService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, appEndpointsVcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

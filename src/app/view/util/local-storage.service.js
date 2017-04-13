@@ -3,9 +3,7 @@
 
   angular
   .module('app.view')
-  .factory('app.view.localStorage', localStorageFactory);
-
-  localStorageFactory.$inject = ['$window'];
+  .factory('appLocalStorage', localStorageFactory);
 
   /**
   * @namespace app.view.localStorageFactory
@@ -34,7 +32,7 @@
     return {
       /**
        * @function isSupported
-       * @memberof app.view.localStorage
+       * @memberof app.view.appLocalStorage
        * @description Checks if local storage is supported by the browser
        * @returns {boolean} Flag indicating local storage is supported
        */
@@ -44,7 +42,7 @@
 
       /**
        * @function setItem
-       * @memberof app.view.localStorage
+       * @memberof app.view.appLocalStorage
        * @description Set the item in the local storage for the given key
        * @param {string} key - key to store the value under
        * @param {string} value - value to be stored
@@ -57,7 +55,7 @@
 
       /**
        * @function removeItem
-       * @memberof app.view.localStorage
+       * @memberof app.view.appLocalStorage
        * @description Remove the item in the local storage with the given key
        * @param {string} key - key to store the value under
        */
@@ -69,7 +67,7 @@
 
       /**
        * @function getItem
-       * @memberof app.view.localStorage
+       * @memberof app.view.appLocalStorage
        * @description Get the item in the local storage for the given key. Optioanlly return the default value if not found.
        * @param {string} key - key of value fo retrieve
        * @param {string=} defaultValue - default value to be returned if no value is found

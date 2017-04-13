@@ -3,34 +3,27 @@
 
   angular
     .module('helion.framework.widgets')
-    .factory('helion.framework.widgets.toaster', toasterServiceFactory);
+    .factory('frameworkToaster', toasterServiceFactory);
 
   // See: https://github.com/Foxandxss/angular-toastr for the underlying library that is used
 
-  toasterServiceFactory.$inject = [
-    '$q',
-    '$timeout',
-    'toastrConfig',
-    'toastr'
-  ];
-
   /**
-   * @namespace helion.framework.widgets.toaster
+   * @namespace helion.framework.widgets.frameworkToaster
    * @memberof helion.framework.widgets
-   * @name toaster
+   * @name frameworkToaster
    * @description A service for sjhow toast-style notifications
    * @param {object} $q - the Angular promise service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {object} toasterConfig - the toasterConfig object for the toastr library
+   * @param {object} toastrConfig - the toasterConfig object for the toastr library
    * @param {object} toastr - the toastr library
    * @example
    *  ```
-   *  toaster.error('Example error toast notification');
+   *  frameworkToaster.error('Example error toast notification');
    * @returns {object} The toaster notification service
    */
-  function toasterServiceFactory($q, $timeout, toasterConfig, toastr) {
+  function toasterServiceFactory($q, $timeout, toastrConfig, toastr) {
     // Set our defaults for the toastr library
-    angular.extend(toasterConfig, {
+    angular.extend(toastrConfig, {
       autoDismiss: false,
       allowHtml: true,
       closeButton: true,

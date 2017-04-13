@@ -31,11 +31,11 @@
       <td>
         <div class="app-state-column">
         <app-state-icon state="app.state.indicator"></app-state-icon>
-        <span class="list-view-app-state-label">{{ app.state.label }}
+        <span class="list-view-app-state-label">{{ app.state.label | translate }}
         <span
-          ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel }}
+          ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel | translate }}
         </span>
-        </span
+        </span>
         </div>
       </td>
       <td class="text-uppercase">{{ app.instanceCount || 0 }}/{{ app.entity.instances }}</td>

@@ -5,10 +5,6 @@
     .module('app.view.endpoints.dashboard', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.dashboard', {
       url: '',
@@ -21,18 +17,6 @@
     });
   }
 
-  EndpointsDashboardController.$inject = [
-    '$q',
-    '$scope',
-    '$state',
-    'modelManager',
-    'appUtilsService',
-    'app.view.registerService',
-    'app.view.endpoints.dashboard.dashboardService',
-    'app.view.endpoints.dashboard.cnsiService',
-    'app.view.endpoints.dashboard.vcsService'
-  ];
-
   /**
    * @namespace app.view.endpoints.dashboard
    * @memberof app.view.endpoints.dashboard
@@ -41,23 +25,23 @@
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {appUtilsService} utilsService - the utils service
-   * @param {app.view.registerService} registerService register service to display the core slide out
-   * @param {app.view.endpoints.dashboard.dashboardService} dashboardService - service to support endpoints dashboard
-   * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints
-   * @param {app.view.endpoints.dashboard.vcsService} vcsService - service to support dashboard with vcs type endpoints
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.view.appRegisterService} appRegisterService register service to display the core slide out
+   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
+   * @param {app.view.endpoints.dashboard.appEndpointsVcsService} appEndpointsVcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
-                                        dashboardService, cnsiService, vcsService) {
+  function EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, appRegisterService,
+                                        appEndpointsDashboardService, appEndpointsCnsiService, appEndpointsVcsService) {
     var that = this;
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
-    var endpointsProviders = [cnsiService, vcsService];
+    var endpointsProviders = [appEndpointsCnsiService, appEndpointsVcsService];
 
-    this.endpoints = dashboardService.endpoints;
-    dashboardService.clear();
+    this.endpoints = appEndpointsDashboardService.endpoints;
+    appEndpointsDashboardService.clear();
 
     /*
      * Call method on all service providers, forwarding the passed arguments
@@ -112,7 +96,7 @@
      * @description Register a service endpoint
      */
     this.register = function () {
-      registerService.show($scope).then(function () {
+      appRegisterService.show($scope).then(function () {
         _updateEndpoints();
       });
     };
@@ -152,7 +136,7 @@
       });
     }
 
-    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+    appUtilsService.chainStateResolve('endpoint.dashboard', $state, init);
 
     function _updateWelcomeMessage() {
       // Show the welcome message if either...
@@ -204,7 +188,7 @@
           that.listError = true;
         })
         .then(function () {
-          return dashboardService.refreshCodeEngineVcses();
+          return appEndpointsDashboardService.refreshCodeEngineVcses();
         })
         .then(function () {
           _updateEndpointsFromCache();

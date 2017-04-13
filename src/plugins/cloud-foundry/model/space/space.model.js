@@ -9,17 +9,8 @@
     .module('cloud-foundry.model')
     .run(registerSpaceModel);
 
-  registerSpaceModel.$inject = [
-    '$q',
-    'modelManager',
-    'apiManager',
-    'cloud-foundry.model.service.serviceUtils',
-    'modelUtils',
-    'organization-model'
-  ];
-
-  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, modelUtils, organizationModel) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel));
+  function registerSpaceModel($q, modelManager, apiManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel));
   }
 
   /**
@@ -30,21 +21,21 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @param {object} serviceUtils - the service utils service
+   * @param {object} cfServiceUtils - the service utils service
    * @param {object} modelUtils - a service containing general hcf model helpers
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {object} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, serviceUtils, modelUtils, organizationModel) {
+  function Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.modelManager = modelManager;
-    this.serviceUtils = serviceUtils;
+    this.cfServiceUtils = cfServiceUtils;
     this.modelUtils = modelUtils;
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.data = {};
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
   }
 
   angular.extend(Space.prototype, {
@@ -161,7 +152,7 @@
      * @public
      */
     onListAllServicesForSpace: function (cnsiGuid, guid, services) {
-      this.serviceUtils.enhance(services);
+      this.cfServiceUtils.enhance(services);
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
       return services;
     },
@@ -629,10 +620,10 @@
       });
     },
 
-    refreshSpaceAndAuth: function (cnsiGuid, organizationModel, orgGuid) {
+    refreshSpaceAndAuth: function (cnsiGuid, cfOrganizationModel, orgGuid) {
       var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
       return authModel.initializeForEndpoint(cnsiGuid, true).finally(function () {
-        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return cfOrganizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
     },
 
@@ -641,7 +632,7 @@
 
       var stackatoInfoModel = this.modelManager.retrieve('app.model.stackatoInfo');
       var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      var organizationModel = this._getOrganizationModel();
+      var cfOrganizationModel = this._getOrganizationModel();
       var createPromises = [];
 
       function getSpaceDetails(response) {
@@ -665,7 +656,7 @@
 
       return that.$q.all(createPromises).then(function () {
         // Refresh the spaces
-        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
       });
 
     },
@@ -676,20 +667,20 @@
         recursive: false,
         async: false
       };
-      var organizationModel = this._getOrganizationModel();
+      var cfOrganizationModel = this._getOrganizationModel();
       return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
-        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
       });
     },
 
     updateSpace: function (cnsiGuid, orgGuid, spaceGuid, spaceData) {
       var that = this;
-      var organizationModel = this._getOrganizationModel();
+      var cfOrganizationModel = this._getOrganizationModel();
       return this.spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function () {
           // Refresh the org spaces
-          return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid)
+          return cfOrganizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid)
             .then(_.partialRight(_.find, ['metadata.guid', spaceGuid]))
             .then(function (depthOneSpace) {
               // Refresh the space itself
@@ -730,7 +721,7 @@
     },
 
     _getOrganizationModel: function () {
-      return this.organizationModel;
+      return this.cfOrganizationModel;
     }
 
   });

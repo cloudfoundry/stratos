@@ -11,13 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerHceModel);
 
-  registerHceModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'appEventService',
-    '$log'
-  ];
-
   function registerHceModel(modelManager, apiManager, appEventService, $log) {
     modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, appEventService, $log));
   }

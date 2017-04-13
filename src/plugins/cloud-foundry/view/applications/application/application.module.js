@@ -14,10 +14,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application', {
       url: '/:cnsiGuid/app/:guid',
@@ -27,31 +23,15 @@
     });
   }
 
-  ApplicationController.$inject = [
-    'modelManager',
-    'appEventService',
-    'frameworkDialogConfirm',
-    'appUtilsService',
-    'cloud-foundry.view.applications.application.summary.cliCommands',
-    'helion.framework.widgets.detailView',
-    '$stateParams',
-    '$scope',
-    '$window',
-    '$q',
-    '$interval',
-    '$interpolate',
-    '$state'
-  ];
-
   /**
    * @name ApplicationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} frameworkDialogConfirm - the confirm dialog service
-   * @param {object} utils - the utils service
-   * @param {object} cliCommands - the cliCommands dialog service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {object} appUtilsService - the appUtilsService service
+   * @param {object} cfAppCliCommands - the cfAppCliCommands dialog service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
@@ -70,7 +50,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, utils, cliCommands, detailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -79,7 +59,7 @@
     this.$interpolate = $interpolate;
     this.appEventService = appEventService;
     this.confirmDialog = frameworkDialogConfirm;
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -87,7 +67,7 @@
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
-    this.cliCommands = cliCommands;
+    this.cfAppCliCommands = cfAppCliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
@@ -99,7 +79,7 @@
     that.hideVariables = true;
     that.hideDeliveryPipelineData = true;
     // Wait for parent state to be fully initialised
-    utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
+    appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
     // When a modal interaction starts, stop the background polling
     this.removeModalStartListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_START, function () {
@@ -173,7 +153,7 @@
           if (that.stackatoInfo.info.endpoints) {
             username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
           }
-          that.cliCommands.show(that.model.application, username);
+          that.cfAppCliCommands.show(that.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
@@ -445,7 +425,7 @@
     },
 
     complexDeleteAppDialog: function (guids) {
-      this.detailView(
+      this.frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')

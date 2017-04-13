@@ -9,10 +9,6 @@
     .config(registerRoute)
     .run(register);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint', {
       url: '/endpoint',
@@ -27,44 +23,29 @@
     });
   }
 
-  register.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appEventService',
-    'appUtilsService'
-  ];
-
-  function register($q, $state, modelManager, appEventService, utils) {
-    return new Endpoints($q, $state, modelManager, appEventService, utils);
+  function register($q, $state, modelManager, appEventService, appUtilsService) {
+    return new Endpoints($q, $state, modelManager, appEventService, appUtilsService);
   }
 
-  function Endpoints($q, $state, modelManager, appEventService, utils) {
-    var that = this;
-
-    this.initialized = $q.defer();
-
-    this.modelManager = modelManager;
+  function Endpoints($q, $state, modelManager, appEventService, appUtilsService) {
+    var initialized = $q.defer();
 
     function init() {
-      return that.initialized.promise;
+      return initialized.promise;
     }
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      that.onLoggedIn();
+      onLoggedIn();
     });
 
-    utils.chainStateResolve('endpoint', $state, init);
-  }
+    appUtilsService.chainStateResolve('endpoint', $state, init);
 
-  angular.extend(Endpoints.prototype, {
-
-    onLoggedIn: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function onLoggedIn() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'helion-icon-Inherit helion-icon-r270');
-      this.initialized.resolve();
+      initialized.resolve();
     }
 
-  });
+  }
 
 })();

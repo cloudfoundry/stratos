@@ -4,8 +4,6 @@
   angular.module('helion.framework.filters')
     .filter('percentage', percentage);
 
-  percentage.$inject = ['$filter'];
-
   /**
    * @namespace helion.framework.filters.percentage
    * @memberof helion.framework.filters

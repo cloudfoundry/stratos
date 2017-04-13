@@ -1,14 +1,14 @@
 (function () {
   'use strict';
 
-  describe('utils service', function () {
-    var utils, mbToHumanSizeFilter, $q, $scope, $timeout;
+  describe('appUtilsService service', function () {
+    var appUtilsService, mbToHumanSizeFilter, $q, $scope, $timeout;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      utils = $injector.get('appUtilsService');
+      appUtilsService = $injector.get('appUtilsService');
       mbToHumanSizeFilter = $injector.get('mbToHumanSizeFilter');
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope');
@@ -16,41 +16,41 @@
     }));
 
     it('should be defined', function () {
-      expect(utils).toBeDefined();
+      expect(appUtilsService).toBeDefined();
       expect(mbToHumanSizeFilter).toBeDefined();
     });
 
     it('should return URL', function () {
-      expect(utils.getClusterEndpoint()).toBe('');
+      expect(appUtilsService.getClusterEndpoint()).toBe('');
       var cluster = {
         api_endpoint: {
           Scheme: 'http',
           Host: 'cluster.com'
         }
       };
-      expect(utils.getClusterEndpoint(cluster)).toBe('http://cluster.com');
+      expect(appUtilsService.getClusterEndpoint(cluster)).toBe('http://cluster.com');
     });
 
     describe('mb formatting', function () {
 
       it('should format undefined', function () {
-        expect(utils.mbToHumanSize()).toBe('');
+        expect(appUtilsService.mbToHumanSize()).toBe('');
       });
 
       it('should format -1', function () {
-        expect(utils.mbToHumanSize(-1)).toBe('∞');
+        expect(appUtilsService.mbToHumanSize(-1)).toBe('∞');
       });
 
       it('should format TB', function () {
-        expect(utils.mbToHumanSize(1048577)).toBe('1 TB');
+        expect(appUtilsService.mbToHumanSize(1048577)).toBe('1 TB');
       });
 
       it('should format GB', function () {
-        expect(utils.mbToHumanSize(2049)).toBe('2 GB');
+        expect(appUtilsService.mbToHumanSize(2049)).toBe('2 GB');
       });
 
       it('should format MB', function () {
-        expect(utils.mbToHumanSize(27)).toBe('27 MB');
+        expect(appUtilsService.mbToHumanSize(27)).toBe('27 MB');
       });
 
       it('should work as a filter', function () {
@@ -62,15 +62,15 @@
     describe('size utilization formatting', function () {
 
       it('should format value out of infinity', function () {
-        expect(utils.sizeUtilization(1, -1)).toBe('1 MB / ∞');
+        expect(appUtilsService.sizeUtilization(1, -1)).toBe('1 MB / ∞');
       });
 
       it('should format value', function () {
-        expect(utils.sizeUtilization(12, 2049)).toBe('12 MB / 2 GB');
+        expect(appUtilsService.sizeUtilization(12, 2049)).toBe('12 MB / 2 GB');
       });
 
       it('should format value with same units', function () {
-        expect(utils.sizeUtilization(1025, 2049)).toBe('1 / 2 GB');
+        expect(appUtilsService.sizeUtilization(1025, 2049)).toBe('1 / 2 GB');
       });
 
     });
@@ -95,7 +95,7 @@
       }
 
       it('should not need to retry', function () {
-        var result = utils.retryRequest(createRequestPromise(0), 3, 0);
+        var result = appUtilsService.retryRequest(createRequestPromise(0), 3, 0);
         result.catch(function () {
           fail();
         });
@@ -105,7 +105,7 @@
       });
 
       it('should need to retry', function () {
-        var result = utils.retryRequest(createRequestPromise(2), 3, 0);
+        var result = appUtilsService.retryRequest(createRequestPromise(2), 3, 0);
         result.catch(function () {
           fail();
         });
@@ -116,7 +116,7 @@
       });
 
       it('should need to retry - needs 6 retries', function () {
-        var result = utils.retryRequest(createRequestPromise(6), 3, 0);
+        var result = appUtilsService.retryRequest(createRequestPromise(6), 3, 0);
         result.then(function () {
           fail();
         });
@@ -146,7 +146,7 @@
           createFunction('task-4')
         ];
 
-        utils.runInSequence(tasks, false).then(function () {
+        appUtilsService.runInSequence(tasks, false).then(function () {
           expect(results).toBe('task-4task-3task-2task-1');
         }).catch(function () {
           fail();
@@ -172,7 +172,7 @@
           createFunction('task-4')
         ];
 
-        utils.runInSequence(tasks, true).then(function () {
+        appUtilsService.runInSequence(tasks, true).then(function () {
           expect(results).toBe('task-1task-2task-3task-4');
         }).catch(function () {
           fail();
@@ -187,7 +187,7 @@
       var regExp;
 
       beforeEach(function () {
-        regExp = utils.urlValidationExpression;
+        regExp = appUtilsService.urlValidationExpression;
       });
 
       it('should validate these urls', function () {

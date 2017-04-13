@@ -23,11 +23,6 @@
     .module('helion.framework.widgets')
     .factory('frameworkDialogConfirm', serviceFactory);
 
-  serviceFactory.$inject = [
-    '$uibModal',
-    'frameworkDialogEvents'
-  ];
-
   function serviceFactory($uibModal, frameworkDialogEvents) {
     return frameworkDialogConfirm;
 
@@ -54,12 +49,6 @@
       return confirmDialogContext.modalInstance;
     }
   }
-
-  ConfirmController.$inject = [
-    '$q',
-    '$timeout',
-    'confirmDialogContext'
-  ];
 
   /**
    * @namespace helion.framework.widgets.dialog

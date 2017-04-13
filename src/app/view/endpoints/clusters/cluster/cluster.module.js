@@ -8,10 +8,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster', {
       url: '/:guid',
@@ -22,19 +18,7 @@
     });
   }
 
-  ClusterController.$inject = [
-    '$stateParams',
-    '$log',
-    'appUtilsService',
-    '$state',
-    '$q',
-    'app.view.endpoints.clusters.cluster.rolesService',
-    'modelManager',
-    'app.view.userSelection',
-    'organization-model'
-  ];
-
-  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection, organizationModel) {
+  function ClusterController($stateParams, $log, appUtilsService, $state, $q, appClusterRolesService, modelManager, appUserSelection, cfOrganizationModel) {
     var that = this;
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -43,10 +27,10 @@
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
-    userSelection.deselectAllUsers(this.guid);
+    appUserSelection.deselectAllUsers(this.guid);
 
     this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
+      return appUtilsService.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
     };
 
     function init() {
@@ -56,17 +40,17 @@
         'inline-relations-depth': 2,
         'exclude-relations': 'domains,private_domains,space_quota_definitions'
       };
-      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
+      var orgPromise = cfOrganizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
-          var orgDetailsP = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {
+          var orgDetailsP = cfOrganizationModel.getOrganizationDetails(that.guid, org).catch(function () {
             // Swallow errors for individual orgs
             $log.error('Failed to fetch details for org - ' + org.entity.name);
           });
           allDetailsP.push(orgDetailsP);
         });
         return $q.all(allDetailsP).then(function (val) {
-          that.organizationNames = organizationModel.organizationNames[that.guid];
+          that.organizationNames = cfOrganizationModel.organizationNames[that.guid];
           return val;
         });
       }).catch(function (error) {
@@ -91,7 +75,7 @@
 
       orgPromise.then(function () {
         // Background load of users list
-        rolesService.listUsers(that.guid, true);
+        appClusterRolesService.listUsers(that.guid, true);
       });
 
       return $q.all([
@@ -103,7 +87,7 @@
         });
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster', $state, init);
   }
 
 })();

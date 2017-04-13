@@ -28,10 +28,6 @@
     };
   }
 
-  InlineMessageController.$inject = [
-    '$state'
-  ];
-
   function InlineMessageController($state) {
 
     this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');

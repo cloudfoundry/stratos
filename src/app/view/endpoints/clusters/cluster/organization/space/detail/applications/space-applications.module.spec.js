@@ -3,7 +3,7 @@
 
   describe('cluster space detail (applications) module', function () {
 
-    var $controller, $httpBackend, $state, $stateParams, $q, $scope, modelManager, utils, appStateService, spaceModel;
+    var $controller, $httpBackend, $state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService, spaceModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -40,8 +40,8 @@
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope').$new();
       modelManager = $injector.get('modelManager');
-      utils = $injector.get('appUtilsService');
-      appStateService = $injector.get('cloud-foundry.model.application.stateService');
+      appUtilsService = $injector.get('appUtilsService');
+      cfAppStateService = $injector.get('cfAppStateService');
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
@@ -49,7 +49,7 @@
 
     function createController() {
       var SpaceapplicationsController = $state.get('endpoint.clusters.cluster.organization.space.detail.applications').controller;
-      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService);
+      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService);
     }
 
     afterEach(function () {
@@ -80,7 +80,7 @@
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, clonedSpace);
 
       var state = 'state';
-      spyOn(appStateService, 'get').and.callFake(function (appEntity) {
+      spyOn(cfAppStateService, 'get').and.callFake(function (appEntity) {
         expect(appEntity).toEqual(app.entity);
         return state;
       });

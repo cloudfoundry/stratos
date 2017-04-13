@@ -12,10 +12,10 @@
   serviceFactory.$inject = [
     '$q',
     'modelManager',
-    'helion.framework.widgets.detailView'
+    'frameworkDetailView'
   ];
 
-  function serviceFactory($q, modelManager, detailView) {
+  function serviceFactory($q, modelManager, frameworkDetailView) {
     return {
       /**
        * @function add
@@ -26,7 +26,7 @@
        * @public
        **/
       add: function (cnsiGuid, id) {
-        return detailView({
+        return frameworkDetailView({
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
           detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
@@ -46,7 +46,7 @@
        * @public
        **/
       edit: function (cnsiGuid, id, variableName) {
-        return detailView({
+        return frameworkDetailView({
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
           detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',

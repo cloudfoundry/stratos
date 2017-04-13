@@ -2,14 +2,14 @@
   'use strict';
 
   describe('notifications service', function () {
-    var notifications, toaster;
+    var notifications, frameworkToaster;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      notifications = $injector.get('app.view.notificationsService');
-      toaster = $injector.get('helion.framework.widgets.toaster');
+      notifications = $injector.get('appNotificationsService');
+      frameworkToaster = $injector.get('frameworkToaster');
     }));
 
     describe('notify method', function () {
@@ -20,33 +20,33 @@
       });
 
       it('show busy toast', function () {
-        spyOn(toaster, 'busy');
+        spyOn(frameworkToaster, 'busy');
         notifications.notify('busy', 'test_message');
-        expect(toaster.busy).toHaveBeenCalled();
+        expect(frameworkToaster.busy).toHaveBeenCalled();
       });
 
       it('show error toast', function () {
-        spyOn(toaster, 'error');
+        spyOn(frameworkToaster, 'error');
         notifications.notify('error', 'test_message');
-        expect(toaster.error).toHaveBeenCalled();
+        expect(frameworkToaster.error).toHaveBeenCalled();
       });
 
       it('show success toast', function () {
-        spyOn(toaster, 'success');
+        spyOn(frameworkToaster, 'success');
         notifications.notify('success', 'test_message');
-        expect(toaster.success).toHaveBeenCalled();
+        expect(frameworkToaster.success).toHaveBeenCalled();
       });
 
       it('show warning toast', function () {
-        spyOn(toaster, 'warning');
+        spyOn(frameworkToaster, 'warning');
         notifications.notify('warning', 'test_message');
-        expect(toaster.warning).toHaveBeenCalled();
+        expect(frameworkToaster.warning).toHaveBeenCalled();
       });
 
       it('show custom toast', function () {
-        spyOn(toaster, 'show');
+        spyOn(frameworkToaster, 'show');
         notifications.notify('custom', 'test_message');
-        expect(toaster.show).toHaveBeenCalled();
+        expect(frameworkToaster.show).toHaveBeenCalled();
       });
 
     });
@@ -65,33 +65,33 @@
       };
 
       it('show busy toast', function () {
-        spyOn(toaster, 'busy');
+        spyOn(frameworkToaster, 'busy');
         appEventService.$emit('cf.events.NOTIFY_BUSY', eventData);
-        expect(toaster.busy).toHaveBeenCalled();
+        expect(frameworkToaster.busy).toHaveBeenCalled();
       });
 
       it('show error toast', function () {
-        spyOn(toaster, 'error');
+        spyOn(frameworkToaster, 'error');
         appEventService.$emit('cf.events.NOTIFY_ERROR', eventData);
-        expect(toaster.error).toHaveBeenCalled();
+        expect(frameworkToaster.error).toHaveBeenCalled();
       });
 
       it('show success toast', function () {
-        spyOn(toaster, 'success');
+        spyOn(frameworkToaster, 'success');
         appEventService.$emit('cf.events.NOTIFY_SUCCESS', eventData);
-        expect(toaster.success).toHaveBeenCalled();
+        expect(frameworkToaster.success).toHaveBeenCalled();
       });
 
       it('show warning toast', function () {
-        spyOn(toaster, 'warning');
+        spyOn(frameworkToaster, 'warning');
         appEventService.$emit('cf.events.NOTIFY_WARNING', eventData);
-        expect(toaster.warning).toHaveBeenCalled();
+        expect(frameworkToaster.warning).toHaveBeenCalled();
       });
 
       it('show custom toast', function () {
-        spyOn(toaster, 'show');
+        spyOn(frameworkToaster, 'show');
         appEventService.$emit('cf.events.NOTIFY', eventData);
-        expect(toaster.show).toHaveBeenCalled();
+        expect(frameworkToaster.show).toHaveBeenCalled();
       });
 
     });

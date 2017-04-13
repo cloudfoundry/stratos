@@ -33,7 +33,7 @@
       $exceptionHandlerProvider.mode('log');
     }));
     beforeEach(module({
-      'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
+      frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {
           content: content,
           context: context,
@@ -58,7 +58,7 @@
       expect(addRoutesFactory).toBeDefined();
     });
 
-    it('should pass correct content spec to asyncTaskDialog', function () {
+    it('should pass correct content spec to frameworkAsyncTaskDialog', function () {
       var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
       expect(modalObj.content.title).toBeDefined();
       expect(modalObj.content.templateUrl).toBeDefined();

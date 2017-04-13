@@ -11,12 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerServiceBindingModel);
 
-  registerServiceBindingModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerServiceBindingModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.service-binding', new ServiceBinding(apiManager, modelUtils));
   }

@@ -19,11 +19,11 @@
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
       var $state = $injector.get('$state');
-      var modelManager = $injector.get('modelManager');
-      var utils = $injector.get('appUtilsService');
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      var appUtilsService = $injector.get('appUtilsService');
 
       var ClusterDetailSpacesController = $state.get('endpoint.clusters.cluster.organization.detail.spaces').controller;
-      $controller = new ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils);
+      $controller = new ClusterDetailSpacesController($q, $stateParams, $state, appUtilsService, cfOrganizationModel);
     }));
 
     afterEach(function () {

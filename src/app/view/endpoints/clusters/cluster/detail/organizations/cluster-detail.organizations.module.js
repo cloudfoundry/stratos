@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.detail.organizations', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.organizations', {
       url: '/organizations',

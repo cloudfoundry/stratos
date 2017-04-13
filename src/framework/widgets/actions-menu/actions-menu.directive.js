@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('actionsMenu', actionsMenu);
 
-  actionsMenu.$inject = [
-    '$document'
-  ];
-
   /**
    * @namespace helion.framework.widgets.actionsMenu
    * @memberof helion.framework.widgets
@@ -86,8 +82,6 @@
       event.stopPropagation();
     }
   }
-
-  ActionsMenuController.$inject = ['$scope'];
 
   /**
    * @namespace helion.framework.widgets.ActionsMenuController

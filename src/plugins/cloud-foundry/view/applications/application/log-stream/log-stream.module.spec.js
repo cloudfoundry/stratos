@@ -9,7 +9,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
-      var utils = $injector.get('appUtilsService');
+      var appUtilsService = $injector.get('appUtilsService');
       var $stateParams = $injector.get('$stateParams');
       var $location = $injector.get('$location');
       var $log = $injector.get('$log');
@@ -20,7 +20,7 @@
       $stateParams.cnsiGuid = 'cnsiGuid';
 
       var ApplicationLogStreamController = $state.get('cf.applications.application.log-stream').controller;
-      appLogStreamController = new ApplicationLogStreamController(base64, modelManager, utils, $stateParams, $location, $log);
+      appLogStreamController = new ApplicationLogStreamController(base64, modelManager, appUtilsService, $stateParams, $location, $log);
     }));
 
     afterEach(function () {

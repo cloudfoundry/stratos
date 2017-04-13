@@ -64,8 +64,6 @@
     }
   }
 
-  RadioInputController.$inject = [];
-
   /**
    * @namespace helion.framework.widgets.RadioInputController
    * @memberof helion.framework.widgets

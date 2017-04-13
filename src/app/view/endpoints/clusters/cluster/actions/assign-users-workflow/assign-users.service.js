@@ -3,23 +3,19 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory)
+    .factory('appClusterAssignUsers', AssignUserFactory)
     .controller('app.view.endpoints.clusters.cluster.assignUsersController', AssignUsersWorkflowController);
 
-  AssignUserFactory.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
-
-  function AssignUserFactory(detailView) {
+  function AssignUserFactory(frameworkDetailView) {
     return {
       /**
-       * @memberof app.view.endpoints.clusters.cluster.assignUsers
+       * @memberof appClusterAssignUsers
        * @name assign
        * @constructor
        * @param {object} context - the context for the modal. Used to pass in data
        */
       assign: function (context) {
-        return detailView(
+        return frameworkDetailView(
           {
             detailViewTemplateUrl:
               'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
@@ -32,18 +28,6 @@
     };
   }
 
-  AssignUsersWorkflowController.$inject = [
-    '$scope',
-    'modelManager',
-    'context',
-    'app.view.endpoints.clusters.cluster.rolesService',
-    'organization-model',
-    '$stateParams',
-    '$q',
-    '$timeout',
-    '$uibModalInstance'
-  ];
-
   /**
    * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
@@ -51,15 +35,15 @@
    * @param {object} $scope - the angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
-   * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
+   * @param {object} appClusterRolesService - the console roles service. Aids in selecting, assigning and removing roles with the
    * roles table.
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController($scope, modelManager, context, rolesService, organizationModel,
+  function AssignUsersWorkflowController($scope, modelManager, context, appClusterRolesService, cfOrganizationModel,
                                          $stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
@@ -69,7 +53,7 @@
 
     context = context || {};
 
-    this.organizationModel = organizationModel;
+    this.cfOrganizationModel = cfOrganizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -101,7 +85,7 @@
       return (context.initPromise || that.$q.when()).then(function () {
         // Omit any org that we don't have permissions to either edit org or at least one child space
         // Create a collection to support the organization drop down
-        var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
+        var organizations = _.omitBy(that.cfOrganizationModel.organizations[that.data.clusterGuid], function (org) {
           return !that.authModel.isOrgOrSpaceActionableByResource(that.data.clusterGuid, org, that.authModel.actions.update);
         });
 
@@ -117,7 +101,7 @@
           .value();
 
         // Fetch a list of all users for this cluster
-        return rolesService.listUsers(that.data.clusterGuid)
+        return appClusterRolesService.listUsers(that.data.clusterGuid)
           .then(function (users) {
             return _.filter(users, function (user) {
               return user.entity.username;
@@ -146,7 +130,7 @@
         orgWatch = $scope.$watch(function () {
           return that.userInput.roles[org.details.guid].organization;
         }, function () {
-          rolesService.updateRoles(that.userInput.roles[org.details.guid]);
+          appClusterRolesService.updateRoles(that.userInput.roles[org.details.guid]);
         }, true);
       } else if (orgWatch) {
         orgWatch();
@@ -232,7 +216,7 @@
                 return user.metadata.guid;
               });
 
-              return rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles);
+              return appClusterRolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles);
             },
             isLastStep: true,
             actions: {
@@ -255,8 +239,8 @@
             table: {
               config: {
                 clusterGuid: context.clusterGuid,
-                orgRoles: rolesService.organizationRoles,
-                spaceRoles: rolesService.spaceRoles,
+                orgRoles: appClusterRolesService.organizationRoles,
+                spaceRoles: appClusterRolesService.spaceRoles,
                 disableOrg: true
               },
               roles: that.userInput.roles

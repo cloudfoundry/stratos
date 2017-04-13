@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('preventDrop', preventDrop);
 
-  preventDrop.$inject = [
-    '$window'
-  ];
-
   function preventDrop($window) {
     var directive = {
       link: link,

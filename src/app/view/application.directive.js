@@ -23,22 +23,6 @@
     };
   }
 
-  ApplicationController.$inject = [
-    'appEventService',
-    'modelManager',
-    'appBasePath',
-    'appUpgradeCheck',
-    'appLoggedInService',
-    'app.view.localStorage',
-    'app.view.selectLanguage',
-    '$timeout',
-    '$state',
-    '$stateParams',
-    '$window',
-    '$rootScope',
-    '$scope'
-  ];
-
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
@@ -47,11 +31,9 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
-   * @param {object} appLoggedInService - the Logged In Service
-   * @param {object} localStorage - the Local Storage In Service
-   * @param {object} selectLanguage - the Language Selection dialogService
+   * @param {object} appLocalStorage - the Local Storage In Service
+   * @param {object} appSelectLanguage - the Language Selection dialogService
    * @param {object} $timeout - Angular $timeout service
-   * @param {$state} $state - Angular ui-router $state service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
    * @param {$rootScope} $rootScope - Angular $rootScope service
@@ -59,60 +41,55 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.basePath} appBasePath - the base path serving our app (i.e. /app)
-   * @property {app.view.appUpgradeCheck} upgradeCheck - the upgrade check service
+   * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @property {object} appLoggedInService - the Logged In Service
-   * @property {$state} $state - Angular ui-router $state service
    * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLoggedInService, localStorage,
-                                 selectLanguage, $timeout, $state, $stateParams, $window, $rootScope, $scope) {
-    var that = this;
+  function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLocalStorage,
+                                 appSelectLanguage, $timeout, $stateParams, $window, $rootScope, $scope) {
 
-    this.appEventService = appEventService;
-    this.modelManager = modelManager;
-    this.appBasePath = appBasePath;
-    this.upgradeCheck = appUpgradeCheck;
-    this.appLoggedInService = appLoggedInService;
-    this.selectLanguage = selectLanguage;
+    var vm = this;
 
-    this.$state = $state;
-    this.$window = $window;
+    vm.appBasePath = appBasePath;
+    vm.appUpgradeCheck = appUpgradeCheck;
+    vm.showLanguageSelection = showLanguageSelection;
+    vm.loggedIn = false;
+    vm.serverFailedToRespond = false;
+    vm.showGlobalSpinner = false;
+    vm.ready = false;
+    vm.failedLogin = false;
+    vm.serverErrorOnLogin = false;
+    vm.hideNavigation = $stateParams.hideNavigation;
+    vm.hideAccount = $stateParams.hideAccount;
+    vm.navbarIconsOnly = false;
 
-    this.loggedIn = false;
-    this.failedLogin = false;
-    this.serverErrorOnLogin = false;
-    this.serverFailedToRespond = false;
-    this.showGlobalSpinner = false;
-    this.ready = false;
+    vm.login = login;
+    vm.logout = logout;
+    vm.reload = reload;
 
     $timeout(function () {
-      that.verifySessionOrCheckUpgrade();
+      verifySessionOrCheckUpgrade();
     }, 0);
 
     // Navigation options
-    this.hideNavigation = $stateParams.hideNavigation;
-    this.hideAccount = $stateParams.hideAccount;
     $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
-      that.hideNavigation = toParams.hideNavigation;
-      that.hideAccount = toParams.hideAccount;
+      vm.hideNavigation = toParams.hideNavigation;
+      vm.hideAccount = toParams.hideAccount;
     });
 
     // Read back and persist the state of the navigation bar to local storage
-    this.navbarIconsOnly = localStorage.getItem('navbarIconsOnly', 'false') === 'true';
+    vm.navbarIconsOnly = appLocalStorage.getItem('navbarIconsOnly', 'false') === 'true';
     $scope.$watch(function () {
-      return that.navbarIconsOnly;
+      return vm.navbarIconsOnly;
     }, function (nv, ov) {
       if (nv !== ov) {
-        localStorage.setItem('navbarIconsOnly', nv);
+        appLocalStorage.setItem('navbarIconsOnly', nv);
       }
     });
-  }
-
-  angular.extend(ApplicationController.prototype, {
 
     /**
      * @function showLanguageSelection
@@ -120,9 +97,9 @@
      * @description Shows the Language Selection dialog
      * @public
      */
-    showLanguageSelection: function () {
-      this.selectLanguage.show();
-    },
+    function showLanguageSelection() {
+      appSelectLanguage.show();
+    }
 
     /**
      * @function verifySession
@@ -131,14 +108,13 @@
      * @returns {object} Promise object for session verification
      * @public
      */
-    verifySession: function () {
-      var that = this;
-      return this.modelManager.retrieve('app.model.account')
+    function verifySession() {
+      return modelManager.retrieve('app.model.account')
         .verifySession()
         .then(function () {
-          that.onLoggedIn();
+          onLoggedIn();
         });
-    },
+    }
 
     /**
      * @function verifySessionOrCheckUpgrade
@@ -146,20 +122,19 @@
      * @description Verify session or use version endpoint to check if an upgrade is in progress
      * @public
      */
-    verifySessionOrCheckUpgrade: function () {
-      var that = this;
-      this.verifySession().catch(function (response) {
+    function verifySessionOrCheckUpgrade() {
+      verifySession().catch(function (response) {
         // We only care about 503 - use upgrade service to determine if this is an upgrade
-        if (that.upgradeCheck.isUpgrading(response)) {
+        if (appUpgradeCheck.isUpgrading(response)) {
           // Upgrade service will cause the upgrade page to be displayed to the user
-          that.upgradeCheck.responseError(response);
+          appUpgradeCheck.responseError(response);
           // Need to pretend that we are logged in to hide the login page and show the upgrade page
-          that.loggedIn = true;
+          vm.loggedIn = true;
         }
       }).finally(function () {
-        that.ready = true;
+        vm.ready = true;
       });
-    },
+    }
 
     /**
      * @function login
@@ -169,23 +144,18 @@
      * @param {string} password - the password
      * @public
      */
-    login: function (username, password) {
-      this.serverFailedToRespond = false;
-      this.serverErrorOnLogin = false;
-      this.failedLogin = false;
-
-      var that = this;
-      this.modelManager.retrieve('app.model.account')
+    function login(username, password) {
+      modelManager.retrieve('app.model.account')
         .login(username, password)
         .then(
           function () {
-            that.onLoggedIn();
+            onLoggedIn();
           },
           function (response) {
-            that.onLoginFailed(response);
+            onLoginFailed(response);
           }
         );
-    },
+    }
 
     /**
      * @function onLoggedIn
@@ -194,33 +164,30 @@
      * @emits LOGIN
      * @private
      */
-    onLoggedIn: function () {
-      var that = this;
-      this.loggedIn = true;
-      this.failedLogin = false;
-      this.serverErrorOnLogin = false;
-      this.serverFailedToRespond = false;
-      this.showGlobalSpinner = true;
+    function onLoggedIn() {
+      vm.loggedIn = true;
+      vm.failedLogin = false;
+      vm.serverErrorOnLogin = false;
+      vm.serverFailedToRespond = false;
+      vm.showGlobalSpinner = true;
+      vm.redirectState = false;
 
       // If we have a setup error, then we don't want to continue login to some other page
       // We will redirect to our error page instead
-      this.continueLogin = true;
-
-      // State that we should go to
-      this.redirectState = false;
+      var continueLogin = true;
 
       /**
        * Show cluster registration if user is ITOps (hdp3.admin).
        * Otherwise, show service instance registration as a
        * developer if unregistered.
        */
-      var account = this.modelManager.retrieve('app.model.account');
+      var account = modelManager.retrieve('app.model.account');
 
       // Fetch the list of services instances
       /* eslint-disable */
       // TODO: If this fails, we should show a notification message
       /* eslint-enable */
-      this.modelManager.retrieve('app.model.serviceInstance')
+      modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
           var noHCFInstances = data.numAvailable === 0;
@@ -228,21 +195,21 @@
           if (account.isAdmin()) {
             // Go the endpoints dashboard if there are no HCF clusters
             if (noHCFInstances) {
-              that.redirectState = 'endpoint.dashboard';
+              vm.redirectState = 'endpoint.dashboard';
             }
           } else {
             // Developer
             if (noHCFInstances) {
               // No HCF instances, so the system is not setup and the user can't fix this
-              that.continueLogin = false;
-              that.appEventService.$emit(that.appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+              continueLogin = false;
+              appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
             } else {
-              var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+              var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
                 if (userServiceInstanceModel.getNumValid() === 0) {
-                  that.redirectState = 'endpoint.dashboard';
+                  vm.redirectState = 'endpoint.dashboard';
                 }
               });
             }
@@ -250,27 +217,27 @@
         })
         .then(function () {
           // Update stackatoInfo
-          return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+          return modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
         })
         .then(function () {
           // Get the user registered services once at login - only refreshed in endpoints dashboard
-          var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+          var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
           return userServiceInstanceModel.list();
         })
         .finally(function () {
-          that.showGlobalSpinner = false;
-          if (that.continueLogin) {
+          vm.showGlobalSpinner = false;
+          if (continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them
             // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
             // So, we pass this flag to tell them login happenned, but that they should not redirect
-            that.appEventService.$emit(that.appEventService.events.LOGIN, !!that.redirectState);
+            appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
             // We need to dpo this after the login events are handled, so that ui-router states we might go to are registered
-            if (that.redirectState) {
-              that.appEventService.$emit(that.appEventService.events.REDIRECT, that.redirectState);
+            if (vm.redirectState) {
+              appEventService.$emit(appEventService.events.REDIRECT, vm.redirectState);
             }
           }
         });
-    },
+    }
 
     /**
      * @function onLoginFailed
@@ -281,34 +248,34 @@
      * @emits HTTP_5XX_ON_LOGIN
      * @private
      */
-    onLoginFailed: function (response) {
+    function onLoginFailed(response) {
       if (response.status === -1) {
         // handle the case when the server never responds
-        this.appEventService.$emit(this.appEventService.events.LOGIN_TIMEOUT);
-        this.serverFailedToRespond = true;
-        this.serverErrorOnLogin = false;
-        this.failedLogin = false;
+        appEventService.$emit(appEventService.events.LOGIN_TIMEOUT);
+        vm.serverFailedToRespond = true;
+        vm.serverErrorOnLogin = false;
+        vm.failedLogin = false;
       } else if (response.status >= 500 && response.status < 600) {
         // Check for upgrade - the upgrade handler will show the error - but we need to hide the login panel
-        if (this.upgradeCheck.isUpgrading(response)) {
-          this.loggedIn = true;
+        if (appUpgradeCheck.isUpgrading(response)) {
+          vm.loggedIn = true;
           return;
         }
 
         // handle 5xx errors when attempting to login
-        this.appEventService.$emit(this.appEventService.events.HTTP_5XX_ON_LOGIN);
-        this.serverFailedToRespond = false;
-        this.serverErrorOnLogin = true;
-        this.failedLogin = false;
+        appEventService.$emit(appEventService.events.HTTP_5XX_ON_LOGIN);
+        vm.serverFailedToRespond = false;
+        vm.serverErrorOnLogin = true;
+        vm.failedLogin = false;
       } else {
         // general authentication failed
-        this.appEventService.$emit(this.appEventService.events.LOGIN_FAILED);
-        this.serverFailedToRespond = false;
-        this.serverErrorOnLogin = false;
-        this.failedLogin = true;
+        appEventService.$emit(appEventService.events.LOGIN_FAILED);
+        vm.serverFailedToRespond = false;
+        vm.serverErrorOnLogin = false;
+        vm.failedLogin = true;
       }
-      this.loggedIn = false;
-    },
+      vm.loggedIn = false;
+    }
 
     /**
      * @function logout
@@ -316,18 +283,16 @@
      * @description Log out of the application
      * @public
      */
-    logout: function () {
-      var that = this;
-      this.showGlobalSpinner = true;
-      this.modelManager.retrieve('app.model.account')
+    function logout() {
+      vm.showGlobalSpinner = true;
+      modelManager.retrieve('app.model.account')
         .logout()
         .then(function () {
-          // no point calling this as we are going to reload the app
-          //that.onLoggedOut();
+          onLoggedOut();
 
-          that.reload();
+          vm.reload();
         });
-    },
+    }
 
     /**
      * @function reload
@@ -335,13 +300,13 @@
      * @description Reload the application
      * @public
      */
-    reload: function () {
+    function reload() {
       /* eslint-disable no-warning-comments */
       // FIXME: Can we clean the model and all current state instead? (reload the app for now)
       /* eslint-enable no-warning-comments */
       // Hard reload of the app in the browser ensures all state is cleared
-      this.$window.location = '/';
-    },
+      $window.location = '/';
+    }
 
     /**
      * @function onLoggedOut
@@ -350,10 +315,11 @@
      * @emits LOGOUT
      * @private
      */
-    onLoggedOut: function () {
-      this.appEventService.$emit(this.appEventService.events.LOGOUT);
-      this.loggedIn = false;
+    function onLoggedOut() {
+      // no point calling these as we are going to reload the app
+      //appEventService.$emit(appEventService.events.LOGOUT);
+      //vm.loggedIn = false;
     }
-  });
+  }
 
 })();

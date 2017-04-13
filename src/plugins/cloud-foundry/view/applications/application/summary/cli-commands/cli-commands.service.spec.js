@@ -13,19 +13,19 @@
         detailViewCalled = true;
         return {rendered: $q.resolve(), result: $q.reject()};
       };
-      $provide.value('helion.framework.widgets.detailView', mock);
+      $provide.value('frameworkDetailView', mock);
     }));
 
     beforeEach(inject(function ($injector, _$q_) {
       $q = _$q_;
-      cliCommandsFactory = $injector.get('cloud-foundry.view.applications.application.summary.cliCommands');
+      cliCommandsFactory = $injector.get('cfAppCliCommands');
     }));
 
     it('should be defined', function () {
       expect(cliCommandsFactory).toBeDefined();
     });
 
-    it('should invoke detailView', function () {
+    it('should invoke frameworkDetailView', function () {
       cliCommandsFactory.show({
         organization: {
           entity: {

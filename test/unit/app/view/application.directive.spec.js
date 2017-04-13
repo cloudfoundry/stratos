@@ -45,15 +45,6 @@
 
       // property definitions
 
-      it('should have properties `appEventService` defined', function () {
-        expect(applicationCtrl.appEventService).toBeDefined();
-      });
-
-      it('should have properties `modelManager` defined', function () {
-        expect(applicationCtrl.modelManager).toBeDefined();
-        expect(applicationCtrl.modelManager.retrieve('app.model.account')).toBeDefined();
-      });
-
       it('should have properties `loggedIn` defined', function () {
         expect(applicationCtrl.loggedIn).toBeDefined();
       });
@@ -94,18 +85,6 @@
 
       it('should have method `logout` defined', function () {
         expect(angular.isFunction(applicationCtrl.logout)).toBe(true);
-      });
-
-      it('should have method `onLoggedIn` defined', function () {
-        expect(angular.isFunction(applicationCtrl.onLoggedIn)).toBe(true);
-      });
-
-      it('should have method `onLoginFailed` defined', function () {
-        expect(angular.isFunction(applicationCtrl.onLoginFailed)).toBe(true);
-      });
-
-      it('should have method `onLoggedOut` defined', function () {
-        expect(angular.isFunction(applicationCtrl.onLoggedOut)).toBe(true);
       });
 
       // method invocation

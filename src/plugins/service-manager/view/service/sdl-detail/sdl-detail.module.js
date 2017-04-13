@@ -33,7 +33,7 @@
     'modelManager'
   ];
 
-  function ServiceManagerSdlDetailController($stateParams, $state, $q, utils, modelManager) {
+  function ServiceManagerSdlDetailController($stateParams, $state, $q, appUtilsService, modelManager) {
     var that = this;
     that.loading = true;
 
@@ -66,7 +66,7 @@
         });
     }
 
-    utils.chainStateResolve('sm.endpoint.service.sdl', $state, init);
+    appUtilsService.chainStateResolve('sm.endpoint.service.sdl', $state, init);
 
   }
 

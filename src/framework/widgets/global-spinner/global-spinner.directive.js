@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('globalSpinner', globalSpinner);
 
-  globalSpinner.$inject = [
-    '$document'
-  ];
-
   function globalSpinner($document) {
     return {
       bindToController: {

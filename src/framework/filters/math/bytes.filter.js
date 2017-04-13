@@ -27,8 +27,6 @@
   angular.module('helion.framework.filters')
     .filter('bytes', bytes);
 
-  bytes.$inject = [];
-
   function bytes() {
     return function (bytes, precision) {
       if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) {
@@ -45,8 +43,6 @@
 
   angular.module('helion.framework.filters')
     .filter('usageBytes', usageBytes);
-
-  usageBytes.$inject = [];
 
   function usageBytes() {
     return function (usage, usedPrecision, totalPrecision) {

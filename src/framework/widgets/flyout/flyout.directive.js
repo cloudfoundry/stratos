@@ -40,11 +40,6 @@
     }
   }
 
-  FlyoutController.$inject = [
-    '$scope',
-    'frameworkDialogEvents'
-  ];
-
   /**
    * @name FlyoutController
    * @description Controller for a flyout to support Dialog Events

@@ -9,11 +9,7 @@
     .module('cloud-foundry.view.applications.application.delivery-logs')
     .factory('viewEventDetailView', viewEventDetailView);
 
-  viewEventDetailView.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
-
-  function viewEventDetailView(detailView) {
+  function viewEventDetailView(frameworkDetailView) {
     return {
       /**
        * @function open
@@ -24,7 +20,7 @@
        * @public
        **/
       open: function (event, cnsiGuid) {
-        return detailView({
+        return frameworkDetailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
           controller: EventDetailViewController,
           title: event.name
@@ -36,24 +32,16 @@
     };
   }
 
-  EventDetailViewController.$inject = [
-    '$timeout',
-    '$log',
-    'context',
-    'content',
-    'modelManager'
-  ];
-
   /**
    * @name EventDetailViewController
    * @constructor
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $log - the Angular $log service
-   * @param {object} context - parameter object passed in to DetailView
-   * @param {object} content - configuration object passed in to DetailView
+   * @param {object} context - parameter object passed in to frameworkDetailView
+   * @param {object} content - configuration object passed in to frameworkDetailView
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {object} context - parameter object passed in to DetailView
-   * @property {object} content - configuration object passed in to DetailView
+   * @property {object} context - parameter object passed in to frameworkDetailView
+   * @property {object} content - configuration object passed in to frameworkDetailView
    * @property {object} log - The log / artifact associated with the event
    * @property {string} duration - The duration of the event
    */

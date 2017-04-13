@@ -57,8 +57,8 @@
 
       var modelManager = $injector.get('modelManager');
 
-      var organizationModel = $injector.get('organization-model');
-      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));
+      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));
@@ -116,7 +116,6 @@
         expect(controller.actions.length).toEqual(3);
         expect(controller.summary).toBeDefined();
         expect(controller.spaceDetail).toBeDefined();
-        expect(controller.orgDetails).toBeDefined();
       });
 
       it('should have rename space enabled', function () {

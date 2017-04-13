@@ -20,11 +20,11 @@
    * @memberof app.model.serviceInstance.user
    * @name app.model.serviceInstance.user.UserServiceInstance
    * @param {object} $q - the Angular Promise service
-   * @param {appUtilsService} utilsService - utils service
+   * @param {app.utils.appUtilsService} appUtilsService - utils service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} UserServiceInstance
    */
-  function UserServiceInstance($q, utilsService, apiManager) {
+  function UserServiceInstance($q, appUtilsService, apiManager) {
     var serviceInstances = {};
     var numValid = 0;
 
@@ -204,7 +204,7 @@
         }
       });
 
-      utilsService.replaceProperties(serviceInstances, _.keyBy(items, 'guid'));
+      appUtilsService.replaceProperties(serviceInstances, _.keyBy(items, 'guid'));
 
       numValid = _.sumBy(items, function (o) {
         return o.valid ? 1 : 0;

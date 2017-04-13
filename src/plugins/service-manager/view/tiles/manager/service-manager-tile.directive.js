@@ -32,9 +32,9 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - the console utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    */
-  function ServiceManagerTileController($scope, $state, modelManager, utils) {
+  function ServiceManagerTileController($scope, $state, modelManager, appUtilsService) {
     var that = this;
 
     this.$state = $state;
@@ -82,7 +82,7 @@
       });
     }
 
-    utils.chainStateResolve('sm.tiles', $state, init);
+    appUtilsService.chainStateResolve('sm.tiles', $state, init);
   }
 
   angular.extend(ServiceManagerTileController.prototype, {

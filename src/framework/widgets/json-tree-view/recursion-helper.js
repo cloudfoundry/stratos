@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .factory('RecursionHelper', RecursionHelper);
 
-  RecursionHelper.$inject = [
-    '$compile'
-  ];
-
   function RecursionHelper($compile) {
     return {
       /**

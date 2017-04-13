@@ -9,7 +9,7 @@
   /**
    * @namespace appUtilsService
    * @memberof app.utils
-   * @name utilsService
+   * @name appUtilsService
    * @description Various utility functions
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service

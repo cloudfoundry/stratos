@@ -11,10 +11,6 @@
     .module('cloud-foundry.model')
     .run(register);
 
-  register.$inject = [
-    'modelManager'
-  ];
-
   function register(modelManager) {
     modelManager.register('cloud-foundry.model.auth.checkers.routeAccess',
       RouteAccessFactory(modelManager));

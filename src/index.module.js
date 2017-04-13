@@ -29,12 +29,6 @@
     .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config)
     .factory('missingTranslateHandler', missingTranslateHandler);
 
-  config.$inject = [
-    '$compileProvider',
-    '$logProvider',
-    '$translateProvider'
-  ];
-
   function config($compileProvider, $logProvider, $translateProvider) {
 
     /**
@@ -66,10 +60,6 @@
     // Uncomment this for development to see which strings need localizing
     $translateProvider.useMissingTranslationHandler('missingTranslateHandler');
   }
-
-  missingTranslateHandler.$inject = [
-    '$log'
-  ];
 
   // Custom missing translation handler only logs each missing translation id once
   function missingTranslateHandler($log) {

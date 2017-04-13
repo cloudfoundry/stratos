@@ -5,10 +5,6 @@
     .module('helion.framework.utils')
     .factory('helion.framework.utils.long-running.service', serviceFactory);
 
-  serviceFactory.$inject = [
-    '$q', '$timeout'
-  ];
-
   /**
    * serviceFactory factory of the service
    * @param {object} $q - angular $q service

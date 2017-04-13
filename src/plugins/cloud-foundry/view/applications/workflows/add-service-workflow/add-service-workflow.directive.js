@@ -27,7 +27,7 @@
     '$interpolate',
     'modelManager',
     'appEventService',
-    'helion.framework.widgets.detailView'
+    'frameworkDetailView'
   ];
 
   /**
@@ -39,10 +39,10 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
-   * @param {helion.framework.widgets.detailView} detailView - the detail view widget
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view widget
    * @property {object} $q - the Angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {helion.framework.widgets.detailView} detailView - the detail view widget
+   * @property {frameworkDetailView} frameworkDetailView - the detail view widget
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
    * @property {cloud-foundry.model.service-instance} instanceModel - the CF service instance model
@@ -52,12 +52,12 @@
    * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventService, detailView) {
+  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventService, frameworkDetailView) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
     this.appEventService = appEventService;
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -332,7 +332,7 @@
         options: this.options
       };
 
-      return this.detailView(config, context);
+      return this.frameworkDetailView(config, context);
     },
 
     /**

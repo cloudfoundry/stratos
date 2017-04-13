@@ -6,10 +6,6 @@
     .module('cloud-foundry.view.applications.application.delivery-logs')
     .filter('deliveryLogsBuildFilter', deliveryLogsBuildFilter);
 
-  deliveryLogsBuildFilter.$inject = [
-    '$filter'
-  ];
-
   /**
    * @name deliveryLogsBuildFilter
    * @description An angular filter which wraps byProperties filter searching for specific properties. Used as a

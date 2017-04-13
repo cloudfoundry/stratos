@@ -74,12 +74,12 @@
 
         <dt translate>MEMORY</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.memory)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.memory)}}
         </dd>
 
         <dt translate>DISK QUOTA</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
         </dd>
 
       </dl>
@@ -218,8 +218,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
-        <td>{{ applicationSummaryCtrl.routesService.getRouteId(route) }}</td>
+      <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.appClusterRoutesService.getRouteId(route)">
+        <td>{{ applicationSummaryCtrl.appClusterRoutesService.getRouteId(route) }}</td>
         <td ng-if="!applicationSummaryCtrl.hideRouteActions">
           <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
                         action-target="route"

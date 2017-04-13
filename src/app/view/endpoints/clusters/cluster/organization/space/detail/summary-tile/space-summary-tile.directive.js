@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.organization.space.detail')
     .directive('spaceSummaryTile', SpaceSummaryTile);
 
-  SpaceSummaryTile.$inject = [];
-
   function SpaceSummaryTile() {
     return {
       bindToController: {
@@ -19,20 +17,6 @@
     };
   }
 
-  SpaceSummaryTileController.$inject = [
-    '$state',
-    '$scope',
-    '$stateParams',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'app.view.notificationsService',
-    'app.view.endpoints.clusters.cluster.cliCommands',
-    'frameworkDialogConfirm',
-    'helion.framework.widgets.asyncTaskDialog',
-    'organization-model'
-  ];
-
   /**
    * @name SpaceSummaryTileController
    * @constructor
@@ -41,43 +25,42 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {appUtilsService} utils - the utils service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
-   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.appClusterCliCommands} appClusterCliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
-   * @param {object} organizationModel - the organization-model service
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      cliCommands, frameworkDialogConfirm, asyncTaskDialog, organizationModel) {
-    var that = this;
+  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, appUtilsService, appNotificationsService,
+                                      appClusterCliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
+    var vm = this;
 
-    this.clusterGuid = $stateParams.guid;
-    this.organizationGuid = $stateParams.organization;
-    this.spaceGuid = $stateParams.space;
-
-    this.$state = $state;
-
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = organizationModel;
-    this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
-
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    this.isAdmin = user.admin;
-    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var spaceDetail;
-
-    this.cardData = {
+    vm.clusterGuid = $stateParams.guid;
+    vm.organizationGuid = $stateParams.organization;
+    vm.spaceGuid = $stateParams.space;
+    vm.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
+    vm.cardData = {
       title: gettext('Summary')
     };
+    vm.roles = [];
+    vm.memory = '';
+    vm.spaceDetail = spaceDetail;
+    vm.getEndpoint = getEndpoint;
+    vm.showCliCommands = showCliCommands;
+
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var user = stackatoInfo.info.endpoints.hcf[vm.clusterGuid].user;
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var spaceDetailObj;
 
     var renameAction = {
       name: gettext('Rename Space'),
       disabled: true,
       execute: function () {
-        return asyncTaskDialog(
+        return frameworkAsyncTaskDialog(
           {
             title: gettext('Rename Space'),
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
@@ -90,21 +73,21 @@
           },
           {
             data: {
-              name: that.spaceDetail().details.space.entity.name,
-              spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
+              name: spaceDetail().details.space.entity.name,
+              spaceNames: _.map(cfOrganizationModel.organizations[vm.clusterGuid][vm.organizationGuid].spaces, function (space) {
                 return space.entity.name;
               })
             }
           },
           function (spaceData) {
             if (spaceData.name && spaceData.name.length > 0) {
-              if (that.spaceDetail().details.space.entity.name === spaceData.name) {
+              if (spaceDetail().details.space.entity.name === spaceData.name) {
                 return $q.resolve();
               }
-              return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
+              return spaceModel.updateSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid,
                 {name: spaceData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                  appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
                     {name: spaceData.name});
                 });
             } else {
@@ -121,7 +104,7 @@
         return frameworkDialogConfirm({
           title: gettext('Delete Space'),
           description: gettext('Are you sure you want to delete space') +
-          " '" + that.spaceDetail().details.space.entity.name + "'?",
+          " '" + spaceDetail().details.space.entity.name + "'?",
           submitCommit: true,
           buttonText: {
             yes: gettext('Delete'),
@@ -129,10 +112,10 @@
           },
           errorMessage: gettext('Failed to delete space'),
           callback: function () {
-            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
+            return spaceModel.deleteSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid)
               .then(function () {
-                notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
-                  {name: that.spaceDetail().details.space.entity.name});
+                appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                  {name: spaceDetail().details.space.entity.name});
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
               });
@@ -141,73 +124,78 @@
       }
     };
 
-    this.getEndpoint = function () {
-      return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
-    };
-
-    this.showCliCommands = function () {
-      cliCommands.show(this.getEndpoint(), this.userName, that.clusterGuid,
-        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid],
-        that.spaceDetail());
-    };
+    vm.isAdmin = user.admin;
 
     $scope.$watchCollection(function () {
-      var space = that.spaceDetail();
+      var space = spaceDetail();
       if (space && space.roles && space.roles[user.guid]) {
         return space.roles[user.guid];
       }
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.spaceModel.spaceRolesToStrings(roles);
+      vm.roles = spaceModel.spaceRolesToStrings(roles);
     });
 
+    // Ensure the parent state is fully initialised before we start our own init
+    appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+
+    function getEndpoint() {
+      return appUtilsService.getClusterEndpoint(vm.userServiceInstance.serviceInstances[vm.clusterGuid]);
+    }
+
+    function showCliCommands() {
+      appClusterCliCommands.show(getEndpoint(), vm.userName, vm.clusterGuid,
+        cfOrganizationModel.organizations[vm.clusterGuid][vm.organizationGuid],
+        spaceDetail());
+    }
+
     function enableActions() {
-      that.actions = [];
+      vm.actions = [];
 
       // Rename Space
-      var canRename = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
-        spaceDetail.details.guid, that.organizationGuid);
-      if (canRename || that.isAdmin) {
+      var canRename = authModel.isAllowed(vm.clusterGuid, authModel.resources.space, authModel.actions.rename,
+        spaceDetailObj.details.guid, vm.organizationGuid);
+      if (canRename || vm.isAdmin) {
         renameAction.disabled = false;
-        that.actions.push(renameAction);
+        vm.actions.push(renameAction);
       }
 
       // Delete Space
-      var isSpaceEmpty = spaceDetail.details.totalRoutes === 0 &&
-        spaceDetail.details.totalServiceInstances === 0 &&
-        spaceDetail.details.totalApps === 0;
-      var canDelete = authModel.isAllowed(that.clusterGuid, authModel.resources.space,
-        authModel.actions.delete, that.organizationGuid);
-      if (canDelete || that.isAdmin) {
+      var isSpaceEmpty = spaceDetailObj.details.totalRoutes === 0 &&
+        spaceDetailObj.details.totalServiceInstances === 0 &&
+        spaceDetailObj.details.totalApps === 0;
+      var canDelete = authModel.isAllowed(vm.clusterGuid, authModel.resources.space,
+        authModel.actions.delete, vm.organizationGuid);
+      if (canDelete || vm.isAdmin) {
         deleteAction.disabled = !isSpaceEmpty;
-        that.actions.push(deleteAction);
+        vm.actions.push(deleteAction);
       }
 
-      if (that.actions.length < 1) {
-        delete that.actions;
+      if (vm.actions.length < 1) {
+        delete vm.actions;
       }
     }
 
     function init() {
-      that.userName = user.name;
-      spaceDetail = that.spaceDetail();
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
+      vm.userName = user.name;
+      spaceDetailObj = spaceDetail();
+      vm.memory = appUtilsService.sizeUtilization(spaceDetailObj.details.memUsed, spaceDetailObj.details.memQuota);
 
       // If navigating to/reloading the space details page these will be missing. Do these here instead of in
       // getSpaceDetails to avoid blocking state init when there are 100s of spaces
       var updatePromises = [];
-      if (angular.isUndefined(spaceDetail.details.totalRoutes)) {
-        updatePromises.push(that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid));
+      if (angular.isUndefined(spaceDetailObj.details.totalRoutes)) {
+        updatePromises.push(spaceModel.updateRoutesCount(vm.clusterGuid, vm.spaceGuid));
       }
-      if (angular.isUndefined(spaceDetail.details.totalServices)) {
-        updatePromises.push(that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid));
+      if (angular.isUndefined(spaceDetailObj.details.totalServices)) {
+        updatePromises.push(spaceModel.updateServiceCount(vm.clusterGuid, vm.spaceGuid));
       }
 
       return $q.all(updatePromises).then(function () {
 
         // Update delete action when space info changes (requires authService which depends on chainStateResolve)
         $scope.$watch(function () {
-          return !spaceDetail.details.totalRoutes && !spaceDetail.details.totalServiceInstances && !spaceDetail.details.totalApps;
+          return !spaceDetailObj.details.totalRoutes && !spaceDetailObj.details.totalServiceInstances && !spaceDetailObj.details.totalApps;
         }, function () {
           enableActions();
         });
@@ -218,17 +206,10 @@
 
     }
 
-    // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
-
-  }
-
-  angular.extend(SpaceSummaryTileController.prototype, {
-
-    spaceDetail: function () {
-      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
+    function spaceDetail() {
+      return spaceModel.fetchSpace(vm.clusterGuid, vm.spaceGuid);
     }
 
-  });
+  }
 
 })();

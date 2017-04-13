@@ -11,12 +11,6 @@
     .module('cloud-foundry.model')
     .run(registerServiceInstanceModel);
 
-  registerServiceInstanceModel.$inject = [
-    'modelManager',
-    'apiManager',
-    'modelUtils'
-  ];
-
   function registerServiceInstanceModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.service-instance', new ServiceInstance(apiManager, modelUtils));
   }

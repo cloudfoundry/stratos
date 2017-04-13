@@ -3,11 +3,8 @@
 
   angular
     .module('app.view')
+    .constant('showLanguageSelection', false)
     .directive('navbar', navbar);
-
-  navbar.$inject = [
-    'appBasePath'
-  ];
 
   /**
    * @namespace app.view.navbar
@@ -26,12 +23,8 @@
     };
   }
 
-  NavBarController.$inject = [
-    'app.config'
-  ];
-
-  function NavBarController(appConfig) {
-    this.showLanguageSelection = appConfig.showLanguageSelection || false;
+  function NavBarController(showLanguageSelection) {
+    this.showLanguageSelection = showLanguageSelection || false;
   }
 
 })();

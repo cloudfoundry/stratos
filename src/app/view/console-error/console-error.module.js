@@ -30,7 +30,4 @@
     this.error = $stateParams.error;
   }
 
-  angular.extend(ErrorPageController.prototype, {
-  });
-
 })();

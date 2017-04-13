@@ -24,7 +24,7 @@
           <tbody>
           <tr
             ng-repeat="route in spaceRoutesCtrl.visibleRoutes">
-            <td>{{ spaceRoutesCtrl.routesService.getRouteId(route)}}</td>
+            <td>{{ spaceRoutesCtrl.appClusterRoutesService.getRouteId(route)}}</td>
             <td>{{ spaceRoutesCtrl.appsToNames(route.entity.apps).join(',')}}</td>
             <td ng-if="spaceRoutesCtrl.canDeleteOrUnmap">
               <actions-menu actions="spaceRoutesCtrl.actionsPerRoute[route.metadata.guid]"

@@ -54,7 +54,7 @@
         close: angular.noop,
         dismiss: angular.noop
       };
-      addNotificationTargetService = $injector.get('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService');
+      addNotificationTargetService = $injector.get('cfAddNotificationService');
       var $controller = $injector.get('$controller');
       addNotificationTargetController = $controller('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationTargetController', {
         modelManager: modelManager,
@@ -71,7 +71,7 @@
       expect(addNotificationTargetController).toBeDefined();
     });
 
-    it('should pass correct content spec to detailView', function () {
+    it('should pass correct content spec to frameworkDetailView', function () {
       var modalObj = addNotificationTargetService.add();
       expect(modalObj.opened).toBeDefined();
     });

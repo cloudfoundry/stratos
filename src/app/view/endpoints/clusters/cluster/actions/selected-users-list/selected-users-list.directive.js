@@ -5,8 +5,6 @@
     .module('app.view.endpoints.clusters.cluster')
     .directive('selectedUsersList', SelectedUsersList);
 
-  SelectedUsersList.$inject = [];
-
   function SelectedUsersList() {
     return {
       bindToController: {

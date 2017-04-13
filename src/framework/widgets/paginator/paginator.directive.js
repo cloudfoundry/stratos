@@ -60,10 +60,6 @@
     };
   }
 
-  PaginatorController.$inject = [
-    '$scope'
-  ];
-
   /**
    * @namespace helion.framework.widgets.paginator.PaginatorController
    * @memberof helion.framework.widgets

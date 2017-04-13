@@ -8,10 +8,6 @@
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.delivery-pipeline', {
       url: '/delivery-pipeline',
@@ -24,39 +20,19 @@
     });
   }
 
-  ApplicationDeliveryPipelineController.$inject = [
-    'appEventService',
-    'modelManager',
-    'app.view.vcs.manageVcsTokens',
-    'app.view.vcs.registerVcsToken',
-    'frameworkDialogConfirm',
-    'app.view.notificationsService',
-    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
-    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
-    'appUtilsService',
-    'helion.framework.widgets.detailView',
-    'PAT_DELIMITER',
-    '$interpolate',
-    '$stateParams',
-    '$scope',
-    '$q',
-    '$state',
-    '$log'
-  ];
-
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
    * @param {app.utils.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
-   * @param {app.view.vcs.manageVcsTokens} registerVcsToken - service to register a new VCS token
-   * @param {helion.framework.widgets.dialog.confirm} frameworkDialogConfirm - the confirmation dialog service
-   * @param {app.view.notificationsService} notificationsService The toasts notifications service
-   * @param {object} addNotificationService - Service for adding new notifications
-   * @param {object} postDeployActionService - Service for adding a new post-deploy action
-   * @param {appUtilsService} utils - the console utils service
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {app.view.vcs.appManageVcsTokens} appManageVcsTokens - the VCS token manager
+   * @param {app.view.vcs.appManageVcsTokens} appRegisterVcsToken - service to register a new VCS token
+   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
+   * @param {object} cfAddNotificationService - Service for adding new notifications
+   * @param {object} cfPostDeployActionService - Service for adding a new post-deploy action
+   * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
+   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
@@ -66,15 +42,15 @@
    * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
-   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
-  function ApplicationDeliveryPipelineController(appEventService, modelManager, vcsTokenManager, registerVcsToken, frameworkDialogConfirm, notificationsService,
-                                                 addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
+  function ApplicationDeliveryPipelineController(appEventService, modelManager, appManageVcsTokens, appRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
+                                                 cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
-    this.vcsTokenManager = vcsTokenManager;
-    this.registerVcsToken = registerVcsToken;
+    this.appManageVcsTokens = appManageVcsTokens;
+    this.appRegisterVcsToken = appRegisterVcsToken;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
@@ -82,20 +58,20 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.detailView = detailView;
+    this.frameworkDetailView = frameworkDetailView;
     this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.appEventService = appEventService;
-    this.vcsTokenManager = vcsTokenManager;
+    this.appManageVcsTokens = appManageVcsTokens;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$log = $log;
     this.frameworkDialogConfirm = frameworkDialogConfirm;
-    this.notificationsService = notificationsService;
-    this.addNotificationService = addNotificationService;
-    this.postDeployActionService = postDeployActionService;
+    this.appNotificationsService = appNotificationsService;
+    this.cfAddNotificationService = cfAddNotificationService;
+    this.cfPostDeployActionService = cfPostDeployActionService;
     this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.hceCnsi = null;
@@ -138,7 +114,7 @@
       return $q.all(promises);
     }
 
-    utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
+    appUtilsService.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
 
     this.notificationTargetActions = [
       {
@@ -215,7 +191,7 @@
      * @description Show the delivvery pipeline workflow in a slide-in
      **/
     this.setupPipeline = function () {
-      that.detailView(
+      that.frameworkDetailView(
         {
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
         }
@@ -331,7 +307,7 @@
         if (tokensForVcs.length > 0) {
           return that._manageTokens(vcs);
         } else {
-          return that.registerVcsToken.registerToken(vcs).then(function () {
+          return that.appRegisterVcsToken.registerToken(vcs).then(function () {
             return that._manageTokens(vcs);
           });
         }
@@ -343,7 +319,7 @@
 
     addNotificationTarget: function () {
       var that = this;
-      this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
+      this.cfAddNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
         .result
         .then(function (notificationTargetData) {
           that.notificationTargets.push(notificationTargetData);
@@ -352,7 +328,7 @@
 
     addPostDeployAction: function () {
       var that = this;
-      this.postDeployActionService.add(this.hceCnsi.guid, this.project.id)
+      this.cfPostDeployActionService.add(this.hceCnsi.guid, this.project.id)
         .result
         .then(function (postDeployAction) {
           that.postDeployActions.push(postDeployAction.data);
@@ -383,20 +359,20 @@
       if (!this.project) {
         return undefined;
       }
-      return this.vcsTokenManager.getPatGuid(this.project.name);
+      return this.appManageVcsTokens.getPatGuid(this.project.name);
     },
 
     _manageTokens: function (vcs) {
       var that = this;
       var patGuid = that._getPatGuid();
-      return that.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+      return that.appManageVcsTokens.manage(vcs, true, patGuid).then(function (newTokenGuid) {
         // If the token was changed. update the HCE project
         if (newTokenGuid !== patGuid) {
-          that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
+          that.project.name = that.appManageVcsTokens.updateProjectName(that.project.name, newTokenGuid);
           return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
             that.model.application.project = res.data;
             var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
-            that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
+            that.appNotificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
               {name: newTokenName});
           });
         }

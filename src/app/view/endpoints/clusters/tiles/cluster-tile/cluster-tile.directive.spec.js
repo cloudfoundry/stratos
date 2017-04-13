@@ -70,8 +70,6 @@
       it('check initial state - null', function () {
         createCtrl();
 
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
-
         expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(clusterTileCtrl.getCardData()).toBeDefined();

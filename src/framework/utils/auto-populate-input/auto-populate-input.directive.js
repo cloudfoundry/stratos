@@ -5,9 +5,6 @@
   .module('helion.framework.utils')
   .directive('autoPopulateInput', autoPopulateInput);
 
-  autoPopulateInput.$inject = [
-  ];
-
   /**
    * @name autoPopulateInput
    *
@@ -30,10 +27,6 @@
       scope: {}
     };
   }
-
-  AutoPopulateController.$inject = [
-    '$scope'
-  ];
 
   /**
    * @memberof helion.framework.widgets

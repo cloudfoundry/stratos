@@ -7,10 +7,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space', {
       url: '/space/:space',
@@ -21,9 +17,6 @@
     });
   }
 
-  ClusterSpaceController.$inject = [];
-
   function ClusterSpaceController() {}
 
-  angular.extend(ClusterSpaceController.prototype, {});
 })();

@@ -5,10 +5,6 @@
     .module('app.view.endpoints.clusters.cluster.detail.firehose', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.firehose', {
       url: '/firehose',
@@ -24,20 +20,7 @@
     });
   }
 
-  ClusterFirehoseController.$inject = [
-    'base64',
-    'appUtilsService',
-    'app.view.localStorage',
-    '$scope',
-    '$rootScope',
-    '$stateParams',
-    '$location',
-    '$log',
-    '$document',
-    '$animate'
-  ];
-
-  function ClusterFirehoseController(base64, utils, localStorage,
+  function ClusterFirehoseController(base64, appUtilsService, appLocalStorage,
                                      $scope, $rootScope, $stateParams, $location, $log, $document, $animate) {
     var vm = this;
 
@@ -64,10 +47,10 @@
       others: true
     };
 
-    var coloredLog = utils.coloredLog;
+    var coloredLog = appUtilsService.coloredLog;
 
     try {
-      var fromStore = angular.fromJson(localStorage.getItem('firehose-filters', defaultFilters));
+      var fromStore = angular.fromJson(appLocalStorage.getItem('firehose-filters', defaultFilters));
       // Ensure properties are clean after upgrades or in case local storage was tampered with
       vm.hoseFilters = _.pick(fromStore, Object.keys(defaultFilters));
       _.defaults(vm.hoseFilters, defaultFilters);
@@ -146,7 +129,7 @@
       if (newVal === oldVal) {
         return;
       }
-      localStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
+      appLocalStorage.setItem('firehose-filters', angular.toJson(vm.hoseFilters));
     });
 
     $scope.$watch(function () {
@@ -212,7 +195,7 @@
       var httpEventString = peerType + ' ' + coloredLog(method, 'magenta', true) + ' ' +
         coloredLog(httpStartStop.uri, null, true) +
         ', Status-Code: ' + coloredLog(httpStartStop.statusCode, 'green') +
-        ', Content-Length: ' + coloredLog(utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
+        ', Content-Length: ' + coloredLog(appUtilsService.bytesToHumanSize(httpStartStop.contentLength), 'green') +
         ', User-Agent: ' + coloredLog(httpStartStop.userAgent, 'green') +
         ', Remote-Address: ' + coloredLog(httpStartStop.remoteAddress, 'green') + '\n';
       return buildOriginString(cfEvent, 'magenta') + ' ' + httpEventString;
@@ -249,8 +232,8 @@
       var counterEvent = cfEvent.counterEvent;
       var delta, total;
       if (counterEvent.name.indexOf('ByteCount') !== -1) {
-        delta = utils.bytesToHumanSize(counterEvent.delta);
-        total = utils.bytesToHumanSize(counterEvent.total);
+        delta = appUtilsService.bytesToHumanSize(counterEvent.delta);
+        total = appUtilsService.bytesToHumanSize(counterEvent.total);
       } else {
         delta = counterEvent.delta;
         total = counterEvent.total;
@@ -270,9 +253,9 @@
         ' ' + coloredLog('[', 'cyan', true) + coloredLog('CPU: ', 'cyan', true) +
         coloredLog(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
         ', ' + coloredLog('Memory: ', 'cyan', true) +
-        coloredLog(utils.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
+        coloredLog(appUtilsService.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
         ', ' + coloredLog('Disk: ', 'cyan', true) +
-        coloredLog(utils.bytesToHumanSize(containerMetric.diskBytes), 'green', true) + coloredLog(']', 'cyan', true);
+        coloredLog(appUtilsService.bytesToHumanSize(containerMetric.diskBytes), 'green', true) + coloredLog(']', 'cyan', true);
       return buildOriginString(cfEvent, 'cyan') + ' ' + metricString + '\n';
     }
 
@@ -417,7 +400,7 @@
 
         // Remember the previous foreground colour and bold (we know we don't use background colours)
         var restoreModes = getPreviousModes(toEndOfMatch);
-        finalString += before + utils.highlightLog(sanitizedMatch, restoreModes.colour, restoreModes.bold);
+        finalString += before + appUtilsService.highlightLog(sanitizedMatch, restoreModes.colour, restoreModes.bold);
 
         leftToParse = leftToParse.slice(mappedIndices[matchIndex + matchLength] - afterLastMatch);
         afterLastMatch = mappedIndices[matchIndex + matchLength];

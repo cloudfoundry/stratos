@@ -10,25 +10,17 @@
     ])
     .run(register);
 
-  register.$inject = [
-    '$state',
-    '$location',
-    'appEventService',
-    'modelManager',
-    'app.view.notificationsService'
-  ];
-
-  function register($state, $location, appEventService, modelManager, notificationService) {
-    return new CloudFoundry($state, $location, appEventService, modelManager, notificationService);
+  function register($state, $location, appEventService, modelManager, appNotificationsService) {
+    return new CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService);
   }
 
-  function CloudFoundry($state, $location, appEventService, modelManager, notificationService) {
+  function CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService) {
     var that = this;
     this.appEventService = appEventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
-    this.notificationService = notificationService;
+    this.appNotificationsService = appNotificationsService;
     this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });

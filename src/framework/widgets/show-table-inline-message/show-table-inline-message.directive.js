@@ -5,10 +5,6 @@
     .module('helion.framework.widgets')
     .directive('showTableInlineMessage', showTableInlineMessage);
 
-  showTableInlineMessage.$inject = [
-    '$compile'
-  ];
-
   /**
    * @namespace helion.framework.widgets.showTableInlineMessage
    * @memberof helion.framework.widgets

@@ -19,7 +19,7 @@
         this.modelManager = $injector.get('modelManager');
         this.appEventService = $injector.get('appEventService');
         this.$q = $injector.get('$q');
-        this.utils = $injector.get('appUtilsService');
+        this.appUtilsService = $injector.get('appUtilsService');
         this.$scope = $injector.get('$rootScope').$new();
         this.$timeout = $injector.get('$timeout');
         this.userInput = {

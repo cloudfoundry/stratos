@@ -60,7 +60,7 @@
                  ng-click="clusterUsersController.removeOrgRole(user, orgRole)"
                  ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)"></i>
             </div>
-            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0" translate>
+            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0">
               <span ng-if="user.entity.username" translate>None assigned</span>
               <span ng-if="!user.entity.username" translate>Not Applicable</span>
             </div>

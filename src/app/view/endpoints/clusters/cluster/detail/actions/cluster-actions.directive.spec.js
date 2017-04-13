@@ -64,7 +64,7 @@
     }
 
     describe('cluster-actions', function () {
-      var $uibModal, $q, organizationModel, spaceModel, assignUsersService;
+      var $uibModal, $q, cfOrganizationModel, spaceModel, appClusterAssignUsers;
 
       var modelOrganization2 = {
         details: {
@@ -83,13 +83,13 @@
         $q = $injector.get('$q');
 
         var modelManager = $injector.get('modelManager');
-        organizationModel = $injector.get('organization-model');
-        _.set(organizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization.details.guid, modelOrganization);
-        _.set(organizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization2.details.guid, modelOrganization2);
+        cfOrganizationModel = $injector.get('cfOrganizationModel');
+        _.set(cfOrganizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization.details.guid, modelOrganization);
+        _.set(cfOrganizationModel, 'organizations.' + inputClusterGuid + '.' + modelOrganization2.details.guid, modelOrganization2);
 
         spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
-        assignUsersService = $injector.get('app.view.endpoints.clusters.cluster.assignUsers');
+        appClusterAssignUsers = $injector.get('appClusterAssignUsers');
 
         initAuthModel('admin', $injector);
       }));
@@ -226,14 +226,14 @@
               result: $q.reject()
             };
           });
-          spyOn(organizationModel, 'createOrganization');
+          spyOn(cfOrganizationModel, 'createOrganization');
 
           clusterActionsCtrl.clusterActions[0].execute().result
             .then(function () {
               fail('A cancelled modal should not provide a resolved promised');
             })
             .catch(function () {
-              expect(organizationModel.createOrganization).not.toHaveBeenCalled();
+              expect(cfOrganizationModel.createOrganization).not.toHaveBeenCalled();
             });
         });
 
@@ -255,7 +255,7 @@
             };
 
           });
-          spyOn(organizationModel, 'createOrganization').and.callFake(function (clusterGuid, orgName) {
+          spyOn(cfOrganizationModel, 'createOrganization').and.callFake(function (clusterGuid, orgName) {
             expect(clusterGuid).toEqual(inputClusterGuid);
             expect(orgName).toEqual(inputOrgName);
             return $q.resolve();
@@ -264,13 +264,13 @@
           clusterActionsCtrl.clusterActions[0].execute();
 
           $scope.$digest();
-          expect(organizationModel.createOrganization).toHaveBeenCalled();
+          expect(cfOrganizationModel.createOrganization).toHaveBeenCalled();
         });
       });
 
       describe('Assign Users', function () {
         it('execute - cancel', function () {
-          spyOn(assignUsersService, 'assign').and.callFake(function (input) {
+          spyOn(appClusterAssignUsers, 'assign').and.callFake(function (input) {
             expect(input.clusterGuid).toEqual(inputClusterGuid);
             expect(input.selectedUsers).toBeDefined();
             return $q.reject();
@@ -281,12 +281,12 @@
               fail('A cancelled assign should not provide a resolved promised');
             })
             .catch(function () {
-              expect(assignUsersService.assign).toHaveBeenCalled();
+              expect(appClusterAssignUsers.assign).toHaveBeenCalled();
             });
         });
 
         it('execute - success', function () {
-          spyOn(assignUsersService, 'assign').and.callFake(function (input) {
+          spyOn(appClusterAssignUsers, 'assign').and.callFake(function (input) {
             expect(input.clusterGuid).toEqual(inputClusterGuid);
             expect(input.selectedUsers).toBeDefined();
             return $q.resolve();
@@ -294,7 +294,7 @@
 
           clusterActionsCtrl.clusterActions[2].execute()
             .then(function () {
-              expect(assignUsersService.assign).toHaveBeenCalled();
+              expect(appClusterAssignUsers.assign).toHaveBeenCalled();
             })
             .catch(function () {
               fail('A resolved assign should not provide a cancelled promised');

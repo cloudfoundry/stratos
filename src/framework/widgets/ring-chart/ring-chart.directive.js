@@ -37,11 +37,6 @@
     };
   }
 
-  RingChartController.$inject = [
-    '$scope',
-    '$element'
-  ];
-
   /**
    * @namespace helion.framework.widgets.ringChart
    * @memberof helion.framework.widgets

@@ -51,10 +51,10 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {appUtilsService} utils - the utils service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @constructor
    */
-  function ServicesManagersRouterController($q, $state, modelManager, utils) {
+  function ServicesManagersRouterController($q, $state, modelManager, appUtilsService) {
     var that = this;
     this.modelManager = modelManager;
     this.$q = $q;
@@ -82,7 +82,7 @@
         });
     }
 
-    utils.chainStateResolve('sm.list', $state, init);
+    appUtilsService.chainStateResolve('sm.list', $state, init);
   }
 
   angular.extend(ServicesManagersRouterController.prototype, {});
