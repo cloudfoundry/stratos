@@ -23,7 +23,7 @@
     return {
       /**
        * @function show
-       * @memberof app.view.endpoints.clusters.cluster
+       * @memberof cloud-foundry.view.applications.application.summary
        * @description Show a detail view containing basic cli instructions
        * @param {object} appModel - Application model
        * @param {string} username - Username used to connect to HCF

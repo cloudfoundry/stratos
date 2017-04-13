@@ -6,8 +6,8 @@
     .factory('appNotificationsService', notificationsFactory);
 
   /**
-   * @memberof cloud-foundry.view.applications.services
-   * @name notifications
+   * @memberof app.view
+   * @name appNotificationsService
    * @description A notifications service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.utils.appEventService} appEventService - the application event bus service

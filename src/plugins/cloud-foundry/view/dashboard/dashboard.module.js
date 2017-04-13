@@ -2,31 +2,31 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints', [
-      'app.view.endpoints.dashboard'
+    .module('cloud-foundry.view.dashboard', [
+      'cloud-foundry.view.dashboard.cluster',
+      'cloud-foundry.view.dashboard.tiles',
+      'cloud-foundry.view.dashboard.router'
     ])
     .config(registerRoute)
     .run(register);
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint', {
-      url: '/endpoint',
+    $stateProvider.state('endpoint.clusters', {
+      url: '/cf',
       abstract: true,
       template: '<ui-view/>',
       data: {
-        activeMenuState: 'endpoints'
-      },
-      ncyBreadcrumb: {
-        label: 'endpoints'
+        activeMenuState: 'endpoint.clusters'
       }
     });
   }
 
   function register($q, $state, modelManager, appEventService, appUtilsService) {
-    return new Endpoints($q, $state, modelManager, appEventService, appUtilsService);
+    return new Clusters($q, $state, modelManager, appEventService, appUtilsService);
   }
 
-  function Endpoints($q, $state, modelManager, appEventService, appUtilsService) {
+  function Clusters($q, $state, modelManager, appEventService, appUtilsService) {
+
     var initialized = $q.defer();
 
     function init() {
@@ -37,14 +37,13 @@
       onLoggedIn();
     });
 
-    appUtilsService.chainStateResolve('endpoint', $state, init);
+    appUtilsService.chainStateResolve('endpoint.clusters', $state, init);
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'helion-icon-Inherit helion-icon-r270');
+      menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', 'menu.cloud-foundry', 1, 'helion-icon-Cloud');
       initialized.resolve();
     }
-
   }
 
 })();
