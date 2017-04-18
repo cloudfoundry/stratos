@@ -5,17 +5,17 @@
   var SUPPORTED_VCS_TYPES;
 
   /**
-   * @namespace cloud-foundry.model.vcs
-   * @memberOf cloud-foundry.model
+   * @namespace code-engine.model.vcs
+   * @memberOf code-engine.model
    * @name vcs
    * @description VCS model
    */
   angular
-    .module('cloud-foundry.model')
+    .module('code-engine.model')
     .run(registerVcsModel);
 
   function registerVcsModel($q, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.vcs', new VcsModel($q, apiManager));
+    modelManager.register('code-engine.model.vcs', new VcsModel($q, apiManager));
 
     // Init these here - gettext will then ot be available
     SUPPORTED_VCS_TYPES = {
@@ -33,7 +33,7 @@
   }
 
   /**
-   * @memberof cloud-foundry.model.vcs
+   * @memberof code-engine.model.vcs
    * @name VcsModel
    * @param {object} $q - the Angular $q service
    * @param {app.api.apiManager} apiManager - the application API manager
@@ -58,7 +58,7 @@
 
     /**
      * @function listVcsClients
-     * @memberof cloud-foundry.model.vcs.VcsModel
+     * @memberof code-engine.model.vcs.VcsModel
      * @description Get the list of valid VCS clients
      * @returns {promise} A promise object
      * @public
@@ -198,7 +198,7 @@
 
     /**
      * @function _expandVcsType
-     * @memberof cloud-foundry.model.vcs.VcsModel
+     * @memberof code-engine.model.vcs.VcsModel
      * @description Returns more detailed VCS type name from VCS instance metadata
      * @param {object} vcs - VCS Instance Metadata
      * @returns {string} VCS type - expanded to split types like GitHub to GitHub and GitHub Enterprise

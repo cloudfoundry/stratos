@@ -1,8 +1,11 @@
 (function () {
   'use strict';
 
+  var PAT_DELIMITER = ';PAT:';
+
   angular
     .module('code-engine.service')
+    .constant('PAT_DELIMITER', PAT_DELIMITER)
     .factory('ceVCSEndpointService', vcsServiceFactory);
 
   /**
@@ -41,25 +44,25 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description Synchronous. Are there any cached service instances?
      * @returns {boolean}
      * @public
      */
     function haveInstances() {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       return vcsModel.vcsClients && vcsModel.vcsClients.length > 0;
     }
 
     /**
      * @function _updateEndpoints
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
      */
     function updateInstances() {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       return $q.all([_refreshTokens(), vcsModel.listVcsClients()]).then(function () {
         // Note - We may need to wait for service instances to also have been updated before calling this
         refreshCodeEngineVcses();
@@ -68,7 +71,7 @@
 
     function getStatus(vcs) {
       return function () {
-        var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+        var vcsModel = modelManager.retrieve('code-engine.model.vcs');
         var vcsTokens = vcsModel.getTokensForVcs(vcs);
 
         if (vcsTokens.length < 1) {
@@ -101,12 +104,12 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description convert the model service instances into endpoints entries
      * @public
      */
     function createEndpointEntries() {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       var endpoints = appEndpointsDashboardService.endpoints;
       var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
@@ -161,7 +164,7 @@
 
     /**
      * @function clear
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description Synchronous. clear any local data before leaving the dashboard
      * @public
      */
@@ -172,7 +175,7 @@
 
     function refreshCodeEngineVcses() {
       var promises = [];
-      var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+      var hceModel = modelManager.retrieve('code-engine.model.hce');
 
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       _.forEach(userServiceInstanceModel.serviceInstances, function (ep) {
@@ -199,7 +202,7 @@
     }
 
     function _createVcsActions(endpoint) {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       if (vcsModel.getTokensForVcs(endpoint.vcs).length > 0) {
         endpoint.actions = [{
           name: gettext('Manage Tokens'),
@@ -231,7 +234,7 @@
     }
 
     function _refreshTokens() {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       return vcsModel.listVcsTokens().then(function () {
         // No need to return this promise, validity data is updated asynchronously
         vcsModel.checkTokensValidity();
@@ -253,7 +256,7 @@
     }
 
     function _unregister(endpoint) {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       var scope = $rootScope.$new();
       scope.name = endpoint.name;
       frameworkDialogConfirm({

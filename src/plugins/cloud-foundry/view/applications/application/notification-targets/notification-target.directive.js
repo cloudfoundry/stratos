@@ -44,7 +44,7 @@
     this.$scope = $scope;
     this.frameworkAsyncTaskDialog = frameworkAsyncTaskDialog;
     this.hceNotificationApi = apiManager.retrieve('code-engine.api.HceNotificationApi');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
 
   }
 

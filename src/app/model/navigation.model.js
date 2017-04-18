@@ -133,12 +133,11 @@
      * is a sub-menu which is also of type Menu and is empty initially.
      * @param {string} name - the name/ID of the menu item
      * @param {string} href - the href / ng-router state we go to when clicking the entry.
-     *                        e.g. cf.applications.list.gallery-view
+     *                        e.g. endpoint.dashboard
      * @param {string} text - the displayed text of the menu item
      * @param {number=} pos - optional position in the menu to insert at
      * @param {string=} icon - the icon of the menu item
-     * @param {string=} baseState - optional href / ng-router top-level base state e.g. cf.applications or cf.workspaces
-     *                              (defaults to name)
+     * @param {string=} baseState - optional href / ng-router top-level base state e.g. endpoint (defaults to name)
      * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
     addMenuItem: function (name, href, text, pos, icon, baseState) {

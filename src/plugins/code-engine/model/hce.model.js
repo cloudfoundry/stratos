@@ -2,21 +2,21 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model.hce
-   * @memberOf cloud-foundry.model
+   * @namespace code-engine.model.hce
+   * @memberOf code-engine.model
    * @name hce
    * @description Helion Code Engine model
    */
   angular
-    .module('cloud-foundry.model')
+    .module('code-engine.model')
     .run(registerHceModel);
 
   function registerHceModel(modelManager, apiManager, appEventService, $log) {
-    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, appEventService, $log));
+    modelManager.register('code-engine.model.hce', new HceModel(apiManager, appEventService, $log));
   }
 
   /**
-   * @memberof cloud-foundry.model.hce
+   * @memberof code-engine.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.utils.appEventService} appEventService - the application event service
@@ -107,7 +107,7 @@
 
     /**
      * @function infos
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get service info for one or more HCE instances
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -120,7 +120,7 @@
 
     /**
      * @function info
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get service info for an HCE instance
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -133,7 +133,7 @@
 
     /**
      * @function getBuildContainer
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get build container by ID
      * @param {string} guid - the HCE instance GUID
      * @param {number} id - the build container ID
@@ -147,7 +147,7 @@
 
     /**
      * @function getBuildContainers
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get registered build container instances
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -164,7 +164,7 @@
 
     /**
      * @function getDeploymentTarget
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get deployment target by ID
      * @param {string} guid - the HCE instance GUID
      * @param {number} id - the deployment target ID
@@ -178,7 +178,7 @@
 
     /**
      * @function getDeploymentTargets
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get registered deployment targets
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -195,7 +195,7 @@
 
     /**
      * @function getImageRegistries
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get registered image registries
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -212,7 +212,7 @@
 
     /**
      * @function getNotificationTargets
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get notification targets for project
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the project ID
@@ -226,7 +226,7 @@
 
     /**
      * @function filterNotificationTargets
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Filter notification targets to include only those that should be shown
      * @param {object} targets - Array of notification targets
      * @returns {object} A filtered array of notification targets
@@ -246,7 +246,7 @@
 
     /**
      * @function getPipelineTasks
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get post-deploy pipeline tasks for project
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the project ID
@@ -264,7 +264,7 @@
 
     /**
      * @function addPipelineTask
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Add a post-deploy pipeline task to a project
      * @param {string} guid - the HCE instance GUID
      * @param {string} projectId - the project ID
@@ -291,7 +291,7 @@
 
     /**
      * @function removePipelineTask
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Remove a post-deploy pipeline task to a project
      * @param {string} guid - the HCE instance GUID
      * @param {!number} taskId - The PipelineTask id to remove.
@@ -306,7 +306,7 @@
 
     /**
      * @function listNotificationTargetTypes
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get notification targets for project
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -323,7 +323,7 @@
 
     /**
      * @function getProject
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get project by ID
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the HCE project ID
@@ -337,7 +337,7 @@
 
     /**
      * @function getProjectByName
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get project by name
      * @param {string} guid - the HCE instance GUID
      * @param {number} name - the HCE project name
@@ -356,7 +356,7 @@
 
     /**
      * @function getProjects
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get projects of user
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -373,7 +373,7 @@
 
     /**
      * @function getPipelineExecutions
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get executions by project ID
      * @param {string} guid - the HCE instance GUID
      * @param {string} projectId - the HCE project ID
@@ -391,7 +391,7 @@
 
     /**
      * @function getPipelineEvents
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get events by execution ID
      * @param {string} guid - the HCE instance GUID
      * @param {string} executionId - the HCE execution ID that owns the events
@@ -409,7 +409,7 @@
 
     /**
      * @function getVcses
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get VCS instances
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -426,7 +426,7 @@
 
     /**
      * @function getVcs
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get VCS instance
      * @param {string} guid - the HCE instance GUID
      * @param {number} vcsId - the VCS instance ID
@@ -444,7 +444,7 @@
 
     /**
      * @function listVcsTypes
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Get VCS types
      * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
@@ -461,7 +461,7 @@
 
     /**
      * @function createDeploymentTarget
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Create a new deployment target
      * @param {string} guid - the HCE instance GUID
      * @param {string} name - the user-provided label for this target
@@ -495,7 +495,7 @@
 
     /**
      * @function updateDeploymentTarget
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Update a deployment target
      * @param {string} guid - the HCE instance GUID
      * @param {string} targetId - the deployment target ID
@@ -510,7 +510,7 @@
 
     /**
      * @function createCfBinding
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Create a Cloud Foundry service instance binding to the application
      * @param {string} guid - the HCE instance GUID
      * @param {string} projectId - the project ID
@@ -525,7 +525,7 @@
 
     /**
      * @function createProject
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Create a new project
      * @param {string} guid - the HCE instance GUID
      * @param {string} name - the project name
@@ -573,7 +573,7 @@
 
     /**
      * @function updateProject
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Update an existing project
      * @param {string} guid - the HCE instance GUID
      * @param {string} tokenGuid - the ID of the VCS token to use
@@ -597,7 +597,7 @@
 
     /**
      * @function downloadArtifact
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Download the artifact associated with the artifact ID.
      * @param {string} guid - the HCE instance GUID
      * @param {string} artifactId - the HCE artifact ID
@@ -625,7 +625,7 @@
 
     /**
      * @function removeNotificationTarget
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Remove notification target
      * @param {string} guid - the HCE instance GUID
      * @param {number} targetId - the notification target ID
@@ -639,7 +639,7 @@
 
     /**
      * @function triggerPipelineExecution
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Trigger pipeline execution for project and commit ref
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the project ID
@@ -659,7 +659,7 @@
 
     /**
      * @function onGetBuildContainers
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache build container
      * @param {string} response - the JSON response from API call
      * @private
@@ -671,7 +671,7 @@
 
     /**
      * @function onGetDeploymentTargets
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache deployment targets
      * @param {string} response - the JSON response from API call
      * @private
@@ -683,7 +683,7 @@
 
     /**
      * @function onGetImageRegistries
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache image registries
      * @param {string} response - the JSON response from API call
      * @private
@@ -695,7 +695,7 @@
 
     /**
      * @function onGetProjects
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache user projects
      * @param {string} response - the JSON response from API call
      * @returns {array} An array of the user's projects
@@ -709,7 +709,7 @@
 
     /**
      * @function onCreateDeploymentTarget
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache deployment target
      * @param {string} response - the JSON response from API call
      * @returns {object} The new deployment target data
@@ -726,7 +726,7 @@
 
     /**
      * @function onGetPipelineExecutions
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Cache pipeline executions
      * @param {string} response - the JSON response from API call
      * @private
@@ -738,7 +738,7 @@
 
     /**
      * @function onGetPipelineEvents
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
      * @returns {object} The collection of pipeline events
@@ -750,7 +750,7 @@
 
     /**
      * @function onGetVcses
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Extract VCS instances data from response
      * @param {object} response - the JSON response from API call
      * @returns {object} The response data
@@ -763,7 +763,7 @@
 
     /**
      * @function onGetVcs
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Extract VCS instance data from response
      * @param {object} response - the JSON response from API call
      * @returns {object} The response data
@@ -776,7 +776,7 @@
 
     /**
      * @function onListVcsTypes
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Extract VCS types data from response
      * @param {object} response - the JSON response from API call
      * @returns {object} The response data
@@ -790,7 +790,7 @@
 
     /**
      * @function onDownloadArtifact
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
      * @returns {object} Artifact content
@@ -802,7 +802,7 @@
 
     /**
      * @function onLogout
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description Clear the data on logout
      * @returns {void}
      * @private
@@ -819,7 +819,7 @@
 
     /**
      * @function onListNotificationTargetTypes
-     * @memberof cloud-foundry.model.hce.HceModel
+     * @memberof code-engine.model.hce.HceModel
      * @description store current notification target types
      * @param {object} response - HCE listNotificationTargetTypes response
      * @returns {void}

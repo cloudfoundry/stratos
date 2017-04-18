@@ -9,7 +9,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
-      hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+      hceModel = modelManager.retrieve('code-engine.model.hce');
     }));
 
     afterEach(function () {

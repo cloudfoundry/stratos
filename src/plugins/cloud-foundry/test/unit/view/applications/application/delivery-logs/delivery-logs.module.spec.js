@@ -66,7 +66,7 @@
       // Store the model functions that the constructor calls out to. These functions will be monitored and overwritten
       var model = modelManager.retrieve('cloud-foundry.model.application');
       _.set(model, 'application', application);
-      hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+      hceModel = modelManager.retrieve('code-engine.model.hce');
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     }));
 

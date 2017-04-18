@@ -364,7 +364,7 @@
               appName: that.data.app.summary.name
             };
             var message = that.$interpolate(successMsg)(context);
-            that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
             that.modal.close();
           }, function () {
             return that._onServiceBindingError();

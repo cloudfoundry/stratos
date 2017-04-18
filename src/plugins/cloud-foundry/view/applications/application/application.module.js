@@ -63,7 +63,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -452,7 +452,7 @@
             // show notification for successful binding
             var successMsg = gettext("'{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: appName});
-            that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
             that.appEventService.$emit(that.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }

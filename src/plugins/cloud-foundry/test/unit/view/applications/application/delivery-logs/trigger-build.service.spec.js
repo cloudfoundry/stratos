@@ -50,7 +50,7 @@
 
       modelManager = $injector.get('modelManager');
       ceManageVcsTokens = $injector.get('ceManageVcsTokens');
-      hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+      hceModel = modelManager.retrieve('code-engine.model.hce');
       hceModel.data.vcsInstance = vcsInstance;
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);

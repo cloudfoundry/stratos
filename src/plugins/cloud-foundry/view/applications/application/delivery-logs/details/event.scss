@@ -1,0 +1,14 @@
+.delivery-log-event {
+  color: $gray-darker;
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1 1 0px;
+
+  .delivery-log-event-summary {
+    margin-bottom: $padding-large-vertical;
+  }
+
+  .delivery-log-event-log-view {
+    margin-bottom: $hpe-unit-space;
+  }
+}

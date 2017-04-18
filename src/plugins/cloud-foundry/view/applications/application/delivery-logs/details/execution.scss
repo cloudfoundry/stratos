@@ -1,0 +1,57 @@
+.delivery-log-execution {
+  color: $gray-darker;
+
+  .delivery-log-execution-detail {
+    &.panel {
+      box-shadow: none;
+      background-color: transparent;
+    }
+
+    & > dl {
+      padding-bottom: $hpe-unit-space;
+      padding-left: 0px;
+      padding-top: $hpe-unit-space;
+
+      dt, dd {
+        padding-top: $hpe-unit-space / 2;
+      }
+    }
+
+    .nav-tabs {
+      clear: both;
+      border-width: 2px;
+    }
+  }
+
+  .delivery-log-execution-events {
+
+    padding-top: $hpe-unit-space;
+
+    table.table.table-outlined {
+      border-width: 1px;
+      tbody > tr > td {
+        vertical-align: middle;
+      }
+    }
+
+    .event-result {
+      text-transform: uppercase;
+      font-weight: $hpe-font-weight-semibold;
+    }
+
+    .event-view {
+      a {
+        font-size: inherit;
+        text-decoration: none;
+      }
+    }
+
+    spinner {
+      width: 14px;
+      height: 14px;
+      .spinner-container {
+        top: 3px;
+      }
+    }
+  }
+}

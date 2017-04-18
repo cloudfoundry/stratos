@@ -50,7 +50,7 @@
     });
 
     function createBasicController(context) {
-      assignUsersController = $controller('app.view.endpoints.clusters.cluster.assignUsersController', {
+      assignUsersController = $controller('cloud-foundry.view.dashboard.cluster.assignUsersController', {
         $scope: $scope,
         modelManager: modelManager,
         context: context || {},

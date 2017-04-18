@@ -35,7 +35,8 @@
     '$scope',
     '$q',
     '$timeout',
-    '$stateParams'
+    '$stateParams',
+    'PAT_DELIMITER'
   ];
 
   /**
@@ -59,7 +60,8 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, $scope, $q,
+                                         $timeout, $stateParams, PAT_DELIMITER) {
     this.modelManager = modelManager;
     this.appEventService = appEventService;
     this.appUtilsService = appUtilsService;
@@ -70,8 +72,9 @@
     this.userInput = {};
     this.options = {};
     this.cnsiGuid = $stateParams.cnsiGuid;
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
+    this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
+    this.PAT_DELIMITER;
 
     this.init();
     this.startWorkflow();

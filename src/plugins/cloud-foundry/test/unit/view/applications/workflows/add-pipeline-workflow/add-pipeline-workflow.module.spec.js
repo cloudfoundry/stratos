@@ -22,6 +22,7 @@
         this.appUtilsService = $injector.get('appUtilsService');
         this.$scope = $injector.get('$rootScope').$new();
         this.$timeout = $injector.get('$timeout');
+        this.PAT_DELIMITER = $injector.get('PAT_DELIMITER');
         this.userInput = {
           application: {
             summary: {
@@ -64,7 +65,7 @@
         };
         this.options = {};
         this.cnsiGuid = 'cnsiGuid';
-        this.hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        this.hceModel = this.modelManager.retrieve('code-engine.model.hce');
       }
 
       F.prototype = this.addPipelineWorkflowPrototype;
@@ -542,7 +543,7 @@
 
       beforeEach(inject(function ($injector) {
         modelManager = $injector.get('modelManager');
-        vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+        vcsModel = modelManager.retrieve('code-engine.model.vcs');
         $q = $injector.get('$q');
       }));
 

@@ -1,0 +1,20 @@
+<div class="delivery-log-event">
+  <div class="delivery-log-event-summary">
+    <div class="row col-md-5">
+      <span translate>Started: </span>
+      <span ng-if="detailViewCtrl.context.event.start_date">{{ detailViewCtrl.context.event.start_date | amDateFormat:'L - LTS'}}</span>
+      <span ng-if="!detailViewCtrl.context.event.start_date" translate>Unknown</span>
+    </div>
+    <div class="row col-md-4">
+      <span translate>Duration: </span> {{ detailViewCtrl.context.event.durationString }}
+    </div>
+  </div>
+  <div ng-if="detailViewCtrl.log === null" class="message-box message-box-no-bg">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <div ng-if="detailViewCtrl.log === false" class="message-box message-box-no-bg">
+    <span translate>No log available</span>
+  </div>
+  <log-viewer ng-if="detailViewCtrl.log" class="delivery-log-event-log-view"
+              auto-scroll-on="false" colorize="true" log-text="detailViewCtrl.log"></log-viewer>
+</div>

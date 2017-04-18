@@ -56,19 +56,19 @@
       }
     };
 
-    appEventService.$on('cf.events.NOTIFY', function (event, config) {
+    appEventService.$on('events.NOTIFY', function (event, config) {
       service.notify(config.toastType, config.message, config.scope, config.options);
     });
-    appEventService.$on('cf.events.NOTIFY_BUSY', function (event, config) {
+    appEventService.$on('events.NOTIFY_BUSY', function (event, config) {
       service.notify('busy', config.message, config.scope, config.options);
     });
-    appEventService.$on('cf.events.NOTIFY_ERROR', function (event, config) {
+    appEventService.$on('events.NOTIFY_ERROR', function (event, config) {
       service.notify('error', config.message, config.scope, config.options);
     });
-    appEventService.$on('cf.events.NOTIFY_SUCCESS', function (event, config) {
+    appEventService.$on('events.NOTIFY_SUCCESS', function (event, config) {
       service.notify('success', config.message, config.scope, config.options);
     });
-    appEventService.$on('cf.events.NOTIFY_WARNING', function (event, config) {
+    appEventService.$on('events.NOTIFY_WARNING', function (event, config) {
       service.notify('warning', config.message, config.scope, config.options);
     });
 

@@ -16,8 +16,7 @@
   /* eslint-disable camelcase */
   angular.extend(VersionsApi.prototype, {
 
-
-    /**
+    /*
      * Helper method to make the request config for $http
      */
     _makeConfig: function(params, httpConfigOptions) {
