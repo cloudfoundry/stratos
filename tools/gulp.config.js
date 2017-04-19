@@ -67,7 +67,8 @@
       },
 
       i18nFiles: [
-        paths.i18n + '**/*.json'
+        paths.i18n + '**/*.json',
+        paths.src + 'plugins/*/i18n/**/*.json'
       ],
 
       assetFiles: [

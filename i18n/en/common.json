@@ -1,15 +1,11 @@
 {
   "applications": "Applications",
-  "cloud-foundry": "Cloud Foundry",
-  "code-engine": "Code Engine",
   "service-manager": "Service Manager",
   "console": "Console",
   "endpoints": "Endpoints",
   "privacy": "privacy",
   "terms": "Terms of Use",
   "console.version": "Console Version",
-  "org": "Org",
-  "space": "Space",
   "endpoint": "Endpoint",
 
   "buttons": {
@@ -28,8 +24,6 @@
   },
   "menu": {
     "applications": "@:applications",
-    "cloud-foundry": "@:cloud-foundry",
-    "code-engine": "@:code-engine",
     "endpoints": "@:endpoints",
     "about": "@:about",
     "language": "Language",

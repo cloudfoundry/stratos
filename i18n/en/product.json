@@ -1,10 +1,7 @@
 {
   "product": {
     "version": "4.1",
-    "name": "Cloud Foundry",
-    "console": "Web Console",
-    "cf": "Cloud Foundry",
-    "ce": "Code Engine"
+    "console": "Web Console"
   },
   "company": {
     "name": "Hewlett Packard Enterprise Company, L.P.",
@@ -13,8 +10,6 @@
     "PRODUCT_FAMILY_HREF": "",
     "COMPANY_HREF": "http://www.hpe.com",
     "PRODUCT_CONSOLE": "Helion Stackato Web Console",
-    "CODE_ENGINE": "Code Engine",
-    "CLOUD_FOUNDRY": "Cloud Foundry",
     "COMPANY_LOGO_HREF": "images/brand_company_logo.png",
     "PRODUCT_FAMILY_LOGO_HREF": "",
     "ABOUT_COMPANY_LOGO_HREF": "images/brand_company_logo.png"
