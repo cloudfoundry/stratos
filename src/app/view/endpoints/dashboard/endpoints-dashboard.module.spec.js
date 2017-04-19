@@ -81,7 +81,7 @@
       var appUtilsService = $injector.get('appUtilsService');
       var appEndpointsDashboardService = $injector.get('appEndpointsDashboardService');
       var cfServiceInstanceService = $injector.get('appEndpointsCnsiService');
-      var appEndpointsVcsService = $injector.get('appEndpointsVcsService');
+      var ceVCSEndpointService = $injector.get('ceVCSEndpointService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -97,7 +97,8 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, appUtilsService, appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, appEndpointsVcsService);
+      controller = new EndpointsDashboardController($scope, $state, modelManager, appUtilsService,
+        appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, ceVCSEndpointService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
@@ -130,7 +131,7 @@
       });
 
       it('should be uninitialised', function () {
-        expect(controller.endpoints).toEqual([]);
+        expect(controller.endpoints).toBeUndefined();
         expect(controller.initialised).toBe(false);
         $httpBackend.flush();
       });
@@ -149,9 +150,8 @@
       it('initialisation fails', function () {
         $httpBackend.expect('GET', '/pp/v1/cnsis').respond(500, {});
         $httpBackend.flush();
-        expect(controller.initialised).toBe(true);
-        expect(controller.endpoints).toBeDefined();
-        expect(controller.endpoints.length).toBe(0);
+        expect(controller.initialised).toBe(false);
+        expect(controller.endpoints).toBeUndefined();
         expect(controller.listError).toBeTruthy();
       });
     });

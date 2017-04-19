@@ -38,12 +38,12 @@
    * @param {object} $timeout - the angular timeout service
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
    * @param {object} $q - the angular $q service
-   * @param {object} appManageVcsTokens - the VCS token manager
+   * @param {object} ceManageVcsTokens - the VCS token manager
    * @param {object} context - parameter object passed in to frameworkDetailView
    * @param {object} content - configuration object passed in to frameworkDetailView
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, appManageVcsTokens, context, content, modelManager) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, ceManageVcsTokens, context, content, modelManager) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -52,7 +52,7 @@
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.$q = $q;
-    that.appManageVcsTokens = appManageVcsTokens;
+    that.ceManageVcsTokens = ceManageVcsTokens;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -87,7 +87,7 @@
     },
 
     _getPatGuid: function () {
-      return this.appManageVcsTokens.getPatGuid(this.context.project.name);
+      return this.ceManageVcsTokens.getPatGuid(this.context.project.name);
     },
 
     _checkPatAndBuild: function () {

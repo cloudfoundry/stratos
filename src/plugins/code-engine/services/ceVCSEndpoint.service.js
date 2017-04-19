@@ -2,62 +2,73 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.dashboard')
-    .factory('appEndpointsVcsService', vcsServiceFactory);
+    .module('code-engine.service')
+    .factory('ceVCSEndpointService', vcsServiceFactory);
 
   /**
-   * @name appEndpointsVcsService
+   * @name ceVCSEndpointService
    * @description provide functionality to view and manage VCS endpoints in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $rootScope - the angular $rootScope service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {object} appManageVcsTokens - the manage VCS tokens service
-   * @param {object} appRegisterVcsToken - register a new VCS token
-   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {ceManageVcsTokens} ceManageVcsTokens - the manage VCS tokens service
+   * @param {ceRegisterVcsToken} ceRegisterVcsToken - register a new VCS token
+   * @param {appNotificationsService} appNotificationsService - the toast notification service
+   * @param {frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
   function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService,
-                             appManageVcsTokens, appRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
-
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+                             ceManageVcsTokens, ceRegisterVcsToken, appNotificationsService, frameworkDialogConfirm) {
 
     var endpointPrefix = 'vcs_';
-
-    return {
+    var codeEngineVcs = [];
+    var fetchedCodeEngineVcses = false;
+    var service = {
       haveInstances: haveInstances,
       updateInstances: updateInstances,
       createEndpointEntries: createEndpointEntries,
-      clear: clear
+      clear: clear,
+      fetchedCodeEngineVcses: false,
+      refreshCodeEngineVcses: refreshCodeEngineVcses,
+      isCodeEngineVcs: isCodeEngineVcs
     };
 
+    appEndpointsDashboardService.endpointsProviders.push(service);
+
+    return service;
+
     /**
-     * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description are there any cached service instances?
+     * @function haveInstances
+     * @memberOf code-engine.service.ceVCSEndpointService
+     * @description Synchronous. Are there any cached vcs instances?
      * @returns {boolean}
      * @public
      */
     function haveInstances() {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return vcsModel.vcsClients && vcsModel.vcsClients.length > 0;
     }
 
     /**
-     * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @function updateInstances
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
      */
     function updateInstances() {
-      return $q.all([_refreshTokens(), vcsModel.listVcsClients()]);
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      return $q.all([_refreshTokens(), vcsModel.listVcsClients()]).then(function () {
+        // Note - We may need to wait for service instances to also have been updated before calling this
+        refreshCodeEngineVcses();
+      });
     }
 
     function getStatus(vcs) {
       return function () {
-
+        var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
         var vcsTokens = vcsModel.getTokensForVcs(vcs);
 
         if (vcsTokens.length < 1) {
@@ -90,11 +101,12 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description convert the model service instances into endpoints entries
      * @public
      */
     function createEndpointEntries() {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       var endpoints = appEndpointsDashboardService.endpoints;
       var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
@@ -149,14 +161,45 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description clear any local data before leaving the dashboard
+     * @memberOf code-engine.service.ceVCSEndpointService
+     * @description Synchronous. clear local data
      * @public
      */
     function clear() {
+      fetchedCodeEngineVcses = false;
+      codeEngineVcs.length = 0;
+    }
+
+    function refreshCodeEngineVcses() {
+      var promises = [];
+      var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      _.forEach(userServiceInstanceModel.serviceInstances, function (ep) {
+        if (ep.cnsi_type === 'hce' && ep.valid) {
+          promises.push(hceModel.getVcses(ep.guid));
+        }
+      });
+
+      return $q.all(promises).then(function (allCeVcses) {
+        codeEngineVcs.length = 0;
+        for (var i = 0; i < allCeVcses.length; i++) {
+          var vcses = allCeVcses[i];
+          Array.prototype.push.apply(codeEngineVcs, vcses);
+        }
+        fetchedCodeEngineVcses = true;
+      });
+
+    }
+
+    function isCodeEngineVcs(ep) {
+      return !!_.find(codeEngineVcs, function (vcs) {
+        return vcs.browse_url === ep.vcs.browse_url && vcs.api_url === ep.vcs.api_url && vcs.label === ep.vcs.label;
+      });
     }
 
     function _createVcsActions(endpoint) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       if (vcsModel.getTokensForVcs(endpoint.vcs).length > 0) {
         endpoint.actions = [{
           name: gettext('Manage Tokens'),
@@ -176,8 +219,8 @@
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
       var noHces = !_.find(userServiceInstanceModel.serviceInstances, {cnsi_type: 'hce', valid: true});
-      if (currentUserAccount.isAdmin() && (noHces || appEndpointsDashboardService.fetchedCodeEngineVcses &&
-        !appEndpointsDashboardService.isCodeEngineVcs(endpoint))) {
+      if (currentUserAccount.isAdmin() && (noHces || fetchedCodeEngineVcses &&
+        !isCodeEngineVcs(endpoint))) {
         endpoint.actions.push({
           name: gettext('Unregister'),
           execute: function (endpoint) {
@@ -188,6 +231,7 @@
     }
 
     function _refreshTokens() {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return vcsModel.listVcsTokens().then(function () {
         // No need to return this promise, validity data is updated asynchronously
         vcsModel.checkTokensValidity();
@@ -195,13 +239,13 @@
     }
 
     function _manageTokens(endpoint) {
-      return appManageVcsTokens.manage(endpoint.vcs).then(function () {
+      return ceManageVcsTokens.manage(endpoint.vcs).then(function () {
         _createVcsActions(endpoint);
       });
     }
 
     function _addToken(endpoint) {
-      return appRegisterVcsToken.registerToken(endpoint.vcs).then(function () {
+      return ceRegisterVcsToken.registerToken(endpoint.vcs).then(function () {
         return _refreshTokens().then(function () {
           _createVcsActions(endpoint);
         });
@@ -209,6 +253,7 @@
     }
 
     function _unregister(endpoint) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       var scope = $rootScope.$new();
       scope.name = endpoint.name;
       frameworkDialogConfirm({

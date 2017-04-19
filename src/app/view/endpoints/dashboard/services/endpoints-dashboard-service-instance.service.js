@@ -11,11 +11,10 @@
    * @name appEndpointsCnsiService
    * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {object} $q - the Angular $q service
-   * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {app.model.modelManager} appEndpointsVcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.appUtilsService.appErrorService} appErrorService - service to show custom errors below title bar
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -24,22 +23,43 @@
    * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, appEndpointsDashboardService, appEndpointsVcsService, appUtilsService, appErrorService,
-                                         appNotificationsService, appCredentialsDialog, frameworkDialogConfirm, appEventService) {
+  function cnsiServiceFactory($q, $interpolate, $translate, modelManager, appEndpointsDashboardService,
+                              appUtilsService, appErrorService, appNotificationsService,
+                              appCredentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
+    var cnsiEndpointProviders = {};
 
-    return {
+    var service = {
+      getEndpointsToRegister: getEndpointsToRegister,
       haveInstances: haveInstances,
       updateInstances: updateInstances,
       createEndpointEntries: createEndpointEntries,
-      clear: clear
+      clear: clear,
+      cnsiEndpointProviders: cnsiEndpointProviders
     };
+
+    appEndpointsDashboardService.endpointsProviders.push(service);
+
+    return service;
+
+    function getEndpointsToRegister() {
+      return _
+        .chain(cnsiEndpointProviders)
+        .filter(function (provider) {
+          return !provider.isHidden(modelManager.retrieve('app.model.account').isAdmin());
+        })
+        .forEach(function (endpoint) {
+          endpoint.label = endpoint.label || $translate.instant(endpoint.register.html.type.name);
+        })
+        .sort('label')
+        .value();
+    }
 
     /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description are there any cached service instances?
+     * @description Synchronous. Are there any cached service instances?
      * @returns {boolean}
      * @public
      */
@@ -82,29 +102,10 @@
         });
     }
 
-    function _setEndpointVisit(isValid, serviceInstance, endpoint) {
-      // Some service types have more detail available
-      if (isValid) {
-        switch (serviceInstance.cnsi_type) {
-          case 'hcf':
-            endpoint.visit = function () {
-              return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-            };
-            break;
-          case 'hsm':
-            endpoint.visit = function () {
-              return $state.href('sm.endpoint.detail.instances', {guid: serviceInstance.guid});
-            };
-            break;
-        }
-      }
-    }
-
     /**
      * @function createEndpointEntries
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
      * @description convert the model service instances into endpoints entries
-     * @param {Array} endpoints - collection of existing endpoints
      * @public
      */
     function createEndpointEntries() {
@@ -127,27 +128,12 @@
         var eKey = endpointPrefix + serviceInstance.guid;
         var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
         var reuse = !!endpoint;
-        var hide = false;
         if (!reuse) {
           endpoint = {
-            key: eKey
+            key: eKey,
+            type: gettext('Unknown')
           };
-          switch (serviceInstance.cnsi_type) {
-            case 'hcf':
-              endpoint.type = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
-              break;
-            case 'hce':
-              endpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
-              break;
-            case 'hsm':
-              endpoint.type = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
-              // Only Console admins can see HSM endpoints
-              hide = !userAccount.isAdmin();
-              break;
-            default:
-              endpoint.type = gettext('Unknown');
-          }
-          if (!hide) {
+          if (!_callEndpointProvidersFunc(serviceInstance.cnsi_type, 'isHidden', userAccount.isAdmin())) {
             endpoints.push(endpoint);
           }
         } else {
@@ -157,7 +143,6 @@
 
         endpoint.actions = _createInstanceActions(isValid, hasExpired);
         endpoint.visit = undefined;
-        _setEndpointVisit(isValid, serviceInstance, endpoint);
         endpoint.url = appUtilsService.getClusterEndpoint(serviceInstance);
         endpoint.actionsTarget = serviceInstance;
         endpoint.name = serviceInstance.name;
@@ -189,10 +174,19 @@
             status: 'error'
           };
         }
+
+        _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'update', serviceInstance, isValid, endpoint);
       });
 
       _cleanupStaleEndpoints(activeEndpointsKeys);
 
+    }
+
+    function _callEndpointProvidersFunc(type, method) {
+      var func = _.get(cnsiEndpointProviders, type + '.' + method);
+      if (angular.isFunction(func)) {
+        return func.apply(this, _.slice(arguments, 2));
+      }
     }
 
     function _cleanupStaleEndpoints(activeEndpointsKeys) {
@@ -219,7 +213,7 @@
     /**
      * @function clear
      * @memberOf app.view.endpoints.dashboard.appEndpointsCnsiService
-     * @description clear any local data before leaving the dashboard
+     * @description Synchronous. clear any local data before leaving the dashboard
      * @public
      */
     function clear() {
@@ -260,7 +254,6 @@
     }
 
     function _unregister(serviceInstance) {
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       frameworkDialogConfirm({
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\'?'))({name: serviceInstance.name}),
@@ -278,16 +271,7 @@
               });
               updateInstances().then(function () {
                 createEndpointEntries();
-                switch (serviceInstance.cnsi_type) {
-                  case 'hcf':
-                    authModel.remove(serviceInstance.guid);
-                    break;
-                  case 'hce':
-                    appEndpointsDashboardService.refreshCodeEngineVcses().then(function () {
-                      appEndpointsVcsService.createEndpointEntries();
-                    });
-                    break;
-                }
+                return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'unregister', serviceInstance);
               });
             })
             .then(function () {
@@ -301,7 +285,6 @@
     }
 
     function _connect(serviceInstance) {
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = appCredentialsDialog.show({
         activeServiceInstance: serviceInstance,
         onConnectCancel: function () {
@@ -315,29 +298,20 @@
             that.dialog.close();
             that.dialog = undefined;
           }
-          updateInstances().then(function () {
-            createEndpointEntries();
-            switch (serviceInstance.cnsi_type) {
-              case 'hcf':
-                // Initialise AuthModel for service
-                authModel.initializeForEndpoint(serviceInstance.guid);
-                break;
-              case 'hce':
-                $q.all([appEndpointsVcsService.updateInstances(), appEndpointsDashboardService.refreshCodeEngineVcses()])
-                .then(function () {
-                  appEndpointsVcsService.createEndpointEntries();
-                });
-                break;
-            }
-            appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
-          });
+          updateInstances()
+            .then(function () {
+              createEndpointEntries();
+              return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'connect', serviceInstance);
+            })
+            .then(function () {
+              appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
+            });
         }
       });
     }
 
     function _disconnect(serviceInstance) {
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
           appNotificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
@@ -351,18 +325,7 @@
             name: serviceInstance.name
           });
           createEndpointEntries();
-          switch (serviceInstance.cnsi_type) {
-            case 'hcf':
-              authModel.remove(serviceInstance.guid);
-              break;
-            case 'hce':
-              appEndpointsDashboardService.refreshCodeEngineVcses()
-                .then(function () {
-                  // Note: we could optimize this with the createEndpointEntries above somehow
-                  appEndpointsVcsService.createEndpointEntries();
-                });
-              break;
-          }
+          return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'disconnect', serviceInstance);
         })
         .then(function () {
           // Ensure that the user service instance list is updated before sending change notification

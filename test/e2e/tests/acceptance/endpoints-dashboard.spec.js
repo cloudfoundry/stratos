@@ -36,7 +36,7 @@
               expect(isEndpoints).toBe(true);
             });
             expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
-            expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+            expect(endpointsPage.getEndpointTable().isDisplayed()).toBeFalsy();
           });
 
           it('should show register button', function () {
@@ -182,7 +182,7 @@
                 expect(isEndpoints).toBe(true);
 
                 // No endpoints ... no table
-                expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+                expect(endpointsPage.getEndpointTable().isDisplayed()).toBeFalsy();
               });
           });
 
@@ -341,8 +341,7 @@
                 registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
                   service.register.skip_ssl_validation)
                   .then(function () {
-                    var toastText = new RegExp("(?:Helion Code Engine|Cloud Foundry) endpoint '" +
-                      service.register.cnsi_name + "' successfully registered");
+                    var toastText = new RegExp("Endpoint '" + service.register.cnsi_name + "' successfully registered");
                     return helpers.checkAndCloseToast(toastText);
                   })
                   .then(function () {
@@ -391,7 +390,7 @@
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
 
-                expect(endpointsPage.getEndpointTable().isPresent()).toBeTruthy();
+                expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
                 return helpers.getTableRows(endpointsPage.getEndpointTable()).count();
               })
               .then(function (count) {
@@ -431,7 +430,7 @@
               })
               .then(function () {
                 // The new row count should be two less than when we started (row had an additional 'disconnected' error)
-                endpointsPage.getEndpointTable().isPresent().then(function (haveTable) {
+                endpointsPage.getEndpointTable().isDisplayed().then(function (haveTable) {
                   if (haveTable) {
                     expect(helpers.getTableRows(endpointsPage.getEndpointTable()).count()).toBe(endpointCount - 2);
                   }
@@ -450,7 +449,7 @@
               })
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
-                expect(endpointsPage.getEndpointTable().isPresent()).toBeTruthy();
+                expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
               });
           });
 
@@ -592,7 +591,7 @@
             })
             .then(function (isEndpoints) {
               expect(isEndpoints).toBe(true);
-              expect(endpointsPage.getEndpointTable().isPresent()).toBeTruthy();
+              expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
               return endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name);
             })
             .then(function (hcfRowIndex) {

@@ -66,7 +66,7 @@
   var oem = require('./oem.gulp.js');
   oem(config);
 
-  // Pull in the gulp tasks for e2e test
+  // Pull in the gulp tasks for e2e tests
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 

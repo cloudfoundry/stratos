@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-    .module('app.view')
-    .factory('appManageVcsTokens', ManageVcsTokensService);
+    .module('code-engine.view')
+    .factory('ceManageVcsTokens', ManageVcsTokensService);
 
   /**
    * @name ManageVcsTokensService
@@ -15,14 +15,13 @@
    * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async detail view
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm The framework confirmation dialog
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
-   * @param {app.view.appRegisterVcsToken} appRegisterVcsToken Service to register new VCS tokens
-   * @param {app.view.appEditVcsToken} appEditVcsToken Service to rename VCS tokens
+   * @param {ceRegisterVcsToken} ceRegisterVcsToken Service to register new VCS tokens
+   * @param {ceEditVcsToken} ceEditVcsToken Service to rename VCS tokens
    * @returns {object} The ManageVcsTokensService with a manage method that opens slide out containing the manage tokens UI
    */
   function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, frameworkAsyncTaskDialog,
-                                  frameworkDialogConfirm, appNotificationsService, appRegisterVcsToken,
-                                  appEditVcsToken) {
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+                                  frameworkDialogConfirm, appNotificationsService, ceRegisterVcsToken,
+                                  ceEditVcsToken) {
     var tokenActions = [];
     var context = {
       tokens: []
@@ -38,6 +37,7 @@
     };
 
     context.refreshTokens = function (fetchFresh) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       var oldLength = context.tokens.length;
       var promise;
       if (fetchFresh) {
@@ -59,7 +59,7 @@
 
     function _edit(token) {
       var oldName = token.token.name;
-      return appEditVcsToken.editToken(token).then(function (newName) {
+      return ceEditVcsToken.editToken(token).then(function (newName) {
         if (newName === oldName) {
           return;
         }
@@ -85,6 +85,7 @@
         },
         errorMessage: gettext('Failed to delete Personal Access Token'),
         callback: function () {
+          var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
           return vcsModel.deleteVcsToken(token.token.guid)
             .then(function () {
               appNotificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
@@ -97,14 +98,17 @@
     }
 
     context.isCheckInProgress = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return _.isUndefined(vcsModel.invalidTokens[token.token.guid]);
     };
 
     context.isTokenValid = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return !vcsModel.invalidTokens[token.token.guid];
     };
 
     context.invalidReason = function (token) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return vcsModel.invalidTokens[token.token.guid] || '';
     };
 
@@ -138,7 +142,7 @@
         context.chosenToken = tokenGuid;
 
         context.registerNewToken = function () {
-          return appRegisterVcsToken.registerToken(vcs).then(function () {
+          return ceRegisterVcsToken.registerToken(vcs).then(function () {
             // Update tokens (need to fetch the new token)
             return context.refreshTokens(true);
           });
