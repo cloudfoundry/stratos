@@ -104,10 +104,9 @@
         paths.dist + 'app/**/*.module.js',
         paths.dist + 'app/**/*.js',
         paths.dist + 'plugins/**/*.module.js',
-        paths.dist + 'plugins/**/*.js'
-        // ,
-        // '!' + paths.dist + '**/*.mock.js',
-        // '!' + paths.dist + '**/*.spec.js'
+        paths.dist + 'plugins/**/*.js',
+        paths.dist + '**/*.mock.js',
+        paths.dist + '**/*.spec.js'
       ],
 
       jsFile: 'console-console.js',
@@ -122,8 +121,6 @@
         paths.src + 'plugins/**/*.js',
         paths.src + 'framework/**/*.js',
         '!' + paths.src + 'config.js',
-        // '!' + paths.src + 'app/**/*.mock.js',
-        // '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
         '!' + paths.src + 'framework/**/*.mock.js',

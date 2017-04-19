@@ -53,6 +53,7 @@
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
+   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -71,6 +72,7 @@
    * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
+   * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, cfOrganizationModel,
                                     $interpolate, $scope, $q, $timeout, PAT_DELIMITER) {
@@ -97,7 +99,6 @@
     this.userInput = {};
     this.options = {};
     this.PAT_DELIMITER = PAT_DELIMITER;
-
 
     this.init();
   }
