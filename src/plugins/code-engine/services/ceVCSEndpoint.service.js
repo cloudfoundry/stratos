@@ -12,11 +12,11 @@
    * @param {object} $rootScope - the angular $rootScope service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {object} ceManageVcsTokens - the manage VCS tokens service
-   * @param {object} ceRegisterVcsToken - register a new VCS token
-   * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {ceManageVcsTokens} ceManageVcsTokens - the manage VCS tokens service
+   * @param {ceRegisterVcsToken} ceRegisterVcsToken - register a new VCS token
+   * @param {appNotificationsService} appNotificationsService - the toast notification service
+   * @param {frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @returns {object} the vcs instance service
    */
   function vcsServiceFactory($q, $rootScope, $interpolate, modelManager, appEndpointsDashboardService,
@@ -40,9 +40,9 @@
     return service;
 
     /**
-     * @function _updateEndpoints
-     * @memberOf service-manager.service.ceVCSEndpointService
-     * @description Synchronous. Are there any cached service instances?
+     * @function haveInstances
+     * @memberOf code-engine.service.ceVCSEndpointService
+     * @description Synchronous. Are there any cached vcs instances?
      * @returns {boolean}
      * @public
      */
@@ -52,8 +52,8 @@
     }
 
     /**
-     * @function _updateEndpoints
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @function updateInstances
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description Refresh the VCS and token instances within the model
      * @returns {object} a promise
      * @public
@@ -101,7 +101,7 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf service-manager.service.ceVCSEndpointService
+     * @memberOf code-engine.service.ceVCSEndpointService
      * @description convert the model service instances into endpoints entries
      * @public
      */
@@ -161,8 +161,8 @@
 
     /**
      * @function clear
-     * @memberOf service-manager.service.ceVCSEndpointService
-     * @description Synchronous. clear any local data before leaving the dashboard
+     * @memberOf code-engine.service.ceVCSEndpointService
+     * @description Synchronous. clear local data
      * @public
      */
     function clear() {

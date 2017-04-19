@@ -83,6 +83,7 @@
     }
 
     /* eslint-disable no-unused-vars */
+    // func params are standard across all <x>ServiceEndpoint providers. In this one isAdmin is not required
     function isHidden(isAdmin) {
       return cfHideEndpoint;
     }
