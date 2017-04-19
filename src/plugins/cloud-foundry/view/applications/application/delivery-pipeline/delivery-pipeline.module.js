@@ -27,8 +27,8 @@
    * @constructor
    * @param {app.utils.appEventService} appEventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.view.vcs.ceManageVcsTokens} ceManageVcsTokens - the VCS token manager
-   * @param {app.view.vcs.ceManageVcsTokens} ceRegisterVcsToken - service to register a new VCS token
+   * @param {ceManageVcsTokens} ceManageVcsTokens - the VCS token manager
+   * @param {ceRegisterVcsToken} ceRegisterVcsToken - service to register a new VCS token
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.view.appNotificationsService} appNotificationsService The toasts notifications service
    * @param {object} cfAddNotificationService - Service for adding new notifications

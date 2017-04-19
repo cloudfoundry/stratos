@@ -24,7 +24,7 @@
           <tbody>
           <tr ng-repeat="application in spaceAppsCtrl.visibleApplications">
             <td><a ng-click="spaceAppsCtrl.goToApp(application)" rel="noopener noreferrer" target="_blank">{{ application.entity.name }}</a></td>
-            <td>{{ application.state.label }}</td>
+            <td translate>{{ application.state.label }}</td>
             <td>{{ application.createdTimestampString }}</td>
             <td>{{ application.entity.instances }}</td>
           </tr>

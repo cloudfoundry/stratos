@@ -63,6 +63,8 @@
     return service;
 
     /* eslint-disable no-unused-vars */
+    // func params are standard across all <x>ServiceEndpoint providers. In this one some are not required or used
+
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
       serviceEndpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
     }

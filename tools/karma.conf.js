@@ -132,7 +132,8 @@
         'src/plugins/**/*.html': ['ng-html2js'],
         'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/plugins/github/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/plugins/code-engine/!(api)/**/!(*.mock|*.spec).js': ['coverage']
+        'src/plugins/service-manager/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
+        'src/plugins/code-engine/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
       },
 
       proxies: {

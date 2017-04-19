@@ -109,7 +109,7 @@
           vm.listError = false;
           vm.initialised = true;
           if (!vm.endpoints) {
-            vm.endpoints = vm.endpoints || appEndpointsDashboardService.endpoints;
+            vm.endpoints = appEndpointsDashboardService.endpoints;
           }
           _updateWelcomeMessage();
         }).catch(function () {

@@ -47,7 +47,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {app.view.vcs.ceManageVcsTokens} ceManageVcsTokens - the VCS Token management service
+   * @param {ceManageVcsTokens} ceManageVcsTokens - the VCS Token management service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
