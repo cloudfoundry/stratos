@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-    .module('app.view')
-    .factory('appEditVcsToken', EditVcsTokenService);
+    .module('code-engine.view')
+    .factory('ceEditVcsToken', EditVcsTokenService);
 
   /**
    * @name EditVcsTokenService

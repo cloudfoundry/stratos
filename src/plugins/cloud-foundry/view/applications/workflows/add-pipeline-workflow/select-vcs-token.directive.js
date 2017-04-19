@@ -26,11 +26,11 @@
 
   SelectVcsTokenController.$inject = [
     'modelManager',
-    'appManageVcsTokens',
-    'appRegisterVcsToken'
+    'ceManageVcsTokens',
+    'ceRegisterVcsToken'
   ];
 
-  function SelectVcsTokenController(modelManager, appManageVcsTokens, appRegisterVcsToken) {
+  function SelectVcsTokenController(modelManager, ceManageVcsTokens, ceRegisterVcsToken) {
     var vm = this;
 
     vm.singleToken = singleToken;
@@ -42,8 +42,6 @@
     vm.isSelected = isSelected;
 
     refreshSelectedToken();
-
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     function singleToken() {
       return vm.source.value.tokenOptions.length === 1;
@@ -58,12 +56,14 @@
     }
 
     function noToken() {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       return vcsModel.getTokensForVcs(vm.source.value).length < 1;
     }
 
     function manageTokens($event) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       $event.stopPropagation();
-      appManageVcsTokens.manage(vm.source.value).then(function () {
+      ceManageVcsTokens.manage(vm.source.value).then(function () {
         // Avoid potential race condition when the last validity check is still in flight
         vcsModel.lastValidityCheck.then(function () {
 
@@ -79,8 +79,9 @@
     }
 
     function addNewToken($event) {
+      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
       $event.stopPropagation();
-      appRegisterVcsToken.registerToken(vm.source.value).then(function () {
+      ceRegisterVcsToken.registerToken(vm.source.value).then(function () {
         // Refresh tokens
         return vcsModel.listVcsTokens().then(function () {
           return vcsModel.checkTokensValidity(vm.source.value).then(function () {
