@@ -26,10 +26,11 @@
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(cfHideEndpoint, $state, appUtilsService, modelManager, appEndpointsCnsiService) {
+  function endpointService(cfHideEndpoint, $q, $state, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
 
     var service = {
       cnsi_type: 'hcf',
+      refreshToken: refreshToken,
       update: updateEndpoint,
       unregister: unregister,
       connect: connect,
@@ -59,6 +60,18 @@
     appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
+
+    function refreshToken(allServiceInstances) {
+      var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
+      var hcfGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
+      var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
+      if (hcfGuids.length > 0) {
+        return cfInfoApi.GetInfo({}, hcfCfg).then(function (response) {
+          return response.data || {};
+        });
+      }
+      return $q.resolve();
+    }
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
       serviceEndpoint.type = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
