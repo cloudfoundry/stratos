@@ -176,7 +176,8 @@
 
   /**
    * Get default App Name
-   * @param isoTime Date in ISO string format
+   * @param {string} isoTime Date in ISO string format
+   * @returns {string} app name
    */
   function getName(isoTime) {
     var customLabel = helpers.getCustomAppLabel() || '';
@@ -185,7 +186,8 @@
 
   /**
    * Get default sanitized URL name for App
-   * @param appName Name of the app
+   * @param {string} appName Name of the app
+   * @returns {string} URL friendly name
    */
   function getHostName(appName) {
     var hostName = appName.replace(/\./g, '_');
@@ -195,8 +197,9 @@
 
   /**
    * Get default service name
-   * @param isoTime Date in ISO String format
-   * @param sanitize Return a URL santized name
+   * @param {string} isoTime Date in ISO String format
+   * @param {boolean} sanitize Return a URL sanitized name
+   * @returns {string} service name
    */
   function getServiceName(isoTime, sanitize) {
     var serviceName = getName(isoTime);
