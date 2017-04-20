@@ -17,7 +17,10 @@
     deleteApp: deleteApp,
     deleteAppByName: deleteAppByName,
     getTestCluster: getTestCluster,
-    deletePat: deletePat
+    deletePat: deletePat,
+    getName: getName,
+    getHostName: getHostName,
+    getServiceName: getServiceName
   };
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
@@ -169,6 +172,37 @@
           expect(selectedSpace).toEqual(testSpaceName);
         });
       });
+  }
+
+  /**
+   * Get default App Name
+   * @param isoTime Date in ISO string format
+   * @param label custom label to append to app name
+   */
+  function getName(isoTime, label) {
+    var customLabel = helpers.getCustomAppLabel() || '';
+    return 'acceptance.e2e.' + customLabel + '.' + (label || '') + isoTime;
+  }
+
+  /**
+   * Get default sanitized URL name for App
+   * @param appName Name of the app
+   */
+  function getHostName(appName) {
+    var hostName = appName.replace(/\./g, '_');
+    hostName = hostName.replace(/:/g, '_');
+    return hostName;
+  }
+
+  /**
+   * Get default service name
+   * @param isoTime Date in ISO String format
+   * @param sanitize Return a URL santized name
+   */
+  function getServiceName(isoTime, sanitize) {
+    var serviceName = getName(isoTime);
+    serviceName = serviceName.replace(/acceptance/g, 'service');
+    return sanitize ? getHostName(serviceName) : serviceName;
   }
 
   function appSetup() {
