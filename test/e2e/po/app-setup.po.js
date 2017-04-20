@@ -177,11 +177,10 @@
   /**
    * Get default App Name
    * @param isoTime Date in ISO string format
-   * @param label custom label to append to app name
    */
-  function getName(isoTime, label) {
+  function getName(isoTime) {
     var customLabel = helpers.getCustomAppLabel() || '';
-    return 'acceptance.e2e.' + customLabel + '.' + (label || '') + isoTime;
+    return 'acceptance.e2e.' + customLabel + '.' + isoTime;
   }
 
   /**
