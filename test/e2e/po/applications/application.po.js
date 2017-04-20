@@ -1,7 +1,10 @@
 (function () {
   'use strict';
 
+  var helpers = require('../helpers.po');
+
   module.exports = {
+    goToApp: goToApp,
 
     showSummary: showSummary,
     showLogView: showLogView,
@@ -28,6 +31,18 @@
     // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
   };
+
+  function goToApp(clusterGuid, appGuid) {
+    console.log(clusterGuid, appGuid);
+    var url = helpers.getHost() + '/#/cf/applications/' + clusterGuid + '/app/' + appGuid + '/summary';
+    return browser.get(url)
+      .then(function () {
+        return browser.getCurrentUrl();
+      })
+      .then(function (actualUrl) {
+        return expect(actualUrl).toBe(url);
+      });
+  }
 
   function showSummary() {
     applicationAction(0).click();
