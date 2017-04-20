@@ -64,14 +64,16 @@
       });
 
       wizard.next(element(by.css('delete-app-workflow wizard')));
+      helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
 
       browser.call(function () {
         return cfModel.fetchApp(testCluster.guid, testAppName, helpers.getUser(), helpers.getPassword()).then(function (app) {
           expect(app).toBeNull();
+        }).catch(function () {
+          fail('Failed to determine if app does not exist');
         });
       });
 
-      helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
     });
 
     it('Should delete app with no routes or services', function () {
@@ -100,14 +102,16 @@
       expect(confirmModal.getTitle()).toBe('Delete Application');
       expect(confirmModal.getBody()).toBe('Are you sure you want to delete ' + testAppName + '?');
       confirmModal.commit();
+      helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
 
       browser.call(function () {
         return cfModel.fetchApp(testCluster.guid, testAppName, helpers.getUser(), helpers.getPassword()).then(function (app) {
           expect(app).toBeNull();
+        }).catch(function () {
+          fail('Failed to determine if app does not exist');
         });
       });
 
-      helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
     });
 
   });
