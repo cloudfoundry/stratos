@@ -22,8 +22,8 @@
 
   describe('Application Delivery Pipeline', function () {
     //var testConfig;
-    var testTime = (new Date()).getTime();
-    var testAppName = 'acceptance.e2e.' + testTime;
+    var testTime = (new Date()).toISOString();
+    var testAppName = appSetupHelper.getName(testTime);
 
     beforeAll(function () {
       // Setup the test environment.
