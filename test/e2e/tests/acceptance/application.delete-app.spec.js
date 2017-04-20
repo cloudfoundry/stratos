@@ -37,6 +37,7 @@
         return addAppHcfApp.domain().getValue().then(function (d) {
           domain = d;
           addAppWizard.getWizard().next();
+          helpers.checkAndCloseToast("A new application and route have been created for '" + testAppName + "'");
           return browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
         });
 
@@ -89,7 +90,7 @@
         expect(confirmModal.getTitle()).toBe('Delete Route');
         expect(confirmModal.getBody()).toBe('Are you sure you want to delete ' + hostName + '.' + domain + '?');
         confirmModal.commit();
-
+        helpers.checkAndCloseToast('Route successfully deleted');
       });
 
       // Delete the app
