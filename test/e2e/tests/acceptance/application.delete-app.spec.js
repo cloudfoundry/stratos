@@ -73,7 +73,7 @@
       helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
     });
 
-    fit('Should delete app with no routes or services', function () {
+    it('Should delete app with no routes or services', function () {
 
       expect(application.getHeader().getText()).toBe(testAppName);
 
