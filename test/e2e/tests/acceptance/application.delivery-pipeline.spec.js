@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var _ = require('../../../../tools/node_modules/lodash');
+  var _ = require('lodash');
   var appSetupHelper = require('../../po/app-setup.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');

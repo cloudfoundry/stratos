@@ -58,6 +58,8 @@
     overrides: config.bower.overrides
   });
 
+  console.log(__dirname);
+
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
   examples(config);
@@ -115,7 +117,11 @@
 
   // Copy 'lib' folder to 'dist'
   gulp.task('copy:lib', function (done) {
-    utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+    console.log(paths.lib);
+    console.log(path.resolve(paths.lib));
+    console.log(paths.dist + 'lib');
+    console.log(path.resolve(paths.dist + 'lib'));
+    utils.copyBowerFolder(paths.lib, paths.dist + 'lib');
     done();
   });
 
@@ -268,7 +274,7 @@
 
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
-    var CMD = 'cd ../src/plugins && ls */*.scss';
+    var CMD = 'cd ./src/plugins && ls */*.scss';
     var pluginsScssFiles = sh.exec(CMD, {silent: true})
       .output
       .trim()

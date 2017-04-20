@@ -19,7 +19,7 @@
     "update-webdriver": "webdriver-manager update",
     "watch": "gulp watch",
     "watch:test": "karma start karma.conf.js",
-    "list-e2e": "node ../e2e/list-tests.js protractor.conf.js"
+    "list-e2e": "node ./test/e2e/list-tests.js ./tools/protractor.conf.js"
   },
   "author": "",
   "license": "ISC",

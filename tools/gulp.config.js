@@ -4,27 +4,28 @@
   // This stores all the configuration information for Gulp
   module.exports = function () {
     var paths = {
-      dist: '../dist/',
-      src: '../src/',
-      translations: '../translations/',
-      tools: '../tools/',
-      e2e: '../e2e/',
-      instrumented: '../tmp/instrumented/',
-      oem: '../oem/',
-      theme: '../theme/',
-      examples: './examples/',
-      examplesScripts: './examples/scripts/',
-      examplesDist: './examples/dist/',
-      browserSyncDist: '../dist',
-      i18n: '../i18n/',
-      i18nDist: '../dist/i18n/'
+      dist: './dist/',
+      src: './src/',
+      lib: './bower_components',
+      translations: './translations/',
+      tools: './tools/',
+      e2e: './e2e/',
+      instrumented: './tmp/instrumented/',
+      oem: './oem/',
+      theme: './theme/',
+      examples: './tools/examples/',
+      examplesScripts: './tools/examples/scripts/',
+      examplesDist: './tools/examples/dist/',
+      browserSyncDist: './dist',
+      i18n: './i18n/',
+      i18nDist: './dist/i18n/'
     };
 
     return {
       bower: {
-        bowerJson: require('./bower.json'),
-        directory: '../src/lib/',
-        ignorePath: '../src/',
+        bowerJson: require('../bower.json'),
+        directory: './bower_components/',
+        ignorePath: './src/',
         exclude: [/.js$/, 'jquery.js'],
         overrides: {
           'angular-link-header-parser': {
@@ -49,9 +50,9 @@
       },
 
       bowerDev: {
-        bowerJson: require('./bower.json'),
-        directory: '../src/lib/',
-        ignorePath: '../src/',
+        bowerJson: require('../bower.json'),
+        directory: './bower_components/',
+        ignorePath: './src/',
         devDependencies: false
       },
 
