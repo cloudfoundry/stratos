@@ -60,6 +60,7 @@ jobs:
       file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
        REGISTRY_NAME: {{insecure-registry}}
+       CUSTOM_APP_LABEL: {{custom-app-label}}
       on_success:
         put: stratos-ui
         params:

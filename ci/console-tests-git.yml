@@ -36,5 +36,6 @@ jobs:
       privileged: true
       params:
        REGISTRY_NAME: {{insecure-registry}}
+       CUSTOM_APP_LABEL: {{custom-app-label}}
       timeout: 10m
       file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml

@@ -8,6 +8,8 @@ services:
     extends:
       file: common.yml
       service: ui
+    environment:
+       - CUSTOM_APP_LABEL=${CUSTOM_APP_LABEL}
     build:
       dockerfile: Dockerfile.test
     links:
