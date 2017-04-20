@@ -16,9 +16,9 @@
   var helpers = require('../../po/helpers.po');
 
   describe('Application Delete', function () {
-    var testTime = (new Date()).getTime();
-    var testAppName = 'acceptance.e2e.' + testTime + '-delete';
-    var hostName = testAppName.replace(/\./g, '_');
+    var testTime = (new Date()).toISOString();
+    var testAppName = appSetupHelper.getName(testTime) + '-delete';
+    var hostName = appSetupHelper.getHostName(testAppName);
     var testCluster, domain;
 
     beforeEach(function () {
@@ -60,7 +60,7 @@
       expect(detailView.getTitle()).toBe('Delete App, Pipeline, and Selected Items');
       element.all(by.repeater('route in wizardCtrl.options.safeRoutes')).then(function (rows) {
         expect(rows.length).toEqual(1);
-        expect(rows[0].getText()).toMatch(testAppName);
+        expect(rows[0].getText()).toMatch(testAppName.replace(/[.:]/g, '_'));
       });
 
       wizard.next(element(by.css('delete-app-workflow wizard')));
