@@ -28,6 +28,11 @@
         ignorePath: './src/',
         exclude: [/.js$/, 'jquery.js'],
         overrides: {
+          angular: {
+            dependencies: {
+              jquery: '*'
+            }
+          },
           'angular-link-header-parser': {
             main: ['release/angular-link-header-parser.min.js']
           },

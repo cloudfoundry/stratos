@@ -31,9 +31,11 @@
   var uglify = require('gulp-uglify');
   var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
-  var i18n = require('./gulp.i18n');
-
+  var i18n = require('./i18n.gulp');
+  var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
+  var bowerDepends = require('wiredep')(config.bowerDev);
+
   var paths = config.paths;
   var assetFiles = config.assetFiles;
   var themeFiles = config.themeFiles;
@@ -50,6 +52,7 @@
   oemConfig = _.defaults(oemConfig, defaultConfig);
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
+  defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
 
   var usePlumber = true;
   var server;
@@ -57,8 +60,6 @@
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
   });
-
-  console.log(__dirname);
 
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
@@ -117,11 +118,7 @@
 
   // Copy 'lib' folder to 'dist'
   gulp.task('copy:lib', function (done) {
-    console.log(paths.lib);
-    console.log(path.resolve(paths.lib));
-    console.log(paths.dist + 'lib');
-    console.log(path.resolve(paths.dist + 'lib'));
-    utils.copyBowerFolder(paths.lib, paths.dist + 'lib');
+    utils.copyBowerFolder(paths.lib, paths.dist + 'bower_components');
     done();
   });
 
@@ -180,7 +177,7 @@
   });
 
   // Compile SCSS to CSS
-  gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
+  gulp.task('css:generate', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
       .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
@@ -192,6 +189,15 @@
       .pipe(sass())
       .pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
       .pipe(gulp.dest(paths.dist));
+  });
+
+  gulp.task('css', ['css:generate'], function () {
+    var cssFiles = bowerDepends.css;
+    cssFiles.push(path.join(paths.dist, 'index.css'));
+    return gulp.src(cssFiles)
+    .pipe(concat('index.css'))
+    .pipe(cleanCSS({}))
+    .pipe(gulp.dest(paths.dist));
   });
 
   gulp.task('template-cache', function () {
@@ -207,7 +213,7 @@
   // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
   gulp.task('dev-template-cache', function () {
-    return gulp.src('./' + config.jsTemplatesFile)
+    return gulp.src('./tools/' + config.jsTemplatesFile)
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -265,7 +271,7 @@
 
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
+    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
     return gulp.src(i18nSource)
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -376,7 +382,7 @@
     options.env.client_port = config.browserSyncPort;
     options.env.client_logging = config.disableServerLogging || false;
 
-    server = fork('./server.js', [], options);
+    server = fork(path.join(__dirname, 'server.js'), [], options);
   });
 
   gulp.task('stop-server', function () {
