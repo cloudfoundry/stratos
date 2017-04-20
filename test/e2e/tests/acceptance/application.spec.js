@@ -18,9 +18,9 @@
 
   describe('Application View', function () {
     //var testConfig;
-    var testTime = (new Date()).getTime();
-    var testAppName = 'acceptance.e2e.' + testTime;
-    var hostName = testAppName.replace(/\./g, '_');
+    var testTime = (new Date()).toISOString();
+    var testAppName = appSetupHelper.getName(testTime);
+    var hostName = appSetupHelper.getHostName(testAppName);
     var newHostName = hostName + '_new';
     var domain;
 
