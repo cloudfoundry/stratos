@@ -40,13 +40,19 @@
   });
 
   app.use(function (req, res, next) {
-    if (!doNotLogRequests) {
-      console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
-    }
-    try {
-      return proxy.web(req, res);
-    } catch (e) {
-      console.log('\x1b[31mError proxying request: %s\x1b[0m', req.url);
+    // Only proxy requests that start /pp
+    if (req.url.indexOf('/pp/') !== 0) {
+      console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
+      res.status(404).send('Not found');
+    } else {
+      if (!doNotLogRequests) {
+        console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
+      }
+      try {
+        return proxy.web(req, res);
+      } catch (e) {
+        console.log('\x1b[31mError proxying request: %s\x1b[0m', req.url);
+      }
       return next();
     }
   });
