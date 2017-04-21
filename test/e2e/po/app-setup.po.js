@@ -44,7 +44,7 @@
 
   function deleteAppByName(appName) {
     if (appName) {
-      var promise = cfModel.deleteAppIfExisting(testCluster.guid, testHceCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+      var promise = cfModel.deleteAppIfExisting(testCluster.guid, _.get(testHceCluster, 'guid'), appName, helpers.getUser(), helpers.getPassword())
         .catch(function (error) {
           fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (appName || 'unknown') + '\'. Error:', error);
         });
