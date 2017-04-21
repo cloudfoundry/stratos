@@ -25,7 +25,7 @@
   var appFolder = process.env.client_folder || path.resolve('../dist');
   var doNotLogRequests = process.env.client_logging === 'true';
 
-  // config is of the form: "pp": "https://nwm-dev-3.gbr.hp.com/pp"
+  // config is of the form: "pp": "https://[server]/pp"
   var target = devConfig.pp;
   if (target.endsWith('/pp')) {
     target = target.substr(0, target.length - 3);
