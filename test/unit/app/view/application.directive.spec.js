@@ -94,11 +94,9 @@
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
-        $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         // No endpoints are set up, so we should go to error page
-        $httpBackend.expectGET('/app/view/console-error/console-error.html');
         $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, []);
 
         applicationCtrl.login('dev', 'dev');
@@ -114,7 +112,6 @@
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
-        $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
