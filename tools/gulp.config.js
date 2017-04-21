@@ -82,8 +82,9 @@
       ],
 
       themeFiles: [
-        paths.theme + '**/*',
-        '!' + paths.theme + '**/*.scss'
+        paths.theme + 'fonts/**/*',
+        paths.theme + 'images/**/*',
+        paths.theme + 'svg/**/*'
       ],
 
       cssFiles: [
@@ -102,7 +103,6 @@
       ],
 
       jsFiles: [
-        paths.dist + 'lib/*.js',
         paths.dist + 'framework/**/*.module.js',
         paths.dist + 'framework/**/*.js',
         paths.dist + 'plugins/**/plugin.config.js',

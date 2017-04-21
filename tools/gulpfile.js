@@ -34,7 +34,6 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
-  var bowerDepends = require('wiredep')(config.bowerDev);
 
   var paths = config.paths;
   var assetFiles = config.assetFiles;
@@ -116,7 +115,8 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'lib' folder to 'dist'
+  // Copy 'bower_components' folder to 'dist'
+  // This is only used for development builds
   gulp.task('copy:lib', function (done) {
     utils.copyBowerFolder(paths.lib, paths.dist + 'bower_components');
     done();
@@ -141,11 +141,13 @@
       .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
+  // Combine all of the bower js dependencies into a single lib file that we can include
+  // Only used for a production build
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
+      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist));
   });
 
   gulp.task('copy:assets', ['copy:default-brand'], function () {
@@ -192,7 +194,7 @@
   });
 
   gulp.task('css', ['css:generate'], function () {
-    var cssFiles = bowerDepends.css;
+    var cssFiles = bowerFiles.ext('css').files;
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
     .pipe(concat('index.css'))
@@ -200,6 +202,7 @@
     .pipe(gulp.dest(paths.dist));
   });
 
+  // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
     return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
@@ -230,6 +233,7 @@
     var sources = gulp.src(
         plugins
         .concat(config.jsFiles)
+        .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
         .concat(config.cssFiles), {read: false});
@@ -428,11 +432,9 @@
       'clean',
       'plugin',
       'copy:js',
-      'copy:lib',
       'css',
       'i18n',
       'template-cache',
-      'copy:html',
       'copy:svg',
       'copy:assets',
       'copy:theme',
