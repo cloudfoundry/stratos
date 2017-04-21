@@ -70,7 +70,7 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clean
+  // Clean dist
   gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
