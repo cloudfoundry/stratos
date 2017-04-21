@@ -176,7 +176,9 @@
 
       paths: paths,
 
-      plugins: [],
+      plugins: [
+        'cloud-foundry'
+      ],
 
       translate: {
         dist: paths.dist + 'translations',

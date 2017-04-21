@@ -38,8 +38,8 @@
   var assetFiles = config.assetFiles;
   var themeFiles = config.themeFiles;
   var jsSourceFiles = config.jsSourceFiles;
-  var plugins = config.plugins;
   var scssFiles = config.scssFiles;
+  var gulpIgnore = require('gulp-ignore');
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -145,9 +145,11 @@
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
   });
 
-  gulp.task('copy:assets', ['copy:default-brand'], function () {
+  // 'copy:default-brand'
+  gulp.task('copy:assets', [], function () {
     return gulp
       .src(assetFiles, {base: paths.src})
+      // .pipe(gulpIgnore.exclude(utils.excludedPlugins()))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -216,8 +218,7 @@
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
-        plugins
-        .concat(config.jsFiles)
+        utils.updateWithPlugins(config.jsFiles, true)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
         .concat(config.cssFiles), {read: false});
@@ -260,7 +261,9 @@
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
     i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
+    // return gulp.src(i18nSource, { base: './' })
     return gulp.src(i18nSource)
+      .pipe(gulpIgnore.exclude(utils.excludedPlugins()))
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));

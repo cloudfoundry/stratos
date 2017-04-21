@@ -6,7 +6,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [
-      'code-engine.service'
+      //'code-engine.service'
     ])
     .config(registerRoute);
 
@@ -35,7 +35,6 @@
    * @param {object} cfPostDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
-   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
@@ -47,7 +46,7 @@
    * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
   function ApplicationDeliveryPipelineController(appEventService, modelManager, ceManageVcsTokens, ceRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
-                                                 cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
+                                                 cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
@@ -74,7 +73,7 @@
     this.appNotificationsService = appNotificationsService;
     this.cfAddNotificationService = cfAddNotificationService;
     this.cfPostDeployActionService = cfPostDeployActionService;
-    this.PAT_DELIMITER = PAT_DELIMITER;
+    //this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.hceCnsi = null;
 
