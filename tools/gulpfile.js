@@ -46,6 +46,7 @@
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
+  defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
@@ -165,7 +166,7 @@
   gulp.task('copy:default-brand', ['copy:default-brand:favicon'], function () {
     return gulp
       .src([
-        defaultBrandFolder + 'images/*'
+        path.join(defaultBrandFolder, 'images/*')
       ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
   });
@@ -173,7 +174,7 @@
   // Copy the default brand's images and logo to the dist folder
   gulp.task('copy:default-brand:favicon', function () {
     return gulp
-      .src(defaultBrandFolder + 'favicon.ico', {base: defaultBrandFolder})
+      .src(path.join(defaultBrandFolder, 'favicon.ico'), {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist + 'images'));
   });
 
