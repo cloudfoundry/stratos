@@ -36,7 +36,7 @@
      */
 
     var testConfig, testApp;
-    var testTime = (new Date()).getTime();
+    var testTime = (new Date()).toISOString();
     var appsToDelete = [];
 
     beforeAll(function () {
@@ -116,9 +116,9 @@
 
     it('Create hcf app - test', function () {
 
-      var appName = 'acceptance.e2e.' + testTime;
-      var hostName = appName.replace(/\./g, '_');
-      var serviceName = 'acceptance.e2e.service.' + testTime;
+      var appName = appSetupHelper.getName(testTime);
+      var hostName = appSetupHelper.getHostName(appName);
+      var serviceName = appSetupHelper.getServiceName(testTime);
       var until = protractor.ExpectedConditions;
 
       //browser.driver.wait(protractor.until.elementIsVisible(galleryWall.getAddApplicationButton(), 5000));
@@ -181,7 +181,7 @@
       serviceWizard.getCreateNewName().addText(serviceName);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-      serviceName = serviceName.replace(/\./g, '_');
+      serviceName = appSetupHelper.getServiceName(testTime, true);
       serviceWizard.getCreateNewName().clear();
       serviceWizard.getCreateNewName().addText(serviceName);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
@@ -235,8 +235,8 @@
 
     describe('Delivery Pipeline', function () {
       it('Create an application and allow user to choose to setup a pipeline', function () {
-        var appName = 'acceptance.e2e.' + testTime + '_2';
-        var hostName = appName.replace(/\./g, '_');
+        var appName = appSetupHelper.getName(testTime) + '_2';
+        var hostName = appSetupHelper.getHostName(appName);
         var until = protractor.ExpectedConditions;
         browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
         galleryWall.addApplication();
@@ -298,7 +298,7 @@
 
     describe('check application on the cf endpoints dashboard', function () {
 
-      var serviceName = 'acceptance_e2e_service_' + testTime;
+      var serviceName = appSetupHelper.getServiceName(testTime, true);
 
       beforeAll(function () {
         // Load the app again - keep the cookies so we don't have to login
