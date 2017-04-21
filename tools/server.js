@@ -25,7 +25,7 @@
   var appFolder = process.env.client_folder || path.resolve('../dist');
   var doNotLogRequests = process.env.client_logging === 'true';
 
-  // config is of the form: "pp": "https://nwm-dev-3.gbr.hp.com/pp"
+  // config is of the form: "pp": "https://[server]/pp"
   var target = devConfig.pp;
   if (target.endsWith('/pp')) {
     target = target.substr(0, target.length - 3);
@@ -40,13 +40,19 @@
   });
 
   app.use(function (req, res, next) {
-    if (!doNotLogRequests) {
-      console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
-    }
-    try {
-      return proxy.web(req, res);
-    } catch (e) {
-      console.log('\x1b[31mError proxying request: %s\x1b[0m', req.url);
+    // Only proxy requests that start /pp
+    if (req.url.indexOf('/pp/') !== 0) {
+      console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
+      res.status(404).send('Not found');
+    } else {
+      if (!doNotLogRequests) {
+        console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
+      }
+      try {
+        return proxy.web(req, res);
+      } catch (e) {
+        console.log('\x1b[31mError proxying request: %s\x1b[0m', req.url);
+      }
       return next();
     }
   });

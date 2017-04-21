@@ -2,8 +2,8 @@
 (function () {
   'use strict';
 
-  var _ = require('../../../../tools/node_modules/lodash');
-  var Q = require('../../../../tools/node_modules/q');
+  var _ = require('lodash');
+  var Q = require('q');
   var appSetupHelper = require('../../po/app-setup.po');
   var helpers = require('../../po/helpers.po');
   var galleryWall = require('../../po/applications/applications.po');
