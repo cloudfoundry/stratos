@@ -14,10 +14,12 @@
   //var REPLACE_REGEX = /\[\[:@(.*)]]/g;
   var REPLACE_REGEX = /\[\[(@:.*?)\]\]/g;
 
-  module.exports = function (prettyPrint) {
+  module.exports = function (prettyPrint, initJsonAllLocales) {
     // Translations
     var translations = {};
     var firstFiles = {};
+
+    var initAllLocales = initJsonAllLocales || {};
 
     function replace(obj, current) {
       _.each(current, function (v, k) {
@@ -40,6 +42,10 @@
 
     function resolveKey(obj, key) {
       var value = _.get(obj, key);
+      if (!value) {
+        gutil.log('ERROR: Missing string: ' + key);
+        return '';
+      }
       if (value.indexOf('@:') === 0) {
         return resolveKey(obj, value.substr(2));
       }
@@ -71,7 +77,7 @@
 
     function addStrings(locale, file) {
       if (!translations[locale]) {
-        translations[locale] = {};
+        translations[locale] = _.cloneDeep(initAllLocales);
         firstFiles[locale] = file;
       }
       var json = JSON.parse(file.contents.toString());
