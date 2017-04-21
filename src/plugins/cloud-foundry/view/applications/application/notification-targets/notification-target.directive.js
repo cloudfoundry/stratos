@@ -43,8 +43,8 @@
   function NotificationTargetController($scope, apiManager, modelManager, frameworkAsyncTaskDialog) {
     this.$scope = $scope;
     this.frameworkAsyncTaskDialog = frameworkAsyncTaskDialog;
-    this.hceNotificationApi = apiManager.retrieve('cloud-foundry.api.HceNotificationApi');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceNotificationApi = apiManager.retrieve('code-engine.api.HceNotificationApi');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
 
   }
 

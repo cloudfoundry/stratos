@@ -1,11 +1,8 @@
 (function () {
   'use strict';
 
-  var PAT_DELIMITER = ';PAT:';
-
   angular
-    .module('cloud-foundry.view.applications.workflows.add-pipeline-workflow', [])
-    .constant('PAT_DELIMITER', PAT_DELIMITER)
+    .module('cloud-foundry.view.applications.workflows.add-pipeline-workflow', [ ])
     .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
 
       init: function () {
@@ -240,7 +237,7 @@
               formName: 'application-pipeline-notification-form',
               nextBtnText: gettext('Next'),
               onEnter: function () {
-                var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+                var hceModel = that.modelManager.retrieve('code-engine.model.hce');
                 that.options.notificationTargetsReady = false;
 
                 return hceModel.listNotificationTargetTypes(that.userInput.hceCnsi.guid)
@@ -277,7 +274,7 @@
       refreshBranches: function () {
         var that = this;
         var githubModel = that.modelManager.retrieve('github.model');
-        var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+        var hceModel = that.modelManager.retrieve('code-engine.model.hce');
         if (that.userInput.repo) {
           return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
             var githubOptions = that._getVcsHeaders();
@@ -349,7 +346,7 @@
 
       /**
        * @function getSupportedVcsInstances
-       * @memberof cloud-foundry.model.vcs.VcsModel
+       * @memberof code-engine.model.vcs.VcsModel
        * @description Returns metadata about the supported VCS Instances, given a list of all of the available instances
        * @param {object} hceVcsInstances - HCE VCS instance metadata from HCE
        * @returns {object} Metadata array with details of the set of supported VCS instances that can be presented to the user
@@ -357,7 +354,7 @@
        */
       getSupportedVcsInstances: function (hceVcsInstances) {
         var that = this;
-        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+        var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
 
         if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
           return this.$q.resolve([]);
@@ -420,7 +417,7 @@
 
       getVcsInstances: function () {
         var that = this;
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var hceModel = this.modelManager.retrieve('code-engine.model.hce');
 
         return hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
           return that.getSupportedVcsInstances(hceModel.data.vcsInstances)
@@ -505,7 +502,7 @@
 
       getPipelineDetailsData: function () {
         var that = this;
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var hceModel = this.modelManager.retrieve('code-engine.model.hce');
 
         hceModel.getBuildContainers(this.userInput.hceCnsi.guid)
           .then(function () {
@@ -534,7 +531,7 @@
       },
 
       createDeploymentTarget: function () {
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var hceModel = this.modelManager.retrieve('code-engine.model.hce');
         var endpoint = this.userInput.serviceInstance.api_endpoint;
         var url = endpoint.Scheme + '://' + endpoint.Host;
         var name = this._getDeploymentTargetName(url);
@@ -678,7 +675,7 @@
           this.userInput.application.summary.guid
         ].join('-');
 
-        name += PAT_DELIMITER + this.userInput.source.selectedToken;
+        name += this.PAT_DELIMITER + this.userInput.source.selectedToken;
 
         return name;
       },

@@ -88,8 +88,8 @@
   angular.extend(ServiceManagerTileController.prototype, {
 
     /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
+     * @namespace service-manager.view.tiles
+     * @memberof service-manager.view.tiles
      * @name summary
      * @description Navigate to the cluster summary page for this cluster
      */

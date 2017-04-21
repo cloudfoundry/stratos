@@ -5,7 +5,9 @@
   var DELETED_TOKEN = 'token deleted';
 
   angular
-    .module('cloud-foundry.view.applications.application.delivery-pipeline', [])
+    .module('cloud-foundry.view.applications.application.delivery-pipeline', [
+      'code-engine.service'
+    ])
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
@@ -33,7 +35,6 @@
    * @param {object} cfPostDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
-   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
@@ -45,7 +46,7 @@
    * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
   function ApplicationDeliveryPipelineController(appEventService, modelManager, ceManageVcsTokens, ceRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
-                                                 cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView, PAT_DELIMITER,
+                                                 cfAddNotificationService, cfPostDeployActionService, appUtilsService, frameworkDetailView,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
@@ -57,7 +58,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.frameworkDetailView = frameworkDetailView;
     this.modelManager = modelManager;
 
@@ -72,7 +73,6 @@
     this.appNotificationsService = appNotificationsService;
     this.cfAddNotificationService = cfAddNotificationService;
     this.cfPostDeployActionService = cfPostDeployActionService;
-    this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.hceCnsi = null;
 
@@ -93,7 +93,7 @@
     };
 
     function init() {
-      var vcsModel = that.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = that.modelManager.retrieve('code-engine.model.vcs');
       // Fetch HCE service metadata so that we can show the appropriate message
       that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
@@ -226,7 +226,7 @@
             // show notification for successful binding
             var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
-            that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+            that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
 
             return that.model.updateDeliveryPipelineMetadata();
           })
@@ -273,7 +273,7 @@
     },
 
     getTokenName: function () {
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
       var patGuid = this._getPatGuid();
       if (_.isUndefined(patGuid)) {
         // the project uses a legacy OAuth token
@@ -288,7 +288,7 @@
     },
 
     isInvalidToken: function () {
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
       var patGuid = this._getPatGuid();
       if (_.isUndefined(patGuid)) {
         // the project uses a legacy OAuth token
@@ -304,7 +304,7 @@
 
     manageVcsTokens: function () {
       var that = this;
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
       var vcs = that._getVcs();
       if (vcs) {
         var tokensForVcs = vcsModel.getTokensForVcs(vcs);
@@ -340,7 +340,7 @@
     },
 
     _getVcs: function () {
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
       var vi = this.hceModel.data.vcsInstance;
       return _.find(vcsModel.vcsClients, function (vc) {
         return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
@@ -368,7 +368,7 @@
     },
 
     _manageTokens: function (vcs) {
-      var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = this.modelManager.retrieve('code-engine.model.vcs');
       var that = this;
       var patGuid = that._getPatGuid();
       return that.ceManageVcsTokens.manage(vcs, true, patGuid).then(function (newTokenGuid) {
