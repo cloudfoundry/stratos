@@ -33,7 +33,6 @@
   };
 
   function goToApp(clusterGuid, appGuid) {
-    console.log(clusterGuid, appGuid);
     var url = helpers.getHost() + '/#/cf/applications/' + clusterGuid + '/app/' + appGuid + '/summary';
     return browser.get(url)
       .then(function () {
