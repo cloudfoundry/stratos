@@ -108,7 +108,7 @@
     function list() {
       var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
       var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
-      var hceInfoApi = apiManager.retrieve('cloud-foundry.api.HceInfoApi');
+      var hceInfoApi = apiManager.retrieve('code-engine.api.HceInfoApi');
       var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');
 
       return serviceInstanceApi.list().then(function (response) {

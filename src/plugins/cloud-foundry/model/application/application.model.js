@@ -946,7 +946,7 @@
           ? this.$q.when(userCnsiModel.serviceInstances) : userCnsiModel.list();
         return promise.then(function () {
           // Retrieve dynamicllay as this model may load before the one we need
-          var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+          var hceModel = that.modelManager.retrieve('code-engine.model.hce');
           var hceCnsis = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length === 0) {
             return that.$q.when(hceCnsis);

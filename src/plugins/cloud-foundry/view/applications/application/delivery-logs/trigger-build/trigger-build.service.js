@@ -47,7 +47,7 @@
     var that = this;
     that.context = context;
     that.content = content;
-    that.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    that.hceModel = modelManager.retrieve('code-engine.model.hce');
     that.githubModel = modelManager.retrieve('github.model');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
