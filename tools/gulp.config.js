@@ -105,8 +105,8 @@
         paths.dist + 'app/**/*.js',
         paths.dist + 'plugins/**/*.module.js',
         paths.dist + 'plugins/**/*.js',
-        paths.dist + '**/*.mock.js',
-        paths.dist + '**/*.spec.js'
+        '!' + paths.dist + '**/*.mock.js',
+        '!' + paths.dist + '**/*.spec.js'
       ],
 
       jsFile: 'console-console.js',
