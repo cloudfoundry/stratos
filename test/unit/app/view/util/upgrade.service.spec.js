@@ -101,8 +101,6 @@
       it('should show upgrade page when an upgrade is in progress', function () {
         $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(503, null, {'Retry-After': 300});
         $httpBackend.expectGET('/pp/v1/auth/session/verify');
-        $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
-        $httpBackend.expectGET('/app/view/console-error/console-error.html');
         $timeout.flush();
         $httpBackend.flush();
         expect(applicationCtrl.ready).toBe(true);
@@ -159,8 +157,6 @@
           // Try to login when we are upgrading
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(503, {}, {'Retry-After': 300});
           $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
-          $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
-          $httpBackend.expectGET('/app/view/console-error/console-error.html');
           applicationCtrl.login('dev', 'dev');
           $httpBackend.flush();
           expect(applicationCtrl.loggedIn).toBe(true);
@@ -212,8 +208,6 @@
         it('503 is upgrade', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis/test').respond(503, {}, {'Retry-After': 300});
           $httpBackend.expectGET('/pp/v1/cnsis/test');
-          $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
-          $httpBackend.expectGET('/app/view/console-error/console-error.html');
           $http.get('/pp/v1/cnsis/test');
           $httpBackend.flush();
           expect($state.current.name).toBe('error-page');

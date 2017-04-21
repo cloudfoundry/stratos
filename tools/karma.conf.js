@@ -28,7 +28,7 @@
       },
 
       files: [
-        'src/lib/jquery/dist/jquery.js',
+        //'src/lib/jquery/dist/jquery.js',
         'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
         'src/lib/angular-mocks/angular-mocks.js',
         'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
