@@ -83,7 +83,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(config.templatePaths, {base: paths.src})
+      .src(utils.updateWithPlugins(config.templatePaths), {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -150,11 +150,10 @@
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist));
   });
 
-  // 'copy:default-brand'
-  gulp.task('copy:assets', [], function () {
+  gulp.task('copy:assets', ['copy:default-brand'], function () {
+    var updatedAssetFiles = utils.updateWithPlugins(assetFiles);
     return gulp
-      .src(assetFiles, {base: paths.src})
-      // .pipe(gulpIgnore.exclude(utils.excludedPlugins()))
+      .src(updatedAssetFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -206,7 +205,7 @@
 
   // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(config.templatePaths)
+    return gulp.src(utils.updateWithPlugins(config.templatePaths))
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true
@@ -233,7 +232,7 @@
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
-        utils.updateWithPlugins(config.jsFiles, true)
+        utils.updateWithPlugins(config.jsFiles)
         .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -276,10 +275,8 @@
 
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
-    // return gulp.src(i18nSource, { base: './' })
-    return gulp.src(i18nSource)
-      .pipe(gulpIgnore.exclude(utils.excludedPlugins()))
+    // i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
+    return gulp.src(utils.updateWithPlugins(i18nSource))
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
@@ -307,7 +304,7 @@
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
-    gulp.watch(config.templatePaths, ['copy:html', callback]);
+    gulp.watch(utils.updateWithPlugins(config.templatePaths), ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);

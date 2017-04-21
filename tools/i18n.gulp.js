@@ -120,7 +120,7 @@
         return b === '/';
       });
       var locale = file.relative.substr(parentDirIndex - 2, 2);
-      console.log(locale, file.relative);
+      // console.log(locale, file.relative);
       addStrings(locale, file);
       cb();
     }
@@ -129,3 +129,4 @@
     return through.obj(bufferContents, endStream);
   };
 })();
+
