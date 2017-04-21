@@ -8,7 +8,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('error-page', {
       url: '/error',
-      templateUrl: '/app/view/console-error/console-error.html',
+      templateUrl: 'app/view/console-error/console-error.html',
       controller: ErrorPageController,
       controllerAs: 'errPageCtrl',
       params: {
