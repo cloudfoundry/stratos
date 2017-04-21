@@ -60,6 +60,11 @@
     overrides: config.bower.overrides
   });
 
+  // gulp taaks should be run from the top-level folder
+  if (process.cwd() === __dirname) {
+    throw new gutil.PluginError('gulp', 'gulp tasks should be run from the top-level folder');
+  }
+
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
   examples(config);
