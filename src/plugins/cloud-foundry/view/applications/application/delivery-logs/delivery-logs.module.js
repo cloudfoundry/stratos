@@ -35,7 +35,7 @@
   function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, viewEventDetailView,
                                              viewExecutionDetailView, triggerBuildDetailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hasProject = false;
     this.last = {};

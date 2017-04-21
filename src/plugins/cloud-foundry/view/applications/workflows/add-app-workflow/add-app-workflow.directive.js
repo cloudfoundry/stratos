@@ -36,7 +36,8 @@
     '$interpolate',
     '$scope',
     '$q',
-    '$timeout'
+    '$timeout',
+    'PAT_DELIMITER'
   ];
 
   /**
@@ -52,6 +53,7 @@
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
+   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -70,9 +72,10 @@
    * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
+   * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, cfOrganizationModel,
-                                    $interpolate, $scope, $q, $timeout) {
+                                    $interpolate, $scope, $q, $timeout, PAT_DELIMITER) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -90,11 +93,12 @@
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+    this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
     this.userInput = {};
     this.options = {};
+    this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.init();
   }
@@ -232,7 +236,7 @@
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
                     var msg = gettext("A new application and route have been created for '{{ appName }}'");
-                    that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {
+                    that.appEventService.$emit('events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });
                   }, function (error) {

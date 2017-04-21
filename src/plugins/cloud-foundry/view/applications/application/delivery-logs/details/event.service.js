@@ -53,7 +53,7 @@
 
     var event = vm.context.event;
 
-    var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    var hceModel = modelManager.retrieve('code-engine.model.hce');
 
     // If we fetch large files before the slideout is shown the animation looks odd. Provide a pause before we fetch
     $timeout(function () {

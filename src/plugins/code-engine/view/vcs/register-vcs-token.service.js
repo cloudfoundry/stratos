@@ -16,7 +16,7 @@
    */
   function RegisterVcsTokenService($q, frameworkAsyncTaskDialog, appNotificationsService, modelManager) {
 
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+    var vcsModel = modelManager.retrieve('code-engine.model.vcs');
 
     return {
       /**

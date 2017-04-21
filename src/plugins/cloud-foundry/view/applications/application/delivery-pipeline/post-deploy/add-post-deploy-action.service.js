@@ -22,8 +22,8 @@
   function postDeployAction(modelManager, apiManager, frameworkAsyncTaskDialog) {
 
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.hceSecurityApi = apiManager.retrieve('cloud-foundry.api.HceSecurityApi');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
+    this.hceSecurityApi = apiManager.retrieve('code-engine.api.HceSecurityApi');
 
     var that = this;
 
