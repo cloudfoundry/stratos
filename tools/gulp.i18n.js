@@ -19,8 +19,6 @@
     var translations = {};
     var firstFiles = {};
 
-    var initAllLocales = initJsonAllLocales || {};
-
     function replace(obj, current) {
       _.each(current, function (v, k) {
         if (_.isObject(v)) {
@@ -77,7 +75,7 @@
 
     function addStrings(locale, file) {
       if (!translations[locale]) {
-        translations[locale] = _.cloneDeep(initAllLocales);
+        translations[locale] = _.cloneDeep(initJsonAllLocales || {});
         firstFiles[locale] = file;
       }
       var json = JSON.parse(file.contents.toString());
