@@ -19,6 +19,7 @@
   var gulp = require('gulp');
   var del = require('delete');
   var fork = require('child_process').fork;
+  var path = require('path');
   var runSequence = require('run-sequence');
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
@@ -29,9 +30,10 @@
   });
 
   gulp.task('coverage-combine', function (cb) {
+    var coverageDir = path.resolve(__dirname, '..', 'out', 'coverage-report');
     var opts = {
-      dir: '../out/coverage-report/combined',
-      pattern: '../out/coverage-report/_json/*.json',
+      dir: path.join(coverageDir, 'combined'),
+      pattern: path.join(coverageDir, '_json/*.json'),
       print: 'summary',
       reporters: {
         html: {}
