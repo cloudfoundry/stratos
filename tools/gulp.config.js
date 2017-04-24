@@ -184,7 +184,8 @@
       paths: paths,
 
       plugins: [
-        'cloud-foundry'
+        'cloud-foundry',
+        'code-engine'
       ],
 
       translate: {

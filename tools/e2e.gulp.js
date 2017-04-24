@@ -24,6 +24,7 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
+  var utils = require('./gulp.utils');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
