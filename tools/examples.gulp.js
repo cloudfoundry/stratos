@@ -19,6 +19,7 @@
   var injectString = require('gulp-inject-string');
   var browserSync = require('browser-sync').create();
   var gutil = require('gulp-util');
+  var utils = require('./gulp.utils');
 
   // Clean the examples dist folder
   gulp.task('examples:clean', function () {

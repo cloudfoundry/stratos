@@ -210,7 +210,7 @@
 
   // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(config.templatePaths)
+    return gulp.src(templateFiles)
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true

@@ -5,8 +5,7 @@
   var DELETED_TOKEN = 'token deleted';
 
   angular
-    .module('cloud-foundry.view.applications.application.delivery-pipeline', [
-    ])
+    .module('cloud-foundry.view.applications.application.delivery-pipeline', [])
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
