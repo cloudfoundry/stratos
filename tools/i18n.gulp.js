@@ -14,7 +14,7 @@
   //var REPLACE_REGEX = /\[\[:@(.*)]]/g;
   var REPLACE_REGEX = /\[\[(@:.*?)\]\]/g;
 
-  module.exports = function (prettyPrint) {
+  module.exports = function (prettyPrint, initJsonAllLocales) {
     // Translations
     var translations = {};
     var firstFiles = {};
@@ -40,6 +40,9 @@
 
     function resolveKey(obj, key) {
       var value = _.get(obj, key);
+      if (!value) {
+        throw new gutil.PluginError(PLUGIN_NAME, ' Missing string: ' + key);
+      }
       if (value.indexOf('@:') === 0) {
         return resolveKey(obj, value.substr(2));
       }
@@ -71,7 +74,7 @@
 
     function addStrings(locale, file) {
       if (!translations[locale]) {
-        translations[locale] = {};
+        translations[locale] = _.cloneDeep(initJsonAllLocales || {});
         firstFiles[locale] = file;
       }
       var json = JSON.parse(file.contents.toString());
@@ -116,10 +119,8 @@
         return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
       }
 
-      var parentDirIndex = _.findLastIndex(file.relative, function (b) {
-        return b === path.sep;
-      });
-      var locale = file.relative.substr(parentDirIndex - 2, 2);
+      var parentDir = path.dirname(file.relative);
+      var locale = parentDir.substr(parentDir.length - 2, 2);
       addStrings(locale, file);
       cb();
     }

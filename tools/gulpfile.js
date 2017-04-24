@@ -41,13 +41,14 @@
   var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
   var scssFiles = utils.updateWithPlugins(config.scssFiles);
   var templateFiles = utils.updateWithPlugins(config.templatePaths);
+  var packageJson = require('../package.json');
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
   defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
-  var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
+  var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
   defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
 
   var usePlumber = true;
@@ -129,7 +130,6 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
@@ -224,7 +224,7 @@
 
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index', ['inject:index:oem'], function () {
-    var distPath = path.resolve(__dirname, paths.dist);
+    var distPath = path.resolve(__dirname, '..', paths.dist);
     var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
     return gulp
       .src(paths.oem + 'dist/index.html')
@@ -276,11 +276,17 @@
       .pipe(eslint.failAfterError());
   });
 
+  function getMajorMinor(version) {
+    var regex = /^(\d+\.)?(\d)/i;
+    return version.match(regex)[0];
+  }
+
   gulp.task('i18n', function () {
+    var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
     var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
+    i18nSource.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
     return gulp.src(utils.updateWithPlugins(i18nSource))
-      .pipe(i18n(gutil.env.devMode))
+      .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
   });

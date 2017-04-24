@@ -1,4 +1,11 @@
 {
+  "code-engine": "Code Engine",
+  "menu": {
+    "code-engine": "@:code-engine"
+  },
+  "product": {
+    "ce": "@:code-engine"
+  },
   "ce": {
     "registration": {
       "name": "@:code-engine",

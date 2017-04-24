@@ -1,22 +1,16 @@
 {
   "product": {
-    "version": "4.1",
+    "name": "Cloud Foundry",
     "console": "Web Console",
     "logo": "",
     "www-link": ""
   },
   "company": {
+    "name": "SUSE",
     "logo": "images/brand_company_logo.png",
     "www-link": "http://www.suse.com",
     "terms-href":"",
     "privacy-href":"",
-    "product-family-href": "",
-    "name": "Hewlett Packard Enterprise Company, L.P.",
-    "TERMS_OF_USE_HREF": "",
-    "PRIVACY_HREF": "",
-    "PRODUCT_FAMILY_HREF": "",
-    "PRODUCT_CONSOLE": "Helion Stackato Web Console",
-    "PRODUCT_FAMILY_LOGO_HREF": "",
-    "ABOUT_COMPANY_LOGO_HREF": "images/brand_company_logo.png"
+    "product-family-href": ""
   }
 }
