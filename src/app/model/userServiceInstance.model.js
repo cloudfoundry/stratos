@@ -23,6 +23,7 @@
    * @param {object} $q - the Angular Promise service
    * @param {app.utils.appUtilsService} appUtilsService - utils service
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {appEndpointsCnsiService} appEndpointsCnsiService - functionality revolving around endpoint CNSIs
    * @returns {object} UserServiceInstance
    */
   function UserServiceInstance($q, appUtilsService, apiManager, appEndpointsCnsiService) {
@@ -191,8 +192,8 @@
       appUtilsService.replaceProperties(serviceInstances, _.keyBy(items, 'guid'));
 
       numValid = _.sumBy(items, function (o) {
-          return o.valid ? 1 : 0;
-        }) || 0;
+        return o.valid ? 1 : 0;
+      }) || 0;
 
       // Add in the metadata about error status of endpoints
       if (infoResults) {

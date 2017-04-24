@@ -50,8 +50,8 @@
 
   var filePathsToExclude;
   function updateWithPlugins(srcArray) {
-    // All config (srcArray) collections will contain the file glops for ALL plugins. Here we eliminate those that
-    // aren't required
+    // All config (srcArray) collections will contain the file globs for ALL plugins. Here we eliminate those that
+    // aren't required (in plugins folder but not in config.plugins)
     if (!filePathsToExclude) {
       filePathsToExclude = [];
       var pluginsDirs = getDirs(path.join(config.paths.src, 'plugins'));

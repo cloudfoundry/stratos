@@ -117,10 +117,9 @@
       }
 
       var parentDirIndex = _.findLastIndex(file.relative, function (b) {
-        return b === '/';
+        return b === path.sep;
       });
       var locale = file.relative.substr(parentDirIndex - 2, 2);
-      // console.log(locale, file.relative);
       addStrings(locale, file);
       cb();
     }

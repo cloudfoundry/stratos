@@ -19,9 +19,11 @@
    * @description provide functionality to support cloud foundry cnsi service instances (cnsisi..) in the endpoints
    * dashboard
    * @param {cfHideEndpoint} cfHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
+   * @param {object} $q - the Angular $q service
    * @param {object} $state - the Angular $state service
    * @param {object} $translate - the $translate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
