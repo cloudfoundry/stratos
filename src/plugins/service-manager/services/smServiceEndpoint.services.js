@@ -67,6 +67,15 @@
       return $q.resolve();
     }
 
+    function refreshToken(allServiceInstances) {
+      var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');
+      var hsmGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
+      if (hsmGuids.length > 0) {
+        return hsmApi.info(hsmGuids.join(','));
+      }
+      return $q.resolve();
+    }
+
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
       serviceEndpoint.type = $translate.instant('service-manager');
       if (isValid) {

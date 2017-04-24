@@ -6,7 +6,6 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [
-      //'code-engine.service'
     ])
     .config(registerRoute);
 

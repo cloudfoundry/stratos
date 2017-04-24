@@ -36,16 +36,17 @@
   var config = require('./gulp.config')();
 
   var paths = config.paths;
-  var assetFiles = config.assetFiles;
+  var assetFiles = utils.updateWithPlugins(config.assetFiles);
   var themeFiles = config.themeFiles;
-  var jsSourceFiles = config.jsSourceFiles;
-  var scssFiles = config.scssFiles;
-  var gulpIgnore = require('gulp-ignore');
+  var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
+  var scssFiles = utils.updateWithPlugins(config.scssFiles);
+  var templateFiles = utils.updateWithPlugins(config.templatePaths);
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
+  defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
   defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
 
@@ -55,6 +56,11 @@
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
   });
+
+  // gulp taaks should be run from the top-level folder
+  if (process.cwd() === __dirname) {
+    throw new gutil.PluginError('gulp', 'gulp tasks should be run from the top-level folder');
+  }
 
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
@@ -68,7 +74,7 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clean
+  // Clean dist
   gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
@@ -79,7 +85,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(utils.updateWithPlugins(config.templatePaths), {base: paths.src})
+      .src(templateFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -123,6 +129,7 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
@@ -146,9 +153,8 @@
   });
 
   gulp.task('copy:assets', ['copy:default-brand'], function () {
-    var updatedAssetFiles = utils.updateWithPlugins(assetFiles);
     return gulp
-      .src(updatedAssetFiles, {base: paths.src})
+      .src(assetFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -156,7 +162,7 @@
   gulp.task('copy:default-brand', ['copy:default-brand:favicon'], function () {
     return gulp
       .src([
-        defaultBrandFolder + 'images/*'
+        path.join(defaultBrandFolder, 'images/*')
       ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
   });
@@ -164,7 +170,7 @@
   // Copy the default brand's images and logo to the dist folder
   gulp.task('copy:default-brand:favicon', function () {
     return gulp
-      .src(defaultBrandFolder + 'favicon.ico', {base: defaultBrandFolder})
+      .src(path.join(defaultBrandFolder, 'favicon.ico'), {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist + 'images'));
   });
 
@@ -200,7 +206,7 @@
 
   // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(utils.updateWithPlugins(config.templatePaths))
+    return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true
@@ -264,7 +270,7 @@
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
     return gulp
-      .src(config.lintFiles)
+      .src(utils.updateWithPlugins(config.lintFiles))
       .pipe(eslint())
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
@@ -300,8 +306,8 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
-    gulp.watch(utils.updateWithPlugins(config.templatePaths), ['copy:html', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
+    gulp.watch(templateFiles, ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);
