@@ -1,6 +1,5 @@
 {
   "product": {
-    "version": "4.1",
     "name": "Cloud Foundry",
     "console": "Web Console",
     "cf": "Cloud Foundry",
