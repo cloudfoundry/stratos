@@ -5,7 +5,7 @@
   var resetTo = require('../../po/resets.po');
   var loginPage = require('../../po/login-page.po');
   var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
-  var Q = require('../../../../tools/node_modules/q');
+  var Q = require('q');
 
   describe('HCF Endpoints Dashboard', function () {
 

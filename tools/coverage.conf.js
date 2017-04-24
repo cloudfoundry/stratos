@@ -47,15 +47,16 @@
       this.jasmineDone = function () {
         gutil.log('Tests finished - collecting coverage metadata');
         q.all(deferred).then(function () {
-          gutil.log('Writing coverage report');
+          var coverageDir = path.resolve(__dirname, '..', 'out', 'coverage-report');
+          gutil.log('Writing coverage report to ' + coverageDir);
           _.each(results, function (r) {
             collector.add(r);
           });
-          istanbul.Report.create('html', {dir: '../out/coverage-report/e2e-html'})
+          istanbul.Report.create('html', {dir: path.join(coverageDir, 'e2e-html')})
             .writeReport(collector, true);
-          istanbul.Report.create('json', {dir: '../out/coverage-report/_json'})
+          istanbul.Report.create('json', {dir: path.join(coverageDir, '_json')})
             .writeReport(collector, true);
-          fs.renameSync('../out/coverage-report/_json/coverage-final.json', '../out/coverage-report/_json/e2e-coverage.json');
+          fs.renameSync(path.join(coverageDir, '_json', 'coverage-final.json'), path.join(coverageDir, '_json', 'e2e-coverage.json'));
           waitPlugin.resolve();
         });
       };

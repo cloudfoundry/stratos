@@ -106,6 +106,7 @@
     }
 
     function bufferContents(file, enc, cb) {
+
       // ignore empty files
       if (file.isNull()) {
         return cb(file);

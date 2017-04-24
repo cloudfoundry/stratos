@@ -28,10 +28,10 @@
       },
 
       files: [
-        //'src/lib/jquery/dist/jquery.js',
-        'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
-        'src/lib/angular-mocks/angular-mocks.js',
-        'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        //'bower_components/jquery/dist/jquery.js',
+        'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
+        'bower_components/angular-mocks/angular-mocks.js',
+        'bower_components/angular-link-header-parser/release/angular-link-header-parser.min.js',
         'tools/console-templates.js',
 
         'src/config.js',

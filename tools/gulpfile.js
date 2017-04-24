@@ -31,9 +31,10 @@
   var uglify = require('gulp-uglify');
   var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
-  var i18n = require('./gulp.i18n');
-
+  var i18n = require('./i18n.gulp');
+  var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
+
   var paths = config.paths;
   var assetFiles = config.assetFiles;
   var themeFiles = config.themeFiles;
@@ -45,7 +46,9 @@
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
+  defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
+  defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
 
   var usePlumber = true;
   var server;
@@ -53,6 +56,11 @@
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
   });
+
+  // gulp taaks should be run from the top-level folder
+  if (process.cwd() === __dirname) {
+    throw new gutil.PluginError('gulp', 'gulp tasks should be run from the top-level folder');
+  }
 
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
@@ -109,9 +117,10 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'lib' folder to 'dist'
+  // Copy 'bower_components' folder to 'dist'
+  // This is only used for development builds
   gulp.task('copy:lib', function (done) {
-    utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+    utils.copyBowerFolder(paths.lib, paths.dist + 'bower_components');
     done();
   });
 
@@ -133,11 +142,13 @@
       .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
+  // Combine all of the bower js dependencies into a single lib file that we can include
+  // Only used for a production build
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
+      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist));
   });
 
   gulp.task('copy:assets', ['copy:default-brand'], function () {
@@ -150,7 +161,7 @@
   gulp.task('copy:default-brand', ['copy:default-brand:favicon'], function () {
     return gulp
       .src([
-        defaultBrandFolder + 'images/*'
+        path.join(defaultBrandFolder, 'images/*')
       ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
   });
@@ -158,7 +169,7 @@
   // Copy the default brand's images and logo to the dist folder
   gulp.task('copy:default-brand:favicon', function () {
     return gulp
-      .src(defaultBrandFolder + 'favicon.ico', {base: defaultBrandFolder})
+      .src(path.join(defaultBrandFolder, 'favicon.ico'), {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist + 'images'));
   });
 
@@ -169,7 +180,7 @@
   });
 
   // Compile SCSS to CSS
-  gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
+  gulp.task('css:generate', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
       .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
@@ -183,6 +194,16 @@
       .pipe(gulp.dest(paths.dist));
   });
 
+  gulp.task('css', ['css:generate'], function () {
+    var cssFiles = bowerFiles.ext('css').files;
+    cssFiles.push(path.join(paths.dist, 'index.css'));
+    return gulp.src(cssFiles)
+    .pipe(concat('index.css'))
+    .pipe(cleanCSS({}))
+    .pipe(gulp.dest(paths.dist));
+  });
+
+  // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
     return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
@@ -196,7 +217,7 @@
   // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
   gulp.task('dev-template-cache', function () {
-    return gulp.src('./' + config.jsTemplatesFile)
+    return gulp.src('./tools/' + config.jsTemplatesFile)
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -215,6 +236,7 @@
     var sources = gulp.src(
         plugins
         .concat(config.jsFiles)
+        .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
         .concat(config.cssFiles), {read: false});
@@ -256,7 +278,7 @@
 
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
+    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
     return gulp.src(i18nSource)
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -265,7 +287,7 @@
 
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
-    var CMD = 'cd ../src/plugins && ls */*.scss';
+    var CMD = 'cd ./src/plugins && ls */*.scss';
     var pluginsScssFiles = sh.exec(CMD, {silent: true})
       .output
       .trim()
@@ -367,7 +389,7 @@
     options.env.client_port = config.browserSyncPort;
     options.env.client_logging = config.disableServerLogging || false;
 
-    server = fork('./server.js', [], options);
+    server = fork(path.join(__dirname, 'server.js'), [], options);
   });
 
   gulp.task('stop-server', function () {
@@ -413,11 +435,9 @@
       'clean',
       'plugin',
       'copy:js',
-      'copy:lib',
       'css',
       'i18n',
       'template-cache',
-      'copy:html',
       'copy:svg',
       'copy:assets',
       'copy:theme',

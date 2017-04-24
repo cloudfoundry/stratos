@@ -75,7 +75,7 @@
     var hceServicesEndpoint = {
       key: 'cnsi_4',
       name: 'c4',
-      type: 'Helion Code Engine'
+      type: 'Code Engine'
     };
 
     function createController($injector) {
