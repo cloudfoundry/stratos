@@ -20,3 +20,4 @@ oem/tmp
 tmp
 out/
 bower_components/
+.vscode/
