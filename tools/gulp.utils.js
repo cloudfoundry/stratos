@@ -7,6 +7,7 @@
   var _ = require('lodash');
   var fsx = require('fs-extra');
   var minimatch = require('minimatch');
+  var config = require('./gulp.config')();
 
   function handleBower(srcDir, destDir) {
     var bowerFile = path.join(srcDir, 'bower.json');
@@ -47,5 +48,32 @@
     });
   }
 
+  var filePathsToExclude;
+  function updateWithPlugins(srcArray) {
+    // All config (srcArray) collections will contain the file glops for ALL plugins. Here we eliminate those that
+    // aren't required
+    if (!filePathsToExclude) {
+      filePathsToExclude = [];
+      var pluginsDirs = getDirs(path.join(config.paths.src, 'plugins'));
+      var pluginsToExclude = _.difference(pluginsDirs, config.plugins);
+      _.forEach(pluginsToExclude, function (plugin) {
+        filePathsToExclude.push('!./' + path.join(config.paths.dist, 'plugins', plugin, '**', '*.*'));
+        filePathsToExclude.push('!./' + path.join(config.paths.src, 'plugins', plugin, '**', '*.*'));
+      });
+    }
+    var res = filePathsToExclude.concat(srcArray);
+
+    console.log('res', res);
+    return res;
+  }
+
+  function getDirs(srcpath) {
+    return fs.readdirSync(srcpath).filter(function (file) {
+      return fs.statSync(path.join(srcpath, file)).isDirectory();
+    });
+  }
+
   module.exports.copyBowerFolder = copyBowerFolder;
+  module.exports.updateWithPlugins = updateWithPlugins;
+  module.exports.getDirs = getDirs;
 })();

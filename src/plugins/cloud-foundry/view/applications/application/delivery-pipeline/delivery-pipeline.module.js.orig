@@ -6,7 +6,11 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [
+<<<<<<< HEAD
+      'code-engine.service'
+=======
       //'code-engine.service'
+>>>>>>> origin/extensions
     ])
     .config(registerRoute);
 
@@ -73,7 +77,10 @@
     this.appNotificationsService = appNotificationsService;
     this.cfAddNotificationService = cfAddNotificationService;
     this.cfPostDeployActionService = cfPostDeployActionService;
+<<<<<<< HEAD
+=======
     //this.PAT_DELIMITER = PAT_DELIMITER;
+>>>>>>> origin/extensions
 
     this.hceCnsi = null;
 

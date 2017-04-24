@@ -28,10 +28,10 @@
       },
 
       files: [
-        //'src/lib/jquery/dist/jquery.js',
-        'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
-        'src/lib/angular-mocks/angular-mocks.js',
-        'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        //'bower_components/jquery/dist/jquery.js',
+        'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
+        'bower_components/angular-mocks/angular-mocks.js',
+        'bower_components/angular-link-header-parser/release/angular-link-header-parser.min.js',
         'tools/console-templates.js',
 
         'src/config.js',
@@ -62,7 +62,7 @@
           nocache: false
         },
         {
-          pattern: 'src/plugins/cloud-foundry/view/assets/**/*.png',
+          pattern: 'src/plugins/*/view/assets/**/*.png',
           watched: false,
           included: false,
           served: true,
@@ -83,9 +83,8 @@
         'src/app/**/*.html',
 
         'src/plugins/**/*.module.js',
-        'src/plugins/**/!(*.mock|*.spec).js',
-        'src/plugins/**/*.mock.js',
-        'src/plugins/**/*.spec.js',
+        'src/plugins/**/!(*.mock|*.spec)*.js',
+        'src/plugins/*/test/**/*.js',
         'src/plugins/**/*.html',
 
         'test/unit/**/*.mock.js',
@@ -130,10 +129,7 @@
         'src/app/**/*.html': ['ng-html2js'],
         'src/app/**/*.js': ['ngannotate', 'coverage'],
         'src/plugins/**/*.html': ['ng-html2js'],
-        'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/plugins/github/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/plugins/service-manager/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/plugins/code-engine/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
+        'src/plugins/*/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
       },
 
       proxies: {

@@ -11,8 +11,9 @@
     .module('app.model')
     .run(registerUserServiceInstanceModel);
 
-  function registerUserServiceInstanceModel($q, appUtilsService, apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, appUtilsService, apiManager));
+  function registerUserServiceInstanceModel($q, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
+    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, appUtilsService, apiManager,
+      appEndpointsCnsiService));
   }
 
   /**
@@ -24,7 +25,7 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} UserServiceInstance
    */
-  function UserServiceInstance($q, appUtilsService, apiManager) {
+  function UserServiceInstance($q, appUtilsService, apiManager, appEndpointsCnsiService) {
     var serviceInstances = {};
     var numValid = 0;
 
@@ -107,31 +108,14 @@
      */
     function list() {
       var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
-      var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
-      var hceInfoApi = apiManager.retrieve('code-engine.api.HceInfoApi');
-      var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');
 
       return serviceInstanceApi.list().then(function (response) {
         var items = response.data;
 
-        var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
-        var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
-        var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
-        var hsmGuids = _.map(_.filter(items, {cnsi_type: 'hsm'}) || [], 'guid') || [];
-
         var tasks = [];
-        // make a request on each service type to refresh the oauth token
-        if (hcfGuids.length > 0) {
-          tasks.push(cfInfoApi.GetInfo({}, hcfCfg).then(function (response) {
-            return response.data || {};
-          }));
-        }
-        if (hceGuids.length > 0) {
-          tasks.push(hceInfoApi.info(hceGuids.join(',')));
-        }
-        if (hsmGuids.length > 0) {
-          tasks.push(hsmApi.info(hsmGuids.join(',')));
-        }
+        _.forEach(appEndpointsCnsiService.cnsiEndpointProviders, function (endpointProvider) {
+          tasks.push(appEndpointsCnsiService.callEndpointProvidersFunc(endpointProvider.cnsi_type, 'refreshToken', items) || $q.resolve());
+        });
 
         if (tasks.length === 0) {
           onList(response);
@@ -207,8 +191,8 @@
       appUtilsService.replaceProperties(serviceInstances, _.keyBy(items, 'guid'));
 
       numValid = _.sumBy(items, function (o) {
-        return o.valid ? 1 : 0;
-      }) || 0;
+          return o.valid ? 1 : 0;
+        }) || 0;
 
       // Add in the metadata about error status of endpoints
       if (infoResults) {

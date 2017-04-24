@@ -27,7 +27,11 @@
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(cfHideEndpoint, $q, $state, $translate, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
+<<<<<<< HEAD
+  function endpointService(cfHideEndpoint, $state, $translate, appUtilsService, modelManager, appEndpointsCnsiService) {
+=======
+  function endpointService(cfHideEndpoint, $q, $state, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
+>>>>>>> origin/extensions
 
     var service = {
       cnsi_type: 'hcf',

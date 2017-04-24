@@ -31,21 +31,23 @@
   var uglify = require('gulp-uglify');
   var utils = require('./gulp.utils');
   var wiredep = require('wiredep').stream;
-  var i18n = require('./gulp.i18n');
-
+  var i18n = require('./i18n.gulp');
+  var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
+
   var paths = config.paths;
   var assetFiles = config.assetFiles;
   var themeFiles = config.themeFiles;
   var jsSourceFiles = config.jsSourceFiles;
-  var plugins = config.plugins;
   var scssFiles = config.scssFiles;
+  var gulpIgnore = require('gulp-ignore');
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
+  defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
 
   var usePlumber = true;
   var server;
@@ -66,7 +68,7 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clean dist
+  // Clean
   gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
@@ -77,7 +79,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(config.templatePaths, {base: paths.src})
+      .src(utils.updateWithPlugins(config.templatePaths), {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -109,9 +111,10 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'lib' folder to 'dist'
+  // Copy 'bower_components' folder to 'dist'
+  // This is only used for development builds
   gulp.task('copy:lib', function (done) {
-    utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+    utils.copyBowerFolder(paths.lib, paths.dist + 'bower_components');
     done();
   });
 
@@ -133,16 +136,19 @@
       .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
+  // Combine all of the bower js dependencies into a single lib file that we can include
+  // Only used for a production build
   gulp.task('copy:bowerjs', function () {
     return gulp.src(bowerFiles.ext('js').files)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
+      .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist));
   });
 
   gulp.task('copy:assets', ['copy:default-brand'], function () {
+    var updatedAssetFiles = utils.updateWithPlugins(assetFiles);
     return gulp
-      .src(assetFiles, {base: paths.src})
+      .src(updatedAssetFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -169,7 +175,7 @@
   });
 
   // Compile SCSS to CSS
-  gulp.task('css', ['inject:scss', 'scss:set-brand'], function () {
+  gulp.task('css:generate', ['inject:scss', 'scss:set-brand'], function () {
     return gulp
       .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
@@ -183,8 +189,18 @@
       .pipe(gulp.dest(paths.dist));
   });
 
+  gulp.task('css', ['css:generate'], function () {
+    var cssFiles = bowerFiles.ext('css').files;
+    cssFiles.push(path.join(paths.dist, 'index.css'));
+    return gulp.src(cssFiles)
+    .pipe(concat('index.css'))
+    .pipe(cleanCSS({}))
+    .pipe(gulp.dest(paths.dist));
+  });
+
+  // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(config.templatePaths)
+    return gulp.src(utils.updateWithPlugins(config.templatePaths))
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true
@@ -196,7 +212,7 @@
   // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
   gulp.task('dev-template-cache', function () {
-    return gulp.src('./' + config.jsTemplatesFile)
+    return gulp.src('./tools/' + config.jsTemplatesFile)
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -213,8 +229,8 @@
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
-        plugins
-        .concat(config.jsFiles)
+        utils.updateWithPlugins(config.jsFiles)
+        .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
         .concat(config.cssFiles), {read: false});
@@ -256,8 +272,8 @@
 
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '**/*.json');
-    return gulp.src(i18nSource)
+    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
+    return gulp.src(utils.updateWithPlugins(i18nSource))
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
@@ -265,7 +281,7 @@
 
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
-    var CMD = 'cd ../src/plugins && ls */*.scss';
+    var CMD = 'cd ./src/plugins && ls */*.scss';
     var pluginsScssFiles = sh.exec(CMD, {silent: true})
       .output
       .trim()
@@ -284,8 +300,8 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
-    gulp.watch(config.templatePaths, ['copy:html', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
+    gulp.watch(utils.updateWithPlugins(config.templatePaths), ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);
@@ -367,7 +383,7 @@
     options.env.client_port = config.browserSyncPort;
     options.env.client_logging = config.disableServerLogging || false;
 
-    server = fork('./server.js', [], options);
+    server = fork(path.join(__dirname, 'server.js'), [], options);
   });
 
   gulp.task('stop-server', function () {
@@ -413,11 +429,9 @@
       'clean',
       'plugin',
       'copy:js',
-      'copy:lib',
       'css',
       'i18n',
       'template-cache',
-      'copy:html',
       'copy:svg',
       'copy:assets',
       'copy:theme',

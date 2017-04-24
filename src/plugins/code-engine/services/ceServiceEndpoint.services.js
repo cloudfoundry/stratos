@@ -29,10 +29,11 @@
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, $translate, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService) {
+                           appEndpointsCnsiService, apiManager) {
 
     var service = {
       cnsi_type: 'hce',
+      refreshToken: refreshToken,
       update: updateEndpoint,
       unregister: unregister,
       connect: connect,
@@ -62,6 +63,15 @@
     appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
+
+    function refreshToken(allServiceInstances) {
+      var hceInfoApi = apiManager.retrieve('code-engine.api.HceInfoApi');
+      var hceGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
+      if (hceGuids.length > 0) {
+        return hceInfoApi.info(hceGuids.join(','));
+      }
+      return $q.resolve();
+    }
 
     /* eslint-disable no-unused-vars */
     // func params are standard across all <x>ServiceEndpoint providers. In this one some are not required or used

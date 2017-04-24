@@ -106,6 +106,7 @@
     }
 
     function bufferContents(file, enc, cb) {
+
       // ignore empty files
       if (file.isNull()) {
         return cb(file);
@@ -115,7 +116,11 @@
         return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
       }
 
-      var locale = file.relative.substr(0, 2);
+      var parentDirIndex = _.findLastIndex(file.relative, function (b) {
+        return b === '/';
+      });
+      var locale = file.relative.substr(parentDirIndex - 2, 2);
+      // console.log(locale, file.relative);
       addStrings(locale, file);
       cb();
     }
@@ -124,3 +129,4 @@
     return through.obj(bufferContents, endStream);
   };
 })();
+

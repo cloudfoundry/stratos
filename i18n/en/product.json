@@ -1,10 +1,7 @@
 {
   "product": {
     "version": "4.1",
-    "name": "Cloud Foundry",
     "console": "Web Console",
-    "cf": "Cloud Foundry",
-    "ce": "Code Engine",
     "logo": "",
     "www-link": ""
   },
@@ -19,8 +16,6 @@
     "PRIVACY_HREF": "",
     "PRODUCT_FAMILY_HREF": "",
     "PRODUCT_CONSOLE": "Helion Stackato Web Console",
-    "CODE_ENGINE": "Code Engine",
-    "CLOUD_FOUNDRY": "Cloud Foundry",
     "PRODUCT_FAMILY_LOGO_HREF": "",
     "ABOUT_COMPANY_LOGO_HREF": "images/brand_company_logo.png"
   }
