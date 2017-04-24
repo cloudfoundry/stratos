@@ -41,7 +41,7 @@
   var jsSourceFiles = config.jsSourceFiles;
   var plugins = config.plugins;
   var scssFiles = config.scssFiles;
-  var packageJson = require('./package.json');
+  var packageJson = require('../package.json');
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
