@@ -11,6 +11,10 @@
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
+    $stateProvider.state('cf', {
+      url: '/cf',
+      template: '<div ui-view></div>'
+    });
     $stateProvider.state('cf.applications', {
       url: '/applications',
       templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',

@@ -66,31 +66,31 @@
 
       it('show busy toast', function () {
         spyOn(frameworkToaster, 'busy');
-        appEventService.$emit('cf.events.NOTIFY_BUSY', eventData);
+        appEventService.$emit('events.NOTIFY_BUSY', eventData);
         expect(frameworkToaster.busy).toHaveBeenCalled();
       });
 
       it('show error toast', function () {
         spyOn(frameworkToaster, 'error');
-        appEventService.$emit('cf.events.NOTIFY_ERROR', eventData);
+        appEventService.$emit('events.NOTIFY_ERROR', eventData);
         expect(frameworkToaster.error).toHaveBeenCalled();
       });
 
       it('show success toast', function () {
         spyOn(frameworkToaster, 'success');
-        appEventService.$emit('cf.events.NOTIFY_SUCCESS', eventData);
+        appEventService.$emit('events.NOTIFY_SUCCESS', eventData);
         expect(frameworkToaster.success).toHaveBeenCalled();
       });
 
       it('show warning toast', function () {
         spyOn(frameworkToaster, 'warning');
-        appEventService.$emit('cf.events.NOTIFY_WARNING', eventData);
+        appEventService.$emit('events.NOTIFY_WARNING', eventData);
         expect(frameworkToaster.warning).toHaveBeenCalled();
       });
 
       it('show custom toast', function () {
         spyOn(frameworkToaster, 'show');
-        appEventService.$emit('cf.events.NOTIFY', eventData);
+        appEventService.$emit('events.NOTIFY', eventData);
         expect(frameworkToaster.show).toHaveBeenCalled();
       });
 
