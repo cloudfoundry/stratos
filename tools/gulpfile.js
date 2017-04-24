@@ -290,10 +290,17 @@
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
     var CMD = 'cd ./src/plugins && ls */*.scss';
-    var pluginsScssFiles = sh.exec(CMD, {silent: true})
+    var plugins = sh.exec(CMD, {silent: true})
       .output
       .trim()
-      .split(/\s+/)
+      .split(/\s+/);
+
+    plugins = _.intersectionBy(plugins, config.plugins, function (input) {
+      var sep = input.indexOf(path.sep);
+      return input.substring(0, sep >= 0 ? sep : input.length);
+    });
+
+    var pluginsScssFiles = plugins
       .map(function (scss) {
         return '@import "' + scss + '";';
       });
