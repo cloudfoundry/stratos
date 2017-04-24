@@ -11,39 +11,10 @@
   </div>
 
   <ul class="application-nav nav nav-tabs col-sm-12">
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
-        Summary
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
-        Log Stream
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
-        Services
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideDeliveryPipelineData">
-      <a class="nav-link" ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
-        Delivery Pipeline
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideDeliveryPipelineData">
-      <a class="nav-link" ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
-        Delivery Logs
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideVariables">
-      <a class="nav-link" ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
-        Variables
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active" ng-if="appCtrl.supportsVersions">
-      <a class="nav-link" ui-sref="cf.applications.application.versions({guid: appCtrl.id})" translate>
-        Versions
+    <li ng-repeat="feature in appCtrl.cfApplicationTabs.tabs | orderBy:'position'"
+        class="nav-item" ui-sref-active="active" ng-hide="feature.hide()">
+      <a class="nav-link" ng-click="feature.go(appCtrl.id)" translate>
+        {{ feature.label }}
       </a>
     </li>
   </ul>

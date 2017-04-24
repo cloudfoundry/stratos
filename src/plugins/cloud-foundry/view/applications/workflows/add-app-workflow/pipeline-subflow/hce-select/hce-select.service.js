@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.delivery-pipeline')
+    .module('cloud-foundry.view.applications.workflows')
     .factory('cloud-foundry.view.applications.application.delivery-pipeline.hceSelect', hceSelectFactory)
     .controller('HceSelectController', HceSelectController);
 

@@ -25,13 +25,15 @@
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
+   * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager) {
+                           appEndpointsCnsiService, apiManager, cfApplicationTabs) {
 
     var service = {
       cnsi_type: 'hce',
+      cfAppTabs: cfAppTabs,
       refreshToken: refreshToken,
       update: updateEndpoint,
       unregister: unregister,
@@ -59,7 +61,27 @@
       }
     };
 
+    var cfAppTabs = [{
+      position: 4,
+      hide: function () {
+        return false;
+      },
+      go: cfApplicationTabs.goToState,
+      uiSref: 'cf.applications.application.delivery-pipeline',
+      label: 'Delivery Pipeline'
+    }, {
+      position: 5,
+      hide: function () {
+        return false;
+      },
+      go: cfApplicationTabs.goToState,
+      uiSref: 'cf.applications.application.delivery-logs',
+      label: 'Delivery Logs'
+    }];
+
     appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
+
+    cfApplicationTabs.tabs = cfApplicationTabs.tabs.concat(cfAppTabs);
 
     return service;
 

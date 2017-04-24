@@ -1,0 +1,123 @@
+<ce-delivery-Pipeline-Status pipeline="appDelLogsCtrl.model.application.pipeline"></ce-delivery-Pipeline-Status>
+<div ng-if="appDelLogsCtrl.hasProject === true">
+  <div id="delivery-logs-summary" class="panel panel-default delivery-logs-summary">
+    <div class="panel-heading action-header">
+      <span translate>Summary</span>
+    </div>
+
+    <dl class="dl-horizontal">
+      <dt translate>LAST BUILD</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.building" class="" href=""
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.building, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
+          {{ appDelLogsCtrl.last.building.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.building" am-time-ago="appDelLogsCtrl.last.building.end_date"></span>
+        <span ng-if="!appDelLogsCtrl.last.building" translate>None</span>
+      </dd>
+      <dt translate>LAST TEST</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.testing" class="" href=""
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
+          {{ appDelLogsCtrl.last.testing.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.testing" am-time-ago="appDelLogsCtrl.last.testing.end_date"></span>
+        <span ng-if="!appDelLogsCtrl.last.testing" translate>None</span>
+      </dd>
+      <dt translate>LAST DEPLOYMENT</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.deploying" class="" href=""
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.deploying, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
+          {{ appDelLogsCtrl.last.deploying.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.deploying" am-time-ago="appDelLogsCtrl.last.deploying.end_date"></span>
+        <span ng-if="!appDelLogsCtrl.last.deploying" translate>None</span>
+      </dd>
+    </dl>
+  </div>
+  <div id="delivery-logs"
+       st-table="appDelLogsCtrl.displayedExecutions"
+       st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
+       st-set-filter="ceDeliveryLogsBuildFilter"
+       st-filtered-collection
+       >
+    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search"
+         ng-if="appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <label class="control-label" for="build-search" required translate>
+            Search Builds
+          </label>
+          <div>
+            <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search" st-search>
+            <i class="helion-icon helion-icon-Search"></i>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="delivery-logs-builds" class="delivery-logs-builds">
+      <div class="action-header">
+        <span translate>Builds</span>
+        <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()"
+          ng-if="appDelLogsCtrl.hceModel.data.vcsInstance.vcs_type === 'GITHUB'">
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <span translate>Trigger Build</span>
+        </a>
+      </div>
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length < 1"
+           class="panel panel-default">
+        <div class="panel-body">
+          <span ng-if="appDelLogsCtrl.parsedHceModel.pipelineExecutions.length" translate>No builds found</span>
+          <span ng-if="!appDelLogsCtrl.parsedHceModel.pipelineExecutions.length" translate>You have no builds</span>
+        </div>
+      </div>
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length > 0"
+           class="panel panel-default">
+        <table class="table" >
+          <thead>
+          <tr>
+            <th st-sort="message" st-skip-natural="true" translate>MESSAGE</th>
+            <th st-sort="result.label" st-skip-natural="true" translate>STATUS</th>
+            <th st-sort="reason.mCreatedDate" st-skip-natural="true" st-descending-first="true" st-sort-default="reverse" translate>TIME</th>
+            <th st-sort="reason.author" st-skip-natural="true" translate>COMMIT AUTHOR</th>
+            <th st-sort="reason.type" st-skip-natural="true" translate>REASON</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="execution in appDelLogsCtrl.displayedExecutions">
+            <td><a href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
+            <td ng-if="!execution.result" class="row result-col"><spinner></spinner></td>
+            <td ng-if="execution.result" class="row result-col" id="build-result-col">
+              <div ng-switch="execution.result.state" class="pull-left">
+                <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
+                <span ng-switch-when="running"><spinner></spinner></span>
+                <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
+                <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
+              </div>
+              <span translate>{{ execution.result.label }}</span>
+            </td>
+            <td>{{ execution.reason.created_date | amDateFormat:'L - LTS' }}</td>
+            <td>{{ execution.reason.author }}</td>
+            <td>{{ execution.reason.type }}</td>
+          </tr>
+          </tbody>
+          <tfoot ng-init="appDelLogsCtrl.showExecutions = 5"
+                 ng-show="appDelLogsCtrl.showExecutions < filteredCollection.length">
+          <tr>
+            <td colspan="5" class="text-center">
+              <a ng-click="appDelLogsCtrl.showExecutions = appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+                <span translate>Show All</span> ({{ filteredCollection.length }})
+              </a>
+              <div ng-show="false" st-pagination="" st-items-by-page="appDelLogsCtrl.showExecutions"></div>
+            </td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+

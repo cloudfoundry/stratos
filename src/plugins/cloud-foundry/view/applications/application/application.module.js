@@ -6,8 +6,6 @@
       'cloud-foundry.view.applications.application.summary',
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
-      'cloud-foundry.view.applications.application.delivery-logs',
-      'cloud-foundry.view.applications.application.delivery-pipeline',
       'cloud-foundry.view.applications.application.variables',
       'cloud-foundry.view.applications.application.versions',
       'cloud-foundry.view.applications.application.notification-target'
@@ -50,7 +48,9 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
+                                 cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
+                                 $interpolate, $state, cfApplicationTabs) {
     var that = this;
 
     this.$window = $window;
@@ -76,8 +76,10 @@
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     this.supportsVersions = false;
-    that.hideVariables = true;
-    that.hideDeliveryPipelineData = true;
+    this.hideVariables = true;
+    this.hideDeliveryPipelineData = true;
+    this.cfApplicationTabs = cfApplicationTabs;
+
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 

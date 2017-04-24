@@ -1,8 +1,9 @@
 (function () {
   'use strict';
 
+  //cloud-foundry.view.applications.application.delivery-pipeline
   angular
-    .module('cloud-foundry.view.applications.application.delivery-pipeline')
+    .module('cloud-foundry.view.applications.workflows')
     .directive('codeEngineInfo', codeEngineInfo);
 
   codeEngineInfo.$inject = [];
@@ -20,8 +21,10 @@
     };
   }
 
+  //TODO: RC FIXME
+  //'cloud-foundry.view.applications.application.delivery-pipeline.hceSelect'
   CodeEngineInfoController.$inject = [
-    'cloud-foundry.view.applications.application.delivery-pipeline.hceSelect'
+
   ];
 
   /**
@@ -35,7 +38,7 @@
    */
   function CodeEngineInfoController(hceSelect) {
 
-    this.hceSelect = hceSelect;
+    this.hceSelect = hceSelect || [];
     // Select the first hce instance
     if (this.hceCnsis.length > 0) {
       this.hce = this.hceCnsis[0];
