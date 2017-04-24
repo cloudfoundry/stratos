@@ -13,15 +13,10 @@
       'app.utils'
     ])
     .constant('appBasePath', 'app/')
-    .run(setTranslationLanguage)
-    .run(setOEMTranslations);
+    .run(setTranslationLanguage);
 
   function setTranslationLanguage(gettextCatalog) {
     gettextCatalog.setCurrentLanguage('en');
-  }
-
-  function setOEMTranslations($window, $rootScope) {
-    $rootScope.OEM_CONFIG = $window.env.OEM_CONFIG;
   }
 
 })();

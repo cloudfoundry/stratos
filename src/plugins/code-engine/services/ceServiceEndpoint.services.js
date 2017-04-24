@@ -20,6 +20,7 @@
    * dashboard
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
+   * @param {object} $translate - the $translate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
@@ -27,7 +28,7 @@
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
+  function endpointService(ceHideEndpoint, $q, $translate, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsCnsiService) {
 
     var service = {
@@ -66,7 +67,7 @@
     // func params are standard across all <x>ServiceEndpoint providers. In this one some are not required or used
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
-      serviceEndpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
+      serviceEndpoint.type = $translate.instant('code-engine');
     }
 
     function unregister(serviceInstance) {

@@ -20,12 +20,13 @@
    * dashboard
    * @param {cfHideEndpoint} smHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $state - the Angular $state service
+   * @param {object} $translate - the $translate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(smHideEndpoint, $state, appUtilsService, appEndpointsCnsiService) {
+  function endpointService(smHideEndpoint, $state, $translate, appUtilsService, appEndpointsCnsiService) {
 
     var service = {
       cnsi_type: 'hsm',
@@ -57,7 +58,7 @@
     return service;
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
-      serviceEndpoint.type = appUtilsService.getOemConfiguration().SERVICE_MANAGER;
+      serviceEndpoint.type = $translate.instant('service-manager');
       if (isValid) {
         serviceEndpoint.visit = function () {
           return $state.href('sm.endpoint.detail.instances', {guid: serviceInstance.guid});

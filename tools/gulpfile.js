@@ -45,10 +45,6 @@
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
-  var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
-  var defaultConfig = require('../oem/config-defaults.json');
-  oemConfig = _.defaults(oemConfig, defaultConfig);
-  var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
 
   var usePlumber = true;
@@ -124,7 +120,6 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
@@ -207,9 +202,11 @@
 
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index', ['inject:index:oem'], function () {
+    var distPath = path.resolve(__dirname, paths.dist);
+    var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
     return gulp
       .src(paths.oem + 'dist/index.html')
-      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
+      .pipe(gulpreplace('@@PRODUCT_NAME@@', enStrings.product.name))
       .pipe(gulp.dest(paths.dist));
   });
 

@@ -3,7 +3,7 @@
     "registration": {
       "name": "@:code-engine",
       "title": "Register a [[@:cf.registration.name]] Endpoint",
-      "p1": "[[@:code-engine]] is a continuous delivery service for enterprise development teams that automates build, test, and deploy cycles. Developers can push and merge changes into their source control system (e.g. GitHub or GitHub Enterprise) and {{ OEM_CONFIG.CODE_ENGINE }} builds, tests, and deploys each change.",
+      "p1": "[[@:code-engine]] is a continuous delivery service for enterprise development teams that automates build, test, and deploy cycles. Developers can push and merge changes into their source control system (e.g. GitHub or GitHub Enterprise) and [[@:code-engine]] builds, tests, and deploys each change.",
       "p2": "Register an existing [[@:ce.registration.name]] endpoint to allow your development team to automate their application development process.",
       "p3": "When registering, choose a unique, recognizable name so that your developers can easily know which [[@:ce.registration.name]] endpoint they are working with.",
       "tagline": "[[@:ce.registration.name]] gives teams the ability to set up their own automated ci/cd routines, allowing the build/test/deploy cycle to be triggered by checkins into VCS repositories",
