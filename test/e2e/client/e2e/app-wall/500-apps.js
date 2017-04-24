@@ -2,7 +2,7 @@
   'use strict';
 
   var commonSetup = require('./common.js');
-  var _ = require('../../../../../tools/node_modules/lodash');
+  var _ = require('lodash');
 
   module.exports = function ($httpBackend) {
 

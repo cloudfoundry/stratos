@@ -4,8 +4,8 @@
   'use strict';
 
   var helpers = require('../helpers.po');
-  var Q = require('../../../../tools/node_modules/q');
-  var _ = require('../../../../tools/node_modules/lodash');
+  var Q = require('q');
+  var _ = require('lodash');
 
   module.exports = {
     deletePat: deletePat

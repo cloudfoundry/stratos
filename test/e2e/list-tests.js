@@ -3,7 +3,7 @@
   'use strict';
 
   var path = require('path');
-  var _ = require('../../tools/node_modules/lodash');
+  var _ = require('lodash');
   var skipPlugin = require('./po/skip-plugin.js');
 
   var currentFile, currentTest;
@@ -67,7 +67,7 @@
 
   console.log('Listing tests');
 
-  // Lasr arg is the protractor config file
+  // Last arg is the protractor config file
   var configFile = process.argv[2];
   configFile = path.resolve(process.cwd(), configFile);
   var config = require(configFile).config;
@@ -94,9 +94,7 @@
     }
     // Add this suite to the parent
     current.suites.push(currentTest);
-    spaces += INDENT;
     fn();
-    spaces -= INDENT;
     current.total += currentTest.total;
     currentTest = current;
 
@@ -119,9 +117,9 @@
   skipPlugin.install(jasmine);
 
   _.each(suite, function (testFile) {
-    //console.log(_.padStart('', spaces) + testFile);
     currentFile = testFile;
-    require(testFile);
+    // Test files are relative to tools folder
+    require(path.join('..', testFile));
   });
 
   // Calculate number of skipped tests

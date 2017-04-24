@@ -10,7 +10,7 @@
   var navbar = require('../../po/navbar.po');
   var actionMenu = require('../../po/widgets/actions-menu.po');
   var confModal = require('../../po/widgets/confirmation-modal.po');
-  var _ = require('../../../../tools/node_modules/lodash');
+  var _ = require('lodash');
 
   describe('Endpoints Dashboard', function () {
 

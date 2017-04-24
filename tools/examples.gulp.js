@@ -12,6 +12,7 @@
   };
 
   var del = require('del');
+  var path = require('path');
   var gulp = require('gulp');
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
@@ -26,7 +27,7 @@
 
   // Build the examples
   gulp.task('examples:dist', function (next) {
-    paths.dist = './examples/dist/';
+    paths.dist = path.join(__dirname, 'examples', 'dist') + '/';
     paths.frameworkDist = paths.dist + 'lib/';
     gutil.env.devMode = false;
     config.scssSourceFiles = [
@@ -58,10 +59,11 @@
   });
 
   gulp.task('examples:oem:images', function () {
+    var brandFolder = path.resolve(__dirname, '../oem/brands/suse');
     return gulp
       .src([
-        '../oem/brands/hpe/images/*'
-      ], {base: '../oem/brands/hpe'})
+        brandFolder + '/images/*'
+      ], {base: brandFolder})
       .pipe(gulp.dest(paths.examplesDist));
   });
 
