@@ -26,7 +26,7 @@
   }
 
   function goToHcfEndpoints() {
-    return browser.get(helpers.getHost() + '/#/endpoint/cluster');
+    return browser.get(helpers.getHost() + '/#/endpoint/cf');
   }
 
   function isEndpoints() {
@@ -37,7 +37,7 @@
 
   function isHcfEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cluster/list');
+      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cf/list');
     });
   }
 

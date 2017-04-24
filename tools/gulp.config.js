@@ -4,29 +4,35 @@
   // This stores all the configuration information for Gulp
   module.exports = function () {
     var paths = {
-      dist: '../dist/',
-      src: '../src/',
-      translations: '../translations/',
-      tools: '../tools/',
-      e2e: '../e2e/',
-      instrumented: '../tmp/instrumented/',
-      oem: '../oem/',
-      theme: '../theme/',
-      examples: './examples/',
-      examplesScripts: './examples/scripts/',
-      examplesDist: './examples/dist/',
-      browserSyncDist: '../dist',
-      i18n: '../i18n/',
-      i18nDist: '../dist/i18n/'
+      dist: './dist/',
+      src: './src/',
+      lib: './bower_components',
+      translations: './translations/',
+      tools: './tools/',
+      e2e: './e2e/',
+      instrumented: './tmp/instrumented/',
+      oem: './oem/',
+      theme: './theme/',
+      examples: './tools/examples/',
+      examplesScripts: './tools/examples/scripts/',
+      examplesDist: './tools/examples/dist/',
+      browserSyncDist: './dist',
+      i18n: './i18n/',
+      i18nDist: './dist/i18n/'
     };
 
     return {
       bower: {
-        bowerJson: require('./bower.json'),
-        directory: '../src/lib/',
-        ignorePath: '../src/',
+        bowerJson: require('../bower.json'),
+        directory: './bower_components/',
+        ignorePath: './src/',
         exclude: [/.js$/, 'jquery.js'],
         overrides: {
+          angular: {
+            dependencies: {
+              jquery: '*'
+            }
+          },
           'angular-link-header-parser': {
             main: ['release/angular-link-header-parser.min.js']
           },
@@ -49,9 +55,9 @@
       },
 
       bowerDev: {
-        bowerJson: require('./bower.json'),
-        directory: '../src/lib/',
-        ignorePath: '../src/',
+        bowerJson: require('../bower.json'),
+        directory: './bower_components/',
+        ignorePath: './src/',
         devDependencies: false
       },
 
@@ -76,8 +82,9 @@
       ],
 
       themeFiles: [
-        paths.theme + '**/*',
-        '!' + paths.theme + '**/*.scss'
+        paths.theme + 'fonts/**/*',
+        paths.theme + 'images/**/*',
+        paths.theme + 'svg/**/*'
       ],
 
       cssFiles: [
@@ -96,7 +103,6 @@
       ],
 
       jsFiles: [
-        paths.dist + 'lib/*.js',
         paths.dist + 'framework/**/*.module.js',
         paths.dist + 'framework/**/*.js',
         paths.dist + 'plugins/**/plugin.config.js',
@@ -121,8 +127,6 @@
         paths.src + 'plugins/**/*.js',
         paths.src + 'framework/**/*.js',
         '!' + paths.src + 'config.js',
-        '!' + paths.src + 'app/**/*.mock.js',
-        '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
         '!' + paths.src + 'framework/**/*.mock.js',
@@ -139,8 +143,9 @@
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/hce/**/*.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js',
+        '!' + paths.src + 'plugins/code-engine/api/hce/**/*.js',
+        '!' + paths.src + 'plugins/code-engine/api/vcs/**/*.js',
+        '!' + paths.src + 'plugins/cloud-foundry/api/**/*.js',
         '!' + paths.src + 'framework/**/*.spec.js',
         '!' + paths.src + 'framework/**/*.mock.js',
         '!' + paths.src + 'framework/utils/wheel-handler/*.js',
@@ -152,8 +157,9 @@
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        '!' + paths.src + 'plugins/cloud-foundry/test/unit/api/*.mock.js',
+        '!' + paths.src + 'plugins/cloud-foundry/api/**/*',
         paths.src + 'framework/**/*.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*',
         paths.tools + '*.js',
         paths.tools + 'test-backend/*.js',
         paths.tools + 'test-backend/api/**/*.js',

@@ -56,12 +56,12 @@
     }
 
     function noToken() {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       return vcsModel.getTokensForVcs(vm.source.value).length < 1;
     }
 
     function manageTokens($event) {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       $event.stopPropagation();
       ceManageVcsTokens.manage(vm.source.value).then(function () {
         // Avoid potential race condition when the last validity check is still in flight
@@ -79,7 +79,7 @@
     }
 
     function addNewToken($event) {
-      var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+      var vcsModel = modelManager.retrieve('code-engine.model.vcs');
       $event.stopPropagation();
       ceRegisterVcsToken.registerToken(vm.source.value).then(function () {
         // Refresh tokens

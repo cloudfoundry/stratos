@@ -28,10 +28,10 @@
       },
 
       files: [
-        //'src/lib/jquery/dist/jquery.js',
-        'tools/node_modules/jasmine-jquery/lib/jasmine-jquery.js',
-        'src/lib/angular-mocks/angular-mocks.js',
-        'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        //'bower_components/jquery/dist/jquery.js',
+        'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
+        'bower_components/angular-mocks/angular-mocks.js',
+        'bower_components/angular-link-header-parser/release/angular-link-header-parser.min.js',
         'tools/console-templates.js',
 
         'src/config.js',
@@ -128,10 +128,9 @@
         'src/framework/**/*.html': ['ng-html2js'],
         'src/framework/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/app/**/*.html': ['ng-html2js'],
-        'src/app/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
+        'src/app/**/*.js': ['ngannotate', 'coverage'],
         'src/plugins/**/*.html': ['ng-html2js'],
         'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/plugins/cloud-foundry/api/vcs/*.js': ['ngannotate', 'coverage'],
         'src/plugins/github/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/plugins/service-manager/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
         'src/plugins/code-engine/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']

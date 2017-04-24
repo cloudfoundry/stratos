@@ -14,7 +14,7 @@
    * @returns {object} The EditVcsTokenService with an editToken method that opens slide out containing the edit form
    */
   function EditVcsTokenService($q, frameworkAsyncTaskDialog, modelManager) {
-    var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+    var vcsModel = modelManager.retrieve('code-engine.model.vcs');
     return {
       /**
        * @name editToken

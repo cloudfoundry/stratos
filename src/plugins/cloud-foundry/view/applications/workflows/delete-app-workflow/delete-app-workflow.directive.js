@@ -64,7 +64,7 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.deletingApplication = false;
     this.cnsiGuid = null;
     this.hceCnsiGuid = null;
@@ -407,7 +407,7 @@
         // show notification for successful binding
         var successMsg = gettext("'{{appName}}' has been deleted");
         var message = that.$interpolate(successMsg)({appName: appName});
-        that.appEventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+        that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
         that.appEventService.$emit(that.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         that.dismissDialog();
       })

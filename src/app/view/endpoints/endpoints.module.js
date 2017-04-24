@@ -3,7 +3,6 @@
 
   angular
     .module('app.view.endpoints', [
-      'app.view.endpoints.clusters',
       'app.view.endpoints.dashboard'
     ])
     .config(registerRoute)

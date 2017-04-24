@@ -37,17 +37,18 @@
     var file = path.resolve(base, importFile);
     var partial = false;
     var outName = path.basename(importFile);
-    if (path.extname(file) !== '.scss') {
+    if (path.extname(file) !== '.scss' && path.extname(file) !== '.css') {
       file = file + '.scss';
       outName = outName + '.scss';
     }
+
     if (!fs.existsSync(file)) {
       file = path.join(path.dirname(file), '_' + path.basename(file));
       partial = true;
       if (!fs.existsSync(file)) {
         throw new gutil.PluginError({
           plugin: 'oem',
-          message: 'Can not find file:' + scssFile
+          message: 'Can not find file:' + importFile
         });
       }
     }

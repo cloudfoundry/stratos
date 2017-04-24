@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var _ = require('../../../../tools/node_modules/lodash');
-  var Q = require('../../../../tools/node_modules/q');
+  var _ = require('lodash');
+  var Q = require('q');
   var wizard = require('../widgets/wizard.po');
 
   module.exports = {
