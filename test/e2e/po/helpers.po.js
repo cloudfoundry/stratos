@@ -33,6 +33,9 @@
   var branchNames = browser.params.pipelineDetails.branchNames;
   var buildContainer = browser.params.pipelineDetails.buildContainer;
 
+  // This makes identification of acceptance test apps easier in case they leak
+  var customAppLabel = process.env.CUSTOM_APP_LABEL || process.env.USER;
+
   module.exports = {
 
     getHost: getHost,
@@ -92,7 +95,9 @@
     getCnsiForUrl: getCnsiForUrl,
 
     hasClass: hasClass,
-    isButtonEnabled: isButtonEnabled
+    isButtonEnabled: isButtonEnabled,
+
+    getCustomAppLabel: getCustomAppLabel
   };
 
   function getHost() {
@@ -218,6 +223,10 @@
 
   function getTableCellAt(table, rowIndex, colIndex) {
     return getTableRows(table).get(rowIndex).all(by.css('td')).get(colIndex);
+  }
+
+  function getCustomAppLabel() {
+    return customAppLabel;
   }
 
   /*

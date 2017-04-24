@@ -17,7 +17,10 @@
     deleteApp: deleteApp,
     deleteAppByName: deleteAppByName,
     getTestCluster: getTestCluster,
-    deletePat: deletePat
+    deletePat: deletePat,
+    getName: getName,
+    getHostName: getHostName,
+    getServiceName: getServiceName
   };
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
@@ -41,7 +44,7 @@
 
   function deleteAppByName(appName) {
     if (appName) {
-      var promise = cfModel.deleteAppIfExisting(testCluster.guid, testHceCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+      var promise = cfModel.deleteAppIfExisting(testCluster.guid, _.get(testHceCluster, 'guid'), appName, helpers.getUser(), helpers.getPassword())
         .catch(function (error) {
           fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + (appName || 'unknown') + '\'. Error:', error);
         });
@@ -169,6 +172,39 @@
           expect(selectedSpace).toEqual(testSpaceName);
         });
       });
+  }
+
+  /**
+   * Get default App Name
+   * @param {string} isoTime Date in ISO string format
+   * @returns {string} app name
+   */
+  function getName(isoTime) {
+    var customLabel = helpers.getCustomAppLabel() || '';
+    return 'acceptance.e2e.' + customLabel + '.' + isoTime;
+  }
+
+  /**
+   * Get default sanitized URL name for App
+   * @param {string} appName Name of the app
+   * @returns {string} URL friendly name
+   */
+  function getHostName(appName) {
+    var hostName = appName.replace(/\./g, '_');
+    hostName = hostName.replace(/:/g, '_');
+    return hostName;
+  }
+
+  /**
+   * Get default service name
+   * @param {string} isoTime Date in ISO String format
+   * @param {boolean} sanitize Return a URL sanitized name
+   * @returns {string} service name
+   */
+  function getServiceName(isoTime, sanitize) {
+    var serviceName = getName(isoTime);
+    serviceName = serviceName.replace(/acceptance/g, 'service');
+    return sanitize ? getHostName(serviceName) : serviceName;
   }
 
   function appSetup() {

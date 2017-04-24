@@ -46,6 +46,7 @@
   var DEFAULT_BRAND = 'suse';
 
   var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
+  defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
   var defaultConfig = require('../oem/config-defaults.json');
   oemConfig = _.defaults(oemConfig, defaultConfig);
@@ -60,6 +61,11 @@
     overrides: config.bower.overrides
   });
 
+  // gulp taaks should be run from the top-level folder
+  if (process.cwd() === __dirname) {
+    throw new gutil.PluginError('gulp', 'gulp tasks should be run from the top-level folder');
+  }
+
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
   examples(config);
@@ -72,7 +78,7 @@
   var e2e = require('./e2e.gulp.js');
   e2e(config);
 
-  // Clean
+  // Clean dist
   gulp.task('clean', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
   });
@@ -161,7 +167,7 @@
   gulp.task('copy:default-brand', ['copy:default-brand:favicon'], function () {
     return gulp
       .src([
-        defaultBrandFolder + 'images/*'
+        path.join(defaultBrandFolder, 'images/*')
       ], {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist));
   });
@@ -169,7 +175,7 @@
   // Copy the default brand's images and logo to the dist folder
   gulp.task('copy:default-brand:favicon', function () {
     return gulp
-      .src(defaultBrandFolder + 'favicon.ico', {base: defaultBrandFolder})
+      .src(path.join(defaultBrandFolder, 'favicon.ico'), {base: defaultBrandFolder})
       .pipe(gulp.dest(paths.dist + 'images'));
   });
 
@@ -234,6 +240,7 @@
     var sources = gulp.src(
         utils.updateWithPlugins(config.jsFiles)
         .concat(paths.dist + config.jsLibsFile)
+        .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
         .concat(config.cssFiles), {read: false});
@@ -275,7 +282,7 @@
 
   gulp.task('i18n', function () {
     var i18nSource = config.i18nFiles;
-    // i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
+    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
     return gulp.src(utils.updateWithPlugins(i18nSource))
       .pipe(i18n(gutil.env.devMode))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -303,7 +310,7 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
     gulp.watch(utils.updateWithPlugins(config.templatePaths), ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);

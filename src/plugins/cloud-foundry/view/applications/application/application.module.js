@@ -58,7 +58,7 @@
     this.$interval = $interval;
     this.$interpolate = $interpolate;
     this.appEventService = appEventService;
-    this.confirmDialog = frameworkDialogConfirm;
+    this.frameworkDialogConfirm = frameworkDialogConfirm;
     this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');

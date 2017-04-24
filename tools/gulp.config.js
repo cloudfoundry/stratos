@@ -145,6 +145,7 @@
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
         '!' + paths.src + 'plugins/*/api/**/*.js',
+        '!' + paths.src + 'plugins/cloud-foundry/api/**/*.js',
         '!' + paths.src + 'framework/**/*.spec.js',
         '!' + paths.src + 'framework/**/*.mock.js',
         '!' + paths.src + 'framework/utils/wheel-handler/*.js',

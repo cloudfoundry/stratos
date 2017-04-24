@@ -19,5 +19,4 @@ oem/scss
 oem/tmp
 tmp
 out/
-node_modules/
 bower_components/

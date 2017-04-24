@@ -9,7 +9,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('account-settings', {
       url: '/account/settings',
-      templateUrl: '/app/view/console-view/settings-page/settings-page.html',
+      templateUrl: 'app/view/console-view/settings-page/settings-page.html',
       controller: SettingsController,
       controllerAs: 'settingsCtrl',
       data: {

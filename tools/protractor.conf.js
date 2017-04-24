@@ -11,6 +11,7 @@
     '../test/e2e/tests/acceptance/applications.add-app.spec.js',
     '../test/e2e/tests/acceptance/application.delivery-pipeline.spec.js',
     '../test/e2e/tests/acceptance/application.spec.js',
+    '../test/e2e/tests/acceptance/application.delete-app.spec.js',
     '../test/e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
     '../test/e2e/tests/acceptance/application-wall.spec.js',
     '../test/e2e/tests/acceptance/navbar.spec.js',
