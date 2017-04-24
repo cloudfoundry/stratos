@@ -113,7 +113,7 @@
   // Gulp watch JavaScript, SCSS and HTML source files
   gulp.task('examples:watch', function () {
     // Watch source and use correct task to update dist
-    gulp.watch(config.jsSourceFiles, ['copy:js']);
+    gulp.watch(utils.updateWithPlugins(config.jsSourceFiles), ['copy:js']);
     gulp.watch(config.examplesHtml, ['examples:copy:html']);
     gulp.watch(config.paths.theme + '**/*', ['examples:copy:theme']);
     gulp.watch(config.frameworkHtml, ['examples:copy:html:framework']);

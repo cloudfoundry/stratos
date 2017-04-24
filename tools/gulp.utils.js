@@ -57,14 +57,11 @@
       var pluginsDirs = getDirs(path.join(config.paths.src, 'plugins'));
       var pluginsToExclude = _.difference(pluginsDirs, config.plugins);
       _.forEach(pluginsToExclude, function (plugin) {
-        filePathsToExclude.push('!./' + path.join(config.paths.dist, 'plugins', plugin, '**', '*.*'));
-        filePathsToExclude.push('!./' + path.join(config.paths.src, 'plugins', plugin, '**', '*.*'));
+        filePathsToExclude.push('!./' + path.join(config.paths.dist, 'plugins', plugin, '**', '*'));
+        filePathsToExclude.push('!./' + path.join(config.paths.src, 'plugins', plugin, '**', '*'));
       });
     }
-    var res = filePathsToExclude.concat(srcArray);
-
-    console.log('res', res);
-    return res;
+    return srcArray.concat(filePathsToExclude);
   }
 
   function getDirs(srcpath) {

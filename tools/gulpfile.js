@@ -36,11 +36,11 @@
   var config = require('./gulp.config')();
 
   var paths = config.paths;
-  var assetFiles = config.assetFiles;
+  var assetFiles = utils.updateWithPlugins(config.assetFiles);
   var themeFiles = config.themeFiles;
-  var jsSourceFiles = config.jsSourceFiles;
-  var scssFiles = config.scssFiles;
-  var gulpIgnore = require('gulp-ignore');
+  var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
+  var scssFiles = utils.updateWithPlugins(config.scssFiles);
+  var templateFiles = utils.updateWithPlugins(config.templatePaths);
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -89,7 +89,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(utils.updateWithPlugins(config.templatePaths), {base: paths.src})
+      .src(templateFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -157,9 +157,8 @@
   });
 
   gulp.task('copy:assets', ['copy:default-brand'], function () {
-    var updatedAssetFiles = utils.updateWithPlugins(assetFiles);
     return gulp
-      .src(updatedAssetFiles, {base: paths.src})
+      .src(assetFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -211,7 +210,7 @@
 
   // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(utils.updateWithPlugins(config.templatePaths))
+    return gulp.src(config.templatePaths)
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true
@@ -239,7 +238,6 @@
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
         utils.updateWithPlugins(config.jsFiles)
-        .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -274,7 +272,7 @@
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
     return gulp
-      .src(config.lintFiles)
+      .src(utils.updateWithPlugins(config.lintFiles))
       .pipe(eslint())
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
@@ -311,7 +309,7 @@
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
-    gulp.watch(utils.updateWithPlugins(config.templatePaths), ['copy:html', callback]);
+    gulp.watch(templateFiles, ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);

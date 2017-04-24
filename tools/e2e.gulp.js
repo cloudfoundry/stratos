@@ -66,7 +66,7 @@
   });
 
   gulp.task('e2e:instrument-source', function () {
-    var sources = gulp.src(config.sourceFilesToInstrument, {base: paths.src});
+    var sources = gulp.src(utils.updateWithPlugins(config.sourceFilesToInstrument), {base: paths.src});
     return sources
       .pipe(ngAnnotate({
         single_quotes: true
