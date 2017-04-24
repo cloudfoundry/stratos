@@ -287,7 +287,7 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles], ['css', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
     gulp.watch(config.templatePaths, ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
