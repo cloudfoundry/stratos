@@ -1,0 +1,7 @@
+{
+  "code-engine": "Code Engine",
+
+  "menu": {
+    "code-engine": "@:code-engine"
+  }
+}

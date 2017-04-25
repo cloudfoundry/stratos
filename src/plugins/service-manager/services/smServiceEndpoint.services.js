@@ -26,7 +26,7 @@
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(smHideEndpoint, $q, $state, $translate, appUtilsService, appEndpointsCnsiService) {
+  function endpointService(smHideEndpoint, $q, $state, $translate, appUtilsService, apiManager, appEndpointsCnsiService) {
 
     var service = {
       cnsi_type: 'hsm',
@@ -57,15 +57,6 @@
     appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
-
-    function refreshToken(allServiceInstances) {
-      var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');
-      var hsmGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
-      if (hsmGuids.length > 0) {
-        return hsmApi.info(hsmGuids.join(','));
-      }
-      return $q.resolve();
-    }
 
     function refreshToken(allServiceInstances) {
       var hsmApi = apiManager.retrieve('service-manager.api.HsmApi');

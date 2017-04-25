@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    "cloud-foundry",
+    "code-engine"
+  ]
+}
