@@ -34,6 +34,7 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
+  var buildConfig = require('./build_config.json');
 
   var paths = config.paths;
   var assetFiles = utils.updateWithPlugins(config.assetFiles);
@@ -42,6 +43,9 @@
   var scssFiles = utils.updateWithPlugins(config.scssFiles);
   var templateFiles = utils.updateWithPlugins(config.templatePaths);
   var packageJson = require('../package.json');
+  var jsFiles = utils.updateWithPlugins(config.jsFiles);
+  var lintFiles = utils.updateWithPlugins(config.lintFiles);
+  var i18nFiles = utils.updateWithPlugins(config.i18nFiles);
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -51,6 +55,7 @@
   defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
   defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
+  i18nFiles.unshift(defaultBrandI18nFolder + '/**/*.json');
 
   var usePlumber = true;
   var server;
@@ -224,7 +229,7 @@
     var distPath = path.resolve(__dirname, '..', paths.dist);
     var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
     var sources = gulp.src(
-        utils.updateWithPlugins(config.jsFiles)
+        jsFiles
         .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -260,7 +265,7 @@
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
     return gulp
-      .src(utils.updateWithPlugins(config.lintFiles))
+      .src(lintFiles)
       .pipe(eslint())
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
@@ -273,7 +278,7 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    var i18nSource = config.i18nFiles;
+    return gulp.src(i18nFiles)
     i18nSource.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
     return gulp.src(utils.updateWithPlugins(i18nSource))
       .pipe(i18n(gutil.env.devMode, productVersion))
@@ -292,7 +297,7 @@
     // Find all of the plugin folders that are included by the configuration
     plugins = _.reject(plugins, function (filePath) {
       var plugin = path.dirname(filePath);
-      return _.indexOf(config.plugins, plugin) === -1;
+      return _.indexOf(buildConfig.plugins, plugin) === -1;
     });
 
     var pluginsScssFiles = plugins
