@@ -50,7 +50,6 @@
 
       // User services list
       $httpBackend.expectGET('/pp/v1/cnsis/registered').respond([]);
-
       // auth.model init for endpoint
       $httpBackend.expectGET('/pp/v1/proxy/v2/config/feature_flags').respond([]);
       $httpBackend.expectGET('/pp/v1/proxy/v2/users/user_guid/summary').respond({
@@ -61,6 +60,9 @@
 
       // list all users
       $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
+
+      // User services list
+      $httpBackend.expectGET('/pp/v1/cnsis/registered').respond([]);
     }
 
     it('initial state', function () {

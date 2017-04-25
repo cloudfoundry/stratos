@@ -36,7 +36,8 @@
       updateInstances: updateInstances,
       createEndpointEntries: createEndpointEntries,
       clear: clear,
-      cnsiEndpointProviders: cnsiEndpointProviders
+      cnsiEndpointProviders: cnsiEndpointProviders,
+      callEndpointProvidersFunc: callEndpointProvidersFunc
     };
 
     appEndpointsDashboardService.endpointsProviders.push(service);
@@ -133,7 +134,7 @@
             key: eKey,
             type: gettext('Unknown')
           };
-          if (!_callEndpointProvidersFunc(serviceInstance.cnsi_type, 'isHidden', userAccount.isAdmin())) {
+          if (!callEndpointProvidersFunc(serviceInstance.cnsi_type, 'isHidden', userAccount.isAdmin())) {
             endpoints.push(endpoint);
           }
         } else {
@@ -175,14 +176,14 @@
           };
         }
 
-        _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'update', serviceInstance, isValid, endpoint);
+        callEndpointProvidersFunc(serviceInstance.cnsi_type, 'update', serviceInstance, isValid, endpoint);
       });
 
       _cleanupStaleEndpoints(activeEndpointsKeys);
 
     }
 
-    function _callEndpointProvidersFunc(type, method) {
+    function callEndpointProvidersFunc(type, method) {
       var func = _.get(cnsiEndpointProviders, type + '.' + method);
       if (angular.isFunction(func)) {
         return func.apply(this, _.slice(arguments, 2));
@@ -271,7 +272,7 @@
               });
               updateInstances().then(function () {
                 createEndpointEntries();
-                return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'unregister', serviceInstance);
+                return callEndpointProvidersFunc(serviceInstance.cnsi_type, 'unregister', serviceInstance);
               });
             })
             .then(function () {
@@ -301,7 +302,7 @@
           updateInstances()
             .then(function () {
               createEndpointEntries();
-              return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'connect', serviceInstance);
+              return callEndpointProvidersFunc(serviceInstance.cnsi_type, 'connect', serviceInstance);
             })
             .then(function () {
               appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
@@ -325,7 +326,7 @@
             name: serviceInstance.name
           });
           createEndpointEntries();
-          return _callEndpointProvidersFunc(serviceInstance.cnsi_type, 'disconnect', serviceInstance);
+          return callEndpointProvidersFunc(serviceInstance.cnsi_type, 'disconnect', serviceInstance);
         })
         .then(function () {
           // Ensure that the user service instance list is updated before sending change notification

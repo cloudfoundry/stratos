@@ -1,0 +1,9 @@
+{
+  "cloud-foundry": "Cloud Foundry",
+  "org": "Org",
+  "space": "Space",
+
+  "menu": {
+    "cloud-foundry": "@:cloud-foundry"
+  }
+}
