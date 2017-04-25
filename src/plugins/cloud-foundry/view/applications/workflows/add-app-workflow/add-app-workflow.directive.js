@@ -31,7 +31,6 @@
     'modelManager',
     'appEventService',
     'appUtilsService',
-    'ceManageVcsTokens',
     'cfOrganizationModel',
     '$interpolate',
     '$scope',
@@ -46,7 +45,6 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {ceManageVcsTokens} ceManageVcsTokens - the VCS Token management service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
@@ -64,14 +62,13 @@
    * @property {object} spaceModel - the Cloud Foundry space model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} githubModel - the Github model
-   * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
    * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, cfOrganizationModel,
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfOrganizationModel,
                                     $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
@@ -81,7 +78,6 @@
     this.modelManager = modelManager;
     this.appEventService = appEventService;
     this.appUtilsService = appUtilsService;
-    this.ceManageVcsTokens = ceManageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -90,9 +86,7 @@
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
     this.userInput = {};
     this.options = {};
 
@@ -167,7 +161,6 @@
           host: null,
           domain: null,
           application: null,
-          hceCnsi: null,
           source: null,
           repo: null,
           repoFilterTerm: null,
@@ -526,7 +519,7 @@
 
       /**
        * @function selectOptionMapping
-       * @memberOf code-engine.view.application.AddAppWorkflowController
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
        * @description domain mapping function
        * @param {object} o - an object to map
        * @returns {object} select-option object

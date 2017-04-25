@@ -1,6 +1,5 @@
 {
   "plugins": [
-    "cloud-foundry",
-    "code-engine"
+    "cloud-foundry"
   ]
 }

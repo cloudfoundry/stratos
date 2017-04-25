@@ -46,7 +46,7 @@
    */
   function ApplicationDeliveryPipelineController(appEventService, modelManager, ceManageVcsTokens, ceRegisterVcsToken, frameworkDialogConfirm, appNotificationsService,
                                                  ceAddNotificationService, cePostDeployActionService, appUtilsService, frameworkDetailView,
-                                                 $interpolate, $stateParams, $scope, $q, $state, $log) {
+                                                 $interpolate, $stateParams, $scope, $q, $state, $log, ceAppPipelineService) {
     var that = this;
 
     this.ceManageVcsTokens = ceManageVcsTokens;
@@ -60,6 +60,7 @@
     this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.frameworkDetailView = frameworkDetailView;
     this.modelManager = modelManager;
+    this.ceAppPipelineService = ceAppPipelineService;
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
@@ -227,7 +228,7 @@
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
 
-            return that.model.updateDeliveryPipelineMetadata();
+            return that.ceAppPipelineService.updateDeliveryPipelineMetadata(that.hceCnsi.guid);
           })
           .catch(function () {
             that.deleteError = true;

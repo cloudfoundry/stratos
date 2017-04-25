@@ -97,10 +97,10 @@
 
       it('addPipelineActions - finish', function () {
         var appModel = addPipelineWorkflowCtrl.modelManager.retrieve('cloud-foundry.model.application');
-        spyOn(appModel, 'updateDeliveryPipelineMetadata');
+        spyOn(ceAppPipelineService, 'updateDeliveryPipelineMetadata');
         spyOn(addPipelineWorkflowCtrl, 'finishWorkflow');
         addPipelineWorkflowCtrl.addPipelineActions.finish();
-        expect(appModel.updateDeliveryPipelineMetadata).toHaveBeenCalledWith(true);
+        expect(ceAppPipelineService.updateDeliveryPipelineMetadata).toHaveBeenCalledWith(true);
         expect(addPipelineWorkflowCtrl.finishWorkflow).toHaveBeenCalled();
       });
     });

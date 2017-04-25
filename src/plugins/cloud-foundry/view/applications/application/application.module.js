@@ -49,7 +49,7 @@
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
                                  cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $interpolate, $state, cfApplicationTabs) {
+                                 $interpolate, $state, cfApplicationTabs, appEndpointsCnsiService) {
     var that = this;
 
     this.$window = $window;
@@ -61,12 +61,10 @@
     this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
-    this.hceCnsi = null;
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
@@ -74,6 +72,7 @@
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     this.cfApplicationTabs = cfApplicationTabs;
+    this.appEndpointsCnsiService = appEndpointsCnsiService;
 
     // Clear any previous state in the application tabs service
     cfApplicationTabs.clearStates();
@@ -228,10 +227,10 @@
 
           // updateDeliveryPipelineMetadata requires summary.guid and summary.services which are only found in updated
           // app summary
-          blockUpdate.push(that.model.updateDeliveryPipelineMetadata(true)
-            .then(function (response) {
-              return that.onUpdateDeliveryPipelineMetadata(response);
-            }));
+
+          blockUpdate.push(
+            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateDeliveryPipelineMetadata', that.cnsiGuid,
+              true));
 
           if (!haveApplication && that.model.application.summary.state === 'STARTED') {
             blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -307,13 +306,11 @@
       return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
-            return that.model.updateDeliveryPipelineMetadata()
-              .then(function (response) {
-                return that.onUpdateDeliveryPipelineMetadata(response);
-              });
+            return that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid, true);
           });
         })
         .finally(function () {
+          that.updateActions();
           that.updating = false;
         });
     },
@@ -336,50 +333,6 @@
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
       this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
-    },
-
-    /**
-     * @function onUpdateDeliveryPipelineMetadata
-     * @description Set project when delivery pipeline metadata is updated
-     * @param {object} pipeline - the delivery pipeline data
-     * @returns {void}
-     * @private
-     */
-    onUpdateDeliveryPipelineMetadata: function (pipeline) {
-      var that = this;
-      if (pipeline && pipeline.valid) {
-        this.hceCnsi = pipeline.hceCnsi;
-        return this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
-          .then(function (response) {
-            pipeline.forbidden = false;
-            var project = response.data;
-            if (!_.isNil(project)) {
-              // Don't need to fetch VCS data every time if project hasn't changed
-              if (_.isNil(that.model.application.project) ||
-                that.model.application.project.id !== project.id) {
-                return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
-                  .then(function () {
-                    that.model.application.project = project;
-                  });
-              } else {
-                that.model.application.project = project;
-              }
-            } else {
-              that.model.application.project = null;
-            }
-          })
-          .catch(function (response) {
-            pipeline.forbidden = response.status === 403;
-            pipeline.valid = false;
-            that.model.application.project = null;
-            return that.$q.reject(response);
-          })
-          .finally(function () {
-            that.updateActions();
-          });
-      } else {
-        this.model.application.project = null;
-      }
     },
 
     /**

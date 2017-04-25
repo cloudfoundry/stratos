@@ -63,7 +63,7 @@
    * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    */
   function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, $scope, $q,
-                                         $timeout, $stateParams, PAT_DELIMITER) {
+                                         $timeout, $stateParams, PAT_DELIMITER, ceAppPipelineService) {
     this.modelManager = modelManager;
     this.appEventService = appEventService;
     this.appUtilsService = appUtilsService;
@@ -77,6 +77,7 @@
     this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
     this.PAT_DELIMITER = PAT_DELIMITER;
+    this.ceAppPipelineService = ceAppPipelineService;
 
     this.init();
     this.startWorkflow();
@@ -147,7 +148,7 @@
           },
 
           finish: function () {
-            that.modelManager.retrieve('cloud-foundry.model.application').updateDeliveryPipelineMetadata(true);
+            that.ceAppPipelineService.updateDeliveryPipelineMetadata(this.cnsiGuid, true);
             that.finishWorkflow();
           }
         };

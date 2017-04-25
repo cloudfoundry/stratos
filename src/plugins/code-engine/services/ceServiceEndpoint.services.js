@@ -29,7 +29,7 @@
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, $stateParams, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager, modelManager, cfApplicationTabs) {
+                           appEndpointsCnsiService, apiManager, modelManager, cfApplicationTabs, ceAppPipelineService) {
     var canEditApp;
 
     var service = {
@@ -40,6 +40,8 @@
       connect: connect,
       disconnect: disconnect,
       isHidden: isHidden,
+      updateApplicationPipeline: updateApplicationPipeline,
+      deleteApplicationPipeline: deleteApplicationPipeline,
       register: {
         html: {
           class: 'register-type-hce',
@@ -124,6 +126,14 @@
       return ceHideEndpoint;
     }
     /* eslint-enable no-unused-vars */
+
+    function updateApplicationPipeline(cnsiGuid, refresh) {
+      return ceAppPipelineService.updateDeliveryPipelineMetadata(cnsiGuid, refresh);
+    }
+
+    function deleteApplicationPipeline(hceCnsiGuid) {
+      return ceAppPipelineService.deleteApplicationPipeline(hceCnsiGuid);
+    }
 
     function _clearAppTabsState() {
       canEditApp = undefined;
