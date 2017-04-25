@@ -27,6 +27,7 @@
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @param {object} apiManager - apiManager service
    * dashboard
+   * @param {object} apiManager - apiManager service
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, $translate, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
