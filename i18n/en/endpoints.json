@@ -5,6 +5,12 @@
       "start": "To enable developers to use the [[@:console]] to interact with [[@:product.name]],",
       "link": "please register endpoints.",
       "end": "The process of registering these endpoints will make them discoverable for anyone who logs into the [[@:product.console]]. Once you register an endpoint, we recommend connecting it to your account so you can manage it."
+    },
+    "registration": {
+      "title": "Register an Endpoint",
+      "success": "Endpoint '{{name}}' successfully registered",
+      "ssl-error": "{{error}}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted.",
+      "error": "There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. If this error persists, please contact the administrator."
     }
   }
 }

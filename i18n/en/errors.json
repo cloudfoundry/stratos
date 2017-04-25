@@ -9,5 +9,6 @@
     "nothing-registered": "There are no registered endpoints.",
     "endpoint-retrieval": "The [[@:product.console]] could not retrieve Endpoint information.",
     "no-cf-connected": "No connected [[@:cloud-foundry]] endpoints."
-  }
+  },
+  "error-format": "{{errorMsg}}, Error Code: {{errorCode}}"
 }

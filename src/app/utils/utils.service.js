@@ -14,9 +14,10 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
+   * @param {object} $translate - the translation service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log) {
+  function utilsServiceFactory($q, $timeout, $log, $translate) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     /*
@@ -304,41 +305,42 @@
       }
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
+
+    function extractCloudFoundryError(errorResponse) {
+      /*
+      Cloud Foundry errors have the following format:
+      data: {
+      description: 'some text',
+      errorCode: 1000,
+      error_code: 'UnknownHostException'
+      }
+      */
+      var errorText;
+
+      if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+        return;
+      }
+      if (errorResponse.data && errorResponse.data.error_code) {
+        errorResponse = errorResponse.data;
+      }
+
+      if (errorResponse.description && _.isString(errorResponse.description)) {
+        errorText = errorResponse.description;
+      }
+
+      if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
+        errorText = $translate.instant('error-format', {errorMsg: errorText, errorCode: errorResponse.error_code});
+      }
+
+      return errorText;
+    }
+
   }
 
   function mbToHumanSizeFilter(appUtilsService) {
     return function (input) {
       return appUtilsService.mbToHumanSize(input);
     };
-  }
-
-  function extractCloudFoundryError(errorResponse) {
-    /*
-     Cloud Foundry errors have the following format:
-     data: {
-     description: 'some text',
-     errorCode: 1000,
-     error_code: 'UnknownHostException'
-     }
-     */
-    var errorText;
-
-    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
-      return;
-    }
-    if (errorResponse.data && errorResponse.data.error_code) {
-      errorResponse = errorResponse.data;
-    }
-
-    if (errorResponse.description && _.isString(errorResponse.description)) {
-      errorText = errorResponse.description;
-    }
-
-    if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
-      errorText = errorText + gettext(', Error Code: ') + errorResponse.error_code;
-    }
-
-    return errorText;
   }
 
   function extractCodeEngineError(errorResponse) {

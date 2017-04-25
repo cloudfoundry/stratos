@@ -44,7 +44,7 @@
               lastStepCommit: true,
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
-              title: gettext('Register an Endpoint'),
+              title: 'endpoints.registration.title',
               allowBack: function () {
                 return allowBack;
               },
@@ -67,20 +67,19 @@
                   templateUrl: 'app/view/endpoints/register/register-service-details.html',
                   showBusyOnNext: true,
                   isLastStep: true,
-                  nextBtnText: gettext('Register'),
+                  nextBtnText: 'endpoints.register',
                   onNext: function () {
                     var userInput = context.wizardOptions.userInput;
                     return serviceInstanceModel.create(userInput.endpoint.cnsi_type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
                       appNotificationsService.notify('success',
-                        gettext('Endpoint \'{{name}}\' successfully registered'),
-                        { name: userInput.name });
+                        $translate.instant('endpoints.registration.success', { name: userInput.name })
+                      );
                       return serviceInstance;
                     }).catch(function (response) {
                       if (response.status === 403) {
-                        return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                        return $q.reject($translate.instant('endpoints.registration.ssl-error', {error: response.data.error}));
                       }
-                      return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
-                        'is correct and try again. If this error persists, please contact the administrator.'));
+                      return $q.reject($translate.instant('endpoints.registration.error'));
                     });
                   },
                   onEnter: function () {
