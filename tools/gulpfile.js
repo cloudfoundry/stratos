@@ -302,9 +302,10 @@
       .trim()
       .split(/\s+/);
 
-    plugins = _.intersectionBy(plugins, config.plugins, function (input) {
-      var sep = input.indexOf(path.sep);
-      return input.substring(0, sep >= 0 ? sep : input.length);
+    // Find all of the plugin folders that are included by the configuration
+    plugins = _.reject(plugins, function (filePath) {
+      var plugin = path.dirname(filePath);
+      return _.indexOf(config.plugins, plugin) === -1;
     });
 
     var pluginsScssFiles = plugins
