@@ -43,11 +43,11 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: gettext('Register a GitHub Personal Access Token'),
+            title: 'ce.tokens.register',
             templateUrl: 'app/view/endpoints/vcs/register-vcs-token.html',
             class: 'detail-view',
             buttonTitles: {
-              submit: gettext('Register Token')
+              submit: 'ce.tokens.buttons.register'
             },
             submitCommit: true
           },

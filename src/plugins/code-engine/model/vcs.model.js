@@ -20,14 +20,14 @@
     // Init these here - gettext will then ot be available
     SUPPORTED_VCS_TYPES = {
       GITHUB: {
-        description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
+        description: 'ce.vcs.github.description',
         img: 'github_octocat.png',
-        label: 'GitHub'
+        label: 'ce.vcs.github.name'
       },
       GITHUB_ENTERPRISE: {
-        description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
+        description: 'ce.vcs.github-enterprise.description',
         img: 'GitHub-Mark-120px-plus.png',
-        label: 'GitHub Enterprise'
+        label: 'ce.vcs.github-enterprise.name'
       }
     };
   }

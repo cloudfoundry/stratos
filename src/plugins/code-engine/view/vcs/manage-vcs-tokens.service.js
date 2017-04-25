@@ -116,13 +116,13 @@
     context.disableAsyncIndicator = true;
 
     tokenActions.push({
-      name: gettext('Rename'),
+      name: 'buttons.rename',
       execute: function (token) {
         return _edit(token);
       }
     });
     tokenActions.push({
-      name: gettext('Delete'),
+      name: 'buttons.delete',
       execute: function (token) {
         return _delete(token);
       }
@@ -168,7 +168,7 @@
               templateUrl: 'app/view/endpoints/vcs/manage-vcs-tokens.html',
               class: 'detail-view',
               buttonTitles: {
-                submit: gettext('Done')
+                submit: 'buttons.done'
               },
               noCancel: true,
               submitCommit: submitCommit
