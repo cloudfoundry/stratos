@@ -7,11 +7,14 @@
 
   /**
    * @name cfApplicationTabs
-   * @description Provides collection of configuration ojects for tabs on the application page
+   * @description Provides collection of configuration objects for tabs on the application page
+   * @param {object} $q - the Angular $q service
    * @param {object} $state - the Angular $state service
+   * @param {object} $stateParams - the Angular $stateParams service
+   * @param {modelManager} modelManager - the Model management service
    * @returns {object} The cfApplicationTabs object
    */
-  function ApplicationTabs($q, $state, $stateParams, appUtilsService, modelManager) {
+  function ApplicationTabs($q, $state, $stateParams, modelManager) {
     var canEditApp, cfSupportsVersions;
 
     var tabs = [

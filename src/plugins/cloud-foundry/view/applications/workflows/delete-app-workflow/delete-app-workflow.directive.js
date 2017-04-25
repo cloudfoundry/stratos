@@ -47,6 +47,7 @@
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
