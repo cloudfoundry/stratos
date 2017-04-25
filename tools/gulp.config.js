@@ -73,7 +73,8 @@
       },
 
       i18nFiles: [
-        paths.i18n + '**/*.json'
+        paths.i18n + '**/*.json',
+        paths.src + 'plugins/*/i18n/**/*.json'
       ],
 
       assetFiles: [
@@ -143,8 +144,7 @@
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js',
-        '!' + paths.src + 'plugins/code-engine/api/hce/**/*.js',
-        '!' + paths.src + 'plugins/code-engine/api/vcs/**/*.js',
+        '!' + paths.src + 'plugins/*/api/**/*.js',
         '!' + paths.src + 'plugins/cloud-foundry/api/**/*.js',
         '!' + paths.src + 'framework/**/*.spec.js',
         '!' + paths.src + 'framework/**/*.mock.js',
@@ -156,9 +156,8 @@
       lintFiles: [
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
-        paths.src + 'plugins/**/*.js',
-        '!' + paths.src + 'plugins/cloud-foundry/test/unit/api/*.mock.js',
-        '!' + paths.src + 'plugins/cloud-foundry/api/**/*',
+        paths.src + 'plugins/**/!(*.mock).js',
+        '!' + paths.src + 'plugins/*/api/**/*.js',
         paths.src + 'framework/**/*.js',
         paths.tools + '*.js',
         paths.tools + 'test-backend/*.js',
@@ -183,8 +182,6 @@
       ],
 
       paths: paths,
-
-      plugins: [],
 
       translate: {
         dist: paths.dist + 'translations',

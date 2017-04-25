@@ -120,6 +120,7 @@
           $httpBackend.expectGET('/pp/v1/cnsis').respond(200, {});
           $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, {});
           $httpBackend.expectGET('/pp/v1/stackato/info').respond(200, {});
+          $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, {});
           service.updateInstances()
             .then(function () {
 
@@ -134,6 +135,7 @@
           $httpBackend.expectGET('/pp/v1/cnsis').respond(200, {});
           $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, {});
           $httpBackend.expectGET('/pp/v1/stackato/info').respond(500);
+          $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, {});
           service.updateInstances().then(function () {
             fail('Failed calls should not result in succeeded promise');
           });

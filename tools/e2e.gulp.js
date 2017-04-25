@@ -24,6 +24,7 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
+  var utils = require('./gulp.utils');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -66,7 +67,7 @@
   });
 
   gulp.task('e2e:instrument-source', function () {
-    var sources = gulp.src(config.sourceFilesToInstrument, {base: paths.src});
+    var sources = gulp.src(utils.updateWithPlugins(config.sourceFilesToInstrument), {base: paths.src});
     return sources
       .pipe(ngAnnotate({
         single_quotes: true

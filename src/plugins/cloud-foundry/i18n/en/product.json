@@ -1,0 +1,9 @@
+{
+  "product": {
+    "name": "Cloud Foundry",
+    "cf": "Cloud Foundry"
+  },
+  "company": {
+    "CLOUD_FOUNDRY": "Cloud Foundry"
+  }
+}

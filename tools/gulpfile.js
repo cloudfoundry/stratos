@@ -34,14 +34,18 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config')();
+  var buildConfig = require('./build_config.json');
 
   var paths = config.paths;
-  var assetFiles = config.assetFiles;
+  var assetFiles = utils.updateWithPlugins(config.assetFiles);
   var themeFiles = config.themeFiles;
-  var jsSourceFiles = config.jsSourceFiles;
-  var plugins = config.plugins;
-  var scssFiles = config.scssFiles;
+  var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
+  var scssFiles = utils.updateWithPlugins(config.scssFiles);
+  var templateFiles = utils.updateWithPlugins(config.templatePaths);
   var packageJson = require('../package.json');
+  var jsFiles = utils.updateWithPlugins(config.jsFiles);
+  var lintFiles = utils.updateWithPlugins(config.lintFiles);
+  var i18nFiles = utils.updateWithPlugins(config.i18nFiles);
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -54,6 +58,7 @@
   var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
   var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
   defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
+  i18nFiles.unshift(defaultBrandI18nFolder + '/**/*.json');
 
   var usePlumber = true;
   var server;
@@ -90,7 +95,7 @@
   // Copy HTML files to 'dist'
   gulp.task('copy:html', function () {
     return gulp
-      .src(config.templatePaths, {base: paths.src})
+      .src(templateFiles, {base: paths.src})
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -211,7 +216,7 @@
 
   // Put all of the html templates into an anagule module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(config.templatePaths)
+    return gulp.src(templateFiles)
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true
@@ -238,8 +243,7 @@
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
-        plugins
-        .concat(config.jsFiles)
+        jsFiles
         .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -274,7 +278,7 @@
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
     return gulp
-      .src(config.lintFiles)
+      .src(lintFiles)
       .pipe(eslint())
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
@@ -287,9 +291,7 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    var i18nSource = config.i18nFiles;
-    i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
-    return gulp.src(i18nSource)
+    return gulp.src(i18nFiles)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
@@ -298,10 +300,18 @@
   // Generate .plugin.scss file and copy to 'dist'
   gulp.task('plugin', function () {
     var CMD = 'cd ./src/plugins && ls */*.scss';
-    var pluginsScssFiles = sh.exec(CMD, {silent: true})
+    var plugins = sh.exec(CMD, {silent: true})
       .output
       .trim()
-      .split(/\s+/)
+      .split(/\s+/);
+
+    // Find all of the plugin folders that are included by the configuration
+    plugins = _.reject(plugins, function (filePath) {
+      var plugin = path.dirname(filePath);
+      return _.indexOf(buildConfig.plugins, plugin) === -1;
+    });
+
+    var pluginsScssFiles = plugins
       .map(function (scss) {
         return '@import "' + scss + '";';
       });
@@ -317,7 +327,7 @@
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
-    gulp.watch(config.templatePaths, ['copy:html', callback]);
+    gulp.watch(templateFiles, ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);
