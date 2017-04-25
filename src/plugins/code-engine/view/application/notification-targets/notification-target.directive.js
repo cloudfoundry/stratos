@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.notification-target', [])
+    .module('code-engine.view.application.notification-target', [])
     .directive('notificationTarget', notificationTarget);
 
   notificationTarget.$inject = [];
@@ -18,8 +18,7 @@
       controllerAs: 'notificationTargetCtrl',
       scope: {},
       restrict: 'E',
-      templateUrl: 'plugins/cloud-foundry/view/applications/' +
-      'application/notification-targets/notification-target.html'
+      templateUrl: 'plugins/code-engine/view/application/notification-targets/notification-target.html'
     };
   }
 
@@ -34,7 +33,7 @@
    * @constructor
    * @name NotificationTargetController
    * @description Notification target controller
-   * @memberOf cloud-foundry.view.applications.application.notification-target
+   * @memberOf code-engine.view.application.notification-target
    * @param {object} $scope - angular $scope
    * @param {app.api.apiManager} apiManager - the API management service
    * @param {app.model.modelManager} modelManager - the Model management service
@@ -52,7 +51,7 @@
 
     /**
      * @name addTarget
-     * @memberOf cloud-foundry.view.applications.application.notification-target
+     * @memberOf code-engine.view.application.notification-target
      * @description Add new target to project
      * @returns {promise}
      */
@@ -80,8 +79,7 @@
       return this.frameworkAsyncTaskDialog(
         {
           title: this.targetType.title,
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/' +
-            'add-app-workflow/pipeline-subflow/add-notification-dialog.html',
+          templateUrl: 'plugins/code-engine/view/application/add-notification-workflow/add-notification-dialog.html',
           submitCommit: true,
           buttonTitles: {
             submit: gettext('Add notification'),
@@ -98,7 +96,7 @@
 
     /**
      * @name getCountForType
-     * @memberOf cloud-foundry.view.applications.application.notification-target
+     * @memberOf code-engine.view.application.notification-target
      * @description Get count
      * @returns {number}
      */

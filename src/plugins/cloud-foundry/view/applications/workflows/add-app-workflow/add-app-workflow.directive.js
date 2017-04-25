@@ -36,8 +36,7 @@
     '$interpolate',
     '$scope',
     '$q',
-    '$timeout',
-    'PAT_DELIMITER'
+    '$timeout'
   ];
 
   /**
@@ -53,7 +52,6 @@
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -72,10 +70,9 @@
    * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
-   * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, cfOrganizationModel,
-                                    $interpolate, $scope, $q, $timeout, PAT_DELIMITER) {
+                                    $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -98,17 +95,14 @@
     this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
     this.userInput = {};
     this.options = {};
-    this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.init();
   }
 
-  run.$inject = [
-    'cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype'
-  ];
+  run.$inject = [ ];
 
-  function run(addPipelineWorkflowPrototype) {
-    angular.extend(AddAppWorkflowController.prototype, addPipelineWorkflowPrototype, {
+  function run() {
+    angular.extend(AddAppWorkflowController.prototype, {
 
       init: function () {
         var that = this;
@@ -258,6 +252,9 @@
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
         this.options = {
+          workflow: this.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
           appEventService: this.appEventService,
           subflow: null,
           serviceInstances: [],
@@ -268,10 +265,9 @@
           servicesReady: false,
           organizations: [],
           spaces: [],
-          domains: []
+          domains: [],
+          apps: []
         };
-
-        this.setOptions();
 
         this.addApplicationActions = {
           stop: function () {
@@ -526,6 +522,20 @@
         this.notify();
         this.addingApplication = false;
         this.dismissDialog();
+      },
+
+      /**
+       * @function selectOptionMapping
+       * @memberOf code-engine.view.application.AddAppWorkflowController
+       * @description domain mapping function
+       * @param {object} o - an object to map
+       * @returns {object} select-option object
+       */
+      selectOptionMapping: function (o) {
+        return {
+          label: o.entity.name,
+          value: o
+        };
       }
     });
   }

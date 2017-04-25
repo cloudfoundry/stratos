@@ -6,7 +6,6 @@
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
-    console.log('REGESTERING');
     // $stateProvider.state('ce.application.delivery-logs', {
     $stateProvider.state('cf.applications.application.delivery-logs', {
       url: '/delivery-logs',

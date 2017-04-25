@@ -13,7 +13,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      this.addPipelineWorkflowPrototype = $injector.get('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype');
+      this.addPipelineWorkflowPrototype = $injector.get('code-engine.view.application.add-pipeline-workflow.prototype');
 
       function F() {
         this.modelManager = $injector.get('modelManager');
@@ -99,15 +99,15 @@
         this.instance.init();
       });
 
-      it('should listen cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
+      it('should listen ce.events.START_ADD_PIPELINE_WORKFLOW', function () {
         spyOn(this.instance, 'startWorkflow');
-        this.instance.appEventService.$emit('cf.events.START_ADD_PIPELINE_WORKFLOW');
+        this.instance.appEventService.$emit('ce.events.START_ADD_PIPELINE_WORKFLOW');
         expect(this.instance.startWorkflow).toHaveBeenCalled();
       });
 
-      it('should listen cf.events.LOAD_MORE_REPOS', function () {
+      it('should listen ce.events.LOAD_MORE_REPOS', function () {
         spyOn(this.instance, 'loadMoreRepos');
-        this.instance.appEventService.$emit('cf.events.LOAD_MORE_REPOS');
+        this.instance.appEventService.$emit('ce.events.LOAD_MORE_REPOS');
         expect(this.instance.loadMoreRepos).toHaveBeenCalled();
       });
 

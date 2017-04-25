@@ -7,8 +7,7 @@
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
       'cloud-foundry.view.applications.application.variables',
-      'cloud-foundry.view.applications.application.versions',
-      'cloud-foundry.view.applications.application.notification-target'
+      'cloud-foundry.view.applications.application.versions'
     ])
     .config(registerRoute);
 
@@ -61,7 +60,6 @@
     this.frameworkDialogConfirm = frameworkDialogConfirm;
     this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -75,10 +73,10 @@
     this.pipelineReady = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
-    this.supportsVersions = false;
-    this.hideVariables = true;
-    this.hideDeliveryPipelineData = true;
     this.cfApplicationTabs = cfApplicationTabs;
+
+    // Clear any previous state in the application tabs service
+    cfApplicationTabs.clearStates();
 
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
@@ -198,12 +196,6 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
-      var supportsVersions = this.versions.hasVersionSupport(this.cnsiGuid);
-      var promise = angular.isDefined(supportsVersions) ? that.$q.when(supportsVersions) : this.versions.list(this.cnsiGuid, this.id, true);
-      promise.then(function () {
-        that.supportsVersions = !!that.versions.hasVersionSupport(that.cnsiGuid);
-      });
-
       var haveApplication = angular.isDefined(this.model.application) &&
         angular.isDefined(this.model.application.summary) &&
         angular.isDefined(this.model.application.state);
@@ -217,7 +209,7 @@
         this.ready = true;
 
         this.updateBuildPack();
-        this.updateHiddenProperties();
+        this.cfApplicationTabs.clearStates();
 
         if (this.model.application.summary.state === 'STARTED') {
           blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -232,7 +224,7 @@
       var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
           that.updateBuildPack();
-          that.updateHiddenProperties();
+          that.cfApplicationTabs.clearStates();
 
           // updateDeliveryPipelineMetadata requires summary.guid and summary.services which are only found in updated
           // app summary
@@ -344,20 +336,6 @@
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
       this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
-    },
-
-    updateHiddenProperties: function () {
-      this.hideVariables = !this.authModel.isAllowed(this.cnsiGuid,
-        this.authModel.resources.application,
-        this.authModel.actions.update,
-        this.model.application.summary.space_guid
-      );
-
-      this.hideDeliveryPipelineData = !this.authModel.isAllowed(this.cnsiGuid,
-        this.authModel.resources.application,
-        this.authModel.actions.update,
-        this.model.application.summary.space_guid
-      );
     },
 
     /**

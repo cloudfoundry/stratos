@@ -48,7 +48,7 @@
       <td class="text-center text-uppercase" colspan="2">
         <bounce-spinner classes="bounce-spinner-sm" ng-if="wizardCtrl.options.loadingRepos"></bounce-spinner>
         <a class="btn-link font-semi-bold"
-            ng-click="wizardCtrl.options.appEventService.$emit('cf.events.LOAD_MORE_REPOS')"
+            ng-click="wizardCtrl.options.appEventService.$emit('ce.events.LOAD_MORE_REPOS')"
             ng-if="wizardCtrl.options.hasMoreRepos && !wizardCtrl.options.loadingRepos"
             translate>Load More Repositories</a>
       </td>

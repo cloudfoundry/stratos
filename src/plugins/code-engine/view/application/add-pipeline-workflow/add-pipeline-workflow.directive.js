@@ -2,14 +2,14 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications')
+    .module('code-engine.view.application')
     .directive('addPipelineWorkflow', addPipelineWorkflow)
     .run(run);
 
   addPipelineWorkflow.$inject = [];
 
   /**
-   * @memberof cloud-foundry.view.applications
+   * @memberof code-engine.view.application
    * @name addAppWorkflow
    * @description An add-app-workflow directive
    * @returns {object} The add-app-workflow directive definition object
@@ -18,7 +18,7 @@
     return {
       controller: AddPipelineWorkflowController,
       controllerAs: 'addPipelineWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-workflow.html',
+      templateUrl: 'plugins/code-engine/view/application/add-pipeline-workflow/add-pipeline-workflow.html',
       scope: {
         closeDialog: '=',
         dismissDialog: '='
@@ -40,7 +40,7 @@
   ];
 
   /**
-   * @memberof cloud-foundry.view.applications
+   * @memberof code-engine.view.application
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
@@ -83,14 +83,14 @@
   }
 
   run.$inject = [
-    'cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype'
+    'code-engine.view.application.add-pipeline-workflow.prototype'
   ];
 
   function run(addPipelineWorkflowPrototype) {
     angular.extend(AddPipelineWorkflowController.prototype, addPipelineWorkflowPrototype, {
       reset: function () {
         var that = this;
-        var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
+        var path = 'plugins/code-engine/view/application/add-pipeline-workflow/';
         this.data = {};
         this.errors = {};
 

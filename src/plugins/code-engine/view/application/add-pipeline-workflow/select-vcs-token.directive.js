@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications')
+    .module('code-engine.view.application')
     .directive('selectVcsToken', selectVcsToken);
 
   // Replace directives are not going anywhere, see:
@@ -18,7 +18,7 @@
       scope: {},
       controller: SelectVcsTokenController,
       controllerAs: 'selectVcsAndTokenCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/select-vcs-token.directive.html',
+      templateUrl: 'plugins/code-engine/view/application/add-pipeline-workflow/select-vcs-token.directive.html',
       replace: true
     };
   }

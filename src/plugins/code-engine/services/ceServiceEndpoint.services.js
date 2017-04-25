@@ -28,12 +28,12 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager, cfApplicationTabs) {
+  function endpointService(ceHideEndpoint, $q, $stateParams, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
+                           appEndpointsCnsiService, apiManager, modelManager, cfApplicationTabs) {
+    var canEditApp;
 
     var service = {
       cnsi_type: 'hce',
-      cfAppTabs: cfAppTabs,
       refreshToken: refreshToken,
       update: updateEndpoint,
       unregister: unregister,
@@ -63,25 +63,23 @@
 
     var cfAppTabs = [{
       position: 4,
-      hide: function () {
-        return false;
-      },
+      hide: _blockEditApplication,
       go: cfApplicationTabs.goToState,
       uiSref: 'cf.applications.application.delivery-pipeline',
-      label: 'Delivery Pipeline'
+      label: 'Delivery Pipeline',
+      clearState: _clearAppTabsState
     }, {
       position: 5,
-      hide: function () {
-        return false;
-      },
+      hide: _blockEditApplication,
       go: cfApplicationTabs.goToState,
       uiSref: 'cf.applications.application.delivery-logs',
-      label: 'Delivery Logs'
+      label: 'Delivery Logs',
+      clearState: _clearAppTabsState
     }];
 
-    appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
-
     cfApplicationTabs.tabs = cfApplicationTabs.tabs.concat(cfAppTabs);
+
+    appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
 
@@ -126,6 +124,28 @@
       return ceHideEndpoint;
     }
     /* eslint-enable no-unused-vars */
+
+    function _clearAppTabsState() {
+      canEditApp = undefined;
+    }
+
+    function _blockEditApplication() {
+      var model = modelManager.retrieve('cloud-foundry.model.application');
+      if (!model.application.summary.space_guid) {
+        return true;
+      }
+      if (angular.isUndefined(canEditApp)) {
+        var cnsiGuid = $stateParams.cnsiGuid;
+        var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+        canEditApp = authModel.isAllowed(cnsiGuid,
+          authModel.resources.application,
+          authModel.actions.update,
+          model.application.summary.space_guid
+        );
+      }
+      return !canEditApp;
+    }
 
   }
 

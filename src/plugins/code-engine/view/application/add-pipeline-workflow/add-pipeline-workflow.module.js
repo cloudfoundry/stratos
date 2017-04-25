@@ -2,18 +2,18 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.workflows.add-pipeline-workflow', [ ])
-    .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
+    .module('code-engine.view.application.add-pipeline-workflow', [ ])
+    .constant('code-engine.view.application.add-pipeline-workflow.prototype', {
 
       init: function () {
         var that = this;
         this.addingPipeline = false;
 
-        this.appEventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
+        this.appEventService.$on('ce.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
         });
 
-        this.appEventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+        this.appEventService.$on('ce.events.LOAD_MORE_REPOS', function () {
           that.loadMoreRepos();
         });
 
@@ -52,7 +52,6 @@
           workflow: this.data.workflow,
           userInput: this.userInput,
           errors: this.errors,
-          apps: [],
           hceCnsis: [],
           notificationTargetTypes: [],
           notificationTargets: [],
@@ -126,7 +125,7 @@
       },
 
       getWorkflowDefinition: function () {
-        var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
+        var path = 'plugins/code-engine/view/application/add-pipeline-workflow/';
         var that = this;
 
         that.pipelineCreated = false;
@@ -232,7 +231,7 @@
             {
               ready: true,
               title: gettext('Notifications'),
-              templateUrl: 'plugins/cloud-foundry/view/applications/application/' +
+              templateUrl: 'plugins/code-engine/application/' +
               'notification-targets/notification-target-list.html',
               formName: 'application-pipeline-notification-form',
               nextBtnText: gettext('Next'),
@@ -312,7 +311,7 @@
 
       /**
        * @function selectOptionMapping
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @memberOf code-engine.view.application.AddAppWorkflowController
        * @description domain mapping function
        * @param {object} o - an object to map
        * @returns {object} select-option object
@@ -521,7 +520,7 @@
 
       /**
        * @function appendSubflow
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @memberOf code-engine.view.application.AddAppWorkflowController
        * @description append a sub workflow to the main workflow
        * @param {object} subflow - the sub workflow to append
        */
@@ -664,7 +663,7 @@
 
       /**
        * @function _createProjectName
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @memberOf code-engine.view.application.AddAppWorkflowController
        * @description create a unique project name
        * @returns {string} a unique project name
        * @private
