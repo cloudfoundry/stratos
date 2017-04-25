@@ -41,6 +41,7 @@
   var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
   var scssFiles = utils.updateWithPlugins(config.scssFiles);
   var templateFiles = utils.updateWithPlugins(config.templatePaths);
+  var packageJson = require('../package.json');
 
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
@@ -278,11 +279,17 @@
       .pipe(eslint.failAfterError());
   });
 
+  function getMajorMinor(version) {
+    var regex = /^(\d+\.)?(\d)/i;
+    return version.match(regex)[0];
+  }
+
   gulp.task('i18n', function () {
+    var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
     var i18nSource = config.i18nFiles;
     i18nSource.unshift(defaultBrandI18nFolder + '/**/*.json');
     return gulp.src(utils.updateWithPlugins(i18nSource))
-      .pipe(i18n(gutil.env.devMode))
+      .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
   });
