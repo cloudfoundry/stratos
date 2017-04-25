@@ -2,6 +2,9 @@
 
   .gallery-card-title {
     text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
   }
 
   .dl-horizontal {
