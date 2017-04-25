@@ -182,9 +182,6 @@
 
       paths: paths,
 
-        'cloud-foundry',
-        'code-engine'
-      ],
       translate: {
         dist: paths.dist + 'translations',
         js: paths.translations + 'js',

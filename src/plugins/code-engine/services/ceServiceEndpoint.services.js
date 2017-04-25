@@ -16,8 +16,7 @@
    * @namespace code-engine.service
    * @memberOf code-engine.service
    * @name ceEndpointService
-   * @description provide functionality to support code engine cnsi service instances (cnsisi..) in the endpoints
-   * dashboard
+   * @description provide functionality to support code engine cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
    * @param {object} $translate - the $translate service
@@ -25,8 +24,6 @@
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * @param {object} apiManager - apiManager service
-   * dashboard
    * @param {object} apiManager - apiManager service
    * @returns {object} the service instance service
    */
@@ -65,15 +62,6 @@
     appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
-
-    function refreshToken(allServiceInstances) {
-      var hceInfoApi = apiManager.retrieve('code-engine.api.HceInfoApi');
-      var hceGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
-      if (hceGuids.length > 0) {
-        return hceInfoApi.info(hceGuids.join(','));
-      }
-      return $q.resolve();
-    }
 
     function refreshToken(allServiceInstances) {
       var hceInfoApi = apiManager.retrieve('code-engine.api.HceInfoApi');

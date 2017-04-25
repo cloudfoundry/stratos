@@ -121,8 +121,6 @@
 
       var parentDir = path.dirname(file.relative);
       var locale = parentDir.substr(parentDir.length - 2, 2);
-      });
-      var locale = file.relative.substr(parentDirIndex - 2, 2);
       addStrings(locale, file);
       cb();
     }

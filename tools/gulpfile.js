@@ -277,10 +277,10 @@
   }
 
   gulp.task('i18n', function () {
+    var i18nSource = i18nFiles;
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    return gulp.src(i18nFiles)
     i18nSource.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
-    return gulp.src(utils.updateWithPlugins(i18nSource))
+    return gulp.src(i18nSource)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
