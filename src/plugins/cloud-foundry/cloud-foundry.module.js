@@ -11,44 +11,35 @@
     ])
     .run(register);
 
-  function register($state, $location, appEventService, modelManager, appNotificationsService) {
-    return new CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService);
+  function register($location, modelManager, appEventService) {
+    return new CloudFoundry($location, modelManager, appEventService);
   }
 
-  function CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService) {
-    var that = this;
-    this.appEventService = appEventService;
-    this.modelManager = modelManager;
-    this.$state = $state;
-    this.$location = $location;
-    this.appNotificationsService = appNotificationsService;
-    this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
-      that.onLoggedIn(preventRedirect);
+  function CloudFoundry($location, modelManager, appEventService) {
+    appEventService.$on(appEventService.events.LOGIN, function (ev, preventRedirect) {
+      _onLoggedIn(preventRedirect);
     });
-    this.appEventService.$on(this.appEventService.events.LOGOUT, function () {
-      that.onLoggedOut();
+    appEventService.$on(appEventService.events.LOGOUT, function () {
+      _onLoggedOut();
     });
-  }
 
-  angular.extend(CloudFoundry.prototype, {
-    onLoggedIn: function (preventRedirect) {
-      this.registerNavigation();
+    function _onLoggedIn(preventRedirect) {
+      _registerNavigation();
       // Only redirect if we are permitted
       if (!preventRedirect) {
         // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
-        if (this.$location.path() === '') {
-          this.appEventService.$emit(this.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        if ($location.path() === '') {
+          appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         }
       }
-    },
+    }
 
-    onLoggedOut: function () {
-    },
+    function _onLoggedOut() {
+    }
 
-    registerNavigation: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function _registerNavigation() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', 0, 'helion-icon-Application');
     }
-  });
-
+  }
 })();

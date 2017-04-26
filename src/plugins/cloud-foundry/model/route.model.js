@@ -10,125 +10,129 @@
     .run(registerRouteModel);
 
   function registerRouteModel(modelManager, apiManager, modelUtils) {
-    modelManager.register('cloud-foundry.model.route', new Route(apiManager, modelManager, modelUtils));
+    modelManager.register('cloud-foundry.model.route', new Route(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model
    * @name Route
    * @param {app.api.apiManager} apiManager - the API manager
-   * @param {app.api.modelManager}  modelManager - the Model management service
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
-   * @property {app.api.modelManager} modelManager - the Model management service
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {object} route - the currently selected route state
    * @class
    */
-  function Route(apiManager, modelManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.modelManager = modelManager;
-    this.modelUtils = modelUtils;
-    this.route = {};
-  }
+  function Route(apiManager, modelUtils) {
 
-  angular.extend(Route.prototype, {
+    var model = {
+      route: {},
+      checkRouteExists: checkRouteExists,
+      associateAppWithRoute: associateAppWithRoute,
+      removeAppFromRoute: removeAppFromRoute,
+      createRoute: createRoute,
+      deleteRoute: deleteRoute,
+      listAllAppsForRoute: listAllAppsForRoute,
+      listAllAppsForRouteWithoutStore: listAllAppsForRouteWithoutStore,
+      listAllRouteMappingsForRoute: listAllRouteMappingsForRoute
+    };
 
-   /**
-    * @function checkRouteExists
-    * @memberof cloud-foundry.model.route
-    * @description check a route exists
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} domainGuid - route's domain identifier
-    * @param {string} host - route's host part
-    * @param {string} path - route's path part
-    * @param {string} port - route's port part
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    checkRouteExists: function (cnsiGuid, domainGuid, host, path, port) {
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CheckRouteExists(domainGuid, host, path || '', port || '', {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    return model;
+
+    /**
+     * @function checkRouteExists
+     * @memberof cloud-foundry.model.route
+     * @description check a route exists
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} domainGuid - route's domain identifier
+     * @param {string} host - route's host part
+     * @param {string} path - route's path part
+     * @param {string} port - route's port part
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function checkRouteExists(cnsiGuid, domainGuid, host, path, port) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .CheckRouteExists(domainGuid, host, path || '', port || '', {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
-   /**
-    * @function associateAppWithRoute
-    * @memberof cloud-foundry.model.route
-    * @description associate app with the route
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - route identifier
-    * @param {string} appGuid - app identifier
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    associateAppWithRoute: function (cnsiGuid, guid, appGuid) {
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .AssociateAppWithRoute(guid, appGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    /**
+     * @function associateAppWithRoute
+     * @memberof cloud-foundry.model.route
+     * @description associate app with the route
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {string} appGuid - app identifier
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function associateAppWithRoute(cnsiGuid, guid, appGuid) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .AssociateAppWithRoute(guid, appGuid, {}, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
-   /**
-    * @function removeAppFromRoute
-    * @memberof cloud-foundry.model.route
-    * @description remove app from the route
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - route identifier
-    * @param {string} appGuid - app identifier
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    removeAppFromRoute: function (cnsiGuid, guid, appGuid) {
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .RemoveAppFromRoute(guid, appGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    /**
+     * @function removeAppFromRoute
+     * @memberof cloud-foundry.model.route
+     * @description remove app from the route
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {string} appGuid - app identifier
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function removeAppFromRoute(cnsiGuid, guid, appGuid) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .RemoveAppFromRoute(guid, appGuid, {}, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
-    createRoute: function (cnsiGuid, routeSpec, params) {
+    function createRoute(cnsiGuid, routeSpec, params) {
       var routeParams = params || {};
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CreateRoute(routeSpec, routeParams, this.modelUtils.makeHttpConfig(cnsiGuid))
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .CreateRoute(routeSpec, routeParams, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
-   /**
-    * @function deleteApp
-    * @memberof cloud-foundry.model.route
-    * @description deletes a particular route
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - route identifier
-    * @param {boolean} recursive - flag for recursive delete or not (not currently used by sub-code)
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    deleteRoute: function (cnsiGuid, guid, recursive) {
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .DeleteRoute(guid, recursive, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    /**
+     * @function deleteApp
+     * @memberof cloud-foundry.model.route
+     * @description deletes a particular route
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {boolean} recursive - flag for recursive delete or not (not currently used by sub-code)
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function deleteRoute(cnsiGuid, guid, recursive) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .DeleteRoute(guid, recursive, {}, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
-   /**
-    * @function listAllAppsForRoute
-    * @memberof cloud-foundry.model.route
-    * @description lists all apps for the route and store the response in the model
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - route identifier
-    * @param {object=} params - optional parameters
-    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
-    * containing ALL results will be returned. This could mean more than one http request is made.
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    listAllAppsForRoute: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    /**
+     * @function listAllAppsForRoute
+     * @memberof cloud-foundry.model.route
+     * @description lists all apps for the route and store the response in the model
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {object=} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function listAllAppsForRoute(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllAppsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (paginate) {
             return response.data;
           }
-          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid))
+          return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid))
             .then(function (list) {
               return {
                 total_pages: 1,
@@ -140,33 +144,32 @@
             });
         })
         .then(function (responseData) {
-          that.route.id = guid;
-          that.route.apps = responseData;
+          model.route.id = guid;
+          model.route.apps = responseData;
           return responseData;
         });
-    },
+    }
 
-   /**
-    * @function listAllAppsForRouteWithoutStore
-    * @memberof cloud-foundry.model.route
-    * @description get all apps for the route
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - route identifier
-    * @param {object} params - optional parameters
-    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
-    * containing ALL results will be returned. This could mean more than one http request is made.
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    listAllAppsForRouteWithoutStore: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    /**
+     * @function listAllAppsForRouteWithoutStore
+     * @memberof cloud-foundry.model.route
+     * @description get all apps for the route
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {object} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function listAllAppsForRouteWithoutStore(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllAppsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (paginate) {
             return response.data;
           }
-          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid))
+          return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid))
             .then(function (list) {
               return {
                 total_pages: 1,
@@ -177,7 +180,7 @@
               };
             });
         });
-    },
+    }
 
     /**
      * @function listAllRouteMappingsForRoute
@@ -191,18 +194,17 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllRouteMappingsForRoute: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllRouteMappingsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllRouteMappingsForRoute(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllRouteMappingsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
     }
 
-  });
+  }
 
 })();
