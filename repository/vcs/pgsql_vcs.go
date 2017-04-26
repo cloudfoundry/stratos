@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
-	"strings"
 	"net/url"
+	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 const (
@@ -220,4 +221,3 @@ func CheckUrl(urlString string) (string, error) {
 	}
 	return parsed.String(), nil
 }
-

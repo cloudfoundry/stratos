@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
+
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
@@ -28,7 +30,7 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	versions, err := p.getVersionsData()
 	if err != nil {
 		msg := "Could not find database version"
-		logger.Error(msg)
+		log.Error(msg)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 
@@ -36,14 +38,14 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	userGUID, err := p.getSessionStringValue(c, "user_id")
 	if err != nil {
 		msg := "Could not find session user_id"
-		logger.Error(msg)
+		log.Error(msg)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	uaaUser, err := p.getUAAUser(userGUID)
 	if err != nil {
 		msg := "Could not load session user data"
-		logger.Error(msg)
+		log.Error(msg)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 

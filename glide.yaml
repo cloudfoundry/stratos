@@ -32,8 +32,6 @@ import:
   version: 56ba4b0a11da87516629a57408a5f7e4c8ea7b0b
 - package: github.com/gorilla/websocket
   version: 54f9decdbfb3fe254c5df3d5aa234480989f4af0
-- package: github.com/hpcloud/ucpconfig
-  version: 0eace611cfcb89291849724f4704b390b436fe71
 - package: github.com/kat-co/vala
   version: 43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b
 - package: github.com/labstack/echo
@@ -61,8 +59,6 @@ import:
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - package: github.com/Sirupsen/logrus
   version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
-  subpackages:
-  - hooks/syslog
 - package: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - package: golang.org/x/net
@@ -103,3 +99,4 @@ testImports:
   - assert
 - package: gopkg.in/DATA-DOG/go-sqlmock.v1
   version: 9958e5c69de03e97ec215b23f6fcae1f600c3fb6
+

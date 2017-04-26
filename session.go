@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -23,7 +24,7 @@ func (e *SessionValueNotFound) Error() string {
 }
 
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, error) {
-	logger.Debug("getSessionValue")
+	log.Debug("getSessionValue")
 	req := c.Request().(*standard.Request).Request
 	session, err := p.SessionStore.Get(req, portalSessionName)
 	if err != nil {
@@ -40,7 +41,7 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 }
 
 func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, error) {
-	logger.Debug("getSessionInt64Value")
+	log.Debug("getSessionInt64Value")
 	intf, err := p.getSessionValue(c, key)
 	if err != nil {
 		return 0, err
@@ -50,7 +51,7 @@ func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, e
 }
 
 func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, error) {
-	logger.Debug("getSessionStringValue")
+	log.Debug("getSessionStringValue")
 	intf, err := p.getSessionValue(c, key)
 	if err != nil {
 		return "", err
@@ -70,7 +71,7 @@ func (p *portalProxy) saveSession(c echo.Context, session *sessions.Session) err
 }
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
-	logger.Debug("setSessionValues")
+	log.Debug("setSessionValues")
 
 	req := c.Request().(*standard.Request).Request
 	session, err := p.SessionStore.Get(req, portalSessionName)
@@ -86,7 +87,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 }
 
 func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error {
-	logger.Debug("unsetSessionValues")
+	log.Debug("unsetSessionValues")
 
 	req := c.Request().(*standard.Request).Request
 	session, err := p.SessionStore.Get(req, portalSessionName)
@@ -100,7 +101,7 @@ func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error
 }
 
 func (p *portalProxy) clearSession(c echo.Context) error {
-	logger.Debug("clearSession")
+	log.Debug("clearSession")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter

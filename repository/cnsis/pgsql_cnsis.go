@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 const (

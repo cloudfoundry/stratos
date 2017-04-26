@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type userTokenInfo struct {
@@ -15,7 +17,7 @@ type userTokenInfo struct {
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
-	logger.Debug("getUserTokenInfo")
+	log.Debug("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")
 
