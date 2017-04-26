@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view')
+    .module('endpoints-dashboard')
     .factory('appRegisterService', ServiceRegistrationFactory);
 
   /**
