@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('ce-delivery-Pipeline-Status directive', function () {
+  describe('ce-delivery-pipeline-status directive', function () {
     var element, $httpBackend, controller, setupPipelineSpy;
 
     beforeEach(module('templates'));
@@ -29,8 +29,8 @@
 
         $httpBackend = $injector.get('$httpBackend');
 
-        var markup = '<ce-delivery-Pipeline-Status hce="hce" pipeline="pipeline" setup="setup">' +
-          '</ce-delivery-Pipeline-Status>';
+        var markup = '<ce-delivery-pipeline-status hce="hce" pipeline="pipeline" setup="setup">' +
+          '</ce-delivery-pipeline-status>';
 
         element = angular.element(markup);
         $compile(element)(contextScope);

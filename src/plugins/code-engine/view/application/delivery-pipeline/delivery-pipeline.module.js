@@ -9,7 +9,6 @@
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
-    // $stateProvider.state('ce.application.delivery-pipeline', {
     $stateProvider.state('cf.applications.application.delivery-pipeline', {
       url: '/delivery-pipeline',
       params: {
@@ -227,8 +226,6 @@
             var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
-            console.log(Object.keys(that));
-            console.log(that.ceAppPipelineService);
             return that.ceAppPipelineService.updateDeliveryPipelineMetadata(that.hceCnsi.guid);
           })
           .catch(function () {

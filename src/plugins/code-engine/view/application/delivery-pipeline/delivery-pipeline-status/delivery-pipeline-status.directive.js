@@ -9,7 +9,7 @@
    * @memberof code-engine.view.applications
    * @name ceDeliveryPipelineStatus
    * @description A directive for showing the delivery pipeline status
-   * @returns {object} The ce-delivery-Pipeline-Status directive definition object
+   * @returns {object} The ce-delivery-pipeline-status directive definition object
    */
   function ceDeliveryPipelineStatus() {
     return {

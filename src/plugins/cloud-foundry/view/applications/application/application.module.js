@@ -227,11 +227,11 @@
           that.updateBuildPack();
           that.cfApplicationTabs.clearStates();
 
-          // updateDeliveryPipelineMetadata requires summary.guid and summary.services which are only found in updated
+          // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
           // app summary
 
           blockUpdate.push(
-            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateDeliveryPipelineMetadata', that.cnsiGuid,
+            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid,
               true));
 
           if (!haveApplication && that.model.application.summary.state === 'STARTED') {

@@ -53,7 +53,7 @@
   }
 
   function getDeliveryPipelineStatus() {
-    return element(by.tagName('ce-delivery-Pipeline-Status'));
+    return element(by.tagName('ce-delivery-pipeline-status'));
   }
 
   function getDeliveryPipelineStatusMessage() {
