@@ -2,13 +2,14 @@
   'use strict';
 
   describe('add-pipeline-workflow directive', function () {
-    var $httpBackend, $scope, addPipelineWorkflowCtrl, mockApp;
+    var $httpBackend, $scope, addPipelineWorkflowCtrl, mockApp, ceAppPipelineService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
+      ceAppPipelineService = $injector.get('ceAppPipelineService');
       $scope = $injector.get('$rootScope').$new();
       $scope.testDismiss = function () {};
       $scope.testClose = function () {};
@@ -96,11 +97,11 @@
       });
 
       it('addPipelineActions - finish', function () {
-        var appModel = addPipelineWorkflowCtrl.modelManager.retrieve('cloud-foundry.model.application');
         spyOn(ceAppPipelineService, 'updateDeliveryPipelineMetadata');
         spyOn(addPipelineWorkflowCtrl, 'finishWorkflow');
+        addPipelineWorkflowCtrl.cnsiGuid = 'cnsiGuid';
         addPipelineWorkflowCtrl.addPipelineActions.finish();
-        expect(ceAppPipelineService.updateDeliveryPipelineMetadata).toHaveBeenCalledWith(true);
+        expect(ceAppPipelineService.updateDeliveryPipelineMetadata).toHaveBeenCalledWith('cnsiGuid', true);
         expect(addPipelineWorkflowCtrl.finishWorkflow).toHaveBeenCalled();
       });
     });

@@ -69,7 +69,6 @@
     this.serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     this.deletingApplication = false;
     this.cnsiGuid = null;
-    this.hceCnsiGuid = null;
     this.$filter = $filter;
     this.appEndpointsCnsiService = appEndpointsCnsiService;
 
@@ -81,7 +80,6 @@
       var that = this;
       var path = 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/';
       this.cnsiGuid = null;
-      this.hceCnsiGuid = null;
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
@@ -361,20 +359,19 @@
      * @returns {promise} A promise
      */
     deleteProject: function () {
-      return this.appEndpointsCnsiService.callAllEndpointProvidersFunc('deleteApplicationPipeline', this.hceCnsiGuid);
+      return this.appEndpointsCnsiService.callAllEndpointProvidersFunc('deleteApplicationPipeline', _.get(this, 'details.project'));
     },
 
     /**
      * @function startWorkflow
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @param {object} data - cnsiGuid and hceCnsiGuid
+     * @param {object} data - cnsiGuid and project information
      * @description start workflow
      */
     startWorkflow: function (data) {
       this.deletingApplication = true;
       this.reset();
       this.cnsiGuid = data.cnsiGuid;
-      this.hceCnsiGuid = data.hceCnsiGuid;
     },
 
     /**

@@ -36,7 +36,8 @@
     '$q',
     '$timeout',
     '$stateParams',
-    'PAT_DELIMITER'
+    'PAT_DELIMITER',
+    'ceAppPipelineService'
   ];
 
   /**
@@ -52,6 +53,7 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
+   * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {appUtilsService} appUtilsService - the appUtilsService service
@@ -61,6 +63,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
+   * @property {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    */
   function AddPipelineWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, $scope, $q,
                                          $timeout, $stateParams, PAT_DELIMITER, ceAppPipelineService) {
@@ -148,7 +151,7 @@
           },
 
           finish: function () {
-            that.ceAppPipelineService.updateDeliveryPipelineMetadata(this.cnsiGuid, true);
+            that.ceAppPipelineService.updateDeliveryPipelineMetadata(that.cnsiGuid, true);
             that.finishWorkflow();
           }
         };

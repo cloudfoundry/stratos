@@ -20,12 +20,16 @@
    * dashboard
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
+   * @param {object} $stateParams - the Angular $stateParams service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
+   * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, $stateParams, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,

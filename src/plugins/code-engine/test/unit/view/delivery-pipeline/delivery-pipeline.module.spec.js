@@ -4,7 +4,8 @@
   describe('Delivery Pipeline', function () {
 
     var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, appNotificationsService,
-      modelManager, ceManageVcsTokens, ceRegisterVcsToken, $httpBackend, account, appUtilsService, $q;
+      modelManager, ceManageVcsTokens, ceRegisterVcsToken, $httpBackend, account, appUtilsService, $q, $log,
+      ceAppPipelineService;
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
@@ -46,9 +47,11 @@
       $interpolate = $injector.get('$interpolate');
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
+      $log = $injector.get('$log');
       modelManager = $injector.get('modelManager');
       ceManageVcsTokens = $injector.get('ceManageVcsTokens');
       ceRegisterVcsToken = $injector.get('ceRegisterVcsToken');
+      ceAppPipelineService = $injector.get('ceAppPipelineService');
 
       // Some generic vars needed in tests
       $rootScope = $injector.get('$rootScope');
@@ -116,7 +119,7 @@
       controller = new ApplicationDeliveryPipelineController(appEventService, modelManager, ceManageVcsTokens,
         ceRegisterVcsToken, confirmDialog, appNotificationsService, ceAddNotificationService,
         cePostDeployActionService, appUtilsService, frameworkDetailView,
-        $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+        $interpolate, $stateParams, $rootScope.$new(), $q, $state, $log, ceAppPipelineService);
 
       $httpBackend.flush();
 

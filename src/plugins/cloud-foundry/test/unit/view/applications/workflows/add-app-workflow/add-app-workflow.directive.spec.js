@@ -113,7 +113,6 @@
             host: null,
             domain: null,
             application: null,
-            hceCnsi: null,
             source: null,
             repo: null,
             repoFilterTerm: null,
@@ -139,8 +138,6 @@
           expect(that.options.domains).toEqual([]);
           expect(that.options.errors).toEqual({});
           expect(that.options.apps).toEqual([]);
-          expect(that.options.notificationTargetTypes).toEqual([]);
-          expect(that.options.notificationTargets).toEqual([]);
         });
 
         it('addApplicationActions - stop', function () {

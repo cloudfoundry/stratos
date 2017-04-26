@@ -10,26 +10,19 @@
    * @memberOf code-engine.service
    * @name utilsService
    * @description
-   * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
-   * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
-   * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * dashboard
-   * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.api.apiManager} modelManager - the application model manager
    * @returns {object} the service instance service
    */
   function utilsService($q, modelManager) {
 
-    var hceServiceInfo;
+    var hceCnsi, hceServiceInfo;
 
     return {
       listHceCnsis: listHceCnsis,
       updateDeliveryPipelineMetadata: updateDeliveryPipelineMetadata,
       deleteApplicationPipeline: deleteApplicationPipeline
     };
-
 
     /**
      * @function listHceCnsis
@@ -71,6 +64,7 @@
      * @function updateDeliveryPipelineMetadata
      * @memberof cloud-foundry.model.application
      * @description Update the pipeline metadata for the application
+     * @param {string} cnsiGuid - guid of the cnsi of the pipeline
      * @param {boolean} refresh - indicates if cached hce metadata should be refreshed
      * @returns {promise} A promise object
      * @public
@@ -138,7 +132,6 @@
         return _onUpdateDeliveryPipelineMetadata(responce);
       });
     }
-    var hceCnsi;
 
     /**
      * @function onUpdateDeliveryPipelineMetadata

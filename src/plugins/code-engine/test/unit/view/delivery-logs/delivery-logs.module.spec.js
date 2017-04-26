@@ -47,16 +47,16 @@
     }
 
     beforeEach(inject(function (_$stateParams_, _$q_, _$log_, _moment_, $injector, _$state_, _$rootScope_,
-                                _viewEventDetailView_, _viewExecutionDetailView_, _triggerBuildDetailView_) {
+                                _ceEventDetailView_, _ceExecutionDetailView_, _ceTriggerBuildDetailView_) {
       // Create the parameters required by the ctor
       $stateParams = _$stateParams_;
       $q = _$q_;
       $log = _$log_;
       moment = _moment_;
       modelManager = $injector.get('modelManager');
-      viewEvent = _viewEventDetailView_;
-      viewExecution = _viewExecutionDetailView_;
-      triggerBuild = _triggerBuildDetailView_;
+      viewEvent = _ceEventDetailView_;
+      viewExecution = _ceExecutionDetailView_;
+      triggerBuild = _ceTriggerBuildDetailView_;
 
       // Some generic vars needed in tests
       $state = _$state_;

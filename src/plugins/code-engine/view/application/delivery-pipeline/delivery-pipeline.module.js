@@ -40,6 +40,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {object} $log - the Angular $log service
+   * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    * @property {frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
@@ -65,7 +66,6 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.appEventService = appEventService;
-    this.ceManageVcsTokens = ceManageVcsTokens;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$log = $log;
@@ -227,7 +227,8 @@
             var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
-
+            console.log(Object.keys(that));
+            console.log(that.ceAppPipelineService);
             return that.ceAppPipelineService.updateDeliveryPipelineMetadata(that.hceCnsi.guid);
           })
           .catch(function () {

@@ -349,24 +349,24 @@
 
     deleteApp: function () {
       if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
-        var guids = {
+        var data = {
           cnsiGuid: this.cnsiGuid,
-          hceCnsiGuid: this.hceCnsi ? this.hceCnsi.guid : ''
+          project: _.get(this.model, 'application.project')
         };
-        this.complexDeleteAppDialog(guids);
+        this.complexDeleteAppDialog(data);
       } else {
         this.simpleDeleteAppDialog();
       }
     },
 
-    complexDeleteAppDialog: function (guids) {
+    complexDeleteAppDialog: function (details) {
       this.frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
         },
         {
-          guids: guids
+          details: details
         }
       );
     },
