@@ -24,7 +24,7 @@ func (e *SessionValueNotFound) Error() string {
 }
 
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, error) {
-	logger.Debug("getSessionValue")
+	log.Debug("getSessionValue")
 	req := c.Request().(*standard.Request).Request
 	session, err := p.SessionStore.Get(req, portalSessionName)
 	if err != nil {

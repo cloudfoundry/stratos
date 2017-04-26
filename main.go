@@ -5,16 +5,12 @@ import (
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -23,7 +19,6 @@ import (
 	"github.com/hpcloud/portal-proxy/config"
 	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
-	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -69,7 +64,7 @@ func main() {
 
 	// Load the portal configuration from env vars
 	var portalConfig portalConfig
-	portalConfig, err := loadConfig()
+	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
@@ -164,7 +159,7 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 	// Read the key from the shared volume
 	key, err := crypto.ReadEncryptionKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
-		logger.Errorf("Unable to read the encryption key from the shared volume: %v", err)
+		log.Errorf("Unable to read the encryption key from the shared volume: %v", err)
 		return nil, err
 	}
 
@@ -207,7 +202,7 @@ func initConnPool() (*sql.DB, error) {
 		}
 
 		// Circle back and try again
-		log.Infof("Waiting for Postgres to be responsive: %+v\n", err)
+		log.Infof("Waiting for Postgres to be responsive: %+v", err)
 		time.Sleep(time.Second)
 	}
 
@@ -226,7 +221,10 @@ func initSessionStore(db *sql.DB, pc portalConfig) (*pgstore.PGStore, error) {
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 	log.Debug("loadPortalConfig")
-	if err := ucpconfig.Load(&pc); err != nil {
+
+	config.LoadConfigFile("./config.properties")
+
+	if err := config.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
 	}
 	return pc, nil
@@ -234,7 +232,7 @@ func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
-	if err := ucpconfig.Load(&dc); err != nil {
+	if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 

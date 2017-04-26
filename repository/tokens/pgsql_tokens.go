@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 )
 

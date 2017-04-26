@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/portal-proxy/repository/vcs"
@@ -55,7 +56,7 @@ func (e *TokenNotFound) Error() string {
 func scanRow(scannable Scannable, encryptionKey []byte) (*VcsTokenRecord, error) {
 	tr := &VcsTokenRecord{}
 	var (
-		plainTextAccessToken string
+		plainTextAccessToken  string
 		cipherTextAccessToken []byte
 	)
 
@@ -228,7 +229,7 @@ func (p *PgsqlVcsTokenRepository) ListVcsTokenByUser(userGuid string, encryption
 		}
 		userVcsToken := &UserVcsToken{
 			VcsToken: tr,
-			Vcs: vr,
+			Vcs:      vr,
 		}
 		vcsTokensList = append(vcsTokensList, userVcsToken)
 	}

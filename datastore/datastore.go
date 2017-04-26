@@ -3,24 +3,24 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/kat-co/vala"
 )
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
-	Username                string `ucp:"PGSQL_USER"`
-	Password                string `ucp:"PGSQL_PASSWORD"`
-	Database                string `ucp:"PGSQL_DATABASE"`
-	Host                    string `ucp:"PGSQL_HOST"`
-	Port                    int    `ucp:"PGSQL_PORT"`
-	SSLMode                 string `ucp:"PGSQL_SSL_MODE"`
-	ConnectionTimeoutInSecs int    `ucp:"PGSQL_CONNECT_TIMEOUT_IN_SECS"`
-	SSLCertificate          string `ucp:"PGSQL_CERT"`
-	SSLKey                  string `ucp:"PGSQL_CERT_KEY"`
-	SSLRootCertificate      string `ucp:"PGSQL_ROOT_CERT"`
+	Username                string `configName:"PGSQL_USER"`
+	Password                string `configName:"PGSQL_PASSWORD"`
+	Database                string `configName:"PGSQL_DATABASE"`
+	Host                    string `configName:"PGSQL_HOST"`
+	Port                    int    `configName:"PGSQL_PORT"`
+	SSLMode                 string `configName:"PGSQL_SSL_MODE"`
+	ConnectionTimeoutInSecs int    `configName:"PGSQL_CONNECT_TIMEOUT_IN_SECS"`
+	SSLCertificate          string `configName:"PGSQL_CERT"`
+	SSLKey                  string `configName:"PGSQL_CERT_KEY"`
+	SSLRootCertificate      string `configName:"PGSQL_ROOT_CERT"`
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
@@ -133,7 +133,7 @@ func Ping(db *sql.DB) error {
 	log.Println("Ping")
 	err := db.Ping()
 	if err != nil {
-		return fmt.Errorf("Unable to ping the database: %+v\n", err)
+		return fmt.Errorf("Unable to ping the database: %+v", err)
 	}
 
 	return nil

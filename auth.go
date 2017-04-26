@@ -112,7 +112,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	uaaAdmin := strings.Contains(uaaRes.Scope, p.UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(uaaRes.Scope, UAAAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     c.FormValue("username"),
@@ -175,7 +175,7 @@ func (p *portalProxy) doLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes,
 		}
 	}
 
-	hcfAdmin := strings.Contains(uaaRes.Scope, p.HCFAdminIdentifier)
+	hcfAdmin := strings.Contains(uaaRes.Scope, HCFAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     u.UserGUID,
@@ -511,7 +511,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 	resp := &VerifySessionRes{
 		Account: sessionUser,
@@ -545,7 +545,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 	}
 
 	// is the user a UAA admin?
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 	// add the uaa entry to the output
 	uaaEntry := &ConnectedUser{
