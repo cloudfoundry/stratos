@@ -1,6 +1,7 @@
 {
   "plugins": [
     "cloud-foundry",
-    "code-engine"
+    "code-engine",
+    "endpoints-dashboard"
   ]
 }

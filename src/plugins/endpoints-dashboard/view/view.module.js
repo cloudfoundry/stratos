@@ -8,7 +8,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.dashboard', {
       url: '',
-      templateUrl: 'plugins/endpoint-dashboard/view/view.html',
+      templateUrl: 'plugins/endpoints-dashboard/view/view.html',
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl',
       ncyBreadcrumb: {
