@@ -16,8 +16,6 @@ type portalConfig struct {
 	UAAEndpoint                 string   `configName:"UAA_ENDPOINT"`
 	AllowedOrigins              []string `configName:"ALLOWED_ORIGINS"`
 	SessionStoreSecret          string   `configName:"SESSION_STORE_SECRET"`
-	HCPFlightRecorderHost       string   `configName:"HCP_FLIGHTRECORDER_HOST"`
-	HCPFlightRecorderPort       string   `configName:"HCP_FLIGHTRECORDER_PORT"`
 	EncryptionKeyVolume         string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
