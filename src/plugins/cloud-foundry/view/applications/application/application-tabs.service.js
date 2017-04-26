@@ -25,7 +25,8 @@
         },
         go: goToState,
         uiSref: 'cf.applications.application.summary',
-        label: 'Summary'
+        label: 'Summary',
+        isTabActive: _isTabActive
       },
       {
         position: 2,
@@ -34,7 +35,8 @@
         },
         go: goToState,
         uiSref: 'cf.applications.application.log-stream',
-        label: 'Log Stream'
+        label: 'Log Stream',
+        isTabActive: _isTabActive
       },
       {
         position: 3,
@@ -43,7 +45,8 @@
         },
         go: goToState,
         uiSref: 'cf.applications.application.services',
-        label: 'Services'
+        label: 'Services',
+        isTabActive: _isTabActive
       },
       {
         position: 6,
@@ -69,7 +72,8 @@
         label: 'Variables',
         clearState: function () {
           canEditApp = undefined;
-        }
+        },
+        isTabActive: _isTabActive
       },
       {
         position: 7,
@@ -98,7 +102,8 @@
         label: 'Versions',
         clearState: function () {
           cfSupportsVersions = undefined;
-        }
+        },
+        isTabActive: _isTabActive
       }
     ];
 
@@ -112,6 +117,10 @@
 
     function goToState(appId) {
       $state.go(this.uiSref, appId);
+    }
+
+    function _isTabActive() {
+      return $state.current.name === this.uiSref;
     }
 
     function clearStates() {

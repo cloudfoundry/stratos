@@ -20,6 +20,7 @@
    * dashboard
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
+   * @param {object} $state - the Angular $state service
    * @param {object} $stateParams - the Angular $stateParams service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
@@ -32,8 +33,9 @@
    * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, $stateParams, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager, modelManager, cfApplicationTabs, ceAppPipelineService) {
+  function endpointService(ceHideEndpoint, $q, $state, $stateParams, appUtilsService, ceVCSEndpointService,
+                           appEndpointsDashboardService, appEndpointsCnsiService, apiManager, modelManager,
+                           cfApplicationTabs, ceAppPipelineService) {
     var canEditApp;
 
     var service = {
@@ -73,14 +75,16 @@
       go: cfApplicationTabs.goToState,
       uiSref: 'cf.applications.application.delivery-pipeline',
       label: 'Delivery Pipeline',
-      clearState: _clearAppTabsState
+      clearState: _clearAppTabsState,
+      isTabActive: _isAppTabActive
     }, {
       position: 5,
       hide: _blockEditApplication,
       go: cfApplicationTabs.goToState,
       uiSref: 'cf.applications.application.delivery-logs',
       label: 'Delivery Logs',
-      clearState: _clearAppTabsState
+      clearState: _clearAppTabsState,
+      isTabActive: _isAppTabActive
     }];
 
     cfApplicationTabs.tabs = cfApplicationTabs.tabs.concat(cfAppTabs);
@@ -141,6 +145,9 @@
 
     function _clearAppTabsState() {
       canEditApp = undefined;
+    }
+    function _isAppTabActive() {
+      return $state.current.name === this.uiSref;
     }
 
     function _blockEditApplication() {

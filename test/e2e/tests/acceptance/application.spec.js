@@ -52,7 +52,7 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Delivery Pipeline', 'Delivery Logs', 'Variables', 'Versions'];
+      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Versions'];
       // Walk through each of the tabs
       application.getTabs().then(function (tabs) {
         _.each(tabs, function (tab, i) {
