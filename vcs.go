@@ -5,24 +5,24 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/hpcloud/portal-proxy/repository/vcs"
 	"github.com/hpcloud/portal-proxy/repository/vcstokens"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
-	"strings"
 )
 
 const (
-
 	TOKEN_GUID_HEADER string = "x-cnap-vcs-token-guid"
 )
 
 var GITHUB_REQUIRED_SCOPES = [...]string{"admin:repo_hook", "repo"}
 
 func (p *portalProxy) listVCSClients(c echo.Context) error {
-	logger.Info("listVCSClients")
+	log.Info("listVCSClients")
 
 	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
 	vrs, err := vcsRepository.List()
@@ -38,7 +38,7 @@ func (p *portalProxy) listVCSClients(c echo.Context) error {
 }
 
 func (p *portalProxy) deleteVCSClient(c echo.Context) error {
-	logger.Info("deleteVCSClient")
+	log.Info("deleteVCSClient")
 
 	vcsGuid := c.Param("vcsGuid")
 
@@ -52,12 +52,12 @@ func (p *portalProxy) deleteVCSClient(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "We found the VCS but failed to delete it")
 	}
 
-	logger.Infof("deleteVCSClient: successfully deleted VCS Client: %s", vcsGuid)
+	log.Infof("deleteVCSClient: successfully deleted VCS Client: %s", vcsGuid)
 	return c.NoContent(http.StatusNoContent)
 }
 
 func (p *portalProxy) listVcsTokens(c echo.Context) error {
-	logger.Info("listVcsTokens")
+	log.Info("listVcsTokens")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		// Shouldn't happen as caught by our session middleware
@@ -76,7 +76,7 @@ func (p *portalProxy) listVcsTokens(c echo.Context) error {
 }
 
 func (p *portalProxy) getVcsToken(c echo.Context) (*vcstokens.VcsTokenRecord, error) {
-	logger.Info("getVcsToken")
+	log.Info("getVcsToken")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		/// Shouldn't happen as caught by our session middleware
@@ -84,8 +84,8 @@ func (p *portalProxy) getVcsToken(c echo.Context) (*vcstokens.VcsTokenRecord, er
 	}
 
 	vcsTokenGuid := c.Request().Header().Get(TOKEN_GUID_HEADER)
-	if (vcsTokenGuid == "") {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "Header '" + TOKEN_GUID_HEADER + "' is required")
+	if vcsTokenGuid == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Header '"+TOKEN_GUID_HEADER+"' is required")
 	}
 
 	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
@@ -93,13 +93,13 @@ func (p *portalProxy) getVcsToken(c echo.Context) (*vcstokens.VcsTokenRecord, er
 }
 
 func (p *portalProxy) getVcs(vcsGuid string) (*vcs.VcsRecord, error) {
-	logger.Info("getVcs")
+	log.Info("getVcs")
 	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
 	return vcsRepository.Find(vcsGuid)
 }
 
 func (p *portalProxy) registerVcsToken(c echo.Context) error {
-	logger.Info("registerVcsToken")
+	log.Info("registerVcsToken")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		// Shouldn't happen as caught by our session middleware
@@ -110,18 +110,18 @@ func (p *portalProxy) registerVcsToken(c echo.Context) error {
 	inputParams := make(map[string]string)
 	for _, key := range required {
 		paramValue := c.FormValue(key)
-		if (paramValue == "") {
-			return echo.NewHTTPError(http.StatusBadRequest, "Parameter '" + key + "' is required")
+		if paramValue == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Parameter '"+key+"' is required")
 		}
 		inputParams[key] = paramValue
 	}
 
 	tr := &vcstokens.VcsTokenRecord{
-		Guid: uuid.NewV4().String(),
+		Guid:     uuid.NewV4().String(),
 		UserGuid: userGuid,
-		VcsGuid: inputParams["vcs_guid"],
-		Name: inputParams["name"],
-		Token: inputParams["token"],
+		VcsGuid:  inputParams["vcs_guid"],
+		Name:     inputParams["name"],
+		Token:    inputParams["token"],
 	}
 
 	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
@@ -129,12 +129,12 @@ func (p *portalProxy) registerVcsToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	logger.Infof("registerVcsToken: successfully saved VCS Token: %s", tr.Name)
+	log.Infof("registerVcsToken: successfully saved VCS Token: %s", tr.Name)
 	return c.JSON(http.StatusCreated, tr)
 }
 
 func (p *portalProxy) renameVcsToken(c echo.Context) error {
-	logger.Info("renameVcsToken")
+	log.Info("renameVcsToken")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		// Shouldn't happen as caught by our session middleware
@@ -147,7 +147,7 @@ func (p *portalProxy) renameVcsToken(c echo.Context) error {
 	// Find the token by guid
 	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
 	if err := vcsTokensRepository.RenameVcsToken(userGuid, tokenGuid, newTokenName); err != nil {
-		logger.Errorf("Failed to rename VCS token with id %s - %s", tokenGuid, err)
+		log.Errorf("Failed to rename VCS token with id %s - %s", tokenGuid, err)
 		if _, ok := err.(*vcstokens.TokenNotFound); ok {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
@@ -155,12 +155,12 @@ func (p *portalProxy) renameVcsToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "We found your token but failed to rename it")
 	}
 
-	logger.Infof("renameVcsToken: successfully renamed VCS Token: %s to %s", tokenGuid, newTokenName)
+	log.Infof("renameVcsToken: successfully renamed VCS Token: %s to %s", tokenGuid, newTokenName)
 	return c.NoContent(http.StatusNoContent)
 }
 
 func (p *portalProxy) deleteVcsToken(c echo.Context) error {
-	logger.Info("deleteVcsToken")
+	log.Info("deleteVcsToken")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		// Shouldn't happen as caught by our session middleware
@@ -172,7 +172,7 @@ func (p *portalProxy) deleteVcsToken(c echo.Context) error {
 	// Find the token by guid
 	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
 	if err := vcsTokensRepository.DeleteVcsToken(userGuid, tokenGuid); err != nil {
-		logger.Errorf("Failed to delete VCS token with id %s - %s", tokenGuid, err)
+		log.Errorf("Failed to delete VCS token with id %s - %s", tokenGuid, err)
 		if _, ok := err.(*vcstokens.TokenNotFound); ok {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
@@ -180,7 +180,7 @@ func (p *portalProxy) deleteVcsToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "We found your token but failed to delete it")
 	}
 
-	logger.Infof("deleteVcsToken: successfully deleted VCS Token: %s", tokenGuid)
+	log.Infof("deleteVcsToken: successfully deleted VCS Token: %s", tokenGuid)
 	return c.NoContent(http.StatusNoContent)
 }
 
@@ -188,12 +188,12 @@ func (p *portalProxy) deleteVcsToken(c echo.Context) error {
 type VcsTokenValid struct {
 	Guid          string `json:"guid"`
 	Name          string `json:"name"`
-	Valid         bool `json:"valid"`
+	Valid         bool   `json:"valid"`
 	InvalidReason string `json:"invalid_reason,omitempty"`
 }
 
 func (p *portalProxy) checkVcsToken(c echo.Context) error {
-	logger.Info("checkVcsToken")
+	log.Info("checkVcsToken")
 	userGuid, err := getPortalUserGUID(c)
 	if err != nil {
 		// Shouldn't happen as caught by our session middleware
@@ -222,12 +222,12 @@ func (p *portalProxy) checkVcsToken(c echo.Context) error {
 		if reason != "" {
 			msg += " - " + reason
 		}
-		return newHTTPShadowError(http.StatusInternalServerError, msg, msg + ": %v", err)
+		return newHTTPShadowError(http.StatusInternalServerError, msg, msg+": %v", err)
 	}
 	tokenValid := VcsTokenValid{
-		Guid: tr.Guid,
-		Name: tr.Name,
-		Valid: valid,
+		Guid:          tr.Guid,
+		Name:          tr.Name,
+		Valid:         valid,
 		InvalidReason: reason,
 	}
 
@@ -258,19 +258,19 @@ func (p *portalProxy) autoRegisterCodeEngineVcs(userID string, hceGuid string) e
 	for _, aVcs := range hceVcses {
 		checkedType, err := vcs.CheckVcsType(aVcs.VcsType)
 		if err != nil {
-			logger.Warnf("autoRegisterCodeEngineVcs: skipping VCS with unsupported type %#v", aVcs.VcsType)
+			log.Warnf("autoRegisterCodeEngineVcs: skipping VCS with unsupported type %#v", aVcs.VcsType)
 			continue
 		}
 		aVcs.VcsType = checkedType
 		if _, err = vcsRepository.FindMatching(aVcs); err != nil {
 			aVcs.Guid = uuid.NewV4().String()
 			if err = vcsRepository.Save(aVcs); err != nil {
-				logger.Warnf("autoRegisterCodeEngineVcs: Failed to auto register new VCS from Code Engine! %#v - %#v", aVcs, err)
+				log.Warnf("autoRegisterCodeEngineVcs: Failed to auto register new VCS from Code Engine! %#v - %#v", aVcs, err)
 			} else {
-				logger.Infof("autoRegisterCodeEngineVcs: New VCS from Code Engine registered! : %s", aVcs.BrowseUrl)
+				log.Infof("autoRegisterCodeEngineVcs: New VCS from Code Engine registered! : %s", aVcs.BrowseUrl)
 			}
 		} else {
-			logger.Infof("autoRegisterCodeEngineVcs: VCS from Code Engine was already registered: %s", aVcs.BrowseUrl)
+			log.Infof("autoRegisterCodeEngineVcs: VCS from Code Engine was already registered: %s", aVcs.BrowseUrl)
 		}
 	}
 	return nil
@@ -300,7 +300,7 @@ func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, stri
 	} else {
 		authorizationPrefix = "bearer "
 	}
-	req.Header.Add("Authorization", authorizationPrefix + tr.Token)
+	req.Header.Add("Authorization", authorizationPrefix+tr.Token)
 
 	// Do the request
 	res, err := client.Do(req)
@@ -329,7 +329,7 @@ func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, stri
 	for _, requiredScope := range GITHUB_REQUIRED_SCOPES {
 		if !scopesMap[requiredScope] {
 			valid = false
-			missingScopes = append(missingScopes, "'" + requiredScope + "'")
+			missingScopes = append(missingScopes, "'"+requiredScope+"'")
 		}
 	}
 

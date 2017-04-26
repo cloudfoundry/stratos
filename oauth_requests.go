@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error) {
-	logger.Debug("doOauthFlowRequest")
+	log.Debug("doOauthFlowRequest")
 
 	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
@@ -39,7 +40,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 			}
 			tokenRec = refreshedTokenRec
 		}
-		req.Header.Set("Authorization", "bearer " + tokenRec.AuthToken)
+		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
 
 		var client http.Client
 		if cnsi.SkipSSLValidation {
@@ -64,7 +65,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 }
 
 func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
-	logger.Debug("getCNSIRequestRecords")
+	log.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
 	if !ok {
@@ -80,7 +81,7 @@ func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t tokens.TokenRecor
 }
 
 func (p *portalProxy) refreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
-	logger.Debug("refreshToken")
+	log.Debug("refreshToken")
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
 	// TODO (wchrisjohnson): this call is unnecessary. The cnsi token record was retrieved

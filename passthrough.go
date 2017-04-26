@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
 	"github.com/labstack/echo/engine/standard"
@@ -36,7 +37,7 @@ type CNSIRequest struct {
 }
 
 func getEchoURL(c echo.Context) url.URL {
-	logger.Debug("getEchoURL")
+	log.Debug("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
 
 	// dereference so we get a copy
@@ -44,7 +45,7 @@ func getEchoURL(c echo.Context) url.URL {
 }
 
 func getEchoHeaders(c echo.Context) http.Header {
-	logger.Debug("getEchoHeaders")
+	log.Debug("getEchoHeaders")
 	h := make(http.Header)
 	originalHeader := c.Request().Header().(*standard.Header).Header
 	for k, v := range originalHeader {
@@ -60,7 +61,7 @@ func getEchoHeaders(c echo.Context) http.Header {
 }
 
 func makeRequestURI(c echo.Context) *url.URL {
-	logger.Debug("makeRequestURI")
+	log.Debug("makeRequestURI")
 	uri := getEchoURL(c)
 	prefix := strings.TrimSuffix(c.Path(), "*")
 	uri.Path = strings.TrimPrefix(uri.Path, prefix)
@@ -69,7 +70,7 @@ func makeRequestURI(c echo.Context) *url.URL {
 }
 
 func getPortalUserGUID(c echo.Context) (string, error) {
-	logger.Debug("getPortalUserGUID")
+	log.Debug("getPortalUserGUID")
 	portalUserGUIDIntf := c.Get("user_id")
 	if portalUserGUIDIntf == nil {
 		return "", errors.New("Corrupted session")
@@ -78,7 +79,7 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 }
 
 func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
-	logger.Debug("getRequestParts")
+	log.Debug("getRequestParts")
 	var body []byte
 	var err error
 	req := c.Request()
@@ -91,7 +92,7 @@ func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
 }
 
 func buildJSONResponse(cnsiList []string, responses map[string]*CNSIRequest) map[string]*json.RawMessage {
-	logger.Debug("buildJSONResponse")
+	log.Debug("buildJSONResponse")
 	jsonResponse := make(map[string]*json.RawMessage)
 	for _, guid := range cnsiList {
 		var response []byte
@@ -119,7 +120,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*CNSIRequest) map
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (CNSIRequest, error) {
-	logger.Debug("buildCNSIRequest")
+	log.Debug("buildCNSIRequest")
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -143,7 +144,7 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 }
 
 func (p *portalProxy) validateCNSIList(cnsiList []string) error {
-	logger.Debug("validateCNSIList")
+	log.Debug("validateCNSIList")
 	for _, cnsiGUID := range cnsiList {
 		if _, err := p.getCNSIRecord(cnsiGUID); err != nil {
 			return err
@@ -154,7 +155,7 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 }
 
 func fwdCNSIStandardHeaders(cnsiRequest *CNSIRequest, req *http.Request) {
-	logger.Debug("fwdCNSIStandardHeaders")
+	log.Debug("fwdCNSIStandardHeaders")
 	for k, v := range cnsiRequest.Header {
 		switch {
 		// Skip these
@@ -170,7 +171,7 @@ func fwdCNSIStandardHeaders(cnsiRequest *CNSIRequest, req *http.Request) {
 }
 
 func (p *portalProxy) proxy(c echo.Context) error {
-	logger.Debug("proxy")
+	log.Debug("proxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
 
@@ -194,10 +195,10 @@ func (p *portalProxy) proxy(c echo.Context) error {
 
 	// if the following header is found, add the GH Oauth code to the body
 	if header.Get(TOKEN_GUID_HEADER) != "" {
-		logger.Debug("--- " + TOKEN_GUID_HEADER + " HEADER FOUND.....")
+		log.Debug("--- " + TOKEN_GUID_HEADER + " HEADER FOUND.....")
 		body, err = p.addTokenToPayload(c, body)
 		if err != nil {
-			logger.Errorf("Unable to add token to HCE payload: %+v", err)
+			log.Errorf("Unable to add token to HCE payload: %+v", err)
 			return err
 		}
 	}
@@ -260,13 +261,13 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	e := json.NewEncoder(c.Response())
 	err = e.Encode(jsonResponse)
 	if err != nil {
-		logger.Errorf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
+		log.Errorf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
 	}
 	return err
 }
 
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
-	logger.Debug("addTokenToPayload")
+	log.Debug("addTokenToPayload")
 
 	tr, err := p.getVcsToken(c)
 	if err != nil {
@@ -282,8 +283,8 @@ func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, er
 	return json.Marshal(projData)
 }
 
-func (p *portalProxy) doRequest(cnsiRequest *CNSIRequest, done chan <- *CNSIRequest) {
-	logger.Debug("doRequest")
+func (p *portalProxy) doRequest(cnsiRequest *CNSIRequest, done chan<- *CNSIRequest) {
+	log.Debug("doRequest")
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request
@@ -295,7 +296,7 @@ func (p *portalProxy) doRequest(cnsiRequest *CNSIRequest, done chan <- *CNSIRequ
 	req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
 	if err != nil {
 		cnsiRequest.Error = err
-		if (done != nil) {
+		if done != nil {
 			done <- cnsiRequest
 		}
 		return
@@ -315,15 +316,14 @@ func (p *portalProxy) doRequest(cnsiRequest *CNSIRequest, done chan <- *CNSIRequ
 		defer res.Body.Close()
 	}
 
-	if (done != nil) {
+	if done != nil {
 		done <- cnsiRequest
 	}
 
 }
 
 func (p *portalProxy) vcsProxy(c echo.Context) error {
-	logger.Debug("VCS proxy passthrough...")
-
+	log.Debug("VCS proxy passthrough...")
 
 	tr, err := p.getVcsToken(c)
 	if err != nil {
@@ -338,7 +338,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	}
 
 	fullUrl := fmt.Sprintf("%s/%s", vr.ApiUrl, makeRequestURI(c))
-	logger.Debug("VCS proxy passthrough to URL: %s", fullUrl)
+	log.Debug("VCS proxy passthrough to URL: %s", fullUrl)
 
 	tokenHeader := fmt.Sprintf("token %s", tr.Token)
 

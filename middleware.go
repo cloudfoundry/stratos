@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/context"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -28,7 +30,7 @@ func handleSessionError(err error) error {
 
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger.Debug("sessionMiddleware")
+		log.Debug("sessionMiddleware")
 
 		p.removeEmptyCookie(c)
 
@@ -43,7 +45,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger.Debug("sessionCleanupMiddleware")
+		log.Debug("sessionCleanupMiddleware")
 		err := h(c)
 		req := c.Request().(*standard.Request).Request
 		context.Clear(req)
@@ -77,10 +79,10 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 
 func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger.Debug("errorLoggingMiddleware")
+		log.Debug("errorLoggingMiddleware")
 		err := h(c)
 		if shadowError, ok := err.(errHTTPShadow); ok {
-			logger.Error(shadowError.LogMessage)
+			log.Error(shadowError.LogMessage)
 			return shadowError.HTTPError
 		}
 

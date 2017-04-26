@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
 	noaa_errors "github.com/cloudfoundry/noaa/errors"
@@ -41,7 +42,7 @@ func (p *portalProxy) firehose(c echo.Context) error {
 	return p.commonStreamHandler(c, firehoseStreamHandler)
 }
 
-func (p *portalProxy) commonStreamHandler(c echo.Context, bespokeStreamHandler func (echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
+func (p *portalProxy) commonStreamHandler(c echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
 	ac, err := p.openNoaaConsumer(c)
 	if err != nil {
 		return err
@@ -65,8 +66,8 @@ func (p *portalProxy) commonStreamHandler(c echo.Context, bespokeStreamHandler f
 }
 
 type AuthorizedConsumer struct {
-	consumer *consumer.Consumer
-	authToken string
+	consumer     *consumer.Consumer
+	authToken    string
 	refreshToken func() error
 }
 
@@ -96,14 +97,14 @@ func (p *portalProxy) openNoaaConsumer(c echo.Context) (*AuthorizedConsumer, err
 	}
 
 	dopplerAddress := cnsiRecord.DopplerLoggingEndpoint
-	logger.Debugf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
+	log.Debugf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
 
 	// Get the auth token for the CNSI from the DB, refresh it if it's expired
 	if tokenRecord, ok := p.getCNSITokenRecord(cnsiGUID, userGUID); ok {
 		ac.authToken = "bearer " + tokenRecord.AuthToken
 		expTime := time.Unix(tokenRecord.TokenExpiry, 0)
 		if expTime.Before(time.Now()) {
-			logger.Debug("Token obtained has expired, refreshing!")
+			log.Debug("Token obtained has expired, refreshing!")
 			if err = ac.refreshToken(); err != nil {
 				return nil, err
 			}
@@ -113,7 +114,7 @@ func (p *portalProxy) openNoaaConsumer(c echo.Context) (*AuthorizedConsumer, err
 	}
 
 	// Open a Noaa consumer to the doppler endpoint
-	logger.Debugf("Creating Noaa consumer for Doppler endpoint %s", dopplerAddress)
+	log.Debugf("Creating Noaa consumer for Doppler endpoint %s", dopplerAddress)
 	ac.consumer = consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
 
 	return ac, nil
@@ -127,12 +128,12 @@ func upgradeToWebSocket(c echo.Context) (*websocket.Conn, *time.Ticker, error) {
 	request := c.Request().(*standard.Request).Request
 
 	// We're now ok talking to HCF, time to upgrade the request to a WebSocket connection
-	logger.Debugf("Upgrading request to the WebSocket protocol...")
+	log.Debugf("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Upgrading connection to a WebSocket failed: [%v]", err)
 	}
-	logger.Debugf("Successfully upgraded to a WebSocket connection")
+	log.Debugf("Successfully upgraded to a WebSocket connection")
 
 	// HSC-1276 - handle pong messages and reset the read deadline
 	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
@@ -154,7 +155,7 @@ func upgradeToWebSocket(c echo.Context) (*websocket.Conn, *time.Ticker, error) {
 
 // Attempts to get the recent logs, if we get an unauthorized error we will refresh the auth token and retry once
 func getRecentLogs(ac *AuthorizedConsumer, cnsiGUID, appGUID string) ([]*events.LogMessage, error) {
-	logger.Debug("getRecentLogs")
+	log.Debug("getRecentLogs")
 	messages, err := ac.consumer.RecentLogs(appGUID, ac.authToken)
 	if err != nil {
 		errorPattern := "Failed to get recent messages for App %s on CNSI %s [%v]"
@@ -181,7 +182,7 @@ func drainErrors(errorChan <-chan error) {
 	for err := range errorChan {
 		// Note: we receive a nil error before the channel is closed so check here...
 		if err != nil {
-			logger.Errorf("Received error from Doppler %v", err.Error())
+			log.Errorf("Received error from Doppler %v", err.Error())
 		}
 	}
 }
@@ -214,7 +215,7 @@ func appStreamHandler(c echo.Context, ac *AuthorizedConsumer, clientWebSocket *w
 	cnsiGUID := c.Param("cnsiGuid")
 	appGUID := c.Param("appGuid")
 
-	logger.Infof("Received request for log stream for App ID: %s - in CNSI: %s", appGUID, cnsiGUID)
+	log.Infof("Received request for log stream for App ID: %s - in CNSI: %s", appGUID, cnsiGUID)
 
 	messages, err := getRecentLogs(ac, cnsiGUID, appGUID)
 	if err != nil {
@@ -224,11 +225,11 @@ func appStreamHandler(c echo.Context, ac *AuthorizedConsumer, clientWebSocket *w
 	// N.B. We convert protobuf messages to JSON for ease of use in the frontend
 	relayLogMsg := func(msg *events.LogMessage) {
 		if jsonMsg, err := json.Marshal(msg); err != nil {
-			logger.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
+			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
 			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
 			if err != nil {
-				logger.Errorf("Error writing data to WebSocket, %v", err)
+				log.Errorf("Error writing data to WebSocket, %v", err)
 			}
 		}
 	}
@@ -244,21 +245,21 @@ func appStreamHandler(c echo.Context, ac *AuthorizedConsumer, clientWebSocket *w
 	go drainErrors(errorChan)
 	go drainLogMessages(msgChan, relayLogMsg)
 
-	logger.Infof("Now streaming log for App ID: %s - on CNSI: %s", appGUID, cnsiGUID)
+	log.Infof("Now streaming log for App ID: %s - on CNSI: %s", appGUID, cnsiGUID)
 	return nil
 }
 
 func firehoseStreamHandler(c echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
-	logger.Debug("firehose")
+	log.Debug("firehose")
 
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := c.Param("cnsiGuid")
 
-	logger.Infof("Received request for Firehose stream for CNSI: %s", cnsiGUID)
+	log.Infof("Received request for Firehose stream for CNSI: %s", cnsiGUID)
 
 	userGUID := c.Get("user_id").(string)
-	firehoseSubscriptionId := userGUID + "@" + strconv.FormatInt(time.Now().UnixNano(), 10);
-	logger.Debugf("Connecting the Firehose with subscription ID: %s", firehoseSubscriptionId)
+	firehoseSubscriptionId := userGUID + "@" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	log.Debugf("Connecting the Firehose with subscription ID: %s", firehoseSubscriptionId)
 
 	eventChan, errorChan := ac.consumer.Firehose(firehoseSubscriptionId, ac.authToken)
 
@@ -266,15 +267,15 @@ func firehoseStreamHandler(c echo.Context, ac *AuthorizedConsumer, clientWebSock
 	go drainErrors(errorChan)
 	go drainFirehoseEvents(eventChan, func(msg *events.Envelope) {
 		if jsonMsg, err := json.Marshal(msg); err != nil {
-			logger.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
+			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
 			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
 			if err != nil {
-				logger.Errorf("Error writing data to WebSocket, %v", err)
+				log.Errorf("Error writing data to WebSocket, %v", err)
 			}
 		}
 	})
 
-	logger.Infof("Firehose connected and streaming for CNSI: %s - subscription ID: %s", cnsiGUID, firehoseSubscriptionId)
+	log.Infof("Firehose connected and streaming for CNSI: %s - subscription ID: %s", cnsiGUID, firehoseSubscriptionId)
 	return nil
 }

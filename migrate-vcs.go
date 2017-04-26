@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 	"os"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // This is a one-off migration of VCS entries from Connected Code Engine endpoints
@@ -16,7 +18,7 @@ const listCodeEngineTokens = `SELECT t.user_guid, c.guid
                               WHERE t.cnsi_guid = c.guid AND c.cnsi_type = 'hce' AND t.token_type = 'cnsi'`
 
 type CodeEngineConnection struct {
-	UserId string
+	UserId   string
 	CnsiGuid string
 }
 
@@ -31,7 +33,7 @@ func getConnectedCodeEngines(dcp *sql.DB) (map[string][]string, error) {
 
 	if err = rows.Err(); err != nil {
 		msg := "Unable to retrieve Code Engine Tokens: %v"
-		logger.Errorf(msg, err)
+		log.Errorf(msg, err)
 		return nil, fmt.Errorf(msg, err)
 	}
 
@@ -40,13 +42,13 @@ func getConnectedCodeEngines(dcp *sql.DB) (map[string][]string, error) {
 
 	for rows.Next() {
 		var (
-			userId string
+			userId   string
 			cnsiGuid string
 		)
 
 		err := rows.Scan(&userId, &cnsiGuid)
 		if err != nil {
-			logger.Warnf("Unable to scan token record: %v - Skipping row", err)
+			log.Warnf("Unable to scan token record: %v - Skipping row", err)
 			continue
 		}
 
@@ -72,38 +74,38 @@ func migrateVcsFromCodeEngine(p *portalProxy) error {
 		return nil
 	}
 
-	logger.Infof("migrateVcsFromCodeEngine")
+	log.Infof("migrateVcsFromCodeEngine")
 
 	// Wait for the upgrade lock file to disappear
 	upgradeLock := "/hsc-upgrade-volume/upgrade.lock"
 	_, err := os.Stat(upgradeLock)
 	if err == nil {
-		logger.Infof("Waiting for upgrade to complete...")
+		log.Infof("Waiting for upgrade to complete...")
 	}
 	for err == nil {
 		time.Sleep(1 * time.Second)
 		_, err = os.Stat(upgradeLock)
 	}
 
-	logger.Infof("Upgrade completed, proceeding")
+	log.Infof("Upgrade completed, proceeding")
 	ceConnectedUsers, err := getConnectedCodeEngines(p.DatabaseConnectionPool)
 	if err != nil {
 		msg := "Unable to retrieve Code Engine connected users: %v"
 		return fmt.Errorf(msg, err)
 	}
 
-	logger.Infof("Migrating VCSes from %d Code Engine record(s)...", len(ceConnectedUsers))
+	log.Infof("Migrating VCSes from %d Code Engine record(s)...", len(ceConnectedUsers))
 
 	// Attempt to use each connection to talk to HCE until we find one that works
 	for cnsiGuid, connections := range ceConnectedUsers {
-		logger.Infof("Auto-register VCSes from %s", cnsiGuid)
+		log.Infof("Auto-register VCSes from %s", cnsiGuid)
 		for _, userId := range connections {
-			logger.Infof("Using connection from user %s to %s...", userId, cnsiGuid)
+			log.Infof("Using connection from user %s to %s...", userId, cnsiGuid)
 			err = p.autoRegisterCodeEngineVcs(userId, cnsiGuid)
 			if err == nil {
 				break
 			}
-			logger.Warnf("Failed to import VCSes register using this connection %v", err)
+			log.Warnf("Failed to import VCSes register using this connection %v", err)
 		}
 	}
 

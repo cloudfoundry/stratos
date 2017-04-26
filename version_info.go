@@ -4,8 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/labstack/echo"
+	log "github.com/Sirupsen/logrus"
 	"github.com/hpcloud/portal-proxy/repository/goose-db-version"
+	"github.com/labstack/echo"
 )
 
 // Versions - response returned to caller from a getVersions action
@@ -39,7 +40,7 @@ func (p *portalProxy) getVersionsData() (*Versions, error) {
 func (p *portalProxy) getVersions(c echo.Context) error {
 	v, err := p.getVersionsData()
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 	}
 	return c.JSON(http.StatusOK, v)
