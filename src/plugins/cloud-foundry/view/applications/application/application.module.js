@@ -410,7 +410,7 @@
       } else {
         // Check permissions
         if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
-          // Hide delete if user has no HCE project permissions
+          // Hide delete if user has no project permissions
           hideAction = true;
         } else if (this.authModel.isInitialized(this.cnsiGuid)) {
           // Hide actions if user has no HCF app update perissions (i.e not a space developer)

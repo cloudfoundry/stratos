@@ -23,8 +23,7 @@
       };
 
       $scope.guids = {
-        cnsiGuid: 'cnsiGuid',
-        hceCnsiGuid: 'hceCnsiGuid'
+        cnsiGuid: 'cnsiGuid'
       };
 
       $scope.testNoOp = function () {};

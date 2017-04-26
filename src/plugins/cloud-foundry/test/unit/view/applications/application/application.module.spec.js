@@ -71,12 +71,6 @@
       var infoRequest = mock.cloudFoundryAPI.Info.GetInfo(cnsiGuid);
       $httpBackend.whenGET(infoRequest.url).respond(200, infoRequest.response['200'].body);
 
-      var hceInfoRequest = mock.hceApi.HceInfoApi.info(cnsiGuid);
-      $httpBackend.whenGET(hceInfoRequest.url).respond(200, hceInfoRequest.response['200'].body);
-
-      var userProvidedServiceRequest = mock.hceApi.UserProvidedServiceInstancesApi.RetrieveUserProvidedServiceInstance(appGuid);
-      $httpBackend.whenGET(userProvidedServiceRequest.url).respond(200, userProvidedServiceRequest.response['200']);
-
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, appEventService, confirmDialogMock,
         appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate,
