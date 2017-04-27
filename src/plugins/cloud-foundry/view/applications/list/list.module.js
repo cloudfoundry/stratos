@@ -182,7 +182,6 @@
     },
 
     getEndpointsLink: function () {
-      // TODO test this case
       if (this.model.clusterCount === 0 && this.isEndpointsDashboardAvailable) {
         return this.$state.go('endpoint.dashboard');
       }

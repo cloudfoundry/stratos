@@ -194,10 +194,15 @@
         .then(function onSuccess(data) {
           var noHCFInstances = data.numAvailable === 0;
           // Admin
-          if (account.isAdmin() && vm.isEndpointsDashboardAvailable) {
+          if (account.isAdmin()) {
             // Go the endpoints dashboard if there are no HCF clusters
             if (noHCFInstances) {
-              vm.redirectState = 'endpoint.dashboard';
+              if (vm.isEndpointsDashboardAvailable) {
+                vm.redirectState = 'endpoint.dashboard';
+              } else {
+                // Endpoint dashboard is not available and user can't add any HCF instances
+                appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+              }
             }
           } else {
             // Developer or Endpoint Dashboard plugin isn't loaded
@@ -213,8 +218,8 @@
                 if (userServiceInstanceModel.getNumValid() === 0 && vm.isEndpointsDashboardAvailable) {
                   vm.redirectState = 'endpoint.dashboard';
                 } else {
-
-                  // TODO think about this case
+                  // User cannot connect to any instances as the Endpoints dashboard isn't available
+                  appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
                 }
               });
             }
