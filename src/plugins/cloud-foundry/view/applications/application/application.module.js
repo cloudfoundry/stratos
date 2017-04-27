@@ -77,7 +77,7 @@
     this.appEndpointsCnsiService = appEndpointsCnsiService;
 
     // Clear any previous state in the application tabs service
-    cfApplicationTabs.clearStates();
+    cfApplicationTabs.callAppTabs('clearStates');
 
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
@@ -210,7 +210,7 @@
         this.ready = true;
 
         this.updateBuildPack();
-        this.cfApplicationTabs.clearStates();
+        this.cfApplicationTabs.callAppTabs('clearStates');
 
         if (this.model.application.summary.state === 'STARTED') {
           blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -225,13 +225,13 @@
       var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
           that.updateBuildPack();
-          that.cfApplicationTabs.clearStates();
+          that.cfApplicationTabs.callAppTabs('clearStates');
 
           // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
           // app summary
 
           blockUpdate.push(
-            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid,
+            that.appEndpointsCnsiService.callEndpointProviders('updateApplicationPipeline', that.cnsiGuid,
               true));
 
           if (!haveApplication && that.model.application.summary.state === 'STARTED') {
@@ -308,7 +308,7 @@
       return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
-            return that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid, true);
+            return that.appEndpointsCnsiService.callEndpointProviders('updateApplicationPipeline', that.cnsiGuid, true);
           });
         })
         .finally(function () {

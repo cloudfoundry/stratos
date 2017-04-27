@@ -3,7 +3,8 @@
 
   angular
     .module('code-engine.view.application.delivery-logs', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     // $stateProvider.state('ce.application.delivery-logs', {
@@ -12,6 +13,35 @@
       templateUrl: 'plugins/code-engine/view/application/delivery-logs/delivery-logs.html',
       controller: ApplicationDeliveryLogsController,
       controllerAs: 'appDelLogsCtrl'
+    });
+  }
+
+  function registerAppTab($stateParams, cfApplicationTabs, modelManager) {
+    var canEditApp;
+    cfApplicationTabs.tabs.push({
+      position: 5,
+      hide: function () {
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        if (!model.application.summary.space_guid) {
+          return true;
+        }
+        if (angular.isUndefined(canEditApp)) {
+          var cnsiGuid = $stateParams.cnsiGuid;
+          var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+          canEditApp = authModel.isAllowed(cnsiGuid,
+            authModel.resources.application,
+            authModel.actions.update,
+            model.application.summary.space_guid
+          );
+        }
+        return !canEditApp;
+      },
+      uiSref: 'cf.applications.application.delivery-logs',
+      label: 'app.tabs.deliveryLogs.label',
+      clearState: function () {
+        canEditApp = undefined;
+      }
     });
   }
 

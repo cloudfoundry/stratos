@@ -1,0 +1,12 @@
+{
+  "app": {
+    "tabs": {
+      "deliveryPipeline": {
+        "label": "Delivery Pipeline"
+      },
+      "deliveryLogs": {
+        "label": "Delivery Logs"
+      }
+    }
+  }
+}

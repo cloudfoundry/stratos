@@ -8,7 +8,7 @@
       "pending": "Pending",
       "loading": "Loading",
       "offline": "Offline",
-      "updating":  "Offline while Updating",
+      "updating": "Offline while Updating",
       "no-instances": "No Instances",
       "staging": "Staging App",
       "starting": "Starting App",
@@ -17,6 +17,17 @@
       "crashing": "Crashing",
       "partial": "Partially Online",
       "unknown": "Unknown"
+    },
+    "tabs": {
+      "summary": {
+        "label": "Summary"
+      },
+      "logStream": {
+        "label": "Log Stream"
+      },
+      "services": {
+        "label": "Services"
+      }
     }
   }
 }

@@ -359,7 +359,7 @@
      * @returns {promise} A promise
      */
     deleteProject: function () {
-      return this.appEndpointsCnsiService.callAllEndpointProvidersFunc('deleteApplicationPipeline', _.get(this, 'details.project'));
+      return this.appEndpointsCnsiService.callEndpointProviders('deleteApplicationPipeline', _.get(this, 'details.project'));
     },
 
     /**

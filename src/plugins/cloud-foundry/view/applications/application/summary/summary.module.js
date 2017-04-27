@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -18,6 +19,15 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/summary.html',
       controller: ApplicationSummaryController,
       controllerAs: 'applicationSummaryCtrl'
+    });
+  }
+
+  function registerAppTab(cfApplicationTabs) {
+    cfApplicationTabs.tabs.push({
+      position: 1,
+      hide: false,
+      uiSref: 'cf.applications.application.summary',
+      label: 'app.tabs.summary.label'
     });
   }
 

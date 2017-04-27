@@ -321,18 +321,18 @@
 
       it('#deleteProject - project is defined', function () {
         that.appModel.application.project = {};
-        that.appEndpointsCnsiService.callAllEndpointProvidersFunc = function () {
+        that.appEndpointsCnsiService.callEndpointProviders = function () {
           return that.$q.resolve();
         };
         that.details = {
           project: 'project'
         };
-        spyOn(that.appEndpointsCnsiService, 'callAllEndpointProvidersFunc').and.callThrough();
+        spyOn(that.appEndpointsCnsiService, 'callEndpointProviders').and.callThrough();
 
         var p = that.deleteProject();
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
-        expect(that.appEndpointsCnsiService.callAllEndpointProvidersFunc).toHaveBeenCalledWith('deleteApplicationPipeline', that.details.project);
+        expect(that.appEndpointsCnsiService.callEndpointProviders).toHaveBeenCalledWith('deleteApplicationPipeline', that.details.project);
       });
 
       it('#startWorkflow', function () {

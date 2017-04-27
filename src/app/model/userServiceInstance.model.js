@@ -115,7 +115,7 @@
 
         var tasks = [];
         _.forEach(appEndpointsCnsiService.cnsiEndpointProviders, function (endpointProvider) {
-          tasks.push(appEndpointsCnsiService.callEndpointProvidersFunc(endpointProvider.cnsi_type, 'refreshToken', items) || $q.resolve());
+          tasks.push(appEndpointsCnsiService.callEndpointProvidersOfType(endpointProvider.cnsi_type, 'refreshToken', items) || $q.resolve());
         });
 
         if (tasks.length === 0) {
