@@ -36,7 +36,6 @@
 
     appUtilsService.chainStateResolve('endpoint', $state, init);
 
-
   }
 
 })();

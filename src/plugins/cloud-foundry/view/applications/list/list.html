@@ -9,7 +9,8 @@
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
             translate
-            ng-click="applicationsListCtrl.addApplication()">app-wall.add-application</button>
+            ng-click="applicationsListCtrl.addApplication()">app-wall.add-application
+    </button>
   </div>
 </div>
 
@@ -22,34 +23,40 @@
             <div class="form-group search-field" focusable-input>
               <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
               <input type="text" class="form-control" id="applications-text" name="applications-text"
-                    ng-model="applicationsListCtrl.filter.text"
-                    ng-model-options='{ debounce: 100 }'
-                    ng-change="applicationsListCtrl.setText()"
-                    ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps"
-                    placeholder="{{'app-wall.search-placeholder' | translate}}"/>
+                     ng-model="applicationsListCtrl.filter.text"
+                     ng-model-options='{ debounce: 100 }'
+                     ng-change="applicationsListCtrl.setText()"
+                     ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps"
+                     placeholder="{{'app-wall.search-placeholder' | translate}}"/>
             </div>
           </form>
         </div>
         <div class="app-total-control">
           <form class="form-horizontal">
             <div class=" form-group">
-              <label ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>app-wall.total-apps</label>
-              <label ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount" class="control-label" translate>app-wall.filtered-apps</label>
+              <label
+                ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount"
+                class="control-label" translate>app-wall.total-apps</label>
+              <label
+                ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount"
+                class="control-label" translate>app-wall.filtered-apps</label>
               <div class="app-count">
                 <div class="app-count-number">
-                  <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
+                  <span
+                    ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
                     {{ applicationsListCtrl.model.unfilteredApplicationCount }}
                   </span>
-                  <span ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
+                  <span
+                    ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
                     {{ applicationsListCtrl.model.filteredApplications.length }} / {{ applicationsListCtrl.model.unfilteredApplicationCount }}
                   </span>
                 </div>
                 <div class="app-count-reset">
                   <div class="reset-link">
                     <a class="btn-link"
-                      ng-click="applicationsListCtrl.resetFilter()"
-                      ng-show="applicationsListCtrl.filter.cnsiGuid !== 'all' || applicationsListCtrl.filter.text.length"
-                      translate>app-wall.reset</a>
+                       ng-click="applicationsListCtrl.resetFilter()"
+                       ng-show="applicationsListCtrl.filter.cnsiGuid !== 'all' || applicationsListCtrl.filter.text.length"
+                       translate>app-wall.reset</a>
                   </div>
                 </div>
               </div>
@@ -73,13 +80,13 @@
         <div class="application-options-control">
           <div class="reset-link">
             <a class="btn-link"
-              ng-if="applicationsListCtrl.model.hideFilterPanel"
-              ng-click="applicationsListCtrl.toggleFilterPanel()"
-              translate>app-wall.options.show</a>
+               ng-if="applicationsListCtrl.model.hideFilterPanel"
+               ng-click="applicationsListCtrl.toggleFilterPanel()"
+               translate>app-wall.options.show</a>
             <a class="btn-link"
-              ng-if="!applicationsListCtrl.model.hideFilterPanel"
-              ng-click="applicationsListCtrl.toggleFilterPanel()"
-              translate>app-wall.options.hide</a>
+               ng-if="!applicationsListCtrl.model.hideFilterPanel"
+               ng-click="applicationsListCtrl.toggleFilterPanel()"
+               translate>app-wall.options.hide</a>
           </div>
         </div>
       </div>
@@ -125,8 +132,15 @@
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
       <div class="applications-msg" translate>You cannot view any applications.</div>
       <div class="applications-cta">
-        <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints Dashboard</a>
-        <span translate>to fix your connections or connect to new endpoints.</span>
+        <div ng-if="applicationsListCtrl.isEndpointsDashboardAvailable">
+          <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
+            Dashboard</a>
+          <span translate>to fix your connections or connect to new endpoints.</span>
+        </div>
+        <div ng-if="!applicationsListCtrl.isEndpointsDashboardAvailable">
+          <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Connect to your endpoint</a>
+          <span translate>or contact your administrator</span>
+        </div>
       </div>
     </div>
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
@@ -136,8 +150,7 @@
           <div class="applications-msg" translate>You have no applications and</div>
           <div class="applications-msg" translate>there are no spaces where you can add any.</div>
           <div class="applications-cta">
-            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
-              Dashboard</a>
+            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Click here</a>
             <span translate>to manage spaces.</span>
           </div>
         </div>

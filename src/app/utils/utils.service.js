@@ -15,9 +15,10 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
    * @param {object} $window - angular $window service
+   * @param {object} $injector - angular $injector service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log, $window) {
+  function utilsServiceFactory($q, $timeout, $log, $window, $injector) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     /*
@@ -91,7 +92,8 @@
       getOemConfiguration: getOemConfiguration,
       coloredLog: coloredLog,
       highlightLog: highlightLog,
-      replaceProperties: replaceProperties
+      replaceProperties: replaceProperties,
+      isPluginAvailable: isPluginAvailable
     };
 
     /**
@@ -310,6 +312,11 @@
     function getOemConfiguration() {
       return $window.env.OEM_CONFIG;
     }
+
+    function isPluginAvailable(pluginName) {
+      return $injector.has(pluginName);
+    }
+
   }
 
   function mbToHumanSizeFilter(appUtilsService) {

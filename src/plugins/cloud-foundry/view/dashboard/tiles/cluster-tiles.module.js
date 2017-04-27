@@ -5,7 +5,7 @@
     .module('cloud-foundry.view.dashboard.tiles', [])
     .config(registerRoute);
 
-  function registerRoute($stateProvider) {
+  function registerRoute($stateProvider, $injector) {
     $stateProvider.state('endpoint.clusters.tiles', {
       url: '/list',
       templateUrl: 'plugins/cloud-foundry/view/dashboard/tiles/cluster-tiles.html',
@@ -18,7 +18,11 @@
       },
       ncyBreadcrumb: {
         label: 'product.cf',
-        parent: 'endpoint.dashboard'
+        parent: function () {
+          if ($injector.has('endpoints-dashboard')) {
+            return 'endpoint.dashboard';
+          }
+        }
       }
     });
   }
@@ -43,9 +47,12 @@
     vm.currentUserAccount = modelManager.retrieve('app.model.account');
     vm.serviceInstances = {};
     vm.state = '';
+    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
+
     vm.createClusterList = createClusterList;
     vm.refreshClusterModel = refreshClusterModel;
     vm.updateState = updateState;
+    vm.isAdmin = isAdmin;
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -120,6 +127,23 @@
       } else {
         vm.state = 'noClusters';
       }
+
+    }
+
+    /**
+     * @namespace cloud-foundry.view.dashboard
+     * @memberof cloud-foundry.view.dashboard
+     * @name isAdmin
+     * @description check if user is admin, optionally check if endpoints dashboard is loaded
+     * @param {boolean} checkForEndpointsDashboard check if Endpoints Dashboard plugin is loaded
+     * @returns {*|boolean}
+     */
+    function isAdmin(checkForEndpointsDashboard) {
+      var isAdmin = vm.currentUserAccount.isAdmin();
+      if (checkForEndpointsDashboard) {
+        isAdmin = isAdmin && vm.isEndpointsDashboardAvailable;
+      }
+      return isAdmin;
     }
   }
 })();

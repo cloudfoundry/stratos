@@ -10,11 +10,11 @@
     <div ng-switch-when="noClusters" class="applications-empty">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
       <div class="applications-msg" translate>No connected {{ OEM_CONFIG.SERVICE_MANAGER }} endpoints.</div>
-      <div class="applications-cta" ng-show="clustersCtrl.currentUserAccount.isAdmin()">
+      <div class="applications-cta" ng-show="clustersCtrl.isAdmin(true)">
         <a class="btn-link" ui-sref="endpoint.dashboard" translate>Use the Endpoints Dashboard</a>
         <span translate>to fix your connections or connect to new endpoints.</span>
       </div>
-      <div class="applications-cta" ng-show="!clustersCtrl.currentUserAccount.isAdmin()">
+      <div class="applications-cta" ng-show="!clustersCtrl.isAdmin()">
         <span translate>Please contact your administrator.</span>
       </div>
     </div>

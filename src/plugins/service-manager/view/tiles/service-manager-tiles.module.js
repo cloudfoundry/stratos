@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute($stateProvider) {
+  function registerRoute($stateProvider, $injector) {
     $stateProvider.state('sm.tiles', {
       url: '/tiles',
       templateUrl: 'plugins/service-manager/view/tiles/service-manager-tiles.html',
@@ -22,8 +22,11 @@
       },
       ncyBreadcrumb: {
         label: 'service-manager',
-        parent: 'endpoint.dashboard'
-      },
+        parent: function () {
+          if ($injector.has('endpoints-dashboard')) {
+            return 'endpoint.dashboard';
+          }
+        },
       data: {
         activeMenuState: 'sm.list'
       }
@@ -66,6 +69,7 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
     this.state = '';
+    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
 
     function init() {
       return that.refreshEndpointModel();
