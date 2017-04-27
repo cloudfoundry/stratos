@@ -50,16 +50,18 @@
   }
 
   var filePathsToExclude;
-  function updateWithPlugins(srcArray) {
+  function updateWithPlugins(srcArray, flipExclude) {
     // All config (srcArray) collections will contain the file globs for ALL plugins. Here we eliminate those that
     // aren't required (in plugins folder but not in build_config.json plugins)
     if (!filePathsToExclude) {
       filePathsToExclude = [];
-      var pluginsDirs = getDirs(path.join(config.paths.src, 'plugins'));
+      var appRoot = path.resolve(__dirname, '..');
+      var pluginsDirs = getDirs(path.join(appRoot, config.paths.src, 'plugins'));
       var pluginsToExclude = _.difference(pluginsDirs, buildConfig.plugins);
+      var exclude = flipExclude ? '' : '!';
       _.forEach(pluginsToExclude, function (plugin) {
-        filePathsToExclude.push('!./' + path.join(config.paths.dist, 'plugins', plugin, '**', '*'));
-        filePathsToExclude.push('!./' + path.join(config.paths.src, 'plugins', plugin, '**', '*'));
+        filePathsToExclude.push(exclude + './' + path.join(config.paths.dist, 'plugins', plugin, '**', '*'));
+        filePathsToExclude.push(exclude + './' + path.join(config.paths.src, 'plugins', plugin, '**', '*'));
       });
     }
     return srcArray.concat(filePathsToExclude);
