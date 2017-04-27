@@ -1,12 +1,16 @@
 package datastore
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/kat-co/vala"
+	// SQL Lite 3
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // DatabaseConfig represents the connection configuration parameters
@@ -35,6 +39,10 @@ const (
 	SSLVerifyCA SSLValidationMode = "verify-ca"
 	// SSLVerifyFull verifies the certificate and hostname and the CA
 	SSLVerifyFull SSLValidationMode = "verify-full"
+	// SQLiteSchemaFile - SQLite schema file
+	SQLiteSchemaFile = "./db/sqlite_schema.sql"
+	// SQLiteDatabaseFile - SQLite database file
+	SQLiteDatabaseFile = "./console-database.db"
 )
 
 const (
@@ -72,7 +80,6 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
 		vala.IsNotNil(database, "database"),
-		vala.IsNotNil(host, "host"),
 		vala.GreaterThan(port, 0, "port"),
 		vala.Not(vala.GreaterThan(port, 65535, "port")),
 	).Check()
@@ -83,10 +90,62 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	return nil
 }
 
-// GetConnection returns a database connection to PostgreSQL
+// GetConnection returns a database connection to either PostgreSQL or SQLite
 func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	log.Println("GetConnection")
-	return sql.Open("postgres", buildConnectionString(dc))
+
+	if len(dc.Host) > 0 {
+		return sql.Open("postgres", buildConnectionString(dc))
+	}
+
+	// SQL Lite
+	return GetSQLLiteConnection(dc)
+}
+
+func GetSQLLiteConnection(dc DatabaseConfig) (*sql.DB, error) {
+	os.Remove(SQLiteDatabaseFile)
+
+	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
+	if err != nil {
+		return db, err
+	}
+
+	// Need to initialize the schema of the SQLite Database
+	file, err := os.Open(SQLiteSchemaFile)
+	if err != nil {
+		log.Warn("Can not find the schema file for database initialization")
+		return db, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var statement = ""
+	var counter = 1
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimSpace(line)
+
+		if strings.Index(line, "--") != 0 && len(line) > 0 {
+			// not a comment or an empty line
+			statement += line
+			if strings.HasSuffix(line, ";") {
+				// This is the end of the statement
+				_, err = db.Exec(statement)
+				if err != nil {
+					log.Errorf("Failed to execute statement #%d: %s", counter, err)
+					return db, err
+				}
+				statement = ""
+				counter++
+			}
+		}
+	}
+
+	err = scanner.Err()
+	if err == nil {
+		log.Info("Created database schema for SQLite database")
+	}
+	return db, err
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -130,7 +189,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 
 // Ping - ping the database to ensure the connection/pool works.
 func Ping(db *sql.DB) error {
-	log.Println("Ping")
+	log.Debug("Ping database")
 	err := db.Ping()
 	if err != nil {
 		return fmt.Errorf("Unable to ping the database: %+v", err)

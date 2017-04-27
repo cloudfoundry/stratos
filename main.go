@@ -16,8 +16,10 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/gorilla/sessions"
 	"github.com/hpcloud/portal-proxy/config"
 	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/hpcloud/portal-proxy/datastore/sqllite"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -141,6 +143,7 @@ func main() {
 	if err := start(portalProxy); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
+
 }
 
 func getEncryptionKey(pc portalConfig) ([]byte, error) {
@@ -183,13 +186,13 @@ func initConnPool() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Ensure Postgres is responsive
+	// Ensure that the database is responsive
 	for {
 
 		// establish an outer timeout boundary
 		timeout := time.Now().Add(time.Minute * TimeoutBoundary)
 
-		// Ping Postgres
+		// Ping the database
 		err = datastore.Ping(pool)
 		if err == nil {
 			log.Info("Database appears to now be available.")
@@ -202,21 +205,29 @@ func initConnPool() (*sql.DB, error) {
 		}
 
 		// Circle back and try again
-		log.Infof("Waiting for Postgres to be responsive: %+v", err)
+		log.Infof("Waiting for database to be responsive: %+v", err)
 		time.Sleep(time.Second)
 	}
 
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, pc portalConfig) (*pgstore.PGStore, error) {
+func initSessionStore(db *sql.DB, pc portalConfig) (sessions.Store, error) {
 	log.Debug("initSessionStore")
-	store, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+
+	// load up postgresql database configuration
+	var dc datastore.DatabaseConfig
+	dc, err := loadDatabaseConfig(dc)
 	if err != nil {
 		return nil, err
 	}
 
-	return store, nil
+	// Store depends on the DB Type
+	if len(dc.Host) > 0 {
+		return pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+	}
+
+	return sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
