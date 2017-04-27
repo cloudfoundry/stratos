@@ -110,8 +110,6 @@
           fetching: false,
           valid: false,
           forbidden: false,
-          hceCnsi: undefined,
-          hceServiceGuid: undefined,
           projectId: undefined
         },
         project: null,
@@ -924,110 +922,6 @@
         .then(function (response) {
           return response.data;
         });
-    },
-
-    /**
-     * @function listHceCnsis
-     * @memberof cloud-foundry.model.application
-     * @description Invoke the /info endpoint of all HCE instances available to the user, in order to get their public API url.
-     * The url we have registeed can be different to the API url returned by the /info endpoint.
-     * @returns {promise} A promise object
-     * @private
-     */
-    listHceCnsis: function () {
-      var that = this;
-      // We cache on the application - so if you add an HCE while on the app, we won't detect that
-      // Saves making lots of calls
-      var userCnsiModel = this._getUserCnsiModel();
-      if (this.hceServiceInfo) {
-        return this.$q.when(this.hceServiceInfo);
-      } else {
-        var promise = userCnsiModel.serviceInstances && _.keys(userCnsiModel.serviceInstances).length
-          ? this.$q.when(userCnsiModel.serviceInstances) : userCnsiModel.list();
-        return promise.then(function () {
-          // Retrieve dynamicllay as this model may load before the one we need
-          var hceModel = that.modelManager.retrieve('code-engine.model.hce');
-          var hceCnsis = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-          if (hceCnsis.length === 0) {
-            return that.$q.when(hceCnsis);
-          }
-          var hceCnsisGuids = _.chain(hceCnsis).map('guid').value();
-          return hceModel.infos(hceCnsisGuids.join(',')).then(function (infos) {
-            _.each(hceCnsis, function (cnsi) {
-              cnsi.info = infos[cnsi.guid];
-            });
-            that.hceServiceInfo = hceCnsis;
-            return hceCnsis;
-          });
-        });
-      }
-    },
-
-    /**
-     * @function updateDeliveryPipelineMetadata
-     * @memberof cloud-foundry.model.application
-     * @description Update the pipeline metadata for the application
-     * @param {boolean} refresh - indicates if cached hce metadata should be refreshed
-     * @returns {promise} A promise object
-     * @public
-     */
-    updateDeliveryPipelineMetadata: function (refresh) {
-      var that = this;
-      var pipeline = this.application.pipeline;
-      if (refresh) {
-        this.hceServiceInfo = undefined;
-      }
-      // Retrieve dynamicllay as this model may load before the one we need
-      var hcfUserProvidedServiceInstanceModel = that.modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
-      // Async: work out if this application has a delivery pipeline
-      // Look at the services for one named 'hce-<APP_GUID>'
-      var hceServiceLink = 'hce-' + that.application.summary.guid;
-      var hceServiceData = _.find(that.application.summary.services, function (svc) {
-        return svc.name === hceServiceLink;
-      });
-
-      function clearDeliveryPipelineMetadata(metadata) {
-        metadata.fetching = false;
-        metadata.valid = false;
-        metadata.hceCnsi = undefined;
-        metadata.hce_api_url = undefined;
-        metadata.hceServiceGuid = undefined;
-        metadata.projectId = undefined;
-        // Ensure all traces of the project are removed
-        that.application.project = null;
-      }
-
-      if (hceServiceData) {
-        // Go fetch the service metadata
-        return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
-          .then(function (data) {
-            // Now we need to see if the CNSI is known
-            if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
-              // HCE API Endpoint
-              pipeline.hceServiceGuid = hceServiceData.guid;
-              pipeline.hce_api_url = data.entity.credentials.hce_api_url;
-              pipeline.projectId = _.toNumber(data.entity.credentials.hce_pipeline_id);
-              return that.listHceCnsis().then(function (hceEndpoints) {
-                var hceInstance = _.find(hceEndpoints, function (hce) {
-                  var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
-                  return pipeline.hce_api_url.indexOf(url) === 0;
-                });
-                pipeline.hceCnsi = hceInstance;
-                pipeline.valid = angular.isDefined(hceInstance);
-                pipeline.fetching = false;
-                return pipeline;
-              });
-            } else {
-              clearDeliveryPipelineMetadata(pipeline);
-            }
-          })
-          .catch(function () {
-            clearDeliveryPipelineMetadata(pipeline);
-          });
-      } else {
-        clearDeliveryPipelineMetadata(pipeline);
-        return that.$q.when(pipeline);
-      }
     },
 
     /**

@@ -7,7 +7,6 @@
 
     beforeEach(module('green-box-console'));
 
-    beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module('ng', function ($exceptionHandlerProvider) {
       // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely
       // wrap them as per the actual implementation). Therefor disable so we can test error cases.

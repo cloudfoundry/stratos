@@ -20,9 +20,11 @@
 
   var skipPlugin = require('../test/e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+  var path = require('path');
+  var reporterPath = path.resolve(__dirname, '..', 'out/e2e-failures');
 
   var reporter = new HtmlScreenshotReporter({
-    dest: '../out/e2e-failures',
+    dest: reporterPath,
     filename: 'test-report.html',
     ignoreSkippedSpecs: true,
     captureOnlyFailedSpecs: true,
