@@ -7,7 +7,7 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
-    beforeEach(module('app.view.endpoints.dashboard'));
+    beforeEach(module('app.view.endpoints'));
 
     beforeEach(inject(function ($injector) {
       var appUtilsService = $injector.get('appUtilsService');

@@ -31,6 +31,9 @@
         getClusterEndpoint: function () {
           return '';
         },
+        isPluginAvailable: function () {
+          return true;
+        },
         getOemConfiguration: function () {
           return {
             PRODUCT_VERSION: '4.0',
@@ -54,7 +57,7 @@
         }
       }
     }));
-    beforeEach(module('app.view.endpoints.dashboard'));
+    beforeEach(module('endpoints-dashboard'));
     beforeEach(module(function ($provide) {
       var mock = function () {
         // Params are config, context

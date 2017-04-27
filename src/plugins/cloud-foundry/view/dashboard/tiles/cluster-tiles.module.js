@@ -5,7 +5,7 @@
     .module('cloud-foundry.view.dashboard.tiles', [])
     .config(registerRoute);
 
-  function registerRoute($stateProvider, $injector) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.tiles', {
       url: '/list',
       templateUrl: 'plugins/cloud-foundry/view/dashboard/tiles/cluster-tiles.html',
