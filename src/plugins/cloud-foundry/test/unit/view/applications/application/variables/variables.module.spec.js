@@ -13,7 +13,7 @@
       var modelManager = $injector.get('modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
-      var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+      var appVarsManager = $injector.get('cfVariablesManager');
       $stateParams.cnsiGuid = cnsiGuid;
       $stateParams.guid = guid;
       var ApplicationVariablesController = $state.get('cf.applications.application.variables').controller;

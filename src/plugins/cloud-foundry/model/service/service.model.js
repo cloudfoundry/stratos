@@ -26,13 +26,19 @@
    * @class
    */
   function Service(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.serviceApi = this.apiManager.retrieve('cloud-foundry.api.Services');
-    this.modelUtils = modelUtils;
-    this.data = {};
-  }
+    var serviceApi = apiManager.retrieve('cloud-foundry.api.Services');
 
-  angular.extend(Service.prototype, {
+    var model = {
+      data: {},
+      all: all,
+      allServicePlans: allServicePlans,
+      retrieveService: retrieveService,
+      onAll: onAll,
+      onAllServicePlans: onAllServicePlans
+    };
+
+    return model;
+
     /**
      * @function all
      * @memberof  cloud-foundry.model.service
@@ -44,20 +50,20 @@
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (cnsiGuid, options, paginate) {
-      var that = this;
-      return this.serviceApi.ListAllServices(this.modelUtils.makeListParams(options),
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function all(cnsiGuid, options, paginate) {
+
+      return serviceApi.ListAllServices(modelUtils.makeListParams(options),
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (all) {
-          return that.onAll(all);
+          return onAll(all);
         });
-    },
+    }
 
     /**
      * @function allServicePlans
@@ -71,20 +77,20 @@
      * @returns {promise} A promise object
      * @public
      */
-    allServicePlans: function (cnsiGuid, guid, options, paginate) {
-      var that = this;
-      return this.serviceApi.ListAllServicePlansForService(guid, this.modelUtils.makeListParams(options),
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function allServicePlans(cnsiGuid, guid, options, paginate) {
+
+      return serviceApi.ListAllServicePlansForService(guid, modelUtils.makeListParams(options),
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (all) {
-          return that.onAllServicePlans(all);
+          return onAllServicePlans(all);
         });
-    },
+    }
 
     /**
      * @function retrieveService
@@ -96,12 +102,12 @@
      * @returns {promise} A promise object
      * @public
      */
-    retrieveService: function (cnsiGuid, guid, options) {
-      return this.serviceApi.RetrieveService(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function retrieveService(cnsiGuid, guid, options) {
+      return serviceApi.RetrieveService(guid, options, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function onAll
@@ -111,10 +117,10 @@
      * @returns {Array} The response
      * @private
      */
-    onAll: function (all) {
-      this.data = all;
+    function onAll(all) {
+      model.data = all;
       return all;
-    },
+    }
 
     /**
      * @function onAllServicePlans
@@ -124,10 +130,10 @@
      * @returns {Array} The response
      * @private
      */
-    onAllServicePlans: function (all) {
-      this.data.servicePlans = all;
+    function onAllServicePlans(all) {
+      model.data.servicePlans = all;
       return all;
     }
-  });
+  }
 
 })();

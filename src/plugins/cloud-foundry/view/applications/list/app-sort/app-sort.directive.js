@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications.list')
     .directive('applicationsSorting', applicationsSorting);
 
-  applicationsSorting.$inject = [];
-
   function applicationsSorting() {
     return {
       controller: ApplicationsSortingController,
@@ -15,11 +13,6 @@
       'app-sort/app-sort.html'
     };
   }
-
-  ApplicationsSortingController.$inject = [
-    '$scope',
-    'modelManager'
-  ];
 
   /**
    * @name ApplicationsSortingController

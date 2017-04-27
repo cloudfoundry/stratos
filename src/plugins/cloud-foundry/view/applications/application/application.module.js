@@ -46,63 +46,47 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
-   * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
                                  cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
                                  $interpolate, $state, cfApplicationTabs, appEndpointsCnsiService) {
-    var that = this;
+    var vm = this;
 
-    this.$window = $window;
-    this.$q = $q;
-    this.$interval = $interval;
-    this.$interpolate = $interpolate;
-    this.appEventService = appEventService;
-    this.frameworkDialogConfirm = frameworkDialogConfirm;
-    this.frameworkDetailView = frameworkDetailView;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.cnsiGuid = $stateParams.cnsiGuid;
-    this.cfAppCliCommands = cfAppCliCommands;
-    this.id = $stateParams.guid;
-    // Do we have the application summary? If so ready = true. This should be renamed
-    this.ready = false;
-    this.pipelineReady = false;
-    this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.UPDATE_INTERVAL = 5000; // milliseconds
-    this.cfApplicationTabs = cfApplicationTabs;
-    this.appEndpointsCnsiService = appEndpointsCnsiService;
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var cnsiGuid = $stateParams.cnsiGuid;
+    var pipelineReady = false;
+    var UPDATE_INTERVAL = 5000; // milliseconds
 
-    // Clear any previous state in the application tabs service
-    cfApplicationTabs.clearStates();
-
-    // Wait for parent state to be fully initialised
-    appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
+    var scopeDestroyed, updating;
 
     // When a modal interaction starts, stop the background polling
-    this.removeModalStartListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_START, function () {
-      that.stopUpdate();
+    var removeModalStartListener = appEventService.$on(appEventService.events.MODAL_INTERACTION_START, function () {
+      stopUpdate();
     });
     // When a modal interaction ends, resume the background polling
-    this.removeModalEndListener = this.appEventService.$on(this.appEventService.events.MODAL_INTERACTION_END, function () {
-      that.update().finally(function () {
-        that.startUpdate();
+    var removeModalEndListener = appEventService.$on(appEventService.events.MODAL_INTERACTION_END, function () {
+      update().finally(function () {
+        startUpdate();
       });
     });
 
-    this.appActions = [
+    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+    vm.id = $stateParams.guid;
+    // Do we have the application summary? If so ready = true. This should be renamed
+    vm.ready = false;
+    vm.cfApplicationTabs = cfApplicationTabs;
+    vm.appActions = [
       {
         name: gettext('View App'),
         execute: function () {
-          var routes = that.model.application.summary.routes;
+          var routes = vm.model.application.summary.routes;
           if (routes.length) {
             var route = routes[0];
             var path = angular.isUndefined(route.path) ? '' : '/' + route.path;
             var url = 'http://' + route.host + '.' + route.domain.name + path;
-            that.$window.open(url, '_blank');
+            $window.open(url, '_blank');
           }
         },
         disabled: true,
@@ -113,7 +97,7 @@
         name: gettext('Stop'),
         id: 'stop',
         execute: function () {
-          that.model.stopApp(that.cnsiGuid, that.id);
+          vm.model.stopApp(cnsiGuid, vm.id);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Halt-stop'
@@ -122,7 +106,7 @@
         name: gettext('Restart'),
         id: 'restart',
         execute: function () {
-          that.model.restartApp(that.cnsiGuid, that.id);
+          vm.model.restartApp(cnsiGuid, vm.id);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Refresh'
@@ -131,7 +115,7 @@
         name: gettext('Delete'),
         id: 'delete',
         execute: function () {
-          that.deleteApp();
+          deleteApp();
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Trash'
@@ -140,7 +124,7 @@
         name: gettext('Start'),
         id: 'start',
         execute: function () {
-          that.model.startApp(that.cnsiGuid, that.id);
+          vm.model.startApp(cnsiGuid, vm.id);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Play'
@@ -151,55 +135,62 @@
         execute: function () {
 
           var username = null;
-          if (that.stackatoInfo.info.endpoints) {
-            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          if (stackatoInfo.info.endpoints) {
+            username = stackatoInfo.info.endpoints.hcf[vm.model.application.cluster.guid].user.name;
           }
-          that.cfAppCliCommands.show(that.model.application, username);
+          cfAppCliCommands.show(vm.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
       }
     ];
+    vm.scheduledUpdate;
+
+    vm.showCliInstructions = showCliInstructions;
+    vm.isActionHidden = isActionHidden;
+
+    // Clear any previous state in the application tabs service
+    cfApplicationTabs.clearStates();
+
+    // Wait for parent state to be fully initialised
+    appUtilsService.chainStateResolve('cf.applications', $state, _.bind(init, vm));
 
     // On first load, hide all of the application actions
-    this.onAppStateChange();
+    onAppStateChange();
 
     $scope.$watch(function () {
-      return that.model.application.state
-        ? that.model.application.state.label + that.model.application.state.subLabel : undefined;
+      return vm.model.application.state
+        ? vm.model.application.state.label + vm.model.application.state.subLabel : undefined;
     }, function () {
-      that.onAppStateChange();
+      onAppStateChange();
     });
 
     $scope.$watch(function () {
-      return that.model.application.summary.routes;
+      return vm.model.application.summary.routes;
     }, function (newRoutes, oldRoutes) {
       if (angular.toJson(newRoutes) !== angular.toJson(oldRoutes)) {
-        that.onAppRoutesChange(newRoutes);
+        onAppRoutesChange(newRoutes);
       }
     });
 
     $scope.$on('$destroy', function () {
-      that.removeModalStartListener();
-      that.removeModalEndListener();
-      that.scopeDestroyed = true;
-      that.stopUpdate();
+      removeModalStartListener();
+      removeModalEndListener();
+      scopeDestroyed = true;
+      stopUpdate();
     });
-  }
 
-  angular.extend(ApplicationController.prototype, {
-    init: function () {
-      var that = this;
-      this.ready = false;
-      this.model.application.project = null;
+    function init() {
+      vm.ready = false;
+      vm.model.application.project = null;
       // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
       // in those cases
-      this.model.application.pipeline.fetching = true;
-      this.model.getClusterWithId(this.cnsiGuid);
+      vm.model.application.pipeline.fetching = true;
+      vm.model.getClusterWithId(cnsiGuid);
 
-      var haveApplication = angular.isDefined(this.model.application) &&
-        angular.isDefined(this.model.application.summary) &&
-        angular.isDefined(this.model.application.state);
+      var haveApplication = angular.isDefined(vm.model.application) &&
+        angular.isDefined(vm.model.application.summary) &&
+        angular.isDefined(vm.model.application.state);
 
       // Block the automatic update until we've finished the first round
       var blockUpdate = [];
@@ -207,53 +198,53 @@
       if (haveApplication) {
         // If we already have an application - then we are ready to display straight away
         // the rest of the data we might need will load and update the UI incrementally
-        this.ready = true;
+        vm.ready = true;
 
-        this.updateBuildPack();
-        this.cfApplicationTabs.clearStates();
+        updateBuildPack();
+        cfApplicationTabs.clearStates();
 
-        if (this.model.application.summary.state === 'STARTED') {
-          blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
-            that.model.onAppStateChange();
+        if (vm.model.application.summary.state === 'STARTED') {
+          blockUpdate.push(vm.model.getAppStats(cnsiGuid, vm.id).then(function () {
+            vm.model.onAppStateChange();
           }));
         }
       }
 
       // Only the org and space names are needed, these cane be displayed dynamically when fetched
-      this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
+      vm.model.getAppDetailsOnOrgAndSpace(cnsiGuid, vm.id);
 
-      var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
+      var appSummaryPromise = vm.model.getAppSummary(cnsiGuid, vm.id, false)
         .then(function () {
-          that.updateBuildPack();
-          that.cfApplicationTabs.clearStates();
+          updateBuildPack();
+          cfApplicationTabs.clearStates();
 
           // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
           // app summary
 
           blockUpdate.push(
-            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid,
+            appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', cnsiGuid,
               true));
 
-          if (!haveApplication && that.model.application.summary.state === 'STARTED') {
-            blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
-              that.model.onAppStateChange();
+          if (!haveApplication && vm.model.application.summary.state === 'STARTED') {
+            blockUpdate.push(vm.model.getAppStats(cnsiGuid, vm.id).then(function () {
+              vm.model.onAppStateChange();
             }));
           }
         })
         .finally(function () {
-          that.ready = true;
+          vm.ready = true;
 
-          that.onAppStateChange();
+          onAppStateChange();
 
           // Don't start updating until we have completed the first init
           // Don't create timer when scope has been destroyed
-          if (!that.scopeDestroyed) {
-            return that.$q.all(blockUpdate).finally(function () {
+          if (!scopeDestroyed) {
+            return $q.all(blockUpdate).finally(function () {
               // HSC-1410: Need to check again that the scope has not been destroyed
-              if (!that.scopeDestroyed) {
-                that.pipelineReady = true;
-                that.onAppStateChange();
-                that.startUpdate();
+              if (!scopeDestroyed) {
+                pipelineReady = true;
+                onAppStateChange();
+                startUpdate();
               }
             });
           }
@@ -262,34 +253,33 @@
 
       // Only block on fetching the app summary, anything else is not required by child states... or is but watches for
       // value change
-      return haveApplication ? this.$q.resolve() : appSummaryPromise;
-    },
+      return haveApplication ? $q.resolve() : appSummaryPromise;
+    }
 
     /**
      * @function startUpdate
      * @description start updating application view
      * @public
      */
-    startUpdate: function () {
-      var that = this;
-      if (!this.scheduledUpdate) {
-        this.scheduledUpdate = this.$interval(function () {
-          that.update();
-        }, this.UPDATE_INTERVAL);
+    function startUpdate() {
+      if (!vm.scheduledUpdate) {
+        vm.scheduledUpdate = $interval(function () {
+          update();
+        }, UPDATE_INTERVAL);
       }
-    },
+    }
 
     /**
      * @function stopUpdate
      * @description stop updating application
      * @public
      */
-    stopUpdate: function () {
-      if (this.scheduledUpdate) {
-        this.$interval.cancel(this.scheduledUpdate);
-        delete this.scheduledUpdate;
+    function stopUpdate() {
+      if (vm.scheduledUpdate) {
+        $interval.cancel(vm.scheduledUpdate);
+        vm.scheduledUpdate = undefined;
       }
-    },
+    }
 
     /**
      * @function update
@@ -297,25 +287,23 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    update: function () {
-      if (this.updating) {
-        return;
+    function update() {
+      if (updating) {
+        return $q.resolve();
       }
 
-      var that = this;
-
-      this.updating = true;
-      return this.$q.when()
+      updating = true;
+      return $q.when()
         .then(function () {
-          return that.updateSummary().then(function () {
-            return that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid, true);
+          return updateSummary().then(function () {
+            return appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', cnsiGuid, true);
           });
         })
         .finally(function () {
-          that.updateActions();
-          that.updating = false;
+          updateActions();
+          updating = false;
         });
-    },
+    }
 
     /**
      * @function updateSummary
@@ -323,44 +311,33 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    updateSummary: function () {
-      var that = this;
-      return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function () {
-        that.updateBuildPack();
+    function updateSummary() {
+      return vm.model.getAppSummary(cnsiGuid, vm.id, true).then(function () {
+        updateBuildPack();
       });
-    },
+    }
 
-    updateBuildPack: function () {
+    function updateBuildPack() {
       // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
-      this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
-    },
+      vm.appBuildPack = vm.model.application.summary.buildpack || vm.model.application.summary.detected_buildpack;
+    }
 
-    /**
-     * @function updateState
-     * @description update application state
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    updateState: function () {
-      return this.model.getAppStats(this.cnsiGuid, this.id);
-    },
-
-    deleteApp: function () {
-      if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
+    function deleteApp() {
+      if (vm.model.application.summary.services.length || vm.model.application.summary.routes.length) {
         var data = {
-          cnsiGuid: this.cnsiGuid,
-          project: _.get(this.model, 'application.project')
+          cnsiGuid: cnsiGuid,
+          project: _.get(vm.model, 'application.project')
         };
-        this.complexDeleteAppDialog(data);
+        complexDeleteAppDialog(data);
       } else {
-        this.simpleDeleteAppDialog();
+        simpleDeleteAppDialog();
       }
-    },
+    }
 
-    complexDeleteAppDialog: function (details) {
-      this.frameworkDetailView(
+    function complexDeleteAppDialog(details) {
+      frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
@@ -369,30 +346,29 @@
           details: details
         }
       );
-    },
+    }
 
-    simpleDeleteAppDialog: function () {
-      var that = this;
-      this.frameworkDialogConfirm({
+    function simpleDeleteAppDialog() {
+      frameworkDialogConfirm({
         title: gettext('Delete Application'),
-        description: gettext('Are you sure you want to delete ') + this.model.application.summary.name + '?',
+        description: gettext('Are you sure you want to delete ') + vm.model.application.summary.name + '?',
         submitCommit: true,
         buttonText: {
           yes: gettext('Delete'),
           no: gettext('Cancel')
         },
         callback: function () {
-          var appName = that.model.application.summary.name;
-          that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
+          var appName = vm.model.application.summary.name;
+          vm.model.deleteApp(cnsiGuid, vm.id).then(function () {
             // show notification for successful binding
             var successMsg = gettext("'{{appName}}' has been deleted");
-            var message = that.$interpolate(successMsg)({appName: appName});
-            that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
-            that.appEventService.$emit(that.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+            var message = $interpolate(successMsg)({appName: appName});
+            appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+            appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }
       });
-    },
+    }
 
     /**
      * @function isActionHidden
@@ -400,30 +376,30 @@
      * @param {string} id - the id of the action
      * @returns {boolean} whether or not the action should be hidden
      */
-    isActionHidden: function (id) {
+    function isActionHidden(id) {
 
       var hideAction = true;
-      if (!this.model.application.state || !this.model.application.state.actions) {
+      if (!vm.model.application.state || !vm.model.application.state.actions) {
         return true;
       } else if (id === 'launch') {
         hideAction = false;
       } else {
         // Check permissions
-        if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
+        if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
           // Hide delete if user has no project permissions
           hideAction = true;
-        } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+        } else if (authModel.isInitialized(cnsiGuid)) {
           // Hide actions if user has no HCF app update perissions (i.e not a space developer)
-          var spaceGuid = this.model.application.summary.space_guid;
-          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
-            this.authModel.resources.application,
-            this.authModel.actions.update,
+          var spaceGuid = vm.model.application.summary.space_guid;
+          hideAction = !authModel.isAllowed(cnsiGuid,
+            authModel.resources.application,
+            authModel.actions.update,
             spaceGuid);
         }
 
       }
-      return this.model.application.state.actions[id] !== true || hideAction;
-    },
+      return vm.model.application.state.actions[id] !== true || hideAction;
+    }
 
     /**
      * @function isActionDisabled
@@ -431,58 +407,57 @@
      * @param {string} id - the ID of the action
      * @returns {boolean} Whether or not the action should be disabled
      */
-    isActionDisabled: function (id) {
+    function isActionDisabled(id) {
       if (id === 'delete') {
-        return !this.pipelineReady;
+        return !pipelineReady;
       } else {
         return false;
       }
-    },
+    }
 
     /**
      * @function showCliInstructions
      * @description Show the CLI Instructions slide-in
      */
-    showCliInstructions: function () {
-      var cliAction = _.find(this.appActions, {id: 'cli'});
+    function showCliInstructions() {
+      var cliAction = _.find(vm.appActions, {id: 'cli'});
       if (cliAction && !cliAction.disabled && !cliAction.hidden) {
         cliAction.execute();
       }
-    },
+    }
 
     /**
      * @function onAppStateChange
      * @description invoked when the application state changes, so we can update action visibility
      */
-    onAppStateChange: function () {
-      this.updateActions();
-      this.onAppRoutesChange();
-    },
+    function onAppStateChange() {
+      updateActions();
+      onAppRoutesChange();
+    }
 
-    updateActions: function () {
-      var that = this;
-      angular.forEach(this.appActions, function (appAction) {
-        appAction.disabled = that.isActionDisabled(appAction.id);
-        appAction.hidden = that.isActionHidden(appAction.id);
+    function updateActions() {
+      angular.forEach(vm.appActions, function (appAction) {
+        appAction.disabled = isActionDisabled(appAction.id);
+        appAction.hidden = isActionHidden(appAction.id);
       });
-      this.visibleActions = _.find(this.appActions, { hidden: false });
-    },
+      vm.visibleActions = _.find(vm.appActions, {hidden: false});
+    }
 
     /**
      * @function onAppRoutesChange
      * @description invoked when the application routes change, so we can update action visibility
      * @param {object=} newRoutes - application route metadata
      */
-    onAppRoutesChange: function (newRoutes) {
+    function onAppRoutesChange(newRoutes) {
       // Must have a route to be able to view an application
-      var viewAction = _.find(this.appActions, {id: 'launch'});
-      var hidden = this.isActionHidden(viewAction.id);
+      var viewAction = _.find(vm.appActions, {id: 'launch'});
+      var hidden = isActionHidden(viewAction.id);
       if (!hidden) {
-        var routes = _.isNil(newRoutes) ? this.model.application.summary.routes : newRoutes;
+        var routes = _.isNil(newRoutes) ? vm.model.application.summary.routes : newRoutes;
         hidden = _.isNil(routes) || routes.length === 0;
       }
       viewAction.hidden = hidden;
     }
-  });
+  }
 
 })();

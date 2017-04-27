@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.list.gallery-view', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.list.gallery-view', {
       url: '/gallery-view',

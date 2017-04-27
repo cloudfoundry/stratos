@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.application.log-stream', ['ab-base64'])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.log-stream', {
       url: '/log-stream',
@@ -17,15 +13,6 @@
       controllerAs: 'applicationLogStreamCtrl'
     });
   }
-
-  ApplicationLogStreamController.$inject = [
-    'base64',
-    'modelManager',
-    'appUtilsService',
-    '$stateParams',
-    '$location',
-    '$log'
-  ];
 
   /**
    * @name ApplicationLogStreamController
@@ -91,8 +78,5 @@
     };
 
   }
-
-  angular.extend(ApplicationLogStreamController.prototype, {
-  });
 
 })();

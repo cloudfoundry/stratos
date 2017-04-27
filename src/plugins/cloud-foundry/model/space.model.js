@@ -30,7 +30,7 @@
   function Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
     var spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
 
-    var model =  {
+    var model = {
       data: {},
       listAllAppsForSpace: listAllAppsForSpace,
       listAllSpaces: listAllSpaces,

@@ -5,8 +5,6 @@
     .module('code-engine.view.application.notification-target', [])
     .directive('notificationTarget', notificationTarget);
 
-  notificationTarget.$inject = [];
-
   function notificationTarget() {
     return {
       bindToController: {
@@ -21,13 +19,6 @@
       templateUrl: 'plugins/code-engine/view/application/notification-targets/notification-target.html'
     };
   }
-
-  NotificationTargetController.$inject = [
-    '$scope',
-    'apiManager',
-    'modelManager',
-    'frameworkAsyncTaskDialog'
-  ];
 
   /**
    * @constructor

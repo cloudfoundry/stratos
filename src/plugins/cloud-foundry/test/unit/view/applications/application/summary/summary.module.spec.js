@@ -17,8 +17,8 @@
       var $filter = $injector.get('$filter');
       var $log = $injector.get('$log');
       var $q = $injector.get('$q');
-      var addRoutesService = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
-      var editAppService = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
+      var addRoutesService = $injector.get('cfAddRoutes');
+      var editAppService = $injector.get('cfEditApp');
       var appUtilsService = $injector.get('appUtilsService');
       var appClusterRoutesService = $injector.get('appClusterRoutesService');
 

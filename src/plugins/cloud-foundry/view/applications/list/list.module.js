@@ -7,10 +7,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.list', {
       url: '/list',
@@ -19,21 +15,6 @@
       controllerAs: 'applicationsListCtrl'
     });
   }
-
-  ApplicationsListController.$inject = [
-    '$scope',
-    '$interpolate',
-    '$state',
-    '$timeout',
-    '$q',
-    '$window',
-    'modelManager',
-    'appEventService',
-    'appErrorService',
-    'appUtilsService',
-    'frameworkDetailView',
-    'cfOrganizationModel'
-  ];
 
   /**
    * @name ApplicationsListController
@@ -58,7 +39,9 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.utils.appErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, appUtilsService, frameworkDetailView, cfOrganizationModel) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+                                      appEventService, appErrorService, appUtilsService, frameworkDetailView,
+                                      cfOrganizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;

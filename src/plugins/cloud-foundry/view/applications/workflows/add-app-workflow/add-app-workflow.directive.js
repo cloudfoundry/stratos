@@ -6,8 +6,6 @@
     .directive('addAppWorkflow', addAppWorkflow)
     .run(run);
 
-  addAppWorkflow.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications
    * @name addAppWorkflow
@@ -26,17 +24,6 @@
       bindToController: true
     };
   }
-
-  AddAppWorkflowController.$inject = [
-    'modelManager',
-    'appEventService',
-    'appUtilsService',
-    'cfOrganizationModel',
-    '$interpolate',
-    '$scope',
-    '$q',
-    '$timeout'
-  ];
 
   /**
    * @memberof cloud-foundry.view.applications
@@ -92,8 +79,6 @@
 
     this.init();
   }
-
-  run.$inject = [ ];
 
   function run() {
     angular.extend(AddAppWorkflowController.prototype, {

@@ -25,11 +25,14 @@
    * @class
    */
   function ServiceBinding(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.modelUtils = modelUtils;
-  }
 
-  angular.extend(ServiceBinding.prototype, {
+    var model = {
+      createServiceBinding: createServiceBinding,
+      deleteServiceBinding: deleteServiceBinding,
+      listAllServiceBindings: listAllServiceBindings
+    };
+
+    return model;
 
     /**
      * @function createServiceBinding
@@ -40,13 +43,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    createServiceBinding: function (cnsiGuid, bindingSpec) {
-      return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .CreateServiceBinding(bindingSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function createServiceBinding(cnsiGuid, bindingSpec) {
+      return apiManager.retrieve('cloud-foundry.api.ServiceBindings')
+        .CreateServiceBinding(bindingSpec, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function deleteServiceBinding
@@ -58,10 +61,10 @@
      * @returns {promise} A promise object
      * @public
      */
-    deleteServiceBinding: function (cnsiGuid, guid, params) {
-      return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    function deleteServiceBinding(cnsiGuid, guid, params) {
+      return apiManager.retrieve('cloud-foundry.api.ServiceBindings')
+        .DeleteServiceBinding(guid, params, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
     /**
      * @function listAllServiceBindings
@@ -74,30 +77,28 @@
      * @returns {promise} A promise object
      * @public
      */
-    listAllServiceBindings: function (cnsiGuid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .ListAllServiceBindings(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllServiceBindings(cnsiGuid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.ServiceBindings')
+        .ListAllServiceBindings(modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (serviceBindings) {
-          that.onListAllServiceBindings(cnsiGuid, serviceBindings);
+          _onListAllServiceBindings(cnsiGuid, serviceBindings);
           return serviceBindings;
         });
-    },
+    }
 
-    onListAllServiceBindings: function (cnsiGuid, bindings) {
-      var that = this;
+    function _onListAllServiceBindings(cnsiGuid, bindings) {
       var path = 'allServiceBindings.' + cnsiGuid;
-      _.unset(this, path);
+      _.unset(model, path);
       _.forEach(bindings, function (binding) {
-        _.set(that, path + '.' + binding.entity.service_instance_guid, binding);
+        _.set(model, path + '.' + binding.entity.service_instance_guid, binding);
       });
     }
-  });
+  }
 
 })();

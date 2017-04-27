@@ -20,18 +20,20 @@
    * @description Fetches feature flags for a CF
    * @param {object} apiManager - Api Manager
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @property {object}featureFlagsByCnsi - Feature flag cache
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @contructor
+   * @returns {object}
    */
   function FeatureFlags(apiManager, modelUtils) {
 
-    this.featureFlagsApi = apiManager.retrieve('cloud-foundry.api.FeatureFlags');
-    this.featureFlagsByCnsi = {};
-    this.modelUtils = modelUtils;
-  }
+    var featureFlagsApi = apiManager.retrieve('cloud-foundry.api.FeatureFlags');
 
-  angular.extend(FeatureFlags.prototype, {
+    var model = {
+      featureFlagsByCnsi: {},
+      fetch: fetch,
+      getFeatureFlagsForCnsi: getFeatureFlagsForCnsi
+    };
+
+    return model;
 
     /**
      * @name fetch
@@ -39,16 +41,14 @@
      * @param {Object} cnsiGuid - Cluster Guid
      * @returns {*}
      */
-    fetch: function (cnsiGuid) {
-
-      var that = this;
-      return this.featureFlagsApi.GetAllFeatureFlags({}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function fetch(cnsiGuid) {
+      return featureFlagsApi.GetAllFeatureFlags({}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           // consider using cache
-          that.featureFlagsByCnsi[cnsiGuid] = response.data;
+          model.featureFlagsByCnsi[cnsiGuid] = response.data;
           return response.data;
         });
-    },
+    }
 
     /**
      * @name getFeatureFlagsForCnsi
@@ -56,14 +56,14 @@
      * @param {Object} cnsi - Cluster Guid
      * @returns {*}
      */
-    getFeatureFlagsForCnsi: function (cnsi) {
+    function getFeatureFlagsForCnsi(cnsi) {
 
-      if (this.featureFlagsByCnsi[cnsi]) {
-        return featureFlagService[cnsi];
+      if (model.featureFlagsByCnsi[cnsi]) {
+        return model.featureFlagsByCnsi[cnsi];
       } else {
-        return fetch().then(function () {
-          if (featureFlagService[cnsi]) {
-            return featureFlagService[cnsi];
+        return fetch(cnsi).then(function () {
+          if (model.featureFlagsByCnsi[cnsi]) {
+            return model.featureFlagsByCnsi[cnsi];
           } else {
             throw new Error('Unknown cluster ' + cnsi);
           }
@@ -71,6 +71,6 @@
       }
     }
 
-  });
+  }
 
 })();

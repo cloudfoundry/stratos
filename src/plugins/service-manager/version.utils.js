@@ -3,10 +3,7 @@
 
   angular
     .module('service-manager.utils', [])
-    .factory('service-manager.utils.version', versionUtilsServiceFactory);
-
-  versionUtilsServiceFactory.$inject = [
-  ];
+    .factory('hsmVersion', versionUtilsServiceFactory);
 
   function versionUtilsServiceFactory() {
     return {

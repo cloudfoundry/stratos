@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.application.services', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.services', {
       url: '/services',
@@ -17,13 +13,6 @@
       controllerAs: 'applicationServicesCtrl'
     });
   }
-
-  ApplicationServicesController.$inject = [
-    '$scope',
-    'modelManager',
-    'appEventService',
-    '$stateParams'
-  ];
 
   /**
    * @name ApplicationServicesController
@@ -130,8 +119,5 @@
       }
     });
   }
-
-  angular.extend(ApplicationServicesController.prototype, {
-  });
 
 })();

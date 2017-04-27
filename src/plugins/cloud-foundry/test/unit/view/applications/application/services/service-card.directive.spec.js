@@ -2,7 +2,7 @@
   'use strict';
 
   describe('service-card directive', function () {
-    var $compile, $httpBackend, $scope, mockBindingsApi;
+    var $compile, $httpBackend, $scope, mockBindingsApi, appEventService, cfServiceInstanceService;
 
     var cnsiGuid = 'cnsiGuid';
     var spaceGuid = 'spaceGuid';
@@ -15,6 +15,8 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
+      appEventService = $injector.get('appEventService');
+      cfServiceInstanceService = $injector.get('cfServiceInstanceService');
 
       if (mockAuthModel) {
         var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -148,22 +150,22 @@
 
         describe('addService', function () {
           it('should emit cf.events.START_ADD_SERVICE_WORKFLOW event', function () {
-            spyOn(serviceCardCtrl.appEventService, '$emit');
+            spyOn(appEventService, '$emit');
             serviceCardCtrl.addService();
-            expect(serviceCardCtrl.appEventService.$emit).toHaveBeenCalled();
+            expect(appEventService.$emit).toHaveBeenCalled();
 
-            var args = serviceCardCtrl.appEventService.$emit.calls.mostRecent().args;
+            var args = appEventService.$emit.calls.mostRecent().args;
             expect(args[0]).toBe('cf.events.START_ADD_SERVICE_WORKFLOW');
           });
         });
 
         describe('detach', function () {
           it('should call unbindServiceFromApp', function () {
-            spyOn(serviceCardCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
+            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
             serviceCardCtrl.detach();
-            expect(serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp)
+            expect(cfServiceInstanceService.unbindServiceFromApp)
               .toHaveBeenCalled();
-            var args = serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+            var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
             expect(args[0]).toBe('guid');
             expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
             expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
@@ -171,21 +173,21 @@
           });
 
           it('should not call unbindServiceFromApp if no services attached', function () {
-            spyOn(serviceCardCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
+            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
             serviceCardCtrl.serviceBindings.length = 0;
             serviceCardCtrl.detach();
-            expect(serviceCardCtrl.cfServiceInstanceService.unbindServiceFromApp)
+            expect(cfServiceInstanceService.unbindServiceFromApp)
               .not.toHaveBeenCalled();
           });
         });
 
         describe('manageInstances', function () {
           it('should emit cf.events.START_MANAGE_SERVICES event', function () {
-            spyOn(serviceCardCtrl.appEventService, '$emit');
+            spyOn(appEventService, '$emit');
             serviceCardCtrl.manageInstances();
-            expect(serviceCardCtrl.appEventService.$emit).toHaveBeenCalled();
+            expect(appEventService.$emit).toHaveBeenCalled();
 
-            var args = serviceCardCtrl.appEventService.$emit.calls.mostRecent().args;
+            var args = appEventService.$emit.calls.mostRecent().args;
             expect(args[0]).toBe('cf.events.START_MANAGE_SERVICES');
           });
         });

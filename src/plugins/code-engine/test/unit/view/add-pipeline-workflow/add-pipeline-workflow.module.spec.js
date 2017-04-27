@@ -13,7 +13,7 @@
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
 
-      this.addPipelineWorkflowPrototype = $injector.get('code-engine.view.application.add-pipeline-workflow.prototype');
+      this.addPipelineWorkflowPrototype = $injector.get('ceAddPipelineWorkflowPrototype');
 
       function F() {
         this.modelManager = $injector.get('modelManager');

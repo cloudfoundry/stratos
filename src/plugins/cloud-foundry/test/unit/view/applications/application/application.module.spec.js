@@ -2,7 +2,7 @@
   'use strict';
 
   describe('application module', function () {
-    var $httpBackend, controller, $interval, detailViewMock;
+    var $httpBackend, controller, $interval, detailViewMock, $window, cfAppCliCommands, appEventService;
 
     var mocks = {};
 
@@ -27,16 +27,16 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('modelManager');
-      var appEventService = $injector.get('appEventService');
+      appEventService = $injector.get('appEventService');
       var appUtilsService = $injector.get('appUtilsService');
-      var cfAppCliCommands = $injector.get('cfAppCliCommands');
+      cfAppCliCommands = $injector.get('cfAppCliCommands');
 
       var $scope = $injector.get('$rootScope').$new();
 
       var $stateParams = $injector.get('$stateParams');
       $stateParams.cnsiGuid = cnsiGuid;
       $stateParams.guid = appGuid;
-      var $window = $injector.get('$window');
+      $window = $injector.get('$window');
       var $q = $injector.get('$q');
       var $interval = $injector.get('$interval');
       var $interpolate = $injector.get('$interpolate');
@@ -122,13 +122,13 @@
 
         var calledUrl;
         var expectedUrl = 'http://host-20.domain-48.example.com/';
-        spyOn(controller.$window, 'open').and.callFake(function (url) {
+        spyOn($window, 'open').and.callFake(function (url) {
           calledUrl = url;
         });
 
         var viewAction = controller.appActions[0];
         viewAction.execute();
-        expect(controller.$window.open).toHaveBeenCalled();
+        expect($window.open).toHaveBeenCalled();
         expect(calledUrl).toEqual(expectedUrl);
       });
 
@@ -173,21 +173,21 @@
 
       it('should be able to view CLI instructions', function () {
 
-        spyOn(controller.cfAppCliCommands, 'show').and.callThrough();
+        spyOn(cfAppCliCommands, 'show').and.callThrough();
 
         var startAction = controller.appActions[5];
         startAction.execute();
-        expect(controller.cfAppCliCommands.show).toHaveBeenCalled();
+        expect(cfAppCliCommands.show).toHaveBeenCalled();
 
       });
 
       it('should stop polling when a modal interaction starts', function () {
-        controller.appEventService.$emit(controller.appEventService.events.MODAL_INTERACTION_START);
+        appEventService.$emit(appEventService.events.MODAL_INTERACTION_START);
         expect(_.isUndefined(controller.scheduledUpdate)).toBe(true);
       });
 
       it('should resume polling when a modal interaction starts', function () {
-        controller.appEventService.$emit(controller.appEventService.events.MODAL_INTERACTION_END);
+        appEventService.$emit(appEventService.events.MODAL_INTERACTION_END);
         $httpBackend.flush();
         expect(controller.scheduledUpdate).toBe('interval_created');
       });

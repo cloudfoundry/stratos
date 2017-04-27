@@ -5,12 +5,6 @@
     .module('code-engine.view.application.delivery-pipeline')
     .factory('cePostDeployActionService', postDeployAction);
 
-  postDeployAction.$inject = [
-    'modelManager',
-    'apiManager',
-    'frameworkAsyncTaskDialog'
-  ];
-
   /**
    * @name postDeployAction
    * @description Factory to get Add Post-Deploy Action dialog

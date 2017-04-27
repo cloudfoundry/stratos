@@ -5,12 +5,6 @@
     .module('github.api', [])
     .run(registerGithubApi);
 
-  registerGithubApi.$inject = [
-    '$http',
-    'apiManager',
-    'GITHUB_ENDPOINTS'
-  ];
-
   function registerGithubApi($http, apiManager, GITHUB_ENDPOINTS) {
     apiManager.register('github.api', new GithubApi($http, GITHUB_ENDPOINTS));
   }

@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.application.versions', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.versions', {
       url: '/versions',
@@ -17,19 +13,6 @@
       controllerAs: 'applicationVersionsCtrl'
     });
   }
-
-  ApplicationVersionsController.$inject = [
-    '$q',
-    '$interpolate',
-    '$stateParams',
-    '$scope',
-    '$timeout',
-    '$state',
-    'modelManager',
-    'frameworkDialogConfirm',
-    'appNotificationsService',
-    'appUtilsService'
-  ];
 
   /**
    * @name ApplicationVersionsController
@@ -44,85 +27,73 @@
    * @param {object} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} appUtilsService - appUtilsService service
-   * @property {object} $q - angular $q service
-   * @property {object} $interpolate - the angular $interpolate service
-   * @property {object} versionModel - the Cloud Foundry Application Versions Model
-   * @property {string} cnsiGuid - the HCF Endpoint GUID
-   * @property {string} id - the application GUID
-   * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, frameworkDialogConfirm, appNotificationsService, appUtilsService) {
-    var that = this;
-    this.$q = $q;
-    this.$interpolate = $interpolate;
-    this.versionModel = modelManager.retrieve('cloud-foundry.model.appVersions');
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.cnsiGuid = $stateParams.cnsiGuid;
-    this.id = $stateParams.guid;
-    this.frameworkDialogConfirm = frameworkDialogConfirm;
-    this.appNotificationsService = appNotificationsService;
-    this.$timeout = $timeout;
+  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager,
+                                         frameworkDialogConfirm, appNotificationsService, appUtilsService) {
+    var vm = this;
+    var versionModel = modelManager.retrieve('cloud-foundry.model.appVersions');
+    var appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var cnsiGuid = $stateParams.cnsiGuid;
+    var id = $stateParams.guid;
 
-    this.isBusy = false;
-    this.fetchError = false;
-    this.deleteError = false;
-    this.disableRollbackAction = true;
-    this.versions = [];
-
-    this.refreshVersions(true);
-
-    $scope.$watch(function () {
-      return that.appModel.application.summary.package_updated_at;
-    }, function (nv, ov) {
-      if (nv && nv !== ov) {
-        $timeout(_.bind(that.refreshVersions, that), 2500);
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.appModel.application.state ? that.appModel.application.state.label : undefined;
-    }, function (nv, ov) {
-      if (nv && nv !== ov) {
-        that.refreshVersions(false);
-      }
-    });
-
-    this.actions = [{
+    vm.isBusy = false;
+    vm.fetchError = false;
+    vm.disableRollbackAction = true;
+    vm.versions = [];
+    vm.actions = [{
       name: gettext('Rollback'),
-      disabled: that.disableRollbackAction,
+      disabled: vm.disableRollbackAction,
       execute: function (v) {
-        return that.rollback(v);
+        return rollback(v);
       }
     }];
+
+    vm.hasVersions = hasVersions;
+    vm.rollback = rollback;
+
+    refreshVersions(true);
+
+    $scope.$watch(function () {
+      return appModel.application.summary.package_updated_at;
+    }, function (nv, ov) {
+      if (nv && nv !== ov) {
+        $timeout(_.bind(refreshVersions, vm), 2500);
+      }
+    });
+
+    $scope.$watch(function () {
+      return appModel.application.state ? appModel.application.state.label : undefined;
+    }, function (nv, ov) {
+      if (nv && nv !== ov) {
+        refreshVersions(false);
+      }
+    });
+
+    appUtilsService.chainStateResolve('cf.applications.application.versions', $state, init);
 
     function init() {
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       // Keep rollback action disabled if user does not
       // have permissions to update applications
-      that.disableRollbackAction = !authModel.isAllowed(that.cnsiGuid,
+      vm.disableRollbackAction = !authModel.isAllowed(cnsiGuid,
         authModel.resources.application,
         authModel.actions.update,
-        that.appModel.application.summary.space_guid);
-      that.actions[0].disabled = that.disableRollbackAction;
+        appModel.application.summary.space_guid);
+      vm.actions[0].disabled = vm.disableRollbackAction;
 
-      return that.$q.resolve();
+      return $q.resolve();
     }
 
-    appUtilsService.chainStateResolve('cf.applications.application.versions', $state, init);
-
-  }
-
-  angular.extend(ApplicationVersionsController.prototype, {
     /**
      * @function hasVersions
      * @description Determines if the application has version metadata
      * @returns {boolean} Indicating if the application has version metadata
      * @public
      **/
-    hasVersions: function () {
-      return this.versions && this.versions.length;
-    },
+    function hasVersions() {
+      return vm.versions && vm.versions.length;
+    }
 
     /**
      * @function rollback
@@ -130,11 +101,10 @@
      * @param {object} v - version to rollback to
      * @public
      **/
-    rollback: function (v) {
-      var that = this;
+    function rollback(v) {
       var confirmMessage = gettext('Are you sure you want to rollback to version "{{version}} ?');
-      confirmMessage = that.$interpolate(confirmMessage)({version: v.guid});
-      this.frameworkDialogConfirm({
+      confirmMessage = $interpolate(confirmMessage)({version: v.guid});
+      frameworkDialogConfirm({
         title: gettext('Rollback Application to previous Version'),
         description: confirmMessage,
         submitCommit: true,
@@ -143,16 +113,16 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          return that.versionModel.rollback(that.cnsiGuid, that.id, v.guid).then(function () {
+          return versionModel.rollback(cnsiGuid, id, v.guid).then(function () {
             var message = gettext('Application was successfully rolled back');
-            that.appNotificationsService.notify('success', message);
-            that.refreshVersions();
+            appNotificationsService.notify('success', message);
+            refreshVersions();
           }).catch(function () {
-            return that.$q.reject(gettext('Failed to rollback to previous version'));
+            return $q.reject(gettext('Failed to rollback to previous version'));
           });
         }
       });
-    },
+    }
 
     /**
      * @function refreshVersions
@@ -160,22 +130,21 @@
      * @param {boolean} showBusy - whether or not to show the busy indicator (typiaclly only used on first load)
      * @public
      **/
-    refreshVersions: function (showBusy) {
-      var that = this;
-      this.isBusy = !!showBusy;
-      this.fetchError = false;
-      this.versionModel.list(this.cnsiGuid, this.id)
+    function refreshVersions(showBusy) {
+      vm.isBusy = !!showBusy;
+      vm.fetchError = false;
+      versionModel.list(cnsiGuid, id)
         .then(function () {
-          that.fetchError = false;
-          that.versions = that.versionModel.versions;
+          vm.fetchError = false;
+          vm.versions = vm.versionModel.versions;
         })
         .catch(function () {
-          that.fetchError = true;
-          that.versions = [];
+          vm.fetchError = true;
+          vm.versions = [];
         })
         .finally(function () {
-          that.isBusy = false;
+          vm.isBusy = false;
         });
     }
-  });
+  }
 })();

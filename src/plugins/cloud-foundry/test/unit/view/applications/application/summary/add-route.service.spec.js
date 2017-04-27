@@ -43,7 +43,7 @@
     }));
 
     beforeEach(inject(function ($injector) {
-      addRoutesFactory = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
+      addRoutesFactory = $injector.get('cfAddRoutes');
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
 

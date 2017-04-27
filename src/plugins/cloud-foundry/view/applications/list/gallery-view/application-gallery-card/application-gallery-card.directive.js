@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications.list')
     .directive('applicationGalleryCard', applicationGalleryCard);
 
-  applicationGalleryCard.$inject = [];
-
   function applicationGalleryCard() {
     return {
       bindToController: {
@@ -20,12 +18,6 @@
       'gallery-view/application-gallery-card/application-gallery-card.html'
     };
   }
-
-  ApplicationGalleryCardController.$inject = [
-    '$state',
-    '$scope',
-    'modelManager'
-  ];
 
   function ApplicationGalleryCardController($state, $scope, modelManager) {
     var that = this;
