@@ -96,12 +96,8 @@ spec:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
         env:
-        - name: HCP_IDENTITY_HOST
-          value: console-uaa-int
-        - name: HCP_IDENTITY_PORT
-          value: "8080"
-        - name: HCP_IDENTITY_SCHEME
-          value: http
+        - name: UAA_ENDPOINT
+          value: http://console-uaa-int:8080
         volumeMounts:
         - mountPath: /etc/secrets/
           name: console-secret
@@ -162,12 +158,8 @@ spec:
         - name: NO_PROXY
         - name: FTP_PROXY
         - name: SOCKS_PROXY
-        - name: HCP_IDENTITY_HOST
-          value: console-uaa-int
-        - name: HCP_IDENTITY_PORT
-          value: "8080"
-        - name: HCP_IDENTITY_SCHEME
-          value: http
+        - name: UAA_ENDPOINT
+          value: http://console-uaa-int:8080
         ports:
         - containerPort: 3003
           name: proxy
