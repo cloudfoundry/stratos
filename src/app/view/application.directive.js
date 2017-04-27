@@ -67,7 +67,7 @@
     vm.hideNavigation = $stateParams.hideNavigation;
     vm.hideAccount = $stateParams.hideAccount;
     vm.navbarIconsOnly = false;
-    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
+    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     vm.login = login;
     vm.logout = logout;

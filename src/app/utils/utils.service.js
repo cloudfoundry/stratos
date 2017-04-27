@@ -18,7 +18,7 @@
    * @param {object} $injector - angular $injector service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log, $window, $injector) {
+  function utilsServiceFactory($q, $timeout, $log, $window) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     /*
