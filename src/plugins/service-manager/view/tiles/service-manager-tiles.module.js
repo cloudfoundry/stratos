@@ -26,7 +26,8 @@
           if ($injector.has('endpoints-dashboard')) {
             return 'endpoint.dashboard';
           }
-        },
+        }
+      },
       data: {
         activeMenuState: 'sm.list'
       }
