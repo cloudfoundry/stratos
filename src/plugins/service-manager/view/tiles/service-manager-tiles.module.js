@@ -23,7 +23,7 @@
       ncyBreadcrumb: {
         label: 'service-manager',
         parent: function () {
-          if ($injector.has('endpoints-dashboard')) {
+          if (_.has(env.plugins, 'endpointsDashboard')) {
             return 'endpoint.dashboard';
           }
         }
@@ -70,7 +70,7 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
     this.state = '';
-    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
+    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     function init() {
       return that.refreshEndpointModel();

@@ -14,7 +14,9 @@
       ncyBreadcrumb: {
         label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name ||"..." }}',
         parent: function () {
-          return 'endpoint.clusters.tiles';
+          if (_.has(env.plugins, 'endpointsDashboard')) {
+            return 'endpoint.clusters.tiles';
+          }
         }
       }
     });

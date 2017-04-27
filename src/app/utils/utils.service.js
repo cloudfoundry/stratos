@@ -314,7 +314,7 @@
     }
 
     function isPluginAvailable(pluginName) {
-      return $injector.has(pluginName);
+      return _.has(env.plugins, pluginName);
     }
 
   }

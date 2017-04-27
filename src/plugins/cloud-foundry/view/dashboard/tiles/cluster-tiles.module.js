@@ -19,7 +19,7 @@
       ncyBreadcrumb: {
         label: 'product.cf',
         parent: function () {
-          if ($injector.has('endpoints-dashboard')) {
+          if (_.has(env.plugins, 'endpointsDashboard')) {
             return 'endpoint.dashboard';
           }
         }
@@ -47,7 +47,7 @@
     vm.currentUserAccount = modelManager.retrieve('app.model.account');
     vm.serviceInstances = {};
     vm.state = '';
-    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
+    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     vm.createClusterList = createClusterList;
     vm.refreshClusterModel = refreshClusterModel;
@@ -61,7 +61,14 @@
     appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
     function init() {
-      return refreshClusterModel();
+      return refreshClusterModel().then(function () {
+        if (_.keys(vm.serviceInstances).length === 1 && !vm.isEndpointsDashboardAvailable) {
+          // We are running without the Endpoints Dashboard and there is only one instance available
+          // redirecting to Organisations Detail page
+          var guid = _.keys(vm.serviceInstances)[0];
+          $state.go('endpoint.clusters.cluster.detail.organizations', {guid: guid});
+        }
+      });
     }
 
     /**

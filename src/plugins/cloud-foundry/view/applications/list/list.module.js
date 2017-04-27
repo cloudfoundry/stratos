@@ -75,7 +75,7 @@
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
-    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpoints-dashboard');
+    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
     this.filter = {
       cnsiGuid: 'all',
       orgGuid: 'all',
