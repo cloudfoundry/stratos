@@ -11,6 +11,7 @@
     "terms.href": "https://www.suse.com/company/legal/",
     "PRIVACY_HREF": "", 
     "PRODUCT_FAMILY_HREF": "",
-    "www-link": "http://www.suse.com"
+    "www-link": "http://www.suse.com",
+    "about-logo": "images/suse_logo_light_bg.png"
   }
 }
