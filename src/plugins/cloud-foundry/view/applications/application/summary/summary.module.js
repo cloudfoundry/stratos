@@ -34,7 +34,7 @@
       appCreatedInstructions: [{
         id: 'new-app-deploy-cli',
         position: 2,
-        description: 'Deploy your application using the CLI',
+        description: 'app.tabs.summary.instructions.cli',
         show: function () {
           return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.application, authModel.actions.update,
             model.application.summary.space_guid);
@@ -48,7 +48,7 @@
       }, {
         id: 'new-app-add-services',
         position: 3,
-        description: 'Add services to your application',
+        description: 'app.tabs.summary.instructions.service',
         show: function () {
           return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.managed_service_instance,
             authModel.actions.create, model.application.summary.space_guid);

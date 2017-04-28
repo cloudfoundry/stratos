@@ -57,7 +57,7 @@
       appCreatedInstructions: [{
         id: 'new-app-setup-pipeline',
         position: 1,
-        description: 'Setup a Delivery Pipeline for your application',
+        description: 'app.tabs.deliveryPipeline.instructions.pipeline',
         show: function () {
           return _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
         },

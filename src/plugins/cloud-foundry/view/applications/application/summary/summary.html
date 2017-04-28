@@ -11,7 +11,7 @@
     <ul>
       <li ng-repeat="instruction in applicationSummaryCtrl.appCreatedInstructions | orderBy:'position'"
         ng-if="instruction.show()">
-        <a id="instruction.id" translate ng-click="instruction.go(appCtrl.appActions, appCtrl.id, true)">{{instruction.description}}</a>
+        <a id="{{instruction.id}}" translate ng-click="instruction.go(appCtrl.appActions, appCtrl.id, true)">{{instruction.description}}</a>
       </li>
     </ul>
   </div>

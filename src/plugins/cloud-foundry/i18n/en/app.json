@@ -20,7 +20,11 @@
     },
     "tabs": {
       "summary": {
-        "label": "Summary"
+        "label": "Summary",
+        "instructions": {
+          "cli": "Deploy your application using the CLI",
+          "service": "Add services to your application"
+        }
       },
       "logStream": {
         "label": "Log Stream"

@@ -2,7 +2,10 @@
   "app": {
     "tabs": {
       "deliveryPipeline": {
-        "label": "Delivery Pipeline"
+        "label": "Delivery Pipeline",
+        "instructions": {
+          "pipeline": "Setup a Delivery Pipeline for your application"
+        }
       },
       "deliveryLogs": {
         "label": "Delivery Logs"
