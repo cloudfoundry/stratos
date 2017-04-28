@@ -25,8 +25,6 @@
     };
   }
 
-  function PageFooterController($scope, appUtilsService) {
-    this.OEM_CONFIG = appUtilsService.getOemConfiguration();
-  }
+  function PageFooterController() {}
 
 })();

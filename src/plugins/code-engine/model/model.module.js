@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
-  angular.module('code-engine.model', []);
+  angular
+    .module('code-engine.model', []);
 
 })();

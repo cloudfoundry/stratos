@@ -6,9 +6,7 @@
    * @name env
    */
   var env = {
-    registerApplication: registerApplication,
-
-    OEM_CONFIG:{}
+    registerApplication: registerApplication
   };
 
   expose({
