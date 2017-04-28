@@ -7,7 +7,7 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
-    beforeEach(module('app.view.endpoints.dashboard'));
+    beforeEach(module('app.view.endpoints'));
 
     afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();

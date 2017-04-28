@@ -62,6 +62,9 @@
       appUtilsService: {
         chainStateResolve: function (state, $state, init) {
           init();
+        },
+        isPluginAvailable: function () {
+          return true;
         }
       }
     }));

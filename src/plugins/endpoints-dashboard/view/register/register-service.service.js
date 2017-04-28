@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view')
+    .module('endpoints-dashboard')
     .factory('appRegisterService', ServiceRegistrationFactory);
 
   /**
@@ -51,7 +51,7 @@
               steps: [
                 {
                   hideNext: true,
-                  templateUrl: 'app/view/endpoints/register/register-service-type.html',
+                  templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-type.html',
                   onNext: function () {
                     var step = context.wizardOptions.workflow.steps[1];
                     step.urlValidationExpr = appUtilsService.urlValidationExpression;
@@ -64,7 +64,7 @@
                 },
                 {
                   formName: 'regServiceDetails',
-                  templateUrl: 'app/view/endpoints/register/register-service-details.html',
+                  templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-details.html',
                   showBusyOnNext: true,
                   isLastStep: true,
                   nextBtnText: gettext('Register'),
