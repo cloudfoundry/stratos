@@ -10,9 +10,7 @@
       beforeEach(function () {
         module(function ($provide) {
           $provide.value('$window', {
-            env: {
-              OEM_CONFIG: {}
-            }
+            env: {}
           });
         });
       });

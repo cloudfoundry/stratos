@@ -1,4 +1,5 @@
 {
+  "service-manager": "Service Manager",
   "sm": {
     "registration": {
       "name": "@:service-manager",
