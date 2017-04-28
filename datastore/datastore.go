@@ -15,6 +15,7 @@ import (
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
+	DatabaseProvider        string `configName:"DATABASE_PROVIDER"`
 	Username                string `configName:"PGSQL_USER"`
 	Password                string `configName:"PGSQL_PASSWORD"`
 	Database                string `configName:"PGSQL_DATABASE"`
@@ -25,7 +26,6 @@ type DatabaseConfig struct {
 	SSLCertificate          string `configName:"PGSQL_CERT"`
 	SSLKey                  string `configName:"PGSQL_CERT_KEY"`
 	SSLRootCertificate      string `configName:"PGSQL_ROOT_CERT"`
-	DatabaseProvider        string
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
@@ -44,6 +44,8 @@ const (
 	SQLiteSchemaFile = "./db/sqlite_schema.sql"
 	// SQLiteDatabaseFile - SQLite database file
 	SQLiteDatabaseFile = "./console-database.db"
+	// Default database provider when not specified
+	DefaultDatabaseProvider = "pgsql"
 )
 
 const (
@@ -57,7 +59,18 @@ const (
 // NewDatabaseConnectionParametersFromConfig setup database connection parameters based on contents of config struct
 func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
 	log.Println("NewDatabaseConnectionParametersFromConfig")
-	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+
+	if len(dc.DatabaseProvider) == 0 {
+		dc.DatabaseProvider = DefaultDatabaseProvider
+	}
+
+	// We want to validate that we have a Host parameter - this is not needed for SQLite - so we just set a value here
+	var host = dc.Host
+	if dc.DatabaseProvider == "sqlite" {
+		host = "SQLite"
+	}
+
+	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, host, dc.Port)
 	if err != nil {
 		return dc, err
 	}
@@ -77,10 +90,12 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
 	log.Println("validateRequiredDatabaseParams")
+
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
 		vala.IsNotNil(database, "database"),
+		vala.IsNotNil(host, "host"),
 		vala.GreaterThan(port, 0, "port"),
 		vala.Not(vala.GreaterThan(port, 65535, "port")),
 	).Check()
@@ -100,10 +115,10 @@ func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	}
 
 	// SQL Lite
-	return GetSQLLiteConnection(dc)
+	return GetSQLLiteConnection()
 }
 
-func GetSQLLiteConnection(dc DatabaseConfig) (*sql.DB, error) {
+func GetSQLLiteConnection() (*sql.DB, error) {
 	os.Remove(SQLiteDatabaseFile)
 
 	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
