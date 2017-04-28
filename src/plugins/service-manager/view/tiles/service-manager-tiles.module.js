@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute($stateProvider, $injector) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('sm.tiles', {
       url: '/tiles',
       templateUrl: 'plugins/service-manager/view/tiles/service-manager-tiles.html',

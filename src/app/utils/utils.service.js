@@ -15,7 +15,6 @@
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
    * @param {object} $window - angular $window service
-   * @param {object} $injector - angular $injector service
    * @returns {object} the utils service
    */
   function utilsServiceFactory($q, $timeout, $log, $window) {
