@@ -127,21 +127,12 @@
   });
 
   // Copy JavaScript config file to 'dist'- patch in the default OEM configuration
-  gulp.task('copy:configjs', ['copy:configjs:oem'], function () {
+  gulp.task('copy:configjs', function () {
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
-  });
-
-  // Copy JavaScript config file to the OEM 'dist' folder so it can be patched during OEM process
-  gulp.task('copy:configjs:oem', function () {
-    return gulp
-      .src(paths.src + 'config.js')
-      .pipe(uglify())
-      .pipe(rename('console-config.js'))
-      .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
   // Combine all of the bower js dependencies into a single lib file that we can include
@@ -255,7 +246,7 @@
   gulp.task('scss:set-brand', function () {
     return gulp
       .src(paths.src + 'index.tmpl.scss')
-      .pipe(gulpreplace('@@BRAND@@', DEFAULT_BRAND))
+      .pipe(gulpreplace('@@BRAND@@', brand))
       .pipe(wiredep(config.bowerDev))
       .pipe(rename('index.scss'))
       .pipe(gulp.dest(paths.src));

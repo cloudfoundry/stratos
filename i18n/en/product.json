@@ -8,9 +8,10 @@
   "company": {
     "name": "SUSE",
     "logo": "images/brand_company_logo.png",
+    "about-logo": "@:company.logo",
     "www-link": "http://www.suse.com",
-    "terms-href":"",
-    "privacy-href":"",
+    "terms-href": "",
+    "privacy-href": "",
     "product-family-href": ""
   }
 }
