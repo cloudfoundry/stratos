@@ -1,16 +1,21 @@
 package datastore
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/kat-co/vala"
+	// SQL Lite 3
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
+	DatabaseProvider        string `configName:"DATABASE_PROVIDER"`
 	Username                string `configName:"PGSQL_USER"`
 	Password                string `configName:"PGSQL_PASSWORD"`
 	Database                string `configName:"PGSQL_DATABASE"`
@@ -35,6 +40,12 @@ const (
 	SSLVerifyCA SSLValidationMode = "verify-ca"
 	// SSLVerifyFull verifies the certificate and hostname and the CA
 	SSLVerifyFull SSLValidationMode = "verify-full"
+	// SQLiteSchemaFile - SQLite schema file
+	SQLiteSchemaFile = "./db/sqlite_schema.sql"
+	// SQLiteDatabaseFile - SQLite database file
+	SQLiteDatabaseFile = "./console-database.db"
+	// Default database provider when not specified
+	DefaultDatabaseProvider = "pgsql"
 )
 
 const (
@@ -48,7 +59,18 @@ const (
 // NewDatabaseConnectionParametersFromConfig setup database connection parameters based on contents of config struct
 func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
 	log.Println("NewDatabaseConnectionParametersFromConfig")
-	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+
+	if len(dc.DatabaseProvider) == 0 {
+		dc.DatabaseProvider = DefaultDatabaseProvider
+	}
+
+	// We want to validate that we have a Host parameter - this is not needed for SQLite - so we just set a value here
+	var host = dc.Host
+	if dc.DatabaseProvider == "sqlite" {
+		host = "SQLite"
+	}
+
+	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, host, dc.Port)
 	if err != nil {
 		return dc, err
 	}
@@ -68,6 +90,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
 	log.Println("validateRequiredDatabaseParams")
+
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
@@ -83,10 +106,62 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	return nil
 }
 
-// GetConnection returns a database connection to PostgreSQL
+// GetConnection returns a database connection to either PostgreSQL or SQLite
 func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
-	log.Println("GetConnection")
-	return sql.Open("postgres", buildConnectionString(dc))
+	log.Debug("GetConnection")
+
+	if dc.DatabaseProvider == "pgsql" {
+		return sql.Open("postgres", buildConnectionString(dc))
+	}
+
+	// SQL Lite
+	return GetSQLLiteConnection()
+}
+
+func GetSQLLiteConnection() (*sql.DB, error) {
+	os.Remove(SQLiteDatabaseFile)
+
+	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
+	if err != nil {
+		return db, err
+	}
+
+	// Need to initialize the schema of the SQLite Database
+	file, err := os.Open(SQLiteSchemaFile)
+	if err != nil {
+		log.Warn("Can not find the schema file for database initialization")
+		return db, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var statement = ""
+	var counter = 1
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimSpace(line)
+
+		if strings.Index(line, "--") != 0 && len(line) > 0 {
+			// not a comment or an empty line
+			statement += line
+			if strings.HasSuffix(line, ";") {
+				// This is the end of the statement
+				_, err = db.Exec(statement)
+				if err != nil {
+					log.Errorf("Failed to execute statement #%d: %s", counter, err)
+					return db, err
+				}
+				statement = ""
+				counter++
+			}
+		}
+	}
+
+	err = scanner.Err()
+	if err == nil {
+		log.Info("Created database schema for SQLite database")
+	}
+	return db, err
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -130,7 +205,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 
 // Ping - ping the database to ensure the connection/pool works.
 func Ping(db *sql.DB) error {
-	log.Println("Ping")
+	log.Debug("Ping database")
 	err := db.Ping()
 	if err != nil {
 		return fmt.Errorf("Unable to ping the database: %+v", err)

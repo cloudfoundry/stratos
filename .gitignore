@@ -3,3 +3,5 @@
 demo/*
 dev-certs/*
 portal-proxy
+console-database.db
+.vcs-migrated

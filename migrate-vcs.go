@@ -67,14 +67,19 @@ func getConnectedCodeEngines(dcp *sql.DB) (map[string][]string, error) {
 // migrateVcsFromCodeEngine - one-time auto register of VCS endpoints from connected Code Engines
 func migrateVcsFromCodeEngine(p *portalProxy) error {
 
+	migrationMarkerDir := "/hsc-upgrade-volume"
+	if _, err := os.Stat(migrationMarkerDir); err != nil {
+		migrationMarkerDir = "."
+	}
+
 	// Check we need to migrate
-	migrationMarker := "/hsc-upgrade-volume/.vcs-migrated"
+	migrationMarker := migrationMarkerDir + "/.vcs-migrated"
 	if _, err := os.Stat(migrationMarker); err == nil {
 		// Already migrated, nothing to do
 		return nil
 	}
 
-	log.Infof("migrateVcsFromCodeEngine")
+	log.Infof("Migrating VCSes...")
 
 	// Wait for the upgrade lock file to disappear
 	upgradeLock := "/hsc-upgrade-volume/upgrade.lock"
@@ -113,8 +118,11 @@ func migrateVcsFromCodeEngine(p *portalProxy) error {
 	_, err = os.Create(migrationMarker)
 	if err != nil {
 		msg := "Unable to create VCSes migration marker file: %v"
+		log.Warnf(msg, err)
 		return fmt.Errorf(msg, err)
 	}
+
+	log.Info("VCS migration completed")
 
 	return nil
 }

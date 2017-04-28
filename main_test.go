@@ -67,9 +67,7 @@ func TestLoadPortalConfig(t *testing.T) {
 	os.Setenv("CONSOLE_CLIENT_SECRET", "ohsosecret!")
 	os.Setenv("HCF_CLIENT", "portal-proxy")
 	os.Setenv("HCF_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("HCP_IDENTITY_SCHEME", "https")
-	os.Setenv("HCP_IDENTITY_HOST", "login.hcf.helion.lol")
-	os.Setenv("HCP_IDENTITY_PORT", "443")
+	os.Setenv("UAA_ENDPOINT", "https://login.hcf.helion.lol:443")
 	os.Setenv("ALLOWED_ORIGINS", "https://localhost,https://127.0.0.1")
 	os.Setenv("SESSION_STORE_SECRET", "cookiesecret")
 
@@ -109,16 +107,8 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get HCFClientSecret from config")
 	}
 
-	if result.HCPIdentityScheme != "https" {
-		t.Error("Unable to get HCPIdentityScheme from config")
-	}
-
-	if result.HCPIdentityHost != "login.hcf.helion.lol" {
-		t.Error("Unable to get HCPIdentityHost from config")
-	}
-
-	if result.HCPIdentityPort != "443" {
-		t.Error("Unable to get HCPIdentityPort from config")
+	if result.UAAEndpoint != "https://login.hcf.helion.lol:443" {
+		t.Error("Unable to get UAAEndpoint from config")
 	}
 
 	if len(result.AllowedOrigins) != 2 {

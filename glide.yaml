@@ -84,6 +84,8 @@ import:
   - internal/datastore
   - internal/log
   - internal/remote_api
+- package: github.com/mattn/go-sqlite3
+- package: github.com/nwmac/sqlitestore
 testImports:
 - package: github.com/davecgh/go-spew
   version: 6cf5744a041a0022271cefed95ba843f6d87fd51
