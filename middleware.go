@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -98,6 +99,40 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
 
+		return h(c)
+	}
+}
+
+func (p *portalProxy) cloudFoundryMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Check that we are on HTTPS - redirect if not
+		if c.Request().Header().Contains("X-Forwarded-Proto") {
+			proto := c.Request().Header().Get("X-Forwarded-Proto")
+			if proto != "https" {
+				redirect := fmt.Sprintf("https://%s%s", c.Request().Host(), c.Request().URI())
+				return c.Redirect(301, redirect)
+			}
+			return h(c)
+		}
+
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"X-Forwarded-Proto not found and is required",
+			"X-Forwarded-Proto not found and is required",
+		)
+	}
+}
+
+// TODO
+// For cloud foundry session affinity
+// Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
+func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Make sure there is a JSESSIONID cookie set to the session ID
+		session, err := p.getSession(c)
+		if err == nil {
+			log.Infof("Session ID is: %s", session.ID)
+		}
 		return h(c)
 	}
 }

@@ -23,10 +23,16 @@ func (e *SessionValueNotFound) Error() string {
 	return fmt.Sprintf("Session value not found %s", e.msg)
 }
 
+func (p *portalProxy) getSession(c echo.Context) (*sessions.Session, error) {
+	log.Debug("getSession")
+	req := c.Request().(*standard.Request).Request
+	return p.SessionStore.Get(req, portalSessionName)
+}
+
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, error) {
 	log.Debug("getSessionValue")
-	req := c.Request().(*standard.Request).Request
-	session, err := p.SessionStore.Get(req, portalSessionName)
+
+	session, err := p.getSession(c)
 	if err != nil {
 		return nil, err
 	}

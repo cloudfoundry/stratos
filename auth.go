@@ -51,6 +51,9 @@ type ConnectedUser struct {
 	Admin bool   `json:"admin"`
 }
 
+// LoginHookFunc - function that can be hooked into a successful user login
+type LoginHookFunc func(c echo.Context) error
+
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
 const UAAAdminIdentifier = "hcp.admin"
 
@@ -112,7 +115,14 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	uaaAdmin := strings.Contains(uaaRes.Scope, UAAAdminIdentifier)
+	if p.LoginHook != nil {
+		err = p.LoginHook(c)
+		if err != nil {
+			log.Warn("Login hook failed", err)
+		}
+	}
+
+	uaaAdmin := strings.Contains(uaaRes.Scope, p.UAAAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     c.FormValue("username"),
@@ -175,7 +185,7 @@ func (p *portalProxy) doLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes,
 		}
 	}
 
-	hcfAdmin := strings.Contains(uaaRes.Scope, HCFAdminIdentifier)
+	hcfAdmin := strings.Contains(uaaRes.Scope, p.HCFAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     u.UserGUID,
@@ -511,7 +521,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.UAAAdminIdentifier)
 
 	resp := &VerifySessionRes{
 		Account: sessionUser,
@@ -545,7 +555,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 	}
 
 	// is the user a UAA admin?
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.UAAAdminIdentifier)
 
 	// add the uaa entry to the output
 	uaaEntry := &ConnectedUser{
@@ -589,7 +599,7 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 		return nil, false
 	}
 	if cnsiRecord.CNSIType == cnsis.CNSIHCF {
-		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), HCFAdminIdentifier)
+		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.HCFAdminIdentifier)
 		cnsiUser.Admin = cnsiAdmin
 	}
 
