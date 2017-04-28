@@ -2,7 +2,6 @@
   'use strict';
 
   var path = require('path');
-  var utils = require('./gulp.utils');
 
   module.exports = function (config) {
 

@@ -26,119 +26,114 @@
    * @param {object} $q - the angular $q promise service
    * @param {object} $window - the angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.utils.appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @property {object} $interpolate - the angular $interpolate service
-   * @property {object} $state - the UI router $state service
-   * @property {object} $timeout - the angular $timeout service
-   * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
-   * @property {app.utils.appEventService} appEventService - the event bus service
-   * @property {app.utils.appErrorService} errorService - the error service
    */
   function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
-                                      appEventService, appErrorService, appUtilsService, frameworkDetailView,
+                                      appErrorService, appUtilsService, frameworkDetailView,
                                       cfOrganizationModel) {
-    var that = this;
-    this.$interpolate = $interpolate;
-    this.$state = $state;
-    this.$timeout = $timeout;
-    this.$q = $q;
-    this.modelManager = modelManager;
-    this.frameworkDetailView = frameworkDetailView;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.appEventService = appEventService;
-    this.errorService = appErrorService;
-    this.loading = true;
-    this.isSpaceDeveloper = false;
-    this.clusters = [{label: 'All Endpoints', value: 'all'}];
-    this.organizations = [{label: 'All Organizations', value: 'all'}];
-    this.spaces = [{label: 'All Spaces', value: 'all'}];
-    this.filter = {
+    var vm = this;
+
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    vm.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    // Width at which we automatically switch to the grid layout
+    var FORCE_GRID_LAYOUT_WIDTH = 640;
+    var previousLayout = false;
+
+    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+    vm.loading = true;
+    vm.isSpaceDeveloper = false;
+    vm.clusters = [{label: 'All Endpoints', value: 'all'}];
+    vm.organizations = [{label: 'All Organizations', value: 'all'}];
+    vm.spaces = [{label: 'All Spaces', value: 'all'}];
+    vm.filter = {
       cnsiGuid: 'all',
       orgGuid: 'all',
       spaceGuid: 'all'
     };
-    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.cfOrganizationModel = cfOrganizationModel;
-
-    this.paginationProperties = {
+    vm.paginationProperties = {
       callback: function (page) {
-        return that._loadPage(page);
+        return _loadPage(page);
       },
-      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
-      pageNumber: _.get(that.model, 'appPage', 1),
+      total: _.ceil(vm.model.cachedApplications.length / vm.model.pageSize),
+      pageNumber: _.get(vm.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
       }
     };
-
-    // Width at which we automatically switch to the grid layout
-    var FORCE_GRID_LAYOUT_WIDTH = 640;
-
     // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
     // use case where nothing has changed.
-    this.ready = this.model.hasApps;
-
+    vm.ready = vm.model.hasApps;
     // Force card layout on smaller screen sizes - listen for resize events
-    this.forceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
-    var previousLayout = false;
-    function onResize() {
-      var shouldForceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
-      if (shouldForceCardLayout !== that.forceCardLayout) {
-        that.forceCardLayout = shouldForceCardLayout;
-        $scope.$apply(function () {
-          if (that.forceCardLayout) {
-            previousLayout = that.model.showCardLayout;
-            that.goToGalleryView(true);
-          } else {
-            that.goToGalleryView(previousLayout);
-          }
-        });
-      }
-    }
+    vm.forceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
+
+    vm.getNoAppsMessage = getNoAppsMessage;
+    vm.getEndpointsLink = getEndpointsLink;
+    vm.setCluster = setCluster;
+    vm.setOrganization = setOrganization;
+    vm.setSpace = setSpace;
+    vm.setText = setText;
+    vm.toggleFilterPanel = toggleFilterPanel;
+    vm.resetFilter = resetFilter;
+    vm.isAdminInAnyHcf = isAdminInAnyHcf;
+    vm.showAddApplicationButton = showAddApplicationButton;
+    vm.addApplication = addApplication;
+    vm.disableAddApplicationButton = disableAddApplicationButton;
+    vm.goToGalleryView = goToGalleryView;
+
     angular.element($window).on('resize', onResize);
 
+    // Ensure any app errors we have set are cleared when the scope is destroyed
+    $scope.$on('$destroy', function () {
+      appErrorService.clearAppError();
+      // Ensure that remove the resize handler on the window
+      angular.element($window).off('resize', onResize);
+    });
+
+    appUtilsService.chainStateResolve('cf.applications.list', $state, init);
+
     function init() {
-      var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
+      var serviceInstances = _.values(vm.userCnsiModel.serviceInstances);
       for (var i = 0; i < serviceInstances.length; i++) {
         var cluster = serviceInstances[i];
-        if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
-          that.isSpaceDeveloper = true;
+        if (authModel.doesUserHaveRole(cluster.guid, authModel.roles.space_developer)) {
+          vm.isSpaceDeveloper = true;
           break;
         }
       }
 
       return $q.resolve()
         .then(function () {
-          that.filter.text = that.model.filterParams.text;
+          vm.filter.text = vm.model.filterParams.text;
         })
-        .then(_.bind(that._setClusters, that))
-        .then(_.bind(that._setOrgs, that))
-        .then(_.bind(that._setSpaces, that))
-        .then(_.bind(that._reload, that, true))
+        .then(_.bind(_setClusters, vm))
+        .then(_.bind(_setOrgs, vm))
+        .then(_.bind(_setSpaces, vm))
+        .then(_.bind(_reload, vm, true))
         .finally(function () {
           // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
-          that.ready = true;
+          vm.ready = true;
         });
     }
 
-    appUtilsService.chainStateResolve('cf.applications.list', $state, init);
-
-    // Ensure any app errors we have set are cleared when the scope is destroyed
-    $scope.$on('$destroy', function () {
-      that.errorService.clearAppError();
-      // Ensure that remove the resize handler on the window
-      angular.element($window).off('resize', onResize);
-    });
-  }
-
-  angular.extend(ApplicationsListController.prototype, {
+    function onResize() {
+      var shouldForceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
+      if (shouldForceCardLayout !== vm.forceCardLayout) {
+        vm.forceCardLayout = shouldForceCardLayout;
+        $scope.$apply(function () {
+          if (vm.forceCardLayout) {
+            previousLayout = vm.model.showCardLayout;
+            goToGalleryView(true);
+          } else {
+            goToGalleryView(previousLayout);
+          }
+        });
+      }
+    }
 
     /**
      * @function getNoAppsMessage
@@ -146,11 +141,11 @@
      * @returns {string} No Apps message that is contextualised to the current filter
      * @public
      */
-    getNoAppsMessage: function () {
+    function getNoAppsMessage() {
       var text = gettext('You have no applications');
-      if (this.model.filterParams.cnsiGuid !== 'all') {
-        if (this.model.filterParams.orgGuid !== 'all') {
-          if (this.model.filterParams.spaceGuid !== 'all') {
+      if (vm.model.filterParams.cnsiGuid !== 'all') {
+        if (vm.model.filterParams.orgGuid !== 'all') {
+          if (vm.model.filterParams.spaceGuid !== 'all') {
             text = gettext('This space has no applications');
           } else {
             text = gettext('This organization has no applications');
@@ -160,19 +155,19 @@
         }
       }
       return text +
-        (this.model.filterParams.text && this.model.filterParams.text.length ? ' matching the search term.' : '.');
-    },
+        (vm.model.filterParams.text && vm.model.filterParams.text.length ? ' matching the search term.' : '.');
+    }
 
-    getEndpointsLink: function () {
-      if (this.model.clusterCount === 0) {
-        return this.$state.go('endpoint.dashboard');
+    function getEndpointsLink() {
+      if (vm.model.clusterCount === 0) {
+        return $state.go('endpoint.dashboard');
       }
-      var hcfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
+      var hcfs = _.filter(vm.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
       if (hcfs.length === 1) {
-        return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
+        return $state.go('endpoint.clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
       }
-      return this.$state.go('endpoint.clusters.tiles');
-    },
+      return $state.go('endpoint.clusters.tiles');
+    }
 
     /**
      * @function _setClusters
@@ -180,46 +175,46 @@
      * @returns {promise}
      * @private
      */
-    _setClusters: function () {
+    function _setClusters() {
       // get the list of connected HCF endpoints
-      this.clusters.length = 1;
-      var clusters = _.chain(this.userCnsiModel.serviceInstances)
+      vm.clusters.length = 1;
+      var clusters = _.chain(vm.userCnsiModel.serviceInstances)
         .values()
         .filter({cnsi_type: 'hcf'})
         .map(function (o) {
           return {label: o.name, value: o.guid};
         })
         .value();
-      [].push.apply(this.clusters, clusters);
-      this.model.clusterCount = clusters.length;
+      [].push.apply(vm.clusters, clusters);
+      vm.model.clusterCount = clusters.length;
 
       // Reset filtered cluster if it's no longer valid
-      if (!_.find(this.clusters, { value: this.model.filterParams.cnsiGuid})) {
-        this.model.filterParams.cnsiGuid = 'all';
+      if (!_.find(vm.clusters, {value: vm.model.filterParams.cnsiGuid})) {
+        vm.model.filterParams.cnsiGuid = 'all';
       }
 
       // Check to see if the set of clusters has changed
       var clusterGuids = _.map(clusters, 'value');
-      if (this.model.filterLastCluster) {
-        var intersection = _.intersection(this.model.filterLastCluster, clusterGuids);
-        if (this.model.filterLastCluster.length !== intersection.length || clusterGuids.length !== intersection.length) {
+      if (vm.model.filterLastCluster) {
+        var intersection = _.intersection(vm.model.filterLastCluster, clusterGuids);
+        if (vm.model.filterLastCluster.length !== intersection.length || clusterGuids.length !== intersection.length) {
           // Set of GUIDs has changed, so reset the filter
-          this.model.filterParams.cnsiGuid = 'all';
+          vm.model.filterParams.cnsiGuid = 'all';
         }
       }
 
       // Select the previous filter value or first cluster in list
-      if (this.model.filterParams.cnsiGuid !== 'all') {
-        this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
-      } else if (this.model.clusterCount === 1) {
-        this.model.filterParams.cnsiGuid = clusters[0].value;
-        this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
+      if (vm.model.filterParams.cnsiGuid !== 'all') {
+        vm.filter.cnsiGuid = vm.model.filterParams.cnsiGuid;
+      } else if (vm.model.clusterCount === 1) {
+        vm.model.filterParams.cnsiGuid = clusters[0].value;
+        vm.filter.cnsiGuid = vm.model.filterParams.cnsiGuid;
       }
 
-      this.model.filterLastCluster = clusterGuids;
+      vm.model.filterLastCluster = clusterGuids;
 
-      return this.$q.resolve();
-    },
+      return $q.resolve();
+    }
 
     /**
      * @function _setOrgs
@@ -227,32 +222,32 @@
      * @returns {promise} A promise
      * @private
      */
-    _setOrgs: function () {
-      var that = this;
-      this.organizations.length = 1;
-      if (this.model.filterParams.cnsiGuid !== 'all') {
-        return this.cfOrganizationModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
+    function _setOrgs() {
+
+      vm.organizations.length = 1;
+      if (vm.model.filterParams.cnsiGuid !== 'all') {
+        return cfOrganizationModel.listAllOrganizations(vm.model.filterParams.cnsiGuid)
           .then(function (newOrgs) {
-            var orgs = _.map(newOrgs, that._selectMapping);
-            [].push.apply(that.organizations, orgs);
+            var orgs = _.map(newOrgs, _selectMapping);
+            [].push.apply(vm.organizations, orgs);
 
             // Reset filtered organization if it's no longer valid
-            if (!_.find(that.organizations, { value: that.model.filterParams.orgGuid})) {
-              that.model.filterParams.orgGuid = 'all';
+            if (!_.find(vm.organizations, {value: vm.model.filterParams.orgGuid})) {
+              vm.model.filterParams.orgGuid = 'all';
             }
 
             // Select the previous filter value or first organization in list
-            if (that.model.filterParams.orgGuid !== 'all') {
-              that.filter.orgGuid = that.model.filterParams.orgGuid;
+            if (vm.model.filterParams.orgGuid !== 'all') {
+              vm.filter.orgGuid = vm.model.filterParams.orgGuid;
             } else if (orgs.length === 1) {
-              that.model.filterParams.orgGuid = orgs[0].value;
-              that.filter.orgGuid = that.model.filterParams.orgGuid;
+              vm.model.filterParams.orgGuid = orgs[0].value;
+              vm.filter.orgGuid = vm.model.filterParams.orgGuid;
             }
           });
       } else {
-        return this.$q.resolve();
+        return $q.resolve();
       }
-    },
+    }
 
     /**
      * @function _setSpaces
@@ -260,36 +255,36 @@
      * @returns {promise} A promise
      * @private
      */
-    _setSpaces: function () {
-      var that = this;
-      this.spaces.length = 1;
-      if (this.model.filterParams.cnsiGuid !== 'all' &&
-        this.model.filterParams.orgGuid !== 'all') {
-        return this.cfOrganizationModel.listAllSpacesForOrganization(
-          this.model.filterParams.cnsiGuid,
-          this.model.filterParams.orgGuid
+    function _setSpaces() {
+
+      vm.spaces.length = 1;
+      if (vm.model.filterParams.cnsiGuid !== 'all' &&
+        vm.model.filterParams.orgGuid !== 'all') {
+        return cfOrganizationModel.listAllSpacesForOrganization(
+          vm.model.filterParams.cnsiGuid,
+          vm.model.filterParams.orgGuid
         )
           .then(function (newSpaces) {
-            var spaces = _.map(newSpaces, that._selectMapping);
-            [].push.apply(that.spaces, spaces);
+            var spaces = _.map(newSpaces, _selectMapping);
+            [].push.apply(vm.spaces, spaces);
 
             // Reset filtered space if it's no longer valid
-            if (!_.find(that.spaces, { value: that.model.filterParams.spaceGuid})) {
-              that.model.filterParams.spaceGuid = 'all';
+            if (!_.find(vm.spaces, {value: vm.model.filterParams.spaceGuid})) {
+              vm.model.filterParams.spaceGuid = 'all';
             }
 
             // Select the previous filter value or first space in list
-            if (that.model.filterParams.spaceGuid !== 'all') {
-              that.filter.spaceGuid = that.model.filterParams.spaceGuid;
+            if (vm.model.filterParams.spaceGuid !== 'all') {
+              vm.filter.spaceGuid = vm.model.filterParams.spaceGuid;
             } else if (spaces.length === 1) {
-              that.model.filterParams.spaceGuid = spaces[0].value;
-              that.filter.spaceGuid = that.model.filterParams.spaceGuid;
+              vm.model.filterParams.spaceGuid = spaces[0].value;
+              vm.filter.spaceGuid = vm.model.filterParams.spaceGuid;
             }
           });
       } else {
-        return this.$q.resolve();
+        return $q.resolve();
       }
-    },
+    }
 
     /**
      * @function _setFilter
@@ -298,10 +293,10 @@
      * @returns {void}
      * @private
      */
-    _setFilter: function (updatedFilter) {
-      angular.extend(this.model.filterParams, updatedFilter);
-      angular.extend(this.filter, updatedFilter);
-    },
+    function _setFilter(updatedFilter) {
+      angular.extend(vm.model.filterParams, updatedFilter);
+      angular.extend(vm.filter, updatedFilter);
+    }
 
     /**
      * @function _loadPage
@@ -310,16 +305,16 @@
      * @returns {promise} A promise
      * @private
      */
-    _loadPage: function (page) {
-      var that = this;
-      this.loading = true;
+    function _loadPage(page) {
 
-      return this.model.loadPage(page)
+      vm.loading = true;
+
+      return vm.model.loadPage(page)
         .finally(function () {
-          that.loading = false;
-          that._handleErrors();
+          vm.loading = false;
+          _handleErrors();
         });
-    },
+    }
 
     /**
      * @function _reload
@@ -329,33 +324,33 @@
      * @returns {promise} A promise
      * @private
      */
-    _reload: function (retainPage, fromCache) {
-      var that = this;
-      var reloadPage = retainPage ? that.model.appPage : 1;
-      this.loading = true;
+    function _reload(retainPage, fromCache) {
 
-      return this.model.resetPagination(fromCache)
+      var reloadPage = retainPage ? vm.model.appPage : 1;
+      vm.loading = true;
+
+      return vm.model.resetPagination(fromCache)
         .then(function () {
-          that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
+          vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
 
           //Ensure page number is valid and load it
           reloadPage = reloadPage < 1 ? 1 : reloadPage;
-          reloadPage = reloadPage > that.paginationProperties.total ? that.paginationProperties.total : reloadPage;
+          reloadPage = reloadPage > vm.paginationProperties.total ? vm.paginationProperties.total : reloadPage;
           if (reloadPage) {
-            that._loadPage(reloadPage).then(function () {
-              that.paginationProperties.pageNumber = reloadPage;
+            _loadPage(reloadPage).then(function () {
+              vm.paginationProperties.pageNumber = reloadPage;
             });
           }
         })
         .catch(function (error) {
-          that.paginationProperties.total = 0;
-          that.paginationProperties.pageNumber = 0;
-          return that.$q.reject(error);
+          vm.paginationProperties.total = 0;
+          vm.paginationProperties.pageNumber = 0;
+          return $q.reject(error);
         })
         .finally(function () {
-          that.loading = false;
+          vm.loading = false;
         });
-    },
+    }
 
     /**
      * @function _handleErrors
@@ -363,24 +358,24 @@
      * @returns {void}
      * @orivate
      */
-    _handleErrors: function () {
-      var that = this;
+    function _handleErrors() {
+
       var errors = [];
-      var servicesWithErrors = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', error: true});
+      var servicesWithErrors = _.filter(vm.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', error: true});
       _.each(servicesWithErrors, function (cnsi) {
-        if (that.filter.cnsiGuid === cnsi.guid || that.filter.cnsiGuid === 'all') {
+        if (vm.filter.cnsiGuid === cnsi.guid || vm.filter.cnsiGuid === 'all') {
           errors.push(cnsi.name);
         }
       });
       if (errors.length === 1) {
         var errorMessage = gettext('The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-        that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
+        appErrorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
       } else if (errors.length > 1) {
-        that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
+        appErrorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
       } else {
-        that.errorService.clearAppError();
+        appErrorService.clearAppError();
       }
-    },
+    }
 
     /**
      * @function getClusterOrganizations
@@ -388,35 +383,35 @@
      * @returns {void}
      * @public
      */
-    setCluster: function () {
-      var that = this;
-      this.organizations.length = 1;
-      this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
+    function setCluster() {
+
+      vm.organizations.length = 1;
+      vm.model.filterParams.cnsiGuid = vm.filter.cnsiGuid;
       // Reload if we're coming FROM a situation where we won't have all apps (previously filtered by org/space)
-      var needToReload = !_.isMatch(this.filter, {orgGuid: 'all', spaceGuid: 'all'});
-      this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
-      this.$q.resolve()
-        .then(_.bind(this._setOrgs, this))
-        .then(_.bind(this._setSpaces, this))
+      var needToReload = !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
+      _setFilter({orgGuid: 'all', spaceGuid: 'all'});
+      $q.resolve()
+        .then(_.bind(_setOrgs, vm))
+        .then(_.bind(_setSpaces, vm))
         .then(function () {
           // Reload if we're going TO a situation where we won't have all apps (filtered by org/space). _setOrg may have
           // changed the org and space filter
-          needToReload = needToReload || !_.isMatch(that.filter, {orgGuid: 'all', spaceGuid: 'all'});
+          needToReload = needToReload || !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
           if (needToReload) {
-            that._reload();
+            _reload();
           } else {
-            if (that.filter.cnsiGuid === 'all') {
-              that.model.resetFilter();
+            if (vm.filter.cnsiGuid === 'all') {
+              vm.model.resetFilter();
             } else {
-              that.model.filterByCluster(that.filter.cnsiGuid);
+              vm.model.filterByCluster(vm.filter.cnsiGuid);
             }
-            that.paginationProperties.pageNumber = 1;
-            that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
-            that._loadPage(1);
+            vm.paginationProperties.pageNumber = 1;
+            vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
+            _loadPage(1);
           }
         });
-    },
+    }
 
     /**
      * @function getOrganizationSpaces
@@ -424,29 +419,29 @@
      * @returns {void}
      * @public
      */
-    setOrganization: function () {
-      var that = this;
-      this.spaces.length = 1;
-      this.model.filterParams.orgGuid = this.filter.orgGuid;
-      this._setFilter({spaceGuid: 'all'});
-      this._setSpaces().then(function () {
-        that._reload();
+    function setOrganization() {
+
+      vm.spaces.length = 1;
+      vm.model.filterParams.orgGuid = vm.filter.orgGuid;
+      _setFilter({spaceGuid: 'all'});
+      _setSpaces().then(function () {
+        _reload();
       });
-    },
+    }
 
-    setSpace: function () {
-      this.model.filterParams.spaceGuid = this.filter.spaceGuid;
-      this._reload();
-    },
+    function setSpace() {
+      vm.model.filterParams.spaceGuid = vm.filter.spaceGuid;
+      _reload();
+    }
 
-    setText: function () {
-      this.model.filterParams.text = this.filter.text;
-      this._reload(true, true);
-    },
+    function setText() {
+      vm.model.filterParams.text = vm.filter.text;
+      _reload(true, true);
+    }
 
-    toggleFilterPanel: function () {
-      this.model.hideFilterPanel = !this.model.hideFilterPanel;
-    },
+    function toggleFilterPanel() {
+      vm.model.hideFilterPanel = !vm.model.hideFilterPanel;
+    }
 
     /**
      * @function resetFilter
@@ -454,17 +449,17 @@
      * @returns {void}
      * @public
      */
-    resetFilter: function () {
-      var that = this;
-      var clusters = this.clusters;
+    function resetFilter() {
 
-      this.clusters = [];
-      this.$timeout(function () {
-        that.clusters = clusters;
-        that._setFilter({cnsiGuid: 'all', text: ''});
-        that.setCluster();
+      var clusters = vm.clusters;
+
+      vm.clusters = [];
+      $timeout(function () {
+        vm.clusters = clusters;
+        _setFilter({cnsiGuid: 'all', text: ''});
+        setCluster();
       }, 100);
-    },
+    }
 
     /**
      * @function _selectMapping
@@ -473,57 +468,57 @@
      * @returns {object} Select input option mapping
      * @private
      */
-    _selectMapping: function (obj) {
+    function _selectMapping(obj) {
       return {
         label: obj.entity.name,
         value: obj.metadata.guid
       };
-    },
+    }
 
     /**
      * @function isAdminInAnyHcf
      * @description Helper to detect if user is an admin in any connected HCF
      * @returns {boolean} true if the user is connected to any HCF as an admin
      */
-    isAdminInAnyHcf: function () {
-      for (var guid in this.userCnsiModel.serviceInstances) {
-        if (!this.userCnsiModel.serviceInstances.hasOwnProperty(guid)) {
+    function isAdminInAnyHcf() {
+      for (var guid in vm.userCnsiModel.serviceInstances) {
+        if (!vm.userCnsiModel.serviceInstances.hasOwnProperty(guid)) {
           continue;
         }
-        if (this.userCnsiModel.serviceInstances[guid].cnsi_type !== 'hcf') {
+        if (vm.userCnsiModel.serviceInstances[guid].cnsi_type !== 'hcf') {
           continue;
         }
-        if (this.authModel.isAdmin(guid)) {
+        if (authModel.isAdmin(guid)) {
           return true;
         }
       }
-    },
+    }
 
     /**
      * @function showAddApplicationButton
      * @description Implements the logic for showing the `Add Application` button
      * @returns {boolean} true if the user is an admin or a Space developer to any HCF
      */
-    showAddApplicationButton: function () {
-      if (this.isAdminInAnyHcf()) {
+    function showAddApplicationButton() {
+      if (isAdminInAnyHcf()) {
         return true;
       }
-      return !this.disableAddApplicationButton();
-    },
+      return !disableAddApplicationButton();
+    }
 
     /**
      * @function addApplication
      * @description Shows the Add Application dialog
      */
-    addApplication: function () {
-      this.frameworkDetailView(
+    function addApplication() {
+      frameworkDetailView(
         {
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
           dialog: true,
           class: 'dialog-form-large'
         }
       );
-    },
+    }
 
     /**
      * @function disableAddApplicationButton
@@ -531,9 +526,9 @@
      * @returns {boolean} true is App module is initialising,
      * there no connected endpoints or user is not a space developer
      */
-    disableAddApplicationButton: function () {
-      return !this.ready || this.model.clusterCount <= 0 || !this.isSpaceDeveloper;
-    },
+    function disableAddApplicationButton() {
+      return !vm.ready || vm.model.clusterCount <= 0 || !vm.isSpaceDeveloper;
+    }
 
     /**
      * @function goToGalleryView
@@ -541,10 +536,10 @@
      * @param {boolean} showCardLayout - True if view should card layout, false for list view
      * @returns {*|void}
      */
-    goToGalleryView: function (showCardLayout) {
-      this.model.showCardLayout = showCardLayout;
-      return this.$state.go('cf.applications.list.gallery-view');
+    function goToGalleryView(showCardLayout) {
+      vm.model.showCardLayout = showCardLayout;
+      return $state.go('cf.applications.list.gallery-view');
     }
 
-  });
+  }
 })();

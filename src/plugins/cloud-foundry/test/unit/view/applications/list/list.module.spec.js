@@ -3,7 +3,7 @@
 
   describe('list module', function () {
 
-    var $controller, $httpBackend, $scope, appEventService, $state;
+    var $controller, $httpBackend, $scope, $state;
 
     var cnsiGuid = 'cnsiGuid';
     // Matches org from ListAllOrganizations
@@ -22,7 +22,6 @@
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var modelManager = $injector.get('modelManager');
-      appEventService = $injector.get('appEventService');
       var errorService = $injector.get('appErrorService');
       var appUtilsService = $injector.get('appUtilsService');
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
@@ -52,7 +51,8 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+        errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');

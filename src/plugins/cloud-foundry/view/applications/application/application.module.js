@@ -37,7 +37,6 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $state - the UI router $state service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
-   * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -63,7 +62,6 @@
 
     // Clear any previous state in the application tabs service
     cfApplicationTabs.clearState();
-
 
     // When a modal interaction starts, stop the background polling
     var removeModalStartListener = appEventService.$on(appEventService.events.MODAL_INTERACTION_START, function () {
@@ -148,7 +146,7 @@
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
       }
     ];
-    vm.scheduledUpdate;
+    vm.scheduledUpdate = undefined;
 
     vm.isActionHidden = isActionHidden;
 
