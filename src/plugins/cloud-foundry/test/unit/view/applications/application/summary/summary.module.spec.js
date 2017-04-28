@@ -21,6 +21,9 @@
       var editAppService = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
       var appUtilsService = $injector.get('appUtilsService');
       var appClusterRoutesService = $injector.get('appClusterRoutesService');
+      var cfApplicationTabs = $injector.get('cfApplicationTabs');
+      var appNotificationsService = $injector.get('appNotificationsService');
+      var frameworkDialogConfirm = $injector.get('frameworkDialogConfirm');
 
       $stateParams.cnsiGuid = cnsiGuid;
       if (mockAuthModel) {
@@ -41,7 +44,9 @@
       _.set(appModel, 'application.summary.space_guid', spaceGuid);
 
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
-      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter, modelManager, addRoutesService, editAppService, appUtilsService, appClusterRoutesService);
+      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter, modelManager,
+        addRoutesService, editAppService, appUtilsService, appClusterRoutesService, frameworkDialogConfirm,
+        appNotificationsService, cfApplicationTabs);
 
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);

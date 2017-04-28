@@ -3,7 +3,7 @@
 
   /* eslint-disable angular/no-private-call */
   describe('add-service-workflow directive - ', function () {
-    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute;
+    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute, cfApplicationTabs;
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
@@ -15,6 +15,7 @@
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
       var appModel = modelManager.retrieve('cloud-foundry.model.application');
+      cfApplicationTabs = $injector.get('cfApplicationTabs');
 
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
@@ -147,7 +148,7 @@
         spyOn(that, 'removeAppFromRoutes').and.callThrough();
         spyOn(that, 'tryDeleteEachRoute').and.callThrough();
         spyOn(that, 'deleteServiceBindings').and.callThrough();
-        spyOn(that, 'deleteProject').and.callThrough();
+        spyOn(that.cfApplicationTabs, 'appDeleting').and.callThrough();
         spyOn(that.appModel, 'deleteApp').and.callThrough();
 
         that.deleteApp();
@@ -156,7 +157,7 @@
         expect(that.removeAppFromRoutes).toHaveBeenCalled();
         expect(that.tryDeleteEachRoute).toHaveBeenCalled();
         expect(that.deleteServiceBindings).toHaveBeenCalled();
-        expect(that.deleteProject).toHaveBeenCalled();
+        expect(that.cfApplicationTabs.appDeleting).toHaveBeenCalled();
         expect(that.appModel.deleteApp).toHaveBeenCalled();
       });
 
@@ -321,18 +322,19 @@
 
       it('#deleteProject - project is defined', function () {
         that.appModel.application.project = {};
-        that.appEndpointsCnsiService.callAllEndpointProvidersFunc = function () {
+        that.appModel.application.pipeline = { hceCnsi: '' };
+        cfApplicationTabs.appDeleting = function () {
           return that.$q.resolve();
         };
         that.details = {
           project: 'project'
         };
-        spyOn(that.appEndpointsCnsiService, 'callAllEndpointProvidersFunc').and.callThrough();
+        spyOn(cfApplicationTabs, 'appDeleting').and.callThrough();
 
         var p = that.deleteProject();
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
-        expect(that.appEndpointsCnsiService.callAllEndpointProvidersFunc).toHaveBeenCalledWith('deleteApplicationPipeline', that.details.project);
+        expect(cfApplicationTabs.appDeleting).toHaveBeenCalled();
       });
 
       it('#startWorkflow', function () {

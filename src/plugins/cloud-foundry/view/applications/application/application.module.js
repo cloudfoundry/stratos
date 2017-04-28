@@ -37,7 +37,6 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $state - the UI router $state service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
-   * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -51,7 +50,7 @@
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
                                  cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $interpolate, $state, cfApplicationTabs, appEndpointsCnsiService) {
+                                 $interpolate, $state, cfApplicationTabs) {
     var that = this;
 
     this.$window = $window;
@@ -74,10 +73,9 @@
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     this.cfApplicationTabs = cfApplicationTabs;
-    this.appEndpointsCnsiService = appEndpointsCnsiService;
 
     // Clear any previous state in the application tabs service
-    cfApplicationTabs.clearStates();
+    cfApplicationTabs.clearState();
 
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
@@ -210,7 +208,7 @@
         this.ready = true;
 
         this.updateBuildPack();
-        this.cfApplicationTabs.clearStates();
+        this.cfApplicationTabs.clearState();
 
         if (this.model.application.summary.state === 'STARTED') {
           blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -225,14 +223,10 @@
       var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
           that.updateBuildPack();
-          that.cfApplicationTabs.clearStates();
+          that.cfApplicationTabs.clearState();
 
-          // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
-          // app summary
-
-          blockUpdate.push(
-            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid,
-              true));
+          // appUpdated requires summary.guid and summary.services which are only found in updated app summary
+          blockUpdate.push(that.cfApplicationTabs.appUpdated(that.cnsiGuid, true));
 
           if (!haveApplication && that.model.application.summary.state === 'STARTED') {
             blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -308,7 +302,7 @@
       return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
-            return that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid, true);
+            return that.cfApplicationTabs.appUpdated(that.cnsiGuid, true);
           });
         })
         .finally(function () {
@@ -362,7 +356,7 @@
     complexDeleteAppDialog: function (details) {
       this.frameworkDetailView(
         {
-          template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
+          template: '<delete-app-workflow guids="context.details" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
         },
         {
@@ -436,17 +430,6 @@
         return !this.pipelineReady;
       } else {
         return false;
-      }
-    },
-
-    /**
-     * @function showCliInstructions
-     * @description Show the CLI Instructions slide-in
-     */
-    showCliInstructions: function () {
-      var cliAction = _.find(this.appActions, {id: 'cli'});
-      if (cliAction && !cliAction.disabled && !cliAction.hidden) {
-        cliAction.execute();
       }
     },
 
