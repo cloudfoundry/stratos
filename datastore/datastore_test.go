@@ -15,6 +15,7 @@ import (
 func TestDatastore(t *testing.T) {
 
 	var (
+		mockDatabaseProvider   = "pgsql"
 		mockUsername           = "user1"
 		mockPassword           = "foobar"
 		mockDatabase           = "mydb"
@@ -31,6 +32,7 @@ func TestDatastore(t *testing.T) {
 	Convey("Given the requirement for a non-TLS database connection", t, func() {
 
 		var mockDatabaseConfigNoSSL = DatabaseConfig{
+			DatabaseProvider:        mockDatabaseProvider,
 			Username:                mockUsername,
 			Password:                mockPassword,
 			Database:                mockDatabase,
@@ -233,6 +235,7 @@ func TestDatastore(t *testing.T) {
 	Convey("Given the requirement for a TLS database connection", t, func() {
 
 		var mockDatabaseConfigSSL = DatabaseConfig{
+			DatabaseProvider:        mockDatabaseProvider,
 			Username:                mockUsername,
 			Password:                mockPassword,
 			Database:                mockDatabase,

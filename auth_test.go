@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
+
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
@@ -35,17 +37,13 @@ func TestLoginToUAA(t *testing.T) {
 			msBody(jsonMust(mockUAAResponse)))
 
 		defer mockUAA.Close()
-		mockURL, _ := url.Parse(mockUAA.URL)
-		s := strings.Split(mockURL.Host, ":")
-		pp.Config.HCPIdentityScheme = mockURL.Scheme
-		pp.Config.HCPIdentityHost = s[0]
-		pp.Config.HCPIdentityPort = s[1]
+		pp.Config.UAAEndpoint = mockUAA.URL
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(expectNoRows())
 
 		mock.ExpectExec(insertIntoTokens).
-		// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
+			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		Convey("Should not fail to login", func() {
@@ -79,11 +77,7 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		)
 
 		defer mockUAA.Close()
-		mockURL, _ := url.Parse(mockUAA.URL)
-		s := strings.Split(mockURL.Host, ":")
-		pp.Config.HCPIdentityScheme = mockURL.Scheme
-		pp.Config.HCPIdentityHost = s[0]
-		pp.Config.HCPIdentityPort = s[1]
+		pp.Config.UAAEndpoint = mockUAA.URL
 
 		err := pp.loginToUAA(ctx)
 		Convey("Login to UAA should fail", func() {
@@ -120,20 +114,15 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 			msBody(jsonMust(mockUAAResponse)))
 
 		defer mockUAA.Close()
-		mockURL, _ := url.Parse(mockUAA.URL)
-		s := strings.Split(mockURL.Host, ":")
-		pp.Config.HCPIdentityScheme = mockURL.Scheme
-		pp.Config.HCPIdentityHost = s[0]
-		pp.Config.HCPIdentityPort = s[1]
+		pp.Config.UAAEndpoint = mockUAA.URL
 
 		mock.ExpectQuery(selectAnyFromTokens).
-		// WithArgs(mockUserGUID).
+			// WithArgs(mockUserGUID).
 			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 		// --- set up the database expectation for pp.saveUAAToken
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
-
 
 		Convey("Should not fail to login", func() {
 			So(pp.loginToUAA(ctx), ShouldNotBeNil)
@@ -204,7 +193,7 @@ func TestLoginToCNSI(t *testing.T) {
 		// Setup expectation that the CNSI token will get saved
 		//encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 		mock.ExpectExec(insertIntoTokens).
-		//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
+			//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		// do the call
@@ -416,8 +405,8 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 		tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken)
 
-		logger.Printf("tr is: %T %+v", tr, tr)
-		logger.Printf("emptyTokenRecord is: %T %+v", emptyTokenRecord, emptyTokenRecord)
+		log.Printf("tr is: %T %+v", tr, tr)
+		log.Printf("emptyTokenRecord is: %T %+v", emptyTokenRecord, emptyTokenRecord)
 
 		Convey("Should fail to login", func() {
 			So(err, ShouldNotBeNil)
@@ -662,7 +651,7 @@ func TestVerifySessionExpired(t *testing.T) {
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-			AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
+				AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
 		err := pp.verifySession(ctx)
 
 		Convey("Should fail to verify session", func() {
