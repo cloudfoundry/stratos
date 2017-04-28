@@ -25,6 +25,7 @@ type DatabaseConfig struct {
 	SSLCertificate          string `configName:"PGSQL_CERT"`
 	SSLKey                  string `configName:"PGSQL_CERT_KEY"`
 	SSLRootCertificate      string `configName:"PGSQL_ROOT_CERT"`
+	DatabaseProvider        string
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
@@ -92,9 +93,9 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 
 // GetConnection returns a database connection to either PostgreSQL or SQLite
 func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
-	log.Println("GetConnection")
+	log.Debug("GetConnection")
 
-	if len(dc.Host) > 0 {
+	if dc.DatabaseProvider == "pgsql" {
 		return sql.Open("postgres", buildConnectionString(dc))
 	}
 

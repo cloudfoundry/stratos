@@ -16,14 +16,13 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
-	"github.com/gorilla/sessions"
 	"github.com/hpcloud/portal-proxy/config"
 	"github.com/hpcloud/portal-proxy/datastore"
-	"github.com/hpcloud/portal-proxy/datastore/sqllite"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
+	"github.com/nwmac/sqlitestore"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -45,7 +44,7 @@ var (
 	httpClientSkipSSL = http.Client{}
 )
 
-func cleanup(dbc *sql.DB, ss *pgstore.PGStore) {
+func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 	log.Info("Attempting to shut down gracefully...")
 	log.Info(`--- Closing databaseConnectionPool`)
 	dbc.Close()
@@ -100,15 +99,10 @@ func main() {
 	log.Info("Proxy database connection pool created.")
 
 	// Initialize the Postgres backed session store for Gorilla sessions
-	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig)
+	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig, SessionExpiry)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Setup cookie-store options
-	sessionStore.Options.MaxAge = SessionExpiry
-	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.Secure = true
 
 	defer func() {
 		log.Info(`--- Closing sessionStore`)
@@ -212,7 +206,7 @@ func initConnPool() (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, pc portalConfig) (sessions.Store, error) {
+func initSessionStore(db *sql.DB, pc portalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
 	// load up postgresql database configuration
@@ -223,11 +217,23 @@ func initSessionStore(db *sql.DB, pc portalConfig) (sessions.Store, error) {
 	}
 
 	// Store depends on the DB Type
-	if len(dc.Host) > 0 {
-		return pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+	if dc.DatabaseProvider == "pgsql" {
+		log.Info("Creating Postgres session store")
+		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+		// Setup cookie-store options
+		sessionStore.Options.MaxAge = sessionExpiry
+		sessionStore.Options.HttpOnly = true
+		sessionStore.Options.Secure = true
+		return sessionStore, err
 	}
 
-	return sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	log.Info("Creating SQLite session store")
+	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	// Setup cookie-store options
+	sessionStore.Options.MaxAge = sessionExpiry
+	sessionStore.Options.HttpOnly = true
+	sessionStore.Options.Secure = true
+	return sessionStore, err
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
@@ -250,6 +256,13 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
+	}
+
+	// Determine database provider
+	if len(dc.Host) > 0 {
+		dc.DatabaseProvider = "pgsql"
+	} else {
+		dc.DatabaseProvider = "sqlite"
 	}
 
 	return dc, nil
@@ -282,7 +295,7 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalProxy {
+func newPortalProxy(pc portalConfig, dcp *sql.DB, ss HttpSessionStore) *portalProxy {
 	log.Debug("newPortalProxy")
 	pp := &portalProxy{
 		Config:                 pc,
