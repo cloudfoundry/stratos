@@ -22,14 +22,13 @@
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
    * @param {object} $translate - the $translate service
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, translate, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
+  function endpointService(ceHideEndpoint, $q, $translate, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsCnsiService, apiManager) {
 
     var service = {
