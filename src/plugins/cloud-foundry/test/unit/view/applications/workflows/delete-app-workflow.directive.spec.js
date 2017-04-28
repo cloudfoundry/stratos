@@ -23,8 +23,7 @@
       };
 
       $scope.guids = {
-        cnsiGuid: 'cnsiGuid',
-        hceCnsiGuid: 'hceCnsiGuid'
+        cnsiGuid: 'cnsiGuid'
       };
 
       $scope.testNoOp = function () {};
@@ -57,7 +56,6 @@
 
       it('should be set properly', function () {
         expect(that.cnsiGuid).toBe(null);
-        expect(that.hceCnsiGuid).toBe(null);
         expect(that.data).toBeDefined();
         expect(that.userInput.checkedRouteValue).toBeDefined();
         expect(that.userInput.checkedServiceValue).toBeDefined();
@@ -322,36 +320,29 @@
       });
 
       it('#deleteProject - project is defined', function () {
-        that.appModel.application.project = undefined;
-        spyOn(that.hceModel, 'removeProject').and.callThrough();
-        var p = that.deleteProject();
-        $scope.$apply();
-        expect(p.$$state.status).toBe(1);
-        expect(that.hceModel.removeProject).not.toHaveBeenCalled();
-      });
-
-      it('#deleteProject - project is not defined', function () {
         that.appModel.application.project = {};
-        that.hceModel.removeProject = function () {
+        that.appEndpointsCnsiService.callAllEndpointProvidersFunc = function () {
           return that.$q.resolve();
         };
-        spyOn(that.hceModel, 'removeProject').and.callThrough();
+        that.details = {
+          project: 'project'
+        };
+        spyOn(that.appEndpointsCnsiService, 'callAllEndpointProvidersFunc').and.callThrough();
 
         var p = that.deleteProject();
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
-        expect(that.hceModel.removeProject).toHaveBeenCalled();
+        expect(that.appEndpointsCnsiService.callAllEndpointProvidersFunc).toHaveBeenCalledWith('deleteApplicationPipeline', that.details.project);
       });
 
       it('#startWorkflow', function () {
         spyOn(that, 'reset');
         that.startWorkflow({
-          cnsiGuid: 'cnsiGuid', hceCnsiGuid: 'hceCnsiGuid'
+          cnsiGuid: 'cnsiGuid'
         });
         expect(that.reset).toHaveBeenCalled();
         expect(that.deletingApplication).toBe(true);
         expect(that.cnsiGuid).toBe('cnsiGuid');
-        expect(that.hceCnsiGuid).toBe('hceCnsiGuid');
         that.deletingApplication = false;
       });
 

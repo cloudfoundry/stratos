@@ -71,22 +71,6 @@
       name: 'c3',
       type: 'Cloud Foundry'
     };
-    var hceService = {
-      api_endpoint: {
-        Scheme: 'http',
-        Host: 'api.foo.com'
-      },
-      cnsi_type: 'hce',
-      guid: '4',
-      name: 'c4',
-      valid: true,
-      token_expiry: Number.MAX_VALUE
-    };
-    var hceServicesEndpoint = {
-      key: 'cnsi_4',
-      name: 'c4',
-      type: 'Helion Code Engine'
-    };
 
     function createController($injector) {
       $httpBackend = $injector.get('$httpBackend');
@@ -145,8 +129,8 @@
 
       describe('createEndpointEntries', function () {
         it('empty cache', function () {
-          var services = [validService, invalidService, expiredService, hceService];
-          var endpoints = [validServicesEndpoint, invalidServicesEndpoint, expiredServicesEndpoint, hceServicesEndpoint];
+          var services = [validService, invalidService, expiredService];
+          var endpoints = [validServicesEndpoint, invalidServicesEndpoint, expiredServicesEndpoint];
           var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
           serviceInstanceModel.serviceInstances = services;
           var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -155,7 +139,7 @@
           service.createEndpointEntries();
 
           var result = appEndpointsDashboardService.endpoints;
-          expect(result.length).toBe(4);
+          expect(result.length).toBe(3);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {
               fail('Could not find endpoint with values: ' + JSON.stringify(endpoints[i]));
@@ -165,8 +149,8 @@
         });
 
         it('existing cache', function () {
-          var services = [validService, invalidService, expiredService, hceService];
-          var endpoints = [validServicesEndpoint, invalidServicesEndpoint, expiredServicesEndpoint, hceServicesEndpoint];
+          var services = [validService, invalidService, expiredService];
+          var endpoints = [validServicesEndpoint, invalidServicesEndpoint, expiredServicesEndpoint];
           var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
           serviceInstanceModel.serviceInstances = services;
           var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -194,7 +178,7 @@
           service.createEndpointEntries();
 
           var result = appEndpointsDashboardService.endpoints;
-          expect(result.length).toBe(5);
+          expect(result.length).toBe(4);
           for (var i = 0; i < endpoints.length; i++) {
             if (!_.some(result, endpoints[i])) {
               fail('Could not find endpoint with values: ' + JSON.stringify(endpoints[i]));

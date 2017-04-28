@@ -37,7 +37,8 @@
       createEndpointEntries: createEndpointEntries,
       clear: clear,
       cnsiEndpointProviders: cnsiEndpointProviders,
-      callEndpointProvidersFunc: callEndpointProvidersFunc
+      callEndpointProvidersFunc: callEndpointProvidersFunc,
+      callAllEndpointProvidersFunc: callAllEndpointProvidersFunc
     };
 
     appEndpointsDashboardService.endpointsProviders.push(service);
@@ -188,6 +189,16 @@
       if (angular.isFunction(func)) {
         return func.apply(this, _.slice(arguments, 2));
       }
+    }
+
+    function callAllEndpointProvidersFunc(method) {
+      var tasks = [];
+      var args = Array.prototype.slice.call(arguments);
+      _.forEach(service.cnsiEndpointProviders, function (endpointProvider) {
+        var promise = callEndpointProvidersFunc.apply(this, [endpointProvider.cnsi_type, method].concat(args.slice(1)));
+        tasks.push(promise || $q.resolve());
+      });
+      return $q.all(tasks);
     }
 
     function _cleanupStaleEndpoints(activeEndpointsKeys) {
