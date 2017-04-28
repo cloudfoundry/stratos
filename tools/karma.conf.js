@@ -92,8 +92,6 @@
         'test/unit/**/*.spec.js'
       ],
 
-      exclude: utils.updateWithPlugins([], true),
-
       frameworks: ['wiredep', 'jasmine'],
 
       // Required when running in intellij

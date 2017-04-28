@@ -90,6 +90,8 @@
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     vm.appCreatedInstructions = [];
+    vm.appUtilsService = appUtilsService;
+    vm.appClusterRoutesService = appClusterRoutesService;
 
     _.forEach(cfApplicationTabs.tabs, function (tab) {
       if (tab.appCreatedInstructions && tab.appCreatedInstructions.length) {
@@ -117,7 +119,7 @@
         name: gettext('Unmap from App'),
         disabled: false,
         execute: function (route) {
-          appClusterRoutesService.unmapAppRoute(vm.cnsiGuid, route, route.guid, vm.id).finally(function () {
+          vm.appClusterRoutesService.unmapAppRoute(vm.cnsiGuid, route, route.guid, vm.id).finally(function () {
             update();
           });
         }
@@ -126,7 +128,7 @@
         name: gettext('Delete Route'),
         disabled: false,
         execute: function (route) {
-          appClusterRoutesService.deleteRoute(vm.cnsiGuid, route, route.guid).finally(function () {
+          vm.appClusterRoutesService.deleteRoute(vm.cnsiGuid, route, route.guid).finally(function () {
             update();
           });
         }
@@ -166,7 +168,7 @@
     vm.getEndpoint = getEndpoint;
     vm.formatUptime = formatUptime;
 
-    appUtilsService.chainStateResolve('cf.applications.application.summary', $state, init);
+    vm.appUtilsService.chainStateResolve('cf.applications.application.summary', $state, init);
 
     function init() {
       $scope.$watchCollection(function () {
@@ -177,19 +179,19 @@
       });
 
       // Unmap from app
-      vm.canSetupPipeline[0].hidden = !authModel.isAllowed(vm.cnsiGuid,
+      vm.routesActionMenu[0].hidden = !authModel.isAllowed(vm.cnsiGuid,
         authModel.resources.application,
         authModel.actions.update,
         vm.model.application.summary.space_guid
       );
-      $log.debug('Auth Action: Unmap from app hidden: ' + vm.canSetupPipeline[0].hidden);
+      $log.debug('Auth Action: Unmap from app hidden: ' + vm.routesActionMenu[0].hidden);
       // delete route
-      vm.canSetupPipeline[1].hidden = !authModel.isAllowed(vm.cnsiGuid,
+      vm.routesActionMenu[1].hidden = !authModel.isAllowed(vm.cnsiGuid,
         authModel.resources.route,
         authModel.actions.delete,
         vm.model.application.summary.space_guid
       );
-      $log.debug('Auth Action: Delete from app hidden: ' + vm.canSetupPipeline[1].hidden);
+      $log.debug('Auth Action: Delete from app hidden: ' + vm.routesActionMenu[1].hidden);
       vm.hideRouteActions = !_.find(vm.routesActionMenu, {hidden: false});
 
       // hide Add Routes
@@ -255,7 +257,7 @@
     }
 
     function getEndpoint() {
-      return appUtilsService.getClusterEndpoint(vm.userCnsiModel.serviceInstances[vm.cnsiGuid]);
+      return vm.appUtilsService.getClusterEndpoint(vm.userCnsiModel.serviceInstances[vm.cnsiGuid]);
     }
 
     /**

@@ -169,7 +169,7 @@
       versionModel.list(cnsiGuid, id)
         .then(function () {
           vm.fetchError = false;
-          vm.versions = vm.versionModel.versions;
+          vm.versions = versionModel.versions;
         })
         .catch(function () {
           vm.fetchError = true;

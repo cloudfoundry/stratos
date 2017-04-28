@@ -88,7 +88,7 @@
     vm.isEdit = !!(context && context.variableName);
     if (vm.isEdit) {
       vm.varName = context.variableName;
-      vm.varValue = model.application.variables.environment_json[vm.varName];
+      vm.varValue = vm.model.application.variables.environment_json[vm.varName];
     } else {
       vm.varName = '';
       vm.varValue = '';
@@ -103,7 +103,7 @@
      **/
     function applyChange() {
       vm.addError = false;
-      var vars = _.clone(model.application.variables.environment_json);
+      var vars = _.clone(vm.model.application.variables.environment_json);
       vars[vm.varName] = vm.varValue;
       var updateData = {environment_json: vars};
       vm.model.update(cnsiGuid, vm.id, updateData).then(function () {

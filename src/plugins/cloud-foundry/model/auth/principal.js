@@ -36,6 +36,7 @@
     function Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid) {
 
       var model = {
+        stackatoInfo: stackatoInfo,
         isAdmin: stackatoInfo.endpoints.hcf[cnsiGuid].user.admin,
         userSummary: userSummary,
         featureFlags: featureFlags,

@@ -62,8 +62,8 @@
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.id = $stateParams.guid;
     vm.variableActions = [
-      {name: gettext('Edit Variable'), execute: _.bind(vm.editVariable, vm)},
-      {name: gettext('Delete Variable'), execute: _.bind(vm.deleteVariable, vm)}
+      {name: gettext('Edit Variable'), execute: _.bind(editVariable, vm)},
+      {name: gettext('Delete Variable'), execute: _.bind(deleteVariable, vm)}
     ];
     vm.deleteErrorMsg = gettext('An error occurred deleting this variable. Please try again.');
 
@@ -78,7 +78,7 @@
     vm.editVariable = editVariable;
     vm.deleteVariable = deleteVariable;
 
-    refreshVariables();
+    vm.refreshVariables();
 
     /**
      * @function isObject
@@ -116,7 +116,7 @@
         .then(function () {
           vm.fetchError = false;
           vm.variableNames = _.sortBy(
-            _.keys(model.application.variables.environment_json),
+            _.keys(vm.model.application.variables.environment_json),
             function (v) {
               return v.toUpperCase();
             });
@@ -136,7 +136,7 @@
      **/
     function addVariable() {
       cfVariablesManager.add(cnsiGuid, vm.id).then(function () {
-        refreshVariables();
+        vm.refreshVariables();
       });
     }
 
@@ -148,7 +148,7 @@
      **/
     function editVariable(name) {
       cfVariablesManager.edit(cnsiGuid, vm.id, name).then(function () {
-        refreshVariables();
+        vm.refreshVariables();
       });
     }
 
@@ -163,7 +163,7 @@
       vm.deleteError = false;
       cfVariablesManager.delete(cnsiGuid, vm.id, name)
         .then(function () {
-          refreshVariables();
+          vm.refreshVariables();
         })
         .catch(function () {
           vm.deleteError = name;

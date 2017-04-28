@@ -65,7 +65,7 @@
         per_page: 200,
         order_by: '-created_at'
       };
-      return model.versionsApi.ListVersions(guid, params, config).then(function (response) {
+      return versionsApi.ListVersions(guid, params, config).then(function (response) {
         _onListResponse(cnsiGuid, guid, response);
       }).catch(function () {
         setVersionSupport(cnsiGuid, false);

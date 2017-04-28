@@ -13,14 +13,14 @@
       var modelManager = $injector.get('modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
-      var appVarsManager = $injector.get('cfVariablesManager');
+      var cfVariablesManager = $injector.get('cfVariablesManager');
       $stateParams.cnsiGuid = cnsiGuid;
       $stateParams.guid = guid;
       var ApplicationVariablesController = $state.get('cf.applications.application.variables').controller;
-      createController = function (avMgr) {
-        return new ApplicationVariablesController(modelManager, $stateParams, avMgr);
+      createController = function (cfVariablesManager) {
+        return new ApplicationVariablesController(modelManager, $stateParams, cfVariablesManager);
       };
-      $controller = createController(appVarsManager);
+      $controller = createController(cfVariablesManager);
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);
       expect($controller.isObject).toBeDefined();

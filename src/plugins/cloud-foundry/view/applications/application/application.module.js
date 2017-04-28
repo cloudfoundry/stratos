@@ -60,7 +60,6 @@
     var UPDATE_INTERVAL = 5000; // milliseconds
 
     var scopeDestroyed, updating;
-    this.cfApplicationTabs = cfApplicationTabs;
 
     // Clear any previous state in the application tabs service
     cfApplicationTabs.clearState();
@@ -151,11 +150,10 @@
     ];
     vm.scheduledUpdate;
 
-    vm.showCliInstructions = showCliInstructions;
     vm.isActionHidden = isActionHidden;
 
     // Clear any previous state in the application tabs service
-    cfApplicationTabs.clearStates();
+    cfApplicationTabs.clearState();
 
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(init, vm));
@@ -206,7 +204,7 @@
         vm.ready = true;
 
         updateBuildPack();
-        this.cfApplicationTabs.clearState();
+        cfApplicationTabs.clearState();
 
         if (vm.model.application.summary.state === 'STARTED') {
           blockUpdate.push(vm.model.getAppStats(cnsiGuid, vm.id).then(function () {
@@ -221,14 +219,10 @@
       var appSummaryPromise = vm.model.getAppSummary(cnsiGuid, vm.id, false)
         .then(function () {
           updateBuildPack();
-          that.cfApplicationTabs.clearState();
+          cfApplicationTabs.clearState();
 
           // appUpdated requires summary.guid and summary.services which are only found in updated app summary
-          blockUpdate.push(that.cfApplicationTabs.appUpdated(that.cnsiGuid, true));
-
-          blockUpdate.push(
-            appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', cnsiGuid,
-              true));
+          blockUpdate.push(cfApplicationTabs.appUpdated(cnsiGuid, true));
 
           if (!haveApplication && vm.model.application.summary.state === 'STARTED') {
             blockUpdate.push(vm.model.getAppStats(cnsiGuid, vm.id).then(function () {
@@ -301,7 +295,7 @@
       return $q.when()
         .then(function () {
           return updateSummary().then(function () {
-            return that.cfApplicationTabs.appUpdated(that.cnsiGuid, true);
+            return cfApplicationTabs.appUpdated(cnsiGuid, true);
           });
         })
         .finally(function () {
@@ -328,23 +322,24 @@
       // changed
       vm.appBuildPack = vm.model.application.summary.buildpack || vm.model.application.summary.detected_buildpack;
     }
-    /**
-     * @function updateState
-     * @description update application state
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    updateState: function () {
-      return this.model.getAppStats(this.cnsiGuid, this.id);
-    },
 
-    deleteApp: function () {
-      if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
+    // /**
+    //  * @function updateState
+    //  * @description update application state
+    //  * @returns {promise} A resolved/rejected promise
+    //  * @public
+    //  */
+    // function updateState() {
+    //   return vm.model.getAppStats(cnsiGuid, vm.id);
+    // }
+
+    function deleteApp() {
+      if (vm.model.application.summary.services.length || vm.model.application.summary.routes.length) {
         var data = {
-          cnsiGuid: this.cnsiGuid,
-          project: _.get(this.model, 'application.project')
+          cnsiGuid: cnsiGuid,
+          project: _.get(vm.model, 'application.project')
         };
-        this.complexDeleteAppDialog(data);
+        complexDeleteAppDialog(data);
       } else {
         simpleDeleteAppDialog();
       }
