@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.log-stream', ['ab-base64'])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.log-stream', {
@@ -11,6 +12,15 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/log-stream/log-stream.html',
       controller: ApplicationLogStreamController,
       controllerAs: 'applicationLogStreamCtrl'
+    });
+  }
+
+  function registerAppTab(cfApplicationTabs) {
+    cfApplicationTabs.tabs.push({
+      position: 2,
+      hide: false,
+      uiSref: 'cf.applications.application.log-stream',
+      label: 'app.tabs.logStream.label'
     });
   }
 

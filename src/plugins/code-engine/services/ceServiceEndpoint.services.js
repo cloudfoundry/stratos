@@ -9,31 +9,29 @@
 
   /* eslint-disable no-unused-vars */
   // Ensure that an instance of ceEndpointService is created by injecting it here.
-  function register(ceEndpointService) { }
+  function register(ceEndpointService) {
+  }
+
   /* eslint-enable no-unused-vars */
 
   /**
    * @namespace code-engine.service
    * @memberOf code-engine.service
    * @name ceEndpointService
-   * @description provide functionality to support code engine cnsi service instances (cnsisi..) in the endpoints
-   * dashboard
+   * @description provide functionality to support code engine cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
-   * @param {object} $state - the Angular $state service
-   * @param {object} $stateParams - the Angular $stateParams service
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {object} $translate - the $translate service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * dashboard
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, $state, $stateParams, appUtilsService, ceVCSEndpointService,
+  function endpointService(ceHideEndpoint, $q, $translate, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsDashboardService, appEndpointsCnsiService, apiManager, modelManager,
                            cfApplicationTabs, ceAppPipelineService) {
     var canEditApp;
@@ -106,7 +104,7 @@
     // func params are standard across all <x>ServiceEndpoint providers. In this one some are not required or used
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
-      serviceEndpoint.type = appUtilsService.getOemConfiguration().CODE_ENGINE;
+      serviceEndpoint.type = $translate.instant('code-engine');
     }
 
     function unregister(serviceInstance) {
@@ -133,6 +131,7 @@
     function isHidden(isAdmin) {
       return ceHideEndpoint;
     }
+
     /* eslint-enable no-unused-vars */
 
     function updateApplicationPipeline(cnsiGuid, refresh) {

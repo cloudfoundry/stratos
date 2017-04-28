@@ -7,13 +7,11 @@
   },
   "company": {
     "name": "SUSE (a Micro Focus Company)",
-    "TERMS_OF_USE": "Legal",
-    "TERMS_OF_USE_HREF": "https://www.suse.com/company/legal/",
+    "terms": "Legal",
+    "terms.href": "https://www.suse.com/company/legal/",
     "PRIVACY_HREF": "", 
     "PRODUCT_FAMILY_HREF": "",
-    "COMPANY_HREF": "http://www.suse.com",
-    "PRODUCT_CONSOLE": "SUSE Cloud Foundry Console",
-    "CODE_ENGINE": "Code Engine",
-    "CLOUD_FOUNDRY": "Cloud Foundry"
+    "www-link": "http://www.suse.com",
+    "about-logo": "images/suse_logo_light_bg.png"
   }
 }

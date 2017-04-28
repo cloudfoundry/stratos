@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.versions', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.versions', {
@@ -11,6 +12,38 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/versions/versions.html',
       controller: ApplicationVersionsController,
       controllerAs: 'applicationVersionsCtrl'
+    });
+  }
+
+  function registerAppTab($stateParams, $q, cfApplicationTabs, modelManager) {
+    var cfSupportsVersions;
+    cfApplicationTabs.tabs.push({
+      position: 7,
+      hide: function () {
+        if (angular.isUndefined(cfSupportsVersions)) {
+          var id = $stateParams.guid;
+          var cnsiGuid = $stateParams.cnsiGuid;
+          var versions = modelManager.retrieve('cloud-foundry.model.appVersions');
+          cfSupportsVersions = versions.hasVersionSupport(cnsiGuid);
+          var promise;
+          if (angular.isDefined(cfSupportsVersions)) {
+            promise = $q.when(cfSupportsVersions);
+          } else {
+            cfSupportsVersions = false;
+            promise = versions.list(cnsiGuid, id, true);
+          }
+
+          promise.then(function () {
+            cfSupportsVersions = !!versions.hasVersionSupport(cnsiGuid);
+          });
+        }
+        return !cfSupportsVersions;
+      },
+      uiSref: 'cf.applications.application.versions',
+      label: 'Versions',
+      clearState: function () {
+        cfSupportsVersions = undefined;
+      }
     });
   }
 

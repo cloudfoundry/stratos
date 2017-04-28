@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.variables', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.variables', {
@@ -11,6 +12,35 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables.html',
       controller: ApplicationVariablesController,
       controllerAs: 'applicationVariablesCtrl'
+    });
+  }
+
+  function registerAppTab($stateParams, cfApplicationTabs, modelManager) {
+    var canEditApp;
+    cfApplicationTabs.tabs.push({
+      position: 6,
+      hide: function () {
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        if (!model.application.summary.space_guid) {
+          return true;
+        }
+        if (angular.isUndefined(canEditApp)) {
+          var cnsiGuid = $stateParams.cnsiGuid;
+          var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+          canEditApp = authModel.isAllowed(cnsiGuid,
+            authModel.resources.application,
+            authModel.actions.update,
+            model.application.summary.space_guid
+          );
+        }
+        return !canEditApp;
+      },
+      uiSref: 'cf.applications.application.variables',
+      label: 'Variables',
+      clearState: function () {
+        canEditApp = undefined;
+      }
     });
   }
 

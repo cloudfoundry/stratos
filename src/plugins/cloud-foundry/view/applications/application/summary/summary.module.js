@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.summary', {
@@ -15,6 +16,45 @@
       controller: ApplicationSummaryController,
       controllerAs: 'applicationSummaryCtrl'
     });
+  }
+
+  function registerAppTab($state, $stateParams, cfApplicationTabs, modelManager) {
+    var model = modelManager.retrieve('cloud-foundry.model.application');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+    cfApplicationTabs.tabs.push({
+      position: 1,
+      hide: false,
+      uiSref: 'cf.applications.application.summary',
+      label: 'app.tabs.summary.label',
+      appCreatedInstructions: [{
+        id: 'new-app-deploy-cli',
+        position: 2,
+        description: 'app.tabs.summary.instructions.cli',
+        show: function () {
+          return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.application, authModel.actions.update,
+            model.application.summary.space_guid);
+        },
+        go: function (appActions) {
+          var cliAction = _.find(appActions, {id: 'cli'});
+          if (cliAction && !cliAction.disabled && !cliAction.hidden) {
+            cliAction.execute();
+          }
+        }
+      }, {
+        id: 'new-app-add-services',
+        position: 3,
+        description: 'app.tabs.summary.instructions.service',
+        show: function () {
+          return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.managed_service_instance,
+            authModel.actions.create, model.application.summary.space_guid);
+        },
+        go: function (appActions, appGuid) {
+          $state.go('cf.applications.application.services', {guid: appGuid});
+        }
+      }]
+    });
+
   }
 
   /**
@@ -33,6 +73,7 @@
    * @param {appClusterRoutesService} appClusterRoutesService - the Service management service
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
@@ -43,10 +84,18 @@
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
                                         modelManager, cfAddRoutes, cfEditApp, appUtilsService,
-                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService) {
+                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
+                                        cfApplicationTabs) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    vm.appCreatedInstructions = [];
+
+    _.forEach(cfApplicationTabs.tabs, function (tab) {
+      if (tab.appCreatedInstructions && tab.appCreatedInstructions.length) {
+        vm.appCreatedInstructions = vm.appCreatedInstructions.concat(tab.appCreatedInstructions);
+      }
+    });
 
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -127,8 +176,6 @@
         vm.serviceInstances = $filter('removeHceServiceInstance')(vm.model.application.summary.services, vm.id);
       });
 
-      vm.canSetupPipeline = _.filter(vm.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
-
       // Unmap from app
       vm.canSetupPipeline[0].hidden = !authModel.isAllowed(vm.cnsiGuid,
         authModel.resources.application,
@@ -143,7 +190,7 @@
         vm.model.application.summary.space_guid
       );
       $log.debug('Auth Action: Delete from app hidden: ' + vm.canSetupPipeline[1].hidden);
-      vm.hideRouteActions = !_.find(vm.canSetupPipeline, {hidden: false});
+      vm.hideRouteActions = !_.find(vm.routesActionMenu, {hidden: false});
 
       // hide Add Routes
       vm.hideAddRoutes = !authModel.isAllowed(vm.cnsiGuid,

@@ -262,7 +262,7 @@
       frameworkDialogConfirm({
         title: gettext('Unregister VCS'),
         description: $interpolate(gettext('Please ensure that you have removed VCS <span class="font-semi-bold">{{name}}</span> from ' +
-          '{{ OEM_CONFIG.CODE_ENGINE }} before proceeding. <br><br>' +
+          'Code Engine before proceeding. <br><br>' +
           'All tokens associated with this VCS will also be deleted.'
         ))(scope),
         errorMessage: gettext('Failed to unregister VCS endpoint'),

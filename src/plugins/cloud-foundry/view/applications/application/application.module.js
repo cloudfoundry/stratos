@@ -50,7 +50,7 @@
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
                                  cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $interpolate, $state, cfApplicationTabs, appEndpointsCnsiService) {
+                                 $interpolate, $state, cfApplicationTabs) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -60,6 +60,11 @@
     var UPDATE_INTERVAL = 5000; // milliseconds
 
     var scopeDestroyed, updating;
+    this.cfApplicationTabs = cfApplicationTabs;
+
+    // Clear any previous state in the application tabs service
+    cfApplicationTabs.clearState();
+
 
     // When a modal interaction starts, stop the background polling
     var removeModalStartListener = appEventService.$on(appEventService.events.MODAL_INTERACTION_START, function () {
@@ -201,7 +206,7 @@
         vm.ready = true;
 
         updateBuildPack();
-        cfApplicationTabs.clearStates();
+        this.cfApplicationTabs.clearState();
 
         if (vm.model.application.summary.state === 'STARTED') {
           blockUpdate.push(vm.model.getAppStats(cnsiGuid, vm.id).then(function () {
@@ -216,10 +221,10 @@
       var appSummaryPromise = vm.model.getAppSummary(cnsiGuid, vm.id, false)
         .then(function () {
           updateBuildPack();
-          cfApplicationTabs.clearStates();
+          that.cfApplicationTabs.clearState();
 
-          // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
-          // app summary
+          // appUpdated requires summary.guid and summary.services which are only found in updated app summary
+          blockUpdate.push(that.cfApplicationTabs.appUpdated(that.cnsiGuid, true));
 
           blockUpdate.push(
             appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', cnsiGuid,
@@ -296,7 +301,7 @@
       return $q.when()
         .then(function () {
           return updateSummary().then(function () {
-            return appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', cnsiGuid, true);
+            return that.cfApplicationTabs.appUpdated(that.cnsiGuid, true);
           });
         })
         .finally(function () {
@@ -323,14 +328,23 @@
       // changed
       vm.appBuildPack = vm.model.application.summary.buildpack || vm.model.application.summary.detected_buildpack;
     }
+    /**
+     * @function updateState
+     * @description update application state
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    updateState: function () {
+      return this.model.getAppStats(this.cnsiGuid, this.id);
+    },
 
-    function deleteApp() {
-      if (vm.model.application.summary.services.length || vm.model.application.summary.routes.length) {
+    deleteApp: function () {
+      if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
         var data = {
-          cnsiGuid: cnsiGuid,
-          project: _.get(vm.model, 'application.project')
+          cnsiGuid: this.cnsiGuid,
+          project: _.get(this.model, 'application.project')
         };
-        complexDeleteAppDialog(data);
+        this.complexDeleteAppDialog(data);
       } else {
         simpleDeleteAppDialog();
       }
@@ -339,7 +353,7 @@
     function complexDeleteAppDialog(details) {
       frameworkDetailView(
         {
-          template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
+          template: '<delete-app-workflow guids="context.details" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
         },
         {
@@ -412,17 +426,6 @@
         return !pipelineReady;
       } else {
         return false;
-      }
-    }
-
-    /**
-     * @function showCliInstructions
-     * @description Show the CLI Instructions slide-in
-     */
-    function showCliInstructions() {
-      var cliAction = _.find(vm.appActions, {id: 'cli'});
-      if (cliAction && !cliAction.disabled && !cliAction.hidden) {
-        cliAction.execute();
       }
     }
 
