@@ -28,11 +28,10 @@
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * dashboard
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager, ceAppPipelineService) {
+                           appEndpointsCnsiService, apiManager) {
 
     var service = {
       cnsi_type: 'hce',
@@ -42,8 +41,6 @@
       connect: connect,
       disconnect: disconnect,
       isHidden: isHidden,
-      updateApplicationPipeline: updateApplicationPipeline,
-      deleteApplicationPipeline: deleteApplicationPipeline,
       register: {
         html: {
           class: 'register-type-hce',
@@ -111,14 +108,6 @@
     }
 
     /* eslint-enable no-unused-vars */
-
-    function updateApplicationPipeline(cnsiGuid, refresh) {
-      return ceAppPipelineService.updateDeliveryPipelineMetadata(cnsiGuid, refresh);
-    }
-
-    function deleteApplicationPipeline(hceCnsiGuid) {
-      return ceAppPipelineService.deleteApplicationPipeline(hceCnsiGuid);
-    }
 
   }
 

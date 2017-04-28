@@ -21,8 +21,9 @@
     });
   }
 
-  function registerAppTab($stateParams, cfApplicationTabs, modelManager) {
+  function registerAppTab($state, $stateParams, cfApplicationTabs, modelManager, ceAppPipelineService) {
     var canEditApp;
+    var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     cfApplicationTabs.tabs.push({
       position: 4,
       hide: function () {
@@ -46,7 +47,24 @@
       label: 'app.tabs.deliveryPipeline.label',
       clearState: function () {
         canEditApp = undefined;
-      }
+      },
+      appUpdated: function (cnsiGuid, refresh) {
+        return ceAppPipelineService.updateDeliveryPipelineMetadata(cnsiGuid, refresh);
+      },
+      appDeleting: function () {
+        return ceAppPipelineService.deleteApplicationPipeline();
+      },
+      appCreatedInstructions: [{
+        id: 'new-app-setup-pipeline',
+        position: 1,
+        description: 'Setup a Delivery Pipeline for your application',
+        show: function () {
+          return _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
+        },
+        go: function (appActions, appGuid, showSetup) {
+          $state.go('cf.applications.application.delivery-pipeline', {guid: appGuid, showSetup: showSetup});
+        }
+      }]
     });
   }
 
@@ -223,7 +241,7 @@
     this.setupPipeline = function () {
       that.frameworkDetailView(
         {
-          templateUrl: 'plugins/code-engine/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
+          templateUrl: 'plugins/code-engine/view/application/add-pipeline-workflow/add-pipeline-dialog.html'
         }
       );
     };
