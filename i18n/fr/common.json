@@ -1,9 +1,0 @@
-{
-  "applications": "Les Applications",
-  "welcome": "FRENCH Welcome to the Console",
-  "menu": {
-    "applications": "@:applications",
-    "endpoints": "Les Endpoints",
-    "about": "Le About"
-  }
-}
