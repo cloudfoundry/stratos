@@ -72,7 +72,6 @@
     this.appNotificationsService = appNotificationsService;
     this.ceAddNotificationService = ceAddNotificationService;
     this.cePostDeployActionService = cePostDeployActionService;
-    //this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.hceCnsi = null;
 

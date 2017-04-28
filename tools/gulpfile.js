@@ -54,8 +54,7 @@
   var defaultBrandFolder = '../oem/brands/' + brand + '/';
   defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
-  defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
-  i18nFiles.unshift(defaultBrandI18nFolder + '/**/*.json');
+  i18nFiles.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
 
   var usePlumber = true;
   var server;
@@ -277,10 +276,8 @@
   }
 
   gulp.task('i18n', function () {
-    var i18nSource = i18nFiles;
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    i18nSource.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
-    return gulp.src(i18nSource)
+    return gulp.src(i18nFiles)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
