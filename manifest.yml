@@ -1,7 +1,0 @@
-applications:
-- name: console
-  memory: 512M
-  host: console
-  command: portal-proxy
-  env: 
-    IGNORE_CF_API_URL: https://api.10.4.21.240.nip.io:8443	
