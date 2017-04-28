@@ -33,7 +33,8 @@
     'appEventService',
     '$q',
     '$interpolate',
-    'appUtilsService'
+    'appUtilsService',
+    'appEndpointsCnsiService'
   ];
 
   /**
@@ -46,6 +47,7 @@
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
@@ -56,7 +58,8 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, appUtilsService) {
+  function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, appUtilsService,
+                                       appEndpointsCnsiService) {
     this.appEventService = appEventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -64,11 +67,10 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
-    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.deletingApplication = false;
     this.cnsiGuid = null;
-    this.hceCnsiGuid = null;
     this.$filter = $filter;
+    this.appEndpointsCnsiService = appEndpointsCnsiService;
 
     this.startWorkflow(this.guids || {});
   }
@@ -78,7 +80,6 @@
       var that = this;
       var path = 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/';
       this.cnsiGuid = null;
-      this.hceCnsiGuid = null;
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
@@ -358,27 +359,19 @@
      * @returns {promise} A promise
      */
     deleteProject: function () {
-      if (this.appModel.application.project) {
-        return this.hceModel.removeProject(this.hceCnsiGuid, this.appModel.application.project.id);
-      } else if (_.get(this.appModel.application.pipeline, 'forbidden')) {
-        // No project due to forbidden request? Ensure we stop the delete chain
-        return this.$q.reject('You do not have permission to delete the associated HCE project');
-      } else {
-        return this.$q.resolve();
-      }
+      return this.appEndpointsCnsiService.callAllEndpointProvidersFunc('deleteApplicationPipeline', _.get(this, 'details.project'));
     },
 
     /**
      * @function startWorkflow
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @param {object} data - cnsiGuid and hceCnsiGuid
+     * @param {object} data - cnsiGuid and project information
      * @description start workflow
      */
     startWorkflow: function (data) {
       this.deletingApplication = true;
       this.reset();
       this.cnsiGuid = data.cnsiGuid;
-      this.hceCnsiGuid = data.hceCnsiGuid;
     },
 
     /**

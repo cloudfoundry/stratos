@@ -113,7 +113,6 @@
             host: null,
             domain: null,
             application: null,
-            hceCnsi: null,
             source: null,
             repo: null,
             repoFilterTerm: null,
@@ -137,23 +136,8 @@
           expect(that.options.organizations).toEqual([]);
           expect(that.options.spaces).toEqual([]);
           expect(that.options.domains).toEqual([]);
-          expect(that.options.repos).toEqual([]);
           expect(that.options.errors).toEqual({});
           expect(that.options.apps).toEqual([]);
-          expect(that.options.hceCnsis).toEqual([]);
-          expect(that.options.notificationTargetTypes).toEqual([]);
-          expect(that.options.notificationTargets).toEqual([]);
-          expect(that.options.sources).toEqual([]);
-          expect(that.options.displayedRepos).toEqual([]);
-          expect(that.options.repos).toEqual([]);
-          expect(that.options.branches).toEqual([]);
-          expect(that.options.buildContainers).toEqual([]);
-          expect(that.options.imageRegistries).toEqual([]);
-          expect(that.options.serviceInstances).toEqual([]);
-          expect(that.options.hasMoreRepos).toBe(false);
-          expect(that.options.loadingRepos).toBe(false);
-          expect(that.options.repoStSearch).toBe('full_name');
-          expect(that.options.notificationFormAppMode).toBe(true);
         });
 
         it('addApplicationActions - stop', function () {

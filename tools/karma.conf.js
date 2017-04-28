@@ -93,6 +93,11 @@
 
       frameworks: ['wiredep', 'jasmine'],
 
+      // Required when running in intellij
+      // wiredep: {
+      //   cwd: '../'
+      // },
+
       ngHtml2JsPreprocessor: {
         moduleName: 'templates',
 

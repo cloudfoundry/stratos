@@ -6,11 +6,8 @@
       'cloud-foundry.view.applications.application.summary',
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
-      'cloud-foundry.view.applications.application.delivery-logs',
-      'cloud-foundry.view.applications.application.delivery-pipeline',
       'cloud-foundry.view.applications.application.variables',
-      'cloud-foundry.view.applications.application.versions',
-      'cloud-foundry.view.applications.application.notification-target'
+      'cloud-foundry.view.applications.application.versions'
     ])
     .config(registerRoute);
 
@@ -39,6 +36,8 @@
    * @param {object} $interval - the Angular $interval service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $state - the UI router $state service
+   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
+   * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -50,7 +49,9 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
-  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService, cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
+  function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
+                                 cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
+                                 $interpolate, $state, cfApplicationTabs, appEndpointsCnsiService) {
     var that = this;
 
     this.$window = $window;
@@ -61,23 +62,23 @@
     this.frameworkDialogConfirm = frameworkDialogConfirm;
     this.frameworkDetailView = frameworkDetailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
-    this.hceCnsi = null;
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
     this.pipelineReady = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
-    this.supportsVersions = false;
-    that.hideVariables = true;
-    that.hideDeliveryPipelineData = true;
+    this.cfApplicationTabs = cfApplicationTabs;
+    this.appEndpointsCnsiService = appEndpointsCnsiService;
+
+    // Clear any previous state in the application tabs service
+    cfApplicationTabs.clearStates();
+
     // Wait for parent state to be fully initialised
     appUtilsService.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
@@ -196,12 +197,6 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
-      var supportsVersions = this.versions.hasVersionSupport(this.cnsiGuid);
-      var promise = angular.isDefined(supportsVersions) ? that.$q.when(supportsVersions) : this.versions.list(this.cnsiGuid, this.id, true);
-      promise.then(function () {
-        that.supportsVersions = !!that.versions.hasVersionSupport(that.cnsiGuid);
-      });
-
       var haveApplication = angular.isDefined(this.model.application) &&
         angular.isDefined(this.model.application.summary) &&
         angular.isDefined(this.model.application.state);
@@ -215,7 +210,7 @@
         this.ready = true;
 
         this.updateBuildPack();
-        this.updateHiddenProperties();
+        this.cfApplicationTabs.clearStates();
 
         if (this.model.application.summary.state === 'STARTED') {
           blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -230,14 +225,14 @@
       var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
           that.updateBuildPack();
-          that.updateHiddenProperties();
+          that.cfApplicationTabs.clearStates();
 
-          // updateDeliveryPipelineMetadata requires summary.guid and summary.services which are only found in updated
+          // updateApplicationPipeline requires summary.guid and summary.services which are only found in updated
           // app summary
-          blockUpdate.push(that.model.updateDeliveryPipelineMetadata(true)
-            .then(function (response) {
-              return that.onUpdateDeliveryPipelineMetadata(response);
-            }));
+
+          blockUpdate.push(
+            that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid,
+              true));
 
           if (!haveApplication && that.model.application.summary.state === 'STARTED') {
             blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
@@ -313,13 +308,11 @@
       return this.$q.when()
         .then(function () {
           return that.updateSummary().then(function () {
-            return that.model.updateDeliveryPipelineMetadata()
-              .then(function (response) {
-                return that.onUpdateDeliveryPipelineMetadata(response);
-              });
+            return that.appEndpointsCnsiService.callAllEndpointProvidersFunc('updateApplicationPipeline', that.cnsiGuid, true);
           });
         })
         .finally(function () {
+          that.updateActions();
           that.updating = false;
         });
     },
@@ -344,64 +337,6 @@
       this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
     },
 
-    updateHiddenProperties: function () {
-      this.hideVariables = !this.authModel.isAllowed(this.cnsiGuid,
-        this.authModel.resources.application,
-        this.authModel.actions.update,
-        this.model.application.summary.space_guid
-      );
-
-      this.hideDeliveryPipelineData = !this.authModel.isAllowed(this.cnsiGuid,
-        this.authModel.resources.application,
-        this.authModel.actions.update,
-        this.model.application.summary.space_guid
-      );
-    },
-
-    /**
-     * @function onUpdateDeliveryPipelineMetadata
-     * @description Set project when delivery pipeline metadata is updated
-     * @param {object} pipeline - the delivery pipeline data
-     * @returns {void}
-     * @private
-     */
-    onUpdateDeliveryPipelineMetadata: function (pipeline) {
-      var that = this;
-      if (pipeline && pipeline.valid) {
-        this.hceCnsi = pipeline.hceCnsi;
-        return this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
-          .then(function (response) {
-            pipeline.forbidden = false;
-            var project = response.data;
-            if (!_.isNil(project)) {
-              // Don't need to fetch VCS data every time if project hasn't changed
-              if (_.isNil(that.model.application.project) ||
-                that.model.application.project.id !== project.id) {
-                return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
-                  .then(function () {
-                    that.model.application.project = project;
-                  });
-              } else {
-                that.model.application.project = project;
-              }
-            } else {
-              that.model.application.project = null;
-            }
-          })
-          .catch(function (response) {
-            pipeline.forbidden = response.status === 403;
-            pipeline.valid = false;
-            that.model.application.project = null;
-            return that.$q.reject(response);
-          })
-          .finally(function () {
-            that.updateActions();
-          });
-      } else {
-        this.model.application.project = null;
-      }
-    },
-
     /**
      * @function updateState
      * @description update application state
@@ -414,24 +349,24 @@
 
     deleteApp: function () {
       if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
-        var guids = {
+        var data = {
           cnsiGuid: this.cnsiGuid,
-          hceCnsiGuid: this.hceCnsi ? this.hceCnsi.guid : ''
+          project: _.get(this.model, 'application.project')
         };
-        this.complexDeleteAppDialog(guids);
+        this.complexDeleteAppDialog(data);
       } else {
         this.simpleDeleteAppDialog();
       }
     },
 
-    complexDeleteAppDialog: function (guids) {
+    complexDeleteAppDialog: function (details) {
       this.frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
         },
         {
-          guids: guids
+          details: details
         }
       );
     },
@@ -475,7 +410,7 @@
       } else {
         // Check permissions
         if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
-          // Hide delete if user has no HCE project permissions
+          // Hide delete if user has no project permissions
           hideAction = true;
         } else if (this.authModel.isInitialized(this.cnsiGuid)) {
           // Hide actions if user has no HCF app update perissions (i.e not a space developer)
