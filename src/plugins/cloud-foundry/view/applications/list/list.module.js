@@ -75,6 +75,7 @@
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
+    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
     this.filter = {
       cnsiGuid: 'all',
       orgGuid: 'all',
@@ -181,7 +182,7 @@
     },
 
     getEndpointsLink: function () {
-      if (this.model.clusterCount === 0) {
+      if (this.model.clusterCount === 0 && this.isEndpointsDashboardAvailable) {
         return this.$state.go('endpoint.dashboard');
       }
       var hcfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});

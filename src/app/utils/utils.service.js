@@ -89,7 +89,8 @@
       extractCodeEngineError: extractCodeEngineError,
       coloredLog: coloredLog,
       highlightLog: highlightLog,
-      replaceProperties: replaceProperties
+      replaceProperties: replaceProperties,
+      isPluginAvailable: isPluginAvailable
     };
 
     /**
@@ -304,6 +305,11 @@
       }
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
+
+    function isPluginAvailable(pluginName) {
+      return _.has(env.plugins, pluginName);
+    }
+
   }
 
   function mbToHumanSizeFilter(appUtilsService) {
