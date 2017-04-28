@@ -41,8 +41,7 @@
     function resolveKey(obj, key) {
       var value = _.get(obj, key);
       if (!value) {
-        gutil.log('ERROR: Missing string: ' + key);
-        return '';
+        throw new gutil.PluginError(PLUGIN_NAME, ' Missing string: ' + key);
       }
       if (value.indexOf('@:') === 0) {
         return resolveKey(obj, value.substr(2));
@@ -120,10 +119,8 @@
         return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
       }
 
-      var parentDirIndex = _.findLastIndex(file.relative, function (b) {
-        return b === path.sep;
-      });
-      var locale = file.relative.substr(parentDirIndex - 2, 2);
+      var parentDir = path.dirname(file.relative);
+      var locale = parentDir.substr(parentDir.length - 2, 2);
       addStrings(locale, file);
       cb();
     }

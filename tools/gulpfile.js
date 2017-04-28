@@ -50,15 +50,11 @@
   // Default OEM Config
   var DEFAULT_BRAND = 'suse';
 
-  var defaultBrandFolder = '../oem/brands/' + DEFAULT_BRAND + '/';
+  var brand = process.env.BRAND || DEFAULT_BRAND;
+  var defaultBrandFolder = '../oem/brands/' + brand + '/';
   defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
-  var oemConfig = require(path.join(defaultBrandFolder, 'oem_config.json'));
-  var defaultConfig = require('../oem/config-defaults.json');
-  oemConfig = _.defaults(oemConfig, defaultConfig);
-  var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
-  var defaultBrandI18nFolder = defaultBrandFolder + 'i18n/';
-  defaultBrandI18nFolder = path.resolve(__dirname, defaultBrandI18nFolder);
-  i18nFiles.unshift(defaultBrandI18nFolder + '/**/*.json');
+  var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
+  i18nFiles.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
 
   var usePlumber = true;
   var server;
@@ -75,10 +71,6 @@
   // Pull in the gulp tasks for the ui framework examples
   var examples = require('./examples.gulp');
   examples(config);
-
-  // Pull in the gulp tasks for oem support
-  var oem = require('./oem.gulp.js');
-  oem(config);
 
   // Pull in the gulp tasks for e2e tests
   var e2e = require('./e2e.gulp.js');
@@ -139,7 +131,6 @@
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
@@ -233,15 +224,9 @@
   });
 
   // Inject JavaScript and SCSS source file references in index.html
-  gulp.task('inject:index', ['inject:index:oem'], function () {
-    return gulp
-      .src(paths.oem + 'dist/index.html')
-      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  // Inject JavaScript and SCSS source file references in index.html
-  gulp.task('inject:index:oem', ['copy:index'], function () {
+  gulp.task('inject:index', ['copy:index'], function () {
+    var distPath = path.resolve(__dirname, '..', paths.dist);
+    var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
     var sources = gulp.src(
         jsFiles
         .concat(paths.dist + config.jsLibsFile)
@@ -254,7 +239,8 @@
       .pipe(wiredep(config.bower))
       .pipe(gulpinject(sources, {relative: true}))
       .pipe(concat.header())
-      .pipe(gulp.dest(paths.oem + 'dist'));
+      .pipe(gulpreplace('@@PRODUCT_NAME@@', enStrings.product.name))
+      .pipe(gulp.dest(paths.dist));
   });
 
   // Automatically inject SCSS file imports from Bower packages
@@ -326,7 +312,7 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles, '../oem/brands/**/*'], ['css', callback]);
+    gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
     gulp.watch(templateFiles, ['copy:html', callback]);
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
@@ -462,7 +448,6 @@
       'copy:assets',
       'copy:theme',
       'inject:index',
-      'oem',
       next
     );
   });
