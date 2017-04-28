@@ -192,21 +192,20 @@
       modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
-          var noHCFInstances = data.numAvailable === 0;
+          var noEndpoints = data.numAvailable === 0;
           // Admin
           if (account.isAdmin()) {
             // Go the endpoints dashboard if there are no HCF clusters
-            if (noHCFInstances) {
-              if (vm.isEndpointsDashboardAvailable) {
-                vm.redirectState = 'endpoint.dashboard';
-              } else {
-                // Endpoint dashboard is not available and user can't add any HCF instances
+            if (noEndpoints) {
+              vm.redirectState = 'endpoint.dashboard';
+              if (!vm.isEndpointsDashboardAvailable) {
                 appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+                continueLogin = false;
               }
             }
           } else {
             // Developer or Endpoint Dashboard plugin isn't loaded
-            if (noHCFInstances) {
+            if (noEndpoints) {
               // No HCF instances, so the system is not setup and the user can't fix this
               continueLogin = false;
               appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
@@ -215,11 +214,12 @@
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
-                if (userServiceInstanceModel.getNumValid() === 0 && vm.isEndpointsDashboardAvailable) {
+                if (userServiceInstanceModel.getNumValid() === 0) {
                   vm.redirectState = 'endpoint.dashboard';
-                } else {
-                  // User cannot connect to any instances as the Endpoints dashboard isn't available
-                  appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+                  if (!vm.isEndpointsDashboardAvailable) {
+                    appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notConnected'});
+                    continueLogin = false;
+                  }
                 }
               });
             }
