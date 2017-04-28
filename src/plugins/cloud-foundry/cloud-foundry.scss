@@ -12,28 +12,6 @@
   }
 }
 
-.action-bar {
-  line-height: $hpe-unit-space * 3;
-  vertical-align: middle;
-  margin-top: 0;
-  padding-left: 0;
-  padding-right: $hpe-unit-space;
-
-  &.panel-less {
-    margin-top: 0;
-    padding-left: 16px;
-    padding-right: 16px;
-
-    h1 {
-      margin-top: $hpe-unit-space / 2;
-    }
-  }
-
-  .btn {
-    margin-left: $hpe-unit-space / 3;
-  }
-}
-
 .action-target-state {
   display: inline-block;
   height: 24px;
