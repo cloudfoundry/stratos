@@ -1,5 +1,14 @@
 #!/bin/bash
 
+bold=`tput bold`
+red=`tput setaf 1`
+green=`tput setaf 2`
+orange=`tput setaf 3`
+cyan=`tput setaf 6`
+reset=`tput sgr0`
+
+printf "${bold}Preparing application folder for Cloud Foundry deployment${reset}\n\n"
+
 # First arg is the path to thr portal-proxy code
 # If not set, then we will look in GOPATH
 
@@ -31,14 +40,20 @@ CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Output will go in the top-level out folder in a sub-folder
 DIST=${CF_DIR}/../../out/cloud-foundry
 
-echo "Preparing application in folder ${DIST}"
+echo "Preparing application in folder ${bold}${cyan}$(realpath ${DIST})${reset}"
 
 echo "Building UI....."
 #./provision.sh
 gulp
 
-rm -rf ${DIST}
-mkdir -p ${DIST}
+printf "\n${green}${bold}OK${reset}\n\n"
+
+# Ensure the dist folder exists and is empty
+if [ -d "$DIST" ]; then
+  rm -rf ${DIST}/*
+else
+  mkdir -p ${DIST}
+fi
 
 echo "Copying back-end code to dist folder"
 cp ${BACK_END_DIR}/*.* ${DIST}
@@ -80,4 +95,4 @@ rm -rf ${DIST}/portal-proxy.exe
 
 #tar -zcvf ${DIST}/../cf-console.tar.gz ${DIST} --transform s/dist/cf-console/
 
-echo "All done"
+printf "${bold}All done${reset}\n"
