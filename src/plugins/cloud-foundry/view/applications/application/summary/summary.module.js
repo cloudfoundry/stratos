@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -21,6 +22,45 @@
     });
   }
 
+  function registerAppTab($state, $stateParams, cfApplicationTabs, modelManager) {
+    var model = modelManager.retrieve('cloud-foundry.model.application');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+    cfApplicationTabs.tabs.push({
+      position: 1,
+      hide: false,
+      uiSref: 'cf.applications.application.summary',
+      label: 'app.tabs.summary.label',
+      appCreatedInstructions: [{
+        id: 'new-app-deploy-cli',
+        position: 2,
+        description: 'app.tabs.summary.instructions.cli',
+        show: function () {
+          return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.application, authModel.actions.update,
+            model.application.summary.space_guid);
+        },
+        go: function (appActions) {
+          var cliAction = _.find(appActions, {id: 'cli'});
+          if (cliAction && !cliAction.disabled && !cliAction.hidden) {
+            cliAction.execute();
+          }
+        }
+      }, {
+        id: 'new-app-add-services',
+        position: 3,
+        description: 'app.tabs.summary.instructions.service',
+        show: function () {
+          return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.managed_service_instance,
+            authModel.actions.create, model.application.summary.space_guid);
+        },
+        go: function (appActions, appGuid) {
+          $state.go('cf.applications.application.services', {guid: appGuid});
+        }
+      }]
+    });
+
+  }
+
   ApplicationSummaryController.$inject = [
     '$state',
     '$stateParams',
@@ -34,7 +74,8 @@
     'appUtilsService',
     'appClusterRoutesService',
     'frameworkDialogConfirm',
-    'appNotificationsService'
+    'appNotificationsService',
+    'cfApplicationTabs'
   ];
 
   /**
@@ -53,6 +94,7 @@
    * @param {appClusterRoutesService} appClusterRoutesService - the Service management service
    * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
+   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
@@ -63,8 +105,9 @@
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
                                         modelManager, addRoutesService, editAppService, appUtilsService,
-                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService) {
-
+                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
+                                        cfApplicationTabs) {
+    var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -79,6 +122,13 @@
     this.$log = $log;
     this.$q = $q;
     this.instanceViewLimit = 5;
+    this.appCreatedInstructions = [];
+
+    _.forEach(cfApplicationTabs.tabs, function (tab) {
+      if (tab.appCreatedInstructions && tab.appCreatedInstructions.length) {
+        that.appCreatedInstructions = that.appCreatedInstructions.concat(tab.appCreatedInstructions);
+      }
+    });
 
     this.update = function () {
       return this.appCtrl.update();
@@ -92,7 +142,6 @@
     this.hideEditApp = true;
     this.hideManageServices = true;
 
-    var that = this;
     this.routesActionMenu = [
       {
         name: gettext('Unmap from App'),
@@ -148,8 +197,6 @@
         that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
       });
 
-      that.canSetupPipeline = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
-
       // Unmap from app
       that.routesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
@@ -164,7 +211,7 @@
         that.model.application.summary.space_guid
       );
       that.$log.debug('Auth Action: Delete from app hidden: ' + that.routesActionMenu[1].hidden);
-      that.hideRouteActions = !_.find(that.routesActionMenu, { hidden: false });
+      that.hideRouteActions = !_.find(that.routesActionMenu, {hidden: false});
 
       // hide Add Routes
       that.hideAddRoutes = !that.authModel.isAllowed(that.cnsiGuid,
@@ -188,7 +235,7 @@
       that.instancesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update, that.model.application.summary.space_guid);
-      that.hideInstanceActions = !_.find(that.instancesActionMenu, { hidden: false });
+      that.hideInstanceActions = !_.find(that.instancesActionMenu, {hidden: false});
 
       return that.$q.resolve();
     }

@@ -34,7 +34,8 @@
     '$q',
     '$interpolate',
     'appUtilsService',
-    'appEndpointsCnsiService'
+    'appEndpointsCnsiService',
+    'cfApplicationTabs'
   ];
 
   /**
@@ -48,6 +49,7 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
+   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @property {app.utils.appEventService} appEventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
@@ -59,7 +61,7 @@
    * @property {object} userInput - user's input about new application
    */
   function DeleteAppWorkflowController($filter, modelManager, appEventService, $q, $interpolate, appUtilsService,
-                                       appEndpointsCnsiService) {
+                                       appEndpointsCnsiService, cfApplicationTabs) {
     this.appEventService = appEventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -71,6 +73,7 @@
     this.cnsiGuid = null;
     this.$filter = $filter;
     this.appEndpointsCnsiService = appEndpointsCnsiService;
+    this.cfApplicationTabs = cfApplicationTabs;
 
     this.startWorkflow(this.guids || {});
   }
@@ -83,7 +86,7 @@
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
-        // This will include any hce user server.. even through we may not show it we still want it removed
+        // This will include any pipeline user service.. even through we may not show it we still want it removed
         checkedServiceValue: _.keyBy(this.appModel.application.summary.services, 'guid')
       };
 
@@ -178,9 +181,8 @@
         return that.tryDeleteEachRoute();
       });
 
-      // May not be able to delete the project (HCE user is project developer and not project admin) so ensure
-      // we attempt this up front
-      return this.deleteProject()
+      // May not be able to delete the project (pipeline user permisions) so ensure we attempt this up front
+      return this.cfApplicationTabs.appDeleting()
         .then(function () {
           return that.$q.all([
             removeAndDeleteRoutes,
@@ -189,6 +191,9 @@
         })
         .then(function () {
           return that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid);
+        })
+        .then(function () {
+          return that.cfApplicationTabs.appDeleted();
         });
     },
 
@@ -359,7 +364,7 @@
      * @returns {promise} A promise
      */
     deleteProject: function () {
-      return this.appEndpointsCnsiService.callAllEndpointProvidersFunc('deleteApplicationPipeline', _.get(this, 'details.project'));
+      return this.cfApplicationTabs.appDeleting();
     },
 
     /**

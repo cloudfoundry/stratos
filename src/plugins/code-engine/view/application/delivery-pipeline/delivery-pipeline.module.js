@@ -6,7 +6,8 @@
 
   angular
     .module('code-engine.view.application.delivery-pipeline', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.delivery-pipeline', {
@@ -17,6 +18,53 @@
       templateUrl: 'plugins/code-engine/view/application/delivery-pipeline/delivery-pipeline.html',
       controller: ApplicationDeliveryPipelineController,
       controllerAs: 'applicationDeliveryPipelineCtrl'
+    });
+  }
+
+  function registerAppTab($state, $stateParams, cfApplicationTabs, modelManager, ceAppPipelineService) {
+    var canEditApp;
+    var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    cfApplicationTabs.tabs.push({
+      position: 4,
+      hide: function () {
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        if (!model.application.summary.space_guid) {
+          return true;
+        }
+        if (angular.isUndefined(canEditApp)) {
+          var cnsiGuid = $stateParams.cnsiGuid;
+          var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+          canEditApp = authModel.isAllowed(cnsiGuid,
+            authModel.resources.application,
+            authModel.actions.update,
+            model.application.summary.space_guid
+          );
+        }
+        return !canEditApp;
+      },
+      uiSref: 'cf.applications.application.delivery-pipeline',
+      label: 'app.tabs.deliveryPipeline.label',
+      clearState: function () {
+        canEditApp = undefined;
+      },
+      appUpdated: function (cnsiGuid, refresh) {
+        return ceAppPipelineService.updateDeliveryPipelineMetadata(cnsiGuid, refresh);
+      },
+      appDeleting: function () {
+        return ceAppPipelineService.deleteApplicationPipeline();
+      },
+      appCreatedInstructions: [{
+        id: 'new-app-setup-pipeline',
+        position: 1,
+        description: 'app.tabs.deliveryPipeline.instructions.pipeline',
+        show: function () {
+          return _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
+        },
+        go: function (appActions, appGuid, showSetup) {
+          $state.go('cf.applications.application.delivery-pipeline', {guid: appGuid, showSetup: showSetup});
+        }
+      }]
     });
   }
 
@@ -193,7 +241,7 @@
     this.setupPipeline = function () {
       that.frameworkDetailView(
         {
-          templateUrl: 'plugins/code-engine/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
+          templateUrl: 'plugins/code-engine/view/application/add-pipeline-workflow/add-pipeline-dialog.html'
         }
       );
     };
