@@ -12,8 +12,8 @@
 
   <ul class="application-nav nav nav-tabs col-sm-12">
     <li ng-repeat="feature in appCtrl.cfApplicationTabs.tabs | orderBy:'position'"
-        class="nav-item" ng-hide="feature.hide()" ng-class="{ 'active' : feature.isTabActive() }">
-      <a class="nav-link" ng-click="feature.go(appCtrl.id)" translate>
+        ui-sref-active="active" class="nav-item" ng-hide="feature.hide ? feature.hide() : feature.hide">
+      <a class="nav-link" ui-sref="{{feature.uiSref}}({guid: appCtrl.id})" translate>
         {{ feature.label }}
       </a>
     </li>

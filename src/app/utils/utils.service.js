@@ -14,10 +14,9 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
-   * @param {object} $window - angular $window service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log, $window) {
+  function utilsServiceFactory($q, $timeout, $log) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     /*
@@ -88,7 +87,6 @@
       urlValidationExpression: urlValidationExpression,
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
-      getOemConfiguration: getOemConfiguration,
       coloredLog: coloredLog,
       highlightLog: highlightLog,
       replaceProperties: replaceProperties,
@@ -306,10 +304,6 @@
         return '';
       }
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
-    }
-
-    function getOemConfiguration() {
-      return $window.env.OEM_CONFIG;
     }
 
     function isPluginAvailable(pluginName) {
