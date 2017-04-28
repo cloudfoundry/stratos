@@ -2,9 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints', [
-      'app.view.endpoints.dashboard'
-    ])
+    .module('app.view.endpoints', [])
     .config(registerRoute)
     .run(register);
 
@@ -34,16 +32,9 @@
     }
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      onLoggedIn();
     });
 
     appUtilsService.chainStateResolve('endpoint', $state, init);
-
-    function onLoggedIn() {
-      var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'helion-icon-Inherit helion-icon-r270');
-      initialized.resolve();
-    }
 
   }
 

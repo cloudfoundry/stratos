@@ -33,6 +33,7 @@
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} appSelectLanguage - the Language Selection dialogService
+   * @param {object} appUtilsService - the App Utils service
    * @param {object} $timeout - Angular $timeout service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
@@ -50,7 +51,7 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, $timeout, $stateParams, $window, $rootScope, $scope) {
+                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
@@ -66,6 +67,7 @@
     vm.hideNavigation = $stateParams.hideNavigation;
     vm.hideAccount = $stateParams.hideAccount;
     vm.navbarIconsOnly = false;
+    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     vm.login = login;
     vm.logout = logout;
@@ -190,16 +192,20 @@
       modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
-          var noHCFInstances = data.numAvailable === 0;
+          var noEndpoints = data.numAvailable === 0;
           // Admin
           if (account.isAdmin()) {
             // Go the endpoints dashboard if there are no HCF clusters
-            if (noHCFInstances) {
+            if (noEndpoints) {
               vm.redirectState = 'endpoint.dashboard';
+              if (!vm.isEndpointsDashboardAvailable) {
+                appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+                continueLogin = false;
+              }
             }
           } else {
-            // Developer
-            if (noHCFInstances) {
+            // Developer or Endpoint Dashboard plugin isn't loaded
+            if (noEndpoints) {
               // No HCF instances, so the system is not setup and the user can't fix this
               continueLogin = false;
               appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
@@ -210,6 +216,10 @@
                 // Developer - allow user to connect services, if we have some and none are connected
                 if (userServiceInstanceModel.getNumValid() === 0) {
                   vm.redirectState = 'endpoint.dashboard';
+                  if (!vm.isEndpointsDashboardAvailable) {
+                    appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notConnected'});
+                    continueLogin = false;
+                  }
                 }
               });
             }

@@ -22,7 +22,11 @@
       },
       ncyBreadcrumb: {
         label: 'service-manager',
-        parent: 'endpoint.dashboard'
+        parent: function () {
+          if (_.has(env.plugins, 'endpointsDashboard')) {
+            return 'endpoint.dashboard';
+          }
+        }
       },
       data: {
         activeMenuState: 'sm.list'
@@ -66,6 +70,7 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
     this.state = '';
+    this.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     function init() {
       return that.refreshEndpointModel();
