@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // Encrypt - Encrypt a token based on an encryption key
@@ -18,7 +19,7 @@ import (
 // and OAuth tokens).
 // Source: https://github.com/giorgisio/examples/blob/master/aes-encrypt/main.go
 func Encrypt(key, text []byte) (ciphertext []byte, err error) {
-	log.Println("Encrypt")
+	log.Debug("Encrypt")
 	var block cipher.Block
 
 	if block, err = aes.NewCipher(key); err != nil {
@@ -45,7 +46,7 @@ func Encrypt(key, text []byte) (ciphertext []byte, err error) {
 // and OAuth tokens).
 // Source: https://github.com/giorgisio/examples/blob/master/aes-encrypt/main.go
 func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
-	log.Println("Decrypt")
+	log.Debug("Decrypt")
 
 	var block cipher.Block
 
@@ -75,7 +76,7 @@ func ReadEncryptionKey(v, f string) ([]byte, error) {
 	fname := fmt.Sprintf("/%s/%s", v, f)
 	key64chars, err := ioutil.ReadFile(fname)
 	if err != nil {
-		log.Printf("Unable to read encryption key file: %+v\n", err)
+		log.Errorf("Unable to read encryption key file: %+v\n", err)
 		return nil, err
 	}
 

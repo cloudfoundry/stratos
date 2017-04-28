@@ -64,20 +64,21 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		dc.DatabaseProvider = DefaultDatabaseProvider
 	}
 
-	// We want to validate that we have a Host parameter - this is not needed for SQLite - so we just set a value here
-	var host = dc.Host
-	if dc.DatabaseProvider == "sqlite" {
-		host = "SQLite"
-	}
-
-	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, host, dc.Port)
-	if err != nil {
-		return dc, err
-	}
-
 	// set default for connection timeout if necessary
 	if dc.ConnectionTimeoutInSecs <= 0 {
 		dc.ConnectionTimeoutInSecs = DefaultConnectionTimeout
+	}
+
+	// No configuration needed for SQLite
+	if dc.DatabaseProvider == "sqlite" {
+		return dc, nil
+	}
+
+	// Database Config validation - check requried values and the SSL Mode
+
+	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+	if err != nil {
+		return dc, err
 	}
 
 	if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||

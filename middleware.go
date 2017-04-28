@@ -8,9 +8,13 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	"github.com/satori/go.uuid"
 )
+
+const cfSessionCookieName = "JSESSIONID"
 
 func handleSessionError(err error) error {
 	if strings.Contains(err.Error(), "dial tcp") {
@@ -123,7 +127,6 @@ func (p *portalProxy) cloudFoundryMiddleware(h echo.HandlerFunc) echo.HandlerFun
 	}
 }
 
-// TODO
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
 func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
@@ -131,7 +134,18 @@ func (p *portalProxy) cloudFoundrySessionMiddleware(h echo.HandlerFunc) echo.Han
 		// Make sure there is a JSESSIONID cookie set to the session ID
 		session, err := p.getSession(c)
 		if err == nil {
-			log.Infof("Session ID is: %s", session.ID)
+			// We have a session
+			guid, err := p.getSessionValue(c, cfSessionCookieName)
+			if err != nil || guid == nil {
+				guid = uuid.NewV4().String()
+				session.Values[cfSessionCookieName] = guid
+				p.saveSession(c, session)
+			}
+			sessionGUID := fmt.Sprintf("%s", guid)
+			// Set the JSESSIONID coolie for Cloud Foundry session affinity
+			w := c.Response().(*standard.Response).ResponseWriter
+			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
+			http.SetCookie(w, cookie)
 		}
 		return h(c)
 	}

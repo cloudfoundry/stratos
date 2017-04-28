@@ -509,7 +509,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	pp.GET("/v1/version", p.getVersions)
 
 	// All routes in the session group need the user to be authenticated
-	sessionGroup := e.Group("/v1")
+	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 
 	// Add Cloud Foundry session middleware if required
