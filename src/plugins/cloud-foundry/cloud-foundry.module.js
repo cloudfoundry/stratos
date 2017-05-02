@@ -31,15 +31,8 @@
   }
 
   angular.extend(CloudFoundry.prototype, {
-    onLoggedIn: function (preventRedirect) {
+    onLoggedIn: function () {
       this.registerNavigation();
-      // Only redirect if we are permitted
-      if (!preventRedirect) {
-        // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
-        if (this.$location.path() === '') {
-          this.appEventService.$emit(this.appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-        }
-      }
     },
 
     onLoggedOut: function () {
