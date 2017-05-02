@@ -21,6 +21,7 @@
    * @param {cfHideEndpoint} cfHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the Angular $state service
+   * @param {object} $translate - the $translate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
@@ -28,7 +29,7 @@
    * dashboard
    * @returns {object} the service instance service
    */
-  function endpointService(cfHideEndpoint, $q, $state, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
+  function endpointService(cfHideEndpoint, $q, $state, $translate, appUtilsService, apiManager, modelManager, appEndpointsCnsiService) {
 
     var service = {
       cnsi_type: 'hcf',
@@ -76,7 +77,7 @@
     }
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
-      serviceEndpoint.type = appUtilsService.getOemConfiguration().CLOUD_FOUNDRY;
+      serviceEndpoint.type = $translate.instant('cloud-foundry');
       if (isValid) {
         serviceEndpoint.visit = function () {
           return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});

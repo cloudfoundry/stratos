@@ -176,11 +176,11 @@
       return $q.resolve();
     }
 
-    function deleteApplicationPipeline(hceCnsiGuid) {
+    function deleteApplicationPipeline() {
       var application = modelManager.retrieve('cloud-foundry.model.application').application;
       if (application.project) {
         var hceModel = modelManager.retrieve('code-engine.model.hce');
-        return hceModel.removeProject(hceCnsiGuid, application.project.id);
+        return hceModel.removeProject(application.pipeline.hceCnsi, application.project.id);
       } else if (_.get(application.pipeline, 'forbidden')) {
         // No project due to forbidden request? Ensure we stop the delete chain
         return $q.reject('You do not have permission to delete the associated HCE project');

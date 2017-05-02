@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.services', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerAppTab);
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -15,6 +16,15 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/services/services.html',
       controller: ApplicationServicesController,
       controllerAs: 'applicationServicesCtrl'
+    });
+  }
+
+  function registerAppTab(cfApplicationTabs) {
+    cfApplicationTabs.tabs.push({
+      position: 3,
+      hide: false,
+      uiSref: 'cf.applications.application.services',
+      label: 'app.tabs.services.label'
     });
   }
 

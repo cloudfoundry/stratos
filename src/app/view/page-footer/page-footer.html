@@ -1,5 +1,5 @@
-<a ng-if="pageFooterCtrl.mode !== 'footer' && !!pageFooterCtrl.OEM_CONFIG.ABOUT_PRODUCT_FAMILY_LOGO_HREF" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.OEM_CONFIG.PRODUCT_FAMILY_HREF | translate}}" target="_blank"><img class="helion-logo" ng-src="{{ pageFooterCtrl.OEM_CONFIG.ABOUT_PRODUCT_FAMILY_LOGO_HREF }}"/></a>
-<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.OEM_CONFIG.COMPANY_HREF | translate}}" target="_blank"><img class="hpe-logo" ng-src="{{ pageFooterCtrl.OEM_CONFIG.ABOUT_COMPANY_LOGO_HREF }}"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" translate-href="product.www-link" target="_blank"><img class="helion-logo" translate-img="product.logo"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" translate-href="company.www-link" target="_blank"><img class="hpe-logo" translate-img="company.about-logo"/></a>
 <div class="copyright">
   <span ng-if="mode !== 'footer'" class="product-name font-semi-bold">
     <span translate>footer.title</span>
@@ -9,6 +9,6 @@
 </div>
 
 <ul class="links">
-  <li ng-if="pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF"><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF | translate }}" translate>terms</a></li>
-  <li ng-if="pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF" ><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF | translate }}" translate>privacy</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" translate-href="company.terms-href" translate>terms</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" translate-href="company.privacy-href" translate>privacy</a></li>
 </ul>

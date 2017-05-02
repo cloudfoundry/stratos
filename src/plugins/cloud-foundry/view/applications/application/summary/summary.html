@@ -9,15 +9,10 @@
   <div class="new-app-nextsteps" ng-if="appCtrl.ready">
     <span translate>You may want to:</span>
     <ul>
-      <li ng-if="applicationSummaryCtrl.canSetupPipeline" >
-        <a id="new-app-setup-pipeline" translate ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id, showSetup: true})">Setup a Delivery Pipeline for your application</a>
+      <li ng-repeat="instruction in applicationSummaryCtrl.appCreatedInstructions | orderBy:'position'"
+        ng-if="instruction.show()">
+        <a id="{{instruction.id}}" translate ng-click="instruction.go(appCtrl.appActions, appCtrl.id, true)">{{instruction.description}}</a>
       </li>
-      <li>
-        <a id="new-app-deploy-cli" translate ng-click="appCtrl.showCliInstructions()">Deploy your application using the CLI</a>
-      </li>
-      <li ng-if="!applicationSummaryCtrl.hideManageServices">
-        <a id="new-app-add-services" translate ui-sref="cf.applications.application.services({guid: appCtrl.id})">Add services to your application</a>
-       </li>
     </ul>
   </div>
 </div>

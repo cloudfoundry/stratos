@@ -2,13 +2,13 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.dashboard', [])
+    .module('endpoints-dashboard')
     .config(registerRoute);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.dashboard', {
       url: '',
-      templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
+      templateUrl: 'plugins/endpoints-dashboard/view/view.html',
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl',
       ncyBreadcrumb: {

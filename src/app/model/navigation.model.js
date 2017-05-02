@@ -133,7 +133,6 @@
      * is a sub-menu which is also of type Menu and is empty initially.
      * @param {string} name - the name/ID of the menu item
      * @param {string} href - the href / ng-router state we go to when clicking the entry.
-     *                        e.g. endpoint.dashboard
      * @param {string} text - the displayed text of the menu item
      * @param {number=} pos - optional position in the menu to insert at
      * @param {string=} icon - the icon of the menu item
