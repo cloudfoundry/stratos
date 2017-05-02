@@ -5,12 +5,16 @@ import (
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -28,14 +32,22 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary = 10
-	DEBUG           = "debug"
-	INFO            = "info"
-	WARN            = "warn"
-	ERROR           = "error"
-	FATAL           = "fatal"
-	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
+	TimeoutBoundary  = 10
+	DEBUG            = "debug"
+	INFO             = "info"
+	WARN             = "warn"
+	ERROR            = "error"
+	FATAL            = "fatal"
+	SessionExpiry    = 20 * 60 // Session cookies expire after 20 minutes
+	VCapApplication  = "VCAP_APPLICATION"
+	CFApiURLOverride = "CF_API_URL"
+	CFApiForceSecure = "CF_API_FORCE_SECURE"
 )
+
+// VCapApplicationData - Cloud Fundry VCAP APPLICATION JSON structure that we need access to
+type VCapApplicationData struct {
+	API string `json:"cf_api"`
+}
 
 var appVersion string
 
@@ -58,7 +70,7 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
-	log.Info("Proxy initialization started.")
+	log.Info("Initialization started.")
 
 	// Register time.Time in gob
 	gob.Register(time.Time{})
@@ -131,6 +143,9 @@ func main() {
 
 	// If needed, migrate VCSes from connected Code Engines
 	go migrateVcsFromCodeEngine(portalProxy)
+
+	// Intiialize appropriately if we are running in Cloud Foundry
+	initForCloudFoundryHosting(portalProxy)
 
 	// Start the proxy
 	// Start the back-end
@@ -301,6 +316,9 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss HttpSessionStore) *portalPr
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
 		SessionStore:           ss,
+		UAAAdminIdentifier:     UAAAdminIdentifier,
+		HCFAdminIdentifier:     HCFAdminIdentifier,
+		HTTPS:                  true,
 	}
 
 	return pp
@@ -356,29 +374,148 @@ func start(p *portalProxy) error {
 
 	p.registerRoutes(e)
 
-	certFile, certKeyFile, err := createTempCertFiles(p.Config)
-	if err != nil {
-		return err
+	if p.HTTPS {
+		certFile, certKeyFile, err := createTempCertFiles(p.Config)
+		if err != nil {
+			return err
+		}
+
+		engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
+		e.Run(engine)
+	} else {
+		address := p.Config.TLSAddress
+		log.Infof("Starting HTTP Server at address: %s", address)
+		engine := standard.New(address)
+		e.Run(engine)
 	}
 
-	engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
-	e.Run(engine)
-
 	return nil
+}
+
+// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
+func initForCloudFoundryHosting(p *portalProxy) {
+
+	if config.IsSet(VCapApplication) {
+		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
+
+		p.Config.IsCloudFoundry = true
+
+		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
+		p.Config.ConsoleClient = p.Config.HCFClient
+		p.Config.ConsoleClientSecret = p.Config.HCFClientSecret
+
+		// Ensure that the identifier for an admin is the standard Cloud Foundry one
+		p.UAAAdminIdentifier = HCFAdminIdentifier
+
+		// Need to run as HTTP on the port we were told to use
+		p.HTTPS = false
+
+		if config.IsSet("PORT") {
+			p.Config.TLSAddress = ":" + config.GetString("PORT")
+			log.Infof("Updated Console address to: %s", p.Config.TLSAddress)
+		}
+		// Get the cf_api value from the JSON
+		var appData VCapApplicationData
+		data := []byte(config.GetString(VCapApplication))
+		err := json.Unmarshal(data, &appData)
+		if err != nil {
+			log.Fatal("Could not get the Cloud Foundry API URL", err)
+			return
+		}
+
+		log.Infof("CF API URL: %s", appData.API)
+
+		// Allow the URL to be overridden by an application environment variable
+		if config.IsSet(CFApiURLOverride) {
+			appData.API = config.GetString(CFApiURLOverride)
+			log.Infof("Overrriden CF API URL from environment variable %s", CFApiURLOverride)
+		}
+
+		if config.IsSet(CFApiForceSecure) {
+			// Force the API URL protocol to be https
+			appData.API = strings.Replace(appData.API, "http://", "https://", 1)
+			log.Infof("Ensuring that CF API URL is accessed over HTTPS")
+		} else {
+			log.Info("No forced override to HTTPS")
+		}
+
+		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
+		newCNSI, err := GetHCFv2Info(appData.API, true)
+		if err != nil {
+			log.Fatal("Could not get the info for Cloud Foundry", err)
+			return
+		}
+
+		// Override the configuration to set the authorization endpoint
+		p.Config.UAAEndpoint = newCNSI.AuthorizationEndpoint
+
+		log.Infof("Cloud Foundry UAA is: %s", p.Config.UAAEndpoint)
+
+		// Auto-register the Cloud Foundry
+		cfCnsi, regErr := p.doRegisterEndpoint("Cloud Foundry", appData.API, true, GetHCFv2Info)
+		if regErr != nil {
+			log.Fatal("Could not auto-register the Cloud Foundry endpoint", err)
+			return
+		}
+
+		p.CFCnsiGUID = cfCnsi.GUID
+
+		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
+		p.LoginHook = p.cfLoginHook
+
+		log.Info("All done for Cloud Foundry deployment")
+	}
+}
+
+func (p *portalProxy) cfLoginHook(c echo.Context) error {
+	log.Info("Auto connecting to the Cloud Foundry instance")
+	_, err := p.doLoginToCNSI(c, p.CFCnsiGUID)
+	return err
+}
+
+func getStaticFiles() (string, error) {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err == nil {
+		// Look for a folder named 'ui'
+		_, err := os.Stat(dir + "/ui")
+		if err == nil || !os.IsNotExist(err) {
+			return dir + "/ui", nil
+		}
+	}
+	return "", errors.New("UI folder not found")
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	log.Debug("registerRoutes")
 
-	e.POST("/v1/auth/login/uaa", p.loginToUAA)
-	e.POST("/v1/auth/logout", p.logout)
+	if p.Config.IsCloudFoundry {
+		// Add middleware to ensure we are running over HTTPS
+		e.Use(p.cloudFoundryMiddleware)
+	}
+
+	// Allow the backend to run under /pp if running combined
+	var pp *echo.Group
+	staticDir, err := getStaticFiles()
+	if err == nil {
+		pp = e.Group("/pp")
+	} else {
+		pp = e.Group("")
+	}
+
+	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
+	pp.POST("/v1/auth/logout", p.logout)
 
 	// Version info
-	e.GET("/v1/version", p.getVersions)
+	pp.GET("/v1/version", p.getVersions)
 
 	// All routes in the session group need the user to be authenticated
-	sessionGroup := e.Group("/v1")
+	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
+
+	// Add Cloud Foundry session middleware if required
+	if p.Config.IsCloudFoundry {
+		sessionGroup.Use(p.cloudFoundrySessionMiddleware)
+	}
 
 	// Connect to HCF cluster
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
@@ -448,4 +585,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
+
+	if err == nil {
+		e.Static("/", staticDir)
+		log.Info("Serving static UI resources")
+	}
+
 }

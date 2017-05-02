@@ -18,6 +18,11 @@ type portalProxy struct {
 	Config                 portalConfig
 	DatabaseConnectionPool *sql.DB
 	SessionStore           SessionStorer
+	LoginHook              LoginHookFunc
+	UAAAdminIdentifier     string
+	HCFAdminIdentifier     string
+	HTTPS                  bool
+	CFCnsiGUID             string
 }
 
 type HttpSessionStore interface {

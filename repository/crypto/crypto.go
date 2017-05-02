@@ -19,7 +19,7 @@ import (
 
 // EncryptToken - Encrypt a token being
 func EncryptToken(key []byte, t string) ([]byte, error) {
-	log.Println("encryptToken")
+	log.Debug("encryptToken")
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
@@ -33,7 +33,7 @@ func EncryptToken(key []byte, t string) ([]byte, error) {
 
 // DecryptToken - Decrypt a token
 func DecryptToken(key, t []byte) (string, error) {
-	log.Println("decryptToken")
+	log.Debug("decryptToken")
 	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
 		msg := "Unable to decrypt token: %v"
