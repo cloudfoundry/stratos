@@ -6,13 +6,17 @@
     "ce": "Code Engine"
   },
   "company": {
-    "name": "SUSE (a Micro Focus Company)",
-    "terms": "Legal",
-    "terms.href": "https://www.suse.com/company/legal/",
-    "PRIVACY_HREF": "", 
-    "PRODUCT_FAMILY_HREF": "",
-    "www-link": "http://www.suse.com",
-    "about-logo": "images/suse_logo_light_bg.png",
+    "name": "SUSE, All Rights Reserved",
+    "terms": "",
+    "terms.href": "",
+    "www-link": "",
+    "about-logo": "",
     "logo": ""
+  },
+  "about": {
+    "footer": {
+      "product.logo": "images/cloud-foundry-logo.png",
+      "product.www-link": "https://www.cloudfoundry.org"
+    }
   }
 }

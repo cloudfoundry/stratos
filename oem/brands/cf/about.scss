@@ -6,6 +6,11 @@ $about-top-margin: 48px;
     background: none;
     margin-top: $about-top-margin;
 
+    img.helion-logo {
+      width: 320px;
+      display: block;
+    }
+
     img.hpe-logo {
       width: 128px;
       position: relative;

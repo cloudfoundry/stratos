@@ -1,6 +1,9 @@
 {
   "login": {
-   "footer": {
+    "logo": "images/cloud-foundry-logo.png",
+    "company-logo": "",
+    "title": "Console",
+    "footer": {
       "title": "",
       "copyright": "",
       "company.logo": "",
