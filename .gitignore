@@ -10,3 +10,4 @@ hsc-upgrade-volume/
 development.rc
 ci/secrets.yml
 ci/images/
+scf/.vagrant

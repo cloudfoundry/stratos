@@ -1,0 +1,5 @@
+uaaDbPassword: uaaadmin_password
+uaaAdminClientSecret: admin_secret
+mysqlImage: registry.paas-ui:5000/uaa-mysql:0bbd3011076de7c545606cdc768aed58e8dd64b1
+uaaImage: registry.paas-ui:5000/uaa-uaa:39b70dd1d06e0a51a8ed3c544cbe6c5d1522ea80
+domain: cf-dev.io

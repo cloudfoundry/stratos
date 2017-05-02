@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "http://registry.paas-ui:8080/scf-libvirt.box"
+  config.vm.network "private_network", ip: "192.168.77.77"
+
+  config.vm.synced_folder "../scf", "/home/vagrant/scf"
+
+  config.vm.provider "libvirt" do |vb|
+    vb.memory = "32024"
+    vb.cpus = "16"
+    vb.driver = "kvm"
+
+  end
+
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    ulimit -l unlimited
+
+    # Allowed number of open file descriptors
+    ulimit -n 100000
+
+    # Ephemeral port range
+    echo "1024 65535" > /proc/sys/net/ipv4/ip_local_port_range
+
+    # TCP_FIN_TIMEOUT
+    echo 5 > /proc/sys/net/ipv4/tcp_fin_timeout
+
+    # TCP_TW_RECYCLE
+    echo 0 > /proc/sys/net/ipv4/tcp_tw_recycle
+
+    # TCP_TW_REUSE
+    echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+
+    # Allow a few more queued connections than are allowed by default
+    echo 1024 > /proc/sys/net/core/somaxconn
+  SHELL
+
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    # Install Docker
+    scf/install_docker.sh
+
+    # configure
+    scf/configure_docker.sh /dev/sdb 64 4
+
+    #setup network
+    scf/setup_network.sh "172.20.10.0/24" "172.20.10.1"
+
+  SHELL
+
+  # Deploy HyperKube
+  config.vm.provision "shell", path: "deploy-hyperkube.sh"
+
+  # Deploy SCF
+  config.vm.provision "shell", path: "deploy-scf.sh"
+end
