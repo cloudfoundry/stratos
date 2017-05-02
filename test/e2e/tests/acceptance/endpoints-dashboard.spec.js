@@ -209,9 +209,9 @@
               endpointsPage.headerRegister()
                 .then(function () {
                   expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-                  expect(registerEndpoint.getStep()).toBe(1);
+                  expect(registerEndpoint.getStep()).toBe(2);
                   registerEndpoint.closeEnabled(true);
-                  registerEndpoint.selectType(type);
+                  // registerEndpoint.selectType(type);
                 });
             });
 
