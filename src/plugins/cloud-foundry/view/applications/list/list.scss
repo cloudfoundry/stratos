@@ -66,21 +66,6 @@ $applications-msg-height: 50px;
   }
 }
 
-.applications-header {
-  font-size: $hpe-unit-space;
-
-  .applications-count {
-    word-spacing: -2px;
-    font-size: $hpe-unit-space - $hpe-unit-space / 4;
-    padding-left: $hpe-unit-space / 4;
-    display: inline;
-  }
-
-  .bounce-spinner-sm {
-    margin-left: $hpe-unit-space;
-  }
-}
-
 .applications-filter {
   padding-left: 16px;
   padding-right: 16px;
