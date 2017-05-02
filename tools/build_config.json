@@ -1,8 +1,12 @@
 {
   "brand": "suse",
+
+  "main": "cloud-foundry",
   
   "plugins": [
     "cloud-foundry",
-    "endpoints-dashboard"
+    "endpoints-dashboard",
+    "_code-engine",
+    "_service-manager"
   ]
 }

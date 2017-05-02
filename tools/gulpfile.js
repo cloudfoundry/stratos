@@ -130,6 +130,7 @@
   gulp.task('copy:configjs', function () {
     return gulp
       .src(paths.src + 'config.js')
+      .pipe(gulpreplace('@@MAIN_PLUGIN@@', buildConfig.main || ''))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
