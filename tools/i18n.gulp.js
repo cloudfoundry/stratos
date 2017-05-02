@@ -85,7 +85,7 @@
     function merge(dest, src) {
       _.each(src, function (v, k) {
         //console.log(k);
-        if (dest[k]) {
+        if (!_.isUndefined(dest[k])) {
           if (_.isString(v) && _.isObject(dest[k])) {
             // Need to check if dest[k][k] exists
             dest[k][k] = v;
@@ -94,7 +94,7 @@
             dest[k] = v;
           } else {
             if (_.isString(v)) {
-              if (!dest[k]) {
+              if (_.isUndefined(dest[k])) {
                 dest[k] = v;
               }
             } else {

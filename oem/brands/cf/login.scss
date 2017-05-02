@@ -1,6 +1,7 @@
 $login-padding: 24px;
 $login-logo-size: 128px;
-$login-panel-width: 420px;
+$login-panel-width: 380px;
+$login-bg-color: #eee;
 
 .brand {
   .login-page .login-background .login-panel-hpe-logo > img {
@@ -17,31 +18,33 @@ $login-panel-width: 420px;
     position: absolute;
     width: 0;
     height: 0;
-    display: none;
   }
 
   .login-page {
-    background-color: $suse-dark-blue;
+    background-color: $login-bg-color;
     height: 100vw;
-
-    .hpe-logo {
-      width: 128px;
-    }
 
     .login-panel {
       justify-content: center;
-      background-color: $suse-dark-blue;
+      background-color: $login-bg-color;
 
       login-form {
         flex: 0;
         background-color: #fff;
         margin: 0;
-        //box-shadow: 0 0 20px 10px #333;
+        box-shadow: 0 0 20px 10px #d8d8d8;
         width: $login-panel-width;
 
         .login-form {
           max-width: $login-panel-width;
           padding: $login-padding;
+
+          img.login-form-logo-image {
+            width: 280px;
+            margin: auto;
+            display: flex;
+            margin-top: $login-padding;
+          }          
 
           .login-form-spinner {
             text-align: center;
@@ -49,10 +52,15 @@ $login-panel-width: 420px;
 
           > h1 {
             margin-top: $login-padding;
+            display: none;
           }
 
           .form-group {
             width: auto;
+
+            .control-label {
+              font-size: 14px;
+            }
           }
 
           > button {

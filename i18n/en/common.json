@@ -34,10 +34,19 @@
   },
   "about": {
     "about": "About",
-    "title": "[[@:product.name]] [[@:product.version]]"
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "footer": {
+      "title": "@:footer.title",
+      "copyright": "@:footer.copyright",
+      "company.logo": "@:company.logo",
+      "product.logo": "@:product.logo",
+      "company.www-link": "@:company.www-link",
+      "product.www-link": "@:product.www-link"
+    }
   },
   "footer": {
     "title": "[[@:product.name]] [[@:product.version]]",
-    "copyright": "&copy; 2017 [[@:company.name]]"
+    "copyright": "&copy; 2017 [[@:company.name]]",
+    "logo": "@:company.logo"
   }
 }

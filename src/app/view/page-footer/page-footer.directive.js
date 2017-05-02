@@ -18,10 +18,9 @@
       templateUrl: appBasePath + 'view/page-footer/page-footer.html',
       controller: PageFooterController,
       controllerAs: 'pageFooterCtrl',
-      scope: {
-        mode: '@'
-      },
-      bindToController: true
+      bindToController: {
+        context: '@'
+      }
     };
   }
 
