@@ -1,4 +1,4 @@
-/* eslint-disable angular/log,no-console,no-process-env,angular/json-functions */
+/* eslint-disable angular/log,no-console,no-process-env,angular/json-functions,no-sync */
 (function () {
   'use strict';
 
@@ -11,6 +11,7 @@
   var eslint = require('gulp-eslint');
   var file = require('gulp-file');
   var fork = require('child_process').fork;
+  var fs = require('fs');
   var gulp = require('gulp');
   var gulpBowerFiles = require('bower-files');
   var gulpif = require('gulp-if');
@@ -37,27 +38,17 @@
   var buildConfig = require('./build_config.json');
 
   var paths = config.paths;
-  var assetFiles = utils.updateWithPlugins(config.assetFiles);
+  var assetFiles, jsSourceFiles, scssFiles, templateFiles, jsFiles, lintFiles, i18nFiles, brand, defaultBrandFolder, defaultBrandI18nFolder, server;
   var themeFiles = config.themeFiles;
-  var jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
-  var scssFiles = utils.updateWithPlugins(config.scssFiles);
-  var templateFiles = utils.updateWithPlugins(config.templatePaths);
   var packageJson = require('../package.json');
-  var jsFiles = utils.updateWithPlugins(config.jsFiles);
-  var lintFiles = utils.updateWithPlugins(config.lintFiles);
-  var i18nFiles = utils.updateWithPlugins(config.i18nFiles);
 
   // Default Brand
   var DEFAULT_BRAND = 'suse';
 
-  var brand = buildConfig.brand || process.env.BRAND || DEFAULT_BRAND;
-  var defaultBrandFolder = '../oem/brands/' + brand + '/';
-  defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
-  var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
-  i18nFiles.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
+  // Initial plugin configuration - when in dev, will be watched and reloaded
+  pluginPreparation();
 
   var usePlumber = true;
-  var server;
 
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
@@ -75,6 +66,30 @@
   // Pull in the gulp tasks for e2e tests
   var e2e = require('./e2e.gulp.js');
   e2e(config);
+
+  function pluginPreparation() {
+    buildConfig = JSON.parse(fs.readFileSync('./tools/build_config.json', 'utf8'));
+    utils.clearCachedPlugins(buildConfig);
+
+    assetFiles = utils.updateWithPlugins(config.assetFiles);
+    jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
+    scssFiles = utils.updateWithPlugins(config.scssFiles);
+    templateFiles = utils.updateWithPlugins(config.templatePaths);
+    jsFiles = utils.updateWithPlugins(config.jsFiles);
+    lintFiles = utils.updateWithPlugins(config.lintFiles);
+    i18nFiles = utils.updateWithPlugins(config.i18nFiles);
+
+    brand = buildConfig.brand || process.env.BRAND || DEFAULT_BRAND;
+    defaultBrandFolder = '../oem/brands/' + brand + '/';
+    defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
+    defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
+    i18nFiles.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
+  }
+
+  gulp.task('prepare', function (next) {
+    pluginPreparation();
+    next();
+  });
 
   // Clean dist dir
   gulp.task('clean', function (next) {
@@ -308,6 +323,18 @@
     gulp.watch(config.svgPaths, ['copy:svg', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(config.i18nFiles, ['i18n', callback]);
+
+    // Watch build configuration file for changes
+    gulp.watch('./tools/build_config.json', ['build-config', callback]);
+  });
+
+  gulp.task('build-config', function (next) {
+    usePlumber = false;
+    runSequence(
+      'prepare',
+      'dev-default',
+      next
+    );
   });
 
   gulp.task('browsersync', function (callback) {

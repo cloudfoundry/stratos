@@ -67,6 +67,11 @@
     return srcArray.concat(filePathsToExclude);
   }
 
+  function clearCachedPlugins(config) {
+    filePathsToExclude = undefined;
+    buildConfig = config;
+  }
+
   function getDirs(srcpath) {
     return fs.readdirSync(srcpath).filter(function (file) {
       return fs.statSync(path.join(srcpath, file)).isDirectory();
@@ -75,5 +80,6 @@
 
   module.exports.copyBowerFolder = copyBowerFolder;
   module.exports.updateWithPlugins = updateWithPlugins;
+  module.exports.clearCachedPlugins = clearCachedPlugins;
   module.exports.getDirs = getDirs;
 })();
