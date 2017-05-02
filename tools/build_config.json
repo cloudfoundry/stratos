@@ -1,4 +1,6 @@
 {
+  "brand": "suse",
+  
   "plugins": [
     "cloud-foundry",
     "endpoints-dashboard"

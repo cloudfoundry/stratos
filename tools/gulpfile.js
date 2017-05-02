@@ -47,10 +47,10 @@
   var lintFiles = utils.updateWithPlugins(config.lintFiles);
   var i18nFiles = utils.updateWithPlugins(config.i18nFiles);
 
-  // Default OEM Config
+  // Default Brand
   var DEFAULT_BRAND = 'suse';
 
-  var brand = process.env.BRAND || DEFAULT_BRAND;
+  var brand = buildConfig.brand || process.env.BRAND || DEFAULT_BRAND;
   var defaultBrandFolder = '../oem/brands/' + brand + '/';
   defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
   var defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
