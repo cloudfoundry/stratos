@@ -3,3 +3,26 @@
 $turquoise:             #2ad2c9; // Turquoise (Selection)
 
 $input-select-fg: $turquoise;
+
+.login-panel-helion-logo {
+  display: none;
+}
+
+.page-footer-items {
+  .company-logo {
+    display: none;
+  }
+  .copyright-and-links {
+    .product-and-links {
+      display: none;
+    }
+  }
+  .copyright {
+    span {
+      font-size: 14px;
+    }
+    a {
+      display: block;
+    }
+  }
+}
