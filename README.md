@@ -1,6 +1,5 @@
 # Console UI
 The Console UI is written in JavaScript. It also uses Angular 1.4.x to maintain compatibility with Angular UI Bootstrap.
-Test
 For more implementation details, please see the following pages:
 * [Overview](docs/README.md)
 * [Architecture](docs/architecture.md)
