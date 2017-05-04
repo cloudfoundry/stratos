@@ -379,4 +379,11 @@
     }
   }
 
+  // Filter for converting a size to a human value - e.g. TB, GB, MB etc
+  function mbToHumanSizeFilter(appUtilsService) {
+    return function (input) {
+      return appUtilsService.mbToHumanSize(input);
+    };
+  }
+
 })();
