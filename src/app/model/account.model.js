@@ -130,9 +130,9 @@
     function onLoggedIn(response) {
       var sessionExpiresOnEpoch = response.headers()['x-cnap-session-expires-on'];
 
-      var loginRes = response.data;
+      var loginRes = response.data && response.data.user ? response.data.user : {};
       accountData = {
-        username: loginRes.account,
+        username: loginRes.name,
         isAdmin: loginRes.admin,
         sessionExpiresOn: moment.unix(sessionExpiresOnEpoch)
       };

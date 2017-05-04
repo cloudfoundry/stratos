@@ -11,8 +11,8 @@
     .module('app.model')
     .run(registerStackatoInfoModel);
 
-  function registerStackatoInfoModel(modelManager, appUtilsService, stackatoInfoService) {
-    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsService, stackatoInfoService));
+  function registerStackatoInfoModel(modelManager, appUtilsService, consoleInfoService) {
+    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsService, consoleInfoService));
   }
 
   /**
@@ -20,11 +20,11 @@
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
    * @param {app.utils.appUtilsService} appUtilsService - utils service
-   * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
+   * @param {app.api.consoleInfoService} consoleInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class
    */
-  function StackatoInfo(appUtilsService, stackatoInfoService) {
+  function StackatoInfo(appUtilsService, consoleInfoService) {
     var info = {};
 
     return {
@@ -42,7 +42,7 @@
      * @public
      */
     function getStackatoInfo() {
-      return stackatoInfoService.stackatoInfo()
+      return consoleInfoService.info()
         .then(function (response) {
           onStackatoInfo(response);
           return info;
@@ -57,7 +57,7 @@
      * @public
      */
     function version() {
-      return stackatoInfoService.version();
+      return consoleInfoService.version();
     }
 
     /**
