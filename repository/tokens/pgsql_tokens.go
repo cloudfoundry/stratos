@@ -252,10 +252,24 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	default:
 
 		log.Println("Existing CNSI token found - attempting update.")
-		if _, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, cnsiGUID, userGUID, "cnsi"); err != nil {
+		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, cnsiGUID, userGUID, "cnsi")
+		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
+		}
+
+		rowsUpdates, err := result.RowsAffected()
+		if err != nil {
+			return errors.New("Unable to UPDATE CNSI token: could not determine number of rows that were updated")
+		}
+
+		if rowsUpdates < 1 {
+			return errors.New("Unable to UPDATE CNSI token: no rows were updated")
+		}
+
+		if rowsUpdates > 1 {
+			log.Warn("UPDATE CNSI token: More than 1 row was updated (expected only 1)")
 		}
 
 		log.Println("CNSI token UPDATE complete")
