@@ -321,24 +321,6 @@
       }
       */
       var errorText;
-  }
-
-  function mbToHumanSizeFilter(appUtilsService) {
-    return function (input) {
-      return appUtilsService.mbToHumanSize(input);
-    };
-  }
-
-  function extractCloudFoundryError(errorResponse) {
-    /*
-     Cloud Foundry errors have the following format:
-     data: {
-     description: 'some text',
-     errorCode: 1000,
-     error_code: 'UnknownHostException'
-     }
-     */
-    var errorText;
 
       if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
         return;
@@ -355,45 +337,46 @@
         errorText = $translate.instant('error-format', {errorMsg: errorText, errorCode: errorResponse.error_code});
       }
 
-    return errorText;
-  }
-
-  function extractCodeEngineError(errorResponse) {
-
-    /*
-     Code Engine errors have the following format
-     data: {
-     message: 'some text',
-     detail: 'more text',
-     }
-     */
-
-    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
-      return;
-    }
-    var errorText;
-    if (errorResponse.data && errorResponse.data.message) {
-      errorResponse = errorResponse.data;
+      return errorText;
     }
 
-    if (errorResponse.message && _.isString(errorResponse.message)) {
-      errorText = errorResponse.message;
-      if (errorResponse.details || errorResponse.detail) {
-        var detail = errorResponse.details || errorResponse.detail;
-        if (_.isString(detail)) {
-          errorText = errorText + ', ' + detail;
+    function extractCodeEngineError(errorResponse) {
+
+      /*
+      Code Engine errors have the following format
+      data: {
+      message: 'some text',
+      detail: 'more text',
+      }
+      */
+
+      if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+        return;
+      }
+      var errorText;
+      if (errorResponse.data && errorResponse.data.message) {
+        errorResponse = errorResponse.data;
+      }
+
+      if (errorResponse.message && _.isString(errorResponse.message)) {
+        errorText = errorResponse.message;
+        if (errorResponse.details || errorResponse.detail) {
+          var detail = errorResponse.details || errorResponse.detail;
+          if (_.isString(detail)) {
+            errorText = errorText + ', ' + detail;
+          }
         }
       }
+
+      return errorText;
     }
 
-    return errorText;
-  }
-
-  function replaceProperties(destination, source) {
-    _.forIn(destination, function (value, key) {
-      delete destination[key];
-    });
-    _.assign(destination, source);
+    function replaceProperties(destination, source) {
+      _.forIn(destination, function (value, key) {
+        delete destination[key];
+      });
+      _.assign(destination, source);
+    }
   }
 
 })();
