@@ -7,32 +7,31 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/portal-proxy/repository/vcs"
 )
 
-const (
-	findVcsToken = `SELECT guid, user_guid, vcs_guid, name, token
-	                FROM vcs_tokens
-	                WHERE user_guid = $1 AND guid = $2`
+var findVcsToken = `SELECT guid, user_guid, vcs_guid, name, token
+								FROM vcs_tokens
+								WHERE user_guid = $1 AND guid = $2`
 
-	findMatchingVcsToken = `SELECT guid, user_guid, vcs_guid, name, token
-	                        FROM vcs_tokens
-	                        WHERE user_guid = $1 AND vcs_guid = $2 AND name = $3`
+var findMatchingVcsToken = `SELECT guid, user_guid, vcs_guid, name, token
+												FROM vcs_tokens
+												WHERE user_guid = $1 AND vcs_guid = $2 AND name = $3`
 
-	saveVcsToken = `INSERT INTO vcs_tokens (guid, user_guid, vcs_guid, name, token)
-	                VALUES ($1, $2, $3, $4, $5)`
+var saveVcsToken = `INSERT INTO vcs_tokens (guid, user_guid, vcs_guid, name, token)
+								VALUES ($1, $2, $3, $4, $5)`
 
-	renameVcsToken = `UPDATE vcs_tokens
-	                  SET name = $3
-	                  WHERE user_guid = $1 AND guid = $2`
+var renameVcsToken = `UPDATE vcs_tokens
+									SET name = $3
+									WHERE user_guid = $1 AND guid = $2`
 
-	deleteVcsToken = `DELETE FROM vcs_tokens WHERE user_guid = $1 AND guid = $2`
+var deleteVcsToken = `DELETE FROM vcs_tokens WHERE user_guid = $1 AND guid = $2`
 
-	listVcsTokensByUser = `SELECT t.guid, t.user_guid, t.vcs_guid, t.name, t.token, v.guid, v.label, v.type, v.browse_url, v.api_url, v.skip_ssl_validation
-	                       FROM vcs v, vcs_tokens t
-	                       WHERE t.user_guid=$1 AND v.guid = t.vcs_guid`
-)
+var listVcsTokensByUser = `SELECT t.guid, t.user_guid, t.vcs_guid, t.name, t.token, v.guid, v.label, v.type, v.browse_url, v.api_url, v.skip_ssl_validation
+												FROM vcs v, vcs_tokens t
+												WHERE t.user_guid=$1 AND v.guid = t.vcs_guid`
 
 // PgsqlVCSTokenRepository is a PostgreSQL-backed token repository
 type PgsqlVcsTokenRepository struct {
@@ -81,6 +80,17 @@ func scanRow(scannable Scannable, encryptionKey []byte) (*VcsTokenRecord, error)
 // NewPgsqlVCSTokenRepository - get a reference to the token data source
 func NewPgsqlVcsTokenRepository(dcp *sql.DB) (Repository, error) {
 	return &PgsqlVcsTokenRepository{db: dcp}, nil
+}
+
+// InitRepositoryProvider - One time init for the given DB Provider
+func InitRepositoryProvider(databaseProvider string) {
+	// Modify the database statements if needed, for the given database type
+	findVcsToken = datastore.ModifySQLStatement(findVcsToken, databaseProvider)
+	findMatchingVcsToken = datastore.ModifySQLStatement(findMatchingVcsToken, databaseProvider)
+	saveVcsToken = datastore.ModifySQLStatement(saveVcsToken, databaseProvider)
+	renameVcsToken = datastore.ModifySQLStatement(renameVcsToken, databaseProvider)
+	deleteVcsToken = datastore.ModifySQLStatement(deleteVcsToken, databaseProvider)
+	deleteVcsToken = datastore.ModifySQLStatement(deleteVcsToken, databaseProvider)
 }
 
 // SaveVCSToken - Save the VCS token to the DB

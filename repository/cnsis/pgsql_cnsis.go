@@ -6,30 +6,30 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/hpcloud/portal-proxy/datastore"
+
 	log "github.com/Sirupsen/logrus"
 )
 
-const (
-	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
-               FROM cnsis`
+var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+							FROM cnsis`
 
-	listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation
-                     FROM cnsis c, tokens t
-                     WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
+var listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation
+										FROM cnsis c, tokens t
+										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
 
-	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
-              FROM cnsis
-              WHERE guid=$1`
+var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+						FROM cnsis
+						WHERE guid=$1`
 
-	findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
-              FROM cnsis
-              WHERE api_endpoint=$1`
+var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+						FROM cnsis
+						WHERE api_endpoint=$1`
 
-	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
-	deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
-)
+var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
 
@@ -40,8 +40,18 @@ type PostgresCNSIRepository struct {
 
 // NewPostgresCNSIRepository will create a new instance of the PostgresCNSIRepository
 func NewPostgresCNSIRepository(dcp *sql.DB) (Repository, error) {
-	log.Println("NewPostgresCNSIRepository")
 	return &PostgresCNSIRepository{db: dcp}, nil
+}
+
+// InitRepositoryProvider - One time init for the given DB Provider
+func InitRepositoryProvider(databaseProvider string) {
+	// Modify the database statements if needed, for the given database type
+	listCNSIs = datastore.ModifySQLStatement(listCNSIs, databaseProvider)
+	listCNSIsByUser = datastore.ModifySQLStatement(listCNSIsByUser, databaseProvider)
+	findCNSI = datastore.ModifySQLStatement(findCNSI, databaseProvider)
+	findCNSIByAPIEndpoint = datastore.ModifySQLStatement(findCNSIByAPIEndpoint, databaseProvider)
+	saveCNSI = datastore.ModifySQLStatement(saveCNSI, databaseProvider)
+	deleteCNSI = datastore.ModifySQLStatement(deleteCNSI, databaseProvider)
 }
 
 // List - Returns a list of CNSI Records
