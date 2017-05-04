@@ -31,13 +31,11 @@
     'modelManager',
     'appEventService',
     'appUtilsService',
-    'ceManageVcsTokens',
     'cfOrganizationModel',
     '$interpolate',
     '$scope',
     '$q',
-    '$timeout',
-    'PAT_DELIMITER'
+    '$timeout'
   ];
 
   /**
@@ -47,13 +45,11 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {ceManageVcsTokens} ceManageVcsTokens - the VCS Token management service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -66,16 +62,14 @@
    * @property {object} spaceModel - the Cloud Foundry space model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} githubModel - the Github model
-   * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
    * @property {object} cfOrganizationModel - the organization model
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
-   * @property {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    */
-  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, ceManageVcsTokens, cfOrganizationModel,
-                                    $interpolate, $scope, $q, $timeout, PAT_DELIMITER) {
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfOrganizationModel,
+                                    $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -84,7 +78,6 @@
     this.modelManager = modelManager;
     this.appEventService = appEventService;
     this.appUtilsService = appUtilsService;
-    this.ceManageVcsTokens = ceManageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -93,22 +86,17 @@
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.cfOrganizationModel = cfOrganizationModel;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.hceModel = modelManager.retrieve('code-engine.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.vcsModel = modelManager.retrieve('code-engine.model.vcs');
     this.userInput = {};
     this.options = {};
-    this.PAT_DELIMITER = PAT_DELIMITER;
 
     this.init();
   }
 
-  run.$inject = [
-    'cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype'
-  ];
+  run.$inject = [ ];
 
-  function run(addPipelineWorkflowPrototype) {
-    angular.extend(AddAppWorkflowController.prototype, addPipelineWorkflowPrototype, {
+  function run() {
+    angular.extend(AddAppWorkflowController.prototype, {
 
       init: function () {
         var that = this;
@@ -173,7 +161,6 @@
           host: null,
           domain: null,
           application: null,
-          hceCnsi: null,
           source: null,
           repo: null,
           repoFilterTerm: null,
@@ -258,6 +245,9 @@
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
         this.options = {
+          workflow: this.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
           appEventService: this.appEventService,
           subflow: null,
           serviceInstances: [],
@@ -268,10 +258,9 @@
           servicesReady: false,
           organizations: [],
           spaces: [],
-          domains: []
+          domains: [],
+          apps: []
         };
-
-        this.setOptions();
 
         this.addApplicationActions = {
           stop: function () {
@@ -526,6 +515,20 @@
         this.notify();
         this.addingApplication = false;
         this.dismissDialog();
+      },
+
+      /**
+       * @function selectOptionMapping
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description domain mapping function
+       * @param {object} o - an object to map
+       * @returns {object} select-option object
+       */
+      selectOptionMapping: function (o) {
+        return {
+          label: o.entity.name,
+          value: o
+        };
       }
     });
   }

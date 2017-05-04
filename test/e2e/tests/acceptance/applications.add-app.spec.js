@@ -198,12 +198,12 @@
           });
       });
 
-      // Go to the delivery pipeline tab
-      application.showDeliveryPipeline();
-      expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
-
       // Skip if there is no Code Engine available
       if (!helpers.skipIfNoHCE()) {
+        // Go to the delivery pipeline tab
+        application.showDeliveryPipeline();
+        expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
+
         expect(deliveryPipeline.setupPipelineButton().isPresent()).toBe(true);
         deliveryPipeline.setupPipelineButton().click();
         expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);

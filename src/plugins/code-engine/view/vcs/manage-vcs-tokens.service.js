@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('code-engine.view')
+    .module('code-engine.view.vcs')
     .factory('ceManageVcsTokens', ManageVcsTokensService);
 
   /**

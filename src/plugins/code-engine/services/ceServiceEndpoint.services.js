@@ -9,7 +9,9 @@
 
   /* eslint-disable no-unused-vars */
   // Ensure that an instance of ceEndpointService is created by injecting it here.
-  function register(ceEndpointService) { }
+  function register(ceEndpointService) {
+  }
+
   /* eslint-enable no-unused-vars */
 
   /**
@@ -20,14 +22,13 @@
    * @param {ceHideEndpoint} ceHideEndpoint - Config - Hide the endpoint from endpoint dashboard components
    * @param {object} $q - the Angular $q service
    * @param {object} $translate - the $translate service
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {ceVCSEndpointService} ceVCSEndpointService - service to support dashboard with vcs type endpoints
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
-   * @param {object} apiManager - apiManager service
+   * @param {app.api.apiManager} apiManager - the application API manager
    * @returns {object} the service instance service
    */
-  function endpointService(ceHideEndpoint, $q, $translate, appUtilsService, ceVCSEndpointService, appEndpointsDashboardService,
+  function endpointService(ceHideEndpoint, $q, $translate, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsCnsiService, apiManager) {
 
     var service = {
@@ -103,6 +104,7 @@
     function isHidden(isAdmin) {
       return ceHideEndpoint;
     }
+
     /* eslint-enable no-unused-vars */
 
   }

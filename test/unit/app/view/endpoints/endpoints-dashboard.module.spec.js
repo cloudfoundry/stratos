@@ -31,6 +31,9 @@
         getClusterEndpoint: function () {
           return '';
         },
+        isPluginAvailable: function () {
+          return true;
+        },
         getOemConfiguration: function () {
           return {
             PRODUCT_VERSION: '4.0',
@@ -54,7 +57,7 @@
         }
       }
     }));
-    beforeEach(module('app.view.endpoints.dashboard'));
+    beforeEach(module('endpoints-dashboard'));
     beforeEach(module(function ($provide) {
       var mock = function () {
         // Params are config, context
@@ -80,8 +83,6 @@
       var appRegisterService = $injector.get('appRegisterService');
       var appUtilsService = $injector.get('appUtilsService');
       var appEndpointsDashboardService = $injector.get('appEndpointsDashboardService');
-      var cfServiceInstanceService = $injector.get('appEndpointsCnsiService');
-      var ceVCSEndpointService = $injector.get('ceVCSEndpointService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -98,7 +99,7 @@
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
       controller = new EndpointsDashboardController($scope, $state, modelManager, appUtilsService,
-        appRegisterService, appEndpointsDashboardService, cfServiceInstanceService, ceVCSEndpointService);
+        appRegisterService, appEndpointsDashboardService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);

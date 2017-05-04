@@ -45,6 +45,8 @@
         dialogSpecs.callback();
       };
       detailViewMock = jasmine.createSpy('frameworkDetailView');
+      var cfApplicationTabs = $injector.get('cfApplicationTabs');
+      var appEndpointsCnsiService = $injector.get('appEndpointsCnsiService');
 
       var authModelOpts = {
         role: role,
@@ -69,15 +71,10 @@
       var infoRequest = mock.cloudFoundryAPI.Info.GetInfo(cnsiGuid);
       $httpBackend.whenGET(infoRequest.url).respond(200, infoRequest.response['200'].body);
 
-      var hceInfoRequest = mock.hceApi.HceInfoApi.info(cnsiGuid);
-      $httpBackend.whenGET(hceInfoRequest.url).respond(200, hceInfoRequest.response['200'].body);
-
-      var userProvidedServiceRequest = mock.hceApi.UserProvidedServiceInstancesApi.RetrieveUserProvidedServiceInstance(appGuid);
-      $httpBackend.whenGET(userProvidedServiceRequest.url).respond(200, userProvidedServiceRequest.response['200']);
-
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, appEventService, confirmDialogMock,
-        appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
+        appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate,
+        $state, cfApplicationTabs, appEndpointsCnsiService);
       $httpBackend.flush();
     }
 
@@ -115,10 +112,6 @@
 
       it('init', function () {
         expect(controller).toBeDefined();
-      });
-
-      it('should have variables section enabled', function () {
-        expect(controller.hideVariables).toBe(false);
       });
 
       it('should have all actions enabled', _.partial(allActionsHidden, false));
@@ -210,14 +203,6 @@
         expect(controller).toBeDefined();
       });
 
-      it('should have variables section disabled', function () {
-        expect(controller.hideVariables).toBe(true);
-      });
-
-      it('should have delivery pipeline section disabled', function () {
-        expect(controller.hideDeliveryPipelineData).toBe(true);
-      });
-
       it('should have all actions disabled', _.partial(allActionsHidden, true));
 
       it('should have all actions disabled except delete', _.partial(allActionsHiddenExcludingDelete, true));
@@ -231,14 +216,6 @@
 
       it('init', function () {
         expect(controller).toBeDefined();
-      });
-
-      it('should have variables section disabled', function () {
-        expect(controller.hideVariables).toBe(false);
-      });
-
-      it('should have delivery pipeline section disabled', function () {
-        expect(controller.hideDeliveryPipelineData).toBe(false);
       });
 
       it('should have all actions enabled', _.partial(allActionsHidden, false));

@@ -17,11 +17,16 @@ $login-panel-width: 420px;
     position: absolute;
     width: 0;
     height: 0;
+    display: none;
   }
 
   .login-page {
     background-color: $suse-dark-blue;
     height: 100vw;
+
+    .hpe-logo {
+      width: 128px;
+    }
 
     .login-panel {
       justify-content: center;
@@ -31,7 +36,7 @@ $login-panel-width: 420px;
         flex: 0;
         background-color: #fff;
         margin: 0;
-        box-shadow: 0 0 20px 10px #333;
+        //box-shadow: 0 0 20px 10px #333;
         width: $login-panel-width;
 
         .login-form {
@@ -43,7 +48,7 @@ $login-panel-width: 420px;
           }
 
           > h1 {
-            margin-top: 0;
+            margin-top: $login-padding;
           }
 
           .form-group {
@@ -52,6 +57,14 @@ $login-panel-width: 420px;
 
           > button {
             float: none;
+          }
+
+          .login-form-spinner.ng-hide {
+            display: block !important;
+
+            > * {
+              visibility: hidden;
+            }
           }
         }
       }

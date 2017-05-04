@@ -66,21 +66,6 @@ $applications-msg-height: 50px;
   }
 }
 
-.applications-header {
-  font-size: $hpe-unit-space;
-
-  .applications-count {
-    word-spacing: -2px;
-    font-size: $hpe-unit-space - $hpe-unit-space / 4;
-    padding-left: $hpe-unit-space / 4;
-    display: inline;
-  }
-
-  .bounce-spinner-sm {
-    margin-left: $hpe-unit-space;
-  }
-}
-
 .applications-filter {
   padding-left: 16px;
   padding-right: 16px;
@@ -110,39 +95,6 @@ $applications-msg-height: 50px;
 .apps-sorting {
   padding-left: 16px;
   padding-right: 16px;
-}
-
-.applications-empty, .console-error-block {
-  clear: both;
-  text-align: center;
-  padding: $hpe-unit-space*2 0;
-  width: 80%;
-  margin: auto;
-
-  .applications-msg, .applications-cta {
-    font-weight: $hpe-font-weight-semibold;
-    color: $dove-gray;
-
-    .btn-link {
-      font-weight: $hpe-font-weight-semibold;
-    }
-  }
-
-  .applications-msg {
-    font-size: $font-size-h1;
-    //height: $applications-msg-height;
-    line-height: $font-size-h1 * 1.2;
-  }
-
-  .applications-cta {
-    font-size: 24px;
-  }
-
-  .helion-icon {
-    color: $dove-gray;
-    margin-bottom: $hpe-unit-space * .5;
-  }
-
 }
 
 .applications-empty {

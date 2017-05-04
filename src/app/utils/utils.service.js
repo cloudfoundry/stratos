@@ -90,7 +90,8 @@
       extractCodeEngineError: extractCodeEngineError,
       coloredLog: coloredLog,
       highlightLog: highlightLog,
-      replaceProperties: replaceProperties
+      replaceProperties: replaceProperties,
+      isPluginAvailable: isPluginAvailable
     };
 
     /**
@@ -306,6 +307,10 @@
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
 
+    function isPluginAvailable(pluginName) {
+      return _.has(env.plugins, pluginName);
+    }
+
     function extractCloudFoundryError(errorResponse) {
       /*
       Cloud Foundry errors have the following format:
@@ -316,6 +321,24 @@
       }
       */
       var errorText;
+  }
+
+  function mbToHumanSizeFilter(appUtilsService) {
+    return function (input) {
+      return appUtilsService.mbToHumanSize(input);
+    };
+  }
+
+  function extractCloudFoundryError(errorResponse) {
+    /*
+     Cloud Foundry errors have the following format:
+     data: {
+     description: 'some text',
+     errorCode: 1000,
+     error_code: 'UnknownHostException'
+     }
+     */
+    var errorText;
 
       if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
         return;
@@ -332,15 +355,7 @@
         errorText = $translate.instant('error-format', {errorMsg: errorText, errorCode: errorResponse.error_code});
       }
 
-      return errorText;
-    }
-
-  }
-
-  function mbToHumanSizeFilter(appUtilsService) {
-    return function (input) {
-      return appUtilsService.mbToHumanSize(input);
-    };
+    return errorText;
   }
 
   function extractCodeEngineError(errorResponse) {

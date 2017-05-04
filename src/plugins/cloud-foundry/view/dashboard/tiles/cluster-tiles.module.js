@@ -18,7 +18,11 @@
       },
       ncyBreadcrumb: {
         label: 'product.cf',
-        parent: 'endpoint.dashboard'
+        parent: function () {
+          if (_.has(env.plugins, 'endpointsDashboard')) {
+            return 'endpoint.dashboard';
+          }
+        }
       }
     });
   }
@@ -43,9 +47,12 @@
     vm.currentUserAccount = modelManager.retrieve('app.model.account');
     vm.serviceInstances = {};
     vm.state = '';
+    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
+
     vm.createClusterList = createClusterList;
     vm.refreshClusterModel = refreshClusterModel;
     vm.updateState = updateState;
+    vm.isAdmin = isAdmin;
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -54,7 +61,14 @@
     appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
     function init() {
-      return refreshClusterModel();
+      return refreshClusterModel().then(function () {
+        if (_.keys(vm.serviceInstances).length === 1 && !vm.isEndpointsDashboardAvailable) {
+          // We are running without the Endpoints Dashboard and there is only one instance available
+          // redirecting to Organisations Detail page
+          var guid = _.keys(vm.serviceInstances)[0];
+          $state.go('endpoint.clusters.cluster.detail.organizations', {guid: guid});
+        }
+      });
     }
 
     /**
@@ -120,6 +134,23 @@
       } else {
         vm.state = 'noClusters';
       }
+
+    }
+
+    /**
+     * @namespace cloud-foundry.view.dashboard
+     * @memberof cloud-foundry.view.dashboard
+     * @name isAdmin
+     * @description check if user is admin, optionally check if endpoints dashboard is loaded
+     * @param {boolean} checkForEndpointsDashboard check if Endpoints Dashboard plugin is loaded
+     * @returns {*|boolean}
+     */
+    function isAdmin(checkForEndpointsDashboard) {
+      var isAdmin = vm.currentUserAccount.isAdmin();
+      if (checkForEndpointsDashboard) {
+        isAdmin = isAdmin && vm.isEndpointsDashboardAvailable;
+      }
+      return isAdmin;
     }
   }
 })();

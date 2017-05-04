@@ -1,6 +1,4 @@
 @import "credentials/credentials-form";
-@import "dashboard/endpoints-dashboard";
-@import "register/register-service";
 
 .endpoints {
 
@@ -45,4 +43,63 @@
   > checkbox-input {
     display: flex;
   }
+}
+
+.endpoint-notification.alert {
+
+  margin-bottom: $hpe-unit-space;
+  font-size: 18px;
+
+  .endpoint-notification-icon {
+    position: absolute;
+    left: $hpe-unit-space;
+    top: $hpe-unit-space;
+    width: $hpe-unit-space;
+    path, rect {
+      fill: $charcoal;
+    }
+  }
+
+  &.endpoint-notification-slim {
+    width: 80%;
+    margin: auto;
+    margin-top: 40px;
+    margin-bottom: 0;
+  }
+}
+.endpoint-notification-error {
+
+}
+
+.applications-empty, .console-error-block {
+  clear: both;
+  text-align: center;
+  padding: $hpe-unit-space*2 0;
+  width: 80%;
+  margin: auto;
+
+  .applications-msg, .applications-cta {
+    font-weight: $hpe-font-weight-semibold;
+    color: $dove-gray;
+
+    .btn-link {
+      font-weight: $hpe-font-weight-semibold;
+    }
+  }
+
+  .applications-msg {
+    font-size: $font-size-h1;
+    //height: $applications-msg-height;
+    line-height: $font-size-h1 * 1.2;
+  }
+
+  .applications-cta {
+    font-size: 24px;
+  }
+
+  .helion-icon {
+    color: $dove-gray;
+    margin-bottom: $hpe-unit-space * .5;
+  }
+
 }

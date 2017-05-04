@@ -1,0 +1,36 @@
+$about-top-margin: 48px;
+
+.brand {
+
+  page-footer.about-branding {
+    background: none;
+    margin-top: $about-top-margin;
+
+    img.helion-logo {
+      width: 320px;
+      display: block;
+    }
+
+    img.hpe-logo {
+      width: 128px;
+      position: relative;
+      top: auto;
+      right: auto;
+    }
+
+    .copyright {
+      font-size: 18px;
+      line-height: 1.25em;
+      left: auto;
+
+      .product-name, .secondary {
+        color: #333;
+      }
+
+    }
+
+  }
+
+
+
+}

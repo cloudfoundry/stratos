@@ -20,4 +20,5 @@ $login-page-text-panel-display: none;
 // The normal status-okay green is close to suse primary, so just use it instead
 $status-okay: $suse-primary;
 
-@import "login"
+@import "login";
+@import "about";

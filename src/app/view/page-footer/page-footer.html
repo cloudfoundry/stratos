@@ -1,14 +1,21 @@
-<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" translate-href="product.www-link" target="_blank"><img class="helion-logo" translate-img="product.logo"/></a>
-<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" translate-href="company.www-link" target="_blank"><img class="hpe-logo" translate-img="company.logo"/></a>
-<div class="copyright">
-  <span ng-if="mode !== 'footer'" class="product-name font-semi-bold">
-    <span translate>footer.title</span>
-  <span class="secondary">
-    <span ng-if="mode !== 'footer'" translate>footer.copyright</span>
-  </span>
-</div>
+<div class="page-footer-items">
+  <div class="copyright-and-links">
+    <div class="copyright">
+      <a rel="noopener noreferrer" translate-href="{{pageFooterCtrl.context + '.product.www-link'}}" target="_blank"><img class="helion-logo" translate-img="{{pageFooterCtrl.context + '.product.logo'}}"/></a>
+      <span class="product-name font-semi-bold">
+        <span translate>{{pageFooterCtrl.context + '.title'}}</span>
+      <span class="secondary">
+        <span translate>{{pageFooterCtrl.context + '.copyright'}}</span>
+      </span>
+    </div>
 
-<ul class="links">
-  <li><a rel="noopener noreferrer" target="_blank" translate-href="company.terms-href" translate>terms</a></li>
-  <li><a rel="noopener noreferrer" target="_blank" translate-href="company.privacy-href" translate>privacy</a></li>
-</ul>
+    <ul class="product-and-links">
+      <li><a rel="noopener noreferrer" target="_blank" translate-href="{{pageFooterCtrl.context + '.company.terms-href'}}" translate>terms</a></li>
+      <li><a rel="noopener noreferrer" target="_blank" translate-href="{{pageFooterCtrl.context + '.company.privacy-href'}}" translate>privacy</a></li>
+    </ul>
+  </div>
+  <div class="company-logo">
+    <a rel="noopener noreferrer" translate-href="{{pageFooterCtrl.context + '.company.www-link'}}" target="_blank"><img class="hpe-logo" translate-img="{{pageFooterCtrl.context + '.company.logo'}}"/></a>
+  </div>
+  
+</div>

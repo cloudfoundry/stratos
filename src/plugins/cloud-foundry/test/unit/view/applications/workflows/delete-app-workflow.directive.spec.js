@@ -3,7 +3,7 @@
 
   /* eslint-disable angular/no-private-call */
   describe('add-service-workflow directive - ', function () {
-    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute;
+    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute, cfApplicationTabs;
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
@@ -15,6 +15,7 @@
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
       var appModel = modelManager.retrieve('cloud-foundry.model.application');
+      cfApplicationTabs = $injector.get('cfApplicationTabs');
 
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
@@ -23,8 +24,7 @@
       };
 
       $scope.guids = {
-        cnsiGuid: 'cnsiGuid',
-        hceCnsiGuid: 'hceCnsiGuid'
+        cnsiGuid: 'cnsiGuid'
       };
 
       $scope.testNoOp = function () {};
@@ -57,7 +57,6 @@
 
       it('should be set properly', function () {
         expect(that.cnsiGuid).toBe(null);
-        expect(that.hceCnsiGuid).toBe(null);
         expect(that.data).toBeDefined();
         expect(that.userInput.checkedRouteValue).toBeDefined();
         expect(that.userInput.checkedServiceValue).toBeDefined();
@@ -149,7 +148,7 @@
         spyOn(that, 'removeAppFromRoutes').and.callThrough();
         spyOn(that, 'tryDeleteEachRoute').and.callThrough();
         spyOn(that, 'deleteServiceBindings').and.callThrough();
-        spyOn(that, 'deleteProject').and.callThrough();
+        spyOn(that.cfApplicationTabs, 'appDeleting').and.callThrough();
         spyOn(that.appModel, 'deleteApp').and.callThrough();
 
         that.deleteApp();
@@ -158,7 +157,7 @@
         expect(that.removeAppFromRoutes).toHaveBeenCalled();
         expect(that.tryDeleteEachRoute).toHaveBeenCalled();
         expect(that.deleteServiceBindings).toHaveBeenCalled();
-        expect(that.deleteProject).toHaveBeenCalled();
+        expect(that.cfApplicationTabs.appDeleting).toHaveBeenCalled();
         expect(that.appModel.deleteApp).toHaveBeenCalled();
       });
 
@@ -322,36 +321,30 @@
       });
 
       it('#deleteProject - project is defined', function () {
-        that.appModel.application.project = undefined;
-        spyOn(that.hceModel, 'removeProject').and.callThrough();
-        var p = that.deleteProject();
-        $scope.$apply();
-        expect(p.$$state.status).toBe(1);
-        expect(that.hceModel.removeProject).not.toHaveBeenCalled();
-      });
-
-      it('#deleteProject - project is not defined', function () {
         that.appModel.application.project = {};
-        that.hceModel.removeProject = function () {
+        that.appModel.application.pipeline = { hceCnsi: '' };
+        cfApplicationTabs.appDeleting = function () {
           return that.$q.resolve();
         };
-        spyOn(that.hceModel, 'removeProject').and.callThrough();
+        that.details = {
+          project: 'project'
+        };
+        spyOn(cfApplicationTabs, 'appDeleting').and.callThrough();
 
         var p = that.deleteProject();
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
-        expect(that.hceModel.removeProject).toHaveBeenCalled();
+        expect(cfApplicationTabs.appDeleting).toHaveBeenCalled();
       });
 
       it('#startWorkflow', function () {
         spyOn(that, 'reset');
         that.startWorkflow({
-          cnsiGuid: 'cnsiGuid', hceCnsiGuid: 'hceCnsiGuid'
+          cnsiGuid: 'cnsiGuid'
         });
         expect(that.reset).toHaveBeenCalled();
         expect(that.deletingApplication).toBe(true);
         expect(that.cnsiGuid).toBe('cnsiGuid');
-        expect(that.hceCnsiGuid).toBe('hceCnsiGuid');
         that.deletingApplication = false;
       });
 
