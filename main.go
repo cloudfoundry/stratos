@@ -46,7 +46,9 @@ const (
 
 // VCapApplicationData - Cloud Fundry VCAP APPLICATION JSON structure that we need access to
 type VCapApplicationData struct {
-	API string `json:"cf_api"`
+	API           string `json:"cf_api"`
+	ApplicationID string `json:"application_id"`
+	SpaceID       string `json:"space_id"`
 }
 
 var appVersion string
@@ -425,6 +427,12 @@ func initForCloudFoundryHosting(p *portalProxy) {
 
 		log.Infof("CF API URL: %s", appData.API)
 
+		// Store the space and id of the Console application - we can use these to prevent stop/delete in the front-end
+		p.CloudFoundry = &CFInfo{
+			SpaceGUID: appData.SpaceID,
+			AppGUID:   appData.ApplicationID,
+		}
+
 		// Allow the URL to be overridden by an application environment variable
 		if config.IsSet(CFApiURLOverride) {
 			appData.API = config.GetString(CFApiURLOverride)
@@ -458,7 +466,7 @@ func initForCloudFoundryHosting(p *portalProxy) {
 			return
 		}
 
-		p.CFCnsiGUID = cfCnsi.GUID
+		p.CloudFoundry.EndpointGUID = cfCnsi.GUID
 
 		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
 		p.LoginHook = p.cfLoginHook
@@ -468,8 +476,8 @@ func initForCloudFoundryHosting(p *portalProxy) {
 }
 
 func (p *portalProxy) cfLoginHook(c echo.Context) error {
-	log.Info("Auto connecting to the Cloud Foundry instance")
-	_, err := p.doLoginToCNSI(c, p.CFCnsiGUID)
+	log.Debug("Auto connecting to the Cloud Foundry instance")
+	_, err := p.doLoginToCNSI(c, p.CloudFoundry.EndpointGUID)
 	return err
 }
 

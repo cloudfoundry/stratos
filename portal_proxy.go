@@ -22,9 +22,17 @@ type portalProxy struct {
 	UAAAdminIdentifier     string
 	HCFAdminIdentifier     string
 	HTTPS                  bool
-	CFCnsiGUID             string
+	CloudFoundry           *CFInfo
 }
 
+// CFInfo - Cloud Foundry info when deployed as a Cloud Foundry application
+type CFInfo struct {
+	EndpointGUID string
+	SpaceGUID    string
+	AppGUID      string
+}
+
+// HttpSessionStore - Interface for a store that can manage HTTP Sessions
 type HttpSessionStore interface {
 	sessions.Store
 	Close()
