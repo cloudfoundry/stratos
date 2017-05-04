@@ -38,12 +38,6 @@ type LoginRes struct {
 	Admin       bool     `json:"admin"`
 }
 
-// VerifySessionRes - Response to the caller from a Verify Session action
-type VerifySessionRes struct {
-	Account string `json:"account"`
-	Admin   bool   `json:"admin"`
-}
-
 // ConnectedUser - details about the user connected to a specific service or UAA
 type ConnectedUser struct {
 	GUID  string `json:"guid"`
@@ -469,14 +463,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	// get the scope out of the JWT token data
-	userTokenInfo, err := getUserTokenInfo(tr.AuthToken)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to find scope information in the UAA Auth Token: %s", err)
-		log.Error(msg, err)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
 	// Check if UAA token has expired
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 
@@ -503,7 +489,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		if err = p.setSessionValues(c, sessionValues); err != nil {
 			return err
 		}
-		userTokenInfo = u
 	} else {
 		// Still need to extend the expires_on of the Session
 		if err = p.setSessionValues(c, nil); err != nil {
@@ -521,14 +506,12 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.UAAAdminIdentifier)
-
-	resp := &VerifySessionRes{
-		Account: sessionUser,
-		Admin:   uaaAdmin,
+	info, err := p.getInfo(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = c.JSON(http.StatusOK, resp)
+	err = c.JSON(http.StatusOK, info)
 	if err != nil {
 		return err
 	}

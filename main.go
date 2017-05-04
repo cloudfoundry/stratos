@@ -547,8 +547,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Applications Log Streams
 	sessionGroup.GET("/:cnsiGuid/apps/:appGuid/stream", p.appStream)
 
-	// Stackato info
-	sessionGroup.GET("/stackato/info", p.stackatoInfo)
+	// Info
+	sessionGroup.GET("/info", p.info)
 
 	// VCS Requests
 	vcsGroup := sessionGroup.Group("/vcs")
@@ -584,13 +584,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// The admin-only routes need to be last as the admin middleware will be
 	// applied to any routes below it's instantiation
 	adminGroup := sessionGroup
-	adminGroup.Use(p.stackatoAdminMiddleware)
+	adminGroup.Use(p.adminMiddleware)
 	// Register clusters
 	adminGroup.POST("/register/hcf", p.registerHCFCluster)
 	adminGroup.POST("/register/hce", p.registerHCECluster)
 	adminGroup.POST("/register/hsm", p.registerHSMEndpoint)
 
-	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
+	// TODO): revisit the API and fix these wonky calls.
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
