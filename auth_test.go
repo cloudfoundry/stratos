@@ -22,10 +22,6 @@ const (
 	findUAATokenSql = `SELECT auth_token, refresh_token, token_expiry FROM tokens .*`
 )
 
-// findUAAToken = `SELECT auth_token, refresh_token, token_expiry
-//                   FROM tokens
-//                   WHERE token_type = 'uaa' AND user_guid = $1`
-
 func TestLoginToUAA(t *testing.T) {
 	t.Parallel()
 
