@@ -400,23 +400,40 @@
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
       } else if (id === 'launch') {
-        hideAction = false;
-      } else {
-        // Check permissions
-        if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
-          // Hide delete if user has no project permissions
-          hideAction = true;
-        } else if (this.authModel.isInitialized(this.cnsiGuid)) {
-          // Hide actions if user has no HCF app update perissions (i.e not a space developer)
-          var spaceGuid = this.model.application.summary.space_guid;
-          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
-            this.authModel.resources.application,
-            this.authModel.actions.update,
-            spaceGuid);
-        }
-
+        return false;
       }
+
+      // Check permissions
+      if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
+        // Hide delete if user has no project permissions
+        hideAction = true;
+      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+        // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+        var spaceGuid = this.model.application.summary.space_guid;
+        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+          this.authModel.resources.application,
+          this.authModel.actions.update,
+          spaceGuid);
+      }
+
+      // Check when running in cloud-foundry
+      if (this.isCloudFoundryConsoleApplication()) {
+        return true;
+      }
+
       return this.model.application.state.actions[id] !== true || hideAction;
+    },
+
+    isCloudFoundryConsoleApplication: function () {
+      // Check when running in cloud-foundry
+      var cfInfo = this.stackatoInfo.info ? this.stackatoInfo.info['cloud-foundry'] : undefined;
+      if (cfInfo) {
+        return this.cnsiGuid === cfInfo.EndpointGUID &&
+          this.model.application.summary.space_guid === cfInfo.SpaceGUID &&
+          this.id === cfInfo.AppGUID;
+      } else {
+        return false;
+      }
     },
 
     /**
