@@ -18,8 +18,14 @@ resources:
     private_key: {{github-private-key}}
     uri: git@github.com:hpcloud/stratos-ui.git
 
+groups:
+- name: tests
+  jobs:
+  - unit-tests
+  - e2e-tests
+
 jobs:
-- name: console-tests
+- name: unit-tests
   plan:
   - get: stratos-deploy
   - get: portal-proxy
@@ -30,6 +36,16 @@ jobs:
       privileged: true
       timeout: 5m
       file: stratos-deploy/ci/tasks/stratos-ui/run-unit-tests.yml
+- name: e2e-tests
+  plan:
+  - get: stratos-deploy
+    passed: [unit-tests]
+  - get: portal-proxy
+    passed: [unit-tests]
+  - get: stratos-ui
+    passed: [unit-tests]
+
+  - do:
     - task: build-proxy-image
       file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
     - task: run-e2e-tests

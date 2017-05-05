@@ -28,8 +28,14 @@ resources:
     label: suse
     base_url: {{base-url}}
 
+groups:
+- name: tests
+  jobs:
+  - console-unit-tests
+  - console-e2e-tests
+
 jobs:
-- name: console-tests
+- name: console-unit-tests
   plan:
   - get: stratos-deploy
   - get: portal-proxy
@@ -52,6 +58,19 @@ jobs:
         params:
           path: stratos-ui
           status: failure
+
+- name: console-e2e-tests
+  plan:
+  - get: stratos-deploy
+  - get: portal-proxy
+
+
+  # get PR and set status to pending
+  - get: stratos-ui
+    trigger: true
+    passed: [console-unit-tests]
+
+  - do:
     - task: build-proxy-image
       file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
     - task: run-e2e-tests
@@ -61,6 +80,8 @@ jobs:
       params:
        REGISTRY_NAME: {{insecure-registry}}
        CUSTOM_APP_LABEL: {{custom-app-label}}
+       WEB_SERVER_URI: {{web-server-uri}}
+       SCP_LOCATION: {{scp-location}}
       on_success:
         put: stratos-ui
         params:

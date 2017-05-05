@@ -21,7 +21,6 @@ run:
     - |
       source /docker-lib.sh
       start_docker
-      docker info
       export GOPATH=$PWD
       cd stratos-deploy
       # Load images from image
@@ -31,7 +30,20 @@ run:
       done
       mkdir uaa/tmp
       cp /tarballs/* ./uaa/tmp/
+
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
       docker logs -f stratosdeploy_ui_1
+
+      CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
+      mkdir e2e-output
+      for name in $CONTAINER_NAMES; do
+          ID=$(docker ps --format "{{.ID}}" --filter name=$name)
+          LOG_PATH=$(find /var/lib/docker/containers -name ${ID}\*.log)
+          cp $LOG_PATH e2e-output/${name}.log
+      done
+      TIMESTAMP=$(date +%s)
+      tar -czf $TIMESTAMP.tar.gz e2e-output/*
+      scp -i /id_rsa $TIMESTAMP.tar.gz ${SCP_LOCATION}
+      echo "Download logs from: http://${WEB_SERVER_URI}/$TIMESTAMP.tar.gz"
       sh ./ci/scripts/check_tests.sh
