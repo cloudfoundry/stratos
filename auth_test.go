@@ -379,8 +379,8 @@ func TestLogout(t *testing.T) {
 		setCookie := header.Get("Set-Cookie")
 
 		Convey("Should unset Cookie", func() {
-			So(setCookie, ShouldNotStartWith, "stackato-console-session=")
-			So(setCookie, ShouldNotStartWith, "stackato-console-session=; Max-Age=0")
+			So(setCookie, ShouldNotStartWith, "console-session=")
+			So(setCookie, ShouldNotStartWith, "console-session=; Max-Age=0")
 		})
 
 	})

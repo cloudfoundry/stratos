@@ -8,5 +8,5 @@ fi
 echo "Updating System CA Store"
 update-ca-certificates
 
-# Start the Stackato Console Portal Proxy 
+# Start the Console Portal Proxy 
 /srv/portal-proxy
