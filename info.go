@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
@@ -18,40 +18,44 @@ type Endpoint struct {
 	CNSIType string         `json:"type"`
 }
 
-// StackatoInfo - this represents user specific Stackato info
-type StackatoInfo struct {
+// Info - this represents user specific info
+type Info struct {
 	Versions     *Versions                               `json:"version"`
 	User         *ConnectedUser                          `json:"user"`
 	Endpoints    map[cnsis.CNSIType]map[string]*Endpoint `json:"endpoints"`
 	CloudFoundry *CFInfo                                 `json:"cloud-foundry,omitempty"`
 }
 
-func (p *portalProxy) stackatoInfo(c echo.Context) error {
+func (p *portalProxy) info(c echo.Context) error {
+
+	s, err := p.getInfo(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, s)
+}
+
+func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 	// get the version
 	versions, err := p.getVersionsData()
 	if err != nil {
-		msg := "Could not find database version"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+		return nil, errors.New("Could not find database version")
 	}
 
 	// get the user
 	userGUID, err := p.getSessionStringValue(c, "user_id")
 	if err != nil {
-		msg := "Could not find session user_id"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
+		return nil, errors.New("Could not find session user_id")
 	}
 
 	uaaUser, err := p.getUAAUser(userGUID)
 	if err != nil {
-		msg := "Could not load session user data"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
+		return nil, errors.New("Could not load session user data")
 	}
 
 	// create initial info struct
-	s := &StackatoInfo{
+	s := &Info{
 		Versions:     versions,
 		User:         uaaUser,
 		Endpoints:    make(map[cnsis.CNSIType]map[string]*Endpoint),
@@ -78,5 +82,5 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
 	}
 
-	return c.JSON(http.StatusOK, s)
+	return s, nil
 }

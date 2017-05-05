@@ -2,12 +2,12 @@
 
 ## Getting started
 
-The portal-proxy is the back-end for the Stackato Console UI. It is written in Go.
+The portal-proxy is the back-end for the Console UI. It is written in Go.
 
 ### Set a GOPATH
 As Matt Farina says, “With the go toolchain there is no escaping the GOPATH.”  Feel free to choose where your GOPATH variable points to, just be sure you set one.
 ```
-export GOPATH=~/gop
+export GOPATH=~/go
 ```
 
 ### Clone the project

@@ -18,6 +18,10 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
+const (
+	findUAATokenSql = `SELECT auth_token, refresh_token, token_expiry FROM tokens .*`
+)
+
 func TestLoginToUAA(t *testing.T) {
 	t.Parallel()
 
@@ -547,14 +551,22 @@ func TestVerifySession(t *testing.T) {
 			t.Error(errors.New("Unable to mock/stub user in session object."))
 		}
 
-		newExpiry := 1234567
 		encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 		expectedTokensRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, newExpiry)
+			AddRow(encryptedUAAToken, encryptedUAAToken, mockTokenExpiry)
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockUserGUID).
 			WillReturnRows(expectedTokensRow)
+
+		expectVersionRow := sqlmock.NewRows([]string{"version_id"}).
+			AddRow(mockProxyVersion)
+		mock.ExpectQuery(getDbVersion).WillReturnRows(expectVersionRow)
+
+		rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+			AddRow(encryptedUAAToken, encryptedUAAToken, mockTokenExpiry)
+		mock.ExpectQuery(findUAATokenSql).
+			WillReturnRows(rs)
 
 		if err := pp.verifySession(ctx); err != nil {
 			t.Error(err)
@@ -567,7 +579,7 @@ func TestVerifySession(t *testing.T) {
 			So(contentType, ShouldEqual, "application/json; charset=utf-8")
 		})
 
-		var expectedBody = "{\"account\":\"asd-gjfg-bob\",\"admin\":false}"
+		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false},\"endpoints\":{\"hce\":{},\"hcf\":{},\"hsm\":{}},\"cloud-foundry\":null}"
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)

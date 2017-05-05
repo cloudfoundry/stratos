@@ -58,7 +58,7 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// if user is an admin, passthrough request
 
