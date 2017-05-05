@@ -56,7 +56,7 @@
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
     appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
@@ -102,7 +102,7 @@
     function refreshClusterModel() {
       updateState(true, false);
 
-      var promises = [stackatoInfo.getStackatoInfo()];
+      var promises = [consoleInfo.getConsoleInfo()];
       if (!$stateParams.instancesListed) {
         promises = promises.concat([serviceInstanceModel.list(), userServiceInstanceModel.list()]);
       }

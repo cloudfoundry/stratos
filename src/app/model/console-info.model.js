@@ -9,10 +9,10 @@
    */
   angular
     .module('app.model')
-    .run(registerStackatoInfoModel);
+    .run(registerConsoleInfoModel);
 
-  function registerStackatoInfoModel(modelManager, appUtilsService, consoleInfoService) {
-    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsService, consoleInfoService));
+  function registerConsoleInfoModel(modelManager, appUtilsService, consoleInfoService) {
+    modelManager.register('app.model.consoleInfo', new ConsoleInfo(appUtilsService, consoleInfoService));
   }
 
   /**
@@ -24,34 +24,34 @@
    * @property {object} info - the user info data object
    * @class
    */
-  function StackatoInfo(appUtilsService, consoleInfoService) {
+  function ConsoleInfo(appUtilsService, consoleInfoService) {
     var info = {};
 
     return {
       info: info,
-      getStackatoInfo: getStackatoInfo,
+      getconsoleInfo: getconsoleInfo,
       version: version,
-      onStackatoInfo: onStackatoInfo
+      onconsoleInfo: onconsoleInfo
     };
 
     /**
-     * @function getStackatoInfo
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @function getconsoleInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Fetch the user's authorisation information per cnsi
      * @returns {promise} A promise object
      * @public
      */
-    function getStackatoInfo() {
+    function getConsoleInfo() {
       return consoleInfoService.info()
         .then(function (response) {
-          onStackatoInfo(response);
+          onConsoleInfo(response);
           return info;
         });
     }
 
     /**
      * @function version
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Fetch the version metadata
      * @returns {promise} A promise object
      * @public
@@ -62,12 +62,12 @@
 
     /**
      * @function onLoggedIn
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
      * @private
      */
-    function onStackatoInfo(response) {
+    function onConsoleInfo(response) {
       appUtilsService.replaceProperties(info, response.data);
     }
 

@@ -3,7 +3,7 @@
 
   describe('Assign Users test', function () {
     var appClusterAssignUsers, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
-      appClusterRolesService, $stateParams, $q, $timeout, $controller, stackatoInfo, cfOrganizationModel;
+      appClusterRolesService, $stateParams, $q, $timeout, $controller, consoleInfo, cfOrganizationModel;
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';
@@ -38,7 +38,7 @@
 
       $controller = $injector.get('$controller');
 
-      stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
       appClusterAssignUsers = $injector.get('appClusterAssignUsers');
 
@@ -72,7 +72,7 @@
 
     it('should pass correct content spec to frameworkDetailView', function () {
       // This will call initialiseSelect, so ensure it has all the shizzle to run
-      _.set(stackatoInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
+      _.set(consoleInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
       // User services list
       $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
 
@@ -180,7 +180,7 @@
 
           beforeEach(function () {
             // This will call initialiseSelect, so ensure it has all the shizzle to run
-            _.set(stackatoInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
+            _.set(consoleInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
             // User services list
             $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: users });
 

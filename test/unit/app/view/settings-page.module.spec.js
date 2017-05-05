@@ -18,7 +18,7 @@
     it('should be defined', function () {
       expect(controller).toBeDefined();
       expect(controller.model).toBeDefined();
-      expect(controller.stackatoInfo).toBeDefined();
+      expect(controller.consoleInfo).toBeDefined();
     });
   });
 

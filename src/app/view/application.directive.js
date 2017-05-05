@@ -226,8 +226,8 @@
           }
         })
         .then(function () {
-          // Update stackatoInfo
-          return modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+          // Update consoleInfo
+          return modelManager.retrieve('app.model.consoleInfo').getConsoleInfo();
         })
         .then(function () {
           // Get the user registered services once at login - only refreshed in endpoints dashboard

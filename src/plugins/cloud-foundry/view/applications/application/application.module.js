@@ -63,7 +63,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
     this.id = $stateParams.guid;
@@ -149,8 +149,8 @@
         execute: function () {
 
           var username = null;
-          if (that.stackatoInfo.info.endpoints) {
-            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          if (that.consoleInfo.info.endpoints) {
+            username = that.consoleInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
           }
           that.cfAppCliCommands.show(that.model.application, username);
         },
@@ -400,23 +400,40 @@
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
       } else if (id === 'launch') {
-        hideAction = false;
-      } else {
-        // Check permissions
-        if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
-          // Hide delete if user has no project permissions
-          hideAction = true;
-        } else if (this.authModel.isInitialized(this.cnsiGuid)) {
-          // Hide actions if user has no HCF app update perissions (i.e not a space developer)
-          var spaceGuid = this.model.application.summary.space_guid;
-          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
-            this.authModel.resources.application,
-            this.authModel.actions.update,
-            spaceGuid);
-        }
-
+        return false;
       }
+
+      // Check permissions
+      if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
+        // Hide delete if user has no project permissions
+        hideAction = true;
+      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+        // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+        var spaceGuid = this.model.application.summary.space_guid;
+        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+          this.authModel.resources.application,
+          this.authModel.actions.update,
+          spaceGuid);
+      }
+
+      // Check when running in cloud-foundry
+      if (this.isCloudFoundryConsoleApplication()) {
+        return true;
+      }
+
       return this.model.application.state.actions[id] !== true || hideAction;
+    },
+
+    isCloudFoundryConsoleApplication: function () {
+      // Check when running in cloud-foundry
+      var cfInfo = this.consoleInfo.info ? this.consoleInfo.info['cloud-foundry'] : undefined;
+      if (cfInfo) {
+        return this.cnsiGuid === cfInfo.EndpointGUID &&
+          this.model.application.summary.space_guid === cfInfo.SpaceGUID &&
+          this.id === cfInfo.AppGUID;
+      } else {
+        return false;
+      }
     },
 
     /**

@@ -41,7 +41,7 @@
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
     var promiseForUsers;
 
@@ -392,7 +392,7 @@
      * @returns {promise} Promise containing Array of users.
      */
     this.listUsers = function (clusterGuid, forceRefresh) {
-      var isAdmin = stackatoInfo.info.endpoints.hcf[clusterGuid].user.admin;
+      var isAdmin = consoleInfo.info.endpoints.hcf[clusterGuid].user.admin;
       if (!forceRefresh && angular.isDefined(promiseForUsers)) {
         return promiseForUsers;
       }

@@ -26,11 +26,11 @@
    * @memberof app.view
    * @name AccountActionsController
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.stackatoInfo} stackatoInfo - the stackatoInfo model
+   * @property {app.model.consoleInfo} consoleInfo - the consoleInfo model
    * @constructor
    */
   function AccountActionsController(modelManager) {
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
   }
 
 })();
