@@ -20,9 +20,10 @@ type Endpoint struct {
 
 // StackatoInfo - this represents user specific Stackato info
 type StackatoInfo struct {
-	Versions  *Versions                               `json:"version"`
-	User      *ConnectedUser                          `json:"user"`
-	Endpoints map[cnsis.CNSIType]map[string]*Endpoint `json:"endpoints"`
+	Versions     *Versions                               `json:"version"`
+	User         *ConnectedUser                          `json:"user"`
+	Endpoints    map[cnsis.CNSIType]map[string]*Endpoint `json:"endpoints"`
+	CloudFoundry *CFInfo                                 `json:"cloud-foundry,omitempty"`
 }
 
 func (p *portalProxy) stackatoInfo(c echo.Context) error {
@@ -51,9 +52,10 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 
 	// create initial info struct
 	s := &StackatoInfo{
-		Versions:  versions,
-		User:      uaaUser,
-		Endpoints: make(map[cnsis.CNSIType]map[string]*Endpoint),
+		Versions:     versions,
+		User:         uaaUser,
+		Endpoints:    make(map[cnsis.CNSIType]map[string]*Endpoint),
+		CloudFoundry: p.CloudFoundry,
 	}
 	// initialize the Endpoints maps
 	s.Endpoints[cnsis.CNSIHCF] = make(map[string]*Endpoint)
