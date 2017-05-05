@@ -1,0 +1,7 @@
+FROM golang:alpine
+
+RUN apk update && \
+    apk add git gcc g++ make && \
+    go get gopkg.in/DATA-DOG/go-sqlmock.v1 && \
+    go get github.com/stretchr/testify && \
+    go get github.com/smartystreets/goconvey
