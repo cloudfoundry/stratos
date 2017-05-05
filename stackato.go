@@ -23,7 +23,7 @@ type StackatoInfo struct {
 	Versions     *Versions                               `json:"version"`
 	User         *ConnectedUser                          `json:"user"`
 	Endpoints    map[cnsis.CNSIType]map[string]*Endpoint `json:"endpoints"`
-	CloudFoundry *CFInfo                                 `json:"cloud-foundry"`
+	CloudFoundry *CFInfo                                 `json:"cloud-foundry,omitempty"`
 }
 
 func (p *portalProxy) stackatoInfo(c echo.Context) error {
