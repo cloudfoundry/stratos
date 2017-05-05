@@ -38,12 +38,14 @@
 
   function expectGetSessionVerifiedWithSuccess($httpBackend) {
     $httpBackend.whenGET('/pp/v1/auth/session/verify').respond(200, {
-      admin: true
+      user: {
+        admin: true
+      }
     });
   }
 
   function expectGetStackatoInfo($httpBackend) {
-    $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {
+    $httpBackend.whenGET('/pp/v1/info').respond(200, {
       version: {
         proxy_version: 'dev',
         database_version: 20160511195737
