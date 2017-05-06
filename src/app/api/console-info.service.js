@@ -6,30 +6,30 @@
    */
   angular
     .module('app')
-    .factory('stackatoInfoService', StackatoInfoService);
+    .factory('consoleInfoService', ConsoleInfoService);
 
   /**
    * @memberof app
-   * @name app.stackatoInfoService
+   * @name app.consoleInfoService
    * @description User information service provider
    * @param {object} $http - the $http service
    * @returns {object} The user info service
    */
-  function StackatoInfoService($http) {
+  function ConsoleInfoService($http) {
     return {
       /**
-       * @function stackatoInfo
-       * @memberof app.stackatoInfoService
-       * @description Fetch the user's authorisation information
+       * @function info
+       * @memberof app.consoleInfoService
+       * @description Fetch console info including the user and endpoint info
        * @returns {promise} A promise object
        */
-      stackatoInfo: function () {
-        return $http.get('/pp/v1/stackato/info');
+      info: function () {
+        return $http.get('/pp/v1/info');
       },
 
       /**
        * @function version
-       * @memberof app.stackatoInfoService
+       * @memberof app.consoleInfoService
        * @description Fetch the version metadata
        * @returns {promise} A promise object
        */
