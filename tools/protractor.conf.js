@@ -90,7 +90,8 @@
               password: 'changeme'
             },
             testOrgName: 'e2e',
-            testSpaceName: 'e2e'
+            testSpaceName: 'e2e',
+            supportsVersions: false
           }
         }
       },
