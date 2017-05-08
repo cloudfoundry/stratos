@@ -88,7 +88,10 @@
   }
 
   function getTabs() {
-    return element.all(by.css('ul.application-nav.nav > li.nav-item > a'));
+    return element.all(by.css('ul.application-nav.nav > li.nav-item > a'))
+      .filter(function (elem) {
+        return elem.isDisplayed();
+      });
   }
 
   function addRoute() {
