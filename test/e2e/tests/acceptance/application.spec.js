@@ -52,7 +52,12 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Versions'];
+      var names = ['Summary', 'Log Stream', 'Services', 'Variables'];
+      var hcfFromConfig = helpers.getHcfs() ? helpers.getHcfs().hcf1 : undefined;
+      if (hcfFromConfig && hcfFromConfig.supportsVersions) {
+        names.push('Versions');
+      }
+      browser.debugger();
       // Walk through each of the tabs
       application.getTabs().then(function (tabs) {
         _.each(tabs, function (tab, i) {
@@ -118,7 +123,7 @@
           var routes = table.wrap(element(by.css('.summary-routes table')));
           routes.getData(routes).then(function (rows) {
             expect(rows.length).toBe(2);
-            var columnMenu = actionMenu.wrap(routes.getItem(0,1));
+            var columnMenu = actionMenu.wrap(routes.getItem(0, 1));
             columnMenu.click();
             // Delete
             columnMenu.clickItem(1);

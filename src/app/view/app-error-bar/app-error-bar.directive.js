@@ -10,17 +10,16 @@
    * @memberof app.view
    * @name clusterRegistration
    * @description A cluster-registration directive
-   * @param {string} appBasePath - the application base path
    * @returns {object} The cluster-registration directive definition object
    */
-  function appErrorBar(appBasePath) {
+  function appErrorBar() {
     return {
       bindToController: {
         displayed: '='
       },
       controller: AppErrorBarController,
       controllerAs: 'appErrorBarCtrl',
-      templateUrl: appBasePath + 'view/app-error-bar/app-error-bar.html',
+      templateUrl: 'app/view/app-error-bar/app-error-bar.html',
       scope: {}
     };
   }

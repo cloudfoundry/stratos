@@ -11,12 +11,11 @@
    * @memberof app.view
    * @name navbar
    * @description A navbar directive
-   * @param {string} appBasePath - the application base path
    * @returns {object} The navbar directive definition object
    */
-  function navbar(appBasePath) {
+  function navbar() {
     return {
-      templateUrl: appBasePath + 'view/navbar/navbar.html',
+      templateUrl: 'app/view/navbar/navbar.html',
       controller: NavBarController,
       controllerAs: 'navBarCtrl',
       bindToController: true
