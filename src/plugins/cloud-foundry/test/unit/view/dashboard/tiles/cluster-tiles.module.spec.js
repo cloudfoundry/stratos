@@ -123,7 +123,7 @@
           userServiceInstanceModel.serviceInstances = {};
           return $q.when(userServiceInstanceModel.serviceInstances);
         });
-        spyOn(consoleInfo, 'getconsoleInfo').and.returnValue($q.resolve());
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.resolve());
 
         createCluster();
         // updateClusterList should have been called as part of creation.
@@ -171,7 +171,7 @@
     describe('refreshClusterModel', function () {
 
       it('Calls fail', function () {
-        spyOn(consoleInfo, 'getconsoleInfo').and.returnValue($q.reject());
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.reject());
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.reject());
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
         createCluster();
@@ -190,7 +190,7 @@
       it('Call succeeds', function () {
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.when([]));
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.when([]));
-        spyOn(consoleInfo, 'getconsoleInfo').and.returnValue($q.when({}));
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.when({}));
 
         createCluster();
         $scope.$digest();

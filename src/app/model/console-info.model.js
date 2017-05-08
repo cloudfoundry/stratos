@@ -35,7 +35,7 @@
     };
 
     /**
-     * @function getconsoleInfo
+     * @function getConsoleInfo
      * @memberof app.model.consoleInfo.consoleInfo
      * @description Fetch the user's authorisation information per cnsi
      * @returns {promise} A promise object
