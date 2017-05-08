@@ -29,9 +29,9 @@
 
     return {
       info: info,
-      getconsoleInfo: getconsoleInfo,
+      getConsoleInfo: getConsoleInfo,
       version: version,
-      onconsoleInfo: onconsoleInfo
+      onConsoleInfo: onConsoleInfo
     };
 
     /**
