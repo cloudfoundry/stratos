@@ -51,8 +51,8 @@
     vm.showCliCommands = showCliCommands;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    var user = stackatoInfo.info.endpoints.hcf[vm.clusterGuid].user;
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    var user = consoleInfo.info.endpoints.hcf[vm.clusterGuid].user;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var spaceDetailObj;
 

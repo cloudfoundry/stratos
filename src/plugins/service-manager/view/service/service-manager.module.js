@@ -47,9 +47,9 @@
     function init() {
       that.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       that.hsmModel = modelManager.retrieve('service-manager.model');
-      that.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      that.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
-      return that.stackatoInfo.getStackatoInfo().then(function (info) {
+      return that.consoleInfo.getConsoleInfo().then(function (info) {
         that.endpoint = info.endpoints.hsm[that.guid];
 
         return that.hsmModel.getModel(that.guid).then(function (model) {

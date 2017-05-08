@@ -32,7 +32,7 @@
 
     this.cfOrganizationModel = cfOrganizationModel;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.appClusterRolesService = appClusterRolesService;
 
@@ -44,7 +44,7 @@
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
     function refreshUsers() {
-      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      var user = that.consoleInfo.info.endpoints.hcf[that.guid].user;
       that.isAdmin = user.admin;
 
       that.userRoles = {};

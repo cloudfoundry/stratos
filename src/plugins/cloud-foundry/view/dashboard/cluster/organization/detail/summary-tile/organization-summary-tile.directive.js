@@ -65,8 +65,8 @@
       appClusterCliCommands.show(that.getEndpoint(), that.userName, that.clusterGuid, that.organization);
     };
 
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    var user = consoleInfo.info.endpoints.hcf[that.clusterGuid].user;
     that.isAdmin = user.admin;
     that.userName = user.name;
 

@@ -4,7 +4,7 @@
   describe('cluster module', function () {
 
     var $controller, $httpBackend;
-    // var $http, stackatoInfoService;
+    // var $http, consoleInfoService;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -25,8 +25,8 @@
       var appUserSelection = $injector.get('appUserSelection');
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

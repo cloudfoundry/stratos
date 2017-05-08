@@ -2,7 +2,7 @@
   'use strict';
 
   describe('endpoints clusters cluster-tile directive', function () {
-    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg, stackatoInfo;
+    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg, consoleInfo;
 
     var initialService = {
       guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
@@ -39,7 +39,7 @@
       var apiManager = $injector.get('apiManager');
       cfAPIUsers = apiManager.retrieve('cloud-foundry.api.Users');
       cfAPIOrg = apiManager.retrieve('cloud-foundry.api.Organizations');
-      stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      consoleInfo = modelManager.retrieve('app.model.consoleInfo');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
       userServiceInstanceModel.serviceInstances[$scope.service.guid] = {};
@@ -80,7 +80,7 @@
         $scope.service.isConnected = true;
         spyOn(cfAPIUsers, 'ListAllUsers').and.returnValue($q.when({ data: { total_results: 1 }}));
         spyOn(cfAPIOrg, 'ListAllOrganizations').and.returnValue($q.when({ data: { total_results: 1 }}));
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
+        _.set(consoleInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
         expect(clusterTileCtrl.orgCount).toEqual(1);
@@ -128,7 +128,7 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 2 }});
         });
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
+        _.set(consoleInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
         expect(clusterTileCtrl.userCount).toBeUndefined();
@@ -145,7 +145,7 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 0 }});
         });
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
+        _.set(consoleInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
         expect(clusterTileCtrl.userCount).toBeUndefined();
@@ -162,7 +162,7 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
+        _.set(consoleInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
         expect(clusterTileCtrl.userCount).toBeUndefined();
@@ -176,7 +176,7 @@
 
       it('Not admin', function () {
         spyOn(cfAPIUsers, 'ListAllUsers');
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', false);
+        _.set(consoleInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', false);
         createCtrl();
 
         expect(clusterTileCtrl.userCount).toBeUndefined();

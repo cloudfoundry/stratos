@@ -28,7 +28,7 @@
     this.users = [];
     this.removingOrg = {};
     this.cfOrganizationModel = cfOrganizationModel;
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.appClusterRolesService = appClusterRolesService;
 
@@ -39,7 +39,7 @@
     this.stateInitialised = false;
 
     function refreshUsers() {
-      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      var user = that.consoleInfo.info.endpoints.hcf[that.guid].user;
       that.isAdmin = user.admin;
 
       that.userRoles = {};
