@@ -13,7 +13,7 @@
   function init(router, config) {
 
     router.get('/pp/v1/stackato/info', noCache, function (request, response) {
-      response.json(mockconsoleInfo(config));
+      response.json(mockConsoleInfo(config));
     });
 
     router.get('/pp/v1/proxy/v2/info', noCache, function (request, response) {
@@ -27,7 +27,7 @@
 
   }
 
-  function mockconsoleInfo(config) {
+  function mockConsoleInfo(config) {
 
     var response = JSON.parse(JSON.stringify(responseTemplate));
 
