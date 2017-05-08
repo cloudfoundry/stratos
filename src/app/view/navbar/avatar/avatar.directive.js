@@ -10,14 +10,13 @@
    * @memberof app.view
    * @name avatar
    * @description An avatar UI component directive
-   * @param {string} appBasePath - the application base path
    * @returns {object} The avatar directive definition object
    */
-  function avatar(appBasePath) {
+  function avatar() {
     return {
       controller: AvatarController,
       controllerAs: 'avatarCtrl',
-      templateUrl: appBasePath + 'view/navbar/avatar/avatar.html'
+      templateUrl: 'app/view/navbar/avatar/avatar.html'
     };
   }
 

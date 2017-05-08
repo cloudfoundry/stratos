@@ -9,17 +9,16 @@
    * @namespace app.view.application
    * @memberof app.view
    * @name application
-   * @param {string} appBasePath - the application base path
    * @property {app.view.application.ApplicationController} controller - the application controller
    * @property {string} controllerAs - the application controller identifier
    * @property {string} templateUrl - the application template filepath
    * @returns {object} The application directive definition object
    */
-  function application(appBasePath) {
+  function application() {
     return {
       controller: ApplicationController,
       controllerAs: 'applicationCtrl',
-      templateUrl: appBasePath + 'view/application.html'
+      templateUrl: 'app/view/application.html'
     };
   }
 
@@ -29,7 +28,6 @@
    * @name ApplicationController
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} appSelectLanguage - the Language Selection dialogService
@@ -41,7 +39,6 @@
    * @param {$scope} $scope - Angular $scope service
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
-   * @property {app.basePath} appBasePath - the base path serving our app (i.e. /app)
    * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @property {object} appLoggedInService - the Logged In Service
    * @property {$window} $window - Angular $window service
@@ -50,12 +47,11 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, appBasePath, appUpgradeCheck, appLocalStorage,
+  function ApplicationController(appEventService, modelManager, appUpgradeCheck, appLocalStorage,
                                  appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
-    vm.appBasePath = appBasePath;
     vm.appUpgradeCheck = appUpgradeCheck;
     vm.showLanguageSelection = showLanguageSelection;
     vm.loggedIn = false;
