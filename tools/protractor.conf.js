@@ -77,7 +77,7 @@
         hcf: {
           hcf1: {
             register: {
-              api_endpoint: 'https://api.10.4.21.240.nip.io:8443',
+              api_endpoint: 'https://api.10.4.21.211.nip.io:8443',
               cnsi_name: 'hcf',
               skip_ssl_validation: 'true'
             },
@@ -90,7 +90,8 @@
               password: 'changeme'
             },
             testOrgName: 'e2e',
-            testSpaceName: 'e2e'
+            testSpaceName: 'e2e',
+            supportsVersions: false
           }
         }
       },
