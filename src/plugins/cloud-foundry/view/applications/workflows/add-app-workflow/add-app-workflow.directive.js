@@ -85,7 +85,7 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.cfOrganizationModel = cfOrganizationModel;
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};

@@ -31,7 +31,7 @@
     this.modelManager = modelManager;
 
     this.model = modelManager.retrieve('app.model.account');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
   }
 
   function register(modelManager, appEventService) {

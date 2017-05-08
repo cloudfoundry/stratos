@@ -30,8 +30,8 @@
 
       // property definitions
 
-      it('should have properties `stackatoInfo` defined', function () {
-        expect(accountActionsCtrl.stackatoInfo).toBeDefined();
+      it('should have properties `consoleInfo` defined', function () {
+        expect(accountActionsCtrl.consoleInfo).toBeDefined();
       });
 
     });

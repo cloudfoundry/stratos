@@ -38,7 +38,7 @@
   function ClusterTileController($scope, $state, modelManager, apiManager, appUtilsService, modelUtils) {
     var vm = this;
 
-    vm.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    vm.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     vm.orgCount = null;
     vm.userCount = null;
     vm.userService = {};
@@ -92,7 +92,7 @@
       vm.userCount = 0;
 
       if (!vm.service.isConnected || vm.userService.error ||
-        !vm.stackatoInfo.info.endpoints.hcf[vm.service.guid].user.admin) {
+        !vm.consoleInfo.info.endpoints.hcf[vm.service.guid].user.admin) {
         vm.userCount = undefined;
         return;
       }

@@ -80,8 +80,8 @@
     function updateInstances() {
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), stackatoInfo.getStackatoInfo()])
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), consoleInfo.getConsoleInfo()])
         .then(function () {
 
           var errors = _.filter(userServiceInstanceModel.serviceInstances, {error: true});

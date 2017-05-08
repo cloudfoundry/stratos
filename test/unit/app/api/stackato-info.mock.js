@@ -2,11 +2,11 @@
   'use strict';
 
   /* eslint-disable quote-props, quotes */
-  mock.stackatoInfoAPI = mock.stackatoInfoAPI || {};
+  mock.consoleInfoAPI = mock.consoleInfoAPI || {};
 
-  mock.stackatoInfoAPI.Routes = {
+  mock.consoleInfoAPI.Routes = {
 
-    stackatoInfo: function () {
+    consoleInfo: function () {
       return {
         url: '/pp/v1/stackato/info',
 
