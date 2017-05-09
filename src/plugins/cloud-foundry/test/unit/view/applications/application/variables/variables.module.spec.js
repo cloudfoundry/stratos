@@ -6,7 +6,7 @@
     var cnsiGuid = 'HCF_GUID';
     var guid = 'APP_ID';
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $q = $injector.get('$q');

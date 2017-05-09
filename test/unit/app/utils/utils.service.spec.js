@@ -5,7 +5,7 @@
     var appUtilsService, mbToHumanSizeFilter, $q, $scope, $timeout;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       appUtilsService = $injector.get('appUtilsService');

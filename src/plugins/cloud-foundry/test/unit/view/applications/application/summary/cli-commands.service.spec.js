@@ -7,7 +7,7 @@
     var name = 'foobar';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module(function ($provide) {
       var mock = function () {
         detailViewCalled = true;

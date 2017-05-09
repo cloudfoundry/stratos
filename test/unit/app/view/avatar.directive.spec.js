@@ -5,7 +5,7 @@
     var $element, avatarCtrl, $timeout, $document;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');

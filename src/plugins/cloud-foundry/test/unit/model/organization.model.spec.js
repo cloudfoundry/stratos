@@ -5,7 +5,7 @@
     var $httpBackend, cfOrganizationModel;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       cfOrganizationModel = $injector.get('cfOrganizationModel');
