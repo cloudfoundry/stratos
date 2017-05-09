@@ -9,5 +9,6 @@
     "nothing-registered": "There are no registered endpoints.",
     "nothing-connected": "There are no connected endpoints.",
     "endpoint-retrieval": "The [[@:product.console]] could not retrieve Endpoint information."
-  }
+  },
+  "error-format": "{{errorMsg}}, Error Code: {{errorCode}}"
 }
