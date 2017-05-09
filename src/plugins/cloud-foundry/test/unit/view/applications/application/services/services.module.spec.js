@@ -4,7 +4,7 @@
   describe('app details - services view', function () {
     var $httpBackend, $scope, appServicesCtrl;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');

@@ -4,7 +4,7 @@
   describe('appStateIcon filter', function () {
     var appStateIconFilter;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       appStateIconFilter = $injector.get('appStateIconFilter');
     }));

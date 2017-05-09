@@ -7,7 +7,7 @@
       modelManager, ceManageVcsTokens, ceRegisterVcsToken, $httpBackend, account, appUtilsService, $q, $log,
       ceAppPipelineService;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       appUtilsService: {
         chainStateResolve: function (state, $state, init) {

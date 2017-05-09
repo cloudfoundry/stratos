@@ -16,7 +16,7 @@
       });
 
       beforeEach(module('templates'));
-      beforeEach(module('green-box-console'));
+      beforeEach(module('console-app'));
 
       beforeEach(inject(function ($injector) {
         localStorage = $injector.get('appLocalStorage');
@@ -36,7 +36,7 @@
       });
 
       beforeEach(module('templates'));
-      beforeEach(module('green-box-console'));
+      beforeEach(module('console-app'));
 
       beforeEach(inject(function ($injector) {
         localStorage = $injector.get('appLocalStorage');
@@ -61,7 +61,7 @@
       var localStorage;
 
       beforeEach(module('templates'));
-      beforeEach(module('green-box-console'));
+      beforeEach(module('console-app'));
 
       beforeEach(inject(function ($injector) {
         localStorage = $injector.get('appLocalStorage');

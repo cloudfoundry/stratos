@@ -16,7 +16,7 @@
     var cnsiGuid = 'cnsiGuid';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       $scope = $injector.get('$rootScope').$new();
