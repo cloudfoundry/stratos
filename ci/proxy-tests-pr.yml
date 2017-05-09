@@ -66,6 +66,10 @@ jobs:
   - get: portal-proxy
     trigger: true
     passed: [proxy-unit-tests]
+  - put: portal-proxy
+    params:
+      path: stratos-ui
+      status: pending
 
   - do:
     - task: build-proxy-image

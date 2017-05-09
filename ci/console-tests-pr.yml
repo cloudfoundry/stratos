@@ -69,6 +69,10 @@ jobs:
   - get: stratos-ui
     trigger: true
     passed: [console-unit-tests]
+  - put: stratos-ui
+    params:
+      path: stratos-ui
+      status: pending
 
   - do:
     - task: build-proxy-image
