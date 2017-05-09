@@ -16,7 +16,7 @@
     });
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console', 'IntervalMockModule'));
+    beforeEach(module('console-app', 'IntervalMockModule'));
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');

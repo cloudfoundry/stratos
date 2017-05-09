@@ -6,7 +6,7 @@
     var $controller, $httpBackend, $scope, $stateParams, $q, $state, modelManager, appClusterRoutesService, appUtilsService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';

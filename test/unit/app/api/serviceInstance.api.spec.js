@@ -4,7 +4,7 @@
   describe('user service instance API', function () {
     var $httpBackend, $httpParamSerializer, serviceInstanceApi;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $httpParamSerializer = $injector.get('$httpParamSerializer');

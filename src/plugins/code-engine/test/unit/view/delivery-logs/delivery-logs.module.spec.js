@@ -6,7 +6,7 @@
     var controller, $stateParams, $q, $log, moment, $state, $rootScope, hceModel, cnsiModel, modelManager,
       $httpBackend, viewEvent, viewExecution, triggerBuild;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module('code-engine.view.application.delivery-logs'));
 
     // Define some common properties used throughout tests

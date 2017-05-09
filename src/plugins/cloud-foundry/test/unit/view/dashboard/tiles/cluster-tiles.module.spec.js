@@ -57,7 +57,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       appUtilsService: {
         chainStateResolve: function (state, $state, init) {
