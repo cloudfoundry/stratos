@@ -15,7 +15,10 @@
     "back": "Back",
     "done": "Done",
     "add": "Add",
-    "set": "Set"
+    "set": "Set",
+    "save": "Save",
+    "delete": "Delete",
+    "rename": "Rename"
   },
   "auth": {
     "username": "Username",

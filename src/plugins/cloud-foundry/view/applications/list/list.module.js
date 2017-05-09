@@ -91,8 +91,8 @@
       total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
       pageNumber: _.get(that.model, 'appPage', 1),
       text: {
-        nextBtn: gettext('Next'),
-        prevBtn: gettext('Previous')
+        nextBtn: 'buttons.next',
+        prevBtn: 'buttons.previous'
       }
     };
 

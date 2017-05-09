@@ -40,11 +40,11 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: gettext('Rename a GitHub Personal Access Token'),
+            title: 'ce.tokens.rename',
             templateUrl: 'app/view/endpoints/vcs/edit-vcs-token.html',
             class: 'detail-view',
             buttonTitles: {
-              submit: gettext('Save')
+              submit: 'buttons.save'
             },
             submitCommit: true
           },
