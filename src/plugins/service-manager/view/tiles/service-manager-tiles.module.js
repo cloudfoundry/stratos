@@ -65,7 +65,7 @@
     this.$stateParams = $stateParams;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
@@ -112,7 +112,7 @@
       var that = this;
       this.updateState(true, false);
 
-      var promises = [this.stackatoInfo.getStackatoInfo()];
+      var promises = [this.consoleInfo.getConsoleInfo()];
       if (!that.$stateParams.instancesListed) {
         promises = promises.concat([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
       }

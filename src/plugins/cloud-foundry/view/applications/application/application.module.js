@@ -63,7 +63,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
     this.id = $stateParams.guid;
@@ -149,8 +149,8 @@
         execute: function () {
 
           var username = null;
-          if (that.stackatoInfo.info.endpoints) {
-            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          if (that.consoleInfo.info.endpoints) {
+            username = that.consoleInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
           }
           that.cfAppCliCommands.show(that.model.application, username);
         },
@@ -426,7 +426,7 @@
 
     isCloudFoundryConsoleApplication: function () {
       // Check when running in cloud-foundry
-      var cfInfo = this.stackatoInfo.info ? this.stackatoInfo.info['cloud-foundry'] : undefined;
+      var cfInfo = this.consoleInfo.info ? this.consoleInfo.info['cloud-foundry'] : undefined;
       if (cfInfo) {
         return this.cnsiGuid === cfInfo.EndpointGUID &&
           this.model.application.summary.space_guid === cfInfo.SpaceGUID &&

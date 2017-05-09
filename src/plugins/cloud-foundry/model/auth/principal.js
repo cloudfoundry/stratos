@@ -27,16 +27,16 @@
     /**
      * @name Principal
      * @description Enforces ACLs for a particular connceted endpoint
-     * @param {String} stackatoInfo - stackatoInfo data
+     * @param {String} consoleInfo - consoleInfo data
      * @param {Object} userSummary - user info
      * @param {Object} featureFlags - Feature flags for cluster
      * @param {String} cnsiGuid - cluster GUID
      * @constructor
      */
-    function Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid) {
+    function Principal(consoleInfo, userSummary, featureFlags, cnsiGuid) {
 
-      this.isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
-      this.stackatoInfo = stackatoInfo;
+      this.isAdmin = consoleInfo.endpoints.hcf[cnsiGuid].user.admin;
+      this.consoleInfo = consoleInfo;
       this.userSummary = userSummary;
       this.featureFlags = featureFlags;
       this.checkers = [];
