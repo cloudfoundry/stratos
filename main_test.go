@@ -67,7 +67,7 @@ func TestLoadPortalConfig(t *testing.T) {
 	os.Setenv("CONSOLE_CLIENT_SECRET", "ohsosecret!")
 	os.Setenv("HCF_CLIENT", "portal-proxy")
 	os.Setenv("HCF_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("UAA_ENDPOINT", "https://login.hcf.helion.lol:443")
+	os.Setenv("UAA_ENDPOINT", "https://login.cf.org.com:443")
 	os.Setenv("ALLOWED_ORIGINS", "https://localhost,https://127.0.0.1")
 	os.Setenv("SESSION_STORE_SECRET", "cookiesecret")
 
@@ -107,7 +107,7 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get HCFClientSecret from config")
 	}
 
-	if result.UAAEndpoint != "https://login.hcf.helion.lol:443" {
+	if result.UAAEndpoint != "https://login.cf.org.com:443" {
 		t.Error("Unable to get UAAEndpoint from config")
 	}
 
