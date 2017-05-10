@@ -68,7 +68,7 @@ jobs:
     passed: [proxy-unit-tests]
   - put: portal-proxy
     params:
-      path: stratos-ui
+      path: portal-proxy
       status: pending
 
   - do:
