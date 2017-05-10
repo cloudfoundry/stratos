@@ -24,14 +24,6 @@ At the bare minimum you need to do the following
 minikube start
 ```
 
-## Declare a persistent volume
-By default minkube does not have a persistent volume against which volumes for the containers can be created.
-The following will map a local folder to be used as a persistent volume for kubernetes.
-```
-cd kubernetes
-kubectl create -f optional/console-pv.yaml
-```
-
 ## Setup Helm
 - Download the Helm binary for your system from https://github.com/kubernetes/helm/releases.
 For convenience the guide assumes that helm binary has been added to your PATH.
@@ -83,3 +75,12 @@ For instance:
 ./build.sh -o suse -r docker.suse.de -t 1.0.0
 ```
 Will upload the component images to `docker.suse.de/suse` and tag them with `1.0.0-hash`, where hash is the latest commit in the `portal-proxy` branch.
+
+## Troubleshooting
+If creating of containers is stalled and no persistent volume claims exist, delete and purge the console and create the following persistent volume.
+
+The following will map a local folder to be used as a persistent volume for kubernetes.
+```
+cd kubernetes
+kubectl create -f optional/console-pv.yaml
+```

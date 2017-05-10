@@ -1,4 +1,4 @@
-consoleVersion: 1.0.53-0-gbb71b6c
+consoleVersion: 20170509T151337Z-0-g4fa247d
 dockerOrg: susetest
 dockerRegistry: docker.io
 images:

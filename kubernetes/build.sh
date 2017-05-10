@@ -47,7 +47,6 @@ echo "TAG: ${TAG}"
 echo
 echo "Starting build"
 
-
 # Copy values template
 
 
@@ -105,15 +104,14 @@ function buildAndPublishImage {
 function cleanup {
   # Cleanup the SDL/instance defs
   echo
-  echo "-- Cleaning up ${__DIRNAME}/output/*"
-  rm -rf ${__DIRNAME}/output/*
-
+  echo "-- Cleaning up older values.yaml"
+  rm -f values.yaml
   # Cleanup prior to generating the UI container
   echo
   echo "-- Cleaning up ${__DIRNAME}/../stratos-ui"
-  rm -rf ${__DIRNAME}/../../stratos-ui/dist
-  rm -rf ${__DIRNAME}/../../stratos-ui/tools/node_modules
-  rm -rf ${__DIRNAME}/../../stratos-ui/src/lib
+  sudo rm -rf ${__DIRNAME}/../../stratos-ui/dist
+  sudo rm -rf ${__DIRNAME}/../../stratos-ui/node_modules
+  sudo rm -rf ${__DIRNAME}/../../stratos-ui/bower_components
   echo
   echo "-- Cleaning up ${__DIRNAME}/../../stratos-ui/containers/nginx/dist"
   rm -rf ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
@@ -194,7 +192,16 @@ function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job ${PORTAL_PROXY_PATH}
+
+  docker run \
+             ${RUN_ARGS} \
+             -it \
+             --rm \
+             --name postflight-builder \
+             --volume $(pwd):/go/bin/ \
+             ${DOCKER_ORG}/hsc-postflight-builder:latest
+  cp goose  ${__DIRNAME}/../../portal-proxy/db/
+  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${PORTAL_PROXY_PATH}
 }
 
 function buildUI {
@@ -217,8 +224,6 @@ function buildUI {
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   buildAndPublishImage hsc-console Dockerfile.k8s ${__DIRNAME}/../../stratos-ui/containers/nginx
-  echo "-- Building/publishing the container image for the facilitating OEM branding for Console"
-  buildAndPublishImage hsc-console-oem-builder Dockerfile.oem ${__DIRNAME}/../../stratos-ui/oem
 }
 
 # MAIN ------------------------------------------------------
