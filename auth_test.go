@@ -579,7 +579,7 @@ func TestVerifySession(t *testing.T) {
 			So(contentType, ShouldEqual, "application/json; charset=utf-8")
 		})
 
-		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false},\"endpoints\":{\"hce\":{},\"hcf\":{},\"hsm\":{}},\"cloud-foundry\":null}"
+		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false},\"endpoints\":{\"hce\":{},\"hcf\":{},\"hsm\":{}}}"
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)
