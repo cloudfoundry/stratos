@@ -19,6 +19,11 @@
       "product.logo": "@:product.logo",
       "company.www-link": "@:company.www-link",
       "product.www-link": "@:product.www-link"
+    },
+    "timeout": {
+      "prompt": "Are you still there?",
+      "notice": "You have been inactive for a while. For your protection, we will automatically log you out in {{timeout}}",
+      "confirm": "I am still here"
     }
   }
 }

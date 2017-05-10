@@ -18,10 +18,11 @@
    * @param {object} $window - the angular $window Service
    * @param {object} $log - the angular $log Service
    * @param {object} $document - the angular $document Service
+   * @param {object} $translate - the $translate Service
    * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(appEventService, modelManager, frameworkDialogConfirm,
-                                  $interval, $interpolate, $rootScope, $window, $log, $document) {
+                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();
@@ -75,15 +76,14 @@
       };
 
       dialog = frameworkDialogConfirm({
-        title: gettext('Are you still there?'),
+        title: 'login.timeout.prompt',
         description: function () {
-          return $interpolate(gettext('You have been inactive for a while. For your protection, ' +
-              'we will automatically log you out in {{ getExpiryDuration() }}'))(scope);
+          return $translate.instant('login.timeout.notice', {timeout: scope.getExpiryDuration()});
         },
         moment: moment,
         hideNo: true,
         buttonText: {
-          yes: gettext('I am still here')
+          yes: 'login.timeout.confirm'
         }
       });
       dialog.result
@@ -91,7 +91,7 @@
           $log.debug('User is still here! Automatically refresh session');
           return _getAccountModel().verifySession().catch(function (error) {
             // If we fail to refresh, logout!
-            $log.error('Failed to refreshed Session!', error);
+            $log.error('Failed to refresh session', error);
             logout();
           });
         })
