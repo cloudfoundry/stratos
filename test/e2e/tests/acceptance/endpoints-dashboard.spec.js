@@ -12,7 +12,7 @@
   var confModal = require('../../po/widgets/confirmation-modal.po');
   var _ = require('lodash');
 
-  fdescribe('Endpoints Dashboard', function () {
+  describe('Endpoints Dashboard', function () {
 
     function resetToLoggedIn(stateSetter, isAdmin) {
       return browser.driver.wait(stateSetter())
