@@ -22,7 +22,11 @@ import (
 	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/config"
 	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
+	"github.com/hpcloud/portal-proxy/repository/vcs"
+	"github.com/hpcloud/portal-proxy/repository/vcstokens"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -100,9 +104,21 @@ func main() {
 	}
 	log.Info("Encryption key set.")
 
+	// Load database configuration
+	var dc datastore.DatabaseConfig
+	dc, err = loadDatabaseConfig(dc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
+	tokens.InitRepositoryProvider(dc.DatabaseProvider)
+	vcs.InitRepositoryProvider(dc.DatabaseProvider)
+	vcstokens.InitRepositoryProvider(dc.DatabaseProvider)
+
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = initConnPool()
+	databaseConnectionPool, err = initConnPool(dc)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -113,7 +129,7 @@ func main() {
 	log.Info("Proxy database connection pool created.")
 
 	// Initialize the Postgres backed session store for Gorilla sessions
-	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig, SessionExpiry)
+	sessionStore, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -180,19 +196,11 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 	return key, nil
 }
 
-func initConnPool() (*sql.DB, error) {
+func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 	log.Debug("initConnPool")
 
-	// load up postgresql database configuration
-	var dc datastore.DatabaseConfig
-	dc, err := loadDatabaseConfig(dc)
-	if err != nil {
-		return nil, err
-	}
-
 	// initialize the database connection pool
-	var pool *sql.DB
-	pool, err = datastore.GetConnection(dc)
+	pool, err := datastore.GetConnection(dc)
 	if err != nil {
 		return nil, err
 	}
@@ -223,18 +231,11 @@ func initConnPool() (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, pc portalConfig, sessionExpiry int) (HttpSessionStore, error) {
+func initSessionStore(db *sql.DB, databaseProvider string, pc portalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
-	// load up postgresql database configuration
-	var dc datastore.DatabaseConfig
-	dc, err := loadDatabaseConfig(dc)
-	if err != nil {
-		return nil, err
-	}
-
 	// Store depends on the DB Type
-	if dc.DatabaseProvider == "pgsql" {
+	if databaseProvider == "pgsql" {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options

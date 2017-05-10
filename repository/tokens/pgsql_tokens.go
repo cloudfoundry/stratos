@@ -6,47 +6,46 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/portal-proxy/repository/crypto"
 )
 
-const (
-	findUAAToken = `SELECT auth_token, refresh_token, token_expiry
-                    FROM tokens
-                    WHERE token_type = 'uaa' AND user_guid = $1`
+var findUAAToken = `SELECT auth_token, refresh_token, token_expiry
+									FROM tokens
+									WHERE token_type = 'uaa' AND user_guid = $1`
 
-	countUAATokens = `SELECT COUNT(*)
-                      FROM tokens
-                      WHERE token_type = 'uaa' AND user_guid = $1`
+var countUAATokens = `SELECT COUNT(*)
+										FROM tokens
+										WHERE token_type = 'uaa' AND user_guid = $1`
 
-	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-	                  VALUES ($1, $2, $3, $4, $5)`
+var insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
+									VALUES ($1, $2, $3, $4, $5)`
 
-	updateUAAToken = `UPDATE tokens
-	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5
-	                  WHERE user_guid = $1 AND token_type = $2`
+var updateUAAToken = `UPDATE tokens
+									SET auth_token = $3, refresh_token = $4, token_expiry = $5
+									WHERE user_guid = $1 AND token_type = $2`
 
-	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
-                     FROM tokens
-                     WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
+var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
+										FROM tokens
+										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
-                             FROM tokens
-                             WHERE token_type = 'cnsi' AND user_guid = $1`
+var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
+														FROM tokens
+														WHERE token_type = 'cnsi' AND user_guid = $1`
 
-	countCNSITokens = `SELECT COUNT(*)
-                       FROM tokens
-                       WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+var countCNSITokens = `SELECT COUNT(*)
+											FROM tokens
+											WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-	                   VALUES ($1, $2, $3, $4, $5, $6)`
+var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+										VALUES ($1, $2, $3, $4, $5, $6)`
 
-	updateCNSIToken = `UPDATE tokens
-	                   SET auth_token = $4, refresh_token = $5, token_expiry = $6
-	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
+var updateCNSIToken = `UPDATE tokens
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3
+										WHERE cnsi_guid = $4 AND user_guid = $5 AND token_type = $6`
 
-	deleteCNSIToken = `DELETE FROM tokens
-                       WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
-)
+var deleteCNSIToken = `DELETE FROM tokens
+											WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
 
@@ -59,6 +58,21 @@ type PgsqlTokenRepository struct {
 func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
 	log.Println("NewPgsqlTokenRepository")
 	return &PgsqlTokenRepository{db: dcp}, nil
+}
+
+// InitRepositoryProvider - One time init for the given DB Provider
+func InitRepositoryProvider(databaseProvider string) {
+	// Modify the database statements if needed, for the given database type
+	findUAAToken = datastore.ModifySQLStatement(findUAAToken, databaseProvider)
+	countUAATokens = datastore.ModifySQLStatement(countUAATokens, databaseProvider)
+	insertUAAToken = datastore.ModifySQLStatement(insertUAAToken, databaseProvider)
+	updateUAAToken = datastore.ModifySQLStatement(updateUAAToken, databaseProvider)
+	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
+	listCNSITokensForUser = datastore.ModifySQLStatement(listCNSITokensForUser, databaseProvider)
+	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
+	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
+	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
+	deleteCNSIToken = datastore.ModifySQLStatement(deleteCNSIToken, databaseProvider)
 }
 
 // SaveUAAToken - Save the UAA token to the datastore
@@ -238,11 +252,24 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	default:
 
 		log.Println("Existing CNSI token found - attempting update.")
-		if _, err := p.db.Exec(updateCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
+		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, cnsiGUID, userGUID, "cnsi")
+		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
+		}
+
+		rowsUpdates, err := result.RowsAffected()
+		if err != nil {
+			return errors.New("Unable to UPDATE CNSI token: could not determine number of rows that were updated")
+		}
+
+		if rowsUpdates < 1 {
+			return errors.New("Unable to UPDATE CNSI token: no rows were updated")
+		}
+
+		if rowsUpdates > 1 {
+			log.Warn("UPDATE CNSI token: More than 1 row was updated (expected only 1)")
 		}
 
 		log.Println("CNSI token UPDATE complete")

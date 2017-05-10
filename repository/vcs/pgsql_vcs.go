@@ -8,29 +8,28 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hpcloud/portal-proxy/datastore"
 )
 
-const (
-	listVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
-               FROM vcs`
+var listVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
+							FROM vcs`
 
-	listVcsByUser = `SELECT v.guid, v.label, v.type, v.browse_url, v.api_url, v.skip_ssl_validation
-                     FROM vcs v, vcs_tokens t
-                     WHERE t.user_guid=$1 AND v.guid = t.vcs_guid`
+var listVcsByUser = `SELECT v.guid, v.label, v.type, v.browse_url, v.api_url, v.skip_ssl_validation
+										FROM vcs v, vcs_tokens t
+										WHERE t.user_guid=$1 AND v.guid = t.vcs_guid`
 
-	findVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
-               FROM vcs
-               WHERE guid=$1`
+var findVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
+							FROM vcs
+							WHERE guid=$1`
 
-	findVcsByProperties = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
-                           FROM vcs
-                           WHERE type=$1 AND browse_url=$2 AND api_url=$3 AND skip_ssl_validation=$4`
+var findVcsByProperties = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
+													FROM vcs
+													WHERE type=$1 AND browse_url=$2 AND api_url=$3 AND skip_ssl_validation=$4`
 
-	saveVcs = `INSERT INTO vcs (guid, label, type, browse_url, api_url, skip_ssl_validation)
-               VALUES ($1, $2, $3, $4, $5, $6)`
+var saveVcs = `INSERT INTO vcs (guid, label, type, browse_url, api_url, skip_ssl_validation)
+							VALUES ($1, $2, $3, $4, $5, $6)`
 
-	deleteVcs = `DELETE FROM vcs WHERE guid = $1`
-)
+var deleteVcs = `DELETE FROM vcs WHERE guid = $1`
 
 // PostgresVcsRepository is a PostgreSQL-backed VCS repository
 type PostgresVcsRepository struct {
@@ -41,6 +40,17 @@ type PostgresVcsRepository struct {
 func NewPostgresVcsRepository(dcp *sql.DB) (Repository, error) {
 	log.Println("NewPostgresVcsRepository")
 	return &PostgresVcsRepository{db: dcp}, nil
+}
+
+// InitRepositoryProvider - One time init for the given DB Provider
+func InitRepositoryProvider(databaseProvider string) {
+	// Modify the database statements if needed, for the given database type
+	listVcs = datastore.ModifySQLStatement(listVcs, databaseProvider)
+	listVcsByUser = datastore.ModifySQLStatement(listVcsByUser, databaseProvider)
+	findVcs = datastore.ModifySQLStatement(findVcs, databaseProvider)
+	findVcsByProperties = datastore.ModifySQLStatement(findVcsByProperties, databaseProvider)
+	saveVcs = datastore.ModifySQLStatement(saveVcs, databaseProvider)
+	deleteVcs = datastore.ModifySQLStatement(deleteVcs, databaseProvider)
 }
 
 type Scannable interface {

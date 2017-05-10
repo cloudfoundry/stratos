@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -213,4 +214,18 @@ func Ping(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+// ModifySQLStatement - Modify the given DB statement for the specified provider, as appropraite
+// e.g Postgres uses $1, $2 etc
+// SQLite uses ?
+func ModifySQLStatement(sql string, databaseProvider string) string {
+
+	if databaseProvider == "sqlite" {
+		sqlParamReplace := regexp.MustCompile("\\$[0-9]")
+		return sqlParamReplace.ReplaceAllString(sql, "?")
+	}
+
+	// Default is to return the SQL provided directly
+	return sql
 }
