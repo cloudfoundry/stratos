@@ -329,7 +329,7 @@
           return $q.reject(error);
         })
         .then(function () {
-          appNotificationsService.notify('success', $tanslate.instant('endpoints.disconnect.success', {name: serviceInstance.name}));
+          appNotificationsService.notify('success', $translate.instant('endpoints.disconnect.success', {name: serviceInstance.name}));
           createEndpointEntries();
           return callEndpointProvidersOfType(serviceInstance.cnsi_type, 'disconnect', serviceInstance);
         })
