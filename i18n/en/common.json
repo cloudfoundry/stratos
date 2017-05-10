@@ -18,7 +18,9 @@
     "set": "Set",
     "save": "Save",
     "delete": "Delete",
-    "rename": "Rename"
+    "rename": "Rename",
+    "yes": "Yes",
+    "no": "No"
   },
   "auth": {
     "username": "Username",
