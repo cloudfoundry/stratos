@@ -97,7 +97,7 @@
           } else if (errors.length === 1) {
             appErrorService.setAppError($translate.instant('endpoints.errors.unavailabe', {name: errors[0]}));
           } else if (errors.length > 1) {
-            appErrorService.setAppError($transalte.instant('endpoints.errors.multiple'));
+            appErrorService.setAppError($translate.instant('endpoints.errors.multiple'));
           }
 
         });
