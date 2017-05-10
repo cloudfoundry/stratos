@@ -40,6 +40,7 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
+   * @param {object} $translate - the $translate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @property {boolean} authenticating - a flag that authentication is in process
@@ -48,7 +49,7 @@
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController(modelManager, appNotificationsService) {
+  function CredentialsFormController($translate, modelManager, appNotificationsService) {
     var vm = this;
 
     vm.authenticating = false;
@@ -85,7 +86,7 @@
       vm.authenticating = true;
       userServiceInstanceModel.connect(vm.cnsi.guid, vm.cnsi.name, vm._data.username, vm._data.password)
         .then(function success(response) {
-          appNotificationsService.notify('success', gettext("Successfully connected to '") + vm.cnsi.name + "'");
+          appNotificationsService.notify('success', $translate.instant('endpoints.connect.success', {name: vm.cnsi.name}));
           vm.reset();
           if (angular.isDefined(vm.onSubmit)) {
             vm.onSubmit({serviceInstance: response.data});
