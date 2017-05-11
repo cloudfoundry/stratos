@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o pipefail
 
-echo "Stackato Console Stolon Startup Script"
+echo "Console Stolon Startup Script"
 
 function modifyNoProxy()
 {

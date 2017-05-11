@@ -6,26 +6,17 @@ execStatement() {
     PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $PGSQL_HOST -p $PGSQL_PORT -d postgres -w -tc "$stmt"
 }
 
-execBackupRestore() {
-    orig_server="hsc-stproxy-int"
-    dest_server=$PGSQL_HOST
-    bkup="pg_dump -U $PGSQL_USER -h $orig_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
-    stor="psql -U $PGSQL_USER -h $dest_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
-
-    PGPASSFILE=/tmp/pgpass $bkup | PGPASSFILE=/tmp/pgpass $stor
-}
-
 # Save the superuser info to file to ensure secure access
 echo "*:$PGSQL_PORT:postgres:$POSTGRES_USER:$(cat $POSTGRES_PASSWORD_FILE)" > /tmp/pgpass
 echo "*:$PGSQL_PORT:$PGSQL_DATABASE:$PGSQL_USER:$(cat $PGSQL_PASSWORDFILE)" >> /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
-# Get Stackato user password from secrets file
+# Get database user password from secrets file
 PWD=$(cat $PGSQL_PASSWORDFILE)
 
 # Create the database if necessary
-stackatoDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
-if [ -z "$stackatoDbExists" ] ; then
+consoleDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
+if [ -z "$consoleDbExists" ] ; then
     echo "Creating database $PGSQL_DATABASE"
     execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
     echo "Creating user $PGSQL_USER"
@@ -35,9 +26,6 @@ if [ -z "$stackatoDbExists" ] ; then
 else
     echo "$PGSQL_DATABASE already exists"
 fi
-
-# Backup existing stackato-db database from stolon cluster and restore it to the single instance
-#execBackupRestore
 
 # Migrate the database if necessary
 echo "Checking database to see if migration is necessary."

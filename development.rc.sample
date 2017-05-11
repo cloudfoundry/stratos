@@ -13,24 +13,24 @@ export GITHUB_OAUTH_CLIENT_ID=<add your OAuth client ID here>
 export GITHUB_OAUTH_CLIENT_SECRET=<add you OAuth client secret here>
 export GITHUB_OAUTH_STATE=thisshouldberando
 
-###################
-# Corporate Proxy #
-###################
+#############
+# Web Proxy #
+#############
 
-# HPE's corporate proxy makes things pretty difficult.
+# Proxy settings if you are require a web proxy
 
-#export http_proxy=http://proxy.houston.hpecorp.net:8088
+#export http_proxy=http://proxy.company.com:8088
 #export https_proxy=$http_proxy
-#export no_proxy=localhost,127.0.0.1,.hpcloud.net,.hp.com,192.168.56.102,192.168.99.100,192.168.222.130
+#export no_proxy=localhost,127.0.0.1,92.168.56.102,192.168.99.100,192.168.222.130
 
 
 ###################
 # All the things  #
 ###################
 
-export PGSQL_USER='stackato'
-export PGSQL_PASSWORD='stackato'
-export PGSQL_DATABASE='stackato-db'
+export PGSQL_USER='console'
+export PGSQL_PASSWORD='console'
+export PGSQL_DATABASE='console-db'
 export PGSQL_HOST='localhost'
 export PGSQL_PORT=5432
 export PGSQL_CONNECT_TIMEOUT_IN_SECS=100
@@ -43,9 +43,7 @@ export CONSOLE_CLIENT='portal-proxy'
 export CONSOLE_CLIENT_SECRET='ohsosecret!'
 export HCF_CLIENT='portal-proxy'
 export HCF_CLIENT_SECRET='ohsosecret!'
-export HCP_IDENTITY_SCHEME=https
-export HCP_IDENTITY_HOST=login.hcf.helion.lol
-export HCP_IDENTITY_PORT=443
+export UAA_ENDPOINTT=https://login.hcf.org:443
 export ALLOWED_ORIGINS='https://localhost,https://127.0.0.1'
 export SESSION_STORE_SECRET='cookiesecret'
 export CONSOLE_PROXY_CERT=<cert file contents>
