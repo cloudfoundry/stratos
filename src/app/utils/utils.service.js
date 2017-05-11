@@ -4,7 +4,8 @@
   angular
     .module('app.utils')
     .factory('appUtilsService', utilsServiceFactory)
-    .filter('mbToHumanSize', mbToHumanSizeFilter);
+    .filter('mbToHumanSize', mbToHumanSizeFilter)
+    .filter('infinityFilter', infinityFilter);
 
   /**
    * @namespace appUtilsService
@@ -82,6 +83,7 @@
       getClusterEndpoint: getClusterEndpoint,
       bytesToHumanSize: bytesToHumanSize,
       mbToHumanSize: mbToHumanSize,
+      infinityFilter: showInfinitySymbolIfRequired,
       retryRequest: retryRequest,
       runInSequence: runInSequence,
       sizeUtilization: sizeUtilization,
@@ -208,6 +210,13 @@
       return precisionIfUseful(sizeMb) + ' MB';
     }
 
+    function showInfinitySymbolIfRequired(value) {
+      if (value === -1) {
+        return '∞';
+      }
+      return value;
+    }
+
     function sizeUtilization(sizeMbUsed, sizeMbTotal) {
       var usedMemHuman = this.mbToHumanSize(sizeMbUsed);
       var totalMemHuman = this.mbToHumanSize(sizeMbTotal);
@@ -313,13 +322,13 @@
 
     function extractCloudFoundryError(errorResponse) {
       /*
-      Cloud Foundry errors have the following format:
-      data: {
-      description: 'some text',
-      errorCode: 1000,
-      error_code: 'UnknownHostException'
-      }
-      */
+       Cloud Foundry errors have the following format:
+       data: {
+       description: 'some text',
+       errorCode: 1000,
+       error_code: 'UnknownHostException'
+       }
+       */
       var errorText;
 
       if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
@@ -343,12 +352,12 @@
     function extractCodeEngineError(errorResponse) {
 
       /*
-      Code Engine errors have the following format
-      data: {
-      message: 'some text',
-      detail: 'more text',
-      }
-      */
+       Code Engine errors have the following format
+       data: {
+       message: 'some text',
+       detail: 'more text',
+       }
+       */
 
       if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
         return;
@@ -383,6 +392,13 @@
   function mbToHumanSizeFilter(appUtilsService) {
     return function (input) {
       return appUtilsService.mbToHumanSize(input);
+    };
+  }
+
+  // Filter for displaying infinity symbol if value is supposed to infinite
+  function infinityFilter(appUtilsService) {
+    return function (input) {
+      return appUtilsService.infinityFilter(input);
     };
   }
 

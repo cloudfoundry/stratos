@@ -8,9 +8,9 @@
       <dt translate>APPLICATIONS</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
       <dt translate>SERVICES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }} / {{ spaceSummaryTileCtrl.spaceDetail().details.servicesQuota === -1 ? '∞' : spaceSummaryTileCtrl.spaceDetail().details.servicesQuota}}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }} / {{ spaceSummaryTileCtrl.spaceDetail().details.servicesQuota | infinityFilter }}</dd>
       <dt translate>ROUTES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }} / {{ spaceSummaryTileCtrl.spaceDetail().details.routesQuota === -1 ? '∞' : spaceSummaryTileCtrl.spaceDetail().details.routesQuota}}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }} / {{ spaceSummaryTileCtrl.spaceDetail().details.routesQuota | infinityFilter }}</dd>
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
       <dt translate>MEMORY</dt>
