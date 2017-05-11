@@ -12,7 +12,8 @@
 $ vagrant up --provider=libvirt
 ```
 
-This will initialise all neccessary components for `SCF`.  Please leave some time for the images to be pulled down and the containers to initialise.
+This will initialise all necessary components for `SCF`.  Please leave some time for the images to be pulled down and the containers to initialise.
+
 Check for the status of the components by watching the pods:
 ```
 $  watch -n1 kubectl get po --all-namespaces

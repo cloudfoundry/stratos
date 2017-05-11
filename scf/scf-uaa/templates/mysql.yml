@@ -48,7 +48,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: {{.Values.mysqlImage}}
+        image: registry.paas-ui:5000/uaa-mysql:0bbd3011076de7c545606cdc768aed58e8dd64b1
         livenessProbe:
           initialDelaySeconds: 600
           tcpSocket:
