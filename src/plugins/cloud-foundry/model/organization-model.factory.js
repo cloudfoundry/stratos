@@ -410,17 +410,6 @@
           return res.data.instance_usage;
         });
       }
-      function getPrivateDomains(spaces) {
-        if (spaces) {
-          if (spaces.length === 0) {
-            return $q.resolve(0);
-          }
-        }
-
-        return orgsApi.ListAllPrivateDomainsForOrganization(orgGuid, params, httpConfig).then(function (res) {
-          return res.data.resources;
-        });
-      }
 
       function getRouteCount(spaces) {
         if (spaces) {
@@ -543,13 +532,10 @@
 
       var instancesP = allSpacesP.then(getInstances);
 
-      var privateDomainsP = allSpacesP.then(getPrivateDomains);
-
       return $q.all({
         memory: usedMemP,
         quota: quotaP,
         instances: instancesP,
-        privateDomains: privateDomainsP,
         appCounts: appCountsP,
         routesCountP: routesCountP,
         roles: orgRolesP,
@@ -582,7 +568,7 @@
        // Service Keys are credentials for service instances
         details.servicesKeysQuota = _.get(vals.quota, 'entity.total_service_keys', -1);
 
-        details.privateDomains = vals.privateDomains.length;
+        details.privateDomains =  _.get(org, 'entity.private_domains', []).length;
         details.privateDomainsQuota = _.get(vals.quota, 'entity.total_private_domains', -1);
 
         details.roles = vals.roles;
