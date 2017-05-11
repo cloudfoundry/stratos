@@ -568,10 +568,10 @@
        // Service Keys are credentials for service instances
         details.servicesKeysQuota = _.get(vals.quota, 'entity.total_service_keys', -1);
 
-        details.privateDomains =  _.get(org, 'entity.private_domains', []).length;
+        details.privateDomains = _.get(org, 'entity.private_domains', []).length;
         details.privateDomainsQuota = _.get(vals.quota, 'entity.total_private_domains', -1);
 
-        details.nonBasicServicesAllowed =  _.get(vals.quota, 'entity.non_basic_services_allowed', false);
+        details.nonBasicServicesAllowed = _.get(vals.quota, 'entity.non_basic_services_allowed', false);
         details.roles = vals.roles;
 
         cacheOrganizationDetails(cnsiGuid, orgGuid, details);
