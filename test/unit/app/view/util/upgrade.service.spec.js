@@ -11,7 +11,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       $state = $injector.get('$state');
@@ -173,7 +173,7 @@
         beforeEach(function () {
           applicationCtrl.loggedIn = false;
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
-          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);

@@ -4,7 +4,6 @@
   // TODO woodnt: This list needs to be translated once gettext works.
   /* eslint-enable */
 
-  // Probably like var units = gettext('bytes kB MB GB TB PB'). split(' ');
   var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
 
   // Private utility functions

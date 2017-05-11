@@ -5,7 +5,7 @@
     var $httpBackend, $timeout, modelManager, applicationModel;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       modelManager = $injector.get('modelManager');

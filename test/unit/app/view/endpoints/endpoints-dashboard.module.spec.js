@@ -22,7 +22,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       appUtilsService: {
         chainStateResolve: function (state, $state, init) {
@@ -107,7 +107,7 @@
       $httpBackend.when('GET', '/pp/v1/vcs/clients').respond(200, []);
       $httpBackend.whenGET('/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
-      $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {});
+      $httpBackend.whenGET('/pp/v1/info').respond(200, {});
     }
 
     describe('controller tests', function () {

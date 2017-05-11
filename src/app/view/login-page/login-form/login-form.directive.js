@@ -10,14 +10,13 @@
    * @memberof app.view
    * @name loginForm
    * @description A login-form directive
-   * @param {string} appBasePath - the application base path
    * @returns {object} The login form directive definition object
    */
-  function loginForm(appBasePath) {
+  function loginForm() {
     return {
       controller: LoginFormController,
       controllerAs: 'loginFormCtrl',
-      templateUrl: appBasePath + 'view/login-page/login-form/login-form.html'
+      templateUrl: 'app/view/login-page/login-form/login-form.html'
     };
   }
 

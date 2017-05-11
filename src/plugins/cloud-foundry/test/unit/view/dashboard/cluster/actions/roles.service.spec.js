@@ -66,7 +66,7 @@
     modelSpace.roles[userGuid] = [];
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
@@ -454,8 +454,8 @@
       it('user is admin', function () {
         var promiseForUsers;
 
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', true);
+        var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+        _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', true);
 
         var usersModel = modelManager.retrieve('cloud-foundry.model.users');
         spyOn(usersModel, 'listAllUsers').and.callFake(function (inClusterGuid) {
@@ -477,8 +477,8 @@
       it('user is not admin', function () {
         var users;
 
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', false);
+        var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+        _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', false);
 
         _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
 

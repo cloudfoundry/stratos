@@ -48,8 +48,8 @@
       config.detailViewTemplateUrl = 'framework/widgets/async-task-dialog/async-task-dialog.html';
 
       context.buttonTitles = {
-        submit: gettext(config.buttonTitles && config.buttonTitles.submit) || gettext('Done'),
-        cancel: gettext(config.buttonTitles && config.buttonTitles.cancel) || gettext('Cancel')
+        submit: config.buttonTitles && config.buttonTitles.submit || 'buttons.done',
+        cancel: config.buttonTitles && config.buttonTitles.cancel || 'buttons.cancel'
       };
 
       if (_.isFunction(config.submitCommit)) {

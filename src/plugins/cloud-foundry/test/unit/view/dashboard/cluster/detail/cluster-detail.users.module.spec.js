@@ -7,7 +7,7 @@
       appClusterRolesService, appEventService, appUserSelection, orgModel;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     var clusterGuid = 'clusterGuid';
 
@@ -86,8 +86,8 @@
       appUserSelection = $injector.get('appUserSelection');
       orgModel = $injector.get('cfOrganizationModel');
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

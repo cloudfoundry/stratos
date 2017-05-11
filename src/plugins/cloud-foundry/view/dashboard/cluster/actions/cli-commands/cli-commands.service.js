@@ -16,7 +16,7 @@
   function CliCommandsFactory(modelManager, frameworkDetailView) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
     return {
       /**
@@ -32,7 +32,7 @@
        * @public
        */
       show: function (api, username, clusterGuid, organization, space) {
-        var user = stackatoInfo.info.endpoints.hcf[clusterGuid].user;
+        var user = consoleInfo.info.endpoints.hcf[clusterGuid].user;
         var isAdmin = user.admin;
 
         var canUpdateOrg = organization ? authModel.isAllowed(clusterGuid,

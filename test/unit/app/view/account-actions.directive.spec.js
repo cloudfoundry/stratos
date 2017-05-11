@@ -5,7 +5,7 @@
     var $element, accountActionsCtrl;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -30,8 +30,8 @@
 
       // property definitions
 
-      it('should have properties `stackatoInfo` defined', function () {
-        expect(accountActionsCtrl.stackatoInfo).toBeDefined();
+      it('should have properties `consoleInfo` defined', function () {
+        expect(accountActionsCtrl.consoleInfo).toBeDefined();
       });
 
     });

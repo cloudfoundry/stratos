@@ -66,11 +66,11 @@
       var that = this;
       var authModelInitPromise = [];
       var userCnsiModel = this.modelManager.retrieve('app.model.serviceInstance.user');
-      var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
+      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
       var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
       if (services.length > 0) {
         _.each(services, function (service) {
-          var endpointUser = _.get(stackatoInfo.info.endpoints.hcf, service.guid + '.user');
+          var endpointUser = _.get(consoleInfo.info.endpoints.hcf, service.guid + '.user');
           if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;
@@ -90,28 +90,28 @@
      * @name initializeForEndpoint
      * @description Initialize a principal instance for connected CF
      * @param {string} cnsiGuid - Cluster Guid
-     * @param {boolean} useStackatoInfoCache - Set to true if StackatoInfo has already been fetched
+     * @param {boolean} useconsoleInfoCache - Set to true if consoleInfo has already been fetched
      * @returns {*}
      */
-    initializeForEndpoint: function (cnsiGuid, useStackatoInfoCache) {
+    initializeForEndpoint: function (cnsiGuid, useconsoleInfoCache) {
       var that = this;
 
       this.principal[cnsiGuid] = null;
 
       var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
-      var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
+      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
       var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
       var userModel = this.modelManager.retrieve('cloud-foundry.model.users');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
-      var stackatoInfoPromise = this.$q.resolve(stackatoInfo.info);
-      if (!useStackatoInfoCache) {
-        stackatoInfoPromise = stackatoInfo.getStackatoInfo();
+      var consoleInfoPromise = this.$q.resolve(consoleInfo.info);
+      if (!useconsoleInfoCache) {
+        consoleInfoPromise = consoleInfo.getConsoleInfo();
       }
 
-      return stackatoInfoPromise.then(function (stackatoInfo) {
-        var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
-        var isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
+      return consoleInfoPromise.then(function (consoleInfo) {
+        var userId = consoleInfo.endpoints.hcf[cnsiGuid].user.guid;
+        var isAdmin = consoleInfo.endpoints.hcf[cnsiGuid].user.admin;
         var promises = [
           featureFlagsPromise
         ];
@@ -164,7 +164,7 @@
                 }
               };
             }
-            that.principal[cnsiGuid] = new Principal(stackatoInfo, mappedSummary, featureFlags, cnsiGuid);
+            that.principal[cnsiGuid] = new Principal(consoleInfo, mappedSummary, featureFlags, cnsiGuid);
           });
       });
     },
@@ -200,7 +200,7 @@
       var initialised = angular.isObject(this.principal[cnsiGuid]);
 
       if (userInfo && initialised) {
-        initialised = this.principal[cnsiGuid].stackatoInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
+        initialised = this.principal[cnsiGuid].consoleInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
       }
       return initialised;
     },

@@ -5,7 +5,7 @@
     var $httpBackend, cfAppStateService, $translate;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       cfAppStateService = $injector.get('cfAppStateService');

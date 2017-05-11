@@ -61,7 +61,7 @@
     var userGuid = 'userGuid';
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {
@@ -92,8 +92,8 @@
 
       mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + organization.cnsiGuid + '.user', {
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      _.set(consoleInfo, 'info.endpoints.hcf.' + organization.cnsiGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

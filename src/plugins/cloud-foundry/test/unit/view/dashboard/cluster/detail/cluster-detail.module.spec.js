@@ -6,7 +6,7 @@
     var $controller, $httpBackend;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     var clusterGuid = 'clusterGuid';
 
@@ -26,8 +26,8 @@
 
       var appClusterCliCommands = $injector.get('appClusterCliCommands');
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

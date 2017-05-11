@@ -17,7 +17,7 @@
       return $interval;
     });
 
-    beforeEach(module('green-box-console', 'interval'));
+    beforeEach(module('console-app', 'interval'));
     var userGuid = 'guid';
     var cnsiGuid = 'cnsiGuid';
     var appGuid = 'appGuid';

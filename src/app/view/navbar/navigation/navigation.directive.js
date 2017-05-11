@@ -10,14 +10,13 @@
    * @memberof app.view
    * @name navigation
    * @description A navigation UI component directive
-   * @param {string} appBasePath - the application base path
    * @returns {object} The navigation directive definition object
    */
-  function navigation(appBasePath) {
+  function navigation() {
     return {
       controller: NavigationController,
       controllerAs: 'navigationCtrl',
-      templateUrl: appBasePath + 'view/navbar/navigation/navigation.html'
+      templateUrl: 'app/view/navbar/navigation/navigation.html'
     };
   }
 

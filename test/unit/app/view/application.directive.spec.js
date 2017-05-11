@@ -11,7 +11,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -94,7 +94,7 @@
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
-        $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
+        $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         // No endpoints are set up, so we should go to error page
@@ -112,7 +112,7 @@
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
-        $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
+        $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
@@ -134,7 +134,7 @@
           { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
         ]);
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
-        $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
+        $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         $httpBackend.expectGET('/pp/v1/cnsis');
@@ -226,7 +226,7 @@
         it('should go to endpoints dashboard if cluster count === 0', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, []);
-          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
@@ -244,7 +244,7 @@
           ];
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, responseData);
-          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
@@ -266,7 +266,7 @@
 
         it('should show service instance registration if we dont not have registered services', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
-          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('dev', 'dev');
@@ -278,7 +278,7 @@
         it('should not show service instance registration if we have registered services', function () {
           var future = 50000 + (new Date()).getTime() / 1000;
 
-          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [
             { account: 'test', token_expiry: future, guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
