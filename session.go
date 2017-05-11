@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	portalSessionName = "stackato-console-session"
+	portalSessionName = "console-session"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
