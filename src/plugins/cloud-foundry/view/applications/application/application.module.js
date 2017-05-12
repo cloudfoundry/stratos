@@ -245,10 +245,9 @@
           } else {
             listStacksP = that.$q.resolve();
           }
-          return listStacksP
-            .then(function () {
-              that.model.application.summary.stack_detail = _.get(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid + '.entity', stackGuid);
-            });
+          return listStacksP.then(function () {
+            that.updateStackName();
+          });
         })
         .finally(function () {
           that.ready = true;
@@ -337,6 +336,7 @@
       var that = this;
       return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function () {
         that.updateBuildPack();
+        that.updateStackName();
       });
     },
 
@@ -345,6 +345,9 @@
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
       this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
+    },
+    updateStackName: function (stackGuid) {
+      this.appStackName = _.get(this.stacksModel, 'stacks.' + this.cnsiGuid + '.' + this.model.application.summary.stack_guid + '.entity.name', stackGuid);
     },
 
     /**
