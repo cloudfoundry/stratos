@@ -64,6 +64,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    this.stacksModel = modelManager.retrieve('cloud-foundry.model.stacks');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
     this.id = $stateParams.guid;
@@ -233,6 +234,21 @@
               that.model.onAppStateChange();
             }));
           }
+        })
+        .then(function () {
+          // Update stacks
+          var stackGuid = that.model.application.summary.stack_guid;
+          var listStacksP;
+          if (!_.has(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid)) {
+            // Stacks haven't been fetched yet
+            listStacksP = that.stacksModel.listAllStacks(that.cnsiGuid);
+          } else {
+            listStacksP = that.$q.resolve();
+          }
+          return listStacksP
+            .then(function () {
+              that.model.application.summary.stack_detail = _.get(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid + '.entity', stackGuid);
+            });
         })
         .finally(function () {
           that.ready = true;
@@ -465,7 +481,7 @@
         appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
-      this.visibleActions = _.find(this.appActions, { hidden: false });
+      this.visibleActions = _.find(this.appActions, {hidden: false});
     },
 
     /**
