@@ -315,7 +315,7 @@
       formatPart(hours, gettext('h'), gettext('h')) +
       formatPart(minutes, gettext('m'), gettext('m')) +
       formatPart(seconds, gettext('s'), gettext('s'))).trim();
-    },
+    }
 
   });
 
