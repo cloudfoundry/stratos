@@ -17,4 +17,5 @@ run:
       mkdir -p /go/src/github.com/hpcloud/
       ln -s $PWD/portal-proxy /go/src/github.com/hpcloud/portal-proxy
       cd /go/src/github.com/hpcloud/portal-proxy
+      glide install
       go test -v $(go list ./... | grep -v /vendor/)

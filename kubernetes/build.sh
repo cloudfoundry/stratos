@@ -161,9 +161,9 @@ function buildProxy {
              ${RUN_ARGS} \
              -it \
              --rm \
-             --name hsc-console-proxy-builder \
+             --name console-proxy-builder \
              --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/hsc-console-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/console-proxy-builder
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 

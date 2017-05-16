@@ -2,8 +2,8 @@
 set -eux
 
 DOCKER_REGISTRY=docker.io
-DOCKER_ORG=stackatodev
-NAME=hsc-console-proxy-builder
+DOCKER_ORG=susetest
+NAME=console-proxy-builder
 TAG=latest
 
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
