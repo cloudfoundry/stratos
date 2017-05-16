@@ -20,6 +20,7 @@ run:
     mkdir -p /go/src/github.com/hpcloud
     cp -r ./portal-proxy /go/src/github.com/hpcloud
     cd /go/src/github.com/hpcloud/portal-proxy
+    glide install
     go build
     cd -
     cp -r /go/src/github.com/hpcloud/portal-proxy/. ./portal-proxy-output
