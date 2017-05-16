@@ -83,7 +83,6 @@
     "q": "^1.4.1",
     "randomstring": "^1.1.5",
     "request": "^2.69.0",
-    "shelljs": "^0.5.3",
     "through": "^2.3.8",
     "toSrc": "^0.1.4",
     "transformer-proxy": "^0.3.3"

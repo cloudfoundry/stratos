@@ -1,0 +1,8 @@
+{
+  "templatePrefix": "framework",
+  "dependencies": {
+    "angular": {
+      "jquery": "*"
+    }
+  }
+}
