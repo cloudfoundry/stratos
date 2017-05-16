@@ -12,9 +12,8 @@
   // todo
   //var file = require('gulp-file');
   var fork = require('child_process').fork;
-  var fs = require('fs');
+  //var fs = require('fs');
   var gulp = require('gulp');
-  var gulpBowerFiles = require('bower-files');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
   var gulpreplace = require('gulp-replace');
@@ -36,58 +35,43 @@
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
   var components = require('./components.gulp');
-
-  var paths = config.paths;
-  var jsSourceFiles, scssFiles, templateFiles, lintFiles, i18nFiles, brand, defaultBrandFolder, defaultBrandI18nFolder, server;
-  var themeFiles = config.themeFiles;
-  var packageJson = require('../package.json');
-
-  // Initial plugin configuration - when in dev, will be watched and reloaded
-  //pluginPreparation();
-
-
-  var usePlumber = true;
-
-  var bowerFiles = gulpBowerFiles({
-    overrides: config.bower.overrides
-  });
-
-  // bower install won't update our local components files, do this ourselves as a full install takes a ahile
-  components.refreshLocalComponents();
-
-  console.log(_.map(components.findComponentsDependencySorted(), 'name'));
-
-
-  //var wiring = require('wiredep')(components.addWiredep(config.bower));
-
-  var bowerFolder = path.resolve(__dirname, '../bower_components');
-
   // Pull in the gulp tasks for the ui framework examples
   require('./examples.gulp');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
 
-  function pluginPreparation() {
-    buildConfig = JSON.parse(fs.readFileSync('./build/build_config.json', 'utf8'));
-    utils.clearCachedPlugins(buildConfig);
+  var paths = config.paths;
+  var jsSourceFiles, templateFiles, i18nFiles, assetFiles, server;
+  var packageJson = require('../package.json');
 
-    //assetFiles = utils.updateWithPlugins(config.assetFiles);
-    jsSourceFiles = utils.updateWithPlugins(config.jsSourceFiles);
-    scssFiles = utils.updateWithPlugins(config.scssFiles);
-    templateFiles = utils.updateWithPlugins(config.templatePaths);
-    jsFiles = utils.updateWithPlugins(config.jsFiles);
-    lintFiles = utils.updateWithPlugins(config.lintFiles);
-    i18nFiles = utils.updateWithPlugins(config.i18nFiles);
+  // Initial component configuration
+  initialize();
 
-    brand = buildConfig.brand || process.env.BRAND || DEFAULT_BRAND;
-    defaultBrandFolder = '../oem/brands/' + brand + '/';
-    defaultBrandFolder = path.resolve(__dirname, defaultBrandFolder);
-    defaultBrandI18nFolder = path.join(defaultBrandFolder, 'i18n');
-    i18nFiles.unshift(path.join(defaultBrandI18nFolder, '**', '*.json'));
+  var usePlumber = true;
+
+  var bowerConfig = _.clone(config.bower);
+  delete bowerConfig.exclude;
+  var bowerFiles = require('wiredep')(components.addWiredep(bowerConfig));
+
+  // todo - is this needed?
+  var bowerFolder = path.resolve(__dirname, '../bower_components');
+
+  function initialize() {
+    //var buildConfig = JSON.parse(fs.readFileSync('./build_config.json', 'utf8'));
+    //utils.clearCachedPlugins(buildConfig);
+
+    // bower install won't update our local components files, do this ourselves as a full install takes a ahile
+    components.refreshLocalComponents();
+
+    i18nFiles = components.getGlobs('i18n/**/*.json');
+    assetFiles = components.getGlobs('assets/**/*', true);
+    jsSourceFiles = components.getGlobs(['src/**/*.js', '!**/*.spec.js'], false);
+    templateFiles = components.getGlobs(['src/**/*.html'], false);
+    //scssFiles = components.getGlobs(['src/**/*.scss'], false);
   }
 
   gulp.task('prepare', function (next) {
-    pluginPreparation();
+    initialize();
     next();
   });
 
@@ -100,41 +84,16 @@
   gulp.task('clean:dist', ['clean']);
 
   // Copy HTML files to 'dist'
+  // This is only used for development builds
   gulp.task('copy:html', function () {
-    return gulp
-      .src(templateFiles, {base: paths.src})
+    return gulp.src(templateFiles)
+      .pipe(rename(components.renamePath))
       .pipe(gulp.dest(paths.dist));
   });
-
-  gulp.task('copy:svg', function () {
-    return gulp
-      .src(config.svgPaths, {base: paths.theme})
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  // // Copy index.html to 'dist'
-  // gulp.task('copy:index', function () {
-  //   return gulp
-  //     .src(paths.src + 'index.html')
-  //     .pipe(gulp.dest(paths.dist));
-  // });
 
   // Copy JavaScript source files to 'dist'
   gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
-    //var sourceFiles = jsSourceFiles;
-
-    var sourceFiles = components.getGlobs(['src/**/*.js', '!**/*.spec.js'], false);
-
-    // sourceFiles = [
-    //   path.join(bowerFolder, 'app-framework', 'src', '**/*.js'),
-    //   '!' + path.join(bowerFolder, 'app-framework', 'src', '**/*.spec.js'),
-    //   path.join(bowerFolder, 'app-shell', 'src', '**/*.js'),
-    //   '!' + path.join(bowerFolder, 'app-shell', 'src', '**/*.spec.js')
-    // ];
-    //var sources = gulp.src(sourceFiles, {base: paths.src});
-
-    var sources = gulp.src(sourceFiles);
-    return sources
+    return gulp.src(jsSourceFiles)
       .pipe(sort())
       .pipe(angularFilesort())
       .pipe(ngAnnotate({
@@ -150,7 +109,6 @@
   // This is only used for development builds
   gulp.task('copy:lib', function (done) {
     utils.copyBowerFolder(paths.lib, paths.dist + 'bower_components');
-    components.copyTo(paths.dist);
     done();
   });
 
@@ -166,24 +124,17 @@
   });
 
   // Combine all of the bower js dependencies into a single lib file that we can include
-  // Only used for a production build
+  // This is only used for production builds
   gulp.task('copy:bowerjs', function () {
-    return gulp.src(bowerFiles.ext('js').files)
+    return gulp.src(bowerFiles.js)
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsLibsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist));
   });
 
   gulp.task('copy:assets', function () {
-    var assets = components.getGlobs('assets/**/*', true);
     return gulp
-      .src(assets)
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('copy:theme', function () {
-    return gulp
-      .src(themeFiles, {base: paths.theme})
+      .src(assetFiles)
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -205,7 +156,7 @@
   });
 
   gulp.task('css', ['css:generate'], function () {
-    var cssFiles = bowerFiles.ext('css').files;
+    var cssFiles = bowerFiles.css;
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
     .pipe(concat('index.css'))
@@ -217,6 +168,7 @@
   gulp.task('template-cache', function () {
     var tFiles = components.getGlobs('src/**/*.html');
     return gulp.src(tFiles)
+      .pipe(sort())
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true,
@@ -228,14 +180,10 @@
 
   // In dev we do not use the cached templates, so we need an empty angular module
   // for the templates so the dependency is still met
+  // This is only used for development builds
   gulp.task('dev-template-cache', function () {
     return gulp.src('./build/' + config.jsTemplatesFile)
       .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('nwm', function (cb) {
-    console.log(components.findMainFile('index.html'));
-    cb();
   });
 
   // Copy index.html to 'dist'
@@ -249,8 +197,6 @@
   gulp.task('inject:index', ['i18n', 'copy:index'], function () {
     var distPath = path.resolve(__dirname, '..', paths.dist);
     var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
-
-    gutil.env.devMode = true;
 
     var jsDevFiles = [];
     if (gutil.env.devMode) {
@@ -279,6 +225,7 @@
 
   // Run ESLint on 'src' folder
   gulp.task('lint', function () {
+    var lintFiles = config.lintFiles;
     return gulp
       .src(lintFiles)
       .pipe(eslint())
@@ -293,7 +240,6 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    var i18nFiles = components.getGlobs('i18n/**/*.json');
     return gulp.src(i18nFiles)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -306,11 +252,11 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
+    //gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
     gulp.watch(templateFiles, ['copy:html', callback]);
-    gulp.watch(config.svgPaths, ['copy:svg', callback]);
+    gulp.watch(assetFiles, ['copy:assets', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
-    gulp.watch(config.i18nFiles, ['i18n', callback]);
+    gulp.watch(i18nFiles, ['i18n', callback]);
 
     // Watch build configuration file for changes
     gulp.watch('./tools/build_config.json', ['build-config', callback]);
@@ -429,9 +375,7 @@
       'i18n',
       'dev-template-cache',
       'copy:html',
-      'copy:svg',
       'copy:assets',
-      'copy:theme',
       'inject:index',
       next
     );
@@ -459,9 +403,7 @@
       'css',
       'i18n',
       'template-cache',
-      'copy:svg',
       'copy:assets',
-      'copy:theme',
       'inject:index',
       next
     );

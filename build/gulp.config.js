@@ -9,7 +9,7 @@
     translations: './translations/',
     tools: './tools/',
     build: './build/',
-    e2e: './e2e/',
+    e2e: './test/e2e/',
     instrumented: './tmp/instrumented/',
     oem: './oem/',
     theme: './theme/',
@@ -17,18 +17,17 @@
     examplesScripts: './tools/examples/scripts/',
     examplesDist: './tools/examples/dist/',
     browserSyncDist: './dist',
-    i18n: './i18n/',
     i18nDist: './dist/i18n/',
     components: './components/'
   };
 
-  // Now returned as an object so require always retruns same object
+  // Now returned as an object so require always returns same object
   module.exports = {
     bower: {
       bowerJson: require('../bower.json'),
       directory: './bower_components/',
       ignorePath: './src/',
-      exclude: [/.js$/, 'jquery.js'],
+      exclude: [/.js$/],
       overrides: {
         angular: {
           dependencies: {
@@ -67,35 +66,13 @@
       coverageVariable: '__coverage__'
     },
 
-    i18nFiles: [
-      paths.i18n + '**/*.json',
-      paths.src + 'plugins/*/i18n/**/*.json'
-    ],
-
     assetFiles: [
       paths.src + 'app/**/assets/**/*',
       paths.src + 'plugins/**/assets/**/*'
     ],
 
-    themeFiles: [
-      paths.theme + 'fonts/**/*',
-      paths.theme + 'images/**/*',
-      paths.theme + 'svg/**/*'
-    ],
-
     cssFiles: [
       paths.dist + 'index.css'
-    ],
-
-    templatePaths: [
-      paths.src + '**/app/**/*.html',
-      paths.src + '**/plugins/**/*.html',
-      paths.src + '**/framework/**/*.html'
-    ],
-
-    svgPaths: [
-      paths.theme + '**/*.svg',
-      '!' + paths.theme + 'fonts/**/*.svg'
     ],
 
     jsFiles: [
@@ -146,9 +123,10 @@
       '!' + paths.src + 'framework/widgets/ring-chart/*.js'
     ],
 
-    // Sacrifice all inclusive with exclusions for explicit declaration of directories saves ~10s per run
+    // Files that should be run through the linter
     lintFiles: [
       paths.components + '**/*.js',
+      '!' + paths.components + '**/*.mock.js',
       // paths.src + 'app/**/*.js',
       // paths.src + 'plugins/**/!(*.mock).js',
       // '!' + paths.src + 'plugins/*/api/**/*.js',
@@ -159,16 +137,6 @@
       paths.build + 'test-backend/config/**/*.js',
       paths.build + 'test-backend/data/**/*.js',
       paths.e2e + '**/*.js'
-    ],
-
-    themeScssFiles: [
-      paths.theme + '**/*.scss'
-    ],
-
-    scssFiles: [
-      paths.src + '*.scss',
-      paths.src + 'app/**/*.scss',
-      paths.src + 'plugins/**/*.scss'
     ],
 
     scssSourceFiles: [

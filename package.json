@@ -37,7 +37,6 @@
   },
   "devDependencies": {
     "body-parser": "^1.15.2",
-    "bower-files": "^3.14.1",
     "browser-sync": "^2.8.2",
     "gulp-clean-css": "^3.0.4",
     "connect-nocache": "^1.1.0",

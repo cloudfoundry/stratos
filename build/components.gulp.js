@@ -11,23 +11,21 @@
   // var config = require('./gulp.config');
   // var buildConfig = require('./build_config.json');
 
+  var buildConfig, components;
   var baseFolder = path.resolve(__dirname, '..');
-
-  var mainBowerFile, buildConfig, components;
-  console.log(mainBowerFile);
+  var bowerFolder = path.join(baseFolder, 'bower_components');
 
   // Initialization when first brought in via require
   initialize();
 
   function initialize() {
-    mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
+    //mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
     buildConfig = JSON.parse(fs.readFileSync(path.join(baseFolder, 'build_config.json'), 'utf8'));
     components = findComponents();
   }
 
   function findComponents() {
     var components = {};
-    var bowerFolder = path.join(baseFolder, 'bower_components');
     var files = fs.readdirSync(bowerFolder);
     _.each(files, function (f) {
       var folder = path.join(bowerFolder, f);
@@ -70,7 +68,6 @@
   }
 
   function refreshLocalComponents() {
-    var bowerFolder = path.resolve(__dirname, '../bower_components');
     var c = findLocalComponents(baseFolder);
     _.each(c, function (localComponentPath) {
       utils.copySingleBowerFolder(localComponentPath, bowerFolder);
@@ -78,9 +75,7 @@
   }
 
   function getGlobs(glob, skipName, absolute) {
-    var baseFolder = path.resolve(__dirname, '..');
     var c = findComponentsDependencySorted();
-    var bowerFolder = path.join(baseFolder, 'bower_components');
     var n = [];
     if (!Array.isArray(glob)) {
       glob = [glob];
@@ -112,15 +107,16 @@
       _.each(glob, function (g) {
         var inverse = g.indexOf('!') === 0;
         g = !inverse ? g : g.substring(1);
-        var name = v.templatePrefix ? v.templatePrefix : v.name;
-        console.log(name);
-        var f = path.join(prefix, name, g);
+        var f;
+        if (!prefix) {
+          f = path.join('./components', v.name, g);
+        } else {
+          var name = v.templatePrefix ? v.templatePrefix : v.name;
+          f = path.join(prefix, name, g);
+        }
         n.push(inverse ? '!' + f : f);
       });
     });
-
-    console.log(n);
-
     return n;
   }
 
@@ -187,23 +183,6 @@
     return files;
   }
 
-  function copyTo(dest) {
-    var dependencies = findComponentsDependencySorted();
-    _.each(dependencies, function (c) {
-      var destPath = path.join(dest, c.name);
-      if (c.templatePrefix) {
-        destPath = path.join(dest, c.templatePrefix);
-      }
-
-      var srcPath = path.join(c.folder, 'src');
-      console.log('COPYING: ' + srcPath + ' TO ' + destPath);
-      if (fs.existsSync(srcPath)) {
-        fsx.ensureDirSync(destPath);
-        fsx.copySync(srcPath, destPath);
-      }
-    });
-  }
-
   function transformPath(p) {
     var parts = p.split(path.sep);
     var name = parts[0];
@@ -232,7 +211,6 @@
   module.exports.getSourceGlobs = getSourceGlobs;
   module.exports.addWiredep = addWiredep;
   module.exports.findMainFile = findMainFile;
-  module.exports.copyTo = copyTo;
   module.exports.renamePath = renamePath;
   module.exports.transformPath = transformPath;
   module.exports.findComponentsDependencySorted = findComponentsDependencySorted;

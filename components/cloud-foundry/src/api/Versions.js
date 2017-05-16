@@ -19,7 +19,7 @@
     /*
      * Helper method to make the request config for $http
      */
-    _makeConfig: function(params, httpConfigOptions) {
+    _makeConfig: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
       for (var option in httpConfigOptions) {

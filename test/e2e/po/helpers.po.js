@@ -1,4 +1,4 @@
-/* eslint-disable angular/json-functions,angular/log,no-console */
+/* eslint-disable angular/json-functions,angular/log,no-console,no-process-env */
 (function () {
   'use strict';
 
@@ -498,10 +498,6 @@
 
   function skipIfNoSecondHCF() {
     return !getHcfs() || !getHcfs().hcf2;
-  }
-
-  function skipIfOnlyOneHCF() {
-    return !getHcfs() || Object.keys(getHcfs()).length < 2;
   }
 
   function skipIfNoAppWithLogStrean() {
