@@ -43,7 +43,7 @@
       files: [
         'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
         'bower_components/angular-mocks/angular-mocks.js',
-        'src/config.js',
+        'build/config.js',
         'build/unit-test-helpers.js',
         'dist/svg/**/*.svg',
         {

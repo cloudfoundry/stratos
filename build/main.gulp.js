@@ -116,7 +116,7 @@
   gulp.task('copy:configjs', function () {
     var buildConfig = components.getBuildConfig();
     return gulp
-      .src(paths.src + 'config.js')
+      .src(paths.build + 'config.js')
       .pipe(gulpreplace('@@MAIN_PLUGIN@@', buildConfig.main || ''))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(rename('console-config.js'))
