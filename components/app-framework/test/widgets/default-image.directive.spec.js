@@ -19,19 +19,19 @@
     }
 
     it('should be defined', function () {
-      var markup = '<img ng-src="images/brand_company_logo.png" default-image default-image-src="images/brand_product_family_logo.png"></img>';
+      var markup = '<img ng-src="images/brand_company_logo.png" default-image default-image-src="test-images/test_image.png"></img>';
       create(markup);
       expect(element).toBeDefined();
       expect(element.attr('src')).toBe('images/brand_company_logo.png');
       element.trigger('error');
-      expect(element.attr('src')).toBe('images/brand_product_family_logo.png');
+      expect(element.attr('src')).toBe('test-images/test_image.png');
       $scope.$destroy();
     });
 
     it('should use default src when no src specified', function () {
-      var markupEmpty = '<img ng-src="" default-image default-image-src="images/brand_product_family_logo.png"></img>';
+      var markupEmpty = '<img ng-src="" default-image default-image-src="test-images/test_image.png"></img>';
       create(markupEmpty);
-      expect(element.attr('src')).toBe('images/brand_product_family_logo.png');
+      expect(element.attr('src')).toBe('test-images/test_image.png');
     });
   });
 })();

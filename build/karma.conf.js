@@ -10,7 +10,7 @@
     var reportPath = path.resolve(__dirname, '..', 'out/coverage-report');
 
     var karmaConfig = {
-      autoWatch: false,
+      autoWatch: true,
 
       basePath: '../',
 
@@ -24,7 +24,11 @@
       customLaunchers: {
         Chrome_Headless: {
           base: 'Chrome',
-          flags: ['--headless']
+          flags: [
+            '--headless',
+            '--disable-gpu',
+            '--remote-debugging-port=9222'
+          ]
         }
       },
 
@@ -56,6 +60,13 @@
           served: true,
           nocache: false
         },
+        {
+          pattern: 'build/test-images/**/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
         // use the HTML templates compiled into a template cahce
         'dist/console-templates.js'
 
@@ -81,9 +92,10 @@
       },
 
       phantomjsLauncher: {
+        // Setting this to true tends to cause phantomjs to crash
         // Have phantomjs exit if a ResourceError is encountered
         // (useful if karma exits without killing phantom)
-        exitOnResourceError: true
+        //exitOnResourceError: true
       },
 
       plugins: [
@@ -104,6 +116,7 @@
 
       proxies: {
         '/images/': '/base/dist/images/',
+        '/test-images/': '/base/build/test-images/',
         '/svg/': '/base/dist/svg/',
         '/i18n/': '/base/dist/i18n/',
         '/fonts/': '/base/dist/fonts/'
@@ -117,10 +130,11 @@
     };
 
     // Add in the test folders only for the components that are referneced in the bower file
-    var pluginFiles = components.getLocalGlobs('src/plugin.config.js');
-    var moduleFiles = components.getLocalGlobs('src/**/*.module.js');
-    var srcFiles = components.getLocalGlobs('src/**/*.js');
-    var testFiles = components.getLocalGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']);
+    var pluginFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/plugin.config.js'));
+    var moduleFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/**/*.module.js'));
+    var srcFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/**/*.js'));
+    var testFiles = components.removeEmptyGlobs(components.getLocalGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']));
+
     karmaConfig.files = _.concat(karmaConfig.files, pluginFiles, moduleFiles, srcFiles, testFiles);
 
     // Add the cannotation and overage pre-processors for the component source

@@ -6,6 +6,7 @@
   var path = require('path');
   var _ = require('lodash');
   var minimatch = require('minimatch');
+  var globLib = require('glob');
   var utils = require('./gulp.utils');
   // var config = require('./gulp.config');
   // var buildConfig = require('./build_config.json');
@@ -79,8 +80,8 @@
     if (!Array.isArray(glob)) {
       glob = [glob];
     }
-    _.each(c, function (v) {
-      _.each(glob, function (g) {
+    _.each(glob, function (g) {
+      _.each(c, function (v) {
         var inverse = g.indexOf('!') === 0;
         g = !inverse ? g : g.substring(1);
         var f = skipName ? path.join(bowerFolder, v.name, g) : path.join(bowerFolder, '**', v.name, g);
@@ -222,6 +223,17 @@
     return buildConfig;
   }
 
+  function removeEmptyGlobs(globs) {
+    var filtered = [];
+    _.each(globs, function (pattern) {
+      var files = globLib.sync(pattern);
+      if (files.length > 0) {
+        filtered.push(pattern);
+      }
+    });
+    return filtered;
+  }
+
   module.exports.initialize = initialize;
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.findComponents = findComponents;
@@ -234,5 +246,6 @@
   module.exports.renamePath = renamePath;
   module.exports.transformPath = transformPath;
   module.exports.findComponentsDependencySorted = findComponentsDependencySorted;
+  module.exports.removeEmptyGlobs = removeEmptyGlobs;
 
 })();

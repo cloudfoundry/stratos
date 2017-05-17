@@ -65,7 +65,7 @@
 
     i18nFiles = components.getGlobs('i18n/**/*.json');
     assetFiles = components.getGlobs('assets/**/*', true);
-    jsSourceFiles = components.getGlobs(['src/**/*.js', '!**/*.spec.js'], false);
+    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js'], false);
     templateFiles = components.getGlobs(['src/**/*.html'], false);
     //scssFiles = components.getGlobs(['src/**/*.scss'], false);
   }

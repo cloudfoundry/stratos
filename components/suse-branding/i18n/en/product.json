@@ -17,5 +17,11 @@
     "footer": {
       "company.logo": "images/suse_logo_light_bg.png"
     }
+  },
+  "login": {
+    "footer": {
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
   }
 }

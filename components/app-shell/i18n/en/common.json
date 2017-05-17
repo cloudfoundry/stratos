@@ -52,6 +52,10 @@
   "footer": {
     "title": "[[@:product.name]] [[@:product.version]]",
     "copyright": "&copy; 2017 [[@:company.name]]",
-    "logo": "@:company.logo"
+    "logo": "@:company.logo",
+    "company.logo": "@:company.logo",
+    "product.logo": "@:product.logo",
+    "company.www-link": "@:company.www-link",
+    "product.www-link": "@:product.www-link"
   }
 }
