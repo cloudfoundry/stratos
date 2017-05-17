@@ -5,13 +5,17 @@
               card-actions-position="actions-menu-right">
   <div class="col-md-5" ng-if="orgSummaryTileCtrl.organization.details">
     <dl class="dl-horizontal">
-      <dt translate>APPLICATIONS</dt>
+      <dt translate>applications</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.totalApps}}</dd>
-      <dt translate>SERVICES</dt>
-      <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota === -1 ? '∞' : orgSummaryTileCtrl.organization.details.servicesQuota}}</dd>
-      <dt translate>ROUTES</dt>
-      <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}} / {{ orgSummaryTileCtrl.organization.details.routesQuota === -1 ? '∞' : orgSummaryTileCtrl.organization.details.routesQuota}}</dd>
-      <dt translate>MEMORY UTILIZATION</dt>
+      <dt translate>application instances</dt>
+      <dd>{{ orgSummaryTileCtrl.organization.details.instances}} / {{ orgSummaryTileCtrl.organization.details.instancesQuota | infinityFilter }}</dd>
+      <dt translate>services</dt>
+      <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota | infinityFilter }}</dd>
+      <dt translate>routes</dt>
+      <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}} / {{ orgSummaryTileCtrl.organization.details.routesQuota | infinityFilter }}</dd>
+      <dt translate>private domains</dt>
+      <dd>{{ orgSummaryTileCtrl.organization.details.privateDomains}} / {{ orgSummaryTileCtrl.organization.details.privateDomainsQuota | infinityFilter }}</dd>
+      <dt translate>memory usage</dt>
       <dd>{{ orgSummaryTileCtrl.memory }}</dd>
     </dl>
   </div>
