@@ -4,18 +4,29 @@
 1. Make sure you have the following dependencies:
     - KVM
     - Libvirt
-    - Vagrant 1.9.3+
+    - Vagrant 1.9.3 (Don't use 1.9.4)
     - vagrant-libvirt plugin
+
+To install the vagrant plugin, do the following:
+```
+$ sudo zypper in libvirt libvirt-devel ruby-devel gcc qemu-kvm
+$ vagrant plugin install vagrant-libvirt 
+```
     
 2. Start the VM
+
+From the scf folder, start the VM with the command:
 ```
 $ vagrant up --provider=libvirt
 ```
 
 This will initialise all necessary components for `SCF`.  Please leave some time for the images to be pulled down and the containers to initialise.
+**Note** - If you run into a `requested nfs version is not supported` exception then edit `/etc/exports` and clear out all entries added by Vagrant, and restart the `nfs-server.service`.
 
 Check for the status of the components by watching the pods:
+
 ```
+$  vagrant ssh
 $  watch -n1 kubectl get po --all-namespaces
 ```
 
