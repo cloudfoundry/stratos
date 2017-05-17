@@ -247,6 +247,10 @@
     return mainBowerFile;
   }
 
+  function getBowerFolder() {
+    return bowerFolder;
+  }
+
   function removeEmptyGlobs(globs) {
     var filtered = [];
     _.each(globs, function (pattern) {
@@ -261,6 +265,7 @@
   module.exports.initialize = initialize;
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.getBowerConfig = getBowerConfig;
+  module.exports.getBowerFolder = getBowerFolder;
   module.exports.findComponents = findComponents;
   module.exports.syncLocalComponents = syncLocalComponents;
   module.exports.getGlobs = getGlobs;

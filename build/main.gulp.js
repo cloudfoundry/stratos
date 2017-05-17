@@ -9,8 +9,6 @@
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var eslint = require('gulp-eslint');
-  // todo
-  //var file = require('gulp-file');
   var fork = require('child_process').fork;
   var fs = require('fs');
   var fsx = require('fs-extra');
@@ -56,13 +54,9 @@
   delete bowerConfig.exclude;
   var bowerFiles = require('wiredep')(components.addWiredep(bowerConfig));
 
-  // todo - is this needed?
-  var bowerFolder = path.resolve(__dirname, '../bower_components');
-
   function initialize() {
     //var buildConfig = JSON.parse(fs.readFileSync('./build_config.json', 'utf8'));
     //utils.clearCachedPlugins(buildConfig);
-
 
     // bower install won't update our local components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
@@ -152,7 +146,7 @@
   // Compile SCSS to CSS
   gulp.task('css:generate', function () {
     var scssFile = './bower_components/index.scss';
-    utils.generateScssFile('./bower_components/index.scss', components.findMainFile('**/*.scss'), bowerFolder);
+    utils.generateScssFile('./bower_components/index.scss', components.findMainFile('**/*.scss'), components.getBowerFolder());
     return gulp
       .src(scssFile)
       .pipe(gulpif(usePlumber, plumber({
