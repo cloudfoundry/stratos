@@ -13,6 +13,7 @@
   //var file = require('gulp-file');
   var fork = require('child_process').fork;
   var fs = require('fs');
+  var fsx = require('fs-extra');
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
@@ -41,8 +42,10 @@
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var jsSourceFiles, templateFiles, i18nFiles, assetFiles, server;
+  var localComponents, jsSourceFiles, templateFiles, server;
   var packageJson = require('../package.json');
+
+  var watches = {};
 
   // Initial component configuration
   initialize();
@@ -60,14 +63,21 @@
     //var buildConfig = JSON.parse(fs.readFileSync('./build_config.json', 'utf8'));
     //utils.clearCachedPlugins(buildConfig);
 
-    // bower install won't update our local components files, do this ourselves as a full install takes a ahile
-    components.refreshLocalComponents();
 
-    i18nFiles = components.getGlobs('i18n/**/*.json');
-    assetFiles = components.getGlobs('assets/**/*', true);
+    // bower install won't update our local components files, do this ourselves as a full install takes a while
+    // this will also remove any components that are no longer referenced in the bower.json
+    components.syncLocalComponents();
+    components.initialize();
+
+    localComponents = components.getLocalGlobs('**/*.*');
+    watches.i18nFiles = components.getGlobs('i18n/**/*.json', true);
+    watches.assetFiles = components.getGlobs('assets/**/*', true);
+
     jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js'], false);
     templateFiles = components.getGlobs(['src/**/*.html'], false);
     //scssFiles = components.getGlobs(['src/**/*.scss'], false);
+
+    //console.log(watches);
   }
 
   gulp.task('prepare', function (next) {
@@ -133,6 +143,7 @@
   });
 
   gulp.task('copy:assets', function () {
+    var assetFiles = components.getGlobs('assets/**/*', true);
     return gulp
       .src(assetFiles)
       .pipe(gulp.dest(paths.dist));
@@ -253,6 +264,7 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
+    var i18nFiles = components.getGlobs('i18n/**/*.json');
     return gulp.src(i18nFiles)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -264,15 +276,25 @@
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
+    // Watch the local components folders and copy only the changed file to the corresponding location in bower_components
+    gulp.watch(localComponents, function (vfs) {
+      if (vfs.type === 'changed') {
+        var destPath = vfs.path.replace('/components/', '/bower_components/');
+        fsx.copySync(vfs.path, destPath);
+      }
+    });
+
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     //gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
-    gulp.watch(templateFiles, ['copy:html', callback]);
-    gulp.watch(assetFiles, ['copy:assets', callback]);
-    gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
-    gulp.watch(i18nFiles, ['i18n', callback]);
+
+    gulp.watch(watches.i18nFiles, ['i18n', callback]);
+    gulp.watch(watches.assetFiles, ['copy:assets', callback]);
+
+    // gulp.watch(templateFiles, ['copy:html', callback]);
+    // gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
 
     // Watch build configuration file for changes
-    gulp.watch('./tools/build_config.json', ['build-config', callback]);
+    //gulp.watch('./tools/build_config.json', ['build-config', callback]);
   });
 
   gulp.task('build-config', function (next) {

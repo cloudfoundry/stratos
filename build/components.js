@@ -7,6 +7,7 @@
   var _ = require('lodash');
   var minimatch = require('minimatch');
   var globLib = require('glob');
+  var fsx = require('fs-extra');
   var utils = require('./gulp.utils');
   // var config = require('./gulp.config');
   // var buildConfig = require('./build_config.json');
@@ -78,11 +79,19 @@
     return local;
   }
 
-  function refreshLocalComponents() {
+  function syncLocalComponents() {
     var c = findLocalComponents(baseFolder);
     _.each(c, function (localComponent) {
       utils.copySingleBowerFolder(localComponent.path, bowerFolder);
     });
+
+    // Prune components that should no longer be in bower_components
+    _.each(components, function (component) {
+      if (!c[component.name]) {
+        fsx.removeSync(component.folder);
+      }
+    });
+
   }
 
   function getGlobs(glob, skipName, absolute) {
@@ -253,7 +262,7 @@
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.getBowerConfig = getBowerConfig;
   module.exports.findComponents = findComponents;
-  module.exports.refreshLocalComponents = refreshLocalComponents;
+  module.exports.syncLocalComponents = syncLocalComponents;
   module.exports.getGlobs = getGlobs;
   module.exports.getSourceGlobs = getSourceGlobs;
   module.exports.getLocalGlobs = getLocalGlobs;
