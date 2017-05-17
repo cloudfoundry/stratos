@@ -34,7 +34,7 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
-  var components = require('./components.gulp');
+  var components = require('./components');
   // Pull in the gulp tasks for the ui framework examples
   require('./examples.gulp');
   // Pull in the gulp tasks for e2e tests
@@ -237,6 +237,9 @@
     var regex = /^(\d+\.)?(\d)/i;
     return version.match(regex)[0];
   }
+
+  // Prepare required artifacts for the unit tests
+  gulp.task('prepare:unit-tests', ['i18n','template-cache','copy:assets']);
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };

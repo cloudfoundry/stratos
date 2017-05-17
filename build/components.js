@@ -7,11 +7,10 @@
   var _ = require('lodash');
   var minimatch = require('minimatch');
   var utils = require('./gulp.utils');
-  var fsx = require('fs-extra');
   // var config = require('./gulp.config');
   // var buildConfig = require('./build_config.json');
 
-  var buildConfig, components;
+  var mainBowerFile, buildConfig, components;
   var baseFolder = path.resolve(__dirname, '..');
   var bowerFolder = path.join(baseFolder, 'bower_components');
 
@@ -19,7 +18,7 @@
   initialize();
 
   function initialize() {
-    //mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
+    mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
     buildConfig = JSON.parse(fs.readFileSync(path.join(baseFolder, 'build_config.json'), 'utf8'));
     components = findComponents();
   }
@@ -48,19 +47,19 @@
     return components;
   }
 
-  // TODO: Only find local components referenced in the main bower.json
+  // Find local components referenced in the main bower.json
+  // Assumes the location if a path starting with '.'
   function findLocalComponents() {
-    var components = [];
-
-    var folder = path.join(baseFolder, 'components');
-    var files = fs.readdirSync(folder);
-    _.each(files, function (f) {
-      var componentFolder = path.join(folder, f);
-      console.log('Component folder: ' + componentFolder);
-      if (fs.lstatSync(componentFolder).isDirectory()) {
-        var bowerFile = path.join(componentFolder, 'bower.json');
-        if (fs.existsSync(bowerFile)) {
-          components.push(path.resolve(componentFolder));
+    var components = {};
+    _.each(mainBowerFile.dependencies, function (location, name) {
+      if (location.indexOf('.') === 0) {
+        var componentFolder = path.resolve(location);
+        if (fs.lstatSync(componentFolder).isDirectory()) {
+          components[name] = {
+            name: name,
+            folder: location,
+            path: componentFolder
+          };
         }
       }
     });
@@ -69,8 +68,8 @@
 
   function refreshLocalComponents() {
     var c = findLocalComponents(baseFolder);
-    _.each(c, function (localComponentPath) {
-      utils.copySingleBowerFolder(localComponentPath, bowerFolder);
+    _.each(c, function (localComponent) {
+      utils.copySingleBowerFolder(localComponent.path, bowerFolder);
     });
   }
 
@@ -116,6 +115,27 @@
         }
         n.push(inverse ? '!' + f : f);
       });
+    });
+    return n;
+  }
+
+  function getLocalGlobs(glob) {
+    var c = findComponentsDependencySorted();
+    var local = findLocalComponents();
+    var n = [];
+    if (!Array.isArray(glob)) {
+      glob = [glob];
+    }
+    _.each(c, function (v) {
+      // Check that v is a local component
+      if (local[v.name]) {
+        _.each(glob, function (g) {
+          var inverse = g.indexOf('!') === 0;
+          g = !inverse ? g : g.substring(1);
+          var f = path.join(local[v.name].folder, g);
+          n.push(inverse ? '!' + f : f);
+        });
+      }
     });
     return n;
   }
@@ -205,10 +225,10 @@
   module.exports.initialize = initialize;
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.findComponents = findComponents;
-  module.exports.findLocalComponents = findLocalComponents;
   module.exports.refreshLocalComponents = refreshLocalComponents;
   module.exports.getGlobs = getGlobs;
   module.exports.getSourceGlobs = getSourceGlobs;
+  module.exports.getLocalGlobs = getLocalGlobs;
   module.exports.addWiredep = addWiredep;
   module.exports.findMainFile = findMainFile;
   module.exports.renamePath = renamePath;

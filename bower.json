@@ -18,5 +18,11 @@
     "suse-branding": "./components/suse-branding",
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.9"
+  },
+  "resolutions": {
+    "lodash": "~4.0.1"
   }
 }

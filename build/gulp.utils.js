@@ -8,8 +8,6 @@
   var fsx = require('fs-extra');
   var minimatch = require('minimatch');
   var config = require('./gulp.config');
-  // todo
-  //var buildConfig = require('./build_config.json');
 
   function handleBower(srcDir, destDir) {
     var bowerFile = path.join(srcDir, 'bower.json');

@@ -9,12 +9,12 @@
   var otherModules = [
     'console-templates',
     'angularMoment',
-    'gettext',
     'helion.framework',
     'smoothScroll',
     'ui.bootstrap',
     'ui.router',
     'smart-table',
+    //'ig.linkHeaderParser',
     'pascalprecht.translate'
   ];
 

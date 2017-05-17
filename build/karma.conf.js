@@ -1,15 +1,16 @@
 (function () {
   'use strict';
 
+  var _ = require('lodash');
   var path = require('path');
+  var components = require('./components');
 
   module.exports = function (config) {
 
     var reportPath = path.resolve(__dirname, '..', 'out/coverage-report');
 
-    config.set({
-
-      autoWatch: true,
+    var karmaConfig = {
+      autoWatch: false,
 
       basePath: '../',
 
@@ -18,6 +19,14 @@
       browserNoActivityTimeout: 20000,
 
       browsers: ['PhantomJS'],
+      //browsers: ['Chrome_Headless'],
+
+      customLaunchers: {
+        Chrome_Headless: {
+          base: 'Chrome',
+          flags: ['--headless']
+        }
+      },
 
       coverageReporter: {
         dir: reportPath,
@@ -28,18 +37,11 @@
       },
 
       files: [
-        //'bower_components/jquery/dist/jquery.js',
         'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
         'bower_components/angular-mocks/angular-mocks.js',
-        'bower_components/angular-link-header-parser/release/angular-link-header-parser.min.js',
-        'tools/console-templates.js',
-
         'src/config.js',
-        'src/plugins/*/plugin.config.js',
-
-        'theme/**/*.svg',
-        'tools/unit-test-helpers.js',
-
+        'build/unit-test-helpers.js',
+        'dist/svg/**/*.svg',
         {
           pattern: 'dist/i18n/*.json',
           watched: false,
@@ -48,47 +50,16 @@
           nocache: false
         },
         {
-          pattern: 'theme/images/*.png',
+          pattern: 'dist/images/**/*.png',
           watched: false,
           included: false,
           served: true,
           nocache: false
         },
-        {
-          pattern: 'oem/brands/hpe/images/*.png',
-          watched: false,
-          included: false,
-          served: true,
-          nocache: false
-        },
-        {
-          pattern: 'src/plugins/*/view/assets/**/*.png',
-          watched: false,
-          included: false,
-          served: true,
-          nocache: false
-        },
+        // use the HTML templates compiled into a template cahce
+        'dist/console-templates.js'
 
-        // Ignore for now - suppresses warning when running tests as we don't have any mocks'
-        'src/framework/**/*.module.js',
-        'src/framework/**/!(*.mock|*.spec).js',
-        'src/framework/**/*.spec.js',
-        'src/framework/**/*.html',
-        //'framework/src/**/*.mock.js',
-
-        'src/index.module.js',
-
-        'src/app/**/*.module.js',
-        'src/app/**/*.js',
-        'src/app/**/*.html',
-
-        'src/plugins/**/*.module.js',
-        'src/plugins/**/!(*.mock|*.spec)*.js',
-        'src/plugins/*/test/**/*.js',
-        'src/plugins/**/*.html',
-
-        'test/unit/**/*.mock.js',
-        'test/unit/**/*.spec.js'
+        // src and test files are added based on which components are specified in bower.json
       ],
 
       frameworks: ['wiredep', 'jasmine'],
@@ -100,12 +71,9 @@
 
       ngHtml2JsPreprocessor: {
         moduleName: 'templates',
-
         cacheIdFromPath: function (filePath) {
-          if (filePath.indexOf('src/') === 0) {
-            return filePath.substr(4);
-          } else if (filePath.indexOf('theme/') === 0) {
-            return filePath.substr(6);
+          if (filePath.indexOf('dist/') === 0) {
+            return filePath.substr(5);
           } else {
             return filePath;
           }
@@ -120,6 +88,7 @@
 
       plugins: [
         'karma-phantomjs-launcher',
+        'karma-chrome-launcher',
         'karma-jasmine',
         'karma-ng-html2js-preprocessor',
         'karma-coverage',
@@ -128,23 +97,37 @@
       ],
 
       preprocessors: {
-        'theme/**/*.svg': ['ng-html2js'],
-        'src/framework/**/*.html': ['ng-html2js'],
-        'src/framework/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage'],
-        'src/app/**/*.html': ['ng-html2js'],
-        'src/app/**/*.js': ['ngannotate', 'coverage'],
-        'src/plugins/**/*.html': ['ng-html2js'],
-        'src/plugins/*/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
+        'dist/svg/**/*.svg': ['ng-html2js']
+        //'components/**/src/**/*.js': ['ngannotate', 'coverage']
+        //'components/**/src/!(api)/**/!(*.mock|*.spec).js': ['ngannotate', 'coverage']
       },
 
       proxies: {
-        '/images/': '/base/oem/brands/hpe/images/',
-        '/svg/': '/base/framework/theme/svg/',
-        '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/',
-        '/app/view/assets/': '/base/app/view/assets/'
+        '/images/': '/base/dist/images/',
+        '/svg/': '/base/dist/svg/',
+        '/i18n/': '/base/dist/i18n/',
+        '/fonts/': '/base/dist/fonts/'
       },
 
-      reporters: ['progress', 'coverage']
+      reporters: ['progress', 'coverage'],
+
+      //logLevel: config.LOG_DEBUG,
+
+      singleRun: true
+    };
+
+    // Add in the test folders only for the components that are referneced in the bower file
+    var pluginFiles = components.getLocalGlobs('src/plugin.config.js');
+    var moduleFiles = components.getLocalGlobs('src/**/*.module.js');
+    var srcFiles = components.getLocalGlobs('src/**/*.js');
+    var testFiles = components.getLocalGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']);
+    karmaConfig.files = _.concat(karmaConfig.files, pluginFiles, moduleFiles, srcFiles, testFiles);
+
+    // Add the cannotation and overage pre-processors for the component source
+    _.each(srcFiles, function (glob) {
+      karmaConfig.preprocessors[glob] = ['ngannotate', 'coverage'];
     });
+
+    config.set(karmaConfig);
   };
 })();

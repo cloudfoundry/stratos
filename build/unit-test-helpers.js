@@ -8,4 +8,6 @@
     $translateProvider.translations('en', json);
   }));
 
+  beforeEach(module('console-templates'));
+
 })();
