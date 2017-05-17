@@ -38,7 +38,7 @@
       // Cache all organizations associated with this cluster
       var inDepthParams = {
         'inline-relations-depth': 2,
-        'exclude-relations': 'domains,private_domains,space_quota_definitions'
+        'exclude-relations': 'domains,space_quota_definitions'
       };
       var orgPromise = cfOrganizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
