@@ -1,4 +1,8 @@
-FROM golang:1.7
+FROM golang:1.7-alpine
+RUN apk update && \
+    apk add --no-cache gcc musl-dev curl git openssl
+# Install the latest version of glide
+RUN curl https://glide.sh/get | sh
 RUN mkdir -p /go/src/github.com/hpcloud/portal-proxy
 WORKDIR /go/src/github.com/hpcloud/portal-proxy
 COPY /scripts/compile.sh /

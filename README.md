@@ -82,12 +82,6 @@ Consider adopting GoConvey to run your unit tests as you write them:
 http://goconvey.co
 
 ```
-# You may need to install these two libraries
-go get gopkg.in/DATA-DOG/go-sqlmock.v1
-go get github.com/stretchr/testify
-
-# The actual install and run
-go get github.com/smartystreets/goconvey
 $GOPATH/bin/goconvey -port 9999
 ```
 
