@@ -67,6 +67,17 @@
     return components;
   }
 
+  function findLocalComponentFolders() {
+    var local = {};
+    var files = globLib.sync('./components/**/bower.json');
+    _.each(files, function (f) {
+      var bower = JSON.parse(fs.readFileSync(f, 'utf8'));
+      var folder = path.dirname(f);
+      local[bower.name] = folder;
+    });
+    return local;
+  }
+
   function refreshLocalComponents() {
     var c = findLocalComponents(baseFolder);
     _.each(c, function (localComponent) {
@@ -223,6 +234,10 @@
     return buildConfig;
   }
 
+  function getBowerConfig() {
+    return mainBowerFile;
+  }
+
   function removeEmptyGlobs(globs) {
     var filtered = [];
     _.each(globs, function (pattern) {
@@ -236,6 +251,7 @@
 
   module.exports.initialize = initialize;
   module.exports.getBuildConfig = getBuildConfig;
+  module.exports.getBowerConfig = getBowerConfig;
   module.exports.findComponents = findComponents;
   module.exports.refreshLocalComponents = refreshLocalComponents;
   module.exports.getGlobs = getGlobs;
@@ -247,5 +263,6 @@
   module.exports.transformPath = transformPath;
   module.exports.findComponentsDependencySorted = findComponentsDependencySorted;
   module.exports.removeEmptyGlobs = removeEmptyGlobs;
+  module.exports.findLocalComponentFolders = findLocalComponentFolders;
 
 })();

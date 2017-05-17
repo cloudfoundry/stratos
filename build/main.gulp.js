@@ -12,7 +12,7 @@
   // todo
   //var file = require('gulp-file');
   var fork = require('child_process').fork;
-  //var fs = require('fs');
+  var fs = require('fs');
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
@@ -239,7 +239,17 @@
   }
 
   // Prepare required artifacts for the unit tests
-  gulp.task('prepare:unit-tests', ['i18n','template-cache','copy:assets']);
+  gulp.task('unit:prepare', ['i18n','template-cache','copy:assets']);
+
+  // By default running the unit tests only tests those components included in bower.json
+  // This task re-writes bower.json to include all components in the components folder
+  gulp.task('unit:update-bower', function (done) {
+    var local = components.findLocalComponentFolders();
+    var bower = components.getBowerConfig();
+    _.assign(bower.dependencies, local);
+    fs.writeFile('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
+    done();
+  });
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };

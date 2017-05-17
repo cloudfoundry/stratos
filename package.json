@@ -14,7 +14,7 @@
     "e2e": "gulp e2e:run",
     "preheadless-e2e": "npm run pree2e",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js",
-    "pretest": "gulp prepare:unit-tests",
+    "pretest": "gulp unit:prepare",
     "test": "karma start build/karma.conf.js",
     "update-webdriver": "webdriver-manager update",
     "watch": "gulp watch",

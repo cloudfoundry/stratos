@@ -1,0 +1,17 @@
+{
+  "name": "code-engine",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/code-engine.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-framework": "./components/app-shell",
+    "angular-link-header-parser-ng": "^1.0.3"
+  }
+}
