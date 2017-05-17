@@ -68,6 +68,9 @@
       var appSummary = mock.cloudFoundryAPI.Apps.GetAppSummary(appGuid, spaceGuid);
       $httpBackend.whenGET(appSummary.url).respond(200, appSummary.response['200'].body);
 
+      var stacks = mock.cloudFoundryAPI.Stacks.ListAllStacks(cnsiGuid);
+      $httpBackend.whenGET(stacks.url).respond(200, appSummary.response['200'].body);
+
       var infoRequest = mock.cloudFoundryAPI.Info.GetInfo(cnsiGuid);
       $httpBackend.whenGET(infoRequest.url).respond(200, infoRequest.response['200'].body);
 

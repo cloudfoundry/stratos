@@ -111,6 +111,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.stacksModel = modelManager.retrieve('cloud-foundry.model.stacks');
     this.appClusterRoutesService = appClusterRoutesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -315,6 +316,7 @@
       formatPart(minutes, gettext('m'), gettext('m')) +
       formatPart(seconds, gettext('s'), gettext('s'))).trim();
     }
+
   });
 
 })();

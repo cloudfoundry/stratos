@@ -225,7 +225,7 @@
         var modalTitle = 'Edit App';
 
         function getMemoryUtilisation() {
-          return element(by.css('.summary .row .col-md-6:first-of-type dd:nth-of-type(5)')).getText()
+          return element(by.css('.summary .row .col-md-6:first-of-type dd:nth-of-type(7)')).getText()
             .then(function (text) {
               var number = text.substring(0, text.indexOf(' '));
               if (text.indexOf('GB') >= 0 || text.indexOf('MB') >= 0) {
