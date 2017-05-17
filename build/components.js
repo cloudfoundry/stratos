@@ -103,8 +103,8 @@
     if (!Array.isArray(glob)) {
       glob = [glob];
     }
-    _.each(c, function (v) {
-      _.each(glob, function (g) {
+    _.each(glob, function (g) {
+      _.each(c, function (v) {
         var inverse = g.indexOf('!') === 0;
         g = !inverse ? g : g.substring(1);
         var f;

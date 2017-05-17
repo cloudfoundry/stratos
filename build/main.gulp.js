@@ -197,10 +197,10 @@
   gulp.task('inject:index', ['i18n', 'copy:index'], function () {
     var distPath = path.resolve(__dirname, '..', paths.dist);
     var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
-
     var jsDevFiles = [];
     if (gutil.env.devMode) {
       jsDevFiles = components.getSourceGlobs([
+        'plugin.config.js',
         '**/*.module.js',
         '**/*.js',
         '!**/*.spec.js'
