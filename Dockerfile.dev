@@ -1,9 +1,8 @@
-FROM debian:jessie
+FROM alpine:latest
 
-RUN export DEBIAN_FRONTEND=noninteractive &&\
- apt-get update &&\
- apt-get install -y --reinstall ca-certificates &&\
- mkdir -p /srv
+RUN apk update && \
+    apk add ca-certificates &&\
+    mkdir -p /srv
 
 WORKDIR /srv
 COPY portal-proxy portal-proxy

@@ -9,9 +9,9 @@ pushd $(git rev-parse --show-toplevel)
 
 docker run -it \
            --rm \
-           --name hsc-console-proxy-builder \
+           --name console-proxy-builder \
            --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-           docker.io/stackatodev/hsc-console-proxy-builder $*
+           docker.io/susetest/console-proxy-builder $*
 
 ret=$?
 popd
