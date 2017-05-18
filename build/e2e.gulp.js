@@ -20,6 +20,7 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
+  var components = require('./components');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -60,17 +61,15 @@
   });
 
   gulp.task('e2e:instrument-source', function () {
-    var jsSourceFiles = [
-      'dist/**/*.js',
-      '!dist/bower_components/**/*.js',
-      '!dist/console-*.js'
-    ];
-    var sources = gulp.src(jsSourceFiles, {base: paths.dist});
-    return sources
+    var sources = components.getGlobs([
+      '**/*.js',
+      '!**/*.spec.js',
+      '!**/*.mock.js'
+    ]);
+    return gulp.src(sources.dist, {base: paths.dist})
       .pipe(ngAnnotate({
         single_quotes: true
       }))
-      //.pipe(rename(components.transformDirname))
       .pipe(istanbul(config.istanbul))
       .pipe(gulp.dest(paths.instrumented));
   });

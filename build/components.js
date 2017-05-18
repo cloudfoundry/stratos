@@ -11,7 +11,7 @@
   var utils = require('./utils');
   var config = require('./gulp.config');
 
-  var mainBowerFile, buildConfig, components;
+  var mainBowerFile, buildConfig, components, localComponents;
   var baseFolder = path.resolve(__dirname, '..');
   var bowerFolder = path.join(baseFolder, 'bower_components');
   var wildBowerFolder = path.join(bowerFolder, '**');
@@ -23,6 +23,7 @@
     mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
     buildConfig = JSON.parse(fs.readFileSync(path.join(baseFolder, 'build_config.json'), 'utf8'));
     components = findComponents();
+    localComponents = findLocalComponents();
   }
 
   function findComponents() {
@@ -42,6 +43,7 @@
             component.bower = bower;
             component.folder = folder;
             component.name = bower.name;
+            component.src = component.src || 'src';
           }
         }
       }
@@ -206,6 +208,16 @@
     return p;
   }
 
+  function reverseTransformPath(p) {
+    _.each(localComponents, function (cmpnt) {
+      var c = components[cmpnt.name];
+      if (c && c.rootDir && _.startsWith(p, c.rootDir + path.sep)) {
+        p = path.join(cmpnt.name, c.src, p.substr(c.rootDir.length + 1));
+      }
+    });
+    return p;
+  }
+
   function getBuildConfig() {
     return buildConfig;
   }
@@ -237,8 +249,9 @@
   module.exports.getGlobs = getGlobs;
   module.exports.addWiredep = addWiredep;
   module.exports.findMainFile = findMainFile;
-  module.exports.transformDirname = transformDirname;
   module.exports.transformPath = transformPath;
+  module.exports.transformDirname = transformDirname;
+  module.exports.reverseTransformPath = reverseTransformPath;
   module.exports.removeEmptyGlobs = removeEmptyGlobs;
   module.exports.findLocalComponentFolders = findLocalComponentFolders;
 

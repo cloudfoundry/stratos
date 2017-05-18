@@ -12,6 +12,10 @@
   var fs = require('fs');
   var protractorConfig = require('./protractor.conf');
   var gutil = require('gulp-util');
+  var components = require('./components');
+
+  var basePath = path.resolve('.');
+  var distPath = path.join(basePath, 'dist') + path.sep;
 
   exports.config = protractorConfig.config;
   var onPrepare = exports.config.onPrepare;
@@ -36,7 +40,17 @@
             .executeScript('if (typeof(__coverage__)!=="undefined") return __coverage__;')
             .then(function (coverageResults) {
               if (coverageResults) {
-                results.push(coverageResults);
+                var modCoverageResults = {};
+                _.each(coverageResults, function (obj, filePath) {
+                  if (filePath.startsWith(distPath)) {
+                    var relPath = filePath.substring(distPath.length);
+                    var newPath = path.join(basePath, 'components', components.reverseTransformPath(relPath));
+                    modCoverageResults[newPath] = obj;
+                  } else {
+                    modCoverageResults[filePath] = obj;
+                  }
+                });
+                results.push(modCoverageResults);
               } else {
                 gutil.log('Could not retrieve code coverage metadata - code may not be instrumented');
               }
