@@ -21,6 +21,10 @@
         clear: right;
       }
 
+      dt.indent{
+        padding-left: 12px;
+      }
+
       @media (min-width: 992px) {
         // Remove extra margin at bottom of lists (except for when lists are stacked)
         dt:last-of-type, dd:last-of-type {
@@ -109,7 +113,7 @@
         margin: $hpe-unit-space * 0.25 0;
       }
     }
-  }  
+  }
 }
 
 .add-route-form-section {

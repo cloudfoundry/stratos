@@ -31,7 +31,7 @@
     <div class="col-md-6">
       <dl class="dl-horizontal">
 
-        <dt translate>STATE</dt>
+        <dt translate>state</dt>
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
           <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
@@ -43,7 +43,17 @@
           </div>
         </dd>
 
-        <dt class="app-instance-title" translate>INSTANCES</dt>
+        <dt class="indent" translate>app state</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.state }}
+        </dd>
+
+        <dt class="indent" translate>package state</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.package_state }}
+        </dd>
+
+        <dt class="app-instance-title" translate>instances</dt>
         <dd>
           <percent-gauge ng-if="appCtrl.model.application.summary.package_updated_at" mode="instance"
                          value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
@@ -55,24 +65,24 @@
           </percent-gauge>
         </dd>
 
-        <dt translate>CREATED</dt>
+        <dt translate>created</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.metadata.created_at">
           {{ appCtrl.model.application.metadata.created_at | amDateFormat: 'L - LTS' }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.metadata.created_at">-</dd>
 
-        <dt translate>MODIFIED</dt>
+        <dt translate>modified</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
           {{ appCtrl.model.application.summary.package_updated_at | amDateFormat: 'L - LTS' }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
-        <dt translate>MEMORY</dt>
+        <dt translate>memory</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.memory)}}
         </dd>
 
-        <dt translate>DISK QUOTA</dt>
+        <dt translate>disk quota</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
         </dd>
@@ -81,7 +91,7 @@
     </div>
     <div class="col-md-6">
       <dl class="dl-horizontal">
-        <dt translate>BUILDPACK</dt>
+        <dt translate>buildpack</dt>
         <dd class="nowrap align-right">
           <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack || '-' }}</span>
           <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)"
@@ -90,12 +100,26 @@
              rel="noopener noreferrer">{{ appCtrl.appBuildPack }}</a>
         </dd>
 
-        <dt translate>ENDPOINT URL</dt>
+        <dt translate>production</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.production }}
+        </dd>
+
+        <dt translate>ssh enabled</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.enable_ssh }}
+        </dd>
+
+        <dt translate>stack</dt>
+        <dd class="pull-right">
+          {{ appCtrl.appStackName }}
+        </dd>
+        <dt translate>endpoint url</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.getEndpoint() }}
         </dd>
 
-        <dt translate>ENDPOINT</dt>
+        <dt translate>endpoint</dt>
         <dd class="pull-right">
           <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.detail.organizations({
                   guid: applicationSummaryCtrl.cnsiGuid
@@ -104,7 +128,7 @@
           </a>
         </dd>
 
-        <dt translate>ORGANIZATION</dt>
+        <dt translate>organization</dt>
         <dd class="pull-right">
           <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces({
                   guid: applicationSummaryCtrl.cnsiGuid,
@@ -114,7 +138,7 @@
           </a>
         </dd>
 
-        <dt translate>SPACE</dt>
+        <dt translate>space</dt>
         <dd class="pull-right">
           <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications({
                   guid: applicationSummaryCtrl.cnsiGuid,

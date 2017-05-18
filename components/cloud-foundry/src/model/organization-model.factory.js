@@ -551,7 +551,7 @@
         // Set created date for sorting
         details.created_at = createdDate.unix();
 
-        // Set memory utilisation
+        // Set memory quota
         details.memUsed = vals.memory;
         details.memQuota = vals.quota.entity.memory_limit;
 
@@ -563,8 +563,15 @@
         details.totalRoutes = vals.routesCountP;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
 
+        // Services Quotas
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
+       // Service Keys are credentials for service instances
+        details.servicesKeysQuota = _.get(vals.quota, 'entity.total_service_keys', -1);
 
+        details.privateDomains = _.get(org, 'entity.private_domains', []).length;
+        details.privateDomainsQuota = _.get(vals.quota, 'entity.total_private_domains', -1);
+
+        details.nonBasicServicesAllowed = _.get(vals.quota, 'entity.non_basic_services_allowed', false);
         details.roles = vals.roles;
 
         cacheOrganizationDetails(cnsiGuid, orgGuid, details);

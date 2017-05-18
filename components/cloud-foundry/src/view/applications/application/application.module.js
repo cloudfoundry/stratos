@@ -64,6 +64,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    this.stacksModel = modelManager.retrieve('cloud-foundry.model.stacks');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.cfAppCliCommands = cfAppCliCommands;
     this.id = $stateParams.guid;
@@ -234,6 +235,20 @@
             }));
           }
         })
+        .then(function () {
+          // Update stacks
+          var stackGuid = that.model.application.summary.stack_guid;
+          var listStacksP;
+          if (!_.has(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid)) {
+            // Stacks haven't been fetched yet
+            listStacksP = that.stacksModel.listAllStacks(that.cnsiGuid);
+          } else {
+            listStacksP = that.$q.resolve();
+          }
+          return listStacksP.then(function () {
+            that.updateStackName();
+          });
+        })
         .finally(function () {
           that.ready = true;
 
@@ -321,6 +336,7 @@
       var that = this;
       return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function () {
         that.updateBuildPack();
+        that.updateStackName();
       });
     },
 
@@ -329,6 +345,9 @@
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
       this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
+    },
+    updateStackName: function (stackGuid) {
+      this.appStackName = _.get(this.stacksModel, 'stacks.' + this.cnsiGuid + '.' + this.model.application.summary.stack_guid + '.entity.name', stackGuid);
     },
 
     /**
@@ -465,7 +484,7 @@
         appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
-      this.visibleActions = _.find(this.appActions, { hidden: false });
+      this.visibleActions = _.find(this.appActions, {hidden: false});
     },
 
     /**
