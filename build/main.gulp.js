@@ -56,7 +56,6 @@
 
     // bower install won't update our local components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
-    components.syncLocalComponents();
     components.initialize();
 
     localComponents = components.getGlobs('**/*.*');

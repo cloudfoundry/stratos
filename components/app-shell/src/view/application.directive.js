@@ -48,7 +48,7 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
+                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope, loginManager) {
 
     var vm = this;
 
@@ -69,9 +69,15 @@
     vm.logout = logout;
     vm.reload = reload;
 
-    $timeout(function () {
-      verifySessionOrCheckUpgrade();
-    }, 0);
+    if (loginManager.isEnabled()) {
+      $timeout(function () {
+        verifySessionOrCheckUpgrade();
+      }, 0);
+    } else {
+      vm.loggedIn = true;
+      vm.failedLogin = false;
+      appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
+    }
 
     // Navigation options
     $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
@@ -237,7 +243,7 @@
             // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
             // So, we pass this flag to tell them login happenned, but that they should not redirect
             appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
-            // We need to dpo this after the login events are handled, so that ui-router states we might go to are registered
+            // We need to do this after the login events are handled, so that ui-router states we might go to are registered
             if (vm.redirectState) {
               appEventService.$emit(appEventService.events.REDIRECT, vm.redirectState);
             }

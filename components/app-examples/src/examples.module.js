@@ -2,15 +2,15 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples', [
-      'helion.framework',
-      'ui.router',
+    .module('app-examples-main', [
+      'app',
+//      'ui.router',
       'ncy-angular-breadcrumb',
       'helionFrameworkExamples.tabbed-nav',
       'helionFrameworkExamples.tabs',
       'smart-table'
     ])
-    .constant('helionFrameworkExamples.basePath', 'scripts/')
+    .constant('helionFrameworkExamples.basePath', 'app-examples/')
     .controller('ExampleController', ExampleController);
 
   // provide gettext to widgets
