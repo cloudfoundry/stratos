@@ -7,7 +7,6 @@
   var _ = require('lodash');
   var fsx = require('fs-extra');
   var minimatch = require('minimatch');
-  var config = require('./gulp.config');
 
   function handleBower(srcDir, destDir) {
     var bowerFile = path.join(srcDir, 'bower.json');
@@ -60,35 +59,6 @@
     }
   }
 
-  var filePathsToExclude;
-  function updateWithPlugins(srcArray, flipExclude) {
-    // All config (srcArray) collections will contain the file globs for ALL plugins. Here we eliminate those that
-    // aren't required (in plugins folder but not in build_config.json plugins)
-    if (!filePathsToExclude) {
-      filePathsToExclude = [];
-      var appRoot = path.resolve(__dirname, '..');
-      var pluginsDirs = getDirs(path.join(appRoot, config.paths.src, 'plugins'));
-      var pluginsToExclude = _.difference(pluginsDirs, buildConfig.plugins);
-      var exclude = flipExclude ? '' : '!';
-      _.forEach(pluginsToExclude, function (plugin) {
-        filePathsToExclude.push(exclude + './' + path.join(config.paths.dist, 'plugins', plugin, '**', '*'));
-        filePathsToExclude.push(exclude + './' + path.join(config.paths.src, 'plugins', plugin, '**', '*'));
-      });
-    }
-    return srcArray.concat(filePathsToExclude);
-  }
-
-  function clearCachedPlugins(config) {
-    filePathsToExclude = undefined;
-    buildConfig = config;
-  }
-
-  function getDirs(srcpath) {
-    return fs.readdirSync(srcpath).filter(function (file) {
-      return fs.statSync(path.join(srcpath, file)).isDirectory();
-    });
-  }
-
   function generateScssFile(outFile, filePaths, relativeTo) {
     fs.writeFileSync(outFile, '// Auto-generated file\n');
     _.each(filePaths, function (filePath) {
@@ -108,8 +78,5 @@
   module.exports.getMajorMinor = getMajorMinor;
   module.exports.copyBowerFolder = copyBowerFolder;
   module.exports.copySingleBowerFolder = copySingleBowerFolder;
-  module.exports.updateWithPlugins = updateWithPlugins;
-  module.exports.clearCachedPlugins = clearCachedPlugins;
-  module.exports.getDirs = getDirs;
   module.exports.generateScssFile = generateScssFile;
 })();
