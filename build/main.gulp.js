@@ -62,8 +62,8 @@
     localComponents = components.getGlobs('**/*.*');
     i18nFiles = components.getGlobs('i18n/**/*.json');
     assetFiles = components.getGlobs('assets/**/*');
-    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']).bowerFull;
-    templateFiles = components.getGlobs(['src/**/*.html']).bowerFull;
+    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']);
+    templateFiles = components.getGlobs(['src/**/*.html']);
     scssFiles = components.getGlobs(['src/**/*.scss']);
   }
 
@@ -83,14 +83,14 @@
   // Copy HTML files to 'dist'
   // This is only used for development builds
   gulp.task('copy:html', function () {
-    return gulp.src(templateFiles)
+    return gulp.src(templateFiles.bowerFull)
       .pipe(rename(components.transformDirname))
       .pipe(gulp.dest(paths.dist));
   });
 
   // Copy JavaScript source files to 'dist'
   gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
-    return gulp.src(jsSourceFiles)
+    return gulp.src(jsSourceFiles.bowerFull)
       .pipe(sort())
       .pipe(angularFilesort())
       .pipe(ngAnnotate({
@@ -163,7 +163,7 @@
 
   // Put all of the html templates into an angular module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    return gulp.src(templateFiles)
+    return gulp.src(templateFiles.bowerFull)
       .pipe(sort())
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
@@ -256,6 +256,7 @@
     };
 
     // Watch the local components folders and copy only the changed file to the corresponding location in bower_components
+    // The other watches are then watching for changes to those files
     gulp.watch(localComponents.local, function (vfs) {
       if (vfs.type === 'changed') {
         var destPath = path.sep === '/' ? vfs.path.replace('/components/', '/bower_components/') : vfs.path.replace('\\components\\', '\\bower_components\\');
@@ -263,14 +264,12 @@
       }
     });
 
-    gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
+    gulp.watch(jsSourceFiles.bower, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch(scssFiles.bower, ['css', callback]);
-
     gulp.watch(i18nFiles.bower, ['i18n', callback]);
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);
-
-    // gulp.watch(templateFiles, ['copy:html', callback]);
-    // gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
+    gulp.watch(templateFiles.bower, ['copy:html', callback]);
+    gulp.watch(components.findMainFile('index.html'), ['inject:index', callback]);
 
     // Watch build configuration file for changes
     //gulp.watch('./tools/build_config.json', ['build-config', callback]);
