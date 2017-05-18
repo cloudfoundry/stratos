@@ -20,7 +20,6 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
-  var utils = require('./utils');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -48,7 +47,7 @@
     options.env.env = 'development';
     var c = fork(cmd,
       // You can add a spec file if you just want to run one set of test specs
-      ['./tools/coverage.conf.js'],
+      ['./build/coverage.conf.js'],
       options);
     c.on('close', function () {
       cb();
@@ -61,21 +60,30 @@
   });
 
   gulp.task('e2e:instrument-source', function () {
-    var sources = gulp.src(utils.updateWithPlugins(config.sourceFilesToInstrument), {base: paths.src});
+    var jsSourceFiles = [
+      'dist/**/*.js',
+      '!dist/bower_components/**/*.js',
+      '!dist/console-*.js'
+    ];
+    var sources = gulp.src(jsSourceFiles, {base: paths.dist});
     return sources
       .pipe(ngAnnotate({
         single_quotes: true
       }))
+      //.pipe(rename(components.transformDirname))
       .pipe(istanbul(config.istanbul))
       .pipe(gulp.dest(paths.instrumented));
   });
 
-  gulp.task('e2e:run', ['e2e:clean:dist'], function () {
+  gulp.task('neil', ['e2e:instrument-source', 'start-server']);
+
+  gulp.task('e2e:run', function () {
     paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
     config.disableServerLogging = true;
     runSequence(
-      'dev-default',
+      'e2e:clean:dist',
+      'dev-build',
       'e2e:pre-instrument',
       'e2e:instrument-source',
       'start-server',

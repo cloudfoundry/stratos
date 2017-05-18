@@ -279,7 +279,7 @@
     usePlumber = false;
     runSequence(
       'prepare',
-      'dev-default',
+      'dev-build',
       next
     );
   });
@@ -357,7 +357,7 @@
     cb();
   });
 
-  gulp.task('start-server', function () {
+  gulp.task('start-server', function (cb) {
     var options = {};
     options.env = _.clone(process.env);
     options.env.NODE_ENV = 'development';
@@ -366,6 +366,7 @@
     options.env.client_logging = config.disableServerLogging || false;
 
     server = fork(path.join(__dirname, 'server.js'), [], options);
+    cb();
   });
 
   gulp.task('stop-server', function () {
