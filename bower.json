@@ -16,16 +16,8 @@
     "app-framework": "./components/app-framework",
     "app-shell": "./components/app-shell",
     "suse-branding": "./components/suse-branding",
-    "app-examples": "./components/app-examples"
-  },
-  "olddependencies": {
-    "app-theme": "./components/app-theme",
-    "app-framework": "./components/app-framework",
-    "app-shell": "./components/app-shell",
-    "suse-branding": "./components/suse-branding",
     "endpoints-dashboard": "./components/endpoints-dashboard",
-    "cloud-foundry": "./components/cloud-foundry",
-    "app-examples": "./components/app-examples"
+    "cloud-foundry": "./components/cloud-foundry"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"
