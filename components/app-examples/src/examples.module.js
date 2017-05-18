@@ -1,4 +1,4 @@
-(function (global) {
+(function () {
   'use strict';
 
   angular
@@ -91,9 +91,9 @@
       }
     };
     vm.autoPopulate = {
-		src: '',
-		dest: ''
-	};
+      src: '',
+      dest: ''
+    };
     vm.actions = [
       {
         name: 'Start',
@@ -214,7 +214,7 @@
       }
 
       return ret;
-    };
+    }
 
     function updateRingChartData() {
       ringChartData.critical++;
@@ -281,7 +281,7 @@
           open: function () {
             openDetailView();
           },
-          showConfirmModal: function() {
+          showConfirmModal: function () {
             openConfirmModal();
           }
         });

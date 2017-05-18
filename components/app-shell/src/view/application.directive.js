@@ -28,6 +28,7 @@
    * @name ApplicationController
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.model.loginManager} loginManager - the login management service
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} appSelectLanguage - the Language Selection dialogService
@@ -47,8 +48,8 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope, loginManager) {
+  function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
+                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 

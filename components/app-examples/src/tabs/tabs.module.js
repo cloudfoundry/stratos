@@ -1,3 +1,4 @@
+/* eslint-disable angular/controller-as */
 (function () {
   'use strict';
 

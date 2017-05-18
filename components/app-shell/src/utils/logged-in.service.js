@@ -11,6 +11,7 @@
    * @name loggedInServiceFactory
    * @param {object} appEventService - Event Service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.model.loginManager} loginManager - the login management service
    * @param {object} frameworkDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
    * @param {object} $interpolate - the angular $interpolate Service
@@ -21,8 +22,8 @@
    * @param {object} $translate - the $translate Service
    * @returns {object} Logged In Service
    */
-  function loggedInServiceFactory(appEventService, modelManager, frameworkDialogConfirm,
-                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate, loginManager) {
+  function loggedInServiceFactory(appEventService, modelManager, loginManager, frameworkDialogConfirm,
+                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();
