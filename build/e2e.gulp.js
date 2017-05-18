@@ -20,7 +20,7 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
-  var utils = require('./gulp.utils');
+  var utils = require('./utils');
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -48,8 +48,6 @@
     options.env.env = 'development';
     var c = fork(cmd,
       // You can add a spec file if you just want to run one set of test specs
-      //['./protractor.conf.js', '--specs=./e2e/section_network_grps.spec.js'],
-      //['./protractor.conf.js', '--specs=./e2e/section_identify_servers.spec.js'],
       ['./tools/coverage.conf.js'],
       options);
     c.on('close', function () {

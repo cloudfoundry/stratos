@@ -28,7 +28,7 @@
   var sort = require('gulp-sort');
   var templateCache = require('gulp-angular-templatecache');
   var uglify = require('gulp-uglify');
-  var utils = require('./gulp.utils');
+  var utils = require('./utils');
   var wiredep = require('wiredep').stream;
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
@@ -38,7 +38,7 @@
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var localComponents, assetFiles, i18nFiles, jsSourceFiles, templateFiles, server;
+  var localComponents, assetFiles, i18nFiles, jsSourceFiles, templateFiles, scssFiles, server;
   var packageJson = require('../package.json');
 
   // Initial component configuration
@@ -64,7 +64,7 @@
     assetFiles = components.getGlobs('assets/**/*');
     jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']).bowerFull;
     templateFiles = components.getGlobs(['src/**/*.html']).bowerFull;
-    //scssFiles = components.getGlobs(['src/**/*.scss'], false);
+    scssFiles = components.getGlobs(['src/**/*.scss']);
   }
 
   gulp.task('prepare', function (next) {
@@ -219,7 +219,7 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Run ESLint on 'src' folder
+  // Run ESLint on all source in the components folder as well as the build files and e2e tests
   gulp.task('lint', function () {
     var lintFiles = config.lintFiles;
     return gulp
@@ -228,11 +228,6 @@
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
   });
-
-  function getMajorMinor(version) {
-    var regex = /^(\d+\.)?(\d)/i;
-    return version.match(regex)[0];
-  }
 
   // Prepare required artifacts for the unit tests
   gulp.task('unit:prepare', ['i18n','template-cache','copy:assets']);
@@ -248,7 +243,7 @@
   });
 
   gulp.task('i18n', function () {
-    var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
+    var productVersion = { product: { version: utils.getMajorMinor(packageJson.version) } };
     return gulp.src(i18nFiles.bower)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -263,13 +258,13 @@
     // Watch the local components folders and copy only the changed file to the corresponding location in bower_components
     gulp.watch(localComponents.local, function (vfs) {
       if (vfs.type === 'changed') {
-        var destPath = vfs.path.replace('/components/', '/bower_components/');
+        var destPath = path.sep === '/' ? vfs.path.replace('/components/', '/bower_components/') : vfs.path.replace('\\components\\', '\\bower_components\\');
         fsx.copySync(vfs.path, destPath);
       }
     });
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    //gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
+    gulp.watch(scssFiles.bower, ['css', callback]);
 
     gulp.watch(i18nFiles.bower, ['i18n', callback]);
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);

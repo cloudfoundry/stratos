@@ -8,9 +8,8 @@
   var minimatch = require('minimatch');
   var globLib = require('glob');
   var fsx = require('fs-extra');
-  var utils = require('./gulp.utils');
+  var utils = require('./utils');
   var config = require('./gulp.config');
-  // var buildConfig = require('./build_config.json');
 
   var mainBowerFile, buildConfig, components;
   var baseFolder = path.resolve(__dirname, '..');
