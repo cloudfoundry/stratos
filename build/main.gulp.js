@@ -34,16 +34,12 @@
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
   var components = require('./components');
-  // Pull in the gulp tasks for the ui framework examples
-  require('./examples.gulp');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var localComponents, jsSourceFiles, templateFiles, server;
+  var localComponents, assetFiles, i18nFiles, jsSourceFiles, templateFiles, server;
   var packageJson = require('../package.json');
-
-  var watches = {};
 
   // Initial component configuration
   initialize();
@@ -63,15 +59,12 @@
     components.syncLocalComponents();
     components.initialize();
 
-    localComponents = components.getLocalGlobs('**/*.*');
-    watches.i18nFiles = components.getGlobs('i18n/**/*.json', true);
-    watches.assetFiles = components.getGlobs('assets/**/*', true);
-
-    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js'], false);
-    templateFiles = components.getGlobs(['src/**/*.html'], false);
+    localComponents = components.getGlobs('**/*.*');
+    i18nFiles = components.getGlobs('i18n/**/*.json');
+    assetFiles = components.getGlobs('assets/**/*');
+    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']).bowerFull;
+    templateFiles = components.getGlobs(['src/**/*.html']).bowerFull;
     //scssFiles = components.getGlobs(['src/**/*.scss'], false);
-
-    //console.log(watches);
   }
 
   gulp.task('prepare', function (next) {
@@ -91,7 +84,7 @@
   // This is only used for development builds
   gulp.task('copy:html', function () {
     return gulp.src(templateFiles)
-      .pipe(rename(components.renamePath))
+      .pipe(rename(components.transformDirname))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -104,7 +97,7 @@
         single_quotes: true
       }))
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
-      .pipe(!gutil.env.devMode ? gutil.noop() : rename(components.renamePath))
+      .pipe(!gutil.env.devMode ? gutil.noop() : rename(components.transformDirname))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.dist));
   });
@@ -116,7 +109,7 @@
     done();
   });
 
-  // Copy JavaScript config file to 'dist'- patch in the default OEM configuration
+  // Copy JavaScript config file to 'dist'
   gulp.task('copy:configjs', function () {
     var buildConfig = components.getBuildConfig();
     return gulp
@@ -137,9 +130,8 @@
   });
 
   gulp.task('copy:assets', function () {
-    var assetFiles = components.getGlobs('assets/**/*', true);
     return gulp
-      .src(assetFiles)
+      .src(assetFiles.bower)
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -171,8 +163,7 @@
 
   // Put all of the html templates into an angular module that preloads them when the app loads
   gulp.task('template-cache', function () {
-    var tFiles = components.getGlobs('src/**/*.html');
-    return gulp.src(tFiles)
+    return gulp.src(templateFiles)
       .pipe(sort())
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
@@ -204,12 +195,12 @@
     var enStrings = require(path.join(distPath, 'i18n', 'locale-en.json'));
     var jsDevFiles = [];
     if (gutil.env.devMode) {
-      jsDevFiles = components.getSourceGlobs([
+      jsDevFiles = components.getGlobs([
         'plugin.config.js',
         '**/*.module.js',
         '**/*.js',
         '!**/*.spec.js'
-      ], paths.dist);
+      ]).dist;
     }
 
     var sources = gulp.src(
@@ -258,8 +249,7 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: getMajorMinor(packageJson.version) } };
-    var i18nFiles = components.getGlobs('i18n/**/*.json');
-    return gulp.src(i18nFiles)
+    return gulp.src(i18nFiles.bower)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
@@ -271,7 +261,7 @@
     };
 
     // Watch the local components folders and copy only the changed file to the corresponding location in bower_components
-    gulp.watch(localComponents, function (vfs) {
+    gulp.watch(localComponents.local, function (vfs) {
       if (vfs.type === 'changed') {
         var destPath = vfs.path.replace('/components/', '/bower_components/');
         fsx.copySync(vfs.path, destPath);
@@ -281,8 +271,8 @@
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     //gulp.watch([scssFiles, config.themeScssFiles, defaultBrandFolder + '/**/*'], ['css', callback]);
 
-    gulp.watch(watches.i18nFiles, ['i18n', callback]);
-    gulp.watch(watches.assetFiles, ['copy:assets', callback]);
+    gulp.watch(i18nFiles.bower, ['i18n', callback]);
+    gulp.watch(assetFiles.bower, ['copy:assets', callback]);
 
     // gulp.watch(templateFiles, ['copy:html', callback]);
     // gulp.watch(paths.src + 'index.html', ['inject:index', callback]);

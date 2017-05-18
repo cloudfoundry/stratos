@@ -1,3 +1,3 @@
 {
-  "templatePrefix": "plugins/cloud-foundry"
+  "rootDir": "plugins/cloud-foundry"
 }

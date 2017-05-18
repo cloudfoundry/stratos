@@ -46,7 +46,7 @@
         },
         'bootstrap-sass': {
           main: [
-            'assets/stylesheets/_bootstrap.scss'
+//            'assets/stylesheets/_bootstrap.scss'
           ]
         }
       }
@@ -63,26 +63,8 @@
       coverageVariable: '__coverage__'
     },
 
-    assetFiles: [
-      paths.src + 'app/**/assets/**/*',
-      paths.src + 'plugins/**/assets/**/*'
-    ],
-
     cssFiles: [
       paths.dist + 'index.css'
-    ],
-
-    jsFiles: [
-      paths.dist + 'framework/**/*.module.js',
-      paths.dist + 'framework/**/*.js',
-      paths.dist + 'plugins/**/plugin.config.js',
-      paths.dist + 'index.module.js',
-      paths.dist + 'app/**/*.module.js',
-      paths.dist + 'app/**/*.js',
-      paths.dist + 'plugins/**/*.module.js',
-      paths.dist + 'plugins/**/*.js',
-      '!' + paths.dist + '**/*.mock.js',
-      '!' + paths.dist + '**/*.spec.js'
     ],
 
     jsFile: 'console-console.js',
@@ -90,18 +72,6 @@
     jsLibsFile: 'console-libs.js',
 
     jsTemplatesFile: 'console-templates.js',
-
-    jsSourceFiles: [
-      paths.src + '*.js',
-      paths.src + 'app/**/*.js',
-      paths.src + 'plugins/**/*.js',
-      paths.src + 'framework/**/*.js',
-      '!' + paths.src + 'config.js',
-      '!' + paths.src + 'plugins/**/*.mock.js',
-      '!' + paths.src + 'plugins/**/*.spec.js',
-      '!' + paths.src + 'framework/**/*.mock.js',
-      '!' + paths.src + 'framework/**/*.spec.js'
-    ],
 
     sourceFilesToInstrument: [
       paths.src + '*.js',
@@ -124,10 +94,6 @@
     lintFiles: [
       paths.components + '**/*.js',
       '!' + paths.components + '**/*.mock.js',
-      // paths.src + 'app/**/*.js',
-      // paths.src + 'plugins/**/!(*.mock).js',
-      // '!' + paths.src + 'plugins/*/api/**/*.js',
-      // paths.src + 'framework/**/*.js',
       paths.build + '*.js',
       paths.build + 'test-backend/*.js',
       paths.build + 'test-backend/api/**/*.js',
@@ -136,11 +102,6 @@
       paths.e2e + '**/*.js'
     ],
 
-    scssSourceFiles: [
-      paths.src + 'index.scss'
-    ],
-
     paths: paths
-
   };
 })();

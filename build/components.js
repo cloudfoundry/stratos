@@ -9,12 +9,13 @@
   var globLib = require('glob');
   var fsx = require('fs-extra');
   var utils = require('./gulp.utils');
-  // var config = require('./gulp.config');
+  var config = require('./gulp.config');
   // var buildConfig = require('./build_config.json');
 
   var mainBowerFile, buildConfig, components;
   var baseFolder = path.resolve(__dirname, '..');
   var bowerFolder = path.join(baseFolder, 'bower_components');
+  var wildBowerFolder = path.join(bowerFolder, '**');
 
   // Initialization when first brought in via require
   initialize();
@@ -81,7 +82,8 @@
 
   function syncLocalComponents() {
     var c = findLocalComponents(baseFolder);
-    _.each(c, function (localComponent) {
+    _.each(c, function (localComponent, name) {
+      fsx.emptyDirSync(path.join(bowerFolder, name));
       utils.copySingleBowerFolder(localComponent.path, bowerFolder);
     });
 
@@ -91,74 +93,40 @@
         fsx.removeSync(component.folder);
       }
     });
-
   }
 
-  function getGlobs(glob, skipName, absolute) {
-    var c = findComponentsDependencySorted();
-    var n = [];
-    if (!Array.isArray(glob)) {
-      glob = [glob];
-    }
-    _.each(glob, function (g) {
-      _.each(c, function (v) {
-        var inverse = g.indexOf('!') === 0;
-        g = !inverse ? g : g.substring(1);
-        var f = skipName ? path.join(bowerFolder, v.name, g) : path.join(bowerFolder, '**', v.name, g);
-        if (absolute) {
-          f = path.resolve(__dirname, f);
-        } else {
-          f = './' + path.relative(baseFolder, f);
-        }
-        n.push(inverse ? '!' + f : f);
-      });
-    });
-
-    return n;
-  }
-
-  function getSourceGlobs(glob, prefix) {
-    var c = findComponentsDependencySorted();
-    var n = [];
-    if (!Array.isArray(glob)) {
-      glob = [glob];
-    }
-    _.each(glob, function (g) {
-      _.each(c, function (v) {
-        var inverse = g.indexOf('!') === 0;
-        g = !inverse ? g : g.substring(1);
-        var f;
-        if (!prefix) {
-          f = path.join('./components', v.name, g);
-        } else {
-          var name = v.templatePrefix ? v.templatePrefix : v.name;
-          f = path.join(prefix, name, g);
-        }
-        n.push(inverse ? '!' + f : f);
-      });
-    });
-    return n;
-  }
-
-  function getLocalGlobs(glob) {
+  function getGlobs(pattern) {
     var c = findComponentsDependencySorted();
     var local = findLocalComponents();
-    var n = [];
-    if (!Array.isArray(glob)) {
-      glob = [glob];
+
+    var globs = {
+      dist: [],
+      bower: [],
+      bowerFull: [],
+      local: []
+    };
+
+    if (!Array.isArray(pattern)) {
+      pattern = [pattern];
     }
-    _.each(c, function (v) {
-      // Check that v is a local component
-      if (local[v.name]) {
-        _.each(glob, function (g) {
-          var inverse = g.indexOf('!') === 0;
-          g = !inverse ? g : g.substring(1);
-          var f = path.join(local[v.name].folder, g);
-          n.push(inverse ? '!' + f : f);
-        });
-      }
+
+    _.each(pattern, function (g) {
+      var inverse = g.indexOf('!') === 0;
+      g = !inverse ? g : g.substring(1);
+      _.each(c, function (v) {
+        var dPath = path.relative(baseFolder, path.join(config.paths.dist, v.rootDir ? v.rootDir : v.name, g));
+        var bPath = path.relative(baseFolder, path.join(bowerFolder, v.name, g));
+        var bfPath = path.relative(baseFolder, path.join(wildBowerFolder, v.name, g));
+        globs.dist.push(inverse ? '!' + dPath : dPath);
+        globs.bower.push(inverse ? '!' + bPath : bPath);
+        globs.bowerFull.push(inverse ? '!' + bfPath : bfPath);
+        if (local[v.name]) {
+          var lPath = path.join(local[v.name].folder, g);
+          globs.local.push(inverse ? '!' + lPath : lPath);
+        }
+      });
     });
-    return n;
+    return globs;
   }
 
   function addWiredep(config) {
@@ -228,13 +196,13 @@
     var parts = p.split(path.sep);
     var name = parts[0];
     parts.splice(1,1);
-    if (components[name] && components[name].templatePrefix) {
-      parts[0] = components[name].templatePrefix;
+    if (components[name] && components[name].rootDir) {
+      parts[0] = components[name].rootDir;
     }
     return parts.join(path.sep);
   }
 
-  function renamePath(p) {
+  function transformDirname(p) {
     p.dirname = transformPath(p.dirname);
     return p;
   }
@@ -266,16 +234,12 @@
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.getBowerConfig = getBowerConfig;
   module.exports.getBowerFolder = getBowerFolder;
-  module.exports.findComponents = findComponents;
   module.exports.syncLocalComponents = syncLocalComponents;
   module.exports.getGlobs = getGlobs;
-  module.exports.getSourceGlobs = getSourceGlobs;
-  module.exports.getLocalGlobs = getLocalGlobs;
   module.exports.addWiredep = addWiredep;
   module.exports.findMainFile = findMainFile;
-  module.exports.renamePath = renamePath;
+  module.exports.transformDirname = transformDirname;
   module.exports.transformPath = transformPath;
-  module.exports.findComponentsDependencySorted = findComponentsDependencySorted;
   module.exports.removeEmptyGlobs = removeEmptyGlobs;
   module.exports.findLocalComponentFolders = findLocalComponentFolders;
 

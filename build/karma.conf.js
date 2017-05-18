@@ -130,10 +130,10 @@
     };
 
     // Add in the test folders only for the components that are referneced in the bower file
-    var pluginFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/plugin.config.js'));
-    var moduleFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/**/*.module.js'));
-    var srcFiles = components.removeEmptyGlobs(components.getLocalGlobs('src/**/*.js'));
-    var testFiles = components.removeEmptyGlobs(components.getLocalGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']));
+    var pluginFiles = components.removeEmptyGlobs(components.getlobs('src/plugin.config.js').local);
+    var moduleFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.module.js').local);
+    var srcFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.js').local);
+    var testFiles = components.removeEmptyGlobs(components.getGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']).local);
 
     karmaConfig.files = _.concat(karmaConfig.files, pluginFiles, moduleFiles, srcFiles, testFiles);
 

@@ -1,5 +1,5 @@
 {
-  "templatePrefix": "framework",
+  "rootDir": "framework",
   "dependencies": {
     "angular": {
       "jquery": "*"
