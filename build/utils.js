@@ -105,7 +105,7 @@
     return version.match(regex)[0];
   }
 
-  module.exports.getMajorMinor = getMajorMinor;  
+  module.exports.getMajorMinor = getMajorMinor;
   module.exports.copyBowerFolder = copyBowerFolder;
   module.exports.copySingleBowerFolder = copySingleBowerFolder;
   module.exports.updateWithPlugins = updateWithPlugins;
