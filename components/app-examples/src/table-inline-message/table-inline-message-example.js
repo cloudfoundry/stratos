@@ -2,16 +2,12 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .directive('tableInlineMessageExample', tableInlineMessageExample);
 
-  tableInlineMessageExample.$inject = [
-    'helionFrameworkExamples.basePath'
-  ];
-
-  function tableInlineMessageExample(path) {
+  function tableInlineMessageExample() {
     return {
-      templateUrl: path + 'table-inline-message/table-inline-message-example.html'
+      templateUrl: '/app-examples/table-inline-message/table-inline-message-example.html'
     };
   }
 

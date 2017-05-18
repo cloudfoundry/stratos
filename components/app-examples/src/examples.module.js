@@ -2,36 +2,31 @@
   'use strict';
 
   angular
-    .module('app-examples-main', [
-      'app',
-//      'ui.router',
-      'ncy-angular-breadcrumb',
-      'helionFrameworkExamples.tabbed-nav',
-      'helionFrameworkExamples.tabs',
-      'smart-table'
+    .module('app-examples.main', [
+      'app-examples.widgets'
     ])
-    .constant('helionFrameworkExamples.basePath', 'app-examples/')
-    .controller('ExampleController', ExampleController);
+    .constant('appExamples.basePath', 'app-examples/')
+    .controller('ExampleController', ExampleController)
+    .config(registerRoute);
 
-  // provide gettext to widgets
-  function expose(vars) {
-    for (var key in vars) {
-      if (vars.hasOwnProperty(key)) {
-        global[key] = vars[key];
+  function registerRoute($stateProvider) {
+    $stateProvider.state('examples', {
+      url: '/examples',
+      templateUrl: 'app-examples/framework.html',
+      data: {
+        activeMenuState: 'examples'
       }
-    }
+    });
+    $stateProvider.state('theme', {
+      url: '/theme',
+      templateUrl: 'app-examples/theme_preview.html',
+      data: {
+        activeMenuState: 'theme'
+      }
+    });
   }
-
-  function gettext(text) {
-    return text;
-  }
-
-  expose({
-    gettext: gettext
-  });
 
   /* eslint-disable no-alert */
-
   function ExampleController($location, $scope, $state, $timeout, $q, $log, frameworkDialogConfirm, frameworkDetailView,
                              frameworkToaster, frameworkAsyncTaskDialog, frameworkDialogEvents) {
     var vm = this;

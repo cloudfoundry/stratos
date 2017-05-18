@@ -2,14 +2,12 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .controller('flyoutExampleController', FlyoutExampleController);
 
-  FlyoutExampleController.$inject = ['helionFrameworkExamples.basePath'];
-
-  function FlyoutExampleController(path) {
+  function FlyoutExampleController() {
     this.flyoutActive = false;
-    this.flyoutTemplateUrl = path + 'flyout/flyout-example.html';
+    this.flyoutTemplateUrl = 'app-examples/flyout/flyout-example.html';
   }
 
   angular.extend(FlyoutExampleController.prototype, {

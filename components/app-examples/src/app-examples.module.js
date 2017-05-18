@@ -3,7 +3,8 @@
 
   angular
     .module('app-examples', [
-      'app-examples-main'
+      'app',
+      'app-examples.main'
     ])
     .run(register);
 
@@ -37,7 +38,10 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('exaples', 'examples', 'menu.examples', 0, 'helion-icon-Application');
+      menu.addMenuItem('examples', 'examples', 'menu.examples', 0, 'helion-icon-Application');
+
+      menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItem('theme', 'theme', 'menu.theme', 1, 'helion-icon-Quick_view');
     }
   });
 

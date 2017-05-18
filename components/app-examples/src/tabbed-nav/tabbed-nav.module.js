@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples.tabbed-nav', [])
+    .module('app-examples.widgets', [])
     .config(TabbedNavRouteConfig);
 
   TabbedNavRouteConfig.$inject = [

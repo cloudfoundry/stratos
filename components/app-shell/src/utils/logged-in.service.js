@@ -22,7 +22,7 @@
    * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(appEventService, modelManager, frameworkDialogConfirm,
-                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate) {
+                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate, loginManager) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();
@@ -132,7 +132,9 @@
 
     appEventService.$on(appEventService.events.LOGIN, function () {
       loggedIn = true;
-      sessionChecker = $interval(checkSession, checkSessionInterval);
+      if (loginManager.isEnabled()) {
+        sessionChecker = $interval(checkSession, checkSessionInterval);
+      }
     });
 
     appEventService.$on(appEventService.events.LOGOUT, function () {

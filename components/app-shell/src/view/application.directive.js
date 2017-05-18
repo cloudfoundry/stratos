@@ -74,6 +74,7 @@
         verifySessionOrCheckUpgrade();
       }, 0);
     } else {
+      vm.ready = true;
       vm.loggedIn = true;
       vm.failedLogin = false;
       appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);

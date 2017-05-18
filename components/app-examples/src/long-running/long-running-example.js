@@ -2,18 +2,14 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .directive('longRunningExample', longRunningExample);
 
-  longRunningExample.$inject = [
-    'helionFrameworkExamples.basePath'
-  ];
-
-  function longRunningExample(path) {
+  function longRunningExample() {
     return {
       controller: LongRunningExampleController,
       controllerAs: 'longRunningExampleCtrl',
-      templateUrl: path + 'long-running/long-running-example.html'
+      templateUrl: 'app-examples/long-running/long-running-example.html'
     };
   }
 
