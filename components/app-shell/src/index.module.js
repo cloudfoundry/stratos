@@ -14,7 +14,6 @@
     'ui.bootstrap',
     'ui.router',
     'smart-table',
-    //'ig.linkHeaderParser',
     'pascalprecht.translate'
   ];
 
