@@ -16,14 +16,12 @@
     "app-framework": "./components/app-framework",
     "app-shell": "./components/app-shell",
     "suse-branding": "./components/suse-branding",
+    "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"
-  },
-  "resolutions": {
-    "lodash": "~4.0.1"
   },
   "config": {
     "main": "cloud-foundry"

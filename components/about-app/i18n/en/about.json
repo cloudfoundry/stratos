@@ -1,0 +1,14 @@
+{
+  "about": {
+    "about": "About",
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "footer": {
+      "title": "@:footer.title",
+      "copyright": "@:footer.copyright",
+      "company.logo": "@:company.logo",
+      "product.logo": "@:product.logo",
+      "company.www-link": "@:company.www-link",
+      "product.www-link": "@:product.www-link"
+    }
+  }
+}

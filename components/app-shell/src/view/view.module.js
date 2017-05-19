@@ -10,7 +10,6 @@
    */
   angular
     .module('app.view', [
-      'app.view.settings-page',
       'app.view.endpoints',
       'app.view.error-page',
       'app.utils'
