@@ -33,7 +33,7 @@
 
     function findMain() {
       var p = _.find(env.plugins, {moduleName: env.main});
-      var main = 'account-settings';
+      var main = 'about-app';
       main = p && p.main ? p.main : main;
       return main;
     }
