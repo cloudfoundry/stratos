@@ -4,8 +4,8 @@
          ng-model="searchBoxCtrl.searchText"
          ng-keydown="searchBoxCtrl.onKeyDown($event)"
          placeholder="{{ searchBoxCtrl.placeholder }}" ng-disabled="searchBoxCtrl.disabled"/>
-  <i class="search-icon"
-     ng-class="searchBoxCtrl.searchIcon || 'helion-icon helion-icon-Search'"></i>
+  <i class="search-icon material-icons"
+     ng-class="searchBoxCtrl.searchIcon || 'search-icon-icon'"></i>
 
   <ul ng-show="searchBoxCtrl.open" class="dropdown-menu">
     <li class="select-option"

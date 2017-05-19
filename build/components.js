@@ -22,6 +22,7 @@
   function initialize() {
     mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
     buildConfig = mainBowerFile.config || {};
+    syncLocalComponents();
     components = findComponents();
     localComponents = findLocalComponents();
   }

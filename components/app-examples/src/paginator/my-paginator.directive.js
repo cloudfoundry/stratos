@@ -2,11 +2,11 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .directive('myPaginator', myPaginator);
 
   myPaginator.$inject = [
-    'helionFrameworkExamples.basePath'
+    'appExamples.basePath'
   ];
 
   function myPaginator(path) {

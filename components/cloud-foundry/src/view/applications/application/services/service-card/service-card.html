@@ -16,7 +16,7 @@
       </div>
       <div class="service-actions-menu" ng-hide="serviceCardCtrl.hideServiceActions()">
         <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
-          action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
+          action-target="service"
           menu-position="actions-menu-right">
         </actions-menu>
       </div>
@@ -43,7 +43,7 @@
           ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
           ng-click="serviceCardCtrl.addService()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
           Add Service
-          <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+          <i class="helion-icon app-icon-sm helion-icon-Plus add-icon"></i>
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"

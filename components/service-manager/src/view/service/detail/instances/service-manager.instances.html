@@ -34,7 +34,7 @@
         <td class="endpoint-table-connected" ng-init="state = smCtrl.hsmModel.instanceStateIndicator(instance.state)">
           <bounce-spinner classes="bounce-spinner-sm" ng-if="state === 'busy'"></bounce-spinner>
           <span ng-if="state !== 'busy'"
-                class="helion-icon helion-icon-lg {{ state | appStateIcon | smallToLargeIcon}}"
+                class="helion-icon app-icon-lg {{ state | appStateIcon | smallToLargeIcon}}"
                 uib-popover="{{ instance.state }}"
                 popover-trigger="'mouseenter'"
                 popover-placement="top-left"
@@ -58,7 +58,6 @@
           <!--
           <actions-menu actions="instance.actions"
                         action-target="instance.actionsTarget"
-                        menu-icon="helion-icon helion-icon-More"
                         menu-position="actions-menu-right"
                         enable-button-mode="true"></actions-menu>
         -->

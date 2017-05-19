@@ -97,7 +97,8 @@
   function ActionsMenuController($scope) {
     var that = this;
 
-    this.icon = this.menuIcon || 'glyphicon glyphicon-option-horizontal';
+    // Optional extra classes (e.g. to change size of icon)
+    this.icon = this.menuIcon;
     this.position = this.menuPosition || '';
     this.open = false;
     this.buttonMode = false;

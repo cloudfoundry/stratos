@@ -1,138 +1,11 @@
-<!doctype html>
-<html ng-strict-di>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="icon" type="image/vnd.microsoft.icon" href="images/favicon.ico" />
-  <style>
-    body {
-      padding-top: 50px;
-      padding-bottom: 20px;
-      text-decoration: none;
-    }
-
-    .headerlink {
-      display: none;
-    }
-
-    .header:hover .headerlink {
-      display: inline;
-      color: #c7254e;
-      text-decoration: none;
-    }
-  </style>
-
-  <!-- inject:css -->
-  <link rel="stylesheet" href="framework.css">
-  <!-- endinject -->
-
-  <script src="console-config.js"></script>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <!-- bower:js -->
-  <!-- endbower -->
-
-  <!-- inject:js -->
-  <!-- endinject -->
-  <script src="console-libs.js"></script>
-  <script src="console-console.js"></script>
-
-  <script src="scripts/examples.module.js"></script>
-  <script src="scripts/flyout/flyout-example.controller.js"></script>
-  <script src="scripts/long-running/long-running-example.js"></script>
-  <script src="scripts/table-inline-message/table-inline-message-example.js"></script>
-  <script src="scripts/tabbed-nav/tabbed-nav.module.js"></script>
-  <script src="scripts/tabs/tabs.module.js"></script>
-  <script src="scripts/paginator/my-paginator.directive.js"></script>
-  <script src="scripts/search-box/my-search-box.directive.js"></script>
-  <script src="scripts/wizard/my-workflow.directive.js"></script>
-</head>
-
-<body ng-app="helionFrameworkExamples" ng-controller="ExampleController as exampleCtrl">
-
-  <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-        aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-      </div>
-      <div id="navbar" class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="theme_preview.html">Theme</a></li>
-          <li><a href="icons.html">Icons</a></li>
-
-          <li><a href="#filters">Filters</a></li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown"
-              role="button" aria-haspopup="true" aria-expanded="true">
-              Utils<span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="#focusable-input" target="_self">Focusable Input</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown"
-              role="button" aria-haspopup="true" aria-expanded="true">
-              Widgets<span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="#actionsMenu" target="_self">Actions Menu</a></li>
-              <li><a href="#breadcrumbs" target="_self">Breadcrumbs</a></li>
-              <li><a href="#default-image" target="_self">Default Image</a></li>
-              <li><a href="#flyout" target="_self">Flyout</a></li>
-              <li><a href="#galleryCard" target="_self">Gallery Card</a></li>
-              <li><a href="#passwordReveal" target="_self">Password Reveal</a></li>
-              <li><a href="#radioInput" target="_self">Radio Input</a></li>
-              <li><a href="#checkboxInput" target="_self">Checkbox Input</a></li>
-              <li><a href="#selectInput" target="_self">Select Input Field</a></li>
-              <li><a href="#smartTable" target="_self">Smart Table</a></li>
-              <li><a href="#spinner" target="_self">Spinner</a></li>
-              <li><a href="#bounce-spinner" target="_self">Bounce Spinner</a></li>
-              <li><a href="#globalSpinner" target="_self">Spinner - Global</a></li>
-              <li><a href="#tabbedNav" target="_self">Tabbed Nav</a></li>
-              <li><a href="#tabs" target="_self">Tabs</a></li>
-              <li><a href="#long-running-example" target="_self">Long Running Service</a></li>
-              <li><a href="#table-inline-message-example" target="_self">Table Inline Message</a></li>
-              <li><a href="#percent-gauge" target="_self">Percent Gauge</a></li>
-              <li><a href="#paginator" target="_self">Paginator</a></li>
-              <li><a href="#search-box" target="_self">Search Box</a></li>
-              <li><a href="#wizard" target="_self">Wizard</a></li>
-              <li><a href="#confirm-modal" target="_self">Confirmation Dialog Service</a></li>
-              <li><a href="#log-viewer" target="_self">Log Viewer</a></li>
-              <li><a href="#ring-chart" target="_self">Ring Chart</a></li>
-              <li><a href="#code-block" target="_self">Code Block</a></li>
-            </ul>
-          </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown"
-              role="button" aria-haspopup="true" aria-expanded="true">
-              Validators<span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="#validator-unique" target="_self">Unique Value</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
-    </div>
-  </nav>
-
+<div ng-controller="ExampleController as exampleCtrl">
+<div class="container">
   <div class="jumbotron">
     <div class="container">
       <h1>UI Framework</h1>
       <p>A collection of reusable Angular-based UI components.</p>
     </div>
   </div>
-
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
@@ -1169,6 +1042,4 @@ Copy for this block has been disabled</code-block>
 
   </div>  <!-- class="container" -->
 
-</body>
-
-</html>
+</div>

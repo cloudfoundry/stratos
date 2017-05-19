@@ -2,28 +2,23 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .directive('myWorkflow', myWorkflow);
 
-  myWorkflow.$inject = [
-    'helionFrameworkExamples.basePath'
-  ];
-
-  function myWorkflow(path) {
+  function myWorkflow() {
     return {
       controller: MyWorkflowController,
       controllerAs: 'myWorkflowCtrl',
-      templateUrl: path + 'wizard/my-workflow.html'
+      templateUrl: 'app-examples/wizard/my-workflow.html'
     };
   }
 
   MyWorkflowController.$inject = [
-    'helionFrameworkExamples.basePath',
     '$q',
     '$timeout'
   ];
 
-  function MyWorkflowController(path, $q, $timeout) {
+  function MyWorkflowController($q, $timeout) {
     var that = this;
 
     this.userInput = {
@@ -43,7 +38,7 @@
         {
           title: 'Step 1',
           formName: 'form1',
-          templateUrl: path + 'wizard/step-1.html',
+          templateUrl: 'app-examples/wizard/step-1.html',
           nextBtnText: 'Go Next',
           cancelBtnText: 'Cancel',
           showBusyOnEnter: 'Preparing for initial step',
@@ -70,12 +65,12 @@
         {
           title: 'Step 2',
           formName: 'form2',
-          templateUrl: path + 'wizard/step-2.html'
+          templateUrl: 'app-examples/wizard/step-2.html'
         },
         {
           title: 'Step 3',
           formName: 'form3',
-          templateUrl: path + 'wizard/step-3.html',
+          templateUrl: 'app-examples/wizard/step-3.html',
           nextBtnText: 'Skip',
           showBusyOnEnter: 'Preparing for step 3',
           onEnter: function () {
@@ -89,7 +84,7 @@
         {
           title: 'Step 4',
           formName: 'form4',
-          templateUrl: path + 'wizard/step-4.html',
+          templateUrl: 'app-examples/wizard/step-4.html',
           checkReadiness: function () {
             var d = $q.defer();
             $timeout(function () {
@@ -101,7 +96,7 @@
         {
           title: 'Step 5',
           formName: 'form5',
-          templateUrl: path + 'wizard/step-5.html',
+          templateUrl: 'app-examples/wizard/step-5.html',
           checkReadiness: false,
           nextBtnText: 'Next',
           onNext: function () {
@@ -122,7 +117,7 @@
           ready: true,
           title: 'Step 1 in subflow one',
           formName: 'form_1_subflow_one',
-          templateUrl: path + 'wizard/subflow-one-step-1.html',
+          templateUrl: 'app-examples/wizard/subflow-one-step-1.html',
           showBusyOnNext: true,
           onNextCancellable: true,
           onNext: function () {
@@ -137,7 +132,7 @@
           ready: true,
           title: 'Step 2 in subflow one',
           formName: 'form_2_subflow_one',
-          templateUrl: path + 'wizard/subflow-one-step-2.html',
+          templateUrl: 'app-examples/wizard/subflow-one-step-2.html',
           nextBtnText: 'Done',
           isLastStep: true
         }
@@ -147,13 +142,13 @@
           ready: true,
           title: 'Step 1 in subflow two',
           formName: 'form_1_subflow_two',
-          templateUrl: path + 'wizard/subflow-two-step-1.html'
+          templateUrl: 'app-examples/wizard/subflow-two-step-1.html'
         },
         {
           ready: true,
           title: 'Step 2 in subflow two',
           formName: 'form_2_subflow_two',
-          templateUrl: path + 'wizard/subflow-two-step-2.html',
+          templateUrl: 'app-examples/wizard/subflow-two-step-2.html',
           nextBtnText: 'Complete',
           isLastStep: true
         }

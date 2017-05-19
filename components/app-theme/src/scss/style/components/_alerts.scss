@@ -43,7 +43,7 @@
 }
 
 .alert-danger {
-  @include hpe-alert($state-danger-bg, $helion-icon-Critical_L, $alert-danger-bg, $helion-icon-Critical_L);
+  @include hpe-alert($state-danger-bg, 'error', $alert-danger-bg, $helion-icon-Critical_L);
 }
 
 .alert-card-warning {

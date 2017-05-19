@@ -28,7 +28,7 @@
             icon = 'helion-icon-Unknown_L';
         }
 
-        return '<span class="helion-icon helion-icon-lg ' + icon + '"></span>';
+        return '<span class="helion-icon app-icon-lg ' + icon + '"></span>';
       }
 
       return '';

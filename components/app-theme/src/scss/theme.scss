@@ -18,18 +18,17 @@ $radio-button-unchecked-icon    : "\e9f9" !default; // helion-icon-Radial_button
 $radio-button-checked-icon      : "\ea74" !default; // helion-icon-Radial_Black
 
 // Fake the font name for the glyphicons to be the helion icon font
-$icon-font-name: "/helion-icons";
-$icon-font-path: '/fonts/helion-icons/fonts' !default;
+//$icon-font-name: "/helion-icons";
+//$icon-font-path: '/fonts/helion-icons/fonts' !default;
 
 // Fonts and theme
+@import "fonts/index";
 @import "fonts/helion-icons/variables";
 @import "theme/index";
 
 // Mixins
 @import "mixin/index";
 
-// Fonts and theme
-@import "fonts/index";
 
 @import "../../../bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 

@@ -95,7 +95,7 @@
           }
         );
       },
-      icon: 'helion-icon-lg helion-icon helion-icon-Tree'
+      icon: 'app-icon-lg helion-icon helion-icon-Tree'
     };
 
     var createSpace = {
@@ -207,7 +207,7 @@
           }
         );
       },
-      icon: 'helion-icon-lg helion-icon helion-icon-Tree'
+      icon: 'app-icon-lg helion-icon helion-icon-Tree'
     };
 
     var assignUsers = {
@@ -219,7 +219,7 @@
           selectedUsers: appUserSelection.getSelectedUsers(that.clusterGuid)
         });
       },
-      icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
+      icon: 'app-icon-lg helion-icon helion-icon-Add_user'
     };
 
     function enableActions() { // eslint-disable-line complexity

@@ -15,8 +15,8 @@
       </div>
 
       <div class="view-controls">
-        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
-        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle app-icon-lg helion-icon helion-icon-Expand"></span>
+        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle app-icon-lg helion-icon helion-icon-Contract"></span>
       </div>
 
     </div>
@@ -24,7 +24,7 @@
     <div class="firehose-header-bottom">
       <div class="text-filter">
         <div class="search-box" ng-focus="firehoseCtrl.focusTextFilter()" tabindex="0">
-          <span class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></span>
+          <span class="text-filter-icon material-icons app-icon-lg">search</span>
           <span class="regex-marker opening" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
 
           <div class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" contenteditable="true"></div>
@@ -32,7 +32,7 @@
           <span class="regex-marker closing" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
           <div class="space-absorber"></div>
           <span ng-click="firehoseCtrl.textFilter.toMatch = ''"
-             class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></span>
+             class="clear-text-filter-icon helion-icon app-icon-lg helion-icon-Close"></span>
         </div>
         <div class="search-options">
           <checkbox-input ng-model="firehoseCtrl.textFilter.regex"

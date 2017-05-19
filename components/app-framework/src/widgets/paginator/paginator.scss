@@ -11,15 +11,13 @@
     height: $button-height;
 
     &.btn-prev:before {
-      content: $helion-icon-Left_Arrow;
-      font-family: 'helion-icons';
+      content: 'navigate_before';
       font-size: $hpe-unit-space;
       padding-right: $hpe-unit-space / 4;
     }
 
     &.btn-next:after {
-      content: $helion-icon-Right_Arrow;
-      font-family: 'helion-icons';
+      content: 'navigate_next';
       font-size: $hpe-unit-space;
       padding-left: $hpe-unit-space / 4;
     }

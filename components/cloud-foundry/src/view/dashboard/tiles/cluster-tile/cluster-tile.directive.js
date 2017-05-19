@@ -56,13 +56,13 @@
 
     var expiredStatus = {
       classes: 'danger',
-      icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+      icon: 'app-icon-lg helion-icon helion-icon-Critical_S',
       description: gettext('Token has expired')
     };
 
     var erroredStatus = {
       classes: 'danger',
-      icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+      icon: 'app-icon-lg helion-icon helion-icon-Critical_S',
       description: gettext('Cannot contact endpoint')
     };
 

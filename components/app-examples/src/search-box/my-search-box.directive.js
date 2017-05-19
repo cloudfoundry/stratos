@@ -2,18 +2,14 @@
   'use strict';
 
   angular
-    .module('helionFrameworkExamples')
+    .module('app-examples.widgets')
     .directive('mySearchBox', mySearchBox);
 
-  mySearchBox.$inject = [
-    'helionFrameworkExamples.basePath'
-  ];
-
-  function mySearchBox(path) {
+  function mySearchBox() {
     return {
       controller: MySearchBoxController,
       controllerAs: 'mySearchBoxCtrl',
-      templateUrl: path + 'search-box/my-search-box.html'
+      templateUrl: 'app-examples/search-box/my-search-box.html'
     };
   }
 

@@ -1,0 +1,16 @@
+{
+  "name": "app-examples",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/app-examples.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-shell": "./components/app-shell"
+  }
+}
