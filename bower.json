@@ -24,5 +24,8 @@
   },
   "resolutions": {
     "lodash": "~4.0.1"
+  },
+  "config": {
+    "main": "cloud-foundry"
   }
 }

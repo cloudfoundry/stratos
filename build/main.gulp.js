@@ -48,12 +48,10 @@
 
   var bowerConfig = _.clone(config.bower);
   delete bowerConfig.exclude;
+  var mainBowerFile = path.resolve('./bower.json');
   var bowerFiles = require('wiredep')(components.addWiredep(bowerConfig));
 
   function initialize() {
-    //var buildConfig = JSON.parse(fs.readFileSync('./build_config.json', 'utf8'));
-    //utils.clearCachedPlugins(buildConfig);
-
     // bower install won't update our local components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
     components.syncLocalComponents();
@@ -270,9 +268,8 @@
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);
     gulp.watch(templateFiles.bower, ['copy:html', callback]);
     gulp.watch(components.findMainFile('index.html'), ['inject:index', callback]);
-
-    // Watch build configuration file for changes
-    //gulp.watch('./tools/build_config.json', ['build-config', callback]);
+    // Watch main bower filefor changes
+    gulp.watch(mainBowerFile, ['build-config', callback]);
   });
 
   gulp.task('build-config', function (next) {
