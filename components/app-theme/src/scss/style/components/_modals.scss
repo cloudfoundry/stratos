@@ -42,8 +42,8 @@
         margin-bottom: $hpe-unit-space;
 
         &:before {
-          @extend .helion-icon;
-          content: $helion-icon-Alert_pressed;
+          @extend .material-icons;
+          content: 'warning';
           display: block;
           margin-bottom: $hpe-unit-space;
           font-size: $hpe-unit-space * 2;

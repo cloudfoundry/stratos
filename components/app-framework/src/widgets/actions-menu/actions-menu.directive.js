@@ -98,7 +98,7 @@
     var that = this;
 
     // Optional extra classes (e.g. to change size of icon)
-    this.icon = this.menuIcon;
+    this.icon = this.menuIcon || '';
     this.position = this.menuPosition || '';
     this.open = false;
     this.buttonMode = false;

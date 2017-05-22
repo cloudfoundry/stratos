@@ -423,10 +423,10 @@ div.user-avatar {
       color: $page-header-bg;
 
       &:after {
+        @extend .material-icons;
         height: $user-avatar-image-size;
         width: $user-avatar-image-size;
-        font-family: "helion-icons";
-        content: "\e980";
+        content: "arrow_drop_down";
         text-align: center;
         line-height: $user-avatar-image-size;
         margin-right: 1px;

@@ -9,8 +9,12 @@
 
   & > button.close {
     position: absolute;
-    top: $hpe-unit-space * 2.5;
-    right: $hpe-unit-space * 4;
+    top: $hpe-unit-space;
+    right: $hpe-unit-space;
+
+    &:after {
+      content: 'close';
+    }
   }
 
   .modal-header, .wizard-head {

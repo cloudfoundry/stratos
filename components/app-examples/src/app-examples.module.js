@@ -38,10 +38,10 @@
 
     registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('examples', 'examples', 'menu.examples', 0, 'helion-icon-Application');
+      menu.addMenuItem('examples', 'examples', 'menu.examples', 0, 'business_center');
 
       menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('theme', 'theme', 'menu.theme', 1, 'helion-icon-Quick_view');
+      menu.addMenuItem('theme', 'theme', 'menu.theme', 1, 'dvr');
     }
   });
 

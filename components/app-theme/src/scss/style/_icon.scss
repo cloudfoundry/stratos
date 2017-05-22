@@ -21,3 +21,18 @@
 .app-icon-5x {
   font-size: $hpe-unit-space * 5;
 }
+
+svg {
+  &.app-icon-2x {
+    width: $hpe-unit-space * 2;
+    height: $hpe-unit-space * 2;
+  }
+  &.app-icon-3x {
+    width: $hpe-unit-space * 3;
+    height: $hpe-unit-space * 3;
+  }
+  &.app-icon-4x {
+    width: $hpe-unit-space * 4;
+    height: $hpe-unit-space * 4;
+  }
+}

@@ -129,7 +129,7 @@
 
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
     <div ng-if="applicationsListCtrl.model.clusterCount === 0">
-      <div class="helion-icon app-icon-3x helion-icon-Cluster"></div>
+      <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
       <div class="applications-msg" translate>You cannot view any applications.</div>
       <div class="applications-cta">
         <div ng-if="applicationsListCtrl.isEndpointsDashboardAvailable">

@@ -9,21 +9,8 @@ $page-header-fg             : #333 !default;
 $page-header-fg-unselected  : #999 !default;
 $page-header-bg             : #fff !default;
 
-$checkbox-button-font-family    : "helion-icons" !default;
-$checkbox-button-unchecked-icon : "\e92a" !default; // helion-icon-Checkbox
-$checkbox-button-checked-icon   : "\e92b" !default; // helion-icon-Checkbox_selected
-
-$radio-button-font-family       : "helion-icons" !default;
-$radio-button-unchecked-icon    : "\e9f9" !default; // helion-icon-Radial_button
-$radio-button-checked-icon      : "\ea74" !default; // helion-icon-Radial_Black
-
-// Fake the font name for the glyphicons to be the helion icon font
-//$icon-font-name: "/helion-icons";
-//$icon-font-path: '/fonts/helion-icons/fonts' !default;
-
 // Fonts and theme
 @import "fonts/index";
-@import "fonts/helion-icons/variables";
 @import "theme/index";
 
 // Mixins

@@ -15,7 +15,6 @@
       <div class="form-group">
         <label class="control-label" translate>Show</label>
         <select-input
-          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
           ng-model="applicationServicesCtrl.searchCategory"
           input-options="applicationServicesCtrl.serviceCategories"
           tabindex="0">
@@ -24,7 +23,7 @@
       <div class="form-group addon-form-group filter-form-group">
         <div class="input-group">
           <span class="input-group-addon">
-            <i class="helion-icon app-icon-lg helion-icon-Filter"></i>
+            <app-icon icon="svg:Filter.svg"></i>
           </span>
           <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
         </div>

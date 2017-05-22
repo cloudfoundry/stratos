@@ -62,3 +62,7 @@ search-box {
     width: $hpe-unit-space * 15;
   }
 }
+
+.app-icon-seacrh-plus:before {
+  content: 'add';
+}

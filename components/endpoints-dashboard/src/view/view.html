@@ -77,8 +77,8 @@
 
           <!--Endpoint Connection Status-->
           <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
-            <span class="helion-icon app-icon-lg helion-icon-Active_L text-primary"
-                  ng-switch-when="connected"></span>
+            <span class="material-icons app-icon-lg text-primary"
+                  ng-switch-when="connected">check_circle</span>
             <div ng-switch-when="unconnected"
                  uib-popover="{{ 'Disconnected' | translate }}"
                  popover-trigger="'mouseenter'"
@@ -86,12 +86,12 @@
                  popover-popup-delay="1000">
               <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
             </div>
-            <span class="helion-icon app-icon-lg helion-icon-Critical_L text-danger"
-                  ng-switch-when="expired"></span>
-            <span class="helion-icon app-icon-lg helion-icon-Critical_L text-danger"
-                  ng-switch-when="error"></span>
-            <span class="helion-icon app-icon-lg helion-icon-Warning_L text-warning"
-                  ng-switch-when="complicated"></span>
+            <span class="material-icons app-icon-lg text-danger"
+                  ng-switch-when="expired">cancel</span>
+            <span class="material-icons app-icon-lg text-danger"
+                  ng-switch-when="error">cancel</span>
+            <span class="material-icons app-icon-lg text-warning"
+                  ng-switch-when="complicated">warning</span>
           </td>
 
           <td>{{ endpoint.type }}</td>

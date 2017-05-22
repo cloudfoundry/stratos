@@ -32,10 +32,6 @@
         expect(element).toBeDefined();
       });
 
-      it('should use default icon for actions dropdown', function () {
-        expect(galleryCardCtrl.actionsIcon).toBe('glyphicon glyphicon-option-horizontal');
-      });
-
       it('should not show actions menu component', function () {
         expect(galleryCardCtrl.cardActions).toBeUndefined();
         expect(element.find('actions-menu').length).toBe(0);
@@ -75,7 +71,7 @@
           }
         ];
 
-        var markup = '<gallery-card card-data="mockData" card-actions-icon="foo" ' +
+        var markup = '<gallery-card card-data="mockData" ' +
           'on-card-click="mockClick(card)" on-notification-click="mockClick(card)" ' +
           'card-actions="mockActions">' +
           'Content' +
@@ -93,10 +89,6 @@
 
       it('should be defined', function () {
         expect(element).toBeDefined();
-      });
-
-      it('should use specified icon for actions dropdown', function () {
-        expect(galleryCardCtrl.actionsIcon).toBe('foo');
       });
 
       it('should show actions menu component', function () {

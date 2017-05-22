@@ -3,7 +3,7 @@
     {{ appCtrl.model.application.summary.name }}
     <app-state-icon class="action-target-state" state="appCtrl.model.application.state.indicator"></app-state-icon>
     <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
-      menu-icon="app-icon-2"
+      menu-icon="app-icon-2x"
       menu-position="actions-menu-right"
       ng-show="appCtrl.ready"
       ng-if="appCtrl.visibleActions">
@@ -31,7 +31,7 @@
       ng-disabled="appAction.disabled"
       ng-hide="appAction.hidden"
       ng-click="appAction.execute()">
-      <i ng-class="appAction.icon"></i> {{ appAction.name }}
+      <app-icon icon="appAction.icon"></app-icon> {{ appAction.name }}
     </button>
   </li>
 </ul>

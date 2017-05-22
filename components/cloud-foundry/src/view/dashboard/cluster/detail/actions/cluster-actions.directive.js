@@ -95,7 +95,7 @@
           }
         );
       },
-      icon: 'app-icon-lg helion-icon helion-icon-Tree'
+      icon: 'svg:Tree.svg'
     };
 
     var createSpace = {
@@ -207,7 +207,7 @@
           }
         );
       },
-      icon: 'app-icon-lg helion-icon helion-icon-Tree'
+      icon: 'svg:Tree.svg'
     };
 
     var assignUsers = {
@@ -219,7 +219,7 @@
           selectedUsers: appUserSelection.getSelectedUsers(that.clusterGuid)
         });
       },
-      icon: 'app-icon-lg helion-icon helion-icon-Add_user'
+      icon: 'person_add'
     };
 
     function enableActions() { // eslint-disable-line complexity

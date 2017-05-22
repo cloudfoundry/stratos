@@ -1,6 +1,6 @@
 <div class="paginator"
      ng-if="paginatorCtrl.properties.total > 1">
-  <a class="btn-link btn-prev material-icons"
+  <a class="btn-link btn-prev"
      ng-click="paginatorCtrl.loadPage(paginatorCtrl.currentPageNumber - 1)"
      ng-disabled="paginatorCtrl.currentPageNumber === 1">
     <span translate class="text">{{ paginatorCtrl.properties.text.prevBtn }}</span>
@@ -26,7 +26,7 @@
     </span>
   </span>
 
-  <a class="btn-link btn-next material-icons"
+  <a class="btn-link btn-next"
      ng-click="paginatorCtrl.loadPage(paginatorCtrl.currentPageNumber + 1)"
      ng-disabled="paginatorCtrl.currentPageNumber === paginatorCtrl.properties.total">
     <span translate class="text">{{ paginatorCtrl.properties.text.nextBtn }}</span>
