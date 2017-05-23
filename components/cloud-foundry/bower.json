@@ -1,0 +1,16 @@
+{
+  "name": "cloud-foundry",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/cloud-foundry.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-framework": "./components/app-shell"
+  }
+}
