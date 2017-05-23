@@ -118,7 +118,7 @@
     this.hsmVersion = hsmVersion;
 
     this.hsmModel = modelManager.retrieve('service-manager.model');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
     this.getEndpoint = function () {
       return appUtilsService.getClusterEndpoint(that.endpoint);

@@ -334,12 +334,12 @@
      * */
     function getOrganizationDetails(cnsiGuid, org, params) {
 
-      var stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
       var httpConfig = modelUtils.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
       var createdDate = moment(org.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
-      var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       function getRoles(org) {
         // The users roles may be returned inline
@@ -551,7 +551,7 @@
         // Set created date for sorting
         details.created_at = createdDate.unix();
 
-        // Set memory utilisation
+        // Set memory quota
         details.memUsed = vals.memory;
         details.memQuota = vals.quota.entity.memory_limit;
 
@@ -563,8 +563,15 @@
         details.totalRoutes = vals.routesCountP;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
 
+        // Services Quotas
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
+       // Service Keys are credentials for service instances
+        details.servicesKeysQuota = _.get(vals.quota, 'entity.total_service_keys', -1);
 
+        details.privateDomains = _.get(org, 'entity.private_domains', []).length;
+        details.privateDomainsQuota = _.get(vals.quota, 'entity.total_private_domains', -1);
+
+        details.nonBasicServicesAllowed = _.get(vals.quota, 'entity.non_basic_services_allowed', false);
         details.roles = vals.roles;
 
         cacheOrganizationDetails(cnsiGuid, orgGuid, details);
@@ -577,13 +584,13 @@
     }
 
     function createOrganization(cnsiGuid, orgName) {
-      var stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
 
       var httpConfig = modelUtils.makeHttpConfig(cnsiGuid);
       return orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
         var org = res.data;
         var newOrgGuid = org.metadata.guid;
-        var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+        var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
         var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         return $q.all([makeUserP, makeManagerP]).then(function () {

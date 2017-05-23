@@ -12,7 +12,6 @@
       'app.view',
       'app.utils'
     ])
-    .constant('appBasePath', 'app/')
     .run(setTranslationLanguage);
 
   function setTranslationLanguage(gettextCatalog) {

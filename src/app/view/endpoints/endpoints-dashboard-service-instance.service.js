@@ -80,8 +80,8 @@
     function updateInstances() {
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), stackatoInfo.getStackatoInfo()])
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), consoleInfo.getConsoleInfo()])
         .then(function () {
 
           var errors = _.filter(userServiceInstanceModel.serviceInstances, {error: true});
@@ -95,10 +95,9 @@
             // If there are no services or no errors continue as normal
             appErrorService.clearAppError();
           } else if (errors.length === 1) {
-            var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-            appErrorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
+            appErrorService.setAppError($translate.instant('endpoints.errors.unavailabe', {name: errors[0]}));
           } else if (errors.length > 1) {
-            appErrorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
+            appErrorService.setAppError($translate.instant('endpoints.errors.multiple'));
           }
 
         });
@@ -133,7 +132,7 @@
         if (!reuse) {
           endpoint = {
             key: eKey,
-            type: gettext('Unknown')
+            type: 'endpoints.unknown'
           };
           if (!callEndpointProvidersOfType(serviceInstance.cnsi_type, 'isHidden', userAccount.isAdmin())) {
             endpoints.push(endpoint);
@@ -166,13 +165,13 @@
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
-            message: gettext('The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'),
+            message: 'endpoints.errors.contact',
             status: 'error'
           };
         } else if (hasExpired) {
           // Service token has expired
           endpoint.error = {
-            message: gettext('Token has expired. Try reconnecting to this endpoint to resolve this problem.'),
+            message: 'endpoints.errors.expired',
             status: 'error'
           };
         }
@@ -237,7 +236,7 @@
 
       if (!isConnected) {
         actions.push({
-          name: gettext('Connect'),
+          name: 'endpoints.connect',
           execute: function (serviceInstance) {
             _connect(serviceInstance);
           }
@@ -246,7 +245,7 @@
 
       if (isConnected || expired) {
         actions.push({
-          name: gettext('Disconnect'),
+          name: 'endpoints.disconnect',
           execute: function (serviceInstance) {
             _disconnect(serviceInstance);
           }
@@ -256,7 +255,7 @@
       var currentUserAccount = modelManager.retrieve('app.model.account');
       if (currentUserAccount.isAdmin()) {
         actions.push({
-          name: gettext('Unregister'),
+          name: 'endpoints.unregister',
           execute: function (serviceInstance) {
             _unregister(serviceInstance);
           }
@@ -267,20 +266,18 @@
 
     function _unregister(serviceInstance) {
       frameworkDialogConfirm({
-        title: gettext('Unregister Endpoint'),
-        description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\'?'))({name: serviceInstance.name}),
-        errorMessage: gettext('Failed to unregister endpoint'),
+        title: 'endpoints.unregister.title',
+        description: $translate.instant('endpoints.unregister.confirm', {name: serviceInstance.name}),
+        errorMessage: 'endpoints.unregister.error',
         submitCommit: true,
         buttonText: {
-          yes: gettext('Unregister'),
-          no: gettext('Cancel')
+          yes: 'endpoints.unregister',
+          no: 'buttons.cancel'
         },
         callback: function () {
           modelManager.retrieve('app.model.serviceInstance').remove(serviceInstance)
             .then(function () {
-              appNotificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
-                name: serviceInstance.name
-              });
+              appNotificationsService.notify('success', $translate.instant('endpoints.unregister.success', {name: serviceInstance.name}));
               updateInstances().then(function () {
                 createEndpointEntries();
                 return callEndpointProvidersOfType(serviceInstance.cnsi_type, 'unregister', serviceInstance);
@@ -326,16 +323,13 @@
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
-          appNotificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {
-            timeOut: 10000,
-            name: serviceInstance.name
+          appNotificationsService.notify('error', $translate.instant('endpoints.disconnect.error', {name: serviceInstance.name}), {
+            timeOut: 10000
           });
           return $q.reject(error);
         })
         .then(function () {
-          appNotificationsService.notify('success', gettext('Successfully disconnected endpoint \'{{name}}\''), {
-            name: serviceInstance.name
-          });
+          appNotificationsService.notify('success', $translate.instant('endpoints.disconnect.success', {name: serviceInstance.name}));
           createEndpointEntries();
           return callEndpointProvidersOfType(serviceInstance.cnsi_type, 'disconnect', serviceInstance);
         })

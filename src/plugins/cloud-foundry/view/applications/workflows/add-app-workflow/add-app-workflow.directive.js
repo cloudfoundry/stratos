@@ -72,7 +72,7 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.cfOrganizationModel = cfOrganizationModel;
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};
@@ -117,14 +117,6 @@
           }
         });
 
-        this.stopWatchSearchCategory = $scope.$watch(function () {
-          return that.userInput.searchCategory;
-        }, function (newSearchCategory) {
-          if (angular.isDefined(that.userInput.search)) {
-            that.userInput.search.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
-          }
-        });
-
         // Start the workflow
         this.startWorkflow();
       },
@@ -146,20 +138,8 @@
           host: null,
           domain: null,
           application: null,
-          source: null,
-          repo: null,
-          repoFilterTerm: null,
-          branch: null,
-          buildContainer: null,
-          projectId: null,
           hcfApiEndpoint: null,
-          hcfUserName: null,
-          searchCategory: 'all',
-          search: {
-            entity: {
-              extra: undefined
-            }
-          }
+          hcfUserName: null
         };
 
         this.data.workflow = {
@@ -175,7 +155,7 @@
           steps: [
             {
               title: gettext('Name'),
-              templateUrl: path + 'name.html',
+              templateUrl: path + 'add-application.html',
               formName: 'application-name-form',
               nextBtnText: 'buttons.add',
               cancelBtnText: 'buttons.cancel',

@@ -39,7 +39,7 @@
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var userApi = apiManager.retrieve('cloud-foundry.api.Users');
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     var organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
 
     this.updateTotalApps = function () {
@@ -70,8 +70,8 @@
     function init() {
       that.organizations = [];
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      var user = stackatoInfo.info.endpoints.hcf[that.guid].user;
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      var user = consoleInfo.info.endpoints.hcf[that.guid].user;
       that.userService = userServiceInstanceModel.serviceInstances[that.guid] || {};
       that.service = _.find(serviceInstanceModel.serviceInstances, {guid: that.guid});
       that.isAdmin = user.admin;
@@ -104,7 +104,7 @@
     function setUserCount() {
       that.userCount = 0;
 
-      if (!that.userService.valid || that.userService.error || !stackatoInfo.info.endpoints.hcf[that.guid].user.admin) {
+      if (!that.userService.valid || that.userService.error || !consoleInfo.info.endpoints.hcf[that.guid].user.admin) {
         that.userCount = undefined;
         return;
       }

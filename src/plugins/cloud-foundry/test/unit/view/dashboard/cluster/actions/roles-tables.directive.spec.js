@@ -5,7 +5,7 @@
     var $httpBackend, $compile, element, controller, contextScope;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       $compile = $injector.get('$compile');

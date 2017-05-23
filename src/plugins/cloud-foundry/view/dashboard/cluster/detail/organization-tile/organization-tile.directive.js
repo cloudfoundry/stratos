@@ -67,8 +67,8 @@
       return cardData;
     };
 
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.user = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    this.user = consoleInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
     var spacesInOrg = that.cfOrganizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
     var canDelete = _.keys(spacesInOrg).length === 0;
 

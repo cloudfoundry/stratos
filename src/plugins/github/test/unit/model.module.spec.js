@@ -5,7 +5,7 @@
   describe('github.model - ', function () {
     var that, $httpBackend, $rootScope;
 
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(module('ng', function ($exceptionHandlerProvider) {
       // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely

@@ -3,7 +3,7 @@
 
   describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, appUtilsService, clusterTilesCtrl, serviceInstanceModel,
-      userServiceInstanceModel, stackatoInfo, $stateParams;
+      userServiceInstanceModel, consoleInfo, $stateParams;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -57,7 +57,7 @@
     };
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       appUtilsService: {
         chainStateResolve: function (state, $state, init) {
@@ -79,7 +79,7 @@
       appUtilsService = $injector.get('appUtilsService');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-      stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
       var $httpBackend = $injector.get('$httpBackend');
       // Something other than the controller is calling these.
@@ -123,7 +123,7 @@
           userServiceInstanceModel.serviceInstances = {};
           return $q.when(userServiceInstanceModel.serviceInstances);
         });
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.resolve());
 
         createCluster();
         // updateClusterList should have been called as part of creation.
@@ -171,7 +171,7 @@
     describe('refreshClusterModel', function () {
 
       it('Calls fail', function () {
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.reject());
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.reject());
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.reject());
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
         createCluster();
@@ -190,7 +190,7 @@
       it('Call succeeds', function () {
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.when([]));
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.when([]));
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.when({}));
+        spyOn(consoleInfo, 'getConsoleInfo').and.returnValue($q.when({}));
 
         createCluster();
         $scope.$digest();

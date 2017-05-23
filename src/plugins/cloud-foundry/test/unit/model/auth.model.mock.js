@@ -70,10 +70,10 @@
       mock.cloudFoundryAPI.Users.GetUserSummary(userGuid, spaceGuid).success.response);
   }
 
-  function setupStackatoInfo(isAdmin, userGuid, cnsiGuid, modelManager) {
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    stackatoInfo.info = {};
-    _.set(stackatoInfo.info, 'endpoints.hcf.' + cnsiGuid, {
+  function setupConsoleInfo(isAdmin, userGuid, cnsiGuid, modelManager) {
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    consoleInfo.info = {};
+    _.set(consoleInfo.info, 'endpoints.hcf.' + cnsiGuid, {
       guid: cnsiGuid,
       name: 'myHCF',
       version: '',
@@ -107,7 +107,7 @@
 
       var $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
-      setupStackatoInfo(isAdmin, opts.userGuid, opts.cnsiGuid, modelManager);
+      setupConsoleInfo(isAdmin, opts.userGuid, opts.cnsiGuid, modelManager);
       setupFeatureFlagsRequest($httpBackend);
       if (isAdmin) {
         // Need to pass known space GUID for application ACL tests

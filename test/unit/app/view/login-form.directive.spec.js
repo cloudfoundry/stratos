@@ -5,15 +5,7 @@
     var $timeout, $element, $controller;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
-
-    beforeEach(module(function ($provide) {
-      $provide.provider('appBasePath', function () {
-        this.$get = function () {
-          return 'app/';
-        };
-      });
-    }));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');

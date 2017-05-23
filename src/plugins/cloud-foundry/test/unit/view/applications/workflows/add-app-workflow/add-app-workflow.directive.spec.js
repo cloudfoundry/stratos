@@ -14,7 +14,7 @@
     }
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -86,17 +86,6 @@
         expect(that.getAppsForSpace).toHaveBeenCalledWith('space-guid');
       });
 
-      it('should watch userInput.searchCategory', function () {
-        that.userInput.search = { entity: {} };
-        that.userInput.searchCategory = 'all';
-        $scope.$apply();
-        expect(that.userInput.search.entity.extra).toBeUndefined();
-
-        that.userInput.searchCategory = 'something';
-        $scope.$apply();
-        expect(that.userInput.search.entity.extra).toBe(that.userInput.searchCategory);
-      });
-
       describe('- after reset', function () {
         beforeEach(function () {
           that.reset();
@@ -113,20 +102,8 @@
             host: null,
             domain: null,
             application: null,
-            source: null,
-            repo: null,
-            repoFilterTerm: null,
-            branch: null,
-            buildContainer: null,
-            projectId: null,
             hcfApiEndpoint: null,
-            hcfUserName: null,
-            searchCategory: 'all',
-            search: {
-              entity: {
-                extra: undefined
-              }
-            }
+            hcfUserName: null
           });
           expect(that.data.workflow).toBeDefined();
           expect($translate.instant(that.data.workflow.title)).toBe('Add Application');
@@ -518,7 +495,6 @@
       that.stopWatchServiceInstance();
       that.stopWatchOrganization();
       that.stopWatchSpace();
-      that.stopWatchSearchCategory();
     }
 
     function simulateUserInput() {

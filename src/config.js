@@ -6,7 +6,8 @@
    * @name env
    */
   var env = {
-    registerApplication: registerApplication
+    registerApplication: registerApplication,
+    main: '@@MAIN_PLUGIN@@'
   };
 
   expose({
@@ -35,12 +36,14 @@
    * @param {string} basePath - the base path to the root folder where the
    * plugin application resides or is installed. The basePath is relative to
    * the 'src' folder.
+   * @param {string} mainState - the state name of the main (start) state for the application
    */
-  function registerApplication(id, angularModuleName, basePath) {
+  function registerApplication(id, angularModuleName, basePath, mainState) {
     env.plugins = env.plugins || {};
     env.plugins[id] = {
       moduleName: angularModuleName,
-      basePath: basePath
+      basePath: basePath,
+      main: mainState
     };
   }
 

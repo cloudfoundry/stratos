@@ -3,10 +3,13 @@
     "name": "Helion Stackato",
     "console": "Helion Stackato Web Console",
     "cf": "Helion Cloud Foundry",
-    "ce": "Helion Code Engine"
+    "ce": "Helion Code Engine",
+    "logo": "images/brand_product_family_logo.png",
+    "www-link": "http://www.hpe.com"
   },
   "company": {
     "name": "Hewlett Packard Enterprise Company, L.P.",
+    "logo": "images/brand_company_logo.png",
     "TERMS_OF_USE_HREF": "",
     "PRIVACY_HREF": "",
     "PRODUCT_FAMILY_HREF": "",

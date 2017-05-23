@@ -5,7 +5,7 @@
     var hceCnsi, hceProjectId, postDeployActionFactory, data, $httpBackend;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(module({
       frameworkAsyncTaskDialog: function (content, context, actionTask) {
         return {

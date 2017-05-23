@@ -6,14 +6,14 @@
   var noCache = require('connect-nocache')();
   exports.init = init;
 
-  var responseTemplate = require('../data/stackatoInfo.json').response;
+  var responseTemplate = require('../data/consoleInfo.json').response;
   var hcfInfoTemplate = require('../data/hcfInfo.json').response;
   var hceInfoTemplate = require('../data/hceInfo.json').response;
 
   function init(router, config) {
 
     router.get('/pp/v1/stackato/info', noCache, function (request, response) {
-      response.json(mockStackatoInfo(config));
+      response.json(mockConsoleInfo(config));
     });
 
     router.get('/pp/v1/proxy/v2/info', noCache, function (request, response) {
@@ -27,7 +27,7 @@
 
   }
 
-  function mockStackatoInfo(config) {
+  function mockConsoleInfo(config) {
 
     var response = JSON.parse(JSON.stringify(responseTemplate));
 

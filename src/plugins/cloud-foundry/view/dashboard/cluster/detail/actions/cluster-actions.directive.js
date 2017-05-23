@@ -42,7 +42,7 @@
     var that = this;
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
@@ -223,7 +223,7 @@
     };
 
     function enableActions() { // eslint-disable-line complexity
-      var isAdmin = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
+      var isAdmin = consoleInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
       var canCreateOrg = authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);

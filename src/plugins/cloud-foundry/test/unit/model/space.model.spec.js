@@ -5,7 +5,7 @@
     var $httpBackend, spaceModel, modelManager;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       modelManager = $injector.get('modelManager');
@@ -108,7 +108,7 @@
       $httpBackend.expectGET(ListAllAppsForSpace.url).respond(200, ListAllAppsForSpace.response['200'].body);
 
       var userGuid = 'userGuid';
-      _.set(modelManager.retrieve('app.model.stackatoInfo'), 'info', userGuid);
+      _.set(modelManager.retrieve('app.model.consoleInfo'), 'info', userGuid);
 
       var space = {
         metadata: {
@@ -162,7 +162,7 @@
       var ListAllAppsForSpace = mock.cloudFoundryAPI.Spaces.ListAllAppsForSpaceNoPassthrough(spaceGuid);
 
       var userGuid = 'userGuid';
-      _.set(modelManager.retrieve('app.model.stackatoInfo'), 'info', userGuid);
+      _.set(modelManager.retrieve('app.model.consoleInfo'), 'info', userGuid);
 
       var space = {
         metadata: {

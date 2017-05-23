@@ -35,10 +35,11 @@
         var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
         var modal;
         var allowBack = false;
+        var endpointTypesToRegister = appEndpointsCnsiService.getEndpointsToRegister();
         var context = {
           wizardOptions: {
             scope: {
-              endpoints: appEndpointsCnsiService.getEndpointsToRegister()
+              endpoints: endpointTypesToRegister
             },
             workflow: {
               lastStepCommit: true,
@@ -48,49 +49,7 @@
               allowBack: function () {
                 return allowBack;
               },
-              steps: [
-                {
-                  hideNext: true,
-                  templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-type.html',
-                  onNext: function () {
-                    var step = context.wizardOptions.workflow.steps[1];
-                    step.urlValidationExpr = appUtilsService.urlValidationExpression;
-                    step.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
-                    step.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
-                  },
-                  onEnter: function () {
-                    allowBack = false;
-                  }
-                },
-                {
-                  formName: 'regServiceDetails',
-                  templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-details.html',
-                  showBusyOnNext: true,
-                  isLastStep: true,
-                  nextBtnText: gettext('Register'),
-                  onNext: function () {
-                    var userInput = context.wizardOptions.userInput;
-                    return serviceInstanceModel.create(userInput.endpoint.cnsi_type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
-                      appNotificationsService.notify('success',
-                        gettext('Endpoint \'{{name}}\' successfully registered'),
-                        { name: userInput.name });
-                      return serviceInstance;
-                    }).catch(function (response) {
-                      if (response.status === 403) {
-                        return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
-                      }
-                      return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
-                        'is correct and try again. If this error persists, please contact the administrator.'));
-                    });
-                  },
-                  onEnter: function () {
-                    delete context.wizardOptions.userInput.url;
-                    delete context.wizardOptions.userInput.name;
-                    delete context.wizardOptions.userInput.skipSslValidation;
-                    allowBack = true;
-                  }
-                }
-              ]
+              steps: []
             },
             userInput: {}
           },
@@ -104,6 +63,72 @@
             }
           }
         };
+
+        var wizardSteps = [];
+
+        if (endpointTypesToRegister.length > 1) {
+          // Show type selection screen only if multiple endpoint types are available
+          wizardSteps.push({
+            hideNext: true,
+            templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-type.html',
+            onNext: function () {
+              var step = context.wizardOptions.workflow.steps[1];
+              step.urlValidationExpr = appUtilsService.urlValidationExpression;
+              step.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+              step.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
+            },
+            onEnter: function () {
+              allowBack = false;
+            }
+          });
+        }
+
+        var registrationStep = {
+          formName: 'regServiceDetails',
+          templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-details.html',
+          showBusyOnNext: true,
+          isLastStep: true,
+          nextBtnText: gettext('Register'),
+          onNext: function () {
+            var userInput = context.wizardOptions.userInput;
+            return serviceInstanceModel.create(userInput.endpoint.cnsi_type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
+              appNotificationsService.notify('success',
+                gettext('Endpoint \'{{name}}\' successfully registered'),
+                {name: userInput.name});
+              return serviceInstance;
+            }).catch(function (response) {
+              if (response.status === 403) {
+                return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+              }
+              return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
+                'is correct and try again. If this error persists, please contact the administrator.'));
+            });
+          },
+          onEnter: function () {
+            delete context.wizardOptions.userInput.url;
+            delete context.wizardOptions.userInput.name;
+            delete context.wizardOptions.userInput.skipSslValidation;
+            allowBack = true;
+          }
+        };
+
+        if (endpointTypesToRegister.length === 1) {
+          // Since only one type is available, step 1 wasn't displayed. We need to preload these variables before entering step 2
+          context.wizardOptions.userInput.endpoint = appEndpointsCnsiService.getEndpointsToRegister()[0];
+          registrationStep.urlValidationExpr = appUtilsService.urlValidationExpression;
+          registrationStep.instanceUrls = createInstanceUrls(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+          registrationStep.instanceNames = createInstanceNames(serviceInstanceModel.serviceInstances);
+          registrationStep.onEnter = function () {
+            delete context.wizardOptions.userInput.url;
+            delete context.wizardOptions.userInput.name;
+            delete context.wizardOptions.userInput.skipSslValidation;
+            allowBack = false;
+          };
+        }
+        // Append Step 2
+        wizardSteps.push(registrationStep);
+        context.wizardOptions.workflow.steps = wizardSteps;
+
         modal = frameworkDetailView({
           template: '<wizard ' +
           'class="register-service-wizard" ' +

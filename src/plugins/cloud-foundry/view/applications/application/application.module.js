@@ -53,12 +53,14 @@
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    var stacksModel = modelManager.retrieve('cloud-foundry.model.stacks');
     var cnsiGuid = $stateParams.cnsiGuid;
     var pipelineReady = false;
     var UPDATE_INTERVAL = 5000; // milliseconds
 
     var scopeDestroyed, updating;
+
 
     // Clear any previous state in the application tabs service
     cfApplicationTabs.clearState();
@@ -137,8 +139,8 @@
         execute: function () {
 
           var username = null;
-          if (stackatoInfo.info.endpoints) {
-            username = stackatoInfo.info.endpoints.hcf[vm.model.application.cluster.guid].user.name;
+          if (consoleInfo.info.endpoints) {
+            username = consoleInfo.info.endpoints.hcf[vm.model.application.cluster.guid].user.name;
           }
           cfAppCliCommands.show(vm.model.application, username);
         },
@@ -228,6 +230,20 @@
             }));
           }
         })
+        .then(function () {
+          // Update stacks
+          var stackGuid = that.model.application.summary.stack_guid;
+          var listStacksP;
+          if (!_.has(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid)) {
+            // Stacks haven't been fetched yet
+            listStacksP = that.stacksModel.listAllStacks(that.cnsiGuid);
+          } else {
+            listStacksP = that.$q.resolve();
+          }
+          return listStacksP.then(function () {
+            that.updateStackName();
+          });
+        })
         .finally(function () {
           vm.ready = true;
 
@@ -311,6 +327,7 @@
     function updateSummary() {
       return vm.model.getAppSummary(cnsiGuid, vm.id, true).then(function () {
         updateBuildPack();
+        that.updateStackName();
       });
     }
 
@@ -320,6 +337,9 @@
       // changed
       vm.appBuildPack = vm.model.application.summary.buildpack || vm.model.application.summary.detected_buildpack;
     }
+    updateStackName: function (stackGuid) {
+      this.appStackName = _.get(this.stacksModel, 'stacks.' + this.cnsiGuid + '.' + this.model.application.summary.stack_guid + '.entity.name', stackGuid);
+    },
 
     // /**
     //  * @function updateState
@@ -389,24 +409,41 @@
       if (!vm.model.application.state || !vm.model.application.state.actions) {
         return true;
       } else if (id === 'launch') {
-        hideAction = false;
-      } else {
-        // Check permissions
-        if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
-          // Hide delete if user has no project permissions
-          hideAction = true;
-        } else if (authModel.isInitialized(cnsiGuid)) {
-          // Hide actions if user has no HCF app update perissions (i.e not a space developer)
-          var spaceGuid = vm.model.application.summary.space_guid;
-          hideAction = !authModel.isAllowed(cnsiGuid,
-            authModel.resources.application,
-            authModel.actions.update,
-            spaceGuid);
-        }
-
+        return false;
       }
+
+      // Check permissions
+      if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
+        // Hide delete if user has no project permissions
+        hideAction = true;
+      } else if (authModel.isInitialized(this.cnsiGuid)) {
+        // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+        var spaceGuid = vm.model.application.summary.space_guid;
+        hideAction = !authModel.isAllowed(this.cnsiGuid,
+          authModel.resources.application,
+          authModel.actions.update,
+          spaceGuid);
+      }
+
+      // Check when running in cloud-foundry
+      if (this.isCloudFoundryConsoleApplication()) {
+        return true;
+      }
+
       return vm.model.application.state.actions[id] !== true || hideAction;
-    }
+    },
+
+    isCloudFoundryConsoleApplication: function () {
+      // Check when running in cloud-foundry
+      var cfInfo = consoleInfo.info ? consoleInfo.info['cloud-foundry'] : undefined;
+      if (cfInfo) {
+        return cnsiGuid === cfInfo.EndpointGUID &&
+          vm.model.application.summary.space_guid === cfInfo.SpaceGUID &&
+          vm.id === cfInfo.AppGUID;
+      } else {
+        return false;
+      }
+    },
 
     /**
      * @function isActionDisabled
@@ -436,7 +473,7 @@
         appAction.disabled = isActionDisabled(appAction.id);
         appAction.hidden = isActionHidden(appAction.id);
       });
-      vm.visibleActions = _.find(vm.appActions, {hidden: false});
+      vm.visibleActions = _.find(vm.appActions, { hidden: false });
     }
 
     /**

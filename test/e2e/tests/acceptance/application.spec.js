@@ -52,7 +52,12 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Versions'];
+      var names = ['Summary', 'Log Stream', 'Services', 'Variables'];
+      var hcfFromConfig = helpers.getHcfs() ? helpers.getHcfs().hcf1 : undefined;
+      if (hcfFromConfig && hcfFromConfig.supportsVersions) {
+        names.push('Versions');
+      }
+      browser.debugger();
       // Walk through each of the tabs
       application.getTabs().then(function (tabs) {
         _.each(tabs, function (tab, i) {
@@ -118,7 +123,7 @@
           var routes = table.wrap(element(by.css('.summary-routes table')));
           routes.getData(routes).then(function (rows) {
             expect(rows.length).toBe(2);
-            var columnMenu = actionMenu.wrap(routes.getItem(0,1));
+            var columnMenu = actionMenu.wrap(routes.getItem(0, 1));
             columnMenu.click();
             // Delete
             columnMenu.clickItem(1);
@@ -220,7 +225,7 @@
         var modalTitle = 'Edit App';
 
         function getMemoryUtilisation() {
-          return element(by.css('.summary .row .col-md-6:first-of-type dd:nth-of-type(5)')).getText()
+          return element(by.css('.summary .row .col-md-6:first-of-type dd:nth-of-type(7)')).getText()
             .then(function (text) {
               var number = text.substring(0, text.indexOf(' '));
               if (text.indexOf('GB') >= 0 || text.indexOf('MB') >= 0) {

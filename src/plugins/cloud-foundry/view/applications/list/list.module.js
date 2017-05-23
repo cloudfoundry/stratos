@@ -62,8 +62,8 @@
       total: _.ceil(vm.model.cachedApplications.length / vm.model.pageSize),
       pageNumber: _.get(vm.model, 'appPage', 1),
       text: {
-        nextBtn: gettext('Next'),
-        prevBtn: gettext('Previous')
+        nextBtn: 'buttons.next',
+        prevBtn: 'buttons.previous'
       }
     };
     // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority

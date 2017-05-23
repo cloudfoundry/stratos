@@ -5,7 +5,7 @@
     var $httpBackend, $scope, addPipelineWorkflowCtrl, mockApp, ceAppPipelineService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');

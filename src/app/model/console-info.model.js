@@ -9,10 +9,10 @@
    */
   angular
     .module('app.model')
-    .run(registerStackatoInfoModel);
+    .run(registerConsoleInfoModel);
 
-  function registerStackatoInfoModel(modelManager, appUtilsService, stackatoInfoService) {
-    modelManager.register('app.model.stackatoInfo', new StackatoInfo(appUtilsService, stackatoInfoService));
+  function registerConsoleInfoModel(modelManager, appUtilsService, consoleInfoService) {
+    modelManager.register('app.model.consoleInfo', new ConsoleInfo(appUtilsService, consoleInfoService));
   }
 
   /**
@@ -20,54 +20,54 @@
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
    * @param {app.utils.appUtilsService} appUtilsService - utils service
-   * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
+   * @param {app.api.consoleInfoService} consoleInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class
    */
-  function StackatoInfo(appUtilsService, stackatoInfoService) {
+  function ConsoleInfo(appUtilsService, consoleInfoService) {
     var info = {};
 
     return {
       info: info,
-      getStackatoInfo: getStackatoInfo,
+      getConsoleInfo: getConsoleInfo,
       version: version,
-      onStackatoInfo: onStackatoInfo
+      onConsoleInfo: onConsoleInfo
     };
 
     /**
-     * @function getStackatoInfo
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @function getConsoleInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Fetch the user's authorisation information per cnsi
      * @returns {promise} A promise object
      * @public
      */
-    function getStackatoInfo() {
-      return stackatoInfoService.stackatoInfo()
+    function getConsoleInfo() {
+      return consoleInfoService.info()
         .then(function (response) {
-          onStackatoInfo(response);
+          onConsoleInfo(response);
           return info;
         });
     }
 
     /**
      * @function version
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Fetch the version metadata
      * @returns {promise} A promise object
      * @public
      */
     function version() {
-      return stackatoInfoService.version();
+      return consoleInfoService.version();
     }
 
     /**
      * @function onLoggedIn
-     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @memberof app.model.consoleInfo.consoleInfo
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
      * @private
      */
-    function onStackatoInfo(response) {
+    function onConsoleInfo(response) {
       appUtilsService.replaceProperties(info, response.data);
     }
 

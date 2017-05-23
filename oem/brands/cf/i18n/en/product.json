@@ -1,0 +1,22 @@
+{
+  "product": {
+    "name": "Cloud Foundry",
+    "console": "Cloud Foundry Console",
+    "cf": "Cloud Foundry",
+    "ce": "Code Engine"
+  },
+  "company": {
+    "name": "SUSE, All Rights Reserved",
+    "terms": "",
+    "terms.href": "",
+    "www-link": "",
+    "about-logo": "",
+    "logo": ""
+  },
+  "about": {
+    "footer": {
+      "product.logo": "images/cloud-foundry-logo.png",
+      "product.www-link": "https://www.cloudfoundry.org"
+    }
+  }
+}

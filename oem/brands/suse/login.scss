@@ -17,11 +17,16 @@ $login-panel-width: 420px;
     position: absolute;
     width: 0;
     height: 0;
+    display: none;
   }
 
   .login-page {
     background-color: $suse-dark-blue;
     height: 100vw;
+
+    .hpe-logo {
+      width: 128px;
+    }
 
     .login-panel {
       justify-content: center;

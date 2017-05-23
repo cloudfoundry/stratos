@@ -43,43 +43,43 @@
     };
 
     var baseNotificationData = {
-      tokenLabel: gettext('Token'),
-      tokenErrorLabel: gettext('Token is required')
+      tokenLabel: 'ce.tokens.token',
+      tokenErrorLabel: 'ce.tokens.required-error'
     };
 
-    // This will be provided by HCE in future
+    // This will be provided by Code Engine in future
     this.staticNotificationData = {
       hipchat: {
-        title: gettext('HipChat'),
-        description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
-        endpointLabel: gettext('Server URL with Room Number or Name'),
-        endpointErrorLabel: gettext('Server URL is required'),
+        title: 'ce.notifications.hipchat.title',
+        description: 'ce.notifications.hipchat.description',
+        endpointLabel: 'ce.notifications.hipchat.endpoint-label',
+        endpointErrorLabel: 'ce.notifications.hipchat.endpoint-error-label',
         img: 'hipchat_logo.png',
         imgScale: 0.8
       },
       httpPost: {
-        title: gettext('Http'),
-        description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
-        endpointLabel: gettext('Server URL'),
-        endpointErrorLabel: gettext('Server URL is required'),
+        title: 'ce.notifications.http.title',
+        description: 'ce.notifications.http.description',
+        endpointLabel: 'ce.notifications.http.endpoint-label',
+        endpointErrorLabel: 'ce.notifications.http.endpoint-error-label',
         img: 'httppost_logo.png',
         imgScale: 0.8
       },
       flowdock: {
-        title: gettext('Flow Dock'),
-        description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
-        endpointLabel: gettext('API Endpoint'),
-        endpointErrorLabel: gettext('API Endpoint is required'),
+        title: 'ce.notifications.flowdock.title',
+        description: 'ce.notifications.flowdock.description',
+        endpointLabel: 'ce.notifications.flowdock.endpoint-label',
+        endpointErrorLabel: 'ce.notifications.flowdock.endpoint-error-label',
         img: 'flowdock_logo.png',
         imgScale: 0.75
       },
       slack: {
-        title: gettext('Slack'),
-        description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack channel.'),
-        endpointLabel: gettext('Webhook URL'),
-        endpointErrorLabel: gettext('Webhook URL is required'),
-        tokenLabel: gettext('Provide #<Channel Name> or @<Username>'),
-        tokenErrorLabel: gettext('Channel or user name is required'),
+        title: 'ce.notifications.slack.title',
+        description: 'ce.notifications.slack.description',
+        endpointLabel: 'ce.notifications.slack.endpoint-label',
+        endpointErrorLabel: 'ce.notifications.slack.endpoint-error-label',
+        tokenLabel: 'ce.notifications.slack.token-label',
+        tokenErrorLabel: 'ce.notifications.slack.token-error-label',
         img: 'slack.png',
         imgScale: 0.75
       }

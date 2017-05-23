@@ -22,11 +22,11 @@
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
 
   /**
-   * @namespace green-box-console
-   * @name green-box-console
+   * @namespace console-app
+   * @name console-app
    */
   angular
-    .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config)
+    .module('console-app', angularModules.concat(otherModules, ['app'], pluginModules), config)
     .factory('missingTranslateHandler', missingTranslateHandler);
 
   function config($compileProvider, $logProvider, $translateProvider) {

@@ -4,7 +4,8 @@
   angular
     .module('app.utils')
     .factory('appUtilsService', utilsServiceFactory)
-    .filter('mbToHumanSize', mbToHumanSizeFilter);
+    .filter('mbToHumanSize', mbToHumanSizeFilter)
+    .filter('infinityFilter', infinityFilter);
 
   /**
    * @namespace appUtilsService
@@ -14,9 +15,10 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
+   * @param {object} $translate - the translation service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log) {
+  function utilsServiceFactory($q, $timeout, $log, $translate) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     /*
@@ -81,6 +83,7 @@
       getClusterEndpoint: getClusterEndpoint,
       bytesToHumanSize: bytesToHumanSize,
       mbToHumanSize: mbToHumanSize,
+      infinityFilter: showInfinitySymbolIfRequired,
       retryRequest: retryRequest,
       runInSequence: runInSequence,
       sizeUtilization: sizeUtilization,
@@ -207,6 +210,13 @@
       return precisionIfUseful(sizeMb) + ' MB';
     }
 
+    function showInfinitySymbolIfRequired(value) {
+      if (value === -1) {
+        return '∞';
+      }
+      return value;
+    }
+
     function sizeUtilization(sizeMbUsed, sizeMbTotal) {
       var usedMemHuman = this.mbToHumanSize(sizeMbUsed);
       var totalMemHuman = this.mbToHumanSize(sizeMbTotal);
@@ -310,79 +320,86 @@
       return _.has(env.plugins, pluginName);
     }
 
+    function extractCloudFoundryError(errorResponse) {
+      /*
+       Cloud Foundry errors have the following format:
+       data: {
+       description: 'some text',
+       errorCode: 1000,
+       error_code: 'UnknownHostException'
+       }
+       */
+      var errorText;
+
+      if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+        return;
+      }
+      if (errorResponse.data && errorResponse.data.error_code) {
+        errorResponse = errorResponse.data;
+      }
+
+      if (errorResponse.description && _.isString(errorResponse.description)) {
+        errorText = errorResponse.description;
+      }
+
+      if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
+        errorText = $translate.instant('error-format', {errorMsg: errorText, errorCode: errorResponse.error_code});
+      }
+
+      return errorText;
+    }
+
+    function extractCodeEngineError(errorResponse) {
+
+      /*
+       Code Engine errors have the following format
+       data: {
+       message: 'some text',
+       detail: 'more text',
+       }
+       */
+
+      if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+        return;
+      }
+      var errorText;
+      if (errorResponse.data && errorResponse.data.message) {
+        errorResponse = errorResponse.data;
+      }
+
+      if (errorResponse.message && _.isString(errorResponse.message)) {
+        errorText = errorResponse.message;
+        if (errorResponse.details || errorResponse.detail) {
+          var detail = errorResponse.details || errorResponse.detail;
+          if (_.isString(detail)) {
+            errorText = errorText + ', ' + detail;
+          }
+        }
+      }
+
+      return errorText;
+    }
+
+    function replaceProperties(destination, source) {
+      _.forIn(destination, function (value, key) {
+        delete destination[key];
+      });
+      _.assign(destination, source);
+    }
   }
 
+  // Filter for converting a size to a human value - e.g. TB, GB, MB etc
   function mbToHumanSizeFilter(appUtilsService) {
     return function (input) {
       return appUtilsService.mbToHumanSize(input);
     };
   }
 
-  function extractCloudFoundryError(errorResponse) {
-    /*
-     Cloud Foundry errors have the following format:
-     data: {
-     description: 'some text',
-     errorCode: 1000,
-     error_code: 'UnknownHostException'
-     }
-     */
-    var errorText;
-
-    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
-      return;
-    }
-    if (errorResponse.data && errorResponse.data.error_code) {
-      errorResponse = errorResponse.data;
-    }
-
-    if (errorResponse.description && _.isString(errorResponse.description)) {
-      errorText = errorResponse.description;
-    }
-
-    if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
-      errorText = errorText + gettext(', Error Code: ') + errorResponse.error_code;
-    }
-
-    return errorText;
-  }
-
-  function extractCodeEngineError(errorResponse) {
-
-    /*
-     Code Engine errors have the following format
-     data: {
-     message: 'some text',
-     detail: 'more text',
-     }
-     */
-
-    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
-      return;
-    }
-    var errorText;
-    if (errorResponse.data && errorResponse.data.message) {
-      errorResponse = errorResponse.data;
-    }
-
-    if (errorResponse.message && _.isString(errorResponse.message)) {
-      errorText = errorResponse.message;
-      if (errorResponse.details || errorResponse.detail) {
-        var detail = errorResponse.details || errorResponse.detail;
-        if (_.isString(detail)) {
-          errorText = errorText + ', ' + detail;
-        }
-      }
-    }
-
-    return errorText;
-  }
-
-  function replaceProperties(destination, source) {
-    _.forIn(destination, function (value, key) {
-      delete destination[key];
-    });
-    _.assign(destination, source);
+  // Filter for displaying infinity symbol if value is supposed to infinite
+  function infinityFilter(appUtilsService) {
+    return function (input) {
+      return appUtilsService.infinityFilter(input);
+    };
   }
 
 })();

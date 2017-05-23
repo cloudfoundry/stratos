@@ -7,7 +7,7 @@
       cfServiceInstanceService, appUtilsService;
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    beforeEach(module('console-app'));
 
     var clusterGuid = 'clusterGuid';
     var organizationGuid = 'organizationGuid';

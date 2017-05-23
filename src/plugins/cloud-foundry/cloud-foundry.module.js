@@ -25,14 +25,7 @@
 
     function _onLoggedIn(preventRedirect) {
       _registerNavigation();
-      // Only redirect if we are permitted
-      if (!preventRedirect) {
-        // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
-        if ($location.path() === '') {
-          appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-        }
-      }
-    }
+    },
 
     function _onLoggedOut() {
     }

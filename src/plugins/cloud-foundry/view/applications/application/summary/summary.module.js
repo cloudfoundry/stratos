@@ -89,6 +89,7 @@
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var stacksModel = modelManager.retrieve('cloud-foundry.model.stacks');
     vm.appCreatedInstructions = [];
     vm.appUtilsService = appUtilsService;
     vm.appClusterRoutesService = appClusterRoutesService;

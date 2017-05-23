@@ -10,7 +10,7 @@
   function setupWithClusters($httpBackend) {
     expectGetTemplates($httpBackend);
     expectGetSessionVerifiedWithSuccess($httpBackend);
-    expectGetStackatoInfo($httpBackend);
+    expectGetConsoleInfo($httpBackend);
     expectGetClustersWithSuccess($httpBackend);
     expectGetRegisterdClusters($httpBackend);
     expectGetHcfClusterInfo($httpBackend);
@@ -21,7 +21,7 @@
   function setupWithoutClusters($httpBackend) {
     expectGetTemplates($httpBackend);
     expectGetSessionVerifiedWithSuccess($httpBackend);
-    expectGetStackatoInfo($httpBackend);
+    expectGetConsoleInfo($httpBackend);
     expectGetClustersWithSuccess($httpBackend);
 
     // Pretend that there are no clusters
@@ -38,12 +38,14 @@
 
   function expectGetSessionVerifiedWithSuccess($httpBackend) {
     $httpBackend.whenGET('/pp/v1/auth/session/verify').respond(200, {
-      admin: true
+      user: {
+        admin: true
+      }
     });
   }
 
-  function expectGetStackatoInfo($httpBackend) {
-    $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {
+  function expectGetConsoleInfo($httpBackend) {
+    $httpBackend.whenGET('/pp/v1/info').respond(200, {
       version: {
         proxy_version: 'dev',
         database_version: 20160511195737

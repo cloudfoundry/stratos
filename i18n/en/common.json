@@ -15,7 +15,12 @@
     "back": "Back",
     "done": "Done",
     "add": "Add",
-    "set": "Set"
+    "set": "Set",
+    "save": "Save",
+    "delete": "Delete",
+    "rename": "Rename",
+    "yes": "Yes",
+    "no": "No"
   },
   "auth": {
     "username": "Username",
@@ -34,10 +39,19 @@
   },
   "about": {
     "about": "About",
-    "title": "[[@:product.name]] [[@:product.version]]"
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "footer": {
+      "title": "@:footer.title",
+      "copyright": "@:footer.copyright",
+      "company.logo": "@:company.logo",
+      "product.logo": "@:product.logo",
+      "company.www-link": "@:company.www-link",
+      "product.www-link": "@:product.www-link"
+    }
   },
   "footer": {
     "title": "[[@:product.name]] [[@:product.version]]",
-    "copyright": "&copy; 2017 [[@:company.name]]"
+    "copyright": "&copy; 2017 [[@:company.name]]",
+    "logo": "@:company.logo"
   }
 }

@@ -1,7 +1,8 @@
 <form name="loginForm" role="form" class="form-stacked login-form center-block"
   ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''"
   method="post">
-  <h1 class="text-center" translate>login.title</h1>
+  <img class="login-form-logo-image" translate-img="login.logo"></img>
+  <h1 class="login-form-title text-center" translate>login.title</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>login.username</label>
     <input type="text" class="form-control"
