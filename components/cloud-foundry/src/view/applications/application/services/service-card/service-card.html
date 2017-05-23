@@ -41,9 +41,9 @@
         </div>
         <button class="btn btn-sm btn-link"
           ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
-          ng-click="serviceCardCtrl.addService()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
-          Add Service
-          <i class="material-icons app-icon-sm add-icon">add</i>
+          ng-click="serviceCardCtrl.addService()" ng-hide="serviceCardCtrl.hideServiceActions()">
+          <span translate>Add Service</span>
+          <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"

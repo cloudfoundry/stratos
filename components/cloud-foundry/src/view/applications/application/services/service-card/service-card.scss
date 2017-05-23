@@ -103,9 +103,10 @@ service-card {
         }
 
         .service-attached:before {
-          font-family: 'helion-icons';
-          content: '\e916';
+          @extend .material-icons;
+          content: 'attachment';
           margin-right: $hpe-unit-space / 4;
+          vertical-align: bottom;
         }
 
         .service-added:after {
@@ -121,6 +122,8 @@ service-card {
         .btn-link {
           margin-top: auto;
           padding-right: 0;
+          display: flex;
+          align-items: center;
 
           &:hover,
           &:focus,
@@ -134,10 +137,7 @@ service-card {
           }
 
           .add-icon {
-            border: 2px solid $brand-primary;
-            font-size: $hpe-unit-space / 2;
-            border-radius: 50%;
-            padding: $hpe-unit-space / 6;
+            font-size: 20px;
             margin-left: $hpe-unit-space / 4;
           }
         }

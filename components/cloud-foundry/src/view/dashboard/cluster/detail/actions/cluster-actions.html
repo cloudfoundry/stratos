@@ -3,12 +3,13 @@
               menu-position="actions-menu-right">
 </actions-menu>
 <ul class="hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="clusterAction in clusterActionsCtrl.clusterActions">
+  <li class="side-action-item" ng-repeat="clusterAction in clusterActionsCtrl.clusterActions">
     <button class="no-focus btn btn-link btn-border-less"
             ng-disabled="clusterAction.disabled"
             ng-hide="clusterAction.hidden"
             ng-click="clusterAction.execute()">
-      <app-icon icon="clusterAction.icon"></app-icon> {{ clusterAction.name }}
+      <app-icon class="{{clusterAction.iconClass}}" icon="{{clusterAction.icon}}"></app-icon>
+      <span>{{ clusterAction.name }}</span>
     </button>
   </li>
 </ul>

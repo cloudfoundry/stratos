@@ -106,7 +106,7 @@
         },
         disabled: true,
         id: 'launch',
-        icon: 'helion-icon app-icon-lg helion-icon-Launch'
+        icon: 'launch'
       },
       {
         name: gettext('Stop'),
@@ -115,7 +115,7 @@
           that.model.stopApp(that.cnsiGuid, that.id);
         },
         disabled: true,
-        icon: 'helion-icon app-icon-lg helion-icon-Halt-stop'
+        icon: 'stop'
       },
       {
         name: gettext('Restart'),
@@ -124,7 +124,7 @@
           that.model.restartApp(that.cnsiGuid, that.id);
         },
         disabled: true,
-        icon: 'helion-icon app-icon-lg helion-icon-Refresh'
+        icon: 'settings_backup_restore'
       },
       {
         name: gettext('Delete'),
@@ -133,7 +133,7 @@
           that.deleteApp();
         },
         disabled: true,
-        icon: 'helion-icon app-icon-lg helion-icon-Trash'
+        icon: 'delete'
       },
       {
         name: gettext('Start'),
@@ -142,7 +142,7 @@
           that.model.startApp(that.cnsiGuid, that.id);
         },
         disabled: true,
-        icon: 'helion-icon app-icon-lg helion-icon-Play'
+        icon: 'play_circle_outline'
       },
       {
         name: gettext('CLI Instructions'),
@@ -156,7 +156,8 @@
           that.cfAppCliCommands.show(that.model.application, username);
         },
         disabled: true,
-        icon: 'helion-icon app-icon-lg helion-icon-Command_line'
+        icon: 'svg:Cli.svg',
+        iconClass: 'app-action-icon-cli'
       }
     ];
 

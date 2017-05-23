@@ -95,7 +95,8 @@
           }
         );
       },
-      icon: 'svg:Tree.svg'
+      icon: 'svg:Tree.svg',
+      iconClass: 'cluster-action-icon-tree'
     };
 
     var createSpace = {
@@ -207,7 +208,8 @@
           }
         );
       },
-      icon: 'svg:Tree.svg'
+      icon: 'svg:Tree.svg',
+      iconClass: 'cluster-action-icon-tree'
     };
 
     var assignUsers = {

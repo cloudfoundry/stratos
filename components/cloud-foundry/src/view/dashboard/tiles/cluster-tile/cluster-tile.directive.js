@@ -56,13 +56,13 @@
 
     var expiredStatus = {
       classes: 'danger',
-      icon: 'app-icon-lg helion-icon helion-icon-Critical_S',
+      icon: 'app-icon-lg material-icons cluster-status-icon-error',
       description: gettext('Token has expired')
     };
 
     var erroredStatus = {
       classes: 'danger',
-      icon: 'app-icon-lg helion-icon helion-icon-Critical_S',
+      icon: 'app-icon-lg material-icons cluster-status-icon-error',
       description: gettext('Cannot contact endpoint')
     };
 
@@ -79,6 +79,7 @@
       } else {
         delete cardData.status;
       }
+
       return cardData;
     }
 

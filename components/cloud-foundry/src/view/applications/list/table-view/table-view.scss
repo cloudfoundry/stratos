@@ -35,12 +35,13 @@
         }
 
         .column-sorter-asc, .column-sorter-desc {
-          font-family: "helion-icons";
+          @extend .material-icons;
           flex: none;
+          margin-top: -4px;
         }
 
         .column-no-sort {
-          font-family: "helion-icons";
+          @extend .material-icons;
           flex: 0 5 auto;
           overflow: hidden;
         }
@@ -83,10 +84,18 @@
     .app-state-column {
       display: flex;
       flex-direction: row;
+      align-items: center;
 
       .list-view-app-state-label {
         margin-left: 12px;
         line-height: 20px;
+      }
+
+      app-state-icon {
+        > span.app-status.material-icons {
+          display: flex;
+          font-size: 20px;
+        }
       }
     }
     // Column widths

@@ -43,8 +43,8 @@
         <td ng-if="asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken)">
           <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
         </td>
-        <td class="helion-icon app-icon-lg helion-icon-Active_L text-primary" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
-        <td class="helion-icon app-icon-lg helion-icon-Critical_L text-danger" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && !asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td class="token-valid-icon material-icons app-icon-lg text-primary" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && asyncTaskDialogCtrl.context.isTokenValid(vcsToken)">check_circle</td>
+        <td class="token-error-icon material-icons app-icon-lg text-danger" ng-if="!asyncTaskDialogCtrl.context.isCheckInProgress(vcsToken) && !asyncTaskDialogCtrl.context.isTokenValid(vcsToken)">cancel</td>
         <td class="token-value">{{ vcsToken.token.token }}</td>
         <td>
           <actions-menu actions="asyncTaskDialogCtrl.context.actions"

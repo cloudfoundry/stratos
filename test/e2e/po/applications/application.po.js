@@ -80,7 +80,7 @@
   }
 
   function isIncomplete() {
-    return element(by.css('app-state-icon .app-status.helion-icon-Warning_S')).isDisplayed();
+    return element(by.css('app-state-icon .app-status.app-status-icon-warning')).isDisplayed();
   }
 
   function getActiveTab() {

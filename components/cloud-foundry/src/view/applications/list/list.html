@@ -68,13 +68,13 @@
                   ng-class="!applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
                   type="button" ng-click="applicationsListCtrl.goToGalleryView(false)"
                   ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
-            <div class="helion-icon app-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
+            <div class="material-icons app-icon-lg">view_list</div>
           </button>
           <button class="btn btn-link btn-border-less"
                   ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
                   type="button" ng-click="applicationsListCtrl.goToGalleryView(true)"
                   ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
-            <div class="helion-icon app-icon-lg helion-icon-Card_Sort"></div>
+            <div class="material-icons">apps</div>
           </button>
         </div>
         <div class="application-options-control">
@@ -145,7 +145,7 @@
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
       <div ng-if="!applicationsListCtrl.isSpaceDeveloper">
         <div ng-if="applicationsListCtrl.isAdminInAnyHcf()">
-          <div class="helion-icon app-icon-3x helion-icon-Cluster"></div>
+          <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
           <div class="applications-msg" translate>You have no applications and</div>
           <div class="applications-msg" translate>there are no spaces where you can add any.</div>
           <div class="applications-cta">
@@ -154,13 +154,13 @@
           </div>
         </div>
         <div ng-if="!applicationsListCtrl.isAdminInAnyHcf()">
-          <div class="helion-icon app-icon-3x helion-icon-Cluster"></div>
+          <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
           <div class="applications-msg" translate>You have no applications and cannot add any.</div>
           <div class="applications-msg" translate>Please contact your administrator.</div>
         </div>
       </div>
       <div ng-if="applicationsListCtrl.isSpaceDeveloper">
-        <div class="helion-icon app-icon-3x helion-icon-Application"></div>
+        <app-icon icon="apps" icon-class="app-icon-3x"></app-icon>
         <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
         <div class="applications-cta">
           <a class="btn btn-link" ng-click="applicationsListCtrl.addApplication()"

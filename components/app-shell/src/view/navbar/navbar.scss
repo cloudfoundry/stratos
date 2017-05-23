@@ -139,14 +139,6 @@ navbar > .main-nav-menu {
             vertical-align: middle;
             font-size: 24px;
             display: inline-block;
-
-            // Correct some icons sizes when used in the nav menu
-            &.helion-icon-Application {
-              font-size: 32px;
-            }
-            &.helion-icon-Unknown_L {
-              font-size: 26px;
-            }
           }
 
           > svg {
@@ -244,6 +236,7 @@ navbar > .main-nav-menu {
     }
   }
 
+  /*
   icons, [icons] {
     display: flex;
     flex-direction: row;
@@ -265,6 +258,7 @@ navbar > .main-nav-menu {
   .helion-icon {
     font-size: 24px;
   }
+  */
 }
 
 .icon-bar {

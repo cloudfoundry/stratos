@@ -18,4 +18,12 @@
     }
   }
 
+  .gallery-card-status {
+
+    .material-icons.cluster-status-icon-error:before {
+      content: 'cancel';
+    }
+
+  }
+
 }
