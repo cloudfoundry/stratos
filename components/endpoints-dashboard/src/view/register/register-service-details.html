@@ -33,7 +33,7 @@
                ng-pattern="step.urlValidationExpr"
                helion-unique items="step.instanceUrls"
                ignore-case
-               auto-focus/>
+               auto-focus="300"/>
       </div>
       <div class="form-group" focusable-input
            ng-class="{'has-error': wizardForm[step.formName][endpoint.nameOfNameInput].$invalid && wizardForm[step.formName][endpoint.nameOfNameInput].$dirty}">
