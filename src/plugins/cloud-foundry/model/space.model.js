@@ -546,7 +546,7 @@
       }
 
       // Find our user's GUID
-      var consoleInfoModel = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
       var userGuid = consoleInfoModel.info;
 
       // Space roles can be inlined
@@ -645,7 +645,7 @@
 
     function createSpaces(cnsiGuid, orgGuid, spaceNames, params) {
 
-      var consoleInfoModel = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
       var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
       var cfOrganizationModel = _getOrganizationModel();
       var createPromises = [];

@@ -61,7 +61,6 @@
 
     var scopeDestroyed, updating;
 
-
     // Clear any previous state in the application tabs service
     cfApplicationTabs.clearState();
 
@@ -232,16 +231,16 @@
         })
         .then(function () {
           // Update stacks
-          var stackGuid = that.model.application.summary.stack_guid;
+          var stackGuid = vm.model.application.summary.stack_guid;
           var listStacksP;
-          if (!_.has(that.stacksModel, 'stacks.' + that.cnsiGuid + '.' + stackGuid)) {
+          if (!_.has(stacksModel, 'stacks.' + vm.cnsiGuid + '.' + stackGuid)) {
             // Stacks haven't been fetched yet
-            listStacksP = that.stacksModel.listAllStacks(that.cnsiGuid);
+            listStacksP = stacksModel.listAllStacks(vm.cnsiGuid);
           } else {
-            listStacksP = that.$q.resolve();
+            listStacksP = $q.resolve();
           }
           return listStacksP.then(function () {
-            that.updateStackName();
+            updateStackName();
           });
         })
         .finally(function () {
@@ -327,7 +326,7 @@
     function updateSummary() {
       return vm.model.getAppSummary(cnsiGuid, vm.id, true).then(function () {
         updateBuildPack();
-        that.updateStackName();
+        updateStackName();
       });
     }
 
@@ -337,9 +336,10 @@
       // changed
       vm.appBuildPack = vm.model.application.summary.buildpack || vm.model.application.summary.detected_buildpack;
     }
-    updateStackName: function (stackGuid) {
-      this.appStackName = _.get(this.stacksModel, 'stacks.' + this.cnsiGuid + '.' + this.model.application.summary.stack_guid + '.entity.name', stackGuid);
-    },
+
+    function updateStackName(stackGuid) {
+      vm.appStackName = _.get(stacksModel, 'stacks.' + vm.cnsiGuid + '.' + vm.model.application.summary.stack_guid + '.entity.name', stackGuid);
+    }
 
     // /**
     //  * @function updateState
@@ -416,24 +416,24 @@
       if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
         // Hide delete if user has no project permissions
         hideAction = true;
-      } else if (authModel.isInitialized(this.cnsiGuid)) {
+      } else if (authModel.isInitialized(cnsiGuid)) {
         // Hide actions if user has no HCF app update perissions (i.e not a space developer)
         var spaceGuid = vm.model.application.summary.space_guid;
-        hideAction = !authModel.isAllowed(this.cnsiGuid,
+        hideAction = !authModel.isAllowed(cnsiGuid,
           authModel.resources.application,
           authModel.actions.update,
           spaceGuid);
       }
 
       // Check when running in cloud-foundry
-      if (this.isCloudFoundryConsoleApplication()) {
+      if (isCloudFoundryConsoleApplication()) {
         return true;
       }
 
       return vm.model.application.state.actions[id] !== true || hideAction;
-    },
+    }
 
-    isCloudFoundryConsoleApplication: function () {
+    function isCloudFoundryConsoleApplication() {
       // Check when running in cloud-foundry
       var cfInfo = consoleInfo.info ? consoleInfo.info['cloud-foundry'] : undefined;
       if (cfInfo) {
@@ -443,7 +443,7 @@
       } else {
         return false;
       }
-    },
+    }
 
     /**
      * @function isActionDisabled

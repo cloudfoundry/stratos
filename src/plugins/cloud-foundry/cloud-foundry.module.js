@@ -11,21 +11,21 @@
     ])
     .run(register);
 
-  function register($location, modelManager, appEventService) {
-    return new CloudFoundry($location, modelManager, appEventService);
+  function register(modelManager, appEventService) {
+    return new CloudFoundry(modelManager, appEventService);
   }
 
-  function CloudFoundry($location, modelManager, appEventService) {
-    appEventService.$on(appEventService.events.LOGIN, function (ev, preventRedirect) {
-      _onLoggedIn(preventRedirect);
+  function CloudFoundry(modelManager, appEventService) {
+    appEventService.$on(appEventService.events.LOGIN, function () {
+      _onLoggedIn();
     });
     appEventService.$on(appEventService.events.LOGOUT, function () {
       _onLoggedOut();
     });
 
-    function _onLoggedIn(preventRedirect) {
+    function _onLoggedIn() {
       _registerNavigation();
-    },
+    }
 
     function _onLoggedOut() {
     }

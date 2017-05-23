@@ -69,7 +69,7 @@
 
       var authModelInitPromise = [];
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
       var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
       if (services.length > 0) {
         _.each(services, function (service) {
@@ -99,13 +99,13 @@
     function initializeForEndpoint(cnsiGuid, useconsoleInfoCache) {
 
       model.principal[cnsiGuid] = null;
-      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
       var featureFlagsModel = modelManager.retrieve('cloud-foundry.model.featureFlags');
       var Principal = modelManager.retrieve('cloud-foundry.model.auth.principal');
       var userModel = modelManager.retrieve('cloud-foundry.model.users');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
-      var consoleInfoPromise = this.$q.resolve(consoleInfo.info);
+      var consoleInfoPromise = $q.resolve(consoleInfo.info);
       if (!useconsoleInfoCache) {
         consoleInfoPromise = consoleInfo.getConsoleInfo();
       }

@@ -7,7 +7,8 @@
    **/
   angular
     .module('cloud-foundry.view.applications.application.variables')
-    .factory('cfVariablesManager', serviceFactory);
+    .factory('cfVariablesManager', serviceFactory)
+    .controller('cloud-foundry.view.applications.application.variables.applicationVariablesDialogController', ApplicationVariablesDialogController);
 
   function serviceFactory($q, modelManager, frameworkDetailView) {
     return {
