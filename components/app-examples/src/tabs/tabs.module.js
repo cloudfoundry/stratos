@@ -1,8 +1,9 @@
+/* eslint-disable angular/controller-as */
 (function () {
   'use strict';
 
   angular
-    .module('helionFrameworkExamples.tabs', ['ui.bootstrap'])
+    .module('app-examples.widgets')
     .controller('TabsDemoController', function ($scope, $window, $timeout) {
 
       $scope.tabs = [
