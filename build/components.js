@@ -88,7 +88,7 @@
 
     // Prune components that should no longer be in bower_components
     _.each(components, function (component) {
-      if (!components[component.name]) {
+      if (!localComponents[component.name]) {
         fsx.removeSync(component.folder);
       }
     });
