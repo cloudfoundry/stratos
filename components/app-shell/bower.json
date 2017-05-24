@@ -1,0 +1,17 @@
+{
+  "name": "app-shell",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "index.html",
+    "src/app-shell.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-framework": "./components/app-framework"
+  }
+}

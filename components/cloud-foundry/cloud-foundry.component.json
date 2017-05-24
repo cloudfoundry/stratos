@@ -1,0 +1,6 @@
+{
+  "rootDir": "plugins/cloud-foundry",
+  "frontend": {
+    "base": "./frontend"
+  }
+}

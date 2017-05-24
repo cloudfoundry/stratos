@@ -4,12 +4,8 @@
 
   // Gulp tasks for the UI Framework Examples
 
-  var config, paths;
-
-  module.exports = function (c) {
-    config = c;
-    paths = config.paths;
-  };
+  var config = require('./gulp.config');
+  var paths = config.paths;
 
   var del = require('del');
   var path = require('path');

@@ -1,0 +1,36 @@
+@mixin font-face(
+  $font-family,
+  $style,
+  $weight,
+  $file-path,
+  $file-name) {
+
+  @font-face {
+    font-family: $font-family;
+    font-style: $style;
+    font-weight: $weight;
+    src: url($file-path + '/' + $file-name + '.eot'),
+         url($file-path + '/' + $file-name + '.woff')
+  }
+}
+
+@include font-face('Metric', normal, 100, $font-path, 'MetricHPE-Web-Thin');
+@include font-face('Metric', italic, 100, $font-path, 'MetricHPE-Web-ThinItalic');
+
+@include font-face('Metric', normal, 300, $font-path, 'MetricHPE-Web-Light');
+@include font-face('Metric', italic, 300, $font-path, 'MetricHPE-Web-LightItalic');
+
+@include font-face('Metric', normal, 400, $font-path, 'MetricHPE-Web-Regular');
+@include font-face('Metric', italic, 400, $font-path, 'MetricHPE-Web-RegularItalic');
+
+@include font-face('Metric', normal, 500, $font-path, 'MetricHPE-Web-Medium');
+@include font-face('Metric', italic, 500, $font-path, 'MetricHPE-Web-MediumItalic');
+
+@include font-face('Metric', normal, 600, $font-path, 'MetricHPE-Web-Semibold');
+@include font-face('Metric', italic, 600, $font-path, 'MetricHPE-Web-SemiboldItalic');
+
+@include font-face('Metric', normal, 700, $font-path, 'MetricHPE-Web-Bold');
+@include font-face('Metric', italic, 700, $font-path, 'MetricHPE-Web-BoldItalic');
+
+@include font-face('Metric', normal, 900, $font-path, 'MetricHPE-Web-Black');
+@include font-face('Metric', italic, 900, $font-path, 'MetricHPE-Web-BlackItalic');

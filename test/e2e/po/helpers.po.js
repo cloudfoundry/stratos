@@ -1,4 +1,4 @@
-/* eslint-disable angular/json-functions,angular/log,no-console */
+/* eslint-disable angular/json-functions,angular/log,no-console,no-process-env */
 (function () {
   'use strict';
 
@@ -51,6 +51,7 @@
     skipIfNoHCE: skipIfNoHCE,
     skipIfNoHCFHCE: skipIfNoHCFHCE,
     skipIfNoSecondHCF: skipIfNoSecondHCF,
+    skipIfOnlyOneHCF: skipIfOnlyOneHCF,
     skipIfNoAppWithLogStrean: skipIfNoAppWithLogStrean,
 
     getAppNameWithLogStream: getAppNameWithLogStream,

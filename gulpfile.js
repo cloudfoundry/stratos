@@ -1,6 +1,6 @@
 (function () {
   'use strict';
 
-  require('./tools/gulpfile');
+  require('./build/main.gulp');
 
 })();
