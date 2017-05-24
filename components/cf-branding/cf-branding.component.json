@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "app-theme": {
+       "cf-branding": "*"
+    }
+  }
+}
