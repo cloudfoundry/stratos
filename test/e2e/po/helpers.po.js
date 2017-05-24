@@ -97,7 +97,9 @@
     hasClass: hasClass,
     isButtonEnabled: isButtonEnabled,
 
-    getCustomAppLabel: getCustomAppLabel
+    getCustomAppLabel: getCustomAppLabel,
+    
+    scrollIntoView: scrollIntoView
   };
 
   function getHost() {
@@ -507,6 +509,12 @@
 
   function getAppNameWithLogStream() {
     return browser.params.appWithLogStream;
+  }
+
+  function scrollIntoView(element) {
+    return browser.controlFlow().execute(function () {
+      browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
+    });
   }
 
 })();

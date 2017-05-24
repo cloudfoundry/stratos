@@ -74,6 +74,7 @@
       }).first();
 
       var actionMenu = theTile.element(by.css('.actions-menu'));
+      helpers.scrollIntoView(theTile);
       actionsMenuHelper.click(actionMenu);
       actionsMenuHelper.clickItem(actionMenu, 1);
       expect(confirmationModalHelper.isVisible()).toBeTruthy();

@@ -103,7 +103,7 @@
   }
 
   function invokeAction(actionName) {
-    var actions = element.all(by.css('ul.application-action-col > li > button'));
+    var actions = element.all(by.css('ul.application-action-col > li > button > span'));
     var matchingAction = actions.filter(function (elem) {
       return elem.getText().then(function (text) {
         return text === actionName;
