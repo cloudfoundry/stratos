@@ -75,22 +75,20 @@
     var files = globLib.sync('./components/**/bower.json');
     _.each(files, function (f) {
       var bower = JSON.parse(fs.readFileSync(f, 'utf8'));
-      var folder = path.dirname(f);
-      local[bower.name] = folder;
+      local[bower.name] = path.dirname(f);
     });
     return local;
   }
 
   function syncLocalComponents() {
-    var c = findLocalComponents(baseFolder);
-    _.each(c, function (localComponent, name) {
+    _.each(localComponents, function (localComponent, name) {
       fsx.emptyDirSync(path.join(bowerFolder, name));
       utils.copySingleBowerFolder(localComponent.path, bowerFolder);
     });
 
     // Prune components that should no longer be in bower_components
     _.each(components, function (component) {
-      if (!c[component.name]) {
+      if (!localComponents[component.name]) {
         fsx.removeSync(component.folder);
       }
     });
@@ -98,8 +96,6 @@
 
   function getGlobs(pattern) {
     var c = findComponentsDependencySorted();
-    var local = findLocalComponents();
-
     var globs = {
       dist: [],
       bower: [],
@@ -121,8 +117,8 @@
         globs.dist.push(inverse ? '!' + dPath : dPath);
         globs.bower.push(inverse ? '!' + bPath : bPath);
         globs.bowerFull.push(inverse ? '!' + bfPath : bfPath);
-        if (local[v.name]) {
-          var lPath = path.join(local[v.name].folder, g);
+        if (localComponents[v.name]) {
+          var lPath = path.join(localComponents[v.name].folder, g);
           globs.local.push(inverse ? '!' + lPath : lPath);
         }
       });
@@ -130,34 +126,27 @@
     return globs;
   }
 
-  function addWiredep(config) {
-    var wiredep = config.overrides;
-    _.each(components, function (component) {
-      _.each(component.dependencies, function (o, name) {
-        var componentBower = JSON.parse(fs.readFileSync(path.join(config.directory, name, 'bower.json'), 'utf8'));
-        var deps = componentBower.dependencies || {};
-        _.defaults(deps, o);
-        wiredep[name] = { dependencies: deps };
-      });
-    });
-    return config;
+  function getWiredep() {
+    var wiredep = _.clone(config.bower);
+    _.assign(wiredep.overrides, getDependencies());
+    return wiredep;
   }
 
-  function getDependencies(cpmnts) {
+  function getDependencies() {
     var depends = {};
-    _.each(cpmnts, function (component) {
+    _.each(components, function (component) {
       _.each(component.dependencies, function (o, name) {
-        var componentBower = JSON.parse(fs.readFileSync(path.join('./bower_components', name, 'bower.json'), 'utf8'));
+        var componentBower = JSON.parse(fs.readFileSync(path.join(config.bower.directory, name, 'bower.json'), 'utf8'));
         var deps = componentBower.dependencies || {};
         _.defaults(deps, o);
-        depends[name] = deps;
+        depends[name] = { dependencies: deps };
       });
     });
     return depends;
   }
 
   function findComponentsDependencySorted() {
-    var depends = getDependencies(components);
+    var depends = getDependencies();
     var names = _.map(components, 'name');
     var list = resolve(depends, components, names);
     return _.map(list, function (name) {
@@ -169,7 +158,7 @@
     var list = [];
     _.each(names, function (name) {
       if (cpmnts[name]) {
-        var deps = _.keys(depends[name]);
+        var deps = _.keys(depends[name] ? depends[name].dependencies : []);
         list = _.concat(resolve(depends, cpmnts, deps), list);
         list.push(name);
         list = _.uniqBy(list);
@@ -247,7 +236,7 @@
   module.exports.getBowerFolder = getBowerFolder;
   module.exports.syncLocalComponents = syncLocalComponents;
   module.exports.getGlobs = getGlobs;
-  module.exports.addWiredep = addWiredep;
+  module.exports.getWiredep = getWiredep;
   module.exports.findMainFile = findMainFile;
   module.exports.transformPath = transformPath;
   module.exports.transformDirname = transformDirname;
