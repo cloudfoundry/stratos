@@ -98,7 +98,7 @@
     isButtonEnabled: isButtonEnabled,
 
     getCustomAppLabel: getCustomAppLabel,
-    
+
     scrollIntoView: scrollIntoView
   };
 
