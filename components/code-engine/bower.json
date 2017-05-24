@@ -11,7 +11,7 @@
     ".*"
   ],
   "dependencies": {
-    "app-framework": "./components/app-shell",
+    "app-shell": "./components/app-shell",
     "angular-link-header-parser-ng": "^1.0.3"
   }
 }
