@@ -11,8 +11,8 @@
       var $state = $injector.get('$state');
       var appEventService = $injector.get('appEventService');
       var modelManager = $injector.get('modelManager');
-      var AccountSettingsController = $state.get('account-settings').controller;
-      controller = new AccountSettingsController(appEventService, modelManager);
+      var AboutAppController = $state.get('about-app').controller;
+      controller = new AboutAppController(appEventService, modelManager);
     }));
 
     it('should be defined', function () {
