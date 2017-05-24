@@ -52,9 +52,9 @@
   var mainBowerFile = path.resolve('./bower.json');
 
   function initialize() {
-    // bower install won't update our local components files, do this ourselves as a full install takes a while
+    // bower install won't update our local path components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
-    components.syncLocalComponents();
+    components.syncLocalPathComponents();
     components.initialize();
 
     localComponents = components.getGlobs('**/*.*');
@@ -233,7 +233,7 @@
   // By default running the unit tests only tests those components included in bower.json
   // This task re-writes bower.json to include all components in the components folder
   gulp.task('unit:update-bower', function (done) {
-    var local = components.findLocalComponentFolders();
+    var local = components.findLocalPathComponentFolders();
     var bower = components.getBowerConfig();
     _.assign(bower.dependencies, local);
     fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
