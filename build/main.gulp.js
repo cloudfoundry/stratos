@@ -46,16 +46,15 @@
 
   var usePlumber = true;
 
-  var bowerConfig = _.clone(config.bower);
+  var bowerConfig = components.getWiredep();
   delete bowerConfig.exclude;
-  var bowerFiles = require('wiredep')(components.addWiredep(bowerConfig));
+  var bowerFiles = require('wiredep')(bowerConfig);
+  var mainBowerFile = path.resolve('./bower.json');
 
   function initialize() {
-    //var buildConfig = JSON.parse(fs.readFileSync('./build_config.json', 'utf8'));
-    //utils.clearCachedPlugins(buildConfig);
-
-    // bower install won't update our local components files, do this ourselves as a full install takes a while
+    // bower install won't update our local path components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
+    components.syncLocalPathComponents();
     components.initialize();
 
     localComponents = components.getGlobs('**/*.*');
@@ -234,10 +233,10 @@
   // By default running the unit tests only tests those components included in bower.json
   // This task re-writes bower.json to include all components in the components folder
   gulp.task('unit:update-bower', function (done) {
-    var local = components.findLocalComponentFolders();
+    var local = components.findLocalPathComponentFolders();
     var bower = components.getBowerConfig();
     _.assign(bower.dependencies, local);
-    fs.writeFile('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
+    fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
     done();
   });
 
@@ -269,9 +268,8 @@
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);
     gulp.watch(templateFiles.bower, ['copy:html', callback]);
     gulp.watch(components.findMainFile('index.html'), ['inject:index', callback]);
-
-    // Watch build configuration file for changes
-    //gulp.watch('./tools/build_config.json', ['build-config', callback]);
+    // Watch main bower filefor changes
+    gulp.watch(mainBowerFile, ['build-config', callback]);
   });
 
   gulp.task('build-config', function (next) {
