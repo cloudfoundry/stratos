@@ -74,8 +74,6 @@
       .pipe(gulp.dest(paths.instrumented));
   });
 
-  gulp.task('neil', ['e2e:instrument-source', 'start-server']);
-
   gulp.task('e2e:run', function () {
     paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
