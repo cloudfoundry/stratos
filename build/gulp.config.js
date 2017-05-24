@@ -73,32 +73,11 @@
 
     jsTemplatesFile: 'console-templates.js',
 
-    sourceFilesToInstrument: [
-      paths.src + '*.js',
-      paths.src + 'app/**/*.js',
-      paths.src + 'plugins/**/*.js',
-      paths.src + 'framework/**/*.js',
-      '!' + paths.src + 'config.js',
-      '!' + paths.src + 'app/**/*.mock.js',
-      '!' + paths.src + 'app/**/*.spec.js',
-      '!' + paths.src + 'plugins/**/*.mock.js',
-      '!' + paths.src + 'plugins/**/*.spec.js',
-      '!' + paths.src + 'plugins/*/api/**/*.js',
-      '!' + paths.src + 'framework/**/*.spec.js',
-      '!' + paths.src + 'framework/**/*.mock.js',
-      '!' + paths.src + 'framework/utils/wheel-handler/*.js',
-      '!' + paths.src + 'framework/widgets/ring-chart/*.js'
-    ],
-
     // Files that should be run through the linter
     lintFiles: [
       paths.components + '**/*.js',
       '!' + paths.components + '**/*.mock.js',
       paths.build + '*.js',
-      paths.build + 'test-backend/*.js',
-      paths.build + 'test-backend/api/**/*.js',
-      paths.build + 'test-backend/config/**/*.js',
-      paths.build + 'test-backend/data/**/*.js',
       paths.e2e + '**/*.js'
     ],
 

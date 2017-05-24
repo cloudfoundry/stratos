@@ -46,10 +46,10 @@
 
   var usePlumber = true;
 
-  var bowerConfig = _.clone(config.bower);
+  var bowerConfig = components.getWiredep();
   delete bowerConfig.exclude;
+  var bowerFiles = require('wiredep')(bowerConfig);
   var mainBowerFile = path.resolve('./bower.json');
-  var bowerFiles = require('wiredep')(components.addWiredep(bowerConfig));
 
   function initialize() {
     // bower install won't update our local components files, do this ourselves as a full install takes a while
@@ -236,7 +236,7 @@
     var local = components.findLocalComponentFolders();
     var bower = components.getBowerConfig();
     _.assign(bower.dependencies, local);
-    fs.writeFile('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
+    fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
     done();
   });
 
