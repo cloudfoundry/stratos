@@ -23,7 +23,7 @@
     mainBowerFile = JSON.parse(fs.readFileSync(path.join(baseFolder, 'bower.json'), 'utf8'));
     buildConfig = mainBowerFile.config || {};
     components = findComponents();
-    localComponents = findLocalComponents();
+    localComponents = findLocalPathComponents();
   }
 
   function findComponents() {
@@ -51,9 +51,11 @@
     return components;
   }
 
-  // Find local components referenced in the main bower.json
+  // Find local path components referenced in the main bower.json
   // Assumes the location if a path starting with '.'
-  function findLocalComponents() {
+  // Only used to ensure that these are synced into the bower_components folder when
+  // files are changed - bower update won't do this.
+  function findLocalPathComponents() {
     var components = {};
     _.each(mainBowerFile.dependencies, function (location, name) {
       if (location.indexOf('.') === 0) {
@@ -70,7 +72,7 @@
     return components;
   }
 
-  function findLocalComponentFolders() {
+  function findLocalPathComponentFolders() {
     var local = {};
     var files = globLib.sync('./components/**/bower.json');
     _.each(files, function (f) {
@@ -80,7 +82,7 @@
     return local;
   }
 
-  function syncLocalComponents() {
+  function syncLocalPathComponents() {
     _.each(localComponents, function (localComponent, name) {
       fsx.emptyDirSync(path.join(bowerFolder, name));
       utils.copySingleBowerFolder(localComponent.path, bowerFolder);
@@ -234,7 +236,7 @@
   module.exports.getBuildConfig = getBuildConfig;
   module.exports.getBowerConfig = getBowerConfig;
   module.exports.getBowerFolder = getBowerFolder;
-  module.exports.syncLocalComponents = syncLocalComponents;
+  module.exports.syncLocalPathComponents = syncLocalPathComponents;
   module.exports.getGlobs = getGlobs;
   module.exports.getWiredep = getWiredep;
   module.exports.findMainFile = findMainFile;
@@ -242,6 +244,6 @@
   module.exports.transformDirname = transformDirname;
   module.exports.reverseTransformPath = reverseTransformPath;
   module.exports.removeEmptyGlobs = removeEmptyGlobs;
-  module.exports.findLocalComponentFolders = findLocalComponentFolders;
+  module.exports.findLocalPathComponentFolders = findLocalPathComponentFolders;
 
 })();
