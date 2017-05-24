@@ -121,7 +121,7 @@
           var lPath = path.join(localComponents[v.name].folder, g);
           globs.local.push(inverse ? '!' + lPath : lPath);
         }
-      }); 
+      });
     });
     return globs;
   }
@@ -139,7 +139,7 @@
         var componentBower = JSON.parse(fs.readFileSync(path.join(config.bower.directory, name, 'bower.json'), 'utf8'));
         var deps = componentBower.dependencies || {};
         _.defaults(deps, o);
-        depends[name] = { dependencies: deps };;
+        depends[name] = { dependencies: deps };
       });
     });
     return depends;
@@ -158,7 +158,7 @@
     var list = [];
     _.each(names, function (name) {
       if (cpmnts[name]) {
-        var deps = _.keys(depends[name]? depends[name].dependencies : []);
+        var deps = _.keys(depends[name] ? depends[name].dependencies : []);
         list = _.concat(resolve(depends, cpmnts, deps), list);
         list.push(name);
         list = _.uniqBy(list);

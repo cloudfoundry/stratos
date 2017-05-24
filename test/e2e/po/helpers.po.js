@@ -500,7 +500,7 @@
   function skipIfNoSecondHCF() {
     return !getHcfs() || !getHcfs().hcf2;
   }
-  
+
   function skipIfOnlyOneHCF() {
     return !getHcfs() || Object.keys(getHcfs()).length < 2;
   }
