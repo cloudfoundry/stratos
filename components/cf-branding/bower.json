@@ -1,0 +1,16 @@
+{
+  "name": "cf-branding",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "brand.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+  }
+
+}

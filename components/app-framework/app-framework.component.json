@@ -1,0 +1,8 @@
+{
+  "rootDir": "framework",
+  "dependencies": {
+    "angular": {
+      "jquery": "*"
+    }
+  }
+}

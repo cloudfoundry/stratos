@@ -1,0 +1,15 @@
+{
+  "name": "github",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-shell": "./components/app-shell"
+  }
+}
