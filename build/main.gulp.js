@@ -242,6 +242,7 @@
 
   gulp.task('i18n', function () {
     var productVersion = { product: { version: utils.getMajorMinor(packageJson.version) } };
+    console.log(i18nFiles.bower);
     return gulp.src(i18nFiles.bower)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())

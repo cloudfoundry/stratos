@@ -42,6 +42,10 @@
             components[bower.name] = component;
             component.bower = bower;
             component.folder = folder;
+            component.base = bower.name;
+            if (component.frontend && component.frontend.base) {
+              component.base = path.join(bower.name, component.frontend.base);
+            }
             component.name = bower.name;
             component.src = component.src || 'src';
           }
@@ -112,13 +116,18 @@
       g = !inverse ? g : g.substring(1);
       _.each(c, function (v) {
         var dPath = path.relative(baseFolder, path.join(config.paths.dist, v.rootDir ? v.rootDir : v.name, g));
-        var bPath = path.relative(baseFolder, path.join(bowerFolder, v.name, g));
-        var bfPath = path.relative(baseFolder, path.join(wildBowerFolder, v.name, g));
+        var bPath = path.relative(baseFolder, path.join(bowerFolder, v.base, g));
+        var bfPath = path.relative(baseFolder, path.join(wildBowerFolder, v.base, g));
         globs.dist.push(inverse ? '!' + dPath : dPath);
         globs.bower.push(inverse ? '!' + bPath : bPath);
         globs.bowerFull.push(inverse ? '!' + bfPath : bfPath);
         if (localComponents[v.name]) {
-          var lPath = path.join(localComponents[v.name].folder, g);
+          var lPath;
+          if (v.frontend && v.frontend.base) {
+            lPath = path.join(localComponents[v.name].folder, v.frontend.base, g);
+          } else {
+            lPath = path.join(localComponents[v.name].folder, g);
+          }
           globs.local.push(inverse ? '!' + lPath : lPath);
         }
       });
@@ -185,7 +194,8 @@
   function transformPath(p) {
     var parts = p.split(path.sep);
     var name = parts[0];
-    parts.splice(1,1);
+    var skip = components[name].base.split(path.sep).length;
+    parts.splice(1, skip);
     if (components[name] && components[name].rootDir) {
       parts[0] = components[name].rootDir;
     }
