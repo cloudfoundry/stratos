@@ -2,31 +2,31 @@
   'use strict';
 
   angular
-    .module('app.view.settings-page', [])
+    .module('about-app', ['app'])
     .config(registerRoute)
     .run(register);
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('account-settings', {
-      url: '/account/settings',
-      templateUrl: 'app/view/console-view/settings-page/settings-page.html',
-      controller: SettingsController,
-      controllerAs: 'settingsCtrl',
+    $stateProvider.state('about-app', {
+      url: '/about',
+      templateUrl: 'about-app/about-app.html',
+      controller: AboutAppController,
+      controllerAs: 'aboutCtrl',
       data: {
-        activeMenuState: 'account-settings'
+        activeMenuState: 'about-app'
       }
     });
   }
 
   /**
-   * @name SettingsController
+   * @name AboutAppController
    * @constructor
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the model management service
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the model management service
    */
-  function SettingsController(appEventService, modelManager) {
+  function AboutAppController(appEventService, modelManager) {
     this.appEventService = appEventService;
     this.modelManager = modelManager;
 
@@ -35,17 +35,17 @@
   }
 
   function register(modelManager, appEventService) {
-    return new UserSettings(modelManager, appEventService);
+    return new AboutApp(modelManager, appEventService);
   }
 
-  function UserSettings(modelManager, appEventService) {
+  function AboutApp(modelManager, appEventService) {
     appEventService.$on(appEventService.events.LOGIN, function () {
       onLoggedIn();
     });
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('account-settings', 'account-settings', 'menu.about', 99, 'info_outline');
+      menu.addMenuItem('about-app', 'about-app', 'menu.about', 99, 'helion-icon-Unknown_L');
     }
   }
 

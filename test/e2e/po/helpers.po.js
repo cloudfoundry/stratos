@@ -51,6 +51,7 @@
     skipIfNoHCE: skipIfNoHCE,
     skipIfNoHCFHCE: skipIfNoHCFHCE,
     skipIfNoSecondHCF: skipIfNoSecondHCF,
+    skipIfOnlyOneHCF: skipIfOnlyOneHCF,
     skipIfNoAppWithLogStrean: skipIfNoAppWithLogStrean,
 
     getAppNameWithLogStream: getAppNameWithLogStream,

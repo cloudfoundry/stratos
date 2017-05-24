@@ -1,11 +1,11 @@
 {
-  "name": "endpoints-dashboard",
+  "name": "about-app",
   "description": "",
   "license": "ISC",
   "moduleType": [],
   "homepage": "",
   "main": [
-    "src/endpoints-dashboard.scss"
+    "src/about-app.scss"
   ],
   "ignore": [
     ".*"
