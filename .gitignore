@@ -11,6 +11,7 @@ src/index.scss
 src/plugins/.plugins.scss
 src/framework.scss
 tools/.coverage-karma/
+build/dev_config.json
 tools/dev_config.json
 translations/js
 translations/**/*.mo

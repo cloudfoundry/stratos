@@ -12,7 +12,6 @@ This project depends on the following:
 * [Docker](https://docs.docker.com/mac)
 * [Node.js](https://nodejs.org) - to easily install Node.js modules
 * [portal-proxy](https://github.com/hpcloud/portal-proxy) - Golang based REST API
-* [helion-ui-framework](https://github.com/hpcloud/helion-ui-framework) - reusable Angular-based UI components, Helion branding, assets, styles, theme files
 
 ## Installation
 Install Docker and clone the repositories listed above at the same level as this project.
