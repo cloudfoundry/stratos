@@ -1,7 +1,9 @@
 {
-  "dependencies": {
-    "app-theme": {
-       "suse-branding": "*"
+  "frontend": {
+    "dependencies": {
+      "app-theme": {
+        "suse-branding": "*"
+      }
     }
   }
 }

@@ -1,3 +1,5 @@
 {
-  "rootDir": "plugins/github"
+  "frontend": {
+    "root": "plugins/github"
+  }
 }
