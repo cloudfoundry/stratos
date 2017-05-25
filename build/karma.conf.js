@@ -16,7 +16,7 @@
 
       browserDisconnectTimeout: 10000,
 
-      browserNoActivityTimeout: 20000,
+      browserNoActivityTimeout: 30000,
 
       browsers: ['PhantomJS'],
       //browsers: ['Chrome_Headless'],
