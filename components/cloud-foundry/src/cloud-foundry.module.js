@@ -11,28 +11,37 @@
     ])
     .run(register);
 
-  function register(modelManager, appEventService) {
-    return new CloudFoundry(modelManager, appEventService);
+  function register($state, $location, appEventService, modelManager, appNotificationsService) {
+    return new CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService);
   }
 
-  function CloudFoundry(modelManager, appEventService) {
-    appEventService.$on(appEventService.events.LOGIN, function () {
-      _onLoggedIn();
+  function CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService) {
+    var that = this;
+    this.appEventService = appEventService;
+    this.modelManager = modelManager;
+    this.$state = $state;
+    this.$location = $location;
+    this.appNotificationsService = appNotificationsService;
+    this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
+      that.onLoggedIn(preventRedirect);
     });
-    appEventService.$on(appEventService.events.LOGOUT, function () {
-      _onLoggedOut();
+    this.appEventService.$on(this.appEventService.events.LOGOUT, function () {
+      that.onLoggedOut();
     });
+  }
 
-    function _onLoggedIn() {
-      _registerNavigation();
-    }
+  angular.extend(CloudFoundry.prototype, {
+    onLoggedIn: function () {
+      this.registerNavigation();
+    },
 
-    function _onLoggedOut() {
-    }
+    onLoggedOut: function () {
+    },
 
-    function _registerNavigation() {
-      var menu = modelManager.retrieve('app.model.navigation').menu;
+    registerNavigation: function () {
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', 0, 'helion-icon-Application');
     }
-  }
+  });
+
 })();

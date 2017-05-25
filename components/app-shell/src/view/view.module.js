@@ -10,7 +10,6 @@
    */
   angular
     .module('app.view', [
-      'app.view.settings-page',
       'app.view.endpoints',
       'app.view.error-page',
       'app.utils'
@@ -34,7 +33,7 @@
 
     function findMain() {
       var p = _.find(env.plugins, {moduleName: env.main});
-      var main = 'account-settings';
+      var main = 'about-app';
       main = p && p.main ? p.main : main;
       return main;
     }

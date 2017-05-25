@@ -28,6 +28,7 @@
    * @name ApplicationController
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.model.loginManager} loginManager - the login management service
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} appSelectLanguage - the Language Selection dialogService
@@ -47,7 +48,7 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, appUpgradeCheck, appLocalStorage,
+  function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
                                  appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
@@ -69,9 +70,16 @@
     vm.logout = logout;
     vm.reload = reload;
 
-    $timeout(function () {
-      verifySessionOrCheckUpgrade();
-    }, 0);
+    if (loginManager.isEnabled()) {
+      $timeout(function () {
+        verifySessionOrCheckUpgrade();
+      }, 0);
+    } else {
+      vm.ready = true;
+      vm.loggedIn = true;
+      vm.failedLogin = false;
+      appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
+    }
 
     // Navigation options
     $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
@@ -237,7 +245,7 @@
             // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
             // So, we pass this flag to tell them login happenned, but that they should not redirect
             appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
-            // We need to dpo this after the login events are handled, so that ui-router states we might go to are registered
+            // We need to do this after the login events are handled, so that ui-router states we might go to are registered
             if (vm.redirectState) {
               appEventService.$emit(appEventService.events.REDIRECT, vm.redirectState);
             }

@@ -405,33 +405,33 @@
      */
     function isActionHidden(id) {
 
-      var hideAction = true;
-      if (!vm.model.application.state || !vm.model.application.state.actions) {
-        return true;
-      } else if (id === 'launch') {
-        return false;
-      }
-
-      // Check permissions
-      if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
-        // Hide delete if user has no project permissions
-        hideAction = true;
-      } else if (authModel.isInitialized(cnsiGuid)) {
-        // Hide actions if user has no HCF app update perissions (i.e not a space developer)
-        var spaceGuid = vm.model.application.summary.space_guid;
-        hideAction = !authModel.isAllowed(cnsiGuid,
-          authModel.resources.application,
-          authModel.actions.update,
-          spaceGuid);
-      }
-
-      // Check when running in cloud-foundry
       if (isCloudFoundryConsoleApplication()) {
+        // App in question is CF
         return true;
-      }
+      } else if (!vm.model.application.state || !vm.model.application.state.actions) {
+        return true;
+      } else {
+        var hideAction = true;
+        if (id === 'launch') {
+          hideAction = false;
+        } else {
+          // Check permissions
+          if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
+            // Hide delete if user has no project permissions
+            hideAction = true;
+          } else if (authModel.isInitialized(this.cnsiGuid)) {
+            // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+            var spaceGuid = vm.model.application.summary.space_guid;
+            hideAction = !authModel.isAllowed(this.cnsiGuid,
+              authModel.resources.application,
+              authModel.actions.update,
+              spaceGuid);
+          }
+        }
 
-      return vm.model.application.state.actions[id] !== true || hideAction;
-    }
+        return vm.model.application.state.actions[id] !== true || hideAction;
+      }
+    },
 
     function isCloudFoundryConsoleApplication() {
       // Check when running in cloud-foundry
