@@ -5,7 +5,6 @@ For more implementation details, please see the following pages:
 * [Architecture](docs/architecture.md)
 * [Plugins](docs/plugins.md)
 
-
 ## System Requirements
 Nginx is used to serve static files while a Golang based REST API backend. Another container hosts the Postgres database for session and service instance management.
 
