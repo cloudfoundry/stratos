@@ -1,5 +1,25 @@
-# Console UI
-The Console UI is written in JavaScript. It also uses Angular 1.4.x to maintain compatibility with Angular UI Bootstrap.
+# Stratos UI
+
+Stratos UI is an Open Source Web-based console UI for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
+
+![Stratos UI Application view](docs/images/stratos-ui.png)
+
+## Deploying Stratos UI
+
+Stratos UI can be deployed in the following environments:
+
+1. Cloud Foundry, as an application
+1. Kubernetes, using a helm chart
+1. Docker, using docker compose
+
+## License
+
+The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.MD).
+
+---
+## OLD DOCS TO BE REVIEWED
+---
+
 For more implementation details, please see the following pages:
 * [Overview](docs/README.md)
 * [Architecture](docs/architecture.md)
