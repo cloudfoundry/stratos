@@ -45,7 +45,7 @@
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('about-app', 'about-app', 'menu.about', 99, 'helion-icon-Unknown_L');
+      menu.addMenuItem('about-app', 'about-app', 'menu.about', 99, 'help_outline');
     }
   }
 
