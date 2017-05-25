@@ -501,6 +501,10 @@
     return !getHcfs() || !getHcfs().hcf2;
   }
 
+  function skipIfOnlyOneHCF() {
+    return !getHcfs() || Object.keys(getHcfs()).length < 2;
+  }
+
   function skipIfNoAppWithLogStrean() {
     var haveNcf = getHcfs() && Object.keys(getHcfs()).length > 0;
     return !haveNcf || !browser.params.appWithLogStream;
