@@ -110,8 +110,8 @@ service-card {
         }
 
         .service-added:after {
-          font-family: 'helion-icons';
-          content: '\e916';
+          @extend .material-icons;
+          content: 'attachment';
           margin-left: $hpe-unit-space / 4;
         }
       }
