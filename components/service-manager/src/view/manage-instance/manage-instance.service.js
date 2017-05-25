@@ -6,12 +6,6 @@
     .module('service-manager.view.manage-instance', ['service-manager.view.manage-instance.form'])
     .factory('service-manager.view.manage-instance.dialog', ManageInstanceDialogFactory);
 
-  ManageInstanceDialogFactory.$inject = [
-    '$q',
-    'modelManager',
-    'frameworkAsyncTaskDialog'
-  ];
-
   /**
    * @name ManageInstanceDialogFactory
    * @constructor

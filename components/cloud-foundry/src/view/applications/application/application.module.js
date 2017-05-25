@@ -419,10 +419,10 @@
           if (id === 'delete' ? _.get(vm.model.application.pipeline, 'forbidden') : false) {
             // Hide delete if user has no project permissions
             hideAction = true;
-          } else if (authModel.isInitialized(this.cnsiGuid)) {
+          } else if (authModel.isInitialized(cnsiGuid)) {
             // Hide actions if user has no HCF app update perissions (i.e not a space developer)
             var spaceGuid = vm.model.application.summary.space_guid;
-            hideAction = !authModel.isAllowed(this.cnsiGuid,
+            hideAction = !authModel.isAllowed(cnsiGuid,
               authModel.resources.application,
               authModel.actions.update,
               spaceGuid);
@@ -431,7 +431,7 @@
 
         return vm.model.application.state.actions[id] !== true || hideAction;
       }
-    },
+    }
 
     function isCloudFoundryConsoleApplication() {
       // Check when running in cloud-foundry

@@ -5,10 +5,6 @@
     .module('service-manager.view.service.instance-detail', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     // Abstract detail route
@@ -310,14 +306,6 @@
       });
     }
   });
-
-  UpgradeController.$inject = [
-    '$state',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'hsmVersion'
-  ];
 
   function UpgradeController($state, $q, modelManager, appUtilsService, hsmVersion) {
     var that = this;

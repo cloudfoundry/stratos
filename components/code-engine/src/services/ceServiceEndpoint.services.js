@@ -26,15 +26,10 @@
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support dashboard with cnsi type endpoints
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
-   * @param {ceAppPipelineService} ceAppPipelineService - application pipeline functions
    * @returns {object} the service instance service
    */
   function endpointService(ceHideEndpoint, $q, $translate, ceVCSEndpointService, appEndpointsDashboardService,
-                           appEndpointsCnsiService, apiManager, modelManager, cfApplicationTabs, ceAppPipelineService) {
-    var canEditApp;
-
+                           appEndpointsCnsiService, apiManager) {
     var service = {
       cnsi_type: 'hce',
       refreshToken: refreshToken,

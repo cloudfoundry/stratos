@@ -41,7 +41,6 @@
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
-   * @property {object} appLoggedInService - the Logged In Service
    * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
