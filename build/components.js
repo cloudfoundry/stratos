@@ -40,8 +40,13 @@
           if (fs.existsSync(componentFile)) {
             var component = JSON.parse(fs.readFileSync(componentFile, 'utf8'));
             components[bower.name] = component;
+            component.frontend = component.frontend || {};
             component.bower = bower;
             component.folder = folder;
+            component.base = bower.name;
+            if (component.frontend && component.frontend.base) {
+              component.base = path.join(bower.name, component.frontend.base);
+            }
             component.name = bower.name;
             component.src = component.src || 'src';
           }
@@ -113,14 +118,19 @@
       var inverse = g.indexOf('!') === 0;
       g = !inverse ? g : g.substring(1);
       _.each(c, function (v) {
-        var dPath = path.relative(baseFolder, path.join(config.paths.dist, v.rootDir ? v.rootDir : v.name, g));
-        var bPath = path.relative(baseFolder, path.join(bowerFolder, v.name, g));
-        var bfPath = path.relative(baseFolder, path.join(wildBowerFolder, v.name, g));
+        var dPath = path.relative(baseFolder, path.join(config.paths.dist, v.frontend.root ? v.frontend.root : v.name, g));
+        var bPath = path.relative(baseFolder, path.join(bowerFolder, v.base, g));
+        var bfPath = path.relative(baseFolder, path.join(wildBowerFolder, v.base, g));
         globs.dist.push(inverse ? '!' + dPath : dPath);
         globs.bower.push(inverse ? '!' + bPath : bPath);
         globs.bowerFull.push(inverse ? '!' + bfPath : bfPath);
         if (localComponents[v.name]) {
-          var lPath = path.join(localComponents[v.name].folder, g);
+          var lPath;
+          if (v.frontend.base) {
+            lPath = path.join(localComponents[v.name].folder, v.frontend.base, g);
+          } else {
+            lPath = path.join(localComponents[v.name].folder, g);
+          }
           globs.local.push(inverse ? '!' + lPath : lPath);
         }
       });
@@ -137,7 +147,7 @@
   function getDependencies() {
     var depends = {};
     _.each(components, function (component) {
-      _.each(component.dependencies, function (o, name) {
+      _.each(component.frontend.dependencies, function (o, name) {
         var componentBower = JSON.parse(fs.readFileSync(path.join(config.bower.directory, name, 'bower.json'), 'utf8'));
         var deps = componentBower.dependencies || {};
         _.defaults(deps, o);
@@ -187,9 +197,10 @@
   function transformPath(p) {
     var parts = p.split(path.sep);
     var name = parts[0];
-    parts.splice(1,1);
-    if (components[name] && components[name].rootDir) {
-      parts[0] = components[name].rootDir;
+    var skip = components[name].base.split(path.sep).length;
+    parts.splice(1, skip);
+    if (components[name] && components[name].frontend.root) {
+      parts[0] = components[name].frontend.root;
     }
     return parts.join(path.sep);
   }
@@ -202,8 +213,11 @@
   function reverseTransformPath(p) {
     _.each(localComponents, function (cmpnt) {
       var c = components[cmpnt.name];
-      if (c && c.rootDir && _.startsWith(p, c.rootDir + path.sep)) {
-        p = path.join(cmpnt.name, c.src, p.substr(c.rootDir.length + 1));
+      if (c) {
+        var root = c.frontend.root ? c.frontend.root : c.name;
+        if (_.startsWith(p, root + path.sep)) {
+          p = path.join(cmpnt.name, c.src, p.substr(root.length + 1));
+        }
       }
     });
     return p;

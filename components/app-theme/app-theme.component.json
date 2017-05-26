@@ -1,7 +1,9 @@
 {
-  "dependencies": {
-    "app-framework": {
-       "app-theme": "*"
+  "frontend": {
+    "dependencies": {
+      "app-framework": {
+        "app-theme": "*"
+      }
     }
   }
 }

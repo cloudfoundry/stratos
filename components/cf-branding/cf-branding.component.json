@@ -1,7 +1,9 @@
 {
-  "dependencies": {
-    "app-theme": {
-       "cf-branding": "*"
+  "frontend": {
+    "dependencies": {
+      "app-theme": {
+        "cf-branding": "*"
+      }
     }
   }
 }
