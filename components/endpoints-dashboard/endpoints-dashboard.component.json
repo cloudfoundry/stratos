@@ -1,3 +1,5 @@
 {
-  "rootDir": "plugins/endpoints-dashboard"
+  "frontend": {
+    "root": "plugins/endpoints-dashboard"
+  }
 }

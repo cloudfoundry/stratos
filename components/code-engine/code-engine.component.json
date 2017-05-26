@@ -1,3 +1,5 @@
 {
-  "rootDir": "plugins/code-engine"
+  "frontend": {
+    "root": "plugins/code-engine"
+  }
 }

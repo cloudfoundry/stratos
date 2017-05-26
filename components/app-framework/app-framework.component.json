@@ -1,8 +1,10 @@
 {
-  "rootDir": "framework",
-  "dependencies": {
-    "angular": {
-      "jquery": "*"
+  "frontend": {
+    "root": "framework",
+    "dependencies": {
+      "angular": {
+        "jquery": "*"
+      }
     }
   }
 }
