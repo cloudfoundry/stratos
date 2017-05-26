@@ -20,11 +20,6 @@
 
     // property definitions
 
-    it('should have properties `apiManager` and `serviceApi` defined', function () {
-      expect(serviceModel.apiManager).toBeDefined();
-      expect(serviceModel.serviceApi).toBeDefined();
-    });
-
     it('should have properties `data` defined', function () {
       expect(serviceModel.data).toEqual({});
     });

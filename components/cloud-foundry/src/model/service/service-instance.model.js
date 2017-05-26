@@ -26,12 +26,19 @@
    * @class
    */
   function ServiceInstance(apiManager, modelUtils) {
-    this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
-    this.modelUtils = modelUtils;
-    this.data = {};
-  }
+    var serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
 
-  angular.extend(ServiceInstance.prototype, {
+    var model = {
+      data: {},
+      all: all,
+      createServiceInstance: createServiceInstance,
+      deleteServiceInstance: deleteServiceInstance,
+      listAllServiceBindingsForServiceInstance: listAllServiceBindingsForServiceInstance,
+      onAll: onAll
+    };
+
+    return model;
+
     /**
      * @function all
      * @memberof cloud-foundry.model.service-instance.ServiceInstance
@@ -43,20 +50,20 @@
      * @returns {promise} A promise object
      * @public
      */
-    all: function (cnsiGuid, options, paginate) {
-      var that = this;
-      return this.serviceInstanceApi.ListAllServiceInstances(this.modelUtils.makeListParams(options),
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function all(cnsiGuid, options, paginate) {
+
+      return serviceInstanceApi.ListAllServiceInstances(modelUtils.makeListParams(options),
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (all) {
-          return that.onAll(all);
+          return onAll(all);
         });
-    },
+    }
 
     /**
      * @function createServiceInstance
@@ -67,13 +74,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    createServiceInstance: function (cnsiGuid, newInstanceSpec) {
-      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {},
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function createServiceInstance(cnsiGuid, newInstanceSpec) {
+      return serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {},
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function deleteServiceInstance
@@ -86,13 +93,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    deleteServiceInstance: function (cnsiGuid, serviceInstanceGuid, params) {
-      return this.serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params,
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params) {
+      return serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params,
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function listAllServiceBindingsForServiceInstance
@@ -106,18 +113,18 @@
      * @returns {promise} A promise object
      * @public
      */
-    listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid,
-        this.modelUtils.makeListParams(params),
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllServiceBindingsForServiceInstance(cnsiGuid, guid, params, paginate) {
+
+      return serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid,
+        modelUtils.makeListParams(params),
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
-    },
+    }
 
     /**
      * @function onAll
@@ -127,10 +134,10 @@
      * @returns {Array} The JSON collection returned from API call
      * @private
      */
-    onAll: function (all) {
-      this.data = all;
+    function onAll(all) {
+      model.data = all;
       return all;
     }
-  });
+  }
 
 })();

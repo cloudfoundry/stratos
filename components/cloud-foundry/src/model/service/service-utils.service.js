@@ -24,7 +24,7 @@
     /**
      * @function serviceRequires
      * @memberof cloud-foundry.model.service.cfServiceUtils
-     * @description Check the service's 'requires' metadata to see if it needs the specified requirment
+     * @description Check the service's 'requires' metadata to see if it needs the specified requirement
      * @param {object} service - service metadata to check
      * @param {string} requires - requirement to check for
      * @returns {boolean} indicating if the service includes the specified requirement

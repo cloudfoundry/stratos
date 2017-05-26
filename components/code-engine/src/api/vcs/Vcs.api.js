@@ -5,12 +5,6 @@
     .module('code-engine.api')
     .run(registerVcsApi);
 
-  registerVcsApi.$inject = [
-    '$http',
-    '$httpParamSerializer',
-    'apiManager'
-  ];
-
   function registerVcsApi($http, $httpParamSerializer, apiManager) {
     apiManager.register('code-engine.api.Vcs', new VcsApi($http, $httpParamSerializer));
   }

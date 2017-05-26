@@ -2,7 +2,8 @@
   'use strict';
 
   describe('manage-services directive', function () {
-    var $httpBackend, $scope, appEventService, mockAppsApi, mockApp, mockService, badMockService, manageServicesCtrl;
+    var $httpBackend, $scope, appEventService, mockAppsApi, mockApp, mockService, badMockService, manageServicesCtrl,
+      cfServiceInstanceService;
 
     beforeEach(module('templates'));
     beforeEach(module('console-app'));
@@ -12,6 +13,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       appEventService = $injector.get('appEventService');
+      cfServiceInstanceService = $injector.get('cfServiceInstanceService');
 
       // mock UI router $stateParams
       var $stateParams = $injector.get('$stateParams');
@@ -57,18 +59,12 @@
     describe('ManageServicesController', function () {
       it('should be defined and initialized', function () {
         expect(manageServicesCtrl).toBeDefined();
-        expect(manageServicesCtrl.$q).toBeDefined();
-        expect(manageServicesCtrl.frameworkDetailView).toBeDefined();
-        expect(manageServicesCtrl.cfServiceInstanceService).toBeDefined();
-        expect(manageServicesCtrl.appModel).toBeDefined();
-        expect(manageServicesCtrl.modal).toBe(null);
         expect(manageServicesCtrl.serviceInstances).toEqual([]);
         expect(manageServicesCtrl.serviceBindings).toEqual({});
       });
 
       it('should have correct functions', function () {
         expect(manageServicesCtrl.reset).toBeDefined();
-        expect(manageServicesCtrl.getServiceBindings).toBeDefined();
         expect(manageServicesCtrl.detach).toBeDefined();
         expect(manageServicesCtrl.viewEnvVariables).toBeDefined();
         expect(manageServicesCtrl.startManageServices).toBeDefined();
@@ -177,15 +173,15 @@
             }
           };
 
-          spyOn(manageServicesCtrl.cfServiceInstanceService, 'unbindServiceFromApp');
+          spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
         });
 
         it('should call unbindServiceFromApp', function () {
           var instance = manageServicesCtrl.serviceInstances[0];
           manageServicesCtrl.detach(instance);
-          expect(manageServicesCtrl.cfServiceInstanceService.unbindServiceFromApp)
+          expect(cfServiceInstanceService.unbindServiceFromApp)
             .toHaveBeenCalled();
-          var args = manageServicesCtrl.cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+          var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
           expect(args[0]).toBe('guid');
           expect(args[1]).toBe('app_123');
           expect(args[2]).toBe('binding_123');
@@ -203,12 +199,12 @@
             service: mockService
           };
 
-          spyOn(manageServicesCtrl.cfServiceInstanceService, 'viewEnvVariables');
+          spyOn(cfServiceInstanceService, 'viewEnvVariables');
         });
 
         it('should show env variables in detail view', function () {
           manageServicesCtrl.viewEnvVariables({name: 'instance_123'});
-          expect(manageServicesCtrl.cfServiceInstanceService.viewEnvVariables)
+          expect(cfServiceInstanceService.viewEnvVariables)
             .toHaveBeenCalledWith('guid', mockApp, 'label-19', {name: 'instance_123'});
         });
       });

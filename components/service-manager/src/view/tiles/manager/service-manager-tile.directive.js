@@ -5,8 +5,6 @@
     .module('service-manager.view.tiles')
     .directive('serviceManagerTile', ServiceManagerTile);
 
-  ServiceManagerTile.$inject = [];
-
   function ServiceManagerTile() {
     return {
       bindToController: {
@@ -18,13 +16,6 @@
       templateUrl: 'plugins/service-manager/view/tiles/manager/service-manager-tile.html'
     };
   }
-
-  ServiceManagerTileController.$inject = [
-    '$scope',
-    '$state',
-    'modelManager',
-    'appUtilsService'
-  ];
 
   /**
    * @name ServiceManagerTileController

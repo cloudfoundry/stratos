@@ -5,10 +5,6 @@
     .module('service-manager.view.service.sdl-detail', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('sm.endpoint.service.sdl', {
       url: '/sdl/:product/:sdl',
@@ -24,14 +20,6 @@
       }
     });
   }
-
-  ServiceManagerSdlDetailController.$inject = [
-    '$stateParams',
-    '$state',
-    '$q',
-    'appUtilsService',
-    'modelManager'
-  ];
 
   function ServiceManagerSdlDetailController($stateParams, $state, $q, appUtilsService, modelManager) {
     var that = this;

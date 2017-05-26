@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications')
     .directive('addServiceWorkflow', addServiceWorkflow);
 
-  addServiceWorkflow.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications
    * @name addServiceWorkflow
@@ -20,15 +18,6 @@
       restrict: 'E'
     };
   }
-
-  AddServiceWorkflowController.$inject = [
-    '$q',
-    '$scope',
-    '$interpolate',
-    'modelManager',
-    'appEventService',
-    'frameworkDetailView'
-  ];
 
   /**
    * @memberof cloud-foundry.view.applications

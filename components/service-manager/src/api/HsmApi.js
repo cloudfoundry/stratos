@@ -8,11 +8,6 @@
     .module('service-manager.api', [])
     .run(registerApi);
 
-  registerApi.$inject = [
-    '$http',
-    'apiManager'
-  ];
-
   function registerApi($http, apiManager) {
     apiManager.register('service-manager.api.HsmApi', new HsmApi($http));
   }

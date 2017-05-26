@@ -179,10 +179,9 @@
       }
 
       it('no connected cnsi', function () {
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(false);
           expect(applicationModel.filteredApplications.length).toBe(0);
-          expect(applicationModel.bufferedApplications.length).toBe(0);
           expect(applicationModel.unfilteredApplicationCount).toBe(0);
         });
       });
@@ -195,10 +194,9 @@
         var response = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCount, 1));
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
 
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(true);
           expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCount);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount);
           expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount);
         });
 
@@ -215,10 +213,9 @@
         _.set(response, cnsiGuid2, createResponse(100, cnsi2AppCount, 1));
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
 
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(true);
           expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
           expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount + cnsi2AppCount);
         });
 
@@ -235,10 +232,9 @@
 
         // filter by a cnsi not in the response
         applicationModel.filterParams.cnsiGuid = cnsiGuid2;
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(false);
           expect(applicationModel.filteredApplications.length).toBe(0);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount);
           expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount);
         });
 
@@ -257,10 +253,9 @@
 
         // filter by a cnsi in the response
         applicationModel.filterParams.cnsiGuid = cnsiGuid2;
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(true);
           expect(applicationModel.filteredApplications.length).toBe(cnsi2AppCount);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
           expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount + cnsi2AppCount);
         });
 
@@ -285,10 +280,9 @@
         applicationModel.filterParams.cnsiGuid = cnsiGuid1;
         applicationModel.filterParams.orgGuid = orgGuid;
 
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(true);
           expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCountFiltered);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCountFiltered);
         });
 
         // The second request to ListAllApps is not part of the promise chain, so give it a cycle to complete
@@ -322,10 +316,9 @@
         applicationModel.filterParams.cnsiGuid = cnsiGuid1;
         applicationModel.filterParams.orgGuid = orgGuid;
 
-        applicationModel._listAllApps().then(function () {
+        applicationModel.resetPagination().then(function () {
           expect(applicationModel.hasApps).toBe(true);
           expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCountFiltered);
-          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCountFiltered);
         });
 
         // The second request to ListAllApps is not part of the promise chain, so give it a cycle to complete

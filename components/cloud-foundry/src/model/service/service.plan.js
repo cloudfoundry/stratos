@@ -26,12 +26,11 @@
    * @class
    */
   function ServicePlan(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.servicePlanApi = this.apiManager.retrieve('cloud-foundry.api.ServicePlans');
-    this.modelUtils = modelUtils;
-  }
+    var servicePlanApi = apiManager.retrieve('cloud-foundry.api.ServicePlans');
 
-  angular.extend(ServicePlan.prototype, {
+    return {
+      retrieveServicePlan: retrieveServicePlan
+    };
 
     /**
      * @function retrieveServicePlan
@@ -43,12 +42,12 @@
      * @returns {promise} A promise object
      * @public
      */
-    retrieveServicePlan: function (cnsiGuid, guid, options) {
-      return this.servicePlanApi.RetrieveServicePlan(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function retrieveServicePlan(cnsiGuid, guid, options) {
+      return servicePlanApi.RetrieveServicePlan(guid, options, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
     }
-  });
+  }
 
 })();

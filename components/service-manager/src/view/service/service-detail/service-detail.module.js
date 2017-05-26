@@ -5,10 +5,6 @@
     .module('service-manager.view.service.service-detail', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     $stateProvider.state('sm.endpoint.service', {
@@ -37,21 +33,9 @@
     });
   }
 
-  ServiceManagerServiceController.$inject = [
-    '$state'
-  ];
-
   function ServiceManagerServiceController($state) {
     this.id = $state.params.id;
   }
-
-  ServiceManagerServiceDetailController.$inject = [
-    '$stateParams',
-    '$state',
-    '$q',
-    'appUtilsService',
-    'modelManager'
-  ];
 
   function ServiceManagerServiceDetailController($stateParams, $state, $q, appUtilsService, modelManager) {
     var that = this;

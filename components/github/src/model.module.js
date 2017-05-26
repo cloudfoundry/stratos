@@ -10,14 +10,6 @@
     .module('github.model', [])
     .run(registerGithubModel);
 
-  registerGithubModel.$inject = [
-    'modelManager',
-    'apiManager',
-    '$q',
-    '$filter',
-    'linkHeaderParser'
-  ];
-
   function registerGithubModel(modelManager, apiManager, $q, $filter, linkHeaderParser) {
     modelManager.register('github.model', new GithubModel(apiManager, $q, $filter, linkHeaderParser));
   }

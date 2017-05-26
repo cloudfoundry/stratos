@@ -9,11 +9,6 @@
     .module('cloud-foundry.model')
     .factory('modelUtils', modelUtilsServiceFactory);
 
-  modelUtilsServiceFactory.$inject = [
-    '$q',
-    '$http'
-  ];
-
   /**
    * @function modelUtilsServiceFactory
    * @memberof cloud-foundry.model

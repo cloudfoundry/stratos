@@ -6,8 +6,6 @@
     .directive('addPipelineWorkflow', addPipelineWorkflow)
     .run(run);
 
-  addPipelineWorkflow.$inject = [];
-
   /**
    * @memberof code-engine.view.application
    * @name addAppWorkflow
@@ -26,19 +24,6 @@
       bindToController: true
     };
   }
-
-  AddPipelineWorkflowController.$inject = [
-    'modelManager',
-    'appEventService',
-    'appUtilsService',
-    'ceManageVcsTokens',
-    '$scope',
-    '$q',
-    '$timeout',
-    '$stateParams',
-    'PAT_DELIMITER',
-    'ceAppPipelineService'
-  ];
 
   /**
    * @memberof code-engine.view.application
@@ -86,12 +71,8 @@
     this.startWorkflow();
   }
 
-  run.$inject = [
-    'code-engine.view.application.add-pipeline-workflow.prototype'
-  ];
-
-  function run(addPipelineWorkflowPrototype) {
-    angular.extend(AddPipelineWorkflowController.prototype, addPipelineWorkflowPrototype, {
+  function run(ceAddPipelineWorkflowPrototype) {
+    angular.extend(AddPipelineWorkflowController.prototype, ceAddPipelineWorkflowPrototype, {
       reset: function () {
         var that = this;
         var path = 'plugins/code-engine/view/application/add-pipeline-workflow/';

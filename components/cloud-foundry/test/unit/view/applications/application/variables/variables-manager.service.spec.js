@@ -29,7 +29,7 @@
 
     describe('add', function () {
       beforeEach(inject(function ($injector) {
-        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        var appVarsManager = $injector.get('cfVariablesManager');
         dialog = appVarsManager.add('test_guid', 'test_id');
         expect(dialog).not.toBe(null);
       }));
@@ -44,7 +44,7 @@
 
     describe('edit', function () {
       beforeEach(inject(function ($injector) {
-        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        var appVarsManager = $injector.get('cfVariablesManager');
         dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
         expect(dialog).not.toBe(null);
       }));
@@ -64,7 +64,7 @@
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
         $httpBackend.expectPUT(APP_VAR_UPDATE);
-        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        var appVarsManager = $injector.get('cfVariablesManager');
         dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
         expect(dialog).not.toBe(null);
       }));
@@ -99,7 +99,7 @@
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
         $httpBackend.expectPUT(APP_VAR_UPDATE);
-        appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        appVarsManager = $injector.get('cfVariablesManager');
       }));
 
       it('should delete variable', function () {

@@ -30,11 +30,14 @@
      * @constructor
      */
     function OrganizationAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(OrganizationAccess.prototype, {
+      return {
+        create: create,
+        update: update,
+        delete: deleteResource,
+        canHandle: canHandle
+      };
 
       /**
        * @name create
@@ -43,16 +46,14 @@
        * 2. the `user_org_creation` feature flag is enabled
        * @returns {boolean}
        */
-      create: function () {
-
+      function create() {
         // Admin
-        if (this.baseAccess.create()) {
+        if (baseAccess.create()) {
           return true;
         }
 
-        return this.principal.hasAccessTo('user_org_creation');
-
-      },
+        return principal.hasAccessTo('user_org_creation');
+      }
 
       /**
        * @name delete
@@ -62,17 +63,16 @@
        * @param {object} orgGuid - organisation GUID
        * @returns {boolean}
        */
-      delete: function (orgGuid) {
+      function deleteResource(orgGuid) {
 
         // Admin
-        if (this.baseAccess.delete(orgGuid)) {
+        if (baseAccess.delete(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
-        return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
+      }
 
       /**
        * @name update
@@ -83,17 +83,16 @@
        * @returns {boolean}
        */
 
-      update: function (orgGuid) {
+      function update(orgGuid) {
 
         // User is an admin
-        if (this.baseAccess.update(orgGuid)) {
+        if (baseAccess.update(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
-        return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
+      }
 
       /**
        * @name canHandle
@@ -101,10 +100,10 @@
        * @param {String} resource - string specifying resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'organization';
       }
-    });
+    }
 
     return OrganizationAccess;
   }

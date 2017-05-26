@@ -28,43 +28,65 @@
    * @class
    */
   function Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
-    this.$q = $q;
-    this.apiManager = apiManager;
-    this.modelManager = modelManager;
-    this.cfServiceUtils = cfServiceUtils;
-    this.modelUtils = modelUtils;
-    this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
-    this.data = {};
-    this.cfOrganizationModel = cfOrganizationModel;
-  }
+    var spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
 
-  angular.extend(Space.prototype, {
-   /**
-    * @function listAllAppsForSpace
-    * @memberof cloud-foundry.model.space
-    * @description lists all spaces
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {string} guid - space GUID.
-    * @param {object=} params - optional parameters
-    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
-    * containing ALL results will be returned. This could mean more than one http request is made.
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    listAllAppsForSpace: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllAppsForSpace(guid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    var model = {
+      data: {},
+      listAllAppsForSpace: listAllAppsForSpace,
+      listAllSpaces: listAllSpaces,
+      listAllServicesForSpace: listAllServicesForSpace,
+      listAllServiceInstancesForSpace: listAllServiceInstancesForSpace,
+      uncacheAllServiceInstancesForSpace: uncacheAllServiceInstancesForSpace,
+      listAllRoutesForSpace: listAllRoutesForSpace,
+      uncacheRoutesForSpace: uncacheRoutesForSpace,
+      listRolesOfAllUsersInSpace: listRolesOfAllUsersInSpace,
+      cacheUsersRolesInSpace: cacheUsersRolesInSpace,
+      spaceRoleToString: spaceRoleToString,
+      spaceRolesToStrings: spaceRolesToStrings,
+      fetchSpace: fetchSpace,
+      updateRoutesCount: updateRoutesCount,
+      updateServiceInstanceCount: updateServiceInstanceCount,
+      updateServiceCount: updateServiceCount,
+      getSpaceDetails: getSpaceDetails,
+      refreshSpaceAndAuth: refreshSpaceAndAuth,
+      createSpaces: createSpaces,
+      deleteSpace: deleteSpace,
+      updateSpace: updateSpace,
+      removeManagerFromSpace: removeManagerFromSpace,
+      associateManagerWithSpace: associateManagerWithSpace,
+      removeAuditorFromSpace: removeAuditorFromSpace,
+      associateAuditorWithSpace: associateAuditorWithSpace,
+      removeDeveloperFromSpace: removeDeveloperFromSpace,
+      associateDeveloperWithSpace: associateDeveloperWithSpace
+    };
+
+    return model;
+
+    /**
+     * @function listAllAppsForSpace
+     * @memberof cloud-foundry.model.space
+     * @description lists all spaces
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {object=} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    function listAllAppsForSpace(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllAppsForSpace(guid, modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (apps) {
-          return that.onListAllAppsForSpace(cnsiGuid, guid, apps);
+          return onListAllAppsForSpace(cnsiGuid, guid, apps);
         });
-    },
+    }
 
     /**
      * @function onListAllAppsForSpace
@@ -76,20 +98,22 @@
      * @returns {Array} The array of apps
      * @public
      */
-    onListAllAppsForSpace: function (cnsiGuid, guid, apps) {
+    function onListAllAppsForSpace(cnsiGuid, guid, apps) {
       // Avoid flicker in endpoints dashboard by pre-sorting apps
-      var sortedApps = _.sortBy(apps, function (a) { return -a.metadata.created_at; });
+      var sortedApps = _.sortBy(apps, function (a) {
+        return -a.metadata.created_at;
+      });
 
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.apps', sortedApps);
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.apps', sortedApps);
 
       // Ensures we also update inlined data for getDetails to pick up
-      var cachedSpace = _.get(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
+      var cachedSpace = _.get(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
       if (angular.isDefined(cachedSpace)) {
         cachedSpace.entity.apps = sortedApps;
       }
 
       return sortedApps;
-    },
+    }
 
     /**
      * @function listAllSpaces
@@ -102,17 +126,16 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpaces: function (cnsiGuid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllSpaces(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllSpaces(cnsiGuid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllSpaces(modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
-    },
+    }
 
     /**
      * @function listAllServicesForSpace
@@ -126,20 +149,19 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForSpace: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServicesForSpace(guid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllServicesForSpace(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServicesForSpace(guid, modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (services) {
-          return that.onListAllServicesForSpace(cnsiGuid, guid, services);
+          return onListAllServicesForSpace(cnsiGuid, guid, services);
         });
-    },
+    }
 
     /**
      * @function onListAllServicesForSpace
@@ -151,11 +173,11 @@
      * @returns {object} services
      * @public
      */
-    onListAllServicesForSpace: function (cnsiGuid, guid, services) {
-      this.cfServiceUtils.enhance(services);
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
+    function onListAllServicesForSpace(cnsiGuid, guid, services) {
+      cfServiceUtils.enhance(services);
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
       return services;
-    },
+    }
 
     /**
      * @function listAllServiceInstancesForSpace
@@ -169,26 +191,25 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
+    function listAllServiceInstancesForSpace(cnsiGuid, guid, params, paginate) {
       var inlineParams = {
         'inline-relations-depth': 2,
         'include-relations': 'service_bindings,service_plan,service,app'
       };
       var combinedParams = _.assign(params, inlineParams);
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(guid, this.modelUtils.makeListParams(combinedParams),
-          this.modelUtils.makeHttpConfig(cnsiGuid))
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServiceInstancesForSpace(guid, modelUtils.makeListParams(combinedParams),
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (serviceInstances) {
-          return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, serviceInstances);
+          return onListAllServiceInstancesForSpace(cnsiGuid, guid, serviceInstances);
         });
-    },
+    }
 
     /**
      * @function onListAllServiceInstancesForSpace
@@ -200,11 +221,11 @@
      * @returns {object} list of service instances
      * @public
      */
-    onListAllServiceInstancesForSpace: function (cnsiGuid, guid, serviceInstances) {
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.instances', serviceInstances);
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', (serviceInstances || []).length);
+    function onListAllServiceInstancesForSpace(cnsiGuid, guid, serviceInstances) {
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.instances', serviceInstances);
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', (serviceInstances || []).length);
       return serviceInstances;
-    },
+    }
 
     /**
      * @function uncacheAllServiceInstancesForSpace
@@ -214,10 +235,10 @@
      * @param {string} guid - the space guid
      * @public
      */
-    uncacheAllServiceInstancesForSpace: function (cnsiGuid, guid) {
-      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.instances');
-      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances');
-    },
+    function uncacheAllServiceInstancesForSpace(cnsiGuid, guid) {
+      _.unset(model, 'spaces.' + cnsiGuid + '.' + guid + '.instances');
+      _.unset(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances');
+    }
 
     /**
      * @function listAllRoutesForSpace
@@ -231,26 +252,25 @@
      * @returns {promise} A promise object
      * @public
      */
-    listAllRoutesForSpace: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
+    function listAllRoutesForSpace(cnsiGuid, guid, params, paginate) {
       var inlineParams = {
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
       var combinedParams = _.assign(params, inlineParams);
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, this.modelUtils.makeListParams(combinedParams),
-          this.modelUtils.makeHttpConfig(cnsiGuid))
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllRoutesForSpace(guid, modelUtils.makeListParams(combinedParams),
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (routes) {
-          return that.onListAllRoutesForSpace(cnsiGuid, guid, routes);
+          return onListAllRoutesForSpace(cnsiGuid, guid, routes);
         });
-    },
+    }
 
     /**
      * @function onListAllRoutesForSpace
@@ -262,13 +282,15 @@
      * @returns {object} list of routes
      * @public
      */
-    onListAllRoutesForSpace: function (cnsiGuid, guid, routes) {
+    function onListAllRoutesForSpace(cnsiGuid, guid, routes) {
       // Pre-sort routes to avoid smart-table flicker in the endpoints dashboard
-      var sortedRoutes = _.sortBy(routes, function (r) { return r.entity.host.toLowerCase(); });
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes', sortedRoutes);
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', (routes || []).length);
+      var sortedRoutes = _.sortBy(routes, function (r) {
+        return r.entity.host.toLowerCase();
+      });
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.routes', sortedRoutes);
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', (routes || []).length);
       return routes;
-    },
+    }
 
     /**
      * @function uncacheRoutesForSpace
@@ -278,10 +300,10 @@
      * @param {string} guid - the space guid
      * @public
      */
-    uncacheRoutesForSpace: function (cnsiGuid, guid) {
-      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes');
-      _.unset(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes');
-    },
+    function uncacheRoutesForSpace(cnsiGuid, guid) {
+      _.unset(model, 'spaces.' + cnsiGuid + '.' + guid + '.routes');
+      _.unset(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes');
+    }
 
     /**
      * @function listRolesOfAllUsersInSpace
@@ -295,21 +317,20 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .RetrievingRolesOfAllUsersInSpace(guid, this.modelUtils.makeListParams(params),
-          this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listRolesOfAllUsersInSpace(cnsiGuid, guid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Spaces')
+        .RetrievingRolesOfAllUsersInSpace(guid, modelUtils.makeListParams(params),
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (roles) {
-          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, roles);
+          return onListRolesOfAllUsersInSpace(cnsiGuid, guid, roles);
         });
-    },
+    }
 
     /**
      * @function onListRolesOfAllUsersInSpace
@@ -321,21 +342,21 @@
      * @returns {object} roles
      * @public
      */
-    onListRolesOfAllUsersInSpace: function (cnsiGuid, guid, allUsersRoles) {
+    function onListRolesOfAllUsersInSpace(cnsiGuid, guid, allUsersRoles) {
       var rolesByUserGuid = {};
       _.forEach(allUsersRoles, function (user) {
         _.set(rolesByUserGuid, user.metadata.guid, user.entity.space_roles);
       });
-      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.roles', rolesByUserGuid);
+      _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.roles', rolesByUserGuid);
 
       // Ensures we also update inlined data for getDetails to pick up
-      var cachedSpace = _.get(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
+      var cachedSpace = _.get(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
       if (angular.isDefined(cachedSpace)) {
         _splitSpaceRoles(cachedSpace, allUsersRoles);
       }
 
       return allUsersRoles;
-    },
+    }
 
     /**
      * @function cacheUsersRolesInSpace
@@ -346,11 +367,11 @@
      * @returns {object} unsplit space roles
      * @public
      */
-    cacheUsersRolesInSpace: function (cnsiGuid, space) {
+    function cacheUsersRolesInSpace(cnsiGuid, space) {
       var unsplitRoles = _unsplitSpaceRoles(space);
-      this.onListRolesOfAllUsersInSpace(cnsiGuid, space.metadata.guid, unsplitRoles);
+      onListRolesOfAllUsersInSpace(cnsiGuid, space.metadata.guid, unsplitRoles);
       return unsplitRoles;
-    },
+    }
 
     /**
      * @function spaceRoleToString
@@ -361,7 +382,7 @@
      * @returns {string} A localised version of the role
      * @public
      */
-    spaceRoleToString: function (role) {
+    function spaceRoleToString(role) {
       switch (role) {
         case 'space_user':
           return gettext('User');
@@ -373,7 +394,7 @@
           return gettext('Developer');
       }
       return role;
-    },
+    }
 
     /**
      * @function spaceRolesToStrings
@@ -384,8 +405,7 @@
      * @returns {string} An array of localised versions of the roles
      * @public
      */
-    spaceRolesToStrings: function (roles) {
-      var that = this;
+    function spaceRolesToStrings(roles) {
       var rolesOrder = ['space_manager', 'space_auditor', 'space_developer'];
 
       if (!roles || roles.length === 0) {
@@ -396,9 +416,9 @@
         return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);
       });
       return _.map(roles, function (role) {
-        return that.spaceRoleToString(role);
+        return spaceRoleToString(role);
       });
-    },
+    }
 
     /**
      * @function fetchSpace
@@ -409,11 +429,11 @@
      * @returns {object} The cached space object
      * @public
      */
-    fetchSpace: function (cnsiGuid, guid) {
-      if (this.spaces && this.spaces[cnsiGuid]) {
-        return this.spaces[cnsiGuid][guid];
+    function fetchSpace(cnsiGuid, guid) {
+      if (model.spaces && model.spaces[cnsiGuid]) {
+        return model.spaces[cnsiGuid][guid];
       }
-    },
+    }
 
     /**
      * @function updateRoutesCount
@@ -426,18 +446,17 @@
      * @returns {promise} promise object once completed, contains number of routes
      * @public
      */
-    updateRoutesCount: function (cnsiGuid, guid, count) {
-      var that = this;
-      var promise = this.$q.resolve({ data: { total_results: count }});
+    function updateRoutesCount(cnsiGuid, guid, count) {
+      var promise = $q.resolve({data: {total_results: count}});
       if (!count) {
-        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllRoutesForSpace(guid, { 'results-per-page': 1 }, this.modelUtils.makeHttpConfig(cnsiGuid));
+        promise = apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllRoutesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', response.data.total_results);
+        _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', response.data.total_results);
         return response.data.total_results;
       });
-    },
+    }
 
     /**
      * @function updateServiceInstanceCount
@@ -450,18 +469,17 @@
      * @returns {promise} promise object once completed, contains number of service instances
      * @public
      */
-    updateServiceInstanceCount: function (cnsiGuid, guid, count) {
-      var that = this;
-      var promise = this.$q.resolve({ data: { total_results: count }});
+    function updateServiceInstanceCount(cnsiGuid, guid, count) {
+      var promise = $q.resolve({data: {total_results: count}});
       if (!count) {
-        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServiceInstancesForSpace(guid, { 'results-per-page': 1 }, this.modelUtils.makeHttpConfig(cnsiGuid));
+        promise = apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServiceInstancesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', response.data.total_results);
+        _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', response.data.total_results);
         return response.data.total_results;
       });
-    },
+    }
 
     /**
      * @function updateServiceCount
@@ -474,18 +492,17 @@
      * @returns {promise} promise object once completed, contains number of services
      * @public
      */
-    updateServiceCount: function (cnsiGuid, guid, count) {
-      var that = this;
-      var promise = this.$q.resolve({ data: { total_results: count }});
+    function updateServiceCount(cnsiGuid, guid, count) {
+      var promise = $q.resolve({data: {total_results: count}});
       if (!count) {
-        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServicesForSpace(guid, { 'results-per-page': 1 }, this.modelUtils.makeHttpConfig(cnsiGuid));
+        promise = apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServicesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServices', response.data.total_results);
+        _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServices', response.data.total_results);
         return response.data.total_results;
       });
-    },
+    }
 
     /**
      * @function  getSpaceDetails
@@ -496,16 +513,15 @@
      * @param {object=} params - optional parameters
      * @returns {promise} A promise which will be resolved with the organizations's details
      * */
-    getSpaceDetails: function (cnsiGuid, space, params) {
-      var that = this;
+    function getSpaceDetails(cnsiGuid, space, params) {
 
       var spaceGuid = space.metadata.guid;
       var spaceQuotaGuid = space.entity.space_quota_definition_guid;
 
-      var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
+      var httpConfig = modelUtils.makeHttpConfig(cnsiGuid);
       var createdDate = moment(space.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
 
-      var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
+      var spaceQuotaApi = apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
       var rolesP, appP, quotaP;
 
@@ -513,36 +529,36 @@
       // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
       // with 100's in
       var serviceInstancesCountP = space.entity.service_instances
-        ? that.$q.resolve(space.entity.service_instances.length)
-        : that.$q.resolve();
+        ? $q.resolve(space.entity.service_instances.length)
+        : $q.resolve();
 
       if (spaceQuotaGuid) {
         // Check for inline quota!
         if (space.entity.space_quota_definition) {
-          quotaP = this.$q.resolve(space.entity.space_quota_definition);
+          quotaP = $q.resolve(space.entity.space_quota_definition);
         } else {
           quotaP = spaceQuotaApi.RetrieveSpaceQuotaDefinition(spaceQuotaGuid, params, httpConfig).then(function (res) {
             return res.data;
           });
         }
       } else {
-        quotaP = this.$q.when();
+        quotaP = $q.when();
       }
 
       // Find our user's GUID
-      var consoleInfoModel = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
       var userGuid = consoleInfoModel.info;
 
       // Space roles can be inlined
       if (space.entity.managers && space.entity.developers && space.entity.auditors) {
-        rolesP = that.$q.resolve(that.cacheUsersRolesInSpace(cnsiGuid, space));
+        rolesP = $q.resolve(cacheUsersRolesInSpace(cnsiGuid, space));
       } else {
-        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
+        rolesP = listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
       }
 
       var spaceRolesP = rolesP.then(function () {
         // Find my user's roles
-        var myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
+        var myRoles = model.spaces[cnsiGuid][spaceGuid].roles[userGuid];
         if (!myRoles) {
           return [];
         }
@@ -550,20 +566,20 @@
       });
 
       if (space.entity.apps) {
-        appP = that.$q.resolve(space.entity.apps);
-        that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
+        appP = $q.resolve(space.entity.apps);
+        onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
       } else {
-        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
+        appP = listAllAppsForSpace(cnsiGuid, spaceGuid);
       }
 
       // Routes will not be cached now, they lack the 'depth' required and will be loaded on demand.
       // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
       // with 100's in
       var routesCountP = space.entity.routes
-        ? that.$q.resolve(space.entity.routes.length)
-        : that.$q.resolve();
+        ? $q.resolve(space.entity.routes.length)
+        : $q.resolve();
 
-      return this.$q.all({
+      return $q.all({
         quota: quotaP,
         serviceInstancesCount: serviceInstancesCountP,
         apps: appP,
@@ -614,29 +630,28 @@
         details.totalServiceInstances = vals.serviceInstancesCount;
         details.serviceInstancesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
-        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);
+        _.set(model, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);
 
         return details;
       });
-    },
+    }
 
-    refreshSpaceAndAuth: function (cnsiGuid, cfOrganizationModel, orgGuid) {
-      var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
+    function refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       return authModel.initializeForEndpoint(cnsiGuid, true).finally(function () {
         return cfOrganizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
-    },
+    }
 
-    createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
-      var that = this;
+    function createSpaces(cnsiGuid, orgGuid, spaceNames, params) {
 
-      var consoleInfoModel = this.modelManager.retrieve('app.model.consoleInfo');
+      var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
       var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      var cfOrganizationModel = this._getOrganizationModel();
+      var cfOrganizationModel = _getOrganizationModel();
       var createPromises = [];
 
       function getSpaceDetails(response) {
-        return that.getSpaceDetails(cnsiGuid, response.data);
+        return getSpaceDetails(cnsiGuid, response.data);
       }
 
       for (var i = 0; i < spaceNames.length; i++) {
@@ -648,83 +663,81 @@
           developer_guids: [userGuid]
         };
 
-        var createP = this.spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+        var createP = spaceApi.CreateSpace(newSpace, params, modelUtils.makeHttpConfig(cnsiGuid))
           .then(getSpaceDetails); // Cache the space details
 
         createPromises.push(createP);
       }
 
-      return that.$q.all(createPromises).then(function () {
+      return $q.all(createPromises).then(function () {
         // Refresh the spaces
-        return that.refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
+        return refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
       });
 
-    },
+    }
 
-    deleteSpace: function (cnsiGuid, orgGuid, spaceGuid) {
-      var that = this;
+    function deleteSpace(cnsiGuid, orgGuid, spaceGuid) {
       var params = {
         recursive: false,
         async: false
       };
-      var cfOrganizationModel = this._getOrganizationModel();
-      return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
+      var cfOrganizationModel = _getOrganizationModel();
+      return spaceApi.DeleteSpace(spaceGuid, params, modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
-        return that.refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
+        return refreshSpaceAndAuth(cnsiGuid, cfOrganizationModel, orgGuid);
       });
-    },
+    }
 
-    updateSpace: function (cnsiGuid, orgGuid, spaceGuid, spaceData) {
-      var that = this;
-      var cfOrganizationModel = this._getOrganizationModel();
-      return this.spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function updateSpace(cnsiGuid, orgGuid, spaceGuid, spaceData) {
+      var cfOrganizationModel = _getOrganizationModel();
+      return spaceApi.UpdateSpace(spaceGuid, spaceData, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function () {
           // Refresh the org spaces
           return cfOrganizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid)
             .then(_.partialRight(_.find, ['metadata.guid', spaceGuid]))
             .then(function (depthOneSpace) {
               // Refresh the space itself
-              return that.getSpaceDetails(cnsiGuid, depthOneSpace);
+              return getSpaceDetails(cnsiGuid, depthOneSpace);
             })
             .then(function () {
               // Refresh service count (not inlined)
-              return that.updateServiceCount(cnsiGuid, spaceGuid);
+              return updateServiceCount(cnsiGuid, spaceGuid);
             });
         });
-    },
-
-    // Warning: this does not update the cache
-    removeManagerFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.RemoveManagerFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    associateManagerWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.AssociateManagerWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    // Warning: this does not update the cache
-    removeAuditorFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.RemoveAuditorFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    associateAuditorWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.AssociateAuditorWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    // Warning: this does not update the cache
-    removeDeveloperFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.RemoveDeveloperFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    associateDeveloperWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
-      return this.spaceApi.AssociateDeveloperWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
-
-    _getOrganizationModel: function () {
-      return this.cfOrganizationModel;
     }
 
-  });
+    // Warning: this does not update the cache
+    function removeManagerFromSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.RemoveManagerFromSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    function associateManagerWithSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.AssociateManagerWithSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    // Warning: this does not update the cache
+    function removeAuditorFromSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.RemoveAuditorFromSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    function associateAuditorWithSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.AssociateAuditorWithSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    // Warning: this does not update the cache
+    function removeDeveloperFromSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.RemoveDeveloperFromSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    function associateDeveloperWithSpace(cnsiGuid, spaceGuid, userGuid) {
+      return spaceApi.AssociateDeveloperWithSpace(spaceGuid, userGuid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
+
+    function _getOrganizationModel() {
+      return cfOrganizationModel;
+    }
+
+  }
 
   var SPACE_ROLE_TO_KEY = {
     space_developer: 'developers',
@@ -781,7 +794,9 @@
         aSpace.entity[key] = [];
       }
       _.forEach(usersRoles, function (user) {
-        if (_hasRole(user, role)) { aSpace.entity[key].push(user); }
+        if (_hasRole(user, role)) {
+          aSpace.entity[key].push(user);
+        }
       });
     });
   }

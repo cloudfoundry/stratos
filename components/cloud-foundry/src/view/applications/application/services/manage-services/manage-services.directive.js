@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications')
     .directive('manageServices', manageServices);
 
-  manageServices.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications
    * @name manageServices
@@ -20,15 +18,6 @@
       restrict: 'E'
     };
   }
-
-  ManageServicesController.$inject = [
-    '$q',
-    '$scope',
-    'modelManager',
-    'appEventService',
-    'frameworkDetailView',
-    'cfServiceInstanceService'
-  ];
 
   /**
    * @memberof cloud-foundry.view.applications
@@ -49,25 +38,27 @@
    * @property {object} serviceBindings - service bindings associated with this app
    */
   function ManageServicesController($q, $scope, modelManager, appEventService, frameworkDetailView, cfServiceInstanceService) {
-    var that = this;
-    this.$q = $q;
-    this.frameworkDetailView = frameworkDetailView;
-    this.cfServiceInstanceService = cfServiceInstanceService;
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.modal = null;
+    var vm = this;
 
-    this.serviceInstances = [];
-    this.serviceBindings = {};
+    var appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var modal = null;
+
+    vm.serviceInstances = [];
+    vm.serviceBindings = {};
+
+    vm.detach = detach;
+    vm.viewEnvVariables = viewEnvVariables;
+    vm.reset = reset;
+    vm.startManageServices = startManageServices;
+    vm.getServiceBindings = getServiceBindings;
 
     var manageServicesEvent = appEventService.$on('cf.events.START_MANAGE_SERVICES', function (event, config) {
-      that.$q.when(that.reset(config)).then(function () {
-        that.modal = that.startManageServices();
+      $q.when(vm.reset(config)).then(function () {
+        modal = vm.startManageServices();
       });
     });
     $scope.$on('$destroy', manageServicesEvent);
-  }
 
-  angular.extend(ManageServicesController.prototype, {
     /**
      * @function reset
      * @memberof cloud-foundry.view.applications.ManageServicesController
@@ -75,27 +66,26 @@
      * @param {object} config - data containing app, service, etc.
      * @returns {promise} A promise object
      */
-    reset: function (config) {
-      var that = this;
-      this.data = {
+    function reset(config) {
+      vm.data = {
         app: config.app,
         service: config.service,
         cnsiGuid: config.cnsiGuid
       };
-      this.serviceInstances.length = 0;
-      this.serviceBindings = {};
+      vm.serviceInstances.length = 0;
+      vm.serviceBindings = {};
 
-      var serviceInstances = _.filter(this.data.app.summary.services, function (o) {
+      var serviceInstances = _.filter(vm.data.app.summary.services, function (o) {
         return angular.isDefined(o.service_plan) &&
-          o.service_plan.service.guid === that.data.service.metadata.guid;
+          o.service_plan.service.guid === vm.data.service.metadata.guid;
       });
       if (serviceInstances.length > 0) {
-        [].push.apply(this.serviceInstances, serviceInstances);
+        [].push.apply(vm.serviceInstances, serviceInstances);
 
-        var guids = _.map(this.serviceInstances, 'guid');
-        return this.getServiceBindings(guids);
+        var guids = _.map(vm.serviceInstances, 'guid');
+        return vm.getServiceBindings(guids);
       }
-    },
+    }
 
     /**
      * @function getServiceBindings
@@ -104,14 +94,16 @@
      * @param {array} serviceInstanceGuids - a list of service instance GUIDs
      * @returns {promise} A promise object
      */
-    getServiceBindings: function (serviceInstanceGuids) {
-      var that = this;
+    function getServiceBindings(serviceInstanceGuids) {
+
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
-      return this.appModel.listServiceBindings(this.data.cnsiGuid, this.data.app.summary.guid, { q: q })
+      return appModel.listServiceBindings(vm.data.cnsiGuid, vm.data.app.summary.guid, {q: q})
         .then(function (bindings) {
-          that.serviceBindings = _.keyBy(bindings, function (o) { return o.entity.service_instance_guid; });
+          vm.serviceBindings = _.keyBy(bindings, function (o) {
+            return o.entity.service_instance_guid;
+          });
         });
-    },
+    }
 
     /**
      * @function detach
@@ -120,22 +112,22 @@
      * @param {object} instance - the service instance to detach
      * @returns {promise} A promise object
      */
-    detach: function (instance) {
-      var that = this;
-      var binding = this.serviceBindings[instance.guid];
-      return this.cfServiceInstanceService.unbindServiceFromApp(
-        this.data.cnsiGuid,
-        this.data.app.summary.guid,
+    function detach(instance) {
+
+      var binding = vm.serviceBindings[instance.guid];
+      return cfServiceInstanceService.unbindServiceFromApp(
+        vm.data.cnsiGuid,
+        vm.data.app.summary.guid,
         binding.metadata.guid,
         instance.name,
         function closeOnEmpty() {
-          _.pull(that.serviceInstances, instance);
-          if (that.serviceInstances.length === 0) {
-            that.modal.dismiss('close');
+          _.pull(vm.serviceInstances, instance);
+          if (vm.serviceInstances.length === 0) {
+            modal.dismiss('close');
           }
         }
       );
-    },
+    }
 
     /**
      * @function viewEnvVariables
@@ -144,29 +136,29 @@
      * @param {object} instance - the service instance to view
      * @returns {promise} A promise object
      */
-    viewEnvVariables: function (instance) {
-      return this.cfServiceInstanceService.viewEnvVariables(
-        this.data.cnsiGuid,
-        this.data.app.summary,
-        this.data.service.entity.label,
+    function viewEnvVariables(instance) {
+      return cfServiceInstanceService.viewEnvVariables(
+        vm.data.cnsiGuid,
+        vm.data.app.summary,
+        vm.data.service.entity.label,
         instance
       );
-    },
+    }
 
-     /**
+    /**
      * @function startManageService
      * @memberof cloud-foundry.view.applications.ManageServicesController
      * @description Show the manage services detail view
      * @returns {promise} A promise object
      */
-    startManageServices: function () {
+    function startManageServices() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/manage-services.html',
         title: gettext('Manage Service Instances')
       };
 
-      return this.frameworkDetailView(config, this);
+      return frameworkDetailView(config, vm);
     }
-  });
+  }
 
 })();

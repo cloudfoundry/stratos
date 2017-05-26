@@ -24,11 +24,12 @@
    * @class
    */
   function PrivateDomain(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.modelUtils = modelUtils;
-  }
 
-  angular.extend(PrivateDomain.prototype, {
+    var model = {
+      listAllPrivateDomains: listAllPrivateDomains
+    };
+
+    return model;
 
     /**
      * @function listAllPrivateDomains
@@ -41,25 +42,24 @@
      * @returns {promise} A promise which will be resolved with the list
      * @public
      */
-    listAllPrivateDomains: function (cnsiGuid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.PrivateDomains')
-        .ListAllPrivateDomains(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllPrivateDomains(cnsiGuid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.PrivateDomains')
+        .ListAllPrivateDomains(modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (domains) {
-          that.onListAllPrivateDomains(cnsiGuid, domains);
+          _onListAllPrivateDomains(cnsiGuid, domains);
           return domains;
         });
-    },
-
-    onListAllPrivateDomains: function (cnsiGuid, domains) {
-      _.set(this, 'domains.' + cnsiGuid, _.keyBy(domains, 'metadata.guid'));
     }
-  });
+
+    function _onListAllPrivateDomains(cnsiGuid, domains) {
+      _.set(model, 'domains.' + cnsiGuid, _.keyBy(domains, 'metadata.guid'));
+    }
+  }
 
 })();

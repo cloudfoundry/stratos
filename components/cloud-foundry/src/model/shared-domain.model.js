@@ -24,11 +24,13 @@
    * @class
    */
   function SharedDomain(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.modelUtils = modelUtils;
-  }
 
-  angular.extend(SharedDomain.prototype, {
+    var model = {
+      listAllSharedDomains: listAllSharedDomains
+    };
+
+    return model;
+
     /**
      * @function listAllSharedDomains
      * @memberof cloud-foundry.model.private-domain
@@ -40,25 +42,24 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSharedDomains: function (cnsiGuid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
-        .ListAllSharedDomains(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllSharedDomains(cnsiGuid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.SharedDomains')
+        .ListAllSharedDomains(modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (list) {
-          that.onListAllSharedDomains(cnsiGuid, list);
+          _onListAllSharedDomains(cnsiGuid, list);
           return list;
         });
-    },
-
-    onListAllSharedDomains: function (cnsiGuid, domains) {
-      _.set(this, 'domains.' + cnsiGuid, _.keyBy(domains, 'metadata.guid'));
     }
-  });
+
+    function _onListAllSharedDomains(cnsiGuid, domains) {
+      _.set(model, 'domains.' + cnsiGuid, _.keyBy(domains, 'metadata.guid'));
+    }
+  }
 
 })();

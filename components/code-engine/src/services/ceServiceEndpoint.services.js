@@ -30,7 +30,6 @@
    */
   function endpointService(ceHideEndpoint, $q, $translate, ceVCSEndpointService, appEndpointsDashboardService,
                            appEndpointsCnsiService, apiManager) {
-
     var service = {
       cnsi_type: 'hce',
       refreshToken: refreshToken,

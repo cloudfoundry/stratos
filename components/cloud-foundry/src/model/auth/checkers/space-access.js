@@ -30,11 +30,15 @@
      * @constructor
      */
     function SpaceAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(SpaceAccess.prototype, {
+      return {
+        create: create,
+        update: update,
+        rename: rename,
+        delete: deleteResource,
+        canHandle: canHandle
+      };
 
       /**
        * @name create
@@ -44,14 +48,14 @@
        * @param {Object} orgGuid - org GUID
        * @returns {boolean}
        */
-      create: function (orgGuid) {
+      function create(orgGuid) {
         // Admin
-        if (this.baseAccess.create(orgGuid)) {
+        if (baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
+      }
 
       /**
        * @name delete
@@ -61,15 +65,14 @@
        * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
-      delete: function (orgGuid) {
+      function deleteResource(orgGuid) {
         // Admin
-        if (this.baseAccess.create(orgGuid)) {
+        if (baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
-      },
-
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
+      }
       /**
        * @name update
        * @description User can update a space if:
@@ -81,15 +84,15 @@
        * @returns {boolean}
        */
 
-      update: function (spaceGuid, orgGuid) {
+      function update(spaceGuid, orgGuid) {
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid) ||
+          baseAccess._doesContainGuid(principal.userSummary.spaces.managed, spaceGuid);
+      }
 
       /**
        * @name rename
@@ -102,18 +105,18 @@
        * @returns {boolean}
        */
 
-      rename: function (spaceGuid, orgGuid) {
+      function rename(spaceGuid, orgGuid) {
 
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
         // User is Org manager
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
+        return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid) ||
           // User is Space manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
-      },
+          baseAccess._doesContainGuid(principal.userSummary.spaces.managed, spaceGuid);
+      }
 
       /**
        * @name canHandle
@@ -121,10 +124,10 @@
        * @param {String} resource - string specifying resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'space';
       }
-    });
+    }
 
     return SpaceAccess;
   }

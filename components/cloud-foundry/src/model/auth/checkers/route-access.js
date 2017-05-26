@@ -30,11 +30,15 @@
      * @constructor
      */
     function RouteAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(RouteAccess.prototype, {
+      return {
+        create: create,
+        update: update,
+        delete: deleteResource,
+        canHandle: canHandle
+      };
+
       /**
        * @name create
        * @description User can create a route if:
@@ -43,15 +47,15 @@
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      create: function (spaceGuid) {
+      function create(spaceGuid) {
         // Admin
-        if (this.baseAccess.create(spaceGuid)) {
+        if (baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid) &&
-          this.principal.hasAccessTo('route_creation');
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid) &&
+          principal.hasAccessTo('route_creation');
+      }
 
       /**
        * @name update
@@ -61,14 +65,14 @@
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      update: function (spaceGuid) {
+      function update(spaceGuid) {
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name delete
@@ -78,15 +82,14 @@
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      delete: function (spaceGuid) {
+      function deleteResource(spaceGuid) {
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name canHandle
@@ -94,10 +97,10 @@
        * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'route';
       }
-    });
+    }
 
     return RouteAccess;
   }

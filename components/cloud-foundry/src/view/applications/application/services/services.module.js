@@ -6,10 +6,6 @@
     .config(registerRoute)
     .run(registerAppTab);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.services', {
       url: '/services',
@@ -27,13 +23,6 @@
       label: 'app.tabs.services.label'
     });
   }
-
-  ApplicationServicesController.$inject = [
-    '$scope',
-    'modelManager',
-    'appEventService',
-    '$stateParams'
-  ];
 
   /**
    * @name ApplicationServicesController
@@ -140,8 +129,5 @@
       }
     });
   }
-
-  angular.extend(ApplicationServicesController.prototype, {
-  });
 
 })();

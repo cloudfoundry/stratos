@@ -27,11 +27,13 @@
    * @class
    */
   function UserProvidedServiceInstance(apiManager, modelUtils) {
-    this.userProvidedServiceInstance = apiManager.retrieve('cloud-foundry.api.UserProvidedServiceInstances');
-    this.modelUtils = modelUtils;
-  }
+    var userProvidedServiceInstance = apiManager.retrieve('cloud-foundry.api.UserProvidedServiceInstances');
 
-  angular.extend(UserProvidedServiceInstance.prototype, {
+    return {
+      getUserProvidedServiceInstance: getUserProvidedServiceInstance,
+      listAllServiceBindings: listAllServiceBindings,
+      deleteUserProvidedServiceInstance: deleteUserProvidedServiceInstance
+    };
 
     /**
      * @function getUserProvidedServiceInstance
@@ -41,13 +43,13 @@
      * @param {string} guid - the user provided service instance guid
      * @returns {promise} A promise object
      */
-    getUserProvidedServiceInstance: function (cnsiGuid, guid) {
-      return this.userProvidedServiceInstance.RetrieveUserProvidedServiceInstance(guid, {},
-        this.modelUtils.makeHttpConfig(cnsiGuid))
+    function getUserProvidedServiceInstance(cnsiGuid, guid) {
+      return userProvidedServiceInstance.RetrieveUserProvidedServiceInstance(guid, {},
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function listAllServiceBindings
@@ -57,10 +59,10 @@
      * @param {string} guid - the user provided service instance guid
      * @returns {promise} A promise object
      */
-    listAllServiceBindings: function (cnsiGuid, guid) {
-      return this.userProvidedServiceInstance.ListAllServiceBindingsForUserProvidedServiceInstance(guid, {},
-        this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    function listAllServiceBindings(cnsiGuid, guid) {
+      return userProvidedServiceInstance.ListAllServiceBindingsForUserProvidedServiceInstance(guid, {},
+        modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
     /**
      * @function deleteUserProvidedServiceInstance
@@ -70,10 +72,10 @@
      * @param {string} guid - the user provided service instance guid
      * @returns {promise} A promise object
      */
-    deleteUserProvidedServiceInstance: function (cnsiGuid, guid) {
-      return this.userProvidedServiceInstance.DeleteUserProvidedServiceInstance(guid, {},
-        this.modelUtils.makeHttpConfig(cnsiGuid));
+    function deleteUserProvidedServiceInstance(cnsiGuid, guid) {
+      return userProvidedServiceInstance.DeleteUserProvidedServiceInstance(guid, {},
+        modelUtils.makeHttpConfig(cnsiGuid));
     }
-  });
+  }
 
 })();

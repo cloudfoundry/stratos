@@ -5,10 +5,6 @@
     .module('service-manager.view.tiles', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('sm.tiles', {
       url: '/tiles',
@@ -33,14 +29,6 @@
       }
     });
   }
-
-  ServiceManagerTilesController.$inject = [
-    '$q',
-    '$state',
-    '$stateParams',
-    'modelManager',
-    'appUtilsService'
-  ];
 
   /**
    * @name ServiceManagerTilesController

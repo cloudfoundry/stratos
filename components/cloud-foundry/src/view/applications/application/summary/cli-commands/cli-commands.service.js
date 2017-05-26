@@ -5,11 +5,6 @@
     .module('cloud-foundry.view.applications.application.summary')
     .factory('cfAppCliCommands', CliCommandsFactory);
 
-  CliCommandsFactory.$inject = [
-    'frameworkDetailView',
-    'appUtilsService'
-  ];
-
   /**
    * @memberof cloud-foundry.view.applications.application.summary
    * @name CliCommandsFactory

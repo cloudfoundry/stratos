@@ -11,15 +11,6 @@
     ])
     .run(register);
 
-  register.$inject = [
-    '$state',
-    '$location',
-    'appEventService',
-    'modelManager',
-    'appNotificationsService',
-    'appUtilsService'
-  ];
-
   function register($state, $location, appEventService, modelManager, appNotificationsService, appUtilsService) {
     return new ServiceManager($state, $location, appEventService, modelManager, appNotificationsService, appUtilsService);
   }
