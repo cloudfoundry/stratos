@@ -38,7 +38,7 @@
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var localComponents, assetFiles, i18nFiles, jsSourceFiles, templateFiles, scssFiles, server;
+  var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles, templateFiles, scssFiles, server;
   var packageJson = require('../package.json');
 
   // Initial component configuration
@@ -60,7 +60,8 @@
     localComponents = components.getGlobs('**/*.*');
     i18nFiles = components.getGlobs('i18n/**/*.json');
     assetFiles = components.getGlobs('assets/**/*');
-    jsSourceFiles = components.getGlobs(['src/plugin.config.js', 'src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']);
+    pluginFiles = components.getGlobs('src/plugin.config.js');
+    jsSourceFiles = components.getGlobs(['src/**/*.module.js', 'src/**/*.js', '!src/**/*.spec.js']);
     templateFiles = components.getGlobs(['src/**/*.html']);
     scssFiles = components.getGlobs(['src/**/*.scss']);
   }
@@ -110,11 +111,12 @@
   // Copy JavaScript config file to 'dist'
   gulp.task('copy:configjs', function () {
     var buildConfig = components.getBuildConfig();
+    var configFiles = _.concat([paths.build + 'config.js'], pluginFiles.bower);
     return gulp
-      .src(paths.build + 'config.js')
+      .src(configFiles)
+      .pipe(concat('console-config.js'))
       .pipe(gulpreplace('@@MAIN_PLUGIN@@', buildConfig.main || ''))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(rename('console-config.js'))
       .pipe(gulp.dest(paths.dist));
   });
 
