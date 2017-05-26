@@ -183,7 +183,7 @@
   // Copy index.html to 'dist'
   gulp.task('copy:index', function () {
     return gulp
-      .src(components.findMainFile('index.html'))
+      .src(components.findMainFile('**/index.html'))
       .pipe(gulp.dest(paths.dist));
   });
 
