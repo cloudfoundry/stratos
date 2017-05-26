@@ -71,7 +71,7 @@
       switch (text) {
         case 'Register a Cloud Foundry Endpoint':
           return 'hcf';
-        case 'Register a Helion Code Engine Endpoint':
+        case 'Register a Code Engine Endpoint':
           return 'hce';
         default:
           fail('Unknown endpoint type: ', text);

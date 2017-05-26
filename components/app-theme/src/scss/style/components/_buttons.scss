@@ -22,31 +22,31 @@
 // -----------------
 
 .btn-commit {
-  @include helion-button-variant($hpe-primary-bg, $brand-primary, $brand-primary, $button-focus-outline-width);
+  @include stratos-button-variant($hpe-primary-bg, $brand-primary, $brand-primary, $button-focus-outline-width);
 }
 
 .btn-primary {
-  @include helion-button-variant(inherit, transparent, $brand-primary, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $brand-primary, $button-focus-outline-width);
 }
 
 .btn-default {
-  @include helion-button-variant(inherit, transparent, $gray-darker, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $gray-darker, $button-focus-outline-width);
 }
 
 .btn-success {
-  @include helion-button-variant(inherit, transparent, $btn-success-bg, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $btn-success-bg, $button-focus-outline-width);
 }
 
 .btn-info {
-  @include helion-button-variant(inherit, transparent, $btn-info-bg, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $btn-info-bg, $button-focus-outline-width);
 }
 
 .btn-warning {
-  @include helion-button-variant(inherit, transparent, $btn-warning-bg, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $btn-warning-bg, $button-focus-outline-width);
 }
 
 .btn-danger {
-  @include helion-button-variant(inherit, transparent, $btn-danger-bg, $button-focus-outline-width);
+  @include stratos-button-variant(inherit, transparent, $btn-danger-bg, $button-focus-outline-width);
 }
 
 .btn-link {

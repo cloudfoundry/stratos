@@ -93,7 +93,7 @@
        */
       show: function (message, iconClass, options) {
         var opts = {
-          iconClass: 'toast-helion',
+          iconClass: 'toast-stratos',
           titleClass: iconClass
         };
         _.assign(opts, options);
@@ -109,7 +109,7 @@
        */
       busy: function (message, options) {
         var opts = {
-          iconClass: 'toast-helion toast-busy',
+          iconClass: 'toast-stratos toast-busy',
           titleClass: '',
           extraData: {busy: true},
           closeButton: false,

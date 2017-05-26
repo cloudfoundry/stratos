@@ -17,7 +17,7 @@
     </span>
     <span
       translate
-      ng-if="wizardForm['application-name-form'].appName.$error.helionUnique">
+      ng-if="wizardForm['application-name-form'].appName.$error.stratosUnique">
       This name already exists. Choose a new one.
     </span>
   </span>
@@ -26,7 +26,7 @@
     type="text" class="form-control"
     id="add-app-workflow-application-name"
     name="appName"
-    helion-unique items="wizardCtrl.options.apps" key="'label'"
+    stratos-unique items="wizardCtrl.options.apps" key="'label'"
     required
     auto-focus="300"/>
 </div>

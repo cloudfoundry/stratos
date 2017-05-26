@@ -265,7 +265,7 @@
       };
     }
 
-    return element.all(by.css('.toast-helion')).then(function (toasts) {
+    return element.all(by.css('.toast-stratos')).then(function (toasts) {
       var promises = [];
       for (var i = 0; i < toasts.length; i++) {
         promises.push(toasts[i].getText());
