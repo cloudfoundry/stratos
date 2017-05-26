@@ -3,13 +3,13 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('logViewer', logViewer);
 
   /**
    * @name logViewer
-   * @memberOf helion.framework.widgets
-   * @namespace helion.framework.widgets.logViewer
+   * @memberOf app.framework.widgets
+   * @namespace app.framework.widgets.logViewer
    * @description  Display logs, in color
    * @params {object} AnsiColorsService - color service
    * @params {object} $websocket - $websocket service

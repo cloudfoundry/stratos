@@ -4,7 +4,7 @@
   describe('Filter: percentage', function () {
     var percentageFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_percentageFilter_) {
       percentageFilter = _percentageFilter_;
     }));

@@ -23,7 +23,7 @@
   }
 
   // The filters
-  angular.module('helion.framework.filters')
+  angular.module('app.framework.filters')
     .filter('bytes', bytes);
 
   function bytes() {
@@ -40,7 +40,7 @@
     };
   }
 
-  angular.module('helion.framework.filters')
+  angular.module('app.framework.filters')
     .filter('usageBytes', usageBytes);
 
   function usageBytes() {

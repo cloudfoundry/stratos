@@ -2,6 +2,6 @@
   'use strict';
 
   angular
-    .module('helion.framework.validators', []);
+    .module('app.framework.validators', []);
 
 })();

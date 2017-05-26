@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('translateImg', translateImg);
 
   function translateImg($document, $translate) {

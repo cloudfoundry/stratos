@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('tableInlineMessage', tableInlineMessage);
 
   /**
-   * @namespace helion.framework.widgets.tableInlineMessage
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.tableInlineMessage
+   * @memberof app.framework.widgets
    * @name tableInlineMessage
    * @description A table-inline-message directive
    * @returns {object} The table-inline-message directive definition object

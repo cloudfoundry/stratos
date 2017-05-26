@@ -15,7 +15,7 @@
    *  });
    */
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .controller('detailViewController', detailViewController)
     .directive('detailViewTemplate', detailViewTemplate)
     .factory('frameworkDetailView', serviceFactory);
@@ -144,8 +144,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.detailViewTemplate
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.detailViewTemplate
+   * @memberof app.framework.widgets
    * @name detailViewTemplate
    * @description Helper directive to allow a template to be supplied directly
    * @param {object} $compile - Angular's $compile service

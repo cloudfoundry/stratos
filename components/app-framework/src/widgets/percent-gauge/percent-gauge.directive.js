@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('percentGauge', percentGauge);
 
   /**
-   * @namespace helion.framework.widgets.percentGauge
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.percentGauge
+   * @memberof app.framework.widgets
    * @name percentGauge
    * @description A small widget displaying a percentage as a progress bar.
    * @returns {object} The percent-gauge directive definition object
@@ -30,8 +30,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.PercentGaugeController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.PercentGaugeController
+   * @memberof app.framework.widgets
    * @name PercentGaugeController
    * @constructor
    * @property {string} title - the title of this gauge

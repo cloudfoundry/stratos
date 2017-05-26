@@ -2,6 +2,6 @@
   'use strict';
 
   angular
-    .module('helion.framework.filters', []);
+    .module('app.framework.filters', []);
 
 })();

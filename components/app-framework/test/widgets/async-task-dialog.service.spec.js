@@ -20,7 +20,7 @@
     var asynTaskDialog;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
     beforeEach(module('ui.bootstrap'));
 
     beforeEach(inject(function ($injector) {
@@ -51,7 +51,7 @@
     var asyncTaskDialogController, $timeout;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
     beforeEach(module('ui.bootstrap'));
 
     beforeEach(inject(function ($injector) {
@@ -94,7 +94,7 @@
     var asyncTaskDialogController, $timeout;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
     beforeEach(module('ui.bootstrap'));
 
     beforeEach(inject(function ($injector) {

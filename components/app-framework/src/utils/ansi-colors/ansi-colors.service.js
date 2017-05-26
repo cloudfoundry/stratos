@@ -2,14 +2,14 @@
   'use strict';
   /* eslint-disable angular/no-service-method */
   angular
-    .module('helion.framework.utils')
+    .module('app.framework.utils')
     .service('AnsiColorsService', ansiColorsService);
   /* eslint-enable angular/no-service-method */
 
   /**
    * @name ansiColorsService
-   * @namespace helion.framework.utils.ansiColorsService
-   * @memberof helion.framework.utils
+   * @namespace app.framework.utils.ansiColorsService
+   * @memberof app.framework.utils
    * @description replaces ANSI color escape sequences with wrapping <span> elements
    */
   function ansiColorsService() {

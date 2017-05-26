@@ -11,7 +11,7 @@
    * @description Factory to provide a way to show the cli commands for HCF
    * @constructor
    * @param {app.model.modelManager} modelManager - The console's modelManager service
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    */
   function CliCommandsFactory(modelManager, frameworkDetailView) {
 

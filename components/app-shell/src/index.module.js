@@ -9,7 +9,7 @@
   var otherModules = [
     'console-templates',
     'angularMoment',
-    'helion.framework',
+    'app.framework',
     'smoothScroll',
     'ui.bootstrap',
     'ui.router',

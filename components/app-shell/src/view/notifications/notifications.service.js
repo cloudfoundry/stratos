@@ -11,7 +11,7 @@
    * @description A notifications service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.utils.appEventService} appEventService - the application event bus service
-   * @param {helion.framework.widgets.frameworkToaster} frameworkToaster - the toast service
+   * @param {app.framework.widgets.frameworkToaster} frameworkToaster - the toast service
    * @returns {object} A service instance factory
    */
   function notificationsFactory($interpolate, appEventService, frameworkToaster) {

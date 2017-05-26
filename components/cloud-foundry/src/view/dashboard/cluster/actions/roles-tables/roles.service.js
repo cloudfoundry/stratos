@@ -16,7 +16,7 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the framework confirm dialog service
+   * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the framework confirm dialog service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations

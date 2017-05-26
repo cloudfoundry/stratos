@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('selectInput', selectInput);
 
   /**
-   * @namespace helion.framework.widgets.selectInput
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.selectInput
+   * @memberof app.framework.widgets
    * @name selectInput
    * @description A select input directive that displays
    * a select input field with a dropdown menu with options.
@@ -92,8 +92,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.SelectInputController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.SelectInputController
+   * @memberof app.framework.widgets
    * @name SelectInputController
    * @constructor
    * @param {object} $scope - the Angular $scope
@@ -118,7 +118,7 @@
   angular.extend(SelectInputController.prototype, {
     /**
      * @function init
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description initialize the widget
      * @returns {void}
      */
@@ -145,7 +145,7 @@
 
     /**
      * @function searchAndSetValue
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description Search for option that starts with specified
      * character from key press and set it as the input value.
      * @param {string} searchTerm - the character to search for
@@ -169,7 +169,7 @@
 
     /**
      * @function setLabel
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description Set this input field's label
      * @param {object} modelValue - the input field's value
      * @returns {void}
@@ -185,7 +185,7 @@
 
     /**
      * @function setValue
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description Set this input field's selected value
      * @param {object} option - the option object (label and value)
      * @returns {void}
@@ -199,7 +199,7 @@
 
     /**
      * @function toggleMenu
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description Toggle the menu
      * @returns {void}
      */
@@ -209,7 +209,7 @@
 
     /**
      * @function refreshActionWrapper
-     * @memberof helion.framework.widgets.SelectInputController
+     * @memberof app.framework.widgets.SelectInputController
      * @description Wrapper around the refresh action to manage the spinner and intercept the click event
      * @param {object} $event - click event
      * @returns {boolean} true

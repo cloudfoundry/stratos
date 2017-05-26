@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('ringChart', ringChart);
 
   /**
@@ -11,8 +11,8 @@
    */
 
   /**
-   * @namespace helion.framework.widgets.ringChart
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.ringChart
+   * @memberof app.framework.widgets
    * @name ringChart
    * @description A rint chart  directive that displays a ring chart.
    * @example
@@ -38,8 +38,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.ringChart
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.ringChart
+   * @memberof app.framework.widgets
    * @name RingChartController
    * @description Controller for Ring Chart Widget
    * @param {object} $scope - Angular $scope

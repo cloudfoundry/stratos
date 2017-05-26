@@ -4,7 +4,7 @@
   describe('Filter: bytes', function () {
     var bytesFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_bytesFilter_) {
       bytesFilter = _bytesFilter_;
     }));
@@ -57,7 +57,7 @@
   describe('Filter: usageBytes', function () {
     var usageBytesFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_usageBytesFilter_) {
       usageBytesFilter = _usageBytesFilter_;
     }));

@@ -29,7 +29,7 @@
    * @param {appEventService} appEventService - the event bus service
    * @param {appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} $state - the UI router $state service

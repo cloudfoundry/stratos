@@ -6,7 +6,7 @@
     var service;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
 
     beforeEach(inject(function ($injector) {
       service = $injector.get('AnsiColorsService');

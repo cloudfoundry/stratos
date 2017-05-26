@@ -4,7 +4,7 @@
   describe('Filter: max', function () {
     var maxFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_maxFilter_) {
       maxFilter = _maxFilter_;
     }));

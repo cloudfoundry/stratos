@@ -6,7 +6,7 @@
     var frameworkToaster, $scope, $timeout, $sce;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
 
     beforeEach(inject(function ($injector) {
       $scope = $injector.get('$rootScope');

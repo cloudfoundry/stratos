@@ -5,7 +5,7 @@
     var element, tabbedNavCtrl;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');

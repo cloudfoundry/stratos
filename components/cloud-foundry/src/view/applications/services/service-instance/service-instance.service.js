@@ -14,8 +14,8 @@
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
+   * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog
    * @returns {object} A service instance factory
    */
   function serviceInstanceFactory($log, $interpolate, $q, modelManager, appNotificationsService, frameworkDetailView,

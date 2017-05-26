@@ -28,7 +28,7 @@
    * @param {object} frameworkDialogConfirm - the confirm dialog service
    * @param {object} appUtilsService - the appUtilsService service
    * @param {object} cfAppCliCommands - the cfAppCliCommands dialog service
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service

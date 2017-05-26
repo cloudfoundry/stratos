@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('listTable', listTable);
 
   /**
-   * @namespace helion.framework.widgets.listTable
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.listTable
+   * @memberof app.framework.widgets
    * @name listTable
    * @description
    * The listTable directive presents a list of items in a tabular format using
@@ -49,8 +49,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.ListTableController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.ListTableController
+   * @memberof app.framework.widgets
    * @name ListTableController
    * @constructor
    */

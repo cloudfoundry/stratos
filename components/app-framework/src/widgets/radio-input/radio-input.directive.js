@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('radioInput', radioInput);
 
   /**
-   * @namespace helion.framework.widgets.radioInput
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.radioInput
+   * @memberof app.framework.widgets
    * @name radioInput
    * @description A radio input directive with custom style
    * @returns {object} The radio-input directive definition object
@@ -65,8 +65,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.RadioInputController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.RadioInputController
+   * @memberof app.framework.widgets
    * @name RadioInputController
    * @constructor
    */

@@ -5,7 +5,7 @@
     var $compile, injector;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
 
     beforeEach(inject(function ($injector) {
       injector = $injector;

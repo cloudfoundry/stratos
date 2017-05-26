@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('galleryCard', galleryCard);
 
   /**
-   * @namespace helion.framework.widgets.galleryCard
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.galleryCard
+   * @memberof app.framework.widgets
    * @name galleryCard
    * @description A gallery card directive that includes a title,
    * an actions dropdown, main content, and a status notification bar.
@@ -33,8 +33,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.GalleryCardController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.GalleryCardController
+   * @memberof app.framework.widgets
    * @name GalleryCardController
    * @constructor
    * @property {string} actionsPosition - the position of the actions dropdown

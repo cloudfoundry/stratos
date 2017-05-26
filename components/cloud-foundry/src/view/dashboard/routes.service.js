@@ -15,7 +15,7 @@
    * @param {object} $q - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
+   * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    */
   function appClusterRoutesService($q, modelManager, appNotificationsService, frameworkDialogConfirm) {
 

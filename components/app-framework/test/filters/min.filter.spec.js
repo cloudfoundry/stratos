@@ -4,7 +4,7 @@
   describe('Filter: min', function () {
     var minFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_minFilter_) {
       minFilter = _minFilter_;
     }));
