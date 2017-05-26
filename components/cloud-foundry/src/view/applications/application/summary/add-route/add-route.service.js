@@ -3,12 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
-    .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory);
-
-  AddRouteServiceFactory.$inject = [
-    'modelManager',
-    'frameworkAsyncTaskDialog'
-  ];
+    .factory('cfAddRoutes', AddRouteServiceFactory);
 
   /**
    * @name AddRouteServiceFactory

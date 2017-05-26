@@ -7,10 +7,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.list', {
       url: '/list',
@@ -19,21 +15,6 @@
       controllerAs: 'applicationsListCtrl'
     });
   }
-
-  ApplicationsListController.$inject = [
-    '$scope',
-    '$interpolate',
-    '$state',
-    '$timeout',
-    '$q',
-    '$window',
-    'modelManager',
-    'appEventService',
-    'appErrorService',
-    'appUtilsService',
-    'frameworkDetailView',
-    'cfOrganizationModel'
-  ];
 
   /**
    * @name ApplicationsListController
@@ -45,8 +26,8 @@
    * @param {object} $q - the angular $q promise service
    * @param {object} $window - the angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.appEventService} appEventService - the event bus service
-   * @param {app.utils.appErrorService} appErrorService - the error service
+   * @param {appEventService} appEventService - the event bus service
+   * @param {appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
    * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
@@ -55,10 +36,12 @@
    * @property {object} $timeout - the angular $timeout service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
-   * @property {app.utils.appEventService} appEventService - the event bus service
-   * @property {app.utils.appErrorService} errorService - the error service
+   * @property {appEventService} appEventService - the event bus service
+   * @property {appErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager, appEventService, appErrorService, appUtilsService, frameworkDetailView, cfOrganizationModel) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+                                      appEventService, appErrorService, appUtilsService, frameworkDetailView,
+                                      cfOrganizationModel) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;

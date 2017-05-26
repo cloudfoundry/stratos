@@ -8,10 +8,6 @@
 
   // stBinding directive is sued to make the Smart Table controller
   // availale to the table view controller
-  stBinding.$inject = [
-    '$parse'
-  ];
-
   function stBinding($parse) {
     return {
       require: 'stTable',
@@ -26,8 +22,6 @@
     };
   }
 
-  tableView.$inject = [];
-
   function tableView() {
     return {
       bindToController: {
@@ -40,11 +34,6 @@
       'table-view/table-view.html'
     };
   }
-
-  TableViewController.$inject = [
-    '$scope',
-    'modelManager'
-  ];
 
   function TableViewController($scope, modelManager) {
 

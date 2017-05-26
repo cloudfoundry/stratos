@@ -7,13 +7,8 @@
    **/
   angular
     .module('cloud-foundry.view.applications.application.variables')
-    .factory('cloud-foundry.view.applications.application.variables.manager', serviceFactory);
-
-  serviceFactory.$inject = [
-    '$q',
-    'modelManager',
-    'frameworkDetailView'
-  ];
+    .factory('cfVariablesManager', serviceFactory)
+    .controller('cloud-foundry.view.applications.application.variables.applicationVariablesDialogController', ApplicationVariablesDialogController);
 
   function serviceFactory($q, modelManager, frameworkDetailView) {
     return {
@@ -81,46 +76,43 @@
     };
   }
 
-  ApplicationVariablesDialogController.$inject = [
-    'modelManager',
-    '$uibModalInstance',
-    'context'
-  ];
-
   function ApplicationVariablesDialogController(modelManager, $uibModalInstance, context) {
-    this.$modal = $uibModalInstance;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.cnsiGuid = context.cnsiGuid;
-    this.id = context.guid;
-    this.addError = false;
-    this.isEdit = !!(context && context.variableName);
-    if (this.isEdit) {
-      this.varName = context.variableName;
-      this.varValue = this.model.application.variables.environment_json[this.varName];
-    } else {
-      this.varName = '';
-      this.varValue = '';
-    }
-  }
 
-  angular.extend(ApplicationVariablesDialogController.prototype, {
+    var vm = this;
+
+    var $modal = $uibModalInstance;
+    var cnsiGuid = context.cnsiGuid;
+
+    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+    vm.id = context.guid;
+    vm.addError = false;
+    vm.isEdit = !!(context && context.variableName);
+    if (vm.isEdit) {
+      vm.varName = context.variableName;
+      vm.varValue = vm.model.application.variables.environment_json[vm.varName];
+    } else {
+      vm.varName = '';
+      vm.varValue = '';
+    }
+
+    vm.applyChange = applyChange;
+
     /**
      * @function applyChange
      * @description Add or Update the application variable
      * @public
      **/
-    applyChange: function () {
-      var that = this;
-      this.addError = false;
-      var vars = _.clone(this.model.application.variables.environment_json);
-      vars[this.varName] = this.varValue;
+    function applyChange() {
+      vm.addError = false;
+      var vars = _.clone(vm.model.application.variables.environment_json);
+      vars[vm.varName] = vm.varValue;
       var updateData = {environment_json: vars};
-      this.model.update(this.cnsiGuid, this.id, updateData).then(function () {
-        that.$modal.close();
+      vm.model.update(cnsiGuid, vm.id, updateData).then(function () {
+        $modal.close();
       }).catch(function () {
-        that.addError = true;
+        vm.addError = true;
       });
     }
-  });
+  }
 
 })();

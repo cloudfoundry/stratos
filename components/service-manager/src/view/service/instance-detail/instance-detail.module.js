@@ -5,10 +5,6 @@
     .module('service-manager.view.service.instance-detail', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     // Abstract detail route
@@ -101,11 +97,11 @@
     'modelManager',
     'frameworkDialogConfirm',
     'service-manager.view.manage-instance.dialog',
-    'service-manager.utils.version'
+    'hsmVersion'
   ];
 
   function ServiceManagerInstanceDetailController($scope, $timeout, $state, $stateParams, appUtilsService, modelManager,
-                                                  frameworkDialogConfirm, manageInstanceDialog, versionUtils) {
+                                                  frameworkDialogConfirm, manageInstanceDialog, hsmVersion) {
     var that = this;
 
     this.initialized = false;
@@ -115,7 +111,7 @@
     this.manageInstanceDialog = manageInstanceDialog;
     this.$timeout = $timeout;
     this.$state = $state;
-    this.versionUtils = versionUtils;
+    this.hsmVersion = hsmVersion;
 
     this.hsmModel = modelManager.retrieve('service-manager.model');
     this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
@@ -252,9 +248,9 @@
 
     _sortUpgrades: function () {
       var that = this;
-      this.versionUtils.sortByProperty(this.instance.available_upgrades, 'product_version', true);
+      this.hsmVersion.sortByProperty(this.instance.available_upgrades, 'product_version', true);
       _.each(this.instance.available_upgrades, function (product) {
-        that.versionUtils.sortByProperty(product.sdl_versions, 'sdl_version', true);
+        that.hsmVersion.sortByProperty(product.sdl_versions, 'sdl_version', true);
       });
     },
 
@@ -311,18 +307,10 @@
     }
   });
 
-  UpgradeController.$inject = [
-    '$state',
-    '$q',
-    'modelManager',
-    'appUtilsService',
-    'service-manager.utils.version'
-  ];
-
-  function UpgradeController($state, $q, modelManager, appUtilsService, versionUtils) {
+  function UpgradeController($state, $q, modelManager, appUtilsService, hsmVersion) {
     var that = this;
 
-    this.versionUtils = versionUtils;
+    this.hsmVersion = hsmVersion;
     this.guid = $state.params.guid;
     this.id = $state.params.id;
 
@@ -370,9 +358,9 @@
             isCurrent: instance.product_version === product.product_version && instance.sdl_version === sdlVersion
           });
         });
-        versionUtils.sortByProperty(product.versions, 'sdl_version', true);
+        hsmVersion.sortByProperty(product.versions, 'sdl_version', true);
       });
-      versionUtils.sortByProperty(that.versions, 'product_version', true);
+      hsmVersion.sortByProperty(that.versions, 'product_version', true);
     }
 
     appUtilsService.chainStateResolve('sm.endpoint.instance.versions', $state, init);

@@ -20,7 +20,7 @@
     }));
 
     beforeEach(inject(function ($injector) {
-      editAppFactory = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
+      editAppFactory = $injector.get('cfEditApp');
       $httpBackend = $injector.get('$httpBackend');
 
     }));

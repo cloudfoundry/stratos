@@ -10,14 +10,6 @@
     .module('service-manager.model', [])
     .run(registerServiceManagerModel);
 
-  registerServiceManagerModel.$inject = [
-    '$q',
-    '$timeout',
-    'modelManager',
-    'apiManager',
-    'appEventService'
-  ];
-
   function registerServiceManagerModel($q, $timeout, modelManager, apiManager, appEventService) {
     modelManager.register('service-manager.model', new ServiceManagerModel($q, $timeout, apiManager, modelManager,
       appEventService));

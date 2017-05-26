@@ -3,7 +3,7 @@
 
   angular
     .module('code-engine.view.application.add-pipeline-workflow', [ ])
-    .constant('code-engine.view.application.add-pipeline-workflow.prototype', {
+    .constant('ceAddPipelineWorkflowPrototype', {
 
       init: function () {
         var that = this;

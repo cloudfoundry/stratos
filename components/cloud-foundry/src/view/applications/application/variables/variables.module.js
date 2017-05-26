@@ -6,10 +6,6 @@
     .config(registerRoute)
     .run(registerAppTab);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.variables', {
       url: '/variables',
@@ -48,44 +44,42 @@
     });
   }
 
-  ApplicationVariablesController.$inject = [
-    'modelManager',
-    '$stateParams',
-    'cloud-foundry.view.applications.application.variables.manager'
-  ];
-
   /**
    * @name ApplicationVariablesController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
-   * @param {object} appVarsManager - the Application Variables Manager service
+   * @param {object} cfVariablesManager - the Application Variables Manager service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} cnsiGuid - the HCF Cluster GUID
    * @property {string} id - the application GUID
    */
-  function ApplicationVariablesController(modelManager, $stateParams, appVarsManager) {
-    var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.cnsiGuid = $stateParams.cnsiGuid;
-    this.id = $stateParams.guid;
-    this.appVarsManager = appVarsManager;
+  function ApplicationVariablesController(modelManager, $stateParams, cfVariablesManager) {
+    var vm = this;
 
-    this.variableActions = [
-      {name: gettext('Edit Variable'), execute: _.bind(that.editVariable, this)},
-      {name: gettext('Delete Variable'), execute: _.bind(that.deleteVariable, this)}
+    var cnsiGuid = $stateParams.cnsiGuid;
+
+    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+    vm.id = $stateParams.guid;
+    vm.variableActions = [
+      {name: gettext('Edit Variable'), execute: _.bind(editVariable, vm)},
+      {name: gettext('Delete Variable'), execute: _.bind(deleteVariable, vm)}
     ];
+    vm.deleteErrorMsg = gettext('An error occurred deleting this variable. Please try again.');
 
-    this.deleteErrorMsg = gettext('An error occurred deleting this variable. Please try again.');
+    vm.isBusy = false;
+    vm.fetchError = false;
+    vm.deleteError = false;
 
-    this.isBusy = false;
-    this.fetchError = false;
-    this.deleteError = false;
+    vm.isObject = isObject;
+    vm.hasVariables = hasVariables;
+    vm.refreshVariables = refreshVariables;
+    vm.addVariable = addVariable;
+    vm.editVariable = editVariable;
+    vm.deleteVariable = deleteVariable;
 
-    this.refreshVariables();
-  }
+    vm.refreshVariables();
 
-  angular.extend(ApplicationVariablesController.prototype, {
     /**
      * @function isObject
      * @description Determine if supplied var is an object
@@ -93,9 +87,9 @@
      * @returns {boolean} Indicating if value is an object
      * @public
      **/
-    isObject: function (v) {
+    function isObject(v) {
       return angular.isObject(v);
-    },
+    }
 
     /**
      * @function hasVariables
@@ -103,47 +97,48 @@
      * @returns {boolean} Indicating if the application has variables
      * @public
      **/
-    hasVariables: function () {
-      return angular.isDefined(this.model.application.variables) &&
-        angular.isDefined(this.model.application.variables.environment_json) &&
-        Object.keys(this.model.application.variables.environment_json).length > 0;
-    },
+    function hasVariables() {
+      return angular.isDefined(vm.model.application.variables) &&
+        angular.isDefined(vm.model.application.variables.environment_json) &&
+        Object.keys(vm.model.application.variables.environment_json).length > 0;
+    }
 
     /**
      * @function refreshVariables
      * @description Refreshes the application variables from HCF
      * @public
      **/
-    refreshVariables: function () {
-      var that = this;
-      this.isBusy = true;
-      this.fetchError = false;
-      this.model.getAppVariables(this.cnsiGuid, this.id)
+    function refreshVariables() {
+
+      vm.isBusy = true;
+      vm.fetchError = false;
+      vm.model.getAppVariables(cnsiGuid, vm.id)
         .then(function () {
-          that.fetchError = false;
-          that.variableNames = _.sortBy(
-            _.keys(that.model.application.variables.environment_json),
+          vm.fetchError = false;
+          vm.variableNames = _.sortBy(
+            _.keys(vm.model.application.variables.environment_json),
             function (v) {
               return v.toUpperCase();
             });
-        }).catch(function () {
-          that.fetchError = true;
-        }).finally(function () {
-          that.isBusy = false;
+        })
+        .catch(function () {
+          vm.fetchError = true;
+        })
+        .finally(function () {
+          vm.isBusy = false;
         });
-    },
+    }
 
     /**
      * @function addVariable
      * @description Open the add variable dialog and add a new application variable
      * @public
      **/
-    addVariable: function () {
-      var that = this;
-      this.appVarsManager.add(this.cnsiGuid, this.id).then(function () {
-        that.refreshVariables();
+    function addVariable() {
+      cfVariablesManager.add(cnsiGuid, vm.id).then(function () {
+        vm.refreshVariables();
       });
-    },
+    }
 
     /**
      * @function editVariable
@@ -151,12 +146,11 @@
      * @param {string} name - the name of the variable to edit
      * @public
      **/
-    editVariable: function (name) {
-      var that = this;
-      this.appVarsManager.edit(this.cnsiGuid, this.id, name).then(function () {
-        that.refreshVariables();
+    function editVariable(name) {
+      cfVariablesManager.edit(cnsiGuid, vm.id, name).then(function () {
+        vm.refreshVariables();
       });
-    },
+    }
 
     /**
      * @function deleteVariable
@@ -164,18 +158,19 @@
      * @param {string} name - the name of the variable to delete
      * @public
      **/
-    deleteVariable: function (name) {
-      var that = this;
-      this.isBusy = true;
-      this.deleteError = false;
-      this.appVarsManager.delete(this.cnsiGuid, this.id, name)
+    function deleteVariable(name) {
+      vm.isBusy = true;
+      vm.deleteError = false;
+      cfVariablesManager.delete(cnsiGuid, vm.id, name)
         .then(function () {
-          that.refreshVariables();
-        }).catch(function () {
-          that.deleteError = name;
-        }).finally(function () {
-          that.isBusy = false;
+          vm.refreshVariables();
+        })
+        .catch(function () {
+          vm.deleteError = name;
+        })
+        .finally(function () {
+          vm.isBusy = false;
         });
     }
-  });
+  }
 })();

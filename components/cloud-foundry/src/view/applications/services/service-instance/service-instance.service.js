@@ -5,16 +5,6 @@
     .module('cloud-foundry.view.applications.services')
     .factory('cfServiceInstanceService', serviceInstanceFactory);
 
-  serviceInstanceFactory.$inject = [
-    '$log',
-    '$interpolate',
-    '$q',
-    'modelManager',
-    'appNotificationsService',
-    'frameworkDetailView',
-    'frameworkDialogConfirm'
-  ];
-
   /**
    * @memberof cloud-foundry.view.applications.services
    * @name cfServiceInstanceService

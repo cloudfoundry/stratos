@@ -3,12 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
-    .factory('cloud-foundry.view.applications.application.summary.editApp', editAppFactory);
-
-  editAppFactory.$inject = [
-    'modelManager',
-    'frameworkAsyncTaskDialog'
-  ];
+    .factory('cfEditApp', editAppFactory);
 
   /**
    * @name editAppFactory

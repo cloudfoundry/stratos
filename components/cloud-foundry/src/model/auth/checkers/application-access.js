@@ -30,11 +30,15 @@
      * @constructor
      */
     function ApplicationAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(ApplicationAccess.prototype, {
+      return {
+        create: create,
+        update: update,
+        delete: deleteResource,
+        canHandle: canHandle
+      };
+
       /**
        * @name create
        * @description User can deploy apps if:
@@ -43,16 +47,16 @@
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      create: function (spaceGuid) {
+      function create(spaceGuid) {
 
         // Admin
-        if (this.baseAccess.create(spaceGuid)) {
+        if (baseAccess.create(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name update
@@ -62,33 +66,33 @@
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      update: function (spaceGuid) {
+      function update(spaceGuid) {
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
-       * @name delete
+       * @name deleteResource
        * @description User can delete apps if:
        * 1. User is an admin
        * 2. User is a space developer
        * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      delete: function (spaceGuid) {
+      function deleteResource(spaceGuid) {
         // Admin
-        if (this.baseAccess.delete(spaceGuid)) {
+        if (baseAccess.delete(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name canHandle
@@ -96,10 +100,10 @@
        * @param {String} resource - String representing the resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'application';
       }
-    });
+    }
 
     return ApplicationAccess;
   }

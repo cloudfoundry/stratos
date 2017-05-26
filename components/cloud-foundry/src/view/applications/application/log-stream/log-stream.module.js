@@ -6,10 +6,6 @@
     .config(registerRoute)
     .run(registerAppTab);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.log-stream', {
       url: '/log-stream',
@@ -27,15 +23,6 @@
       label: 'app.tabs.logStream.label'
     });
   }
-
-  ApplicationLogStreamController.$inject = [
-    'base64',
-    'modelManager',
-    'appUtilsService',
-    '$stateParams',
-    '$location',
-    '$log'
-  ];
 
   /**
    * @name ApplicationLogStreamController
@@ -101,8 +88,5 @@
     };
 
   }
-
-  angular.extend(ApplicationLogStreamController.prototype, {
-  });
 
 })();

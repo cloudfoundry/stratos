@@ -17,9 +17,9 @@
     })
     .run(registerApplicationModel);
 
-  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appUtilsService) {
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils) {
     modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
-      cfAppStateService, $q, modelUtils, appUtilsService));
+      cfAppStateService, $q, modelUtils));
   }
 
   /**
@@ -31,67 +31,81 @@
    * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
-   * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @class
    */
-  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils, appUtilsService) {
-    this.apiManager = apiManager;
-    this.modelManager = modelManager;
-    this.cfAppStateService = cfAppStateService;
-    this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-    this.$q = $q;
-    this.pageSize = config.pagination.pageSize;
-    this.loadingLimit = config.loadingLimit;
-    this.modelUtils = modelUtils;
-    this.appUtilsService = appUtilsService;
+  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils) {
+    var applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
+    var loadingLimit = config.loadingLimit;
 
-    this.data = {
-      applications: [],
-      appStateMap: {}
-    };
-
-    this.clearApplication();
-    this.appStateSwitchTo = '';
-    this.filterParams = {
-      cnsiGuid: 'all',
-      orgGuid: 'all',
-      spaceGuid: 'all'
-    };
-
-    // Controls view of App Wall (Card layout or List layout)
-    this.showCardLayout = true;
-
-    // This state should be in the model
-    this.clusterCount = 0;
-    this.hasApps = false;
     // Track the list of apps fetched from the back end. List may or may not be filtered.
-    this.bufferedApplications = [];
-    // Track the list of apps from the last time we fetched. Used to ensure we have something to show if filters change
-    // whilst bufferedApplications is empty while loading.
-    this.cachedApplications = [];
-    // Track the list of apps filtered by local means
-    this.filteredApplications = [];
-    // The unfiltered application count. Normally this is fetched by default in a ListAllApps request, however sometimes
-    // this is filtered by org or space
-    this.unfilteredApplicationCount = undefined;
-    // Page number (not zero based, used in UX)
-    this.appPage = 1;
+    var bufferedApplications = [];
 
-    // Sorting options
-    // Default to sorting with the newest applications first
-    this.currentSortOption = 'metadata.created_at';
-    this.sortAscending = false;
-  }
+    var model = {
+      data: {
+        applications: [],
+        appStateMap: {}
+      },
+      pageSize: config.pagination.pageSize,
+      filterParams: {
+        cnsiGuid: 'all',
+        orgGuid: 'all',
+        spaceGuid: 'all'
+      },
+      // Controls view of App Wall (Card layout or List layout)
+      showCardLayout: true,
+      // This state should be in the model
+      clusterCount: 0,
+      hasApps: false,
+      // Track the list of apps from the last time we fetched. Used to ensure we have something to show if filters change
+      // whilst bufferedApplications is empty while loading.
+      cachedApplications: [],
+      // Track the list of apps filtered by local means
+      filteredApplications: [],
+      // The unfiltered application count. Normally this is fetched by default in a ListAllApps request, however sometimes
+      // this is filtered by org or space
+      unfilteredApplicationCount: undefined,
+      // Page number (not zero based, used in UX)
+      appPage: 1,
+      // Sorting options
+      // Default to sorting with the newest applications first
+      currentSortOption: 'metadata.created_at',
+      sortAscending: false,
+      clearApplication: clearApplication,
+      initApplicationFromSummary: initApplicationFromSummary,
+      reSort: reSort,
+      loadPage: loadPage,
+      resetPagination: resetPagination,
+      filterByCluster: filterByCluster,
+      filterByText: filterByText,
+      resetFilter: resetFilter,
+      usage: usage,
+      files: files,
+      getClusterWithId: getClusterWithId,
+      getAppSummary: getAppSummary,
+      getAppDetailsOnOrgAndSpace: getAppDetailsOnOrgAndSpace,
+      getAppVariables: getAppVariables,
+      unbindServiceFromApp: unbindServiceFromApp,
+      listServiceBindings: listServiceBindings,
+      startApp: startApp,
+      stopApp: stopApp,
+      restartApp: restartApp,
+      createApp: createApp,
+      update: update,
+      deleteApp: deleteApp,
+      terminateRunningAppInstanceAtGivenIndex: terminateRunningAppInstanceAtGivenIndex,
+      getAppStats: getAppStats,
+      returnAppStats: returnAppStats,
+      getEnv: getEnv,
+      onAppStateChange: onAppStateChange
+    };
 
-  angular.extend(Application.prototype, {
+    clearApplication();
+
+    return model;
 
     /**
      * @function clearApplication
@@ -99,8 +113,8 @@
      * @description Clear the cached application metadata
      * @public
      **/
-    clearApplication: function () {
-      this.application = {
+    function clearApplication() {
+      model.application = {
         instanceCount: 0,
         summary: {
           state: 'LOADING'
@@ -115,7 +129,7 @@
         project: null,
         state: undefined
       };
-    },
+    }
 
     /**
      * @function initApplicationFromSummary
@@ -123,44 +137,44 @@
      * @param {object} appSummaryMetadata - application summary metadata
      * @public
      **/
-    initApplicationFromSummary: function (appSummaryMetadata) {
-      this.clearApplication();
-      this.application.summary = appSummaryMetadata.entity;
-      this.application.instances = appSummaryMetadata.instances || {};
-      this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
-      this.application.state = appSummaryMetadata.state || {};
+    function initApplicationFromSummary(appSummaryMetadata) {
+      clearApplication();
+      model.application.summary = appSummaryMetadata.entity;
+      model.application.instances = appSummaryMetadata.instances || {};
+      model.application.instanceCount = appSummaryMetadata.instanceCount || 0;
+      model.application.state = appSummaryMetadata.state || {};
 
-      if (this.application.instances) {
-        var running = _.filter(this.application.instances, {state: 'RUNNING'});
-        this.application.summary.running_instances = running.length;
+      if (model.application.instances) {
+        var running = _.filter(model.application.instances, {state: 'RUNNING'});
+        model.application.summary.running_instances = running.length;
       }
-    },
+    }
 
-    _fetchAppStatsForApps: function (apps) {
-      var that = this;
+    function _fetchAppStatsForApps(apps) {
+
       // For all of the apps in the running state, we may need to get stats in order to be able to
       // determine the user-friendly state of the application
       var tasks = [];
       _.each(apps, function (app) {
         // Update the state for the app to give it an initial state while we wait for the API call to return
         var cacheId = app.clusterId + '#' + app.metadata.guid;
-        app.state = that.data.appStateMap[cacheId] || that.cfAppStateService.get(app.entity);
+        app.state = model.data.appStateMap[cacheId] || cfAppStateService.get(app.entity);
 
         if (app.entity.state === 'STARTED') {
           // We need more information
-          tasks.push(that.returnAppStats(app.clusterId, app.metadata.guid, null).then(function (stats) {
+          tasks.push(returnAppStats(app.clusterId, app.metadata.guid, null).then(function (stats) {
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
-            app.state = that.cfAppStateService.get(app.entity, app.instances);
-            that.data.appStateMap[cacheId] = app.state;
+            app.state = cfAppStateService.get(app.entity, app.instances);
+            model.data.appStateMap[cacheId] = app.state;
             return stats.data;
           }));
         } else {
-          app.state = that.cfAppStateService.get(app.entity);
+          app.state = cfAppStateService.get(app.entity);
         }
       });
       return tasks;
-    },
+    }
 
     /**
      * @function reloadPage
@@ -168,10 +182,10 @@
      * @returns {object} promise object
      * @public
      */
-    reSort: function () {
-      this._sortFilteredApplications();
-      return this.loadPage(this.appPage);
-    },
+    function reSort() {
+      _sortFilteredApplications();
+      return loadPage(model.appPage);
+    }
 
     /**
      * @function loadPage
@@ -180,32 +194,32 @@
      * @returns {object} promise object
      * @public
      */
-    loadPage: function (pageNumber) {
-      var start = (pageNumber - 1) * this.pageSize;
-      var end = start + this.pageSize;
-      this.data.applications = _.slice(this.filteredApplications, start, end);
-      this.appPage = pageNumber;
-      this._updateAppStateMap();
-      this._fetchAppStatsForApps(this.data.applications);
+    function loadPage(pageNumber) {
+      var start = (pageNumber - 1) * model.pageSize;
+      var end = start + model.pageSize;
+      model.data.applications = _.slice(model.filteredApplications, start, end);
+      model.appPage = pageNumber;
+      _updateAppStateMap();
+      _fetchAppStatsForApps(model.data.applications);
 
-      return this.$q.resolve();
-    },
+      return $q.resolve();
+    }
 
     /**
      * @function _updateAppStateMap
      * @description Update the application state cache
      * @private
      */
-    _updateAppStateMap: function () {
-      var that = this;
-      this.data.appStateMap = {};
-      _.each(this.data.applications, function (app) {
+    function _updateAppStateMap() {
+
+      model.data.appStateMap = {};
+      _.each(model.data.applications, function (app) {
         if (app.state) {
           var cacheId = app.clusterId + '#' + app.metadata.guid;
-          that.data.appStateMap[cacheId] = app.state;
+          model.data.appStateMap[cacheId] = app.state;
         }
       });
-    },
+    }
 
     /**
      * @function resetPagination
@@ -214,9 +228,9 @@
      * @returns {object} promise object
      * @public
      */
-    resetPagination: function (fromCache) {
-      return this._listAllApps(fromCache);
-    },
+    function resetPagination(fromCache) {
+      return _listAllApps(fromCache);
+    }
 
     /**
      * @function _listAllApps
@@ -225,71 +239,70 @@
      * @returns {object} promise object
      * @private
      */
-    _listAllApps: function (fromCache) {
-      var that = this;
+    function _listAllApps(fromCache) {
 
       var loadPromise;
       if (fromCache) {
-        loadPromise = that.$q.resolve();
+        loadPromise = $q.resolve();
       } else {
-        this.bufferedApplications = [];
-        loadPromise = this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis());
+        bufferedApplications = [];
+        loadPromise = _listAllAppsWithPage(1, loadingLimit, _getCurrentCnsis());
       }
       return loadPromise
-        .then(_.bind(this._onListAllAppsSuccess, this, true))
+        .then(_.bind(_onListAllAppsSuccess, this, true))
         .then(function () {
-          if (_.isMatch(that.filterParams, {orgGuid: 'all', spaceGuid: 'all'})) {
+          if (_.isMatch(model.filterParams, {orgGuid: 'all', spaceGuid: 'all'})) {
             // No org/space filter applied, the app count can be found in the cached applications
-            that.unfilteredApplicationCount = that.cachedApplications.length;
+            model.unfilteredApplicationCount = model.cachedApplications.length;
           } else {
             // Filter applied. Reach out and call again without filters and only retrieve a single app per cnsi.
 
             // This will run every time the user changes the org or space filters. Tested with 1001 apps and it takes
             // about 60ms to complete (HCF in AWS)
-            that.applicationApi.ListAllApps({
+            applicationApi.ListAllApps({
               'results-per-page': 1
             }, {
               headers: {
-                'x-cnap-cnsi-list': that._getCurrentCnsis().join(',')
+                'x-cnap-cnsi-list': _getCurrentCnsis().join(',')
               }
             }).then(function (response) {
-              that.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
+              model.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
             });
           }
         })
         .then(function () {
           var didFilter = false;
-          if (that.filterParams.cnsiGuid !== 'all') {
-            that.filterByCluster(that.filterParams.cnsiGuid);
+          if (model.filterParams.cnsiGuid !== 'all') {
+            filterByCluster(model.filterParams.cnsiGuid);
             didFilter = true;
           }
-          if (that.filterParams.text) {
-            that.filterByText(that.filterParams.text);
+          if (model.filterParams.text) {
+            filterByText(model.filterParams.text);
             didFilter = true;
           }
           if (!didFilter) {
-            that.resetFilter();
+            resetFilter();
           }
         })
-        .catch(_.bind(this._onListAllAppsFailure, this));
-    },
+        .catch(_.bind(_onListAllAppsFailure, this));
+    }
 
     /**
      * @name sortFilteredApplications
      * @description Sort model.filteredApplications based on the required sort parameters
      *
      */
-    _sortFilteredApplications: function () {
-      var path = this.currentSortOption;
-      var sortOrder = this.sortAscending ? 'asc' : 'desc';
-      this.filteredApplications = _.orderBy(this.filteredApplications, function (app) {
+    function _sortFilteredApplications() {
+      var path = model.currentSortOption;
+      var sortOrder = model.sortAscending ? 'asc' : 'desc';
+      model.filteredApplications = _.orderBy(model.filteredApplications, function (app) {
         var value = _.get(app, path);
         if (_.isString(value)) {
           return value.toLowerCase();
         }
         return value;
       }, sortOrder);
-    },
+    }
 
     /**
      * @function _onListAllAppsSuccess
@@ -297,22 +310,22 @@
      * @param {boolean} skipReset do not reset the filter
      * @private
      */
-    _onListAllAppsSuccess: function (skipReset) {
-      this.hasApps = this.bufferedApplications.length > 0;
-      this._updateCache();
+    function _onListAllAppsSuccess(skipReset) {
+      model.hasApps = bufferedApplications.length > 0;
+      _updateCache();
       if (!skipReset) {
-        this.resetFilter();
+        resetFilter();
       }
-    },
+    }
 
     /**
      * @function _updateCache
      * @description update cached application list.
      * @private
      */
-    _updateCache: function () {
-      this.cachedApplications = _.clone(this.bufferedApplications);
-    },
+    function _updateCache() {
+      model.cachedApplications = _.clone(bufferedApplications);
+    }
 
     /**
      * @function _onListAllAppsFailure
@@ -321,11 +334,11 @@
      * @returns {object} promise object
      * @private
      */
-    _onListAllAppsFailure: function (error) {
-      this._updateAppStateMap();
-      this._reset();
-      return this.$q.reject(error);
-    },
+    function _onListAllAppsFailure(error) {
+      _updateAppStateMap();
+      _reset();
+      return $q.reject(error);
+    }
 
     /**
      * @function _listAllAppsWithPageHelper
@@ -336,22 +349,22 @@
      * @returns {object} promise object
      * @private
      */
-    _listAllAppsWithPageHelper: function (page, pageSize, cnsis) {
-      var that = this;
+    function _listAllAppsWithPageHelper(page, pageSize, cnsis) {
+
       var options = angular.extend({
         'results-per-page': pageSize,
         page: page
-      }, this._buildFilter());
+      }, _buildFilter());
       var config = {
         headers: {
           'x-cnap-cnsi-list': cnsis.join(',')
         }
       };
-      return this.applicationApi.ListAllApps(options, config).then(function (response) {
-        that._onListAllAppsWithPageSuccess(response.data);
+      return applicationApi.ListAllApps(options, config).then(function (response) {
+        _onListAllAppsWithPageSuccess(response.data);
         return response;
       });
-    },
+    }
 
     /**
      * @function _listAllAppsWithPage
@@ -362,16 +375,16 @@
      * @returns {object} promise object - contains array containing ALL applications
      * @private
      */
-    _listAllAppsWithPage: function (page, pageSize, cnsis) {
-      var that = this;
+    function _listAllAppsWithPage(page, pageSize, cnsis) {
+
       if (cnsis.length === 0) {
-        return that.$q.resolve();
+        return $q.resolve();
       }
 
-      return this._listAllAppsWithPageHelper(page, pageSize, cnsis)
+      return _listAllAppsWithPageHelper(page, pageSize, cnsis)
         .then(function (response) {
           if (!response.data) {
-            return that.$q.reject();
+            return $q.reject();
           } else {
             // We can further optimize the calls to be in parallel - after the first call, we know how many calls we need to make
             // Find the highest total number of page
@@ -380,13 +393,13 @@
             }));
             var tasks = [];
             for (var i = 2; i <= maxPage; i++) {
-              var cnsis = that._getClustersWithPage(response.data, i);
-              tasks.push(that._listAllAppsWithPageHelper(i, pageSize, cnsis));
+              var cnsis = _getClustersWithPage(response.data, i);
+              tasks.push(_listAllAppsWithPageHelper(i, pageSize, cnsis));
             }
-            return that.$q.all(tasks);
+            return $q.all(tasks);
           }
         });
-    },
+    }
 
     /**
      * @function _onListAllAppsWithPageSuccess
@@ -394,9 +407,9 @@
      * @param {object} data The data set in map data structure that holds data of applications for each cluster.
      * @private
      */
-    _onListAllAppsWithPageSuccess: function (data) {
-      this._accumulateApps(data);
-    },
+    function _onListAllAppsWithPageSuccess(data) {
+      _accumulateApps(data);
+    }
 
     /**
      * @function _accumulateApps
@@ -404,8 +417,8 @@
      * @param {object} data The data set in map data structure that holds data of applications for each cluster.
      * @private
      */
-    _accumulateApps: function (data) {
-      var that = this;
+    function _accumulateApps(data) {
+
       _.each(data, function (value, key) {
         var apps = value.resources;
         if (!apps) {
@@ -414,9 +427,9 @@
         _.each(apps, function (app) {
           app.clusterId = key;
         });
-        that.bufferedApplications = that.bufferedApplications.concat(apps);
+        bufferedApplications = bufferedApplications.concat(apps);
       });
-    },
+    }
 
     /**
      * @function _getClustersWithPage
@@ -426,7 +439,7 @@
      * @returns {Array} An array of clusters still need to retrieve applications from that have the specified page
      * @private
      */
-    _getClustersWithPage: function (data, page) {
+    function _getClustersWithPage(data, page) {
       var cnsis = [];
       _.each(data, function (value, key) {
         if (value.total_pages >= page) {
@@ -434,18 +447,18 @@
         }
       });
       return cnsis;
-    },
+    }
 
     /**
      * @function _reset
      * @description reset the model state
      * @private
      */
-    _reset: function () {
-      this.data.applications.length = 0;
-      this.hasApps = false;
-      this.appPage = 0;
-    },
+    function _reset() {
+      model.data.applications.length = 0;
+      model.hasApps = false;
+      model.appPage = 0;
+    }
 
     /**
      * @function _getCurentCnsis
@@ -453,17 +466,17 @@
      * @returns {Array} collection of valid CF cnsis
      * @private
      */
-    _getCurrentCnsis: function () {
+    function _getCurrentCnsis() {
       // Find cnsi's to reach out to
       // - Ignore cnsi's that are invalid (session expired) or errored (cannot contact)
       // - Fetch apps from all available cnsi's. Specifically important if we return to the page and pre-filter. Need
       // to ignore this in order to have the correct cache
-      return _.chain(this._getUserCnsiModel().serviceInstances)
-          .values()
-          .filter({cnsi_type: 'hcf', valid: true, error: false})
-          .map('guid')
-          .value();
-    },
+      return _.chain(_getUserCnsiModel().serviceInstances)
+        .values()
+        .filter({cnsi_type: 'hcf', valid: true, error: false})
+        .map('guid')
+        .value();
+    }
 
     /**
      * @function filterByCluster
@@ -471,33 +484,33 @@
      * @param {string} clusterId The cluster ID to filter by.
      * @public
      */
-    filterByCluster: function (clusterId) {
-      this.filteredApplications = _.filter(this.cachedApplications, ['clusterId', clusterId]);
-      this._sortFilteredApplications();
-      this.hasApps = this.filteredApplications.length > 0;
-    },
+    function filterByCluster(clusterId) {
+      model.filteredApplications = _.filter(model.cachedApplications, ['clusterId', clusterId]);
+      _sortFilteredApplications();
+      model.hasApps = model.filteredApplications.length > 0;
+    }
 
-    filterByText: function (text) {
+    function filterByText(text) {
       text = text.toLowerCase();
-      this.filteredApplications = _.filter(this.cachedApplications, function (app) {
+      model.filteredApplications = _.filter(model.cachedApplications, function (app) {
         if (app.entity.name.toLowerCase().indexOf(text) > -1) {
           return app;
         }
       });
-      this._sortFilteredApplications();
-      this.hasApps = this.filteredApplications.length > 0;
-    },
+      _sortFilteredApplications();
+      model.hasApps = model.filteredApplications.length > 0;
+    }
 
     /**
      * @function resetFilter
      * @description clean out applied filtering and reset the applications back;
      * @public
      */
-    resetFilter: function () {
-      this.filteredApplications = _.clone(this.cachedApplications);
-      this._sortFilteredApplications();
-      this.hasApps = this.filteredApplications.length > 0;
-    },
+    function resetFilter() {
+      model.filteredApplications = _.clone(model.cachedApplications);
+      _sortFilteredApplications();
+      model.hasApps = model.filteredApplications.length > 0;
+    }
 
     /**
      * @function _buildFilter
@@ -505,15 +518,15 @@
      * @returns {object} The CF q filter
      * @private
      */
-    _buildFilter: function () {
-      if (this.filterParams.spaceGuid !== 'all') {
-        return {q: 'space_guid:' + this.filterParams.spaceGuid};
-      } else if (this.filterParams.orgGuid !== 'all') {
-        return {q: 'organization_guid:' + this.filterParams.orgGuid};
+    function _buildFilter() {
+      if (model.filterParams.spaceGuid !== 'all') {
+        return {q: 'space_guid:' + model.filterParams.spaceGuid};
+      } else if (model.filterParams.orgGuid !== 'all') {
+        return {q: 'organization_guid:' + model.filterParams.orgGuid};
       }
 
       return {};
-    },
+    }
 
     /**
      * @function usage
@@ -525,13 +538,13 @@
      * @returns {promise} A promise object
      * @public
      **/
-    usage: function (cnsiGuid, guid, options) {
-      var that = this;
-      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function usage(cnsiGuid, guid, options) {
+
+      return applicationApi.GetDetailedStatsForStartedApp(guid, options, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onUsage(response.data);
+          onUsage(response.data);
         });
-    },
+    }
 
     /**
      * @function files
@@ -544,13 +557,13 @@
      * @returns {promise} A promise object
      * @public
      **/
-    files: function (guid, instanceIndex, filepath, options) {
-      var that = this;
-      return this.applicationApi.files(guid, instanceIndex, filepath, options)
+    function files(guid, instanceIndex, filepath, options) {
+
+      return applicationApi.files(guid, instanceIndex, filepath, options)
         .then(function (response) {
-          that.onFiles(response);
+          onFiles(response);
         });
-    },
+    }
 
     /**
      * @function getClusterWithId
@@ -560,15 +573,15 @@
      * @returns {promise} a promise object
      * @public
      */
-    getClusterWithId: function (cnsiGuid) {
-      var that = this;
-      var userCnsiModel = this._getUserCnsiModel();
+    function getClusterWithId(cnsiGuid) {
+
+      var userCnsiModel = _getUserCnsiModel();
       var isAvailable = userCnsiModel.serviceInstances[cnsiGuid];
-      var p = isAvailable ? this.$q.resolve(true) : userCnsiModel.list();
+      var p = isAvailable ? $q.resolve(true) : userCnsiModel.list();
       return p.then(function () {
-        that.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
+        model.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
       });
-    },
+    }
 
     /**
      * @function getAppSummary
@@ -580,24 +593,22 @@
      * @returns {promise} a promise object
      * @public
      */
-    getAppSummary: function (cnsiGuid, guid, includeStats) {
-      var that = this;
-
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetAppSummary(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function getAppSummary(cnsiGuid, guid, includeStats) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetAppSummary(guid, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           response.data.clusterId = cnsiGuid;
           if (!includeStats || response.data.state !== 'STARTED') {
-            that.onSummary(cnsiGuid, guid, response.data);
+            onSummary(cnsiGuid, guid, response.data);
             return response;
           } else {
             // We were asked for stats and this app is RUNNING, so go and get them
-            return that.getAppStats(cnsiGuid, guid).then(function () {
-              that.onSummary(cnsiGuid, guid, response.data);
+            return getAppStats(cnsiGuid, guid).then(function () {
+              onSummary(cnsiGuid, guid, response.data);
             });
           }
         });
-    },
+    }
 
     /**
      * @function _getAppDetails
@@ -609,15 +620,13 @@
      * @returns {promise} a promise object
      * @private
      */
-    _getAppDetails: function (cnsiGuid, guid, params) {
-      var that = this;
-
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .RetrieveApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function _getAppDetails(cnsiGuid, guid, params) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .RetrieveApp(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onGetAppOrgAndSpace(response.data);
+          onGetAppOrgAndSpace(response.data);
         });
-    },
+    }
 
     /**
      * @function getAppDetailsOnOrgAndSpace
@@ -628,12 +637,12 @@
      * @returns {promise} a promise object
      * @public
      */
-    getAppDetailsOnOrgAndSpace: function (cnsiGuid, guid) {
-      return this._getAppDetails(cnsiGuid, guid, {
+    function getAppDetailsOnOrgAndSpace(cnsiGuid, guid) {
+      return _getAppDetails(cnsiGuid, guid, {
         'inline-relations-depth': 2,
         'include-relations': 'organization,space'
       });
-    },
+    }
 
     /**
      * @function _getUserCnsiModel
@@ -641,9 +650,9 @@
      * @returns {*|Object}
      * @private
      */
-    _getUserCnsiModel: function () {
-      return this.modelManager.retrieve('app.model.serviceInstance.user');
-    },
+    function _getUserCnsiModel() {
+      return modelManager.retrieve('app.model.serviceInstance.user');
+    }
 
     /**
      * @function getAppVariables
@@ -654,10 +663,10 @@
      * @returns {promise} a promise object
      * @public
      **/
-    getAppVariables: function (cnsiGuid, guid) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function getAppVariables(cnsiGuid, guid) {
+
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetEnvForApp(guid, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           var data = response.data;
           if (data.error_code) {
@@ -667,9 +676,9 @@
           }
         })
         .then(function (data) {
-          that.application.variables = data;
+          model.application.variables = data;
         });
-    },
+    }
 
     /**
      * @function unbindServiceFromApp
@@ -682,10 +691,10 @@
      * @returns {promise} a promise object
      * @public
      */
-    unbindServiceFromApp: function (cnsiGuid, guid, bindingGuid, params) {
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .RemoveServiceBindingFromApp(guid, bindingGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    function unbindServiceFromApp(cnsiGuid, guid, bindingGuid, params) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .RemoveServiceBindingFromApp(guid, bindingGuid, params, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
     /**
      * @function listServiceBindings
@@ -699,18 +708,18 @@
      * @returns {promise} A promise object
      * @public
      **/
-    listServiceBindings: function (cnsiGuid, guid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .ListAllServiceBindingsForApp(guid, this.modelUtils.makeListParams(params),
-          this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listServiceBindings(cnsiGuid, guid, params, paginate) {
+
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .ListAllServiceBindingsForApp(guid, modelUtils.makeListParams(params),
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
-    },
+    }
 
     /**
      * @function startApp
@@ -721,31 +730,31 @@
      * @returns {promise} a promise object
      * @public
      */
-    startApp: function (cnsiGuid, guid) {
-      var that = this;
-      this.appStateSwitchTo = 'STARTED';
-      this.application.summary.state = 'PENDING';
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STARTED'}, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
-        .then(that.getAppStats(cnsiGuid, guid))
+    function startApp(cnsiGuid, guid) {
+
+      model.appStateSwitchTo = 'STARTED';
+      model.application.summary.state = 'PENDING';
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .UpdateApp(guid, {state: 'STARTED'}, {}, modelUtils.makeHttpConfig(cnsiGuid))
+        .then(getAppStats(cnsiGuid, guid))
         .then(
           function (response) {
             var data = response.data;
             if (angular.isDefined(data.entity)) {
-              that.onAppStateChangeSuccess(data);
+              onAppStateChangeSuccess(data);
             } else if (data.error_code === 'CF-AppPackageInvalid') {
-              that.onAppStateChangeInvalid();
+              onAppStateChangeInvalid();
             } else {
-              that.onAppStateChangeFailure();
+              onAppStateChangeFailure();
             }
             return response;
           },
           function (error) {
-            that.onAppStateChangeFailure();
+            onAppStateChangeFailure();
             return error;
           }
         );
-    },
+    }
 
     /**
      * @function stopApp
@@ -756,28 +765,28 @@
      * @returns {promise} a promise object
      * @public
      */
-    stopApp: function (cnsiGuid, guid) {
-      var that = this;
-      this.appStateSwitchTo = 'STOPPED';
-      this.application.summary.state = 'PENDING';
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STOPPED'}, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function stopApp(cnsiGuid, guid) {
+
+      model.appStateSwitchTo = 'STOPPED';
+      model.application.summary.state = 'PENDING';
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .UpdateApp(guid, {state: 'STOPPED'}, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(
           function (response) {
             var data = response.data;
             if (angular.isDefined(data.entity)) {
-              that.onAppStateChangeSuccess(data);
+              onAppStateChangeSuccess(data);
             } else {
-              that.onAppStateChangeFailure();
+              onAppStateChangeFailure();
             }
             return response;
           },
           function (error) {
-            that.onAppStateChangeFailure();
+            onAppStateChangeFailure();
             return error;
           }
         );
-    },
+    }
 
     /**
      * @function restartApp
@@ -787,12 +796,12 @@
      * @param {string} guid - the application id
      * @public
      */
-    restartApp: function (cnsiGuid, guid) {
-      var that = this;
-      this.stopApp(cnsiGuid, guid).then(function () {
-        that.startApp(cnsiGuid, guid);
+    function restartApp(cnsiGuid, guid) {
+
+      stopApp(cnsiGuid, guid).then(function () {
+        startApp(cnsiGuid, guid);
       });
-    },
+    }
 
     /**
      * @function createApp
@@ -803,15 +812,15 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    createApp: function (cnsiGuid, newAppSpec) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .CreateApp(newAppSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function createApp(cnsiGuid, newAppSpec) {
+
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .CreateApp(newAppSpec, {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.getAppSummary(cnsiGuid, response.data.metadata.guid);
+          getAppSummary(cnsiGuid, response.data.metadata.guid);
           return response.data;
         });
-    },
+    }
 
     /**
      * @function update
@@ -823,17 +832,17 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    update: function (cnsiGuid, guid, newAppSpec) {
-      var that = this;
-      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.UpdateApp(guid, newAppSpec, null, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function update(cnsiGuid, guid, newAppSpec) {
+
+      var applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
+      return applicationApi.UpdateApp(guid, newAppSpec, null, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (response.data.metadata) {
-            that.getAppSummary(cnsiGuid, response.data.metadata.guid, true);
+            getAppSummary(cnsiGuid, response.data.metadata.guid, true);
           }
           return response.data;
         });
-    },
+    }
 
     /**
      * @function deleteApp
@@ -844,10 +853,10 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    deleteApp: function (cnsiGuid, guid) {
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    function deleteApp(cnsiGuid, guid) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .DeleteApp(guid, null, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
     /**
      * @function terminateRunningAppInstanceAtGivenIndex
@@ -859,10 +868,10 @@
      * @returns {promise}
      * @public
      */
-    terminateRunningAppInstanceAtGivenIndex: function (cnsiGuid, guid, index) {
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .TerminateRunningAppInstanceAtGivenIndex(guid, index, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
-    },
+    function terminateRunningAppInstanceAtGivenIndex(cnsiGuid, guid, index) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .TerminateRunningAppInstanceAtGivenIndex(guid, index, {}, modelUtils.makeHttpConfig(cnsiGuid));
+    }
 
     /**
      * @function getAppStats
@@ -875,18 +884,18 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    getAppStats: function (cnsiGuid, guid, params, noCache) {
-      var that = this;
-      return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
+    function getAppStats(cnsiGuid, guid, params, noCache) {
+
+      return returnAppStats(cnsiGuid, guid, params).then(function (response) {
         if (!noCache) {
           var data = response.data;
           // Stats for all instances
-          that.application.instances = data;
-          that.application.instanceCount = _.keys(data).length;
+          model.application.instances = data;
+          model.application.instanceCount = _.keys(data).length;
         }
         return response;
       });
-    },
+    }
 
     /**
      * @function returnAppStats
@@ -898,13 +907,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    returnAppStats: function (cnsiGuid, guid, params) {
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetDetailedStatsForStartedApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function returnAppStats(cnsiGuid, guid, params) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetDetailedStatsForStartedApp(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response;
         });
-    },
+    }
 
     /**
      * @function getEnv
@@ -916,13 +925,13 @@
      * @returns {promise} A promise object
      * @public
      */
-    getEnv: function (cnsiGuid, guid, params) {
-      return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+    function getEnv(cnsiGuid, guid, params) {
+      return apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetEnvForApp(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
-    },
+    }
 
     /**
      * @function onUsage
@@ -931,9 +940,9 @@
      * @param {string} response - the return from the api call
      * @private
      */
-    onUsage: function (response) {
-      this.data.usage = response;
-    },
+    function onUsage(response) {
+      model.data.usage = response;
+    }
 
     /**
      * @function onFiles
@@ -942,9 +951,9 @@
      * @param {string} response - the return from the api call
      * @private
      */
-    onFiles: function (response) {
-      this.data.files = response.data;
-    },
+    function onFiles(response) {
+      model.data.files = response.data;
+    }
 
     /**
      * @function onSummary
@@ -955,15 +964,15 @@
      * @param {object} response - the json return from the api call
      * @private
      */
-    onSummary: function (cnsiGuid, guid, response) {
-      _.set(this, 'appSummary.' + cnsiGuid + '.' + guid, response);
+    function onSummary(cnsiGuid, guid, response) {
+      _.set(model, 'appSummary.' + cnsiGuid + '.' + guid, response);
 
       /* eslint-disable no-warning-comments */
       // FIXME (TEAMFOUR-779): This is application specific and should be kept separate from a generic appSummary call
       /* eslint-enable no-warning-comments */
-      this.application.summary = response;
-      this.onAppStateChange();
-    },
+      model.application.summary = response;
+      onAppStateChange();
+    }
 
     /**
      * @function onGetAppOrgAndSpace
@@ -972,11 +981,11 @@
      * @param {object} application - response
      * @private
      */
-    onGetAppOrgAndSpace: function (application) {
-      this.application.organization = application.entity.space.entity.organization;
-      this.application.space = application.entity.space;
-      this.application.metadata = application.metadata;
-    },
+    function onGetAppOrgAndSpace(application) {
+      model.application.organization = application.entity.space.entity.organization;
+      model.application.space = application.entity.space;
+      model.application.metadata = application.metadata;
+    }
 
     /**
      * @function onAppStateChangeSuccess
@@ -985,11 +994,11 @@
      * @param {object} response - the json return from the api call
      * @private
      */
-    onAppStateChangeSuccess: function (response) {
-      this.application.summary.state = response.entity.state;
-      this.appStateSwitchTo = '';
-      this.onAppStateChange();
-    },
+    function onAppStateChangeSuccess(response) {
+      model.application.summary.state = response.entity.state;
+      model.appStateSwitchTo = '';
+      onAppStateChange();
+    }
 
     /**
      * @function onAppStateChangeFailure
@@ -997,23 +1006,23 @@
      * @description onAppStateChangeFailure handler at model layer
      * @private
      */
-    onAppStateChangeFailure: function () {
-      this.application.summary.state = 'ERROR';
-      this.appStateSwitchTo = '';
-      this.onAppStateChange();
-    },
-
-    onAppStateChangeInvalid: function () {
-      this.application.summary.state = 'STOPPED';
-      this.appStateSwitchTo = '';
-      this.onAppStateChange();
-    },
-
-    onAppStateChange: function () {
-      this.application.state = this.cfAppStateService.get(this.application.summary, this.application.instances);
-      var cacheId = this.application.summary.clusterId + '#' + this.application.summary.guid;
-      this.data.appStateMap[cacheId] = this.application.state;
+    function onAppStateChangeFailure() {
+      model.application.summary.state = 'ERROR';
+      model.appStateSwitchTo = '';
+      onAppStateChange();
     }
-  });
+
+    function onAppStateChangeInvalid() {
+      model.application.summary.state = 'STOPPED';
+      model.appStateSwitchTo = '';
+      onAppStateChange();
+    }
+
+    function onAppStateChange() {
+      model.application.state = cfAppStateService.get(model.application.summary, model.application.instances);
+      var cacheId = model.application.summary.clusterId + '#' + model.application.summary.guid;
+      model.data.appStateMap[cacheId] = model.application.state;
+    }
+  }
 
 })();

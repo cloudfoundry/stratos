@@ -5,9 +5,6 @@
     .module('service-manager.view.manage-instance.form', [])
     .directive('manageInstanceForm', manageInstanceForm);
 
-  manageInstanceForm.$inject = [
-  ];
-
   /**
    * @name application
    * @returns {object} The manage instance form directive definition object
@@ -24,28 +21,20 @@
     };
   }
 
-  ManageInstanceForm.$inject = [
-    '$scope',
-    '$q',
-    '$window',
-    'modelManager',
-    'service-manager.utils.version'
-  ];
-
   /**
    * @name ManageInstanceForm
    * @param {object} $scope - the Angular $scope service
    * @param {object} $q - the Angular $q promise service
    * @param {object} $window - the Angular $window service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} versionUtils - version utils service
+   * @param {object} hsmVersion - version utils service
    * @class
    */
-  function ManageInstanceForm($scope, $q, $window, modelManager, versionUtils) {
+  function ManageInstanceForm($scope, $q, $window, modelManager, hsmVersion) {
     var that = this;
     this.$q = $q;
     this.hsmModel = modelManager.retrieve('service-manager.model');
-    this.versionUtils = versionUtils;
+    this.hsmVersion = hsmVersion;
     this.data.form = $scope.form;
     this.data.params = {};
 
@@ -159,10 +148,10 @@
               latest: sdlVersion === version.latest
             });
           });
-          that.versionUtils.sortByProperty(sdl, 'value', true);
+          that.hsmVersion.sortByProperty(sdl, 'value', true);
         });
 
-        this.versionUtils.sortByProperty(that.productVersions, 'value', true);
+        this.hsmVersion.sortByProperty(that.productVersions, 'value', true);
 
         if (productVersion) {
           this.data.product = productVersion;
@@ -237,9 +226,9 @@
             latest: sdlVersion.is_latest
           });
         });
-        that.versionUtils.sortByProperty(sdl, 'value', true);
+        that.hsmVersion.sortByProperty(sdl, 'value', true);
       });
-      this.versionUtils.sortByProperty(that.productVersions, 'value', true);
+      this.hsmVersion.sortByProperty(that.productVersions, 'value', true);
       this.data.product = that.productVersions[0].value;
       this.sdlOptions = this.sdlVersions[this.data.product] || [];
       var found = _.find(this.sdlOptions, {latest: true});

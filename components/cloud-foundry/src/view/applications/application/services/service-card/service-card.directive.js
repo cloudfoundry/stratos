@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications.application.services')
     .directive('serviceCard', serviceCard);
 
-  serviceCard.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications.application.services
    * @name serviceCard
@@ -29,13 +27,6 @@
     };
   }
 
-  ServiceCardController.$inject = [
-    '$scope',
-    'modelManager',
-    'appEventService',
-    'cfServiceInstanceService'
-  ];
-
   /**
    * @memberof cloud-foundry.view.applications.application.services.serviceCard
    * @name ServiceCardController
@@ -51,67 +42,74 @@
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
    * @property {array} serviceBindings - the service instances bound to specified app
    * @property {number} numAttached - the number of service instances bound to specified app
-   * @property {array} actions - the actions that can be performed from this service card
+   * @property {array} actions - the actions that can be performed from vm.service card
    */
   function ServiceCardController($scope, modelManager, appEventService, cfServiceInstanceService) {
-    var that = this;
-    this.appEventService = appEventService;
-    this.cfServiceInstanceService = cfServiceInstanceService;
-    this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
-    this.serviceBindings = [];
-    this.numAttached = 0;
-    this.actions = [
+    var vm = this;
+
+    var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+    vm.allowAddOnly = angular.isDefined(vm.addOnly) ? vm.addOnly : false;
+    vm.numAttached = 0;
+    vm.actions = [
       {
         name: gettext('Add Service'),
         execute: function () {
-          that.addService();
+          addService();
         }
       },
       {
         name: gettext('Detach'),
         execute: function () {
-          that.detach();
+          detach();
         }
       },
       {
         name: gettext('Manage Instances'),
         execute: function () {
-          that.manageInstances();
+          manageInstances();
         }
       }
     ];
+    vm.serviceBindings = [];
 
     $scope.$watch(function () {
-      return that.app.summary.services;
+      return vm.app.summary.services;
     }, function () {
-      that.init();
+      init();
     });
 
     $scope.$watch(function () {
-      return that.service;
+      return vm.service;
     }, function () {
-      that.canBind = that.service._bindTarget === 'APP';
+      vm.canBind = vm.service._bindTarget === 'APP';
     });
-  }
 
-  angular.extend(ServiceCardController.prototype, {
+    vm.addService = addService;
+    vm.detach = detach;
+    vm.manageInstances = manageInstances;
+    vm.hideServiceActions = hideServiceActions;
+    vm.getServiceInstanceGuids = getServiceInstanceGuids;
+    vm.getServiceBindings = getServiceBindings;
+    vm.updateActions = updateActions;
+    vm.init = init;
+
     /**
      * @function init
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Fetch service bindings for this app and update content
      * @returns {undefined}
      */
-    init: function () {
-      var serviceInstances = this.getServiceInstanceGuids();
+    function init() {
+      var serviceInstances = vm.getServiceInstanceGuids();
       if (serviceInstances.length > 0) {
-        return this.getServiceBindings(serviceInstances);
+        return vm.getServiceBindings(serviceInstances);
       } else {
-        this.serviceBindings = [];
-        this.updateActions();
+        vm.serviceBindings = [];
+        vm.updateActions();
       }
-    },
+    }
 
     /**
      * @function getServiceInstanceGuids
@@ -119,17 +117,16 @@
      * @description Get service instances for app
      * @returns {array} A list of service instance GUIDs
      */
-    getServiceInstanceGuids: function () {
-      var that = this;
-      var serviceInstances = _.chain(this.app.summary.services)
+    function getServiceInstanceGuids() {
+      var serviceInstances = _.chain(vm.app.summary.services)
         .filter(function (o) {
           return angular.isDefined(o.service_plan) &&
-            o.service_plan.service.guid === that.service.metadata.guid;
+            o.service_plan.service.guid === vm.service.metadata.guid;
         })
         .map('guid')
         .value();
       return serviceInstances;
-    },
+    }
 
     /**
      * @function getServiceBindings
@@ -138,21 +135,19 @@
      * @param {array} serviceInstanceGuids A list of service instance GUIDs
      * @returns {promise} A promise object
      */
-    getServiceBindings: function (serviceInstanceGuids) {
-      var that = this;
-
+    function getServiceBindings(serviceInstanceGuids) {
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
       var options = {q: q, 'inline-relations-depth': 1, 'include-relations': 'service_instance'};
-      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, options)
+      return bindingModel.listAllServiceBindings(vm.cnsiGuid, options)
         .then(function (bindings) {
-          var appGuid = that.app.summary.guid;
+          var appGuid = vm.app.summary.guid;
           var appBindings = _.filter(bindings, function (o) {
             return o.entity.app_guid === appGuid;
           });
-          that.serviceBindings = appBindings;
-          that.updateActions();
+          vm.serviceBindings = appBindings;
+          vm.updateActions();
         });
-    },
+    }
 
     /**
      * @function addService
@@ -160,16 +155,16 @@
      * @description Show the add service detail view
      * @returns {undefined}
      */
-    addService: function () {
+    function addService() {
       var config = {
-        app: this.app,
-        cnsiGuid: this.cnsiGuid,
-        confirm: !this.allowAddOnly,
-        service: this.service
+        app: vm.app,
+        cnsiGuid: vm.cnsiGuid,
+        confirm: !vm.allowAddOnly,
+        service: vm.service
       };
 
-      this.appEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
-    },
+      appEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
+    }
 
     /**
      * @function detach
@@ -177,17 +172,17 @@
      * @description Detach service instance from app
      * @returns {undefined}
      */
-    detach: function () {
-      if (this.serviceBindings.length === 1) {
-        var serviceBinding = this.serviceBindings[0];
-        return this.cfServiceInstanceService.unbindServiceFromApp(
-          this.cnsiGuid,
-          this.app.summary.guid,
+    function detach() {
+      if (vm.serviceBindings.length === 1) {
+        var serviceBinding = vm.serviceBindings[0];
+        return cfServiceInstanceService.unbindServiceFromApp(
+          vm.cnsiGuid,
+          vm.app.summary.guid,
           serviceBinding.metadata.guid,
           serviceBinding.entity.service_instance.entity.name
         );
       }
-    },
+    }
 
     /**
      * @function manageInstances
@@ -195,15 +190,15 @@
      * @description Show the manage services detail view
      * @returns {void}
      */
-    manageInstances: function () {
+    function manageInstances() {
       var config = {
-        app: this.app,
-        cnsiGuid: this.cnsiGuid,
-        service: this.service
+        app: vm.app,
+        cnsiGuid: vm.cnsiGuid,
+        service: vm.service
       };
 
-      this.appEventService.$emit('cf.events.START_MANAGE_SERVICES', config);
-    },
+      appEventService.$emit('cf.events.START_MANAGE_SERVICES', config);
+    }
 
     /**
      * @function updateActions
@@ -211,23 +206,23 @@
      * @description Update service actions visibility
      * @returns {void}
      */
-    updateActions: function () {
-      this.numAttached = this.serviceBindings.length;
-      this.actions[1].hidden = this.numAttached !== 1;
-      this.actions[2].hidden = this.numAttached === 0;
-    },
+    function updateActions() {
+      vm.numAttached = vm.serviceBindings.length;
+      vm.actions[1].hidden = vm.numAttached !== 1;
+      vm.actions[2].hidden = vm.numAttached === 0;
+    }
 
     /**
-     * @function updateActions
+     * @function hideServiceActions
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Update service actions visibility
      * @returns {*}
      */
-    hideServiceActions: function () {
-      return !this.authModel.isAllowed(this.cnsiGuid,
-        this.authModel.resources.managed_service_instance,
-        this.authModel.actions.create, this.app.summary.space_guid);
+    function hideServiceActions() {
+      return !authModel.isAllowed(vm.cnsiGuid,
+        authModel.resources.managed_service_instance,
+        authModel.actions.create, vm.app.summary.space_guid);
     }
-  });
+  }
 
 })();

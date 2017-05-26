@@ -31,11 +31,14 @@
      * @constructor
      */
     function ServiceInstanceAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(ServiceInstanceAccess.prototype, {
+      return {
+        create: create,
+        update: update,
+        delete: deleteResource,
+        canHandle: canHandle
+      };
 
       /**
        * @name create
@@ -45,18 +48,17 @@
        * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      create: function (spaceGuid) {
-
+      function create(spaceGuid) {
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
         // Admin
-        if (this.baseAccess.create(spaceGuid)) {
+        if (baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this.principal.hasAccessTo('service_instance_creation') &&
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return principal.hasAccessTo('service_instance_creation') &&
+          baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name update
@@ -66,14 +68,14 @@
        * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      update: function (spaceGuid) {
+      function update(spaceGuid) {
         // Admin
-        if (this.baseAccess.create(spaceGuid)) {
+        if (baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
-      },
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
+      }
 
       /**
        * @name delete
@@ -83,15 +85,15 @@
        * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      delete: function (spaceGuid) {
+      function deleteResource(spaceGuid) {
         // Admin
-        if (this.baseAccess.delete(spaceGuid)) {
+        if (baseAccess.delete(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
+        return baseAccess._doesContainGuid(principal.userSummary.spaces.all, spaceGuid);
 
-      },
+      }
 
       /**
        * @name canHandle
@@ -99,10 +101,10 @@
        * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'managed_service_instance';
       }
-    });
+    }
 
     return ServiceInstanceAccess;
   }

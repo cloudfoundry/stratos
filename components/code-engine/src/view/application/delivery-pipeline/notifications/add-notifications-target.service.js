@@ -6,10 +6,6 @@
     .factory('ceAddNotificationService', AddNotificationTargetServiceFactory)
     .controller('code-engine.view.application.delivery-pipeline.addNotificationTargetController', AddNotificationTargetController);
 
-  AddNotificationTargetServiceFactory.$inject = [
-    'frameworkDetailView'
-  ];
-
   function AddNotificationTargetServiceFactory(frameworkDetailView) {
 
     return {
@@ -26,13 +22,6 @@
       }
     };
   }
-
-  AddNotificationTargetController.$inject = [
-    'modelManager',
-    'apiManager',
-    '$q',
-    '$uibModalInstance'
-  ];
 
   /**
    * @memberof code-engine.view.application.delivery-pipeline

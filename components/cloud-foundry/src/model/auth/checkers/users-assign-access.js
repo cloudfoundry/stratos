@@ -30,11 +30,12 @@
      * @constructor
      */
     function UsersAssignmentAccess(principal) {
-      this.principal = principal;
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-    }
+      var baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
 
-    angular.extend(UsersAssignmentAccess.prototype, {
+      return {
+        update: update,
+        canHandle: canHandle
+      };
 
       /**
        * @name updateSpaces
@@ -47,37 +48,34 @@
        * @param {boolean} isSpace - flag to indicate what object is
        * @returns {boolean}
        */
-      update: function (spaceGuid, orgGuid, isSpace) {
+      function update(spaceGuid, orgGuid, isSpace) {
 
         // Admin
-        if (this.baseAccess.update(spaceGuid)) {
+        if (baseAccess.update(spaceGuid)) {
           return true;
         }
 
         if (isSpace) {
           // Check if user is space manager or org manager
-          return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid) ||
-            this.baseAccess
-              ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
+          return baseAccess._doesContainGuid(principal.userSummary.spaces.managed, spaceGuid) ||
+            baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
         } else {
           // check if user is org manager
-          return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
+          return baseAccess._doesContainGuid(principal.userSummary.organizations.managed, orgGuid);
         }
 
-      },
+      }
 
-       /**
+      /**
        * @name canHandle
        * @description Specifies that this ACL checker can handle `application` permission
        * @param {String} resource - string specifying resource
        * @returns {boolean}
        */
-      canHandle: function (resource) {
+      function canHandle(resource) {
         return resource === 'user';
       }
-    });
+    }
 
     return UsersAssignmentAccess;
   }

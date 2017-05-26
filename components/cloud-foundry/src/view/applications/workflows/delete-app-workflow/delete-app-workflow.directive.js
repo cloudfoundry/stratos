@@ -5,8 +5,6 @@
     .module('cloud-foundry.view.applications')
     .directive('deleteAppWorkflow', deleteAppWorkflow);
 
-  deleteAppWorkflow.$inject = [];
-
   /**
    * @memberof cloud-foundry.view.applications
    * @name deleteAppWorkflow
@@ -26,17 +24,6 @@
       bindToController: true
     };
   }
-
-  DeleteAppWorkflowController.$inject = [
-    '$filter',
-    'modelManager',
-    'appEventService',
-    '$q',
-    '$interpolate',
-    'appUtilsService',
-    'appEndpointsCnsiService',
-    'cfApplicationTabs'
-  ];
 
   /**
    * @memberof cloud-foundry.view.applications

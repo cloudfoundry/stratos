@@ -5,10 +5,6 @@
     .module('service-manager.view.service.detail', [])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
     $stateProvider.state('sm.endpoint.detail', {
       url: '/detail',
@@ -22,13 +18,6 @@
       controllerAs: 'svcSDetailCtrl'
     });
   }
-
-  ServiceManagerDetailController.$inject = [
-    '$state',
-    '$rootScope',
-    '$scope',
-    'modelManager'
-  ];
 
   function ServiceManagerDetailController($state, $rootScope, $scope, modelManager) {
     var that = this;

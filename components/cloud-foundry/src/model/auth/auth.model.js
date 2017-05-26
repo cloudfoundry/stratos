@@ -23,50 +23,53 @@
    */
   function AuthModel(modelManager, $q) {
 
-    this.modelManager = modelManager;
-    this.$q = $q;
-
-    // Initialised authorization checkers for individual CNSIs
-    this.principal = {};
-
-    this.resources = {
-      space: 'space',
-      user: 'user',
-      space_quota_definition: 'space_quota_definition',
-      user_provided_service_instance: 'user_provided_service_instance',
-      managed_service_instance: 'managed_service_instance',
-      service_instance: 'service_instance',
-      organization: 'organization',
-      application: 'application',
-      domain: 'domain',
-      route: 'route'
+    var model = {
+      // Initialised authorization checkers for individual CNSIs
+      principal: {},
+      resources: {
+        space: 'space',
+        user: 'user',
+        space_quota_definition: 'space_quota_definition',
+        user_provided_service_instance: 'user_provided_service_instance',
+        managed_service_instance: 'managed_service_instance',
+        service_instance: 'service_instance',
+        organization: 'organization',
+        application: 'application',
+        domain: 'domain',
+        route: 'route'
+      },
+      actions: {
+        create: 'create',
+        update: 'update',
+        delete: 'delete',
+        rename: 'rename'
+      },
+      roles: {
+        space_developer: 'space_developer'
+      },
+      initialize: initialize,
+      initializeForEndpoint: initializeForEndpoint,
+      isAllowed: isAllowed,
+      isInitialized: isInitialized,
+      remove: remove,
+      doesUserHaveRole: doesUserHaveRole,
+      isOrgOrSpaceActionableByResource: isOrgOrSpaceActionableByResource,
+      isAdmin: isAdmin
     };
 
-    this.actions = {
-      create: 'create',
-      update: 'update',
-      delete: 'delete',
-      rename: 'rename'
-    };
-
-    this.roles = {
-      space_developer: 'space_developer'
-    };
-  }
-
-  angular.extend(AuthModel.prototype, {
+    return model;
 
     /**
      * @name initialize
      * @description Initialize AuthModel for all connected endpoints
      * @returns {promise} Initialization promise
      */
-    initialize: function () {
+    function initialize() {
       // Initialise Auth Service
-      var that = this;
+
       var authModelInitPromise = [];
-      var userCnsiModel = this.modelManager.retrieve('app.model.serviceInstance.user');
-      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
+      var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
       var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
       if (services.length > 0) {
         _.each(services, function (service) {
@@ -74,18 +77,18 @@
           if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;
-          } else if (that.isInitialized(service.guid, endpointUser)) {
+          } else if (isInitialized(service.guid, endpointUser)) {
             // We have already initialised for this endpoint + user
             return;
           }
-          authModelInitPromise.push(that.initializeForEndpoint(service.guid, true).catch(angular.noop));
+          authModelInitPromise.push(initializeForEndpoint(service.guid, true).catch(angular.noop));
         });
 
-        return that.$q.all(authModelInitPromise);
+        return $q.all(authModelInitPromise);
       }
 
-      return that.$q.resolve();
-    },
+      return $q.resolve();
+    }
     /**
      * @name initializeForEndpoint
      * @description Initialize a principal instance for connected CF
@@ -93,18 +96,16 @@
      * @param {boolean} useconsoleInfoCache - Set to true if consoleInfo has already been fetched
      * @returns {*}
      */
-    initializeForEndpoint: function (cnsiGuid, useconsoleInfoCache) {
-      var that = this;
+    function initializeForEndpoint(cnsiGuid, useconsoleInfoCache) {
 
-      this.principal[cnsiGuid] = null;
-
-      var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
-      var consoleInfo = this.modelManager.retrieve('app.model.consoleInfo');
-      var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
-      var userModel = this.modelManager.retrieve('cloud-foundry.model.users');
+      model.principal[cnsiGuid] = null;
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      var featureFlagsModel = modelManager.retrieve('cloud-foundry.model.featureFlags');
+      var Principal = modelManager.retrieve('cloud-foundry.model.auth.principal');
+      var userModel = modelManager.retrieve('cloud-foundry.model.users');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
-      var consoleInfoPromise = this.$q.resolve(consoleInfo.info);
+      var consoleInfoPromise = $q.resolve(consoleInfo.info);
       if (!useconsoleInfoCache) {
         consoleInfoPromise = consoleInfo.getConsoleInfo();
       }
@@ -120,11 +121,11 @@
           // User is an admin, therefore, we will use the more efficient userSummary request
           promises.push(userModel.getUserSummary(cnsiGuid, userId));
         } else {
-          promises = promises.concat(that._addOrganisationRolePromisesForUser(cnsiGuid, userId));
-          promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
+          promises = promises.concat(_addOrganisationRolePromisesForUser(cnsiGuid, userId));
+          promises = promises.concat(_addSpaceRolePromisesForUser(cnsiGuid, userId));
         }
 
-        return that.$q.all(promises)
+        return $q.all(promises)
           .then(function (data) {
             var featureFlags = _.transform(data[0], function (result, value) {
               result[value.name] = value.enabled;
@@ -164,10 +165,10 @@
                 }
               };
             }
-            that.principal[cnsiGuid] = new Principal(consoleInfo, mappedSummary, featureFlags, cnsiGuid);
+            model.principal[cnsiGuid] = new Principal(consoleInfo, mappedSummary, featureFlags, cnsiGuid);
           });
       });
-    },
+    }
 
     /**
      * @name isAllowed
@@ -179,13 +180,14 @@
      * @returns {*}
      */
     /* eslint-disable no-unused-vars */
-    isAllowed: function (cnsiGuid, resourceType, action) {
+    function isAllowed(cnsiGuid, resourceType, action) {
       var args = Array.prototype.slice.call(arguments);
-      if (!this.isInitialized(cnsiGuid)) {
+      if (!isInitialized(cnsiGuid)) {
         return false;
       }
-      return this.principal[cnsiGuid].isAllowed.apply(this.principal[cnsiGuid], args.slice(1));
-    },
+      return model.principal[cnsiGuid].isAllowed.apply(model.principal[cnsiGuid], args.slice(1));
+    }
+
     /* eslint-enable no-unused-vars */
 
     /**
@@ -195,24 +197,24 @@
      * @param {object} userInfo - User info
      * @returns {boolean}
      */
-    isInitialized: function (cnsiGuid, userInfo) {
+    function isInitialized(cnsiGuid, userInfo) {
 
-      var initialised = angular.isObject(this.principal[cnsiGuid]);
+      var initialised = angular.isObject(model.principal[cnsiGuid]);
 
       if (userInfo && initialised) {
-        initialised = this.principal[cnsiGuid].consoleInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
+        initialised = model.principal[cnsiGuid].consoleInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
       }
       return initialised;
-    },
+    }
 
     /**
      * @name remove
      * @description Remove an initialized principal for an endpoint
      * @param {string} cnsiGuid - Cluster GUID
      */
-    remove: function (cnsiGuid) {
-      delete this.principal[cnsiGuid];
-    },
+    function remove(cnsiGuid) {
+      delete model.principal[cnsiGuid];
+    }
 
     /**
      * @name doesUserHaveRole
@@ -222,18 +224,18 @@
      * @param {string} role - role
      * @returns {boolean}
      */
-    doesUserHaveRole: function (cnsiGuid, role) {
+    function doesUserHaveRole(cnsiGuid, role) {
 
       // convenience method implemented for Application permissions
-      if (!this.isInitialized(cnsiGuid)) {
+      if (!isInitialized(cnsiGuid)) {
         return false;
       }
       var hasRole = false;
       if (role === 'space_developer') {
-        hasRole = this.principal[cnsiGuid].userSummary.spaces.all.length > 0;
+        hasRole = model.principal[cnsiGuid].userSummary.spaces.all.length > 0;
       }
       return hasRole;
-    },
+    }
 
     /**
      * @name isOrgOrSpaceActionableByResource
@@ -245,24 +247,26 @@
      * @param {string} action - action (create, delete, update..)
      * @returns {boolean}
      */
-    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, action) {
-      var that = this;
+    function isOrgOrSpaceActionableByResource(cnsiGuid, org, action) {
+
       var orgGuid = org.details.org.metadata.guid;
       // Is the organization valid?
-      if (this.isAllowed(cnsiGuid, this.resources.organization, action, orgGuid)) {
+      if (isAllowed(cnsiGuid, model.resources.organization, action, orgGuid)) {
         return true;
       } else {
         // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
-          if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
+          if (!org.spaces.hasOwnProperty(spaceGuid)) {
+            continue;
+          }
           var space = org.spaces[spaceGuid];
-          if (that.isAllowed(cnsiGuid, this.resources.space, action, space.metadata.guid, orgGuid)) {
+          if (isAllowed(cnsiGuid, model.resources.space, action, space.metadata.guid, orgGuid)) {
             return true;
           }
         }
         return false;
       }
-    },
+    }
 
     /**
      * @name isAdmin
@@ -270,12 +274,12 @@
      * @param {string} cnsiGuid - Cluster GUID
      * @returns {boolean}
      */
-    isAdmin: function (cnsiGuid) {
-      if (!this.isInitialized(cnsiGuid)) {
+    function isAdmin(cnsiGuid) {
+      if (!isInitialized(cnsiGuid)) {
         return false;
       }
-      return this.principal[cnsiGuid].isAdmin;
-    },
+      return model.principal[cnsiGuid].isAdmin;
+    }
 
     /**
      * @name _addOrganisationRolePromisesForUser
@@ -285,16 +289,16 @@
      * @returns {Array} promises
      * @private
      */
-    _addOrganisationRolePromisesForUser: function (cnsiGuid, userGuid) {
+    function _addOrganisationRolePromisesForUser(cnsiGuid, userGuid) {
       var promises = [];
-      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
+      var usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
       promises.push(usersModel.listAllAuditedOrganizationsForUser(cnsiGuid, userGuid));
       promises.push(usersModel.listAllBillingManagedOrganizationsForUser(cnsiGuid, userGuid));
       promises.push(usersModel.listAllManagedOrganizationsForUser(cnsiGuid, userGuid));
       promises.push(usersModel.listAllOrganizationsForUser(cnsiGuid, userGuid));
       return promises;
-    },
+    }
 
     /**
      * @name _addSpaceRolePromisesForUser
@@ -304,15 +308,15 @@
      * @returns {Array} promises
      * @private
      */
-    _addSpaceRolePromisesForUser: function (cnsiGuid, userGuid) {
+    function _addSpaceRolePromisesForUser(cnsiGuid, userGuid) {
       var promises = [];
-      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
+      var usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
       promises.push(usersModel.listAllAuditedSpacesForUser(cnsiGuid, userGuid));
       promises.push(usersModel.listAllManagedSpacesForUser(cnsiGuid, userGuid));
       promises.push(usersModel.listAllSpacesForUser(cnsiGuid, userGuid));
       return promises;
     }
-  });
+  }
 })
 ();

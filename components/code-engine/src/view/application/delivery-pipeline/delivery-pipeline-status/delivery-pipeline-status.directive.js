@@ -27,19 +27,26 @@
 
   /**
    * @name ApplicationSetupPipelineController
+   * @param {object} $scope  - the Angular $scope
    * @constructor
    */
-  function ApplicationSetupPipelineController() {}
+  function ApplicationSetupPipelineController($scope) {
 
-  angular.extend(ApplicationSetupPipelineController.prototype, {
+    var vm = this;
+
+    vm.setupPipeline = setupPipeline;
+
     /**
      * @function setupPipeline
      * @memberOf code-engine.view.applicationSetupPipelineController
      * @description trigger add pipeline workflow
      */
-    setupPipeline: function () {
-      this.setup();
+    function setupPipeline() {
+      if (angular.isFunction($scope.setup)) {
+        $scope.setup();
+      }
     }
-  });
+
+  }
 
 })();

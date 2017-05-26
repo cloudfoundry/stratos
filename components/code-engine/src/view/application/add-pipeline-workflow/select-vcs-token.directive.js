@@ -24,12 +24,6 @@
   }
   /* eslint-enable angular/no-directive-replace */
 
-  SelectVcsTokenController.$inject = [
-    'modelManager',
-    'ceManageVcsTokens',
-    'ceRegisterVcsToken'
-  ];
-
   function SelectVcsTokenController(modelManager, ceManageVcsTokens, ceRegisterVcsToken) {
     var vm = this;
 

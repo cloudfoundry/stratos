@@ -35,14 +35,17 @@
      */
     function Principal(consoleInfo, userSummary, featureFlags, cnsiGuid) {
 
-      this.isAdmin = consoleInfo.endpoints.hcf[cnsiGuid].user.admin;
-      this.consoleInfo = consoleInfo;
-      this.userSummary = userSummary;
-      this.featureFlags = featureFlags;
-      this.checkers = [];
-    }
+      var model = {
+        consoleInfo: consoleInfo,
+        isAdmin: consoleInfo.endpoints.hcf[cnsiGuid].user.admin,
+        userSummary: userSummary,
+        featureFlags: featureFlags,
+        checkers: [],
+        hasAccessTo: hasAccessTo,
+        isAllowed: isAllowed
+      };
 
-    angular.extend(Principal.prototype, {
+      return model;
 
       /**
        * @name hasAccessTo
@@ -50,9 +53,9 @@
        * @param {String} operation - operation name
        * @returns {*}
        */
-      hasAccessTo: function (operation) {
-        return this.isAdmin || this.featureFlags[operation];
-      },
+      function hasAccessTo(operation) {
+        return model.isAdmin || model.featureFlags[operation];
+      }
 
       /**
        * @name isAllowed
@@ -61,7 +64,7 @@
        * @param {String} action - action name
        * @returns {*}
        */
-      isAllowed: function (resourceType, action) {
+      function isAllowed(resourceType, action) {
 
         var args = Array.prototype.slice.call(arguments);
         if (args.length > 2) {
@@ -69,9 +72,9 @@
           args = args.splice(2);
         }
 
-        var accessChecker = this._getAccessChecker(resourceType, this.featureFlags);
+        var accessChecker = _getAccessChecker(resourceType, model.featureFlags);
         return accessChecker[action].apply(accessChecker, args);
-      },
+      }
 
       /**
        * @name_createAccessCheckerList
@@ -79,7 +82,7 @@
        * @returns {Array}
        * @private
        */
-      _createAccessCheckerList: function () {
+      function _createAccessCheckerList() {
 
         var ServiceInstanceAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.serviceInstanceAccess');
@@ -95,14 +98,14 @@
 
         var checkers = [];
 
-        checkers.push(new OrganizationAccess(this));
-        checkers.push(new ServiceInstanceAccess(this, this.featureFlags));
-        checkers.push(new RouteAccess(this, this.featureFlags));
-        checkers.push(new ApplicationAccess(this, this.featureFlags));
-        checkers.push(new SpaceAccess(this, this.featureFlags));
-        checkers.push(new UserAssignmentAccess(this, this.featureFlags));
+        checkers.push(new OrganizationAccess(model));
+        checkers.push(new ServiceInstanceAccess(model, model.featureFlags));
+        checkers.push(new RouteAccess(model, model.featureFlags));
+        checkers.push(new ApplicationAccess(model, model.featureFlags));
+        checkers.push(new SpaceAccess(model, model.featureFlags));
+        checkers.push(new UserAssignmentAccess(model, model.featureFlags));
         return checkers;
-      },
+      }
 
       /**
        * @name _getAccessChecker
@@ -111,16 +114,16 @@
        * @returns {*}
        * @private
        */
-      _getAccessChecker: function (resourceType) {
+      function _getAccessChecker(resourceType) {
 
-        if (this.checkers.length === 0) {
-          this.checkers = this._createAccessCheckerList();
+        if (model.checkers.length === 0) {
+          model.checkers = _createAccessCheckerList();
         }
-        return _.find(this.checkers, function (checker) {
+        return _.find(model.checkers, function (checker) {
           return checker.canHandle(resourceType);
         });
       }
-    });
+    }
 
     return Principal;
   }

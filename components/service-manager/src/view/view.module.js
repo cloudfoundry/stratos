@@ -11,10 +11,6 @@
     ])
     .config(registerRoute);
 
-  registerRoute.$inject = [
-    '$stateProvider'
-  ];
-
   function registerRoute($stateProvider) {
 
     $stateProvider.state('sm', {
@@ -36,13 +32,6 @@
       }
     });
   }
-
-  ServicesManagersRouterController.$inject = [
-    '$q',
-    '$state',
-    'modelManager',
-    'appUtilsService'
-  ];
 
   /**
    * @name ServicesManagersRouterController
