@@ -52,7 +52,7 @@
         status: {
           description: 'Danger!',
           classes: 'danger',
-          icon: 'glyphicon glyphicon-exclamation-sign',
+          icon: 'material-icons app-icon-error',
           link: '#flyout'
         }
       },
@@ -61,7 +61,7 @@
         status: {
           description: 'Warning!',
           classes: 'warning',
-          icon: 'glyphicon glyphicon-alert'
+          icon: 'material-icons app-icon-warning'
         }
       }
     ];
@@ -97,7 +97,7 @@
     vm.actions = [
       {
         name: 'Start',
-        icon: 'glyphicon glyphicon-play',
+        icon: 'material-icons app-icon-play',
         execute: function (target) {
           alert('Start ' + target);
           vm.disabled = true;

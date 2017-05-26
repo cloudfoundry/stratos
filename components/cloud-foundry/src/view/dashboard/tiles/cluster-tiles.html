@@ -8,7 +8,7 @@
       <div translate>An error occurred retrieving endpoints.</div>
     </div>
     <div ng-switch-when="noClusters" class="applications-empty">
-      <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
+      <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
       <div class="applications-msg" translate>errors.no-cf-connected</div>
       <div class="applications-cta" ng-show="clustersCtrl.isAdmin(true)">
         <a class="btn-link" ui-sref="endpoint.dashboard" translate>Use the Endpoints Dashboard</a>

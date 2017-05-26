@@ -59,8 +59,7 @@
     .hpe-copy-success-icon {
        &:after {
          font-size: 24px;
-         content: $helion-icon-Active_L;
-         font-family: 'helion-icons';
+         content: 'check_circle';
          color: $hpe-primary;
       }
     }

@@ -15,7 +15,7 @@
     <dd ng-if="tileCtrl.servicesCount >= 0" >{{tileCtrl.servicesCount}}</dd>
   </dl>
   <div ng-if="!tileCtrl.service.isConnected" class="text-center">
-    <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
+    <i class="app-icon-lg helion-icon helion-icon-Cluster"></i><br>
     <a class="" ng-click="tileCtrl.connect(tileCtrl.service)" translate>Connect</a>
       {{ ' to this endpoint.' | translate }}<br>
     <span translate="">ENDPOINT URL</span> {{tileCtrl.service.api_endpoint.Host}}<br>

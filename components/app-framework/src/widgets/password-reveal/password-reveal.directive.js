@@ -10,8 +10,7 @@
       link: function (scope, element) {
         scope.showPassword = false;
 
-        var eyeIcon = scope.passwordRevealIcon || 'glyphicon glyphicon-eye-open';
-        var markup = '<span class="' + eyeIcon + ' password-reveal form-control-feedback text-muted"></span>';
+        var markup = '<i class="material-icons password-reveal form-control-feedback text-muted">visibility</i>';
         var eyeElement = angular.element(markup);
 
         eyeElement.on('click', function clickHandler() {
@@ -28,7 +27,6 @@
       },
       restrict: 'A',
       scope: {
-        passwordRevealIcon: '=?'
       }
     };
   }

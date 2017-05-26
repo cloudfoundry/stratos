@@ -2,9 +2,10 @@ app-state-icon bounce-spinner {
   line-height: 1;
 }
 
-app-state-icon.app-status {
-  line-height: 1;
-  vertical-align: text-top;
+app-state-icon {
+  line-height: normal;
+  font-size: 20px;
+  height: auto;
 
   bounce-spinner {
     vertical-align: middle;
@@ -13,4 +14,25 @@ app-state-icon.app-status {
 
 .text-tentative {
   color: $hpe-primary;
+}
+
+
+span.material-icons.app-status {
+  font-size: 20px;
+}
+
+.app-status-icon-ok:after {
+  content: 'lens';
+}
+
+.app-status-icon-warning:after {
+  content: 'warning';
+}
+
+.app-status-icon-error:after {
+  content: 'cancel';
+}
+
+.app-status-icon-delete:after {
+  content: 'delete';
 }

@@ -4,8 +4,8 @@
          ng-model="searchBoxCtrl.searchText"
          ng-keydown="searchBoxCtrl.onKeyDown($event)"
          placeholder="{{ searchBoxCtrl.placeholder }}" ng-disabled="searchBoxCtrl.disabled"/>
-  <i class="search-icon"
-     ng-class="searchBoxCtrl.searchIcon || 'helion-icon helion-icon-Search'"></i>
+  <i class="search-icon material-icons"
+     ng-class="searchBoxCtrl.searchIcon || 'search-icon-icon'"></i>
 
   <ul ng-show="searchBoxCtrl.open" class="dropdown-menu">
     <li class="select-option"
@@ -21,7 +21,7 @@
     <li class="select-option select-add-option"
         ng-if="searchBoxCtrl.addAction"
         ng-click="selectInputCtrl.addAction.execute()">
-      <i ng-class="searchBoxCtrl.addAction.icon || 'glyphicon glyphicon-plus'"></i>
+      <i ng-class="searchBoxCtrl.addAction.icon || 'material-icons app-icon-seacrh-plus'"></i>
       <span>
         {{ searchBoxCtrl.addAction.label }}
       </span>

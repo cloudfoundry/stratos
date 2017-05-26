@@ -12,7 +12,7 @@
   </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
-      <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
+      <app-icon icon-class="app-icon-3x" icon="cancel"></app-icon>
       <div class="applications-msg" translate>errors.endpoint-retrieval</div>
       <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
     </div>
@@ -36,9 +36,7 @@
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"
          class="applications-empty">
-
-         <!--class="console-error-block console-error">-->
-      <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
+      <app-icon icon-class="app-icon-3x" icon="svg:Cluster.svg"></app-icon>
       <div class="applications-msg" translate>There are no registered endpoints.</div>
       <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
@@ -77,8 +75,8 @@
 
           <!--Endpoint Connection Status-->
           <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
-            <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                  ng-switch-when="connected"></span>
+            <span class="material-icons app-icon-lg text-primary endpoint-connected-icon"
+                  ng-switch-when="connected">check_circle</span>
             <div ng-switch-when="unconnected"
                  uib-popover="{{ 'Disconnected' | translate }}"
                  popover-trigger="'mouseenter'"
@@ -86,12 +84,12 @@
                  popover-popup-delay="1000">
               <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
             </div>
-            <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                  ng-switch-when="expired"></span>
-            <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                  ng-switch-when="error"></span>
-            <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                  ng-switch-when="complicated"></span>
+            <span class="material-icons app-icon-lg text-danger endpoint-critical-icon"
+                  ng-switch-when="expired">cancel</span>
+            <span class="material-icons app-icon-lg text-danger endpoint-critical-icon"
+                  ng-switch-when="error">cancel</span>
+            <span class="material-icons app-icon-lg text-warning endpoint-warning-icon"
+                  ng-switch-when="complicated">warning</span>
           </td>
 
           <td>{{ endpoint.type }}</td>
@@ -99,7 +97,6 @@
           <td>
             <actions-menu actions="endpoint.actions"
                           action-target="endpoint.actionsTarget"
-                          menu-icon="helion-icon helion-icon-More"
                           menu-position="actions-menu-right"
                           enable-button-mode="true"></actions-menu>
           </td>

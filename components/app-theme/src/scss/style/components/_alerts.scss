@@ -31,25 +31,25 @@
 }
 
 .alert-success {
-  @include hpe-alert($state-success-bg, $helion-icon-Active_L, $alert-success-bg, $helion-icon-Active_L);
+  @include hpe-alert($state-success-bg, 'check_circle', $alert-success-bg, 'check_circle');
 }
 
 .alert-info {
-  @include hpe-alert($state-info-bg, $helion-icon-Information, $alert-info-bg, $helion-icon-Information, $hpe-primary-fg);
+  @include hpe-alert($state-info-bg, 'info', $alert-info-bg, 'info_outline', $hpe-primary-fg);
 }
 
 .alert-warning {
-  @include hpe-alert($state-warning-bg, $helion-icon-Alert, $alert-warning-bg, $helion-icon-Alert_pressed);
+  @include hpe-alert($state-warning-bg, 'warning', $alert-warning-bg, 'warning');
 }
 
 .alert-danger {
-  @include hpe-alert($state-danger-bg, $helion-icon-Critical_L, $alert-danger-bg, $helion-icon-Critical_L);
+  @include hpe-alert($state-danger-bg, 'error', $alert-danger-bg, 'error');
 }
 
 .alert-card-warning {
   @include hpe-box-shadow-small();
   margin-bottom: 22px;
-  @include hpe-alert($white, $helion-icon-Alert_pressed, $white, $helion-icon-Alert_pressed, $dove-gray);
+  @include hpe-alert($white, 'warning', $white, 'warning', $dove-gray);
   &:before {
     color: $state-warning-bg;
   }
@@ -58,8 +58,14 @@
 .alert-card-danger {
   @include hpe-box-shadow-small();
   margin-bottom: 22px;
-  @include hpe-alert($white, $helion-icon-Critical_L, $white, $helion-icon-Critical_L, $dove-gray);
+  @include hpe-alert($white, 'error', $white, 'error', $dove-gray);
   &:before {
     color: $state-danger-bg;
+  }
+}
+
+button.material-icons.app-icon-close {
+  &:after {
+    content: 'close';
   }
 }

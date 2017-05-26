@@ -18,7 +18,7 @@
     flex-flow: column nowrap;
     align-items: stretch;
 
-    border-bottom-color: #666;
+    border-bottom-color: $gray-darker;
 
     &.panel-heading.action-header {
       height: auto;

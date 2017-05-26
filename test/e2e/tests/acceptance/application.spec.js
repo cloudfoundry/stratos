@@ -124,6 +124,7 @@
           routes.getData(routes).then(function (rows) {
             expect(rows.length).toBe(2);
             var columnMenu = actionMenu.wrap(routes.getItem(0, 1));
+            helpers.scrollIntoView(columnMenu);
             columnMenu.click();
             // Delete
             columnMenu.clickItem(1);

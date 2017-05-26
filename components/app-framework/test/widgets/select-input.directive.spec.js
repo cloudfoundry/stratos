@@ -54,11 +54,6 @@
         expect(element.find('span').text().trim()).toBe('Select');
       });
 
-      it('should use default arrow icon', function () {
-        expect(selectInputCtrl.arrowIcon).toBe('helion-icon helion-icon-Up_tab helion-icon-r180');
-        expect(element.find('i').hasClass('helion-icon helion-icon-Up_tab helion-icon-r180')).toBe(true);
-      });
-
       it('should toggle menu on click', function () {
         element.triggerHandler('click');
         expect(selectInputCtrl.open).toBe(true);
@@ -200,7 +195,7 @@
         var markup = '<select-input input-label="Label" ' +
           'input-options="mockOptions" ' +
           'ng-model="mockValue" ' +
-          'placeholder="placeholder" arrow-icon="arrow-icon">' +
+          'placeholder="placeholder">' +
           '</select-input>';
 
         element = angular.element(markup);
@@ -213,11 +208,6 @@
 
       it('should be defined', function () {
         expect(element).toBeDefined();
-      });
-
-      it('should use specified icon for arrow', function () {
-        expect(selectInputCtrl.arrowIcon).toBe('arrow-icon');
-        expect(element.find('i').hasClass('arrow-icon')).toBe(true);
       });
 
       it('should use specified placeholder', function () {

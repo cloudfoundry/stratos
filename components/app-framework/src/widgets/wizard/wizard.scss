@@ -1,8 +1,8 @@
 .wizard-nav-item.complete {
   a:after {
+    @extend .material-icons;
     color: $hpe-primary;
-    content: $helion-icon-Checkmark;
-    font-family: 'helion-icons';
+    content: 'check';
     float: right;
   }
 }

@@ -15,11 +15,11 @@ app-error-bar {
 			display: inline-block;
 			margin: auto 0 auto 0;
 			padding-right: $hpe-unit-space * .5;
+			@extend .material-icons;
 			
 			&:before {
-			  font-family: "helion-icons";
 			  font-size: 24px;
-			  content: $helion-icon-Critical_L;
+			  content: 'error'
 			}
 		}
 

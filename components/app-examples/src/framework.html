@@ -153,9 +153,7 @@
           <pre>&#x3C;flyout flyout-active="flyoutActiveFlag"&#x3E;
   My transcluded content
 &#x3C;/flyout&#x3E;</pre>
-          <pre>&#x3C;flyout flyout-active="flyoutActiveFlag" flyout-close-icon="'helion-icon helion-icon-Close'"&#x3E;
-  My transcluded content with custom close icon
-&#x3C;/flyout&#x3E;</pre>
+          <pre>&#x3C;flyout flyout-active="flyoutActiveFlag" &#x3C;/flyout&#x3E;</pre>
           <button type="button" class="btn btn-primary" ng-click="flyoutExampleCtrl.open()">Show Flyout</button>
           <flyout flyout-active="flyoutExampleCtrl.flyoutActive">
             <ng-include src="flyoutExampleCtrl.flyoutTemplateUrl"></ng-include>
@@ -221,13 +219,13 @@
               <input type="password" class="form-control" password-reveal/>
             </div>
           </form>
-          <pre>&#x3C;input type="password" password-reveal password-reveal-icon="'glyphicon glyphicon-star'"/&#x3E;</pre>
+          <pre>&#x3C;input type="password" password-reveal/&#x3E;</pre>
           <form>
             <div class="form-group has-feedback">
               <label class="control-label">
                 Password Again
               </label>
-              <input type="password" class="form-control" password-reveal password-reveal-icon="'glyphicon glyphicon-star'"/>
+              <input type="password" class="form-control" password-reveal/>
             </div>
           </form>
         </div>
@@ -325,7 +323,6 @@
             <ul>
               <li><code>ng-model - {any}, required, the input field value</code></li>
               <li><code>input-options - {array}, required, the input field options</code></li>
-              <li><code>arrow-icon - {string}, optional, the arrow icon</code></li>
               <li><code>placeholder - {string}, optional, the placeholder text</code></li>
               <li><code>add-action - {object}, optional, the add action definition</code></li>
             </ul>
@@ -468,7 +465,6 @@ var actionTarget = 'Target';
             <h4>Options</h4>
             <ul>
               <li>card-data - required, the card data</li>
-              <li>card-actions-icon - optional, the card actions dropdown icon</li>
             </ul>
           </div>
           <pre>var cardData1 = { title: 'App 1', link: '#focusable-input' };
@@ -480,11 +476,10 @@ var cardData2 = { title: 'App 2',
   status: {
     description: 'Danger!',
     classes: 'danger',
-    icon: 'glyphicon glyphicon-exclamation-sign',
     link: '#flyout'
   }
 };
-&#x3C;gallery-card card-data="cardData2" card-actions-icon="glyphicon glyphicon-chevron-down"&#x3E;
+&#x3C;gallery-card card-data="cardData2"&#x3E;
 ... transcluded content ...
 &#x3C;/gallery-card&#x3E;</pre>
           <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[1]">
@@ -504,9 +499,8 @@ var cardData2 = { title: 'App 2',
               </tbody>
             </table>
           </gallery-card>
-          <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[1]"
-            card-actions="exampleCtrl.actions" on-notification-click="exampleCtrl.notificationClicked(card)"
-            card-actions-icon="glyphicon glyphicon-chevron-down">
+          <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[2]"
+            card-actions="exampleCtrl.actions" on-notification-click="exampleCtrl.notificationClicked(card)">
             <table style="width: 100%;">
               <tbody>
                 <tr><td>Instances</td><td class="text-right">3</td></tr>
@@ -688,7 +682,7 @@ var cardData2 = { title: 'App 2',
   &#x3C;/uib-tab&#x3E;
   &#x3C;uib-tab index="3" select="alertMe()"&#x3E;
     &#x3C;uib-tab-heading&#x3E;
-      &#x3C;i class="glyphicon glyphicon-bell"&#x3E;&#x3C;/i&#x3E; Alert!
+      &#x3C;i &#x3E;&#x3C;/i&#x3E; Alert!
     &#x3C;/uib-tab-heading&#x3E;
     I've got an HTML heading, and a select callback. Pretty cool!
   &#x3C;/uib-tab&#x3E;
@@ -727,7 +721,7 @@ var cardData2 = { title: 'App 2',
           </uib-tab>
           <uib-tab index="3" select="alertMe()">
             <uib-tab-heading>
-              <i class="glyphicon glyphicon-bell"></i> Alert!
+              <i class="material-icons app-icon-warning"></i> Alert!
             </uib-tab-heading>
             I've got an HTML heading, and a select callback. Pretty cool!
           </uib-tab>
@@ -919,7 +913,7 @@ detailView({
           toaster.success('success message');
           toaster.warniong('warning message');
           toaster.error('error message');
-          toaster.show('custom icon message', 'helion-icon-');
+          toaster.show('custom icon message', 'icon-name');
           toaster.busy('Busy doing something');
         </pre>
         <p>
@@ -947,7 +941,7 @@ detailView({
         <button type="button" class="btn btn-success" style="margin: 10px;"
           ng-click="exampleCtrl.showBusyToast('Deleting application')">Busy</button>
         <button type="button" class="btn btn-success" style="margin: 10px;"
-          ng-click="exampleCtrl.showCustomToast('Custom icon', 'helion-icon-Notification')">Custom Icon</button>
+          ng-click="exampleCtrl.showCustomToast('Custom icon', 'custom-toast-icon')">Custom Icon</button>
         <button type="button" class="btn btn-success" style="margin: 10px;"
           ng-click="exampleCtrl.showToastNoAutoClose('success', 'This toast needs to be closed manually.')">Sticky Toast</button>
       </div>
@@ -1037,6 +1031,21 @@ Copy for this block has been disabled</code-block>
         </form>
       </div> <!-- class="col-sm-12" -->
     </div>  <!-- class="row" -->
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="code-block" class="header page-header">
+          Application Icon
+          <a class="headerlink" href="#app-icon" title="Permalink to Application Icon">¶</a>
+        </h2>
+        <p>An icon directive that displays a material icon or an svg icon.</p>
+        <app-icon icon="person_add"></app-icon>
+        <app-icon icon="svg:Cluster.svg"></app-icon>
+        <app-icon icon-class="app-icon-3x" icon="person_add"></app-icon>
+        <app-icon icon-class="app-icon-3x" icon="svg:Cluster.svg"></app-icon>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+    
 
 
 

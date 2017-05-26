@@ -4,7 +4,7 @@
       ng-class="{ 'text-muted': !selectInputCtrl.ngModelCtrl.$modelValue }">
       {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder }}
     </span>
-    <i class="dropdown-toggle" ng-class="selectInputCtrl.arrowIcon"></i>
+    <i class="dropdown-toggle material-icons">arrow_drop_down</i>
   </div>
   <ul class="dropdown-menu">
     <li ng-if="selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled>
@@ -27,7 +27,7 @@
     </li>
     <li class="select-option select-add-option" ng-if="selectInputCtrl.addAction"
       ng-click="selectInputCtrl.addAction.execute()">
-      <i ng-class="selectInputCtrl.addAction.icon || 'glyphicon glyphicon-plus'"></i>
+      <i ng-class="selectInputCtrl.addAction.icon || 'material-icons app-icon-select-plus'"></i>
       <span translate>{{ selectInputCtrl.addAction.label }}</span>
     </li>
   </ul>

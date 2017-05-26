@@ -43,24 +43,26 @@
       <div class="row">
         <h3 class="page-header">Icons & Spinners</h3>
 
-        <p>Use class <code>helion-icon</code> and <code>helion-icon-*</code> to specify icon. Available sizes (prefix with <code>helion-icon-</code>): lg, 2x, 3x, 4x, 5x</p>
-        <span class="helion-icon helion-icon-User helion-icon-sm"></span>
-        <span class="helion-icon helion-icon-User"></span>
-        <span class="helion-icon helion-icon-User helion-icon-lg"></span>
-        <span class="helion-icon helion-icon-User helion-icon-2x"></span>
-        <span class="helion-icon helion-icon-User helion-icon-3x"></span>
-        <span class="helion-icon helion-icon-User helion-icon-4x"></span>
-        <span class="helion-icon helion-icon-User helion-icon-5x"></span>
+        <p>Use Material Icons for your icons.</p>
+
+        <p>Use class <code>material-icons</code> and set the text content to the name of the icon. Available sizes (prefix with <code>app-icon-</code>): lg, 2x, 3x, 4x, 5x</p>
+        <span class="material-icons app-icon-sm">wallpaper</span>
+        <span class="material-icons">wallpaper</span>
+        <span class="material-icons app-icon-lg">wallpaper</span>
+        <span class="material-icons app-icon-2x">wallpaper</span>
+        <span class="material-icons app-icon-3x">wallpaper</span>
+        <span class="material-icons app-icon-4x">wallpaper</span>
+        <span class="material-icons app-icon-5x">wallpaper</span>
         <p>
-          <pre class="hpe-pre-dark">&#x3C;span class="helion-icon helion-icon-User helion-icon-lg"&#x3E;&#x3C;/span&#x3E;</pre>
+          <pre class="hpe-pre-dark">&#x3C;span class="material-icons app-icon-lg"&#x3E;wallpaper&#x3C;/span&#x3E;</pre>
         </p>
         <h4>Status Icons</h4>
         <p>
           <div style="display: flex; align-items: center;">
-            Online <span class="helion-icon helion-icon-Active_S text-primary" style="padding-left: 6px;"></span>
+            Online <span class="material-icons text-primary" style="padding-left: 6px;">lens</span>
           </div>
           <div style="display: flex; align-items: center;">
-            Offline <span class="helion-icon helion-icon-Critical_S text-danger" style="padding-left: 6px;"></span>
+            Offline <span class="material-icons text-danger" style="padding-left: 6px;">warning</span>
           </div>
         </p>
         <h4>Bounce Spinner</h4>
@@ -195,10 +197,10 @@
             <input type="radio" name="media-radio"/>
           </div>
           <div class="media-left media-middle">
-            <img class="media-object" src="images/images/hpe_helion_grn_pos_rgb.png"/>
+            <i class="media-icon material-icons">cloud</i>
           </div>
           <div class="media-body">
-            <h4 class="media-heading">HPE Helion</h4>
+            <h4 class="media-heading">Media Heading 1</h4>
             <p>
               Media description. Bacon ipsum dolor amet shankle shank salami kevin jowl. Porchetta
               drumstick short ribs cow frankfurter picanha venison. Pork chop
@@ -209,7 +211,7 @@
           </div>
           <div class="hpe-media-actions-col">
             <button type="text" class="btn btn-sm btn-link hpe-media-add-link">
-              <i class="helion-icon helion-icon-Next_link"></i>
+              <i class="material-icons">arrow_forward</i>
               Add Option
             </button>
           </div>
@@ -219,10 +221,10 @@
             <input type="radio" name="media-radio"/>
           </div>
           <div class="media-left media-middle">
-            <i class="media-icon helion-icon helion-icon-Deployment"></i>
+            <i class="media-icon material-icons">cloud_upload</i>
           </div>
           <div class="media-body">
-            <h4 class="media-heading">Hewlett Packard Enterprise</h4>
+            <h4 class="media-heading">Media Heading 2</h4>
             <p>
               Media description. Bacon ipsum dolor amet shankle shank salami kevin jowl. Porchetta
               drumstick short ribs cow frankfurter picanha venison. Pork chop
@@ -233,7 +235,7 @@
           </div>
           <div class="hpe-media-actions-col">
             <button type="text" class="btn btn-sm btn-link hpe-media-add-link">
-              <i class="helion-icon helion-icon-Next_link"></i>
+              <i class="material-icons">arrow_forward</i>
               Add Option
             </button>
           </div>
@@ -368,21 +370,21 @@
                 <td>Column Content</td>
                 <td>Column Content</td>
                 <td class="text-center">
-                  <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>
+                  <span class="material-icons app-icon-lg text-primary">check_circle</span>
                 </td>
               </tr>
               <tr>
                 <td>Column Content</td>
                 <td>Column Content</td>
                 <td class="text-center">
-                  <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"></span>
+                  <span class="material-icons app-icon-lg text-danger">cancel</span>
                 </td>
               </tr>
               <tr>
                 <td>Column Content</td>
                 <td>Column Content</td>
                 <td class="text-center">
-                  <span class="helion-icon helion-icon-lg helion-icon-Unknown_L"></span>
+                  <span class="material-icons app-icon-lg">help_outline</span>
                 </td>
               </tr>
             </tbody>
@@ -409,12 +411,11 @@
             <tbody>
               <tr>
                 <td class="text-center registration-status">
-                  <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" style="font-size: 24px">
-                  </span>
+                  <span class="material-icons app-icon-lg text-primary" style="font-size: 24px">check_circle</span>
                 </td>
-                <td>HPE Cloud Foundry_01</td>
+                <td>Cloud Foundry_01</td>
                 <td>api.15.126.233.29.xip.io</td>
-                <td>HPE Cloud Foundry_01_user</td>
+                <td>Cloud Foundry_01_user</td>
                 <td>Mar 11 2016, 3:00:22 pm</td>
                 <td>
                   <a class="btn btn-link btn-sm">
@@ -423,8 +424,8 @@
                 </td>
               </tr>
 
-              <tr table-inline-message>
-                <td colspan="100" class="table-inline-message">
+              <tr table-inline-message col-span="6">
+                <td class="table-inline-message">
                   <div class="hpe-popover-alert hpe-popover-alert-success popover bottom in">
                     <div class="arrow"></div>
                     <div class="popover-content">
@@ -436,11 +437,11 @@
 
               <tr>
                 <td class="text-center registration-status">
-                  <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning" style="font-size: 24px"></span>
+                  <span class="material-icons app-icon-lg text-primary" style="font-size: 24px">warning</span>
                 </td>
-                <td>HPE Cloud Foundry_02</td>
+                <td>Cloud Foundry_02</td>
                 <td>api.12.163.29.3.xip.io</td>
-                <td>HPE Cloud Foundry_02_user</td>
+                <td>Cloud Foundry_02_user</td>
                 <td>Mar 11 2016, 2:15:36 pm</td>
                 <td>
                   <a class="btn btn-link btn-sm">
@@ -449,7 +450,7 @@
                 </td>
               </tr>
 
-              <tr table-inline-message>
+              <tr table-inline-message col-span="6">
                 <td colspan="100" class="table-inline-message">
                   <div class="hpe-popover-alert hpe-popover-alert-warning popover bottom in">
                     <div class="arrow"></div>
@@ -515,7 +516,7 @@
           <div class="col-lg-12">
             <div class="bs-component">
               <div class="alert alert-dismissible alert-info">
-                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <button type="button" class="close material-icons app-icon-close" data-dismiss="alert"></button>
                 <p>Best check yo self, you're not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
               </div>
             </div>
@@ -525,7 +526,7 @@
           <div class="col-lg-4">
             <div>
               <div class="alert alert-dismissible alert-danger">
-                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <button type="button" class="close material-icons app-icon-close" data-dismiss="alert"></button>
                 <strong>Oh snap!</strong> <a href="#" class="alert-link">Change a few things up</a> and try submitting again.
               </div>
             </div>
@@ -533,7 +534,7 @@
           <div class="col-lg-4">
             <div>
               <div class="alert alert-dismissible alert-success">
-                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <button type="button" class="close material-icons app-icon-close" data-dismiss="alert"></button>
                 <strong>Well done!</strong> You successfully read <a href="#" class="alert-link">this important alert message</a>.
               </div>
             </div>
@@ -541,7 +542,7 @@
           <div class="col-lg-4">
             <div>
               <div class="alert alert-dismissible alert-info">
-                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <button type="button" class="close material-icons app-icon-close" data-dismiss="alert"></button>
                 <strong>Heads up!</strong> This <a href="#" class="alert-link">alert needs your attention</a>, but it's not super important.
               </div>
             </div>
@@ -626,7 +627,7 @@
                   <div class="actions">
                     <span class="action">
                     <a class="btn-border-less" href="#/account/settings">
-                      <i class="helion-icon helion-icon-Actions"></i>
+                      <i class="material-icons">settings</i>
                       <div translate>
                         Account Settings
                       </div>
@@ -635,7 +636,7 @@
 
                     <span class="action">
                       <a class="btn-border-less" href="#/account/help">
-                        <i class="helion-icon helion-icon-Help"></i>
+                        <i class="material-icons">help</i>
                         <div translate>
                           Help
                         </div>
@@ -645,7 +646,7 @@
                     <span class="action">
                       <a class="btn-border-less" href="#"
                         ng-click="applicationCtrl.logout()">
-                        <i class="helion-icon helion-icon-Logout"></i>
+                        <i class="material-icons">exit_to_app</i>
                         <div translate>
                           Sign Out
                         </div>
@@ -664,7 +665,7 @@
             height: 400px;
           }
 
-          .popover-trigger .helion-icon {
+          .popover-trigger .material-icons {
             font-size: 24px;
           }
 
@@ -746,7 +747,7 @@
             <div class="form-group addon-form-group">
               <div class="input-group">
                 <span class="input-group-addon">
-                  <i class="helion-icon helion-icon-Filter helion-icon-lg"></i>
+                  <i class="material_icons">filter_list</i>
                 </span>
                 <input type="search" class="form-control" placeholder="Enter filter term..."/>
               </div>
@@ -759,8 +760,7 @@
                     <span class="select-input-value text-muted">
                       Select a color
                     </span>
-                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
-                      style="margin-left: auto;"></i>
+                    <i class="dropdown-toggle material-icons" style="margin-left: auto;">arrow_drop_down</i>
                   </div>
                 </div>
               </select-input>
@@ -773,8 +773,7 @@
                     <span class="select-input-value">
                       Green
                     </span>
-                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
-                      style="margin-left: auto;"></i>
+                    <i class="dropdown-toggle material-icons" style="margin-left: auto;">arrow_drop_down</i>
                   </div>
                   <ul class="dropdown-menu" style="min-width: 100%;">
                     <li class="dropdown-menu-header">
@@ -790,7 +789,7 @@
                       Blue
                     </li>
                     <li class="select-option select-add-option">
-                      <i class="helion-icon helion-icon-Add"></i>
+                      <i class="material-icons">add</i>
                       Add Color
                     </li>
                   </ul>
@@ -811,8 +810,7 @@
                     <span class="select-input-value text-muted">
                       Select a color
                     </span>
-                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
-                      style="margin-left: auto;"></i>
+                    <i class="dropdown-toggle material-icons" style="margin-left: auto;">arrow_drop_down</i>
                   </div>
                 </div>
               </select-input>
@@ -891,7 +889,7 @@
               <div class="action-header">
                 Panel heading
                 <button class="btn btn-link">
-                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  <i class="material-icons" style="margin-right: 5px;">arrow_forward</i>
                   Link
                 </button>
               </div>
@@ -912,7 +910,7 @@
               <div class="panel-heading action-header">
                 Panel heading
                 <button class="btn btn-link">
-                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  <i class="material-icons" style="margin-right: 5px;">arrow_forward</i>
                   Link
                 </button>
               </div>
@@ -983,7 +981,7 @@
               <div class="panel-heading action-header">
                 Panel bordered
                 <button class="btn btn-link">
-                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  <i class="material-icons" style="margin-right: 5px;">arrow_forward</i>
                   Link
                 </button>
               </div>
@@ -1007,8 +1005,7 @@
                 CARD HEADING
                 <actions-menu class="gallery-card-actions" style="line-height: inherit; margin-left: auto;">
                   <div class="actions-menu dropdown open" tabindex="0">
-                    <i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"
-                      style="cursor: pointer;"></i>
+                    <i class="actions-menu-icon dropdown-toggle material_icons app-icon-lg" style="cursor: pointer;">menu_horiz</i>
                     <ul class="actions-menu-list dropdown-menu">
                       <li class="actions-menu-item">Start</li>
                       <li class="actions-menu-item">Stop</li>
@@ -1020,7 +1017,7 @@
                 Card content
               </div>
               <div class="panel-footer" style="line-height: normal; display: flex; align-items: center;">
-                <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"></span>
+                <span class="material-icons app-icon-lg text-danger">cancel</span>
                 <span style="font-size: 18px; margin-left: 10px;">DANGER</span>
               </div>
             </div>

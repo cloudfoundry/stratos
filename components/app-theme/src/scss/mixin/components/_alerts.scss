@@ -4,7 +4,7 @@
   color: $fg-color;
 
   &:before {
-    @extend .helion-icon;
+    @extend .material-icons;
     background-color: $color;
     color: $fg-color;
     font-size: $hpe-alert-icon-size;

@@ -1,27 +1,38 @@
-.helion-icon-sm {
+.app-icon-sm {
   font-size: $hpe-unit-space / 2;
 }
 
-.helion-icon-lg {
+.app-icon-lg {
   font-size: $hpe-unit-space;
 }
 
-.helion-icon-2x {
+.app-icon-2x {
   font-size: $hpe-unit-space * 2;
 }
 
-.helion-icon-3x {
+.app-icon-3x {
   font-size: $hpe-unit-space * 3;
 }
 
-.helion-icon-4x {
+.app-icon-4x {
   font-size: $hpe-unit-space * 4;
 }
 
-.helion-icon-5x {
+.app-icon-5x {
   font-size: $hpe-unit-space * 5;
 }
 
-.helion-icon-2dot5x {
-  font-size: $hpe-unit-space * 2.5;
+svg {
+  &.app-icon-2x {
+    width: $hpe-unit-space * 2;
+    height: $hpe-unit-space * 2;
+  }
+  &.app-icon-3x {
+    width: $hpe-unit-space * 3;
+    height: $hpe-unit-space * 3;
+  }
+  &.app-icon-4x {
+    width: $hpe-unit-space * 4;
+    height: $hpe-unit-space * 4;
+  }
 }

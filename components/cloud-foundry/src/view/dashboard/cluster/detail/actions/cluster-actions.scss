@@ -4,3 +4,12 @@ button.no-focus:focus {
 button.no-focus:focus:hover {
   color: $brand-primary;
 }
+
+.side-action-item > button {
+  app-icon {
+    &.cluster-action-icon-tree > svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

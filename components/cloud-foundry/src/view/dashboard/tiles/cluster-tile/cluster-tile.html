@@ -15,7 +15,7 @@
     <dd ng-if="clusterTile.userCount >= 0" >{{clusterTile.userCount}}</dd>
   </dl>
   <div ng-if="!clusterTile.service.isConnected" class="text-center">
-    <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
+    <app-icon icon="svg:Cluster.svg"></app-icon><br>
     <a class="" ng-click="clusterTile.connect(clusterTile.service)" translate>Connect</a>
       {{ ' to this endpoint.' | translate }}<br>
     <span translate="">ENDPOINT URL</span> {{clusterTile.service.api_endpoint.Host}}<br>

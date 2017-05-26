@@ -17,8 +17,7 @@ pre {
   }
 
   &:after {
-    content: '\e948';
-    font-family: 'helion-icons';
+    content: 'content_copy';
     position: absolute;
     right: $hpe-unit-space / 2;
     top: $hpe-unit-space / 2;

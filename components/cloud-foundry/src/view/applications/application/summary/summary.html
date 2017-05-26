@@ -1,8 +1,8 @@
 <div id="new-app-panel" ng-if="applicationSummaryCtrl.newlyCreated" class="new-app-panel">
   <div class="new-app-title-box">
-    <span class="new-app-okay helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>
+    <span class="new-app-okay material-icons app-icon-lg text-primary">check_circle</span>
     <span class="new-app-headline" translate>Your application has been created.</span>
-    <button type="button" class="close helion-icon helion-icon-Close"
+    <button type="button" class="close material-icons app-icon-close"
       ng-click="applicationSummaryCtrl.newlyCreated = false">
     </button>
   </div>
@@ -22,7 +22,7 @@
   <div class="panel-heading action-header">
     <span translate>Summary</span>
     <a class="btn btn-link" ng-click="applicationSummaryCtrl.editApp()" ng-hide="applicationSummaryCtrl.hideEditApp">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <i class="material-icons">arrow_forward</i>
       <span translate>Edit</span>
     </a>
   </div>
@@ -34,7 +34,7 @@
         <dt translate>state</dt>
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
-          <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
+          <span class="app-status material-icons {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
           <span class="app-status" translate>{{ appCtrl.model.application.state.label }}
             <span ng-if="appCtrl.model.application.state.subLabel" >&nbsp;-
               <span translate>{{ appCtrl.model.application.state.subLabel }}</span>
@@ -156,12 +156,6 @@
 <div class="summary-instances">
   <div class="action-header">
     <span translate>Instances</span>
-    <!--
-    <a class="btn btn-link">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
-      <span translate>Add instances</span>
-    </a>
-    -->
   </div>
   <div class="panel panel-default">
     <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
@@ -196,7 +190,6 @@
           <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
                         action-target="$index"
                         menu-position="actions-menu-right"
-                        menu-icon="helion-icon helion-icon-More"
                         enable-button-mode="true"></actions-menu>
         </td>
       </tr>
@@ -218,7 +211,7 @@
   <div class="action-header">
     <span translate>Routes</span>
     <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()" ng-hide="!appCtrl.ready || applicationSummaryCtrl.hideAddRoutes">
-      <i class="helion-icon helion-icon-Right_Arrow" ></i>
+      <i class="material-icons">arrow_forward</i>
       <span translate>Add route</span>
     </a>
   </div>
@@ -243,7 +236,6 @@
           <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
                         action-target="route"
                         menu-position="actions-menu-right"
-                        menu-icon="helion-icon helion-icon-More"
                         enable-button-mode="true"></actions-menu>
         </td>
       </tr>
@@ -257,7 +249,7 @@
     <span translate>Service Instances</span>
     <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})"
        ng-hide="applicationSummaryCtrl.hideManageServices">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <i class="material-icons">arrow_forward</i>
       <span translate>Manage Services</span>
     </a>
   </div>
@@ -283,11 +275,6 @@
           <td>{{ service.name }}</td>
           <td>{{ service.service_plan.service.label }}</td>
           <td>{{ service.service_plan.name }}</td>
-          <!--
-          <td>
-            <a class="icon-link" href="#" target="_blank"><i class="helion-icon helion-icon-Share"></i></a>
-          </td>
-          -->
         </tr>
       </tbody>
     </table>

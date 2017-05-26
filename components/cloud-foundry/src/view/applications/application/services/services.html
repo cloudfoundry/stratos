@@ -1,7 +1,7 @@
 <div ng-if="applicationServicesCtrl.ready && applicationServicesCtrl.services.length === 0"
   class="message-box message-box-no-bg">
   <p>
-    <div class="helion-icon helion-icon-3x helion-icon-Service_business"></div>
+    <img src="/images/services/App_services_72.png" />
     <h3 translate>There are no services available for this endpoint. Please contact your Administrator to add services so you can bind them to your applications.</h3>
   </p>
 </div>
@@ -15,7 +15,6 @@
       <div class="form-group">
         <label class="control-label" translate>Show</label>
         <select-input
-          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
           ng-model="applicationServicesCtrl.searchCategory"
           input-options="applicationServicesCtrl.serviceCategories"
           tabindex="0">
@@ -24,7 +23,7 @@
       <div class="form-group addon-form-group filter-form-group">
         <div class="input-group">
           <span class="input-group-addon">
-            <i class="helion-icon helion-icon-lg helion-icon-Filter"></i>
+            <app-icon icon="svg:Filter.svg"></i>
           </span>
           <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
         </div>
