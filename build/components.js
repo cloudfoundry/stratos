@@ -213,8 +213,11 @@
   function reverseTransformPath(p) {
     _.each(localComponents, function (cmpnt) {
       var c = components[cmpnt.name];
-      if (c && c.frontend.root && _.startsWith(p, c.frontend.root + path.sep)) {
-        p = path.join(cmpnt.name, c.src, p.substr(c.frontend.root.length + 1));
+      if (c) {
+        var root = c.frontend.root ? c.frontend.root : c.name;
+        if (_.startsWith(p, root + path.sep)) {
+          p = path.join(cmpnt.name, c.src, p.substr(root.length + 1));
+        }
       }
     });
     return p;
