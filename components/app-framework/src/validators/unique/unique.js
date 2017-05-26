@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.validators')
+    .module('app.framework.validators')
     .directive('helionUnique', helionUnique);
 
   /**
-   * @namespace helion.framework.validators.helionUnique
-   * @memberof helion.framework.validators
+   * @namespace app.framework.validators.helionUnique
+   * @memberof app.framework.validators
    * @name helionUnique
    * @description A validator to check for uniqueness of the
    * value entered in the input field.

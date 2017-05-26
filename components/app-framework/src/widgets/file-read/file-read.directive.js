@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('fileread', fileRead);
 
   function fileRead() {

@@ -1,14 +1,14 @@
 (function () {
   'use strict';
 
-  describe('helion.framework.utils.long-running.service', function () {
+  describe('app.framework.utils.long-running.service', function () {
     var $q, $timeout, longRunning;
 
-    beforeEach(module('helion.framework.utils'));
+    beforeEach(module('app.framework.utils'));
     beforeEach(inject(function ($injector) {
       $q = $injector.get('$q');
       $timeout = $injector.get('$timeout');
-      longRunning = $injector.get('helion.framework.utils.long-running.service');
+      longRunning = $injector.get('app.framework.utils.long-running.service');
     }));
 
     it('defines the service as a function.', function () {

@@ -1,12 +1,12 @@
 (function () {
   'use strict';
 
-  angular.module('helion.framework.filters')
+  angular.module('app.framework.filters')
     .filter('percentage', percentage);
 
   /**
-   * @namespace helion.framework.filters.percentage
-   * @memberof helion.framework.filters
+   * @namespace app.framework.filters.percentage
+   * @memberof app.framework.filters
    * @name percentage
    * @description An angular filter which converts a float between 0 and 1 into a whole number + '%' char.  E.G. 42%
    * @param {object} $filter - angular $filter service

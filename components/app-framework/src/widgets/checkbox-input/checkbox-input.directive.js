@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('checkboxInput', checkboxInput);
 
   /**
-   * @namespace helion.framework.widgets.checkboxInput
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.checkboxInput
+   * @memberof app.framework.widgets
    * @name checkboxInput
    * @description A checkbox input directive with custom style
    * @returns {object} The checkbox-input directive definition object
@@ -64,8 +64,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.CheckboxInputController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.CheckboxInputController
+   * @memberof app.framework.widgets
    * @name CheckboxInputController
    * @constructor
    */

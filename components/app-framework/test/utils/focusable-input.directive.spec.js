@@ -2,7 +2,7 @@
   'use strict';
 
   describe('focusable-input directive', function () {
-    beforeEach(module('helion.framework.utils'));
+    beforeEach(module('app.framework.utils'));
 
     describe('with default class', function () {
       var $element;

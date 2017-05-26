@@ -4,7 +4,7 @@
   describe('auto-populate-input directive', function () {
     var $element;
 
-    beforeEach(module('helion.framework.utils'));
+    beforeEach(module('app.framework.utils'));
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();

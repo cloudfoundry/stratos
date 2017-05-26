@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-    .module('helion.framework.utils')
-    .factory('helion.framework.utils.long-running.service', serviceFactory);
+    .module('app.framework.utils')
+    .factory('app.framework.utils.long-running.service', serviceFactory);
 
   /**
    * serviceFactory factory of the service
@@ -13,7 +13,7 @@
    * @example
    *
    ```js
-   // inject 'helion.framework.utils.long-running.service' as longRunning here
+   // inject 'app.framework.utils.long-running.service' as longRunning here
 
    var interval = 3000;
 

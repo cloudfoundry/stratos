@@ -13,7 +13,7 @@
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService The console notification service
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView The framework async detail view
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView The framework async detail view
    * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support
    *  dashboard with cnsi type endpoints
    * @returns {object} Object containing 'show' function

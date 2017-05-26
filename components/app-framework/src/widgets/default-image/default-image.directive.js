@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('defaultImage', defaultImage);
 
   /**
-   * @namespace helion.framework.widgets.defaultImage
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.defaultImage
+   * @memberof app.framework.widgets
    * @name defaultImage
    * @description A default image directive that displays
    * a default image if the src provided doesn't exist.

@@ -71,14 +71,14 @@
    * @param {cfEditApp} cfEditApp - edit Application
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {appClusterRoutesService} appClusterRoutesService - the Service management service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
+   * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cfAddRoutes} cfAddRoutes - add routes service
-   * @property {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
+   * @property {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @property {appNotificationsService} appNotificationsService - the toast notification service
    */

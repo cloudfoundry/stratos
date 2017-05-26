@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework', [
+    .module('app.framework', [
       'ncy-angular-breadcrumb',
-      'helion.framework.filters',
-      'helion.framework.utils',
-      'helion.framework.validators',
-      'helion.framework.widgets',
+      'app.framework.filters',
+      'app.framework.utils',
+      'app.framework.validators',
+      'app.framework.widgets',
       'angular-websocket',
       'ngAnimate',
       'toastr'

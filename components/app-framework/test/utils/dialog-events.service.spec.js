@@ -5,7 +5,7 @@
 
     var dialogEvents, $scope;
 
-    beforeEach(module('helion.framework.utils'));
+    beforeEach(module('app.framework.utils'));
     beforeEach(inject(function ($injector) {
       $scope = $injector.get('$rootScope').$new();
       dialogEvents = $injector.get('frameworkDialogEvents');

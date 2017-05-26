@@ -10,7 +10,7 @@
    * @description Factory get Show Edit App dialog
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
+   * @param {app.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
   function editAppFactory(modelManager, frameworkAsyncTaskDialog) {
     return {

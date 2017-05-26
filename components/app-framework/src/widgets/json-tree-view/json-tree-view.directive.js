@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('jsonTreeView', jsonTreeView);
 
   /**
@@ -28,8 +28,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.ActionsMenuController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.ActionsMenuController
+   * @memberof app.framework.widgets
    * @name ActionsMenuController
    * @constructor
    * @param {object} $scope - the angular $scope service

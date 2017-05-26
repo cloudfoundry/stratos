@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .factory('RecursionHelper', RecursionHelper);
 
   function RecursionHelper($compile) {

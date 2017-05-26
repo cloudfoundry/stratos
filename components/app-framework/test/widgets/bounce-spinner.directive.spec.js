@@ -5,7 +5,7 @@
     var element, bounceSpinnerCtrl;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
 
     describe('with defaults', function () {
       beforeEach(inject(function ($injector) {
