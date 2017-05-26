@@ -28,6 +28,10 @@ search-box {
     }
   }
 
+  .search-icon-icon {
+    content: 'search'
+  }
+
   .search-icon {
     margin-right: -4px;
     margin-top: 2px;
@@ -57,4 +61,8 @@ search-box {
   search-box input {
     width: $hpe-unit-space * 15;
   }
+}
+
+.app-icon-seacrh-plus:before {
+  content: 'add';
 }

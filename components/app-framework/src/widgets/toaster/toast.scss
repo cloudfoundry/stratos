@@ -32,18 +32,18 @@
     padding: 0;
 
     .toast-close-button {
+      @extend .material-icons;
       font-size: 18px;
       position: absolute;
       top: $hpe-unit-space * 0.5;
       right: $hpe-unit-space * 0.5;
       border: 0;
       background-color: $toast-background;
-      font-family: 'helion-icons';
       color: $dove-gray2;
       outline: 0;
 
       &:before {
-        content: $helion-icon-Close;
+        content: 'close';
       }
     }
 
@@ -81,21 +81,21 @@
         &.toast-success {
           color: $status-okay;
           &:before {
-            content: $helion-icon-Active_L;
+            content: 'check_circle';
           }
         }
 
         &.toast-error {
           color: $status-critical;
           &:before {
-            content: $helion-icon-Critical_L;
+            content: 'cancel';
           }
         }
 
         &.toast-warning {
           color: $status-warning;
           &:before {
-            content: $helion-icon-Alert;
+            content: 'warning';
           }
         }
       }

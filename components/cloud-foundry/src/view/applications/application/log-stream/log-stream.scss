@@ -6,3 +6,15 @@
 .log-stream-title {
   margin-right: $padding-small-horizontal;
 }
+
+
+.app-log-stream-indicator.material-icons {
+
+  &.log-stream-ok:after {
+    content: 'lens';
+  }
+
+  &.log-stream-error:after {
+    content: 'cancel';
+  }
+}

@@ -69,10 +69,11 @@ $detail-view-margin: $hpe-unit-space * 4;
     }
 
     .detail-view-close {
+      @extend .material-icons;
       position: absolute;
       top: $hpe-unit-space * 2;
       right: $hpe-unit-space * 2.5;
-      font-family: 'helion-icons' !important;
+      font-size: 28px;
       speak: none;
       font-style: normal;
       font-weight: normal;
@@ -80,7 +81,7 @@ $detail-view-margin: $hpe-unit-space * 4;
       text-transform: none;
       line-height: 1;
       &:before {
-        content: "";
+        content: "close";
       }
     }
 

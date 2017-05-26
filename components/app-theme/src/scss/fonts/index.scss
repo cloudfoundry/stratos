@@ -1,7 +1,7 @@
 $font-path:         "fonts/metric-font" !default;
-$icon-font-path:    "fonts/helion-icons/fonts" !default;
+$icon-font-path:    "fonts/iconfont" !default;
 $scpro-font-path:   "fonts/sourcecodepro" !default;
 
-@import 'helion-icons/style';
+@import 'material-icons';
 @import 'metric-font/font_face';
 @import 'sourcecodepro/font';

@@ -5,18 +5,18 @@
     <div class="firehose-header-top">
       <div class="firehose-status">
         <div class="log-stream-title" translate>Firehose Stream</div>
-        <span ng-if="firehoseCtrl.streamingStatus !== 2" class="app-log-stream-indicator helion-icon"
+        <span ng-if="firehoseCtrl.streamingStatus !== 2" class="app-log-stream-indicator material-icons"
               ng-class="{
-                'helion-icon-Active_S text-primary': firehoseCtrl.streamingStatus === 1,
-                'helion-icon-Critical_S text-danger': firehoseCtrl.streamingStatus === 3
+                'log-stream-ok text-primary': firehoseCtrl.streamingStatus === 1,
+                'log-stream-error text-danger': firehoseCtrl.streamingStatus === 3
               }"></span>
         <bounce-spinner ng-if="firehoseCtrl.streamingStatus === 2"
                         class="app-log-stream-indicator" classes="bounce-spinner-sm"></bounce-spinner>
       </div>
 
       <div class="view-controls">
-        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Expand"></span>
-        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle helion-icon-lg helion-icon helion-icon-Contract"></span>
+        <span ng-click="firehoseCtrl.fullScreenOn()" ng-if="!firehoseCtrl.fullScreen" class="fullscreen-toggle app-icon-lg material-icons">fullscreen</span>
+        <span ng-click="firehoseCtrl.fullScreenOff()" ng-if="firehoseCtrl.fullScreen" class="fullscreen-toggle app-icon-lg material-icons">fullscreen_exit</span>
       </div>
 
     </div>
@@ -24,7 +24,7 @@
     <div class="firehose-header-bottom">
       <div class="text-filter">
         <div class="search-box" ng-focus="firehoseCtrl.focusTextFilter()" tabindex="0">
-          <span class="text-filter-icon helion-icon helion-icon-lg helion-icon-Search"></span>
+          <span class="text-filter-icon material-icons app-icon-lg">search</span>
           <span class="regex-marker opening" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
 
           <div class="text-filter-input" ng-model="firehoseCtrl.textFilter.toMatch" contenteditable="true"></div>
@@ -32,7 +32,7 @@
           <span class="regex-marker closing" ng-style="{'visibility': firehoseCtrl.textFilter.regex ? 'visible' : 'hidden'}">/</span>
           <div class="space-absorber"></div>
           <span ng-click="firehoseCtrl.textFilter.toMatch = ''"
-             class="clear-text-filter-icon helion-icon helion-icon-lg helion-icon-Close"></span>
+             class="clear-text-filter-icon material-icons app-icon-lg">close</span>
         </div>
         <div class="search-options">
           <checkbox-input ng-model="firehoseCtrl.textFilter.regex"
@@ -76,7 +76,7 @@
         </div>
 
         <div class="btn btn-link" ng-click="firehoseCtrl.autoScroll()">
-          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <i class="material-icons">arrow_forward</i>
           <span translate>Scroll to bottom</span>
         </div>
       </div>

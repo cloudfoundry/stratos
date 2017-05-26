@@ -27,7 +27,7 @@
       vertical-align: middle;
     }
 
-    .helion-icon {
+    .materials-icons {
       padding-right: $hpe-unit-space;
     }
   }
@@ -39,7 +39,7 @@
   padding: 0;
   height: $main-nav-title-height;
 
-  .action-target-state, .bounce-spinner {
+  .app-summary-app-state-icon, .bounce-spinner {
     margin-left: $hpe-unit-space;
   }
 
@@ -84,3 +84,32 @@
   }
 }
 
+.side-action-item > button {
+  display: flex;
+  align-items: center;
+
+  app-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &.app-action-icon-cli > svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  > span {
+    margin-left: $hpe-unit-space * 0.5;
+  }
+
+  &:hover {
+
+    svg > path {
+      stroke: $brand-primary;
+      width: 20px;
+    }
+  }
+}

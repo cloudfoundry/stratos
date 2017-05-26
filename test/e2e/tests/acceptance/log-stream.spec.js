@@ -84,7 +84,7 @@
         // Check icon is green
         var logStatusIcon = element(by.css('.app-log-stream-indicator'));
         expect(helpers.hasClass(logStatusIcon, 'text-primary')).toBe(true);
-        expect(helpers.hasClass(logStatusIcon, 'helion-icon-Active_S')).toBe(true);
+        expect(helpers.hasClass(logStatusIcon, 'log-stream-ok')).toBe(true);
       });
 
       /*

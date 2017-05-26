@@ -25,7 +25,11 @@ login-form, [login-form] {
       margin-top: 40px;
     }
 
-    .helion-icon-View.form-control-feedback {
+    .app-icon-view {
+      content: 'visibility'
+    }
+
+    .app-icon-view.form-control-feedback {
       cursor: pointer;
       pointer-events: auto;
     }

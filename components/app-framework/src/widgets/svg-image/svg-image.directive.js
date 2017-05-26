@@ -5,7 +5,7 @@
     .module('helion.framework.widgets')
     .directive('svgImage', svgImage);
 
-  function svgImage($templateRequest) {
+  function svgImage($templateRequest, $compile) {
     return {
       restrict: 'E',
       link: function (scope, element, attrs) {
@@ -22,11 +22,11 @@
             if (!attrs.hasOwnProperty(attr) || attr[0] === '$') {
               continue;
             }
-            svg.attr(attr, attrs[attr]);
+            svg.attr(attrs.$attr[attr], attrs[attr]);
           }
 
           svg = svg.removeAttr('xmlns:a');
-          element.replaceWith(svg);
+          element.replaceWith($compile(svg)(scope));
 
           scope.$on('$destroy', function () {
             svg.remove();

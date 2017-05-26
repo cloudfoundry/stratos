@@ -21,7 +21,7 @@
 
   .welcome-message {
 
-    > .helion-icon {
+    > .material-icons {
       font-size: $hpe-unit-space;
       margin-right: $hpe-unit-space * 0.5;
     }
@@ -97,9 +97,20 @@
     font-size: 24px;
   }
 
-  .helion-icon {
+  .material-icons {
     color: $dove-gray;
     margin-bottom: $hpe-unit-space * .5;
+  }
+
+}
+
+.applications-empty {
+  app-icon > svg > path{
+    stroke: $gray-darker;
+  }
+
+  i {
+    color: $gray-darker;
   }
 
 }

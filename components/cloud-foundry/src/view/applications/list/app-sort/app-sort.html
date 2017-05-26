@@ -6,7 +6,6 @@
       <svg-image ng-if="!applicationsSortingCtrl.model.sortAscending" src="svg/SortDescending_Green.svg"></svg-image>
     </div>
     <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
       ng-model="applicationsSortingCtrl.selectedOption"
       input-options="applicationsSortingCtrl.sortOptions"
       ng-change="applicationsSortingCtrl.setSort()">

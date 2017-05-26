@@ -94,7 +94,7 @@
         },
         disabled: true,
         id: 'launch',
-        icon: 'helion-icon helion-icon-lg helion-icon-Launch'
+        icon: 'launch'
       },
       {
         name: gettext('Stop'),
@@ -103,7 +103,7 @@
           vm.model.stopApp(cnsiGuid, vm.id);
         },
         disabled: true,
-        icon: 'helion-icon helion-icon-lg helion-icon-Halt-stop'
+        icon: 'stop'
       },
       {
         name: gettext('Restart'),
@@ -112,7 +112,7 @@
           vm.model.restartApp(cnsiGuid, vm.id);
         },
         disabled: true,
-        icon: 'helion-icon helion-icon-lg helion-icon-Refresh'
+        icon: 'settings_backup_restore'
       },
       {
         name: gettext('Delete'),
@@ -121,7 +121,7 @@
           deleteApp();
         },
         disabled: true,
-        icon: 'helion-icon helion-icon-lg helion-icon-Trash'
+        icon: 'delete'
       },
       {
         name: gettext('Start'),
@@ -130,7 +130,7 @@
           vm.model.startApp(cnsiGuid, vm.id);
         },
         disabled: true,
-        icon: 'helion-icon helion-icon-lg helion-icon-Play'
+        icon: 'play_circle_outline'
       },
       {
         name: gettext('CLI Instructions'),
@@ -144,7 +144,8 @@
           cfAppCliCommands.show(vm.model.application, username);
         },
         disabled: true,
-        icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
+        icon: 'svg:Cli.svg',
+        iconClass: 'app-action-icon-cli'
       }
     ];
     vm.scheduledUpdate = undefined;

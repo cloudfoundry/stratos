@@ -24,7 +24,7 @@
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'helion-icon-Inherit helion-icon-r270');
+      menu.addMenuItem('endpoints', 'endpoint.dashboard', 'menu.endpoints', 2, 'settings_input_component');
       initialized.resolve();
     }
   }

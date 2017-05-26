@@ -1,18 +1,3 @@
-<!--
-        <div class="application-search-box">
-          <form>
-            <div class="form-group search-field" focusable-input>
-              <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
-              <input type="text" class="form-control" id="applications-text" name="applications-text"
-                    ng-model="instanceCtrl.params.filter"
-                    ng-model-options='{ debounce: 100 }'
-                    ng-change="instanceCtrl.setParamsFilterText()"
-                    placeholder="{{'Search by name' | translate}}"/>
-            </div>
-          </form>
-        </div>
-
--->
 <table class="table"
         st-table="instanceCtrl.stTableInstanceParameters"
         st-safe-src="instanceCtrl.instance.parameters">
@@ -25,7 +10,7 @@
     <th colspan="5" class="table-sort-filter">
       <form>
         <div class="form-group search-field" focusable-input>
-          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <i class="application-search-box-icon material-icons app-icon-lg">search</i>
           <input st-search=""
                 type="text" class="form-control"
                 placeholder="{{'Filter parameters' | translate}}"/>

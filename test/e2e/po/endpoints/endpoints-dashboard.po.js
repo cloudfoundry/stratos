@@ -141,11 +141,11 @@
   }
 
   function endpointIsConnected(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Active_L')).isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.endpoint-connected-icon')).isPresent();
   }
 
   function endpointIsCritical(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Critical_L')).isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.endpoint-critical-icon')).isPresent();
   }
 
   function endpointType(row) {

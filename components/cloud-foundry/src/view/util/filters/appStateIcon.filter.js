@@ -22,25 +22,25 @@
       var icon = '';
       switch (input) {
         case 'STARTED':
-          icon = 'helion-icon-Active_S text-success';
+          icon = 'app-status-icon-ok text-success';
           break;
         case 'STOPPED':
-          icon = 'helion-icon-Critical_S text-danger';
+          icon = 'app-status-icon-warning text-danger';
           break;
         case 'ok':
-          icon = 'helion-icon-Active_S text-success';
+          icon = 'app-status-icon-ok text-success';
           break;
         case 'tentative':
-          icon = 'helion-icon-Active_S text-tentative';
+          icon = 'app-status-icon-ok text-tentative';
           break;
         case 'warning':
-          icon = 'helion-icon-Warning_S text-warning';
+          icon = 'app-status-icon-warning text-warning';
           break;
         case 'error':
-          icon = 'helion-icon-Critical_S text-danger';
+          icon = 'app-status-icon-error text-danger';
           break;
         case 'deleted':
-          icon = 'helion-icon-Trash text-success';
+          icon = 'app-status-icon-delete text-success';
           break;
         default:
           icon = '';

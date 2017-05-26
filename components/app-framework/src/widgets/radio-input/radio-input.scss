@@ -16,7 +16,7 @@
       color: $radio-input-checked-color;
 
       &:before {
-        content: $radio-button-checked-icon;
+        content: 'radio_button_checked';
       }
     }
 
@@ -39,8 +39,8 @@
   }
 
   .radio-input-button:before {
-    content: $radio-button-unchecked-icon;
-    font-family: $radio-button-font-family;
+    @extend .material-icons;
+    content: 'radio_button_unchecked';
     font-size: $radio-input-size;
     cursor: pointer;
   }

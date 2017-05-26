@@ -48,7 +48,7 @@
       .role-pill {
         &.progress-cursor {
           cursor: progress;
-          i.helion-icon.close-icon {
+          i.material-icons.close-icon {
             cursor: progress;
           }
         }
@@ -65,7 +65,7 @@
         border-color: $brand-primary;
       }
 
-      i.helion-icon.close-icon {
+      i.material-icons.close-icon {
         font-size: 14px;
         font-weight: bolder;
         margin-left: 10px;

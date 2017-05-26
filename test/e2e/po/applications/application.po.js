@@ -80,7 +80,7 @@
   }
 
   function isIncomplete() {
-    return element(by.css('app-state-icon .app-status.helion-icon-Warning_S')).isDisplayed();
+    return element(by.css('app-state-icon .app-status.app-status-icon-warning')).isDisplayed();
   }
 
   function getActiveTab() {
@@ -103,7 +103,7 @@
   }
 
   function invokeAction(actionName) {
-    var actions = element.all(by.css('ul.application-action-col > li > button'));
+    var actions = element.all(by.css('ul.application-action-col > li > button > span'));
     var matchingAction = actions.filter(function (elem) {
       return elem.getText().then(function (text) {
         return text === actionName;

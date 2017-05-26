@@ -14,8 +14,7 @@
       $scope.flyoutActive = false;
       $scope.flyoutCloseIcon = null;
 
-      var markup = '<flyout flyout-active="flyoutActive" ' +
-        'flyout-close-icon="flyoutCloseIcon">' +
+      var markup = '<flyout flyout-active="flyoutActive">' +
         'Flyout Content' +
         '<flyout>';
 
@@ -27,10 +26,6 @@
 
     it('should be defined', function () {
       expect($element).toBeDefined();
-    });
-
-    it('should initially use glyphicon for close icon', function () {
-      expect($element.isolateScope().flyoutCloseIcon).toBe('glyphicon glyphicon-remove');
     });
 
     it('should not contain content when inactive', function () {
@@ -67,13 +62,6 @@
 
       expect(eltScope.flyoutActive).toBe(false);
       expect($element.find('div').children().hasClass('active')).toBe(false);
-    });
-
-    it('should show custom icon if set', function () {
-      $scope.flyoutCloseIcon = 'close-icon';
-      $scope.$apply();
-
-      expect($element.find('button').hasClass('close-icon')).toBeTruthy();
     });
   });
 

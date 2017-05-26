@@ -3,7 +3,6 @@
        ng-class="{'has-error': form.createSpace.name.$invalid}">
     <label class="control-label" translate>Organization</label>
     <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
       ng-model="asyncTaskDialogCtrl.context.data.organization"
       input-options="asyncTaskDialogCtrl.context.data.organizations"
       ng-change="asyncTaskDialogCtrl.context.data.setOrganization()">

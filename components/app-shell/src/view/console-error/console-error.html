@@ -8,22 +8,22 @@
       </div>
       <div class="console-error-block console-error">
         <div ng-if="errPageCtrl.error === 'notSetup'">
-          <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
+          <app-icon icon="device_hub" icon-class="app-icon-3x app-icon-r90"></app-icon>
           <div class="applications-msg" translate>errors.nothing-registered</div>
           <div class="applications-cta" translate>errors.contact-admin</div>
         </div>
         <div ng-if="errPageCtrl.error === 'notConnected'">
-          <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
+          <app-icon icon="device_hub" icon-class="app-icon-3x app-icon-r90"></app-icon>
           <div class="applications-msg" translate>errors.nothing-connected</div>
           <div class="applications-cta" translate>errors.contact-admin</div>
         </div>
         <div ng-if="errPageCtrl.error === 'unknown'">
-          <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
+          <app-icon icon="cancel" icon-class="app-icon-3x app-icon-r90"></app-icon>
           <div class="applications-msg" translate>errors.unexpected</div>
-          <div class="applications-cta" translate>errors.ontact-admin</div>
+          <div class="applications-cta" translate>errors.contact-admin</div>
         </div>
         <div ng-if="errPageCtrl.error === 'upgrading'">
-          <div class="helion-icon helion-icon-3x helion-icon-Install"></div>
+          <app-icon icon="system_update_alt" icon-class="app-icon-3x"></app-icon>
           <div class="applications-msg" translate>errors.upgrading</div>
           <div class="applications-cta" translate>errors.upgrade-wait</div>
         </div>

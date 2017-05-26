@@ -46,8 +46,8 @@
         expect(actionsMenuCtrl.open).toBe(false);
       });
 
-      it('should use default icon for actions menu', function () {
-        expect(actionsMenuCtrl.icon).toBe('glyphicon glyphicon-option-horizontal');
+      it('should use default icon classes for actions menu', function () {
+        expect(actionsMenuCtrl.icon).toBe('');
       });
 
       it('should use default position for actions menu', function () {

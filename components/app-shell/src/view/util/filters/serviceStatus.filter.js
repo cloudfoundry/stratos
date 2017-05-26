@@ -17,18 +17,21 @@
     return function (input) {
       if (angular.isDefined(input)) {
         var icon = '';
+        var textClass = '';
         switch (input) {
           case 'OK':
-            icon = 'helion-icon-Active_L text-primary';
+            icon = 'check_circle';
+            textClass = 'text-primary';
             break;
           case 'ERROR':
-            icon = 'helion-icon-Critical_L text-danger';
+            icon = 'cancel';
+            textClass = 'text-danger';
             break;
           default:
-            icon = 'helion-icon-Unknown_L';
+            icon = 'help_outline';
         }
 
-        return '<span class="helion-icon helion-icon-lg ' + icon + '"></span>';
+        return '<span class="material-icons app-icon-lg ' + textClass + '">' + icon + '</span>';
       }
 
       return '';

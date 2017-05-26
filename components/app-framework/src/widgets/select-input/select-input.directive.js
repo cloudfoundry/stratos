@@ -26,7 +26,6 @@
     return {
       bindToController: {
         addAction: '=?',
-        arrowIcon: '@?',
         inputOptions: '=',
         refreshAction: '=?',
         placeholder: '@?'
@@ -101,7 +100,6 @@
    * @param {object} $q - the Angular $q service
    * @property {object} $scope - the Angular $scope
    * @property {object} ngModelCtrl - the ng-model controller
-   * @property {string} arrowIcon - the arrow icon
    * @property {string} placeholder - the placeholder text
    * @property {string} modelLabel - the selected options's label
    * @property {boolean} open - flag whether menu should be visible
@@ -111,7 +109,6 @@
     this.$scope = $scope;
     this.$q = $q;
     this.ngModelCtrl = null;
-    this.arrowIcon = this.arrowIcon || 'helion-icon helion-icon-Up_tab helion-icon-r180';
     this.placeholder = this.placeholder || 'Select';
     this.open = false;
     this.modelLabel = null;
