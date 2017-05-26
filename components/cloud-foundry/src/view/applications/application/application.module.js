@@ -423,7 +423,8 @@
       } else {
         var hideAction = true;
         if (id === 'launch') {
-          hideAction = false;
+          // isActionHidden is called on update. Ensure we check routes are ok here as well as in onAppRoutesChange
+          hideAction = !_.get(this.model.application.summary.routes, 'length');
         } else {
           // Check permissions
           if (id === 'delete' ? _.get(this.model.application.pipeline, 'forbidden') : false) {
