@@ -449,7 +449,7 @@
               })
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
-                expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
+                endpointsPage.waitForEndpointTable();
               });
           });
 

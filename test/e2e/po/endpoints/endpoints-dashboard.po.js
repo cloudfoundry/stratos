@@ -34,6 +34,8 @@
     endpointActionMenu: endpointActionMenu,
     endpointError: endpointError,
 
+    waitForEndpointTable: waitForEndpointTable,
+
     headerRegister: headerRegister,
     headerRegisterVisible: headerRegisterVisible,
 
@@ -217,6 +219,11 @@
     var row = helpers.getTableRowAt(getEndpointTable(), rowIndex + 1);
     expect(row.getAttribute('table-inline-message')).toBeDefined();
     return row;
+  }
+
+  function waitForEndpointTable() {
+    var until = protractor.ExpectedConditions;
+    browser.wait(until.presenceOf(getEndpointTable()), 5000);
   }
 
   function getHeaderRegister() {
