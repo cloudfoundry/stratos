@@ -160,7 +160,7 @@ $detail-view-margin: $hpe-unit-space * 4;
       padding-top: $hpe-unit-space * 3 / 4;
       background: $white;
 
-      .btn {
+      .btn:not(:first-of-type) {
         margin-left: $hpe-unit-space / 2;
       }
     }
