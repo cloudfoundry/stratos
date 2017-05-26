@@ -341,16 +341,6 @@
       vm.appStackName = _.get(stacksModel, 'stacks.' + vm.cnsiGuid + '.' + vm.model.application.summary.stack_guid + '.entity.name', stackGuid);
     }
 
-    // /**
-    //  * @function updateState
-    //  * @description update application state
-    //  * @returns {promise} A resolved/rejected promise
-    //  * @public
-    //  */
-    // function updateState() {
-    //   return vm.model.getAppStats(cnsiGuid, vm.id);
-    // }
-
     function deleteApp() {
       if (vm.model.application.summary.services.length || vm.model.application.summary.routes.length) {
         var data = {
