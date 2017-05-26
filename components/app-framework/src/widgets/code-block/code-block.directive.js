@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('codeBlock', codeBlock);
 
   /**
-   * @namespace helion.framework.widgets.codeBlock
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.codeBlock
+   * @memberof app.framework.widgets
    * @name codeBlock
    * @description A coe block card directive that includes a copy icon to copy the text contents to the clipboard.
    * @example
@@ -31,8 +31,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.CodeBlockController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.CodeBlockController
+   * @memberof app.framework.widgets
    * @name CodeBlockController
    * @constructor
    * @param {object} $window - Angular $window service
@@ -48,7 +48,7 @@
   angular.extend(CodeBlockController.prototype, {
     /**
      * @function init
-     * @memberof helion.framework.widgets.CodeBlockController
+     * @memberof app.framework.widgets.CodeBlockController
      * @description Controller init method - looks to see if copy to clipboard is supported by the browser
      * @returns {void}
      */
@@ -63,7 +63,7 @@
 
     /**
      * @function copyToClipboard
-     * @memberof helion.framework.widgets.CodeBlockController
+     * @memberof app.framework.widgets.CodeBlockController
      * @description Copies the text content in the code block to the clipboard
      * @param {object} event - browser event that the user performed to initiate the copy to clipboard
      * @returns {void}

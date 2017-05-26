@@ -20,7 +20,7 @@
    *  ```
    */
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .factory('frameworkDialogConfirm', serviceFactory);
 
   function serviceFactory($uibModal, frameworkDialogEvents) {
@@ -51,8 +51,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.dialog
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.dialog
+   * @memberof app.framework.widgets
    * @name ConfirmController
    * @constructor
    * @param {object} $q - the Angular $q service
@@ -76,7 +76,7 @@
   angular.extend(ConfirmController.prototype, {
     /**
      * @function confirmed
-     * @memberof helion.framework.widgets.dialog.ConfirmController
+     * @memberof app.framework.widgets.dialog.ConfirmController
      * @description User confirmed so run callback
      * @returns {void}
      */

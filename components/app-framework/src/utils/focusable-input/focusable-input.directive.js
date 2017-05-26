@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.utils')
+    .module('app.framework.utils')
     .directive('focusableInput', focusableInput);
 
   /**

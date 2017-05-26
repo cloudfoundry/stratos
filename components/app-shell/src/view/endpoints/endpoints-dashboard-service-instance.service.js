@@ -19,7 +19,7 @@
    * @param {app.appUtilsService.appErrorService} appErrorService - service to show custom errors below title bar
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {app.view.appCredentialsDialog} appCredentialsDialog - the credentials dialog service
-   * @param {helion.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
+   * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirmation dialog service
    * @param {app.appUtilsService.appEventService} appEventService - the event service
    * @returns {object} the service instance service
    */

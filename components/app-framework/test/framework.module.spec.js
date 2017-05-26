@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  describe('helion.framework', function () {
+  describe('app.framework', function () {
     it('should be defined', function () {
-      expect(angular.module('helion.framework')).toBeDefined();
+      expect(angular.module('app.framework')).toBeDefined();
     });
   });
 

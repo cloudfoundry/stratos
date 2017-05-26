@@ -4,7 +4,7 @@
   describe('Filter: byPropeties', function () {
     var byPropertiesFilter;
 
-    beforeEach(module('helion.framework.filters'));
+    beforeEach(module('app.framework.filters'));
     beforeEach(inject(function (_byPropertiesFilter_) {
       byPropertiesFilter = _byPropertiesFilter_;
     }));

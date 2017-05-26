@@ -2,7 +2,7 @@
   'use strict';
 
   /**
-   * @name helion.framework.widgets.frameworkAsyncTaskDialog
+   * @name app.framework.widgets.frameworkAsyncTaskDialog
    * @example:
    *  ```
    *  frameworkAsyncTaskDialog({
@@ -15,7 +15,7 @@
    *  }, actionPromise);
    */
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .factory('frameworkAsyncTaskDialog', serviceFactory)
     .controller('AsyncTaskDialogController', AsyncTaskDialogController);
 
@@ -24,7 +24,7 @@
    * @name serviceFactory
    * @description Factory for async task dialogs
    * @memberof frameworkAsyncTaskDialog
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView frameworkDetailView
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView frameworkDetailView
    * @param {function} $timeout - angular $timeout servie
    * @returns {frameworkAsyncTaskDialog}  frameworkAsyncTaskDialog dialog instance
    */
@@ -165,7 +165,7 @@
     /**
      * @name disableSubmit
      * @description should the submit button be disabled
-     * @namespace helion.framework.widgets.disableSubmit
+     * @namespace app.framework.widgets.disableSubmit
      * @returns {boolean}
      */
     disableSubmit: function () {

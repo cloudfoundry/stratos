@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('paginator', paginator);
 
   /**
-   * @namespace helion.framework.widgets.paginator
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.paginator
+   * @memberof app.framework.widgets
    * @name paginator
    * @description A paginator directive
    * For detailed information on UX design: https://app.frontify.com/screen/866758
@@ -61,8 +61,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.paginator.PaginatorController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.paginator.PaginatorController
+   * @memberof app.framework.widgets
    * @name PaginatorController
    * @constructor
    * @param {object} $scope - the $scope
@@ -80,7 +80,7 @@
   angular.extend(PaginatorController.prototype, {
     /**
      * @function init
-     * @memberof helion.framework.widgets.wizard.PaginatorController
+     * @memberof app.framework.widgets.wizard.PaginatorController
      * @description initialize the widget
      * @returns {void}
      */
@@ -101,7 +101,7 @@
 
     /**
      * @function loadPage
-     * @memberof helion.framework.widgets.wizard.PaginatorController
+     * @memberof app.framework.widgets.wizard.PaginatorController
      * @description call the callback provided by context
      * @param {number} pageNumber number of the page to load
      * @param {boolean=} skipCallback skip calling the properties.callback function.
@@ -126,7 +126,7 @@
 
     /**
      * @function calculateRange
-     * @memberof helion.framework.widgets.wizard.PaginatorController
+     * @memberof app.framework.widgets.wizard.PaginatorController
      * @description calculate the pagination range
      * @returns {void}
      */

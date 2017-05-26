@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('wizard', wizard);
 
   /**
-   * @namespace helion.framework.widgets.wizard
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.wizard
+   * @memberof app.framework.widgets
    * @name wizard
    * @description A wizard directive
    * @returns {object} The wizard directive definition object
@@ -26,8 +26,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.wizard.WizardController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.wizard.WizardController
+   * @memberof app.framework.widgets
    * @name WizardController
    * @constructor
    * @param {object} $scope - the $scope
@@ -142,7 +142,7 @@
   angular.extend(WizardController.prototype, {
     /**
      * @function disableButtons
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description disable buttons in button bar
      * @returns {void}
      */
@@ -154,7 +154,7 @@
 
     /**
      * @function resetButtons
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description reset buttons in button bar
      * @returns {void}
      */
@@ -168,7 +168,7 @@
 
     /**
      * @function disableNext
-     * @memberof helion.framework.widgets.wizard.disableNext
+     * @memberof app.framework.widgets.wizard.disableNext
      * @description Takes into account local nextBtnDisabled AND the validation state of the form
      * @returns {boolean}
      */
@@ -184,7 +184,7 @@
 
     /**
      * @function switchTo
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description switch to a step by the given index if the step exists
      * @param {number} index - the index of the step to switch to
      * @returns {*}
@@ -230,7 +230,7 @@
 
     /**
      * @function next
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description switch to next step if there is one
      * @returns {void}
      */
@@ -305,7 +305,7 @@
 
     /**
      * @function back
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description switch back to previous step if there is one
      * @returns {void}
      */
@@ -315,7 +315,7 @@
 
     /**
      * @function stop
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description stop workflow
      * @returns {void}
      */
@@ -325,7 +325,7 @@
 
     /**
      * @function showMessage
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description show error message
      * @param {string} message - the message text
      * @param {string} messageClass - a CSS class name for the message
@@ -341,7 +341,7 @@
 
     /**
      * @function resetMessage
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description reset message
      * @returns {void}
      */
@@ -355,7 +355,7 @@
 
     /**
      * @function onInitSuccess
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description initialization success handler
      * @returns {void}
      */
@@ -366,7 +366,7 @@
 
     /**
      * @function onInitError
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description initialization error handler
      * @returns {void}
      */
@@ -376,7 +376,7 @@
 
     /**
      * @function checkAllReadiness
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description check if each step is ready
      * @returns {void}
      */
@@ -404,7 +404,7 @@
 
     /**
      * @function switchToFirstReadyStep
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description switch to the first ready step
      * @returns {void}
      */
@@ -423,7 +423,7 @@
 
     /**
      * @function always
-     * @memberof helion.framework.widgets.wizard.WizardController
+     * @memberof app.framework.widgets.wizard.WizardController
      * @description the always handler for initialization
      * @returns {void}
      */

@@ -2,12 +2,12 @@
   'use strict';
 
   // The filters
-  angular.module('helion.framework.filters')
+  angular.module('app.framework.filters')
     .filter('byProperties', byProperties);
 
   /**
-   * @namespace helion.framework.filters.byProperties
-   * @memberof helion.framework.filters
+   * @namespace app.framework.filters.byProperties
+   * @memberof app.framework.filters
    * @name byProperties
    * @description An angular filter which will take a collection of objects and filter over only those properties
    * supplied. Properties that are not supplied will be ignored

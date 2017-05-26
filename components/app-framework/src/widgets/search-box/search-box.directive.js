@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .factory('searchBoxCloser', searchBoxCloser)
     .directive('searchBox', searchBox);
 
@@ -31,8 +31,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.searchBox
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.searchBox
+   * @memberof app.framework.widgets
    * @name searchBox
    * @description a searchable input box.
    * @param {object} $document - the Angular $document service
@@ -108,8 +108,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.SearchBoxController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.SearchBoxController
+   * @memberof app.framework.widgets
    * @name SelectInputController
    * @constructor
    * @param {object} $scope - the Angular $scope
@@ -126,7 +126,7 @@
   angular.extend(SearchBoxController.prototype, {
     /**
      * @function reset
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description reset widget state
      */
     reset: function () {
@@ -142,7 +142,7 @@
 
     /**
      * @function setWatchers
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description set value watchers
      */
     setWatchers: function () {
@@ -165,7 +165,7 @@
 
     /**
      * @function makeSuggestions
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description Make suggestions that matches the search text
      */
     makeSuggestions: function () {
@@ -184,7 +184,7 @@
 
     /**
      * @function pick
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description pick a suggestion
      * @param {object} suggestion - the suggestion to pick
      * @param {object=} $event - optional mouse event that triggered this
@@ -205,7 +205,7 @@
 
     /**
      * @function autoPick
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description automatically pick the first available suggestion
      */
     autoPick: function () {
@@ -221,7 +221,7 @@
 
     /**
      * @function setValue
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description set model value
      * @param {object} value - the value to set as model value
      */
@@ -232,7 +232,7 @@
 
     /**
      * @function onChange
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description input change event handler
      */
     onChange: function () {
@@ -348,7 +348,7 @@
 
     /**
      * @function restoreLastPick
-     * @memberof helion.framework.widgets.SearchBoxController
+     * @memberof app.framework.widgets.SearchBoxController
      * @description if dirty, reset the search-box to the last picked option
      */
     restoreLastPick: function () {

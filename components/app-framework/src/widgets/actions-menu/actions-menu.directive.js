@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('actionsMenu', actionsMenu);
 
   /**
-   * @namespace helion.framework.widgets.actionsMenu
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.actionsMenu
+   * @memberof app.framework.widgets
    * @name actionsMenu
    * @description An actions menu directive that displays
    * a dropdown menu with optional label. Each action should
@@ -84,8 +84,8 @@
   }
 
   /**
-   * @namespace helion.framework.widgets.ActionsMenuController
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.ActionsMenuController
+   * @memberof app.framework.widgets
    * @name ActionsMenuController
    * @constructor
    * @param {object} $scope - the angular $scope service
@@ -121,7 +121,7 @@
   angular.extend(ActionsMenuController.prototype, {
     /**
      * @function executeAction
-     * @memberof helion.framework.widgets.ActionsMenuController
+     * @memberof app.framework.widgets.ActionsMenuController
      * @description Execute the action's function on click and
      * close the menu.
      * @param {object} $event - the event object

@@ -3,7 +3,7 @@
 
   describe('validators :', function () {
 
-    beforeEach(module('helion.framework.validators'));
+    beforeEach(module('app.framework.validators'));
 
     describe('helion-unique - editing with complex table data', function () {
       var $compile, $scope, $form;

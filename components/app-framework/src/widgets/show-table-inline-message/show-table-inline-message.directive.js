@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .directive('showTableInlineMessage', showTableInlineMessage);
 
   /**
-   * @namespace helion.framework.widgets.showTableInlineMessage
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.showTableInlineMessage
+   * @memberof app.framework.widgets
    * @name showTableInlineMessage
    * @description A show-table-inline-message directive
    * @param {object} $compile - the $compile service

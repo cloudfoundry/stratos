@@ -5,7 +5,7 @@
     var $rootScope, $q, $sce, $timeout, confirmDialog, confirmDialogContext, service;
 
     beforeEach(module('templates'));
-    beforeEach(module('helion.framework'));
+    beforeEach(module('app.framework'));
     beforeEach(module('ui.bootstrap'));
 
     beforeEach(inject(function ($injector) {

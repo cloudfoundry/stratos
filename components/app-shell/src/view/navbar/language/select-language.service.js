@@ -10,7 +10,7 @@
    * @description Factory to get the Language Selection App dialog
    * @constructor
    * @param {object} $translate - the i18n $translate service
-   * @param {helion.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
+   * @param {app.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    */
   function selectLanguageFactory($translate, frameworkAsyncTaskDialog) {
     return {

@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-  .module('helion.framework.utils')
+  .module('app.framework.utils')
   .directive('autoPopulateInput', autoPopulateInput);
 
   /**
@@ -29,8 +29,8 @@
   }
 
   /**
-   * @memberof helion.framework.widgets
-   * @namespace helion.framework.utils
+   * @memberof app.framework.widgets
+   * @namespace app.framework.utils
    * @name AutoPopulateController
    * @description Controller for the auto populate input directice
    * @param {object} $scope - Angular $scope object

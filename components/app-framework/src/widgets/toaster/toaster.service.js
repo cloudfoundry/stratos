@@ -2,14 +2,14 @@
   'use strict';
 
   angular
-    .module('helion.framework.widgets')
+    .module('app.framework.widgets')
     .factory('frameworkToaster', toasterServiceFactory);
 
   // See: https://github.com/Foxandxss/angular-toastr for the underlying library that is used
 
   /**
-   * @namespace helion.framework.widgets.frameworkToaster
-   * @memberof helion.framework.widgets
+   * @namespace app.framework.widgets.frameworkToaster
+   * @memberof app.framework.widgets
    * @name frameworkToaster
    * @description A service for sjhow toast-style notifications
    * @param {object} $q - the Angular promise service

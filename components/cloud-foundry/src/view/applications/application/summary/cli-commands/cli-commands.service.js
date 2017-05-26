@@ -10,7 +10,7 @@
    * @name CliCommandsFactory
    * @description Factory to provide a way to show the cli commands for App Summary
    * @constructor
-   * @param {helion.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
+   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} appUtilsService - appUtilsService service
    */
   function CliCommandsFactory(frameworkDetailView, appUtilsService) {
