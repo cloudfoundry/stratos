@@ -53,6 +53,7 @@
       if (angular.isUndefined(spaceDetail().instances)) {
         return update();
       }
+      vm.serviceInstances = spaceDetail().instances;
       return $q.resolve();
     }
 
@@ -60,6 +61,7 @@
       return spaceModel.listAllServiceInstancesForSpace(vm.clusterGuid, vm.spaceGuid, {
         return_user_provided_service_instances: true
       }).then(function () {
+        vm.serviceInstances = spaceDetail().instances;
         if (serviceInstance) {
           updateActions([serviceInstance]);
           spaceModel.updateServiceInstanceCount(vm.clusterGuid, vm.spaceGuid, _.keys(spaceDetail().instances).length);
