@@ -3,7 +3,7 @@
 // Easily pump out default styles, as well as :hover, :focus, :active,
 // and disabled options for all buttons
 
-@mixin helion-button-variant($color, $background, $border-color, $outline-width) {
+@mixin stratos-button-variant($color, $background, $border-color, $outline-width) {
   &,
   &:focus,
   &.focus,

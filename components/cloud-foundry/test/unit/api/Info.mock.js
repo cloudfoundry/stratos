@@ -14,7 +14,7 @@
         "build": "4.0.0",
         "support": "stackato-support@hpe.com",
         "version": 2,
-        "description": "HPE Helion Cloud Foundry",
+        "description": "Stratos Cloud Foundry",
         "authorization_endpoint": "https://hcf.identity.julbra.stacktest.io:443",
         "token_endpoint": "https://hcf.identity.julbra.stacktest.io:443",
         "min_cli_version": null,
