@@ -8,7 +8,7 @@
   /**
    * @memberof cloud-foundry.view.dashboard.cluster
    * @name CliCommandsFactory
-   * @description Factory to provide a way to show the cli commands for HCF
+   * @description Factory to provide a way to show the cli commands for CF
    * @constructor
    * @param {app.model.modelManager} modelManager - The console's modelManager service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
@@ -23,8 +23,8 @@
        * @function show
        * @memberof cloud-foundry.view.dashboard.cluster
        * @description Show a detail view containing basic cli instructions
-       * @param {string=} api - The api url used to connect the HCF cli tool to the required HCF
-       * @param {string=} username - Username used to connect to HCF
+       * @param {string=} api - The api url used to connect the CF cli tool to the required CF
+       * @param {string=} username - Username used to connect to CF
        * @param {string=} clusterGuid - Target cluster guid
        * @param {string=} organization - Target organization
        * @param {string=} space - Target space
@@ -32,7 +32,7 @@
        * @public
        */
       show: function (api, username, clusterGuid, organization, space) {
-        var user = consoleInfo.info.endpoints.hcf[clusterGuid].user;
+        var user = consoleInfo.info.endpoints.cf[clusterGuid].user;
         var isAdmin = user.admin;
 
         var canUpdateOrg = organization ? authModel.isAllowed(clusterGuid,

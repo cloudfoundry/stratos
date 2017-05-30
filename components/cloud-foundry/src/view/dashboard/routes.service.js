@@ -46,7 +46,7 @@
     /**
      * @function unmapRoute
      * @description Unmap route from application
-     * @param {string} cnsiGuid the cnsi guid of the HCF cluster
+     * @param {string} cnsiGuid the cnsi guid of the CF cluster
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
      * @param {string} appGuid the app guid to unmap this route from
@@ -88,7 +88,7 @@
     /**
      * @function unmapRoutes
      * @description Unmap route from applications
-     * @param {string} cnsiGuid the cnsi guid of the HCF cluster
+     * @param {string} cnsiGuid the cnsi guid of the CF cluster
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
      * @param {Array} appGuids array of application guids to unmap
@@ -142,7 +142,7 @@
     /**
      * @function deleteRoute
      * @description Unmap and delete route
-     * @param {string} cnsiGuid the cnsi guid of the HCF cluster
+     * @param {string} cnsiGuid the cnsi guid of the CF cluster
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
      * @returns {promise} promise once execution completed. This could mean confirm dialog was cancelled OR delete

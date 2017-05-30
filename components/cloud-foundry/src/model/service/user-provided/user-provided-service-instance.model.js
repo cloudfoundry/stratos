@@ -20,9 +20,9 @@
    * @memberof cloud-foundry.model.service-instance
    * @name ServiceInstance
    * @param {app.api.apiManager} apiManager - the API manager
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    * @property {object} data - the data holder
    * @class
    */

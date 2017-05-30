@@ -139,7 +139,7 @@
 
           var username = null;
           if (consoleInfo.info.endpoints) {
-            username = consoleInfo.info.endpoints.hcf[vm.model.application.cluster.guid].user.name;
+            username = consoleInfo.info.endpoints.cf[vm.model.application.cluster.guid].user.name;
           }
           cfAppCliCommands.show(vm.model.application, username);
         },
@@ -412,7 +412,7 @@
             // Hide delete if user has no project permissions
             hideAction = true;
           } else if (authModel.isInitialized(cnsiGuid)) {
-            // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+            // Hide actions if user has no CF app update perissions (i.e not a space developer)
             var spaceGuid = vm.model.application.summary.space_guid;
             hideAction = !authModel.isAllowed(cnsiGuid,
               authModel.resources.application,

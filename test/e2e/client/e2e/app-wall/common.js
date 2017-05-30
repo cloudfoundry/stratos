@@ -13,9 +13,9 @@
     expectGetConsoleInfo($httpBackend);
     expectGetClustersWithSuccess($httpBackend);
     expectGetRegisterdClusters($httpBackend);
-    expectGetHcfClusterInfo($httpBackend);
+    expectGetCfClusterInfo($httpBackend);
     expectGetHceClusterInfo($httpBackend);
-    expectHcfCalls($httpBackend);
+    expectCfCalls($httpBackend);
   }
 
   function setupWithoutClusters($httpBackend) {
@@ -80,10 +80,10 @@
             type: ''
           }
         },
-        hcf: {
+        cf: {
           '8221adff-529a-4567-b57a-155fb69f1bd0': {
             guid: '8221adff-529a-4567-b57a-155fb69f1bd0',
-            name: 'HCF_1',
+            name: 'CF_1',
             version: '',
             user: {
               guid: 'ae257571-e323-4cd9-bd97-2b21223d9b36',
@@ -93,7 +93,7 @@
           },
           '925f6b40-c0e4-4595-97e5-287c3c04b1c2': {
             guid: '925f6b40-c0e4-4595-97e5-287c3c04b1c2',
-            name: 'HCF_2',
+            name: 'CF_2',
             version: '',
             user: {
               guid: '58d56fe1-cacf-484b-aa7d-61cf019e6402',
@@ -104,7 +104,7 @@
           },
           'bd4fd4f9-2001-4609-86e6-ccfa2a8ba92d': {
             guid: 'bd4fd4f9-2001-4609-86e6-ccfa2a8ba92d',
-            name: 'HCF_3',
+            name: 'CF_3',
             version: '',
             user: {
               guid: 'a8b7d5ef-dee6-4e71-ae8e-348971151351',
@@ -115,7 +115,7 @@
           },
           'd13aa0f2-4500-4e0d-aa14-1b9f4e0769d8': {
             guid: 'd13aa0f2-4500-4e0d-aa14-1b9f4e0769d8',
-            name: 'HCF_4',
+            name: 'CF_4',
             version: '',
             user: {
               guid: '0c97cd5a-8ef8-4f80-af46-acfa8697824e',
@@ -131,8 +131,8 @@
 
   function expectGetClustersWithSuccess($httpBackend) {
     $httpBackend.whenGET('/pp/v1/cnsis').respond(200, [
-      {id: 1, name: 'HCF_1', url: ' cluster1_url', cnsi_type: 'hcf', guid: '8221adff-529a-4567-b57a-155fb69f1bd0'},
-      {id: 2, name: 'HCE_1', url: ' cluster2_url', cnsi_type: 'hce', guid: 'f0b0f8c6-d00d-47f2-8636-1f558f7ec48e'}
+      {id: 1, name: 'CF_1', url: ' cluster1_url', cnsi_type: 'hcf', guid: '8221adff-529a-4567-b57a-155fb69f1bd0'},
+      {id: 2, name: 'CE_1', url: ' cluster2_url', cnsi_type: 'hce', guid: 'f0b0f8c6-d00d-47f2-8636-1f558f7ec48e'}
     ]);
   }
 
@@ -142,7 +142,7 @@
         valid: true,
         error: false,
         id: 1,
-        name: 'HCF_1',
+        name: 'CF_1',
         url: ' cluster1_url',
         cnsi_type: 'hcf',
         guid: '8221adff-529a-4567-b57a-155fb69f1bd0'
@@ -159,7 +159,7 @@
     ]);
   }
 
-  function expectGetHcfClusterInfo($httpBackend) {
+  function expectGetCfClusterInfo($httpBackend) {
     $httpBackend.whenGET('/pp/v1/proxy/v2/info').respond(200, {});
   }
 
@@ -167,7 +167,7 @@
     $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
   }
 
-  function expectHcfCalls($httpBackend) {
+  function expectCfCalls($httpBackend) {
 
     $httpBackend.whenGET('/pp/v1/proxy/v2/config/feature_flags').respond([]);
 

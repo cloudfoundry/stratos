@@ -144,7 +144,7 @@
     </div>
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
       <div ng-if="!applicationsListCtrl.isSpaceDeveloper">
-        <div ng-if="applicationsListCtrl.isAdminInAnyHcf()">
+        <div ng-if="applicationsListCtrl.isAdminInAnyCf()">
           <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
           <div class="applications-msg" translate>You have no applications and</div>
           <div class="applications-msg" translate>there are no spaces where you can add any.</div>
@@ -153,7 +153,7 @@
             <span translate>to manage spaces.</span>
           </div>
         </div>
-        <div ng-if="!applicationsListCtrl.isAdminInAnyHcf()">
+        <div ng-if="!applicationsListCtrl.isAdminInAnyCf()">
           <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
           <div class="applications-msg" translate>You have no applications and cannot add any.</div>
           <div class="applications-msg" translate>Please contact your administrator.</div>

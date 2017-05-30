@@ -6,13 +6,13 @@
   var acceptanceTests = [
     '../test/e2e/tests/acceptance/login-page.spec.js',
     '../test/e2e/tests/acceptance/endpoints-dashboard.spec.js',
-    '../test/e2e/tests/acceptance/endpoints-list-hcf.spec.js',
+    '../test/e2e/tests/acceptance/endpoints-list-cf.spec.js',
     '../test/e2e/tests/acceptance/endpoints-pat.spec.js',
     '../test/e2e/tests/acceptance/applications.add-app.spec.js',
     '../test/e2e/tests/acceptance/application.delivery-pipeline.spec.js',
     '../test/e2e/tests/acceptance/application.spec.js',
     '../test/e2e/tests/acceptance/application.delete-app.spec.js',
-    '../test/e2e/tests/acceptance/hcf.organizations.spaces.spec.js',
+    '../test/e2e/tests/acceptance/cf.organizations.spaces.spec.js',
     '../test/e2e/tests/acceptance/application-wall.spec.js',
     '../test/e2e/tests/acceptance/navbar.spec.js',
     '../test/e2e/tests/acceptance/log-stream.spec.js'
@@ -74,8 +74,8 @@
       caCert: '',
       appWithLogStream: 'node-env',
       cnsi: {
-        hcf: {
-          hcf1: {
+        cf: {
+          cf1: {
             register: {
               api_endpoint: 'https://api.10.4.21.211.nip.io:8443',
               cnsi_name: 'hcf',

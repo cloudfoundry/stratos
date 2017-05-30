@@ -159,7 +159,7 @@
 
     /**
      * @function refreshVersions
-     * @description Refreshes the application versions from HCF
+     * @description Refreshes the application versions from CF
      * @param {boolean} showBusy - whether or not to show the busy indicator (typiaclly only used on first load)
      * @public
      **/

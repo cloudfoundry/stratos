@@ -198,7 +198,7 @@
           var noEndpoints = data.numAvailable === 0;
           // Admin
           if (account.isAdmin()) {
-            // Go the endpoints dashboard if there are no HCF clusters
+            // Go the endpoints dashboard if there are no CF clusters
             if (noEndpoints) {
               vm.redirectState = 'endpoint.dashboard';
               if (!vm.isEndpointsDashboardAvailable) {
@@ -209,7 +209,7 @@
           } else {
             // Developer or Endpoint Dashboard plugin isn't loaded
             if (noEndpoints) {
-              // No HCF instances, so the system is not setup and the user can't fix this
+              // No CF instances, so the system is not setup and the user can't fix this
               continueLogin = false;
               appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
             } else {

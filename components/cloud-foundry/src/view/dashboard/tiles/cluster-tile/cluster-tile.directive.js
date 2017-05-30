@@ -28,12 +28,12 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
    * @property {number} userCount - user count
    * @property {object} cardData - gallery-card directive data object
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    */
   function ClusterTileController($scope, $state, modelManager, apiManager, appUtilsService, modelUtils) {
     var vm = this;
@@ -93,7 +93,7 @@
       vm.userCount = 0;
 
       if (!vm.service.isConnected || vm.userService.error ||
-        !vm.consoleInfo.info.endpoints.hcf[vm.service.guid].user.admin) {
+        !vm.consoleInfo.info.endpoints.cf[vm.service.guid].user.admin) {
         vm.userCount = undefined;
         return;
       }

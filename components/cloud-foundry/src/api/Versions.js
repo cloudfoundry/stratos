@@ -33,8 +33,6 @@
 
    /*
     * List Versions for an Application
-    * For detailed information, see online documentation at:
-    * https://github.com/hpcloud/hcf-versions/blob/develop/swagger-spec/hcf-versions.yml
     */
     ListVersions: function (guid, params, httpConfigOptions) {
       var config = this._makeConfig(params, httpConfigOptions);
@@ -44,9 +42,7 @@
     },
 
    /*
-    * Rollback the Version for an Application to a pervious one
-    * For detailed information, see online documentation at:
-    * https://github.com/hpcloud/hcf-versions/blob/develop/swagger-spec/hcf-versions.yml
+    * Rollback the Version for an Application to a previous one
     */
     Rollback: function (guid, params, httpConfigOptions) {
       var config = this._makeConfig(params, httpConfigOptions);

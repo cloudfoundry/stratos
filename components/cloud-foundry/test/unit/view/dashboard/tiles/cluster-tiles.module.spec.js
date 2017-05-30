@@ -22,7 +22,7 @@
       authorization_endpoint: '',
       token_endpoint: ''
     };
-    var hcfService = {
+    var cfService = {
       guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
       name: 'lol',
       cnsi_type: 'hcf',
@@ -30,23 +30,23 @@
         Scheme: 'https',
         Opaque: '',
         User: null,
-        Host: 'api.hcf.stratos.lol',
+        Host: 'api.cf.stratos.lol',
         Path: '',
         RawPath: '',
         awQuery: '',
         Fragment: ''
       },
-      authorization_endpoint: 'https://login.hcf.stratos.lol',
-      token_endpoint: 'https://uaa.hcf.stratos.lol'
+      authorization_endpoint: 'https://login.cf.stratos.lol',
+      token_endpoint: 'https://uaa.cf.stratos.lol'
     };
-    var hcfUserService = {
+    var cfUserService = {
       guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
       name: 'lol',
       api_endpoint: {
         Scheme: 'https',
         Opaque: '',
         User: null,
-        Host: 'api.hcf.stratos.lol',
+        Host: 'api.cf.stratos.lol',
         Path: '',
         RawPath: '',
         RawQuery: '',
@@ -141,8 +141,8 @@
       });
 
       it('cluster - connected + not expired token', function () {
-        serviceInstanceModel.serviceInstances = [unknownService, hcfService];
-        var cloned = angular.fromJson(angular.toJson(hcfUserService));
+        serviceInstanceModel.serviceInstances = [unknownService, cfService];
+        var cloned = angular.fromJson(angular.toJson(cfUserService));
         cloned.valid = true;
         userServiceInstanceModel.serviceInstances = {};
         userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
@@ -151,8 +151,8 @@
 
         expect(clusterTilesCtrl.serviceInstances).toBeDefined();
         expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(true);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
+        expect(clusterTilesCtrl.serviceInstances[cfService.guid].isConnected).toEqual(true);
+        expect(clusterTilesCtrl.serviceInstances[cfService.guid].hasExpired).toEqual(false);
         expect(clusterTilesCtrl.state).toEqual('');
       });
 
@@ -215,7 +215,7 @@
 
       it('has clusters, always show them', function () {
         clusterTilesCtrl.serviceInstances = {};
-        clusterTilesCtrl.serviceInstances[hcfService.guid] = hcfService;
+        clusterTilesCtrl.serviceInstances[cfService.guid] = cfService;
         clusterTilesCtrl.updateState(true, false);
         expect(clusterTilesCtrl.state).toEqual('');
       });

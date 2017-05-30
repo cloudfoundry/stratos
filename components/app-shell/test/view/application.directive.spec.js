@@ -90,7 +90,7 @@
 
       // method invocation
 
-      it('invoke `login` method - success - dev user - no hcf services', function () {
+      it('invoke `login` method - success - dev user - no cf services', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
@@ -108,7 +108,7 @@
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
-      it('invoke `login` method - success - admin user - no hcf services', function () {
+      it('invoke `login` method - success - admin user - no cf services', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);

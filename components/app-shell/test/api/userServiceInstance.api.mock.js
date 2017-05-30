@@ -15,13 +15,13 @@
             body: [
               {
                 "guid": cnsiGuid,
-                "name": "Julbra HCF",
+                "name": "Julbra CF",
                 "cnsi_type": "hcf",
                 "api_endpoint": {
                   "Scheme": "https",
                   "Opaque": "",
                   "User": null,
-                  "Host": "api.hcf.julbra.stacktest.io",
+                  "Host": "api.cf.julbra.stacktest.io",
                   "Path": "/",
                   "RawPath": "",
                   "RawQuery": "",

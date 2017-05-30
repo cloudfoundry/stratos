@@ -21,16 +21,16 @@ applications:
 <br/>
 <p translate>3. Enter the following commands in the CLI:</p>
 <br><h5 translate>Target the Cloud Foundry API endpoint</h5>
-<code-block ng-if="{{wizardCtrl.options.userInput.hcfApiEndpoint}}">cf api {{wizardCtrl.options.userInput.hcfApiEndpoint}}</code-block>
-<code-block ng-if="!{{wizardCtrl.options.userInput.hcfApiEndpoint}}">cf api [Cloud Foundry API endpoint]</code-block>
+<code-block ng-if="{{wizardCtrl.options.userInput.cfApiEndpoint}}">cf api {{wizardCtrl.options.userInput.cfApiEndpoint}}</code-block>
+<code-block ng-if="!{{wizardCtrl.options.userInput.cfApiEndpoint}}">cf api [Cloud Foundry API endpoint]</code-block>
 
 
 <br><h5 translate>Login to Cloud Foundry endpoint</h5>
 <code-block hide-copy="true">$ cf login
-  API endpoint: <span ng-if="{{wizardCtrl.options.userInput.hcfApiEndpoint}}">{{wizardCtrl.options.userInput.hcfApiEndpoint}}</span>
-  < ng-if="!{{wizardCtrl.options.userInput.hcfApiEndpoint}}">[Cloud Foundry API endpoint]'}}
+  API endpoint: <span ng-if="{{wizardCtrl.options.userInput.cfApiEndpoint}}">{{wizardCtrl.options.userInput.cfApiEndpoint}}</span>
+  < ng-if="!{{wizardCtrl.options.userInput.cfApiEndpoint}}">[Cloud Foundry API endpoint]'}}
 
-  Email> {{ wizardCtrl.options.userInput.hcfUserName || '[username]'}}
+  Email> {{ wizardCtrl.options.userInput.cfUserName || '[username]'}}
 
   Password> [password]
   Authenticating...

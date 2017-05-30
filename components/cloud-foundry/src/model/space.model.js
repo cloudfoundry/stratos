@@ -22,9 +22,9 @@
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
    * @param {object} cfServiceUtils - the service utils service
-   * @param {object} modelUtils - a service containing general hcf model helpers
+   * @param {object} modelUtils - a service containing general cf model helpers
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @property {object} modelUtils - service containing general hcf model helpers
+   * @property {object} modelUtils - service containing general cf model helpers
    * @class
    */
   function Space($q, apiManager, modelManager, cfServiceUtils, modelUtils, cfOrganizationModel) {
@@ -361,9 +361,9 @@
     /**
      * @function cacheUsersRolesInSpace
      * @memberof cloud-foundry.model.space
-     * @description Cache user roles from a HCF space entity
+     * @description Cache user roles from a CF space entity
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {string} space - HCF space entity. This should contain a set of params to extract the roles from
+     * @param {string} space - CF space entity. This should contain a set of params to extract the roles from
      * @returns {object} unsplit space roles
      * @public
      */
@@ -438,7 +438,7 @@
     /**
      * @function updateRoutesCount
      * @memberof cloud-foundry.model.space
-     * @description Updates the cached route count either from the provided value or via HCF. This will be used when
+     * @description Updates the cached route count either from the provided value or via CF. This will be used when
      * it's not appropriate to fetch/use data that's inline
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
@@ -461,7 +461,7 @@
     /**
      * @function updateServiceInstanceCount
      * @memberof cloud-foundry.model.space
-     * @description Updates the service instance count either from the provided value or via HCF. This will be used when
+     * @description Updates the service instance count either from the provided value or via CF. This will be used when
      * it's not appropriate to fetch/use data that's inline
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
@@ -484,7 +484,7 @@
     /**
      * @function updateServiceCount
      * @memberof cloud-foundry.model.space
-     * @description Updates the service count either from the provided value or via HCF. This will be used when
+     * @description Updates the service count either from the provided value or via CF. This will be used when
      * it's not appropriate to fetch/use data that's inline
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
@@ -646,7 +646,7 @@
     function createSpaces(cnsiGuid, orgGuid, spaceNames, params) {
 
       var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
-      var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = consoleInfoModel.info.endpoints.cf[cnsiGuid].user.guid;
       var cfOrganizationModel = _getOrganizationModel();
       var createPromises = [];
 

@@ -73,9 +73,9 @@
   function setupConsoleInfo(isAdmin, userGuid, cnsiGuid, modelManager) {
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     consoleInfo.info = {};
-    _.set(consoleInfo.info, 'endpoints.hcf.' + cnsiGuid, {
+    _.set(consoleInfo.info, 'endpoints.cf.' + cnsiGuid, {
       guid: cnsiGuid,
-      name: 'myHCF',
+      name: 'myCF',
       version: '',
       user: {guid: userGuid, name: 'test', admin: isAdmin},
       type: ''

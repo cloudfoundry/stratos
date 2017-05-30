@@ -30,7 +30,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
@@ -258,7 +258,7 @@
             // Filter applied. Reach out and call again without filters and only retrieve a single app per cnsi.
 
             // This will run every time the user changes the org or space filters. Tested with 1001 apps and it takes
-            // about 60ms to complete (HCF in AWS)
+            // about 60ms to complete (CF in AWS)
             applicationApi.ListAllApps({
               'results-per-page': 1
             }, {
@@ -388,8 +388,8 @@
           } else {
             // We can further optimize the calls to be in parallel - after the first call, we know how many calls we need to make
             // Find the highest total number of page
-            var maxPage = _.max(_.map(response.data, function (hcfResponse) {
-              return hcfResponse.total_pages || 0;
+            var maxPage = _.max(_.map(response.data, function (cfResponse) {
+              return cfResponse.total_pages || 0;
             }));
             var tasks = [];
             for (var i = 2; i <= maxPage; i++) {
