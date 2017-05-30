@@ -39,7 +39,7 @@
                     bindable: true,
                     unique_id: "8be9090d-f716-4111-aa75-74ec99c30069",
                     extra: {
-                      vendor: "Hewlett Packard Enterprise",
+                      vendor: "SUSE",
                       defaultVersion: 1,
                       versions: "1,2,3",
                       catalogId: "sample:mysql",
@@ -77,7 +77,7 @@
                     bindable: true,
                     unique_id: "8be9090d-f716-4111-aa75-74ec99c30068",
                     extra: {
-                      vendor: "Hewlett Packard Enterprise",
+                      vendor: "SUSE",
                       defaultVersion: 1,
                       versions: "1,2,3",
                       catalogId: "sample:sqlserver",
