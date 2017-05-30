@@ -5,12 +5,12 @@
 
     beforeEach(module('app.framework.validators'));
 
-    describe('helion-unique - editing with complex table data', function () {
+    describe('stratos-unique - editing with complex table data', function () {
       var $compile, $scope, $form;
 
       var markup =
         '<form name="testForm">"' +
-        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" key="\'name\'" helion-unique/>' +
+        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" key="\'name\'" stratos-unique/>' +
         '</form>';
 
       beforeEach(inject(function ($injector) {
@@ -59,12 +59,12 @@
 
     });
 
-    describe('helion-unique - adding with complex table data', function () {
+    describe('stratos-unique - adding with complex table data', function () {
       var $compile, $scope, $form;
 
       var markup =
         '<form name="testForm">"' +
-        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" key="\'name\'" helion-unique/>' +
+        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" key="\'name\'" stratos-unique/>' +
         '</form>';
 
       beforeEach(inject(function ($injector) {
@@ -111,12 +111,12 @@
 
     });
 
-    describe('helion-unique - edting with simple table data', function () {
+    describe('stratos-unique - edting with simple table data', function () {
       var $compile, $scope, $form;
 
       var markup =
         '<form name="testForm">"' +
-        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" helion-unique/>' +
+        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" stratos-unique/>' +
         '</form>';
 
       beforeEach(inject(function ($injector) {
@@ -164,12 +164,12 @@
       });
     });
 
-    describe('helion-unique - adding with simple table data', function () {
+    describe('stratos-unique - adding with simple table data', function () {
       var $compile, $scope, $form;
 
       var markup =
         '<form name="testForm">"' +
-        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" helion-unique/>' +
+        '<input type="text" name="serverName" ng-model="data.serverName" items="servers" stratos-unique/>' +
         '</form>';
 
       beforeEach(inject(function ($injector) {

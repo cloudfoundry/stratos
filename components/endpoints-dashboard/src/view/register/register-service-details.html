@@ -22,7 +22,7 @@
           Invalid url format
         </span>
         <span translate
-              ng-if="wizardForm[step.formName][endpoint.nameOfUrlInput].$error.helionUnique && wizardForm[step.formName][endpoint.nameOfUrlInput].$dirty">
+              ng-if="wizardForm[step.formName][endpoint.nameOfUrlInput].$error.stratosUnique && wizardForm[step.formName][endpoint.nameOfUrlInput].$dirty">
           Url is not unique
         </span>
       </span>
@@ -31,7 +31,7 @@
                required
                placeholder="{{ endpoint.html.details.urlHint | translate }}"
                ng-pattern="step.urlValidationExpr"
-               helion-unique items="step.instanceUrls"
+               stratos-unique items="step.instanceUrls"
                ignore-case
                auto-focus="300"/>
       </div>
@@ -40,11 +40,11 @@
         <label class="control-label" translate>Name</label>
       <span class="control-message">
         <span translate ng-if="wizardForm[step.formName][endpoint.nameOfNameInput].$error.required">Name is required</span>
-        <span translate ng-if="wizardForm[step.formName][endpoint.nameOfNameInput].$error.helionUnique">Name is not unique</span>
+        <span translate ng-if="wizardForm[step.formName][endpoint.nameOfNameInput].$error.stratosUnique">Name is not unique</span>
       </span>
         <input type="text" name="{{endpoint.nameOfNameInput}}" class="form-control"
                ng-model="wizardCtrl.options.userInput.name"
-               helion-unique items="step.instanceNames"
+               stratos-unique items="step.instanceNames"
                ignore-case
                required/>
       </div>

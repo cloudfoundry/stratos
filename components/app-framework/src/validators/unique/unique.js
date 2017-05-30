@@ -3,12 +3,12 @@
 
   angular
     .module('app.framework.validators')
-    .directive('helionUnique', helionUnique);
+    .directive('stratosUnique', stratosUnique);
 
   /**
-   * @namespace app.framework.validators.helionUnique
+   * @namespace app.framework.validators.stratosUnique
    * @memberof app.framework.validators
-   * @name helionUnique
+   * @name stratosUnique
    * @description A validator to check for uniqueness of the
    * value entered in the input field.
    * @example
@@ -18,11 +18,11 @@
    * ];
    * <form name="testForm">
    *   <input type="text" name="serverName" ng-model="data.serverName"
-   *     items="servers" key="'name'" ignore-case helion-unique/>
+   *     items="servers" key="'name'" ignore-case stratos-unique/>
    * </form>
-   * @returns {object} The helion-unique directive definition object
+   * @returns {object} The stratos-unique directive definition object
    */
-  function helionUnique() {
+  function stratosUnique() {
     return {
       link: link,
       require: 'ngModel',
@@ -38,7 +38,7 @@
       var items = [];
       var ignoreCase = angular.isDefined(attrs.ignoreCase);
 
-      ngModelController.$validators.helionUnique = validator;
+      ngModelController.$validators.stratosUnique = validator;
       scope.$watchCollection('items', update);
 
       update();

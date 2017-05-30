@@ -30,14 +30,14 @@
         Scheme: 'https',
         Opaque: '',
         User: null,
-        Host: 'api.hcf.helion.lol',
+        Host: 'api.hcf.stratos.lol',
         Path: '',
         RawPath: '',
         awQuery: '',
         Fragment: ''
       },
-      authorization_endpoint: 'https://login.hcf.helion.lol',
-      token_endpoint: 'https://uaa.hcf.helion.lol'
+      authorization_endpoint: 'https://login.hcf.stratos.lol',
+      token_endpoint: 'https://uaa.hcf.stratos.lol'
     };
     var hcfUserService = {
       guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
@@ -46,7 +46,7 @@
         Scheme: 'https',
         Opaque: '',
         User: null,
-        Host: 'api.hcf.helion.lol',
+        Host: 'api.hcf.stratos.lol',
         Path: '',
         RawPath: '',
         RawQuery: '',
