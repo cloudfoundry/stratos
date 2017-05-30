@@ -6,14 +6,14 @@
   }
 }
 
-.media-list.hpe-add-option-list {
+.media-list.console-add-option-list {
   .media {
-    border-top: $hpe-media-border;
+    border-top: $console-media-border;
     margin-top: 0;
-    padding: $hpe-unit-space / 2;
+    padding: $console-unit-space / 2;
 
     &:last-child {
-      border-bottom: $hpe-media-border;
+      border-bottom: $console-media-border;
     }
 
     p:last-of-type {
@@ -21,13 +21,13 @@
     }
   }
 
-  .hpe-media-actions-col {
+  .console-media-actions-col {
     display: table-cell;
-    padding-left: $hpe-unit-space / 2;
+    padding-left: $console-unit-space / 2;
     text-align: right;
     vertical-align: bottom;
 
-    .hpe-media-add-link {
+    .console-media-add-link {
       display: flex;
       align-items: center;
 
@@ -39,44 +39,39 @@
       }
 
       i {
-        font-weight: $hpe-font-weight-semibold;
-        margin-right: $hpe-unit-space / 4;
-
-        &.hpe-icon-right {
-          margin-left: $hpe-unit-space / 4;
-          margin-right: 0;
-        }
+        font-weight: $console-font-weight-semibold;
+        margin-right: $console-unit-space / 4;
       }
     }
   }
 
   .media-left {
-    padding-right: $hpe-unit-space;
+    padding-right: $console-unit-space;
   }
 
   .media-right {
-    padding-left: $hpe-unit-space;
+    padding-left: $console-unit-space;
   }
 
   .media-icon {
-    font-size: $hpe-media-object-width;
+    font-size: $console-media-object-width;
 
-    &.hpe-media-icon-sm {
-      font-size: $hpe-media-object-sm-width;
+    &.console-media-icon-sm {
+      font-size: $console-media-object-sm-width;
     }
   }
 
   .media-object {
-    width: $hpe-media-object-width;
+    width: $console-media-object-width;
 
-    &.hpe-media-object-sm {
-      width: $hpe-media-object-sm-width;
+    &.console-media-object-sm {
+      width: $console-media-object-sm-width;
     }
   }
 
-  .hpe-media-select-col {
+  .app-media-select-col {
     display: table-cell;
     vertical-align: middle;
-    padding-right: $hpe-unit-space / 2;
+    padding-right: $console-unit-space / 2;
   }
 }

@@ -47,7 +47,7 @@
                       categories: "database",
                       labels: "User-label1",
                       imageUrl: "http://localhost:8081/v1/services/sample:mysql?image",
-                      documentationUrl: "http://www.hpe.com/",
+                      documentationUrl: "http://www.suse.com/",
                       readme: "http://localhost:8081/v1/services/sample:mysql?readme"
                     },
                     tags: [],
@@ -85,7 +85,7 @@
                       categories: "database",
                       labels: "User-label2",
                       imageUrl: "http://localhost:8081/v1/services/sample:mysql?image",
-                      documentationUrl: "http://www.hpe.com/",
+                      documentationUrl: "http://www.suse.com/",
                       readme: "http://localhost:8081/v1/services/sample:mysql?readme"
                     },
                     tags: [],

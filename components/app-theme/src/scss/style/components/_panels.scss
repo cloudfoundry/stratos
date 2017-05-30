@@ -1,5 +1,5 @@
 .panel {
-  @include hpe-box-shadow-small();
+  @include console-box-shadow-small();
   border: none;
   color: $panel-fg;
 

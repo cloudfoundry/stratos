@@ -1,12 +1,12 @@
-$hpe-popover-top                  : $hpe-unit-space * 4.5 !default;
-$hpe-popover-right                : 4px !default;
-$hpe-popover-border-color         : rgba(0, 0, 0, 0.1) !default;
-$hpe-popover-arrow-border-color   : rgba(0, 0, 0, 0.2) !default;
+$console-popover-top                  : $console-unit-space * 4.5 !default;
+$console-popover-right                : 4px !default;
+$console-popover-border-color         : rgba(0, 0, 0, 0.1) !default;
+$console-popover-arrow-border-color   : rgba(0, 0, 0, 0.2) !default;
 $popover-border-color             : $gray-light;
 $popover-border-width             : 1px;
 
 .popover {
-  @include hpe-box-shadow-small();
+  @include console-box-shadow-small();
   border-color: $popover-border-color;
   border-radius: 0;
   border-width: $popover-border-width;
@@ -23,42 +23,42 @@ $popover-border-width             : 1px;
     color: $gray-darker;
     padding: 8px 20px;
     font-size: 14px;
-    line-height: $hpe-unit-space;
+    line-height: $console-unit-space;
   }
 }
 
 
-.popover.hpe-popover {
-  @include hpe-box-shadow-small();
+.popover.console-popover {
+  @include console-box-shadow-small();
 
   box-sizing: border-box;
-  border-color: $hpe-popover-border-color;
+  border-color: $console-popover-border-color;
   left: auto;
-  top: $hpe-popover-top;
-  right: $hpe-popover-right;
+  top: $console-popover-top;
+  right: $console-popover-right;
   display: block;
   max-width: none;
 
   &.bottom > .arrow {
-    border-bottom-color: $hpe-popover-arrow-border-color;
+    border-bottom-color: $console-popover-arrow-border-color;
     left: auto;
-    top: -$hpe-unit-space * 3;
-    right: $hpe-unit-space;
-    border-width: $hpe-unit-space;
-    border-bottom-width: $hpe-unit-space * 2;
+    top: -$console-unit-space * 3;
+    right: $console-unit-space;
+    border-width: $console-unit-space;
+    border-bottom-width: $console-unit-space * 2;
 
     &:after {
       left: 0;
-      margin-left: -$hpe-unit-space;
-      border-width: $hpe-unit-space;
+      margin-left: -$console-unit-space;
+      border-width: $console-unit-space;
       border-top-width: 0;
-      border-bottom-width: $hpe-unit-space * 2;
+      border-bottom-width: $console-unit-space * 2;
     }
   }
 
   .popover-content {
-    padding: $hpe-unit-space;
+    padding: $console-unit-space;
     font-size: $font-size-base;
-    line-height: $hpe-unit-space;
+    line-height: $console-unit-space;
   }
 }

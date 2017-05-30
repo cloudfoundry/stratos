@@ -2,7 +2,7 @@
   @include flex-vertical-centered();
   color: $gray-darker;
   padding: $action-header-padding;
-  font-weight: $hpe-font-weight-semibold;
+  font-weight: $console-font-weight-semibold;
 
   .btn.btn-link {
     @include flex-vertical-centered();

@@ -7,14 +7,14 @@
   }
 
   &:not(.nav-pills) > li > a {
-    font-weight: $hpe-font-weight-semibold;
+    font-weight: $console-font-weight-semibold;
   }
 }
 
 // Stacked Nav
 // -------------------------
 .nav-stacked {
-  background: $hpe-primary-bg;
+  background: $console-primary-bg;
 
   & > li:not(.active):not(.disabled) > a {
     color: $nav-tabs-inactive-color;
@@ -32,9 +32,9 @@
   }
 
   & > li > a {
-    padding-left: $hpe-unit-space;
-    padding-right: $hpe-unit-space;
-    letter-spacing: $hpe-letter-spacing;
+    padding-left: $console-unit-space;
+    padding-right: $console-unit-space;
+    letter-spacing: $console-letter-spacing;
     font-weight: normal;
   }
 }
@@ -45,7 +45,7 @@
   > li {
     border: none;
     border-bottom: $nav-tabs-underline-width solid transparent;
-    letter-spacing: $hpe-letter-spacing;
+    letter-spacing: $console-letter-spacing;
     margin: 0 0 0 $nav-tabs-item-left-padding;
     padding-bottom: $nav-tabs-padding - $nav-tabs-underline-width;
     padding-top: $nav-tabs-padding;

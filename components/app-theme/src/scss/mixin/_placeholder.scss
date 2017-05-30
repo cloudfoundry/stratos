@@ -1,6 +1,6 @@
-@mixin hpe-placeholder() {
+@mixin console-placeholder() {
   ::-webkit-input-placeholder {@content}
   :-moz-placeholder           {@content}
   ::-moz-placeholder          {@content}
-  :-ms-input-placeholder      {@content}  
+  :-ms-input-placeholder      {@content}
 }
