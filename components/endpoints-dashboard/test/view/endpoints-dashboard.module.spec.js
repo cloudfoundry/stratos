@@ -34,21 +34,6 @@
         isPluginAvailable: function () {
           return true;
         },
-        getOemConfiguration: function () {
-          return {
-            PRODUCT_VERSION: '4.0',
-            TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',
-            PRIVACY_HREF: 'https://www.hpe.com/us/en/legal/privacy.html',
-            PRODUCT_CONSOLE: 'Helion Stackato Web Console',
-            CONSOLE: 'Console',
-            PRODUCT_NAME: 'Helion Stackato',
-            COMPANY_NAME: 'Hewlett Packard Enterprise Company, L.P.',
-            TERMS_OF_USE: 'Terms of Use',
-            PRIVACY: 'Privacy',
-            CODE_ENGINE: 'Helion Code Engine',
-            CLOUD_FOUNDRY: 'Cloud Foundry'
-          };
-        },
         replaceProperties: function (destination, source) {
           _.forIn(destination, function (value, key) {
             delete destination[key];

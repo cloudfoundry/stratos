@@ -54,11 +54,11 @@ gallery-card {
   }
 
   .panel-heading {
-    @include helion-flex-align(flex-start, center);
+    @include stratos-flex-align(flex-start, center);
   }
 
   .panel-footer {
-    @include helion-flex-align(flex-start, center);
+    @include stratos-flex-align(flex-start, center);
     padding: 0;
   }
 }

@@ -19,7 +19,7 @@ select-input {
   }
 
   .select-input-field {
-    @include helion-flex-align(flex-start, center);
+    @include stratos-flex-align(flex-start, center);
 
     .dropdown-toggle {
       margin-left: auto;

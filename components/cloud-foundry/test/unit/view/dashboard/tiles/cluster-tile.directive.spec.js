@@ -12,14 +12,14 @@
         Scheme: 'https',
         Opaque: '',
         User: null,
-        Host: 'api.hcf.helion.lol',
+        Host: 'api.hcf.stratos.lol',
         Path: '',
         RawPath: '',
         RawQuery: '',
         Fragment: ''
       },
-      authorization_endpoint: 'https://login.hcf.helion.lol',
-      token_endpoint: 'https://uaa.hcf.helion.lol'
+      authorization_endpoint: 'https://login.hcf.stratos.lol',
+      token_endpoint: 'https://uaa.hcf.stratos.lol'
     };
 
     beforeEach(module('templates'));

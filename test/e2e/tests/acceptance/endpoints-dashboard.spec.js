@@ -141,7 +141,7 @@
                     if (service) {
                       // 1) we show the correct type
                       if (name === 'hce') {
-                        expect(endpointsPage.endpointType(index)).toBe('Helion Code Engine');
+                        expect(endpointsPage.endpointType(index)).toBe('Code Engine');
                       } else if (name === 'hcf') {
                         expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
