@@ -58,8 +58,8 @@
     }
 
     function updateLocalServiceInstances() {
-      // Filter out the stackato hce service
-      vm.serviceInstances = $filter('removeHceServiceInstance')(spaceDetail().instances);
+      // Filter out the hce service
+      vm.serviceInstances = $filter('filterServiceInstance')(spaceDetail().instances, 'hce-');
     }
 
     function update(serviceInstance) {

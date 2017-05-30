@@ -174,8 +174,8 @@
       $scope.$watchCollection(function () {
         return vm.model.application.summary.services;
       }, function () {
-        // Filter out the stackato hce service
-        vm.serviceInstances = $filter('removeHceServiceInstance')(vm.model.application.summary.services, vm.id);
+        // Filter out the hce service
+        vm.serviceInstances = $filter('filterServiceInstance')(vm.model.application.summary.services, 'hce-', vm.id);
       });
 
       // Unmap from app

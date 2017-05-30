@@ -8,7 +8,7 @@
 
     consoleInfo: function () {
       return {
-        url: '/pp/v1/stackato/info',
+        url: '/pp/v1/info',
 
         response: {
           200: {

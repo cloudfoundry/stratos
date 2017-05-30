@@ -153,7 +153,7 @@
         }
       );
       this.options.safeServices =
-       this.$filter('removeHceServiceInstance')(this.options.safeServices, this.appModel.application.summary.guid);
+       this.$filter('filterServiceInstance')(this.options.safeServices, 'hce-', this.appModel.application.summary.guid);
     },
 
     /**

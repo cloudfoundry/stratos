@@ -83,7 +83,7 @@ $breeze: (
   )
 );
 
-$stackato: (
+$ansi-colours-stratos: (
   'default-foreground': (
     normal: #CCCCCC,
     intense: #F6F6F6
@@ -125,7 +125,7 @@ $stackato: (
   )
 );
 
-$ansi-colours: $stackato;
+$ansi-colours: $ansi-colours-stratos;
 //$ansi-colours: $breeze;
 //$ansi-colours: $dark-pastels;
 
