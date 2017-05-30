@@ -171,13 +171,6 @@
     vm.appUtilsService.chainStateResolve('cf.applications.application.summary', $state, init);
 
     function init() {
-      $scope.$watchCollection(function () {
-        return vm.model.application.summary.services;
-      }, function () {
-        // Filter out the hce service
-        vm.serviceInstances = $filter('filterServiceInstance')(vm.model.application.summary.services, 'hce-', vm.id);
-      });
-
       // Unmap from app
       vm.routesActionMenu[0].hidden = !authModel.isAllowed(vm.cnsiGuid,
         authModel.resources.application,

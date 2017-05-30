@@ -14,11 +14,9 @@
    */
   function filterServiceInstance() {
     return function (services, prefix, appGuid) {
-      // Look at the services for one named '<PREFIX><APP_GUID>'
-      var hceServiceLink = prefix + appGuid;
       return _.filter(services, function (svc) {
         if (appGuid) {
-          return svc.name !== hceServiceLink;
+          return svc.name !== prefix + appGuid;
         } else {
           var appIds = [];
           _.forEach(svc.entity.service_bindings, function (binding) {

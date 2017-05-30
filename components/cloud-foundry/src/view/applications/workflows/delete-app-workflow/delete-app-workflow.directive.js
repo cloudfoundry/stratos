@@ -152,8 +152,6 @@
           return o.bound_app_count === 1;
         }
       );
-      this.options.safeServices =
-       this.$filter('filterServiceInstance')(this.options.safeServices, 'hce-', this.appModel.application.summary.guid);
     },
 
     /**
@@ -347,7 +345,7 @@
     /**
      * @function deleteProject
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @description Delete HCE project
+     * @description Notify application tabs that the application is
      * @returns {promise} A promise
      */
     deleteProject: function () {
