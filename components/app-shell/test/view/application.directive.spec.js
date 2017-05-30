@@ -2,7 +2,7 @@
   'use strict';
 
   describe('application directive', function () {
-    var $httpBackend, $element, applicationCtrl, $state;
+    var $httpBackend, $element, applicationCtrl, $state, redirectStateName;
 
     var testAptEndpoint = {
       Scheme: 'https',
@@ -28,6 +28,9 @@
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?page=1&results-per-page=48').respond(200, {guid: {}});
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond([]);
+      
+      // For some tests, the redirected state depends on whether the endpoints dashboard is available
+      redirectStateName = $state.get('endpoint.dashboard') ? 'endpoint.dashboard' : 'error-page';
     }));
 
     afterEach(function () {
@@ -235,7 +238,7 @@
 
           expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
-          expect($state.current.name).toBe('endpoint.dashboard');
+          expect($state.current.name).toBe(redirectStateName);
         });
 
         it('should not show cluster registration if cluster count > 0', function () {
