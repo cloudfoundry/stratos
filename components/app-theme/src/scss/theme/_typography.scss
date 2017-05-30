@@ -1,15 +1,15 @@
 // typography
 // ==========
 
-// HPE semantic names
+// Stratos semantic names
 // ------------------
-$hpe-font-family:             Metric, sans-serif !default;
+$stratos-font-family:         Lato, sans-serif !default;
 $hpe-letter-spacing:          0.025em;
 $hpe-font-weight-semibold:    600;
 
 // Bootstrap binding names
 // -----------------------
-$font-family-base:            $hpe-font-family !default;
+$font-family-base:            $stratos-font-family !default;
 
 $font-size-base:              16px !default;
 $font-size-large:             18px !default;
