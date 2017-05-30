@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.versions', [])
+    .module('cf-versions.view', [])
     .config(registerRoute)
     .run(registerAppTab);
 

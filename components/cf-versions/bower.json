@@ -1,0 +1,16 @@
+{
+  "name": "cf-versions",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/view/versions/versions.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "cloud-foundry": "./components/cloud-foundry"
+  }
+}
