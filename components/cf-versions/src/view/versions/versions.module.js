@@ -9,7 +9,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.versions', {
       url: '/versions',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/versions/versions.html',
+      templateUrl: 'plugins/cf-versions/view/versions/versions.html',
       controller: ApplicationVersionsController,
       controllerAs: 'applicationVersionsCtrl'
     });
