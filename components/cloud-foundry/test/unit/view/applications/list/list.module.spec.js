@@ -33,7 +33,7 @@
       if (Object.keys(userCnsiModel.serviceInstances).length === 0) {
         userCnsiModel.serviceInstances = {
           cnsiGuid: {
-            cnsi_type: 'hcf',
+            cnsi_type: 'cf',
             guid: cnsiGuid,
             valid: true,
             error: false
@@ -138,7 +138,7 @@
       it('should forward to `cluster view` when a singular cluster is connected', function () {
         $controller.userCnsiModel.serviceInstances = [{
           id: 'test',
-          cnsi_type: 'hcf'
+          cnsi_type: 'cf'
         }];
         $controller.model.clusterCount = 1;
         var endpointsLink = $controller.getEndpointsLink();
@@ -184,7 +184,7 @@
         beforeEach(function () {
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: cnsiGuid
             }
           };
@@ -213,11 +213,11 @@
         beforeEach(function () {
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: 'cnsiGuid1'
             },
             cnsiGuid2: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: 'cnsiGuid2'
             }
           };
@@ -373,11 +373,11 @@
           // Return multiple entries
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: cnsiGuid
             },
             cnsiGuid2: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: filteredCnsiGuid
             }
           };

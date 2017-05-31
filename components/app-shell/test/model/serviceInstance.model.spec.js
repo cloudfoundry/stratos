@@ -13,7 +13,7 @@
       serviceInstance = modelManager.retrieve('app.model.serviceInstance');
 
       mockData = [
-        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
+        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'cf' },
         { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc' }
       ];
     }));
@@ -32,10 +32,10 @@
     });
 
     it('should POST correct data on create()', function () {
-      var response = { cnsi_type: 'hcf', api_endpoint: 'url', name: 'name', skip_ssl_validation: false };
+      var response = { cnsi_type: 'cf', api_endpoint: 'url', name: 'name', skip_ssl_validation: false };
       var data = { api_endpoint: 'url', cnsi_name: 'name', skip_ssl_validation: false };
-      $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, response);
-      serviceInstance.create('hcf', 'url', 'name')
+      $httpBackend.expectPOST('/pp/v1/register/cf', $httpParamSerializer(data)).respond(200, response);
+      serviceInstance.create('cf', 'url', 'name')
         .then(function () {
           var serviceInstances = serviceInstance.serviceInstances;
           expect(serviceInstances.length).toBe(1);
@@ -53,7 +53,7 @@
 
     it('should set `serviceInstances` on list()', function () {
       var expectedData = [
-        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
+        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'cf' },
         { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc' }
       ];
 

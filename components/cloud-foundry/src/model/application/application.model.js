@@ -473,7 +473,7 @@
       // to ignore this in order to have the correct cache
       return _.chain(_getUserCnsiModel().serviceInstances)
         .values()
-        .filter({cnsi_type: 'hcf', valid: true, error: false})
+        .filter({cnsi_type: 'cf', valid: true, error: false})
         .map('guid')
         .value();
     }

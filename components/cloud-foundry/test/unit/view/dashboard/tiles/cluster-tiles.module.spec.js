@@ -25,7 +25,7 @@
     var cfService = {
       guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
       name: 'lol',
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       api_endpoint: {
         Scheme: 'https',
         Opaque: '',

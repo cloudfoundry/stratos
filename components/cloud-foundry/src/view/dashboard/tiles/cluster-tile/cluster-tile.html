@@ -6,9 +6,9 @@
   <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
     <dt translate>ENDPOINT URL</dt>
     <dd class="cluster-tile-endpoint">{{clusterTile.service.api_endpoint.Host}}</dd>
-    <dt ng-if="clusterTile.consoleInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>CF ACCOUNT STATUS</dt>
-    <dd class="cluster-tile-account" ng-if="clusterTile.consoleInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>
-      {{ clusterTile.consoleInfo.info.endpoints.hcf[clusterTile.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
+    <dt ng-if="clusterTile.consoleInfo.info.endpoints.cf[clusterTile.service.guid]" translate>CF ACCOUNT STATUS</dt>
+    <dd class="cluster-tile-account" ng-if="clusterTile.consoleInfo.info.endpoints.cf[clusterTile.service.guid]" translate>
+      {{ clusterTile.consoleInfo.info.endpoints.cf[clusterTile.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
     <dt ng-if="clusterTile.orgCount >= 0" translate>ORGANIZATIONS</dt>
     <dd ng-if="clusterTile.orgCount >= 0" >{{clusterTile.orgCount}}</dd>
     <dt ng-if="clusterTile.userCount >= 0" translate>USERS</dt>

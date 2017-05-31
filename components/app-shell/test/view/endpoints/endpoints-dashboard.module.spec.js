@@ -10,7 +10,7 @@
         Scheme: 'http',
         Host: 'api.foo.com'
       },
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       guid: '1',
       name: 'c1',
       token_expiry: Number.MAX_VALUE

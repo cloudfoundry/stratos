@@ -32,7 +32,7 @@
        * @public
        */
       show: function (api, username, clusterGuid, organization, space) {
-        var user = consoleInfo.info.endpoints.hcf[clusterGuid].user;
+        var user = consoleInfo.info.endpoints.cf[clusterGuid].user;
         var isAdmin = user.admin;
 
         var canUpdateOrg = organization ? authModel.isAllowed(clusterGuid,
