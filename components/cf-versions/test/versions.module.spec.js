@@ -7,7 +7,7 @@
       $interpolate, modelManager, confirmDialog, appUtilsService, appNotificationsService;
 
     beforeEach(module('console-app'));
-    beforeEach(module('cloud-foundry.view.applications.application.versions'));
+    beforeEach(module('cf-versions'));
 
     beforeEach(inject(function ($injector, _$q_, _$interpolate_, _$stateParams_, _$timeout_, _$state_) {
       // Create the parameters required by the ctor

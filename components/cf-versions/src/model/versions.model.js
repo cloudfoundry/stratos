@@ -8,7 +8,7 @@
    * @description Application Versions model
    */
   angular
-    .module('cloud-foundry.model')
+    .module('cf-versions.model', [])
     .run(registerApplicationVersionsModel);
 
   function registerApplicationVersionsModel($q, modelManager, apiManager, modelUtils) {
