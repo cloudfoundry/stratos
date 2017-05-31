@@ -78,7 +78,7 @@
           cf1: {
             register: {
               api_endpoint: 'https://api.10.4.21.211.nip.io:8443',
-              cnsi_name: 'hcf',
+              cnsi_name: 'cf',
               skip_ssl_validation: 'true'
             },
             admin: {
