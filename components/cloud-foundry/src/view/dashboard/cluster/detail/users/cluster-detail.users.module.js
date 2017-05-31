@@ -39,7 +39,7 @@
     this.stateInitialised = false;
 
     function refreshUsers() {
-      var user = that.consoleInfo.info.endpoints.cf[that.guid].user;
+      var user = that.consoleInfo.info.endpoints.hcf[that.guid].user;
       that.isAdmin = user.admin;
 
       that.userRoles = {};

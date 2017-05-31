@@ -37,7 +37,7 @@
 
       var model = {
         consoleInfo: consoleInfo,
-        isAdmin: consoleInfo.endpoints.cf[cnsiGuid].user.admin,
+        isAdmin: consoleInfo.endpoints.hcf[cnsiGuid].user.admin,
         userSummary: userSummary,
         featureFlags: featureFlags,
         checkers: [],

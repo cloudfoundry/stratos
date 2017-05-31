@@ -44,7 +44,7 @@
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
     function refreshUsers() {
-      var user = that.consoleInfo.info.endpoints.cf[that.guid].user;
+      var user = that.consoleInfo.info.endpoints.hcf[that.guid].user;
       that.isAdmin = user.admin;
 
       that.userRoles = {};

@@ -73,7 +73,7 @@
       var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
       if (services.length > 0) {
         _.each(services, function (service) {
-          var endpointUser = _.get(consoleInfo.info.endpoints.cf, service.guid + '.user');
+          var endpointUser = _.get(consoleInfo.info.endpoints.hcf, service.guid + '.user');
           if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;
@@ -111,8 +111,8 @@
       }
 
       return consoleInfoPromise.then(function (consoleInfo) {
-        var userId = consoleInfo.endpoints.cf[cnsiGuid].user.guid;
-        var isAdmin = consoleInfo.endpoints.cf[cnsiGuid].user.admin;
+        var userId = consoleInfo.endpoints.hcf[cnsiGuid].user.guid;
+        var isAdmin = consoleInfo.endpoints.hcf[cnsiGuid].user.admin;
         var promises = [
           featureFlagsPromise
         ];
@@ -202,7 +202,7 @@
       var initialised = angular.isObject(model.principal[cnsiGuid]);
 
       if (userInfo && initialised) {
-        initialised = model.principal[cnsiGuid].consoleInfo.endpoints.cf[cnsiGuid].user.guid === userInfo.guid;
+        initialised = model.principal[cnsiGuid].consoleInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
       }
       return initialised;
     }

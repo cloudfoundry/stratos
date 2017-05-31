@@ -177,7 +177,7 @@
         appUserSelection = $injector.get('appUserSelection');
 
         var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-        _.set(consoleInfo, 'info.endpoints.cf.' + clusterGuid + '.user', {
+        _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
           guid: 'user_guid',
           admin: true
         });

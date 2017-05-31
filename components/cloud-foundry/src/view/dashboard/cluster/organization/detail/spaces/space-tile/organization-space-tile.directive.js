@@ -50,7 +50,7 @@
 
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var user = consoleInfo.info.endpoints.cf[vm.clusterGuid].user;
+    var user = consoleInfo.info.endpoints.hcf[vm.clusterGuid].user;
     var isAdmin = user.admin;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 

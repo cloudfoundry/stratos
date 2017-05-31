@@ -66,7 +66,7 @@
     };
 
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-    var user = consoleInfo.info.endpoints.cf[that.clusterGuid].user;
+    var user = consoleInfo.info.endpoints.hcf[that.clusterGuid].user;
     that.isAdmin = user.admin;
     that.userName = user.name;
 
