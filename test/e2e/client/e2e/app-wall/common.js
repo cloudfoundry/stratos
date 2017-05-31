@@ -80,7 +80,7 @@
             type: ''
           }
         },
-        cf: {
+        hcf: {
           '8221adff-529a-4567-b57a-155fb69f1bd0': {
             guid: '8221adff-529a-4567-b57a-155fb69f1bd0',
             name: 'CF_1',
