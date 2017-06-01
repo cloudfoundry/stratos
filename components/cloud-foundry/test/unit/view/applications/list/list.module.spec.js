@@ -121,7 +121,13 @@
 
     describe('endpoints link tests', function () {
 
+      var redirectStateName;
+
       beforeEach(inject(function ($injector) {
+
+        // For some tests, the redirected state depends on whether the endpoints dashboard is available
+        redirectStateName = $state.get('endpoint.dashboard') ? 'endpoint.dashboard' : 'endpoint.clusters.cluster.detail.organizations';
+
         createController($injector);
         spyOn($state, 'go').and.callFake(function (state) {
           return state;
@@ -131,7 +137,7 @@
       it('should forward to `Endpoints Dashboard` when no clusters are available', function () {
         $controller.model.clusterCount = 0;
         var endpointsLink = $controller.getEndpointsLink();
-        expect(endpointsLink).toBe('endpoint.dashboard');
+        expect(endpointsLink).toBe(redirectStateName);
         $httpBackend.flush();
       });
 
