@@ -4,7 +4,10 @@
   "description": "Console",
   "main": "index.js",
   "scripts": {
+    "clean": "gulp clean",
     "build": "gulp clean:dist && gulp",
+    "build-backend": "gulp build-backend",
+    "build-cf": "gulp deploy:cf",
     "precoverage": "npm run update-webdriver",
     "coverage": "npm test && gulp e2e:run && gulp coverage-combine",
     "lint": "gulp lint",
@@ -31,9 +34,12 @@
     "gulp-file": "^0.2.0",
     "gulp-inject": "^3.0.0",
     "gulp-ng-annotate": "^2.0.0",
-    "gulp-sass": "^2.1.1",
+    "gulp-sass": "^3.1.x",
     "run-sequence": "^1.1.5",
     "wiredep": "^3.0.0"
+  },
+  "engines": {
+    "node": "6.10.x"
   },
   "devDependencies": {
     "body-parser": "^1.15.2",

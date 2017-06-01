@@ -41,8 +41,8 @@
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles, templateFiles, scssFiles, server;
   var packageJson = require('../package.json');
 
-  // Initial component configuration
-  initialize();
+  // // Initial component configuration
+  // initialize();
 
   var usePlumber = true;
 
