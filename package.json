@@ -1,0 +1,19 @@
+{
+  "name": "portal-proxy",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "gulp build",
+    "test": "gulp test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "fs-extra": "^3.0.1",
+    "gulp": "^3.9.1",
+    "lodash": "^4.17.4",
+    "merge-dirs": "^0.2.1",
+    "mktemp": "^0.4.0",
+    "q": "^1.5.0",
+    "run-sequence": "^1.2.2",
+    "yaml": "^0.3.0"
+  }
+}
