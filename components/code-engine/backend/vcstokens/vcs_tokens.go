@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/vcs"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/vcs"
 )
 
 // VCSTokenRecord -

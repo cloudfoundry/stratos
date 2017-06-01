@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hpcloud/portal-proxy/components/core/backend/datastore"
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/core/backend/datastore"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
 )
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests
