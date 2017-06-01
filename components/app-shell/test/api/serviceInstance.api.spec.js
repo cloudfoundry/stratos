@@ -29,10 +29,11 @@
       $httpBackend.flush();
     });
 
-    it('should send POST request for create for HCE', function () {
+    it('should send POST request for create for a generic service type', function () {
+      var serviceType = 'abcdef';
       var data = { api_endpoint: 'url', cnsi_name: 'name' };
-      $httpBackend.expectPOST('/pp/v1/register/hce', $httpParamSerializer(data)).respond(200, '');
-      serviceInstanceApi.create('url', 'name', undefined, 'hce');
+      $httpBackend.expectPOST('/pp/v1/register/' + serviceType, $httpParamSerializer(data)).respond(200, '');
+      serviceInstanceApi.create('url', 'name', undefined, serviceType);
       $httpBackend.flush();
     });
 
