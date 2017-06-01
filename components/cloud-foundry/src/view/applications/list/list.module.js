@@ -168,9 +168,9 @@
       if (this.model.clusterCount === 0 && this.isEndpointsDashboardAvailable) {
         return this.$state.go('endpoint.dashboard');
       }
-      var hcfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
-      if (hcfs.length === 1) {
-        return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
+      var cfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
+      if (cfs.length === 1) {
+        return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: cfs[0].guid});
       }
       return this.$state.go('endpoint.clusters.tiles');
     },
@@ -182,7 +182,7 @@
      * @private
      */
     _setClusters: function () {
-      // get the list of connected HCF endpoints
+      // get the list of connected CF endpoints
       this.clusters.length = 1;
       var clusters = _.chain(this.userCnsiModel.serviceInstances)
         .values()
@@ -482,11 +482,11 @@
     },
 
     /**
-     * @function isAdminInAnyHcf
-     * @description Helper to detect if user is an admin in any connected HCF
-     * @returns {boolean} true if the user is connected to any HCF as an admin
+     * @function isAdminInAnyCf
+     * @description Helper to detect if user is an admin in any connected CF
+     * @returns {boolean} true if the user is connected to any CF as an admin
      */
-    isAdminInAnyHcf: function () {
+    isAdminInAnyCf: function () {
       for (var guid in this.userCnsiModel.serviceInstances) {
         if (!this.userCnsiModel.serviceInstances.hasOwnProperty(guid)) {
           continue;
@@ -503,10 +503,10 @@
     /**
      * @function showAddApplicationButton
      * @description Implements the logic for showing the `Add Application` button
-     * @returns {boolean} true if the user is an admin or a Space developer to any HCF
+     * @returns {boolean} true if the user is an admin or a Space developer to any CF
      */
     showAddApplicationButton: function () {
-      if (this.isAdminInAnyHcf()) {
+      if (this.isAdminInAnyCf()) {
         return true;
       }
       return !this.disableAddApplicationButton();

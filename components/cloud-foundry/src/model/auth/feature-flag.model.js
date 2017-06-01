@@ -19,7 +19,7 @@
    * @name FeatureFlags
    * @description Fetches feature flags for a CF
    * @param {object} apiManager - Api Manager
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @contructor
    * @returns {object}
    */

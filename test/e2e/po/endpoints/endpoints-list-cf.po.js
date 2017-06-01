@@ -5,10 +5,10 @@
   var helpers = require('../helpers.po');
 
   module.exports = {
-    showHcfEndpoints: showHcfEndpoints,
-    goToHcfEndpoints: goToHcfEndpoints,
-    isHcfEndpoints: isHcfEndpoints,
-    isHcfOganizationsDetails: isHcfOganizationsDetails,
+    showCfEndpoints: showCfEndpoints,
+    goToCfEndpoints: goToCfEndpoints,
+    isCfEndpoints: isCfEndpoints,
+    isCfOganizationsDetails: isCfOganizationsDetails,
     getTiles: getTiles,
     isTileConnected: isTileConnected,
     getTileTitle: getTileTitle,
@@ -21,11 +21,11 @@
     isEndpoints: isEndpoints
   };
 
-  function showHcfEndpoints() {
-    return endpointDashboard.showHcfEndpoints();
+  function showCfEndpoints() {
+    return endpointDashboard.showCfEndpoints();
   }
 
-  function goToHcfEndpoints() {
+  function goToCfEndpoints() {
     return browser.get(helpers.getHost() + '/#/endpoint/cf');
   }
 
@@ -35,7 +35,7 @@
     });
   }
 
-  function isHcfEndpoints() {
+  function isCfEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
       return expect(url).toBe(helpers.getHost() + '/#/endpoint/cf/list');
     });
@@ -49,7 +49,7 @@
     return getBreadcrumb(index).click();
   }
 
-  function isHcfOganizationsDetails() {
+  function isCfOganizationsDetails() {
     browser.debugger();
     return browser.getCurrentUrl().then(function (url) {
       return expect(url).toMatch(helpers.getHost() + '/#/endpoint/.*/organizations');

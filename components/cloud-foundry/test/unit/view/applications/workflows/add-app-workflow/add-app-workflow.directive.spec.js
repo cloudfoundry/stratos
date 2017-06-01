@@ -102,8 +102,8 @@
             host: null,
             domain: null,
             application: null,
-            hcfApiEndpoint: null,
-            hcfUserName: null
+            cfApiEndpoint: null,
+            cfUserName: null
           });
           expect(that.data.workflow).toBeDefined();
           expect($translate.instant(that.data.workflow.title)).toBe('Add Application');

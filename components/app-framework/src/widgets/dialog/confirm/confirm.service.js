@@ -94,7 +94,7 @@
             }, function (error) {
               var errorMessage = that.confirmDialogContext.errorMessage || error;
               if (_.isPlainObject(error)) {
-                // Try to find a description in case its an HCF error object
+                // Try to find a description in case its an CF error object
                 errorMessage = _.get(error, 'data.description') || error.description || errorMessage;
               }
               that.errorMessage = errorMessage;

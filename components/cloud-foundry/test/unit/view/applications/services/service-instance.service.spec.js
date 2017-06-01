@@ -47,10 +47,10 @@
       var appAutoscaler = {
         credentials: {
           agentUsername: 'agent',
-          api_url: 'http://sclr-api-int.hcf.svc:28861/api',
+          api_url: 'http://sclr-api-int.cf.svc:28861/api',
           service_id: '3a7e7f9a-9cfb-4582-bf80-6fc50151debb',
           app_id: 'e793bedd-57f0-4ae1-b379-8cbf216b4e7d',
-          url: 'http://sclr-server-int.hcf.svc:28862/server',
+          url: 'http://sclr-server-int.cf.svc:28862/server',
           agentPassword: '019d367b-e780-4a9e-b122-1314071e9205'
         },
         syslog_drain_url: null,

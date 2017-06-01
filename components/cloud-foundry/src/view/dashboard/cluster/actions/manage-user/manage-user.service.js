@@ -35,7 +35,7 @@
     /**
      * @name ManageUsersFactory.show
      * @description Show the manage users slide out
-     * @param {string} clusterGuid guid of the HCF cluster
+     * @param {string} clusterGuid guid of the CF cluster
      * @param {string} organizationGuid guid of the organization to show
      * @param {object} users collection of users to pre-select
      * @returns {promise} promise fulfilled when dialogue has closed
