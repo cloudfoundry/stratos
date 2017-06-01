@@ -1,4 +1,4 @@
-/* eslint-disable no-process-env no-sync */
+/* eslint-disable no-process-env, no-sync */
 (function () {
   'use strict';
 
