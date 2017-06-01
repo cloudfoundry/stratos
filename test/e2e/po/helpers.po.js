@@ -17,7 +17,7 @@
   var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 
   var cnsis = browser.params.cnsi;
-  var hcfs = cnsis.hcf || {};
+  var cfs = cnsis.cf || {};
   var hces = cnsis.hce || {};
   var adminUser = browser.params.credentials.admin.username;
   var adminPassword = browser.params.credentials.admin.password;
@@ -40,18 +40,18 @@
 
     getHost: getHost,
     getCNSIs: getCNSIs,
-    getHcfs: getHcfs,
+    getCfs: getCfs,
     getHces: getHces,
     getAdminUser: getAdminUser,
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
 
-    skipIfNoHCF: skipIfNoHCF,
+    skipIfNoCF: skipIfNoCF,
     skipIfNoHCE: skipIfNoHCE,
-    skipIfNoHCFHCE: skipIfNoHCFHCE,
-    skipIfNoSecondHCF: skipIfNoSecondHCF,
-    skipIfOnlyOneHCF: skipIfOnlyOneHCF,
+    skipIfNoCFHCE: skipIfNoCFHCE,
+    skipIfNoSecondCF: skipIfNoSecondCF,
+    skipIfOnlyOneCF: skipIfOnlyOneCF,
     skipIfNoAppWithLogStrean: skipIfNoAppWithLogStrean,
 
     getAppNameWithLogStream: getAppNameWithLogStream,
@@ -111,8 +111,8 @@
     return cnsis;
   }
 
-  function getHcfs() {
-    return hcfs;
+  function getCfs() {
+    return cfs;
   }
 
   function getHces() {
@@ -487,28 +487,28 @@
   }
 
   // Test skip helpers
-  function skipIfNoHCF() {
-    return !getHcfs() || !getHcfs().hcf1;
+  function skipIfNoCF() {
+    return !getCfs() || !getCfs().cf1;
   }
 
   function skipIfNoHCE() {
     return !getHces() || !getHces().hce1;
   }
 
-  function skipIfNoHCFHCE() {
-    return skipIfNoHCF() || skipIfNoHCE();
+  function skipIfNoCFHCE() {
+    return skipIfNoCF() || skipIfNoHCE();
   }
 
-  function skipIfNoSecondHCF() {
-    return !getHcfs() || !getHcfs().hcf2;
+  function skipIfNoSecondCF() {
+    return !getCfs() || !getCfs().cf2;
   }
 
-  function skipIfOnlyOneHCF() {
-    return !getHcfs() || Object.keys(getHcfs()).length < 2;
+  function skipIfOnlyOneCF() {
+    return !getCfs() || Object.keys(getCfs()).length < 2;
   }
 
   function skipIfNoAppWithLogStrean() {
-    var haveNcf = getHcfs() && Object.keys(getHcfs()).length > 0;
+    var haveNcf = getCfs() && Object.keys(getCfs()).length > 0;
     return !haveNcf || !browser.params.appWithLogStream;
   }
 

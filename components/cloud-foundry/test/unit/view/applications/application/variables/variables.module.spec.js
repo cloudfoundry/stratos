@@ -3,7 +3,7 @@
 
   describe('variables view', function () {
     var $controller, createController, $rootScope, $q;
-    var cnsiGuid = 'HCF_GUID';
+    var cnsiGuid = 'CF_GUID';
     var guid = 'APP_ID';
 
     beforeEach(module('console-app'));

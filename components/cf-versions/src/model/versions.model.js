@@ -20,10 +20,10 @@
    * @name ApplicationVersions
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @property {object} $q - the $q service for promise/deferred objects
    * @property {object} versionsApi - the application versions API
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    * @class
    */
   function ApplicationVersions($q, apiManager, modelUtils) {
@@ -33,7 +33,7 @@
 
     this.versions = [];
 
-    // We cache whether an HCF endpoint supports the version API to improve the user experience
+    // We cache whether an CF endpoint supports the version API to improve the user experience
     this.versionSupportCache = {};
     this.versionSupportCacheGuids = [];
 
@@ -44,8 +44,8 @@
     /**
      * @function hasVersionSupport
      * @memberof cloud-foundry.model.application.versions
-     * @description Returns whether the specified HCF Endpoint supports versionning
-     * @param {string} cnsiGuid - HCF CNSI guid
+     * @description Returns whether the specified CF Endpoint supports versionning
+     * @param {string} cnsiGuid - CF CNSI guid
      * @returns {promise} Whether or not Application versionning is supported
      * @public
      **/
@@ -57,7 +57,7 @@
      * @function list
      * @memberof cloud-foundry.model.application.versions
      * @description List all application versions
-     * @param {string} cnsiGuid - HCF CNSI guid
+     * @param {string} cnsiGuid - CF CNSI guid
      * @param {string} guid - Application guid
      * @returns {promise} A promise object
      * @public
@@ -80,7 +80,7 @@
      * @function rollback
      * @memberof cloud-foundry.model.application.versions
      * @description Rollabck an application to a previous version
-     * @param {string} cnsiGuid - HCF CNSI guid
+     * @param {string} cnsiGuid - CF CNSI guid
      * @param {string} appGuid - Application guid
      * @param {string} guid - Version guid to rollback to
      * @returns {promise} A promise object
@@ -104,9 +104,9 @@
   /**
    * @function setVersionSupport
    * @memberof cloud-foundry.model.application.versions
-   * @description Set versionning support status for the given HCF endpoint
-   * @param {string} cnsiGuid - HCF CNSI guid
-   * @param {boolean} supported - Version support status for the HCF endpoint
+   * @description Set versionning support status for the given CF endpoint
+   * @param {string} cnsiGuid - CF CNSI guid
+   * @param {boolean} supported - Version support status for the CF endpoint
    * @private
    **/
     setVersionSupport: function (cnsiGuid, supported) {

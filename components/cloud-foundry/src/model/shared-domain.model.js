@@ -18,9 +18,9 @@
    * @memberOf cloud-foundry.model
    * @name SharedDomain
    * @param {app.api.apiManager} apiManager - the shared-domain API manager
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @property {app.api.apiManager} apiManager - the shared-domain API manager
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    * @class
    */
   function SharedDomain(apiManager, modelUtils) {

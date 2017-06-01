@@ -6,7 +6,7 @@
   var appSetupHelper = require('../../po/app-setup.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
-  var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+  var addAppCfApp = require('../../po/applications/add-application-cf-app.po');
   var application = require('../../po/applications/application.po');
   var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
   var registerVcsToken = require('../../po/applications/register-vcs-token.po');
@@ -33,9 +33,9 @@
         var hostName = testAppName.replace(/\./g, '_');
         galleryWall.showApplications();
         galleryWall.addApplication();
-        addAppHcfApp.name().addText(testAppName);
-        addAppHcfApp.host().clear();
-        addAppHcfApp.host().addText(hostName);
+        addAppCfApp.name().addText(testAppName);
+        addAppCfApp.host().clear();
+        addAppCfApp.host().addText(hostName);
         addAppWizard.getWizard().next();
         helpers.checkAndCloseToast(/application.*created/);
       });
@@ -226,8 +226,8 @@
           stepCheck(3);
 
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(false);
-          var hcfCredentials = helpers.getHcfs().hcf1.admin;
-          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), hcfCredentials.username, 'foo');
+          var cfCredentials = helpers.getCfs().cf1.admin;
+          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), cfCredentials.username, 'foo');
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
 
           deliveryPipeline.getSetupWizard().next();
@@ -238,8 +238,8 @@
         });
 
         it('should allow user to create pipeline with correct data', function () {
-          var hcfCredentials = helpers.getHcfs().hcf1.admin;
-          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), hcfCredentials.username, hcfCredentials.password);
+          var cfCredentials = helpers.getCfs().cf1.admin;
+          pipelineDetails.enterPipelineDetails(helpers.getBranchNames(), helpers.getBuildContainer(), cfCredentials.username, cfCredentials.password);
           expect(deliveryPipeline.getSetupWizard().isNextEnabled()).toBe(true);
         });
       });
@@ -432,5 +432,5 @@
 
       });
     });
-  }).skipWhen(helpers.skipIfNoHCFHCE);
+  }).skipWhen(helpers.skipIfNoCFHCE);
 })();

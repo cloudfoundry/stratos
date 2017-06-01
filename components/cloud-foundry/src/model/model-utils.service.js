@@ -46,7 +46,7 @@
     /**
      * @function makeListParams
      * @memberof cloud-foundry.model.modelUtils
-     * @description Apply a set of default parameters to be used in HCF list calls
+     * @description Apply a set of default parameters to be used in CF list calls
      * @param {object} params - existing custom parameters, these will override defaults
      * @returns {object} the $http service http parameters
      */
@@ -59,8 +59,8 @@
     /**
      * @function dePaginate
      * @memberof cloud-foundry.model.modelUtils
-     * @description Given a HCF response from a 'list' style call return a collection containing all resources
-     * @param {Array} pageOneResponseData - Response from a HCF 'list' request. This must be page 1 and will contain pagination
+     * @description Given a CF response from a 'list' style call return a collection containing all resources
+     * @param {Array} pageOneResponseData - Response from a CF 'list' request. This must be page 1 and will contain pagination
      * data
      * @param {object} httpConfigOptions - Any special http configuration options
      * @returns {promise} promise when complete containing all list entries regardless of page
@@ -69,7 +69,7 @@
     function dePaginate(pageOneResponseData, httpConfigOptions) {
       var list = pageOneResponseData.resources;
       // Be sure to use the next_url as a basis for other calls, this can include the original params and any pagination
-      // specific ones added by HCF (such as order-direction)
+      // specific ones added by CF (such as order-direction)
       var url = pageOneResponseData.next_url;
       if (!url) {
         return $q.resolve(list);

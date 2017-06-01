@@ -10,7 +10,7 @@
   var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
   var endpointDashboard = require('../../po/endpoints/endpoints-dashboard.po');
 
-  describe('HCF - Manage Organizations', function () {
+  describe('CF - Manage Organizations', function () {
 
     /**
      * This spec will ..
@@ -23,7 +23,7 @@
      */
 
     var testOrgName, testSpaceName;
-    var hcfFromConfig = helpers.getHcfs().hcf1;
+    var cfFromConfig = helpers.getCfs().cf1;
 
     beforeAll(function () {
       // Reset all cnsi that exist in params and connect
@@ -42,7 +42,7 @@
           loginPage.loginAsAdmin();
           return navBar.goToView('Endpoints');
         }).then(function () {
-          var requiredRowIndex = endpointDashboard.getRowWithEndpointName(hcfFromConfig.register.cnsi_name);
+          var requiredRowIndex = endpointDashboard.getRowWithEndpointName(cfFromConfig.register.cnsi_name);
           expect(requiredRowIndex).toBeDefined();
           return endpointDashboard.endpointNameClick(requiredRowIndex);
         });
@@ -52,8 +52,8 @@
 
     it('Create and delete an organization', function () {
       // Fetch the e2e org and space names
-      testOrgName = hcfFromConfig.testOrgName;
-      testSpaceName = hcfFromConfig.testSpaceName;
+      testOrgName = cfFromConfig.testOrgName;
+      testSpaceName = cfFromConfig.testSpaceName;
       expect(testOrgName).toBeDefined();
       expect(testSpaceName).toBeDefined();
 
@@ -91,5 +91,5 @@
       cfAppCliCommands.click();
       element(by.css('.detail-view-close.close')).click();
     });
-  }).skipWhen(helpers.skipIfNoHCF);
+  }).skipWhen(helpers.skipIfNoCF);
 })();
