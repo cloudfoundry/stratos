@@ -41,9 +41,9 @@ search-box {
     display: block;
     left: -20px;
     right: -22px;
-    top: $hpe-unit-space - 4px;
-    min-height: $hpe-unit-space * 2 - 4px;
-    max-height: ($hpe-unit-space * 2 - 4px) * 5;
+    top: $console-unit-space - 4px;
+    min-height: $console-unit-space * 2 - 4px;
+    max-height: ($console-unit-space * 2 - 4px) * 5;
     overflow-y: auto;
 
     .select-option {
@@ -59,7 +59,7 @@ search-box {
 
 .form-group-large {
   search-box input {
-    width: $hpe-unit-space * 15;
+    width: $console-unit-space * 15;
   }
 }
 

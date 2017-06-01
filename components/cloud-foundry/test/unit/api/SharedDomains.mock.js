@@ -71,7 +71,7 @@
                     "updated_at": "2016-04-18T19:55:58Z"
                   },
                   "entity": {
-                    "name": "stackato-8hhk.local"
+                    "name": "console-8hhk.local"
                   }
                 },
                 {
@@ -102,7 +102,7 @@
       var mock_shared_domains_data = {
         "e05c91d8-e0d1-439a-911f-2216e62dafa6": {
           "entity": {
-            "name": "stackato-8hhk.local"
+            "name": "console-8hhk.local"
           },
           "metadata": {
             "updated_at": "2016-04-18T19:55:58Z",

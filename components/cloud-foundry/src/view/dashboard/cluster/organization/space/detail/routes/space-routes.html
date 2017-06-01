@@ -1,5 +1,5 @@
 <div class="space-services-table">
-  <div ng-if="spaceRoutesCtrl.spaceDetail().routes.length < 1"
+  <div ng-if="!spaceRoutesCtrl.spaceDetail() || spaceRoutesCtrl.spaceDetail().routes.length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>
       You have no routes

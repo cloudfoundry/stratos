@@ -39,7 +39,7 @@
                     bindable: true,
                     unique_id: "8be9090d-f716-4111-aa75-74ec99c30069",
                     extra: {
-                      vendor: "Hewlett Packard Enterprise",
+                      vendor: "SUSE",
                       defaultVersion: 1,
                       versions: "1,2,3",
                       catalogId: "sample:mysql",
@@ -47,7 +47,7 @@
                       categories: "database",
                       labels: "User-label1",
                       imageUrl: "http://localhost:8081/v1/services/sample:mysql?image",
-                      documentationUrl: "http://www.hpe.com/",
+                      documentationUrl: "http://www.suse.com/",
                       readme: "http://localhost:8081/v1/services/sample:mysql?readme"
                     },
                     tags: [],
@@ -77,7 +77,7 @@
                     bindable: true,
                     unique_id: "8be9090d-f716-4111-aa75-74ec99c30068",
                     extra: {
-                      vendor: "Hewlett Packard Enterprise",
+                      vendor: "SUSE",
                       defaultVersion: 1,
                       versions: "1,2,3",
                       catalogId: "sample:sqlserver",
@@ -85,7 +85,7 @@
                       categories: "database",
                       labels: "User-label2",
                       imageUrl: "http://localhost:8081/v1/services/sample:mysql?image",
-                      documentationUrl: "http://www.hpe.com/",
+                      documentationUrl: "http://www.suse.com/",
                       readme: "http://localhost:8081/v1/services/sample:mysql?readme"
                     },
                     tags: [],

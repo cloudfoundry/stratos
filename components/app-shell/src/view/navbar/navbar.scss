@@ -60,7 +60,7 @@ navbar > nav.main-nav-header {
   &.navbar-hidden {
     .container-fluid {
       .navbar-brand {
-        padding-left: $hpe-unit-space;
+        padding-left: $console-unit-space;
       }
     }
   }
@@ -113,7 +113,7 @@ navbar > .main-nav-menu {
 
       &.navitem-bottom {
         position: absolute;
-        bottom: $hpe-unit-space * 0.25;
+        bottom: $console-unit-space * 0.25;
       }
 
       &.active {
@@ -322,7 +322,7 @@ navbar > .main-nav-menu {
         }
 
         &:hover {
-          color: $hpe-primary;
+          color: $console-primary;
         }
       }
     }
@@ -333,7 +333,7 @@ navbar > .main-nav-menu {
 
 div.user-avatar {
   position: absolute;
-  right: $hpe-unit-space;
+  right: $console-unit-space;
   height: $user-avatar-size;
   top: ($page-header-height - $user-avatar-size) / 2;
   width: $user-avatar-size;

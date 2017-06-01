@@ -5,10 +5,10 @@
     var $q, $state, $scope, modelManager, appUtilsService, clusterTilesCtrl, serviceInstanceModel,
       userServiceInstanceModel, consoleInfo, $stateParams;
 
-    var hceService = {
+    var unknownService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
-      name: 'HCE service',
-      cnsi_type: 'hce',
+      name: 'Unknown service',
+      cnsi_type: 'unknown',
       api_endpoint: {
         Scheme: 'http',
         Opaque: '',
@@ -141,7 +141,7 @@
       });
 
       it('cluster - connected + not expired token', function () {
-        serviceInstanceModel.serviceInstances = [hceService, hcfService];
+        serviceInstanceModel.serviceInstances = [unknownService, hcfService];
         var cloned = angular.fromJson(angular.toJson(hcfUserService));
         cloned.valid = true;
         userServiceInstanceModel.serviceInstances = {};

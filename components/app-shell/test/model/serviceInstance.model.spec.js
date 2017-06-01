@@ -14,7 +14,7 @@
 
       mockData = [
         { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
-        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
+        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc' }
       ];
     }));
 
@@ -54,7 +54,7 @@
     it('should set `serviceInstances` on list()', function () {
       var expectedData = [
         { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
-        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
+        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc' }
       ];
 
       $httpBackend.when('GET', '/pp/v1/cnsis')

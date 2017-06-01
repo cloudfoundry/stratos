@@ -2,12 +2,12 @@
   .manage-users-loading, .manage-users-load-failed {
     display: flex;
     justify-content: center;
-    margin-top: $hpe-unit-space * 3;
+    margin-top: $console-unit-space * 3;
   }
   .manage-users-loaded {
 
     .manage-users-info {
-      padding-bottom: $hpe-unit-space;
+      padding-bottom: $console-unit-space;
 
       .manage-users-info-message {
         padding-bottom: 5px;
@@ -23,10 +23,10 @@
     }
 
     .manage-users-filter {
-      padding-bottom: $hpe-unit-space;
+      padding-bottom: $console-unit-space;
 
       .filter-container {
-        padding: $hpe-unit-space / 2  20px;
+        padding: $console-unit-space / 2  20px;
 
         display: flex;
 

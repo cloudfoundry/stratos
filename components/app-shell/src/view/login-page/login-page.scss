@@ -41,7 +41,7 @@ $login-page-text-fg: $white !default;
       display: $login-page-text-panel-display;
     }
 
-    .login-panel-hpe-logo {
+    .login-panel-company-logo {
       position: absolute;
       width: 100%;
       height: 100vh;
@@ -50,8 +50,8 @@ $login-page-text-fg: $white !default;
 
       > img {
         position: absolute;
-        bottom: 2 * $hpe-unit-space;
-        left: $hpe-unit-space;
+        bottom: 2 * $console-unit-space;
+        left: $console-unit-space;
       }
     }
 
@@ -85,9 +85,9 @@ $login-page-text-fg: $white !default;
     .login-panel-product-logo {
       width: 100%;
 
-      .hpe-logo {
+      .company-logo {
         flex: 0 0 auto;
-        padding: 0 0 4 * $hpe-unit-space $hpe-unit-space;
+        padding: 0 0 4 * $console-unit-space $console-unit-space;
       }
     }
   }

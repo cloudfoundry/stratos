@@ -71,7 +71,7 @@
         }
       },
       skipSSlValidation: true,
-      caCert: 'ssl/stackatoCA.pem',
+      caCert: '',
       appWithLogStream: 'node-env',
       cnsi: {
         hcf: {

@@ -391,8 +391,8 @@
    * @function createSession
    * @description Create a session
    * @param {object} req - the request
-   * @param {string} username - the Stackato username
-   * @param {string} password - the Stackato password
+   * @param {string} username - the console username
+   * @param {string} password - the console password
    * @returns {Promise} A promise
    */
   function createSession(req, username, password) {

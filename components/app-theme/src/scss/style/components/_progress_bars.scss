@@ -2,10 +2,10 @@
 // Progress bars
 // --------------------------------------------------
 
-// HPE Progress bar Stacked Variants
+// console Progress bar Stacked Variants
 // --------------------------------------------------
 .progress {
-  @include hpe-progress-bar($hpe-progress-bar-height-stacked, 1);
+  @include console-progress-bar($console-progress-bar-height-stacked, 1);
 }
 
 // Bar itself
@@ -20,14 +20,14 @@
     content: '';
     background-color: $progress-bg;
     width: 100%;
-    margin-top: ($hpe-progress-bar-height-stacked - $hpe-progress-bar-height) / 2;
-    height: $hpe-progress-bar-height;
+    margin-top: ($console-progress-bar-height-stacked - $console-progress-bar-height) / 2;
+    height: $console-progress-bar-height;
     display: block;
   }
 
   .progress-bar:only-child {
-    height: $hpe-progress-bar-height;
-    margin-top: ($hpe-progress-bar-height-stacked - $hpe-progress-bar-height) / 2;
+    height: $console-progress-bar-height;
+    margin-top: ($console-progress-bar-height-stacked - $console-progress-bar-height) / 2;
   }
 }
 
