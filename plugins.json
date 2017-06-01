@@ -1,6 +1,5 @@
 {
   "enabledPlugins": [
-    "cloud-foundry",
-    "cloud-foundry-hosting"
+    "cloud-foundry"
   ]
 }
