@@ -51,7 +51,6 @@ services:
     env_file:
       ./proxy.env
     volumes:
-      - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
       - ./hsc-upgrade-volume:/hsc-upgrade-volume
 
 

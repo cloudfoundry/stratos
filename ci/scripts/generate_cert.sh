@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Settings
-pproxy_path=portal-proxy-output
+pproxy_path=portal-proxy-output/
 domain=pproxy
 commonname=192.168.99.100
 country=US

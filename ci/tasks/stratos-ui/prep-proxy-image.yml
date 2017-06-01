@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository:  10.4.21.241:5000/stackatodev/hsc-console-proxy-builder
+    repository:  10.4.21.241:5000/susetest/console-proxy-builder
     tag: "latest"
     insecure_registries: [ "10.4.21.241:5000" ]
 
@@ -20,8 +20,16 @@ run:
     mkdir -p /go/src/github.com/hpcloud
     cp -r ./portal-proxy /go/src/github.com/hpcloud
     cd /go/src/github.com/hpcloud/portal-proxy
-    glide install
-    go build
+    cat << EOF > plugins.json
+    {
+      "enabledPlugins": [
+        "cloud-foundry"
+      ]
+    }
+    EOF
+    npm install
+    npm install -g gulp
+    npm run build
     cd -
     cp -r /go/src/github.com/hpcloud/portal-proxy/. ./portal-proxy-output
     sh ./stratos-deploy/ci/scripts/generate_cert.sh
