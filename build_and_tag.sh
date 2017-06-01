@@ -257,7 +257,7 @@ function buildProxy {
              -it \
              --rm \
              --name hsc-console-proxy-builder \
-             --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
+             --volume $(pwd):/go/src/github.com/hpcloud/stratos-ui/ \
              ${DOCKER_REGISTRY}/${DOCKER_ORG}/hsc-console-proxy-builder
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
@@ -330,7 +330,7 @@ function generateSDL {
 #
 
 # Set the path to the portal proxy
-PORTAL_PROXY_PATH=${GOPATH}/src/github.com/hpcloud/portal-proxy
+PORTAL_PROXY_PATH=${GOPATH}/src/github.com/hpcloud/stratos-ui/
 
 # cleanup output, intermediate artifacts
 cleanup

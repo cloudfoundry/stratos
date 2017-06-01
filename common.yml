@@ -37,15 +37,15 @@ services:
   goose:
     extends: buildCommon
     build:
-      context: $GOPATH/src/github.com/hpcloud/portal-proxy
+      context: ../stratos-ui
       dockerfile: db/Dockerfile.goose.dev
 
 
   proxy:
     extends: buildCommon
     build:
-      context: $GOPATH/src/github.com/hpcloud/portal-proxy
-      dockerfile: Dockerfile.dev
+      context: ../stratos-ui
+      dockerfile: Dockerfile.bk.dev
     ports:
       - "3003:3003"
     env_file:
@@ -70,7 +70,7 @@ services:
     extends: buildCommon
     build:
       context: ../stratos-ui
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.ui.dev
       args:
         - USER_ID
         - GROUP_ID

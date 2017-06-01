@@ -20,9 +20,9 @@ run:
     pwd
     mkdir -p /go/src/github.com/hpcloud/
     cp -r $PWD/portal-proxy/ /go/src/github.com/hpcloud/
-    cd /go/src/github.com/hpcloud/portal-proxy
+    cd /go/src/github.com/hpcloud/stratos-ui
     go build
     cd -
-    cp -r /go/src/github.com/hpcloud/portal-proxy/. ./portal-proxy-output/
+    cp -r /go/src/github.com/hpcloud/stratos-ui/. ./portal-proxy-output/
     ls -la .
     ls -la ./portal-proxy-output/

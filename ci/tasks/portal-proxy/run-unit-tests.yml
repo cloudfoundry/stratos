@@ -15,8 +15,8 @@ run:
     - -exc
     - |
       mkdir -p /go/src/github.com/hpcloud/
-      ln -s $PWD/portal-proxy /go/src/github.com/hpcloud/portal-proxy
-      cd /go/src/github.com/hpcloud/portal-proxy
+      ln -s $PWD/portal-proxy /go/src/github.com/hpcloud/stratos-ui
+      cd /go/src/github.com/hpcloud/stratos-ui
       npm install
       npm install -g gulp
       npm run test
