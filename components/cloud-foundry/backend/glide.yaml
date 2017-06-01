@@ -1,4 +1,4 @@
-package: github.com/hpcloud/portal-proxy/components/cloudfoundry
+package: github.com/hpcloud/stratos-ui/components/cloudfoundry
 import:
 - package: github.com/Sirupsen/logrus
   version: ^0.11.5
