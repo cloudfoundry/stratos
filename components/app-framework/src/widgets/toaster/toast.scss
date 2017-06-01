@@ -26,7 +26,7 @@
     border: $toast-border-width solid $rule;
     background-color: $toast-background;
     margin: $toast-spacing 0 0 0;
-    @include hpe-box-shadow-small();
+    @include console-box-shadow-small();
     border-radius: 0;
     cursor: auto;
     padding: 0;
@@ -35,8 +35,8 @@
       @extend .material-icons;
       font-size: 18px;
       position: absolute;
-      top: $hpe-unit-space * 0.5;
-      right: $hpe-unit-space * 0.5;
+      top: $console-unit-space * 0.5;
+      right: $console-unit-space * 0.5;
       border: 0;
       background-color: $toast-background;
       color: $dove-gray2;
@@ -111,7 +111,7 @@
         line-height: $toast-line-height;
         vertical-align: middle;
         margin: auto 0 auto 0;
-        font-weight: $hpe-font-weight-semibold;
+        font-weight: $console-font-weight-semibold;
         color: $dove-gray2;
         cursor: default;
       }

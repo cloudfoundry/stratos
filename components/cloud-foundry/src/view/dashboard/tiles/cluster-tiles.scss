@@ -2,7 +2,7 @@
 
 .cluster-tiles {
   .header {
-    margin-bottom: $hpe-unit-space;
+    margin-bottom: $console-unit-space;
   }
   .clusters-card {
     min-height: 250px;
@@ -32,7 +32,7 @@
 
       //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
       &:first-of-type {
-        padding-left: $hpe-unit-space / 2;
+        padding-left: $console-unit-space / 2;
       }
     }
   }

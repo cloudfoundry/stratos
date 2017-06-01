@@ -14,7 +14,7 @@
     .change-roles-buttons {
       display: inline;
       button {
-        margin: 0 $hpe-unit-space / 2 $hpe-unit-space / 2 0;
+        margin: 0 $console-unit-space / 2 $console-unit-space / 2 0;
       }
     }
 
@@ -77,7 +77,7 @@
 
    .cluster-summary-tile, organization-summary-tile, space-summary-tile  {
      .card.panel-default {
-       margin-bottom: $hpe-unit-space / 4;
+       margin-bottom: $console-unit-space / 4;
      }
   }
 }

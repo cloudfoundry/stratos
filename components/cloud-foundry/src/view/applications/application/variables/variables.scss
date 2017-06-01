@@ -1,6 +1,6 @@
 .app-variables {
-  padding: $hpe-unit-space;
-  background-color: $hpe-primary-fg;
+  padding: $console-unit-space;
+  background-color: $console-primary-fg;
   color: $white;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 
@@ -18,27 +18,27 @@
   }
 }
 .add-variable-dialog {
-  margin-right: $hpe-unit-space * 5;
+  margin-right: $console-unit-space * 5;
 
   .alert {
-    margin-top: $hpe-unit-space;
+    margin-top: $console-unit-space;
   }
 
   .form-actions {
     clear: both;
-    margin-top: $hpe-unit-space * 2;
-    padding: $hpe-unit-space / 2;
+    margin-top: $console-unit-space * 2;
+    padding: $console-unit-space / 2;
     text-align: right;
 
     button:not(:first-child) {
-      margin-left: $hpe-unit-space / 2;
+      margin-left: $console-unit-space / 2;
     }
   }
 }
 
 table.app-variables-table {
 
-  tr td.table-inline-message .popover.hpe-popover-alert-warning {
+  tr td.table-inline-message .popover.console-popover-alert-warning {
     > .arrow {
       border-bottom-color: $state-danger-bg;
     }

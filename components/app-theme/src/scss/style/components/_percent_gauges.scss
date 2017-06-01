@@ -18,7 +18,7 @@
 
   .percent-gauge-bar {
     display: inline-block;
-    height: $hpe-progress-bar-height;
+    height: $console-progress-bar-height;
     margin-bottom: $percent-gauge-margin-vertical;
     margin-top: $percent-gauge-margin-vertical;
     vertical-align: middle;
@@ -34,7 +34,7 @@
 
     &.percent-gauge-quota {
       &:after {
-        @include hpe-four-stepped-gradient();
+        @include console-four-stepped-gradient();
         margin-bottom: 0;
         margin-top: 0;
       }

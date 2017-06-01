@@ -22,7 +22,7 @@
 // -----------------
 
 .btn-commit {
-  @include stratos-button-variant($hpe-primary-bg, $brand-primary, $brand-primary, $button-focus-outline-width);
+  @include stratos-button-variant($console-primary-bg, $brand-primary, $brand-primary, $button-focus-outline-width);
 }
 
 .btn-primary {

@@ -1,5 +1,5 @@
 .alert {
-  padding-left: $hpe-alert-width;
+  padding-left: $console-alert-width;
   color: $white;
   font-size: $font-size-base;
   margin-bottom: 0;
@@ -7,21 +7,21 @@
   overflow: hidden;
 
   &.alert-bordered {
-    border: $hpe-alert-border;
+    border: $console-alert-border;
   }
 
   &.alert-no-bg:not(.alert-bordered) {
-    margin-left: -($hpe-alert-width - $hpe-alert-icon-size)/2;
+    margin-left: -($console-alert-width - $console-alert-icon-size)/2;
     margin-right: -$alert-padding;
   }
 
   &:before {
-    width: $hpe-alert-width;
+    width: $console-alert-width;
     position: absolute;
     content: '';
     top: 0;
     left: 0;
-    padding: ($alert-padding - $hpe-alert-border-width/2) ($hpe-alert-width - $hpe-alert-icon-size)/2;
+    padding: ($alert-padding - $console-alert-border-width/2) ($console-alert-width - $console-alert-icon-size)/2;
   }
 
   .close {
@@ -31,34 +31,34 @@
 }
 
 .alert-success {
-  @include hpe-alert($state-success-bg, 'check_circle', $alert-success-bg, 'check_circle');
+  @include console-alert($state-success-bg, 'check_circle', $alert-success-bg, 'check_circle');
 }
 
 .alert-info {
-  @include hpe-alert($state-info-bg, 'info', $alert-info-bg, 'info_outline', $hpe-primary-fg);
+  @include console-alert($state-info-bg, 'info', $alert-info-bg, 'info_outline', $console-primary-fg);
 }
 
 .alert-warning {
-  @include hpe-alert($state-warning-bg, 'warning', $alert-warning-bg, 'warning');
+  @include console-alert($state-warning-bg, 'warning', $alert-warning-bg, 'warning');
 }
 
 .alert-danger {
-  @include hpe-alert($state-danger-bg, 'error', $alert-danger-bg, 'error');
+  @include console-alert($state-danger-bg, 'error', $alert-danger-bg, 'error');
 }
 
 .alert-card-warning {
-  @include hpe-box-shadow-small();
+  @include console-box-shadow-small();
   margin-bottom: 22px;
-  @include hpe-alert($white, 'warning', $white, 'warning', $dove-gray);
+  @include console-alert($white, 'warning', $white, 'warning', $dove-gray);
   &:before {
     color: $state-warning-bg;
   }
 }
 
 .alert-card-danger {
-  @include hpe-box-shadow-small();
+  @include console-box-shadow-small();
   margin-bottom: 22px;
-  @include hpe-alert($white, 'error', $white, 'error', $dove-gray);
+  @include console-alert($white, 'error', $white, 'error', $dove-gray);
   &:before {
     color: $state-danger-bg;
   }
