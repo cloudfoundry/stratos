@@ -5,7 +5,7 @@ RUN apk update && \
     mkdir -p /srv
 
 WORKDIR /srv
-COPY portal-proxy portal-proxy
+COPY outputs/* /srv/
 COPY dev-certs dev-certs
 RUN chmod +x portal-proxy
 EXPOSE 443

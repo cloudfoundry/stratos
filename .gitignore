@@ -6,3 +6,6 @@ portal-proxy
 console-database.db
 .vcs-migrated
 vendor/
+**/vendor
+**/*.so
+.glide
