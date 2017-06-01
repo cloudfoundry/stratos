@@ -1,0 +1,11 @@
+FROM alpine
+
+RUN apk update && \
+    apk add postgresql-client
+
+COPY goose /usr/local/bin/
+COPY db/dbconf.yml db/dbconf.yml
+COPY db/migrations db/migrations
+COPY db/scripts/run-postflight-job.k8s.sh /run-postflight-job.sh
+
+CMD ["/run-postflight-job.sh"]

@@ -21,4 +21,14 @@ oem/tmp
 tmp
 out/
 bower_components/
-.vscode/
+.vscode/*.rc
+.nfs*
+demo/*
+dev-certs/*
+portal-proxy
+console-database.db
+.vcs-migrated
+vendor/
+**/vendor
+**/*.so
+.glide
