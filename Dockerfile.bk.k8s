@@ -1,0 +1,13 @@
+FROM debian:jessie
+
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+ apt-get update &&\
+ apt-get install -y --reinstall ca-certificates &&\
+ mkdir -p /srv
+
+WORKDIR /srv
+COPY portal-proxy portal-proxy
+COPY dev-certs dev-certs
+RUN chmod +x portal-proxy
+EXPOSE 443
+ENTRYPOINT ["/srv/portal-proxy"]
