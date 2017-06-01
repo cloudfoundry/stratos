@@ -21,7 +21,7 @@ $login-panel-width: 420px;
   }
 
   .login-page {
-    background-color: $suse-dark-blue;
+    background-color: $suse-secondary-lighter;
     height: 100vw;
 
     .hpe-logo {
@@ -30,11 +30,11 @@ $login-panel-width: 420px;
 
     .login-panel {
       justify-content: center;
-      background-color: $suse-dark-blue;
+      background-color: $suse-secondary-lighter;
 
       login-form {
         flex: 0;
-        background-color: #fff;
+        //background-color: #fff;
         margin: 0;
         //box-shadow: 0 0 20px 10px #333;
         width: $login-panel-width;
@@ -49,10 +49,31 @@ $login-panel-width: 420px;
 
           > h1 {
             margin-top: $login-padding;
+            color: $suse-primary;
+            font-weight: 300;
           }
 
           .form-group {
             width: auto;
+            background-color: $suse-secondary;
+            border-color: lighten($suse-secondary, 10%);
+            color: $suse-text;
+            margin-bottom: 12px;
+
+            .control-label {
+              color: $suse-text;
+              font-size: 14px;
+            }
+
+            &.focus {
+              border-color: $suse-primary;
+            }
+
+            input {
+              color: $suse-text;
+              text-shadow: 0 0 0 $suse-text;
+              -webkit-text-fill-color: $suse-text;
+            }
           }
 
           > button {

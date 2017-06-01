@@ -270,7 +270,7 @@
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);
     gulp.watch(templateFiles.bower, ['copy:html', callback]);
     gulp.watch(components.findMainFile('index.html'), ['inject:index', callback]);
-    // Watch main bower filefor changes
+    // Watch main bower file for changes
     gulp.watch(mainBowerFile, ['build-config', callback]);
   });
 
