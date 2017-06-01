@@ -17,7 +17,7 @@
     function createController($injector, type) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var $interpolate = $injector.get('$interpolate');
+      var $translate = $injector.get('$translate');
       $state = $injector.get('$state');
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+      $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
         eventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
