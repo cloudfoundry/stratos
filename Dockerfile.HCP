@@ -1,0 +1,18 @@
+FROM debian:jessie
+
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+ apt-get update &&\
+ apt-get install -y --reinstall ca-certificates &&\
+ mkdir -p /srv && mkdir -p /usr/share/doc/stackato
+
+WORKDIR /srv
+
+COPY portal-proxy portal-proxy
+COPY /containers/proxy/LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
+COPY /containers/proxy/run.sh /
+
+RUN chmod +x portal-proxy
+RUN chmod +x /run.sh
+
+EXPOSE 443
+CMD ["/run.sh"]
