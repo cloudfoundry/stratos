@@ -28,8 +28,8 @@
    * @name ApplicationServicesController
    * @constructor
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {cloud-foundry.model.space} model - the Cloud Foundry space model
    * @property {cloud-foundry.model.application} model - the Cloud Foundry application model
@@ -41,7 +41,7 @@
    * @property {object} search - the search object for filtering
    * @property {object} category - the search category object for filtering
    */
-  function ApplicationServicesController($scope, modelManager, appEventService, $stateParams) {
+  function ApplicationServicesController($scope, $translate, modelManager, $stateParams) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.space');
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -49,8 +49,8 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.services = [];
     this.serviceCategories = [
-      { label: gettext('Attached Service Instances'), value: 'attached' },
-      { label: gettext('All Services'), value: 'all' }
+      { label: $translate.instant('app-tabs.services.categories.attached'), value: 'attached' },
+      { label: $translate.instant('app-tabs.services.categories.all'), value: 'all' }
     ];
     this.searchCategory = 'all';
     this.search = {};

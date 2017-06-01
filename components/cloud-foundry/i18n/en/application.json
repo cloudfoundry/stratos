@@ -1,0 +1,55 @@
+{
+  "app-actions": {
+    "view": "View App",
+    "stop": "Stop",
+    "restart": "Restart",
+    "delete": "Delete",
+    "start": "Start",
+    "cli": "CLI Instructions"
+  },
+  "app-route-actions": {
+    "unmap": "Unmap from App",
+    "delete": "Delete Route"
+  },
+  "app-instances-actions" :{
+    "terminate": "Terminate"
+  },
+  "terminate-instance": {
+    "title": "Terminate Instance",
+    "description": "Are you sure you want to terminate instance {{index}}?",
+    "errorMessage": "There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.",
+    "buttonYes": "Terminate",
+    "buttonNo": "@:buttons.cancel",
+    "success": "Instance {{index}} successfully terminated"
+  },
+  "delete-app": {
+    "complex": {
+      "title": "Delete App and Associated Items"
+    },
+    "simple": {
+      "title": "Delete Application",
+      "description": "Are you sure you want to delete '{{appName}}'?",
+      "buttonYes": "Delete",
+      "buttonNo": "@:buttons.cancel",
+      "success": "'{{appName}}' has been deleted"
+    }
+  },
+  "app-tabs": {
+    "services": {
+      "categories": {
+        "attached": "Attached Service Instances",
+        "all": "All Services"
+      },
+      "manage": {
+        "title": "Manage Service Instances"
+      },
+      "card": {
+        "actions": {
+          "add": "Add Service",
+          "detach": "Detach",
+          "manage": "Manage Instances"
+        }
+      }
+    }
+  }
+}

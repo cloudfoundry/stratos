@@ -55,7 +55,7 @@
             <div class="role-pill" ng-class="{'closable-pill': clusterUsersController.canRemoveOrgRole(user, orgRole)}"
                  ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)"
                  ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg[orgRole.org.details.org.entity.name + orgRole.roleLabel] }">
-              {{ orgRole.org.details.org.entity.name }}: {{ orgRole.roleLabel }}
+              {{ orgRole.org.details.org.entity.name }}: <span translate>{{ orgRole.roleLabel }}</span>
               <i class="close-icon material-icons"
                  ng-click="clusterUsersController.removeOrgRole(user, orgRole)"
                  ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)">close</i>

@@ -10,15 +10,15 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
-      var appEventService = $injector.get('appEventService');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
+      var $translate = $injector.get('$translate');
 
       $stateParams.guid = 'app_123';
       $stateParams.cnsiGuid = 'guid';
 
       var ApplicationServicesController = $state.get('cf.applications.application.services').controller;
-      appServicesCtrl = new ApplicationServicesController($scope, modelManager, appEventService, $stateParams);
+      appServicesCtrl = new ApplicationServicesController($scope, $translate, modelManager, $stateParams);
     }));
 
     afterEach(function () {

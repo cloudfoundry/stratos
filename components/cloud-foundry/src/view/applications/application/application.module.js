@@ -34,7 +34,7 @@
    * @param {object} $window - the Angular $window service
    * @param {object} $q - the Angular $q service
    * @param {object} $interval - the Angular $interval service
-   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $translate - the Angular $translate service
    * @param {object} $state - the UI router $state service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @property {object} model - the Cloud Foundry Applications Model
@@ -49,7 +49,7 @@
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
                                  cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $interpolate, $state, cfApplicationTabs) {
+                                 $translate, $state, cfApplicationTabs) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -82,7 +82,7 @@
     vm.cfApplicationTabs = cfApplicationTabs;
     vm.appActions = [
       {
-        name: gettext('View App'),
+        name: 'app-actions.view',
         execute: function () {
           var routes = vm.model.application.summary.routes;
           if (routes.length) {
@@ -97,7 +97,7 @@
         icon: 'launch'
       },
       {
-        name: gettext('Stop'),
+        name: 'app-actions.stop',
         id: 'stop',
         execute: function () {
           vm.model.stopApp(cnsiGuid, vm.id);
@@ -106,7 +106,7 @@
         icon: 'stop'
       },
       {
-        name: gettext('Restart'),
+        name: 'app-actions.restart',
         id: 'restart',
         execute: function () {
           vm.model.restartApp(cnsiGuid, vm.id);
@@ -115,7 +115,7 @@
         icon: 'settings_backup_restore'
       },
       {
-        name: gettext('Delete'),
+        name: 'app-actions.delete',
         id: 'delete',
         execute: function () {
           deleteApp();
@@ -124,7 +124,7 @@
         icon: 'delete'
       },
       {
-        name: gettext('Start'),
+        name: 'app-actions.start',
         id: 'start',
         execute: function () {
           vm.model.startApp(cnsiGuid, vm.id);
@@ -133,7 +133,7 @@
         icon: 'play_circle_outline'
       },
       {
-        name: gettext('CLI Instructions'),
+        name: 'app-actions.cli',
         id: 'cli',
         execute: function () {
 
@@ -358,7 +358,7 @@
       frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.details" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
-          title: gettext('Delete App, Pipeline, and Selected Items')
+          title: 'delete-app.complex.title'
         },
         {
           details: details
@@ -368,19 +368,18 @@
 
     function simpleDeleteAppDialog() {
       frameworkDialogConfirm({
-        title: gettext('Delete Application'),
-        description: gettext('Are you sure you want to delete ') + vm.model.application.summary.name + '?',
+        title: 'delete-app.simple.title',
+        description: $translate.instant('delete-app.simple.description', { appName: vm.model.application.summary.name }),
         submitCommit: true,
         buttonText: {
-          yes: gettext('Delete'),
-          no: gettext('Cancel')
+          yes: 'delete-app.simple.buttonYes',
+          no: 'delete-app.simple.buttonNo'
         },
         callback: function () {
           var appName = vm.model.application.summary.name;
           vm.model.deleteApp(cnsiGuid, vm.id).then(function () {
             // show notification for successful binding
-            var successMsg = gettext("'{{appName}}' has been deleted");
-            var message = $interpolate(successMsg)({appName: appName});
+            var message = $translate.instant('delete-app.simple.success', {appName: appName});
             appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
             appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
