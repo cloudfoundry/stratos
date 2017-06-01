@@ -4,7 +4,7 @@
 
   > table.table {
     table-layout: fixed;
-    @include hpe-box-shadow-small();
+    @include console-box-shadow-small();
     border-collapse: separate;
 
     > thead > tr > th {
@@ -57,7 +57,7 @@
       &.st-sort-ascent, &.st-sort-descent {
         .column-div {
           .column-text {
-            border-color: $hpe-primary;
+            border-color: $console-primary;
           }
         }
       }

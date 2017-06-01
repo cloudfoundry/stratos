@@ -3,7 +3,7 @@ $login-logo-size: 128px;
 $login-panel-width: 420px;
 
 .brand {
-  .login-page .login-background .login-panel-hpe-logo > img {
+  .login-page .login-background .login-panel-company-logo > img {
     position: fixed;
     bottom: $login-padding;
     right: $login-padding;
@@ -24,7 +24,7 @@ $login-panel-width: 420px;
     background-color: $suse-secondary-lighter;
     height: 100vw;
 
-    .hpe-logo {
+    .company-logo {
       width: 128px;
     }
 

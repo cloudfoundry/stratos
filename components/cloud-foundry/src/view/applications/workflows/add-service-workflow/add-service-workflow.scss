@@ -1,23 +1,23 @@
 .add-service-workflow {
 
   .select-instance {
-    padding: $hpe-unit-space 0;
+    padding: $console-unit-space 0;
 
     .loading-services-spinner {
       text-align: center;
-      margin-top: $hpe-unit-space / 2;
+      margin-top: $console-unit-space / 2;
 
       span {
-        margin-right: $hpe-unit-space / 2;
+        margin-right: $console-unit-space / 2;
       }
     }
   }
 
   .service-confirm {
-    margin: $hpe-unit-space 0;
+    margin: $console-unit-space 0;
 
     .alert {
-      margin-bottom: $hpe-unit-space;
+      margin-bottom: $console-unit-space;
     }
   }
 
@@ -25,11 +25,11 @@
     display: flex;
 
     .service-icon {
-      padding: $hpe-unit-space;
+      padding: $console-unit-space;
 
       img {
-        max-height: $hpe-unit-space * 4;
-        max-width: $hpe-unit-space * 4;
+        max-height: $console-unit-space * 4;
+        max-width: $console-unit-space * 4;
       }
     }
   }
@@ -42,7 +42,7 @@
     }
 
     .tab-content {
-      padding: $hpe-unit-space 0;
+      padding: $console-unit-space 0;
 
       .existing-instances-table {
         tbody > tr td {
@@ -55,10 +55,10 @@
   .wizard-foot {
     border-top: 1px solid $gray-light;
     text-align: right;
-    padding-top: $hpe-unit-space / 2;
+    padding-top: $console-unit-space / 2;
 
     .btn {
-      margin-left: $hpe-unit-space / 2;
+      margin-left: $console-unit-space / 2;
     }
   }
 }

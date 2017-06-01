@@ -1,10 +1,10 @@
 
 account-actions, [account-actions] {
   display: block;
-  width: $hpe-grid-column-width * 4 - 2 * $hpe-unit-space;
+  width: $console-grid-column-width * 4 - 2 * $console-unit-space;
 
   .account-info {
-    margin-bottom: $hpe-grid-margin;
+    margin-bottom: $console-grid-margin;
   }
 
   .actions {
@@ -14,7 +14,7 @@ account-actions, [account-actions] {
     .action {
       display: block;
       white-space: nowrap;
-      padding: $hpe-unit-space * .5 0;
+      padding: $console-unit-space * .5 0;
 
       * {
         display: inline-block;
@@ -25,12 +25,12 @@ account-actions, [account-actions] {
         color: $dove-gray2;
 
         &:hover, &:focus, &:active {
-          color: $hpe-primary;
+          color: $console-primary;
         }
       }
 
       > a > i {
-        margin-right: $hpe-unit-space * .5;
+        margin-right: $console-unit-space * .5;
       }
 
     }

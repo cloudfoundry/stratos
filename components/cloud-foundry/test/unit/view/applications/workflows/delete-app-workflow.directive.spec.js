@@ -322,7 +322,6 @@
 
       it('#deleteProject - project is defined', function () {
         that.appModel.application.project = {};
-        that.appModel.application.pipeline = { hceCnsi: '' };
         cfApplicationTabs.appDeleting = function () {
           return that.$q.resolve();
         };

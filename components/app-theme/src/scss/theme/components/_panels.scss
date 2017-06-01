@@ -1,7 +1,7 @@
 $panel-bg:                    $white !default;
 $panel-fg:                    $gray-darker !default;
-$panel-body-padding:          $hpe-unit-space !default;
-$panel-heading-padding:       $hpe-unit-space/2 $hpe-unit-space !default;
+$panel-body-padding:          $console-unit-space !default;
+$panel-heading-padding:       $console-unit-space/2 $console-unit-space !default;
 $panel-footer-padding:        $panel-heading-padding !default;
 $panel-border-radius:         $border-radius-base !default;
 $panel-heading-height:        60px !default;

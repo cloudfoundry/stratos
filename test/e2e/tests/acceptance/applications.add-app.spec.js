@@ -216,7 +216,7 @@
 
       // cf push acceptance.e2e.1484149644648
       // Check copy to clipboard
-      element.all(by.css('code-block .hpe-copy')).get(2).click();
+      element.all(by.css('code-block .console-copy')).get(2).click();
       element(by.css('button.close')).click();
 
       galleryWall.showApplications();

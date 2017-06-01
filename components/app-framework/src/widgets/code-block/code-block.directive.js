@@ -76,7 +76,7 @@
       var scrollTop = $(this.$document[0]).scrollTop();
       try {
         var element = angular.element(event.event.target.parentElement);
-        jqTextElement.addClass('hpe-code-block-temp');
+        jqTextElement.addClass('console-code-block-temp');
         // Transclude needs a child element. If text is passed in then the transclude will add a span wrapper.
         // Ensure we get the text of this first element to avoid additional white space.
         textElement.textContent = $('pre:first-child', element).text();

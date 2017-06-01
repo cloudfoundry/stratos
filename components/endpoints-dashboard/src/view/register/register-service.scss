@@ -3,8 +3,8 @@
     height: initial;
 
     .register-content-left {
-      padding-bottom: $hpe-unit-space;
-      padding-right: 1.5 * $hpe-unit-space;
+      padding-bottom: $console-unit-space;
+      padding-right: 1.5 * $console-unit-space;
 
       p:last-of-type {
         margin-bottom: 0;
@@ -15,7 +15,7 @@
       display: flex;
       flex-direction: column;
 
-      padding-bottom: $hpe-unit-space;
+      padding-bottom: $console-unit-space;
 
       h4 {
         margin-top: 0;
@@ -55,10 +55,10 @@
 
               .add-icon {
                 border: 2px solid $brand-primary;
-                font-size: $hpe-unit-space / 2;
+                font-size: $console-unit-space / 2;
                 border-radius: 50%;
-                padding: $hpe-unit-space / 6;
-                margin-left: $hpe-unit-space / 4;
+                padding: $console-unit-space / 6;
+                margin-left: $console-unit-space / 4;
               }
             }
           }
@@ -66,7 +66,7 @@
 
         .btn-default {
           align-self: flex-end;
-          margin: $hpe-unit-space 2px;
+          margin: $console-unit-space 2px;
         }
       }
     }

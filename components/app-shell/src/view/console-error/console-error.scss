@@ -1,6 +1,6 @@
 .endpoint-notification-error {
   position: relative;
-  top: $hpe-unit-space*2;
+  top: $console-unit-space*2;
 }
 
 .console-error.console-error-block {
@@ -8,7 +8,7 @@
   @include flex-align(center, center, column);
 
   .btn {
-    margin-top: $hpe-unit-space;
+    margin-top: $console-unit-space;
   }
 }
 

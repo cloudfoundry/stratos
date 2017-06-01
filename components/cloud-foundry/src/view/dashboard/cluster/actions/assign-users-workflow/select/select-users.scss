@@ -2,12 +2,12 @@
 
 
   .select-users-filter {
-    padding-bottom: $hpe-unit-space;
+    padding-bottom: $console-unit-space;
 
     .filter-container {
       margin-left: 0;
       margin-right: 0;
-      padding: $hpe-unit-space / 2  20px;
+      padding: $console-unit-space / 2  20px;
 
       display: flex;
       align-self: stretch;
@@ -16,7 +16,7 @@
         flex: 0.5 1 auto;
 
         > div {
-          padding: $hpe-unit-space / 4 $hpe-unit-space / 2;
+          padding: $console-unit-space / 4 $console-unit-space / 2;
           border-width: 1px;
           div:nth-of-type(2) {
             color: #ccc;
@@ -27,7 +27,7 @@
       .select-users-input {
 
         flex: 1 1 auto;
-        padding-left: $hpe-unit-space / 2;
+        padding-left: $console-unit-space / 2;
 
         form {
           height: 100%;
