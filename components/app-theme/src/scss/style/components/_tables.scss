@@ -1,6 +1,6 @@
 table {
   color: $gray-darker;
-  letter-spacing: $hpe-letter-spacing;
+  letter-spacing: $console-letter-spacing;
   tbody > tr.vertical-centered > td {
     vertical-align: middle;
     th[st-sort] {
@@ -10,7 +10,7 @@ table {
 
   thead > tr {
     th {
-      font-weight: $hpe-font-weight-semibold;
+      font-weight: $console-font-weight-semibold;
       text-transform: uppercase;
     }
     th:hover {
@@ -33,7 +33,7 @@ table {
 table.table {
   &.table-selectable {
     th:first-child, td:first-child {
-      width: $hpe-unit-space * 2.5;
+      width: $console-unit-space * 2.5;
       position: relative;
       checkbox-input {
         position: absolute;
@@ -43,7 +43,7 @@ table.table {
       top: 22px;
     }
     td:first-child checkbox-input {
-      top: $hpe-unit-space * 2 / 3;
+      top: $console-unit-space * 2 / 3;
     }
   }
 
@@ -74,15 +74,15 @@ table.table {
   > tfoot > tr > td {
 
     line-height: 1;
-    padding-top: $hpe-unit-space * .8;
-    padding-bottom: $hpe-unit-space * .8;
+    padding-top: $console-unit-space * .8;
+    padding-bottom: $console-unit-space * .8;
 
     &:first-child:not(.text-center) {
-      padding-left: $hpe-unit-space;
+      padding-left: $console-unit-space;
     }
 
     &:last-child:not(.text-center) {
-      padding-right: $hpe-unit-space;
+      padding-right: $console-unit-space;
     }
 
     .btn-link {
@@ -97,7 +97,7 @@ table.table {
 
       > .btn {
         position: absolute;
-        bottom: -$hpe-unit-space / 3;
+        bottom: -$console-unit-space / 3;
         right: 0;
       }
     }
@@ -115,17 +115,17 @@ table.table {
 
     .material-icons {
       line-height: 0;
-      font-size: $hpe-unit-space;
+      font-size: $console-unit-space;
       vertical-align: middle;
     }
   }
 
   thead tr:first-child th {
-    padding-top: $hpe-unit-space * 1.1;
-    padding-bottom: $hpe-unit-space * .5;
+    padding-top: $console-unit-space * 1.1;
+    padding-bottom: $console-unit-space * .5;
   }
 
   tfoot tr:last-child td {
-    padding-bottom: $hpe-unit-space;
+    padding-bottom: $console-unit-space;
   }
 }

@@ -1,0 +1,58 @@
+hash: 186050757c239e4ac153ce78cb859ffd8ae23236ce54afe58ca4531337068117
+updated: 2017-05-25T12:53:40.88151367+01:00
+imports:
+- name: github.com/cloudfoundry/noaa
+  version: 086fd462f8fcdde1a234e028e3e157237bdb3383
+  subpackages:
+  - consumer
+  - consumer/internal
+  - errors
+- name: github.com/cloudfoundry/sonde-go
+  version: 78019103037ae46207993c8816e970d85bf1a9e4
+  subpackages:
+  - events
+- name: github.com/gogo/protobuf
+  version: 30433562cfbf487fe1df7cd26c7bab168d2f14d0
+  subpackages:
+  - gogoproto
+  - proto
+  - protoc-gen-gogo/descriptor
+- name: github.com/gorilla/context
+  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+- name: github.com/gorilla/securecookie
+  version: 667fe4e3466a040b780561fe9b51a83a3753eefc
+- name: github.com/gorilla/sessions
+  version: ca9ada44574153444b00d3fd9c8559e4cc95f896
+- name: github.com/gorilla/websocket
+  version: 3ab3a8b8831546bd18fd182c20687ca853b2bb13
+- name: github.com/labstack/echo
+  version: e08070379af60f5b9c0fb5bb2d1527ba9624fe43
+  subpackages:
+  - context
+  - engine
+  - engine/standard
+  - log
+- name: github.com/labstack/gommon
+  version: 1121fd3e243c202482226a7afe4dcd07ffc4139a
+  subpackages:
+  - color
+  - log
+- name: github.com/mattn/go-colorable
+  version: ded68f7a9561c023e790de24279db7ebf473ea80
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/valyala/bytebufferpool
+  version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
+- name: github.com/valyala/fasttemplate
+  version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
+- name: golang.org/x/net
+  version: 84f0e6f92b10139f986b1756e149a7d9de270cdc
+  subpackages:
+  - context
+- name: golang.org/x/sys
+  version: 1e99a4f9d247b28c670884b9a8d6801f39a47b77
+  subpackages:
+  - unix
+testImports: []

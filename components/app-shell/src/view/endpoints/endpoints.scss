@@ -2,7 +2,7 @@
 
 .endpoints {
 
-  padding: 0 $hpe-unit-space;
+  padding: 0 $console-unit-space;
 
   display: flex;
   flex-direction: column;
@@ -10,8 +10,8 @@
   align-items: stretch;
 
   .header {
-    padding-top: $hpe-unit-space;
-    padding-bottom: $hpe-unit-space;
+    padding-top: $console-unit-space;
+    padding-bottom: $console-unit-space;
     position: relative;
     button {
       position: absolute;
@@ -22,8 +22,8 @@
   .welcome-message {
 
     > .material-icons {
-      font-size: $hpe-unit-space;
-      margin-right: $hpe-unit-space * 0.5;
+      font-size: $console-unit-space;
+      margin-right: $console-unit-space * 0.5;
     }
 
     > span {
@@ -47,14 +47,14 @@
 
 .endpoint-notification.alert {
 
-  margin-bottom: $hpe-unit-space;
+  margin-bottom: $console-unit-space;
   font-size: 18px;
 
   .endpoint-notification-icon {
     position: absolute;
-    left: $hpe-unit-space;
-    top: $hpe-unit-space;
-    width: $hpe-unit-space;
+    left: $console-unit-space;
+    top: $console-unit-space;
+    width: $console-unit-space;
     path, rect {
       fill: $charcoal;
     }
@@ -74,16 +74,16 @@
 .applications-empty, .console-error-block {
   clear: both;
   text-align: center;
-  padding: $hpe-unit-space*2 0;
+  padding: $console-unit-space*2 0;
   width: 80%;
   margin: auto;
 
   .applications-msg, .applications-cta {
-    font-weight: $hpe-font-weight-semibold;
+    font-weight: $console-font-weight-semibold;
     color: $dove-gray;
 
     .btn-link {
-      font-weight: $hpe-font-weight-semibold;
+      font-weight: $console-font-weight-semibold;
     }
   }
 
@@ -99,7 +99,7 @@
 
   .material-icons {
     color: $dove-gray;
-    margin-bottom: $hpe-unit-space * .5;
+    margin-bottom: $console-unit-space * .5;
   }
 
 }

@@ -1,26 +1,26 @@
 pre {
   position: relative;
-  font-size: $hpe-pre-font-size;
+  font-size: $console-pre-font-size;
 
-  &.hpe-pre-dark {
-    background-color: $hpe-pre-dark-bg;
-    color: $hpe-pre-dark-color;
+  &.console-pre-dark {
+    background-color: $console-pre-dark-bg;
+    color: $console-pre-dark-color;
   }
 }
 
-.hpe-copy {
+.console-copy {
   color: $pre-color;
   position: relative;
 
-  &.hpe-copy-dark {
-    color: $hpe-pre-dark-color;
+  &.console-copy-dark {
+    color: $console-pre-dark-color;
   }
 
   &:after {
     content: 'content_copy';
     position: absolute;
-    right: $hpe-unit-space / 2;
-    top: $hpe-unit-space / 2;
+    right: $console-unit-space / 2;
+    top: $console-unit-space / 2;
     font-size: $font-size-base * 1.5;
   }
 }

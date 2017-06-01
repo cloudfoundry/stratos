@@ -8,12 +8,12 @@
     padding-right: 0;
   }
   .summary .data-body {
-    padding: $hpe-unit-space * .75 $hpe-unit-space;
+    padding: $console-unit-space * .75 $console-unit-space;
 
     .dl-horizontal {
 
       & > * {
-        margin-bottom: $hpe-unit-space * .5;
+        margin-bottom: $console-unit-space * .5;
         margin-left: auto;
       }
 
@@ -87,12 +87,12 @@
 
   .new-app-panel {
     background-color: $white;
-    margin-bottom: $hpe-unit-space;
-    padding: $hpe-unit-space * 0.5 $hpe-unit-space;
+    margin-bottom: $console-unit-space;
+    padding: $console-unit-space * 0.5 $console-unit-space;
 
     .new-app-title-box {
-      height: $hpe-unit-space * 2;
-      line-height: $hpe-unit-space * 2;
+      height: $console-unit-space * 2;
+      line-height: $console-unit-space * 2;
       display: flex;
 
       > .new-app-okay {
@@ -100,26 +100,26 @@
       }
 
       > .new-app-headline {
-        margin-left: $hpe-unit-space * .5;
-        font-size: $hpe-unit-space;
+        margin-left: $console-unit-space * .5;
+        font-size: $console-unit-space;
         flex: 1 1 0px;
       }
     }
 
     .new-app-nextsteps {
-      margin-left: $hpe-unit-space * 1.5;
+      margin-left: $console-unit-space * 1.5;
 
       > ul {
-        margin: $hpe-unit-space * 0.25 0;
+        margin: $console-unit-space * 0.25 0;
       }
     }
   }
 }
 
 .add-route-form-section {
-  margin: $hpe-unit-space 0 $hpe-unit-space * 0.5 0;
+  margin: $console-unit-space 0 $console-unit-space * 0.5 0;
   padding: 0;
-  font-weight: $hpe-font-weight-semibold;
+  font-weight: $console-font-weight-semibold;
   font-size: $font-size-large;
 }
 

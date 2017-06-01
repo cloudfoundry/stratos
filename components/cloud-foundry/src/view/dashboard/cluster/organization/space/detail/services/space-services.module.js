@@ -53,21 +53,15 @@
       if (angular.isUndefined(spaceDetail().instances)) {
         return update();
       }
-      updateLocalServiceInstances();
+      vm.serviceInstances = spaceDetail().instances;
       return $q.resolve();
-    }
-
-    function updateLocalServiceInstances() {
-      // Filter out the stackato hce service
-      vm.serviceInstances = $filter('removeHceServiceInstance')(spaceDetail().instances);
     }
 
     function update(serviceInstance) {
       return spaceModel.listAllServiceInstancesForSpace(vm.clusterGuid, vm.spaceGuid, {
         return_user_provided_service_instances: true
       }).then(function () {
-        updateLocalServiceInstances();
-
+        vm.serviceInstances = spaceDetail().instances;
         if (serviceInstance) {
           updateActions([serviceInstance]);
           spaceModel.updateServiceInstanceCount(vm.clusterGuid, vm.spaceGuid, _.keys(spaceDetail().instances).length);

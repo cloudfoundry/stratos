@@ -7,9 +7,9 @@ $about-color-fg: $page-footer-color-fg;
     margin: 0;
     padding: 0;
 
-    padding-top: $hpe-unit-space;
+    padding-top: $console-unit-space;
     border-bottom: 1px solid #ccc;
-    padding-bottom: $hpe-unit-space * .5;
+    padding-bottom: $console-unit-space * .5;
     .cluster-info {
       margin-left: 0;
     }
@@ -73,7 +73,7 @@ $about-color-fg: $page-footer-color-fg;
         }
 
         .btn-link {
-          margin-left: $hpe-unit-space;
+          margin-left: $console-unit-space;
           font-weight: 600;
         }
       }
@@ -88,8 +88,8 @@ $about-color-fg: $page-footer-color-fg;
 .about-panel {
   .cluster-settings.user-summary.about-summary {
     .about-title {
-      height: $hpe-unit-space * 3;
-      line-height: $hpe-unit-space * 3;
+      height: $console-unit-space * 3;
+      line-height: $console-unit-space * 3;
       padding: 0 10px;
       font-size: $about-title-font-size;
       font-weight: 500;
@@ -102,20 +102,20 @@ $about-color-fg: $page-footer-color-fg;
 
     &:last-child {
       margin: 0;
-      padding: $hpe-unit-space 0 $hpe-unit-space * 2 0;
+      padding: $console-unit-space 0 $console-unit-space * 2 0;
     }
   }
 
   page-footer {
     .copyright {
       width: auto;
-      bottom: $hpe-unit-space * 2;
+      bottom: $console-unit-space * 2;
     }
 
     .links {
       left: 0;
       right: initial;
-      bottom: $hpe-unit-space * .75;
+      bottom: $console-unit-space * .75;
 
       li:first-child {
         margin-left: 0;

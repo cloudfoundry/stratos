@@ -10,13 +10,13 @@
   & > .modal-content {
     @include flex-align(flex-start, stretch, column);
 
-    width: $hpe-unit-space * 16;
-    height: $hpe-unit-space * 16;
+    width: $console-unit-space * 16;
+    height: $console-unit-space * 16;
     box-shadow: none;
     border: none;
 
     .modal-header {
-      padding: $hpe-unit-space;
+      padding: $console-unit-space;
 
       > h3 {
         height: $font-size-large;
@@ -36,17 +36,17 @@
       color: $gray-darker;
       font-size: $font-size-large;
       text-align: center;
-      padding: 0 $hpe-unit-space * 2;
+      padding: 0 $console-unit-space * 2;
 
       & > p {
-        margin-bottom: $hpe-unit-space;
+        margin-bottom: $console-unit-space;
 
         &:before {
           @extend .material-icons;
           content: 'warning';
           display: block;
-          margin-bottom: $hpe-unit-space;
-          font-size: $hpe-unit-space * 2;
+          margin-bottom: $console-unit-space;
+          font-size: $console-unit-space * 2;
           color: $state-warning-bg;
         }
       }
@@ -55,7 +55,7 @@
     .modal-footer {
       @include flex-align(space-between, center);
 
-      padding: $hpe-unit-space;
+      padding: $console-unit-space;
       &:before,
       &:after {
         display: none;

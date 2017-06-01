@@ -574,11 +574,8 @@
                                     'updated_at': '2016-09-13T13:42:30Z'
                                   },
                                   'entity': {
-                                    'name': 'hce-21b765a1-f12a-4df2-8aad-e4bfafc09921',
+                                    'name': '21b765a1-f12a-4df2-8aad-e4bfafc09921',
                                     'credentials': {
-                                      'hce_api_url': 'https://aaa94425477c511e6b3ee020147e9b91-422118293.ap-northeast-2.elb.amazonaws.com:443/v2',
-                                      'hce_execution_id': '1',
-                                      'hce_pipeline_id': '7'
                                     },
                                     'space_guid': '89a370b9-9ba3-4cb4-8f2f-22933fba2990',
                                     'type': 'user_provided_service_instance',
