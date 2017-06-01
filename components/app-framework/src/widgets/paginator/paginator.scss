@@ -2,8 +2,8 @@
   display: flex;
   justify-content: space-between;
   height: $button-height;
-  margin-top: $hpe-unit-space / 2;
-  margin-bottom: $hpe-unit-space / 2;
+  margin-top: $console-unit-space / 2;
+  margin-bottom: $console-unit-space / 2;
   user-select: none;
 
   > * {
@@ -13,15 +13,15 @@
     &.btn-prev:before {
       @extend .material-icons;
       content: 'navigate_before';
-      font-size: $hpe-unit-space;
-      padding-right: $hpe-unit-space / 4;
+      font-size: $console-unit-space;
+      padding-right: $console-unit-space / 4;
     }
 
     &.btn-next:after {
       @extend .material-icons;
       content: 'navigate_next';
-      font-size: $hpe-unit-space;
-      padding-left: $hpe-unit-space / 4;
+      font-size: $console-unit-space;
+      padding-left: $console-unit-space / 4;
     }
 
     &.btn-prev,
@@ -31,7 +31,7 @@
       height: $button-height;
       cursor: pointer;
       font-size: $font-size-large;
-      font-weight: $hpe-font-weight-semibold;
+      font-weight: $console-font-weight-semibold;
 
       &:hover,
       &:active {
@@ -54,7 +54,7 @@
         line-height: $button-height - 2 * $button-border-width;
         text-align: center;
         font-size: $font-size-large;
-        font-weight: $hpe-font-weight-semibold;
+        font-weight: $console-font-weight-semibold;
         color: $gray-light;
         cursor: pointer;
         border: $button-border-width transparent solid;

@@ -19,7 +19,7 @@
   function defaultImage() {
     return {
       link: function (scope, element, attrs) {
-        var defaultImageSrc = attrs.defaultImageSrc || 'images/stackato-logo-md.png';
+        var defaultImageSrc = attrs.defaultImageSrc || 'images/missing-image.png';
 
         attrs.$observe('ngSrc', function (srcValue) {
           if (!srcValue) {

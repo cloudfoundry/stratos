@@ -1,4 +1,4 @@
-$detail-view-margin: $hpe-unit-space * 4;
+$detail-view-margin: $console-unit-space * 4;
 
 .modal.detail-view {
 
@@ -50,7 +50,7 @@ $detail-view-margin: $hpe-unit-space * 4;
     &.detail-view-with-title {
       .wizard {
         .wizard-head {
-          margin: $hpe-unit-space * 0.5 0;
+          margin: $console-unit-space * 0.5 0;
           height: auto;
           min-height: auto;
         }
@@ -58,12 +58,12 @@ $detail-view-margin: $hpe-unit-space * 4;
     }
 
     .detail-view-header {
-      flex: 0 1 $hpe-unit-space * 4;
-      height: $hpe-unit-space * 4;
-      padding: $hpe-unit-space * 1.5 0;
+      flex: 0 1 $console-unit-space * 4;
+      height: $console-unit-space * 4;
+      padding: $console-unit-space * 1.5 0;
       border: none;
       h4 {
-        font-size: $hpe-unit-space;
+        font-size: $console-unit-space;
         font-weight: 600;
       }
     }
@@ -71,8 +71,8 @@ $detail-view-margin: $hpe-unit-space * 4;
     .detail-view-close {
       @extend .material-icons;
       position: absolute;
-      top: $hpe-unit-space * 2;
-      right: $hpe-unit-space * 2.5;
+      top: $console-unit-space * 2;
+      right: $console-unit-space * 2.5;
       font-size: 28px;
       speak: none;
       font-style: normal;
@@ -105,15 +105,15 @@ $detail-view-margin: $hpe-unit-space * 4;
     height: 100%;
 
     .wizard-head {
-      height: $hpe-unit-space * 4;
-      min-height: $hpe-unit-space * 4;
+      height: $console-unit-space * 4;
+      min-height: $console-unit-space * 4;
       padding: 0;
       border: none;
       display: flex;
-      margin-top: $hpe-unit-space * 0.5;
+      margin-top: $console-unit-space * 0.5;
 
       h4 {
-        font-size: $hpe-unit-space;
+        font-size: $console-unit-space;
         font-weight: 600;
         margin: auto 0;
       }
@@ -135,7 +135,7 @@ $detail-view-margin: $hpe-unit-space * 4;
       .wizard-step {
         overflow-y: auto;
         padding-right: 0;
-        padding-left: $hpe-unit-space;
+        padding-left: $console-unit-space;
 
         &.wizard-step-nonav {
           padding-left: 0;
@@ -144,7 +144,7 @@ $detail-view-margin: $hpe-unit-space * 4;
 
         .step-title {
           margin-top: 0;
-          font-size: $hpe-unit-space * 7 / 8;
+          font-size: $console-unit-space * 7 / 8;
         }
       }
 
@@ -155,14 +155,14 @@ $detail-view-margin: $hpe-unit-space * 4;
 
     .wizard-foot {
       @include flex-align(flex-end);
-      height: $hpe-unit-space * 4.5;
-      min-height: $hpe-unit-space * 4.5;
+      height: $console-unit-space * 4.5;
+      min-height: $console-unit-space * 4.5;
       border-top: 1px solid $gray-light;
-      padding-top: $hpe-unit-space * 3 / 4;
+      padding-top: $console-unit-space * 3 / 4;
       background: $white;
 
       .btn:not(:first-of-type) {
-        margin-left: $hpe-unit-space / 2;
+        margin-left: $console-unit-space / 2;
       }
     }
   }

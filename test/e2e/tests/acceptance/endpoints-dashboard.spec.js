@@ -598,9 +598,9 @@
               expect(hcfRowIndex).toBeDefined();
               var errorRow = endpointsPage.endpointError(hcfRowIndex);
               expect(errorRow.isPresent()).toBeTruthy();
-              var div = errorRow.element(by.css('.hpe-popover-alert'));
+              var div = errorRow.element(by.css('.console-popover-alert'));
               expect(div.isPresent()).toBeTruthy();
-              expect(helpers.hasClass(div, 'hpe-popover-alert-error')).toBeTruthy();
+              expect(helpers.hasClass(div, 'console-popover-alert-error')).toBeTruthy();
               div.element(by.css('.popover-content')).getText().then(function (text) {
                 expect(text.indexOf('Token has expired')).toBe(0);
               });
