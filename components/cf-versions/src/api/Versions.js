@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.api')
+    .module('cf-versions.api', [])
     .run(registerApi);
 
   function registerApi($http, apiManager) {

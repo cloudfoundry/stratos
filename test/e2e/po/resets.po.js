@@ -203,7 +203,9 @@
         var promises = data.map(function (c) {
           return helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/unregister'}, null, {cnsi_guid: c.guid});
         });
-        promises.push(_removeAllVcses(req));
+        if (!helpers.skipIfNoHCE()) {
+          promises.push(_removeAllVcses(req));
+        }
         Promise.all(promises).then(resolve, reject);
       }, reject);
     });

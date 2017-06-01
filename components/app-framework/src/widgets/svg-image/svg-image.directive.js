@@ -22,7 +22,10 @@
             if (!attrs.hasOwnProperty(attr) || attr[0] === '$') {
               continue;
             }
-            svg.attr(attrs.$attr[attr], attrs[attr]);
+            var attrName = attrs.$attr[attr];
+            if (attrName !== 'ng-if') {
+              svg.attr(attrName, attrs[attr]);
+            }
           }
 
           svg = svg.removeAttr('xmlns:a');
