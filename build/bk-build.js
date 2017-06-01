@@ -195,7 +195,7 @@
       });
   });
 
-  gulp.task('build', function () {
+  gulp.task('build-backend', function () {
 
     return runSequence(
       'init-build',
@@ -203,7 +203,7 @@
     );
   });
 
-  gulp.task('test', function () {
+  gulp.task('test-backend', function () {
 
     return runSequence(
       'init-build',
