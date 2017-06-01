@@ -22,7 +22,7 @@
       }
 
       .actions-menu-list {
-        @include hpe-box-shadow-small();
+        @include console-box-shadow-small();
         border: none;
         left: 100%;
         top: 0;

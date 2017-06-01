@@ -17,9 +17,9 @@
   display: inline;
 
   & > div {
-    width: $hpe-spinkit-med;
-    height: $hpe-spinkit-med;
-    background-color: $hpe-spinkit-dark-bg;
+    width: $console-spinkit-med;
+    height: $console-spinkit-med;
+    background-color: $console-spinkit-dark-bg;
 
     border-radius: 100%;
     display: inline-block;
@@ -28,17 +28,17 @@
   }
 
   &.bounce-spinner-sm > div {
-    height: $hpe-spinkit-sm;
-    width: $hpe-spinkit-sm;
+    height: $console-spinkit-sm;
+    width: $console-spinkit-sm;
   }
 
   &.bounce-spinner-lg > div {
-    height: $hpe-spinkit-lg;
-    width: $hpe-spinkit-lg;
+    height: $console-spinkit-lg;
+    width: $console-spinkit-lg;
   }
 
   &.bounce-spinner-light > div {
-    background-color: $hpe-spinkit-light-bg;
+    background-color: $console-spinkit-light-bg;
   }
 
   .bounce1 {

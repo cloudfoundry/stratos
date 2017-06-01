@@ -18,7 +18,7 @@ $applications-msg-height: 50px;
     .btn-primary {
       font-size: 16px;
       height: auto;
-      padding: 4px $hpe-unit-space;
+      padding: 4px $console-unit-space;
     }
   }
 }
@@ -30,7 +30,7 @@ $applications-msg-height: 50px;
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
-  margin-left: $hpe-unit-space;
+  margin-left: $console-unit-space;
 
   .form-group.search-field {
     height: 40px;
@@ -74,7 +74,7 @@ $applications-msg-height: 50px;
     flex-wrap: wrap;
 
     .form-group {
-      margin-right: $hpe-unit-space / 2;
+      margin-right: $console-unit-space / 2;
     }
 
     .form-group {
@@ -114,7 +114,7 @@ $applications-msg-height: 50px;
   }
 
   .panel-body {
-    padding: $hpe-unit-space * 0.5;
+    padding: $console-unit-space * 0.5;
   }
 
   .panel-body:not(:first-child) {
@@ -122,9 +122,9 @@ $applications-msg-height: 50px;
   }
 
   .control-label-outside {
-    height: $hpe-input-height;
+    height: $console-input-height;
     margin-bottom: 0;
-    line-height: $hpe-input-height;
+    line-height: $console-input-height;
     margin-right: 12px;
   }
 
@@ -144,8 +144,8 @@ $applications-msg-height: 50px;
 
     .apps-sorting {
       flex: 1 1 auto;
-      max-width: $hpe-input-width;
-      min-width: $hpe-unit-space * 7;
+      max-width: $console-input-width;
+      min-width: $console-unit-space * 7;
       margin: 0;
       padding: 0;
 
@@ -165,8 +165,8 @@ $applications-msg-height: 50px;
       flex: 0 1 auto;
       align-self: center;
       text-align: center;
-      min-width: $hpe-unit-space * 4;
-      margin-left: $hpe-unit-space * 0.5;
+      min-width: $console-unit-space * 4;
+      margin-left: $console-unit-space * 0.5;
 
       .reset-link {
         user-select: none;
@@ -176,7 +176,7 @@ $applications-msg-height: 50px;
     .app-total-control {
       .form-group {
         width: auto;
-        min-width: $hpe-unit-space * 6;
+        min-width: $console-unit-space * 6;
       }
     }
 
@@ -195,23 +195,23 @@ $applications-msg-height: 50px;
     .view-buttons {
       flex: 0 1 auto;
       align-self: center;
-      margin: 0 0 0 $hpe-unit-space * 0.5;
+      margin: 0 0 0 $console-unit-space * 0.5;
       display: flex;
-      height: $hpe-input-height;
+      height: $console-input-height;
       flex-direction: column;
 
       button:not([disabled]):focus, button:not([disabled]):hover {
         outline: none;
-        color: $hpe-primary;
+        color: $console-primary;
       }
 
       .btn {
         padding: 0;
         margin: 0;
-        height: $hpe-input-height/2;
+        height: $console-input-height/2;
       }
       .btn-active {
-        color: $hpe-primary;
+        color: $console-primary;
       }
       .btn-disabled {
         color: $actions-menu-item-disabled-fg;
@@ -231,15 +231,15 @@ $applications-msg-height: 50px;
       height: 100%;
       padding: 0;
       margin: 0;
-      margin-left: $hpe-unit-space;
+      margin-left: $console-unit-space;
     }
 
     .application-search-box-icon {
       position: absolute;
       margin-left: -12px;
-      height: $hpe-input-height;
+      height: $console-input-height;
       vertical-align: middle;
-      line-height: $hpe-input-height;
+      line-height: $console-input-height;
     }
   }
 }

@@ -30,7 +30,7 @@
 
   function InlineMessageController($state) {
 
-    this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
+    this.statusClass = 'console-popover-alert-' + (this.status ? this.status : 'warning');
 
     this.openLink = function () {
       var link = this.link;

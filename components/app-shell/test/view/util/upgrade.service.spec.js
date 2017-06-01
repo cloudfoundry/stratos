@@ -2,7 +2,7 @@
   'use strict';
 
   describe('upgrade service', function () {
-    var $httpBackend, applicationCtrl, $state, appUpgradeCheck, $http, $stateParams, $timeout;
+    var $httpBackend, applicationCtrl, $state, appUpgradeCheck, $http, $stateParams, $timeout, redirectStateName;
 
     var testAptEndpoint = {
       Scheme: 'https',
@@ -22,6 +22,9 @@
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?page=1&results-per-page=48').respond(200, {guid: {}});
       appUpgradeCheck = $injector.get('appUpgradeCheck');
+
+      // For some tests, the redirected state depends on whether the endpoints dashboard is available
+      redirectStateName = $state.get('endpoint.dashboard') ? 'endpoint.dashboard' : 'error-page';
     }));
 
     afterEach(function () {
@@ -186,7 +189,7 @@
           expect(applicationCtrl.failedLogin).toBe(false);
           expect(applicationCtrl.serverErrorOnLogin).toBe(false);
           expect(applicationCtrl.serverFailedToRespond).toBe(false);
-          expect($state.current.name).toBe('endpoint.dashboard');
+          expect($state.current.name).toBe(redirectStateName);
         });
 
         it('503 is not an upgrade', function () {
@@ -194,7 +197,7 @@
           $httpBackend.expectGET('/pp/v1/cnsis/test');
           $http.get('/pp/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('endpoint.dashboard');
+          expect($state.current.name).toBe(redirectStateName);
         });
 
         it('503 is not an portal proxy request', function () {
@@ -202,7 +205,7 @@
           $httpBackend.expectGET('/github/v1/cnsis/test');
           $http.get('/github/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('endpoint.dashboard');
+          expect($state.current.name).toBe(redirectStateName);
         });
 
         it('503 is upgrade', function () {

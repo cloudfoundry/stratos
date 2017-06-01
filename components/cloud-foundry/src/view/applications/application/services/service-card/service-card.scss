@@ -5,16 +5,16 @@ service-card {
   .service-card {
     display: flex;
     width: 100%;
-    min-height: $hpe-unit-space * 5;
+    min-height: $console-unit-space * 5;
 
     .service-icon {
       display: block;
       padding: 0;
-      padding-right: $hpe-unit-space;
+      padding-right: $console-unit-space;
 
       img {
-        max-height: $hpe-unit-space * 4;
-        max-width: $hpe-unit-space * 4;
+        max-height: $console-unit-space * 4;
+        max-width: $console-unit-space * 4;
       }
     }
 
@@ -36,7 +36,7 @@ service-card {
 
         .service-metadata {
           display: flex;
-          padding: 0 $hpe-unit-space 0 $hpe-unit-space;
+          padding: 0 $console-unit-space 0 $console-unit-space;
           flex: none;
           width: 35%;
 
@@ -45,10 +45,10 @@ service-card {
             dt {
               display: inline-block;
               text-transform: uppercase;
-              margin-right: $hpe-unit-space;
+              margin-right: $console-unit-space;
 
               &:not(:first-of-type) {
-                margin-top: $hpe-unit-space / 2;
+                margin-top: $console-unit-space / 2;
               }
             }
             dd {
@@ -65,7 +65,7 @@ service-card {
 
         .service-actions-menu {
           text-align: right;
-          width:  $hpe-unit-space * 2;
+          width:  $console-unit-space * 2;
           flex: none;
 
           .actions-menu {
@@ -75,13 +75,13 @@ service-card {
               }
 
               .actions-menu-list {
-                margin-top: -$hpe-unit-space / 2;
+                margin-top: -$console-unit-space / 2;
               }
             }
 
             .actions-menu-icon {
-              font-weight: $hpe-font-weight-semibold;
-              line-height: $hpe-unit-space;
+              font-weight: $console-font-weight-semibold;
+              line-height: $console-unit-space;
               font-size: 1.75em;
             }
           }
@@ -91,7 +91,7 @@ service-card {
 
       .service-description {
         flex-grow: 1;
-        padding-right: $hpe-unit-space * 2;
+        padding-right: $console-unit-space * 2;
       }
 
       .service-action-block {
@@ -105,14 +105,14 @@ service-card {
         .service-attached:before {
           @extend .material-icons;
           content: 'attachment';
-          margin-right: $hpe-unit-space / 4;
+          margin-right: $console-unit-space / 4;
           vertical-align: bottom;
         }
 
         .service-added:after {
           @extend .material-icons;
           content: 'attachment';
-          margin-left: $hpe-unit-space / 4;
+          margin-left: $console-unit-space / 4;
         }
       }
 
@@ -138,7 +138,7 @@ service-card {
 
           .add-icon {
             font-size: 20px;
-            margin-left: $hpe-unit-space / 4;
+            margin-left: $console-unit-space / 4;
           }
         }
       }

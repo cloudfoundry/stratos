@@ -1,17 +1,17 @@
-.hpe-code-block {
+.console-code-block {
   $fade-transition-duration: 250ms;
   position: relative;
 
   > pre {
-    min-height: 2.5 * $hpe-unit-space;
-    padding: 0.5 * $hpe-unit-space;
+    min-height: 2.5 * $console-unit-space;
+    padding: 0.5 * $console-unit-space;
     margin: 0;
   }
 
-  .hpe-copy {
+  .console-copy {
     position: absolute;
-    right: 0.5 * $hpe-unit-space;
-    top: 0.5 * $hpe-unit-space;
+    right: 0.5 * $console-unit-space;
+    top: 0.5 * $console-unit-space;
     cursor: pointer;
     transition: opacity $fade-transition-duration linear;
 
@@ -22,63 +22,63 @@
     }
   }
 
-  .hpe-copied-msg {
+  .console-copied-msg {
     background-color: $pre-bg;
   }
 
-  &.hpe-code-block-dark {
+  &.console-code-block-dark {
     > pre {
-      background-color: $hpe-primary-fg;
+      background-color: $console-primary-fg;
       color: $silver;
     }
 
-    .hpe-copy {
+    .console-copy {
       color: $silver;
     }
 
-    .hpe-copied-msg {
+    .console-copied-msg {
       color: $silver;
-      background-color: $hpe-primary-fg;
+      background-color: $console-primary-fg;
     }
   }
 
-  .hpe-code-block-copied-msg {
+  .console-code-block-copied-msg {
     position: absolute;
-    right: 0.5 * $hpe-unit-space;
-    top: 0.5 * $hpe-unit-space;
+    right: 0.5 * $console-unit-space;
+    top: 0.5 * $console-unit-space;
     color: #333;
     opacity: 0;
     transition: opacity $fade-transition-duration linear;
     display: flex;
 
-    .hpe-copied-msg {
+    .console-copied-msg {
       margin: auto;
-      padding: 0 0.5 * $hpe-unit-space;
+      padding: 0 0.5 * $console-unit-space;
     }
 
-    .hpe-copy-success-icon {
+    .console-copy-success-icon {
        &:after {
          font-size: 24px;
          content: 'check_circle';
-         color: $hpe-primary;
+         color: $console-primary;
       }
     }
   }
 
   &.copy-success {
-    .hpe-copy {
+    .console-copy {
       opacity: 0;
       pointer-events: none;
       cursor: default;
     }
 
-    .hpe-code-block-copied-msg {
+    .console-code-block-copied-msg {
       opacity: 1;
     }
   }
 }
 
-.hpe-code-block-temp {
+.console-code-block-temp {
   position: relative;
   width: 0px;
   height: 0px;

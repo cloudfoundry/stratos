@@ -4,13 +4,13 @@
         'variables/variables';
 
 .application-action-col {
-  padding-top: $hpe-unit-space;
+  padding-top: $console-unit-space;
 
   .btn {
     font-size: $font-size-large;
     text-transform: none;
     height: auto;
-    padding: $hpe-unit-space * 0.5 $hpe-unit-space;
+    padding: $console-unit-space * 0.5 $console-unit-space;
 
     &:active,
     &:focus,
@@ -27,19 +27,19 @@
     }
 
     .materials-icons {
-      padding-right: $hpe-unit-space;
+      padding-right: $console-unit-space;
     }
   }
 }
 
 .application-header {
   @include flex-vertical-centered();
-  font-size: $hpe-unit-space;
+  font-size: $console-unit-space;
   padding: 0;
   height: $main-nav-title-height;
 
   .app-summary-app-state-icon, .bounce-spinner {
-    margin-left: $hpe-unit-space;
+    margin-left: $console-unit-space;
   }
 
   .popover {
@@ -49,16 +49,16 @@
 }
 
 .application-details {
-  padding-top: $hpe-unit-space;
-  padding-bottom: $hpe-unit-space;
+  padding-top: $console-unit-space;
+  padding-bottom: $console-unit-space;
 }
 
 .application-nav.nav.nav-tabs > li {
   padding-top: 0;
-  margin: $hpe-unit-space * 0.5 $hpe-unit-space 0 0;
+  margin: $console-unit-space * 0.5 $console-unit-space 0 0;
 
   &:last-child {
-    margin: $hpe-unit-space * 0.5 0 0 0;
+    margin: $console-unit-space * 0.5 0 0 0;
   }
 }
 
@@ -75,11 +75,11 @@
 
   .actions-menu-list {
     top: 75%;
-    min-width: $hpe-unit-space * 10;
+    min-width: $console-unit-space * 10;
   }
 
   .actions-menu-item > i {
-    padding-right: $hpe-unit-space / 2;
+    padding-right: $console-unit-space / 2;
   }
 }
 
@@ -101,7 +101,7 @@
   }
 
   > span {
-    margin-left: $hpe-unit-space * 0.5;
+    margin-left: $console-unit-space * 0.5;
   }
 
   &:hover {

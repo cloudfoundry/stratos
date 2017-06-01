@@ -12,7 +12,7 @@
       body[guid] = {
         "name": "HCF",
         "build": "4.0.0",
-        "support": "stackato-support@hpe.com",
+        "support": "stratos@suse.com",
         "version": 2,
         "description": "Stratos Cloud Foundry",
         "authorization_endpoint": "https://hcf.identity.julbra.stacktest.io:443",
