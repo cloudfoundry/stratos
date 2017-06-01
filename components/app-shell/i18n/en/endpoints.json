@@ -31,7 +31,7 @@
     },
     "errors": {
       "unavailable": "The Console could not contact the endpoint named '{{name}}'. Try reconnecting to this endpoint to resolve this problem.",
-      "mutiple": "The Console could not contact multiple endpoints",
+      "multiple": "The Console could not contact multiple endpoints",
       "contact": "The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.",
       "expired": "Token has expired. Try reconnecting to this endpoint to resolve this problem."
     }

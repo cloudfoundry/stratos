@@ -95,7 +95,7 @@
             // If there are no services or no errors continue as normal
             appErrorService.clearAppError();
           } else if (errors.length === 1) {
-            appErrorService.setAppError($translate.instant('endpoints.errors.unavailabe', {name: errors[0]}));
+            appErrorService.setAppError($translate.instant('endpoints.errors.unavailable', {name: errors[0]}));
           } else if (errors.length > 1) {
             appErrorService.setAppError($translate.instant('endpoints.errors.multiple'));
           }

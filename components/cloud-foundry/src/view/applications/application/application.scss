@@ -1,8 +1,7 @@
 @import 'services/services',
         'summary/summary',
         'log-stream/log-stream',
-        'variables/variables',
-        'versions/versions';
+        'variables/variables';
 
 .application-action-col {
   padding-top: $console-unit-space;
