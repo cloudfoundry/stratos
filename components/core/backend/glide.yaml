@@ -1,4 +1,4 @@
-package: github.com/hpcloud/portal-proxy/src/core
+package: github.com/hpcloud/stratos-ui/src/core
 import:
 - package: github.com/Sirupsen/logrus
   version: 0.11.5

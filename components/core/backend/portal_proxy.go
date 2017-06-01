@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
 )
 
 type portalProxy struct {

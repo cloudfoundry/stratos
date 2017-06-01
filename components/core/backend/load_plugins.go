@@ -6,7 +6,7 @@ import (
 	"plugin"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
 )
 
 type pluginType string
