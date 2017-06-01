@@ -21,7 +21,7 @@
        * @memberof cloud-foundry.view.applications.application.summary
        * @description Show a detail view containing basic cli instructions
        * @param {object} appModel - Application model
-       * @param {string} username - Username used to connect to HCF
+       * @param {string} username - Username used to connect to CF
        * @returns {promise} A detail view promise
        * @public
        */

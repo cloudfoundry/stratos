@@ -18,10 +18,10 @@
    * @name Route
    * @param {app.api.apiManager} apiManager - the API manager
    * @param {app.api.modelManager}  modelManager - the Model management service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
    * @property {app.api.modelManager} modelManager - the Model management service
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general cf model helpers
    * @property {object} route - the currently selected route state
    * @class
    */
