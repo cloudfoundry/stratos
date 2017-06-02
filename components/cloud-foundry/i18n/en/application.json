@@ -13,7 +13,9 @@
   },
   "add-route": {
     "title": "Add a Route",
-    "buttonSubmit": "Create route"
+    "button": {
+      "submit": "Create route"
+    }
   },
   "app-instances-actions" :{
     "terminate": "Terminate"
@@ -21,9 +23,11 @@
   "terminate-instance": {
     "title": "Terminate Instance",
     "description": "Are you sure you want to terminate instance {{index}}?",
-    "errorMessage": "There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.",
-    "buttonYes": "Terminate",
-    "buttonNo": "@:buttons.cancel",
+    "error-message": "There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.",
+    "button": {
+      "yes": "Terminate",
+      "no": "@:buttons.cancel"
+    },
     "success": "Instance {{index}} successfully terminated"
   },
   "delete-app": {
@@ -33,8 +37,10 @@
     "simple": {
       "title": "Delete Application",
       "description": "Are you sure you want to delete '{{appName}}'?",
-      "buttonYes": "Delete",
-      "buttonNo": "@:buttons.cancel",
+      "button": {
+        "yes": "Delete",
+        "no": "@:buttons.cancel"
+      },
       "success": "'{{appName}}' has been deleted"
     }
   },
@@ -57,18 +63,22 @@
       "unbind": {
         "title": "Detach Service",
         "description": "Are you sure you want to detach {{name}}?",
-        "errorMessage": "There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.",
-        "buttonYes": "Detach",
-        "buttonNo": "@:buttons.cancel",
+        "error-message": "There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.",
+        "button": {
+          "yes": "Detach",
+          "no": "@:buttons.cancel"
+        },
         "error": "Some applications failed to detach from the service instance",
         "success": "Service instance successfully detached"
       },
       "delete": {
         "title": "Delete Service",
         "description": "Are you sure you want to delete {{name}}?",
-        "errorMessage": "There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.",
-        "buttonYes": "Delete",
-        "buttonNo": "@:buttons.cancel",
+        "error-message": "There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.",
+        "button": {
+          "yes": "Delete",
+          "no": "@:buttons.cancel"
+        },
         "success": "Service instance successfully deleted"
       },
       "view-envs": {

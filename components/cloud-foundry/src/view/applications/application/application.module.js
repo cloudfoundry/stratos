@@ -371,8 +371,8 @@
         description: $translate.instant('delete-app.simple.description', { appName: vm.model.application.summary.name }),
         submitCommit: true,
         buttonText: {
-          yes: 'delete-app.simple.buttonYes',
-          no: 'delete-app.simple.buttonNo'
+          yes: 'delete-app.simple.button.yes',
+          no: 'delete-app.simple.button.no'
         },
         callback: function () {
           var appName = vm.model.application.summary.name;

@@ -41,11 +41,11 @@
         return frameworkDialogConfirm({
           title: 'app-tabs.services.unbind.title',
           description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.unbind.errorMessage',
+          errorMessage: 'app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.unbind.buttonYes',
-            no: 'app-tabs.services.unbind.buttonNo'
+            yes: 'app-tabs.services.unbind.button.yes',
+            no: 'app-tabs.services.unbind.button.no'
           },
           callback: function () {
             return bindingModel.deleteServiceBinding(cnsiGuid, serviceBindingGuid)
@@ -81,11 +81,11 @@
         return frameworkDialogConfirm({
           title: 'app-tabs.services.unbind.title',
           description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.unbind.errorMessage',
+          errorMessage: 'app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.unbind.buttonYes',
-            no: 'app-tabs.services.unbind.buttonNo'
+            yes: 'app-tabs.services.unbind.button.yes',
+            no: 'app-tabs.services.unbind.button.no'
           },
           callback: function () {
             var promises = [];
@@ -147,11 +147,11 @@
         return frameworkDialogConfirm({
           title: 'app-tabs.services.delete.title',
           description: $translate.instant('app-tabs.services.delete.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.delete.errorMessage',
+          errorMessage: 'app-tabs.services.delete.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.delete.buttonYes',
-            no: 'app-tabs.services.delete.buttonNo'
+            yes: 'app-tabs.services.delete.button.yes',
+            no: 'app-tabs.services.delete.button.no'
           },
           callback: function () {
             var params = {

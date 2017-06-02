@@ -142,11 +142,11 @@
           frameworkDialogConfirm({
             title: 'terminate-instance.title',
             description: $translate.instant('terminate-instance.description', { index: instanceIndex }),
-            errorMessage: 'terminate-instance.errorMessage',
+            errorMessage: 'terminate-instance.error-message',
             submitCommit: true,
             buttonText: {
-              yes: 'terminate-instance.buttonYes',
-              no: 'terminate-instance.buttonNo'
+              yes: 'terminate-instance.button.yes',
+              no: 'terminate-instance.button.no'
             },
             callback: function () {
               return vm.model.terminateRunningAppInstanceAtGivenIndex(vm.cnsiGuid, vm.id, instanceIndex)

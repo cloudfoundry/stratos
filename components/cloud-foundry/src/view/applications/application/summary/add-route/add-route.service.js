@@ -121,7 +121,7 @@
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/add-route/add-route.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'add-route.buttonSubmit'
+              submit: 'add-route.button.submit'
             },
             class: 'dialog-form',
             dialog: true
