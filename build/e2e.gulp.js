@@ -20,7 +20,11 @@
   var combine = require('istanbul-combine');
   var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
-  var components = require('./components');
+
+  var components;
+  gulp.task('prepare:e2e', function () {
+    components = require('./components');
+  });
 
   gulp.task('e2e:clean:dist', function (next) {
     del('../tmp', {force: true}, next);
@@ -60,7 +64,7 @@
       .pipe(gulp.dest(paths.instrumented));
   });
 
-  gulp.task('e2e:instrument-source', function () {
+  gulp.task('e2e:instrument-source', ['prepare:e2e'], function () {
     var sources = components.getGlobs([
       '**/*.js',
       '!**/*.spec.js',

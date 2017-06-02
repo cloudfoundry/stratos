@@ -33,18 +33,18 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
-  var components = require('./components');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
 
   var paths = config.paths;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
-    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles;
+    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components;
   var packageJson = require('../package.json');
 
   function initialize() {
     // bower install won't update our local path components files, do this ourselves as a full install takes a while
     // this will also remove any components that are no longer referenced in the bower.json
+    components = require('./components');
     components.syncLocalPathComponents();
     components.initialize();
 

@@ -12,12 +12,21 @@ BOWER_PATH=${NODE_HOME}/bin
 # Copy the config file
 cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 
-# Copy the manifest file
-cp ${CF_DIR}/manifest.yml ${TOP_LEVEL}
+cat << EOF > ${TOP_LEVEL}/plugins.json
+{
+ "enabledPlugins":[
+   "cloud-foundry",
+   "cloud-foundry-hosting"	
+ ]
+}
+EOF
+
 npm install -g gulp
 npm install -g bower
 
 cd ${TOP_LEVEL}
+cat plugins.json
+
 npm install
 ${BOWER_PATH}/bower install
 
