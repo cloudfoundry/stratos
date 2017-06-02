@@ -38,18 +38,9 @@
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles, templateFiles, scssFiles, server;
+  var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
+    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles;
   var packageJson = require('../package.json');
-
-  // // Initial component configuration
-  // initialize();
-
-  var usePlumber = true;
-
-  var bowerConfig = components.getWiredep();
-  delete bowerConfig.exclude;
-  var bowerFiles = require('wiredep')(bowerConfig);
-  var mainBowerFile = path.resolve('./bower.json');
 
   function initialize() {
     // bower install won't update our local path components files, do this ourselves as a full install takes a while
@@ -66,8 +57,15 @@
     scssFiles = components.getGlobs(['src/**/*.scss']);
   }
 
-  gulp.task('prepare', function (next) {
+  gulp.task('prepare-frontend', function (next) {
     initialize();
+
+    usePlumber = true;
+
+    var bowerConfig = components.getWiredep();
+    delete bowerConfig.exclude;
+    bowerFiles = require('wiredep')(bowerConfig);
+    mainBowerFile = path.resolve('./bower.json');
     next();
   });
 
@@ -156,9 +154,9 @@
     var cssFiles = bowerFiles.css;
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
-    .pipe(concat('index.css'))
-    .pipe(cleanCSS({}))
-    .pipe(gulp.dest(paths.dist));
+      .pipe(concat('index.css'))
+      .pipe(cleanCSS({}))
+      .pipe(gulp.dest(paths.dist));
   });
 
   // Put all of the html templates into an angular module that preloads them when the app loads
@@ -168,7 +166,7 @@
       .pipe(templateCache(config.jsTemplatesFile, {
         module: 'console-templates',
         standalone: true,
-        transformUrl : components.transformPath
+        transformUrl: components.transformPath
       }))
       .pipe(uglify())
       .pipe(gulp.dest(paths.dist));
@@ -204,7 +202,7 @@
     }
 
     var sources = gulp.src(
-        jsDevFiles
+      jsDevFiles
         .concat(paths.dist + config.jsLibsFile)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -230,7 +228,7 @@
   });
 
   // Prepare required artifacts for the unit tests
-  gulp.task('unit:prepare', ['i18n','template-cache','copy:assets']);
+  gulp.task('unit:prepare', ['i18n', 'template-cache', 'copy:assets']);
 
   // By default running the unit tests only tests those components included in bower.json
   // This task re-writes bower.json to include all components in the components folder
@@ -238,12 +236,12 @@
     var local = components.findLocalPathComponentFolders();
     var bower = components.getBowerConfig();
     _.assign(bower.dependencies, local);
-    fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2) , 'utf-8');
+    fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2), 'utf-8');
     done();
   });
 
   gulp.task('i18n', function () {
-    var productVersion = { product: { version: utils.getMajorMinor(packageJson.version) } };
+    var productVersion = {product: {version: utils.getMajorMinor(packageJson.version)}};
     return gulp.src(i18nFiles.bower)
       .pipe(i18n(gutil.env.devMode, productVersion))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
@@ -251,7 +249,7 @@
   });
 
   // Gulp watch JavaScript, SCSS and HTML source files
-  gulp.task('watch', function () {
+  gulp.task('watch', ['prepare-frontend'], function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
@@ -277,7 +275,6 @@
   gulp.task('build-config', function (next) {
     usePlumber = false;
     runSequence(
-      'prepare',
       'dev-build',
       next
     );
@@ -338,7 +335,7 @@
         //   '/bower_components': 'bower_components',
         //   '/': 'dist'
         // },
-        baseDir: ['./bower_components', paths.browserSyncDist ],
+        baseDir: ['./bower_components', paths.browserSyncDist],
         middleware: middleware
       },
       notify: false,
@@ -382,6 +379,7 @@
     usePlumber = false;
     runSequence(
       'clean',
+      'prepare-frontend',
       'copy:js',
       'copy:lib',
       'css',
@@ -412,6 +410,7 @@
     usePlumber = false;
     runSequence(
       'clean',
+      'prepare-frontend',
       'copy:js',
       'css',
       'i18n',
