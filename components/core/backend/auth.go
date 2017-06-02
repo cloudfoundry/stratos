@@ -563,7 +563,7 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 		Name: userTokenInfo.UserName,
 	}
 
-	// is the user an HCF admin?
+	// is the user an CF admin?
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
 		msg := "Unable to load CNSI record: %s"
@@ -571,7 +571,7 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 		return nil, false
 	}
 	// TODO should be an extension point
-	if cnsiRecord.CNSIType == "hcf" {
+	if cnsiRecord.CNSIType == "cf" {
 		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.CFAdminIdentifier)
 		cnsiUser.Admin = cnsiAdmin
 	}
