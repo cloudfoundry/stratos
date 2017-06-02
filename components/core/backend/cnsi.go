@@ -74,7 +74,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Needs CNSI Name and API Endpoint",
-			"CNSI Name or Endpoint were not provided when trying to register an HCF Cluster")
+			"CNSI Name or Endpoint were not provided when trying to register an CF Cluster")
 	}
 
 	apiEndpointURL, err := url.Parse(apiEndpoint)

@@ -223,9 +223,9 @@
 //func TestGetHCEInfoWithBadURL(t *testing.T) {
 //	t.Parallel()
 //
-//	 pp.Endpoints["hcf"], _ := cf.Init(portalProxy{})
+//	 pp.Endpoints["cf"], _ := cf.Init(portalProxy{})
 //	invalidEndpoint := "%zzzz"
-//	if _, err :=  pp.Endpoints["hcf"].Info(invalidEndpoint, true); err == nil {
+//	if _, err :=  pp.Endpoints["cf"].Info(invalidEndpoint, true); err == nil {
 //		t.Error("getHCEInfo should not return a valid response when the URL is bad.")
 //	}
 //}
@@ -233,9 +233,9 @@
 //func TestGetHCEInfoWithInvalidEndpoint(t *testing.T) {
 //	t.Parallel()
 //
-//	 pp.Endpoints["hcf"], _ := cf.Init(portalProxy{})
+//	 pp.Endpoints["cf"], _ := cf.Init(portalProxy{})
 //	ep := "http://invalid.net"
-//	if _, err :=  pp.Endpoints["hcf"].Info(invalidEndpoint, true); err == nil {
+//	if _, err :=  pp.Endpoints["cf"].Info(invalidEndpoint, true); err == nil {
 //		t.Error("getHCEInfo should not return a valid response when the endpoint is invalid.")
 //	}
 //}

@@ -128,7 +128,7 @@ func upgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker
 	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
 	request := echoContext.Request().(*standard.Request).Request
 
-	// We're now ok talking to HCF, time to upgrade the request to a WebSocket connection
+	// We're now ok talking to CF, time to upgrade the request to a WebSocket connection
 	log.Debugf("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
 	if err != nil {

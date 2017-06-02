@@ -32,3 +32,4 @@ vendor/
 **/vendor
 **/*.so
 .glide
+tools/ssl

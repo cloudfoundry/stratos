@@ -159,7 +159,7 @@ func fwdCNSIStandardHeaders(cnsiRequest *CNSIRequest, req *http.Request) {
 	for k, v := range cnsiRequest.Header {
 		switch {
 		// Skip these
-		//  - "Referer" causes HCF to fail with a 403
+		//  - "Referer" causes CF to fail with a 403
 		//  - "Connection", "X-Cnap-*" and "Cookie" are consumed by us
 		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
 
