@@ -15,7 +15,7 @@
       /**
        * @function add
        * @description Add an application variable
-       * @param {string} cnsiGuid - the HCF Service GUID
+       * @param {string} cnsiGuid - the CF Service GUID
        * @param {string} id - the application GUID
        * @returns {object} The resolved/rejected promise
        * @public
@@ -34,7 +34,7 @@
       /**
        * @function edit
        * @description Edit an application variable
-       * @param {string} cnsiGuid - the HCF Service GUID
+       * @param {string} cnsiGuid - the CF Service GUID
        * @param {string} id - the application GUID
        * @param {string} variableName - the name of the variable to delete
        * @returns {object} The resolved/rejected promise
@@ -56,7 +56,7 @@
       /**
        * @function delete
        * @description Delete an application variable
-       * @param {string} cnsiGuid - the HCF Service GUID
+       * @param {string} cnsiGuid - the CF Service GUID
        * @param {string} id - the application GUID
        * @param {string} variableName - the name of the variable to delete
        * @returns {object} The resolved/rejected promise

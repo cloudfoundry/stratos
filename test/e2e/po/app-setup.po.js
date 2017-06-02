@@ -25,7 +25,7 @@
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
     organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, appSetupPromise, testHceCluster;
-  var hcfFromConfig = helpers.getHcfs() ? helpers.getHcfs().hcf1 : undefined;
+  var cfFromConfig = helpers.getCfs() ? helpers.getCfs().cf1 : undefined;
   var hceFromConfig = helpers.getHces() ? helpers.getHces().hce1 : undefined;
 
   function getSearchBoxes() {
@@ -66,9 +66,9 @@
 
   function createAppSetupPromise() {
     // Setup the test environment. This will ensure....
-    // - The required hcf is registered and connected (for both admin and non-admin users)
+    // - The required cf is registered and connected (for both admin and non-admin users)
     // - The app wall is showing
-    // - The app wall has the required hcf, organization and space filters set correctly
+    // - The app wall has the required cf, organization and space filters set correctly
 
     // Reset all cnsi that exist in params
     return resetTo.resetAllCnsi()
@@ -83,14 +83,14 @@
       })
       .then(function () {
         // Fetch the e2e org and space names
-        testOrgName = hcfFromConfig.testOrgName;
-        testSpaceName = hcfFromConfig.testSpaceName;
+        testOrgName = cfFromConfig.testOrgName;
+        testSpaceName = cfFromConfig.testSpaceName;
         expect(testOrgName).toBeDefined();
         expect(testSpaceName).toBeDefined();
         // Fetch the cnsi metadata
         return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
           registeredCnsi = JSON.parse(response);
-          testCluster = _.find(registeredCnsi, {name: hcfFromConfig.register.cnsi_name});
+          testCluster = _.find(registeredCnsi, {name: cfFromConfig.register.cnsi_name});
           // HCE can be optional
           testHceCluster = hceFromConfig ? _.find(registeredCnsi, {name: hceFromConfig.register.cnsi_name}) : undefined;
           expect(testCluster).toBeDefined();
@@ -98,11 +98,11 @@
       })
       .then(function () {
         // Set up/find the required organization and space
-        // Fetch the hcf admin + non-admin user guids. This will be used for org + space roles
+        // Fetch the cf admin + non-admin user guids. This will be used for org + space roles
         return cfModel.fetchUsers(testCluster.guid)
           .then(function (users) {
-            testUser = _.find(users, {entity: {username: hcfFromConfig.user.username}});
-            testAdminUser = _.find(users, {entity: {username: hcfFromConfig.admin.username}});
+            testUser = _.find(users, {entity: {username: cfFromConfig.user.username}});
+            testAdminUser = _.find(users, {entity: {username: cfFromConfig.admin.username}});
             expect(testUser).toBeDefined();
             expect(testAdminUser).toBeDefined();
           }).then(function () {
@@ -130,7 +130,7 @@
         expect(galleryWall.isApplicationWall()).toBeTruthy();
       })
       .then(function () {
-        // Select the required HCF cluster
+        // Select the required CF cluster
         clusterSearchBox = searchBox.wrap(getSearchBoxes().get(0));
         expect(clusterSearchBox.isDisplayed()).toBe(true);
         expect(clusterSearchBox).toBeDefined();

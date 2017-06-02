@@ -8,7 +8,7 @@
   /**
    * @name appClusterRolesService
    * @description Service to handle the data required/created by roles tables. This includes the ability to reach out
-   * and update HCF roles. Covers functionality used by Assign/Manage/Change users slide outs and Users tables.
+   * and update CF roles. Covers functionality used by Assign/Manage/Change users slide outs and Users tables.
    * @constructor
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
@@ -135,9 +135,9 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.removeOrgRole
      * @description Remove user from a specific organization role
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {string} orgGuid - the organizations guid
-     * @param {object} user - HCF user object for the user whose role will be removed
+     * @param {object} user - CF user object for the user whose role will be removed
      * @param {string} orgRole - the organisation role to be removed from, for example org_manager
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
@@ -155,10 +155,10 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.removeSpaceRole
      * @description Remove user from a specific space role
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {string} orgGuid - the organizations guid
      * @param {string} spaceGuid - the space guid
-     * @param {object} user - HCF user object for the user whose role will be removed
+     * @param {object} user - CF user object for the user whose role will be removed
      * @param {string} spaceRole - the space role to be removed from, for example space_developer
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
@@ -176,8 +176,8 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.removeAllRoles
      * @description Remove users from all organizations and spaces in a cluster
-     * @param {string} clusterGuid - HCF service guid
-     * @param {Array} users - Array of HCF user objects to be removed from the space
+     * @param {string} clusterGuid - CF service guid
+     * @param {Array} users - Array of CF user objects to be removed from the space
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeAllRoles = function (clusterGuid, users) {
@@ -196,9 +196,9 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.removeFromOrganization
      * @description Remove users from an organization and it's spaces
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {string} orgGuid - the organizations guid
-     * @param {Array} users - Array of HCF user objects to be removed from the space
+     * @param {Array} users - Array of CF user objects to be removed from the space
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeFromOrganization = function (clusterGuid, orgGuid, users) {
@@ -217,10 +217,10 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.removeFromSpace
      * @description Remove users from a space
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {string} orgGuid - the organizations guid
      * @param {string} spaceGuid - the space guid
-     * @param {Array} users - Array of HCF user objects to be removed from the space
+     * @param {Array} users - Array of CF user objects to be removed from the space
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeFromSpace = function (clusterGuid, orgGuid, spaceGuid, users) {
@@ -244,7 +244,7 @@
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.assignUsers
      * @description Assign organization and space roles for the users supplied. does not cover
      * removing roles. If successful refresh the cache of the affected organizations and spaces
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
      * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
@@ -254,7 +254,7 @@
     this.assignUsers = function (clusterGuid, selectedUsers, newRoles) {
 
       // updateUsersOrgsAndSpaces expects a collection of previously selected roles. The diff of which
-      // will be used to determine which assign or remove call to make to HCF.
+      // will be used to determine which assign or remove call to make to CF.
       // For the assign users case we only want to make assign calls. So we need to make an oldRoles which is an
       // identical copy of the newRoles and reverse all 'true' to 'false'
       // Note - This ignores the users currently assigned roles, so there's a chance surplus requests are made
@@ -286,7 +286,7 @@
     /**
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.updateUsers
      * @description Update (assign or remove) organization and space roles for the users supplied
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {Array} selectedUsers - collection of users to apply roles to
      * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
@@ -388,8 +388,8 @@
      * @description Fetch a list of users in all organizations the connected user can see. For a cluster admin this is
      * done in a single call to listAllUsers, for non-cluster admin this is done via a call to each organization they
      * can see
-     * @param {string} clusterGuid - HCF service guid
-     * @param {boolean} forceRefresh - set to true to always reach out to HCF instead of using cached version
+     * @param {string} clusterGuid - CF service guid
+     * @param {boolean} forceRefresh - set to true to always reach out to CF instead of using cached version
      * @returns {promise} Promise containing Array of users.
      */
     this.listUsers = function (clusterGuid, forceRefresh) {
@@ -437,7 +437,7 @@
     /**
      * @name createCurrentRoles
      * @description Determines the org and space roles for the users provided
-     * @param {Array} users - array of HCF user objects
+     * @param {Array} users - array of CF user objects
      * @param {string} clusterGuid - console service guid for cluster
      * @param {string=} singleOrgGuid - restrict result to a single org
      * @param {string=} singleSpaceGuid - restrict result to a single space
@@ -486,7 +486,7 @@
      * @name createConfirmationConfig
      * @description Create a standard confirmation dialog configuration containing call specific text (sensitive to
      * user/s, role/s, assign, remove, etc)
-     * @param {Array} users - array of HCF user objects
+     * @param {Array} users - array of CF user objects
      * @param {object} delta - actual set of roles to assign or unassign
      * @returns {object} confirmation dialog configuration
      */
@@ -646,7 +646,7 @@
      * the affected organizations and spaces.
      * IMPORTANT!!!!!! This is the conduit for changes that all external calls should flow through. It gates the process
      * on a confirmation model and also handles the global 'changingRoles' flag.
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
      * @param {object} oldRolesByUser - Object containing the previously selected roles, or the initial state. The diff
      * between this and newRoles will be applied (assign/remove). Format matches newRoles.
@@ -721,7 +721,7 @@
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.updateUserOrgsAndSpaces
      * @description As per updateUsersOrgsAndSpaces, except for a single user. This should not be called separately only
      * via updateUsersOrgsAndSpaces.
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {object} user - user to apply roles to
      * @param {object} newRolesPerOrg - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
@@ -742,7 +742,7 @@
      * @name cloud-foundry.view.dashboard.cluster.appClusterRolesService.updateUserOrgAndSpaces
      * @description As per updateUserOrgsAndSpaces, except for a single org. This should not be called separately only
      * via updateUsersOrgsAndSpaces.
-     * @param {string} clusterGuid - HCF service guid
+     * @param {string} clusterGuid - CF service guid
      * @param {object} user - user to apply roles to
      * @param {object} orgGuid - guid of organization
      * @param {object} newOrgRoles - Object containing the new roles to apply. Format is...

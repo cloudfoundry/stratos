@@ -7,7 +7,7 @@
 
   module.exports = {
     name: name,
-    hcf: hcf,
+    cf: cf,
     organization: organization,
     space: space,
     domain: domain,
@@ -18,7 +18,7 @@
     return inputText.wrap(addAppWizard.getElement().all(by.css('.form-group')).get(0));
   }
 
-  function hcf() {
+  function cf() {
     return inputSearchBox.wrap(addAppWizard.getElement().all(by.css('.form-group')).get(1));
   }
 

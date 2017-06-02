@@ -86,10 +86,10 @@
           serviceInstances.length = 0;
           [].push.apply(serviceInstances, _.sortBy(items, 'name'));
 
-          var hcfOnly = _.filter(serviceInstances, { cnsi_type: 'hcf' }) || [];
+          var cfOnly = _.filter(serviceInstances, { cnsi_type: 'hcf' }) || [];
 
           return {
-            numAvailable: hcfOnly.length
+            numAvailable: cfOnly.length
           };
         });
     }

@@ -138,8 +138,8 @@
           host: null,
           domain: null,
           application: null,
-          hcfApiEndpoint: null,
-          hcfUserName: null
+          cfApiEndpoint: null,
+          cfUserName: null
         };
 
         this.data.workflow = {

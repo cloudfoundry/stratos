@@ -4,7 +4,7 @@
   var appSetupHelper = require('../../po/app-setup.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
-  var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+  var addAppCfApp = require('../../po/applications/add-application-cf-app.po');
   var application = require('../../po/applications/application.po');
   var detailView = require('../../po/widgets/detail-view.po');
   var cfModel = require('../../po/models/cf-model.po');
@@ -29,11 +29,11 @@
         browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
         galleryWall.addApplication();
         browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
-        addAppHcfApp.name().addText(testAppName);
-        addAppHcfApp.host().clear();
-        addAppHcfApp.host().addText(hostName);
+        addAppCfApp.name().addText(testAppName);
+        addAppCfApp.host().clear();
+        addAppCfApp.host().addText(hostName);
         testCluster = appSetupHelper.getTestCluster();
-        return addAppHcfApp.domain().getValue().then(function (d) {
+        return addAppCfApp.domain().getValue().then(function (d) {
           domain = d;
           addAppWizard.getWizard().next();
           helpers.checkAndCloseToast("A new application and route have been created for '" + testAppName + "'");

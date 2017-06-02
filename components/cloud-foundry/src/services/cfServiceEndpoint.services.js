@@ -54,8 +54,8 @@
             urlHint: 'cf.registration.urlHint'
           }
         },
-        nameOfNameInput: 'hcfName',
-        nameOfUrlInput: 'hcfUrl'
+        nameOfNameInput: 'cfName',
+        nameOfUrlInput: 'cfUrl'
       }
     };
 
@@ -65,10 +65,10 @@
 
     function refreshToken(allServiceInstances) {
       var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
-      var hcfGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
-      var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
-      if (hcfGuids.length > 0) {
-        return cfInfoApi.GetInfo({}, hcfCfg).then(function (response) {
+      var cfGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
+      var cfCfg = {headers: {'x-cnap-cnsi-list': cfGuids.join(',')}};
+      if (cfGuids.length > 0) {
+        return cfInfoApi.GetInfo({}, cfCfg).then(function (response) {
           return response.data || {};
         });
       }

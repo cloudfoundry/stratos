@@ -4,13 +4,13 @@
   var helpers = require('../../po/helpers.po');
   var resetTo = require('../../po/resets.po');
   var loginPage = require('../../po/login-page.po');
-  var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
+  var endpointsCf = require('../../po/endpoints/endpoints-list-cf.po');
   var Q = require('q');
 
-  describe('HCF Endpoints Dashboard', function () {
+  describe('CF Endpoints Dashboard', function () {
 
-    function resetToLoggedIn(loginAsFunc, connectToCnsi, registerMultipleHcf) {
-      return browser.driver.wait(resetTo.resetAllCnsi(null, null, registerMultipleHcf))
+    function resetToLoggedIn(loginAsFunc, connectToCnsi, registerMultipleCf) {
+      return browser.driver.wait(resetTo.resetAllCnsi(null, null, registerMultipleCf))
         .then(function () {
           if (connectToCnsi) {
             return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
@@ -29,12 +29,12 @@
       beforeAll(function () {
         resetToLoggedIn(loginPage.loginAsAdmin)
           .then(function () {
-            return endpointsHcf.showHcfEndpoints();
+            return endpointsCf.showCfEndpoints();
           });
       });
 
-      it('should be the HCF Endpoints page', function () {
-        endpointsHcf.isHcfEndpoints();
+      it('should be the CF Endpoints page', function () {
+        endpointsCf.isCfEndpoints();
       });
 
       it('should show the `no registered endpoints` message', function () {
@@ -48,33 +48,33 @@
       beforeAll(function () {
         resetToLoggedIn(loginPage.loginAsAdmin, true)
           .then(function () {
-            return endpointsHcf.showHcfEndpoints();
+            return endpointsCf.showCfEndpoints();
           });
       });
 
-      it('should be the HCF Organizations details page', function () {
-        endpointsHcf.isHcfOganizationsDetails();
+      it('should be the CF Organizations details page', function () {
+        endpointsCf.isCfOganizationsDetails();
       });
 
       it('should have breadcrumb to `Endpoints`', function () {
-        expect(endpointsHcf.getBreadcrumb(0).getText()).toBe('Endpoints');
+        expect(endpointsCf.getBreadcrumb(0).getText()).toBe('Endpoints');
       });
 
       it('should go to Endpoints page when appropriate breadcrumb is clicked', function () {
-        endpointsHcf.clickBreadcrumb(0).then(function () {
-          endpointsHcf.isEndpoints();
+        endpointsCf.clickBreadcrumb(0).then(function () {
+          endpointsCf.isEndpoints();
           // Go back
-          endpointsHcf.showHcfEndpoints();
+          endpointsCf.showCfEndpoints();
         });
       });
 
       it('should have breadcrumb to `Cloud Foundry`', function () {
-        expect(endpointsHcf.getBreadcrumb(1).getText()).toBe('Cloud Foundry');
+        expect(endpointsCf.getBreadcrumb(1).getText()).toBe('Cloud Foundry');
       });
 
       it('should go to `Cloud Foundry` page when appropriate breadcrumb is clicked', function () {
-        endpointsHcf.clickBreadcrumb(1).then(function () {
-          endpointsHcf.isHcfEndpoints();
+        endpointsCf.clickBreadcrumb(1).then(function () {
+          endpointsCf.isCfEndpoints();
         });
       });
     });
@@ -83,14 +83,14 @@
       beforeAll(function () {
         resetToLoggedIn(loginPage.loginAsAdmin, true, true)
           .then(function () {
-            return endpointsHcf.showHcfEndpoints();
+            return endpointsCf.showCfEndpoints();
           });
       });
 
-      it('should be the HCF Endpoints page', function () {
-        endpointsHcf.isHcfEndpoints();
+      it('should be the CF Endpoints page', function () {
+        endpointsCf.isCfEndpoints();
       });
 
-    }).skipWhen(helpers.skipIfOnlyOneHCF);
-  }).skipWhen(helpers.skipIfNoHCF);
+    }).skipWhen(helpers.skipIfOnlyOneCF);
+  }).skipWhen(helpers.skipIfNoCF);
 })();

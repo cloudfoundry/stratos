@@ -636,7 +636,7 @@
         .RetrievingRolesOfAllUsersInOrganization(orgGuid, modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return hcfPagination.dePaginate(response.data, makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });

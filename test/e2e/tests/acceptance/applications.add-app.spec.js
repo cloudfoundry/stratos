@@ -8,7 +8,7 @@
   var helpers = require('../../po/helpers.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
-  var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+  var addAppCfApp = require('../../po/applications/add-application-cf-app.po');
   var addAppService = require('../../po/applications/add-application-services.po');
   var application = require('../../po/applications/application.po');
   var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
@@ -70,34 +70,26 @@
     });
 
     it('Add Application button shows fly out with correct values', function () {
-      //var selectedHcf = _.find(testConfig.registeredCnsi, {name: testConfig.selectedCluster});
-      //var domain = selectedHcf.api_endpoint.Host.substring(4);
-
       galleryWall.addApplication().then(function () {
         expect(addAppWizard.isDisplayed()).toBeTruthy();
 
         expect(addAppWizard.getTitle()).toBe('Add Application');
 
-        addAppHcfApp.name().getValue().then(function (text) {
+        addAppCfApp.name().getValue().then(function (text) {
           expect(text).toBe('');
         });
 
-        addAppHcfApp.hcf().getValue().then(function (text) {
+        addAppCfApp.cf().getValue().then(function (text) {
           expect(text).toBe(testConfig.selectedCluster);
         });
-        addAppHcfApp.organization().getValue().then(function (text) {
+        addAppCfApp.organization().getValue().then(function (text) {
           expect(text).toBe(testConfig.selectedOrg);
         });
-        addAppHcfApp.space().getValue().then(function (text) {
+        addAppCfApp.space().getValue().then(function (text) {
           expect(text).toBe(testConfig.selectedSpace);
         });
 
-        // Domain that is configured might be different from the HCF endpoint that was registered
-        // addAppHcfApp.domain().getValue().then(function (text) {
-        //   expect(text).toBe(domain);
-        // });
-
-        addAppHcfApp.host().getValue().then(function (text) {
+        addAppCfApp.host().getValue().then(function (text) {
           expect(text).toBe('');
         });
 
@@ -114,7 +106,7 @@
       });
     });
 
-    it('Create hcf app - test', function () {
+    it('Create cf app - test', function () {
 
       var appName = appSetupHelper.getName(testTime);
       var hostName = appSetupHelper.getHostName(appName);
@@ -129,18 +121,17 @@
       expect(addAppWizard.isDisplayed()).toBeTruthy();
       expect(addAppWizard.getTitle()).toBe('Add Application');
 
-      //browser.wait(until.visibilityOf(addAppHcfApp.name()), 5000);
       browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
 
       // Wait until form control is available
       browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
 
-      addAppHcfApp.name().addText(appName);
-      expect(addAppHcfApp.host().getValue()).toBe(appName);
+      addAppCfApp.name().addText(appName);
+      expect(addAppCfApp.host().getValue()).toBe(appName);
 
       expect(addAppWizard.getWizard().isNextEnabled()).toBe(false);
-      addAppHcfApp.host().clear();
-      addAppHcfApp.host().addText(hostName);
+      addAppCfApp.host().clear();
+      addAppCfApp.host().addText(hostName);
       expect(addAppWizard.getWizard().isNextEnabled()).toBe(true);
 
       addAppWizard.getWizard().next();
@@ -223,11 +214,11 @@
 
       // Check that the text from the CLI Instructions was copied to the clipboard
       galleryWall.addApplication();
-      expect(addAppHcfApp.name().getValue()).toBe('');
+      expect(addAppCfApp.name().getValue()).toBe('');
       var inputField = element(by.id('add-app-workflow-application-name'));
       inputField.click();
       inputField.sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'v'));
-      expect(addAppHcfApp.name().getValue()).toBe('cf push ' + appName);
+      expect(addAppCfApp.name().getValue()).toBe('cf push ' + appName);
 
       addAppWizard.getWizard().cancel();
       galleryWall.showApplications();
@@ -245,9 +236,9 @@
         browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
         // Wait until form control is available
         browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
-        addAppHcfApp.name().addText(appName);
-        addAppHcfApp.host().clear();
-        addAppHcfApp.host().addText(hostName);
+        addAppCfApp.name().addText(appName);
+        addAppCfApp.host().clear();
+        addAppCfApp.host().addText(hostName);
         addAppWizard.getWizard().next();
         helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
           return cfModel.fetchApp(testConfig.testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
@@ -368,5 +359,5 @@
         });
       });
     });
-  }).skipWhen(helpers.skipIfNoHCF);
+  }).skipWhen(helpers.skipIfNoCF);
 })();

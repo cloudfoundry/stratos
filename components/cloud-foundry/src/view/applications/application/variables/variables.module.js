@@ -51,7 +51,7 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} cfVariablesManager - the Application Variables Manager service
    * @property {object} model - the Cloud Foundry Applications Model
-   * @property {string} cnsiGuid - the HCF Cluster GUID
+   * @property {string} cnsiGuid - the CF Cluster GUID
    * @property {string} id - the application GUID
    */
   function ApplicationVariablesController(modelManager, $stateParams, cfVariablesManager) {
@@ -105,7 +105,7 @@
 
     /**
      * @function refreshVariables
-     * @description Refreshes the application variables from HCF
+     * @description Refreshes the application variables from CF
      * @public
      **/
     function refreshVariables() {
