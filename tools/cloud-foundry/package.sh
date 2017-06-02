@@ -16,7 +16,7 @@ cat << EOF > ${TOP_LEVEL}/plugins.json
 {
  "enabledPlugins":[
    "cloud-foundry",
-   "cloud-foundry-hosting"	
+   "cloud-foundry-hosting"
  ]
 }
 EOF
@@ -28,9 +28,10 @@ npm install -g gulp
 npm install -g bower
 
 cd ${TOP_LEVEL}
-cat plugins.json
 
-npm install
+npm install --only=prod
+npm install --only=dev
+
 ${BOWER_PATH}/bower install
 
 npm run build
