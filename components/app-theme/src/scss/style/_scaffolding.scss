@@ -2,6 +2,10 @@ body {
   padding-top: $navbar-height;
 }
 
+p {
+  font-size: $font-size-medium;
+}
+
 .font-thin {
   font-weight: 100;
 }

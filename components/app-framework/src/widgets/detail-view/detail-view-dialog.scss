@@ -70,10 +70,11 @@
           padding: $console-unit-space * 0.5;
           flex: 0 1 $console-unit-space * 3;
           height: $console-unit-space * 3;
+          min-height: $console-unit-space * 3;
         }
 
         .detail-view-close {
-          top: $console-unit-space;
+          top: #{($console-unit-space * 3 - 28px) /2};;
           right: $console-unit-space;
         }
 

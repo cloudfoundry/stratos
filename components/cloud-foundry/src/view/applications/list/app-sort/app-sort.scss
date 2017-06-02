@@ -20,12 +20,14 @@ applications-sorting {
     cursor: pointer;
   }
 
-  select-input {
-    margin-left: 2 * $console-unit-space;
-    
-    .select-input-field {
-      margin-left: 4px;
-      user-select: none;
+  form .form-group {
+    select-input {
+      margin-left: 2 * $console-unit-space;
+      
+      .select-input-field {
+        margin-left: 4px;
+        user-select: none;
+      }
     }
   }
 }
