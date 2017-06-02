@@ -45,7 +45,7 @@ services:
     extends: buildCommon
     build:
       context: ../stratos-ui
-      dockerfile: Dockerfile.bk.dev
+      dockerfile: tools/Dockerfile.bk.dev
     ports:
       - "3003:3003"
     env_file:
@@ -70,7 +70,7 @@ services:
     extends: buildCommon
     build:
       context: ../stratos-ui
-      dockerfile: Dockerfile.ui.dev
+      dockerfile: tools/Dockerfile.ui.dev
       args:
         - USER_ID
         - GROUP_ID
@@ -82,4 +82,3 @@ services:
     extends: imageCommon
     image: susetest/uaa:latest
 
-      
