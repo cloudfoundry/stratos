@@ -9,7 +9,7 @@
 
   module.exports = {
     showEndpoints: showEndpoints,
-    showHcfEndpoints: showHcfEndpoints,
+    showCfEndpoints: showCfEndpoints,
     goToEndpoints: goToEndpoints,
     isEndpoints: isEndpoints,
 
@@ -52,7 +52,7 @@
     return navbar.goToView('Endpoints');
   }
 
-  function showHcfEndpoints() {
+  function showCfEndpoints() {
     return navbar.goToView('endpoint.clusters');
   }
 

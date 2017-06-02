@@ -1,15 +1,15 @@
 // typography
 // ==========
 
-// Stratos semantic names
+// Console semantic names
 // ------------------
-$stratos-font-family:         Lato, sans-serif !default;
-$hpe-letter-spacing:          0.025em;
-$hpe-font-weight-semibold:    600;
+$console-font-family:             Lato, sans-serif !default;
+$console-letter-spacing:          0.025em;
+$console-font-weight-semibold:    600;
 
 // Bootstrap binding names
 // -----------------------
-$font-family-base:            $stratos-font-family !default;
+$font-family-base:            $console-font-family !default;
 
 $font-size-base:              16px !default;
 $font-size-large:             18px !default;

@@ -22,7 +22,7 @@
   /**
    * @name ClustersRouterController
    * @description Redirects the user to either the Organizations Detail page or
-   * the Cluster tiles page depending on the number of HCF instances connected.
+   * the Cluster tiles page depending on the number of CF instances connected.
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
@@ -43,10 +43,10 @@
 
           var connectedInstances = 0;
           var serviceInstanceGuid;
-          var hcfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
-          _.forEach(hcfInstances, function (hcfInstance) {
-            if (_.get(userServiceInstanceModel.serviceInstances[hcfInstance.guid], 'valid', false)) {
-              serviceInstanceGuid = hcfInstance.guid;
+          var cfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          _.forEach(cfInstances, function (cfInstance) {
+            if (_.get(userServiceInstanceModel.serviceInstances[cfInstance.guid], 'valid', false)) {
+              serviceInstanceGuid = cfInstance.guid;
               connectedInstances += 1;
             }
           });

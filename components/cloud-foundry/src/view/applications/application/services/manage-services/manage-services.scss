@@ -1,14 +1,14 @@
 .manage-instances {
   .service-description {
     display: flex;
-    padding: $hpe-unit-space 0;
+    padding: $console-unit-space 0;
 
     .service-icon {
-      padding: $hpe-unit-space;
+      padding: $console-unit-space;
 
       img {
-        max-height: $hpe-unit-space * 4;
-        max-width: $hpe-unit-space * 4;
+        max-height: $console-unit-space * 4;
+        max-width: $console-unit-space * 4;
       }
     }
   }
@@ -29,7 +29,7 @@
 }
 
 .env-variables {
-  margin-top: $hpe-unit-space;
+  margin-top: $console-unit-space;
 
   pre {
     white-space: pre-wrap;

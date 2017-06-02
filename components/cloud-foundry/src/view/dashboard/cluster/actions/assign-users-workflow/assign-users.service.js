@@ -211,7 +211,7 @@
               var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
               var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
 
-              // The service expects an object of HCF user objects keyed by their guid
+              // The service expects an object of CF user objects keyed by their guid
               var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
                 return user.metadata.guid;
               });

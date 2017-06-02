@@ -9,7 +9,7 @@
 
 form, [ng-form] {
   .form-group {
-    height: $hpe-input-height;
+    height: $console-input-height;
     position: relative;
   }
 }
@@ -20,14 +20,14 @@ form, [ng-form] {
     border: 1px solid $input-border;
     background-color: $input-bg;
     padding: 0 $padding-large-horizontal;
-    width: $hpe-input-width;
+    width: $console-input-width;
 
     &.form-group-large {
-      width: $hpe-input-width * 1.25;
+      width: $console-input-width * 1.25;
     }
 
     label {
-      color: $hpe-input-label-fg;
+      color: $console-input-label-fg;
       font-weight: normal;
       font-size: $font-size-small;
       margin-bottom: 0;
@@ -70,7 +70,7 @@ form, [ng-form] {
 
     &.focus {
       position: relative;
-      border-color: $hpe-input-select-fg;
+      border-color: $console-input-select-fg;
       z-index: 2;
     }
 
@@ -102,8 +102,8 @@ form, [ng-form] {
 
     .control-message {
       position: absolute;
-      top: $hpe-unit-space / 8;
-      right: $hpe-unit-space / 3;
+      top: $console-unit-space / 8;
+      right: $console-unit-space / 3;
       font-size: $font-size-small;
       display: none;
     }
@@ -146,7 +146,7 @@ form.form-horizontal, [ng-form].form-horizontal {
   input[type="search"],
   input[type="tel"],
   input[type="color"] {
-    color: $hpe-input-select-fg;
+    color: $console-input-select-fg;
     text-shadow: 0 0 0 $input-color-placeholder;
     -webkit-text-fill-color: $input-color;
 
@@ -158,7 +158,7 @@ form.form-horizontal, [ng-form].form-horizontal {
   }
 }
 
-@include hpe-placeholder {
+@include console-placeholder {
   color: inherit;
   opacity: 0.54;
 }
@@ -171,7 +171,7 @@ form.form-horizontal, [ng-form].form-horizontal {
   .input-group {
     @include flex-vertical-centered();
     padding: 0 $padding-large-horizontal;
-    height: $hpe-input-height;
+    height: $console-input-height;
     width: 100%;
 
     .input-group-addon {
@@ -181,7 +181,7 @@ form.form-horizontal, [ng-form].form-horizontal {
       width: auto;
 
       & + input.form-control {
-        margin-left: $hpe-unit-space / 2;
+        margin-left: $console-unit-space / 2;
       }
     }
 
@@ -190,7 +190,7 @@ form.form-horizontal, [ng-form].form-horizontal {
       padding: 0;
 
       & + .input-group-addon {
-        margin-left: $hpe-unit-space / 2;
+        margin-left: $console-unit-space / 2;
       }
     }
   }
@@ -233,7 +233,7 @@ search-box {
       @include flex-vertical-centered();
 
       i {
-        margin-right: $hpe-unit-space / 4;
+        margin-right: $console-unit-space / 4;
       }
     }
 

@@ -67,7 +67,7 @@
           served: true,
           nocache: false
         },
-        // use the HTML templates compiled into a template cahce
+        // use the HTML templates compiled into a template cache
         'dist/console-templates.js'
 
         // src and test files are added based on which components are specified in bower.json

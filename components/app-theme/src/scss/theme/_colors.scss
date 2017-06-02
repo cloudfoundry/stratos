@@ -53,11 +53,11 @@ $status-acknowledged:   #877b75 !default;
 $status-resolved:       $silver-sand !default;
 
 
-// HPE semantic names
+// console semantic names
 // ------------------
-$hpe-primary:           $gossamer !default;
-$hpe-primary-bg:        $concrete !default;
-$hpe-primary-fg:        $mine-shaft !default;
+$console-primary:           $gossamer !default;
+$console-primary-bg:        $concrete !default;
+$console-primary-fg:        $mine-shaft !default;
 
 
 // Bootstrap binding names
@@ -68,14 +68,14 @@ $gray:                  $silver-sand !default;
 $gray-light:            $rule !default;
 $gray-lighter:          $seashell !default;
 
-$brand-primary:         $hpe-primary !default;
+$brand-primary:         $console-primary !default;
 $brand-success:         $gossamer !default;
 $brand-info:            $cutty-sark !default;
 $brand-warning:         $sunglow !default;
 $brand-danger:          $carnation !default;
 
-$body-bg:               $hpe-primary-bg !default;
-$text-color:            $hpe-primary-fg !default;
+$body-bg:               $console-primary-bg !default;
+$text-color:            $console-primary-fg !default;
 $link-color:            $brand-primary !default;
 $link-hover-color:      darken($link-color, 10%) !default;
 $input-color:           $gray-darker !default;

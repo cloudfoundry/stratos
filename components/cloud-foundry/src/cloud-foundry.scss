@@ -5,7 +5,7 @@
 .action-target-state {
   display: inline-block;
   height: 24px;
-  font-size: $hpe-unit-space;
+  font-size: $console-unit-space;
   line-height: 0;
 }
 
@@ -13,8 +13,8 @@
 
   &.panel-heading {
     line-height: 1;
-    padding-top: $hpe-unit-space * 1.1;
-    padding-bottom: $hpe-unit-space * .5;
+    padding-top: $console-unit-space * 1.1;
+    padding-bottom: $console-unit-space * .5;
   }
 
   .btn {
@@ -26,7 +26,7 @@
     }
 
     .material-icons {
-      margin-right: $hpe-unit-space / 3
+      margin-right: $console-unit-space / 3
     }
   }
 }

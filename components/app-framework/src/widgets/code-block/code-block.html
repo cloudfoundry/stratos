@@ -1,11 +1,11 @@
-<div class="hpe-code-block"
-  ng-class="{'hpe-code-block-light': codeBlockCtrl.theme === 'light', 'hpe-code-block-dark': codeBlockCtrl.theme !== 'light'}">
+<div class="console-code-block"
+  ng-class="{'console-code-block-light': codeBlockCtrl.theme === 'light', 'console-code-block-dark': codeBlockCtrl.theme !== 'light'}">
   <pre ng-transclude>
 	</pre>
-  <div class="hpe-code-block-copied-msg">
-    <span class="hpe-copied-msg" translate>Copied to clipboard</span>
-    <i class="hpe-copy-success-icon material-icons"></i>
+  <div class="console-code-block-copied-msg">
+    <span class="console-copied-msg" translate>Copied to clipboard</span>
+    <i class="console-copy-success-icon material-icons"></i>
   </div>
-	<div ng-if="codeBlockCtrl.canCopy && !codeBlockCtrl.hideCopy" ng-click="codeBlockCtrl.copyToClipboard({event: $event})" class="hpe-copy material-icons">
+	<div ng-if="codeBlockCtrl.canCopy && !codeBlockCtrl.hideCopy" ng-click="codeBlockCtrl.copyToClipboard({event: $event})" class="console-copy material-icons">
   </div>
 </div>

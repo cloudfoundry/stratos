@@ -2,13 +2,13 @@
   min-height: 300px;
   h4 {
     margin-top: 0;
-    margin-bottom: $hpe-unit-space / 2;
+    margin-bottom: $console-unit-space / 2;
   }
 
   .assign-selected-users-orgs {
     .assign-selected-users-orgs-roles {
-      padding-top: $hpe-unit-space / 2;
-      padding-bottom: $hpe-unit-space;
+      padding-top: $console-unit-space / 2;
+      padding-bottom: $console-unit-space;
 
       display: flex;
       & > * {
@@ -28,6 +28,6 @@
   }
 
   .alert {
-    margin-bottom: $hpe-unit-space;
+    margin-bottom: $console-unit-space;
   }
 }

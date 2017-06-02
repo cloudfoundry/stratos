@@ -1,5 +1,5 @@
-@mixin hpe-alert($color, $icon, $bg-color, $no-bg-icon, $fg-color: $white) {
-  border-width: $hpe-alert-border-width;
+@mixin console-alert($color, $icon, $bg-color, $no-bg-icon, $fg-color: $white) {
+  border-width: $console-alert-border-width;
   background-color: $bg-color;
   color: $fg-color;
 
@@ -7,7 +7,7 @@
     @extend .material-icons;
     background-color: $color;
     color: $fg-color;
-    font-size: $hpe-alert-icon-size;
+    font-size: $console-alert-icon-size;
     content: $icon;
   }
 

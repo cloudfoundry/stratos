@@ -6,8 +6,7 @@
       'cloud-foundry.view.applications.application.summary',
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
-      'cloud-foundry.view.applications.application.variables',
-      'cloud-foundry.view.applications.application.versions'
+      'cloud-foundry.view.applications.application.variables'
     ])
     .config(registerRoute);
 
@@ -412,7 +411,7 @@
             // Hide delete if user has no project permissions
             hideAction = true;
           } else if (authModel.isInitialized(cnsiGuid)) {
-            // Hide actions if user has no HCF app update perissions (i.e not a space developer)
+            // Hide actions if user has no CF app update perissions (i.e not a space developer)
             var spaceGuid = vm.model.application.summary.space_guid;
             hideAction = !authModel.isAllowed(cnsiGuid,
               authModel.resources.application,

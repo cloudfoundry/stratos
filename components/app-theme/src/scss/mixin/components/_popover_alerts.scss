@@ -1,4 +1,4 @@
-@mixin hpe-popover-alert($color, $bg-color) {
+@mixin console-popover-alert($color, $bg-color) {
   &.bottom > .arrow {
     border-bottom-color: $bg-color;
   }

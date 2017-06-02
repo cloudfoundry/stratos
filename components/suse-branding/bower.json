@@ -5,7 +5,7 @@
   "moduleType": [],
   "homepage": "",
   "main": [
-    "brand.scss",
+    "src/brand.scss",
     "favicon.ico"
   ],
   "ignore": [

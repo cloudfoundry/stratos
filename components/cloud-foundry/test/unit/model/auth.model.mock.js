@@ -75,7 +75,7 @@
     consoleInfo.info = {};
     _.set(consoleInfo.info, 'endpoints.hcf.' + cnsiGuid, {
       guid: cnsiGuid,
-      name: 'myHCF',
+      name: 'myCF',
       version: '',
       user: {guid: userGuid, name: 'test', admin: isAdmin},
       type: ''

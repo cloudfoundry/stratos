@@ -102,8 +102,8 @@
             host: null,
             domain: null,
             application: null,
-            hcfApiEndpoint: null,
-            hcfUserName: null
+            cfApiEndpoint: null,
+            cfUserName: null
           });
           expect(that.data.workflow).toBeDefined();
           expect($translate.instant(that.data.workflow.title)).toBe('Add Application');
@@ -136,7 +136,7 @@
             step = that.data.workflow.steps[0];
             mockData = [
               { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf', valid: true },
-              { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce', valid: true }
+              { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc', valid: true }
             ];
           });
 
