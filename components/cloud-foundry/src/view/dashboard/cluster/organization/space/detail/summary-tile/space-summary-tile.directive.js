@@ -190,6 +190,9 @@
       if (angular.isUndefined(spaceDetailObj.details.totalServices)) {
         updatePromises.push(spaceModel.updateServiceCount(vm.clusterGuid, vm.spaceGuid));
       }
+      if (angular.isUndefined(spaceDetailObj.details.totalServiceInstances)) {
+        updatePromises.push(spaceModel.updateServiceInstanceCount(vm.clusterGuid, vm.spaceGuid));
+      }
 
       return $q.all(updatePromises).then(function () {
 
