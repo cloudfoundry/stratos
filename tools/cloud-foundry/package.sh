@@ -21,6 +21,9 @@ cat << EOF > ${TOP_LEVEL}/plugins.json
 }
 EOF
 
+# Delete endpoints-dashboard from bower.json
+sed -i '/"endpoints-dashboard.*/d' bower.json
+
 npm install -g gulp
 npm install -g bower
 
