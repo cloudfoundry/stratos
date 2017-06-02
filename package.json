@@ -12,7 +12,7 @@
     "coverage": "npm test && gulp e2e:run && gulp coverage-combine",
     "lint": "gulp lint",
     "gate-check": "gulp lint && npm test",
-    "test-backend": "node tools/test_server.js",
+    "test-backend": "gulp test-backend",
     "pree2e": "npm run update-webdriver",
     "e2e": "gulp e2e:run",
     "preheadless-e2e": "npm run pree2e",
