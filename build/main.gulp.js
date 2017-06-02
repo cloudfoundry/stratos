@@ -228,7 +228,15 @@
   });
 
   // Prepare required artifacts for the unit tests
-  gulp.task('unit:prepare', ['i18n', 'template-cache', 'copy:assets']);
+  gulp.task('unit:prepare', function (next) {
+    runSequence(
+      'prepare-frontend',
+      'i18n',
+      'template-cache',
+      'copy:assets',
+      next
+    );
+  });
 
   // By default running the unit tests only tests those components included in bower.json
   // This task re-writes bower.json to include all components in the components folder

@@ -24,7 +24,7 @@ ${BOWER_PATH}/bower install
 npm run build
 npm run build-backend
 npm run build-cf
-ls -l
+
 chmod +x portal-proxy
 
 ./portal-proxy

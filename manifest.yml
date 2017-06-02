@@ -1,0 +1,10 @@
+applications:
+- name: console
+  memory: 1G
+  disk_quota: 2G
+  host: console
+  timeout: 180
+  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  health-check-type: process
+  env:
+    CF_API_FORCE_SECURE: true
