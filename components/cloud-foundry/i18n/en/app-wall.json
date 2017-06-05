@@ -13,7 +13,28 @@
     "filtered-apps": "Filtered Applications",
     "instances": "Instances",
     "disk-quota": "Disk Quota",
-    "memory": "Memory"
+    "memory": "Memory",
+    "no-apps": {
+      "default": "You have no applications",
+      "empty-space": "This space has no applications",
+      "empty-org": "This organization has no applications",
+      "empty-endpoint": "This endpoint has no applications",
+      "empty-x-due-to-search": "{{emptyXMessage}} matching the search term"
+    },
+    "errors": {
+      "single-endpoint-down": "The Console could not connect to the endpoint named \"{{name}}\". Try reconnecting to this endpoint to resolve this problem.",
+      "multiple-endpoint-down": "The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints."
+    },
+    "table": {
+      "columns": {
+        "appName": "Application Name",
+        "status": "Status",
+        "instances": "Instances",
+        "disk": "Disk Quota",
+        "memory": "Memory",
+        "creation": "Creation Date"
+      }
+    }
   },
   "add-app-dialog": {
     "title": "@:app-wall.add-application"

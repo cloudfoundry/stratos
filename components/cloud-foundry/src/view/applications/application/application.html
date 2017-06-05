@@ -32,7 +32,7 @@
       ng-hide="appAction.hidden"
       ng-click="appAction.execute()">
       <app-icon class="{{appAction.iconClass}}" icon-class="app-icon-lg" icon="{{appAction.icon}}"></app-icon>
-      <span>{{ appAction.name }}</span>
+      <span>{{ appAction.name | translate }}</span>
     </button>
   </li>
 </ul>

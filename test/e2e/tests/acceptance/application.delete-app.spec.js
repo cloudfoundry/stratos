@@ -56,7 +56,7 @@
       application.invokeAction('Delete');
       browser.wait(until.presenceOf(detailView.getElement()), 5000);
 
-      expect(detailView.getTitle()).toBe('Delete App, Pipeline, and Selected Items');
+      expect(detailView.getTitle()).toBe('Delete App and Associated Items');
       element.all(by.repeater('route in wizardCtrl.options.safeRoutes')).then(function (rows) {
         expect(rows.length).toEqual(1);
         expect(rows[0].getText()).toMatch(testAppName.replace(/[.:]/g, '_'));
@@ -100,7 +100,7 @@
 
       confirmModal.waitForModal();
       expect(confirmModal.getTitle()).toBe('Delete Application');
-      expect(confirmModal.getBody()).toBe('Are you sure you want to delete ' + testAppName + '?');
+      expect(confirmModal.getBody()).toBe("Are you sure you want to delete '" + testAppName + "'?");
       confirmModal.commit();
       helpers.checkAndCloseToast("'" + testAppName + "' has been deleted");
 
