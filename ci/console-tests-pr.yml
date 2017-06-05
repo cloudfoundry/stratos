@@ -19,7 +19,7 @@ resources:
     repo: hpcloud/stratos-ui
     uri: git@github.com:hpcloud/stratos-ui.git
     private_key: {{github-private-key}}
-    label: suse-test
+    label: {{ui-pr-label}}
     base_url: {{base-url}}
 
 groups:
