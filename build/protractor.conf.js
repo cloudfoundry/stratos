@@ -1,4 +1,4 @@
-/* eslint-disable angular/di,angular/document-service */
+/* eslint-disable angular/di,angular/document-service,no-sync,no-console,no-process-exit,angular/log */
 (function () {
   'use strict';
 
@@ -30,6 +30,15 @@
     captureOnlyFailedSpecs: true,
     showQuickLinks: true
   });
+
+  var fs = require('fs');
+
+  if (!fs.existsSync('secrets.json')) {
+    console.log('No secrets.json was found! Please provide a secrets.json, see `secrets.yml-sample` as reference.');
+    process.exit(1);
+  }
+
+  var secrets = require('./secrets.json');
 
   exports.config = {
 
@@ -77,18 +86,12 @@
         cf: {
           cf1: {
             register: {
-              api_endpoint: 'https://api.10.4.21.211.nip.io:8443',
+              api_endpoint: secrets.cloudFoundry.url,
               cnsi_name: 'cf',
               skip_ssl_validation: 'true'
             },
-            admin: {
-              username: 'admin',
-              password: 'hscadmin'
-            },
-            user: {
-              username: 'e2e',
-              password: 'changeme'
-            },
+            admin: secrets.cloudFoundry.admin,
+            user: secrets.cloudFoundry.user,
             testOrgName: 'e2e',
             testSpaceName: 'e2e',
             supportsVersions: false
@@ -99,7 +102,7 @@
         valid: {
           tokenName: 'e2e-test',
           newTokenName: 'e2e-test-renamed',
-          token: 'a50928e2a0f83fc3786661217c878a2d791e56a6'
+          token: secrets.githubPat
         },
         repository: 'node-env',
         invalid: {
