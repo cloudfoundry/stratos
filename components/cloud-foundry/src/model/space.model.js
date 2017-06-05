@@ -650,7 +650,7 @@
       var cfOrganizationModel = _getOrganizationModel();
       var createPromises = [];
 
-      function getSpaceDetails(response) {
+      function cacheSpaceDetails(response) {
         return getSpaceDetails(cnsiGuid, response.data);
       }
 
@@ -664,7 +664,7 @@
         };
 
         var createP = spaceApi.CreateSpace(newSpace, params, modelUtils.makeHttpConfig(cnsiGuid))
-          .then(getSpaceDetails); // Cache the space details
+          .then(cacheSpaceDetails);
 
         createPromises.push(createP);
       }
