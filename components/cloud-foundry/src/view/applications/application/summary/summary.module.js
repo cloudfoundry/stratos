@@ -64,8 +64,7 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
-   * @param {object} $scope - the Angular $scope service
-   * @param {object} $filter - the Angular $filter service
+   * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cfAddRoutes} cfAddRoutes - add routes service
    * @param {cfEditApp} cfEditApp - edit Application
@@ -82,7 +81,7 @@
    * @property {appUtilsService} appUtilsService - the appUtilsService service
    * @property {appNotificationsService} appNotificationsService - the toast notification service
    */
-  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
+  function ApplicationSummaryController($state, $stateParams, $log, $q, $translate,
                                         modelManager, cfAddRoutes, cfEditApp, appUtilsService,
                                         appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
                                         cfApplicationTabs) {
@@ -116,7 +115,7 @@
 
     vm.routesActionMenu = [
       {
-        name: gettext('Unmap from App'),
+        name: 'app-route-actions.unmap',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.unmapAppRoute(vm.cnsiGuid, route, route.guid, vm.id).finally(function () {
@@ -125,7 +124,7 @@
         }
       },
       {
-        name: gettext('Delete Route'),
+        name: 'app-route-actions.delete',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.deleteRoute(vm.cnsiGuid, route, route.guid).finally(function () {
@@ -137,22 +136,23 @@
 
     vm.instancesActionMenu = [
       {
-        name: gettext('Terminate'),
+        name: 'app-instances-actions.terminate',
         disabled: false,
         execute: function (instanceIndex) {
           frameworkDialogConfirm({
-            title: gettext('Terminate Instance'),
-            description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
-            errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),
+            title: 'terminate-instance.title',
+            description: $translate.instant('terminate-instance.description', { index: instanceIndex }),
+            errorMessage: 'terminate-instance.error-message',
             submitCommit: true,
             buttonText: {
-              yes: gettext('Terminate'),
-              no: gettext('Cancel')
+              yes: 'terminate-instance.button.yes',
+              no: 'terminate-instance.button.no'
             },
             callback: function () {
               return vm.model.terminateRunningAppInstanceAtGivenIndex(vm.cnsiGuid, vm.id, instanceIndex)
                 .then(function () {
-                  appNotificationsService.notify('success', gettext('Instance successfully terminated'));
+                  appNotificationsService.notify('success',
+                    $translate.instant('terminate.success', { index: instanceIndex }));
                   update();
                 });
             }
@@ -263,8 +263,14 @@
       if (angular.isUndefined(uptime) || uptime === null) {
         return '-';
       }
+
+      function getFormattedTime(isPlural, value, unit) {
+        var formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
+        return $translate.instant(formatString, { value: value, unit: unit });
+      }
+
       if (uptime === 0) {
-        return '0' + gettext('s');
+        return getFormattedTime(false, '0', $translate.instant('dateTime.singular.second'));
       }
       var days = Math.floor(uptime / 86400);
       uptime = uptime % 86400;
@@ -277,16 +283,18 @@
         if (count === 0) {
           return '';
         } else if (count === 1) {
-          return count + single + ' ';
+          return getFormattedTime(false, count, single) + ' ';
         } else {
-          return count + plural + ' ';
+          return getFormattedTime(true, count, plural) + ' ';
         }
       }
 
-      return (formatPart(days, gettext('d'), gettext('d')) +
-      formatPart(hours, gettext('h'), gettext('h')) +
-      formatPart(minutes, gettext('m'), gettext('m')) +
-      formatPart(seconds, gettext('s'), gettext('s'))).trim();
+      return (
+      formatPart(days, $translate.instant('dateTime.singular.day'), $translate.instant('dateTime.plural.days')) +
+      formatPart(hours, $translate.instant('dateTime.singular.hour'), $translate.instant('dateTime.plural.hours')) +
+      formatPart(minutes, $translate.instant('dateTime.singular.minute'), $translate.instant('dateTime.plural.minutes')) +
+      formatPart(seconds, $translate.instant('dateTime.singular.second'), $translate.instant('dateTime.plural.seconds')))
+        .trim();
     }
   }
 

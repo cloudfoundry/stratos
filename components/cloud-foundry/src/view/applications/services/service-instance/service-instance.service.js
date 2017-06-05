@@ -10,7 +10,7 @@
    * @name cfServiceInstanceService
    * @description A service instance common service
    * @param {object} $log - the Angular $log service
-   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $translate - the Angular $translate service
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -18,7 +18,7 @@
    * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog
    * @returns {object} A service instance factory
    */
-  function serviceInstanceFactory($log, $interpolate, $q, modelManager, appNotificationsService, frameworkDetailView,
+  function serviceInstanceFactory($log, $translate, $q, modelManager, appNotificationsService, frameworkDetailView,
                                   frameworkDialogConfirm) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -38,15 +38,14 @@
        * @public
        */
       unbindServiceFromApp: function (cnsiGuid, appGuid, serviceBindingGuid, serviceInstanceName, callbackFunc) {
-        var msgStr = gettext('Are you sure you want to detach {{name}}?');
         return frameworkDialogConfirm({
-          title: gettext('Detach Service'),
-          description: $interpolate(msgStr)({name: serviceInstanceName}),
-          errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
+          title: 'app-tabs.services.unbind.title',
+          description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
+          errorMessage: 'app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: gettext('Detach'),
-            no: gettext('Cancel')
+            yes: 'app-tabs.services.unbind.button.yes',
+            no: 'app-tabs.services.unbind.button.no'
           },
           callback: function () {
             return bindingModel.deleteServiceBinding(cnsiGuid, serviceBindingGuid)
@@ -79,15 +78,14 @@
        * @public
        */
       unbindServiceFromApps: function (cnsiGuid, serviceBindings, serviceInstanceName, callbackFunc) {
-        var msgStr = gettext('Are you sure you want to detach {{name}}?');
         return frameworkDialogConfirm({
-          title: gettext('Detach Service'),
-          description: $interpolate(msgStr)({name: serviceInstanceName}),
-          errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
+          title: 'app-tabs.services.unbind.title',
+          description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
+          errorMessage: 'app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: gettext('Detach'),
-            no: gettext('Cancel')
+            yes: 'app-tabs.services.unbind.button.yes',
+            no: 'app-tabs.services.unbind.button.no'
           },
           callback: function () {
             var promises = [];
@@ -107,9 +105,9 @@
             return $q.all(promises)
               .then(function () {
                 if (failedCount > 0) {
-                  appNotificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
+                  appNotificationsService.notify('warning', 'app-tabs.services.unbind.error');
                 } else {
-                  appNotificationsService.notify('success', gettext('Service instance successfully detached'));
+                  appNotificationsService.notify('success', $translate.instant('app-tabs.services.unbind.success'));
                 }
 
                 if (angular.isDefined(callbackFunc)) {
@@ -146,15 +144,14 @@
        * @public
        */
       deleteService: function (cnsiGuid, serviceInstanceGuid, serviceInstanceName, callbackFunc) {
-        var msgStr = gettext('Are you sure you want to delete {{name}}?');
         return frameworkDialogConfirm({
-          title: gettext('Delete Service'),
-          description: $interpolate(msgStr)({name: serviceInstanceName}),
-          errorMessage: gettext('There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.'),
+          title: 'app-tabs.services.delete.title',
+          description: $translate.instant('app-tabs.services.delete.description', {name: serviceInstanceName}),
+          errorMessage: 'app-tabs.services.delete.error-message',
           submitCommit: true,
           buttonText: {
-            yes: gettext('Delete'),
-            no: gettext('Cancel')
+            yes: 'app-tabs.services.delete.button.yes',
+            no: 'app-tabs.services.delete.button.no'
           },
           callback: function () {
             var params = {
@@ -163,7 +160,7 @@
             };
             return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params)
               .then(function () {
-                appNotificationsService.notify('success', gettext('Service instance successfully deleted'));
+                appNotificationsService.notify('success', $translate.instant('app-tabs.services.delete.success'));
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
@@ -195,10 +192,9 @@
             var vcap = variables.system_env_json.VCAP_SERVICES;
             if (angular.isDefined(vcap) && vcap[serviceKey]) {
               var instanceVars = _.find(vcap[serviceKey], { name: instance.name });
-              var titleStr = gettext('{{instanceName}}: Variables');
               var config = {
                 templateUrl: 'plugins/cloud-foundry/view/applications/services/service-instance/env-variables.html',
-                title: $interpolate(titleStr)({instanceName: instance.name})
+                title: $translate.instant('app-tabs.services.view-envs.title', {instanceName: instance.name})
               };
               var context = {
                 variables: instanceVars

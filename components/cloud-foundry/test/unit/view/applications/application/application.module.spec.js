@@ -39,7 +39,7 @@
       $window = $injector.get('$window');
       var $q = $injector.get('$q');
       var $interval = $injector.get('$interval');
-      var $interpolate = $injector.get('$interpolate');
+      var $translate = $injector.get('$translate');
       var $state = $injector.get('$state');
       var confirmDialogMock = function (dialogSpecs) {
         dialogSpecs.callback();
@@ -76,7 +76,7 @@
 
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, appEventService, confirmDialogMock,
-        appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate,
+        appUtilsService, cfAppCliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $translate,
         $state, cfApplicationTabs, appEndpointsCnsiService);
       $httpBackend.flush();
     }
