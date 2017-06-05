@@ -13,6 +13,21 @@
 
   var env;
 
+  // This build mode will build the backend components in containers,
+  // it should be used if building on a Mac or Windows
+  var BUILD_MODE_CONTAINERS = 'containers';
+  // This build mode will build locally,
+  // this will only work on a Linux system with Go and Glide installed
+  var BUILD_MODE_LOCAL = 'local';
+
+  var buildContainerInfo = {
+    dockerRegistry: 'docker.io',
+    dockerOrg: 'susetest',
+    image: 'stratos-backend-builder'
+  };
+
+  var buildMode = BUILD_MODE_LOCAL;
+
   module.exports.init = function () {
     env = process.env;
     env.GOPATH = prepareBuild.getGOPATH();
@@ -20,10 +35,26 @@
     env.GOARCH = 'amd64';
   };
 
+  module.exports.setBuildInformation = setBuildInformation;
   module.exports.runGlideInstall = runGlideInstall;
   module.exports.build = build;
   module.exports.buildPlugin = buildPlugin;
   module.exports.test = test;
+
+  var fsExistsQ = Q.denodeify(fs.pathExists);
+
+  function setBuildInformation() {
+
+    if (fsExistsQ('./dev_config.json')) {
+      var devConfig = require('./dev_config.json');
+      if (_.has(devConfig, 'backendBuildMode')) {
+        buildMode = devConfig.backendBuildMode;
+      }
+      if (_.has(devConfig, 'buildContainer')) {
+        buildContainerInfo = _.default({}, devConfig.buildContainer, buildContainerInfo);
+      }
+    }
+  }
 
   function spawnProcess(processName, args, cwd, env) {
     var deferred = Q.defer();
@@ -46,8 +77,18 @@
     return deferred.promise;
   }
 
+  function run(executable, args, path, env) {
+    var promise;
+    if (buildMode === BUILD_MODE_LOCAL) {
+      promise = spawnProcess(executable, args, path, env);
+    } else {
+      promise = Q.reject('Not yet implemented');
+    }
+    return promise;
+  }
+
   function runGlideInstall(path) {
-    return spawnProcess('glide', ['--debug', 'install'], path, env);
+    return run('glide', ['--debug', 'install'], path, env);
   }
 
   function buildPlugin(pluginPath, pluginName) {
@@ -59,15 +100,15 @@
     var args = ['build', '-buildmode=plugin', '-o', pluginName + '.so'];
     args = args.concat(goFiles);
 
-    return spawnProcess('go', args, pluginPath, env);
+    return run('go', args, pluginPath, env);
   }
 
   function build(path, exeName) {
-    return spawnProcess('go', ['build', '-o', exeName], path, env);
+    return run('go', ['build', '-o', exeName], path, env);
   }
 
   function test(path) {
-    return spawnProcess('go', ['test', '-v'], path, env);
+    return run('go', ['test', '-v'], path, env);
   }
 
 })();
