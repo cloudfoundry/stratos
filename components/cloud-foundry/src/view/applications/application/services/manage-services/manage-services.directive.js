@@ -154,7 +154,7 @@
     function startManageServices() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/manage-services.html',
-        title: gettext('Manage Service Instances')
+        title: 'app-tabs.services.manage.title'
       };
 
       return frameworkDetailView(config, vm);

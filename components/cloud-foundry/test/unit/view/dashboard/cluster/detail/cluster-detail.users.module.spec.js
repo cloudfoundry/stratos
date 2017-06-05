@@ -161,17 +161,17 @@
         {
           org: org1,
           role: 'org_user',
-          roleLabel: 'User'
+          roleLabel: 'roles.org.short.org_user'
         },
         {
           org: org2,
           role: 'org_user',
-          roleLabel: 'User'
+          roleLabel: 'roles.org.short.org_user'
         },
         {
           org: org2,
           role: 'org_manager',
-          roleLabel: 'Manager'
+          roleLabel: 'roles.org.short.org_manager'
         }
       ]);
 

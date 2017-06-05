@@ -41,12 +41,12 @@
     var model = modelManager.retrieve('cloud-foundry.model.application');
     this.stApps = [];
     this.tableColumns = [
-      {name: gettext('Application Name'), value: 'entity.name'},
-      {name: gettext('Status'), value: 'state.label', noSort: true},
-      {name: gettext('Instances'), value: 'entity.instances', descendingFirst: true},
-      {name: gettext('Disk Quota'), value: 'entity.disk_quota', descendingFirst: true},
-      {name: gettext('Memory'), value: 'entity.memory', descendingFirst: true},
-      {name: gettext('Creation Date'), value: 'metadata.created_at', descendingFirst: true}
+      {name: 'app-wall.table.columns.appName', value: 'entity.name'},
+      {name: 'app-wall.table.columns.status', value: 'state.label', noSort: true},
+      {name: 'app-wall.table.columns.instances', value: 'entity.instances', descendingFirst: true},
+      {name: 'app-wall.table.columns.disk', value: 'entity.disk_quota', descendingFirst: true},
+      {name: 'app-wall.table.columns.memory', value: 'entity.memory', descendingFirst: true},
+      {name: 'app-wall.table.columns.creation', value: 'metadata.created_at', descendingFirst: true}
     ];
     this.init = false;
 
