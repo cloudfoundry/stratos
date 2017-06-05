@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hpcloud/portal-proxy/components/core/backend/datastore"
+	"github.com/hpcloud/stratos-ui/components/core/backend/datastore"
 )
 
 var listVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
