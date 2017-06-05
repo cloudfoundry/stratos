@@ -23,7 +23,8 @@ applications-sorting {
   form .form-group {
     select-input {
       margin-left: 2 * $console-unit-space;
-      
+      margin-bottom: 2px;
+
       .select-input-field {
         margin-left: 4px;
         user-select: none;
