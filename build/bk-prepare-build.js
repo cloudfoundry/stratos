@@ -22,7 +22,7 @@
     return tempSrcPath;
   };
 
-  gulp.task('clean', function (done) {
+  gulp.task('clean-backend', function (done) {
     fsRemoveQ(conf.outputPath)
       .then(function () {
         done();
@@ -69,7 +69,7 @@
     });
   });
 
-  gulp.task('create-outputs', ['clean'], function (done) {
+  gulp.task('create-outputs', ['clean-backend'], function (done) {
     var outputPath = conf.outputPath;
     fsEnsureDirQ(outputPath)
       .then(function () {

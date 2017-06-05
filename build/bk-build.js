@@ -12,6 +12,7 @@
   var conf = require('./bk-conf');
   var buildUtils = require('./bk-build-utils');
   var prepareBuild = require('./bk-prepare-build');
+  require('./deploy-in-cf');
 
   var enabledPlugins = [];
 

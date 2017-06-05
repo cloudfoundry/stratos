@@ -11,8 +11,8 @@ import (
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/crypto"
-	"github.com/hpcloud/portal-proxy/components/core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/crypto"
+	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
