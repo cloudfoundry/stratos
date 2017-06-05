@@ -1,6 +1,5 @@
 FROM golang:1.8-alpine
 
-ENV CONFIG_FLAGS="--fully-static "
 ENV VERSION=v6.10.3 NPM_VERSION=3
 
 # Build, install Node and Glide
@@ -20,7 +19,7 @@ RUN apk update && \
     grep " node-${VERSION}.tar.xz\$" | sha256sum -c | grep . && \
   tar -xf node-${VERSION}.tar.xz && \
   cd node-${VERSION} && \
-  ./configure --prefix=/usr ${CONFIG_FLAGS} && \
+  ./configure --prefix=/usr && \
   make -j$(getconf _NPROCESSORS_ONLN) && \
   make install && \
   cd / && \
