@@ -39,10 +39,14 @@
     }
   }
 
-  .checkbox-input-button:before {
-    @extend .material-icons;
-    content: 'check_box_outline_blank';
-    font-size: $checkbox-input-size;
+  .checkbox-input-button {
+    height: $checkbox-input-size;
+    &:before {
+      @extend .material-icons;
+      content: 'check_box_outline_blank';
+      font-size: $checkbox-input-size;
+    }
+
   }
 
   .checkbox-input-label {
