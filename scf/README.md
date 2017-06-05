@@ -6,11 +6,12 @@
     - Libvirt
     - Vagrant 1.9.3 (Don't use 1.9.4)
     - vagrant-libvirt plugin
+    - At least 75GB disk space required, specifically for images in /var/lib/libvirt/
 
 To install the vagrant plugin, do the following:
 ```
 $ sudo zypper in libvirt libvirt-devel ruby-devel gcc qemu-kvm
-$ vagrant plugin install vagrant-libvirt 
+$ vagrant plugin install vagrant-libvirt
 ```
     
 2. Start the VM
@@ -21,6 +22,7 @@ $ vagrant up --provider=libvirt
 ```
 
 This will initialise all necessary components for `SCF`.  Please leave some time for the images to be pulled down and the containers to initialise.
+
 **Note** - If you run into a `requested nfs version is not supported` exception then edit `/etc/exports` and clear out all entries added by Vagrant, and restart the `nfs-server.service`.
 
 Check for the status of the components by watching the pods:
@@ -46,13 +48,13 @@ NAME                   CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 kubernetes-dashboard   10.0.0.95    <none>        80/TCP    22m
 
 ```
-2. Tunnel the port
+2. Tunnel the port by executing the following in the vagrant machine
 
 ```
 $  ssh  vagrant@localhost -L 192.168.77.77:9090:10.0.0.95:80 -Nf 
 ```
 
-The kubernetes dashboard will be available at https://cf-dev.io:9090
+The kubernetes dashboard will be available at http://cf-dev.io:9090
 
 ### Configure CF Cli
 
