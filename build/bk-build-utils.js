@@ -47,7 +47,7 @@
   }
 
   function runGlideInstall(path) {
-    return spawnProcess('glide', ['--debug', 'install'], path, env);
+    return spawnProcess('glide', ['install'], path, env);
   }
 
   function buildPlugin(pluginPath, pluginName) {
