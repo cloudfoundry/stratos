@@ -18,7 +18,10 @@
     examplesDist: './tools/examples/dist/',
     browserSyncDist: './dist',
     i18nDist: './dist/i18n/',
-    components: './components/'
+    components: './components/',
+    backendOutput: './outputs/',
+    ui: './ui'
+
   };
 
   // Now returned as an object so require always returns same object
