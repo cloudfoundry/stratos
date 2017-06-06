@@ -13,6 +13,7 @@
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
    * @param {object} $interpolate - the angular $interpolate service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -34,8 +35,8 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function appClusterRolesService($log, $q, $interpolate,
-                        modelManager, appEventService, appNotificationsService, frameworkDialogConfirm, cfOrganizationModel) {
+  function appClusterRolesService($log, $q, $interpolate, $translate, modelManager, appEventService,
+                                  appNotificationsService, frameworkDialogConfirm, cfOrganizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -49,15 +50,15 @@
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
-      org_manager: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_manager'),
-      org_auditor: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_auditor'),
-      billing_manager: cfOrganizationModel.organizationRoleToString('billing_manager'),
-      org_user: gettext('Org ') + cfOrganizationModel.organizationRoleToString('org_user')
+      org_manager: $translate.instant('roles.org.short.org_manager'),
+      org_auditor: $translate.instant('roles.org.short.org_auditor'),
+      billing_manager: $translate.instant('roles.org.short.billing_manager'),
+      org_user: $translate.instant('roles.org.short.org_user')
     };
     this.spaceRoles = {
-      space_manager: gettext('Space ') + spaceModel.spaceRoleToString('space_manager'),
-      space_auditor: gettext('Space ') + spaceModel.spaceRoleToString('space_auditor'),
-      space_developer: gettext('Space ') + spaceModel.spaceRoleToString('space_developer'),
+      space_manager: $translate.instant('roles.space.short.space_manager'),
+      space_auditor: $translate.instant('roles.space.short.space_auditor'),
+      space_developer: $translate.instant('roles.space.short.space_developer'),
       org_user_filler: ''
     };
 

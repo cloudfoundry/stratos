@@ -138,24 +138,14 @@
     /**
      * @function organizationRoleToString
      * @memberof cloud-foundry.model.organization
-     * @description Converts an organization role to a localized string. The list of all organization
+     * @description Converts an organization role to a key that can be localised. The list of all organization
      * roles is: org_user, org_manager, org_auditor, billing_manager
      * @param {string} role - The organization role
      * @returns {string} A localised version of the role
      * @public
      */
     function organizationRoleToString(role) {
-      switch (role) {
-        case 'org_user':
-          return gettext('User');
-        case 'org_manager':
-          return gettext('Manager');
-        case 'org_auditor':
-          return gettext('Auditor');
-        case 'billing_manager':
-          return gettext('Billing Manager');
-      }
-      return role;
+      return 'roles.org.short.' + role;
     }
 
     /**
@@ -164,7 +154,7 @@
      * @description Converts a list of cloud-foundry organization roles to a sorted localized list.
      * The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
      * @param {Array} roles - A list of cloud-foundry organization roles
-     * @returns {string} An array of localised versions of the roles
+     * @returns {Array} An array of localised versions of the roles
      * @public
      */
     function organizationRolesToStrings(roles) {
@@ -172,7 +162,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return [gettext('none assigned')];
+        return ['roles.none'];
       } else {
         roles.sort(function (r1, r2) {
           return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);

@@ -17,7 +17,7 @@
     function createController($injector, type) {
       $httpBackend = $injector.get('$httpBackend');
 
-      var $interpolate = $injector.get('$interpolate');
+      var $translate = $injector.get('$translate');
       $state = $injector.get('$state');
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
@@ -52,7 +52,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+      $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
         eventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
@@ -91,20 +91,20 @@
       });
 
       it('should return correct message when no filters have been set', function () {
-        expect($controller.getNoAppsMessage()).toBe('You have no applications.');
+        expect($controller.getNoAppsMessage()).toBe('You have no applications');
       });
 
       it('should return the correct message when a cluster filter has been set', function () {
         // set cnsiGuid param
         $controller.model.filterParams.cnsiGuid = 'test';
-        expect($controller.getNoAppsMessage()).toBe('This endpoint has no applications.');
+        expect($controller.getNoAppsMessage()).toBe('This endpoint has no applications');
 
       });
 
       it('should return the correct message when an org filter has been set', function () {
         $controller.model.filterParams.cnsiGuid = 'test';
         $controller.model.filterParams.orgGuid = orgGuid;
-        expect($controller.getNoAppsMessage()).toBe('This organization has no applications.');
+        expect($controller.getNoAppsMessage()).toBe('This organization has no applications');
       });
 
       it('should return the correct message when a space filter has been set', function () {
@@ -114,7 +114,7 @@
         $controller.model.filterParams.cnsiGuid = 'test';
         $controller.model.filterParams.orgGuid = orgGuid;
         $controller.model.filterParams.spaceGuid = 'test';
-        expect($controller.getNoAppsMessage()).toBe('This space has no applications.');
+        expect($controller.getNoAppsMessage()).toBe('This space has no applications');
       });
 
     });
@@ -365,7 +365,7 @@
           expect($controller.model.filteredApplications.length).toBe(0);
           expect($controller.model.unfilteredApplicationCount).toBe(unfilteredApplicationCount);
 
-          expect($controller.getNoAppsMessage()).toBe('This space has no applications matching the search term.');
+          expect($controller.getNoAppsMessage()).toBe('This space has no applications matching the search term');
         });
       });
 

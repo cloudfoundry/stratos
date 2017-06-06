@@ -1,0 +1,11 @@
+consoleVersion: 20170509T151337Z-0-g4fa247d
+dockerOrg: susetest
+dockerRegistry: docker.io
+dbPassword: changeme
+images:
+  console: hsc-console
+  proxy: hsc-proxy
+  postgres: hsc-postgres
+  preflight: hsc-preflight-job
+  postflight: hsc-postflight-job
+

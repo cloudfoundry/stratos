@@ -54,19 +54,19 @@
     vm.numAttached = 0;
     vm.actions = [
       {
-        name: gettext('Add Service'),
+        name: 'app-tabs.services.card.actions.add',
         execute: function () {
           addService();
         }
       },
       {
-        name: gettext('Detach'),
+        name: 'app-tabs.services.card.actions.detach',
         execute: function () {
           detach();
         }
       },
       {
-        name: gettext('Manage Instances'),
+        name: 'app-tabs.services.card.actions.manage',
         execute: function () {
           manageInstances();
         }
