@@ -34,7 +34,6 @@
     };
 
     function link(scope, element, attrs, ngModelController) {
-      var originalModelValue;
       var items = [];
       var ignoreCase = angular.isDefined(attrs.ignoreCase);
 
@@ -58,12 +57,8 @@
       }
 
       function validator(modelValue, viewValue) {
-        if (ngModelController.$pristine) {
-          originalModelValue = modelValue;
-        }
         var valueToCheck = ignoreCase ? _.toLower(viewValue) : viewValue;
-        return originalModelValue === modelValue ||
-          items.indexOf(valueToCheck) === -1;
+        return items.indexOf(valueToCheck) === -1;
       }
     }
   }

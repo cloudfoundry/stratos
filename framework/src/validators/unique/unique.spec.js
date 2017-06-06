@@ -17,7 +17,7 @@
         $compile = $injector.get('$compile');
         $scope = $injector.get('$rootScope').$new();
         $scope.data = {
-          serverName: 'controller1'
+          serverName: 'controller'
         };
         $scope.servers = [
           {name: 'controller1'},
@@ -36,7 +36,7 @@
 
       it('should pass validation if viewValue is unique', function () {
         ['',
-          'controller1',
+          'controller0',
           'controller4'
         ].forEach(function (name) {
           $form.serverName.$setViewValue(name);
@@ -123,7 +123,7 @@
         $compile = $injector.get('$compile');
         $scope = $injector.get('$rootScope').$new();
         $scope.data = {
-          serverName: 'controller1'
+          serverName: 'controller'
         };
         $scope.servers = [
           'controller1',
@@ -142,7 +142,7 @@
 
       it('should pass validation if viewValue is unique', function () {
         ['',
-          'controller1',
+          'controller0',
           'controller4'
         ].forEach(function (name) {
           $form.serverName.$setViewValue(name);

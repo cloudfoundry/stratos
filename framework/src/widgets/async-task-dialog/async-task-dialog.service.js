@@ -157,22 +157,20 @@
     invokeAction: function () {
       this.showSpinner = true;
       this._disableAllInput();
-      this.response = null;
       this.context.showErrorBar = false;
       var that = this;
       return this.context.submitAction(this.context.data, this)
         .then(function (responseData) {
-          that.response = responseData;
-        }).catch(function () {
-          that.context.showErrorBar = that.context.errorMsg ? that.context.errorMsg : true;
-        }).finally(function () {
+          // Successfully completed action
+          // resolve success promise with data returned by submitAction.
+          that.$uibModalInstance.close(responseData);
+        })
+        .catch(function () {
+          that.context.showErrorBar = that.context.errorMsg ? that.context.errorMsg : !that.context.hideErrorMsg;
+        })
+        .finally(function () {
           that.showSpinner = false;
           that._enableAllInput();
-          if (!that.context.showErrorBar) {
-            // Successfully completed action
-            // resolve success promise with data returned by submitAction.
-            that.$uibModalInstance.close(that.response);
-          }
         });
     },
 

@@ -26,6 +26,7 @@
     return {
       bindToController: {
         cnsi: '=',
+        hideNotification: '=?',
         onCancel: '&?',
         onSubmit: '&?'
       },
@@ -38,8 +39,8 @@
 
   CredentialsFormController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager',
-    'app.view.notificationsService'
+    'app.view.notificationsService',
+    'app.view.credentialsDialog'
   ];
 
   /**
@@ -50,8 +51,8 @@
    * service/cluster registration
    * @constructor
    * @param {app.event.eventService} eventService - the application event bus
-   * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @property {app.event.eventService} eventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
@@ -59,8 +60,7 @@
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController(eventService, modelManager, notificationsService) {
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+  function CredentialsFormController(eventService, notificationsService, credentialsDialog) {
     this.eventService = eventService;
     this.notificationsService = notificationsService;
     this.authenticating = false;
@@ -68,6 +68,7 @@
     this.serverErrorOnRegister = false;
     this.serverFailedToRespond = false;
     this._data = {};
+    this.credentialsDialog = credentialsDialog;
   }
 
   angular.extend(CredentialsFormController.prototype, {
@@ -93,12 +94,19 @@
     connect: function () {
       var that = this;
       this.authenticating = true;
-      this.userServiceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
+      this.credentialsDialog.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password,
+        !that.hideNotification)
         .then(function success(response) {
-          that.notificationsService.notify('success', gettext("Successfully connected to '") + that.cnsi.name + "'");
+          var credentials = {
+            username: that._data.username,
+            password: that._data.password
+          };
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
-            that.onSubmit({ serviceInstance: response.data });
+            that.onSubmit({
+              serviceInstance: response.data,
+              credentials: credentials
+            });
           }
         }, function (err) {
           if (err.status >= 400) {
