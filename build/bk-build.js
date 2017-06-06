@@ -64,7 +64,7 @@
   });
 
   gulp.task('prepare-core', ['prepare-plugins'], function (done) {
-    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'core', 'backend');
+    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
     buildUtils.runGlideInstall(fullCorePath)
       .then(function () {
         done();
@@ -99,7 +99,7 @@
     Q.all(promises)
       .then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'core', 'backend', 'vendor');
+        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
         mergeDirs.default(coreVendorPath, goSrc);
         return fsRemoveQ(coreVendorPath);
       })

@@ -56,7 +56,7 @@
       _.each(plugins.enabledPlugins, function (plugin) {
         promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
       });
-      promises.push(fsCopyQ('./components/core', tempSrcPath + '/core'));
+      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/core'));
 
       Q.all(promises)
         .then(function () {

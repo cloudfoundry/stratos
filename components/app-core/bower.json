@@ -1,12 +1,12 @@
 {
-  "name": "app-shell",
+  "name": "app-core",
   "description": "",
   "license": "ISC",
   "moduleType": [],
   "homepage": "",
   "main": [
-    "index.html",
-    "src/app-shell.scss"
+    "frontend/index.html",
+    "frontend/src/app-core.scss"
   ],
   "ignore": [
     ".*"
