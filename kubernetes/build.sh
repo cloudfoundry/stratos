@@ -109,9 +109,9 @@ function cleanup {
   # Cleanup prior to generating the UI container
   echo
   echo "-- Cleaning up ${__DIRNAME}/../stratos-ui"
-  sudo rm -rf ${__DIRNAME}/../../stratos-ui/dist
-  sudo rm -rf ${__DIRNAME}/../../stratos-ui/node_modules
-  sudo rm -rf ${__DIRNAME}/../../stratos-ui/bower_components
+  rm -rf ${__DIRNAME}/../../stratos-ui/dist
+  rm -rf ${__DIRNAME}/../../stratos-ui/node_modules
+  rm -rf ${__DIRNAME}/../../stratos-ui/bower_components
   echo
   echo "-- Cleaning up ${__DIRNAME}/../../stratos-ui/containers/nginx/dist"
   rm -rf ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
@@ -126,7 +126,7 @@ function updateTagForRelease {
   #     <prefix> = git commit prefix - always 'g'
   #     <hash> = git commit hash for the current branch
   # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
-  pushd ${PORTAL_PROXY_PATH} > /dev/null 2>&1
+  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-0-g${GIT_HASH}"
@@ -154,15 +154,18 @@ function buildProxy {
   echo
   echo "-- Run the build container to build the proxy executable"
 
-  pushd ${PORTAL_PROXY_PATH} > /dev/null 2>&1
+  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
 
   docker run -e "APP_VERSION=${TAG}" \
              ${RUN_ARGS} \
              -it \
              --rm \
+             -e USER_NAME=$(id -nu) \
+             -e USER_ID=$(id -u)  \
+             -e GROUP_ID=$(id -g) \
              --name console-proxy-builder \
-             --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
+             --volume $(pwd):/go/src/github.com/hpcloud/stratos-ui \
              ${DOCKER_REGISTRY}/${DOCKER_ORG}/console-proxy-builder
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
@@ -171,21 +174,21 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy Dockerfile.k8s ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-proxy tools/Dockerfile.bk.dev ${STRATOS_UI_PATH}
 }
 
 function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile.HCP ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile.HCP ${STRATOS_UI_PATH}
 }
 
 function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${PORTAL_PROXY_PATH}
+  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
@@ -200,8 +203,8 @@ function buildPostflightJob {
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
-  cp goose  ${__DIRNAME}/../../portal-proxy/db/
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${PORTAL_PROXY_PATH}
+  cp goose  ${STRATOS_UI_PATH}/
+  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
 }
 
 function buildUI {
@@ -230,7 +233,7 @@ function buildUI {
 #
 
 # Set the path to the portal proxy
-PORTAL_PROXY_PATH=${GOPATH}/src/github.com/hpcloud/portal-proxy
+STRATOS_UI_PATH=${__DIRNAME}/../../stratos-ui
 
 # cleanup output, intermediate artifacts
 cleanup
