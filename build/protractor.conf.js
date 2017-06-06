@@ -34,7 +34,7 @@
   var fs = require('fs');
 
   if (!fs.existsSync('secrets.json')) {
-    console.log('No secrets.json was found! Please provide a secrets.json, see `secrets.yml.sample` as reference.');
+    console.log('No secrets.json was found! Please provide a secrets.json, see `secrets.json.sample` as reference.');
     process.exit(1);
   }
 
