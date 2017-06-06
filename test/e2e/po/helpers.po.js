@@ -35,11 +35,8 @@
 
   // This makes identification of acceptance test apps easier in case they leak
   var e2eItemPrefix = 'acceptance.e2e.';
-  console.log(process.env.CUSTOM_APP_LABEL || process.env.USER);
-  console.log(process.env.USER);
-  console.log(process.env.CUSTOM_APP_LABEL || process.env.USER);
-  var customAppLabel = e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER || '');
-  var customOrgSpaceLabel = e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER || '');
+  var customAppLabel = e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
+  var customOrgSpaceLabel = e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   module.exports = {
 

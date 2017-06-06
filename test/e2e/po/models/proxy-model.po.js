@@ -1,3 +1,4 @@
+/* eslint-disable angular/json-functions */
 (function () {
   'use strict';
 

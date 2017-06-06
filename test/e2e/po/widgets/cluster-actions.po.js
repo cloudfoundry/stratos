@@ -21,9 +21,9 @@
 
   function createSpace(orgName, spaceName) {
     element(by.buttonText('Create Space')).click();
-    inputSelect.selectOptionByLabel(element(by.css('.organizations-drop-down select-input')), orgName);
+    inputSelect.selectOptionByLabel(element(by.css('.organizations-drop-down')), orgName);
 
-    var spaceNameField = inputText.wrap(element(by.name('name0')));
+    var spaceNameField = inputText.wrap(element(by.repeater('space in asyncTaskDialogCtrl.context.data.spaces track by $index')));
     spaceNameField.addText(spaceName);
     element(by.buttonText('Create')).click();
     helpers.checkAndCloseToast(/Space '.*' successfully created/);
