@@ -62,10 +62,10 @@
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.id = $stateParams.guid;
     vm.variableActions = [
-      {name: gettext('Edit Variable'), execute: _.bind(editVariable, vm)},
-      {name: gettext('Delete Variable'), execute: _.bind(deleteVariable, vm)}
+      {name: 'app-tabs.variables.actions.edit', execute: _.bind(editVariable, vm)},
+      {name: 'app-tabs.variables.actions.delete', execute: _.bind(deleteVariable, vm)}
     ];
-    vm.deleteErrorMsg = gettext('An error occurred deleting this variable. Please try again.');
+    vm.deleteErrorMsg = 'app-tabs.variables.deleteError';
 
     vm.isBusy = false;
     vm.fetchError = false;

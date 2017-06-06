@@ -20,7 +20,7 @@
    * @name ApplicationsListController
    * @constructor
    * @param {object} $scope - the Angular $scope service
-   * @param {object} $interpolate - the angular $interpolate service
+   * @param {object} $translate - the angular $translate service
    * @param {object} $state - the UI router $state service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $q - the angular $q promise service
@@ -31,7 +31,7 @@
    * @param {object} appUtilsService - the appUtilsService service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @property {object} $interpolate - the angular $interpolate service
+   * @property {object} $translate - the angular $translate service
    * @property {object} $state - the UI router $state service
    * @property {object} $timeout - the angular $timeout service
    * @property {app.model.modelManager} modelManager - the Model management service
@@ -39,11 +39,11 @@
    * @property {appEventService} appEventService - the event bus service
    * @property {appErrorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, $window, modelManager,
+  function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
                                       appEventService, appErrorService, appUtilsService, frameworkDetailView,
                                       cfOrganizationModel) {
     var that = this;
-    this.$interpolate = $interpolate;
+    this.$translate = $translate;
     this.$state = $state;
     this.$timeout = $timeout;
     this.$q = $q;
@@ -148,20 +148,22 @@
      * @public
      */
     getNoAppsMessage: function () {
-      var text = gettext('You have no applications');
+      var text = 'app-wall.no-apps.default';
       if (this.model.filterParams.cnsiGuid !== 'all') {
         if (this.model.filterParams.orgGuid !== 'all') {
           if (this.model.filterParams.spaceGuid !== 'all') {
-            text = gettext('This space has no applications');
+            text = 'app-wall.no-apps.empty-space';
           } else {
-            text = gettext('This organization has no applications');
+            text = 'app-wall.no-apps.empty-org';
           }
         } else {
-          text = gettext('This endpoint has no applications');
+          text = 'app-wall.no-apps.empty-endpoint';
         }
       }
-      return text +
-        (this.model.filterParams.text && this.model.filterParams.text.length ? ' matching the search term.' : '.');
+      text = this.$translate.instant(text);
+      return this.model.filterParams.text && this.model.filterParams.text.length
+        ? this.$translate.instant('app-wall.no-apps.empty-x-due-to-search', { emptyXMessage: text })
+        : text;
     },
 
     getEndpointsLink: function () {
@@ -374,10 +376,9 @@
         }
       });
       if (errors.length === 1) {
-        var errorMessage = gettext('The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-        that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
+        that.errorService.setAppError(that.$translate.instant('app-wall.errors.single-endpoint-down', {name: errors[0]}));
       } else if (errors.length > 1) {
-        that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
+        that.errorService.setAppError('app-wall.errors.multiple-endpoint-down');
       } else {
         that.errorService.clearAppError();
       }

@@ -33,3 +33,8 @@ vendor/
 **/*.so
 .glide
 tools/ssl
+
+deploy/data/
+deploy/hsc-upgrade-volume/
+deploy/development.rc
+deploy/ci/secrets.yml

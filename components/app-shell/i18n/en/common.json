@@ -45,5 +45,22 @@
     "product.logo": "@:product.logo",
     "company.www-link": "@:company.www-link",
     "product.www-link": "@:product.www-link"
+  },
+  "dateTime": {
+    "singular": {
+      "day": "d",
+      "hour": "h",
+      "minute": "m",
+      "second": "s",
+      "format": "{{value}}{{unit}}"
+    },
+    "plural": {
+      "days": "d",
+      "hours": "h",
+      "minutes": "m",
+      "seconds": "s",
+      "format": "{{value}}{{unit}}"
+    }
+
   }
 }

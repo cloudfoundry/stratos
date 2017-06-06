@@ -376,24 +376,14 @@
     /**
      * @function spaceRoleToString
      * @memberof cloud-foundry.model.space
-     * @description Converts a space role to a localized string. The list of all organization
+     * @description Converts a space role to a key that can be localised. The list of all organization
      * roles is: space_user, space_manager, space_auditor, space_developer
      * @param {string} role - The organization role
      * @returns {string} A localised version of the role
      * @public
      */
     function spaceRoleToString(role) {
-      switch (role) {
-        case 'space_user':
-          return gettext('User');
-        case 'space_manager':
-          return gettext('Manager');
-        case 'space_auditor':
-          return gettext('Auditor');
-        case 'space_developer':
-          return gettext('Developer');
-      }
-      return role;
+      return 'roles.space.short.' + role;
     }
 
     /**
@@ -410,7 +400,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the space
-        return [gettext('none assigned')];
+        return ['roles.none'];
       }
       roles.sort(function (r1, r2) {
         return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);
