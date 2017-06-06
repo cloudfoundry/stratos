@@ -3,6 +3,7 @@
   background-color: $console-primary-fg;
   color: $white;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: $font-size-monospace;
 
   .app-variable {
     pre {
@@ -48,3 +49,4 @@ table.app-variables-table {
     }
   }
 }
+

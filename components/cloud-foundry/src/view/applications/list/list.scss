@@ -16,7 +16,8 @@ $applications-msg-height: 50px;
     min-height: $main-nav-item-height;
 
     .btn-primary {
-      font-size: 16px;
+      font-size: $font-size-base;
+      font-weight: $console-font-weight-strongbold;
       height: auto;
       padding: 4px $console-unit-space;
     }
