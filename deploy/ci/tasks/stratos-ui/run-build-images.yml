@@ -1,0 +1,33 @@
+---
+platform: linux
+inputs:
+- name: stratos-deploy
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source: {repository: "stackatotest/hsc-dind", tag: "latest"}
+  # stackatotest/hsc-dind is based on a fork of github.com/hpcloud/concourse-dind-worker
+  # located at github/irfanhabib/concourse-dind-worker (removes usage of deprecated
+  # options and uses a newer Docker)
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      start-docker.sh
+
+      echo "Pushing images to ${DOCKER_REPOSITORY} with tag ${TAG}"
+
+      # Build hsc-concourse image
+      stratos-deploy/ci/scripts/build_concourse_image.sh
+      docker push ${DOCKER_REPOSITORY}/hsc-concourse:${TAG}
+
+      # Build goose image
+      stratos-deploy/ci/scripts/build_goose_image.sh
+      docker push ${DOCKER_REPOSITORY}/goose:${TAG}
+
+      # Build hsc-dcind image
+      stratos-deploy/ci/scripts/build_dcind_image.sh
+      docker push ${DOCKER_REPOSITORY}/hsc-dcind:${TAG}
+
+

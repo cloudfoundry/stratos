@@ -1,0 +1,4 @@
+FROM governmentpaas/cf-cli
+ADD config-cf.sh /config.sh
+
+ENTRYPOINT ["/config.sh"]

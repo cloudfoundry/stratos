@@ -5,7 +5,7 @@
               on-card-click="organizationTileCtrl.summary()">
   <dl class="dl-horizontal">
     <dt translate>role</dt>
-    <dd><div ng-repeat="role in organizationTileCtrl.roles">{{ role }}</div></dd>
+    <dd><div ng-repeat="role in organizationTileCtrl.roles">{{ role | translate }}</div></dd>
     <dt translate>applications</dt>
     <dd>{{organizationTileCtrl.organization.totalApps}}</dd>
     <dt translate>instances</dt>
