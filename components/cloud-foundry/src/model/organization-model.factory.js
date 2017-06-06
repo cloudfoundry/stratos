@@ -329,7 +329,7 @@
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
       var createdDate = moment(org.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
-      var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = consoleInfoModel.info.endpoints.cf[cnsiGuid].user.guid;
 
       function getRoles(org) {
         // The users roles may be returned inline
@@ -580,7 +580,7 @@
       return orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
         var org = res.data;
         var newOrgGuid = org.metadata.guid;
-        var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+        var userGuid = consoleInfoModel.info.endpoints.cf[cnsiGuid].user.guid;
         var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         return $q.all([makeUserP, makeManagerP]).then(function () {

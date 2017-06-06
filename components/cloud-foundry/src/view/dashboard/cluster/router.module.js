@@ -43,7 +43,7 @@
 
           var connectedInstances = 0;
           var serviceInstanceGuid;
-          var cfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          var cfInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'cf'});
           _.forEach(cfInstances, function (cfInstance) {
             if (_.get(userServiceInstanceModel.serviceInstances[cfInstance.guid], 'valid', false)) {
               serviceInstanceGuid = cfInstance.guid;

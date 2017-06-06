@@ -31,7 +31,7 @@
   function endpointService(cfHideEndpoint, $q, $state, $translate, apiManager, modelManager, appEndpointsCnsiService) {
 
     var service = {
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       refreshToken: refreshToken,
       update: updateEndpoint,
       unregister: unregister,

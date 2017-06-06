@@ -135,7 +135,7 @@
           beforeEach(function () {
             step = that.data.workflow.steps[0];
             mockData = [
-              { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf', valid: true },
+              { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'cf', valid: true },
               { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'misc', valid: true }
             ];
           });

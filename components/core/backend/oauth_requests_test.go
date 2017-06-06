@@ -37,7 +37,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 
 		defer mockUAA.Close()
 
-		// setup mock HCF server
+		// setup mock CF server
 		numReqs := 0
 		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
@@ -60,7 +60,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 
 		defer mockHCF.Close()
 
-		// do a GET against the HCF mock server
+		// do a GET against the CF mock server
 		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
@@ -68,7 +68,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockHCF",
-			CNSIType:              "hcf",
+			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
 			TokenEndpoint:         mockUAA.URL,
@@ -160,7 +160,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 		defer mockUAA.Close()
 
-		// setup mock HCF server
+		// setup mock CF server
 		numReqs := 0
 		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
@@ -184,7 +184,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		// close this explicitly here so we can thread-safely check the bool
 		defer mockHCF.Close()
 
-		// do a GET against the HCF mock server
+		// do a GET against the CF mock server
 		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
@@ -192,7 +192,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockHCF",
-			CNSIType:              "hcf",
+			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
 			TokenEndpoint:         mockUAA.URL,
@@ -309,7 +309,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 		defer mockUAA.Close()
 
-		// setup mock HCF server
+		// setup mock CF server
 		numReqs := 0
 		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
@@ -330,7 +330,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			return
 		})) // end of mockHCF
 
-		// do a GET against the HCF mock server
+		// do a GET against the CF mock server
 		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
 
 		_, _, _, pp, db, mock := setupHTTPTest(req)
@@ -341,7 +341,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockHCF",
-			CNSIType:              "hcf",
+			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
 			TokenEndpoint:         mockUAA.URL,
@@ -549,7 +549,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 
 		defer mockUAA.Close()
 
-		// setup mock HCF server
+		// setup mock CF server
 		numReqs := 0
 		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
@@ -570,7 +570,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 			return
 		})) // end of mockHCF
 
-		// do a GET against the HCF mock server
+		// do a GET against the CF mock server
 		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
@@ -578,7 +578,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockHCF",
-			CNSIType:              "hcf",
+			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
 			TokenEndpoint:         mockUAA.URL,

@@ -393,7 +393,7 @@
      * @returns {promise} Promise containing Array of users.
      */
     this.listUsers = function (clusterGuid, forceRefresh) {
-      var isAdmin = consoleInfo.info.endpoints.hcf[clusterGuid].user.admin;
+      var isAdmin = consoleInfo.info.endpoints.cf[clusterGuid].user.admin;
       if (!forceRefresh && angular.isDefined(promiseForUsers)) {
         return promiseForUsers;
       }

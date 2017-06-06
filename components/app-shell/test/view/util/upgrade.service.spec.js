@@ -178,7 +178,7 @@
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
           $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
-            { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
+            { guid: 'service', cnsi_type: 'cf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
           $httpBackend.expectPOST('/pp/v1/auth/login/uaa');

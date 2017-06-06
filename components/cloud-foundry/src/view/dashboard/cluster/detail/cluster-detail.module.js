@@ -71,7 +71,7 @@
       that.organizations = [];
 
       var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-      var user = consoleInfo.info.endpoints.hcf[that.guid].user;
+      var user = consoleInfo.info.endpoints.cf[that.guid].user;
       that.userService = userServiceInstanceModel.serviceInstances[that.guid] || {};
       that.service = _.find(serviceInstanceModel.serviceInstances, {guid: that.guid});
       that.isAdmin = user.admin;
@@ -104,7 +104,7 @@
     function setUserCount() {
       that.userCount = 0;
 
-      if (!that.userService.valid || that.userService.error || !consoleInfo.info.endpoints.hcf[that.guid].user.admin) {
+      if (!that.userService.valid || that.userService.error || !consoleInfo.info.endpoints.cf[that.guid].user.admin) {
         that.userCount = undefined;
         return;
       }
