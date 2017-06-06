@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-- name: portal-proxy
+- name: stratos-ui
 image_resource:
   type: docker-image
   source:
@@ -14,9 +14,6 @@ run:
   args:
     - -exc
     - |
-      mkdir -p /go/src/github.com/hpcloud/
-      ln -s $PWD/portal-proxy /go/src/github.com/hpcloud/portal-proxy
-      cd /go/src/github.com/hpcloud/portal-proxy
+      cd stratos-ui
       npm install
-      npm install -g gulp
-      npm run test
+      npm run test-backend

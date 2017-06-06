@@ -2,9 +2,8 @@
 platform: linux
 inputs:
 - name: stratos-deploy
-- name: portal-proxy-output
-  path: src/github.com/hpcloud/portal-proxy
 - name: stratos-ui
+- name: portal-proxy-output
 # Parameterised task files are currently not supported in Concourse
 # Once that is implemented we can refactor the following into a variable
 image_resource:
@@ -22,6 +21,10 @@ run:
       source /docker-lib.sh
       start_docker
       export GOPATH=$PWD
+
+      # Move portal-proxy binaries
+      cp -r ./portal-proxy-output/* stratos-ui/
+
       cd stratos-deploy
       # Load images from image
       for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do

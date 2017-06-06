@@ -10,7 +10,7 @@ DEV_DOCKER_COMPOSE_ALL="docker-compose.development.yml"
 DEV_DOCKER_COMPOSE_NO_UI="docker-compose.no-ui.development.yml"
 
 # Stratos Paths:
-PROXY_DIR="${GOPATH}/src/github.com/hpcloud/portal-proxy/"
+PROXY_DIR="../stratos-ui/"
 ENV_RC="development.rc"
 
 NO_UI=false
@@ -47,7 +47,7 @@ function clean {
 
     echo "----- portal-proxy"
     pushd ${PROXY_DIR}
-    [ -f portal-proxy ] && rm -f portal-proxy
+    [ -d outputs ] && rm -rf outputs
     popd
 }
 

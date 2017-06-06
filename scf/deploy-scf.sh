@@ -12,13 +12,27 @@ done
 # Deploy UAA
 echo "Deploying UAA..."
 pushd scf
-helm install scf-uaa --namespace uaa --wait
+helm install scf-uaa --namespace uaa
 popd
+
+echo "Waiting for UAA to come up..."
+# Make sure pods are ready before proceeding
+while ! kubectl get po --namespace=uaa | grep '1/1'; do
+    sleep 10
+done
+
 
 # Deploy SCF
 pushd scf
 echo "Deploying SCF..."
-helm install scf --namespace cf --wait
+helm install scf --namespace cf
 popd
+
+
+echo "Waiting for SCF to come up..."
+while ! kubectl get po --namespace=cf | grep '1/1'; do
+    sleep 10
+done
+
 
 echo "All done! :)"
