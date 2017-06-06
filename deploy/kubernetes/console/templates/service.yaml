@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: console
+  name: console-ui-ext
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: console
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: console-postgres
+  name: console-postgres-int
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: console-postgres
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: console-uaa
+  name: console-uaa-int
+spec:
+  ports:
+  - name: uaa
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+        app: console-uaa
+  type: ClusterIP
