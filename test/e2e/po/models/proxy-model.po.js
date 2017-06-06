@@ -2,11 +2,21 @@
   'use strict';
 
   var helpers = require('../helpers.po');
+  var _ = require('lodash');
 
   module.exports = {
     fetchCnsi: fetchCnsi,
-    fetchRegisteredCnsi: fetchRegisteredCnsi
+    fetchRegisteredCnsi: fetchRegisteredCnsi,
+    fetchCnsiByName: fetchCnsiByName
   };
+
+  function fetchCnsiByName(name) {
+    return fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword())
+      .then(function (response) {
+        var cluster = _.find(JSON.parse(response), {name: name});
+        return cluster ? cluster.guid : null;
+      });
+  }
 
   /**
    * @function fetchCnsi
