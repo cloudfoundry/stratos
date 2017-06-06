@@ -183,11 +183,11 @@
       organizations[cnsiGuid] = organizations[cnsiGuid] || {};
       organizationNames[cnsiGuid] = organizationNames[cnsiGuid] || [];
       organizations[cnsiGuid][orgGuid] = organizations[cnsiGuid][orgGuid] || {
-          details: {},
-          roles: {},
-          services: {},
-          spaces: {}
-        };
+        details: {},
+        roles: {},
+        services: {},
+        spaces: {}
+      };
     }
 
     function fetchOrganization(cnsiGuid, orgGuid) {
@@ -494,8 +494,8 @@
       }
 
       allSpacesP = allSpacesP || listAllSpacesForOrganization(cnsiGuid, orgGuid, {
-          'inline-relations-depth': 1
-        });
+        'inline-relations-depth': 1
+      });
 
       var routesCountP = allSpacesP.then(getRouteCount);
 
