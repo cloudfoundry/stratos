@@ -1,0 +1,38 @@
+.app-icon-sm {
+  font-size: $console-unit-space / 2;
+}
+
+.app-icon-lg {
+  font-size: $console-unit-space;
+}
+
+.app-icon-2x {
+  font-size: $console-unit-space * 2;
+}
+
+.app-icon-3x {
+  font-size: $console-unit-space * 3;
+}
+
+.app-icon-4x {
+  font-size: $console-unit-space * 4;
+}
+
+.app-icon-5x {
+  font-size: $console-unit-space * 5;
+}
+
+svg {
+  &.app-icon-2x {
+    width: $console-unit-space * 2;
+    height: $console-unit-space * 2;
+  }
+  &.app-icon-3x {
+    width: $console-unit-space * 3;
+    height: $console-unit-space * 3;
+  }
+  &.app-icon-4x {
+    width: $console-unit-space * 4;
+    height: $console-unit-space * 4;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "endpoints-dashboard",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/endpoints-dashboard.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-shell": "./components/app-shell"
+  }
+}

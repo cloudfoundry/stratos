@@ -9,7 +9,7 @@
 
   module.exports = {
     showEndpoints: showEndpoints,
-    showHcfEndpoints: showHcfEndpoints,
+    showCfEndpoints: showCfEndpoints,
     goToEndpoints: goToEndpoints,
     isEndpoints: isEndpoints,
 
@@ -34,6 +34,8 @@
     endpointActionMenu: endpointActionMenu,
     endpointError: endpointError,
 
+    waitForEndpointTable: waitForEndpointTable,
+
     headerRegister: headerRegister,
     headerRegisterVisible: headerRegisterVisible,
 
@@ -50,7 +52,7 @@
     return navbar.goToView('Endpoints');
   }
 
-  function showHcfEndpoints() {
+  function showCfEndpoints() {
     return navbar.goToView('endpoint.clusters');
   }
 
@@ -141,11 +143,11 @@
   }
 
   function endpointIsConnected(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Active_L')).isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.endpoint-connected-icon')).isPresent();
   }
 
   function endpointIsCritical(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Critical_L')).isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.endpoint-critical-icon')).isPresent();
   }
 
   function endpointType(row) {
@@ -217,6 +219,11 @@
     var row = helpers.getTableRowAt(getEndpointTable(), rowIndex + 1);
     expect(row.getAttribute('table-inline-message')).toBeDefined();
     return row;
+  }
+
+  function waitForEndpointTable() {
+    var until = protractor.ExpectedConditions;
+    browser.wait(until.presenceOf(getEndpointTable()), 5000);
   }
 
   function getHeaderRegister() {

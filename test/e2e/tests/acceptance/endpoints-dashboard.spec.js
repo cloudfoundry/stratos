@@ -126,9 +126,9 @@
                   // Find the name and run type dependent tests
                   endpointsPage.endpointName(index).then(function (name) {
                     name = name.toLowerCase();
-                    service = _.find(helpers.getHcfs(), function (hcf) {
-                      if (hcf.register.cnsi_name === name) {
-                        return hcf;
+                    service = _.find(helpers.getCfs(), function (cf) {
+                      if (cf.register.cnsi_name === name) {
+                        return cf;
                       }
                     });
                     if (!service) {
@@ -141,8 +141,8 @@
                     if (service) {
                       // 1) we show the correct type
                       if (name === 'hce') {
-                        expect(endpointsPage.endpointType(index)).toBe('Helion Code Engine');
-                      } else if (name === 'hcf') {
+                        expect(endpointsPage.endpointType(index)).toBe('Code Engine');
+                      } else if (name === 'cf') {
                         expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
                       // 3) the address is correct
@@ -203,7 +203,7 @@
           });
 
           describe('Form', function () {
-            var service = type === 'hcf' ? helpers.getHcfs().hcf1 : helpers.getHces().hce1;
+            var service = type === 'hcf' ? helpers.getCfs().cf1 : helpers.getHces().hce1;
 
             beforeEach(function () {
               endpointsPage.headerRegister()
@@ -370,7 +370,7 @@
           registerTests('hce');
         }).skipWhen(helpers.skipIfNoHCE);
 
-        describe('Register hcf', function () {
+        describe('Register cf', function () {
           registerTests('hcf');
         });
 
@@ -399,13 +399,13 @@
           });
 
           it('Successfully unregister', function () {
-            var toDelete = helpers.getHcfs().hcf1.register.cnsi_name;
-            var actionMenuElement, hcfRowIndex;
+            var toDelete = helpers.getCfs().cf1.register.cnsi_name;
+            var actionMenuElement, cfRowIndex;
             endpointsPage.getRowWithEndpointName(toDelete)
               .then(function (index) {
-                hcfRowIndex = index;
-                expect(hcfRowIndex).toBeDefined();
-                actionMenuElement = endpointsPage.endpointActionMenu(hcfRowIndex);
+                cfRowIndex = index;
+                expect(cfRowIndex).toBeDefined();
+                actionMenuElement = endpointsPage.endpointActionMenu(cfRowIndex);
                 expect(actionMenu.getItems(actionMenuElement).count()).toBe(2);
                 expect(actionMenu.getItemText(actionMenuElement, 1)).toBe('Unregister');
                 return actionMenu.click(actionMenuElement);
@@ -449,15 +449,15 @@
               })
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
-                expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
+                endpointsPage.waitForEndpointTable();
               });
           });
 
           it('unregister is not visible', function () {
-            endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name)
-              .then(function (hcfRowIndex) {
-                expect(hcfRowIndex).toBeDefined();
-                var actionMenuElement = endpointsPage.endpointActionMenu(hcfRowIndex);
+            endpointsPage.getRowWithEndpointName(helpers.getCfs().cf1.register.cnsi_name)
+              .then(function (cfRowIndex) {
+                expect(cfRowIndex).toBeDefined();
+                var actionMenuElement = endpointsPage.endpointActionMenu(cfRowIndex);
                 expect(actionMenu.isSingleButton(actionMenuElement)).toBeTruthy();
                 expect(actionMenu.getSingleButtonText(actionMenuElement)).not.toBe('Unregister');
               });
@@ -467,8 +467,8 @@
       });
 
       describe('Connect/Disconnect endpoints', function () {
-        var hcf = helpers.getHcfs().hcf1;
-        var hcfRowIndex;
+        var cf = helpers.getCfs().cf1;
+        var cfRowIndex;
         beforeAll(function (done) {
           resetToLoggedIn(resetTo.resetAllCnsi, false)
             .then(function () {
@@ -477,12 +477,12 @@
               });
             })
             .then(function () {
-              // Find the HCF row to test on
-              return endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name);
+              // Find the CF row to test on
+              return endpointsPage.getRowWithEndpointName(helpers.getCfs().cf1.register.cnsi_name);
             })
             .then(function (index) {
               expect(index).toBeDefined();
-              hcfRowIndex = index;
+              cfRowIndex = index;
               done();
             });
         });
@@ -490,8 +490,7 @@
         describe('endpoint `Connect` clicked', function () {
 
           beforeAll(function (done) {
-            // ConfirmFirstService(hcf);
-            endpointsPage.endpointConnectLink(hcfRowIndex).then(function (button) {
+            endpointsPage.endpointConnectLink(cfRowIndex).then(function (button) {
               button.click().then(done);
             });
           });
@@ -502,10 +501,10 @@
 
           it('should show the cluster name and URL as readonly in the credentials form', function () {
             var endpointsTable = endpointsPage.getEndpointTable();
-            var name = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 0).getText().then(function (text) {
+            var name = helpers.getTableCellAt(endpointsTable, cfRowIndex, 0).getText().then(function (text) {
               return text.toLowerCase();
             });
-            var url = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 3).getText().then(function (text) {
+            var url = helpers.getTableCellAt(endpointsTable, cfRowIndex, 3).getText().then(function (text) {
               return text.replace('https://', '');
             });
 
@@ -521,16 +520,16 @@
           });
 
           it('should enable connect button if username and password are not blank', function () {
-            endpointsPage.credentialsFormFill(hcf.admin.username, hcf.admin.password);
+            endpointsPage.credentialsFormFill(cf.admin.username, cf.admin.password);
             expect(endpointsPage.credentialsFormConnectButton().isEnabled()).toBeTruthy();
           });
 
           it('should update service instance data on register', function () {
             endpointsPage.credentialsFormEndpointConnect().then(function () {
-              helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
+              helpers.checkAndCloseToast(/Successfully connected to '(?:cf|hce)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
-              expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('DISCONNECT');
-              expect(endpointsPage.endpointIsConnected(hcfRowIndex)).toBeTruthy();
+              expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('DISCONNECT');
+              expect(endpointsPage.endpointIsConnected(cfRowIndex)).toBeTruthy();
             });
           });
 
@@ -555,14 +554,14 @@
         describe('endpoint `Disconnect`', function () {
           it('should update row in table when disconnected', function () {
             endpointsPage.goToEndpoints();
-            endpointsPage.endpointDisconnectLink(hcfRowIndex)
+            endpointsPage.endpointDisconnectLink(cfRowIndex)
               .then(function (button) {
                 return button.click();
               })
               .then(function () {
-                helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:hcf|hce)'/);
+                helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf|hce)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
-                expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('CONNECT');
+                expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('CONNECT');
               });
           });
 
@@ -592,15 +591,15 @@
             .then(function (isEndpoints) {
               expect(isEndpoints).toBe(true);
               expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
-              return endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name);
+              return endpointsPage.getRowWithEndpointName(helpers.getCfs().cf1.register.cnsi_name);
             })
-            .then(function (hcfRowIndex) {
-              expect(hcfRowIndex).toBeDefined();
-              var errorRow = endpointsPage.endpointError(hcfRowIndex);
+            .then(function (cfRowIndex) {
+              expect(cfRowIndex).toBeDefined();
+              var errorRow = endpointsPage.endpointError(cfRowIndex);
               expect(errorRow.isPresent()).toBeTruthy();
-              var div = errorRow.element(by.css('.hpe-popover-alert'));
+              var div = errorRow.element(by.css('.console-popover-alert'));
               expect(div.isPresent()).toBeTruthy();
-              expect(helpers.hasClass(div, 'hpe-popover-alert-error')).toBeTruthy();
+              expect(helpers.hasClass(div, 'console-popover-alert-error')).toBeTruthy();
               div.element(by.css('.popover-content')).getText().then(function (text) {
                 expect(text.indexOf('Token has expired')).toBe(0);
               });
@@ -610,5 +609,5 @@
 
     });
 
-  }).skipWhen(helpers.skipIfNoHCF);
+  }).skipWhen(helpers.skipIfNoCF);
 })();

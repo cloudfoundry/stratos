@@ -1,0 +1,22 @@
+<div class="panel panel-default summary">
+  <div class="panel-heading action-header">
+    <span class="log-stream-title" translate>Log Stream</span>
+    <span ng-if="applicationLogStreamCtrl.streamingStatus !== 2" class="app-log-stream-indicator material-icons"
+    ng-class="{
+                'log-stream-ok text-primary': applicationLogStreamCtrl.streamingStatus === 1,
+                'log-stream-error text-danger': applicationLogStreamCtrl.streamingStatus === 3
+              }"></span>
+    <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationLogStreamCtrl.streamingStatus === 2"></bounce-spinner>
+    <a class="app-log-stream-autoScroll btn btn-link" ng-click="applicationLogStreamCtrl.autoScroll()">
+      <i class="material-icons">arrow_forward</i>
+      <span translate>Scroll to bottom</span>
+    </a>
+  </div>
+  <log-viewer class="log-viewer"
+              auto-scroll-on="applicationLogStreamCtrl.autoScrollOn"
+              websocket-url="applicationLogStreamCtrl.websocketUrl"
+              colorize="true"
+              filter="applicationLogStreamCtrl.jsonFilter"
+              streaming="applicationLogStreamCtrl.streamingStatus"
+              capacity-bytes="262144"></log-viewer>
+</div>

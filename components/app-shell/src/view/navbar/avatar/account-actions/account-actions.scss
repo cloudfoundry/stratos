@@ -1,0 +1,38 @@
+
+account-actions, [account-actions] {
+  display: block;
+  width: $console-grid-column-width * 4 - 2 * $console-unit-space;
+
+  .account-info {
+    margin-bottom: $console-grid-margin;
+  }
+
+  .actions {
+    display: block;
+    width: 100%;
+
+    .action {
+      display: block;
+      white-space: nowrap;
+      padding: $console-unit-space * .5 0;
+
+      * {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      a.btn-border-less {
+        color: $dove-gray2;
+
+        &:hover, &:focus, &:active {
+          color: $console-primary;
+        }
+      }
+
+      > a > i {
+        margin-right: $console-unit-space * .5;
+      }
+
+    }
+  }
+}

@@ -1,0 +1,39 @@
+// SUSE Brand primary colour
+$suse-primary: #00c081;
+$suse-primary-darker: darken($suse-primary, 5%);
+$suse-primary-lighter: lighten($suse-primary, 5%);
+
+// Secondary blue colour
+$suse-secondary: #00243e;
+$suse-secondary-darker: darken($suse-secondary, 5%);
+$suse-secondary-lighter: lighten($suse-secondary, 5%);
+
+$suse-text: #fff;
+
+$suse-dark-blue: #06253A;
+
+$suse-blue: #073155;
+$suse-primary-light: #16696A;
+
+// Colours for the header bar
+$page-header-fg: #000 !default;
+$page-header-bg: #fff !default;
+$page-header-active-fg: #000 !default;
+
+$page-header-active-fg: $suse-primary;
+
+// Set the primary brand colour
+$brand-primary: $suse-primary;
+
+// Hide welcome text panel on the login page
+$login-page-text-panel-display: none;
+
+// The normal status-okay green is close to suse primary, so just use it instead
+$status-okay: $suse-primary;
+
+$main-nav-background-color: $suse-secondary;
+$navbar-active-bg: $suse-secondary-lighter;
+$navbar-hover-bg: $suse-primary-darker;
+
+@import "login";
+@import "about";

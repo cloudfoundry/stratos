@@ -1,0 +1,19 @@
+.endpoint-notification-error {
+  position: relative;
+  top: $console-unit-space*2;
+}
+
+.console-error.console-error-block {
+  padding-top: 100px;
+  @include flex-align(center, center, column);
+
+  .btn {
+    margin-top: $console-unit-space;
+  }
+}
+
+.console-error {
+  i.material-icons {
+    color: $gray-darker;
+  }
+}

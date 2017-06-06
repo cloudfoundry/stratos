@@ -13,6 +13,16 @@
             wrappers[key] = _.partial(value, element);
           }
         });
+        if (!wrappers.getElement) {
+          wrappers.getElement = function () {
+            return element;
+          };
+        }
+        if (!wrappers.getWebElement) {
+          wrappers.getWebElement = function () {
+            return element.getWebElement();
+          };
+        }
         return wrappers;
       };
     }

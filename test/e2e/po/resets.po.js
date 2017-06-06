@@ -76,13 +76,13 @@
    * admin workflow with the clusters provided as params.
    * @param {string?} username the username used ot create a session token
    * @param {string?} password the username used ot create a session token
-   * @param {boolean?} registerMultipleHcf - register multiple HCF instance
+   * @param {boolean?} registerMultipleCf - register multiple CF instance
    * @returns {promise} A promise
    */
-  function resetAllCnsi(username, password, registerMultipleHcf) {
+  function resetAllCnsi(username, password, registerMultipleCf) {
     return new Promise(function (resolve, reject) {
       helpers.createReqAndSession(null, username, password).then(function (req) {
-        _resetAllCNSI(req, registerMultipleHcf).then(function () {
+        _resetAllCNSI(req, registerMultipleCf).then(function () {
           resolve();
         }, function (error) {
           console.log('Failed to reset all cnsi: ', error);
@@ -115,7 +115,7 @@
               list = helpers.getHces();
               break;
             case 'hcf':
-              list = helpers.getHcfs();
+              list = helpers.getCfs();
               break;
             default:
               fail('Unknown cnsi');
@@ -138,34 +138,34 @@
    * @function resetClusters
    * @description Reset clusters to original state
    * @param {object} req - the request
-   * @param {boolean} registerMultipleHcf - registers multiple HCF instances
+   * @param {boolean} registerMultipleCf - registers multiple CF instances
    * @returns {promise} A promise
    */
-  function _resetAllCNSI(req, registerMultipleHcf) {
+  function _resetAllCNSI(req, registerMultipleCf) {
     return new Promise(function (resolve, reject) {
       _removeAllCnsi(req).then(function () {
 
-        var hcfs = helpers.getHcfs();
-        if (registerMultipleHcf) {
-          if (_.keys(hcfs).length === 1) {
+        var cfs = helpers.getCfs();
+        if (registerMultipleCf) {
+          if (_.keys(cfs).length === 1) {
             // duplicates the current definition
-            var key = _.keys(hcfs)[0];
-            hcfs[key + '_test'] = _.clone(hcfs[key]);
-            hcfs[key + '_test'].name += ' Copy';
+            var key = _.keys(cfs)[0];
+            cfs[key + '_test'] = _.clone(cfs[key]);
+            cfs[key + '_test'].name += ' Copy';
           }
         } else {
-          var firstKey = Object.keys(hcfs)[0];
-          var firstHcf = hcfs[firstKey];
-          hcfs = {};
-          hcfs[firstKey] = firstHcf;
+          var firstKey = Object.keys(cfs)[0];
+          var firstCf = cfs[firstKey];
+          cfs = {};
+          cfs[firstKey] = firstCf;
         }
         var promises = [];
         var c;
-        for (c in hcfs) {
-          if (!hcfs.hasOwnProperty(c)) {
+        for (c in cfs) {
+          if (!cfs.hasOwnProperty(c)) {
             continue;
           }
-          promises.push(helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/register/hcf'}, null, hcfs[c].register));
+          promises.push(helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/register/hcf'}, null, cfs[c].register));
         }
         var hces = helpers.getHces();
         for (c in hces) {
@@ -203,7 +203,9 @@
         var promises = data.map(function (c) {
           return helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/unregister'}, null, {cnsi_guid: c.guid});
         });
-        promises.push(_removeAllVcses(req));
+        if (!helpers.skipIfNoHCE()) {
+          promises.push(_removeAllVcses(req));
+        }
         Promise.all(promises).then(resolve, reject);
       }, reject);
     });

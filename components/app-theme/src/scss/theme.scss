@@ -1,0 +1,26 @@
+// Page header and footer settings
+
+$page-header-height         : 48px !default;
+$page-footer-height         : 176px !default;
+$page-footer-color-bg       : #333 !default;
+$page-footer-color-fg       : #fff !default;
+
+$page-header-fg             : #333 !default;
+$page-header-fg-unselected  : #999 !default;
+$page-header-bg             : #fff !default;
+
+// Fonts and theme
+@import "fonts/index";
+@import "theme/index";
+
+// Mixins
+@import "mixin/index";
+
+
+@import "../../../bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+
+// Theme styles
+@import "style/index";
+
+// SpinKit style
+@import "SpinKit/spinners/7-three-bounce.scss";

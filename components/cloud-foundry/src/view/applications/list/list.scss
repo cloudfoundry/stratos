@@ -1,0 +1,279 @@
+@import "gallery-view/gallery-view";
+@import "app-sort/app-sort";
+
+$applications-msg-height: 50px;
+
+.application-wall-header.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  line-height: $main-nav-item-height;
+
+  .application-header-right {
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: center;
+    display: flex;
+    min-height: $main-nav-item-height;
+
+    .btn-primary {
+      font-size: 16px;
+      height: auto;
+      padding: 4px $console-unit-space;
+    }
+  }
+}
+
+.application-header-centre {
+  flex-grow: 1;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: $console-unit-space;
+
+  .form-group.search-field {
+    height: 40px;
+    display: flex;
+    margin-top: -1px;
+    align-items: center;
+    input {
+      margin-bottom: 0;
+    }
+  }
+}
+
+@media (max-width: 745px) {
+  .application-header-centre {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  .application-header-right {
+    & > button.btn {
+      margin-left: 0;
+    }
+  }
+}
+
+@media (max-width: 549px) {
+  .application-header-centre {
+    .view-buttons {
+      margin-left: 0;
+      button {
+        border: none;
+      }
+    }
+  }
+}
+
+.applications-filter {
+  padding-left: 16px;
+  padding-right: 16px;
+
+  .form-horizontal {
+    flex-wrap: wrap;
+
+    .form-group {
+      margin-right: $console-unit-space / 2;
+    }
+
+    .form-group {
+      width: 30%;
+      max-width: 324px;
+      min-width: 210px;
+    }
+
+    .reset-link {
+      align-self: center;
+      flex-grow: 1;
+      text-align: right;
+      user-select: none;
+    }
+  }
+}
+
+.apps-sorting {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.applications-empty {
+  .btn span {
+    text-transform: none;
+    font-size: $font-size-h1;
+  }
+}
+
+
+// Filter Bar
+
+.application-control-bar {
+
+  .panel {
+    margin: 0 16px 16px 16px
+  }
+
+  .panel-body {
+    padding: $console-unit-space * 0.5;
+  }
+
+  .panel-body:not(:first-child) {
+    padding-top: 0;
+  }
+
+  .control-label-outside {
+    height: $console-input-height;
+    margin-bottom: 0;
+    line-height: $console-input-height;
+    margin-right: 12px;
+  }
+
+  .applications-filter {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-cf-filters {
+      display: flex;
+      flex: 3 3 auto;
+
+      .form-group {
+        width: initial;
+        flex: 1 1 0px;
+      }
+    }
+
+    .apps-sorting {
+      flex: 1 1 auto;
+      max-width: $console-input-width;
+      min-width: $console-unit-space * 7;
+      margin: 0;
+      padding: 0;
+
+      .applications-sorting {
+        .form-group {
+          width: initial;
+        }
+      }
+    }
+  }
+
+  .application-main-controls {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-options-control {
+      flex: 0 1 auto;
+      align-self: center;
+      text-align: center;
+      min-width: $console-unit-space * 4;
+      margin-left: $console-unit-space * 0.5;
+
+      .reset-link {
+        user-select: none;
+      }
+    }
+
+    .app-total-control {
+      .form-group {
+        width: auto;
+        min-width: $console-unit-space * 6;
+      }
+    }
+
+    .app-count {
+      display: flex;
+
+      .app-count-number {
+        flex: 1 1 auto;
+      }
+
+      .app-count-reset {
+        flex: 0 1 auto;
+      }
+    }
+
+    .view-buttons {
+      flex: 0 1 auto;
+      align-self: center;
+      margin: 0 0 0 $console-unit-space * 0.5;
+      display: flex;
+      height: $console-input-height;
+      flex-direction: column;
+
+      button:not([disabled]):focus, button:not([disabled]):hover {
+        outline: none;
+        color: $console-primary;
+      }
+
+      .btn {
+        padding: 0;
+        margin: 0;
+        height: $console-input-height/2;
+      }
+      .btn-active {
+        color: $console-primary;
+      }
+      .btn-disabled {
+        color: $actions-menu-item-disabled-fg;
+      }
+    }
+  }
+
+  .application-search-box {
+    flex: 1 1 auto;
+
+    .search-field {
+      width: auto;
+      margin-right: 12px;
+    }
+
+    form #applications-text {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      margin-left: $console-unit-space;
+    }
+
+    .application-search-box-icon {
+      position: absolute;
+      margin-left: -12px;
+      height: $console-input-height;
+      vertical-align: middle;
+      line-height: $console-input-height;
+    }
+  }
+}
+
+.form-group.form-group-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.app-count {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 6px;
+  height: 22px;
+  line-height: 22px;
+}
+
+@include responsive-mobile() {
+  @import "list_mobile.scss";
+}
+
+@include responsive-tablet-portrait() {
+  @import "list_tablet.scss";
+}
+
+@include responsive-tablet-landscape() {
+  @import "list_tablet.scss";
+}
+
+@include responsive-block($responsive-tablet-landscape-cutoff, $responsive-tablet-portrait-cutoff) {
+  .application-cf-filters {
+    .form-group {
+      max-width: 100%;
+    }
+  }
+}

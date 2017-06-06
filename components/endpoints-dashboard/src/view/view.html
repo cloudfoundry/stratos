@@ -1,0 +1,108 @@
+<div class="endpoints endpoints-dashboard">
+  <div class="header">
+    <div class="applications-header font-semi-bold pull-left" translate>
+      Endpoints
+      <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
+    </div>
+    <button ng-if="endpointsDashboardCtrl.initialised &&
+                     endpointsDashboardCtrl.isUserAdmin()"
+            class="btn btn-primary" stlye="position: absolute; right: 0px;"
+            ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint
+    </button>
+  </div>
+  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
+    <div>
+      <app-icon icon-class="app-icon-3x" icon="cancel"></app-icon>
+      <div class="applications-msg" translate>errors.endpoint-retrieval</div>
+      <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
+    </div>
+  </div>
+  <div ng-if="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
+    <div ng-if="endpointsDashboardCtrl.showWelcomeMessage"
+         class="endpoint-notification panel panel-default alert"
+          ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
+      <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
+      <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
+        <span translate>endpoints.intro.start</span>
+        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints.intro.link</span>
+        <span translate>endpoints.intro.end</span>
+      </div>
+      <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
+          <span translate>
+            To access your cloud native workloads and other related third party services, connect with your personal
+            credentials to the corresponding registered services. Registered services are provided by your systems administrator.
+          </span>
+      </div>
+    </div>
+    <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"
+         class="applications-empty">
+      <app-icon icon-class="app-icon-3x" icon="svg:Cluster.svg"></app-icon>
+      <div class="applications-msg" translate>There are no registered endpoints.</div>
+      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+            Register an endpoint
+          </span> to make it available to developers
+      </div>
+      <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+        Please contact your administrator.
+      </div>
+    </div>
+    <div ng-show="endpointsDashboardCtrl.endpoints.length"
+          class="endpoints-table">
+      <table class="table table-actionable"
+             st-table="endpointsDashboardCtrl.stTableEndpoints"
+             st-safe-src="endpointsDashboardCtrl.endpoints">
+        <thead>
+        <tr>
+          <th translate st-sort="name" st-skip-natural="true">Name</th>
+          <th translate st-sort="connected" st-skip-natural="true">Connection</th>
+          <th translate st-sort="type" st-sort-default="true" st-skip-natural="true">Type</th>
+          <th translate st-sort="url" st-skip-natural="true">Address</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
+            show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+            inline-message-colspan="5"
+            table-inline-status="{{ endpoint.error.status }}">
+
+          <!--Endpoint Name-->
+          <td ng-if="endpoint.visit">
+            <a ng-href="{{endpoint.visit()}}">{{ endpoint.name }}</a>
+          </td>
+          <td ng-if="!endpoint.visit">{{ endpoint.name }}</td>
+
+          <!--Endpoint Connection Status-->
+          <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
+            <span class="material-icons app-icon-lg text-primary endpoint-connected-icon"
+                  ng-switch-when="connected">check_circle</span>
+            <div ng-switch-when="unconnected"
+                 uib-popover="{{ 'Disconnected' | translate }}"
+                 popover-trigger="'mouseenter'"
+                 popover-placement="top-left"
+                 popover-popup-delay="1000">
+              <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
+            </div>
+            <span class="material-icons app-icon-lg text-danger endpoint-critical-icon"
+                  ng-switch-when="expired">cancel</span>
+            <span class="material-icons app-icon-lg text-danger endpoint-critical-icon"
+                  ng-switch-when="error">cancel</span>
+            <span class="material-icons app-icon-lg text-warning endpoint-warning-icon"
+                  ng-switch-when="complicated">warning</span>
+          </td>
+
+          <td>{{ endpoint.type }}</td>
+          <td>{{ endpoint.url }}</td>
+          <td>
+            <actions-menu actions="endpoint.actions"
+                          action-target="endpoint.actionsTarget"
+                          menu-position="actions-menu-right"
+                          enable-button-mode="true"></actions-menu>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

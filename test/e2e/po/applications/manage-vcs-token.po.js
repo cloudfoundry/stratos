@@ -74,7 +74,7 @@
   }
 
   function isTokenInvalid(row) {
-    return helpers.getTableRowAt(getTokensTable(), row).element(by.css('.helion-icon-Critical_L')).isPresent();
+    return helpers.getTableRowAt(getTokensTable(), row).element(by.css('.token-error-icon')).isPresent();
   }
 
   function getTokenError(row) {
@@ -82,7 +82,7 @@
   }
 
   function isTokenValid(row) {
-    return helpers.getTableRowAt(getTokensTable(), row).element(by.css('.helion-icon-Active_L')).isPresent();
+    return helpers.getTableRowAt(getTokensTable(), row).element(by.css('.token-valid-icon')).isPresent();
   }
 
   function getRowWithTokenName(name) {

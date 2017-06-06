@@ -1,0 +1,53 @@
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+.bounce-spinner {
+  display: inline;
+
+  & > div {
+    width: $console-spinkit-med;
+    height: $console-spinkit-med;
+    background-color: $console-spinkit-dark-bg;
+
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  }
+
+  &.bounce-spinner-sm > div {
+    height: $console-spinkit-sm;
+    width: $console-spinkit-sm;
+  }
+
+  &.bounce-spinner-lg > div {
+    height: $console-spinkit-lg;
+    width: $console-spinkit-lg;
+  }
+
+  &.bounce-spinner-light > div {
+    background-color: $console-spinkit-light-bg;
+  }
+
+  .bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+  }
+
+  .bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+  }
+}

@@ -1,0 +1,26 @@
+pre {
+  position: relative;
+  font-size: $console-pre-font-size;
+
+  &.console-pre-dark {
+    background-color: $console-pre-dark-bg;
+    color: $console-pre-dark-color;
+  }
+}
+
+.console-copy {
+  color: $pre-color;
+  position: relative;
+
+  &.console-copy-dark {
+    color: $console-pre-dark-color;
+  }
+
+  &:after {
+    content: 'content_copy';
+    position: absolute;
+    right: $console-unit-space / 2;
+    top: $console-unit-space / 2;
+    font-size: $font-size-base * 1.5;
+  }
+}

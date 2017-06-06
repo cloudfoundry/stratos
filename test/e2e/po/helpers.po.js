@@ -1,4 +1,4 @@
-/* eslint-disable angular/json-functions,angular/log,no-console */
+/* eslint-disable angular/json-functions,angular/log,no-console,no-process-env */
 (function () {
   'use strict';
 
@@ -17,7 +17,7 @@
   var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 
   var cnsis = browser.params.cnsi;
-  var hcfs = cnsis.hcf || {};
+  var cfs = cnsis.cf || {};
   var hces = cnsis.hce || {};
   var adminUser = browser.params.credentials.admin.username;
   var adminPassword = browser.params.credentials.admin.password;
@@ -40,17 +40,18 @@
 
     getHost: getHost,
     getCNSIs: getCNSIs,
-    getHcfs: getHcfs,
+    getCfs: getCfs,
     getHces: getHces,
     getAdminUser: getAdminUser,
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
 
-    skipIfNoHCF: skipIfNoHCF,
+    skipIfNoCF: skipIfNoCF,
     skipIfNoHCE: skipIfNoHCE,
-    skipIfNoHCFHCE: skipIfNoHCFHCE,
-    skipIfNoSecondHCF: skipIfNoSecondHCF,
+    skipIfNoCFHCE: skipIfNoCFHCE,
+    skipIfNoSecondCF: skipIfNoSecondCF,
+    skipIfOnlyOneCF: skipIfOnlyOneCF,
     skipIfNoAppWithLogStrean: skipIfNoAppWithLogStrean,
 
     getAppNameWithLogStream: getAppNameWithLogStream,
@@ -97,7 +98,9 @@
     hasClass: hasClass,
     isButtonEnabled: isButtonEnabled,
 
-    getCustomAppLabel: getCustomAppLabel
+    getCustomAppLabel: getCustomAppLabel,
+
+    scrollIntoView: scrollIntoView
   };
 
   function getHost() {
@@ -108,8 +111,8 @@
     return cnsis;
   }
 
-  function getHcfs() {
-    return hcfs;
+  function getCfs() {
+    return cfs;
   }
 
   function getHces() {
@@ -262,7 +265,7 @@
       };
     }
 
-    return element.all(by.css('.toast-helion')).then(function (toasts) {
+    return element.all(by.css('.toast-stratos')).then(function (toasts) {
       var promises = [];
       for (var i = 0; i < toasts.length; i++) {
         promises.push(toasts[i].getText());
@@ -388,8 +391,8 @@
    * @function createSession
    * @description Create a session
    * @param {object} req - the request
-   * @param {string} username - the Stackato username
-   * @param {string} password - the Stackato password
+   * @param {string} username - the console username
+   * @param {string} password - the console password
    * @returns {Promise} A promise
    */
   function createSession(req, username, password) {
@@ -484,33 +487,39 @@
   }
 
   // Test skip helpers
-  function skipIfNoHCF() {
-    return !getHcfs() || !getHcfs().hcf1;
+  function skipIfNoCF() {
+    return !getCfs() || !getCfs().cf1;
   }
 
   function skipIfNoHCE() {
     return !getHces() || !getHces().hce1;
   }
 
-  function skipIfNoHCFHCE() {
-    return skipIfNoHCF() || skipIfNoHCE();
+  function skipIfNoCFHCE() {
+    return skipIfNoCF() || skipIfNoHCE();
   }
 
-  function skipIfNoSecondHCF() {
-    return !getHcfs() || !getHcfs().hcf2;
+  function skipIfNoSecondCF() {
+    return !getCfs() || !getCfs().cf2;
   }
 
-  function skipIfOnlyOneHCF() {
-    return !getHcfs() || Object.keys(getHcfs()).length < 2;
+  function skipIfOnlyOneCF() {
+    return !getCfs() || Object.keys(getCfs()).length < 2;
   }
 
   function skipIfNoAppWithLogStrean() {
-    var haveNcf = getHcfs() && Object.keys(getHcfs()).length > 0;
+    var haveNcf = getCfs() && Object.keys(getCfs()).length > 0;
     return !haveNcf || !browser.params.appWithLogStream;
   }
 
   function getAppNameWithLogStream() {
     return browser.params.appWithLogStream;
+  }
+
+  function scrollIntoView(element) {
+    return browser.controlFlow().execute(function () {
+      browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
+    });
   }
 
 })();

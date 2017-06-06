@@ -1,0 +1,501 @@
+(function () {
+  'use strict';
+
+  angular
+    .module('cloud-foundry.view.applications')
+    .directive('addAppWorkflow', addAppWorkflow)
+    .run(run);
+
+  /**
+   * @memberof cloud-foundry.view.applications
+   * @name addAppWorkflow
+   * @description An add-app-workflow directive
+   * @returns {object} The add-app-workflow directive definition object
+   */
+  function addAppWorkflow() {
+    return {
+      controller: AddAppWorkflowController,
+      controllerAs: 'addAppWorkflowCtrl',
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '='
+      },
+      bindToController: true
+    };
+  }
+
+  /**
+   * @memberof cloud-foundry.view.applications
+   * @name AddAppWorkflowController
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.appEventService} appEventService - the Event management service
+   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $scope - Angular $scope
+   * @param {object} $q - Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
+   * @property {object} $interpolate - the Angular $interpolate service
+   * @property {object} $scope - angular $scope
+   * @property {object} $q - angular $q service
+   * @property {object} $timeout - the Angular $timeout service
+   * @property {boolean} addingApplication - flag for adding app
+   * @property {app.model.modelManager} modelManager - the Model management service
+   * @property {app.utils.appEventService} appEventService - the Event management service
+   * @property {object} appModel - the Cloud Foundry applications model
+   * @property {object} serviceInstanceModel - the application service instance model
+   * @property {object} spaceModel - the Cloud Foundry space model
+   * @property {object} routeModel - the Cloud Foundry route model
+   * @property {object} githubModel - the Github model
+   * @property {object} privateDomainModel - the private domain model
+   * @property {object} sharedDomainModel - the shared domain model
+   * @property {object} cfOrganizationModel - the organization model
+   * @property {object} userInput - user's input about new application
+   * @property {object} options - workflow options
+   */
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfOrganizationModel,
+                                    $interpolate, $scope, $q, $timeout) {
+    this.$interpolate = $interpolate;
+    this.$scope = $scope;
+    this.$q = $q;
+    this.$timeout = $timeout;
+    this.addingApplication = false;
+    this.modelManager = modelManager;
+    this.appEventService = appEventService;
+    this.appUtilsService = appUtilsService;
+    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
+    this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
+    this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
+    this.cfOrganizationModel = cfOrganizationModel;
+    this.consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.userInput = {};
+    this.options = {};
+
+    this.init();
+  }
+
+  function run() {
+    angular.extend(AddAppWorkflowController.prototype, {
+
+      init: function () {
+        var that = this;
+        var $scope = this.$scope;
+
+        this.stopWatchServiceInstance = $scope.$watch(function () {
+          return that.userInput.serviceInstance;
+        }, function (serviceInstance) {
+          that.userInput.organization = null;
+          that.userInput.space = null;
+          if (serviceInstance) {
+            that.getOrganizations();
+            that.getDomains().then(function () {
+              that.userInput.domain = that.options.domains[0] && that.options.domains[0].value;
+            });
+          }
+        });
+
+        this.stopWatchOrganization = $scope.$watch(function () {
+          return that.userInput.organization;
+        }, function (organization) {
+          that.userInput.space = null;
+          if (organization) {
+            that.getSpacesForOrganization(organization.metadata.guid);
+          }
+        });
+
+        this.stopWatchSpace = $scope.$watch(function () {
+          return that.userInput.space;
+        }, function (space) {
+          if (space) {
+            that.getAppsForSpace(space.metadata.guid);
+          }
+        });
+
+        // Start the workflow
+        this.startWorkflow();
+      },
+
+      reset: function () {
+        var that = this;
+
+        var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
+        this.data = {};
+        this.errors = {};
+
+        this.userInput = {
+          name: null,
+          serviceInstance: null,
+          clusterUsername: null,
+          clusterPassword: null,
+          organization: null,
+          space: null,
+          host: null,
+          domain: null,
+          application: null,
+          cfApiEndpoint: null,
+          cfUserName: null
+        };
+
+        this.data.workflow = {
+          hideStepNavStack: true,
+          allowJump: false,
+          allowBack: false,
+          allowCancelAtLastStep: true,
+          title: 'add-app-dialog.title',
+          lastStepCommit: true,
+          btnText: {
+            cancel: 'buttons.cancel'
+          },
+          steps: [
+            {
+              title: gettext('Name'),
+              templateUrl: path + 'add-application.html',
+              formName: 'application-name-form',
+              nextBtnText: 'buttons.add',
+              cancelBtnText: 'buttons.cancel',
+              showBusyOnNext: true,
+              isLastStep: true,
+              onEnter: function () {
+                return that.serviceInstanceModel.list()
+                  .then(function (serviceInstances) {
+                    var validServiceInstances = _.chain(_.values(serviceInstances))
+                      .filter({cnsi_type: 'hcf', valid: true})
+                      .filter(function (cnsi) {
+                        return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
+                      })
+                      .map(function (o) {
+                        return {label: o.name, value: o};
+                      })
+                      .value();
+                    [].push.apply(that.options.serviceInstances, validServiceInstances);
+
+                    if (!that.options.userInput.serviceInstance &&
+                      that.appModel.filterParams.cnsiGuid &&
+                      that.appModel.filterParams.cnsiGuid !== 'all') {
+                      // Find the option to set. If the user has no permissions this may be null
+                      var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
+                      that.options.userInput.serviceInstance = preSelectedService.value;
+                    }
+                  });
+              },
+              onNext: function () {
+                return that.validateNewRoute().then(function () {
+                  return that.createApp().then(function () {
+                    var msg = gettext("A new application and route have been created for '{{ appName }}'");
+                    that.appEventService.$emit('events.NOTIFY_SUCCESS', {
+                      message: that.$interpolate(msg)({appName: that.userInput.name})
+                    });
+                  }, function (error) {
+                    var msg = gettext('There was a problem creating your application. ');
+                    var cloudFoundryException = that.appUtilsService.extractCloudFoundryError(error);
+                    if (cloudFoundryException || _.isString(error)) {
+                      msg = gettext('The following exception occurred when creating your application: ') + (cloudFoundryException || error) + '. ';
+                    }
+
+                    msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+                    return that.$q.reject(msg);
+                  });
+                });
+              }
+            }
+          ]
+        };
+
+        this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
+
+        this.options = {
+          workflow: this.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
+          appEventService: this.appEventService,
+          subflow: null,
+          serviceInstances: [],
+          services: [],
+          serviceCategories: [
+            { label: gettext('All Services'), value: 'all' }
+          ],
+          servicesReady: false,
+          organizations: [],
+          spaces: [],
+          domains: [],
+          apps: []
+        };
+
+        this.addApplicationActions = {
+          stop: function () {
+            that.stopWorkflow();
+          },
+
+          finish: function () {
+            that.finishWorkflow();
+          }
+        };
+      },
+
+      /**
+       * @function createApp
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description create an application
+       * @returns {promise} A resolved/rejected promise
+       */
+      createApp: function () {
+        var that = this;
+        var cnsiGuid = this.userInput.serviceInstance.guid;
+
+        return that.appModel.createApp(cnsiGuid, {
+          name: that.userInput.name,
+          space_guid: that.userInput.space.metadata.guid
+        }).then(function (app) {
+          var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
+
+          // Add route
+          var routeSpec = {
+            host: that.userInput.host,
+            domain_guid: that.userInput.domain.metadata.guid,
+            space_guid: that.userInput.space.metadata.guid
+          };
+
+          var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
+            .then(function (route) {
+              return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
+            });
+
+          that.appEventService.$emit('cf.events.NEW_APP_CREATED');
+
+          return that.$q.all([summaryPromise, routePromise]).then(function () {
+            that.userInput.application = that.appModel.application;
+          });
+        });
+      },
+
+      /**
+       * @function validateNewRoute
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description check a route exists
+       * @returns {promise} A resolved/rejected promise
+       */
+      validateNewRoute: function () {
+        var that = this;
+        return that.routeModel.checkRouteExists(
+          that.userInput.serviceInstance.guid,
+          that.userInput.domain.metadata.guid,
+          that.userInput.host
+          )
+          .then(function () {
+            // Route has been found, this is not a valid route to add
+            return that.$q.reject({
+              exist: true
+            });
+          })
+          .catch(function (error) {
+            if (error.status === 404) {
+              // Route has not been found, this is a valid route to add
+              return that.$q.resolve();
+            }
+
+            if (error.exist) {
+              return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+            }
+
+            var msg = gettext('There was a problem validating your route. ');
+            var cloudFoundryException = that.appUtilsService.extractCloudFoundryError(error);
+            if (cloudFoundryException || _.isString(error)) {
+              msg = gettext('The following exception occurred when validating your route: ') + (cloudFoundryException || error) + '. ';
+            }
+
+            msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+
+            return that.$q.reject(msg);
+          });
+      },
+
+      /**
+       * @function getOrganizations
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get organizations
+       * @returns {promise} A resolved/rejected promise
+       */
+      getOrganizations: function () {
+        var that = this;
+        var cnsiGuid = that.userInput.serviceInstance.guid;
+        this.options.organizations.length = 0;
+
+        return this.cfOrganizationModel.listAllOrganizations(cnsiGuid)
+          .then(function (organizations) {
+            // Filter out organizations in which user does not
+            // have any space where they aren't a developer
+            // NOTE: This is unnecessary for admin users, and will fail
+            // because the userSummary doesn't contain organization_guid data
+            var filteredOrgs = organizations;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredOrgs = _.filter(organizations, function (organization) {
+                // Retrieve filtered list of Spaces where the user is a developer
+                var orgGuid = organization.metadata.guid;
+                var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                  {entity: {organization_guid: orgGuid}});
+                return filteredSpaces.length > 0;
+              });
+            }
+            [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
+
+            if (!that.options.userInput.organization &&
+              that.appModel.filterParams.orgGuid &&
+              that.appModel.filterParams.orgGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.organizations, { value: { metadata: { guid: that.appModel.filterParams.orgGuid}}}) || {};
+              that.options.userInput.organization = preSelectedOrg.value;
+            }
+          });
+      },
+
+      /**
+       * @function getSpacesForOrganization
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get spaces for organization
+       * @param {string} guid - the organization GUID
+       * @returns {promise} A resolved/rejected promise
+       */
+      getSpacesForOrganization: function (guid) {
+        var that = this;
+        var cnsiGuid = that.userInput.serviceInstance.guid;
+        this.options.spaces.length = 0;
+
+        return this.cfOrganizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
+          .then(function (spaces) {
+
+            // Filter out spaces in which user is not a Space Developer
+            var filteredSpaces = spaces;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                {entity: {organization_guid: guid}});
+            }
+            [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
+
+            if (!that.options.userInput.space &&
+              that.appModel.filterParams.spaceGuid &&
+              that.appModel.filterParams.spaceGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.spaces, { value: { metadata: { guid: that.appModel.filterParams.spaceGuid}}}) || {};
+              that.options.userInput.space = preSelectedOrg.value;
+            }
+          });
+      },
+
+      /**
+       * @function getAppsForSpace
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get apps for space
+       * @param {string} guid - the space GUID
+       * @returns {promise} A resolved/rejected promise
+       */
+      getAppsForSpace: function (guid) {
+        var that = this;
+        var cnsiGuid = that.userInput.serviceInstance.guid;
+        return this.spaceModel.listAllAppsForSpace(cnsiGuid, guid)
+          .then(function (apps) {
+            that.options.apps.length = 0;
+            [].push.apply(that.options.apps, _.map(apps, that.selectOptionMapping));
+          });
+      },
+
+      /**
+       * @function getDomains
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get domains, including private domains and shared domains
+       * @returns {promise} A resolved/rejected promise
+       */
+      getDomains: function () {
+        this.options.domains.length = 0;
+        return this.$q.all([
+          this.getPrivateDomains(),
+          this.getSharedDomains()
+        ]);
+      },
+
+      /**
+       * @function getPrivateDomains
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get private domains
+       * @returns {promise} A resolved/rejected promise
+       */
+      getPrivateDomains: function () {
+        var that = this;
+        var cnsiGuid = that.userInput.serviceInstance.guid;
+        return this.privateDomainModel.listAllPrivateDomains(cnsiGuid).then(function (privateDomains) {
+          [].push.apply(that.options.domains, _.map(privateDomains, that.selectOptionMapping));
+        });
+      },
+
+      /**
+       * @function getSharedDomains
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description get shared domains
+       * @returns {promise} A resolved/rejected promise
+       */
+      getSharedDomains: function () {
+        var that = this;
+        var cnsiGuid = that.userInput.serviceInstance.guid;
+        return this.sharedDomainModel.listAllSharedDomains(cnsiGuid).then(function (sharedDomains) {
+          [].push.apply(that.options.domains, _.map(sharedDomains, that.selectOptionMapping));
+        });
+      },
+
+      /**
+       * @function notify
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description notify success
+       */
+      notify: function () {
+        if (!this.userInput.application) {
+          return;
+        }
+
+        var params = {
+          cnsiGuid: this.userInput.serviceInstance.guid,
+          guid: this.userInput.application.summary.guid,
+          newlyCreated: true
+        };
+
+        this.appEventService.$emit(this.appEventService.events.REDIRECT, 'cf.applications.application.summary', params);
+      },
+
+      startWorkflow: function () {
+        this.addingApplication = true;
+        this.reset();
+      },
+
+      stopWorkflow: function () {
+        this.notify();
+        this.addingApplication = false;
+        this.closeDialog();
+      },
+
+      finishWorkflow: function () {
+        this.notify();
+        this.addingApplication = false;
+        this.dismissDialog();
+      },
+
+      /**
+       * @function selectOptionMapping
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description domain mapping function
+       * @param {object} o - an object to map
+       * @returns {object} select-option object
+       */
+      selectOptionMapping: function (o) {
+        return {
+          label: o.entity.name,
+          value: o
+        };
+      }
+    });
+  }
+
+})();

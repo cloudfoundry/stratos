@@ -5,7 +5,7 @@
   var appSetupHelper = require('../../po/app-setup.po');
   var galleryWall = require('../../po/applications/applications.po');
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
-  var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+  var addAppCfApp = require('../../po/applications/add-application-cf-app.po');
   var application = require('../../po/applications/application.po');
   var table = require('../../po/widgets/table.po');
   var addRouteDialog = require('../../po/applications/add-application-route.po');
@@ -36,10 +36,10 @@
         browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
         galleryWall.addApplication();
         browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
-        addAppHcfApp.name().addText(testAppName);
-        addAppHcfApp.host().clear();
-        addAppHcfApp.host().addText(hostName);
-        return addAppHcfApp.domain().getValue().then(function (d) {
+        addAppCfApp.name().addText(testAppName);
+        addAppCfApp.host().clear();
+        addAppCfApp.host().addText(hostName);
+        return addAppCfApp.domain().getValue().then(function (d) {
           domain = d;
           addAppWizard.getWizard().next();
           return browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
@@ -53,8 +53,8 @@
 
     it('Should Walk through the tabs', function () {
       var names = ['Summary', 'Log Stream', 'Services', 'Variables'];
-      var hcfFromConfig = helpers.getHcfs() ? helpers.getHcfs().hcf1 : undefined;
-      if (hcfFromConfig && hcfFromConfig.supportsVersions) {
+      var cfFromConfig = helpers.getCfs() ? helpers.getCfs().cf1 : undefined;
+      if (cfFromConfig && cfFromConfig.supportsVersions) {
         names.push('Versions');
       }
       browser.debugger();
@@ -124,6 +124,7 @@
           routes.getData(routes).then(function (rows) {
             expect(rows.length).toBe(2);
             var columnMenu = actionMenu.wrap(routes.getItem(0, 1));
+            helpers.scrollIntoView(columnMenu);
             columnMenu.click();
             // Delete
             columnMenu.clickItem(1);
@@ -329,5 +330,5 @@
       });
 
     });
-  }).skipWhen(helpers.skipIfNoHCF);
+  }).skipWhen(helpers.skipIfNoCF);
 })();
