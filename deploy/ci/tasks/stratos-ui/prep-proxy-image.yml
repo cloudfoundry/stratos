@@ -1,0 +1,25 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository:  10.4.21.241:5000/susetest/console-proxy-builder
+    tag: "latest"
+    insecure_registries: [ "10.4.21.241:5000" ]
+
+inputs:
+- name: stratos-ui
+- name: stratos-deploy
+outputs:
+- name: portal-proxy-output
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    cd stratos-ui
+    npm install
+    npm run build-backend
+    cd -
+    cp -r ./stratos-ui/outputs ./portal-proxy-output
+    sh ./stratos-deploy/ci/scripts/generate_cert.sh
