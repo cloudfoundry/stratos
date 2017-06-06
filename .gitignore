@@ -1,13 +1,13 @@
 .DS_Store
 .idea
 
-ci/helion-creds.yml
-ci/local-creds.yml
+deploy/ci/helion-creds.yml
+deploy/ci/local-creds.yml
 
-data/
-output/
-hsc-upgrade-volume/
-development.rc
-ci/secrets.yml
-ci/images/
-scf/.vagrant
+deploy/data/
+deploy/output/
+deploy/hsc-upgrade-volume/
+deploy/development.rc
+deploy/ci/secrets.yml
+deploy/ci/images/
+deploy/scf/.vagrant
