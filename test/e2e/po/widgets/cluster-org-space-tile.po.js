@@ -1,9 +1,7 @@
 (function () {
   'use strict';
 
-  var helpers = require('../helpers.po');
   var actionsMenuHelper = require('./actions-menu.po');
-  var inputText = require('../../po/widgets/input-text.po');
 
   // We should split this out into separate po's when we need specific org/space functionality
 

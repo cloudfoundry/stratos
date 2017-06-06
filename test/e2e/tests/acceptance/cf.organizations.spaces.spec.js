@@ -89,48 +89,7 @@
       element(by.css('.detail-view-close.close')).click();
     });
 
-    // var testUser, testAdminUser;
-    // cfModel.fetchUsers(testCluster.guid)
-    //   .then(function (users) {
-    //     testUser = _.find(users, {entity: {username: cfFromConfig.user.username}});
-    //     testAdminUser = _.find(users, {entity: {username: cfFromConfig.admin.username}});
-    //     expect(testUser).toBeDefined();
-    //     expect(testAdminUser).toBeDefined();
-    //   }).then(function () {
-    //     // Add required test organisation if it does not exist
-    //     // POSSIBLE IMPROVEMENT - Ensure both admin + non-admin have correct roles
-    //     return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, testAdminUser.metadata.guid,
-    //       testUser.metadata.guid);
-    //   })
-
-    // return confirmationModalHelper.commit().then(function () {
-    //   return helpers.checkAndCloseToast(/Organization '.*' successfully deleted/);
-    // }).then(function () {
-    //   return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword());
-    // }).then(function (response) {
-    //   var testCluster = _.find(JSON.parse(response), {name: cfFromConfig.register.cnsi_name});
-    //   expect(testCluster).toBeDefined();
-    //   return testCluster;
-    // }).then(function (testCluster) {
-    //   return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
-    // });
-    //-----
-    // confirmationModalHelper.commit();
-    // helpers.checkAndCloseToast(/Organization '.*' successfully deleted/);
-    // proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (output) {
-    //   testCluster = output;
-    // });
-    // cfModel.fetchUsers(testCluster.guid).then(function (output) {
-    //   users = output;
-    //   testUser = _.find(users, {entity: {username: cfFromConfig.user.username}});
-    //   testAdminUser = _.find(users, {entity: {username: cfFromConfig.admin.username}});
-    //   expect(testUser).toBeDefined();
-    //   expect(testAdminUser).toBeDefined();
-    // });
-    // cfModel.addOrgIfMissing(testCluster.guid, testOrgName, testAdminUser.metadata.guid, testUser.metadata.guid);
-
-
-    fit('Create and delete a space', function () {
+    it('Create and delete a space', function () {
       expect(testOrgName).toBeDefined();
       expect(testSpaceName).toBeDefined();
 
@@ -145,25 +104,24 @@
         .then(function () {
           return cfModel.addOrgIfMissing(testGuid, testOrgName, testAdminUser.metadata.guid,
             testUser.metadata.guid);
+        })
+        .then(function () {
+          // Refresh so new org is visible
+          return browser.refresh();
         });
       browser.driver.wait(init);
 
       // Add space
       clusterActions.createSpace(testOrgName, testSpaceName);
-      browser.driver.sleep(5000);
 
       // Should not be able to delete org via org tile
       var orgTile = orgSpaceTile.getOrgTile(testOrgName);
       helpers.scrollIntoView(orgTile);
-
       orgSpaceTile.clickActionMenu(orgTile, 1);
       expect(confirmationModalHelper.isVisible()).toBeFalsy();
 
-      browser.driver.sleep(5000);
       // Go to org page
       orgTile.click();
-      // orgsAndSpaces.goToOrg(testOrgName);
-      browser.driver.sleep(5000);
 
       // Should not be able to delete org via org summary tile
       var orgSummaryTile = element(by.css('organization-summary-tile'));
@@ -172,13 +130,9 @@
       actionsMenuHelper.clickItem(orgSummaryActionMenu, 1);
       expect(confirmationModalHelper.isVisible()).toBeFalsy();
 
-      browser.driver.sleep(5000);
-      // Delete space in org's space tile
+      // Delete space via org's space tile
       var spaceTile = orgSpaceTile.getSpaceTile(testSpaceName);
       helpers.scrollIntoView(spaceTile);
-
-      browser.driver.sleep(5000);
-
       orgSpaceTile.clickActionMenu(spaceTile, 1);
       expect(confirmationModalHelper.isVisible()).toBeTruthy();
       confirmationModalHelper.commit();
