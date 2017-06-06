@@ -14,7 +14,7 @@ Stratos UI can be deployed in the following environments:
 
 ## Quick Start
 
-The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the stratos-ui repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
 
 ```
 git clone git@github.com:hpcloud/stratos-ui.git
@@ -30,11 +30,15 @@ Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster
 
 Note:
 
-1. You need the cf CLI command line tool installed ana available on the path.
-1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted and the organization and space where you wan the console to application be cerated.
-1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API.
+1. You need the cf CLI command line tool installed and available on the path.
+1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
+1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [here](docs/troubleshooting.md) for more information.
 
 If you run into issues, please refer to the [Troubleshooting Guide](docs/troubleshooting.md).
+
+## Contributing
+
+We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
 
 ## License
 
