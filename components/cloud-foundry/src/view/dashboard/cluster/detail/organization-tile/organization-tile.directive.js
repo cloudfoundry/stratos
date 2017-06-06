@@ -69,56 +69,10 @@
 
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     this.user = consoleInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
-    var spacesInOrg = that.cfOrganizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
-    var canDelete = _.keys(spacesInOrg).length === 0;
-
-    $scope.$watchCollection(function () {
-      var org = that.cfOrganizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
-      if (org && org.roles && org.roles[that.user.guid]) {
-        return org.roles[that.user.guid];
-      }
-    }, function (roles) {
-      // Present the user's roles
-      that.roles = that.cfOrganizationModel.organizationRolesToStrings(roles);
-    });
-
-    var canEditOrg = authModel.isAllowed(that.organization.cnsiGuid,
-      authModel.resources.organization,
-      authModel.actions.update,
-      that.organization.guid);
-
-    var canDeleteOrg = canDelete && authModel.isAllowed(that.organization.cnsiGuid,
-        authModel.resources.organization,
-        authModel.actions.delete,
-        that.organization.guid);
-
-    var isSpaceManager = false;
-    // Iterate through all spaces in the organization to determine if user is a space manager
-    for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
-      var space = that.organization.org.entity.spaces[i];
-      if (authModel.isAllowed(that.organization.cnsiGuid,
-          authModel.resources.space,
-          authModel.actions.update,
-          space.metadata.guid,
-          space.entity.organization_guid,
-          true)) {
-
-        isSpaceManager = true;
-        break;
-      }
-    }
-
-    // Cannot delete if user is:
-    // 1. Not allowed to update the organization (not an admin or an org-manager)
-    // 2. and not a manager of any space within the organization in question
-    var canAssignUsers = authModel.isAllowed(that.organization.cnsiGuid,
-        authModel.resources.organization,
-        authModel.actions.update,
-        that.organization.guid) || isSpaceManager;
 
     var editOrgAction = {
       name: gettext('Edit Organization'),
-      disabled: !canEditOrg,
+      disabled: false,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
@@ -158,7 +112,7 @@
 
     var deleteOrgAction = {
       name: gettext('Delete Organization'),
-      disabled: !canDeleteOrg,
+      disabled: false,
       execute: function () {
         return frameworkDialogConfirm({
           title: gettext('Delete Organization'),
@@ -184,7 +138,7 @@
 
     var assignUsersAction = {
       name: gettext('Assign User(s)'),
-      disabled: !canAssignUsers,
+      disabled: false,
       execute: function () {
         appClusterAssignUsers.assign({
           clusterGuid: that.organization.cnsiGuid,
@@ -193,20 +147,65 @@
       }
     };
 
-    that.actions = [];
-    if (canEditOrg || this.user.admin) {
-      that.actions.push(editOrgAction);
-    }
-    if (canDeleteOrg || this.user.admin) {
-      that.actions.push(deleteOrgAction);
-    }
-    if (canAssignUsers || this.user.admin) {
-      that.actions.push(assignUsersAction);
-    }
+    that.actions = [editOrgAction, deleteOrgAction, assignUsersAction];
 
-    if (that.actions.length < 1) {
-      delete that.actions;
-    }
+    $scope.$watchCollection(function () {
+      var org = that.cfOrganizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
+      if (org && org.roles && org.roles[that.user.guid]) {
+        return org.roles[that.user.guid];
+      }
+    }, function (roles) {
+      // Present the user's roles
+      that.roles = that.cfOrganizationModel.organizationRolesToStrings(roles);
+
+      var canEditOrg = authModel.isAllowed(that.organization.cnsiGuid,
+        authModel.resources.organization,
+        authModel.actions.update,
+        that.organization.guid);
+
+      var canDeleteOrg = authModel.isAllowed(that.organization.cnsiGuid,
+        authModel.resources.organization,
+        authModel.actions.delete,
+        that.organization.guid);
+
+      var isSpaceManager = false;
+      // Iterate through all spaces in the organization to determine if user is a space manager
+      for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
+        var space = that.organization.org.entity.spaces[i];
+        if (authModel.isAllowed(that.organization.cnsiGuid,
+            authModel.resources.space,
+            authModel.actions.update,
+            space.metadata.guid,
+            space.entity.organization_guid,
+            true)) {
+
+          isSpaceManager = true;
+          break;
+        }
+      }
+
+      // Cannot delete if user is:
+      // 1. Not allowed to update the organization (not an admin or an org-manager)
+      // 2. and not a manager of any space within the organization in question
+      var canAssignUsers = authModel.isAllowed(that.organization.cnsiGuid,
+          authModel.resources.organization,
+          authModel.actions.update,
+          that.organization.guid) || isSpaceManager;
+
+      editOrgAction.hidden = !canEditOrg && !that.user.admin;
+      deleteOrgAction.hidden = !canDeleteOrg && !that.user.admin;
+      assignUsersAction.hidden = !canAssignUsers && !that.user.admin;
+    });
+
+    $scope.$watchCollection(function () {
+      var org = that.cfOrganizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
+      if (org) {
+        return org.spaces;
+      }
+    }, function (spacesInOrg) {
+      deleteOrgAction.disabled = _.keys(spacesInOrg).length > 0;
+    });
+
   }
 
 })();

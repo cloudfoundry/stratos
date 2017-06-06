@@ -13,7 +13,9 @@
     deleteAppIfExisting: deleteAppIfExisting,
     fetchApp: fetchApp,
     fetchServiceExist: fetchServiceExist,
-    fetchUsers: fetchUsers
+    fetchUsers: fetchUsers,
+    deleteOrgIfExisting: deleteOrgIfExisting,
+    deleteSpaceIfExisting: deleteSpaceIfExisting
   };
 
   function createHeader(cnsiGuid) {
@@ -204,6 +206,66 @@
             url: 'pp/v1/proxy/v2/apps/' + app.metadata.guid
           }));
         });
+      });
+  }
+
+  function deleteOrgIfExisting(cnsiGuid, orgName) {
+    var req;
+
+    return helpers.createReqAndSession(null)
+      .then(function (inReq) {
+        req = inReq;
+        return helpers.sendRequest(req, {
+          headers: createHeader(cnsiGuid),
+          method: 'GET',
+          url: 'pp/v1/proxy/v2/organizations?q=name IN ' + orgName
+        });
+      })
+      .then(function (response) {
+        var json = JSON.parse(response);
+        if (json.total_results === 0) {
+          return null;
+        }
+        return json.resources[0];
+      })
+      .then(function (org) {
+        if (org) {
+          return helpers.sendRequest(req, {
+            headers: createHeader(cnsiGuid),
+            method: 'DELETE',
+            url: 'pp/v1/proxy/v2/organizations/' + org.metadata.guid
+          });
+        }
+      });
+  }
+
+  function deleteSpaceIfExisting(cnsiGuid, spaceName) {
+    var req;
+
+    return helpers.createReqAndSession(null)
+      .then(function (inReq) {
+        req = inReq;
+        return helpers.sendRequest(req, {
+          headers: createHeader(cnsiGuid),
+          method: 'GET',
+          url: 'pp/v1/proxy/v2/spaces?q=name IN ' + spaceName
+        });
+      })
+      .then(function (response) {
+        var json = JSON.parse(response);
+        if (json.total_results === 0) {
+          return null;
+        }
+        return json.resources[0];
+      })
+      .then(function (space) {
+        if (space) {
+          return helpers.sendRequest(req, {
+            headers: createHeader(cnsiGuid),
+            method: 'DELETE',
+            url: 'pp/v1/proxy/v2/spaces/' + space.metadata.guid
+          });
+        }
       });
   }
 

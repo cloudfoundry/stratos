@@ -34,7 +34,9 @@
   var buildContainer = browser.params.pipelineDetails.buildContainer;
 
   // This makes identification of acceptance test apps easier in case they leak
-  var customAppLabel = process.env.CUSTOM_APP_LABEL || process.env.USER;
+  var e2eItemPrefix = 'acceptance.e2e.';
+  var customAppLabel = e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
+  var customOrgSpaceLabel = e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
 
   module.exports = {
 
@@ -98,7 +100,8 @@
     hasClass: hasClass,
     isButtonEnabled: isButtonEnabled,
 
-    getCustomAppLabel: getCustomAppLabel,
+    getCustomAppName: getCustomAppName,
+    getCustomerOrgSpaceLabel: getCustomerOrgSpaceLabel,
 
     scrollIntoView: scrollIntoView
   };
@@ -228,8 +231,12 @@
     return getTableRows(table).get(rowIndex).all(by.css('td')).get(colIndex);
   }
 
-  function getCustomAppLabel() {
-    return customAppLabel;
+  function getCustomAppName(isoTime) {
+    return customAppLabel + '.' + (isoTime || (new Date()).toISOString());
+  }
+
+  function getCustomerOrgSpaceLabel(isoTime, orgSpace) {
+    return customOrgSpaceLabel + '.' + orgSpace + '.' + (isoTime || (new Date()).toISOString());
   }
 
   /*
