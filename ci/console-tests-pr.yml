@@ -114,6 +114,12 @@ jobs:
        CUSTOM_APP_LABEL: {{custom-app-label}}
        WEB_SERVER_URI: {{web-server-uri}}
        SCP_LOCATION: {{scp-location}}
+       CF_LOCATION: {{cf-location}}
+       CF_ADMIN_USER: {{cf-admin-user}}
+       CF_ADMIN_PASSWORD: {{cf-admin-password}}
+       CF_E2E_USER: {{cf-e2e-user}}
+       CF_E2E_USER_PASSWORD: {{cf-e2e-user-password}}
+       GITHUB_TOKEN: {{github-access-token}}
       on_success:
         put: stratos-ui
         params:
