@@ -34,7 +34,7 @@ Note:
 1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted and the organization and space where you wan the console to application be cerated.
 1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API.
 
-If you run into issues, please refer to the [Troubleshooting Guide](docs/Troubleshooting.md).
+If you run into issues, please refer to the [Troubleshooting Guide](docs/troubleshooting.md).
 
 ## License
 
