@@ -1,0 +1,22 @@
+@import "variables";
+@import "app_ie";
+@import "view/view";
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  padding-top: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.i18n-missing {
+  color: red;
+  border: 2px dotted red;
+  padding: 0 10px;
+  background-color: beige;
+  border-radius: 4px;
+}

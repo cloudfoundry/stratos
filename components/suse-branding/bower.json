@@ -1,0 +1,17 @@
+{
+  "name": "suse-branding",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/brand.scss",
+    "favicon.ico"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+  }
+
+}

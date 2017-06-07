@@ -1,0 +1,29 @@
+.cluster-tile {
+
+  .gallery-card-title {
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+  }
+
+  .dl-horizontal {
+
+    dd.cluster-tile-endpoint {
+      text-transform: lowercase;
+    }
+
+    dd.cluster-tile-account {
+      text-transform: capitalize;
+    }
+  }
+
+  .gallery-card-status {
+
+    .material-icons.cluster-status-icon-error:before {
+      content: 'cancel';
+    }
+
+  }
+
+}

@@ -1,0 +1,10 @@
+{
+  "frontend": {
+    "root": "framework",
+    "dependencies": {
+      "angular": {
+        "jquery": "*"
+      }
+    }
+  }
+}

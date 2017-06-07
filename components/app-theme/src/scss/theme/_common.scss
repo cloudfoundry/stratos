@@ -1,0 +1,18 @@
+$console-box-shadow-shape:          8px 8px 0 !default;
+$console-box-shadow-shape-small:    2px 2px 0 !default;
+$console-box-shadow-color:          rgba(0, 0, 0, 0.05) !default;
+
+$page-header-height         : 96px !default;
+$page-footer-height         : 176px !default;
+$page-footer-color-bg       : #333 !default;
+$page-footer-color-fg       : #fff !default;
+
+$page-header-fg             : #333 !default;
+$page-header-fg-unselected  : #999 !default;
+$page-header-bg             : #fff !default;
+
+$navbar-height              : $page-header-height !default;
+
+// Brand OEM
+
+$form-control-selected-color: $brand-primary !default;

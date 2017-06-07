@@ -1,0 +1,93 @@
+<div ng-if="!clusterUsersController.stateInitialised" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterUsersController.stateInitialised && clusterUsersController.users.length === 0"
+     class="panel panel-default cluster-empty-list">
+  <div class="panel-body" translate>
+    There are no visible users
+  </div>
+</div>
+<div ng-if="clusterUsersController.stateInitialised && clusterUsersController.users.length > 0"
+     class="cluster-users-table"
+     st-table="clusterUsersController.visibleUsers"
+     st-safe-src="clusterUsersController.users">
+  <div>
+    <div class="change-roles-buttons">
+      <button class="btn btn-default"
+              ng-if="clusterUsersController.selectedUsersCount() < 2 && clusterUsersController.showTopAction()"
+              ng-disabled="clusterUsersController.disableManageRoles()"
+              ng-click="clusterUsersController.manageSelectedUsers()"
+              translate>Manage Roles</button>
+      <button class="btn btn-default"
+              ng-if="clusterUsersController.selectedUsersCount() > 1 && clusterUsersController.showTopAction()"
+              ng-disabled="clusterUsersController.disableChangeRoles()"
+              ng-click="clusterUsersController.manageSelectedUsers()"
+              translate>Change Roles</button>
+      <button class="btn btn-default"
+              ng-if="clusterUsersController.showTopAction()"
+              ng-disabled="clusterUsersController.disableRemoveFromOrg()"
+              ng-click="clusterUsersController.removeAllRoles()"
+              translate>Remove All Roles</button><br>
+    </div>
+    <div class="panel panel-default">
+      <table class="table"
+             ng-class="{'table-actionable table-selectable': clusterUsersController.haveShownAnAction}">
+        <thead>
+        <tr>
+          <th ng-if="clusterUsersController.haveShownAnAction">
+            <checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input>
+          </th>
+          <th class="sortable" translate st-sort-default="true" st-skip-natural="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
+          <th translate>Organization Roles</th>
+          <th translate ng-if="clusterUsersController.haveShownAnAction">ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="" ng-repeat="user in clusterUsersController.visibleUsers">
+          <td ng-if="clusterUsersController.userActions[user.metadata.guid]">
+            <checkbox-input
+              ng-model="clusterUsersController.selectedUsers[user.metadata.guid]"
+              ng-if="user.entity.username">
+            </checkbox-input>
+          </td>
+          <td class="user-name">{{ user.entity.username || user.metadata.guid}}</td>
+          <td class="roles-list">
+            <div class="role-pill" ng-class="{'closable-pill': clusterUsersController.canRemoveOrgRole(user, orgRole)}"
+                 ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)"
+                 ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg[orgRole.org.details.org.entity.name + orgRole.roleLabel] }">
+              {{ orgRole.org.details.org.entity.name }}: <span translate>{{ orgRole.roleLabel }}</span>
+              <i class="close-icon material-icons"
+                 ng-click="clusterUsersController.removeOrgRole(user, orgRole)"
+                 ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)">close</i>
+            </div>
+            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0">
+              <span ng-if="user.entity.username" translate>None assigned</span>
+              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+            </div>
+          </td>
+          <td ng-if="clusterUsersController.userActions[user.metadata.guid]">
+            <actions-menu actions="clusterUsersController.userActions[user.metadata.guid]"
+                          action-target="user"
+                          menu-position="actions-menu-right"
+                          ng-if="user.entity.username"
+                          enableButtonMode="true">
+            </actions-menu>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot ng-init="clusterUsersController.showUsers = 6"
+               ng-show="clusterUsersController.showUsers < clusterUsersController.users.length">
+        <tr>
+          <td colspan="{{clusterUsersController.haveShownAnAction ? 4 : 3}}" class="text-center">
+            <a ng-click="clusterUsersController.showUsers = clusterUsersController.users.length">
+              <span translate>Show All</span> ({{ clusterUsersController.users.length }})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="clusterUsersController.showUsers"></div>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div>
+</div>

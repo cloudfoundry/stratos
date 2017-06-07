@@ -1,0 +1,113 @@
+// Detail View dialog
+
+.modal.detail-view.detail-view-dialog {
+  display: flex !important;
+  justify-content: center;
+  overflow: auto;
+  bottom: 0;
+
+  &.fade {
+
+    .modal-dialog {
+      transition: bottom 0.25s ease-in;
+      bottom: 50vw;
+    }
+
+    &.in .modal-dialog {
+      transition: bottom 0.25s ease-in;
+      bottom: 0;
+    }
+  }
+
+  // Standard dialog widths
+
+  &.dialog-form > .modal-dialog .detail-view-content {
+    width: $console-input-width + 2 * $console-unit-space;
+  }
+
+  &.dialog-form-large > .modal-dialog .detail-view-content {
+    width: $console-input-width * 1.25 + 2 * $console-unit-space;
+  }
+
+  > .modal-dialog {
+    left: 0;
+    height: auto;
+    align-self: center;
+    max-height: 100%;
+    width: auto;
+    box-shadow: 0px 0px 32px 2px rgba(0,0,0,0.5);
+
+    > .modal-content {
+      > .async-dialog {
+        margin: 0;
+
+        .detail-view-content {
+          ng-include {
+            margin: 0 $console-unit-space;
+          }
+        }
+
+        .async-indicator {
+          margin-top: $console-unit-space;
+          min-height: $console-unit-space;
+        }
+
+        .form-actions.modal-footer {
+          padding: $console-unit-space;
+          margin-top: $console-unit-space;
+
+          .btn-default {
+            float: left;
+          }
+        }
+      }
+
+      .detail-view-content {
+        margin: 0;
+
+        .detail-view-header, .wizard-head {
+          margin: 0 $console-unit-space * 0.5;
+          padding: $console-unit-space * 0.5;
+          flex: 0 1 $console-unit-space * 3;
+          height: $console-unit-space * 3;
+          min-height: $console-unit-space * 3;
+        }
+
+        .detail-view-close {
+          top: #{($console-unit-space * 3 - 28px) /2};;
+          right: $console-unit-space;
+        }
+
+        wizard {
+          .wizard-foot {
+            min-height: initial;
+            height: initial;
+            padding: $console-unit-space;
+            display: block;
+            text-align: right;
+
+            .btn-default {
+              float: left;
+            }
+          }
+          .wizard-body {
+            margin: 0 $console-unit-space;
+            margin-bottom: $console-unit-space * 0.5;
+          }
+
+          .wizard-step {
+            padding: 0;
+
+            &.wizard-step-full {
+              width: 100%;
+
+              .message-box {
+                margin: $console-unit-space * 0.5 auto;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

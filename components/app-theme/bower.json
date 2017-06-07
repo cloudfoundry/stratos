@@ -1,0 +1,14 @@
+{
+  "name": "app-theme",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/scss/theme.scss"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {}
+}

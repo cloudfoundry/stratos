@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   id="_x32__Color_Icon"
+   x="0px"
+   y="0px"
+   viewBox="0 0 36 36"
+   xml:space="preserve"
+ >
+<style type="text/css">
+	.st0 {fill:#FFF}
+	.st1 {stroke: #FFF}
+</style>
+<g>
+
+  <path
+    class="st0"
+     d="M34.9,19.8c-1.1-1.1-3-1.1-4.1,0L26.6,24h-4.1c0.1-0.3,0.2-0.6,0.2-1c0-1.7-1.3-3-3-3H8.3l-3,3l-5,4.9l7.4,7.5l4.4-4.4h16  l6.7-7.1c0.5-0.5,0.8-1.3,0.8-2C35.7,21.1,35.4,20.4,34.9,19.8z M3.1,28l2.2-2.2l4.6,4.6l-2.2,2.2L3.1,28z M33.4,22.5L27.3,29H11.4  l-4.6-4.6L9.1,22h10.6c0.6,0,1,0.4,1,1c0,0.5-0.4,1-0.9,1h-3.1v2h10.7l4.7-4.7c0.3-0.3,0.9-0.3,1.3,0c0.2,0.2,0.3,0.4,0.3,0.6  C33.7,22.1,33.6,22.3,33.4,22.5z"
+     id="path3397" />
+  <rect class="st1"
+     style="fill:none;fill-rule:evenodd;stroke-width:2.15396976;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="rect3422"
+     width="14.846031"
+     height="14.846031"
+     x="11.890995"
+     y="2.3554654" />
+</g>     
+</svg>

@@ -1,0 +1,37 @@
+{
+  "app": {
+    "state": {
+      "separator": "&nbsp;-&nbsp;",
+      "deployed": "Deployed",
+      "incomplete": "Incomplete",
+      "failed": "Staging Failed",
+      "pending": "Pending",
+      "loading": "Loading",
+      "offline": "Offline",
+      "updating": "Offline while Updating",
+      "no-instances": "No Instances",
+      "staging": "Staging App",
+      "starting": "Starting App",
+      "online": "Online",
+      "crashed": "Crashed",
+      "crashing": "Crashing",
+      "partial": "Partially Online",
+      "unknown": "Unknown"
+    },
+    "tabs": {
+      "summary": {
+        "label": "Summary",
+        "instructions": {
+          "cli": "Deploy your application using the CLI",
+          "service": "Add services to your application"
+        }
+      },
+      "logStream": {
+        "label": "Log Stream"
+      },
+      "services": {
+        "label": "Services"
+      }
+    }
+  }
+}

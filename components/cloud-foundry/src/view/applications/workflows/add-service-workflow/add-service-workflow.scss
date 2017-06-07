@@ -1,0 +1,64 @@
+.add-service-workflow {
+
+  .select-instance {
+    padding: $console-unit-space 0;
+
+    .loading-services-spinner {
+      text-align: center;
+      margin-top: $console-unit-space / 2;
+
+      span {
+        margin-right: $console-unit-space / 2;
+      }
+    }
+  }
+
+  .service-confirm {
+    margin: $console-unit-space 0;
+
+    .alert {
+      margin-bottom: $console-unit-space;
+    }
+  }
+
+  .service-description {
+    display: flex;
+
+    .service-icon {
+      padding: $console-unit-space;
+
+      img {
+        max-height: $console-unit-space * 4;
+        max-width: $console-unit-space * 4;
+      }
+    }
+  }
+
+  .select-instance-tabs {
+    .nav.nav-tabs {
+      .uib-tab > a {
+        background: transparent;
+      }
+    }
+
+    .tab-content {
+      padding: $console-unit-space 0;
+
+      .existing-instances-table {
+        tbody > tr td {
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  .wizard-foot {
+    border-top: 1px solid $gray-light;
+    text-align: right;
+    padding-top: $console-unit-space / 2;
+
+    .btn {
+      margin-left: $console-unit-space / 2;
+    }
+  }
+}

@@ -1,0 +1,35 @@
+<div class="dropdown" ng-class="{ 'open': selectInputCtrl.open }">
+  <div class="select-input-field">
+    <span class="select-input-value"
+      ng-class="{ 'text-muted': !selectInputCtrl.ngModelCtrl.$modelValue }">
+      {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder | translate}}
+    </span>
+    <i class="dropdown-toggle material-icons">arrow_drop_down</i>
+  </div>
+  <ul class="dropdown-menu">
+    <li ng-if="selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled>
+      <div class="select-input-refresh-wrapper">
+        <div translate>{{ selectInputCtrl.placeholder }}</div>
+        <div class="select-input-refresh" ng-click="selectInputCtrl.refreshActionWrapper($event)">
+          <div ng-if="selectInputCtrl.refreshing" class="spinner-wrapper">
+            <svg-image class="spinner" src="/svg/Refresh.svg"></svg-image>
+          </div>
+          <div class="refresh-label" translate>{{ selectInputCtrl.refreshAction.label }}</div>
+        </div>
+      </div>
+
+    </li>
+    <li ng-if="!selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled translate>{{ selectInputCtrl.placeholder }}</li>
+    <li class="select-option" ng-repeat="option in selectInputCtrl.inputOptions"
+        ng-click="selectInputCtrl.setValue(option)" ng-disabled="option.disabled"
+        ng-class="{ 'selected': option.value === selectInputCtrl.ngModelCtrl.$modelValue }"
+        translate>
+      {{ option.label }}
+    </li>
+    <li class="select-option select-add-option" ng-if="selectInputCtrl.addAction"
+      ng-click="selectInputCtrl.addAction.execute()">
+      <i ng-class="selectInputCtrl.addAction.icon || 'material-icons app-icon-select-plus'"></i>
+      <span translate>{{ selectInputCtrl.addAction.label }}</span>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+{
+  "name": "console-app",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "app-theme": "./components/app-theme",
+    "app-framework": "./components/app-framework",
+    "app-core": "./components/app-core",
+    "suse-branding": "./components/suse-branding",
+    "about-app": "./components/about-app",
+    "endpoints-dashboard": "./components/endpoints-dashboard",
+    "cloud-foundry": "./components/cloud-foundry",
+    "cf-versions": "./components/cf-versions"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.9"
+  },
+  "config": {
+    "main": "cloud-foundry"
+  }
+}

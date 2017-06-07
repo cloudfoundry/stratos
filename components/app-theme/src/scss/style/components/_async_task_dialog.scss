@@ -1,0 +1,29 @@
+.async-dialog {
+  margin-right: $detail-view-margin;
+  margin-left: $detail-view-margin;
+
+  .spinner {
+    display: flex;
+    justify-content: center;
+  }
+
+  .no-margin {
+    margin-left: 0px !important;
+    width: 100%;
+  }
+
+  .async-indicator {
+    margin-top: $console-unit-space * 2;
+    min-height: $console-unit-space * 2;
+  }
+
+  .modal-footer {
+    margin-top: $console-unit-space * 2;
+    padding-top: $console-unit-space;
+  }
+
+  .disable-margin {
+    margin-top: 0;
+  }
+
+}

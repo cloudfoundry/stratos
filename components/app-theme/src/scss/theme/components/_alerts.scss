@@ -1,0 +1,22 @@
+// Alerts
+// ======
+
+// console semantic names
+// ------------------
+$console-alert-width:             74px !default;
+$console-alert-icon-size:         $console-alert-width/3 !default;
+$console-alert-border-width:      2px !default;
+$console-alert-border:            $console-alert-border-width solid $gray-light !default;
+
+//== Alerts
+//
+//## Define alert colors, border radius, and padding.
+
+$alert-padding:               19px !default;
+$alert-link-color:            $white !default;
+$alert-link-font-weight:      bold !default;
+
+$alert-success-text:          $white !default;
+$alert-info-text:             $console-primary-fg !default;
+$alert-warning-text:          $white !default;
+$alert-danger-text:           $white !default;

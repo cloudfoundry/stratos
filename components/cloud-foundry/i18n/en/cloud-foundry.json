@@ -1,0 +1,28 @@
+{
+  "cloud-foundry": "Cloud Foundry",
+  "org": "Org",
+  "space": "Space",
+  "menu": {
+    "cloud-foundry": "@:cloud-foundry"
+  },
+  "product": {
+    "cf": "@:cloud-foundry"
+  },  
+  "cf": {
+    "registration": {
+      "name": "@:cloud-foundry",
+      "title": "Register a [[@:cf.registration.name]] Endpoint",
+      "p1": "[[@:cf.registration.name]] supports the full application lifecycle, from initial development, through testing to deployment.",
+      "p2": "Register an existing [[@:cf.registration.name]] endpoint to allow your development team to create and manage their applications.",
+      "p3": "When registering, choose a unique, recognizable name so that your developers can easily know which [[@:cf.registration.name]] endpoint they are working with.",
+      "tagline": "[[@:cf.registration.name]] supports the full application lifecycle, from initial development, through testing to deployment.",
+      "urlHint": "[[@:cf.registration.name]] API endpoint"
+    },
+    "cli": {
+      "commands": {
+        "title": "CLI Commands",
+        "deploy-title": "Deploy Using CLI"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+.wizard-nav-item.complete {
+  a:after {
+    @extend .material-icons;
+    color: $console-primary;
+    content: 'check';
+    float: right;
+  }
+}
+
+.wizard-message {
+  margin-bottom: $console-unit-space / 2;
+  z-index: 2;
+}

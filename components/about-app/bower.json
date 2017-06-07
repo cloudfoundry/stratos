@@ -1,0 +1,16 @@
+{
+  "name": "about-app",
+  "description": "",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/about-app.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "app-core": "./components/app-core"
+  }
+}

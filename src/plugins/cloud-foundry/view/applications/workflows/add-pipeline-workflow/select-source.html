@@ -1,9 +1,0 @@
-<h4 translate>Select Source</h4>
-<div class="media-list hpe-add-option-list">
-  <select-vcs-token ng-repeat="source in wizardCtrl.options.sources"
-                    ng-click="wizardCtrl.options.selectSource(source.value)"
-                    source="source"
-                    selected-source="wizardCtrl.options.userInput.source"
-                    on-manage-tokens="wizardCtrl.options.onManageTokens(vcs)"
-  ></select-vcs-token>
-</div>

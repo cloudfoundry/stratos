@@ -1,0 +1,71 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: portal-proxy-output
+# Parameterised task files are currently not supported in Concourse
+# Once that is implemented we can refactor the following into a variable
+image_resource:
+  type: docker-image
+  source:
+   repository:  10.4.21.241:5000/stackatotest/hsc-dcind
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      source /docker-lib.sh
+      start_docker
+      export GOPATH=$PWD
+
+      # Move portal-proxy binaries
+      cp -r ./portal-proxy-output/* stratos-ui/
+
+      cd stratos-ui/deploy
+
+      cat << EOF > ../build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+        },
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      cat ../build/secrets.json
+
+      # Load images from image
+      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
+        docker pull ${REGISTRY_NAME}/$image
+        docker tag  ${REGISTRY_NAME}/$image $image
+      done
+      mkdir uaa/tmp
+      cp /tarballs/* ./uaa/tmp/
+
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
+      docker logs -f deploy_ui_1
+
+      CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
+      mkdir e2e-output
+      for name in $CONTAINER_NAMES; do
+          ID=$(docker ps --format "{{.ID}}" --filter name=$name)
+          LOG_PATH=$(find /var/lib/docker/containers -name ${ID}\*.log)
+          cp $LOG_PATH e2e-output/${name}.log
+      done
+      TIMESTAMP=$(date +%s)
+      tar -czf $TIMESTAMP.tar.gz e2e-output/*
+      scp -i /id_rsa $TIMESTAMP.tar.gz ${SCP_LOCATION}
+      echo "Download logs from: http://${WEB_SERVER_URI}/$TIMESTAMP.tar.gz"
+      sh ./ci/scripts/check_tests.sh

@@ -1,0 +1,38 @@
+@import 'cluster-tile/cluster-tile';
+
+.cluster-tiles {
+  .header {
+    margin-bottom: $console-unit-space;
+  }
+  .clusters-card {
+    min-height: 250px;
+  }
+
+  .flyout-content-thin {
+    .flyout-content {
+      width: 564px;
+      min-width: 564px;
+      max-width: 564px;
+    }
+  }
+}
+
+.cluster-breadcrumb {
+
+  &.breadcrumb {
+    //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+    margin-left: -15px;
+    width: calc(100% + 30px);
+
+    li {
+      text-transform: none;
+      font-weight: inherit;
+
+      //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+      &:first-of-type {
+        padding-left: $console-unit-space / 2;
+      }
+    }
+  }
+}
+

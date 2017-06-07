@@ -1,0 +1,86 @@
+.console-code-block {
+  $fade-transition-duration: 250ms;
+  position: relative;
+
+  > pre {
+    min-height: 2.5 * $console-unit-space;
+    padding: 0.5 * $console-unit-space;
+    margin: 0;
+  }
+
+  .console-copy {
+    position: absolute;
+    right: 0.5 * $console-unit-space;
+    top: 0.5 * $console-unit-space;
+    cursor: pointer;
+    transition: opacity $fade-transition-duration linear;
+
+    &:after {
+      position: relative;
+      top: auto;
+      right: auto;
+    }
+  }
+
+  .console-copied-msg {
+    background-color: $pre-bg;
+  }
+
+  &.console-code-block-dark {
+    > pre {
+      background-color: $console-primary-fg;
+      color: $silver;
+    }
+
+    .console-copy {
+      color: $silver;
+    }
+
+    .console-copied-msg {
+      color: $silver;
+      background-color: $console-primary-fg;
+    }
+  }
+
+  .console-code-block-copied-msg {
+    position: absolute;
+    right: 0.5 * $console-unit-space;
+    top: 0.5 * $console-unit-space;
+    color: #333;
+    opacity: 0;
+    transition: opacity $fade-transition-duration linear;
+    display: flex;
+
+    .console-copied-msg {
+      margin: auto;
+      padding: 0 0.5 * $console-unit-space;
+    }
+
+    .console-copy-success-icon {
+       &:after {
+         font-size: 24px;
+         content: 'check_circle';
+         color: $console-primary;
+      }
+    }
+  }
+
+  &.copy-success {
+    .console-copy {
+      opacity: 0;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .console-code-block-copied-msg {
+      opacity: 1;
+    }
+  }
+}
+
+.console-code-block-temp {
+  position: relative;
+  width: 0px;
+  height: 0px;
+  border: 0;
+}

@@ -1,76 +1,46 @@
-# Helion Stackato Console UI
-The Helion Stackato Console UI is written in JavaScript and runs in a Docker container. It also uses Angular 1.4.x to maintain compatibility with Angular UI Bootstrap.
+# Stratos UI
 
-For more implementation details, please see the following pages:
-* [Overview](docs/README.md)
-* [Architecture](docs/architecture.md)
-* [Plugins](docs/plugins.md)
+Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
+![Stratos UI Application view](docs/images/stratos-ui.png)
 
-## System Requirements
-Nginx is used to serve static files while a Golang based REST API backend. Another container hosts the Postgres database for session and service instance management.
+## Deploying Stratos UI
 
-This project depends on the following:
-* [Docker](https://docs.docker.com/mac)
-* [Node.js](https://nodejs.org) - to easily install Node.js modules
-* [portal-proxy](https://github.com/hpcloud/portal-proxy) - Golang based REST API
-* [helion-ui-framework](https://github.com/hpcloud/helion-ui-framework) - reusable Angular-based UI components, Helion branding, assets, styles, theme files
+Stratos UI can be deployed in the following environments:
 
-## Installation
-Install Docker and clone the repositories listed above at the same level as this project.
+1. Cloud Foundry, as an application
+1. Kubernetes, using a Helm chart
+1. Docker, using docker compose
 
-### Build and run
-See the README in the `stratos-deploy` repo for details on how to develop against the Console.
+## Quick Start
 
-## Docker commands and development tools
+The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
 
-### View Logs
 ```
-docker logs stratos-ui
+git clone git@github.com:hpcloud/stratos-ui.git
+cd stratos-ui
+cf push
 ```
 
-### SSH into the running container
-```
-docker exec -it stratos-ui /bin/bash
-```
-or, from the stratos-deploy project
-```
-docker-compose run --rm ui bash
-```
+You will then be able to open a web browser and navigate to the console URL:
 
-### Running Karma tests in container
-```
-$ cd tools
-$ npm test
-```
+`https://console.<DOMAIN>`
 
-### Running Protractor tests in container
-```
-$ cd tools
-$ npm run update-webdriver
-$ npm run e2e
-```
-By default tests will execute against the local machine's ip address. To run against, for example, the gulp dev instance use
-```
-$ npm run e2e -- --params.host=localhost --params.port=3100
-```
+Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-### Running ESLint in container
-```
-$ cd tools
-$ ./node_modules/.bin/gulp lint
-```
+Note:
 
-### Running gate check script
-This runs the unit tests and linting.
-```
-$ cd tools
-$ npm run gate-check
-```
+1. You need the cf CLI command line tool installed and available on the path.
+1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
+1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [here](docs/troubleshooting.md) for more information.
 
-### Generate documentation (experimental)
-Locally, run the following command to generate documentation in the `docs/src` folder. You can then view the documentation by pointing your browser to the `index.html` file of that `docs/src` folder.
-```
-cd tools
-./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
-```
+If you run into issues, please refer to the [Troubleshooting Guide](docs/troubleshooting.md).
+
+## Contributing
+
+We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
+
+## License
+
+The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.md).
+

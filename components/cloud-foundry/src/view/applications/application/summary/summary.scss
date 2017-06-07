@@ -1,0 +1,140 @@
+@import "edit-app/edit-app";
+
+.application-details {
+  .action-header {
+    color: $dove-gray2;
+    font-size: $font-size-large;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .summary .data-body {
+    padding: $console-unit-space * .75 $console-unit-space;
+
+    .dl-horizontal {
+
+      & > * {
+        margin-bottom: $console-unit-space * .5;
+        margin-left: auto;
+        font-size: $font-size-small;
+      }
+
+      & > dd {
+        clear: right;
+      }
+
+      dt.indent{
+        padding-left: 12px;
+      }
+
+      @media (min-width: 992px) {
+        // Remove extra margin at bottom of lists (except for when lists are stacked)
+        dt:last-of-type, dd:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    dd {
+      &.nowrap {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &.align-right {
+          clear: right;
+          text-align: right;
+        }
+      }
+
+      .btn {
+        padding: 0;
+        font-size: inherit;
+        text-transform: none;
+        height: inherit;
+        display: table-cell;
+        line-height: normal;
+      }
+
+      .percent-gauge {
+        padding: 0;
+      }
+    }
+
+    .app-status-block {
+      line-height: 0;
+
+      .app-status {
+        margin-left: 0;
+        margin-right: 2px;
+      }
+    }
+
+    .app-instance-title {
+      margin-bottom: 0;
+    }
+  }
+
+  .summary-instances {
+
+    .instance-percent-gauge {
+      padding: 7px 14px;
+    }
+
+    .instance-uptime-td {
+      min-width: 120px;
+    }
+
+  }
+
+  .new-app-panel {
+    background-color: $white;
+    margin-bottom: $console-unit-space;
+    padding: $console-unit-space * 0.5 $console-unit-space;
+
+    .new-app-title-box {
+      height: $console-unit-space * 2;
+      line-height: $console-unit-space * 2;
+      display: flex;
+
+      > .new-app-okay {
+        margin: auto 0;
+      }
+
+      > .new-app-headline {
+        margin-left: $console-unit-space * .5;
+        font-size: $console-unit-space;
+        flex: 1 1 0px;
+      }
+    }
+
+    .new-app-nextsteps {
+      margin-left: $console-unit-space * 1.5;
+
+      > ul {
+        margin: $console-unit-space * 0.25 0;
+      }
+    }
+  }
+}
+
+.add-route-form-section {
+  margin: $console-unit-space 0 $console-unit-space * 0.5 0;
+  padding: 0;
+  font-weight: $console-font-weight-semibold;
+  font-size: $font-size-large;
+}
+
+.form-group.add-route-checkbox {
+  display: flex;
+  > checkbox-input {
+    display: flex;
+  }
+}
+
+div.add-route-path-prefix {
+  position: absolute;
+}
+
+input.add-route-path-prefix {
+  margin-left: 8px;
+}

@@ -1,0 +1,37 @@
+.manage-instances {
+  .service-description {
+    display: flex;
+    padding: $console-unit-space 0;
+
+    .service-icon {
+      padding: $console-unit-space;
+
+      img {
+        max-height: $console-unit-space * 4;
+        max-width: $console-unit-space * 4;
+      }
+    }
+  }
+
+  .btn-link {
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: none;
+      outline: 0;
+    }
+  }
+
+  .min-col-header {
+    width: 1px;
+    white-space: nowrap;
+  }
+}
+
+.env-variables {
+  margin-top: $console-unit-space;
+
+  pre {
+    white-space: pre-wrap;
+  }
+}

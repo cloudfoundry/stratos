@@ -1,0 +1,99 @@
+hash: 9e7036b4cb7abf1da1d97dc148d15a0c3056b2d4cd61da74e50ae9c0ff5b0343
+updated: 2017-05-16T11:17:15.523496697+01:00
+imports:
+- name: github.com/antonlindstrom/pgstore
+  version: 4f1dbba445e540bf071eb9572262edb8fe4a593a
+- name: github.com/cloudfoundry/noaa
+  version: 086fd462f8fcdde1a234e028e3e157237bdb3383
+  subpackages:
+  - consumer
+  - consumer/internal
+  - errors
+- name: github.com/cloudfoundry/sonde-go
+  version: 78019103037ae46207993c8816e970d85bf1a9e4
+  subpackages:
+  - events
+- name: github.com/dgrijalva/jwt-go
+  version: 6c8dedd55f8a2e41f605de6d5d66e51ed1f299fc
+- name: github.com/gogo/protobuf
+  version: 30433562cfbf487fe1df7cd26c7bab168d2f14d0
+  subpackages:
+  - gogoproto
+  - proto
+  - protoc-gen-gogo/descriptor
+- name: github.com/gorilla/context
+  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+- name: github.com/gorilla/securecookie
+  version: 667fe4e3466a040b780561fe9b51a83a3753eefc
+- name: github.com/gorilla/sessions
+  version: ca9ada44574153444b00d3fd9c8559e4cc95f896
+- name: github.com/gorilla/websocket
+  version: 3ab3a8b8831546bd18fd182c20687ca853b2bb13
+- name: github.com/kat-co/vala
+  version: 43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b
+- name: github.com/labstack/echo
+  version: e08070379af60f5b9c0fb5bb2d1527ba9624fe43
+  subpackages:
+  - context
+  - engine
+  - engine/standard
+  - log
+  - middleware
+- name: github.com/labstack/gommon
+  version: 1121fd3e243c202482226a7afe4dcd07ffc4139a
+  subpackages:
+  - bytes
+  - color
+  - log
+  - random
+- name: github.com/lib/pq
+  version: 2704adc878c21e1329f46f6e56a1c387d788ff94
+  subpackages:
+  - oid
+- name: github.com/mattn/go-colorable
+  version: ded68f7a9561c023e790de24279db7ebf473ea80
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/mattn/go-sqlite3
+  version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
+- name: github.com/nwmac/sqlitestore
+  version: 3f93bd4dbffb827c47572d6d1342272be36bd6b0
+- name: github.com/pkg/errors
+  version: c605e284fe17294bda444b34710735b29d1a9d90
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/valyala/bytebufferpool
+  version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
+- name: github.com/valyala/fasttemplate
+  version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
+- name: golang.org/x/net
+  version: 84f0e6f92b10139f986b1756e149a7d9de270cdc
+  subpackages:
+  - context
+- name: golang.org/x/sys
+  version: 1e99a4f9d247b28c670884b9a8d6801f39a47b77
+  subpackages:
+  - unix
+testImports:
+- name: github.com/gopherjs/gopherjs
+  version: 9659c814f1d54d63f9c623449a7111d3864c1361
+  subpackages:
+  - js
+- name: github.com/jtolds/gls
+  version: 77f18212c9c7edc9bd6a33d383a7b545ce62f064
+- name: github.com/smartystreets/assertions
+  version: f8459f92181409546d2762c9e9c4bedc23c92d76
+  subpackages:
+  - internal/go-render/render
+  - internal/oglematchers
+- name: github.com/smartystreets/goconvey
+  version: d4c757aa9afd1e2fc1832aaab209b5794eb336e1
+  subpackages:
+  - convey
+  - convey/gotest
+  - convey/reporting
+- name: gopkg.in/DATA-DOG/go-sqlmock.v1
+  version: 9958e5c69de03e97ec215b23f6fcae1f600c3fb6
+

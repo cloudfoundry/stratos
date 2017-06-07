@@ -1,0 +1,38 @@
+<div class="manage-instances">
+  <div class="service-description col-sm-12">
+    <div class="service-icon">
+      <img ng-src="{{ detailViewCtrl.context.data.service.entity.extra.ImageURL }}"
+        default-image default-image-src="/images/services/App_services_72.png"/>
+    </div>
+    <div>
+      <h4 class="font-semi-bold">{{ detailViewCtrl.context.data.service.entity.label }}</h4>
+      <p>{{ detailViewCtrl.context.data.service.entity.extra.LongDescription || detailViewCtrl.context.data.service.entity.description }}</p>
+    </div>
+  </div>
+  <table class="table table-outlined instances-table">
+    <thead>
+      <tr>
+        <th translate>Name</th>
+        <th translate>Plan</th>
+        <th class="min-col-header" translate>Env. Variables</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="instance in detailViewCtrl.context.serviceInstances">
+        <td>{{ instance.name }}</td>
+        <td>{{ instance.service_plan.name }}</td>
+        <td class="text-right">
+          <button class="btn btn-link btn-sm"
+            ng-click="detailViewCtrl.context.viewEnvVariables(instance)">
+            <i class="material-icons app-icon-2x">open_in_new</i>
+          </button>
+        </td>
+        <td class="text-right">
+          <button class="btn btn-link btn-sm"
+            ng-click="detailViewCtrl.context.detach(instance)" translate>Detach</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
