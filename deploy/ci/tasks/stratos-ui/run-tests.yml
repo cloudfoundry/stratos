@@ -21,20 +21,7 @@ run:
       start_docker
       export GOPATH=$PWD
 
-      # Move portal-proxy binaries
-      cp -r ./portal-proxy-output/* stratos-ui/
-
-      cd stratos-ui/deploy
-      # Load images from image
-      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
-        docker pull ${REGISTRY_NAME}/$image
-        docker tag  ${REGISTRY_NAME}/$image $image
-      done
-      mkdir uaa/tmp
-      cp /tarballs/* ./uaa/tmp/
-
-      # Add protractor.conf file
-       cat << EOF > build/secrets.json
+       cat << EOF > stratos-ui/build/secrets.json
        {
          "cloudFoundry": {
            "url": "${CF_LOCATION}",
@@ -50,6 +37,18 @@ run:
          "githubPat": "${GITHUB_TOKEN}"
        }
        EOF
+
+      # Move portal-proxy binaries
+      cp -r ./portal-proxy-output/* stratos-ui/
+
+      cd stratos-ui/deploy
+      # Load images from image
+      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
+        docker pull ${REGISTRY_NAME}/$image
+        docker tag  ${REGISTRY_NAME}/$image $image
+      done
+      mkdir uaa/tmp
+      cp /tarballs/* ./uaa/tmp/
 
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
