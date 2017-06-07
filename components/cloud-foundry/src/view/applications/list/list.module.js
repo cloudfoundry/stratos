@@ -82,8 +82,8 @@
     // Width at which we automatically switch to the grid layout
     var FORCE_GRID_LAYOUT_WIDTH = 640;
 
-    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
-    // use case where nothing has changed.
+    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for
+    // the majority of use cases where nothing has changed.
     this.ready = this.model.hasApps;
 
     // Force card layout on smaller screen sizes - listen for resize events
