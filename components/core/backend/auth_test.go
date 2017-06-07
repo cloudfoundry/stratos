@@ -162,11 +162,11 @@ func TestLoginToCNSI(t *testing.T) {
 
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
-		stringHCFType := "hcf"
+		stringHCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                   mockCNSIGUID,
 			Name:                   "mockHCF",
-			CNSIType:               "hcf",
+			CNSIType:               "cf",
 			APIEndpoint:            mockURL,
 			AuthorizationEndpoint:  mockUAA.URL,
 			TokenEndpoint:          mockUAA.URL,
@@ -286,7 +286,7 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 		defer mockUAA.Close()
 
 		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-			AddRow(mockCNSIGUID, "mockHCF", "hcf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
+			AddRow(mockCNSIGUID, "mockHCF", "cf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRow)
@@ -326,11 +326,11 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
-		stringHCFType := "hcf"
+		stringHCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
 			Name:                  "mockHCF",
-			CNSIType:              "hcf",
+			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
 			TokenEndpoint:         mockUAA.URL,
@@ -578,7 +578,7 @@ func TestVerifySession(t *testing.T) {
 			So(contentType, ShouldEqual, "application/json; charset=utf-8")
 		})
 
-		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false},\"endpoints\":{\"hcf\":{}}}"
+		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false},\"endpoints\":{\"cf\":{}}}"
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)

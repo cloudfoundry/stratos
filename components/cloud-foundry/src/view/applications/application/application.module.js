@@ -138,7 +138,7 @@
 
           var username = null;
           if (consoleInfo.info.endpoints) {
-            username = consoleInfo.info.endpoints.hcf[vm.model.application.cluster.guid].user.name;
+            username = consoleInfo.info.endpoints.cf[vm.model.application.cluster.guid].user.name;
           }
           cfAppCliCommands.show(vm.model.application, username);
         },

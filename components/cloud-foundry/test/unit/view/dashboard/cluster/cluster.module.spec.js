@@ -26,7 +26,7 @@
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
 
       var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-      _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      _.set(consoleInfo, 'info.endpoints.cf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

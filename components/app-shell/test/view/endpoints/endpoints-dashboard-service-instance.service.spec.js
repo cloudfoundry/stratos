@@ -19,7 +19,7 @@
         Scheme: 'http',
         Host: 'api.foo.com'
       },
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       guid: '1',
       name: 'c1',
       valid: true,
@@ -35,7 +35,7 @@
         Scheme: 'http',
         Host: 'api.foo.com'
       },
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       guid: '2',
       name: 'c2',
       token_expiry: Number.MAX_VALUE,
@@ -51,7 +51,7 @@
         Scheme: 'http',
         Host: 'api.foo.com'
       },
-      cnsi_type: 'hcf',
+      cnsi_type: 'cf',
       guid: '3',
       name: 'c3',
       token_expiry: 1

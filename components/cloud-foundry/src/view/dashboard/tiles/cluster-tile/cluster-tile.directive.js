@@ -93,7 +93,7 @@
       vm.userCount = 0;
 
       if (!vm.service.isConnected || vm.userService.error ||
-        !vm.consoleInfo.info.endpoints.hcf[vm.service.guid].user.admin) {
+        !vm.consoleInfo.info.endpoints.cf[vm.service.guid].user.admin) {
         vm.userCount = undefined;
         return;
       }

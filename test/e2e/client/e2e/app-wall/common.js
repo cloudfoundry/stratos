@@ -80,7 +80,7 @@
             type: ''
           }
         },
-        hcf: {
+        cf: {
           '8221adff-529a-4567-b57a-155fb69f1bd0': {
             guid: '8221adff-529a-4567-b57a-155fb69f1bd0',
             name: 'CF_1',
@@ -131,7 +131,7 @@
 
   function expectGetClustersWithSuccess($httpBackend) {
     $httpBackend.whenGET('/pp/v1/cnsis').respond(200, [
-      {id: 1, name: 'CF_1', url: ' cluster1_url', cnsi_type: 'hcf', guid: '8221adff-529a-4567-b57a-155fb69f1bd0'},
+      {id: 1, name: 'CF_1', url: ' cluster1_url', cnsi_type: 'cf', guid: '8221adff-529a-4567-b57a-155fb69f1bd0'},
       {id: 2, name: 'CE_1', url: ' cluster2_url', cnsi_type: 'hce', guid: 'f0b0f8c6-d00d-47f2-8636-1f558f7ec48e'}
     ]);
   }
@@ -144,7 +144,7 @@
         id: 1,
         name: 'CF_1',
         url: ' cluster1_url',
-        cnsi_type: 'hcf',
+        cnsi_type: 'cf',
         guid: '8221adff-529a-4567-b57a-155fb69f1bd0'
       },
       {

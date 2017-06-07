@@ -147,14 +147,14 @@
       var serviceInstances = _.set({}, cnsiGuid1, {
         guid: cnsiGuid1,
         name: 'cf',
-        cnsi_type: 'hcf',
+        cnsi_type: 'cf',
         valid: true,
         error: false
       });
       _.set(serviceInstances, cnsiGuid2, {
         guid: cnsiGuid2,
         name: 'cf',
-        cnsi_type: 'hcf',
+        cnsi_type: 'cf',
         valid: true,
         error: false
       });

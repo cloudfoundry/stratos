@@ -16,7 +16,7 @@
               {
                 "guid": cnsiGuid,
                 "name": "Julbra CF",
-                "cnsi_type": "hcf",
+                "cnsi_type": "cf",
                 "api_endpoint": {
                   "Scheme": "https",
                   "Opaque": "",

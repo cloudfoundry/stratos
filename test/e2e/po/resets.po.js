@@ -114,7 +114,7 @@
             case 'hce':
               list = helpers.getHces();
               break;
-            case 'hcf':
+            case 'cf':
               list = helpers.getCfs();
               break;
             default:
@@ -165,7 +165,7 @@
           if (!cfs.hasOwnProperty(c)) {
             continue;
           }
-          promises.push(helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/register/hcf'}, null, cfs[c].register));
+          promises.push(helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/register/cf'}, null, cfs[c].register));
         }
         var hces = helpers.getHces();
         for (c in hces) {

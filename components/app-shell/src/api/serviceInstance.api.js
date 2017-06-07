@@ -53,7 +53,7 @@
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      serviceType = serviceType || 'hcf';
+      serviceType = serviceType || 'cf';
       var data = $httpParamSerializer({
         api_endpoint: url,
         cnsi_name: name,

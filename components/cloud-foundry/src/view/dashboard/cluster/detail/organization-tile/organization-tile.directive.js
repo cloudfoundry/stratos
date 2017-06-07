@@ -68,7 +68,7 @@
     };
 
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-    this.user = consoleInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
+    this.user = consoleInfo.info.endpoints.cf[that.organization.cnsiGuid].user;
 
     var editOrgAction = {
       name: gettext('Edit Organization'),
