@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	VCapApplication        = "VCAP_APPLICATION"
-	CFApiURLOverride       = "CF_API_URL"
-	CFApiForceSecure       = "CF_API_FORCE_SECURE"
-	cfSessionCookieName    = "JSESSIONID"
+	VCapApplication     = "VCAP_APPLICATION"
+	CFApiURLOverride    = "CF_API_URL"
+	CFApiForceSecure    = "CF_API_FORCE_SECURE"
+	cfSessionCookieName = "JSESSIONID"
 )
 
 type CFHosting struct {
@@ -38,8 +38,8 @@ func (ch CFHosting) Init() error {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
-		ch.portalProxy.GetConfig().ConsoleClient = ch.portalProxy.GetConfig().HCFClient
-		ch.portalProxy.GetConfig().ConsoleClientSecret = ch.portalProxy.GetConfig().HCFClientSecret
+		ch.portalProxy.GetConfig().ConsoleClient = ch.portalProxy.GetConfig().CFClient
+		ch.portalProxy.GetConfig().ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
 
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().UAAAdminIdentifier = ch.portalProxy.GetConfig().CFAdminIdentifier
@@ -109,9 +109,9 @@ func (ch CFHosting) Init() error {
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-			SpaceGUID: appData.SpaceID,
-			AppGUID:   appData.ApplicationID,
-			EndpointGUID:   cfCnsi.GUID,
+			SpaceGUID:    appData.SpaceID,
+			AppGUID:      appData.ApplicationID,
+			EndpointGUID: cfCnsi.GUID,
 		}
 
 		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
@@ -133,7 +133,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		if  c.Request().Header().Contains("Upgrade") &&
+		if c.Request().Header().Contains("Upgrade") &&
 			c.Request().Header().Contains("Sec-Websocket-Key") {
 			log.Infof("Not redirecting this request")
 			return h(c)
@@ -159,7 +159,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
-func (ch *CFHosting)  SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Make sure there is a JSESSIONID cookie set to the session ID
 		session, err := ch.portalProxy.GetSession(c)
@@ -180,4 +180,3 @@ func (ch *CFHosting)  SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc
 		return h(c)
 	}
 }
-

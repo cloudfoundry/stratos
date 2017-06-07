@@ -988,7 +988,7 @@ items:
         value: hsm
       - name: HCP_CLIENT
         value: hcp
-      - name: HCF_CLIENT
+      - name: CF_CLIENT
         value: cf
       - name: ALLOWED_ORIGINS
         value: https://hsc-proxy-int
@@ -1817,7 +1817,7 @@ items:
             value: hsm
           - name: HCP_CLIENT
             value: hcp
-          - name: HCF_CLIENT
+          - name: CF_CLIENT
             value: cf
           - name: ALLOWED_ORIGINS
             value: https://hsc-proxy-int
@@ -2595,7 +2595,7 @@ items:
             value: hsm
           - name: HCP_CLIENT
             value: hcp
-          - name: HCF_CLIENT
+          - name: CF_CLIENT
             value: cf
           - name: ALLOWED_ORIGINS
             value: https://hsc-proxy-int

@@ -19,8 +19,8 @@ type CloudFoundrySpecification struct {
 }
 
 const (
-	EndpointType   = "cf"
-	CLIENT_ID_KEY  = "HCF_CLIENT"
+	EndpointType  = "cf"
+	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.EndpointPlugin, error) {
@@ -31,12 +31,12 @@ func (c CloudFoundrySpecification) GetType() string {
 	return EndpointType
 }
 
-func (c CloudFoundrySpecification) GetClientId() string{
+func (c CloudFoundrySpecification) GetClientId() string {
 	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
 		return clientId
 	}
 
-	return "cf";
+	return "cf"
 }
 
 func (c CloudFoundrySpecification) Register(echoContext echo.Context) error {
@@ -44,11 +44,11 @@ func (c CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c CloudFoundrySpecification)  AddAdminGroupRoutes(echoGroup *echo.Group){
+func (c CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
-func (c CloudFoundrySpecification)  AddSessionGroupRoutes(echoGroup *echo.Group){
+func (c CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Firehose Stream
 	echoGroup.GET("/:cnsiGuid/firehose", c.firehose)
 

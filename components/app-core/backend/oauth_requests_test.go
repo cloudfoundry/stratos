@@ -241,9 +241,6 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		// p.refreshToken(p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsi.TokenEndpoint))
-		//   p.getCNSITokenRecord(cnsiGUID, userGUID)
-
 		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
 			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration)
 		mock.ExpectQuery(selectAnyFromTokens).
@@ -387,8 +384,6 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		// p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsi.TokenEndpoint))
-		//   p.getCNSITokenRecord(cnsiGUID, userGUID)
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
@@ -632,9 +627,6 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
-
-		// p.refreshToken(p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsi.TokenEndpoint))
-		//   p.getCNSITokenRecord(cnsiGUID, userGUID)
 
 		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
 			AddRow(mockUAAToken, mockUAAToken, tokenExpiration)
