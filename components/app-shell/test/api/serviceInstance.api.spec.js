@@ -24,7 +24,7 @@
 
     it('should send POST request for create', function () {
       var data = { api_endpoint: 'url', cnsi_name: 'name' };
-      $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, '');
+      $httpBackend.expectPOST('/pp/v1/register/cf', $httpParamSerializer(data)).respond(200, '');
       serviceInstanceApi.create('url', 'name');
       $httpBackend.flush();
     });

@@ -203,7 +203,7 @@
           });
 
           describe('Form', function () {
-            var service = type === 'hcf' ? helpers.getCfs().cf1 : helpers.getHces().hce1;
+            var service = type === 'cf' ? helpers.getCfs().cf1 : helpers.getHces().hce1;
 
             beforeEach(function () {
               endpointsPage.headerRegister()
@@ -221,7 +221,7 @@
                 expect(registerEndpoint.getStepTwoType()).toBe(type);
               });
 
-              if (type === 'hcf') {
+              if (type === 'cf') {
                 describe('Invalid address', function () {
 
                   var invalidUrl = 'This is an invalid URL';
@@ -371,7 +371,7 @@
         }).skipWhen(helpers.skipIfNoHCE);
 
         describe('Register cf', function () {
-          registerTests('hcf');
+          registerTests('cf');
         });
 
       });

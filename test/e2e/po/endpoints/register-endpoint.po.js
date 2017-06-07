@@ -54,7 +54,7 @@
   function selectType(type) {
     var registerButtons = _getWizard().all(by.css('.btn.btn-sm.btn-link'));
     switch (type) {
-      case 'hcf':
+      case 'cf':
         return registerButtons.get(0).click();
       case 'hce':
         return registerButtons.get(1).click();
@@ -70,7 +70,7 @@
 
       switch (text) {
         case 'Register a Cloud Foundry Endpoint':
-          return 'hcf';
+          return 'cf';
         case 'Register a Code Engine Endpoint':
           return 'hce';
         default:

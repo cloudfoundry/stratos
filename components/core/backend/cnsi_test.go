@@ -21,7 +21,7 @@ func TestRegisterHCFCluster(t *testing.T) {
 	defer mockV2Info.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":           "Some fancy HCF Cluster",
+		"cnsi_name":           "Some fancy CF Cluster",
 		"api_endpoint":         mockV2Info.URL,
 		"skip_ssl_validation":  "true",
 	})
@@ -30,10 +30,10 @@ func TestRegisterHCFCluster(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true).
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err != nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err != nil {
 		t.Errorf("Failed to register cluster: %v", err)
 	}
 
@@ -61,7 +61,7 @@ func TestRegisterHCFClusterWithMissingName(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
 		t.Error("Should not be able to register cluster without cluster name")
 	}
 }
@@ -78,14 +78,14 @@ func TestRegisterHCFClusterWithMissingAPIEndpoint(t *testing.T) {
 	defer mockV2Info.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name": "Some fancy HCF Cluster",
+		"cnsi_name": "Some fancy CF Cluster",
 	})
 
 	_, _, ctx, pp, db, _ := setupHTTPTest(req)
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
 		t.Error("Should not be able to register cluster without api endpoint")
 	}
 }
@@ -104,7 +104,7 @@ func TestRegisterHCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 	// force a bad api_endpoint to be sure it is handled properly:
 	// src: https://bryce.fisher-fleig.org/blog/golang-testing-stdlib-errors/index.html
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":    "Some fancy HCF Cluster",
+		"cnsi_name":    "Some fancy CF Cluster",
 		"api_endpoint": "%zzzzz",
 	})
 
@@ -112,7 +112,7 @@ func TestRegisterHCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
 		t.Error("Should not be able to register cluster without a valid api endpoint")
 	}
 }
@@ -129,7 +129,7 @@ func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
 	defer mockV2Info.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":    "Some fancy HCF Cluster",
+		"cnsi_name":    "Some fancy CF Cluster",
 		"api_endpoint": mockV2Info.URL,
 	})
 
@@ -137,7 +137,7 @@ func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
 		t.Error("Should not register cluster if call to v2/info fails")
 	}
 }
@@ -154,7 +154,7 @@ func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	defer mockV2Info.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":    "Some fancy HCF Cluster",
+		"cnsi_name":    "Some fancy CF Cluster",
 		"api_endpoint": mockV2Info.URL,
 	})
 
@@ -165,7 +165,7 @@ func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	mock.ExpectExec(insertIntoCNSIs).
 		WillReturnError(errors.New("Unknown Database Error"))
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["hcf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
 		t.Errorf("Unexpected success - should not be able to register cluster without token save.")
 	}
 }

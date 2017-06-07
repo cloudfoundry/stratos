@@ -103,19 +103,17 @@
     this.open = false;
     this.buttonMode = false;
 
-    if (this.enableButtonMode) {
-      $scope.$watch(function () {
-        if (that.actions && that.actions.length > 1) {
-          var hidden = _.countBy(that.actions, function (action) {
-            return !!action.hidden;
-          }).true;
-          return that.actions.length - (hidden ? hidden : 0) > 1;
-        }
-        return false;
-      }, function (moreThanOneVisibleAction) {
-        that.buttonMode = !moreThanOneVisibleAction;
-      });
-    }
+    $scope.$watch(function () {
+      if (that.actions && that.actions.length > 0) {
+        return _.countBy(that.actions, function (action) {
+          return !!action.hidden;
+        }).false;
+      }
+      return 0;
+    }, function (visibleActions) {
+      that.visibleActions = visibleActions > 0;
+      that.buttonMode = that.enableButtonMode && visibleActions === 1;
+    });
   }
 
   angular.extend(ActionsMenuController.prototype, {

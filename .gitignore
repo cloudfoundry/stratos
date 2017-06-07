@@ -32,7 +32,8 @@ vendor/
 **/vendor
 **/*.so
 .glide
-
+tools/ssl
+build/secrets.json
 deploy/data/
 deploy/hsc-upgrade-volume/
 deploy/development.rc

@@ -1,4 +1,4 @@
-<div class="action-menu-wrapper">
+<div class="action-menu-wrapper" ng-show="actionsMenuCtrl.visibleActions">
   <div ng-show="actionsMenuCtrl.buttonMode"
        class="action-button">
     <a class="btn btn-link" ng-click="actionsMenuCtrl.executeAction($event, actionsMenuCtrl.actions[0])">
