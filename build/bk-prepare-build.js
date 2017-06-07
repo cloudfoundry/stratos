@@ -59,8 +59,6 @@
       });
       promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
 
-
-
       Q.all(promises)
         .then(function () {
           done();
