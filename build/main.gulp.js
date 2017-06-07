@@ -257,7 +257,8 @@
   });
 
   // Gulp watch JavaScript, SCSS and HTML source files
-  gulp.task('watch', ['prepare-frontend'], function () {
+  // Task is used by dev task. Don't use externally.
+  gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 

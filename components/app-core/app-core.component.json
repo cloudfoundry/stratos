@@ -1,0 +1,6 @@
+{
+  "frontend": {
+    "base": "frontend",
+    "root": "app"
+  }
+}

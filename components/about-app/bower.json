@@ -11,6 +11,6 @@
     ".*"
   ],
   "dependencies": {
-    "app-shell": "./components/app-shell"
+    "app-core": "./components/app-core"
   }
 }
