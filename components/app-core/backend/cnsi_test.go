@@ -179,7 +179,7 @@ func TestListCNSIs(t *testing.T) {
 	defer db.Close()
 
 	// Mock the CNSIs in the database
-	expectedCNSIList := expectCFAndHCERows()
+	expectedCNSIList := expectCFAndCERows()
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WillReturnRows(expectedCNSIList)
 
