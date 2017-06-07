@@ -1,0 +1,23 @@
+<gallery-card class="cluster-gallery-card cluster-tile"
+              ng-class="{'unlink': !tileCtrl.service.isConnected || tileCtrl.userService.error }"
+              card-data="tileCtrl.getCardData()"
+              on-card-click="tileCtrl.service.isConnected && !tileCtrl.userService.error ? tileCtrl.summary() : false">
+
+  <dl class="dl-horizontal" ng-if="tileCtrl.service.isConnected">
+    <dt translate>ENDPOINT URL</dt>
+    <dd class="cluster-tile-endpoint">{{tileCtrl.service.api_endpoint.Host}}</dd>
+    <dt ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[tileCtrl.service.guid]" translate>ACCOUNT STATUS</dt>
+    <dd class="cluster-tile-account" ng-if="tileCtrl.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>
+      {{ tileCtrl.stackatoInfo.info.endpoints.hcf[tileCtrl.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
+    <dt ng-if="tileCtrl.instancesCount >= 0" translate>INSTANCES</dt>
+    <dd ng-if="tileCtrl.instancesCount >= 0" >{{tileCtrl.instancesCount}}</dd>
+    <dt ng-if="tileCtrl.servicesCount >= 0" translate>SERVICES</dt>
+    <dd ng-if="tileCtrl.servicesCount >= 0" >{{tileCtrl.servicesCount}}</dd>
+  </dl>
+  <div ng-if="!tileCtrl.service.isConnected" class="text-center">
+    <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
+    <a class="" ng-click="tileCtrl.connect(tileCtrl.service)" translate>Connect</a>
+      {{ ' to this endpoint.' | translate }}<br>
+    <span translate="">ENDPOINT URL</span> {{tileCtrl.service.api_endpoint.Host}}<br>
+  </div>
+</gallery-card>

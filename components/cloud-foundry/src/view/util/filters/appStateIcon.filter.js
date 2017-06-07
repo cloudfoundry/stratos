@@ -42,6 +42,9 @@
         case 'deleted':
           icon = 'app-status-icon-delete text-success';
           break;
+        case 'deleted':
+          icon = 'helion-icon-Trash text-success';
+          break;
         default:
           icon = '';
       }

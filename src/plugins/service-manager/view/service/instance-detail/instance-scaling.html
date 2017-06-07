@@ -1,0 +1,36 @@
+<div class="applications-empty"
+  ng-if="!instanceCtrl.instance.scaling || instanceCtrl.instance.scaling.length === 0"
+>
+  <div class="applications-msg" translate>No scaling metadata available.</div>
+</div>
+<table class="table"
+        ng-if="instanceCtrl.instance.scaling && instanceCtrl.instance.scaling.length"
+        st-table="instanceCtrl.stTableInstanceScaling"
+        st-safe-src="instanceCtrl.instance.scaling">
+  <thead>
+  <tr>
+    <th translate st-sort="component" st-sort-default="true" st-skip-natural="true">Component</th>
+    <th translate st-sort="min_instances" st-skip-natural="true">Min Instances</th>
+    <th translate st-sort="max_instances" st-skip-natural="true">Max Instances</th>
+  </tr>
+  <tr>
+    <th colspan="3" class="table-sort-filter">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input st-search=""
+                type="text" class="form-control"
+                placeholder="{{'Filter scaling metadata' | translate}}"/>
+        </div>
+      </form>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="scale in instanceCtrl.stTableInstanceScaling track by $index">
+    <td>{{ scale.component }}</td>
+    <td>{{ scale.min_instances }}</td>
+    <td>{{ scale.max_instances }}</td>
+  </tr>
+  </tbody>
+</table>

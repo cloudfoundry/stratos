@@ -1,0 +1,46 @@
+<div class="applications-empty"
+  ng-if="!instanceCtrl.instance.components || instanceCtrl.instance.components.length === 0">
+  <div class="applications-msg" translate>No components available.</div>
+</div>
+<table class="table"
+        ng-if="instanceCtrl.instance.components && instanceCtrl.instance.components.length"
+        st-table="instanceCtrl.stTableInstanceComponents"
+        st-safe-src="instanceCtrl.components">
+  <thead>
+  <tr>
+    <th translate st-sort="name" st-sort-default="true" st-skip-natural="true">Component Name</th>
+    <th translate st-sort="state.phase" st-skip-natural="true">State</th>
+    <th translate st-sort="volumes" st-skip-natural="true">Volumes</th>
+  </tr>
+  <tr>
+    <th colspan="2" class="table-sort-filter">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <i class="application-search-box-icon helion-icon helion-icon-lg helion-icon-Search"></i>
+          <input st-search=""
+                type="text" class="form-control"
+                placeholder="{{'Filter components' | translate}}"/>
+        </div>
+      </form>
+    </th>
+    <th>
+      <checkbox-input class="hide-components" ng-model="instanceCtrl.hsmModel.hideCompletedComponents"
+                    input-label="{{'Hide completed components' | translate}}">
+      </checkbox-input>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="component in instanceCtrl.stTableInstanceComponents track by component.name">
+    <td>{{ component.name }}</td>
+    <td>{{ component.state.phase }}</td>
+    <td>
+      <span
+          ng-mouseleave="instanceCtrl.highlight(volume.name)"
+          ng-mouseenter="instanceCtrl.highlight(volume.name, true)"
+          class="product-version pointer hsm-volume-{{volume.name}}"
+          ng-repeat="volume in component.volumes">{{ volume.name }}</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
