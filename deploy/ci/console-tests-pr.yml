@@ -11,9 +11,8 @@ resources:
   source:
     access_token: {{github-access-token}}
     repo: hpcloud/stratos-ui
-    uri: git@github.com:hpcloud/stratos-ui.git
+    uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
-    label: {{ui-pr-label}}
     base_url: {{base-url}}
 
 groups:
