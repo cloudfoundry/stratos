@@ -21,31 +21,29 @@ run:
       start_docker
       export GOPATH=$PWD
 
-      ls stratos-ui/
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
-      ls stratos-ui/
       cd stratos-ui/deploy
 
-       cat << EOF > ../build/secrets.json
-       {
-         "cloudFoundry": {
-           "url": "${CF_LOCATION}",
-           "admin": {
-             "username": "${CF_ADMIN_USER}",
-             "password": "${CF_ADMIN_PASSWORD}"
-           },
-           "user": {
-             "username": "${CF_E2E_USER}",
-             "password": "${CF_E2E_USER_PASSWORD}"
-           }
-         },
-         "githubPat": "${GITHUB_TOKEN}"
-       }
-       EOF
+      cat << EOF > ../build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+        },
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
 
-       cat ../build/secrets.json
+      cat ../build/secrets.json
 
       # Load images from image
       for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
