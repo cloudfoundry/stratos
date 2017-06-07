@@ -1,76 +1,101 @@
-# Development on Helion Stackato v4.0 Console UI
-In this section, we describe how to set up your local development environment so that you are able to run through the application end-to-end. In this setup, Docker containers hosting the application will point to Helion Code Engine installed on HCP.
+# Developing for Stratos UI
+
+In this section, we describe how to set up your local development environment so that you are able to run through the application end-to-end. 
+
+---
+## OLD DOCS TO BE REVIEWED
+---
+
+For more implementation details, please see the following pages:
+* [Overview](docs/README.md)
+* [Architecture](docs/architecture.md)
+* [Plugins](docs/plugins.md)
+
+
+## System Requirements
+Nginx is used to serve static files while a Golang based REST API backend. Another container hosts the Postgres database for session and service instance management.
+
+This project depends on the following:
+* [Docker](https://docs.docker.com/mac)
+* [Node.js](https://nodejs.org) - to easily install Node.js modules
+* [portal-proxy](https://github.com/hpcloud/portal-proxy) - Golang based REST API
+
+## Installation
+Install Docker and clone the repositories listed above at the same level as this project.
+
+### Build and run
+See the README in the `stratos-deploy` repo for details on how to develop against the Console.
+
+## Docker commands and development tools
+
+### View Logs
+```
+docker logs stratos-ui
+```
+
+### SSH into the running container
+```
+docker exec -it stratos-ui /bin/bash
+```
+or, from the stratos-deploy project
+```
+docker-compose run --rm ui bash
+```
+
+### Running Karma tests in container
+```
+$ cd tools
+$ npm test
+```
+
+### Running Protractor tests in container
+```
+$ cd tools
+$ npm run update-webdriver
+$ npm run e2e
+```
+By default tests will execute against the local machine's ip address. To run against, for example, the gulp dev instance use
+```
+$ npm run e2e -- --params.host=localhost --params.port=3100
+```
+
+### Running ESLint in container
+```
+$ cd tools
+$ ./node_modules/.bin/gulp lint
+```
+
+### Running gate check script
+This runs the unit tests and linting.
+```
+$ cd tools
+$ npm run gate-check
+```
+
+### Generate documentation (experimental)
+Locally, run the following command to generate documentation in the `docs/src` folder. You can then view the documentation by pointing your browser to the `index.html` file of that `docs/src` folder.
+```
+cd tools 
+./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
+```
+
+
+
+
+
+
+TODO:
+---
 
 Please ensure you have the following installed:
 * Docker
 * Vagrant
 * VMWare Fusion or Workstation
-  - send an email to **hp@vmware.com** with subject "Fusion License Request" or "Workstation License Request"
 * vagrant-reload plugin
 * vagrant-vmware-fusion plugin (or vagrant-vmware-workstation) - **you will need to purchase a license**
 * VirtualBox (optional)
 
-### <a id="install-hcp"></a>1. Install HCP
-* Create a Dockerhub account
-* Request access to the 'helioncf' organization in Dockerhub
-* Request access to Helion Code Engine repositories in Dockerhub (contact: Wayne Foley)
-* Download the [HCP 1.2.18 dev harness](https://s3-us-west-2.amazonaws.com/hcp-concourse/hcp-developer-1.2.18%2Bmaster.c8e429d.20160717012701.tar.gz)
-* Install Vagrant plugins:
-  - `vagrant plugin install vagrant-reload`
-  - `vagrant plugin install vagrant-vmware-fusion` or `vagrant plugin install vagrant-vmware-workstation`
-* To install, run the following command in the *hcp-developer* folder (using your Dockerhub credentials):
-  - `DOCKER_USERNAME=<username> DOCKER_EMAIL=<email> DOCKER_PASSWORD=<pw> ./start.sh`
-* When install is complete, note the HCP service and service manager location. You will need it to install Helion Code Engine.
-* SSH into the *master*: `vagrant ssh master`
-* Wait until all pods are in the "Running" state: `watch kubectl get pods --all-namespaces`
-* SSH into the "node" instance and perform an explicit Docker login:
-  ```
-  vagrant ssh node
-  sudo su
-  docker login
-  ```
-
-### <a id="login-hcp"></a>2. HCP Login
-* Download and install the HCP CLI for your operating system. You will use this to log into HCP and retrieve the token necessary for installing other services.
-  - [Linux](https://s3-us-west-2.amazonaws.com/hcp-cli-release/hcp-1.2.18-linux-amd64.tar.gz)
-  - [OSX](https://s3-us-west-2.amazonaws.com/hcp-cli-release/hcp-1.2.18-darwin-amd64.tar.gz)
-  - [Windows](https://s3-us-west-2.amazonaws.com/hcp-cli-release/hcp-1.2.18-windows-amd64.zip)
-* Log into HCP and export the access token:
-```
-hcp api <HCP service HTTP location from Step 1>
-hcp login admin@cnap.local -p <admin@cnap.local password>
-export token=$(cat $HOME/.hcp | jq -r .AccessToken)
-```
-* Add the `publisher` role to the admin user: `hcp update-user admin@cnap.local -r publisher`
-
-### <a id="install-hce"></a>3. Install Helion Code Engine on HCP
-* Download and install the HSM CLI for your operating system. You will use this to install Helion Code Engine.
-  - [Linux](https://helion-service-manager.s3.amazonaws.com/release/master/hsm-cli/dist/0.1.73/hsm-0.1.73-linux-amd64.tar.gz)
-  - [OSX](https://helion-service-manager.s3.amazonaws.com/release/master/hsm-cli/dist/0.1.73/hsm-0.1.73-darwin-amd64.tar.gz)
-  - [Windows](https://helion-service-manager.s3.amazonaws.com/release/master/hsm-cli/dist/0.1.73/hsm-0.1.73-windows-amd64.zip)
-* Set the API: `hsm api <Service manager location from Step 1>`
-* Log into HSM: `hsm login --skip-ssl-validation`
-* Download the `instance.json` file specific to [Helion Code Engine](https://helion-service-manager.s3.amazonaws.com/release/master/instance-definition/hce/instance.json).
-* Set the Docker credentials, SSL cert and key, and mirror cert and key in the `instance.json` file.
-* Create a Helion Code Engine instance: `hsm create-instance hpe-catalog.hpe.hce -i instance.json`
-* Wait for all Helion Code Engine pods to be in the "Running" state.
-* Get the port of the "hce-rest" service:
-  - `curl http://192.168.200.2:8080/api/v1/namespaces/helion-code-engine/services/hce-rest`
-  - You will need this port to register an HCE endpoint in the Console UI
-
-### <a id="register-ui"></a>4. Register the Helion Stackato v4.0 Console UI on Github
-* Head over to: https://github.com/settings/developers
-* Register the Console UI as a new application
-  - Homepage URL: `http://<DOCKER MACHINE IP>` (ex. `192.168.99.100`)
-  - Authorization callback URL: `http://<DOCKER MACHINE IP>/pp/v1/github/oauth/callback`
-* Create a `development.rc` file based on the provided [template](../development.rc.template)
-* Set the following environmental variables using the generated client ID and secret:
-```
-export GITHUB_OAUTH_CLIENT_ID=<CLIENT ID>
-export GITHUB_OAUTH_CLIENT_SECRET=<CLIENT SECRET>
-```
-
-### <a id="running-ui"></a>5. Running the Helion Stackato v4.0 Console UI
+### <a id="running-ui"></a>5. Running the Console UI
 * Clone all related repositories
   - If starting from a fresh install, run: `sh start_fresh.sh`. This will clone all necessary repositories.
   - Otherwise, manually clone the following repositories:

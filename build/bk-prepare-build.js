@@ -51,12 +51,13 @@
       if (err) {
         throw err;
       }
+
       // Only copy the components that are enabled
       var promises = [];
       _.each(plugins.enabledPlugins, function (plugin) {
         promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
       });
-      promises.push(fsCopyQ('./components/core', tempSrcPath + '/core'));
+      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
 
       Q.all(promises)
         .then(function () {
