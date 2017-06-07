@@ -14,7 +14,7 @@
   "dependencies": {
     "app-theme": "./components/app-theme",
     "app-framework": "./components/app-framework",
-    "app-shell": "./components/app-shell",
+    "app-core": "./components/app-core",
     "suse-branding": "./components/suse-branding",
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",

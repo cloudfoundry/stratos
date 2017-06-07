@@ -12,9 +12,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
 
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/cnsis"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/tokens"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/cnsis"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/tokens"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"

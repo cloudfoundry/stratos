@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hpcloud/stratos-ui/components/core/backend/datastore"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/crypto"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/datastore"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/crypto"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 var findUAAToken = `SELECT auth_token, refresh_token, token_expiry

@@ -1,6 +1,6 @@
 package tokens
 
-import "github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
+import "github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
 
 // Token -
 type Token struct {

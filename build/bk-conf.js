@@ -8,7 +8,7 @@
       return path.join(srcPath, 'vendor', 'github.com', 'hpcloud', 'stratos-ui');
     },
     getCorePath: function (srcPath, executable) {
-      return path.join(srcPath, 'core', 'backend', executable ? executable : '');
+      return path.join(srcPath, 'app-core', 'backend', executable ? executable : '');
     },
     coreName: 'portal-proxy',
     outputPath: path.join(__dirname, '..', 'outputs'),
