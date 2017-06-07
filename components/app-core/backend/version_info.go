@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/goose-db-version"
+	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/goose-db-version"
 	"github.com/labstack/echo"
 )
 
