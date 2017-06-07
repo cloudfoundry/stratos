@@ -206,6 +206,7 @@ function buildPostflightJob {
              ${DOCKER_ORG}/hsc-postflight-builder:latest
   cp goose  ${STRATOS_UI_PATH}/
   buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  rm -f goose
 }
 
 function buildUI {

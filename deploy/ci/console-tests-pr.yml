@@ -68,8 +68,6 @@ jobs:
 
 - name: console-e2e-tests
   plan:
-  - get: stratos-deploy
-
 
   # get PR and set status to pending
   - get: stratos-ui
