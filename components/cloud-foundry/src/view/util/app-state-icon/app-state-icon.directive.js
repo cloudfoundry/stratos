@@ -29,7 +29,5 @@
    */
   function AppStateIconController() {}
 
-  angular.extend(AppStateIconController.prototype, {});
-
 })();
 

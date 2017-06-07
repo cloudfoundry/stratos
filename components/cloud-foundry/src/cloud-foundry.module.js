@@ -11,37 +11,29 @@
     ])
     .run(register);
 
-  function register($state, $location, appEventService, modelManager, appNotificationsService) {
-    return new CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService);
+  function register(appEventService, modelManager) {
+    return new CloudFoundry(appEventService, modelManager);
   }
 
-  function CloudFoundry($state, $location, appEventService, modelManager, appNotificationsService) {
-    var that = this;
-    this.appEventService = appEventService;
-    this.modelManager = modelManager;
-    this.$state = $state;
-    this.$location = $location;
-    this.appNotificationsService = appNotificationsService;
-    this.appEventService.$on(this.appEventService.events.LOGIN, function (ev, preventRedirect) {
-      that.onLoggedIn(preventRedirect);
+  function CloudFoundry(appEventService, modelManager) {
+    appEventService.$on(appEventService.events.LOGIN, function (ev, preventRedirect) {
+      onLoggedIn(preventRedirect);
     });
-    this.appEventService.$on(this.appEventService.events.LOGOUT, function () {
-      that.onLoggedOut();
+    appEventService.$on(appEventService.events.LOGOUT, function () {
+      onLoggedOut();
     });
-  }
 
-  angular.extend(CloudFoundry.prototype, {
-    onLoggedIn: function () {
-      this.registerNavigation();
-    },
+    function onLoggedIn() {
+      registerNavigation();
+    }
 
-    onLoggedOut: function () {
-    },
+    function onLoggedOut() {
+    }
 
-    registerNavigation: function () {
-      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+    function registerNavigation() {
+      var menu = modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', 0, 'apps');
     }
-  });
+  }
 
 })();
