@@ -21,9 +21,11 @@ run:
       start_docker
       export GOPATH=$PWD
 
+      ls stratos-ui/
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
+      ls stratos-ui/
       cd stratos-ui/deploy
 
        cat << EOF > ../build/secrets.json

@@ -60,6 +60,11 @@ jobs:
       privileged: true
       timeout: 5m
       file: stratos-ui/deploy/ci/tasks/portal-proxy/run-unit-tests.yml
+      on_success:
+        put: stratos-ui
+        params:
+          path: stratos-ui
+          status: success
       on_failure:
         put: stratos-ui
         params:
