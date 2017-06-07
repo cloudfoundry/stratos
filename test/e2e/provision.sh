@@ -10,6 +10,5 @@ else
   echo -e "\033[32mpackage.json has not changed. Skipping npm install\033[0m"
 fi
 PATH=$PATH:${WORK_DIR}/node_modules/.bin
-ls build
 bower install --allow-root --force
 npm run build
