@@ -555,7 +555,7 @@
 
         // Services Quotas
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
-       // Service Keys are credentials for service instances
+        // Service Keys are credentials for service instances
         details.servicesKeysQuota = _.get(vals.quota, 'entity.total_service_keys', -1);
 
         details.privateDomains = _.get(org, 'entity.private_domains', []).length;

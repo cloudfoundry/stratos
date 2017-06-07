@@ -180,8 +180,7 @@
    * @returns {string} app name
    */
   function getName(isoTime) {
-    var customLabel = helpers.getCustomAppLabel() || '';
-    return 'acceptance.e2e.' + customLabel + '.' + isoTime;
+    return helpers.getCustomAppName(isoTime) || '';
   }
 
   /**
