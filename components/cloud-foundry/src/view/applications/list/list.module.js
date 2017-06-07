@@ -253,6 +253,9 @@
             }
           });
       } else {
+        // Ensure any previous values are wiped
+        that.model.filterParams.orgGuid = 'all';
+        that.filter.orgGuid = that.model.filterParams.orgGuid;
         return this.$q.resolve();
       }
     },
@@ -290,6 +293,9 @@
             }
           });
       } else {
+        // Ensure any previous values are wiped
+        that.model.filterParams.spaceGuid = 'all';
+        that.filter.spaceGuid = that.model.filterParams.spaceGuid;
         return this.$q.resolve();
       }
     },
