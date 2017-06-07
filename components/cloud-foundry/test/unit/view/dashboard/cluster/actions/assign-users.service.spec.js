@@ -72,7 +72,7 @@
 
     it('should pass correct content spec to frameworkDetailView', function () {
       // This will call initialiseSelect, so ensure it has all the shizzle to run
-      _.set(consoleInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
+      _.set(consoleInfo, 'info.endpoints.cf.clusterGuid.user.admin', true);
       // User services list
       $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
 
@@ -180,7 +180,7 @@
 
           beforeEach(function () {
             // This will call initialiseSelect, so ensure it has all the shizzle to run
-            _.set(consoleInfo, 'info.endpoints.hcf.clusterGuid.user.admin', true);
+            _.set(consoleInfo, 'info.endpoints.cf.clusterGuid.user.admin', true);
             // User services list
             $httpBackend.whenGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: users });
 

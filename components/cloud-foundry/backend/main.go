@@ -19,7 +19,7 @@ type CloudFoundrySpecification struct {
 }
 
 const (
-	EndpointType   = "hcf"
+	EndpointType   = "cf"
 	CLIENT_ID_KEY  = "HCF_CLIENT"
 )
 

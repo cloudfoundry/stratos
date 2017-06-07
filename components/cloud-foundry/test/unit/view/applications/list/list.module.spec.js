@@ -33,7 +33,7 @@
       if (Object.keys(userCnsiModel.serviceInstances).length === 0) {
         userCnsiModel.serviceInstances = {
           cnsiGuid: {
-            cnsi_type: 'hcf',
+            cnsi_type: 'cf',
             guid: cnsiGuid,
             valid: true,
             error: false
@@ -144,7 +144,7 @@
       it('should forward to `cluster view` when a singular cluster is connected', function () {
         $controller.userCnsiModel.serviceInstances = [{
           id: 'test',
-          cnsi_type: 'hcf'
+          cnsi_type: 'cf'
         }];
         $controller.model.clusterCount = 1;
         var endpointsLink = $controller.getEndpointsLink();
@@ -190,7 +190,7 @@
         beforeEach(function () {
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: cnsiGuid
             }
           };
@@ -219,11 +219,11 @@
         beforeEach(function () {
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: 'cnsiGuid1'
             },
             cnsiGuid2: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: 'cnsiGuid2'
             }
           };
@@ -379,11 +379,11 @@
           // Return multiple entries
           userCnsiModel.serviceInstances = {
             cnsiGuid1: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: cnsiGuid
             },
             cnsiGuid2: {
-              cnsi_type: 'hcf',
+              cnsi_type: 'cf',
               guid: filteredCnsiGuid
             }
           };
@@ -438,7 +438,8 @@
           appModel.filterParams.spaceGuid = 'junk3';
 
           setUp();
-          $httpBackend.flush();
+          // Kick of a digest, we only make a call when we have a valid org
+          $scope.$digest();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
@@ -448,6 +449,7 @@
           appModel.filterParams.cnsiGuid = 'junk1';
 
           setUp();
+          // Kick of a digest, we only make a call when we have a valid org
           $scope.$digest();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
@@ -459,6 +461,7 @@
           appModel.filterParams.orgGuid = 'junk2';
 
           setUp();
+          // Kick of a digest, we only make a call when we have a valid org
           $scope.$digest();
 
           check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);

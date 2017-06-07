@@ -52,8 +52,8 @@ $gallery-card-layout-steps: 4;
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
-    font-size: 18px;
-    font-weight: 500;
+    font-size: $font-size-large;
+    font-weight: $console-font-weight-semibold;
     width: 100%;
     color: $dove-gray2;
     &>span {

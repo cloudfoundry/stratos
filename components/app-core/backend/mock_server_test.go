@@ -61,7 +61,7 @@ func (m *mockPGStore) Get(r *http.Request, name string) (*sessions.Session, erro
 type mockServerFunc func(*mockServer)
 
 const mockCNSIGUID = "some-guid-1234"
-const mockHCFGUID = "some-hcf-guid-1234"
+const mockHCFGUID = "some-cf-guid-1234"
 const mockHCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
 
@@ -156,7 +156,7 @@ func expectOneRow() sqlmock.Rows {
 
 func expectHCFRow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true)
+		AddRow(mockHCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true)
 }
 
 func expectHCERow() sqlmock.Rows {
@@ -166,7 +166,7 @@ func expectHCERow() sqlmock.Rows {
 
 func expectHCFAndHCERows() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true).
+		AddRow(mockHCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true).
 		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
 }
 
@@ -264,7 +264,7 @@ const (
 	mockDopplerEndpoint = "https://doppler.127.0.0.1"
 	mockProxyVersion    = 20161117141922
 
-	stringHCFType = "hcf"
+	stringHCFType = "cf"
 	stringHCEType = "hce"
 
 	selectAnyFromTokens = `SELECT .+ FROM tokens WHERE .+`

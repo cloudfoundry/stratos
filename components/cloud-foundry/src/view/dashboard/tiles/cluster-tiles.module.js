@@ -79,7 +79,7 @@
      */
     function createClusterList() {
       vm.serviceInstances = {};
-      var filteredInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+      var filteredInstances = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'cf'});
       _.forEach(filteredInstances, function (serviceInstance) {
         var cloned = angular.fromJson(angular.toJson(serviceInstance));
         cloned.isConnected = _.get(userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);

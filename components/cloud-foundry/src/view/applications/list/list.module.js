@@ -170,7 +170,7 @@
       if (this.model.clusterCount === 0 && this.isEndpointsDashboardAvailable) {
         return this.$state.go('endpoint.dashboard');
       }
-      var cfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
+      var cfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'cf'});
       if (cfs.length === 1) {
         return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: cfs[0].guid});
       }
@@ -188,7 +188,7 @@
       this.clusters.length = 1;
       var clusters = _.chain(this.userCnsiModel.serviceInstances)
         .values()
-        .filter({cnsi_type: 'hcf'})
+        .filter({cnsi_type: 'cf'})
         .map(function (o) {
           return {label: o.name, value: o.guid};
         })
@@ -253,6 +253,9 @@
             }
           });
       } else {
+        // Ensure any previous values are wiped
+        that.model.filterParams.orgGuid = 'all';
+        that.filter.orgGuid = that.model.filterParams.orgGuid;
         return this.$q.resolve();
       }
     },
@@ -290,6 +293,9 @@
             }
           });
       } else {
+        // Ensure any previous values are wiped
+        that.model.filterParams.spaceGuid = 'all';
+        that.filter.spaceGuid = that.model.filterParams.spaceGuid;
         return this.$q.resolve();
       }
     },
@@ -369,7 +375,7 @@
     _handleErrors: function () {
       var that = this;
       var errors = [];
-      var servicesWithErrors = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', error: true});
+      var servicesWithErrors = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'cf', error: true});
       _.each(servicesWithErrors, function (cnsi) {
         if (that.filter.cnsiGuid === cnsi.guid || that.filter.cnsiGuid === 'all') {
           errors.push(cnsi.name);
@@ -492,7 +498,7 @@
         if (!this.userCnsiModel.serviceInstances.hasOwnProperty(guid)) {
           continue;
         }
-        if (this.userCnsiModel.serviceInstances[guid].cnsi_type !== 'hcf') {
+        if (this.userCnsiModel.serviceInstances[guid].cnsi_type !== 'cf') {
           continue;
         }
         if (this.authModel.isAdmin(guid)) {

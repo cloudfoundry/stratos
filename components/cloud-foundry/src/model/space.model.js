@@ -636,7 +636,7 @@
     function createSpaces(cnsiGuid, orgGuid, spaceNames, params) {
 
       var consoleInfoModel = modelManager.retrieve('app.model.consoleInfo');
-      var userGuid = consoleInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = consoleInfoModel.info.endpoints.cf[cnsiGuid].user.guid;
       var cfOrganizationModel = _getOrganizationModel();
       var createPromises = [];
 

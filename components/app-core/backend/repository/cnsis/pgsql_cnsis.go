@@ -237,7 +237,7 @@ func (p *PostgresCNSIRepository) Delete(guid string) error {
 //
 //	switch cnsi {
 //	case
-//		"hcf",
+//		"cf",
 //		"hce",
 //		"hsm":
 //		return CNSIType(cnsi), nil

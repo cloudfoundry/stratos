@@ -46,7 +46,7 @@
      */
     function create(type, url, name, skipSslValidation) {
       var serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
-      type = type || 'hcf';
+      type = type || 'cf';
 
       var promise = serviceInstanceApi.create(url, name, !!skipSslValidation, type);
       return promise.then(function (response) {
@@ -86,7 +86,7 @@
           serviceInstances.length = 0;
           [].push.apply(serviceInstances, _.sortBy(items, 'name'));
 
-          var cfOnly = _.filter(serviceInstances, { cnsi_type: 'hcf' }) || [];
+          var cfOnly = _.filter(serviceInstances, { cnsi_type: 'cf' }) || [];
 
           return {
             numAvailable: cfOnly.length

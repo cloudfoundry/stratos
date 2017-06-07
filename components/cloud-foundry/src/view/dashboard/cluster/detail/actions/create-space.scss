@@ -20,7 +20,7 @@
     right: 14px;
     bottom: 8px;
     font-weight: 500;
-    font-size: 15px;
+    font-size: $font-size-base;
     color: $brand-primary;
     user-select: none;
 
@@ -47,7 +47,7 @@
     align-items: baseline;
     padding-left: 0;
     padding-right: 10px;
-    font-size: 16px;
+    font-size: $font-size-medium;
     text-transform: none;
     font-weight: 600;
     color: $brand-primary;

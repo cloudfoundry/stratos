@@ -165,7 +165,7 @@
                 return that.serviceInstanceModel.list()
                   .then(function (serviceInstances) {
                     var validServiceInstances = _.chain(_.values(serviceInstances))
-                      .filter({cnsi_type: 'hcf', valid: true})
+                      .filter({cnsi_type: 'cf', valid: true})
                       .filter(function (cnsi) {
                         return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
                       })

@@ -6,7 +6,7 @@
 
   .btn.btn-link {
     @include flex-vertical-centered();
-    font-size: inherit;
+    font-size: $font-size-base;
     margin-left: auto;
     padding: 0;
     height: auto;
@@ -20,6 +20,7 @@
 
     .material-icons {
       font-weight: $button-font-weight;
+      font-size: #{$font-size-base + 2px};
     }
   }
 }

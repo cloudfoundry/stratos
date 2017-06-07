@@ -455,7 +455,7 @@
         var promiseForUsers;
 
         var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-        _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', true);
+        _.set(consoleInfo, 'info.endpoints.cf.' + clusterGuid + '.user.admin', true);
 
         var usersModel = modelManager.retrieve('cloud-foundry.model.users');
         spyOn(usersModel, 'listAllUsers').and.callFake(function (inClusterGuid) {
@@ -478,7 +478,7 @@
         var users;
 
         var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-        _.set(consoleInfo, 'info.endpoints.hcf.' + clusterGuid + '.user.admin', false);
+        _.set(consoleInfo, 'info.endpoints.cf.' + clusterGuid + '.user.admin', false);
 
         _.set(cfOrganizationModel, 'organizations.' + clusterGuid + '.' + orgGuid, testModelOrg);
 
