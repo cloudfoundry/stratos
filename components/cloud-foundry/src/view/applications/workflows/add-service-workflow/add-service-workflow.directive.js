@@ -49,17 +49,17 @@
     var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     var serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var modal = null;
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
 
+    vm.modal = null;
     vm.loadingServiceInstances = false;
     vm.addServiceActions = {
       stop: function () {
-        stopWorkflow();
+        vm.stopWorkflow();
       },
 
       finish: function () {
-        finishWorkflow();
+        vm.finishWorkflow();
       }
     };
 
@@ -71,8 +71,8 @@
     vm.finishWorkflow = finishWorkflow;
 
     var startWorkflowEvent = appEventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
-      reset(config);
-      modal = startWorkflow();
+      vm.reset(config);
+      vm.modal = vm.startWorkflow();
       _loadServiceInstances();
     });
     $scope.$on('$destroy', startWorkflowEvent);
@@ -123,8 +123,8 @@
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
-              return addService().then(function () {
-                return addBinding().then(function () {
+              return vm.addService().then(function () {
+                return vm.addBinding().then(function () {
                   return $q.resolve();
                 }, function () {
                   return _onServiceBindingError();
@@ -312,7 +312,7 @@
         title: gettext('Add Service to ') + vm.data.app.summary.name
       };
       var context = {
-        addServiceActions: addServiceActions,
+        addServiceActions: vm.addServiceActions,
         options: vm.options
       };
 
@@ -326,7 +326,7 @@
      * @returns {void}
      */
     function stopWorkflow() {
-      modal.close();
+      vm.modal.close();
     }
 
     /**
@@ -337,8 +337,8 @@
      */
     function finishWorkflow() {
       if (!vm.data.confirm) {
-        addService().then(function () {
-          addBinding().then(function () {
+        vm.addService().then(function () {
+          vm.addBinding().then(function () {
             // show notification for successful binding
             var successMsg = gettext("The '{{ service }}'" +
               " service has been successfully attached to application '{{ appName }}'");
@@ -348,7 +348,7 @@
             };
             var message = $interpolate(successMsg)(context);
             appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
-            modal.close();
+            vm.modal.close();
           }, function () {
             return _onServiceBindingError();
           });
@@ -356,7 +356,7 @@
           return _onCreateServiceError();
         });
       } else {
-        modal.close();
+        vm.modal.close();
       }
     }
 

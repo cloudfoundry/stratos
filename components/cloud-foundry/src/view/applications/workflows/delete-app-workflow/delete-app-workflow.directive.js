@@ -35,12 +35,13 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
+   * @param {cfServiceDeleteAppWorkflow} cfServiceDeleteAppWorkflow - helper service for delete-app logic
    * @property {boolean} deletingApplication - a flag indicating if the workflow in progress
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
   function DeleteAppWorkflowController(modelManager, appEventService, $q, $interpolate, appUtilsService,
-                                       cfApplicationTabs) {
+                                       cfApplicationTabs, cfServiceDeleteAppWorkflow) {
 
     var vm = this;
 
@@ -49,8 +50,6 @@
     var serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     vm.deletingApplication = false;
     vm.cnsiGuid = null;
-
-    startWorkflow(vm.guids || {});
 
     vm.reset = reset;
     vm.checkAppRoutes = checkAppRoutes;
@@ -64,6 +63,8 @@
     vm.startWorkflow = startWorkflow;
     vm.stopWorkflow = stopWorkflow;
     vm.finishWorkflow = finishWorkflow;
+
+    vm.startWorkflow(vm.guids || {});
 
     function reset() {
 
@@ -82,8 +83,8 @@
           wizard.postInitTask.promise.then(function () {
             vm.options.isBusy = true;
             vm.wizard.nextBtnDisabled = true;
-            checkAppServices();
-            checkAppRoutes().finally(function () {
+            vm.checkAppServices();
+            vm.checkAppRoutes().finally(function () {
               vm.wizard.nextBtnDisabled = false;
               vm.options.isBusy = false;
             });
@@ -114,12 +115,12 @@
 
       vm.deleteApplicationActions = {
         stop: function () {
-          stopWorkflow();
+          vm.stopWorkflow();
         },
 
         finish: function (wizard) {
           wizard.disableButtons();
-          finishWorkflow().catch(function () {
+          vm.finishWorkflow().catch(function () {
             wizard.resetButtons();
           });
         }
@@ -161,8 +162,8 @@
      */
     function deleteApp() {
 
-      var removeAndDeleteRoutes = removeAppFromRoutes().then(function () {
-        return tryDeleteEachRoute();
+      var removeAndDeleteRoutes = vm.removeAppFromRoutes().then(function () {
+        return vm.tryDeleteEachRoute();
       });
 
       // May not be able to delete the project (pipeline user permisions) so ensure we attempt this up front
@@ -170,7 +171,7 @@
         .then(function () {
           return $q.all([
             removeAndDeleteRoutes,
-            deleteServiceBindings()
+            vm.deleteServiceBindings()
           ]);
         })
         .then(function () {
@@ -218,84 +219,19 @@
        */
       var serviceInstanceGuids = _.keys(checkedServiceValue);
       if (serviceInstanceGuids.length > 0) {
-        return _unbindServiceInstances(serviceInstanceGuids)
+        return cfServiceDeleteAppWorkflow.unbindServiceInstances(vm.cnsiGuid, serviceInstanceGuids)
           .then(function () {
             var safeServiceInstances = _.chain(checkedServiceValue)
               .filter(function (o) { return o && o.bound_app_count === 1; })
               .map('guid')
               .value();
-            return _deleteServiceInstances(safeServiceInstances);
+            return cfServiceDeleteAppWorkflow.deleteServiceInstances(safeServiceInstances);
           });
       } else {
         var deferred = $q.defer();
         deferred.resolve();
         return deferred.promise;
       }
-    }
-
-    /**
-     * @function _unbindServiceInstances
-     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @description Unbind service instance from app
-     * @param {array} bindingGuids - the service binding GUIDs
-     * @returns {object} A resolved/rejected promise
-     */
-    function _unbindServiceInstances(bindingGuids) {
-
-      var appGuid = appModel.application.summary.guid;
-      var q = 'service_instance_guid IN ' + bindingGuids.join(',');
-      return appModel.listServiceBindings(vm.cnsiGuid, appGuid, {q: q})
-        .then(function (bindings) {
-          var funcStack = [];
-
-          angular.forEach(bindings, function (binding) {
-            funcStack.push(function () {
-              return appModel.unbindServiceFromApp(vm.cnsiGuid, appGuid, binding.metadata.guid);
-            });
-          });
-
-          return appUtilsService.runInSequence(funcStack);
-        });
-    }
-
-    /**
-     * @function _deleteServiceInstances
-     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @description Delete service instances
-     * @param {array} safeServiceInstances - the service instance GUIDs
-     * @returns {object} A resolved/rejected promise
-     */
-    function _deleteServiceInstances(safeServiceInstances) {
-      var funcStack = [];
-
-      angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
-        funcStack.push(function () {
-          return _deleteServiceInstanceIfPossible(serviceInstanceGuid);
-        });
-      });
-
-      return appUtilsService.runInSequence(funcStack);
-    }
-
-    /**
-     * @function _deleteServiceInstanceIfPossible
-     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
-     * @description Delete service instance if possible. Ignore AssociationNotEmpty
-     * errors.
-     * @param {string} serviceInstanceGuid - the service instance GUID
-     * @returns {object} A resolved/rejected promise
-     */
-    function _deleteServiceInstanceIfPossible(serviceInstanceGuid) {
-      return $q(function (resolve, reject) {
-        serviceInstanceModel.deleteServiceInstance(vm.cnsiGuid, serviceInstanceGuid)
-          .then(resolve, function (response) {
-            if (response.data.error_code === 'CF-AssociationNotEmpty') {
-              resolve();
-            } else {
-              reject();
-            }
-          });
-      });
     }
 
     /**
@@ -330,7 +266,7 @@
 
       Object.keys(checkedRouteValue).forEach(function (routeId) {
         funcStack.push(function () {
-          return deleteRouteIfPossible(routeId);
+          return vm.deleteRouteIfPossible(routeId);
         });
       });
 
@@ -355,7 +291,7 @@
      */
     function startWorkflow(data) {
       vm.deletingApplication = true;
-      reset();
+      vm.reset();
       vm.cnsiGuid = data.cnsiGuid;
     }
 
@@ -379,7 +315,7 @@
       var appName = appModel.application.summary.name;
       vm.options.isDeleting = true;
       vm.options.hasError = false;
-      return deleteApp().then(function () {
+      return vm.deleteApp().then(function () {
         vm.deletingApplication = false;
         // show notification for successful binding
         var successMsg = gettext("'{{appName}}' has been deleted");

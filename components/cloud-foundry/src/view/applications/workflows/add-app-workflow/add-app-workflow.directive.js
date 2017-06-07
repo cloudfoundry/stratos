@@ -80,8 +80,8 @@
         vm.userInput.organization = null;
         vm.userInput.space = null;
         if (serviceInstance) {
-          getOrganizations();
-          getDomains().then(function () {
+          vm.getOrganizations();
+          vm.getDomains().then(function () {
             vm.userInput.domain = vm.options.domains[0] && vm.options.domains[0].value;
           });
         }
@@ -92,7 +92,7 @@
       }, function (organization) {
         vm.userInput.space = null;
         if (organization) {
-          getSpacesForOrganization(organization.metadata.guid);
+          vm.getSpacesForOrganization(organization.metadata.guid);
         }
       });
 
@@ -100,12 +100,12 @@
         return vm.userInput.space;
       }, function (space) {
         if (space) {
-          getAppsForSpace(space.metadata.guid);
+          vm.getAppsForSpace(space.metadata.guid);
         }
       });
 
       // Start the workflow
-      startWorkflow();
+      vm.startWorkflow();
     }
 
     function reset() {
@@ -165,13 +165,14 @@
                     appModel.filterParams.cnsiGuid !== 'all') {
                     // Find the option to set. If the user has no permissions this may be null
                     var preSelectedService = _.find(vm.options.serviceInstances, {value: {guid: appModel.filterParams.cnsiGuid}}) || {};
+                    console.log('preSelectedService.value', preSelectedService.value)
                     vm.options.userInput.serviceInstance = preSelectedService.value;
                   }
                 });
             },
             onNext: function () {
-              return validateNewRoute().then(function () {
-                return createApp().then(function () {
+              return vm.validateNewRoute().then(function () {
+                return vm.createApp().then(function () {
                   var msg = gettext("A new application and route have been created for '{{ appName }}'");
                   appEventService.$emit('events.NOTIFY_SUCCESS', {
                     message: $interpolate(msg)({appName: vm.userInput.name})
@@ -214,11 +215,11 @@
 
       vm.addApplicationActions = {
         stop: function () {
-          stopWorkflow();
+          vm.stopWorkflow();
         },
 
         finish: function () {
-          finishWorkflow();
+          vm.finishWorkflow();
         }
       };
     }
@@ -307,7 +308,6 @@
      * @returns {promise} A resolved/rejected promise
      */
     function getOrganizations() {
-
       var cnsiGuid = vm.userInput.serviceInstance.guid;
       vm.options.organizations.length = 0;
 
@@ -327,7 +327,7 @@
               return filteredSpaces.length > 0;
             });
           }
-          [].push.apply(vm.options.organizations, _.map(filteredOrgs, selectOptionMapping));
+          [].push.apply(vm.options.organizations, _.map(filteredOrgs, vm.selectOptionMapping));
 
           if (!vm.options.userInput.organization &&
             appModel.filterParams.orgGuid &&
@@ -347,7 +347,6 @@
      * @returns {promise} A resolved/rejected promise
      */
     function getSpacesForOrganization(guid) {
-
       var cnsiGuid = vm.userInput.serviceInstance.guid;
       vm.options.spaces.length = 0;
 
@@ -360,7 +359,7 @@
             filteredSpaces = _.filter(authModel.principal[cnsiGuid].userSummary.spaces.all,
               {entity: {organization_guid: guid}});
           }
-          [].push.apply(vm.options.spaces, _.map(filteredSpaces, selectOptionMapping));
+          [].push.apply(vm.options.spaces, _.map(filteredSpaces, vm.selectOptionMapping));
 
           if (!vm.options.userInput.space &&
             appModel.filterParams.spaceGuid &&
@@ -385,7 +384,7 @@
       return spaceModel.listAllAppsForSpace(cnsiGuid, guid)
         .then(function (apps) {
           vm.options.apps.length = 0;
-          [].push.apply(vm.options.apps, _.map(apps, selectOptionMapping));
+          [].push.apply(vm.options.apps, _.map(apps, vm.selectOptionMapping));
         });
     }
 
@@ -398,8 +397,8 @@
     function getDomains() {
       vm.options.domains.length = 0;
       return $q.all([
-        getPrivateDomains(),
-        getSharedDomains()
+        vm.getPrivateDomains(),
+        vm.getSharedDomains()
       ]);
     }
 
@@ -412,7 +411,7 @@
     function getPrivateDomains() {
       var cnsiGuid = vm.userInput.serviceInstance.guid;
       return privateDomainModel.listAllPrivateDomains(cnsiGuid).then(function (privateDomains) {
-        [].push.apply(vm.options.domains, _.map(privateDomains, selectOptionMapping));
+        [].push.apply(vm.options.domains, _.map(privateDomains, vm.selectOptionMapping));
       });
     }
 
@@ -423,10 +422,9 @@
      * @returns {promise} A resolved/rejected promise
      */
     function getSharedDomains() {
-
       var cnsiGuid = vm.userInput.serviceInstance.guid;
       return sharedDomainModel.listAllSharedDomains(cnsiGuid).then(function (sharedDomains) {
-        [].push.apply(vm.options.domains, _.map(sharedDomains, selectOptionMapping));
+        [].push.apply(vm.options.domains, _.map(sharedDomains, vm.selectOptionMapping));
       });
     }
 
@@ -451,17 +449,17 @@
 
     function startWorkflow() {
       vm.addingApplication = true;
-      reset();
+      vm.reset();
     }
 
     function stopWorkflow() {
-      notify();
+      vm.notify();
       vm.addingApplication = false;
       vm.closeDialog();
     }
 
     function finishWorkflow() {
-      notify();
+      vm.notify();
       vm.addingApplication = false;
       vm.dismissDialog();
     }

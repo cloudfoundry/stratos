@@ -2,8 +2,9 @@
   'use strict';
 
   /* eslint-disable angular/no-private-call */
-  describe('add-service-workflow directive - ', function () {
-    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute, cfApplicationTabs;
+  describe('delete-app-workflow directive - ', function () {
+    var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute, cfApplicationTabs, $q, appModel,
+      routeModel;
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
@@ -14,8 +15,10 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
-      var appModel = modelManager.retrieve('cloud-foundry.model.application');
+      appModel = modelManager.retrieve('cloud-foundry.model.application');
+      routeModel = modelManager.retrieve('cloud-foundry.model.route');
       cfApplicationTabs = $injector.get('cfApplicationTabs');
+      $q = $injector.get('$q');
 
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
@@ -77,11 +80,11 @@
 
       it('workflow - initControllers', function () {
         that.checkAppRoutes = function () {
-          return that.$q.resolve();
+          return $q.resolve();
         };
         spyOn(that, 'checkAppServices');
         spyOn(that, 'checkAppRoutes').and.callThrough();
-        var deferred = that.$q.defer();
+        var deferred = $q.defer();
         var wizard = {
           postInitTask: deferred
         };
@@ -103,7 +106,7 @@
 
       it('deleteApplicationActions - finish', function () {
         that.finishWorkflow = function () {
-          return that.$q.reject();
+          return $q.reject();
         };
         spyOn(that, 'finishWorkflow').and.callThrough();
         that.deleteApplicationActions.finish({
@@ -140,16 +143,16 @@
       });
 
       it('#deleteApp', function () {
-        that.removeAppFromRoutes = function () { return that.$q.resolve(); };
-        that.tryDeleteEachRoute = function () { return that.$q.resolve(); };
-        that.deleteServiceBindings = function () { return that.$q.resolve(); };
-        that.deleteProject = function () { return that.$q.resolve(); };
-        that.appModel.deleteApp = function () { return that.$q.resolve(); };
+        that.removeAppFromRoutes = function () { return $q.resolve(); };
+        that.tryDeleteEachRoute = function () { return $q.resolve(); };
+        that.deleteServiceBindings = function () { return $q.resolve(); };
+        that.deleteProject = function () { return $q.resolve(); };
+        appModel.deleteApp = function () { return $q.resolve(); };
         spyOn(that, 'removeAppFromRoutes').and.callThrough();
         spyOn(that, 'tryDeleteEachRoute').and.callThrough();
         spyOn(that, 'deleteServiceBindings').and.callThrough();
-        spyOn(that.cfApplicationTabs, 'appDeleting').and.callThrough();
-        spyOn(that.appModel, 'deleteApp').and.callThrough();
+        spyOn(cfApplicationTabs, 'appDeleting').and.callThrough();
+        spyOn(appModel, 'deleteApp').and.callThrough();
 
         that.deleteApp();
         $scope.$apply();
@@ -157,8 +160,8 @@
         expect(that.removeAppFromRoutes).toHaveBeenCalled();
         expect(that.tryDeleteEachRoute).toHaveBeenCalled();
         expect(that.deleteServiceBindings).toHaveBeenCalled();
-        expect(that.cfApplicationTabs.appDeleting).toHaveBeenCalled();
-        expect(that.appModel.deleteApp).toHaveBeenCalled();
+        expect(cfApplicationTabs.appDeleting).toHaveBeenCalled();
+        expect(appModel.deleteApp).toHaveBeenCalled();
       });
 
       it('#removeAppFromRoutes', function () {
@@ -166,140 +169,68 @@
         var RemoveAppFromRoute = mock.cloudFoundryAPI.Routes.RemoveAppFromRoute(routeGuid, appGuid);
         $httpBackend.whenDELETE(RemoveAppFromRoute.url).respond(RemoveAppFromRoute.response[204].body);
         $httpBackend.expectDELETE(RemoveAppFromRoute.url);
-        spyOn(that.routeModel, 'removeAppFromRoute').and.callThrough();
+        spyOn(routeModel, 'removeAppFromRoute').and.callThrough();
         var numCheckedRoutes = Object.keys(that.userInput.checkedRouteValue).length;
 
         that.removeAppFromRoutes();
         $httpBackend.flush();
 
-        expect(that.routeModel.removeAppFromRoute).toHaveBeenCalledTimes(numCheckedRoutes);
+        expect(routeModel.removeAppFromRoute).toHaveBeenCalledTimes(numCheckedRoutes);
       });
 
       it('#deleteServiceBindings - no services checked', function () {
         that.userInput.checkedServiceValue = {};
-        spyOn(that, '_unbindServiceInstances');
+        spyOn(appModel, 'listServiceBindings');
 
         that.deleteServiceBindings();
         $scope.$apply();
 
-        expect(that._unbindServiceInstances).not.toHaveBeenCalled();
+        expect(appModel.listServiceBindings).not.toHaveBeenCalled();
       });
 
       it('#deleteServiceBindings - has services checked', function () {
-        that._unbindServiceInstances = function () { return that.$q.resolve(); };
-        spyOn(that, '_unbindServiceInstances').and.callThrough();
-        spyOn(that, '_deleteServiceInstances');
+        appModel.listServiceBindings = function () { return $q.resolve(); };
 
         that.deleteServiceBindings();
         $scope.$apply();
 
-        expect(that._unbindServiceInstances).toHaveBeenCalled();
-        expect(that._deleteServiceInstances).toHaveBeenCalled();
-      });
-
-      it('#_unbindServiceInstances', function () {
-        var bindingGuids = ['28aa8270-ab0e-480d-b9b6-ba4ec4f15015'];
-        var ListAllServiceBindingsForApp = mock.cloudFoundryAPI.Apps.ListAllServiceBindingsForApp(appGuid);
-        var queryString = '?q=service_instance_guid+IN+28aa8270-ab0e-480d-b9b6-ba4ec4f15015&results-per-page=100';
-        $httpBackend.whenGET(ListAllServiceBindingsForApp.url + queryString).respond(ListAllServiceBindingsForApp.response[200].body);
-        $httpBackend.expectGET(ListAllServiceBindingsForApp.url + queryString);
-
-        that.appModel.unbindServiceFromApp = function () { return that.$q.resolve(); };
-        spyOn(that.appModel, 'unbindServiceFromApp').and.callThrough();
-
-        that._unbindServiceInstances(bindingGuids);
-        $httpBackend.flush();
-
-        expect(that.appModel.unbindServiceFromApp).toHaveBeenCalledTimes(1);
-      });
-
-      it('#_deleteServiceInstances', function () {
-        var safeServiceInstances = ['1', '2', '3'];
-        that._deleteServiceInstanceIfPossible = function () { return that.$q.resolve(); };
-        spyOn(that, '_deleteServiceInstanceIfPossible').and.callThrough();
-
-        that._deleteServiceInstances(safeServiceInstances);
-        $scope.$apply();
-
-        expect(that._deleteServiceInstanceIfPossible).toHaveBeenCalledTimes(safeServiceInstances.length);
-      });
-
-      it('#_deleteServiceInstanceIfPossible - success', function () {
-        that.serviceInstanceModel.deleteServiceInstance = function () { return that.$q.resolve(); };
-        spyOn(that.serviceInstanceModel, 'deleteServiceInstance').and.callThrough();
-
-        var p = that._deleteServiceInstanceIfPossible('123');
-        $scope.$apply();
-
-        expect(that.serviceInstanceModel.deleteServiceInstance).toHaveBeenCalledTimes(1);
-        expect(p.$$state.status).toBe(1);
-      });
-
-      it('#_deleteServiceInstanceIfPossible - failure with error AssociationNotEmpty', function () {
-        that.serviceInstanceModel.deleteServiceInstance = function () {
-          return that.$q.reject({
-            data: {
-              error_code: 'CF-AssociationNotEmpty'
-            }
-          });
-        };
-        spyOn(that.serviceInstanceModel, 'deleteServiceInstance').and.callThrough();
-
-        var p = that._deleteServiceInstanceIfPossible('123');
-        $scope.$apply();
-
-        expect(p.$$state.status).toBe(1);
-      });
-
-      it('#_deleteServiceInstanceIfPossible - failure wihout error', function () {
-        that.serviceInstanceModel.deleteServiceInstance = function () {
-          return that.$q.reject({
-            data: {
-            }
-          });
-        };
-        spyOn(that.serviceInstanceModel, 'deleteServiceInstance').and.callThrough();
-
-        var p = that._deleteServiceInstanceIfPossible('123');
-        $scope.$apply();
-
-        expect(p.$$state.status).toBe(2);
+        expect(appModel.listServiceBindings).toHaveBeenCalled();
       });
 
       it('#deleteRouteIfPossible - do not delete', function () {
         var routeId = 'foo';
-        that.routeModel.listAllAppsForRouteWithoutStore = function () {
-          return that.$q.resolve({
+        routeModel.listAllAppsForRouteWithoutStore = function () {
+          return $q.resolve({
             total_results: 1
           });
         };
-        spyOn(that.routeModel, 'listAllAppsForRouteWithoutStore').and.callThrough();
+        spyOn(routeModel, 'listAllAppsForRouteWithoutStore').and.callThrough();
 
         that.deleteRouteIfPossible(routeId);
         $scope.$apply();
 
-        expect(that.routeModel.listAllAppsForRouteWithoutStore).toHaveBeenCalled();
+        expect(routeModel.listAllAppsForRouteWithoutStore).toHaveBeenCalled();
       });
 
       it('#deleteRouteIfPossible', function () {
         var routeId = 'foo';
-        that.routeModel.listAllAppsForRouteWithoutStore = function () {
-          return that.$q.resolve({
+        routeModel.listAllAppsForRouteWithoutStore = function () {
+          return $q.resolve({
             total_results: 0
           });
         };
-        that.routeModel.deleteRoute = function () {
-          return that.$q.resolve();
+        routeModel.deleteRoute = function () {
+          return $q.resolve();
         };
 
-        spyOn(that.routeModel, 'listAllAppsForRouteWithoutStore').and.callThrough();
-        spyOn(that.routeModel, 'deleteRoute').and.callThrough();
+        spyOn(routeModel, 'listAllAppsForRouteWithoutStore').and.callThrough();
+        spyOn(routeModel, 'deleteRoute').and.callThrough();
 
         that.deleteRouteIfPossible(routeId);
         $scope.$apply();
 
-        expect(that.routeModel.listAllAppsForRouteWithoutStore).toHaveBeenCalled();
-        expect(that.routeModel.deleteRoute).toHaveBeenCalled();
+        expect(routeModel.listAllAppsForRouteWithoutStore).toHaveBeenCalled();
+        expect(routeModel.deleteRoute).toHaveBeenCalled();
       });
 
       it('#tryDeleteEachRoute', function () {
@@ -310,7 +241,7 @@
         var length = Object.keys(that.userInput.checkedRouteValue).length;
 
         that.deleteRouteIfPossible = function () {
-          return that.$q.resolve();
+          return $q.resolve();
         };
         spyOn(that, 'deleteRouteIfPossible').and.callThrough();
 
@@ -321,9 +252,9 @@
       });
 
       it('#deleteProject - project is defined', function () {
-        that.appModel.application.project = {};
+        appModel.application.project = {};
         cfApplicationTabs.appDeleting = function () {
-          return that.$q.resolve();
+          return $q.resolve();
         };
         that.details = {
           project: 'project'
@@ -355,7 +286,7 @@
 
       it('#finishWorkflow - success', function () {
         that.deleteApp = function () {
-          return that.$q.resolve();
+          return $q.resolve();
         };
         spyOn(that, 'deleteApp').and.callThrough();
         var p = that.finishWorkflow();
@@ -367,7 +298,7 @@
 
       it('#finishWorkflow - failure', function () {
         that.deleteApp = function () {
-          return that.$q.reject();
+          return $q.reject();
         };
         spyOn(that, 'deleteApp').and.callThrough();
         var p = that.finishWorkflow();
