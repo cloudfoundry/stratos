@@ -61,8 +61,8 @@ func (m *mockPGStore) Get(r *http.Request, name string) (*sessions.Session, erro
 type mockServerFunc func(*mockServer)
 
 const mockCNSIGUID = "some-guid-1234"
-const mockHCFGUID = "some-cf-guid-1234"
-const mockHCEGUID = "some-hce-guid-1234"
+const mockCFGUID = "some-cf-guid-1234"
+const mockCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
 
 const mockURLString = "http://localhost:9999/some/fake/url/"
@@ -154,20 +154,20 @@ func expectOneRow() sqlmock.Rows {
 	return sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("1")
 }
 
-func expectHCFRow() sqlmock.Rows {
+func expectCFRow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true)
 }
 
-func expectHCERow() sqlmock.Rows {
+func expectCERow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
 }
 
-func expectHCFAndHCERows() sqlmock.Rows {
+func expectCFAndCERows() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true).
-		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true).
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
 }
 
 func expectTokenRow() sqlmock.Rows {
@@ -264,8 +264,8 @@ const (
 	mockDopplerEndpoint = "https://doppler.127.0.0.1"
 	mockProxyVersion    = 20161117141922
 
-	stringHCFType = "cf"
-	stringHCEType = "hce"
+	stringCFType = "cf"
+	stringCEType = "hce"
 
 	selectAnyFromTokens = `SELECT .+ FROM tokens WHERE .+`
 	insertIntoTokens    = `INSERT INTO tokens`
