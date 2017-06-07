@@ -34,6 +34,7 @@ vendor/
 .glide
 tools/ssl
 build/secrets.json
+goose
 deploy/data/
 deploy/hsc-upgrade-volume/
 deploy/development.rc

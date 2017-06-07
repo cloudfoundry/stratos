@@ -6,12 +6,6 @@ resource_types:
     tag: latest
 
 resources:
-- name: stratos-deploy
-  type: git
-  source:
-    uri: git@github.com:hpcloud/stratos-deploy.git
-    branch: {{stratos-deploy-branch}}
-    private_key: {{github-private-key}}
 - name: stratos-ui
   type: pull-request
   source:
@@ -32,8 +26,6 @@ groups:
 jobs:
 - name: console-unit-tests
   plan:
-  - get: stratos-deploy
-
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
@@ -46,7 +38,7 @@ jobs:
     - task: run-unit-tests
       privileged: true
       timeout: 5m
-      file: stratos-deploy/ci/tasks/stratos-ui/run-unit-tests.yml
+      file: stratos-ui/deploy/ci/tasks/stratos-ui/run-unit-tests.yml
       on_failure:
         put: stratos-ui
         params:
@@ -55,8 +47,6 @@ jobs:
 
 - name: proxy-unit-tests
   plan:
-  - get: stratos-deploy
-
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
@@ -65,12 +55,11 @@ jobs:
     params:
       path: stratos-ui
       status: pending
-
   - do:
     - task: run-proxy-unit-tests
       privileged: true
       timeout: 5m
-      file: stratos-deploy/ci/tasks/portal-proxy/run-unit-tests.yml
+      file: stratos-ui/deploy/ci/tasks/portal-proxy/run-unit-tests.yml
       on_failure:
         put: stratos-ui
         params:
@@ -93,7 +82,7 @@ jobs:
 
   - do:
     - task: build-proxy-image
-      file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
+      file: stratos-ui/deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
       on_success:
         put: stratos-ui
         params:
@@ -108,7 +97,7 @@ jobs:
     - task: run-e2e-tests
       privileged: true
       timeout: 10m
-      file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
+      file:  stratos-ui/deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
        REGISTRY_NAME: {{insecure-registry}}
        CUSTOM_APP_LABEL: {{custom-app-label}}

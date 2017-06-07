@@ -1,7 +1,6 @@
 ---
 platform: linux
 inputs:
-- name: stratos-deploy
 - name: stratos-ui
 - name: portal-proxy-output
 # Parameterised task files are currently not supported in Concourse
@@ -25,7 +24,7 @@ run:
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
-      cd stratos-deploy
+      cd stratos-ui
       # Load images from image
       for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
         docker pull ${REGISTRY_NAME}/$image
@@ -35,7 +34,7 @@ run:
       cp /tarballs/* ./uaa/tmp/
 
       # Add protractor.conf file
-       cat << EOF >> ../stratos-ui/build/secrets.json
+       cat << EOF > build/secrets.json
        {
          "cloudFoundry": {
            "url": "${CF_LOCATION}",
@@ -52,9 +51,9 @@ run:
        }
        EOF
 
-      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
-      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
-      docker logs -f stratosdeploy_ui_1
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f deploy/docker-compose.test.yml build
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f deploy/docker-compose.test.yml up -d
+      docker logs -f deploy_ui_1
 
       CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
       mkdir e2e-output
@@ -67,4 +66,4 @@ run:
       tar -czf $TIMESTAMP.tar.gz e2e-output/*
       scp -i /id_rsa $TIMESTAMP.tar.gz ${SCP_LOCATION}
       echo "Download logs from: http://${WEB_SERVER_URI}/$TIMESTAMP.tar.gz"
-      sh ./ci/scripts/check_tests.sh
+      sh ./deploy/ci/scripts/check_tests.sh
