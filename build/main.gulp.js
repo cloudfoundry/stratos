@@ -257,7 +257,7 @@
   });
 
   // Gulp watch JavaScript, SCSS and HTML source files
-  // Task is ued by dev task. Don't use externally.
+  // Task is used by dev task. Don't use externally.
   gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
