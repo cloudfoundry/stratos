@@ -18,14 +18,18 @@ applications-sorting {
     width: $console-unit-space;
     height: $console-unit-space;
     cursor: pointer;
+    margin-top: -1px;
   }
 
-  select-input {
-    margin-left: 2 * $console-unit-space;
-    
-    .select-input-field {
-      margin-left: 4px;
-      user-select: none;
+  form .form-group {
+    select-input {
+      margin-left: 2 * $console-unit-space;
+      margin-bottom: 3px;
+
+      .select-input-field {
+        margin-left: 4px;
+        user-select: none;
+      }
     }
   }
 }

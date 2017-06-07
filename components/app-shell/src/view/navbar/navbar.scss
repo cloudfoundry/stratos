@@ -28,7 +28,7 @@ navbar > nav.main-nav-header {
       margin: 0;
     }
     .navbar-brand {
-      font-size: 24px;
+      font-size: $font-size-large2;
       font-weight: 500;
       padding: 0 0 0 $main-nav-icons-width;
       height: $page-header-height;
@@ -154,6 +154,7 @@ navbar > .main-nav-menu {
           vertical-align: middle;
           text-transform: uppercase;
           letter-spacing: 1px;
+          font-size: $font-size-nav;
         }
       }
 
