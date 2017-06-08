@@ -1,4 +1,4 @@
-package: github.com/suse/stratos-ui/components/cloud-foundry/backend
+package: github.com/SUSE/stratos-ui/components/cloud-foundry/backend
 import:
 - package: github.com/Sirupsen/logrus
   version: ^0.11.5

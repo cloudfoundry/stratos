@@ -22,7 +22,7 @@ docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-pushd $GOPATH/src/github.com/suse/stratos-ui/
+pushd $GOPATH/src/github.com/SUSE/stratos-ui/
 ./tools/build_portal_proxy.sh
 ret=$?
 popd

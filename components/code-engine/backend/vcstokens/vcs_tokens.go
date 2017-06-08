@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/suse/stratos-ui/components/app-core/backend/repository/vcs"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/vcs"
 )
 
 // VCSTokenRecord -

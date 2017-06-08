@@ -19,8 +19,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/suse/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 type mockServer struct {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"encoding/json"
 	"log"
-	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 func (p *portalProxy) vcsProxy(c echo.Context) error {

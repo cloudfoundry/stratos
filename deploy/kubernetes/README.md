@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 This guide assumes that you have checked out the following repositories and places them at the same level as this project.
-- stratos-ui https://github.com/suse/stratos-ui
+- stratos-ui https://github.com/SUSE/stratos-ui
 - portal-proxy https://github.com/hpcloud/portal-proxy
 
 

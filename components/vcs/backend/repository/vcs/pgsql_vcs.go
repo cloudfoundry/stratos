@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/suse/stratos-ui/components/app-core/backend/datastore"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 )
 
 var listVcs = `SELECT guid, label, type, browse_url, api_url, skip_ssl_validation
