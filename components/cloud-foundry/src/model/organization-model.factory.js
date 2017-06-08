@@ -583,14 +583,21 @@
         var userGuid = consoleInfoModel.info.endpoints.cf[cnsiGuid].user.guid;
         var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
-        return $q.all([makeUserP, makeManagerP]).then(function () {
-          getOrganizationDetails(cnsiGuid, org);
-        });
+        return $q.all([makeUserP, makeManagerP])
+          .then(function () {
+            return refreshAuth(cnsiGuid);
+          })
+          .then(function () {
+            getOrganizationDetails(cnsiGuid, org);
+          });
       });
     }
 
     function deleteOrganization(cnsiGuid, orgGuid) {
       return orgsApi.DeleteOrganization(orgGuid, {}, modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function () {
+          return refreshAuth(cnsiGuid);
+        })
         .then(function (val) {
           unCacheOrganization(cnsiGuid, orgGuid);
           return val;
@@ -615,6 +622,11 @@
             }
           });
         });
+    }
+
+    function refreshAuth(cnsiGuid) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      return authModel.initializeForEndpoint(cnsiGuid, true);
     }
 
     function refreshOrganizationUserRoles(cnsiGuid, orgGuid) {
