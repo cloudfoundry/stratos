@@ -1,7 +1,7 @@
 ## CI/CD for the Stratos UI Console
 
 ### Overview
-The CI/CD process for the Stratos UI Console is responsible for creating a set of artifacts that can be used to install the Console. This process is based on [Concourse](http://concourseci.com), an open source CI/CD platform.
+The CI/CD process for the Stratos UI Console is responsible for creating a set of artifacts that can be used to install the Console. 
 
 ### Preparation for pipeline development
 Your environment should be prepared to develop and test Concourse CI/CD pipelines. The best preparation for a newcomer to Concourse is to go thru the [Concourse Tutorial](https://github.com/starkandwayne/concourse-tutorial)
