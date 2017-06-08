@@ -8,7 +8,6 @@
   var browserSync = require('browser-sync').create();
   var concat = require('gulp-concat-util');
   var del = require('delete');
-  var eslint = require('gulp-eslint');
   var fork = require('child_process').fork;
   var fs = require('fs');
   var fsx = require('fs-extra');
@@ -22,7 +21,6 @@
   var path = require('path');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
-  var request = require('request');
   var runSequence = require('run-sequence');
   var sass = require('gulp-sass');
   var sort = require('gulp-sort');
@@ -219,6 +217,7 @@
 
   // Run ESLint on all source in the components folder as well as the build files and e2e tests
   gulp.task('lint', function () {
+    var eslint = require('gulp-eslint');
     var lintFiles = config.lintFiles;
     return gulp
       .src(lintFiles)
@@ -290,6 +289,7 @@
   });
 
   gulp.task('browsersync', function (callback) {
+    var request = require('request');
     var middleware = [];
     var https;
     try {
