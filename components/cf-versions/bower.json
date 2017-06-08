@@ -1,7 +1,7 @@
 {
   "name": "cf-versions",
   "description": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "moduleType": [],
   "homepage": "",
   "main": [
