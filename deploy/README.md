@@ -15,8 +15,6 @@ This script supports the following optional arguments:
 
 The default for TAG_NAME is a ISO-8601-like timestamp, of `YYYYmmddTHHMMSSZ`
 
-The default for REGISTRY_ADDRESS is `!!TODO!!:443`
-
 This will build all of the images for the console, and creates a folder called `output` that contains a HCP service definition and instance definition that refer to the specific registry and tag created during this build.
 
 **Note:** If you're doing local development, against your local registry, the generated service and instance definition should not be distributed, as they do not refer to a generally accessible Docker registry!
