@@ -48,8 +48,6 @@ echo
 echo "Starting build"
 
 # Copy values template
-
-
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
 
