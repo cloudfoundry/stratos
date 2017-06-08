@@ -68,8 +68,8 @@
       }
     };
 
-    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
-    // use case where nothing has changed.
+    // If we have previous apps then show the stale values from cache. This avoids showing a blank screen for
+    // the majority of use cases where nothing has changed.
     vm.ready = vm.model.hasApps;
 
     // Force card layout on smaller screen sizes - listen for resize events
@@ -203,8 +203,15 @@
       if (vm.model.filterLastCluster) {
         var intersection = _.intersection(vm.model.filterLastCluster, clusterGuids);
         if (vm.model.filterLastCluster.length !== intersection.length || clusterGuids.length !== intersection.length) {
-          // Set of GUIDs has changed, so reset the filter
-          vm.model.filterParams.cnsiGuid = 'all';
+          // Set of GUIDs has changed, so reset the all filters. This avoids confusion for users when they add a new cf
+          // and don't see any new apps due to a pre-existing filter.
+          this.model.filterParams.cnsiGuid = 'all';
+          this.model.filterParams.orgGuid = 'all';
+          this.model.filterParams.spaceGuid = 'all';
+          // Also up front reset local filter values
+          this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
+          this.filter.orgGuid = this.model.filterParams.orgGuid;
+          this.filter.spaceGuid = this.model.filterParams.spaceGuid;
         }
       }
 
@@ -250,9 +257,6 @@
             }
           });
       } else {
-        // Ensure any previous values are wiped
-        vm.model.filterParams.orgGuid = 'all';
-        vm.filter.orgGuid = vm.model.filterParams.orgGuid;
         return $q.resolve();
       }
     }
@@ -290,9 +294,6 @@
             }
           });
       } else {
-        // Ensure any previous values are wiped
-        vm.model.filterParams.spaceGuid = 'all';
-        vm.filter.spaceGuid = vm.model.filterParams.spaceGuid;
         return $q.resolve();
       }
     }

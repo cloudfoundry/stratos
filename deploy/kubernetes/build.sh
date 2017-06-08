@@ -51,6 +51,7 @@ echo "Starting build"
 
 
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
 
 # Proxy support
 BUILD_ARGS=""
@@ -108,13 +109,13 @@ function cleanup {
   rm -f values.yaml
   # Cleanup prior to generating the UI container
   echo
-  echo "-- Cleaning up ${__DIRNAME}/../stratos-ui"
-  rm -rf ${__DIRNAME}/../../stratos-ui/dist
-  rm -rf ${__DIRNAME}/../../stratos-ui/node_modules
-  rm -rf ${__DIRNAME}/../../stratos-ui/bower_components
+  echo "-- Cleaning up ${STRATOS_UI_PATH}"
+  rm -rf ${STRATOS_UI_PATH}/dist
+  rm -rf ${STRATOS_UI_PATH}/node_modules
+  rm -rf ${STRATOS_UI_PATH}/bower_components
   echo
-  echo "-- Cleaning up ${__DIRNAME}/../../stratos-ui/containers/nginx/dist"
-  rm -rf ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
+  echo "-- Cleaning up ${STRATOS_UI_PATH}/containers/nginx/dist"
+  rm -rf ${STRATOS_UI_PATH}/containers/nginx/dist
 }
 
 function updateTagForRelease {
@@ -152,7 +153,7 @@ function buildProxy {
   echo "-- Building the Console Proxy"
 
   echo
-  echo "-- Run the build container to build the proxy executable"
+  echo "-- Run the build container to build the Console backend"
 
   pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
@@ -203,17 +204,23 @@ function buildPostflightJob {
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
-  cp goose  ${STRATOS_UI_PATH}/
+  mv goose  ${STRATOS_UI_PATH}/
   buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  rm -f ${STRATOS_UI_PATH}/goose
 }
 
 function buildUI {
   # Prepare the nginx server
+  CURRENT_USER=$
   echo
   echo "-- Provision the UI"
   docker run --rm \
     ${RUN_ARGS} \
-    -v ${__DIRNAME}/../../stratos-ui:/usr/src/app \
+    -v ${STRATOS_UI_PATH}:/usr/src/app \
+    -e CREATE_USER="true"  \
+    -e USER_NAME=$(id -nu) \
+    -e USER_ID=$(id -u)  \
+    -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
     node:6.9.1 \
     /bin/bash ./provision.sh
@@ -221,19 +228,19 @@ function buildUI {
   # Copy the artifacts from the above to the nginx container
   echo
   echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${__DIRNAME}/../../stratos-ui/dist ${__DIRNAME}/../../stratos-ui/containers/nginx/dist
+  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/containers/nginx/dist
 
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.k8s ${__DIRNAME}/../../stratos-ui/containers/nginx
+  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/containers/nginx
 }
 
 # MAIN ------------------------------------------------------
 #
 
 # Set the path to the portal proxy
-STRATOS_UI_PATH=${__DIRNAME}/../../stratos-ui
+STRATOS_UI_PATH=${STRATOS_UI_PATH}
 
 # cleanup output, intermediate artifacts
 cleanup
