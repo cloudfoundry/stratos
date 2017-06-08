@@ -58,12 +58,12 @@
       });
 
       /*
-      it('should show application message: "You have no applications and cannot add any."', function () {
-        var msgElem = element(by.css('.applications-msg'));
-        expect(msgElem.isPresent()).toBeTruthy();
-        expect(msgElem.getText()).toBe('You have no applications and cannot add any.');
-      });
-      */
+       it('should show application message: "You have no applications and cannot add any."', function () {
+       var msgElem = element(by.css('.applications-msg'));
+       expect(msgElem.isPresent()).toBeTruthy();
+       expect(msgElem.getText()).toBe('You have no applications and cannot add any.');
+       });
+       */
     });
 
     describe('When there are 3 applications in total, user', function () {
