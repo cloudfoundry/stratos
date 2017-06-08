@@ -41,7 +41,7 @@ type ConnectedUser struct {
 type LoginHookFunc func(c echo.Context) error
 
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
-const UAAAdminIdentifier = "hcp.admin"
+const UAAAdminIdentifier = "stratos.admin"
 
 // HCFAdminIdentifier - The identifier that Cloud Foundry uses to convey administrative level perms
 const CFAdminIdentifier = "cloud_controller.admin"
