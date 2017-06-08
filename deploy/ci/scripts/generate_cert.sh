@@ -7,9 +7,9 @@ commonname=192.168.99.100
 country=US
 state=Washington
 locality=Seattle
-organization=HPE
+organization=SUSE
 organizationalunit=HDP
-email=HPE
+email=SUSE
 
 # Generate a key and cert
 echo "Generating key and cert for $domain"

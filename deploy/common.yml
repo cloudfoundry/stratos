@@ -3,8 +3,7 @@ services:
 
   ##############################################################################
   # These two "services" are not meant to be instantiated, but instead extended.
-  # Unfortunately, this is necessary for those working at the HPE office where
-  # the proxy is a sad, Sad, SAD way of life.
+  # This is necessary for those who require a web proxty.
   ##############################################################################
 
   imageCommon:
@@ -37,14 +36,14 @@ services:
   goose:
     extends: buildCommon
     build:
-      context: ../stratos-ui
+      context: ../
       dockerfile: db/Dockerfile.goose.dev
 
 
   proxy:
     extends: buildCommon
     build:
-      context: ../stratos-ui
+      context: ../
       dockerfile: tools/Dockerfile.bk.dev
     ports:
       - "3003:3003"
@@ -57,26 +56,26 @@ services:
   nginx:
     extends: buildCommon
     build:
-      context: ../stratos-ui/containers/nginx
+      context: ../containers/nginx
       dockerfile: Dockerfile.dev
     ports:
       - 80:80
       - 443:443
     volumes:
-      - ../stratos-ui/dist:/usr/share/nginx/html:ro
+      - ../dist:/usr/share/nginx/html:ro
 
 
   ui:
     extends: buildCommon
     build:
-      context: ../stratos-ui
+      context: ../
       dockerfile: tools/Dockerfile.ui.dev
       args:
         - USER_ID
         - GROUP_ID
         - USER_NAME
     volumes:
-      - ../stratos-ui:/usr/src/app
+      - ../:/usr/src/app
 
   uaa:
     extends: imageCommon

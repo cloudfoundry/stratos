@@ -33,7 +33,7 @@
 
   var fs = require('fs');
 
-  if (!fs.existsSync('secrets.json')) {
+  if (!fs.existsSync(path.join(__dirname, 'secrets.json'))) {
     console.log('No secrets.json was found! Please provide a secrets.json, see `secrets.json.sample` as reference.');
     process.exit(1);
   }
