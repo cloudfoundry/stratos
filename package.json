@@ -25,7 +25,7 @@
     "list-e2e": "node ./test/e2e/list-tests.js ./build/protractor.conf.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "bower": "^1.7.1",
     "del": "^2.2.0",
