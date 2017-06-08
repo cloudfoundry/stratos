@@ -109,7 +109,6 @@
     }
 
     function reset() {
-      var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
       vm.data = {};
       vm.errors = {};
 
@@ -140,7 +139,7 @@
         steps: [
           {
             title: gettext('Name'),
-            templateUrl: path + 'add-application.html',
+            templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-application.html',
             formName: 'application-name-form',
             nextBtnText: 'buttons.add',
             cancelBtnText: 'buttons.cancel',

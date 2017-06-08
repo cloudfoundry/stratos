@@ -29,16 +29,7 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view widget
-   * @property {object} $q - the Angular $q service
-   * @property {object} $interpolate - the Angular $interpolate service
-   * @property {frameworkDetailView} frameworkDetailView - the detail view widget
-   * @property {cloud-foundry.model.application} appModel - the CF application model
-   * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
-   * @property {cloud-foundry.model.service-instance} instanceModel - the CF service instance model
-   * @property {cloud-foundry.model.service} serviceModel - the CF service model
-   * @property {cloud-foundry.model.space} spaceModel - the CF space model
    * @property {object} modal - the detail view modal instance
-   * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
   function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventService, frameworkDetailView) {

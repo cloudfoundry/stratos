@@ -205,13 +205,13 @@
         if (vm.model.filterLastCluster.length !== intersection.length || clusterGuids.length !== intersection.length) {
           // Set of GUIDs has changed, so reset the all filters. This avoids confusion for users when they add a new cf
           // and don't see any new apps due to a pre-existing filter.
-          this.model.filterParams.cnsiGuid = 'all';
-          this.model.filterParams.orgGuid = 'all';
-          this.model.filterParams.spaceGuid = 'all';
+          vm.model.filterParams.cnsiGuid = 'all';
+          vm.model.filterParams.orgGuid = 'all';
+          vm.model.filterParams.spaceGuid = 'all';
           // Also up front reset local filter values
-          this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
-          this.filter.orgGuid = this.model.filterParams.orgGuid;
-          this.filter.spaceGuid = this.model.filterParams.spaceGuid;
+          vm.filter.cnsiGuid = vm.model.filterParams.cnsiGuid;
+          vm.filter.orgGuid = vm.model.filterParams.orgGuid;
+          vm.filter.spaceGuid = vm.model.filterParams.spaceGuid;
         }
       }
 

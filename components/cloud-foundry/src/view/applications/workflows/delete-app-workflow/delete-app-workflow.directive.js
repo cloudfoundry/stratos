@@ -67,7 +67,6 @@
 
     function reset() {
 
-      var path = 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/';
       vm.cnsiGuid = null;
       vm.data = {};
       vm.userInput = {
@@ -94,7 +93,7 @@
         hideStepNavStack: true,
         steps: [
           {
-            templateUrl: path + 'delete-services-and-routes.html',
+            templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-services-and-routes.html',
             nextBtnText: gettext('Delete app and associated items'),
             isLastStep: true
           }
