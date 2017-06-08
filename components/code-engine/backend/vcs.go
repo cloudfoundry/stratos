@@ -7,13 +7,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/vcs"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/vcstokens"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/vcs"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/vcstokens"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 const (

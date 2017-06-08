@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	"github.com/labstack/echo"
 )
 

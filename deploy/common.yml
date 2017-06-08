@@ -3,8 +3,7 @@ services:
 
   ##############################################################################
   # These two "services" are not meant to be instantiated, but instead extended.
-  # Unfortunately, this is necessary for those working at the HPE office where
-  # the proxy is a sad, Sad, SAD way of life.
+  # This is necessary for those who require a web proxty.
   ##############################################################################
 
   imageCommon:
