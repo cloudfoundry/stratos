@@ -2,7 +2,7 @@ package cnsis
 
 import (
 	"net/url"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 // RegisteredCluster - <TBD>
