@@ -66,8 +66,8 @@ func TestLoadPortalConfig(t *testing.T) {
 	os.Setenv("CONSOLE_PROXY_TLS_ADDRESS", ":8080")
 	os.Setenv("CONSOLE_CLIENT", "portal-proxy")
 	os.Setenv("CONSOLE_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("HCF_CLIENT", "portal-proxy")
-	os.Setenv("HCF_CLIENT_SECRET", "ohsosecret!")
+	os.Setenv("CF_CLIENT", "portal-proxy")
+	os.Setenv("CF_CLIENT_SECRET", "ohsosecret!")
 	os.Setenv("UAA_ENDPOINT", "https://login.cf.org.com:443")
 	os.Setenv("ALLOWED_ORIGINS", "https://localhost,https://127.0.0.1")
 	os.Setenv("SESSION_STORE_SECRET", "cookiesecret")
@@ -100,12 +100,12 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get ConsoleClientSecret from config")
 	}
 
-	if result.HCFClient != "portal-proxy" {
-		t.Error("Unable to get HCFClient from config")
+	if result.CFClient != "portal-proxy" {
+		t.Error("Unable to get CFClient from config")
 	}
 
-	if result.HCFClientSecret != "ohsosecret!" {
-		t.Error("Unable to get HCFClientSecret from config")
+	if result.CFClientSecret != "ohsosecret!" {
+		t.Error("Unable to get CFClientSecret from config")
 	}
 
 	if result.UAAEndpoint != "https://login.cf.org.com:443" {
