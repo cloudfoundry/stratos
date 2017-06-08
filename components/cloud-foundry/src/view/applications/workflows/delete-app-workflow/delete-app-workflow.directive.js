@@ -47,7 +47,6 @@
 
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var routeModel = modelManager.retrieve('cloud-foundry.model.route');
-    var serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     vm.deletingApplication = false;
     vm.cnsiGuid = null;
 

@@ -165,7 +165,6 @@
                     appModel.filterParams.cnsiGuid !== 'all') {
                     // Find the option to set. If the user has no permissions this may be null
                     var preSelectedService = _.find(vm.options.serviceInstances, {value: {guid: appModel.filterParams.cnsiGuid}}) || {};
-                    console.log('preSelectedService.value', preSelectedService.value)
                     vm.options.userInput.serviceInstance = preSelectedService.value;
                   }
                 });

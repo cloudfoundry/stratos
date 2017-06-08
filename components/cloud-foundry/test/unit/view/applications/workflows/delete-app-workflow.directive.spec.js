@@ -4,7 +4,7 @@
   /* eslint-disable angular/no-private-call */
   describe('delete-app-workflow directive - ', function () {
     var $httpBackend, $scope, that, listAllAppsForRouteCall, ListAllAppsForRoute, cfApplicationTabs, $q, appModel,
-      routeModel;
+      routeModel, cfServiceDeleteAppWorkflow;
     var appGuid = 'app_123';
 
     beforeEach(module('templates'));
@@ -18,6 +18,7 @@
       appModel = modelManager.retrieve('cloud-foundry.model.application');
       routeModel = modelManager.retrieve('cloud-foundry.model.route');
       cfApplicationTabs = $injector.get('cfApplicationTabs');
+      cfServiceDeleteAppWorkflow = $injector.get('cfServiceDeleteAppWorkflow');
       $q = $injector.get('$q');
 
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
@@ -53,7 +54,7 @@
       expect(that).toBeDefined();
     });
 
-    describe('after resetting', function () {
+    describe('after resetting -', function () {
       beforeEach(function () {
         that.reset();
       });
@@ -67,7 +68,7 @@
         expect(that.options).toEqual({
           workflow: that.data.workflow,
           userInput: that.userInput,
-          appModel: that.appModel,
+          appModel: appModel,
           isBusy: true,
           isDeleting: false,
           hasError: false,
@@ -189,12 +190,14 @@
       });
 
       it('#deleteServiceBindings - has services checked', function () {
-        appModel.listServiceBindings = function () { return $q.resolve(); };
+        spyOn(cfServiceDeleteAppWorkflow, 'unbindServiceInstances').and.returnValue($q.resolve());
+        spyOn(cfServiceDeleteAppWorkflow, 'deleteServiceInstances').and.returnValue($q.resolve());
 
         that.deleteServiceBindings();
         $scope.$apply();
 
-        expect(appModel.listServiceBindings).toHaveBeenCalled();
+        expect(cfServiceDeleteAppWorkflow.unbindServiceInstances).toHaveBeenCalled();
+        expect(cfServiceDeleteAppWorkflow.deleteServiceInstances).toHaveBeenCalled();
       });
 
       it('#deleteRouteIfPossible - do not delete', function () {
