@@ -26,6 +26,9 @@
     "username": "Username",
     "password": "Password"
   },
+  "navbar": {
+    "title": "@:product.name"
+  },
   "menu": {
     "applications": "@:applications",
     "endpoints": "@:endpoints",
@@ -61,6 +64,5 @@
       "seconds": "s",
       "format": "{{value}}{{unit}}"
     }
-
   }
 }
