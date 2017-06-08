@@ -8,9 +8,9 @@ Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. 
 
 Stratos UI can be deployed in the following environments:
 
-1. Cloud Foundry, as an application
-1. Kubernetes, using a Helm chart
-1. Docker, using docker compose
+1. Cloud Foundry, as an application. See [below](#quick-start)
+1. Kubernetes, using a Helm chart. See [quide](deploy/kubernetes/README.md)
+1. Docker, using docker compose. See [quide](deploy/README.md)
 
 ## Quick Start
 

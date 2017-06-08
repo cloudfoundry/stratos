@@ -1,37 +1,45 @@
 # Stratos UI Console Deploy
 
-## Building the Console for HCP
+**NOTE:** TODO: Review/Remove build_and_tag.sh, deploy_and_wait_until_running.sh, create-vmware-docker-machine.sh
 
-```
-./build_and_tag.sh
-```
-
-This script supports the following optional arguments:
-
-```
--t TAG_NAME
--r REGISTRY_ADDRESS
-```
-
-The default for TAG_NAME is a ISO-8601-like timestamp, of `YYYYmmddTHHMMSSZ`
-
-This will build all of the images for the console, and creates a folder called `output` that contains a HCP service definition and instance definition that refer to the specific registry and tag created during this build.
-
-**Note:** If you're doing local development, against your local registry, the generated service and instance definition should not be distributed, as they do not refer to a generally accessible Docker registry!
-
-## Deploying the Console locally via Docker Compose
+The Stratos UI can be deployed in a number of ways
+## As a Cloud Foundry application
+See the 'Quick Start' section in the [root README](../README.md)
+## In Kubernetes using a helm chart
+See [Deploy Console in Kubernetes using Minikube and Helm](kubernetes/README.md)
+## Deploy locally via Docker Compose
 
 ### Requirements:
-- All requirements for stratos-ui also apply (all dependencies plus repo's cloned in proper location).
-- Docker-compose must also be installed.
+This project depends on the following:
 
+* [Docker](https://docs.docker.com/engine/installation/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Run
 
 ```
 ./stand_up_dev_env.sh -c
 ```
-Wait until the UI container finishing building (the `stratosdeploy_ui_1` container stop running), the Web UI should now be running on your docker host ID, discoverable via `docker-machine ip [machine-name]`
+
+Allowed arguments
+```
+-c    Clean up before building.
+-n    Skip building and deploying the UI.
+```
+
+Wait for all containers to have finished building, the final few lines should be similar to below
+
+```
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS                  PORTS                                      NAMES
+4b0fef5c8f33        deploy_nginx          "nginx -g 'daemon off"   1 seconds ago       Up Less than a second   0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp   deploy_nginx_1
+c1a74ea7d853        deploy_proxy          "/srv/portal-proxy"      2 seconds ago       Up 1 seconds            443/tcp, 0.0.0.0:3003->3003/tcp            deploy_proxy_1
+355ded0febec        deploy_goose          "/bin/sh -c 'bash /sr"   3 seconds ago       Up 2 seconds                                                       deploy_goose_1
+de98a4420d58        susetest/uaa:latest   "/tomcat/bin/catalina"   5 seconds ago       Up 2 seconds            8080/tcp                                   deploy_uaa_1
+dfbcd3ea0dbb        postgres:latest       "docker-entrypoint.sh"   5 seconds ago       Up 2 seconds            0.0.0.0:5432->5432/tcp                     deploy_postgres_1
+
+```
+
+The Web UI is served via deploy_nginx and should now be available at https://localhost
 
 ### Stop/Cleanup
 
@@ -39,116 +47,51 @@ Wait until the UI container finishing building (the `stratosdeploy_ui_1` contain
 ./cleanup-docker-compose.sh
 ```
 
-## Deploying the Console against the a local HCP dev harness
+Will stop and remove all console containers
 
-1. Be sure all requisite projects are up to date/on the correct branch
-    - stratos-ui
+### Useful commands
 
-2. Build your images and SDL/IDL and push them to the shared registry
+```
+# Get a list of failed containers
+$ sudo docker ps -a
+  
+# Get the log of a specific container
+$ docker logs 4499d41872a2
+   
+# SSH into the running container
+$ docker exec -it 4499d41872a2 /bin/bash
+  
+# Inspect a container to view ENV vars, etc.
+$ sudo docker inspect 4499d41872a2
+```
 
-  ```
-  ./build_and_tag.sh
-  ```
-
-3. Update any required placeholders in your IDL:
-
-  a. Grab the service definition (SDL) and instance definition (IDL) json files for a specific build. Typically, these are located in the HSM bucket on Amazon AWS S3.
-
-  b. If you haven't already done so, you will need to register your instance of the Console with GitHub.  Once your application is registered with GitHub, you will be have a client id & client secret associated with that application.
-
-  c. The SDL file (sdl.json) is ready to be used without changes.
-
-  d. Open the IDL file (instance.json) and scroll to the bottom. Replace the two values you see there with your GitHub OAuth `client ID` and `client secret`.
-
-4. Deploy them against the dev harness
-
-  ```
-  ./deploy_and_wait_until_running.sh
-  ```
-
-5. Tear down the Console (not sure this is up to date)
-
-  ```
-  # Get the port
-  $ curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ipmgr | jq '.spec.ports[0].nodePort'
-
-  # Tear down the Console using the port
-  $ curl -X DELETE http://192.168.200.3:<port>/v1/instances/cnapconsole
-  ```
-
-## Deploying the Console against a non-local HCP dev harness (AWS, etc.)
-
-1. Grab the service definition (SDL) and instance definition (IDL) json files for a specific build. Typically, these are located in the HSM bucket on Amazon AWS S3.
-
-2. If you haven't already done so, you will need to register your instance of the Console with GitHub.  Once your application is registered with GitHub, you will be have a client id & client secret associated with that application.
-
-3. The SDL file (sdl.json) is ready to be used without changes.
-
-4. Open the IDL file (instance.json) and scroll to the bottom.
-
-  a. Replace "\__REPLACE_WITH_OAUTH_CLIENT_ID\__" with your GitHub registered client id.
-
-  b. Replace "\__REPLACE_WITH_OAUTH_CLIENT_SECRET\__" with your GitHub registered client secret.
-
-## Useful commands
-
-1. List Registry contents
-
-  ```
-  $  curl -X GET https://[REGISTRY_URL]/v2/_catalog
-  ```
-
-2. Tear down the Console specific components vs restarting the entire dev harness
-
-  ```
-  # Get the port
-  $ curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ipmgr | jq '.spec.ports[0].nodePort'
-
-  # Tear down the Console using the port
-  $ curl -X DELETE http://192.168.200.3:<port>/v1/instances/cnapconsole
-  ```
-
-3. To see more details information than what the Kubernetes Dashboard provides
-
-  ```
-  # SSH to the node VM
-  $ vagrant ssh node
-
-  # Get a list of failed containers
-  node$ sudo docker ps -a
-
-  # Get the log of a specific container
-  node$ docker logs 4499d41872a2
-
-  # Inspect a container to view ENV vars, etc.
-  node$ sudo docker inspect d48da0be6e66
-  ```
-
-# Helpful Tools
+### Helpful Tools
 
 We've created a few tools to help with other general stuff.
 
-1. Creating a vmware docker-machine
+#### Add environment variables to the containers
+Make a copy of
 
-  ```
-  tools/create-vmware-docker-machine.sh
-  ```
+```development.rc.template```
 
-  Creates a vmware based docker-machine and adjusts it's networking to use NFS instead of the standard vmware sharing.
+, rename as 
 
-2. Restarting the portal-proxy container
+```development.rc```
 
-  ```
-  tools/restart_proxy.sh
-  ```
+and update with the required variables.
 
-  Destroys the existing portal-proxy container and rebuilds it.
+#### Restarting the backend container
 
-3. Connecting to the postgres DB
+```
+tools/restart_proxy.sh
+```
 
-  ```
-  tools/connect_postgres.sh
-  ```
+Destroys the existing backend container and rebuilds it.
 
-  Connects you into the postgres DB so you can clean out bad old things.  :-)
- 
+#### Connecting to the postgres DB
+
+```
+tools/connect_postgres.sh
+```
+
+Connects you into the postgres DB so you can clean out bad old things.
