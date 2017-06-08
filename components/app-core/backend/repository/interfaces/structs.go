@@ -1,10 +1,11 @@
 package interfaces
 
 import (
-	"net/url"
 	"net/http"
-	"github.com/labstack/echo"
+	"net/url"
+
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo"
 )
 
 type V2Info struct {
@@ -19,13 +20,14 @@ type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, erro
 type CNSIRecord struct {
 	GUID                   string   `json:"guid"`
 	Name                   string   `json:"name"`
-	CNSIType               string `json:"cnsi_type"`
+	CNSIType               string   `json:"cnsi_type"`
 	APIEndpoint            *url.URL `json:"api_endpoint"`
 	AuthorizationEndpoint  string   `json:"authorization_endpoint"`
 	TokenEndpoint          string   `json:"token_endpoint"`
 	DopplerLoggingEndpoint string   `json:"doppler_logging_endpoint"`
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 }
+
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
 	AuthToken    string
@@ -54,7 +56,6 @@ type LoginRes struct {
 
 type LoginHookFunc func(c echo.Context) error
 
-
 type SessionStorer interface {
 	Get(r *http.Request, name string) (*sessions.Session, error)
 	Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error
@@ -69,8 +70,8 @@ type PortalConfig struct {
 	TLSCertKey                  string   `configName:"CONSOLE_PROXY_CERT_KEY"`
 	ConsoleClient               string   `configName:"CONSOLE_CLIENT"`
 	ConsoleClientSecret         string   `configName:"CONSOLE_CLIENT_SECRET"`
-	HCFClient                   string   `configName:"HCF_CLIENT"`
-	HCFClientSecret             string   `configName:"HCF_CLIENT_SECRET"`
+	CFClient                    string   `configName:"CF_CLIENT"`
+	CFClientSecret              string   `configName:"CF_CLIENT_SECRET"`
 	UAAEndpoint                 string   `configName:"UAA_ENDPOINT"`
 	AllowedOrigins              []string `configName:"ALLOWED_ORIGINS"`
 	SessionStoreSecret          string   `configName:"SESSION_STORE_SECRET"`
