@@ -29,52 +29,45 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view widget
-   * @property {object} $q - the Angular $q service
-   * @property {object} $interpolate - the Angular $interpolate service
-   * @property {frameworkDetailView} frameworkDetailView - the detail view widget
-   * @property {cloud-foundry.model.application} appModel - the CF application model
-   * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
-   * @property {cloud-foundry.model.service-instance} instanceModel - the CF service instance model
-   * @property {cloud-foundry.model.service} serviceModel - the CF service model
-   * @property {cloud-foundry.model.space} spaceModel - the CF space model
    * @property {object} modal - the detail view modal instance
-   * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
   function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventService, frameworkDetailView) {
-    var that = this;
-    this.$q = $q;
-    this.$interpolate = $interpolate;
-    this.appEventService = appEventService;
-    this.frameworkDetailView = frameworkDetailView;
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    this.instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
-    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.modal = null;
-    this.loadingServiceInstances = false;
+    var vm = this;
 
-    this.path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
-    this.addServiceActions = {
+    var appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
+    var serviceModel = modelManager.retrieve('cloud-foundry.model.service');
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
+
+    vm.modal = null;
+    vm.loadingServiceInstances = false;
+    vm.addServiceActions = {
       stop: function () {
-        that.stopWorkflow();
+        vm.stopWorkflow();
       },
 
       finish: function () {
-        that.finishWorkflow();
+        vm.finishWorkflow();
       }
     };
 
-    var startWorkflowEvent = this.appEventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
-      that.reset(config);
-      that.modal = that.startWorkflow();
-      that._loadServiceInstances();
+    vm.reset = reset;
+    vm.addService = addService;
+    vm.addBinding = addBinding;
+    vm.startWorkflow = startWorkflow;
+    vm.stopWorkflow = stopWorkflow;
+    vm.finishWorkflow = finishWorkflow;
+
+    var startWorkflowEvent = appEventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
+      vm.reset(config);
+      vm.modal = vm.startWorkflow();
+      _loadServiceInstances();
     });
     $scope.$on('$destroy', startWorkflowEvent);
-  }
 
-  angular.extend(AddServiceWorkflowController.prototype, {
     /**
      * @function reset
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
@@ -82,31 +75,29 @@
      * @param {object} config - data containing app, service, etc.
      * @returns {void}
      */
-    reset: function (config) {
-      var that = this;
-
+    function reset(config) {
       // Parse service entity extra data JSON string
       if (!_.isNil(config.service.entity.extra) && angular.isString(config.service.entity.extra)) {
         config.service.entity.extra = angular.fromJson(config.service.entity.extra);
       }
 
-      this.data = {
+      vm.data = {
         app: config.app,
         service: config.service,
         confirm: config.confirm,
         cnsiGuid: config.cnsiGuid,
         spaceGuid: config.app.summary.space_guid
       };
-      this.errors = {};
-      this.spinners = {};
+      vm.errors = {};
+      vm.spinners = {};
 
-      this.userInput = {
+      vm.userInput = {
         name: null,
         plan: null,
         existingServiceInstance: null
       };
 
-      this.data.workflow = {
+      vm.data.workflow = {
         allowJump: false,
         allowBack: false,
         allowCancelAtLastStep: false,
@@ -117,20 +108,20 @@
         },
         steps: [
           {
-            templateUrl: this.path + 'instance.html',
+            templateUrl: path + 'instance.html',
             formName: 'addInstanceForm',
             nextBtnText: gettext('Add Service Instance'),
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
-              return that.addService().then(function () {
-                return that.addBinding().then(function () {
-                  return that.$q.resolve();
+              return vm.addService().then(function () {
+                return vm.addBinding().then(function () {
+                  return $q.resolve();
                 }, function () {
-                  return that._onServiceBindingError();
+                  return _onServiceBindingError();
                 });
               }, function () {
-                return that._onCreateServiceError();
+                return _onCreateServiceError();
               });
             }
           }
@@ -139,24 +130,24 @@
 
       if (config.confirm) {
         var confirmStep = {
-          templateUrl: this.path + 'acknowledge.html',
+          templateUrl: path + 'acknowledge.html',
           nextBtnText: gettext('Done'),
           isLastStep: true
         };
-        this.data.workflow.steps.push(confirmStep);
-        this.data.workflow.allowCancelAtLastStep = false;
+        vm.data.workflow.steps.push(confirmStep);
+        vm.data.workflow.allowCancelAtLastStep = false;
       } else {
-        delete this.data.workflow.steps[0].onNext;
-        this.data.workflow.steps[0].isLastStep = true;
-        this.data.workflow.allowCancelAtLastStep = true;
+        delete vm.data.workflow.steps[0].onNext;
+        vm.data.workflow.steps[0].isLastStep = true;
+        vm.data.workflow.allowCancelAtLastStep = true;
       }
 
-      this.options = {
-        errors: this.errors,
-        spinners: this.spinners,
-        userInput: this.userInput,
-        service: this.data.service,
-        workflow: this.data.workflow,
+      vm.options = {
+        errors: vm.errors,
+        spinners: vm.spinners,
+        userInput: vm.userInput,
+        service: vm.data.service,
+        workflow: vm.data.workflow,
         activeTab: 0,
 
         instances: [],
@@ -167,55 +158,53 @@
         serviceInstance: null,
         servicePlan: null
       };
-    },
+    }
 
     /**
      * @function _loadServiceInstances
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Retrieve service plans and existing service
      * instances for this service.
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      * @private
      */
-    _loadServiceInstances: function () {
-      var that = this;
-      this.spinners.loadingServiceInstances = true;
-      return this._getServicePlans(this.data.service.metadata.guid)
+    function _loadServiceInstances() {
+      vm.spinners.loadingServiceInstances = true;
+      return _getServicePlans(vm.data.service.metadata.guid)
         .then(function () {
-          var boundInstances = _.keyBy(that.data.app.summary.services, 'guid');
-          var servicePlanGuids = _.keys(that.options.servicePlanMap);
+          var boundInstances = _.keyBy(vm.data.app.summary.services, 'guid');
+          var servicePlanGuids = _.keys(vm.options.servicePlanMap);
 
           if (servicePlanGuids.length > 0) {
-            return that._getServiceInstances(servicePlanGuids, boundInstances);
+            return _getServiceInstances(servicePlanGuids, boundInstances);
           }
         })
         .finally(function () {
-          that.spinners.loadingServiceInstances = false;
+          vm.spinners.loadingServiceInstances = false;
         });
-    },
+    }
 
     /**
      * @function _getServicePlans
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Retrieve service plans for this service
      * @param {string} serviceGuid - the service GUID to get plans for
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      * @private
      */
-    _getServicePlans: function (serviceGuid) {
-      var that = this;
-      this.options.servicePlans.length = 0;
-      this.options.servicePlanMap = {};
+    function _getServicePlans(serviceGuid) {
+      vm.options.servicePlans.length = 0;
+      vm.options.servicePlanMap = {};
 
-      return this.serviceModel.allServicePlans(this.data.cnsiGuid, serviceGuid)
+      return serviceModel.allServicePlans(vm.data.cnsiGuid, serviceGuid)
         .then(function (servicePlans) {
           var plans = _.map(servicePlans, function (o) { return { label: o.entity.name, value: o }; });
-          [].push.apply(that.options.servicePlans, plans);
+          [].push.apply(vm.options.servicePlans, plans);
 
-          that.options.servicePlanMap = _.keyBy(servicePlans,
+          vm.options.servicePlanMap = _.keyBy(servicePlans,
                                                 function (o) { return o.metadata.guid; });
         });
-    },
+    }
 
     /**
      * @function _getServiceInstances
@@ -223,47 +212,45 @@
      * @description Retrieve service instances for this service
      * @param {array} servicePlanGuids - service plan GUIDs to get bindings for
      * @param {object} boundInstances - already bound service instances
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      * @private
      */
-    _getServiceInstances: function (servicePlanGuids, boundInstances) {
-      var that = this;
-      this.options.instances.length = 0;
-      this.options.instanceNames.length = 0;
+    function _getServiceInstances(servicePlanGuids, boundInstances) {
+      vm.options.instances.length = 0;
+      vm.options.instanceNames.length = 0;
 
       var q = 'service_plan_guid IN ' + servicePlanGuids.join(',');
       var params = { q: q };
-      return this.spaceModel.listAllServiceInstancesForSpace(this.data.cnsiGuid, this.data.spaceGuid, params)
+      return spaceModel.listAllServiceInstancesForSpace(vm.data.cnsiGuid, vm.data.spaceGuid, params)
         .then(function (serviceInstances) {
           var instances = _.sortBy(serviceInstances, function (o) { return o.entity.name; });
           var instanceNames = _.map(instances, function (o) { return o.entity.name; });
-          [].push.apply(that.options.instanceNames, instanceNames);
+          [].push.apply(vm.options.instanceNames, instanceNames);
 
           instances = _.filter(instances, function (o) { return !boundInstances[o.metadata.guid]; });
-          [].push.apply(that.options.instances, instances);
+          [].push.apply(vm.options.instances, instances);
         });
-    },
+    }
 
     /**
      * @function addService
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Add a new service instance to the space
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      */
-    addService: function () {
-      var that = this;
-      var deferred = this.$q.defer();
+    function addService() {
+      var deferred = $q.defer();
 
-      if (this.options.activeTab === 0) {
+      if (vm.options.activeTab === 0) {
         var newInstance = {
-          name: this.options.userInput.name,
-          service_plan_guid: this.options.userInput.plan.metadata.guid,
-          space_guid: this.data.spaceGuid
+          name: vm.options.userInput.name,
+          service_plan_guid: vm.options.userInput.plan.metadata.guid,
+          space_guid: vm.data.spaceGuid
         };
-        this.instanceModel.createServiceInstance(this.data.cnsiGuid, newInstance)
+        instanceModel.createServiceInstance(vm.data.cnsiGuid, newInstance)
           .then(function (newServiceInstance) {
             if (angular.isDefined(newServiceInstance.metadata)) {
-              that.options.serviceInstance = newServiceInstance;
+              vm.options.serviceInstance = newServiceInstance;
               deferred.resolve();
             } else {
               deferred.reject();
@@ -271,58 +258,57 @@
           }, function () {
             deferred.reject();
           });
-        this.options.servicePlan = this.options.userInput.plan;
+        vm.options.servicePlan = vm.options.userInput.plan;
       } else {
-        var planGuid = this.options.userInput.existingServiceInstance.entity.service_plan_guid;
-        this.options.servicePlan = this.options.servicePlanMap[planGuid];
-        this.options.serviceInstance = this.options.userInput.existingServiceInstance;
+        var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
+        vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
+        vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
         deferred.resolve();
       }
 
       return deferred.promise;
-    },
+    }
 
     /**
      * @function addBinding
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Add a new service binding to the application
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      */
-    addBinding: function () {
-      var that = this;
+    function addBinding() {
       var bindingSpec = {
-        service_instance_guid: this.options.serviceInstance.metadata.guid,
-        app_guid: this.data.app.summary.guid
+        service_instance_guid: vm.options.serviceInstance.metadata.guid,
+        app_guid: vm.data.app.summary.guid
       };
 
-      return this.bindingModel.createServiceBinding(this.data.cnsiGuid, bindingSpec)
+      return bindingModel.createServiceBinding(vm.data.cnsiGuid, bindingSpec)
         .then(function (newBinding) {
           if (angular.isDefined(newBinding.metadata)) {
-            that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
+            appModel.getAppSummary(vm.data.cnsiGuid, vm.data.app.summary.guid);
           }
         }, function () {
-          return that.$q.reject();
+          return $q.reject();
         });
-    },
+    }
 
     /**
      * @function startWorkflow
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Show the add service detail view
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      */
-    startWorkflow: function () {
+    function startWorkflow() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: gettext('Add Service to ') + this.data.app.summary.name
+        title: gettext('Add Service to ') + vm.data.app.summary.name
       };
       var context = {
-        addServiceActions: this.addServiceActions,
-        options: this.options
+        addServiceActions: vm.addServiceActions,
+        options: vm.options
       };
 
-      return this.frameworkDetailView(config, context);
-    },
+      return frameworkDetailView(config, context);
+    }
 
     /**
      * @function stopWorkflow
@@ -330,9 +316,9 @@
      * @description Stop the workflow and dismiss view
      * @returns {void}
      */
-    stopWorkflow: function () {
-      this.modal.close();
-    },
+    function stopWorkflow() {
+      vm.modal.close();
+    }
 
     /**
      * @function finishWorkflow
@@ -340,66 +326,63 @@
      * @description Finish the workflow and close view
      * @returns {void}
      */
-    finishWorkflow: function () {
-      var that = this;
-      if (!this.data.confirm) {
-        this.addService().then(function () {
-          that.addBinding().then(function () {
+    function finishWorkflow() {
+      if (!vm.data.confirm) {
+        vm.addService().then(function () {
+          vm.addBinding().then(function () {
             // show notification for successful binding
             var successMsg = gettext("The '{{ service }}'" +
               " service has been successfully attached to application '{{ appName }}'");
             var context = {
-              service: that.options.serviceInstance.entity.name,
-              appName: that.data.app.summary.name
+              service: vm.options.serviceInstance.entity.name,
+              appName: vm.data.app.summary.name
             };
-            var message = that.$interpolate(successMsg)(context);
-            that.appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
-            that.modal.close();
+            var message = $interpolate(successMsg)(context);
+            appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+            vm.modal.close();
           }, function () {
-            return that._onServiceBindingError();
+            return _onServiceBindingError();
           });
         }, function () {
-          return that._onCreateServiceError();
+          return _onCreateServiceError();
         });
       } else {
-        this.modal.close();
+        vm.modal.close();
       }
-    },
+    }
 
     /**
      * @function _onCreateServiceError
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Error handler for create service instance
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      * @private
      */
-    _onCreateServiceError: function () {
+    function _onCreateServiceError() {
       var message = gettext('There was a problem creating the instance. Please try again. If this error persists, please contact the administrator.');
-      return this.$q.reject(message);
-    },
+      return $q.reject(message);
+    }
 
     /**
      * @function _onServiceBindingError
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Error handler for binding service instance
-     * @returns {promise} A promise object
+     * @returns {object} A promise object
      * @private
      */
-    _onServiceBindingError: function () {
-      var that = this;
-
-      if (this.options.activeTab === 0) {
-        this._loadServiceInstances().then(function () {
-          that.options.activeTab = 1;
-          var guid = that.options.serviceInstance.metadata.guid;
-          that.userInput.existingServiceInstance = _.find(that.options.instances,
+    function _onServiceBindingError() {
+      if (vm.options.activeTab === 0) {
+        _loadServiceInstances().then(function () {
+          vm.options.activeTab = 1;
+          var guid = vm.options.serviceInstance.metadata.guid;
+          vm.userInput.existingServiceInstance = _.find(vm.options.instances,
                                                           function (o) { return o.metadata.guid === guid; });
         });
       }
 
       var message = gettext('There was a problem binding the service instance to the application. Please try again. If this error persists, please contact the administrator.');
-      return this.$q.reject(message);
+      return $q.reject(message);
     }
-  });
+  }
 
 })();
