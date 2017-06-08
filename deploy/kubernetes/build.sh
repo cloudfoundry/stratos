@@ -182,7 +182,7 @@ function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile.HCP ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile ${STRATOS_UI_PATH}
 }
 
 function buildPreflightJob {
@@ -259,9 +259,6 @@ cp values.yaml.tmpl values.yaml
 sed -ie 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
 sed -ie 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
 sed -ie 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
-
-# TBD - automate the creation of a new PR against catalog-templates repo
-#       see the HCP repo for an example.
 
 # Done
 echo

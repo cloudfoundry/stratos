@@ -24,7 +24,7 @@ s3-access-key | This should be your AWS S3 access key. | console-ci-master
 s3-secret | This should be your AWS S3 secret. | console-ci-master
 s3-version-bucket | This should be a bucket in S3 that will contain a file that is used to track the current version of the Console. | console-ci-master
 s3-version-key | The full path within the noted `s3-version-bucket` to the version file, including the filename. | console-ci-master
-registry | The registry used to store the tagged docker images required to install the Console within HCP. Generally this is one of two values: 1) `[DOCKER_REGISTRY]:443`, the shared internal SUSE registry. 2) the registry url for DockerHub | console-ci-master
+registry | The registry used to store the tagged docker images required to install the Console. Generally this is one of two values: 1) `[DOCKER_REGISTRY]:443`, the shared internal SUSE registry. 2) the registry url for DockerHub | console-ci-master
 github-access-token | This should be a Github access token with `repo:status` (public repos) or `repo` access (private repos). | console-ui-tests
 github-private-key | This should be a private SSH key properly authorized to interact against the GitHub repos your pipeline with operate against. | console-ci-master, console-ui-tests
 vcs-clients | This should be a list of VCS clients. | console-ui-tests

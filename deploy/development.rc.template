@@ -5,15 +5,6 @@
 # Note: stand-up-dev-env.sh will try to use it if it's present.
 
 
-######################################
-# Local HCP Identity for development #
-######################################
-#export CONSOLE_CLIENT=console
-#export HCP_IDENTITY_SCHEME=https
-#export HCP_IDENTITY_HOST=192.168.200.3
-#export HCP_IDENTITY_PORT=
-
-
 ###################
 # Corporate Proxy #
 ###################
