@@ -30,7 +30,7 @@ npm install -g bower
 cd ${TOP_LEVEL}
 
 npm install --only=prod
-npm install --only=dev
+#npm install --only=dev
 
 ${BOWER_PATH}/bower install
 

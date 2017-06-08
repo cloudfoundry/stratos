@@ -5,7 +5,6 @@
   var _ = require('lodash');
   var angularFilesort = require('gulp-angular-filesort');
   var autoprefixer = require('gulp-autoprefixer');
-  var browserSync = require('browser-sync').create();
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var fork = require('child_process').fork;
@@ -289,6 +288,7 @@
   });
 
   gulp.task('browsersync', function (callback) {
+    var browserSync = require('browser-sync').create();
     var request = require('request');
     var middleware = [];
     var https;

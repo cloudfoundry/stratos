@@ -17,8 +17,6 @@
   var fork = require('child_process').fork;
   var path = require('path');
   var runSequence = require('run-sequence');
-  var combine = require('istanbul-combine');
-  var istanbul = require('gulp-istanbul');
   var ngAnnotate = require('gulp-ng-annotate');
 
   var components;
@@ -31,6 +29,7 @@
   });
 
   gulp.task('coverage-combine', function (cb) {
+    var combine = require('istanbul-combine');
     var coverageDir = path.resolve(__dirname, '..', 'out', 'coverage-report');
     var opts = {
       dir: path.join(coverageDir, 'combined'),
@@ -65,6 +64,7 @@
   });
 
   gulp.task('e2e:instrument-source', ['prepare:e2e'], function () {
+    var istanbul = require('gulp-istanbul');
     var sources = components.getGlobs([
       '**/*.js',
       '!**/*.spec.js',
