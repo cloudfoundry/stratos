@@ -1,4 +1,4 @@
-hash: 5784d2b80411dc2c100ca0fbada5fdfbb692e67424bd4a9b17811b440a45a879
+hash: 3cc07841a38fd63bd934665b5606e56d987dc4baaf31a9df7705c1cc4891c99c
 updated: 2017-05-25T12:53:40.88151367+01:00
 imports:
 - name: github.com/cloudfoundry/noaa

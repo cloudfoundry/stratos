@@ -1,4 +1,4 @@
-hash: 9e7036b4cb7abf1da1d97dc148d15a0c3056b2d4cd61da74e50ae9c0ff5b0343
+hash: 0af5f3aca846cd4c66adb46fd824a172dd748074746191d409df8d8a75a6c252
 updated: 2017-05-16T11:17:15.523496697+01:00
 imports:
 - name: github.com/antonlindstrom/pgstore
