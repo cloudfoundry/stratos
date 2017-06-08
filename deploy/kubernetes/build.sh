@@ -166,7 +166,7 @@ function buildProxy {
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
              --name console-proxy-builder \
-             --volume $(pwd):/go/src/github.com/hpcloud/stratos-ui \
+             --volume $(pwd):/go/src/github.com/suse/stratos-ui \
              ${DOCKER_REGISTRY}/${DOCKER_ORG}/console-proxy-builder
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1

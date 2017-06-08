@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/config"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/suse/stratos-ui/components/app-core/backend/config"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 const (

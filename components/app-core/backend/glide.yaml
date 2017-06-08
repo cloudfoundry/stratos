@@ -1,4 +1,4 @@
-package: github.com/hpcloud/stratos-ui/components/app-core/backend
+package: github.com/suse/stratos-ui/components/app-core/backend
 import:
 - package: github.com/Sirupsen/logrus
   version: 0.11.5

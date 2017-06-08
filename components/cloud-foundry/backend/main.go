@@ -9,8 +9,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/config"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/suse/stratos-ui/components/app-core/backend/config"
 )
 
 type CloudFoundrySpecification struct {

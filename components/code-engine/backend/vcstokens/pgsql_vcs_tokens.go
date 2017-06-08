@@ -7,9 +7,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/datastore"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/vcs"
+	"github.com/suse/stratos-ui/components/app-core/backend/datastore"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/crypto"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/vcs"
 )
 
 var findVcsToken = `SELECT guid, user_guid, vcs_guid, name, token

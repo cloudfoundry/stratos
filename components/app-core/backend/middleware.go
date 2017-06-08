@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	"github.com/satori/go.uuid"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
 
 )
 

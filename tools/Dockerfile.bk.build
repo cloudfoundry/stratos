@@ -33,7 +33,7 @@ RUN apk update && \
     /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html /usr/lib/node_modules/npm/scripts
 
 # Install the latest version of Glide
-RUN mkdir -p /go/src/github.com/hpcloud/stratos-ui
-WORKDIR /go/src/github.com/hpcloud/stratos-ui
+RUN mkdir -p /go/src/github.com/suse/stratos-ui
+WORKDIR /go/src/github.com/suse/stratos-ui
 COPY /scripts/compile.sh /
 CMD ["/compile.sh"]

@@ -7,8 +7,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"encoding/json"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/vcs"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/vcstokens"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/vcs"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/vcstokens"
 )
 
 const (

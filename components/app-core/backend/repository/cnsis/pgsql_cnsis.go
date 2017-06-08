@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/datastore"
+	"github.com/suse/stratos-ui/components/app-core/backend/datastore"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/suse/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
