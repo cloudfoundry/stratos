@@ -4,9 +4,9 @@ set -eux
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=susetest
 NAME=console-proxy-builder
-TAG=test
+TAG=latest
 
-STRATOS_UI_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../stratos-ui"
+STRATOS_UI_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../../stratos-ui"
 
 pushd ${STRATOS_UI_PATH}
 pushd $(git rev-parse --show-toplevel)
