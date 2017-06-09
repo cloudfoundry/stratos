@@ -8,7 +8,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  10.4.21.241:5000/stackatotest/hsc-dcind
+   repository:  10.4.21.241:5000/concourse-dcind
    tag: "latest"
    insecure_registries: [ "10.4.21.241:5000" ]
 
@@ -46,7 +46,7 @@ run:
       cat ../build/secrets.json
 
       # Load images from image
-      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
+      for image in stratos/goose:latest debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stratos/concourse:latest; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done

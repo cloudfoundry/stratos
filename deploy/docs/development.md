@@ -89,33 +89,8 @@ TODO:
 
 Please ensure you have the following installed:
 * Docker
-* Vagrant
-* VMWare Fusion or Workstation
-* vagrant-reload plugin
-* vagrant-vmware-fusion plugin (or vagrant-vmware-workstation) - **you will need to purchase a license**
-* VirtualBox (optional)
 
-### <a id="running-ui"></a>5. Running the Console UI
-* Clone all related repositories
-  - If starting from a fresh install, run: `sh start_fresh.sh`. This will clone all necessary repositories.
-  - Otherwise, manually clone the following repositories:
-    - stratos-ui
-* [Create a Docker machine](create_docker_machine.md)
-  - To keep using VirtualBox, you can run these commands:
-    - `docker-machine create --driver virtualbox`
-    - `eval $(docker-machine env default)`
-* Determine and set the UAA endpoint:
-  - `curl -Ss http://192.168.200.2:8080/api/v1/namespaces/hcp/services/ident-api | jq '.spec.ports[0].nodePort'`
-  - In `development.rc`, uncomment the `Local HCP Identity for development` variables and set the following variable:
-    - `HCP_IDENTITY_PORT=<IDENT-API-PORT>`
-* You now have two options for running the Console:
-  1. Use the `stand-up-dev-env.sh` script. For a clean start, run the script with the `-c` flag.
-  2. Run the `docker-compose` commands manually. See below for [instructions](#running-ui-manually).
-* Get the Docker machine IP: `docker-machine ip default`
-* The Console UI should be available at the IP address returned above.
-* The HCP UAA endpoint provides two users: `admin@cnap.local` and `user@cnap.local`. You can log into the Console UI with those users. Please ask the HCP team or Console UI team for passwords.
-
-#### <a id="running-ui-manually"></a>Option 2: Run Docker Compose manually ####
+#### <a id="running-ui-manually"></a>Run Docker Compose manually ####
 * Generate portal-proxy binary. Follow the directions in the repository's [README](https://github.com/hpcloud/portal-proxy):
   - `cd $GOPATH/src/github.com/hpcloud/portal-proxy`
   - Install dependencies

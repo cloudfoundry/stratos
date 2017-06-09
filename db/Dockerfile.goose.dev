@@ -1,4 +1,4 @@
-FROM stackatotest/goose:latest
+FROM susetest/goose:latest
 
 WORKDIR /src
 
