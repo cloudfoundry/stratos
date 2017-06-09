@@ -10,7 +10,7 @@ resources:
   type: pull-request
   source:
     access_token: {{github-access-token}}
-    repo: hpcloud/stratos-ui
+    repo: SUSE/stratos-ui
     uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
     base_url: {{base-url}}
