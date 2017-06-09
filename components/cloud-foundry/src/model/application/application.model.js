@@ -709,7 +709,6 @@
      * @public
      **/
     function listServiceBindings(cnsiGuid, guid, params, paginate) {
-
       return apiManager.retrieve('cloud-foundry.api.Apps')
         .ListAllServiceBindingsForApp(guid, modelUtils.makeListParams(params),
           modelUtils.makeHttpConfig(cnsiGuid))

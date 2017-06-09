@@ -10,7 +10,7 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 func TestPgSQLCNSIs(t *testing.T) {

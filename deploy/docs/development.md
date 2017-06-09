@@ -100,8 +100,6 @@ Please ensure you have the following installed:
   - If starting from a fresh install, run: `sh start_fresh.sh`. This will clone all necessary repositories.
   - Otherwise, manually clone the following repositories:
     - stratos-ui
-    - helion-ui-framework
-    - portal-proxy (important! clone into **$GOPATH/src/github.com/hpcloud**)
 * [Create a Docker machine](create_docker_machine.md)
   - To keep using VirtualBox, you can run these commands:
     - `docker-machine create --driver virtualbox`

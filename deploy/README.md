@@ -1,4 +1,4 @@
-# Stackato Deploy
+# Stratos UI Console Deploy
 
 ## Building the Console for HCP
 
@@ -14,8 +14,6 @@ This script supports the following optional arguments:
 ```
 
 The default for TAG_NAME is a ISO-8601-like timestamp, of `YYYYmmddTHHMMSSZ`
-
-The default for REGISTRY_ADDRESS is `docker-registry.helion.space:443`
 
 This will build all of the images for the console, and creates a folder called `output` that contains a HCP service definition and instance definition that refer to the specific registry and tag created during this build.
 
@@ -44,10 +42,7 @@ Wait until the UI container finishing building (the `stratosdeploy_ui_1` contain
 ## Deploying the Console against the a local HCP dev harness
 
 1. Be sure all requisite projects are up to date/on the correct branch
-    - stratos-deploy
-    - helion-ui-framework
     - stratos-ui
-    - portal-proxy
 
 2. Build your images and SDL/IDL and push them to the shared registry
 
@@ -100,7 +95,7 @@ Wait until the UI container finishing building (the `stratosdeploy_ui_1` contain
 1. List Registry contents
 
   ```
-  $  curl -X GET https://docker-registry.helion.space/v2/_catalog
+  $  curl -X GET https://[REGISTRY_URL]/v2/_catalog
   ```
 
 2. Tear down the Console specific components vs restarting the entire dev harness

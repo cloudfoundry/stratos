@@ -24,11 +24,11 @@
    * @class
    */
   function Stacks(apiManager, modelUtils) {
-    this.apiManager = apiManager;
-    this.modelUtils = modelUtils;
-  }
+    var model = {
+      listAllStacks: listAllStacks
+    };
 
-  angular.extend(Stacks.prototype, {
+    return model;
 
     /**
      * @function Stacks
@@ -39,24 +39,23 @@
      * containing ALL results will be returned. This could mean more than one http request is made.
      * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
      * containing ALL results will be returned. This could mean more than one http request is made.
-     * @returns {promise} A promise which will be resolved with the list
+     * @returns {object} A promise which will be resolved with the list
      * @public
      */
-    listAllStacks: function (cnsiGuid, params, paginate) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.Stacks')
-        .ListAllStacks(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+    function listAllStacks(cnsiGuid, params, paginate) {
+      return apiManager.retrieve('cloud-foundry.api.Stacks')
+        .ListAllStacks(modelUtils.makeListParams(params), modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
-            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         })
         .then(function (stacks) {
-          that.onListStacks(cnsiGuid, stacks);
+          onListStacks(cnsiGuid, stacks);
           return stacks;
         });
-    },
+    }
 
     /**
      * @function onListStacks
@@ -67,11 +66,11 @@
      * @returns {Array} The array of stacks
      * @public
      */
-    onListStacks: function (cnsiGuid, stacks) {
-      _.set(this, 'stacks.' + cnsiGuid, _.keyBy(stacks, 'metadata.guid'));
+    function onListStacks(cnsiGuid, stacks) {
+      _.set(model, 'stacks.' + cnsiGuid, _.keyBy(stacks, 'metadata.guid'));
       return stacks;
     }
 
-  });
+  }
 
 })();

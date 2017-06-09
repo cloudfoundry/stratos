@@ -83,9 +83,9 @@ function build {
     popd
 
     if [ "$NO_UI" = true ]; then
-        echo "===== Standing up the Stackato Console without the UI"
+        echo "===== Standing up the Stratos UI Console without the UI"
     else
-        echo "===== Standing up the whole Helion Stackato Console"
+        echo "===== Standing up the Stratos UI Console with the UI"
         # Prevent docker from creating dist as root if it doesn't exist
         mkdir -p ${STRATOS_UI_PATH}/dist
     fi

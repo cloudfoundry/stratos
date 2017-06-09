@@ -25,10 +25,11 @@
    */
   function ApplicationsSortingController($scope, modelManager) {
 
-    var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
+    var vm = this;
 
-    this.sortOptions = [
+    var model = modelManager.retrieve('cloud-foundry.model.application');
+
+    vm.sortOptions = [
       {label: 'App Name', value: 'entity.name'},
       // This one relies on app state, which we don't have yet
       //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label'},
@@ -38,67 +39,68 @@
       {label: 'Creation Date', value: 'metadata.created_at', descendingFirst: true}
     ];
 
+    vm.setSort = setSort;
+    vm.setSortOrder = setSortOrder;
+    vm.toggleSortOrder = toggleSortOrder;
+
     // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
       // Combine this into one watch so changes in the same digest only kick off one update
-      return that.model.currentSortOption + that.model.sortAscending;
+      return model.currentSortOption + model.sortAscending;
     }, function (newVal, oldVal) {
       if (newVal === oldVal) {
         return;
       }
-      that.ensureOptionSelected();
-      that.model.reSort();
+      ensureOptionSelected();
+      model.reSort();
     });
 
-    this.ensureOptionSelected();
-  }
-
-  angular.extend(ApplicationsSortingController.prototype, {
+    ensureOptionSelected();
 
     /**
      * @name ensureOptionSelected
      * @description Ensure that the correct sort option is selected in the drop down
      */
-    ensureOptionSelected: function () {
+    function ensureOptionSelected() {
       // Find the menu item that matches the current sort order
-      var selectedSortItem = _.find(this.sortOptions, {value: this.model.currentSortOption});
+      var selectedSortItem = _.find(vm.sortOptions, {value: model.currentSortOption});
       var option = selectedSortItem.value;
-      if (option !== this.selectedOption) {
-        this.selectedOption = option;
+      if (option !== vm.selectedOption) {
+        vm.selectedOption = option;
       }
-    },
+    }
 
     /**
      * @name setSort
      * @description Set the sort option and reset the direction to that option's default
      */
-    setSort: function () {
-      var item = _.find(this.sortOptions, {value: this.selectedOption});
+    function setSort() {
+      var item = _.find(vm.sortOptions, {value: vm.selectedOption});
       if (item) {
-        if (item.value !== this.model.currentSortOption) {
-          this.model.currentSortOption = item.value;
+        if (item.value !== model.currentSortOption) {
+          model.currentSortOption = item.value;
           // Reset the direction to that option's default
-          this.model.sortAscending = !item.descendingFirst;
+          model.sortAscending = !item.descendingFirst;
         }
       }
-    },
+    }
 
     /**
      * @name setSortOrder
      * @description Set sort order (asc/desc)
      * @param {boolean} isAscending - Set sort order
      */
-    setSortOrder: function (isAscending) {
-      this.model.sortAscending = isAscending;
-    },
+    function setSortOrder(isAscending) {
+      model.sortAscending = isAscending;
+    }
 
     /**
      * @name setSortOrder
      * @description Toggle the sort order (asc/desc)
      */
-    toggleSortOrder: function () {
-      this.model.sortAscending = !this.model.sortAscending;
+    function toggleSortOrder() {
+      model.sortAscending = !model.sortAscending;
     }
 
-  });
+  }
 })();

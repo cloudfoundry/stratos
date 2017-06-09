@@ -2,15 +2,16 @@
   'use strict';
 
   /* eslint-disable angular/no-private-call */
-  describe('add-app-workflow directive - ', function () {
-    var $httpBackend, $scope, $translate, that;
+  describe('add-app-workflow directive', function () {
+    var $httpBackend, $scope, $translate, that, $q, authModel, serviceInstanceModel, appModel, routeModel, spaceModel,
+      privateDomainModel, sharedDomainModel, cfOrganizationModel, appEventService;
 
     function getResolved() {
-      return that.$q.resolve();
+      return $q.resolve();
     }
 
     function getRejected() {
-      return that.$q.reject();
+      return $q.reject();
     }
 
     beforeEach(module('templates'));
@@ -21,6 +22,17 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $translate = $injector.get('$translate');
+      var modelManager = $injector.get('modelManager');
+      authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      appModel = modelManager.retrieve('cloud-foundry.model.application');
+      routeModel = modelManager.retrieve('cloud-foundry.model.route');
+      spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
+      sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
+      $q = $injector.get('$q');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
+      appEventService = $injector.get('appEventService');
 
       $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, {});
       $httpBackend.expectGET('/pp/v1/cnsis/registered');
@@ -148,21 +160,21 @@
           });
 
           it('onEnter', function () {
-            that.authModel.doesUserHaveRole = function () { return true; };
-            that.serviceInstanceModel.list = function () {
-              return that.$q.resolve(mockData);
+            authModel.doesUserHaveRole = function () { return true; };
+            serviceInstanceModel.list = function () {
+              return $q.resolve(mockData);
             };
             spyOn(that, 'getOrganizations');
             that.getDomains = getResolved;
             spyOn(that, 'getDomains').and.callThrough();
-            spyOn(that.serviceInstanceModel, 'list').and.callThrough();
+            spyOn(serviceInstanceModel, 'list').and.callThrough();
             that.userInput.serviceInstance = {};
             step.onEnter();
             $scope.$apply();
 
             expect(that.getOrganizations).toHaveBeenCalled();
             expect(that.getDomains).toHaveBeenCalled();
-            expect(that.serviceInstanceModel.list).toHaveBeenCalled();
+            expect(serviceInstanceModel.list).toHaveBeenCalled();
             expect(that.options.serviceInstances.length).toBe(1);
             expect(that.options.serviceInstances[0].label).toBe('cluster1');
           });
@@ -171,17 +183,17 @@
             stopWatch();
             simulateUserInput();
             that.options.userInput.serviceInstance = null;
-            that.appModel.filterParams = { cnsiGuid: 'no all' };
+            appModel.filterParams = { cnsiGuid: 'no all' };
 
-            that.authModel.doesUserHaveRole = function () { return true; };
-            that.serviceInstanceModel.list = function () {
-              return that.$q.resolve(mockData);
+            authModel.doesUserHaveRole = function () { return true; };
+            serviceInstanceModel.list = function () {
+              return $q.resolve(mockData);
             };
-            spyOn(that.serviceInstanceModel, 'list').and.callThrough();
+            spyOn(serviceInstanceModel, 'list').and.callThrough();
             step.onEnter();
             $scope.$apply();
 
-            expect(that.serviceInstanceModel.list).toHaveBeenCalled();
+            expect(serviceInstanceModel.list).toHaveBeenCalled();
             expect(that.options.serviceInstances.length).toBe(1);
             expect(that.options.serviceInstances[0].label).toBe('cluster1');
           });
@@ -196,8 +208,8 @@
           it('onNext - creating application failed', function () {
             stopWatch();
             simulateUserInput();
-            spyOn(that, 'validateNewRoute').and.returnValue(that.$q.resolve());
-            spyOn(that, 'createApp').and.returnValue(that.$q.reject()); // <== here
+            spyOn(that, 'validateNewRoute').and.returnValue($q.resolve());
+            spyOn(that, 'createApp').and.returnValue($q.reject()); // <== here
             var p = step.onNext();
             $scope.$apply();
             expect(p.$$state.status).toBe(2);
@@ -208,9 +220,9 @@
             var services = mock.cloudFoundryAPI.Spaces.ListAllServiceInstancesForSpace(123).response[200].body.resources;
             stopWatch();
             simulateUserInput();
-            spyOn(that, 'validateNewRoute').and.returnValue(that.$q.resolve());
-            spyOn(that, 'createApp').and.returnValue(that.$q.resolve());
-            spyOn(that.spaceModel, 'listAllServicesForSpace').and.returnValue(that.$q.resolve(services));
+            spyOn(that, 'validateNewRoute').and.returnValue($q.resolve());
+            spyOn(that, 'createApp').and.returnValue($q.resolve());
+            spyOn(spaceModel, 'listAllServicesForSpace').and.returnValue($q.resolve(services));
             expect(that.options.services.length).toBe(0);
             var p = step.onNext();
             $scope.$apply();
@@ -227,67 +239,67 @@
             name: that.userInput.name,
             space_guid: that.userInput.space.metadata.guid
           };
-          that.appModel.createApp = function () {
-            return that.$q.resolve(mock.cloudFoundryAPI.Apps.CreateApp(newAppSpec).response[201].body);
+          appModel.createApp = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Apps.CreateApp(newAppSpec).response[201].body);
           };
-          spyOn(that.appModel, 'createApp').and.callThrough();
+          spyOn(appModel, 'createApp').and.callThrough();
 
           that.createApp();
           $scope.$apply();
 
-          expect(that.appModel.createApp).toHaveBeenCalled();
-          expect(that.appModel.getAppSummary).toHaveBeenCalled();
-          expect(that.routeModel.createRoute).toHaveBeenCalled();
-          expect(that.routeModel.associateAppWithRoute).toHaveBeenCalled();
+          expect(appModel.createApp).toHaveBeenCalled();
+          expect(appModel.getAppSummary).toHaveBeenCalled();
+          expect(routeModel.createRoute).toHaveBeenCalled();
+          expect(routeModel.associateAppWithRoute).toHaveBeenCalled();
           expect(that.getOrganizations).toHaveBeenCalled();
           expect(that.getDomains).toHaveBeenCalled();
         });
 
         it('#validateNewRoute - route already exists', function () {
           simulateWatch();
-          that.routeModel.checkRouteExists = function () {
-            return that.$q.resolve({
+          routeModel.checkRouteExists = function () {
+            return $q.resolve({
             });
           };
-          spyOn(that.routeModel, 'checkRouteExists').and.callThrough();
+          spyOn(routeModel, 'checkRouteExists').and.callThrough();
 
           var p = that.validateNewRoute();
           $scope.$apply();
 
-          expect(that.routeModel.checkRouteExists).toHaveBeenCalled();
+          expect(routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
           expect(p.$$state.value).toBe(gettext('This route already exists. Choose a new one.'));
         });
 
         it('#validateNewRoute - valid route', function () {
           simulateWatch();
-          that.routeModel.checkRouteExists = function () {
-            return that.$q.reject({
+          routeModel.checkRouteExists = function () {
+            return $q.reject({
               status: 404
             });
           };
-          spyOn(that.routeModel, 'checkRouteExists').and.callThrough();
+          spyOn(routeModel, 'checkRouteExists').and.callThrough();
 
           var p = that.validateNewRoute();
           $scope.$apply();
 
-          expect(that.routeModel.checkRouteExists).toHaveBeenCalled();
+          expect(routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(1);
           expect(p.$$state.value).toBeUndefined();
         });
 
         it('#validateNewRoute - failed on checking', function () {
           simulateWatch();
-          that.routeModel.checkRouteExists = function () {
-            return that.$q.reject({
+          routeModel.checkRouteExists = function () {
+            return $q.reject({
             });
           };
-          spyOn(that.routeModel, 'checkRouteExists').and.callThrough();
+          spyOn(routeModel, 'checkRouteExists').and.callThrough();
 
           var p = that.validateNewRoute();
           $scope.$apply();
 
-          expect(that.routeModel.checkRouteExists).toHaveBeenCalled();
+          expect(routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
           expect(p.$$state.value).toBe(gettext('There was a problem validating your route. Please try again or contact your administrator if the problem persists.'));
         });
@@ -297,18 +309,18 @@
 
           beforeEach(function () {
             organizations = mock.cloudFoundryAPI.Organizations.ListAllOrganizations(123).response['200'].body.resources;
-            that.cfOrganizationModel.listAllOrganizations = function () {
-              return that.$q.resolve(organizations);
+            cfOrganizationModel.listAllOrganizations = function () {
+              return $q.resolve(organizations);
             };
             that.getDomains = getResolved;
-            spyOn(that.cfOrganizationModel, 'listAllOrganizations').and.callThrough();
+            spyOn(cfOrganizationModel, 'listAllOrganizations').and.callThrough();
             spyOn(that, 'getDomains').and.callThrough();
             stopWatch();
             simulateUserInput();
           });
 
           it('#getOrganizations - is admin', function () {
-            that.authModel.isAdmin = function () { return true; };
+            authModel.isAdmin = function () { return true; };
             expect(that.options.organizations.length).toBe(0);
             var p = that.getOrganizations();
             $scope.$apply();
@@ -318,8 +330,8 @@
           });
 
           it('#getOrganizations - is not admin', function () {
-            that.authModel.isAdmin = function () { return false; };
-            that.authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
+            authModel.isAdmin = function () { return false; };
+            authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
             expect(that.options.organizations.length).toBe(0);
             var p = that.getOrganizations();
             $scope.$apply();
@@ -328,11 +340,11 @@
           });
 
           it('#getOrganizations - no organizations', function () {
-            that.cfOrganizationModel.listAllOrganizations = function () {
-              return that.$q.resolve([]); // empty array, no organizations
+            cfOrganizationModel.listAllOrganizations = function () {
+              return $q.resolve([]); // empty array, no organizations
             };
-            that.appModel.filterParams.orgGuid = 'not all';
-            that.authModel.isAdmin = function () { return true; };
+            appModel.filterParams.orgGuid = 'not all';
+            authModel.isAdmin = function () { return true; };
             expect(that.options.organizations.length).toBe(0);
             var p = that.getOrganizations();
             $scope.$apply();
@@ -347,11 +359,11 @@
 
           beforeEach(function () {
             spaces = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(123).response['200'].body.resources;
-            that.cfOrganizationModel.listAllSpacesForOrganization = function () {
-              return that.$q.resolve(spaces);
+            cfOrganizationModel.listAllSpacesForOrganization = function () {
+              return $q.resolve(spaces);
             };
             that.getDomains = getResolved;
-            spyOn(that.cfOrganizationModel, 'listAllSpacesForOrganization').and.callThrough();
+            spyOn(cfOrganizationModel, 'listAllSpacesForOrganization').and.callThrough();
             spyOn(that, 'getDomains').and.callThrough();
             stopWatch();
             simulateUserInput();
@@ -359,7 +371,7 @@
           });
 
           it('#getSpacesForOrganization - is admin', function () {
-            that.authModel.isAdmin = function () { return true; };
+            authModel.isAdmin = function () { return true; };
             expect(that.options.spaces.length).toBe(0);
             var p = that.getSpacesForOrganization();
             $scope.$apply();
@@ -369,8 +381,8 @@
           });
 
           it('#getSpacesForOrganization - is not admin', function () {
-            that.authModel.isAdmin = function () { return false; };
-            that.authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
+            authModel.isAdmin = function () { return false; };
+            authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
             expect(that.options.spaces.length).toBe(0);
             var p = that.getSpacesForOrganization();
             $scope.$apply();
@@ -379,11 +391,11 @@
           });
 
           it('#getSpacesForOrganization - no space', function () {
-            that.cfOrganizationModel.listAllSpacesForOrganization = function () {
-              return that.$q.resolve([]); // empty array, no spaces
+            cfOrganizationModel.listAllSpacesForOrganization = function () {
+              return $q.resolve([]); // empty array, no spaces
             };
-            that.appModel.filterParams.spaceGuid = 'not all';
-            that.authModel.isAdmin = function () { return true; };
+            appModel.filterParams.spaceGuid = 'not all';
+            authModel.isAdmin = function () { return true; };
             expect(that.options.spaces.length).toBe(0);
             var p = that.getSpacesForOrganization();
             $scope.$apply();
@@ -396,14 +408,14 @@
         it('#getAppsForSpace', function () {
           stopWatch();
           simulateUserInput();
-          that.spaceModel.listAllAppsForSpace = function () {
-            return that.$q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
+          spaceModel.listAllAppsForSpace = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
           };
-          spyOn(that.spaceModel, 'listAllAppsForSpace').and.callThrough();
+          spyOn(spaceModel, 'listAllAppsForSpace').and.callThrough();
           expect(that.options.apps.length).toBe(0);
           that.getAppsForSpace();
           $scope.$apply();
-          expect(that.spaceModel.listAllAppsForSpace).toHaveBeenCalled();
+          expect(spaceModel.listAllAppsForSpace).toHaveBeenCalled();
           expect(that.options.apps.length).toBe(1);
           expect(that.options.apps[0].label).toBe('name-2500');
         });
@@ -420,10 +432,10 @@
         it('#getPrivateDomains', function () {
           stopWatch();
           simulateUserInput();
-          that.privateDomainModel.listAllPrivateDomains = function () {
-            return that.$q.resolve(mock.cloudFoundryAPI.PrivateDomains.ListAllPrivateDomains().response['200'].body.resources);
+          privateDomainModel.listAllPrivateDomains = function () {
+            return $q.resolve(mock.cloudFoundryAPI.PrivateDomains.ListAllPrivateDomains().response['200'].body.resources);
           };
-          spyOn(that.privateDomainModel, 'listAllPrivateDomains').and.callThrough();
+          spyOn(privateDomainModel, 'listAllPrivateDomains').and.callThrough();
           expect(that.options.domains.length).toBe(0);
           that.getPrivateDomains();
           $scope.$apply();
@@ -433,10 +445,10 @@
         it('#getSharedDomains', function () {
           stopWatch();
           simulateUserInput();
-          that.sharedDomainModel.listAllSharedDomains = function () {
-            return that.$q.resolve(mock.cloudFoundryAPI.SharedDomains.ListAllSharedDomains().response['200'].body.resources);
+          sharedDomainModel.listAllSharedDomains = function () {
+            return $q.resolve(mock.cloudFoundryAPI.SharedDomains.ListAllSharedDomains().response['200'].body.resources);
           };
-          spyOn(that.sharedDomainModel, 'listAllSharedDomains').and.callThrough();
+          spyOn(sharedDomainModel, 'listAllSharedDomains').and.callThrough();
           expect(that.options.domains.length).toBe(0);
           that.getSharedDomains();
           $scope.$apply();
@@ -448,7 +460,7 @@
           simulateUserInput();
           that.userInput.application = { summary: { guid: 'appGuid' } };
           var stateValue;
-          that.appEventService.$on(that.appEventService.events.REDIRECT, function (event, state) {
+          appEventService.$on(appEventService.events.REDIRECT, function (event, state) {
             stateValue = state;
           });
           that.notify();
@@ -459,7 +471,7 @@
           stopWatch();
           simulateUserInput();
           var stateValue;
-          that.appEventService.$on(that.appEventService.events.REDIRECT, function (event, state) {
+          appEventService.$on(appEventService.events.REDIRECT, function (event, state) {
             stateValue = state;
           });
           that.notify();
@@ -506,30 +518,30 @@
     }
 
     function simulateWatch() {
-      that.appModel.getAppSummary = function () {
-        return that.$q.resolve(mock.cloudFoundryAPI.Apps.GetAppSummary('84a911b3-16f7-4f47-afa4-581c86018600').response[200].body);
+      appModel.getAppSummary = function () {
+        return $q.resolve(mock.cloudFoundryAPI.Apps.GetAppSummary('84a911b3-16f7-4f47-afa4-581c86018600').response[200].body);
       };
-      that.routeModel.createRoute = function () {
-        return that.$q.resolve({
+      routeModel.createRoute = function () {
+        return $q.resolve({
           metadata: { guid: 'af96374d-3f82-4956-8af2-f2a7b572458e' }
         });
       };
-      that.routeModel.associateAppWithRoute = function () {
-        return that.$q.resolve({
+      routeModel.associateAppWithRoute = function () {
+        return $q.resolve({
         });
       };
       that.getOrganizations = function () {
-        return that.$q.resolve({
+        return $q.resolve({
         });
       };
       that.getDomains = function () {
-        return that.$q.resolve({
+        return $q.resolve({
         });
       };
 
-      spyOn(that.appModel, 'getAppSummary').and.callThrough();
-      spyOn(that.routeModel, 'createRoute').and.callThrough();
-      spyOn(that.routeModel, 'associateAppWithRoute').and.callThrough();
+      spyOn(appModel, 'getAppSummary').and.callThrough();
+      spyOn(routeModel, 'createRoute').and.callThrough();
+      spyOn(routeModel, 'associateAppWithRoute').and.callThrough();
       spyOn(that, 'getOrganizations').and.callThrough();
       spyOn(that, 'getDomains').and.callThrough();
 

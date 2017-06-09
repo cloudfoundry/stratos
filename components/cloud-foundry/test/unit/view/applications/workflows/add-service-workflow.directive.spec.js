@@ -2,7 +2,7 @@
   'use strict';
 
   describe('add-service-workflow directive', function () {
-    var $httpBackend, $scope, appEventService, mockApp, mockService, addServiceWorkflowCtrl;
+    var $httpBackend, $scope, appEventService, mockApp, mockService, addServiceWorkflowCtrl, appModel;
 
     beforeEach(module('templates'));
     beforeEach(module('console-app'));
@@ -12,6 +12,8 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       appEventService = $injector.get('appEventService');
+      var modelManager = $injector.get('modelManager');
+      appModel = modelManager.retrieve('cloud-foundry.model.application');
 
       var markup = '<add-service-workflow></add-service-workflow>';
       var element = angular.element(markup);
@@ -187,7 +189,7 @@
 
     describe('addBinding', function () {
       it('should add binding', function () {
-        spyOn(addServiceWorkflowCtrl.appModel, 'getAppSummary').and.callThrough();
+        spyOn(appModel, 'getAppSummary').and.callThrough();
 
         var newBindingSpec = {
           app_guid: 'app_123',
@@ -212,14 +214,14 @@
         };
 
         addServiceWorkflowCtrl.addBinding().then(function () {
-          expect(addServiceWorkflowCtrl.appModel.getAppSummary).toHaveBeenCalled();
+          expect(appModel.getAppSummary).toHaveBeenCalled();
         });
 
         $httpBackend.flush();
       });
 
       it('should not add binding with error', function () {
-        spyOn(addServiceWorkflowCtrl.appModel, 'getAppSummary').and.callThrough();
+        spyOn(appModel, 'getAppSummary').and.callThrough();
 
         // mock CF service bindings model
         var mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
@@ -239,7 +241,7 @@
           cnsiGuid: 'guid'
         };
         addServiceWorkflowCtrl.addBinding().then(angular.noop, function () {
-          expect(addServiceWorkflowCtrl.appModel.getAppSummary).not.toHaveBeenCalled();
+          expect(appModel.getAppSummary).not.toHaveBeenCalled();
         });
 
         $httpBackend.flush();
