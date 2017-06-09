@@ -13,6 +13,6 @@ RUN go get 'bitbucket.org/liamstask/goose/cmd/goose'
 
 COPY db/dbconf.yml db/dbconf.yml
 COPY db/migrations db/migrations
-COPY db/scripts/run-postflight-job.sh /run-postflight-job.sh
+COPY scripts/run-postflight-job.sh /run-postflight-job.sh
 
 CMD ["/run-postflight-job.sh"]

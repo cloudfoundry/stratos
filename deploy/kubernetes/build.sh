@@ -8,7 +8,7 @@ DOCKER_ORG=susetest
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:" opt; do
+while getopts ":ho:r:t:d" opt; do
   case $opt in
     h)
       echo
@@ -26,6 +26,9 @@ while getopts ":ho:r:t:" opt; do
       ;;
     t)
       TAG="${OPTARG}"
+      ;;
+    d)
+      BUILD_DOCKER_COMPOSE_IMAGES="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -114,6 +117,9 @@ function cleanup {
   echo
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
+
+  rm -f ${STRATOS_UI_PATH}/goose
+
 }
 
 function updateTagForRelease {
@@ -173,14 +179,14 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy Dockerfile.bk.dev ${STRATOS_UI_PATH}/deploy
+  buildAndPublishImage hsc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
 }
 
 function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres ./deploy/containers/postgres/Dockerfile ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
 }
 
 function buildPreflightJob {
@@ -203,7 +209,7 @@ function buildPostflightJob {
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage hsc-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postflight-job Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}/deploy
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
