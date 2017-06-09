@@ -39,7 +39,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 
 		// setup mock CF server
 		numReqs := 0
-		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
 				w.WriteHeader(http.StatusUnauthorized)
 				numReqs++
@@ -56,18 +56,18 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 			io.WriteString(w, "hi")
 			numReqs++
 			return
-		})) // end of mockHCF
+		})) // end of mockCF
 
-		defer mockHCF.Close()
+		defer mockCF.Close()
 
 		// do a GET against the CF mock server
-		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
+		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
-			Name:                  "mockHCF",
+			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
@@ -162,7 +162,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 		// setup mock CF server
 		numReqs := 0
-		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
 				w.WriteHeader(http.StatusUnauthorized)
 				numReqs++
@@ -179,19 +179,19 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			io.WriteString(w, "hi")
 			numReqs++
 			return
-		})) // end of mockHCF
+		})) // end of mockCF
 
 		// close this explicitly here so we can thread-safely check the bool
-		defer mockHCF.Close()
+		defer mockCF.Close()
 
 		// do a GET against the CF mock server
-		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
+		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
-			Name:                  "mockHCF",
+			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
@@ -308,7 +308,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 		// setup mock CF server
 		numReqs := 0
-		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
 				w.WriteHeader(http.StatusUnauthorized)
 				numReqs++
@@ -325,10 +325,10 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			io.WriteString(w, "hi")
 			numReqs++
 			return
-		})) // end of mockHCF
+		})) // end of mockCF
 
 		// do a GET against the CF mock server
-		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
+		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
 
 		_, _, _, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
@@ -337,7 +337,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
-			Name:                  "mockHCF",
+			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
@@ -397,7 +397,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			So(err, ShouldNotBeNil)
 		})
 
-		mockHCF.Close()
+		mockCF.Close()
 
 	})
 
@@ -450,7 +450,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 
 		var failFirst = false
 		numReqs := 0
-		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
 				w.WriteHeader(http.StatusUnauthorized)
 				numReqs++
@@ -467,9 +467,9 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 			io.WriteString(w, "hi")
 			numReqs++
 			return
-		})) // end of mockHCF
+		})) // end of mockCF
 
-		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
+		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
 
 		pp := setupPortalProxy(nil)
 
@@ -484,7 +484,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 			So(err, ShouldNotBeNil)
 		})
 
-		mockHCF.Close()
+		mockCF.Close()
 	})
 
 }
@@ -546,7 +546,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 
 		// setup mock CF server
 		numReqs := 0
-		mockHCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockCF := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if numReqs == 0 && failFirst {
 				w.WriteHeader(http.StatusUnauthorized)
 				numReqs++
@@ -563,16 +563,16 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 			io.WriteString(w, "hi")
 			numReqs++
 			return
-		})) // end of mockHCF
+		})) // end of mockCF
 
 		// do a GET against the CF mock server
-		req, _ := http.NewRequest("GET", mockHCF.URL+"/v2/info", nil)
+		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
 
 		var mockURL *url.URL
 		var mockURLasString string
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
-			Name:                  "mockHCF",
+			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
@@ -653,7 +653,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 			So(err, ShouldNotBeNil)
 		})
 
-		mockHCF.Close()
+		mockCF.Close()
 
 	})
 

@@ -162,10 +162,10 @@ func TestLoginToCNSI(t *testing.T) {
 
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
-		stringHCFType := "cf"
+		stringCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                   mockCNSIGUID,
-			Name:                   "mockHCF",
+			Name:                   "mockCF",
 			CNSIType:               "cf",
 			APIEndpoint:            mockURL,
 			AuthorizationEndpoint:  mockUAA.URL,
@@ -174,7 +174,7 @@ func TestLoginToCNSI(t *testing.T) {
 		}
 
 		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
-			AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true)
+			AddRow(mockCNSIGUID, mockCNSI.Name, stringCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true)
 
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
@@ -286,7 +286,7 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 		defer mockUAA.Close()
 
 		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-			AddRow(mockCNSIGUID, "mockHCF", "cf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
+			AddRow(mockCNSIGUID, "mockCF", "cf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRow)
@@ -326,10 +326,10 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 
 		var mockURL *url.URL
 		mockURL, _ = url.Parse(mockUAA.URL)
-		stringHCFType := "cf"
+		stringCFType := "cf"
 		var mockCNSI = interfaces.CNSIRecord{
 			GUID:                  mockCNSIGUID,
-			Name:                  "mockHCF",
+			Name:                  "mockCF",
 			CNSIType:              "cf",
 			APIEndpoint:           mockURL,
 			AuthorizationEndpoint: mockUAA.URL,
@@ -337,7 +337,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		}
 
 		expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-			AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockDopplerEndpoint)
+			AddRow(mockCNSIGUID, mockCNSI.Name, stringCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockDopplerEndpoint)
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRow)
@@ -475,12 +475,6 @@ func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
 
 	defer mockUAA.Close()
 
-	// var mockCNSI = CNSIRecord{
-	// 	Name:     "mockHCF",
-	// 	CNSIType: cnsiHCF,
-	// }
-	// pp.CNSIs[mockCNSIGuid] = mockCNSI
-
 	if err := pp.loginToCNSI(ctx); err == nil {
 		t.Error("Login against CNSI should fail if API endpoint not specified")
 	}
@@ -511,13 +505,6 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 		msBody(jsonMust(mockUAAResponse)))
 
 	defer mockUAA.Close()
-
-	// var mockCNSI = cnsiRecord{
-	// 	Name:                  "mockHCF",
-	// 	CNSIType:              cnsiHCF,
-	// 	AuthorizationEndpoint: mockUAA.URL,
-	// }
-	// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
 	if err := pp.loginToCNSI(ctx); err != nil {
 		t.Error(err)

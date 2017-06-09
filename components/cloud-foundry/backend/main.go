@@ -57,7 +57,7 @@ func (c CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) 
 }
 
 func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, error) {
-	log.Debug("getHCFv2Info")
+	log.Debug("Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
 
