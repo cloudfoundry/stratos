@@ -92,7 +92,7 @@ $GOPATH/bin/goconvey -port 9999
 
 In order to facilitate a smoother, faster development process, the build script accepts arguments.  If provided these arguments will override the standard "CMD" block for a docker-container.  Here's an example you may find useful:
 ```
-tools/build_portal_proxy.sh bash
+deploy/build_portal_proxy.sh bash
 ... <lots of output here> ...
 root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy#
 
@@ -108,7 +108,7 @@ We've attempted to create a set of helper scripts to aid in running the portal-p
 
 Starting in the top-level directory of the portal-proxy repo, run the build script like so:
 ```
-tools/build_portal_proxy.sh
+deploy/build_portal_proxy.sh
 ```
 NOTE: Currently, you MUST be in the top level of the directory.  There's some relative/base/absolute path issues that we (and by "we" I mean me, woodnt) haven't worked out yet.  Hopefully that'll all be solved soon.
 

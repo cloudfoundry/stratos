@@ -96,7 +96,7 @@ Please ensure you have the following installed:
   - Install dependencies
   - Set environmental variables
   - Set up developer certs
-  - `./tools/build_portal_proxy.sh`
+  - `./deploy/build_portal_proxy.sh`
 * Back in stratos-deploy, build and run:
 ```
 docker-compose -f docker-compose.development.yml build
