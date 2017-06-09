@@ -20,12 +20,12 @@ echo "*:$PGSQL_PORT:postgres:$POSTGRES_USER:$(cat $POSTGRES_PASSWORD_FILE)" > /t
 echo "*:$PGSQL_PORT:$PGSQL_DATABASE:$PGSQL_USER:$(cat $PGSQL_PASSWORDFILE)" >> /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
-# Get Stackato user password from secrets file
+# Get db user password from secrets file
 PWD=$(cat $PGSQL_PASSWORDFILE)
 
 # Create the database if necessary
-stackatoDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
-if [ -z "$stackatoDbExists" ] ; then
+stratosDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
+if [ -z "$stratosDbExists" ] ; then
     echo "Creating database $PGSQL_DATABASE"
     execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
     echo "Creating user $PGSQL_USER"
@@ -36,7 +36,7 @@ else
     echo "$PGSQL_DATABASE already exists"
 fi
 
-# Backup existing stackato-db database from stolon cluster and restore it to the single instance
+# Backup existing database from stolon cluster and restore it to the single instance
 #execBackupRestore
 
 # Migrate the database if necessary
