@@ -59,9 +59,6 @@
       var registeredList = mock.UserServiceInstanceApi.list(cnsiGuid);
       $httpBackend.whenGET(registeredList.url).respond(200, registeredList.response['200'].body);
 
-      var versionsRequest = mock.cloudFoundryAPI.Versions.ListVersions(appGuid);
-      $httpBackend.whenGET(versionsRequest.url).respond(200, versionsRequest.success.code, versionsRequest.success.response);
-
       var retrieveApp = mock.cloudFoundryAPI.Apps.RetrieveApp(appGuid);
       $httpBackend.whenGET(retrieveApp.url).respond(200, retrieveApp.response['200'].body);
 
