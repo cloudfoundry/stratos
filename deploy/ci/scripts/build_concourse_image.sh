@@ -11,5 +11,5 @@ source ${DIRPATH}/build_common.sh
 cd ${DIRPATH}/../
 cp ${DIRPATH}/../../../stratos-ui/tools/package.json .
 
-docker build --squash  -f tools/Dockerfile.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/concourse:${TAG} \
+docker build --squash  -f ci/Dockerfile.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/concourse:${TAG} \
     ${BUILD_ARGS}

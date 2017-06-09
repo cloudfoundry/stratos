@@ -43,7 +43,7 @@ services:
   proxy:
     extends: buildCommon
     build:
-      context: ../tools
+      context: ../deploy
       dockerfile: Dockerfile.bk.dev
     ports:
       - "3003:3003"
@@ -69,7 +69,7 @@ services:
     extends: buildCommon
     build:
       context: ../
-      dockerfile: tools/Dockerfile.ui.dev
+      dockerfile: deploy/Dockerfile.ui.dev
       args:
         - USER_ID
         - GROUP_ID
