@@ -1,11 +1,9 @@
 # Stratos UI Console Deploy
 
-**NOTE:** TODO: Review/Remove build_and_tag.sh, deploy_and_wait_until_running.sh, create-vmware-docker-machine.sh
-
 The Stratos UI can be deployed in a number of ways
-## As a Cloud Foundry application
-See the 'Quick Start' section in the [root README](../README.md)
-## In Kubernetes using a helm chart
+## Deploy as a Cloud Foundry application
+See the 'Quick Start' section in the root [README](../README.md)
+## Deploy in Kubernetes using a helm chart
 See [Deploy Console in Kubernetes using Minikube and Helm](kubernetes/README.md)
 ## Deploy locally via Docker Compose
 
@@ -39,7 +37,7 @@ dfbcd3ea0dbb        postgres:latest       "docker-entrypoint.sh"   5 seconds ago
 
 ```
 
-The Web UI is served via deploy_nginx and should now be available at https://localhost
+The Web UI is served via deploy_nginx and should now be available after a short amount of time at https://localhost
 
 ### Stop/Cleanup
 
