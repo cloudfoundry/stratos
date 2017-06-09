@@ -64,7 +64,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
 
-		// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
+		// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers
 		done := make(chan *CNSIRequest)
 
 		// Set up database expectation for pp.doOauthFlowRequest

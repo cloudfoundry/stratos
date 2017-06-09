@@ -126,7 +126,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	return newCNSI, err
 }
 
-// TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls.  https://jira.hpcloud.net/browse/TEAMFOUR-631
+// TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	cnsiGUID := c.FormValue("cnsi_guid")
 	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")

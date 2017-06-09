@@ -79,7 +79,7 @@
       var removalData = {cnsi_guid: guid};
       var data = $httpParamSerializer(removalData);
       /* eslint-disable */
-      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
       /* eslint-enable */
       return $http.post('/pp/v1/unregister', data, config);
     }
