@@ -35,7 +35,7 @@
 
   var paths = config.paths;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
-    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components;
+    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components, browserSync;
   var packageJson = require('../package.json');
 
   function initialize() {
@@ -257,6 +257,7 @@
   // Gulp watch JavaScript, SCSS and HTML source files
   // Task is used by dev task. Don't use externally.
   gulp.task('watch', function () {
+
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
@@ -288,7 +289,7 @@
   });
 
   gulp.task('browsersync', function (callback) {
-    var browserSync = require('browser-sync').create();
+    browserSync = require('browser-sync').create();
     var request = require('request');
     var middleware = [];
     var https;
