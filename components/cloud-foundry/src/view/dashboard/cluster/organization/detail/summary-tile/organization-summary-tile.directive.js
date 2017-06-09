@@ -26,6 +26,7 @@
    * @param {object} $state - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -34,9 +35,9 @@
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
-  function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, appUtilsService,
-                                             appNotificationsService, appClusterCliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog,
-                                             cfOrganizationModel) {
+  function OrganizationSummaryTileController($scope, $state, $stateParams, $q, $translate, modelManager, appUtilsService,
+                                             appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
+                                             frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -179,7 +180,7 @@
       }
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.cfOrganizationModel.organizationRolesToStrings(roles);
+      that.roles = _.map(that.cfOrganizationModel.organizationRolesToStrings(roles), $translate.instant);
     });
 
     function init() {
