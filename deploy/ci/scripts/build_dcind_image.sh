@@ -1,6 +1,10 @@
 #!/bin/bash
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
+DOCKER_ORG=${DOCKER_ORG:-susetest}
+TAG=${TAG:-test}
+
 DOWNLOAD_FOLDER=${DIRPATH}/tmp
 source ${DIRPATH}/build_common.sh
 
@@ -27,7 +31,7 @@ for tarball in $(ls tmp/); do
   echo COPY ./tmp/$tarball /tarballs/$tarball >> Dockerfile.dcind
 done
 
-docker build -f Dockerfile.dcind ./ -t ${REGISTRY}stackatotest/hsc-dcind:${TAG} ${BUILD_ARGS}
+docker build -f Dockerfile.dcind ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/dcind:${TAG} ${BUILD_ARGS}
 rm -rf tmp
 rm -f Dockerfile.dcind
 

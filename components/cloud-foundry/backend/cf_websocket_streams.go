@@ -87,7 +87,6 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 	}
 
 	ac.refreshToken = func() error {
-		//newTokenRecord, err := p.refreshToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
 		newTokenRecord, err := c.portalProxy.RefreshToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, "", "", cnsiRecord.TokenEndpoint)
 		if err != nil {
 			msg := fmt.Sprintf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)

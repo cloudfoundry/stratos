@@ -21,4 +21,4 @@ USER ${USER_ID}
 
 WORKDIR /usr/src/app
 
-CMD bash provision.sh && node_modules/.bin/gulp watch
+CMD bash provision.sh

@@ -79,5 +79,7 @@ services:
 
   uaa:
     extends: imageCommon
-    image: susetest/uaa:latest
+    # NOTE: This is required so that the tests run against
+    # a UAA instance that has all the correct roles
+    image: susetest/uaa:test
 

@@ -7,7 +7,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  10.4.21.241:5000/stackatotest/hsc-concourse
+   repository:  10.4.21.241:5000/stratos/concourse
    tag: "latest"
    insecure_registries: [ "10.4.21.241:5000" ]
 

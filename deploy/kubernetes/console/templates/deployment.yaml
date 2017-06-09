@@ -143,9 +143,7 @@ spec:
           value: hce
         - name: HSM_CLIENT
           value: hsm
-        - name: HCP_CLIENT
-          value: hcp
-        - name: HCF_CLIENT
+        - name: CF_CLIENT
           value: cf
         - name: ALLOWED_ORIGINS
           value: https://localhost
