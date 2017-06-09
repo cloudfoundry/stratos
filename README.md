@@ -4,7 +4,6 @@ Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. 
 
 ![Stratos UI Application view](docs/images/stratos-ui.png)
 
-
 ## Deploying Stratos UI
 
 Stratos UI can be deployed in the following environments:
