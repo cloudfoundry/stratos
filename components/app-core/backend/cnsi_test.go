@@ -9,7 +9,7 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func TestRegisterHCFCluster(t *testing.T) {
+func TestRegisterCFCluster(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -22,8 +22,8 @@ func TestRegisterHCFCluster(t *testing.T) {
 
 	req := setupMockReq("POST", "", map[string]string{
 		"cnsi_name":           "Some fancy CF Cluster",
-		"api_endpoint":         mockV2Info.URL,
-		"skip_ssl_validation":  "true",
+		"api_endpoint":        mockV2Info.URL,
+		"skip_ssl_validation": "true",
 	})
 
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
@@ -42,7 +42,7 @@ func TestRegisterHCFCluster(t *testing.T) {
 	}
 }
 
-func TestRegisterHCFClusterWithMissingName(t *testing.T) {
+func TestRegisterCFClusterWithMissingName(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -66,7 +66,7 @@ func TestRegisterHCFClusterWithMissingName(t *testing.T) {
 	}
 }
 
-func TestRegisterHCFClusterWithMissingAPIEndpoint(t *testing.T) {
+func TestRegisterCFClusterWithMissingAPIEndpoint(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -90,7 +90,7 @@ func TestRegisterHCFClusterWithMissingAPIEndpoint(t *testing.T) {
 	}
 }
 
-func TestRegisterHCFClusterWithInvalidAPIEndpoint(t *testing.T) {
+func TestRegisterCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -117,7 +117,7 @@ func TestRegisterHCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 	}
 }
 
-func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
+func TestRegisterCFClusterWithBadV2Request(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -142,7 +142,7 @@ func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
 	}
 }
 
-func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
+func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	t.Parallel()
 
 	mockV2Info := setupMockServer(t,
@@ -179,7 +179,7 @@ func TestListCNSIs(t *testing.T) {
 	defer db.Close()
 
 	// Mock the CNSIs in the database
-	expectedCNSIList := expectHCFAndHCERows()
+	expectedCNSIList := expectCFAndCERows()
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WillReturnRows(expectedCNSIList)
 
@@ -212,23 +212,23 @@ func TestListCNSIsWhenListFails(t *testing.T) {
 	}
 }
 
-func TestGetHCFv2InfoWithBadURL(t *testing.T) {
+func TestGetCFv2InfoWithBadURL(t *testing.T) {
 	t.Parallel()
 
 	cfPlugin := initCFPlugin(&portalProxy{})
 
 	invalidEndpoint := "%zzzz"
 	if _, err := cfPlugin.Info(invalidEndpoint, true); err == nil {
-		t.Error("getHCFv2Info should not return a valid response when the URL is bad.")
+		t.Error("getCFv2Info should not return a valid response when the URL is bad.")
 	}
 }
 
-func TestGetHCFv2InfoWithInvalidEndpoint(t *testing.T) {
+func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	t.Parallel()
 
 	cfPlugin := initCFPlugin(&portalProxy{})
 	ep := "http://invalid.net"
 	if _, err := cfPlugin.Info(ep, true); err == nil {
-		t.Error("getHCFv2Info should not return a valid response when the endpoint is invalid.")
+		t.Error("getCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
 }

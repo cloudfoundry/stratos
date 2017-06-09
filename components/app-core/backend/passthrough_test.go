@@ -16,18 +16,18 @@ func TestPassthroughDoRequest(t *testing.T) {
 	t.Parallel()
 
 	Convey("Passthrough request tests", t, func() {
-		mockHCFServer := setupMockServer(t,
+		mockCFServer := setupMockServer(t,
 			msRoute("/v2/info"),
 			msMethod("GET"),
 			msStatus(http.StatusOK),
 			msBody(jsonMust(mockV2InfoResponse)))
-		defer mockHCFServer.Close()
+		defer mockCFServer.Close()
 
-		uri, err := url.Parse(mockHCFServer.URL + "/v2/info")
+		uri, err := url.Parse(mockCFServer.URL + "/v2/info")
 		So(err, ShouldBeNil)
 
 		mockCNSIRequest := CNSIRequest{
-			GUID:     mockHCFGUID,
+			GUID:     mockCFGUID,
 			UserGUID: mockUserGUID,
 			Method:   "GET",
 			URL:      uri,
@@ -46,7 +46,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		defer db.Close()
 
 		mock.ExpectQuery(selectAnyFromTokens).
-			WithArgs(mockHCFGUID, mockUserGUID).
+			WithArgs(mockCFGUID, mockUserGUID).
 			WillReturnRows(expectNoRows())
 
 		// set up the database expectation for pp.setCNSITokenRecord
@@ -54,7 +54,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 			//	WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, mockTokenRecord.TokenExpiry).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		err = pp.setCNSITokenRecord(mockHCFGUID, mockUserGUID, mockTokenRecord)
+		err = pp.setCNSITokenRecord(mockCFGUID, mockUserGUID, mockTokenRecord)
 
 		Convey("Should be able to set CNSI token records", func() {
 			So(err, ShouldBeNil)
@@ -72,13 +72,13 @@ func TestPassthroughDoRequest(t *testing.T) {
 		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
 		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
 		mock.ExpectQuery(selectAnyFromTokens).
-			WithArgs(mockHCFGUID, mockUserGUID).
+			WithArgs(mockCFGUID, mockUserGUID).
 			WillReturnRows(expectEncryptedTokenRow(pp.Config.EncryptionKeyInBytes))
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 		mock.ExpectQuery(selectAnyFromCNSIs).
-			WithArgs(mockHCFGUID).
-			WillReturnRows(expectHCFRow())
+			WithArgs(mockCFGUID).
+			WillReturnRows(expectCFRow())
 
 		go pp.doRequest(&mockCNSIRequest, done)
 
@@ -207,7 +207,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 
 	Convey("Passthrough request should succeed", t, func() {
 		expectedCNSIRequest := CNSIRequest{
-			GUID:     mockHCFGUID,
+			GUID:     mockCFGUID,
 			UserGUID: "user1",
 			Method:   "GET",
 			Body:     nil,
@@ -226,14 +226,14 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 		mock.ExpectQuery(selectAnyFromCNSIs).
-			WithArgs(mockHCFGUID).
-			WillReturnRows(expectHCFRow())
+			WithArgs(mockCFGUID).
+			WillReturnRows(expectCFRow())
 
 		cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
 
 		So(err, ShouldBeNil)
 
-		Convey("All expecations should be met", func() {
+		Convey("All expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
 
