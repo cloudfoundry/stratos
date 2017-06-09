@@ -43,8 +43,8 @@ services:
   proxy:
     extends: buildCommon
     build:
-      context: ../deploy
-      dockerfile: Dockerfile.bk.dev
+      context: ../
+      dockerfile: deploy/Dockerfile.bk.dev
     ports:
       - "3003:3003"
     env_file:
