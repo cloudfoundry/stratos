@@ -585,22 +585,21 @@
         var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         return $q.all([makeUserP, makeManagerP])
           .then(function () {
-            return refreshAuth(cnsiGuid);
-          })
-          .then(function () {
-            getOrganizationDetails(cnsiGuid, org);
+            return refreshAuth(cnsiGuid).finally(function () {
+              getOrganizationDetails(cnsiGuid, org);
+            });
           });
       });
     }
 
     function deleteOrganization(cnsiGuid, orgGuid) {
       return orgsApi.DeleteOrganization(orgGuid, {}, modelUtils.makeHttpConfig(cnsiGuid))
-        .then(function () {
-          return refreshAuth(cnsiGuid);
-        })
         .then(function (val) {
-          unCacheOrganization(cnsiGuid, orgGuid);
-          return val;
+          return refreshAuth(cnsiGuid).then(function () {
+            return val;
+          }).finally(function () {
+            unCacheOrganization(cnsiGuid, orgGuid);
+          });
         });
     }
 
