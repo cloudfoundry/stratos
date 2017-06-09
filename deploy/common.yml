@@ -56,7 +56,7 @@ services:
   nginx:
     extends: buildCommon
     build:
-      context: ../containers/nginx
+      context: ../deploy/containers/nginx
       dockerfile: Dockerfile.dev
     ports:
       - 80:80

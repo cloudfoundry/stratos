@@ -112,8 +112,8 @@ function cleanup {
   rm -rf ${STRATOS_UI_PATH}/node_modules
   rm -rf ${STRATOS_UI_PATH}/bower_components
   echo
-  echo "-- Cleaning up ${STRATOS_UI_PATH}/containers/nginx/dist"
-  rm -rf ${STRATOS_UI_PATH}/containers/nginx/dist
+  echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
+  rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 }
 
 function updateTagForRelease {
@@ -180,7 +180,7 @@ function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postgres ./deploy/containers/postgres/Dockerfile ${STRATOS_UI_PATH}
 }
 
 function buildPreflightJob {
@@ -226,12 +226,12 @@ function buildUI {
   # Copy the artifacts from the above to the nginx container
   echo
   echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/containers/nginx/dist
+  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/containers/nginx
+  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
 # MAIN ------------------------------------------------------
