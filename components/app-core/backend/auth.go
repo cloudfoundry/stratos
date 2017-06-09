@@ -43,7 +43,7 @@ type LoginHookFunc func(c echo.Context) error
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
 const UAAAdminIdentifier = "stratos.admin"
 
-// HCFAdminIdentifier - The identifier that Cloud Foundry uses to convey administrative level perms
+// CFAdminIdentifier - The identifier that Cloud Foundry uses to convey administrative level perms
 const CFAdminIdentifier = "cloud_controller.admin"
 
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
@@ -162,14 +162,13 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
-
-	hcfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
+	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
 
 	resp := &interfaces.LoginRes{
 		Account:     u.UserGUID,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: cnsiRecord.APIEndpoint,
-		Admin:       hcfAdmin,
+		Admin:       cfAdmin,
 	}
 
 	return resp, nil
@@ -542,7 +541,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool) {
 	log.Debug("getCNSIUser")
 	// get the uaa token record
-	hcfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
+	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
 		log.Error(msg)
@@ -550,7 +549,7 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 	}
 
 	// get the scope out of the JWT token data
-	userTokenInfo, err := getUserTokenInfo(hcfTokenRecord.AuthToken)
+	userTokenInfo, err := getUserTokenInfo(cfTokenRecord.AuthToken)
 	if err != nil {
 		msg := "Unable to find scope information in the UAA Auth Token: %s"
 		log.Errorf(msg, err)
