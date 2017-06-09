@@ -187,7 +187,7 @@ function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
@@ -203,7 +203,7 @@ function buildPostflightJob {
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
 }
 

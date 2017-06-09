@@ -42,7 +42,7 @@ const (
 	// SSLVerifyFull verifies the certificate and hostname and the CA
 	SSLVerifyFull SSLValidationMode = "verify-full"
 	// SQLiteSchemaFile - SQLite schema file
-	SQLiteSchemaFile = "./db/sqlite_schema.sql"
+	SQLiteSchemaFile = "./deploy/db/sqlite_schema.sql"
 	// SQLiteDatabaseFile - SQLite database file
 	SQLiteDatabaseFile = "./console-database.db"
 	// Default database provider when not specified

@@ -9,7 +9,7 @@ Check out the [main Goose Page](https://bitbucket.org/liamstask/goose/) for deta
 One note: you'll want to choose SQL based migrations vs Golang based migrations. This choice requires the `sql` keyword at the end of the `goose create` command. Ex:
 ```
 $ goose create AddSomeColumns sql
-$ goose: created db/migrations/20130106093224_AddSomeColumns.sql
+$ goose: created deploy/db/migrations/20130106093224_AddSomeColumns.sql
 ```
 
 #### Testing the new migration

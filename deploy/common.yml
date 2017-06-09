@@ -36,7 +36,7 @@ services:
   goose:
     extends: buildCommon
     build:
-      context: ../
+      context: ../deploy
       dockerfile: db/Dockerfile.goose.dev
 
 
