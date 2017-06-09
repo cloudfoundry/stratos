@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:1.11
 
 RUN mkdir -p /etc/secrets/ && \
   openssl req -batch -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /etc/secrets/server.key -out /etc/secrets/server.crt && \
