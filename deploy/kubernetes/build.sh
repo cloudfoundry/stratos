@@ -209,7 +209,7 @@ function buildPostflightJob {
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage hsc-postflight-job Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}/deploy
+  buildAndPublishImage hsc-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
