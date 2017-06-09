@@ -173,7 +173,7 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy tools/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-proxy Dockerfile.bk.dev ${STRATOS_UI_PATH}/tools
 }
 
 function buildPostgres {

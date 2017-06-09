@@ -35,5 +35,5 @@ RUN apk update && \
 # Install the latest version of Glide
 RUN mkdir -p /go/src/github.com/SUSE/stratos-ui
 WORKDIR /go/src/github.com/SUSE/stratos-ui
-COPY /scripts/compile.sh /
+COPY compile.sh /
 CMD ["/compile.sh"]
