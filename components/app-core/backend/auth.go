@@ -52,7 +52,7 @@ const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
-func (p *portalProxy) getHCPIdentityEndpoint() string {
+func (p *portalProxy) getUAAIdentityEndpoint() string {
 	return fmt.Sprintf("%s/oauth/token", p.Config.UAAEndpoint)
 }
 
@@ -66,7 +66,7 @@ func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
-	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
+	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		err = interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
@@ -455,7 +455,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 
 		// UAA Token has expired, refresh the token, if that fails, fail the request
-		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
+		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 		if tokenErr != nil {
 			msg := "Could not refresh UAA token"
 			log.Error(msg, tokenErr)
