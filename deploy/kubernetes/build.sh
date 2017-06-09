@@ -221,7 +221,7 @@ function buildUI {
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
     node:6.9.1 \
-    /bin/bash ./provision.sh
+    /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
   echo
