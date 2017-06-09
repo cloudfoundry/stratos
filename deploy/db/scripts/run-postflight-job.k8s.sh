@@ -44,23 +44,23 @@ echo "Checking database to see if migration is necessary."
 
 # Check the version
 echo "Checking database version."
-PGSQL_PASSWORD=$PWD goose --env=development dbversion
+PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
 
 # Check the status
 echo "Checking database status."
-PGSQL_PASSWORD=$PWD goose --env=development status
+PGSQL_PASSWORD=$PWD goose --env=k8s status
 
 # Run migrations
 echo "Attempting database migrations."
-PGSQL_PASSWORD=$PWD goose --env=development up
+PGSQL_PASSWORD=$PWD goose --env=k8s up
 
 # CHeck the status
 echo "Checking database status."
-PGSQL_PASSWORD=$PWD goose --env=development status
+PGSQL_PASSWORD=$PWD goose --env=k8s status
 
 # Check the version
 echo "Checking database version."
-PGSQL_PASSWORD=$PWD goose --env=development dbversion
+PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
 
 echo "Database operation(s) complete."
 
