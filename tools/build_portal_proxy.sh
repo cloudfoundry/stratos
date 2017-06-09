@@ -13,8 +13,8 @@ docker run -it \
            -e USER_ID=$(id -u)  \
            -e GROUP_ID=$(id -g) \
            --name console-proxy-builder \
-           --volume $(pwd):/go/src/github.com/hpcloud/stratos-ui \
-           docker.io/susetest/console-proxy-builder:test $*
+           --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
+           docker.io/susetest/console-proxy-builder $*
 
 ret=$?
 popd

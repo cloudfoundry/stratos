@@ -20,31 +20,30 @@
   }
 
   function ApplicationGalleryCardController($state, $scope, modelManager) {
-    var that = this;
-    this.$state = $state;
-    this.modelManager = modelManager;
-    this.cardData = {
-      title: this.app.entity.name
+
+    var vm = this;
+
+    vm.cardData = {
+      title: vm.app.entity.name
     };
 
+    vm.goToApp = goToApp;
+
     $scope.$watch(function () {
-      return that.app.entity.state;
+      return vm.app.entity.state;
     }, function () {
-      that.canShowStats = that.app.entity.state === 'STARTED';
+      vm.canShowStats = vm.app.entity.state === 'STARTED';
     });
-  }
 
-  angular.extend(ApplicationGalleryCardController.prototype, {
-
-    goToApp: function () {
+    function goToApp() {
       var guids = {
-        cnsiGuid: this.cnsiGuid,
-        guid: this.app.metadata.guid
+        cnsiGuid: vm.cnsiGuid,
+        guid: vm.app.metadata.guid
       };
-      var appModel = this.modelManager.retrieve('cloud-foundry.model.application');
-      appModel.initApplicationFromSummary(this.app);
-      this.$state.go('cf.applications.application.summary', guids);
+      var appModel = modelManager.retrieve('cloud-foundry.model.application');
+      appModel.initApplicationFromSummary(vm.app);
+      $state.go('cf.applications.application.summary', guids);
     }
-  });
+  }
 
 })();

@@ -1,9 +1,9 @@
 scim:
   username_pattern: '[A-Za-z0-9+\-_.@!'']+'
   groups:
-    hcp.user: Users of the Helion Control Plane
-    hcp.admin: Administrators of the Helion Control Plane
-    hcp.publisher: Helion Control Plane users allowed to publish Service Definitions
+    hcp.user: Users of the Stratos UI Console
+    hcp.admin: Administrators of the Stratos UI Console
+    hcp.publisher: Stratos UI Console users
   userids_enabled: true
   username_pattern: '[a-z0-9+\-_.@]+'
   users:

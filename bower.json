@@ -1,7 +1,7 @@
 {
   "name": "console-app",
   "description": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "moduleType": [],
   "homepage": "",
   "ignore": [
@@ -18,8 +18,7 @@
     "suse-branding": "./components/suse-branding",
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
-    "cloud-foundry": "./components/cloud-foundry",
-    "cf-versions": "./components/cf-versions"
+    "cloud-foundry": "./components/cloud-foundry"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

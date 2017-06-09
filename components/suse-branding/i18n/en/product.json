@@ -18,7 +18,12 @@
       "company.logo": "images/suse_logo_light_bg.png"
     }
   },
+  "navbar": {
+    "title": "@:product.console"
+  },
   "login": {
+    "title":"SUSE",
+    "title2":"Cloud Foundry Console",
     "footer": {
       "company.terms-href": "",
       "company.privacy-href": ""

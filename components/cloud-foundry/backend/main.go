@@ -9,8 +9,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/hpcloud/stratos-ui/components/app-core/backend/config"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 )
 
 type CloudFoundrySpecification struct {
@@ -20,7 +20,7 @@ type CloudFoundrySpecification struct {
 
 const (
 	EndpointType  = "cf"
-	CLIENT_ID_KEY = "HCF_CLIENT"
+	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.EndpointPlugin, error) {

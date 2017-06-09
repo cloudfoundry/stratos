@@ -5,10 +5,8 @@
   var _ = require('lodash');
   var angularFilesort = require('gulp-angular-filesort');
   var autoprefixer = require('gulp-autoprefixer');
-  var browserSync = require('browser-sync').create();
   var concat = require('gulp-concat-util');
   var del = require('delete');
-  var eslint = require('gulp-eslint');
   var fork = require('child_process').fork;
   var fs = require('fs');
   var fsx = require('fs-extra');
@@ -22,7 +20,6 @@
   var path = require('path');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
-  var request = require('request');
   var runSequence = require('run-sequence');
   var sass = require('gulp-sass');
   var sort = require('gulp-sort');
@@ -38,7 +35,7 @@
 
   var paths = config.paths;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
-    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components;
+    templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components, browserSync;
   var packageJson = require('../package.json');
 
   function initialize() {
@@ -219,6 +216,7 @@
 
   // Run ESLint on all source in the components folder as well as the build files and e2e tests
   gulp.task('lint', function () {
+    var eslint = require('gulp-eslint');
     var lintFiles = config.lintFiles;
     return gulp
       .src(lintFiles)
@@ -257,7 +255,9 @@
   });
 
   // Gulp watch JavaScript, SCSS and HTML source files
-  gulp.task('watch', ['prepare-frontend'], function () {
+  // Task is used by dev task. Don't use externally.
+  gulp.task('watch', function () {
+
     var callback = browserSync.active ? browserSync.reload : function () {
     };
 
@@ -289,6 +289,8 @@
   });
 
   gulp.task('browsersync', function (callback) {
+    browserSync = require('browser-sync').create();
+    var request = require('request');
     var middleware = [];
     var https;
     try {

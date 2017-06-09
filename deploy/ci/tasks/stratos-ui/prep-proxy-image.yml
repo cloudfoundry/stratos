@@ -9,7 +9,6 @@ image_resource:
 
 inputs:
 - name: stratos-ui
-- name: stratos-deploy
 outputs:
 - name: portal-proxy-output
 run:
@@ -22,4 +21,4 @@ run:
     npm run build-backend
     cd -
     cp -r ./stratos-ui/outputs ./portal-proxy-output
-    sh ./stratos-deploy/ci/scripts/generate_cert.sh
+    sh ./stratos-ui/deploy/ci/scripts/generate_cert.sh

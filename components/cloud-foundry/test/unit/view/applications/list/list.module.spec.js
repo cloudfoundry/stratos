@@ -22,7 +22,6 @@
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var modelManager = $injector.get('modelManager');
-      var eventService = $injector.get('appEventService');
       var errorService = $injector.get('appErrorService');
       var appUtilsService = $injector.get('appUtilsService');
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
@@ -53,7 +52,7 @@
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
       $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
-        eventService, errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
+        errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
@@ -438,8 +437,7 @@
           appModel.filterParams.spaceGuid = 'junk3';
 
           setUp();
-          // Kick of a digest, we only make a call when we have a valid org
-          $scope.$digest();
+          $httpBackend.flush();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
@@ -449,7 +447,6 @@
           appModel.filterParams.cnsiGuid = 'junk1';
 
           setUp();
-          // Kick of a digest, we only make a call when we have a valid org
           $scope.$digest();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
@@ -461,7 +458,6 @@
           appModel.filterParams.orgGuid = 'junk2';
 
           setUp();
-          // Kick of a digest, we only make a call when we have a valid org
           $scope.$digest();
 
           check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);

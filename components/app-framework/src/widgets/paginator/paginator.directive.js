@@ -15,10 +15,6 @@
    * @example
    *
    ```js
-   MyPaginatorController.$inject = [
-   '$q'
-   ];
-
    function MyPaginatorController($q) {
       var that = this;
       this.$q = $q;
