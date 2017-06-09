@@ -7,6 +7,7 @@ See the 'Quick Start' section in the root [README](../README.md)
 See [Deploy Console in Kubernetes using Minikube and Helm](kubernetes/README.md)
 ## Deploy locally via Docker Compose
 
+
 ### Requirements:
 This project depends on the following:
 
