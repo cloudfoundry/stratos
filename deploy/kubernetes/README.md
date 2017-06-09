@@ -1,11 +1,5 @@
 # Deploy Console in Kubernetes using Minikube and Helm
 
-## Pre-requisites
-This guide assumes that you have checked out the following repositories and places them at the same level as this project.
-- stratos-ui https://github.com/SUSE/stratos-ui
-- portal-proxy https://github.com/hpcloud/portal-proxy
-
-
 ## Setup Minkube
 
 **minimum supported version - 0.18.0**
@@ -64,6 +58,7 @@ https://192.168.99.100:30941
 
 To login use the following credentials:
  - username: `admin`,
+ TODO Can we change this to changeme?
  - password: `hscadmin`
  
 ## Build the latest Console
