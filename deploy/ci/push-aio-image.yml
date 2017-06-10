@@ -20,6 +20,7 @@ jobs:
   - get: stratos-ui
   - put: aio-image
     params:
+      build: ./
       dockerfile: Dockerfile.all-in-one
 
 
