@@ -1,0 +1,25 @@
+- name: create-all-in-one-image
+  type: docker-image
+  source:
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: {{docker-io-aio-repository}}
+
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    repo: SUSE/stratos-ui
+    uri: git@github.com:suse/stratos-ui.git
+    private_key: {{github-private-key}}
+
+jobs:
+- name: publish-image
+  public: true
+  serial: true
+  plan:
+  - get: stratos-ui
+  - put: aio-image
+    params:
+      dockerfile: Dockerfile.all-in-one
+
