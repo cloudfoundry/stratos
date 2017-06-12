@@ -16,18 +16,18 @@ You will then be able to open a web browser and navigate to the console URL:
 
 Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-If you run into issues, please refer to the [Troubleshooting Guide](#Troubleshooting) below.
+If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
 
 Note:
 
 1. You need the cf CLI command line tool installed and available on the path.
 1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
-1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [below](Troubleshooting_ASGs) for more information.
+1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [below](application_security_groups) for more information.
 
 
-## Troubleshooting [Troubleshooting] ##
+## Troubleshooting
 
-### Application Security Groups [Troubleshooting_ASGs] ##
+### Application Security Groups
 
 If you have problems when deploying Stratos UI as a CLoud Foundry application, check that the Application Security Group you have will allow the Stratos UI to communicate with the Cloud Foundry API.
 
