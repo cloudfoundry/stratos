@@ -6,7 +6,6 @@ services:
       file: ../common.yml
       service: postgres
 
-
   goose:
     image: splatform/stratos-dc-goose:latest
 
@@ -19,7 +18,6 @@ services:
     links:
       - goose:goose
       - uaa:uaa
-
 
   nginx:
     image: splatform/stratos-dc-console:latest
