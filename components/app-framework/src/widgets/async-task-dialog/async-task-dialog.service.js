@@ -116,51 +116,54 @@
    * @constructor
    */
   function AsyncTaskDialogController($scope, context, content, $uibModalInstance) {
-    this.context = context;
-    this.content = content;
-    this.showSpinner = false;
-    this.$uibModalInstance = $uibModalInstance;
-    this.$scope = $scope;
-    // Set form name attribute to form.myForm
-    this.$scope.form = {};
 
-    this.context.frameworkAsyncTaskDialog = {
-      disableAllInput: _.bind(this._disableAllInput, this),
-      enableAllInput: _.bind(this._enableAllInput, this),
-      setSpinner: _.bind(this._setSpinner, this)
+    var vm = this;
+
+    vm.context = context;
+    vm.content = content;
+    vm.showSpinner = false;
+
+    // Set form name attribute to form.myForm
+    vm.form = {};
+
+    vm.context.frameworkAsyncTaskDialog = {
+      disableAllInput: _disableAllInput,
+      enableAllInput: _enableAllInput,
+      setSpinner: _setSpinner
     };
 
-  }
-
-  angular.extend(AsyncTaskDialogController.prototype, {
+    vm.invokeAction = invokeAction;
+    vm.disableSubmit = disableSubmit;
+    vm.disableMargin = disableMargin;
+    vm.hasErrorMessage = hasErrorMessage;
+    vm.isFormInvalid = isFormInvalid;
 
     /**
      * @name invokeAction
      * @description invokes the asyn task
      * @namespace frameworkAsyncTaskDialog
-     * @returns {Promise}
+     * @returns {object}
      */
-    invokeAction: function () {
-      this.showSpinner = true;
-      this._disableAllInput();
-      this.response = null;
-      this.context.showErrorBar = false;
-      var that = this;
-      return this.context.submitAction(this.context.data, this)
+    function invokeAction() {
+      vm.showSpinner = true;
+      _disableAllInput();
+      vm.response = null;
+      vm.context.showErrorBar = false;
+      return vm.context.submitAction(vm.context.data, vm)
         .then(function (responseData) {
-          that.response = responseData;
+          vm.response = responseData;
         }).catch(function () {
-          that.context.showErrorBar = that.context.errorMsg ? that.context.errorMsg : true;
+          vm.context.showErrorBar = vm.context.errorMsg ? vm.context.errorMsg : true;
         }).finally(function () {
-          that.showSpinner = false;
-          that._enableAllInput();
-          if (!that.context.showErrorBar) {
+          vm.showSpinner = false;
+          _enableAllInput();
+          if (!vm.context.showErrorBar) {
             // Successfully completed action
             // resolve success promise with data returned by submitAction.
-            that.$uibModalInstance.close(that.response);
+            $uibModalInstance.close(vm.response);
           }
         });
-    },
+    }
 
     /**
      * @name disableSubmit
@@ -168,13 +171,13 @@
      * @namespace app.framework.widgets.disableSubmit
      * @returns {boolean}
      */
-    disableSubmit: function () {
-      return this.disableButtons || this.showSpinner || this.isFormInvalid();
-    },
+    function disableSubmit() {
+      return vm.disableButtons || vm.showSpinner || vm.isFormInvalid();
+    }
 
-    _setSpinner: function (showSpinner) {
-      this.showSpinner = showSpinner;
-    },
+    function _setSpinner(showSpinner) {
+      vm.showSpinner = showSpinner;
+    }
 
     /**
      * @name _disableAllInput
@@ -183,15 +186,15 @@
      * @namespace frameworkAsyncTaskDialog
      * @private
      */
-    _disableAllInput: function () {
+    function _disableAllInput() {
       var fieldset = angular.element('.async-dialog').find('fieldset');
       if (fieldset.length) {
         fieldset.attr('disabled', 'disabled');
       } else {
         angular.element('.async-dialog').find('input, textarea, button, select').attr('disabled', 'disabled');
       }
-      this.disableButtons = true;
-    },
+      vm.disableButtons = true;
+    }
 
     /**
      * @name _enableAllInput
@@ -199,15 +202,15 @@
      * @namespace frameworkAsyncTaskDialog
      * @private
      */
-    _enableAllInput: function () {
+    function _enableAllInput() {
       var fieldset = angular.element('.async-dialog').find('fieldset');
       if (fieldset.length) {
         fieldset.attr('disabled', false);
       } else {
         angular.element('.async-dialog').find('input, textarea, button, select').attr('disabled', false);
       }
-      this.disableButtons = false;
-    },
+      vm.disableButtons = false;
+    }
 
     /**
      * @name disableMargin
@@ -216,9 +219,9 @@
      * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
-    disableMargin: function () {
-      return this.showSpinner && this.context.showErrorBar;
-    },
+    function disableMargin() {
+      return vm.showSpinner && vm.context.showErrorBar;
+    }
 
     /**
      * @name hasErrorMessage
@@ -226,9 +229,9 @@
      * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
-    hasErrorMessage: function () {
-      return angular.isString(this.context.showErrorBar);
-    },
+    function hasErrorMessage() {
+      return angular.isString(vm.context.showErrorBar);
+    }
 
     /**
      * @name isFormInvalid
@@ -236,22 +239,21 @@
      * @namespace frameworkAsyncTaskDialog
      * @returns {boolean}
      */
-    isFormInvalid: function () {
+    function isFormInvalid() {
 
       var isInvalid = false;
-      if (this.context.invalidityCheck) {
+      if (vm.context.invalidityCheck) {
         // custom check has been provided
-        isInvalid = this.context.invalidityCheck(this.context.data);
-      } else if (!_.isEmpty(this.$scope.form)) {
+        isInvalid = vm.context.invalidityCheck(vm.context.data);
+      } else if (!_.isEmpty($scope.form)) {
         // A form exists in the dialog
         // If multiple forms are present,
         // nest them in an ng-form element
-        var form = _.values(this.$scope.form)[0];
+        var form = _.values($scope.form)[0];
         isInvalid = form.$invalid;
       }
       return isInvalid;
     }
-  })
-  ;
+  }
 
 })();

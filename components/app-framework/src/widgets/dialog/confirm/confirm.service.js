@@ -65,64 +65,65 @@
    * @property {boolean} hasError - request returned an error
    */
   function ConfirmController($q, $timeout, confirmDialogContext) {
-    this.$q = $q;
-    this.$timeout = $timeout;
-    this.confirmDialogContext = confirmDialogContext;
-    this.isBusy = false;
-    this.hasError = false;
-    this.errorMessage = '';
-  }
 
-  angular.extend(ConfirmController.prototype, {
+    var vm = this;
+
+    vm.confirmDialogContext = confirmDialogContext;
+    vm.isBusy = false;
+    vm.hasError = false;
+    vm.errorMessage = '';
+
+    vm.confirmed = confirmed;
+    vm.getDescription = getDescription;
+
     /**
      * @function confirmed
      * @memberof app.framework.widgets.dialog.ConfirmController
      * @description User confirmed so run callback
      * @returns {void}
      */
-    confirmed: function () {
-      var that = this;
-      if (angular.isDefined(this.confirmDialogContext.callback)) {
-        this.isBusy = true;
-        this.hasError = false;
+    function confirmed() {
+      if (angular.isDefined(vm.confirmDialogContext.callback)) {
+        vm.isBusy = true;
+        vm.hasError = false;
 
         // Use a timeout so that the spinner will appear
-        this.$timeout(function () {
-          that.$q.when(that.confirmDialogContext.callback())
+        $timeout(function () {
+          $q.when(vm.confirmDialogContext.callback())
             .then(function () {
-              that.confirmDialogContext.modalInstance.close();
+              vm.confirmDialogContext.modalInstance.close();
             }, function (error) {
-              var errorMessage = that.confirmDialogContext.errorMessage || error;
+              var errorMessage = vm.confirmDialogContext.errorMessage || error;
               if (_.isPlainObject(error)) {
                 // Try to find a description in case its an CF error object
                 errorMessage = _.get(error, 'data.description') || error.description || errorMessage;
               }
-              that.errorMessage = errorMessage;
-              that.hasError = true;
+              vm.errorMessage = errorMessage;
+              vm.hasError = true;
             })
             .finally(function () {
-              that.isBusy = false;
+              vm.isBusy = false;
             });
         }, 100);
       } else {
-        this.confirmDialogContext.modalInstance.close();
+        vm.confirmDialogContext.modalInstance.close();
       }
-    },
+    }
 
-    getDescription: function () {
+    function getDescription() {
 
-      var description = this.confirmDialogContext.description;
+      var description = vm.confirmDialogContext.description;
 
       if (angular.isFunction(description)) {
         description = description();
       }
 
-      if (this.confirmDialogContext.noHtmlEscape) {
+      if (vm.confirmDialogContext.noHtmlEscape) {
         return description;
       } else {
         return _.escape(description);
       }
     }
-  });
+  }
 
 })();

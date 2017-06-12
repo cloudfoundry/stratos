@@ -16,13 +16,13 @@
     var lastOpened;
 
     return {
-      notifyOpened: function opened(searchBoxCtrl) {
+      notifyOpened: function notifyOpened(searchBoxCtrl) {
         if (lastOpened && lastOpened !== searchBoxCtrl) {
           lastOpened.closeIt();
         }
         lastOpened = searchBoxCtrl;
       },
-      notifyClosed: function opened(searchBoxCtrl) {
+      notifyClosed: function notifyClosed(searchBoxCtrl) {
         if (lastOpened === searchBoxCtrl) {
           lastOpened = null;
         }
@@ -118,69 +118,79 @@
    * @property {object} ngModelCtrl - the ng-model controller
    */
   function SearchBoxController($scope, searchBoxCloser) {
-    this.$scope = $scope;
-    this.searchBoxCloser = searchBoxCloser;
-    this.ngModelCtrl = null;
-  }
 
-  angular.extend(SearchBoxController.prototype, {
+    var vm = this;
+
+    vm.searchBoxCloser = searchBoxCloser;
+    vm.ngModelCtrl = null;
+
+    vm.reset = reset;
+    vm.setWatchers = setWatchers;
+    vm.pick = pick;
+    vm.autoPick = autoPick;
+    vm.onChange = onChange;
+    vm.onMouseMove = onMouseMove;
+    vm.onKeyDown = onKeyDown;
+    vm.openIt = openIt;
+    vm.closeIt = closeIt;
+    vm.makePreselectedVisible = _.noop;
+
     /**
      * @function reset
      * @memberof app.framework.widgets.SearchBoxController
      * @description reset widget state
      */
-    reset: function () {
-      this.open = false;
-      this.isDirty = false;
-      this.searchText = '';
-      this.preSelected = -1;
-      this.suggestions = this.inputOptions;
-      if (this.lastPick) {
-        this.pick(this.lastPick);
+    function reset() {
+      vm.open = false;
+      vm.isDirty = false;
+      vm.searchText = '';
+      vm.preSelected = -1;
+      vm.suggestions = vm.inputOptions;
+      if (vm.lastPick) {
+        vm.pick(vm.lastPick);
       }
-    },
+    }
 
     /**
      * @function setWatchers
      * @memberof app.framework.widgets.SearchBoxController
      * @description set value watchers
      */
-    setWatchers: function () {
-      var that = this;
-      this.$scope.$watch(function () {
-        return that.inputOptions.length;
+    function setWatchers() {
+      $scope.$watch(function () {
+        return vm.inputOptions.length;
       }, function () {
-        that.searchText = '';
-        that.makeSuggestions();
+        vm.searchText = '';
+        makeSuggestions();
         // If we already have a value try to pre-select it. This will be the case if ng-model has a value at
         // initialisation
-        var validInitialModelValue = _.find(that.inputOptions, {value: that.ngModelCtrl.$modelValue});
+        var validInitialModelValue = _.find(vm.inputOptions, {value: vm.ngModelCtrl.$modelValue});
         if (validInitialModelValue) {
-          that.pick(validInitialModelValue);
+          vm.pick(validInitialModelValue);
         } else {
-          that.autoPick();
+          vm.autoPick();
         }
       });
-    },
+    }
 
     /**
      * @function makeSuggestions
      * @memberof app.framework.widgets.SearchBoxController
      * @description Make suggestions that matches the search text
      */
-    makeSuggestions: function () {
+    function makeSuggestions() {
       var suggestions;
-      if (this.searchText) {
-        var searchRegex = new RegExp(this.searchText, 'i');
-        suggestions = _.filter(this.inputOptions, function (option) {
+      if (vm.searchText) {
+        var searchRegex = new RegExp(vm.searchText, 'i');
+        suggestions = _.filter(vm.inputOptions, function (option) {
           return searchRegex.test(option.label);
         });
       } else {
-        suggestions = this.inputOptions;
+        suggestions = vm.inputOptions;
       }
 
-      this.suggestions = suggestions;
-    },
+      vm.suggestions = suggestions;
+    }
 
     /**
      * @function pick
@@ -190,34 +200,34 @@
      * @param {object=} $event - optional mouse event that triggered this
      * @returns {boolean} true - we handled the event
      */
-    pick: function (suggestion, $event) {
-      this.preSelected = this.suggestions.indexOf(suggestion);
+    function pick(suggestion, $event) {
+      vm.preSelected = vm.suggestions.indexOf(suggestion);
       if (suggestion.disabled) {
         return;
       }
-      this.lastPick = suggestion;
-      this.isDirty = false;
-      this.searchText = suggestion.label;
-      this.suggestions = this.inputOptions;
-      this.setValue(suggestion.value);
-      return this.closeIt($event);
-    },
+      vm.lastPick = suggestion;
+      vm.isDirty = false;
+      vm.searchText = suggestion.label;
+      vm.suggestions = vm.inputOptions;
+      setValue(suggestion.value);
+      return vm.closeIt($event);
+    }
 
     /**
      * @function autoPick
      * @memberof app.framework.widgets.SearchBoxController
      * @description automatically pick the first available suggestion
      */
-    autoPick: function () {
+    function autoPick() {
       var suggestion;
-      for (var i = 0; i < this.suggestions.length; i++) {
-        suggestion = this.suggestions[i];
+      for (var i = 0; i < vm.suggestions.length; i++) {
+        suggestion = vm.suggestions[i];
         if (!suggestion.disabled) {
-          this.pick(suggestion);
+          vm.pick(suggestion);
           return;
         }
       }
-    },
+    }
 
     /**
      * @function setValue
@@ -225,139 +235,138 @@
      * @description set model value
      * @param {object} value - the value to set as model value
      */
-    setValue: function (value) {
-      this.ngModelCtrl.$setViewValue(value);
-      this.ngModelCtrl.$render();
-    },
+    function setValue(value) {
+      vm.ngModelCtrl.$setViewValue(value);
+      vm.ngModelCtrl.$render();
+    }
 
     /**
      * @function onChange
      * @memberof app.framework.widgets.SearchBoxController
      * @description input change event handler
      */
-    onChange: function () {
-      if (!this.open) {
-        this.openIt();
+    function onChange() {
+      if (!vm.open) {
+        vm.openIt();
       }
-      this.makeSuggestions();
-      this.isDirty = true;
-    },
+      makeSuggestions();
+      vm.isDirty = true;
+    }
 
-    onMouseMove: function (index) {
-      if (this.skipNextMouseMove) {
-        this.skipNextMouseMove = false;
+    function onMouseMove(index) {
+      if (vm.skipNextMouseMove) {
+        vm.skipNextMouseMove = false;
         return;
       }
-      this.preSelected = index;
-    },
+      vm.preSelected = index;
+    }
 
-    preSelectNextSuggestion: function (increment) {
+    function preSelectNextSuggestion(increment) {
       if (!increment || increment < 1) {
         increment = 1;
       }
-      this.preSelected = Math.min(this.preSelected + increment, this.suggestions.length - 1);
-      this.makePreselectedVisible();
-    },
+      vm.preSelected = Math.min(vm.preSelected + increment, vm.suggestions.length - 1);
+      vm.makePreselectedVisible();
+    }
 
-    preSelectPreviousSuggestion: function (increment) {
+    function preSelectPreviousSuggestion(increment) {
       if (!increment || increment > -1) {
         increment = -1;
       }
-      this.preSelected = Math.max(this.preSelected + increment, 0);
-      this.makePreselectedVisible();
-    },
+      vm.preSelected = Math.max(vm.preSelected + increment, 0);
+      vm.makePreselectedVisible();
+    }
 
-    pickPreselectedSuggestion: function () {
-      if (this.preSelected < 0 || this.preSelected > this.suggestions.length - 1) {
+    function pickPreselectedSuggestion() {
+      if (vm.preSelected < 0 || vm.preSelected > vm.suggestions.length - 1) {
         // Out of bounds
         return false;
       }
-      var suggestion = this.suggestions[this.preSelected];
+      var suggestion = vm.suggestions[vm.preSelected];
       if (!suggestion.disabled) {
-        this.pick(suggestion);
+        vm.pick(suggestion);
         return true;
       }
-    },
+    }
 
     /* eslint-disable complexity */
-    onKeyDown: function ($event) {
+    function onKeyDown($event) {
       switch ($event.keyCode) {
         case 27: // escape
-          if (this.open) {
-            this.closeIt();
+          if (vm.open) {
+            vm.closeIt();
           } else {
-            this.restoreLastPick();
+            restoreLastPick();
           }
           $event.preventDefault();
           return true;
         case 40: // down
-          if (!this.open) {
-            this.openIt();
+          if (!vm.open) {
+            vm.openIt();
           }
-          this.preSelectNextSuggestion();
+          preSelectNextSuggestion();
           $event.preventDefault();
           return true;
         case 38: // up
-          this.preSelectPreviousSuggestion();
+          preSelectPreviousSuggestion();
           $event.preventDefault();
           return true;
         case 34: // page-down
-          if (!this.open) {
-            this.openIt();
+          if (!vm.open) {
+            vm.openIt();
           }
-          this.preSelectNextSuggestion(5);
+          preSelectNextSuggestion(5);
           $event.preventDefault();
           return true;
         case 33: // page-up
-          this.preSelectPreviousSuggestion(-5);
+          preSelectPreviousSuggestion(-5);
           $event.preventDefault();
           return true;
         case 13: //enter
-          if (this.open) {
-            this.pickPreselectedSuggestion();
+          if (vm.open) {
+            pickPreselectedSuggestion();
           } else {
-            this.openIt();
+            vm.openIt();
           }
           $event.preventDefault();
           return true;
       }
-    },
+    }
     /* eslint-enable complexity */
 
-    openIt: function () {
-      if (this.open || this.disabled) {
+    function openIt() {
+      if (vm.open || vm.disabled) {
         return false;
       }
-      this.open = true;
-      this.searchBoxCloser.notifyOpened(this);
+      vm.open = true;
+      vm.searchBoxCloser.notifyOpened(vm);
       return true;
-    },
+    }
 
-    closeIt: function ($event) {
-      if (!this.open) {
+    function closeIt($event) {
+      if (!vm.open) {
         return false;
       }
-      this.open = false;
-      this.searchBoxCloser.notifyClosed(this);
-      this.restoreLastPick();
+      vm.open = false;
+      vm.searchBoxCloser.notifyClosed(vm);
+      restoreLastPick();
       if ($event) {
         $event.stopPropagation();
       }
       return true;
-    },
+    }
 
     /**
      * @function restoreLastPick
      * @memberof app.framework.widgets.SearchBoxController
      * @description if dirty, reset the search-box to the last picked option
      */
-    restoreLastPick: function () {
-      var that = this;
-      if (that.isDirty) {
-        that.reset();
+    function restoreLastPick() {
+      if (vm.isDirty) {
+        vm.reset();
       }
     }
 
-  });
+  }
 
 })();
