@@ -45,7 +45,7 @@ run:
 
       cat ../build/secrets.json
 
-      for image in splatform/stratos-goose postgres:latest nginx:1.11 splatform/stratos-uaa java:openjdk-8u66-jre splatform/stratos-concourse; do
+      for image in splatform/stratos-goose postgres:latest nginx:1.11 splatform/stratos-uaa java:openjdk-8u66-jre alpine:latest splatform/stratos-concourse; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done
