@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-# set defaults
+# Set defaults
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
