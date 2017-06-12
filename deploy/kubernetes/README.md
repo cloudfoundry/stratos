@@ -58,7 +58,6 @@ https://192.168.99.100:30941
 
 To login use the following credentials:
  - username: `admin`,
- TODO Can we change this to changeme?
  - password: `hscadmin`
  
 ## Build the latest Console
