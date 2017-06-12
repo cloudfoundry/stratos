@@ -2,14 +2,13 @@
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
-DOCKER_ORG=${DOCKER_ORG:-susetest}
+DOCKER_ORG=${DOCKER_ORG:-splatform}
 TAG=${TAG:-test}
 
 source ${DIRPATH}/build_common.sh
-source ${DIRPATH}/build_common.sh
 
-cd ${DIRPATH}/../
-cp ${DIRPATH}/../../../stratos-ui/tools/package.json .
+cd ${DIRPATH}/../../
+cp ../package.json .
 
-docker build --squash  -f ci/Dockerfile.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/concourse:${TAG} \
+docker build  -f ci/Dockerfile.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/concourse:${TAG} \
     ${BUILD_ARGS}
