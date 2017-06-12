@@ -1,0 +1,34 @@
+version: '2'
+services:
+
+  postgres:
+    extends:
+      file: ../common.yml
+      service: postgres
+
+
+  goose:
+    image: splatform/stratos-dc-goose:latest
+
+  proxy:
+    image: splatform/stratos-dc-proxy:latest
+    ports:
+      - "3003:3003"
+    env_file:
+      ../proxy.env
+    links:
+      - goose:goose
+      - uaa:uaa
+
+
+  nginx:
+    image: splatform/stratos-dc-console:latest
+    ports:
+      - 80:80
+      - 443:443
+
+  uaa:
+    extends:
+      file: ../common.yml
+      service: uaa
+
