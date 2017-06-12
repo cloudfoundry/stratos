@@ -8,7 +8,7 @@ DOCKER_ORG=susetest
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:" opt; do
+while getopts ":ho:r:t:d" opt; do
   case $opt in
     h)
       echo
@@ -26,6 +26,9 @@ while getopts ":ho:r:t:" opt; do
       ;;
     t)
       TAG="${OPTARG}"
+      ;;
+    d)
+      BUILD_DOCKER_COMPOSE_IMAGES="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -112,8 +115,11 @@ function cleanup {
   rm -rf ${STRATOS_UI_PATH}/node_modules
   rm -rf ${STRATOS_UI_PATH}/bower_components
   echo
-  echo "-- Cleaning up ${STRATOS_UI_PATH}/containers/nginx/dist"
-  rm -rf ${STRATOS_UI_PATH}/containers/nginx/dist
+  echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
+  rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
+
+  rm -f ${STRATOS_UI_PATH}/goose
+
 }
 
 function updateTagForRelease {
@@ -173,21 +179,21 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy tools/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
 }
 
 function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
 }
 
 function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
@@ -203,7 +209,7 @@ function buildPostflightJob {
              --volume $(pwd):/go/bin/ \
              ${DOCKER_ORG}/hsc-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage hsc-postflight-job ./db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage hsc-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
@@ -221,17 +227,17 @@ function buildUI {
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
     node:6.9.1 \
-    /bin/bash ./provision.sh
+    /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
   echo
   echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/containers/nginx/dist
+  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/containers/nginx
+  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
 # MAIN ------------------------------------------------------

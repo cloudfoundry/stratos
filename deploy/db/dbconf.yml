@@ -1,0 +1,6 @@
+development:
+    driver: postgres
+    open: host='postgres' port=5432 user='stratos' password='strat0s' dbname='stratos-db' sslmode='disable'
+k8s:
+    driver: postgres
+    open: host='$PGSQL_HOST' port=$PGSQL_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'

@@ -78,7 +78,7 @@ function build {
     export USER_NAME=$(id -nu)
     echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
 
-    pushd ${PROXY_PATH}/tools/
+    pushd ${PROXY_PATH}/deploy/
     ./build_portal_proxy.sh
     popd
 

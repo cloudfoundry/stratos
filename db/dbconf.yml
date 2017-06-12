@@ -1,3 +1,0 @@
-development:
-    driver: postgres
-    open: host='postgres' port=5432 user='stratos' password='strat0s' dbname='stratos-db' sslmode='disable'
