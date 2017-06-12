@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -eu
 
-# set defaults
+# Set defaults
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
-DOCKER_ORG=susetest
+DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
@@ -169,9 +169,9 @@ function buildProxy {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             --name console-proxy-builder \
+             --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/console-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -179,21 +179,21 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage hsc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
 }
 
 function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage hsc-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
+  buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
 }
 
 function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage hsc-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
@@ -207,9 +207,9 @@ function buildPostflightJob {
              --rm \
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
-             ${DOCKER_ORG}/hsc-postflight-builder:latest
+             ${DOCKER_ORG}/stratos-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage hsc-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
@@ -237,7 +237,7 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage hsc-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
+  buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
 # MAIN ------------------------------------------------------
