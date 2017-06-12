@@ -3,7 +3,8 @@
 The following guide details how to deploy the Stratos UI Console in a local docker environment using Docker Compose.
 
 ## Requirements:
-This project depends on the following:
+
+You will need to have installed both Docker and Docker Compose, see:
 
 * [Docker](https://docs.docker.com/engine/installation/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
@@ -34,7 +35,7 @@ https://localhost
     - 443:443
 ```
 
-changing the first `443` to the number of a unused port on your machine.
+changing the first `443` to the number of an unused port on your machine.
 
 ## Tearing down the deployment
 
