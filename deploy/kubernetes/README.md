@@ -1,6 +1,6 @@
 # Deploying in Kubernetes
 
-The following guide details how to deploy the Stratos UI Console in Kubernetes.Docker Compose.
+The following guide details how to deploy the Stratos UI Console in Kubernetes.
 
 ## Requirements:
 
