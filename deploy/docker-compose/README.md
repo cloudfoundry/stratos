@@ -1,6 +1,6 @@
 # Deploying with Docker Compose
 
-The following guide details how to deploy the Straos UI Console in a local docker environemtn using Docker Compose.
+The following guide details how to deploy the Stratos UI Console in a local docker environment using Docker Compose.
 
 ## Requirements:
 This project depends on the following:
@@ -30,7 +30,7 @@ https://localhost
 
 > Note: If you already have a local service running on port 443, you will need to modify the `docker-compose.yml` file to expose the console UI on a different port. To do so, find the `nginx` component and change the line:
 
-'''
+```
     - 443:443
 ```
 
