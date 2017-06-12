@@ -29,6 +29,8 @@ The Console UI should now be accessible at the following URL:
 
 https://localhost
 
+To login use the following credentials detailed [here](../../docs/access.md).
+
 > Note: If you already have a local service running on port 443, you will need to modify the `docker-compose.yml` file to expose the console UI on a different port. To do so, find the `nginx` component and change the line:
 
 ```
