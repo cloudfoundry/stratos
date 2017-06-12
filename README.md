@@ -12,7 +12,6 @@ Stratos UI can be deployed in the following environments:
 1. Kubernetes, using a Helm chart. See [quide](deploy/kubernetes/README.md)
 1. Docker, using docker compose. See [quide](deploy/README.md)
 
-
 ## Quick Start
 
 The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
