@@ -32,7 +32,8 @@
   },
   "delete-app": {
     "complex": {
-      "title": "Delete App and Associated Items"
+      "title": "Delete App and Associated Items",
+      "success": "'{{appName}}' has been deleted"
     },
     "simple": {
       "title": "Delete Application",
@@ -83,6 +84,16 @@
       },
       "view-envs": {
         "title": "{{instanceName}}: Variables"
+      },
+      "add": {
+        "title": "Add Service to {{ appName }}",
+        "back-to-services": "Back to Services",
+        "add": "Add Service Instance",
+        "notifications": {
+          "success": "The '{{ service }}' service has been successfully attached to application '{{ appName }}'",
+          "failure-create": "There was a problem creating the instance. Please try again. If this error persists, please contact the administrator.",
+          "failure-bind": "There was a problem binding the service instance to the application. Please try again. If this error persists, please contact the administrator."
+        }
       }
     },
     "variables": {

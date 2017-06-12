@@ -32,7 +32,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {object} $q - angular $q service
-   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $translate - the Angular $interpolate service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
    * @param {cfServiceDeleteAppWorkflow} cfServiceDeleteAppWorkflow - helper service for delete-app logic
@@ -40,7 +40,7 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController(modelManager, appEventService, $q, $interpolate, appUtilsService,
+  function DeleteAppWorkflowController(modelManager, appEventService, $q, $translate, appUtilsService,
                                        cfApplicationTabs, cfServiceDeleteAppWorkflow) {
 
     var vm = this;
@@ -94,7 +94,7 @@
         steps: [
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-services-and-routes.html',
-            nextBtnText: gettext('Delete app and associated items'),
+            nextBtnText: $translate.instant('delete-app.complex.title'),
             isLastStep: true
           }
         ]
@@ -316,9 +316,8 @@
       return vm.deleteApp().then(function () {
         vm.deletingApplication = false;
         // show notification for successful binding
-        var successMsg = gettext("'{{appName}}' has been deleted");
-        var message = $interpolate(successMsg)({appName: appName});
-        appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+        var successMsg = $translate.instant('delete-app.complex.success', {appName: appName});
+        appEventService.$emit('events.NOTIFY_SUCCESS', {message: successMsg});
         appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         vm.dismissDialog();
       })

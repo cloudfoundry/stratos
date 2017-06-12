@@ -5,19 +5,20 @@
     .module('cloud-foundry.view.dashboard')
     .factory('appClusterRoutesService', RoutesServiceFactory);
 
-  function RoutesServiceFactory($q, modelManager, appNotificationsService, frameworkDialogConfirm) {
-    return new appClusterRoutesService($q, modelManager, appNotificationsService, frameworkDialogConfirm);
+  function RoutesServiceFactory($q, $translate, modelManager, appNotificationsService, frameworkDialogConfirm) {
+    return new appClusterRoutesService($q, $translate, modelManager, appNotificationsService, frameworkDialogConfirm);
   }
 
   /**
    * @name appClusterRoutesService
    * @constructor
    * @param {object} $q - the angular $log service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    */
-  function appClusterRoutesService($q, modelManager, appNotificationsService, frameworkDialogConfirm) {
+  function appClusterRoutesService($q, $translate, modelManager, appNotificationsService, frameworkDialogConfirm) {
 
     return {
       getRouteId: getRouteId,
@@ -35,7 +36,7 @@
     function getRouteId(route) {
       var routeEntity = _.get(route, 'entity', route);
       var domain = _.get(routeEntity, 'domain.entity', routeEntity.domain);
-      var domainName = domain ? domain.name : gettext('Unknown');
+      var domainName = domain ? domain.name : $translate.instant('routes.unknown-domain');
 
       var host = routeEntity.host ? routeEntity.host + '.' : '';
       var port = routeEntity.port ? ':' + routeEntity.port : '';
@@ -50,7 +51,7 @@
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
      * @param {string} appGuid the app guid to unmap this route from
-     * @returns {promise} promise once execution completed. Returns count of successful unmaps. If rejected this could
+     * @returns {object} promise once execution completed. Returns count of successful unmaps. If rejected this could
      * mean confirm dialog was cancelled OR unmap failed
      */
     function unmapAppRoute(cnsiGuid, route, routeGuid, appGuid) {
@@ -58,18 +59,18 @@
       var deferred = $q.defer();
 
       frameworkDialogConfirm({
-        title: gettext('Unmap Route from Application'),
-        description: gettext('Are you sure you want to unmap ') + getRouteId(route) + '?',
+        title: $translate.instant('routes.unmap-app.title'),
+        description: $translate.instant('routes.unmap-app.description', { route: getRouteId(route) }),
         submitCommit: true,
         buttonText: {
-          yes: gettext('Unmap'),
-          no: gettext('Cancel')
+          yes: $translate.instant('routes.unmap-app.button-yes'),
+          no: $translate.instant('buttons.cancel')
         },
-        errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
+        errorMessage: $translate.instant('routes.unmap-app.error'),
         callback: function () {
           return routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
-              appNotificationsService.notify('success', gettext('Route successfully unmapped'));
+              appNotificationsService.notify('success', $translate.instant('routes.unmap-app.success'));
               deferred.resolve(1);
             })
             .catch(function (error) {
@@ -92,7 +93,7 @@
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
      * @param {Array} appGuids array of application guids to unmap
-     * @returns {promise} promise once execution completed. Returns count of successful unmaps. If rejected this could
+     * @returns {object} promise once execution completed. Returns count of successful unmaps. If rejected this could
      * mean confirm dialog was cancelled or ALL apps failed to unmap
      */
     function unmapAppsRoute(cnsiGuid, route, routeGuid, appGuids) {
@@ -100,13 +101,13 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: gettext('Unmap Route from Applications'),
-        description: gettext('Are you sure you want to unmap ') + getRouteId(route) + '?',
-        errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
+        title: $translate.instant('routes.unmap-apps.title'),
+        description: $translate.instant('routes.unmap-apps.description', { route: getRouteId(route) }),
+        errorMessage: $translate.instant('routes.unmap-apps.error'),
         submitCommit: true,
         buttonText: {
-          yes: gettext('Unmap'),
-          no: gettext('Cancel')
+          yes: $translate.instant('routes.unmap-apps.button-yes'),
+          no: $translate.instant('buttons.cancel')
         },
         callback: function () {
           var promises = [];
@@ -122,9 +123,9 @@
           return $q.all(promises)
             .then(function () {
               if (failures > 0) {
-                appNotificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
+                appNotificationsService.notify('warning', $translate.instant('routes.unmap-apps.partial-error'));
               } else {
-                appNotificationsService.notify('success', gettext('Route successfully unmapped'));
+                appNotificationsService.notify('success', $translate.instant('routes.unmap-apps.success'));
               }
               deferred.resolve(appGuids.length - failures);
             }).catch(function (error) {
@@ -145,7 +146,7 @@
      * @param {string} cnsiGuid the cnsi guid of the CF cluster
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
-     * @returns {promise} promise once execution completed. This could mean confirm dialog was cancelled OR delete
+     * @returns {object} promise once execution completed. This could mean confirm dialog was cancelled OR delete
      * failed
      */
     function deleteRoute(cnsiGuid, route, routeGuid) {
@@ -153,13 +154,13 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: gettext('Delete Route'),
-        description: gettext('Are you sure you want to delete ') + getRouteId(route) + '?',
-        errorMessage: gettext('There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.'),
+        title: $translate.instant('routes.delete.title'),
+        description: $translate.instant('routes.delete.description', { route: getRouteId(route) }),
+        errorMessage: $translate.instant('routes.delete.error'),
         submitCommit: true,
         buttonText: {
-          yes: gettext('Delete'),
-          no: gettext('Cancel')
+          yes: $translate.instant('routes.delete.button-yes'),
+          no: $translate.instant('buttons.cancel')
         },
         callback: function () {
           return routesModel.deleteRoute(cnsiGuid, routeGuid, {
@@ -167,7 +168,7 @@
             async: false
           })
             .then(function () {
-              appNotificationsService.notify('success', gettext('Route successfully deleted'));
+              appNotificationsService.notify('success', $translate.instant('routes.delete.success'));
               deferred.resolve();
             })
             .catch(function (error) {

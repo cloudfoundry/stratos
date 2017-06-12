@@ -528,24 +528,27 @@
       var multipleRoles = assigns.length + removes.length > 1;
 
       // Determine the title
-      var title = multipleRoles ? gettext('Update Roles') : gettext('Update Role');
+      var title = multipleRoles ? $translate.instant('change-roles-confirmation.title.update-plural')
+        : $translate.instant('change-roles-confirmation.title.update-singular');
       if (assigns.length === 0) {
-        title = multipleRoles ? gettext('Remove Roles') : gettext('Remove Role');
+        title = multipleRoles ? $translate.instant('change-roles-confirmation.title.remove-plural')
+          : $translate.instant('change-roles-confirmation.title.remove-singular');
       } else if (removes.length === 0) {
-        title = multipleRoles ? gettext('Assign Roles') : gettext('Assign Role');
+        title = multipleRoles ? $translate.instant('change-roles-confirmation.title.assign-plural')
+          : $translate.instant('change-roles-confirmation.title.assign-singular');
       }
 
       // Determine the description
       var line1 = usernames.length > 1
-        ? gettext('You are about to make the following changes for users {{users}}.')
-        : gettext('You are about to make the following changes to user \'{{user}}\'.');
-      var line2 = assigns.length > 1 ? gettext('Assign {{count}} roles') : gettext('Assign role \'{{role}}\'');
-      var line3 = removes.length > 1 ? gettext('Remove {{count}} roles') : gettext('Remove role \'{{role}}\'');
-      var line4 = gettext('Are you sure you wish to continue?');
+        ? 'change-roles-confirmation.line-one-singular'
+        : 'change-roles-confirmation.line-one-plural';
+      var line2 = assigns.length > 1 ? 'change-roles-confirmation.line-assign-plural' : 'change-roles-confirmation.line-assign-singular';
+      var line3 = removes.length > 1 ? 'change-roles-confirmation.line-remove-plural' : 'change-roles-confirmation.line-remove-singular';
+      var line4 = $translate.instant('change-roles-confirmation.line-four');
 
-      line1 = $interpolate(line1)({user: usernames[0], users: usernames.join(', ')});
-      line2 = $interpolate(line2)({count: assigns.length, role: assigns[0]});
-      line3 = $interpolate(line3)({count: removes.length, role: removes[0]});
+      line1 = $translate.instant(line1, {user: usernames[0], users: usernames.join(', ')});
+      line2 = $translate.instant(line2, {count: assigns.length, role: assigns[0]});
+      line3 = $translate.instant(line3, {count: removes.length, role: removes[0]});
 
       var description =
         line1 + '<br><br>' +
@@ -554,11 +557,11 @@
         '<br>' + line4;
 
       // Success and error messages
-      var successMessage = multipleRoles ? gettext('Successfully updated user roles')
-        : gettext('Successfully updated user role');
+      var successMessage = multipleRoles ? $translate.instant('change-roles-confirmation.success-one')
+        : $translate.instant('change-roles-confirmation.success-two');
       if (usernames.length > 1) {
-        successMessage = multipleRoles ? gettext('Successfully updated users roles')
-          : gettext('Successfully updated users role');
+        successMessage = multipleRoles ? $translate.instant('change-roles-confirmation.success-three')
+          : $translate.instant('change-roles-confirmation.success-four');
       }
 
       return {
@@ -566,8 +569,8 @@
         description: description,
         successMessage: successMessage,
         buttonText: {
-          yes: gettext('Yes'),
-          no: gettext('No')
+          yes: $translate.instant('buttons.yes'),
+          no: $translate.instant('buttons.no')
         },
         windowClass: 'roles-conf-dialog',
         noHtmlEscape: true
@@ -662,7 +665,7 @@
       var delta = rolesDelta(oldRolesByUser, newRolesByUser, clusterGuid);
 
       if (!delta) {
-        appNotificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));
+        appNotificationsService.notify('warning', $translate.instant('change-roles-confirmation.notifications.no-changes'));
         that.changingRoles = false;
         return $q.reject();
       }
@@ -693,16 +696,18 @@
 
               var errorMessage, reason;
               if (failures.length > 1) {
-                errorMessage = gettext('Failed to update role(s) for users {{failedUsers}}. ');
+                errorMessage = $translate.instant('change-roles-confirmation.notifications.failure-plural', {
+                  failedUsers: _.map(failures, 'user').join(', ')
+                });
               } else {
-                errorMessage = gettext('Failed to update role(s) for user {{failedUsers}}. ');
+                errorMessage = $translate.instant('change-roles-confirmation.notifications.failure-singular', {
+                  failedUsers: _.map(failures, 'user').join(', ')
+                });
                 reason = _.get(failures[0], 'error.data.description', '');
-                errorMessage += reason.length > 0 ? gettext('Reason: \'{{reason}}\'') : '';
+                errorMessage += reason.length > 0 ? $translate.instant('change-roles-confirmation.notifications.failure-reason', {
+                  reason: reason
+                }) : '';
               }
-              errorMessage = $interpolate(errorMessage)({
-                failedUsers: _.map(failures, 'user').join(', '),
-                reason: reason
-              });
 
               return $q.reject(errorMessage);
             } else {

@@ -1,0 +1,45 @@
+{
+  "assign-user-roles": {
+    "title": "Assign User(s)",
+    "step1": {
+      "title": "Select User(s)",
+      "busy-message": "Fetching Users..."
+    },
+    "step2": {
+      "title": "Assign Roles",
+      "button-yes": "Assign"
+    }
+  },
+  "manage-user-roles": {
+    "title-singular": "Manage User: {{ name }}",
+    "title-plural": "Change User's Roles",
+    "button-submit": "Save Changes"
+  },
+  "change-roles-confirmation": {
+    "titles": {
+      "update-singular": "Update Role",
+      "update-plural": "Update Roles",
+      "remove-singular": "Remove Role",
+      "remove-plural": "Remove Roles",
+      "assign-singular": "Assign Role",
+      "assign-plural": "Assign Roles"
+    },
+    "line-one-singular": "You are about to make the following changes to user '{{user}}'.",
+    "line-one-plural": "You are about to make the following changes for users {{users}}.",
+    "line-assign-singular": "Assign role '{{role}}'",
+    "line-assign-plural": "Assign {{count}} roles",
+    "line-remove-singular": "Remove role '{{role}}'",
+    "line-remove-plural": "Remove {{count}} roles",
+    "line-four": "Are you sure you wish to continue?",
+    "success-one": "Successfully updated user roles",
+    "success-two": "Successfully updated user role",
+    "success-three": "Successfully updated users roles",
+    "success-four": "Successfully updated users role",
+    "notifications": {
+      "no-changes": "There are no changes to make. User(s) roles have not changed",
+      "failure-singular": "Failed to update role(s) for user {{failedUsers}}. ",
+      "failure-plural": "Failed to update role(s) for users {{failedUsers}}. ",
+      "failure-reason": "Reason: '{{reason}}'"
+    }
+  }
+}

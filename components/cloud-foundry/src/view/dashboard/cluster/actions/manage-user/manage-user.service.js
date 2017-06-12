@@ -9,12 +9,14 @@
    * @memberof cloud-foundry.view.dashboard.cluster
    * @name AssignUsersWorkflowController
    * @constructor
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} appClusterRolesService - our roles service, used to create/handle data from roles tables
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
-  function ManageUsersFactory(modelManager, frameworkAsyncTaskDialog, appClusterRolesService, cfOrganizationModel) {
+  function ManageUsersFactory($translate, modelManager, frameworkAsyncTaskDialog, appClusterRolesService,
+                              cfOrganizationModel) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
@@ -38,7 +40,7 @@
      * @param {string} clusterGuid guid of the CF cluster
      * @param {string} organizationGuid guid of the organization to show
      * @param {object} users collection of users to pre-select
-     * @returns {promise} promise fulfilled when dialogue has closed
+     * @returns {object} promise fulfilled when dialogue has closed
      */
     this.show = function (clusterGuid, organizationGuid, users) {
 
@@ -76,11 +78,11 @@
       return frameworkAsyncTaskDialog(
         {
           title: users.length < 2
-            ? gettext('Manager User: ') + users[0].entity.username
-            : gettext('Change User\'s Roles'),
+            ? $translate.instant('manage-user-roles.title-singular', { name: users[0].entity.username})
+            : $translate.instant('manage-user-roles.title-plural'),
           templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/actions/manage-user/manage-user.html',
           buttonTitles: {
-            submit: gettext('Save Changes')
+            submit: $translate.instant('manage-user-roles.button-submit')
           }
         },
         {
