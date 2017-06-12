@@ -300,7 +300,7 @@ spec:
         app: console-uaa
     spec:
       containers:
-      - image: susetest/uaa:latest
+      - image: splatform/stratos-uaa:latest
         name: console-identity
         ports:
         - containerPort: 8080

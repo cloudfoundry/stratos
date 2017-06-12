@@ -46,7 +46,7 @@ run:
       cat ../build/secrets.json
 
       # Load images from image
-      for image in stratos/goose:latest debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stratos/concourse:latest; do
+      for image in postgres:latest nginx splatform/stratos-uaa java:openjdk-8u66-jre stratos/concourse:latest; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done
