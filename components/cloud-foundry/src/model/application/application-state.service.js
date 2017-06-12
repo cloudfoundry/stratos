@@ -17,8 +17,7 @@
    */
   function stateServiceFactory() {
     /**
-     * State metadata - Codifies the state table here:
-     * https://wiki.hpcloud.net/display/iaas/App+Lifecycle+State+Diagram
+     * State metadata
      *
      * First level keys match the APP_STATE with a '?' for a wildcard match for any APP_STATE
      * Second level keys match PACKAGE_STATE directly OR on a combination of #running #crashed, #flapping

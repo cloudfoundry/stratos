@@ -11,7 +11,7 @@ services:
     environment:
        - CUSTOM_APP_LABEL=${CUSTOM_APP_LABEL}
     build:
-      dockerfile: tools/Dockerfile.test
+      dockerfile: deploy/ci/Dockerfile.test
     links:
       - nginx
 

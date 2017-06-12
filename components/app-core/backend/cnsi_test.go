@@ -170,7 +170,7 @@ func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	}
 }
 func TestListCNSIs(t *testing.T) {
-	t.Skip("TODO: fix this test") // https://jira.hpcloud.net/browse/TEAMFOUR-637
+	t.Skip("TODO: fix this test")
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)

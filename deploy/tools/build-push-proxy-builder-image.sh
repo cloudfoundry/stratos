@@ -14,9 +14,10 @@ pushd $(git rev-parse --show-toplevel)
 SHARED_IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
 
 echo "Building Docker Image for $NAME"
+pushd deploy
 docker build --tag ${NAME} \
-             --file tools/Dockerfile.bk.build \
-             .
+             --file Dockerfile.bk.build .
+popd tools
 
 echo "Tag and push the shared image"
 docker tag ${NAME} ${SHARED_IMAGE_URL}

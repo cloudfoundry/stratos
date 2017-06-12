@@ -2,7 +2,7 @@
   'use strict';
 
   describe('organization-tile directive', function () {
-    var $httpBackend, element, controller;
+    var $httpBackend, $q, $scope, element, controller, cfOrganizationModel, appNotificationsService;
 
     var cnsiGuid = 'guid';
     var orgGuid = 'orgGuid';
@@ -78,7 +78,7 @@
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('modelManager');
 
-      var cfOrganizationModel = $injector.get('cfOrganizationModel');
+      cfOrganizationModel = $injector.get('cfOrganizationModel');
       _.set(cfOrganizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
       _.set(cfOrganizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
 
@@ -99,6 +99,9 @@
       });
 
       var $compile = $injector.get('$compile');
+      appNotificationsService = $injector.get('appNotificationsService');
+      $scope = $injector.get('$rootScope').$new();
+      $q = $injector.get('$q');
 
       var contextScope = $injector.get('$rootScope').$new();
       contextScope.organization = organization;
@@ -157,10 +160,15 @@
     });
 
     it('should send request when user deleted organization', function () {
-      $httpBackend.expectDELETE('/pp/v1/proxy/v2/organizations/orgGuid').respond(200, {});
+      spyOn(cfOrganizationModel, 'deleteOrganization').and.returnValue($q.resolve());
+      spyOn(appNotificationsService, 'notify');
+
       var deleteOrgAction = controller.actions[1];
       deleteOrgAction.execute();
-      $httpBackend.flush();
+      expect(cfOrganizationModel.deleteOrganization).toHaveBeenCalled();
+
+      $scope.$digest();
+      expect(appNotificationsService.notify).toHaveBeenCalled();
     });
 
   });
