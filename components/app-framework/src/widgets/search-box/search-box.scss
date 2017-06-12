@@ -22,7 +22,7 @@ search-box {
 
   input {
     flex: 1 1 0px;
-    margin-top: #{$line-height-computed - $font-size-base};
+    margin-top: $console-form-margin-top;
 
     &:hover,
     &:focus,
