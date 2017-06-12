@@ -12,8 +12,9 @@ Stratos UI can be deployed in the following environments:
 1. Kubernetes, using a Helm chart. See [quide](deploy/kubernetes/README.md)
 1. Docker, using docker compose. See [quide](deploy/docker-compose/README.md)
 
-
 ## Quick Start
+
+To get started quickly, we recommend following the steps to deploy the Stratos UI Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry.md).
 
 ## Contributing
 
