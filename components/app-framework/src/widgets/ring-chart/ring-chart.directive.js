@@ -47,48 +47,49 @@
    * @constructor
    */
   function RingChartController($scope, $element) {
-    var that = this;
+    var vm = this;
 
-    this.width = $element.find('svg').width();
-    this.height = this.width;
-    this.derivedData = {
+    vm.width = $element.find('svg').width();
+    vm.height = vm.width;
+    vm.derivedData = {
       ok: {},
       warning: {},
       critical: {},
       unknown: {}
     };
 
+    vm.hasMetric = hasMetric;
+    vm.getPath = getPath;
+    vm.polarToCartesian = polarToCartesian;
+    vm.handleArc = handleArc;
+
     $scope.$watchCollection('data', function (newData) {
-      that.data = newData;
-      if (that.data) {
-        that._updateData();
+      vm.data = newData;
+      if (vm.data) {
+        _updateData();
       }
     });
-  }
 
-  angular.extend(RingChartController.prototype, {
-
-    _updateData: function () {
-      var that = this;
-      var total = _.reduce(this.data, function (total, item) {
+    function _updateData() {
+      var total = _.reduce(vm.data, function (total, item) {
         return total + item;
       }, 0);
 
-      this.total = total;
+      vm.total = total;
 
       var lastAngle = 0;
-      _.each(this.data, function (count, key) {
-        that.handleArc(that.derivedData[key], count, total, lastAngle);
-        lastAngle = that.derivedData[key].eAngle;
+      _.each(vm.data, function (count, key) {
+        vm.handleArc(vm.derivedData[key], count, total, lastAngle);
+        lastAngle = vm.derivedData[key].eAngle;
       });
-    },
+    }
 
-    hasMetric: function (metric) {
-      return this.data && !_.isUndefined(this.data[metric]);
-    },
+    function hasMetric(metric) {
+      return vm.data && !_.isUndefined(vm.data[metric]);
+    }
 
-    getPath: function (metric) {
-      var donutd = this.derivedData[metric];
+    function getPath(metric) {
+      var donutd = vm.derivedData[metric];
 
       //first we make a tiny non-visible line to help Firefox show the whole graph
       var newD = 'M0 0 L0.0001 0.0001' +
@@ -108,16 +109,16 @@
         ' ' + (donutd.ePos[1] + donutd.thickness / 2);
       //set the path d atribute now that we have correctlyu calculated it
       return newD;
-    },
+    }
 
-    polarToCartesian: function (radius, angleInDegrees, cX, cY) {
+    function polarToCartesian(radius, angleInDegrees, cX, cY) {
       var angleInRadians = (-90 + angleInDegrees) * Math.PI / 180.0;
       var x = cX + radius * Math.cos(angleInRadians);
       var y = cY - radius * -Math.sin(angleInRadians);
       return [x, y];
-    },
+    }
 
-    handleArc: function (arc, count, sum, sAngle) {
+    function handleArc(arc, count, sum, sAngle) {
       //start angle
       arc.sAngle = sAngle;
       //the 'length' of the arc in degrees
@@ -129,16 +130,16 @@
       //we manually set the largest arc stroke to 18px so all arcs line up to each other
       arc.thickness = 18;
       //we need to know how tall and wide to our draw space is....take into account stroke thickness
-      arc.w = this.width - arc.thickness;
-      arc.h = this.height - arc.thickness;
+      arc.w = vm.width - arc.thickness;
+      arc.h = vm.height - arc.thickness;
       //end angle of the arc
       arc.eAngle = arc.sAngle + arc.delta;
       //find the x,y coords of the start and end angle
-      arc.sPos = this.polarToCartesian(arc.w / 2, arc.sAngle, arc.w / 2, arc.h / 2);
-      arc.ePos = this.polarToCartesian(arc.w / 2, arc.eAngle, arc.w / 2, arc.h / 2);
+      arc.sPos = vm.polarToCartesian(arc.w / 2, arc.sAngle, arc.w / 2, arc.h / 2);
+      arc.ePos = vm.polarToCartesian(arc.w / 2, arc.eAngle, arc.w / 2, arc.h / 2);
       arc.arcSweep = arc.eAngle - arc.sAngle <= 180 ? '0' : '1'; //determine which circle to draw the arc on
       arc.drawDir = arc.sAngle > arc.eAngle ? '0' : '1'; //determine which part of the circle we use
     }
-  });
+  }
 
 })();

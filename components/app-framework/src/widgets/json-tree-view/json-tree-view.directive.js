@@ -28,27 +28,25 @@
   }
 
   /**
-   * @namespace app.framework.widgets.ActionsMenuController
+   * @namespace app.framework.widgets.JsonTreeViewController
    * @memberof app.framework.widgets
-   * @name ActionsMenuController
+   * @name JsonTreeViewController
    * @constructor
-   * @param {object} $scope - the angular $scope service
-   * @property {string} icon - the actions menu icon
-   * @property {boolean} position - the actions menu position
-   * @property {boolean} open - flag whether actions menu should be visible
-   * @property {boolean} buttonMode - do not show the drop down instead the single action as a button
    */
   function JsonTreeViewController() {
-    this.array = _.isArray(this.json);
-  }
 
-  angular.extend(JsonTreeViewController.prototype, {
+    var vm = this;
 
-    isArray: function () {
-      return _.isArray(this.json);
-    },
+    vm.array = _.isArray(vm.json);
 
-    getTypeOf: function (value) {
+    vm.isArray = isArray;
+    vm.getTypeOf = getTypeOf;
+
+    function isArray() {
+      return _.isArray(vm.json);
+    }
+
+    function getTypeOf(value) {
       if (_.isArray(value)) {
         return 'array';
       } else if (_.isObject(value)) {
@@ -61,6 +59,6 @@
 
       return 'string';
     }
-  });
+  }
 
 })();
