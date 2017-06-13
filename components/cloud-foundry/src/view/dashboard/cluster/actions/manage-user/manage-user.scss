@@ -42,7 +42,10 @@
               .control-label {
                 flex: 0 1 auto;
                 height: 100%;
-                padding: 16px 16px 0 0;
+                padding-right: 10px;
+                display: flex;
+                align-items: center;
+                margin: 0;
               }
               .control-input {
                 margin-bottom: 0;
@@ -59,8 +62,12 @@
         }
         .manage-users-clear {
           flex: 0 1 auto;
+          display: flex;
+          align-items: center;
           // Height relates to height of input box
-          padding: 15px;
+          padding: 0 15px;
+          // Copy the shenanigans that go on in form-group such that text aligns
+          margin-bottom: -1px;
         }
       }
 

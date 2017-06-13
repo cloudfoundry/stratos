@@ -10,34 +10,9 @@
    * @memberof app.framework.widgets
    * @name paginator
    * @description A paginator directive
-   * For detailed information on UX design: https://app.frontify.com/screen/866758
    * @returns {object} The paginator directive definition object
    * @example
    *
-   ```js
-   function MyPaginatorController($q) {
-      var that = this;
-      this.$q = $q;
-      this.properties = {
-        callback: function (page) {
-          return that.loadPage(page);
-        },
-        total: 20,
-        text: {
-          nextBtn: 'Next',
-          prevBtn: 'Previous'
-        }
-      };
-    }
-
-   angular.extend(MyPaginatorController.prototype, {
-      loadPage: function (page) {
-        console.log(page);
-        return this.$q.resolve();
-      }
-    });
-   ```
-
    ```html
    <paginator
    properties="myPaginatorCtrl.properties">
@@ -67,33 +42,36 @@
    * @property {boolean} isLoading - a flag indicating if it is loading
    */
   function PaginatorController($scope) {
-    this.$scope = $scope;
-    this.range = [];
-    this.isLoading = false;
-    this.init();
-  }
 
-  angular.extend(PaginatorController.prototype, {
+    var vm = this;
+
+    vm.range = [];
+    vm.isLoading = false;
+
+    init();
+
+    vm.loadPage = loadPage;
+    vm.calculateRange = calculateRange;
+
     /**
      * @function init
      * @memberof app.framework.widgets.wizard.PaginatorController
      * @description initialize the widget
      * @returns {void}
      */
-    init: function () {
-      var that = this;
-      this.$scope.$watch(function () {
-        return that.properties.total;
+    function init() {
+      $scope.$watch(function () {
+        return vm.properties.total;
       }, function () {
-        that.calculateRange();
+        vm.calculateRange();
       });
 
-      this.$scope.$watch(function () {
-        return that.properties.pageNumber;
+      $scope.$watch(function () {
+        return vm.properties.pageNumber;
       }, function () {
-        that.loadPage(that.properties.pageNumber, true);
+        vm.loadPage(vm.properties.pageNumber, true);
       });
-    },
+    }
 
     /**
      * @function loadPage
@@ -103,22 +81,21 @@
      * @param {boolean=} skipCallback skip calling the properties.callback function.
      * @returns {void}
      */
-    loadPage: function (pageNumber, skipCallback) {
-      var that = this;
-      if (this.isLoading || pageNumber === this.currentPageNumber || pageNumber < 1 || pageNumber > this.properties.total) {
+    function loadPage(pageNumber, skipCallback) {
+      if (vm.isLoading || pageNumber === vm.currentPageNumber || pageNumber < 1 || pageNumber > vm.properties.total) {
         return;
       }
-      this.currentPageNumber = pageNumber;
-      this.properties.pageNumber = pageNumber;
-      this.calculateRange();
-      if (!skipCallback && this.properties.callback) {
-        this.isLoading = true;
-        this.properties.callback(this.currentPageNumber)
+      vm.currentPageNumber = pageNumber;
+      vm.properties.pageNumber = pageNumber;
+      vm.calculateRange();
+      if (!skipCallback && vm.properties.callback) {
+        vm.isLoading = true;
+        vm.properties.callback(vm.currentPageNumber)
           .finally(function () {
-            that.isLoading = false;
+            vm.isLoading = false;
           });
       }
-    },
+    }
 
     /**
      * @function calculateRange
@@ -126,14 +103,14 @@
      * @description calculate the pagination range
      * @returns {void}
      */
-    calculateRange: function () {
-      this.currentPageNumber = Math.min(this.properties.pageNumber || 1, this.properties.total);
-      this.properties.pageNumber = this.currentPageNumber;
+    function calculateRange() {
+      vm.currentPageNumber = Math.min(vm.properties.pageNumber || 1, vm.properties.total);
+      vm.properties.pageNumber = vm.currentPageNumber;
 
       var left, right;
 
-      var currentPageNumber = this.currentPageNumber;
-      var total = this.properties.total;
+      var currentPageNumber = vm.currentPageNumber;
+      var total = vm.properties.total;
 
       if (total === 7) {
         left = 2;
@@ -154,14 +131,14 @@
         }
       }
 
-      this.range.length = 0;
+      vm.range.length = 0;
       for (var i = left; i <= right; i++) {
-        this.range.push(i);
+        vm.range.push(i);
       }
 
-      this.left = left;
-      this.right = right;
+      vm.left = left;
+      vm.right = right;
     }
-  });
+  }
 
 })();

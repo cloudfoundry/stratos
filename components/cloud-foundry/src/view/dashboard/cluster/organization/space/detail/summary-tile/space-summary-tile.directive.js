@@ -24,17 +24,19 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
-   * @param {cloud-foundry.view.dashboard.cluster.appClusterCliCommands} appClusterCliCommands - service to show cli command slide out
+   * @param {appClusterCliCommands} appClusterCliCommands - service to show cli command slide out
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, appUtilsService, appNotificationsService,
-                                      appClusterCliCommands, frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
+  function SpaceSummaryTileController($state, $scope, $stateParams, $q, $translate, modelManager, appUtilsService,
+                                      appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
+                                      frameworkAsyncTaskDialog, cfOrganizationModel) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;
@@ -133,7 +135,7 @@
       }
     }, function (roles) {
       // Present the user's roles
-      vm.roles = spaceModel.spaceRolesToStrings(roles);
+      vm.roles = _.map(spaceModel.spaceRolesToStrings(roles), $translate.instant);
     });
 
     // Ensure the parent state is fully initialised before we start our own init

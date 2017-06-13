@@ -55,17 +55,20 @@
    * @constructor
    */
   function ListTableController() {
-    this.selected = [];
-  }
 
-  angular.extend(ListTableController.prototype, {
-    updateSelected: function (row, checkedState) {
+    var vm = this;
+
+    vm.selected = [];
+
+    vm.updateSelected = updateSelected;
+
+    function updateSelected(row, checkedState) {
       if (checkedState) {
-        this.selected.push(row);
+        vm.selected.push(row);
       } else {
-        _.remove(this.selected, row);
+        _.remove(vm.selected, row);
       }
     }
-  });
+  }
 
 })();

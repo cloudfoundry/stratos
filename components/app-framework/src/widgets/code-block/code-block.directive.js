@@ -35,31 +35,31 @@
    * @memberof app.framework.widgets
    * @name CodeBlockController
    * @constructor
-   * @param {object} $window - Angular $window service
    * @param {object} $document - Angular $document service
    * @param {object} $timeout - Angular $timeout service
    */
-  function CodeBlockController($window, $document, $timeout) {
-    this.$document = $document;
-    this.$timeout = $timeout;
-    this.init();
-  }
+  function CodeBlockController($document, $timeout) {
 
-  angular.extend(CodeBlockController.prototype, {
+    var vm = this;
+
+    vm.copyToClipboard = copyToClipboard;
+
+    init();
+
     /**
      * @function init
      * @memberof app.framework.widgets.CodeBlockController
      * @description Controller init method - looks to see if copy to clipboard is supported by the browser
      * @returns {void}
      */
-    init: function () {
+    function init() {
       // See if copy to clipboard is supported
       try {
-        this.canCopy = this.$document[0].queryCommandSupported('copy');
+        vm.canCopy = $document[0].queryCommandSupported('copy');
       } catch (e) {
-        this.canCopy = false;
+        vm.canCopy = false;
       }
-    },
+    }
 
     /**
      * @function copyToClipboard
@@ -68,12 +68,11 @@
      * @param {object} event - browser event that the user performed to initiate the copy to clipboard
      * @returns {void}
      */
-    copyToClipboard: function (event) {
+    function copyToClipboard(event) {
       /* eslint-disable */
-      var that = this;
-      var textElement = this.$document[0].createElement('textarea');
+      var textElement = $document[0].createElement('textarea');
       var jqTextElement = $(textElement);
-      var scrollTop = $(this.$document[0]).scrollTop();
+      var scrollTop = $($document[0]).scrollTop();
       try {
         var element = angular.element(event.event.target.parentElement);
         jqTextElement.addClass('console-code-block-temp');
@@ -81,25 +80,25 @@
         // Ensure we get the text of this first element to avoid additional white space.
         textElement.textContent = $('pre:first-child', element).text();
         element.append(textElement);
-        this.$document[0].getSelection().removeAllRanges();
+        $document[0].getSelection().removeAllRanges();
         textElement.select();
-        this.$document[0].execCommand('copy');
+        $document[0].execCommand('copy');
 
         // Show the message that we copied to the clipboard
         element.addClass('copy-success');
-        that.$timeout(function() {
+        $timeout(function() {
           element.removeClass('copy-success');
         }, 1000);
       } catch (err) {
         // Failed to copy to clipboard
       } finally {
         jqTextElement.remove();
-        this.$document[0].getSelection().removeAllRanges();
+        $document[0].getSelection().removeAllRanges();
       }
       event.event.preventDefault();
       event.event.stopPropagation();
-      $(this.$document[0]).scrollTop(scrollTop);
+      $($document[0]).scrollTop(scrollTop);
       /* eslint-enable */
     }
-  });
+  }
 })();

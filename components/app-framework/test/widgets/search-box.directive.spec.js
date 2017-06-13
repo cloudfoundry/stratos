@@ -70,8 +70,6 @@
       expect(searchBoxCtrl.suggestions.length).toBe(2);
       searchBoxCtrl.closeIt();
 
-      searchBoxCtrl.preSelectNextSuggestion();
-      searchBoxCtrl.pickPreselectedSuggestion();
     });
 
     it('should handle key down events', function () {
@@ -134,13 +132,21 @@
     });
 
     it('pick preselected', function () {
+      var returnEvent = {
+        preventDefault: _.noop,
+        keyCode: 13
+      };
+
       searchBoxCtrl.onMouseMove(0);
       expect(searchBoxCtrl.preSelected).toBe(0);
 
-      searchBoxCtrl.pickPreselectedSuggestion();
+      // searchBoxCtrl.pickPreselectedSuggestion();
+      searchBoxCtrl.onKeyDown(returnEvent);
+
       searchBoxCtrl.onMouseMove(-1);
       expect(searchBoxCtrl.preSelected).toBe(-1);
-      searchBoxCtrl.pickPreselectedSuggestion();
+      // searchBoxCtrl.pickPreselectedSuggestion();
+      searchBoxCtrl.onKeyDown(returnEvent);
     });
 
     it('should clean up on $destroy', function () {
