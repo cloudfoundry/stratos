@@ -57,7 +57,7 @@
     },
     "delete": {
       "title": "Delete Route",
-      "description": "Are you sure you want to delete '{{ route }}'",
+      "description": "Are you sure you want to delete '{{ route }}'?",
       "button-yes": "Delete",
       "error": "There was a problem deleting this route. Please try again. If this error persists, please contact the Administrator.",
       "success": "Route successfully deleted"

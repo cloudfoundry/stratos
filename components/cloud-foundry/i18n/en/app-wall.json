@@ -40,7 +40,7 @@
     "title": "@:app-wall.add-application",
     "step1": {
       "notifications": {
-        "success": "A new application and route have been created for '{{ appName }}",
+        "success": "A new application and route have been created for '{{ appName }}'",
         "failurePart1": "There was a problem creating your application. ",
         "failurePart1Alt": "The following exception occurred when creating your application: {{ error }}. ",
         "failurePart2": "Please try again or contact your administrator if the problem persists."
