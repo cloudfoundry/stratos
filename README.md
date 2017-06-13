@@ -8,34 +8,13 @@ Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. 
 
 Stratos UI can be deployed in the following environments:
 
-1. Cloud Foundry, as an application. See [below](#quick-start)
-1. Kubernetes, using a Helm chart. See [quide](deploy/kubernetes/README.md)
-1. Docker, using docker compose. See [quide](deploy/README.md)
-
+1. Cloud Foundry, as an application. See [guide](deploy/cloud-foundry)
+2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes)
+3. Docker, using docker compose. See [guide](deploy/docker-compose)
 
 ## Quick Start
 
-The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
-
-```
-git clone git@github.com:SUSE/stratos-ui.git
-cd stratos-ui
-cf push
-```
-
-You will then be able to open a web browser and navigate to the console URL:
-
-`https://console.<DOMAIN>`
-
-Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
-
-Note:
-
-1. You need the cf CLI command line tool installed and available on the path.
-1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
-1. You may need to configure Application Security Groups on you Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [here](docs/troubleshooting.md) for more information.
-
-If you run into issues, please refer to the [Troubleshooting Guide](docs/troubleshooting.md).
+To get started quickly, we recommend following the steps to deploy the Stratos UI Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry.md).
 
 ## Contributing
 
