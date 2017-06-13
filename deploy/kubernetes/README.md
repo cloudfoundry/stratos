@@ -53,17 +53,24 @@ To check the status of the instance use the following command:
 helm status my-console
 ```
 
-Once the instance is in `DEPLOYED` state, find the port that the console is running on:
+Once the instance is in `DEPLOYED` state, find the IP address and port that the console is running on:
 
 ```
 $ helm status my-console | grep ui-ext
-console-ui-ext        10.0.0.162  <nodes>      80:30933/TCP,443:30941/TCP  1m  
+console-ui-ext        10.0.0.162  192.168.77.1      80:30933/TCP,443:30941/TCP  1m  
 ```
 
-The node-port is in this example is `30941`.
+In this example, the IP address is `192.168.77.1` and the node-port is `30941`, so the console is accessible on:
+
+`https://192.168.77.1:30941`
+
+The values will be different for your environment.
 
 You can now access the console UI.
 
 > You may see a certificate warning which you can safely ignore.
 
 To login use the following credentials detailed [here](../../docs/access.md).
+
+> Note: For some environments like Minikube, you are not given an IP Address - it may show as `<nodes>`. In this case, run `kubectl cluster-info` and use the IP address of your node shown in the output of this command.
+
