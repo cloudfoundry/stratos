@@ -16,7 +16,7 @@ You will then be able to open a web browser and navigate to the console URL:
 
 Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-To login use the following credentials detailed [here](../docs/access.md).
+To login use the following credentials detailed [here](../../docs/access.md).
 
 If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
 
