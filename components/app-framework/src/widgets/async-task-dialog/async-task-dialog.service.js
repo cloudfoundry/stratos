@@ -123,8 +123,11 @@
     vm.content = content;
     vm.showSpinner = false;
 
-    // Set form name attribute to form.myForm
-    vm.form = {};
+    // In the dialog template set the form name attribute to form.<form name> to ensure validation is passed to
+    // submit button. This process needs to be fixed
+    /* eslint-disable angular/controller-as */
+    $scope.form = {};
+    /* eslint-enable angular/controller-as */
 
     vm.context.frameworkAsyncTaskDialog = {
       disableAllInput: _disableAllInput,
