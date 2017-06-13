@@ -14,7 +14,7 @@ Stratos UI can be deployed in the following environments:
 
 ## Quick Start
 
-To get started quickly, we recommend following the steps to deploy the Stratos UI Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry.md).
+To get started quickly, we recommend following the steps to deploy the Stratos UI Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry).
 
 ## Contributing
 
