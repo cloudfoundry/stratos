@@ -175,14 +175,14 @@
                       {appName: vm.userInput.name})
                   });
                 }, function (error) {
-                  var msg = $translate.instant('add-app-dialog.step1.notifications.failurePart1');
+                  var msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1');
                   var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
                   if (cloudFoundryException || _.isString(error)) {
-                    msg = $translate.instant('add-app-dialog.step1.notifications.failurePart1Alt',
+                    msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1-alt',
                       { error: cloudFoundryException || error});
                   }
 
-                  msg = msg + $translate.instant('add-app-dialog.step1.notifications.failurePart2');
+                  msg = msg + $translate.instant('add-app-dialog.step1.notifications.failure-part-2');
                   return $q.reject(msg);
                 });
               });
@@ -284,14 +284,14 @@
             return $q.reject($translate.instant('add-app-dialog.step1.route.exists'));
           }
 
-          var msg = $translate.instant('add-app-dialog.step1.route.failurePart1');
+          var msg = $translate.instant('add-app-dialog.step1.route.failure-part-1');
           var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
           if (cloudFoundryException || _.isString(error)) {
-            msg = $translate.instant('add-app-dialog.step1.route.failurePart1Alt',
+            msg = $translate.instant('add-app-dialog.step1.route.failure-part-1-alt',
               {error: cloudFoundryException || error});
           }
 
-          msg = msg + $translate.instant('add-app-dialog.step1.route.failurePart2');
+          msg = msg + $translate.instant('add-app-dialog.step1.route.failure-part-2');
 
           return $q.reject(msg);
         });

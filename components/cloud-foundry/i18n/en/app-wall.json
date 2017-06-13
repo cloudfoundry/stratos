@@ -41,15 +41,15 @@
     "step1": {
       "notifications": {
         "success": "A new application and route have been created for '{{ appName }}'",
-        "failurePart1": "There was a problem creating your application. ",
-        "failurePart1Alt": "The following exception occurred when creating your application: {{ error }}. ",
-        "failurePart2": "Please try again or contact your administrator if the problem persists."
+        "failure-part-1": "There was a problem creating your application. ",
+        "failure-part-1-alt": "The following exception occurred when creating your application: {{ error }}. ",
+        "failure-part-2": "Please try again or contact your administrator if the problem persists."
       },
       "route": {
         "exists": "This route already exists. Choose a new one.",
-        "failurePart1": "There was a problem validating your route. ",
-        "failurePart1Alt": "The following exception occurred when validating your route: {{ error }}. ",
-        "failurePart2": "Please try again or contact your administrator if the problem persists."
+        "failure-part-1": "There was a problem validating your route. ",
+        "failure-part-1-alt": "The following exception occurred when validating your route: {{ error }}. ",
+        "failure-part-2": "Please try again or contact your administrator if the problem persists."
       }
     }
   }
