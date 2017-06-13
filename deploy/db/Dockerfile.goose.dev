@@ -1,4 +1,4 @@
-FROM susetest/goose:latest
+FROM splatform/stratos-goose
 
 WORKDIR /src
 

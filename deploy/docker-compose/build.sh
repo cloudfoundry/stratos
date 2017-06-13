@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-# Set defaults
+# set defaults
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
@@ -179,37 +179,15 @@ function buildProxy {
   # publish the container image for the portal proxy
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-dc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
 }
 
-function buildPostgres {
-  # Build and publish the container image for postgres
-  echo
-  echo "-- Build & publish the runtime container image for postgres"
-  buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
-}
 
-function buildPreflightJob {
-  # Build the preflight container
-  echo
-  echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
-}
-
-function buildPostflightJob {
+function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-
-  docker run \
-             ${RUN_ARGS} \
-             -it \
-             --rm \
-             --name postflight-builder \
-             --volume $(pwd):/go/bin/ \
-             ${DOCKER_ORG}/stratos-postflight-builder:latest
-  mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+    buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
@@ -237,7 +215,7 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
+  buildAndPublishImage stratos-dc-console Dockerfile.dc ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
 # MAIN ------------------------------------------------------
@@ -252,17 +230,9 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-buildProxy
-buildPostgres
-buildPreflightJob
-buildPostflightJob
+#buildProxy
+#buildGoose
 buildUI
-
-# Patch Values.yaml file
-cp values.yaml.tmpl values.yaml
-sed -ie 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
-sed -ie 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
-sed -ie 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 
 # Done
 echo
@@ -270,5 +240,3 @@ echo "Build complete...."
 echo "Registry: ${DOCKER_REGISTRY}"
 echo "Org: ${DOCKER_ORG}"
 echo "Tag: ${TAG}"
-echo "To deploy using Helm, execute the following: "
-echo "helm install console -f values.yaml --namespace console --name my-console"

@@ -16,13 +16,13 @@
     var lastOpened;
 
     return {
-      notifyOpened: function notifyOpened(searchBoxCtrl) {
+      notifyOpened: function (searchBoxCtrl) {
         if (lastOpened && lastOpened !== searchBoxCtrl) {
           lastOpened.closeIt();
         }
         lastOpened = searchBoxCtrl;
       },
-      notifyClosed: function notifyClosed(searchBoxCtrl) {
+      notifyClosed: function (searchBoxCtrl) {
         if (lastOpened === searchBoxCtrl) {
           lastOpened = null;
         }
