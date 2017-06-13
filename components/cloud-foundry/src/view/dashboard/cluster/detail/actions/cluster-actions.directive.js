@@ -25,37 +25,39 @@
   /**
    * @name OrganizationTileController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $stateParams - the ui-router $stateParams service
    * @param {object} appUtilsService - our appUtilsService service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
-   * @param {object} appClusterAssignUsers - service that allows assigning roles to users
+   * @param {object} appClusterAssignUsers - service vm allows assigning roles to users
    * @param {object} appUserSelection - service centralizing user selection
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @property {Array} actions - collection of relevant actions that can be executed against cluster
+   * @property {Array} actions - collection of relevant actions vm can be executed against cluster
    */
-  function ClusterActionsController(modelManager, $state, $q, $stateParams, appUtilsService, frameworkAsyncTaskDialog,
-                                    appClusterAssignUsers, appUserSelection, appNotificationsService, cfOrganizationModel) {
-    var that = this;
+  function ClusterActionsController($scope, modelManager, $state, $q, $stateParams, appUtilsService,
+                                    frameworkAsyncTaskDialog, appClusterAssignUsers, appUserSelection,
+                                    appNotificationsService, cfOrganizationModel) {
+    var vm = this;
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
 
-    this.stateName = $state.current.name;
-    this.clusterGuid = $stateParams.guid;
+    vm.stateName = $state.current.name;
+    vm.clusterGuid = $stateParams.guid;
     // Depending on depth into endpoints these two might be null
-    this.organizationGuid = $stateParams.organization;
-    this.spaceGuid = $stateParams.space;
+    vm.organizationGuid = $stateParams.organization;
+    vm.spaceGuid = $stateParams.space;
 
     function getOrgName(org) {
       return _.get(org, 'details.org.entity.name');
     }
 
     function getExistingSpaceNames(orgGuid) {
-      var orgSpaces = cfOrganizationModel.organizations[that.clusterGuid][orgGuid].spaces;
+      var orgSpaces = cfOrganizationModel.organizations[vm.clusterGuid][orgGuid].spaces;
       return _.map(orgSpaces, function (space) {
         return space.entity.name;
       });
@@ -79,12 +81,12 @@
           {
             data: {
               // Make the form invalid if the name is already taken
-              organizationNames: cfOrganizationModel.organizationNames[that.clusterGuid]
+              organizationNames: cfOrganizationModel.organizationNames[vm.clusterGuid]
             }
           },
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
-              return cfOrganizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
+              return cfOrganizationModel.createOrganization(vm.clusterGuid, orgData.name).then(function () {
                 appNotificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
                   {name: orgData.name});
               });
@@ -108,10 +110,10 @@
 
         // Context-sensitively pre-select the correct organization
         if ($stateParams.organization) {
-          selectedOrg = cfOrganizationModel.organizations[that.clusterGuid][$stateParams.organization];
+          selectedOrg = cfOrganizationModel.organizations[vm.clusterGuid][$stateParams.organization];
         } else {
           // Pre-select the most recently created organization
-          var sortedOrgs = _.sortBy(cfOrganizationModel.organizations[that.clusterGuid], function (org) {
+          var sortedOrgs = _.sortBy(cfOrganizationModel.organizations[vm.clusterGuid], function (org) {
             return -org.details.created_at;
           });
           selectedOrg = sortedOrgs[0];
@@ -153,7 +155,7 @@
 
         contextData = {
           organization: selectedOrg,
-          organizations: _.map(cfOrganizationModel.organizations[that.clusterGuid], function (org) {
+          organizations: _.map(cfOrganizationModel.organizations[vm.clusterGuid], function (org) {
             return {
               label: getOrgName(org),
               value: org
@@ -170,7 +172,7 @@
             if (angular.isUndefined(org)) {
               return false;
             }
-            return authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.create, org.details.guid);
+            return authModel.isAllowed(vm.clusterGuid, authModel.resources.space, authModel.actions.create, org.details.guid);
           }
         };
 
@@ -199,7 +201,7 @@
             if (toCreate.length < 1) {
               return $q.reject('Nothing to create!');
             }
-            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate)
+            return spaceModel.createSpaces(vm.clusterGuid, contextData.organization.details.guid, toCreate)
               .then(function () {
                 appNotificationsService.notify('success', toCreate.length > 1
                   ? gettext('Spaces \'{{names}}\' successfully created')
@@ -217,62 +219,67 @@
       disabled: false,
       execute: function () {
         return appClusterAssignUsers.assign({
-          clusterGuid: that.clusterGuid,
-          selectedUsers: appUserSelection.getSelectedUsers(that.clusterGuid)
+          clusterGuid: vm.clusterGuid,
+          selectedUsers: appUserSelection.getSelectedUsers(vm.clusterGuid)
         });
       },
       icon: 'person_add'
     };
 
     function enableActions() { // eslint-disable-line complexity
-      var isAdmin = consoleInfo.info.endpoints.cf[that.clusterGuid].user.admin;
+      var isAdmin = consoleInfo.info.endpoints.cf[vm.clusterGuid].user.admin;
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
-      var canCreateOrg = authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);
+      var canCreateOrg = authModel.isAllowed(vm.clusterGuid, authModel.resources.organization, authModel.actions.create);
 
       var canCreateSpace = false;
       var canAssignUsers = false;
-      if (that.organizationGuid) {
+      if (vm.organizationGuid) {
         // We're at least the 'organization' depth of a cluster. Check permissions against it.
-        canCreateSpace = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.create, that.organizationGuid);
-        if (that.spaceGuid) {
+        canCreateSpace = authModel.isAllowed(vm.clusterGuid, authModel.resources.space, authModel.actions.create, vm.organizationGuid);
+        if (vm.spaceGuid) {
           // We're at least the 'space' depth of a cluster. Check permissions against it.
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.update, that.spaceGuid, that.organizationGuid);
+            authModel.isAllowed(vm.clusterGuid, authModel.resources.space, authModel.actions.update, vm.spaceGuid, vm.organizationGuid);
         } else {
           // We're at the organization depth, check if user has any space manager roles within it
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update, that.organizationGuid) ||
-            _.find(authModel.principal[that.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
+            authModel.isAllowed(vm.clusterGuid, authModel.resources.organization, authModel.actions.update, vm.organizationGuid) ||
+            _.find(authModel.principal[vm.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: vm.organizationGuid}});
         }
       } else {
         // We're at the top depth of a cluster, need to check if user has any permissions for orgs/spaces within it.
-        canCreateSpace = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0;
+        canCreateSpace = authModel.principal[vm.clusterGuid].userSummary.organizations.managed.length > 0;
         canAssignUsers =
-          authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0 ||
-          authModel.principal[that.clusterGuid].userSummary.spaces.managed.length > 0;
+          authModel.principal[vm.clusterGuid].userSummary.organizations.managed.length > 0 ||
+          authModel.principal[vm.clusterGuid].userSummary.spaces.managed.length > 0;
       }
 
-      that.clusterActions = [];
+      vm.clusterActions = [];
 
       if (canCreateOrg) {
-        that.clusterActions.push(createOrg);
+        vm.clusterActions.push(createOrg);
       }
       if (canCreateSpace) {
-        that.clusterActions.push(createSpace);
+        vm.clusterActions.push(createSpace);
       }
       if (canAssignUsers || isAdmin) {
-        that.clusterActions.push(assignUsers);
+        vm.clusterActions.push(assignUsers);
       }
-      that.hasActions = !!(that.clusterActions && that.clusterActions.length > 0);
+      vm.hasActions = !!(vm.clusterActions && vm.clusterActions.length > 0);
     }
 
     function init() {
-      enableActions();
+      $scope.$watch(function () {
+        return _.keys(cfOrganizationModel.organizations[vm.clusterGuid]).length;
+      }, function () {
+        // Catch case where a new org is added when there were none before, or vice versa
+        enableActions();
+      });
       return $q.resolve();
     }
 
-    appUtilsService.chainStateResolve(this.stateName, $state, init);
+    appUtilsService.chainStateResolve(vm.stateName, $state, init);
   }
 
   // private validator to ensure there are no duplicates within the list of new names
