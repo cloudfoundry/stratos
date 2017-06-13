@@ -1,4 +1,4 @@
-FROM stratos/concourse:latest
+FROM splatform/stratos-concourse
 
 # These args need to be consumed, otherwise build fails
 ARG USER_ID

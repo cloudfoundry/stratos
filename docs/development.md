@@ -1,9 +1,11 @@
 # Developing the Stratos UI Console
 
+> We are in the process of creating this documentation and will update it shortly.
+
 The Stratos Console UI provides a single comprehensive and ubiquitous user experience for: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers.
 
-1. [Working on the front end component](#working-on-the-front-end-component)
-2. [Working on the backend component](#working-on-the-backend-component)
+1. [Working on the front-end component](#working-on-the-front-end-component)
+2. [Working on the back-end component](#working-on-the-backend-component)
 3. [Database Management](#database-management)
 4. [Continuous Integration](#continuous-integration)
 

@@ -1,6 +1,33 @@
-# Troubleshooting
+# Deploying as a Cloud Foundry Application
 
-## Deploying as a Cloud Foundry Application
+## Deployment Steps
+
+The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
+
+```
+git clone git@github.com:SUSE/stratos-ui.git
+cd stratos-ui
+cf push
+```
+
+You will then be able to open a web browser and navigate to the console URL:
+
+`https://console.<DOMAIN>`
+
+Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
+
+To login use the following credentials detailed [here](../docs/access.md).
+
+If you run into issues, please refer to the [Troubleshooting Guide](#troubleshooting) below.
+
+Note:
+
+1. You need the cf CLI command line tool installed and available on the path.
+1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
+1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
+
+
+## Troubleshooting
 
 ### Application Security Groups
 
