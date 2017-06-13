@@ -16,7 +16,7 @@
     "button-submit": "Save Changes"
   },
   "change-roles-confirmation": {
-    "titles": {
+    "title": {
       "update-singular": "Update Role",
       "update-plural": "Update Roles",
       "remove-singular": "Remove Role",

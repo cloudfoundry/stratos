@@ -540,8 +540,8 @@
 
       // Determine the description
       var line1 = usernames.length > 1
-        ? 'change-roles-confirmation.line-one-singular'
-        : 'change-roles-confirmation.line-one-plural';
+        ? 'change-roles-confirmation.line-one-plural'
+        : 'change-roles-confirmation.line-one-singular';
       var line2 = assigns.length > 1 ? 'change-roles-confirmation.line-assign-plural' : 'change-roles-confirmation.line-assign-singular';
       var line3 = removes.length > 1 ? 'change-roles-confirmation.line-remove-plural' : 'change-roles-confirmation.line-remove-singular';
       var line4 = $translate.instant('change-roles-confirmation.line-four');
