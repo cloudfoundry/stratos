@@ -8,7 +8,7 @@ The following guide details how to deploy the Stratos UI Console in Kubernetes.
 
 You will need a suitable Kubernetes environment and a machine from which to run the deployment commands.
 
-You will need to have the `kubectl` CLI installed and available on your path. It should be appropriately configured to be able to communicate with your Kubernete environemnt.
+You will need to have the `kubectl` CLI installed and available on your path. It should be appropriately configured to be able to communicate with your Kubernetes environment.
 
 ### Setup Helm
 
