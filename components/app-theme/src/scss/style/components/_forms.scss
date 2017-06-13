@@ -1,5 +1,7 @@
 $console-form-label-height: 16px;
-$console-form-label-spacing: 4px;
+$console-form-label-spacing: 1px;
+$console-form-margin-top: 5px;
+
 
 .has-error .form-control,
 .has-warning .form-control,
@@ -38,7 +40,7 @@ form, [ng-form] {
       font-weight: normal;
       font-size: $font-size-small;
       margin-bottom: $console-form-label-spacing;
-      margin-top: #{($console-input-height - $line-height-computed - $console-form-label-height - 2 * $padding-base-vertical) /2};
+      margin-top: $console-form-margin-top;
     }
 
     .material-icons.form-control-feedback {
