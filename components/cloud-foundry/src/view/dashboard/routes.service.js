@@ -59,7 +59,7 @@
       var deferred = $q.defer();
 
       frameworkDialogConfirm({
-        title: $translate.instant('routes.unmap-app.title'),
+        title: 'routes.unmap-app.title',
         description: $translate.instant('routes.unmap-app.description', { route: getRouteId(route) }),
         submitCommit: true,
         buttonText: {
@@ -101,7 +101,7 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: $translate.instant('routes.unmap-apps.title'),
+        title: 'routes.unmap-apps.title',
         description: $translate.instant('routes.unmap-apps.description', { route: getRouteId(route) }),
         errorMessage: $translate.instant('routes.unmap-apps.error'),
         submitCommit: true,
@@ -154,7 +154,7 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: $translate.instant('routes.delete.title'),
+        title: 'routes.delete.title',
         description: $translate.instant('routes.delete.description', { route: getRouteId(route) }),
         errorMessage: $translate.instant('routes.delete.error'),
         submitCommit: true,

@@ -148,14 +148,14 @@
         allowJump: false,
         allowBack: true,
         allowCancelAtLastStep: true,
-        title: $translate.instant('assign-user-roles.title'),
+        title: 'assign-user-roles.title',
         btnText: {
           cancel: $translate.instant('buttons.cancel'),
           back: $translate.instant('buttons.previous')
         },
         steps: [
           {
-            title: $translate.instant('assign-user-roles.step1.title'),
+            title: 'assign-user-roles.step1.title',
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
             data: that.data,
@@ -197,7 +197,7 @@
             }
           },
           {
-            title: $translate.instant('assign-user-roles.step2.title'),
+            title: 'assign-user-roles.step2.title',
             templateUrl: path + 'assign/assign-selected-users.html',
             formName: 'assign-selected-form',
             data: that.data,
