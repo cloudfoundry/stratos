@@ -16,5 +16,5 @@ run:
     - |
       source /docker-lib.sh
       start_docker
-      pushd stratos-ui/deploy/kubernetes
+      cd stratos-ui/deploy/kubernetes
       ./build.sh -t test
