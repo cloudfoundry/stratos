@@ -2,7 +2,6 @@
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
-DOCKER_ORG=${DOCKER_ORG:-susetest}
 TAG=${TAG:-test}
 
 DOWNLOAD_FOLDER=${DIRPATH}/tmp
@@ -20,6 +19,7 @@ cat << EOT >> Dockerfile.dcind
 RUN apk update && \\
         apk add dropbear-scp && \\
         apk add bash && \\
+        apk add git && \\
 	apk add dropbear
 RUN  dropbearkey -t rsa -f id_rsa
 RUN mkdir /root/.ssh
@@ -28,6 +28,6 @@ ADD https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.
 ADD https://github.com/sequenceiq/uaa/releases/download/3.9.3/cloudfoundry-identity-uaa-3.9.3.war /tarballs/
 EOT
 
-docker build -f Dockerfile.dcind ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/dcind:${TAG} ${BUILD_ARGS}
+docker build -f Dockerfile.dcind ./ -t ${DOCKER_REGISTRY}/concourse-dcind:${TAG} ${BUILD_ARGS}
 rm -f Dockerfile.dcind
 
