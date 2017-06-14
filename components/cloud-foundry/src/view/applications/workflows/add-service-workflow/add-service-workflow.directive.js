@@ -111,7 +111,7 @@
           {
             templateUrl: path + 'instance.html',
             formName: 'addInstanceForm',
-            nextBtnText: $translate.instant('app-tabs.services.add.add'),
+            nextBtnText: 'app-tabs.services.add.add',
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
@@ -132,7 +132,7 @@
       if (config.confirm) {
         var confirmStep = {
           templateUrl: path + 'acknowledge.html',
-          nextBtnText: $translate.instant('buttons.done'),
+          nextBtnText: 'buttons.done',
           isLastStep: true
         };
         vm.data.workflow.steps.push(confirmStep);

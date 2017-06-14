@@ -569,8 +569,8 @@
         description: description,
         successMessage: successMessage,
         buttonText: {
-          yes: $translate.instant('buttons.yes'),
-          no: $translate.instant('buttons.no')
+          yes: 'buttons.yes',
+          no: 'buttons.no'
         },
         windowClass: 'roles-conf-dialog',
         noHtmlEscape: true

@@ -150,8 +150,8 @@
         allowCancelAtLastStep: true,
         title: 'assign-user-roles.title',
         btnText: {
-          cancel: $translate.instant('buttons.cancel'),
-          back: $translate.instant('buttons.previous')
+          cancel: 'buttons.cancel',
+          back: 'buttons.previous'
         },
         steps: [
           {
@@ -202,7 +202,7 @@
             formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
-            nextBtnText: $translate.instant('assign-user-roles.step2.button-yes'),
+            nextBtnText: 'assign-user-roles.step2.button-yes',
             stepCommit: true,
             onNext: function () {
               // Make the call to the role service to assign new roles. To do this we need to create the params in the

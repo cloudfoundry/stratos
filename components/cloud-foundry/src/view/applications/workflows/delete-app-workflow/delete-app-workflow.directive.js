@@ -94,7 +94,7 @@
         steps: [
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-services-and-routes.html',
-            nextBtnText: $translate.instant('delete-app.complex.title'),
+            nextBtnText: 'delete-app.complex.title',
             isLastStep: true
           }
         ]

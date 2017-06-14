@@ -63,10 +63,10 @@
         description: $translate.instant('routes.unmap-app.description', { route: getRouteId(route) }),
         submitCommit: true,
         buttonText: {
-          yes: $translate.instant('routes.unmap-app.button-yes'),
-          no: $translate.instant('buttons.cancel')
+          yes: 'routes.unmap-app.button-yes',
+          no: 'buttons.cancel'
         },
-        errorMessage: $translate.instant('routes.unmap-app.error'),
+        errorMessage: 'routes.unmap-app.error',
         callback: function () {
           return routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
@@ -103,11 +103,11 @@
       var dialog = frameworkDialogConfirm({
         title: 'routes.unmap-apps.title',
         description: $translate.instant('routes.unmap-apps.description', { route: getRouteId(route) }),
-        errorMessage: $translate.instant('routes.unmap-apps.error'),
+        errorMessage: 'routes.unmap-apps.error',
         submitCommit: true,
         buttonText: {
-          yes: $translate.instant('routes.unmap-apps.button-yes'),
-          no: $translate.instant('buttons.cancel')
+          yes: 'routes.unmap-apps.button-yes',
+          no: 'buttons.cancel'
         },
         callback: function () {
           var promises = [];
@@ -156,11 +156,11 @@
       var dialog = frameworkDialogConfirm({
         title: 'routes.delete.title',
         description: $translate.instant('routes.delete.description', { route: getRouteId(route) }),
-        errorMessage: $translate.instant('routes.delete.error'),
+        errorMessage: 'routes.delete.error',
         submitCommit: true,
         buttonText: {
-          yes: $translate.instant('routes.delete.button-yes'),
-          no: $translate.instant('buttons.cancel')
+          yes: 'routes.delete.button-yes',
+          no: 'buttons.cancel'
         },
         callback: function () {
           return routesModel.deleteRoute(cnsiGuid, routeGuid, {
