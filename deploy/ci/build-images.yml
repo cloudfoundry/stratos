@@ -1,0 +1,56 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    repo: SUSE/stratos-ui
+    uri: git@github.com:suse/stratos-ui.git
+    private_key: {{github-private-key}}
+    master: build-pipeline
+
+groups:
+- name: tests
+  jobs:
+  - build-helm-images
+#  - build-dc
+#  - build-aio
+
+jobs:
+- name: build-helm-images
+  plan:
+  - get: stratos-ui
+
+  - do:
+    - task: build
+      privileged: true
+      timeout: 10m
+      file: stratos-ui/deploy/ci/tasks/build-images/build-helm.yml
+#- name: build-dc
+#  plan:
+#  - get: stratos-ui
+#    passed: [unit-tests]
+#
+#  - do:
+#    - task: build-proxy-image
+#      file: stratos-ui/deploy/tasks/stratos-ui/prep-proxy-image.yml
+#    - task: run-e2e-tests
+#      privileged: true
+#      params:
+#       REGISTRY_NAME: {{insecure-registry}}
+#       CUSTOM_APP_LABEL: {{custom-app-label}}
+#      timeout: 10m
+#      file: stratos-ui/deploy/tasks/stratos-ui/run-tests.yml
+#- name: build-aio
+#  plan:
+#  - get: stratos-ui
+#    passed: [unit-tests]
+#
+#  - do:
+#    - task: build-proxy-image
+#      file: stratos-ui/deploy/tasks/stratos-ui/prep-proxy-image.yml
+#    - task: run-e2e-tests
+#      privileged: true
+#      params:
+#       REGISTRY_NAME: {{insecure-registry}}
+#       CUSTOM_APP_LABEL: {{custom-app-label}}
+#      timeout: 10m
+#      file: stratos-ui/deploy/tasks/stratos-ui/run-tests.yml
