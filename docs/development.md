@@ -133,17 +133,17 @@ the following configuration should be used
 ```
 
 #### Run
-To run the frontend with bits as if it were production execute...
+To run the frontend with bits as if it were production (uses minified resources) execute ...
 ```
 $ gulp run
 ```
-This will include minified resources.
 
-To run the frontend in development mode, which includes non-minified 
-resources and browsersync enabled execute... 
+To run the frontend in development mode (uses non-minified resources and serves via browsersync) execute ...
 ```
 $ gulp dev
 ```
+
+In both cases the console should be available via https://localhost:3100
 
 ### Linting
 We use eslint to executing linting. To run these execute...
