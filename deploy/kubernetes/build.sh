@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -eu
 
 # Set defaults
@@ -51,7 +51,7 @@ echo
 echo "Starting build"
 
 # Copy values template
-__DIRNAME="$(exec 2>/dev/null;cd -- $(dirname "$0"); unset PWD; /usr/bin/pwd || /bin/pwd || pwd)"
+__DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
 
 # Proxy support
