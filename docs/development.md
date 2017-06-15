@@ -10,7 +10,7 @@ cloud/compute providers.
 
 1. [Working on the front-end component](#working-on-the-front-end-component)
 2. [Working on the back-end component](#working-on-the-backend-component)
-3. [Testing](#Testing)
+3. [Testing](#testing)
 
 ## Components
 
@@ -183,7 +183,7 @@ The portal-proxy is the back-end for the Console UI. It is written in Go.
 
 #### Set up developer certs
 
-#### Testing
+#### Tests
 
 ##### Unit Testing
 
@@ -197,21 +197,24 @@ The portal-proxy is the back-end for the Console UI. It is written in Go.
 
 ##### Run the server
 
-### Testing
+## Testing
 
-#### Front End Unit Tests
+### Front End Unit Tests
 Unit test are written via jasmine and executed in karma. To run these execute...
 ```
 $ npm test
 ```
 
-#### End to End Tests
+### End to End Tests
 To run e2e tests a cloud foundry with specific orgs, spaces and users is required.
 
 To set this up
 1. Ensure the cf cli tool is installed. See https://github.com/cloudfoundry/cli
 2. cf tool has targeted the cf instance and logged in (cf api, cf login)
 3. Execute the following script to set up the SUSE org, dev space and e2e user
+
+**NOTE** This will also create an application which will continually output log statements. This will be used to test
+ the log reader.
 ```
 $ ./test/e2e/config-cf.sh
 ```
