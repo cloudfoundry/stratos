@@ -1,0 +1,21 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: alpine
+    tag: latest
+
+inputs:
+- name: stratos-ui
+outputs:
+- name: dev-certs-output
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    apk update
+    apk add openssl
+    export DEV_CERTS_PATH=dev-certs-output/dev-certs
+    ./stratos-ui/deploy/ci/scripts/generate_cert.sh
