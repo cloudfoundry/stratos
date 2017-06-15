@@ -247,6 +247,7 @@ function buildUI {
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   # Download and retag image to save bandwidth
+  preloadImage nginx:1.11
   buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
