@@ -32,15 +32,15 @@
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
+   * @param {object} $translate - Angular $translate service
    * @property {boolean} addingApplication - flag for adding app
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfOrganizationModel,
-                                    $interpolate, $scope, $q) {
+  function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfOrganizationModel, $scope, $q,
+                                    $translate) {
 
     var vm = this;
 
@@ -138,7 +138,6 @@
         },
         steps: [
           {
-            title: gettext('Name'),
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-application.html',
             formName: 'application-name-form',
             nextBtnText: 'buttons.add',
@@ -171,18 +170,19 @@
             onNext: function () {
               return vm.validateNewRoute().then(function () {
                 return vm.createApp().then(function () {
-                  var msg = gettext("A new application and route have been created for '{{ appName }}'");
                   appEventService.$emit('events.NOTIFY_SUCCESS', {
-                    message: $interpolate(msg)({appName: vm.userInput.name})
+                    message: $translate.instant('add-app-dialog.step1.notifications.success',
+                      {appName: vm.userInput.name})
                   });
                 }, function (error) {
-                  var msg = gettext('There was a problem creating your application. ');
+                  var msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1');
                   var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
                   if (cloudFoundryException || _.isString(error)) {
-                    msg = gettext('The following exception occurred when creating your application: ') + (cloudFoundryException || error) + '. ';
+                    msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1-alt',
+                      { error: cloudFoundryException || error});
                   }
 
-                  msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+                  msg = msg + $translate.instant('add-app-dialog.step1.notifications.failure-part-2');
                   return $q.reject(msg);
                 });
               });
@@ -201,9 +201,6 @@
         subflow: null,
         serviceInstances: [],
         services: [],
-        serviceCategories: [
-          {label: gettext('All Services'), value: 'all'}
-        ],
         servicesReady: false,
         organizations: [],
         spaces: [],
@@ -278,22 +275,23 @@
           });
         })
         .catch(function (error) {
-          if (error.status === 404) {
+          if (error && error.status === 404) {
             // Route has not been found, this is a valid route to add
             return $q.resolve();
           }
 
           if (error.exist) {
-            return $q.reject(gettext('This route already exists. Choose a new one.'));
+            return $q.reject($translate.instant('add-app-dialog.step1.route.exists'));
           }
 
-          var msg = gettext('There was a problem validating your route. ');
+          var msg = $translate.instant('add-app-dialog.step1.route.failure-part-1');
           var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
           if (cloudFoundryException || _.isString(error)) {
-            msg = gettext('The following exception occurred when validating your route: ') + (cloudFoundryException || error) + '. ';
+            msg = $translate.instant('add-app-dialog.step1.route.failure-part-1-alt',
+              {error: cloudFoundryException || error});
           }
 
-          msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+          msg = msg + $translate.instant('add-app-dialog.step1.route.failure-part-2');
 
           return $q.reject(msg);
         });

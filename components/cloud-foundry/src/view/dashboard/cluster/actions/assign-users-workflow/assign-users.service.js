@@ -33,6 +33,7 @@
    * @name AssignUsersWorkflowController
    * @constructor
    * @param {object} $scope - the angular $scope service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} appClusterRolesService - the console roles service. Aids in selecting, assigning and removing roles with the
@@ -43,8 +44,8 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController($scope, modelManager, context, appClusterRolesService, cfOrganizationModel,
-                                         $stateParams, $q, $timeout, $uibModalInstance) {
+  function AssignUsersWorkflowController($scope, $translate, modelManager, context, appClusterRolesService,
+                                         cfOrganizationModel,$stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
@@ -147,19 +148,19 @@
         allowJump: false,
         allowBack: true,
         allowCancelAtLastStep: true,
-        title: gettext('Assign User(s)'),
+        title: 'assign-user-roles.title',
         btnText: {
-          cancel: gettext('Cancel'),
-          back: gettext('Previous')
+          cancel: 'buttons.cancel',
+          back: 'buttons.previous'
         },
         steps: [
           {
-            title: gettext('Select User(s)'),
+            title: 'assign-user-roles.step1.title',
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
             data: that.data,
             userInput: that.userInput,
-            showBusyOnEnter: gettext('Fetching Users...'),
+            showBusyOnEnter: $translate.instant('assign-user-roles.step1.busy-message'),
             checkReadiness: function () {
               return initialiseSelect();
             },
@@ -196,12 +197,12 @@
             }
           },
           {
-            title: gettext('Assign Roles'),
+            title: 'assign-user-roles.step2.title',
             templateUrl: path + 'assign/assign-selected-users.html',
             formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
-            nextBtnText: gettext('Assign'),
+            nextBtnText: 'assign-user-roles.step2.button-yes',
             stepCommit: true,
             onNext: function () {
               // Make the call to the role service to assign new roles. To do this we need to create the params in the

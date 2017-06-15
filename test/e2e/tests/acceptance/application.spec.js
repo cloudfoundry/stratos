@@ -130,7 +130,7 @@
             columnMenu.clickItem(1);
 
             expect(confirmModal.getTitle()).toBe('Delete Route');
-            expect(confirmModal.getBody()).toBe('Are you sure you want to delete ' + hostName + '.' + domain + '?');
+            expect(confirmModal.getBody()).toBe("Are you sure you want to delete '" + hostName + '.' + domain + "'?");
             confirmModal.commit();
 
             routes.getData(routes).then(function (newRows) {
