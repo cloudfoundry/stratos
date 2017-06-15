@@ -98,7 +98,7 @@ jobs:
 
     - task: run-e2e-tests
       privileged: true
-      timeout: 10m
+      timeout: 12m
       file:  stratos-ui/deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
        REGISTRY_NAME: {{insecure-registry}}

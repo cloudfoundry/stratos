@@ -76,6 +76,11 @@ if [ -n "${BUILD_ARGS}" ]; then
   echo -e "- RUN_ARGS:\t'${RUN_ARGS}'"
 fi
 
+function preloadImage {
+  docker pull ${DOCKER_REGISTRY}/$1
+  docker tag ${DOCKER_REGISTRY}/$1 $1
+}
+
 function buildAndPublishImage {
   NAME=${1}
   DOCKER_FILE=${2}
@@ -187,6 +192,7 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
+    preloadImage splatform/stratos-goose:latest
     buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
   rm -f ${STRATOS_UI_PATH}/goose
 }
@@ -196,6 +202,7 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
+  preloadImage node:6.9.1
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \

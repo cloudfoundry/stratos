@@ -122,6 +122,11 @@ function cleanup {
 
 }
 
+function preloadImage {
+  docker pull ${DOCKER_REGISTRY}/$1
+  docker tag ${DOCKER_REGISTRY}/$1 $1
+}
+
 function updateTagForRelease {
   # Reset the TAG variable for a release to be of the form:
   #   <version>-<commit#>-<prefix><hash>
@@ -171,7 +176,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:test
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -186,6 +191,8 @@ function buildPostgres {
   # Build and publish the container image for postgres
   echo
   echo "-- Build & publish the runtime container image for postgres"
+  # Pull base image locally and retag
+  preloadImage postgres:9.4.9
   buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
 }
 
@@ -193,6 +200,7 @@ function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
+  preloadImage debian:jessie
   buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
@@ -207,7 +215,7 @@ function buildPostflightJob {
              --rm \
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
-             ${DOCKER_ORG}/stratos-postflight-builder:latest
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:latest
   mv goose  ${STRATOS_UI_PATH}/
   buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
@@ -218,6 +226,7 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
+  preloadImage node:6.9.1
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -237,6 +246,7 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
+  # Download and retag image to save bandwidth
   buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 
