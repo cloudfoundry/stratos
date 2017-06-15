@@ -146,7 +146,7 @@
      * @param {string} cnsiGuid the cnsi guid of the CF cluster
      * @param {object} route route metadata
      * @param {string} routeGuid route guid
-     * @returns {object} promise once execution completed. This could mean confirm dialog was cancelled OR delete
+     * @returns {object} promise once execution completed. This could mean confirm dialog was cancelled OR deleted
      * failed
      */
     function deleteRoute(cnsiGuid, route, routeGuid) {
