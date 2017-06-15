@@ -39,10 +39,10 @@
 <div id="navbar" class="primary-nav"
   ng-class="{'navbar-icons-only' : applicationCtrl.navbarIconsOnly, 'navbar-hidden': applicationCtrl.hideNavigation}">
   <div ng-if="!applicationCtrl.hideNavigation" class="navbar-menu">
-    <div ng-if="applicationCtrl.navbarIconsOnly" class="nav-logo">
+    <div ng-class="{'nav-logo-hide': applicationCtrl.navbarIconsOnly}" class="nav-logo">
       <app-icon icon-class="nav-logo-icon" icon="{{ 'navbar.logo' | translate }}"></app-icon>
     </div>
-    <div ng-if="!applicationCtrl.navbarIconsOnly" class="nav-brand">
+    <div ng-class="{'nav-logo-hide': !applicationCtrl.navbarIconsOnly}" class="nav-brand">
       <span class="navbar-brand" translate>navbar.title</span>
     </div>
     <navigation ></navigation>

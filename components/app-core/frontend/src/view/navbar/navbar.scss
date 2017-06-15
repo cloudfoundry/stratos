@@ -47,6 +47,7 @@ nav.secondary-nav {
     width: $navbar-toggle-button-width;
     text-align: center;
     border-bottom: 1px solid $secondary-nav-bottom-border-color;
+    user-select: none;
 
     > i {
       line-height: $page-header-height;
@@ -143,10 +144,6 @@ nav.secondary-nav {
   &.navbar-icons-only {
     width: $main-nav-icons-width;
 
-    .navbar-brand {
-      display: none;
-    }
-
     .nav.navbar-nav {
       li a .navitem-label {
         display: none;
@@ -161,6 +158,13 @@ nav.secondary-nav {
     align-items: center;
     justify-content: center;
     border-bottom: 1px solid $navbar-primary-bottom-border-color;
+    opacity: 0;
+    transition: opacity 0.6s linear;
+
+    &.nav-logo-hide {
+      opacity: 1;
+      transition: opacity 0.4s linear;
+    }
 
     .nav-logo-icon {
       color: $navbar-text-color;
@@ -285,6 +289,15 @@ nav.secondary-nav {
     align-items: center;
     justify-content: center;
     align-content: center;
+    opacity: 0;
+    transition: opacity 0.6s linear;
+    position: fixed;
+    top: 0;
+
+    &.nav-logo-hide {
+      opacity: 1;
+      transition: opacity 0.4s linear;
+    }
   }
 
   .navbar-brand {
@@ -323,6 +336,10 @@ nav.secondary-nav {
 
   #navbar {
     display: none;
+  }
+
+  .primary-nav .navbar-menu > div {
+      display: none;
   }
 
   #navbar[aria-expanded="true"] {
