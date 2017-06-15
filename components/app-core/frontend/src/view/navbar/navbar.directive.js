@@ -22,8 +22,10 @@
     };
   }
 
-  function NavBarController(showLanguageSelection) {
-    this.showLanguageSelection = showLanguageSelection || false;
+  function NavBarController(showLanguageSelection, modelManager) {
+    var vm = this;
+    vm.showLanguageSelection = showLanguageSelection || false;
+    vm.accountModel = modelManager.retrieve('app.model.account');
   }
 
 })();

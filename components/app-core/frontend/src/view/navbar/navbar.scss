@@ -15,12 +15,12 @@ $navbar-text-color: $white !default;
 $seconday-nav-background-color: #fff !default;
 $seconday-nav-hover-color: #ccc !default;
 $secondary-nav-underline-size: 4px;
+$secondary-nav-bottom-border-color: darken($page-header-bg, 10%) !default;
 
 $navbar-toggle-button-width: $page-header-height !default;
 $navbar-bottom-border-color: $page-header-bg !default;
-$navbar-primary-bottom-border-color: lighten($main-nav-background-color, 10%);
+$navbar-primary-bottom-border-color: lighten($main-nav-background-color, 10%) !default;
 $user-menu-hover-color: $brand-primary !default;
-
 
 nav.secondary-nav {
   color: $page-header-fg;
@@ -46,7 +46,7 @@ nav.secondary-nav {
     left: 0;
     width: $navbar-toggle-button-width;
     text-align: center;
-    border-bottom: 1px solid $navbar-bottom-border-color;
+    border-bottom: 1px solid $secondary-nav-bottom-border-color;
 
     > i {
       line-height: $page-header-height;
@@ -62,7 +62,7 @@ nav.secondary-nav {
   .secondary-navbar {
     flex: 1 1 0;
     background-color: $navbar-bottom-border-color;
-    border-bottom: 1px solid $navbar-bottom-border-color;
+    border-bottom: 1px solid $secondary-nav-bottom-border-color;
   }
 
   .user-avatar {
@@ -71,7 +71,7 @@ nav.secondary-nav {
     align-items: center;
     display: flex;
     padding: 0 $console-unit-space;
-    border-bottom: 1px solid $navbar-bottom-border-color;
+    border-bottom: 1px solid $secondary-nav-bottom-border-color;
     padding-top: 1px;
 
     .action-menu-wrapper .actions-menu ul.actions-menu-list {
@@ -249,8 +249,6 @@ nav.secondary-nav {
 
         .navitem-label {
           vertical-align: middle;
-          text-transform: uppercase;
-          letter-spacing: 1px;
           font-size: $font-size-nav;
         }
       }
@@ -293,7 +291,7 @@ nav.secondary-nav {
     color: $white;
     font-size: $font-size-large2;
     font-weight: 500;
-    padding: 0 16px;
+    padding: 0 $console-unit-space;
     overflow: hidden;
     width: 100%;
     margin-left: 0;
