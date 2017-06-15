@@ -19,7 +19,8 @@
     }
   },
   "navbar": {
-    "title": "@:product.console"
+    "title": "@:product.name",
+    "logo": "svg:SUSE_Geeko.svg"
   },
   "login": {
     "title":"SUSE",

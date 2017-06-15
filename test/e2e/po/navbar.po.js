@@ -44,7 +44,7 @@
   }
 
   function toggleNavBar() {
-    return element(by.css('.navbar-toggle-labels > i')).click();
+    return element(by.css('.navbar-toggle-width > i')).click();
   }
 
   function isIconsOnly() {

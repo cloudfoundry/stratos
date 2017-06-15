@@ -27,7 +27,8 @@
     "password": "Password"
   },
   "navbar": {
-    "title": "@:product.name"
+    "title": "@:product.name",
+    "logo": "home"
   },
   "menu": {
     "applications": "@:applications",
