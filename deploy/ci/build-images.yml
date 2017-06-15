@@ -16,7 +16,7 @@ resources:
   type: time
   source:
     start: 12:00 AM
-    stop: 1:00 AM
+    stop: 2:00 AM
     location: UTC
 groups:
 - name: tests
@@ -37,7 +37,7 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
-      timeout: 15m
+      timeout: 30m
       file: stratos-ui/deploy/ci/tasks/build-images/build-helm.yml
 
 - name: build-dc-images
@@ -51,7 +51,7 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
-      timeout: 15m
+      timeout: 30m
       file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
 
 - name: build-aio-image
