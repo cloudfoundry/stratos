@@ -120,7 +120,6 @@
           expect(that.data.workflow).toBeDefined();
           expect($translate.instant(that.data.workflow.title)).toBe('Add Application');
           expect(that.data.workflow.steps.length).toBe(1);
-          expect(that.options.serviceCategories).toEqual([{ label: gettext('All Services'), value: 'all' }]);
           expect(that.options.services).toEqual([]);
           expect(that.options.organizations).toEqual([]);
           expect(that.options.spaces).toEqual([]);
@@ -153,7 +152,6 @@
           });
 
           it('should have right title and button labels', function () {
-            expect(step.title).toBe(gettext('Name'));
             expect($translate.instant(step.nextBtnText)).toBe(gettext('Add'));
             expect($translate.instant(step.cancelBtnText)).toBe(gettext('Cancel'));
             expect(step.showBusyOnNext).toBe(true);

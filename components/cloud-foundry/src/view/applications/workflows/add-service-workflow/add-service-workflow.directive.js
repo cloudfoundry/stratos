@@ -25,14 +25,14 @@
    * @constructor
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the Angular $scope service
-   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view widget
    * @property {object} modal - the detail view modal instance
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, appEventService, frameworkDetailView) {
+  function AddServiceWorkflowController($q, $scope, $translate, modelManager, appEventService, frameworkDetailView) {
     var vm = this;
 
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -104,13 +104,14 @@
         hideStepNavStack: true,
         lastStepCommit: false,
         btnText: {
-          cancel: config.confirm ? gettext('Cancel') : gettext('Back to Services')
+          cancel: config.confirm ? $translate.instant('buttons.cancel')
+            : $translate.instant('app-tabs.services.add.back-to-services')
         },
         steps: [
           {
             templateUrl: path + 'instance.html',
             formName: 'addInstanceForm',
-            nextBtnText: gettext('Add Service Instance'),
+            nextBtnText: 'app-tabs.services.add.add',
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
@@ -121,7 +122,7 @@
                   return _onServiceBindingError();
                 });
               }, function () {
-                return _onCreateServiceError();
+                return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-create'));
               });
             }
           }
@@ -131,7 +132,7 @@
       if (config.confirm) {
         var confirmStep = {
           templateUrl: path + 'acknowledge.html',
-          nextBtnText: gettext('Done'),
+          nextBtnText: 'buttons.done',
           isLastStep: true
         };
         vm.data.workflow.steps.push(confirmStep);
@@ -300,7 +301,7 @@
     function startWorkflow() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: gettext('Add Service to ') + vm.data.app.summary.name
+        title: $translate.instant('app-tabs.services.add.title', { appName: vm.data.app.summary.name })
       };
       var context = {
         addServiceActions: vm.addServiceActions,
@@ -331,36 +332,21 @@
         vm.addService().then(function () {
           vm.addBinding().then(function () {
             // show notification for successful binding
-            var successMsg = gettext("The '{{ service }}'" +
-              " service has been successfully attached to application '{{ appName }}'");
-            var context = {
+            var successMsg = $translate.instant('app-tabs.services.add.title', {
               service: vm.options.serviceInstance.entity.name,
               appName: vm.data.app.summary.name
-            };
-            var message = $interpolate(successMsg)(context);
-            appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+            });
+            appEventService.$emit('events.NOTIFY_SUCCESS', {message: successMsg});
             vm.modal.close();
           }, function () {
             return _onServiceBindingError();
           });
         }, function () {
-          return _onCreateServiceError();
+          return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-create'));
         });
       } else {
         vm.modal.close();
       }
-    }
-
-    /**
-     * @function _onCreateServiceError
-     * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
-     * @description Error handler for create service instance
-     * @returns {object} A promise object
-     * @private
-     */
-    function _onCreateServiceError() {
-      var message = gettext('There was a problem creating the instance. Please try again. If this error persists, please contact the administrator.');
-      return $q.reject(message);
     }
 
     /**
@@ -379,9 +365,7 @@
                                                           function (o) { return o.metadata.guid === guid; });
         });
       }
-
-      var message = gettext('There was a problem binding the service instance to the application. Please try again. If this error persists, please contact the administrator.');
-      return $q.reject(message);
+      return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-bind'));
     }
   }
 
