@@ -6,12 +6,18 @@ resources:
     uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
     branch: build-pipeline
-
+- name: aio-docker-image
+  type: docker-image
+  source:
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: splatform/stratos-ui
 groups:
 - name: tests
   jobs:
   - build-helm-images
   - build-dc-images
+  - build-aio-images
 #  - build-dc
 #  - build-aio
 
@@ -19,6 +25,7 @@ jobs:
 - name: build-helm-images
   plan:
   - get: stratos-ui
+    trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
@@ -31,6 +38,7 @@ jobs:
 - name: build-dc-images
   plan:
   - get: stratos-ui
+    trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
@@ -39,33 +47,14 @@ jobs:
       privileged: true
       timeout: 15m
       file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
-#- name: build-dc
-#  plan:
-#  - get: stratos-ui
-#    passed: [unit-te sts]
-#
-#  - do:
-#    - task: build-proxy-image
-#      file: stratos-ui/deploy/tasks/stratos-ui/prep-proxy-image.yml
-#    - task: run-e2e-tests
-#      privileged: true
-#      params:
-#       REGISTRY_NAME: {{insecure-registry}}
-#       CUSTOM_APP_LABEL: {{custom-app-label}}
-#      timeout: 10m
-#      file: stratos-ui/deploy/tasks/stratos-ui/run-tests.yml
-#- name: build-aio
-#  plan:
-#  - get: stratos-ui
-#    passed: [unit-tests]
-#
-#  - do:
-#    - task: build-proxy-image
-#      file: stratos-ui/deploy/tasks/stratos-ui/prep-proxy-image.yml
-#    - task: run-e2e-tests
-#      privileged: true
-#      params:
-#       REGISTRY_NAME: {{insecure-registry}}
-#       CUSTOM_APP_LABEL: {{custom-app-label}}
-#      timeout: 10m
-#      file: stratos-ui/deploy/tasks/stratos-ui/run-tests.yml
+
+- name: build-aio-images
+  public: true
+  serial: true
+  plan:
+  - get: stratos-ui
+    trigger: true
+  - put: aio-docker-image
+    params:
+      build: stratos-ui
+      dockerfile: stratos-ui/deploy/Dockerfile.all-in-one
