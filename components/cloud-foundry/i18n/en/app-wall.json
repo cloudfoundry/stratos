@@ -3,6 +3,7 @@
     "app-wall": "@:applications",
     "search-placeholder": "Search by name",
     "add-application": "Add Application",
+    "deploy-application": "Deploy Application",
     "reset": "Reset",
     "options": {
       "show": "Show Options",
@@ -51,6 +52,23 @@
         "failure-part-1-alt": "The following exception occurred when validating your route: {{ error }}. ",
         "failure-part-2": "Please try again or contact your administrator if the problem persists."
       }
+    }
+  },
+  "deploy-app-dialog": {
+    "title": "Deploy Application",
+    "step1": {
+      "title": "Information"
+    },
+    "step2": {
+      "title": "Manifest",
+      "button-yes": "Deploy",
+      "busy": "Processing application files and extracting manifest data"
+    },
+    "step3": {
+      "title": "Progress"
+    },
+    "step4": {
+      "title": "Result"
     }
   }
 }

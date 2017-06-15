@@ -1,0 +1,34 @@
+<div class="" file-drop="step.userInput.file">
+  <p translate>Application Bits</p>
+  <p translate>
+    You can upload a zip file containing your application by either selecting the file below or by dragging and dropping
+    it onto this area. Alternatively provide a github URL in the box below.
+  </p>
+  <div>
+    <input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"></input>
+    <label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>
+    <!--<span>!!{{JSON.stringify(step.userInput.file)}}!!</span>-->
+  </div>
+  <br>
+  <div class="form-group form-group-large">
+    <label class="control-label" translate>Application File path</label>
+    <input type="text" class="form-control" ng-value="step.userInput.file.name"/>
+  </div>
+  <div class="form-group form-group-large">
+    <label class="control-label" translate>Github url</label>
+    <input type="text" class="form-control" ng-value="step.userInput.github"/>
+  </div>
+  <!--<p translate>For existing apps, if the relative path to your manifest.yml is not in the root please supply it below. For example </p><code>path/to/manifest/manifest.yml</code>-->
+  <div class="form-group form-group-large">
+    <label class="control-label" translate>Path to manifest</label>
+    <input type="text" class="form-control" ng-value="step.userInput.manifest" placeholder="{{'Relative path of manifest to root of app directory' | translate}}"/>
+  </div>
+</div>
+
+
+<deploy-location
+  service-instances="step.data.serviceInstances"
+  service-instance="step.userInput.serviceInstance"
+  organization="step.userInput.organization"
+  space="step.userInput.space"
+></deploy-location>

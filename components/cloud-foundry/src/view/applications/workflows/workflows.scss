@@ -1,6 +1,7 @@
 @import "add-app-workflow/add-app-workflow";
 @import "add-service-workflow/add-service-workflow";
 @import "delete-app-workflow/delete-app-workflow";
+@import "deploy-app-workflow/deploy-app";
 
 .control-title {
   margin-top: $console-unit-space;

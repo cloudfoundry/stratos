@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.list', [
-      'cloud-foundry.view.applications.list.gallery-view'
+      'cloud-foundry.view.applications.list.gallery-view',
+      'cloud-foundry.view.applications.list.deployApplication'
     ])
     .config(registerRoute);
 
@@ -30,9 +31,10 @@
    * @param {object} appUtilsService - the appUtilsService service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {object} appDeployAppService - the appDeployAppService service
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, frameworkDetailView, cfOrganizationModel) {
+                                      appUtilsService, frameworkDetailView, cfOrganizationModel, appDeployAppService) {
 
     var vm = this;
 
@@ -86,6 +88,7 @@
     vm.isAdminInAnyCf = isAdminInAnyCf;
     vm.showAddApplicationButton = showAddApplicationButton;
     vm.addApplication = addApplication;
+    vm.deployApplication = deployApplication;
     vm.goToGalleryView = goToGalleryView;
 
     angular.element($window).on('resize', onResize);
@@ -527,6 +530,10 @@
           class: 'dialog-form-large'
         }
       );
+    }
+
+    function deployApplication() {
+      appDeployAppService.deploy();
     }
 
     /**
