@@ -12,19 +12,24 @@ resources:
     username: {{docker-username}}
     password: {{docker-password}}
     repository: splatform/stratos-ui
+- name: after-midnight
+  type: time
+  source:
+    start: 12:00 AM
+    stop: 1:00 AM
+    location: UTC
 groups:
 - name: tests
   jobs:
   - build-helm-images
   - build-dc-images
-  - build-aio-images
-#  - build-dc
-#  - build-aio
+  - build-aio-image
 
 jobs:
 - name: build-helm-images
   plan:
   - get: stratos-ui
+  - get: after-midnight
     trigger: true
   - do:
     - task: generete-certs
@@ -38,6 +43,7 @@ jobs:
 - name: build-dc-images
   plan:
   - get: stratos-ui
+  - get: after-midnight
     trigger: true
   - do:
     - task: generete-certs
@@ -48,11 +54,12 @@ jobs:
       timeout: 15m
       file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
 
-- name: build-aio-images
+- name: build-aio-image
   public: true
   serial: true
   plan:
   - get: stratos-ui
+  - get: after-midnight
     trigger: true
   - put: aio-docker-image
     params:
