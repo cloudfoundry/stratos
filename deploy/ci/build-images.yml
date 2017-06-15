@@ -20,6 +20,10 @@ jobs:
   - get: stratos-ui
 
   - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+
     - task: build
       privileged: true
       timeout: 10m

@@ -171,7 +171,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:test
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
