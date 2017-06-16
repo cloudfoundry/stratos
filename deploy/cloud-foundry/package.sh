@@ -27,7 +27,6 @@ sed -i '/"endpoints-dashboard.*/d' bower.json
 npm install -g gulp bower
 
 cd ${TOP_LEVEL}
-pids=""
 
 npm install --only=prod & NPM_INSTALL=$!
 ${BOWER_PATH}/bower install & BOWER_INSTALL=$!
