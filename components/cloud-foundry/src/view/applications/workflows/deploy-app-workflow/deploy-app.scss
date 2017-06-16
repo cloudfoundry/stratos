@@ -1,9 +1,19 @@
 .deploy-app {
+  deploy-location {
+    .control-title {
+      margin-top: 0;
+    }
+  }
+
   #deploy-app-choose-bits {
     display: none;
   }
 
   .wizard-step {
     padding-bottom: 24px;
+  }
+
+  .rm-background{
+    background-color: transparent;
   }
 }

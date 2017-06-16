@@ -46,7 +46,6 @@
     var vm = this;
 
 
-
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     // var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     // var spaceModel = modelManager.retrieve('cloud-foundry.model.space');

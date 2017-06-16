@@ -43,22 +43,37 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function DeployAppController($q, $timeout, $uibModalInstance, modelManager) {
+  function DeployAppController($scope, $q, $timeout, $uibModalInstance, modelManager, cfUtilsService) {
 
     var vm = this;
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var buildPacks = modelManager.retrieve('cloud-foundry.model.build-pack');
 
     vm.data = {
-      serviceInstances: []
+      serviceInstances: [],
+      buildPacks: []
     };
 
     vm.userInput = {
       serviceInstance: null,
       organization: null,
-      space: null
+      space: null,
+      manifest: {
+        location: '/manifest.yml'
+      }
     };
+
+    $scope.$watch(function () {
+      return vm.userInput.file;
+    }, function (val) {
+      if (val) {
+        vm.userInput.filename = val.name;
+      } else {
+        vm.userInput.filename = '';
+      }
+    });
 
     var path = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
 
@@ -84,6 +99,9 @@
             formName: 'deploy-info-form',
             data: vm.data,
             userInput: vm.userInput,
+            allowNext: function () {
+              return vm.userInput.file || vm.userInput.github;
+            },
             onEnter: function () {
               return serviceInstanceModel.list()
                 .then(function (serviceInstances) {
@@ -114,24 +132,17 @@
             stepCommit: true,
             showBusyOnEnter: 'deploy-app-dialog.step2.busy',
             onEnter: function () {
-              // TODO: Upload (zip file|github url), cf + org + space guids
-              // var fd = new FormData();
-              // fd.append("file", files[0]);
-              // $http.post(settings.apiBaseUri + "/files", fd,
-
-              // TODO: Resolve promise when we get back manifest data
-              // TODO: Add progress indicator
+              // Upload/Process bits here to allow the wizard 'busy' process to handle screen in progress content
+              var fetchBuildPacksPromise = buildPacks.listAllBuildPacks(vm.userInput.serviceInstance.guid).then(function (response) {
+                [].push.apply(vm.data.buildPacks, _.map(response.resources, cfUtilsService.selectOptionMapping));
+              });
               // TODO: Handle errors
-              //TODO: ONLY RESOLVE ONCE DEPLOY SUCCESSFULLY STARTED
-              return $timeout(function () {
-                console.log('manifest received');
-              }, 3000);
+              return $q.all(fetchBuildPacksPromise, submitManifest());
             },
             onNext: function () {
               deploying = true;
-              // TODO: Add progress indicator
               // TODO: Handle errors
-              return $q.resolve();
+              return submitManifest();
             }
           },
           {
@@ -145,10 +156,9 @@
             },
             onEnter: function () {
               allowBack = false;
-              $timeout(function () {
-                deploying = false;
-              }, 5000);
-              return $q.resolve();
+              return waitForDeploy().then(function () {
+                //TODO: Automatically move to the next step
+              });
             },
             onNext: function () {
               // TODO: Handle errors
@@ -171,7 +181,7 @@
     };
 
     // Actions for the wizard controller
-    this.actions = {
+    vm.actions = {
       stop: function () {
         $uibModalInstance.dismiss();
       },
@@ -180,6 +190,34 @@
         $uibModalInstance.close();
       }
     };
+
+    function submitBits() {
+      // TODO: Upload (zip file|github url), cf + org + space guids
+      // var fd = new FormData();
+      // fd.append("file", files[0]);
+      // $http.post(settings.apiBaseUri + "/files", fd,
+
+      // TODO: Resolve promise when we get back manifest data
+      // TODO: Add progress indicator
+      // TODO: Handle errors
+      //TODO: ONLY RESOLVE ONCE DEPLOY SUCCESSFULLY STARTED
+      return $timeout(function () {
+        console.log('manifest received');
+      }, 3000);
+    }
+
+    function submitManifest() {
+      // TODO: Add progress indicator
+      // TODO: Handle errors
+      return $q.resolve();
+    }
+
+    function waitForDeploy() {
+      $timeout(function () {
+        deploying = false;
+      }, 5000);
+      return $q.resolve();
+    }
 
   }
 
