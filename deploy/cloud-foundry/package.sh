@@ -24,7 +24,7 @@ EOF
 # Delete endpoints-dashboard from bower.json
 sed -i '/"endpoints-dashboard.*/d' bower.json
 
-npm install -g bower
+npm install -g gulp bower
 
 cd ${TOP_LEVEL}
 pids=""
