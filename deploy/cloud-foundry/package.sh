@@ -28,16 +28,17 @@ npm install -g gulp bower
 
 cd ${TOP_LEVEL}
 
-npm install --only=prod & NPM_INSTALL=$!
+npm install & NPM_INSTALL=$!
 ${BOWER_PATH}/bower install & BOWER_INSTALL=$!
 
 wait ${NPM_INSTALL}
-wait ${BOWER_INSTALL}
-
-npm run build & UI_BUILD=$!
 npm run build-backend & BK_BUILD=$!
-wait ${UI_BUILD}
+
+wait ${BOWER_INSTALL}
+npm run build & UI_BUILD=$!
+
 wait ${BK_BUILD}
+wait ${UI_BUILD}
 npm run build-cf
 
 chmod +x portal-proxy
