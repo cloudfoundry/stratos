@@ -23,7 +23,7 @@ $ docker pull splatform/stratos-ui:latest
 $ docker run -p 4443:443 splatform/stratos-ui:latest 
 ```
 
-You can access the UI on `https://localhost:4443`
+You can access the UI on `https://localhost:4443` 
 ## Contributing
 
 We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
