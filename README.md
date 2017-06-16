@@ -19,7 +19,7 @@ To get started quickly, we recommend following the steps to deploy the Stratos U
 
 You can also quickly deploy Stratos UI, using the all-in-one container.
 ```
-$ docker pull splatform/stratos-ui:latest
+$ docker pull splatform/stratos-ui:latest 
 $ docker run -p 4443:443 splatform/stratos-ui:latest 
 ```
 
