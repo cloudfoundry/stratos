@@ -28,7 +28,7 @@ npm install -g gulp bower
 
 cd ${TOP_LEVEL}
 
-npm install & NPM_INSTALL=$!
+npm install --only=prod & NPM_INSTALL=$!
 ${BOWER_PATH}/bower install & BOWER_INSTALL=$!
 
 wait ${NPM_INSTALL}
