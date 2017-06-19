@@ -18,7 +18,7 @@
     '../test/e2e/tests/acceptance/log-stream.spec.js'
   ];
 
-  var skipPlugin = require('../test/e2e/po/skip-plugin.js');
+  var skipPlugin = require('../components/app-core/frontend/test/e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
   var path = require('path');
   var reporterPath = path.resolve(__dirname, '..', 'out/e2e-failures');
@@ -46,11 +46,12 @@
       all: '../test/e2e/tests/**/*.spec.js',
       localhost: '../test/e2e/tests/localhost/**/*.spec.js',
       other: '../test/e2e/tests/other/**/*.spec.js',
-      acceptance: acceptanceTests
+      acceptance: acceptanceTests,
+      components: ''
     },
 
     // Default suite to run
-    suite: 'acceptance',
+    suite: 'components',
 
     framework: 'jasmine2',
 
