@@ -13,7 +13,7 @@
       <span translate ng-if="form['deploy-manifest-form'].appMemory.$error.min">Memory must be higher than 0</span>
     </span>
   <div class="input-group">
-    <input type="number" min="1" name="appMemory" class="form-control" ng-model="step.userInput.manifest.memory"
+    <input type="number" min="1" name="appMemory" class="form-control" ng-model="step.userInput.manifest.mbMemory"
            required/>
     <label class="input-group-addon rm-background" translate>MB</label>
   </div>
@@ -26,19 +26,38 @@
       <span translate ng-if="form['deploy-manifest-form'].diskQuota.$error.min">Disk Quota must be higher than 0</span>
     </span>
   <div class="input-group">
-    <input type="number" min="1" name="diskQuota" class="form-control" ng-model="step.userInput.manifest.diskQuota"
+    <input type="number" min="1" name="diskQuota" class="form-control" ng-model="step.userInput.manifest.mbDiskQuota"
            required/>
     <label class="input-group-addon rm-background" translate>MB</label>
   </div>
 </div>
-
-<div class="form-group">
-  TODO: Convert this to github url
-  <label class="control-label" required translate>Build Pack</label>
-  <search-box
-    ng-model="step.userInput.manifest.buildPack"
-    input-options="step.data.buildPacks"
-    placeholder="{{'Select build pack' | translate}}"
-    required>
-  </search-box>
+<div class="form-group" focusable-input ng-class="{'has-error': form['deploy-manifest-form'].instances.$invalid}">
+  <label class="control-label" translate>Instances</label>
+  <span class="control-message">
+      <span translate ng-if="form['deploy-manifest-form'].instances.$error.required">Instances is required</span>
+      <span translate ng-if="form['deploy-manifest-form'].instances.$error.min">Instances must be higher than 0</span>
+    </span>
+  <div class="input-group">
+    <input type="number" min="1" name="instances" class="form-control" ng-model="step.userInput.manifest.instances"
+           required/>
+    <label class="input-group-addon rm-background" translate>MB</label>
+  </div>
+</div>
+<div class="form-group" focusable-input ng-class="{'has-error': form['deploy-manifest-form'].route.$invalid}">
+  <label class="control-label" translate>Route</label>
+  <span class="control-message">
+      <span translate ng-if="form['deploy-manifest-form'].route.$error.required">Route is required</span>
+    </span>
+  <div class="input-group">
+    <input type="text" name="diskQuota" class="form-control" ng-model="step.userInput.manifest.route" required/>
+  </div>
+</div>
+<div class="form-group" focusable-input ng-class="{'has-error': form['deploy-manifest-form'].buildpack.$invalid}">
+  <label class="control-label" translate>Build Pack Github URL</label>
+  <span class="control-message">
+      <span translate ng-if="form['deploy-manifest-form'].buildpack.$error.required">Build pack is required</span>
+    </span>
+  <div class="input-group">
+    <input type="text" name="diskQuota" class="form-control" ng-model="step.userInput.manifest.buildpack" required/>
+  </div>
 </div>

@@ -30,28 +30,16 @@
    * @memberof cloud-foundry.view.applications.application
    * @name DeployLocationController
    * @constructor
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.appEventService} appEventService - the Event management service
-   * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} $scope - Angular $scope
-   * @param {object} $q - Angular $q service
-   * @param {object} $translate - Angular $translate service
-   * @property {boolean} addingApplication - flag for adding app
-   * @property {object} userInput - user's input about new application
-   * @property {object} options - workflow options
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {object} cfUtilsService - Utilities for cloud foundries
    */
   function DeployLocationController($scope, modelManager, cfOrganizationModel, cfUtilsService) {
 
     var vm = this;
 
-
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    // var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    // var routeModel = modelManager.retrieve('cloud-foundry.model.route');
-    // var privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
-    // var sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     init();
@@ -87,17 +75,7 @@
         }
       });
 
-      // vm.stopWatchSpace = $scope.$watch(function () {
-      //   return vm.space;
-      // }, function (space) {
-      //   if (space) {
-      //     getAppsForSpace(space.metadata.guid);
-      //   }
-      // });
-
     }
-
-    // var cnsiGuid = vm.serviceInstance.guid;
 
     /**
      * @function getOrganizations
@@ -168,7 +146,6 @@
           }
         });
     }
-
 
   }
 

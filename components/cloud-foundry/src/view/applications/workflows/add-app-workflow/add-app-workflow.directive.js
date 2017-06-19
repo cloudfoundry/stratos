@@ -31,7 +31,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appEventService} appEventService - the Event management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
-   * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {object} cfUtilsService - utilities for cloud foundry
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $translate - Angular $translate service

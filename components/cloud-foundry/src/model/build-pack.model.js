@@ -37,7 +37,6 @@
      * @memberof cloud-foundry.model.route
      * @description lists all apps for the route and store the response in the model
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {string} guid - route identifier
      * @param {object=} params - optional parameters
      * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
      * containing ALL results will be returned. This could mean more than one http request is made.

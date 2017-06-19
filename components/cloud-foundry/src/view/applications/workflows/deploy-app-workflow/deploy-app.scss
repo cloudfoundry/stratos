@@ -16,4 +16,10 @@
   .rm-background{
     background-color: transparent;
   }
+
+  cf-log-viewer {
+    .panel-heading.action-header {
+      background-color: $console-primary-bg;
+    }
+  }
 }
