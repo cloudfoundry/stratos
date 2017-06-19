@@ -16,11 +16,14 @@ $seconday-nav-background-color: #fff !default;
 $seconday-nav-hover-color: #ccc !default;
 $secondary-nav-underline-size: 4px;
 $secondary-nav-bottom-border-color: darken($page-header-bg, 10%) !default;
+$secondary-nav-active-color: $brand-primary !default;
 
 $navbar-toggle-button-width: $page-header-height !default;
 $navbar-bottom-border-color: $page-header-bg !default;
 $navbar-primary-bottom-border-color: lighten($main-nav-background-color, 10%) !default;
 $user-menu-hover-color: $brand-primary !default;
+
+@import "navigation/navigation";
 
 nav.secondary-nav {
   color: $page-header-fg;

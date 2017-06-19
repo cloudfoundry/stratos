@@ -1,0 +1,18 @@
+<ul class="secondary-navbar-nav">
+  <li ng-repeat="menuItem in navCtrl.navigationModel.secondary"
+      ng-if="!menuItem.hidden"
+      ng-class="{ 'active': navCtrl.navigationModel.menu.absoluteState === menuItem.baseState }">
+    <a class="navtab" id="navbar-item-{{menuItem.name}}" ng-if="menuItem.href" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">
+      <div class="navtab-inner">
+        <app-icon ng-if="menuItem.icon" icon="{{ menuItem.icon }}"></app-icon>
+        <span translate>{{ menuItem.text || menuItem.name }}</span>
+      </div>
+    </a>
+    <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.onClick" ng-click="menuItem.onClick()">
+      <div class="navtab-inner">
+        <app-icon ng-if="menuItem.icon" icon="{{ menuItem.icon }}"></app-icon>
+        <span translate>{{ menuItem.text || menuItem.name }}</span>
+      </div>
+    </a>
+  </li>
+</ul>
