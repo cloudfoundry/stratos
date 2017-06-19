@@ -42,6 +42,9 @@
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
+    vm.getOrganizations = getOrganizations;
+    vm.getSpacesForOrganization = getSpacesForOrganization;
+
     init();
 
     function init() {

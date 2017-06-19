@@ -40,6 +40,11 @@
       $scope.testDismiss = function () {};
       $scope.testClose = function () {};
 
+      var organizations = mock.cloudFoundryAPI.Organizations.ListAllOrganizations(123).response['200'].body.resources;
+      cfOrganizationModel.listAllOrganizations = function () {
+        return $q.resolve(organizations);
+      };
+
       var markup = '<add-app-workflow close-dialog="testClose" dismiss-dialog="testDismiss"></add-app-workflow>';
       var element = angular.element(markup);
       $compile(element)($scope);
@@ -59,32 +64,6 @@
 
     describe('- after init', function () {
       beforeEach(function () {
-      });
-
-      it('should watch userInput.serviceInstance', function () {
-        that.options.domains = [{
-          value: 'my-domain'
-        }];
-        that.getDomains = getResolved;
-        spyOn(that, 'getOrganizations');
-        spyOn(that, 'getDomains').and.callThrough();
-        that.userInput.serviceInstance = {};
-        $scope.$apply();
-        expect(that.getOrganizations).toHaveBeenCalled();
-        expect(that.getDomains).toHaveBeenCalled();
-        expect(that.userInput.domain).toBe(that.options.domains[0].value);
-      });
-
-      it('should watch userInput.organization', function () {
-        spyOn(that, 'getSpacesForOrganization');
-        that.userInput.organization = {
-          metadata: {
-            guid: 'organization-guid'
-          }
-        };
-        $scope.$apply();
-        expect(that.userInput.space).toBe(null);
-        expect(that.getSpacesForOrganization).toHaveBeenCalledWith('organization-guid');
       });
 
       it('should watch userInput.space', function () {
@@ -162,15 +141,14 @@
             serviceInstanceModel.list = function () {
               return $q.resolve(mockData);
             };
-            spyOn(that, 'getOrganizations');
             that.getDomains = getResolved;
             spyOn(that, 'getDomains').and.callThrough();
             spyOn(serviceInstanceModel, 'list').and.callThrough();
+            _.set(authModel, 'principal.undefined.userSummary.spaces.all', []);
             that.userInput.serviceInstance = {};
             step.onEnter();
             $scope.$apply();
 
-            expect(that.getOrganizations).toHaveBeenCalled();
             expect(that.getDomains).toHaveBeenCalled();
             expect(serviceInstanceModel.list).toHaveBeenCalled();
             expect(that.options.serviceInstances.length).toBe(1);
@@ -180,6 +158,7 @@
           it('onEnter - when that.options.userInput.serviceInstance is null', function () {
             stopWatch();
             simulateUserInput();
+            _.set(authModel, 'principal.undefined.userSummary.spaces.all', []);
             that.options.userInput.serviceInstance = null;
             appModel.filterParams = { cnsiGuid: 'no all' };
 
@@ -206,6 +185,7 @@
           it('onNext - creating application failed', function () {
             stopWatch();
             simulateUserInput();
+            _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
             spyOn(that, 'validateNewRoute').and.returnValue($q.resolve());
             spyOn(that, 'createApp').and.returnValue($q.reject()); // <== here
             var p = step.onNext();
@@ -218,6 +198,7 @@
             var services = mock.cloudFoundryAPI.Spaces.ListAllServiceInstancesForSpace(123).response[200].body.resources;
             stopWatch();
             simulateUserInput();
+            _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
             spyOn(that, 'validateNewRoute').and.returnValue($q.resolve());
             spyOn(that, 'createApp').and.returnValue($q.resolve());
             spyOn(spaceModel, 'listAllServicesForSpace').and.returnValue($q.resolve(services));
@@ -232,7 +213,10 @@
 
         it('createApp', function () {
           simulateWatch();
-
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
+          spaceModel.listAllAppsForSpace = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
+          };
           var newAppSpec = {
             name: that.userInput.name,
             space_guid: that.userInput.space.metadata.guid
@@ -249,12 +233,15 @@
           expect(appModel.getAppSummary).toHaveBeenCalled();
           expect(routeModel.createRoute).toHaveBeenCalled();
           expect(routeModel.associateAppWithRoute).toHaveBeenCalled();
-          expect(that.getOrganizations).toHaveBeenCalled();
           expect(that.getDomains).toHaveBeenCalled();
         });
 
         it('#validateNewRoute - route already exists', function () {
           simulateWatch();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
+          spaceModel.listAllAppsForSpace = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
+          };
           routeModel.checkRouteExists = function () {
             return $q.resolve({
             });
@@ -271,6 +258,10 @@
 
         it('#validateNewRoute - valid route', function () {
           simulateWatch();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
+          spaceModel.listAllAppsForSpace = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
+          };
           routeModel.checkRouteExists = function () {
             return $q.reject({
               status: 404
@@ -287,6 +278,10 @@
         });
 
         it('#validateNewRoute - failed on checking', function () {
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
+          spaceModel.listAllAppsForSpace = function () {
+            return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
+          };
           simulateWatch();
           routeModel.checkRouteExists = function () {
             return $q.reject({
@@ -302,110 +297,10 @@
           expect(p.$$state.value).toBe(gettext('There was a problem validating your route. Please try again or contact your administrator if the problem persists.'));
         });
 
-        describe('#getOrganizations', function () {
-          var organizations;
-
-          beforeEach(function () {
-            organizations = mock.cloudFoundryAPI.Organizations.ListAllOrganizations(123).response['200'].body.resources;
-            cfOrganizationModel.listAllOrganizations = function () {
-              return $q.resolve(organizations);
-            };
-            that.getDomains = getResolved;
-            spyOn(cfOrganizationModel, 'listAllOrganizations').and.callThrough();
-            spyOn(that, 'getDomains').and.callThrough();
-            stopWatch();
-            simulateUserInput();
-          });
-
-          it('#getOrganizations - is admin', function () {
-            authModel.isAdmin = function () { return true; };
-            expect(that.options.organizations.length).toBe(0);
-            var p = that.getOrganizations();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.organizations.length).toBe(1);
-            expect(that.options.organizations[0].label).toBe(organizations[0].entity.name);
-          });
-
-          it('#getOrganizations - is not admin', function () {
-            authModel.isAdmin = function () { return false; };
-            authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
-            expect(that.options.organizations.length).toBe(0);
-            var p = that.getOrganizations();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.organizations.length).toBe(0);
-          });
-
-          it('#getOrganizations - no organizations', function () {
-            cfOrganizationModel.listAllOrganizations = function () {
-              return $q.resolve([]); // empty array, no organizations
-            };
-            appModel.filterParams.orgGuid = 'not all';
-            authModel.isAdmin = function () { return true; };
-            expect(that.options.organizations.length).toBe(0);
-            var p = that.getOrganizations();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.organizations.length).toBe(0);
-            expect(that.options.userInput.organization).toBeUndefined();
-          });
-        });
-
-        describe('#getSpacesForOrganization', function () {
-          var spaces;
-
-          beforeEach(function () {
-            spaces = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(123).response['200'].body.resources;
-            cfOrganizationModel.listAllSpacesForOrganization = function () {
-              return $q.resolve(spaces);
-            };
-            that.getDomains = getResolved;
-            spyOn(cfOrganizationModel, 'listAllSpacesForOrganization').and.callThrough();
-            spyOn(that, 'getDomains').and.callThrough();
-            stopWatch();
-            simulateUserInput();
-            that.userInput.space = null;
-          });
-
-          it('#getSpacesForOrganization - is admin', function () {
-            authModel.isAdmin = function () { return true; };
-            expect(that.options.spaces.length).toBe(0);
-            var p = that.getSpacesForOrganization();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.spaces.length).toBe(1);
-            expect(that.options.spaces[0].label).toBe(spaces[0].entity.name);
-          });
-
-          it('#getSpacesForOrganization - is not admin', function () {
-            authModel.isAdmin = function () { return false; };
-            authModel.principal = { cnsiGuid_123: { userSummary: { spaces: { all: [] } } } };
-            expect(that.options.spaces.length).toBe(0);
-            var p = that.getSpacesForOrganization();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.spaces.length).toBe(0);
-          });
-
-          it('#getSpacesForOrganization - no space', function () {
-            cfOrganizationModel.listAllSpacesForOrganization = function () {
-              return $q.resolve([]); // empty array, no spaces
-            };
-            appModel.filterParams.spaceGuid = 'not all';
-            authModel.isAdmin = function () { return true; };
-            expect(that.options.spaces.length).toBe(0);
-            var p = that.getSpacesForOrganization();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.options.spaces.length).toBe(0);
-            expect(that.options.userInput.space).toBeUndefined();
-          });
-        });
-
         it('#getAppsForSpace', function () {
           stopWatch();
           simulateUserInput();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
           spaceModel.listAllAppsForSpace = function () {
             return $q.resolve(mock.cloudFoundryAPI.Spaces.ListAllAppsForSpace(123).response['200'].body.guid.resources);
           };
@@ -430,6 +325,7 @@
         it('#getPrivateDomains', function () {
           stopWatch();
           simulateUserInput();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
           privateDomainModel.listAllPrivateDomains = function () {
             return $q.resolve(mock.cloudFoundryAPI.PrivateDomains.ListAllPrivateDomains().response['200'].body.resources);
           };
@@ -443,6 +339,7 @@
         it('#getSharedDomains', function () {
           stopWatch();
           simulateUserInput();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
           sharedDomainModel.listAllSharedDomains = function () {
             return $q.resolve(mock.cloudFoundryAPI.SharedDomains.ListAllSharedDomains().response['200'].body.resources);
           };
@@ -456,6 +353,7 @@
         it('#notify - has application created', function () {
           stopWatch();
           simulateUserInput();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
           that.userInput.application = { summary: { guid: 'appGuid' } };
           var stateValue;
           appEventService.$on(appEventService.events.REDIRECT, function (event, state) {
@@ -468,6 +366,7 @@
         it('#notify - has no created', function () {
           stopWatch();
           simulateUserInput();
+          _.set(authModel, 'principal.cnsiGuid_123.userSummary.spaces.all', []);
           var stateValue;
           appEventService.$on(appEventService.events.REDIRECT, function (event, state) {
             stateValue = state;
@@ -503,7 +402,6 @@
 
     function stopWatch() {
       that.stopWatchServiceInstance();
-      that.stopWatchOrganization();
       that.stopWatchSpace();
     }
 
@@ -528,10 +426,6 @@
         return $q.resolve({
         });
       };
-      that.getOrganizations = function () {
-        return $q.resolve({
-        });
-      };
       that.getDomains = function () {
         return $q.resolve({
         });
@@ -540,7 +434,6 @@
       spyOn(appModel, 'getAppSummary').and.callThrough();
       spyOn(routeModel, 'createRoute').and.callThrough();
       spyOn(routeModel, 'associateAppWithRoute').and.callThrough();
-      spyOn(that, 'getOrganizations').and.callThrough();
       spyOn(that, 'getDomains').and.callThrough();
 
       simulateUserInput();
