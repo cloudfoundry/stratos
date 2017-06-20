@@ -33,10 +33,12 @@
    */
   function NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log) {
     var menu = new Menu($log);
+    var bottomMenu = new Menu($log);
 
     var navModel = {
       menu: menu,
       secondary: [],
+      bottomMenu: bottomMenu,
       secondaryMenus: {},
       getSecondaryMenu: getSecondaryMenu,
       clearSecondary: clearSecondary,
@@ -116,6 +118,7 @@
 
     function reset() {
       menu.reset();
+      bottomMenu.reset();
       navModel.secondary = {};
     }
 

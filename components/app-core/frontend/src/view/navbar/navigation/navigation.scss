@@ -1,3 +1,8 @@
+$bottom-nav-height: $page-header-height !default;
+$bottom-nav-bg-color: darken($main-nav-background-color, 5%);
+
+$bottom-nav-item-height: 32px;
+
 secondary-nav {
   display: flex;
 
@@ -28,4 +33,137 @@ secondary-nav {
       }
     }
   }
+}
+
+bottom-nav {
+  height: $bottom-nav-height;
+  background-color: $bottom-nav-bg-color;
+  flex: 0 0 $bottom-nav-height;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: $main-nav-width;
+
+  > div {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    color: #fff;
+
+    .bottom-nav-copyright {
+      flex: 1 1 0;
+      padding-left: 12px;
+      font-size: 12px;
+    }
+
+    .bottom-nav-menu {
+      flex: 0 0 $bottom-nav-item-height;
+      text-align: center;
+
+      i {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .bottom-nav-menu.open {
+    .bottom-nav-menu-icon {
+      i {
+        color: $user-menu-hover-color;
+      }
+    }
+  }
+
+  ul.bottom-nav-menu-list.dropdown-menu {
+    position: fixed;
+    bottom: $bottom-nav-height;
+    left: 0;
+    width: $main-nav-width;
+    transform: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    
+    > li {
+      margin: 0;
+      padding: 0;
+      height: $bottom-nav-item-height;
+
+      > nav-item > a {
+        height: $bottom-nav-item-height;
+        background-color: $bottom-nav-bg-color;
+        color: #fff;
+        
+        &:hover {
+          text-decoration: none;
+          border: 0;
+          padding: 0;
+          background-color: $navbar-hover-bg;
+        }
+      }
+
+    }
+  }
+
+  .bottom-nav-menu-icon {
+    cursor: pointer;
+    user-select: none;
+  }
+}
+
+.navbar-icons-only {
+  bottom-nav {
+    width: $main-nav-icons-width;
+
+    .bottom-nav-copyright {
+      display: none;
+    }
+
+    > div {
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 479px) {
+
+  navbar nav.secondary-nav .user-avatar {
+    margin-right: $bottom-nav-item-height;
+    padding-right: 0;
+  }
+
+  .navbar-icons-only bottom-nav {
+    width: $bottom-nav-item-height;
+  }
+
+  bottom-nav {
+    top: 0;
+    right: 0;
+    z-index: 1040;
+    left: initial;
+    background-color: #fff;
+    color: #000;
+    width: $bottom-nav-item-height;
+
+    .bottom-nav-copyright {
+      display: none;
+    }
+
+    .bottom-nav-menu .bottom-nav-menu-icon i {
+      color: #000;
+    }
+
+    ul.bottom-nav-menu-list.dropdown-menu {
+
+    left: inherit;
+    right: 0;
+    top: $page-header-height;
+    height: initial;
+    bottom: initial;
+    border-left: 1px solid $secondary-nav-background-color;
+    border-bottom: 1px solid $secondary-nav-background-color;
+    }
+  }
+
 }
