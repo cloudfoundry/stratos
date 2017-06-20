@@ -13,6 +13,8 @@
     logout: logout,
 
     toggleNavBar: toggleNavBar,
+    waitForNavBarToggle: waitForToggleNavBar,
+
     isIconsOnly: isIconsOnly,
     setLabelsShown: setLabelsShown
 
@@ -43,8 +45,17 @@
       });
   }
 
+  function toggleNavBarElement() {
+    return element(by.css('.navbar-toggle-width > i'));
+  }
+
+  function waitForToggleNavBar() {
+    var until = protractor.ExpectedConditions;
+    browser.wait(until.presenceOf(toggleNavBarElement()), 15000);
+  }
+
   function toggleNavBar() {
-    return element(by.css('.navbar-toggle-width > i')).click();
+    return toggleNavBarElement().click();
   }
 
   function isIconsOnly() {

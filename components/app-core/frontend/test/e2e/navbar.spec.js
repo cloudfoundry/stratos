@@ -17,6 +17,10 @@
       browser.driver.wait(setupPromise);
     });
 
+    beforeEach(function () {
+      navBar.waitForNavBarToggle();
+    });
+
     afterEach(function () {
       navBar.setLabelsShown();
     });
