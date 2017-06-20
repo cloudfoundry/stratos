@@ -20,7 +20,7 @@
     });
   }
 
-  function BuildPacksController($stateParams, $translate, modelManager) {
+  function BuildPacksController($stateParams, modelManager) {
     var vm = this;
     vm.guid = $stateParams.guid;
     vm.users = [];
