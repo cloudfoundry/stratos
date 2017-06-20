@@ -12,7 +12,7 @@
       // Load the browser and navigate to app wall
       helpers.setBrowserNormal();
       var setupPromise = helpers.loadApp().then(function () {
-        return loginPage.loginAsNonAdmin();
+        return loginPage.loginAsAdmin();
       });
       browser.driver.wait(setupPromise);
     });
