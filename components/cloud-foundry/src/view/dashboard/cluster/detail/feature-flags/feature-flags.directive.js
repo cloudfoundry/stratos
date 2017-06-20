@@ -28,13 +28,13 @@
     vm.featureFlagsModel = modelManager.retrieve('cloud-foundry.model.featureFlags');
 
     // The feature flags metadata will normally have been loaded already
-    vm.flags = vm.featureFlagsModel.featureFlagsByCnsi[vm.guid];
+    vm.flags = _.sortBy(vm.featureFlagsModel.featureFlagsByCnsi[vm.guid], 'name');
     addDescription();
     vm.error = false;
     vm.stateInitialised = !!vm.flags;
 
     vm.featureFlagsModel.fetch(vm.guid).then(function (flags) {
-      vm.flags = flags;
+      vm.flags = _.sortBy(flags, 'name');
       addDescription();
     }).catch(function () {
       vm.flags = [];
