@@ -11,9 +11,10 @@
     beforeEach(function () {
       // Load the browser and navigate to app wall
       helpers.setBrowserNormal();
-      helpers.loadApp();
-      // Log in as a standard non-admin user
-      loginPage.loginAsNonAdmin();
+      var setupPromise = helpers.loadApp().then(function () {
+        return loginPage.loginAsNonAdmin();
+      });
+      browser.driver.wait(setupPromise);
     });
 
     afterEach(function () {
@@ -25,7 +26,6 @@
     });
 
     it('Should show labels by default', function () {
-      browser.driver.sleep(5000);
       expect(navBar.isIconsOnly()).toBe(false);
     });
 
