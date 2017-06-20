@@ -1,5 +1,6 @@
 {
   "frontend": {
+    "base": "frontend",
     "root": "plugins/cloud-foundry"
   }
 }

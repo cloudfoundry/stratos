@@ -5,7 +5,7 @@
   "moduleType": [],
   "homepage": "",
   "main": [
-    "src/framework.scss"
+    "frontend/src/framework.scss"
   ],
   "ignore": [
     "**/.*"
