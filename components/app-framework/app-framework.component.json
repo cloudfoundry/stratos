@@ -1,6 +1,7 @@
 {
   "frontend": {
     "root": "framework",
+    "base": "frontend",
     "dependencies": {
       "angular": {
         "jquery": "*"

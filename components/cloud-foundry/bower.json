@@ -5,7 +5,7 @@
   "moduleType": [],
   "homepage": "",
   "main": [
-    "src/cloud-foundry.scss"
+    "frontend/src/cloud-foundry.scss"
   ],
   "ignore": [
     ".*"
