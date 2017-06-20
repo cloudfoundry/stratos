@@ -22,10 +22,8 @@ docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-pushd $GOPATH/src/github.com/SUSE/stratos-ui/
-./deploy/build_portal_proxy.sh
+./build_portal_proxy.sh
 ret=$?
-popd
 
 if [ ${ret} -eq 0 ]; then
     # nginx also restarts the proxy

@@ -61,8 +61,13 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 		CloudFoundry: p.Config.CloudFoundryInfo,
 	}
 	// initialize the Endpoints maps
-	for _, endpoint := range p.EndpointPlugins {
-		s.Endpoints[endpoint.GetType()] = make(map[string]*Endpoint)
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
+		}
+		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*Endpoint)
 	}
 	// get the CNSI Endpoints
 	cnsiList, _ := p.buildCNSIList(c)

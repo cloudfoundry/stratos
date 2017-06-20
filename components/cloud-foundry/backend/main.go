@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+	"errors"
 )
 
 type CloudFoundrySpecification struct {
@@ -23,8 +24,20 @@ const (
 	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
-func Init(portalProxy interfaces.PortalProxy) (interfaces.EndpointPlugin, error) {
+func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &CloudFoundrySpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
+}
+
+func (c CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+	return c, nil
+}
+
+func (c CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error){
+	return c, nil
+}
+
+func (c CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+	return nil, errors.New("Not implemented!")
 }
 
 func (c CloudFoundrySpecification) GetType() string {
@@ -42,6 +55,11 @@ func (c CloudFoundrySpecification) GetClientId() string {
 func (c CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	log.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
+}
+
+func (c CloudFoundrySpecification) Init() error {
+	// No-op
+	return nil
 }
 
 func (c CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {

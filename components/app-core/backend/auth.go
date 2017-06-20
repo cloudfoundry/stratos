@@ -91,7 +91,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
+		log.Error(msg + " - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -230,10 +230,11 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 }
 
 func (p *portalProxy) GetClientId(cnsiType string) (string, error) {
-	if endpoint, ok := p.EndpointPlugins[cnsiType]; ok {
-		return endpoint.GetClientId(), nil
+	plugin, err := p.GetEndpointTypeSpec(cnsiType)
+	if err != nil {
+		return "", errors.New("Endpoint type not registered")
 	}
-	return "", errors.New("Endpoint type not registered")
+	return plugin.GetClientId(), nil
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
@@ -489,7 +490,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
+		log.Error(msg + " - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))

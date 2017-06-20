@@ -24,6 +24,4 @@ type PortalProxy interface {
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 
 	GetConfig() *PortalConfig
-
-
 }

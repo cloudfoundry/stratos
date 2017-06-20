@@ -11,11 +11,6 @@ import (
 
 type pluginType string
 
-const (
-	EndpointPlugin pluginType = "endpoint"
-	GeneralPlugin  pluginType = "general"
-)
-
 type pluginDef struct {
 	LibraryPath string     `json:"libraryPath"`
 	PluginPath  string     `json:"pluginPath"`
@@ -35,8 +30,7 @@ func (pp *portalProxy) loadPlugins() {
 
 	json.Unmarshal(pluginsDef, &loadedPlugins)
 
-	pp.EndpointPlugins = make(map[string]interfaces.EndpointPlugin)
-	pp.GeneralPlugins = make(map[string]interfaces.GeneralPlugin)
+	pp.Plugins = make(map[string]interfaces.StratosPlugin)
 
 	for _, loadedPlugin := range loadedPlugins {
 		p, err := plugin.Open(loadedPlugin.LibraryPath)
@@ -49,17 +43,8 @@ func (pp *portalProxy) loadPlugins() {
 			log.Warnf("Plugin %s does not implement `Init` function. Skipping loading of this plugin", loadedPlugin.PluginName)
 			continue
 		}
-		if loadedPlugin.PluginType == EndpointPlugin {
-			initialisedEndpoint, _ := init.(func(interfaces.PortalProxy) (interfaces.EndpointPlugin, error))(pp)
-			pp.EndpointPlugins[initialisedEndpoint.GetType()] = initialisedEndpoint
-			log.Infof("Loaded plugin: %+v", loadedPlugin)
-
-		}
-		if loadedPlugin.PluginType == GeneralPlugin {
-			generalPlugin, _ := init.(func(interfaces.PortalProxy) (interfaces.GeneralPlugin, error))(pp)
-			pp.GeneralPlugins[loadedPlugin.PluginName] = generalPlugin
-			log.Infof("Loaded plugin: %+v", loadedPlugin)
-
-		}
+		plugin, _ := init.(func(interfaces.PortalProxy) (interfaces.StratosPlugin, error))(pp)
+		pp.Plugins[loadedPlugin.PluginName] = plugin
+		log.Infof("Loaded plugin: %+v", loadedPlugin)
 	}
 }
