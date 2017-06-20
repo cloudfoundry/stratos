@@ -1,7 +1,8 @@
 @import 'organization-tile/organization-tile',
 'actions/cluster-actions',
 'actions/create-space',
-'firehose/cluster-detail.firehose';
+'firehose/cluster-detail.firehose',
+'feature-flags/feature-flags';
 
 .cluster-detail {
 
