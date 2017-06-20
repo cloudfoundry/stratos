@@ -12,8 +12,8 @@
     loginAsNonAdmin: loginAsNonAdmin,
     loginButton: loginButton,
     loginFormFields: loginFormFields,
-    loginPanel: loginPanel
-
+    loginPanel: loginPanel,
+    waitForLogin: waitForLogin
   };
 
   function loginPanel() {
@@ -22,6 +22,11 @@
 
   function loginFormFields() {
     return helpers.getFormFields('loginForm');
+  }
+
+  function waitForLogin() {
+    var until = protractor.ExpectedConditions;
+    browser.wait(until.presenceOf(loginButton()), 5000);
   }
 
   function loginButton() {
