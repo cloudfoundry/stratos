@@ -23,7 +23,7 @@
   };
 
   var testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
-    organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, appSetupPromise, testHceCluster;
+    organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace, testHceCluster;
   var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : undefined;
 
   function getSearchBoxes() {
@@ -194,10 +194,7 @@
   }
 
   function appSetup() {
-    // Lazyily initialize the promise
-    if (!appSetupPromise) {
-      appSetupPromise = createAppSetupPromise();
-    }
+    var appSetupPromise = createAppSetupPromise();
 
     // Ensure we don't continue until everything is set up
     return browser.driver.wait(appSetupPromise).then(function () {

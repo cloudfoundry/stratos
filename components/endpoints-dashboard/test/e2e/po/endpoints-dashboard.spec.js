@@ -2,17 +2,19 @@
   'use strict';
 
   var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
-  //TODO: FIX ME
-  var cfHelpers = require('../../../../cloud-foundry/test/e2e/po/helpers.po');
   var resetTo = require('../../../../app-core/frontend/test/e2e/po/resets.po');
   var loginPage = require('../../../../app-core/frontend/test/e2e/po/login-page.po');
   var endpointsPage = require('./endpoints/endpoints-dashboard.po.js');
   var registerEndpoint = require('./endpoints/register-endpoint.po.js');
-  var applications = require('../../po/applications/applications.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
   var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
   var confModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
   var _ = require('lodash');
+
+  // These are pretty tied into the tests. The dashboard will need to know about specific endpoints to determine
+  // behaviour on log in, out, etc. These could, if a problem, be split out into the cf app if this becomes a problem
+  var cfHelpers = require('../../../../cloud-foundry/test/e2e/po/helpers.po');
+  var applications = require('../../../../cloud-foundry/test/e2e/po/applications/applications.po');
 
   describe('Endpoints Dashboard', function () {
 
@@ -124,15 +126,31 @@
               endpointsRows.each(function (element, index) {
                 if (index % 2 === 0) {
                   // Row is an endpoint
-                  var service;
+                  var service, serviceType;
                   // Find the name and run type dependent tests
                   endpointsPage.endpointName(index).then(function (name) {
                     name = name.toLowerCase();
-                    service = _.find(cfHelpers.getCfs(), function (cf) {
-                      if (cf.register.cnsi_name === name) {
-                        return cf;
+                    var cnsisConfig = helpers.getCNSIs();
+
+                    for (var type in cnsisConfig) {
+                      if (!cnsisConfig.hasOwnProperty(type)) { continue; }
+                      var cnsis = cnsisConfig[type];
+                      service = _.find(cnsis, function (cnsi) {
+                        if (cnsi.register.cnsi_name === name) {
+                          return cnsi;
+                        }
+                      });
+                      if (service) {
+                        serviceType = type;
+                        break;
                       }
-                    });
+                    }
+
+                    // service = _.find(helpers.getCNSIs(), function (cf) {
+                    //   if (cf.register.cnsi_name === name) {
+                    //     return cf;
+                    //   }
+                    // });
                     // if (!service) {
                     //   service = _.find(helpers.getHces(), function (hce) {
                     //     if (hce.register.cnsi_name === name) {
@@ -142,10 +160,10 @@
                     // }
                     if (service) {
                       // 1) we show the correct type
-                      // if (name === 'hce') {
-                      //   expect(endpointsPage.endpointType(index)).toBe('Code Engine');
-                      // } else
-                      if (name === 'cf') {
+                      if (serviceType === 'hce') {
+                        expect(endpointsPage.endpointType(index)).toBe('Code Engine');
+                      } else
+                      if (serviceType === 'cf') {
                         expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
                       // 3) the address is correct
@@ -206,7 +224,7 @@
           });
 
           describe('Form', function () {
-            var service = cfHelpers.getCfs().cf1;
+            var service = helpers.getRegisteredService();
 
             beforeEach(function () {
               endpointsPage.headerRegister()
@@ -402,7 +420,7 @@
           });
 
           it('Successfully unregister', function () {
-            var toDelete = cfHelpers.getCfs().cf1.register.cnsi_name;
+            var toDelete = helpers.getRegisteredService().register.cnsi_name;
             var actionMenuElement, cfRowIndex;
             endpointsPage.getRowWithEndpointName(toDelete)
               .then(function (index) {
@@ -457,7 +475,7 @@
           });
 
           it('unregister is not visible', function () {
-            endpointsPage.getRowWithEndpointName(cfHelpers.getCfs().cf1.register.cnsi_name)
+            endpointsPage.getRowWithEndpointName(helpers.getRegisteredService().register.cnsi_name)
               .then(function (cfRowIndex) {
                 expect(cfRowIndex).toBeDefined();
                 var actionMenuElement = endpointsPage.endpointActionMenu(cfRowIndex);
@@ -470,7 +488,7 @@
       });
 
       describe('Connect/Disconnect endpoints', function () {
-        var cf = cfHelpers.getCfs().cf1;
+        var cf = helpers.getRegisteredService();
         var cfRowIndex;
         beforeAll(function (done) {
           resetToLoggedIn(resetTo.resetAllCnsi, false)
@@ -481,7 +499,7 @@
             })
             .then(function () {
               // Find the CF row to test on
-              return endpointsPage.getRowWithEndpointName(cfHelpers.getCfs().cf1.register.cnsi_name);
+              return endpointsPage.getRowWithEndpointName(helpers.getRegisteredService().register.cnsi_name);
             })
             .then(function (index) {
               expect(index).toBeDefined();
@@ -594,7 +612,7 @@
             .then(function (isEndpoints) {
               expect(isEndpoints).toBe(true);
               expect(endpointsPage.getEndpointTable().isDisplayed()).toBeTruthy();
-              return endpointsPage.getRowWithEndpointName(cfHelpers.getCfs().cf1.register.cnsi_name);
+              return endpointsPage.getRowWithEndpointName(helpers.getRegisteredService().register.cnsi_name);
             })
             .then(function (cfRowIndex) {
               expect(cfRowIndex).toBeDefined();

@@ -206,7 +206,7 @@
    * @param {object} req - the request
    */
   function resetUserServiceInstances() {
-    throw 'deprecated (contacts old endpoint, needs updating';
+    throw 'deprecated (contacts old endpoint, needs updating)';
 
     // return new Promise(function (resolve, reject) {
     //   removeUserServiceInstances(req).then(function () {
@@ -232,7 +232,7 @@
    * @param {object} req - the request
    */
   function removeUserServiceInstances() {
-    throw 'deprecated (contacts old endpoint, needs updating';
+    throw 'deprecated (contacts old endpoint, needs updating)';
 
     // return new Promise(function (resolve, reject) {
     //   var data = '';
@@ -267,7 +267,7 @@
    * @description Set user registered state
    */
   function setUser() {
-    throw 'deprecated (contacts old endpoint, needs updating';
+    throw 'deprecated (contacts old endpoint, needs updating)';
 
     // return new Promise(function (resolve, reject) {
     //   var data = '';

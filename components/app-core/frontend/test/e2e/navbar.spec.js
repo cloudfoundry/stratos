@@ -4,18 +4,16 @@
 
   var helpers = require('./po/helpers.po');
   var navBar = require('./po/navbar.po');
-  //TODO: RC FIX ME
-  var appWallConfig500 = require('../../../../cloud-foundry/test/e2e/app-wall/500-apps.js');
-  var ngMockE2E = require('./po/ng-mock-e2e.po');
+  var loginPage = require('./po/login-page.po');
 
   describe('Application Navigation Bar', function () {
 
-    beforeAll(function () {
-      ngMockE2E.init();
-      // Configure HTTP responses for all wall with 500 apps
-      appWallConfig500(ngMockE2E.$httpBackend);
+    beforeEach(function () {
+      // Load the browser and navigate to app wall
       helpers.setBrowserNormal();
       helpers.loadApp();
+      // Log in as a standard non-admin user
+      loginPage.loginAsNonAdmin();
     });
 
     afterEach(function () {
@@ -24,7 +22,6 @@
 
     afterAll(function () {
       navBar.setLabelsShown();
-      ngMockE2E.unload();
     });
 
     it('Should show labels by default', function () {
@@ -42,7 +39,7 @@
       expect(navBar.isIconsOnly()).toBe(false);
       navBar.toggleNavBar();
       expect(navBar.isIconsOnly()).toBe(true);
-      helpers.loadApp();
+      helpers.loadApp(true);
       expect(navBar.isIconsOnly()).toBe(true);
     });
   });

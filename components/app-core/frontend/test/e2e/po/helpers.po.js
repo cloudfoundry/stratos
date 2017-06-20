@@ -60,6 +60,7 @@
     resetDate: resetDate,
 
     getCnsiForUrl: getCnsiForUrl,
+    getRegisteredService: getRegisteredService,
 
     hasClass: hasClass,
     isButtonEnabled: isButtonEnabled,
@@ -380,6 +381,10 @@
       }
     }
     return null;
+  }
+
+  function getRegisteredService() {
+    return getCNSIs().cf.cf1;
   }
 
   function hasClass(element, cls) {
