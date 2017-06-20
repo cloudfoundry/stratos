@@ -21,12 +21,12 @@ secondary-nav {
         text-decoration: none;
       }
 
-      .navtab-inner app-icon {
+      .nav-item-inner app-icon {
         display: flex;
       }
       
       &.active {
-        .navtab {
+        .nav-item {
           padding-top: $secondary-nav-underline-size;
           border-bottom: $secondary-nav-underline-size solid $secondary-nav-active-color;
         }      
