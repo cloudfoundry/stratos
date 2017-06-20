@@ -6,6 +6,8 @@
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
   var path = require('path');
   var reporterPath = path.resolve(__dirname, '..', 'out/e2e-failures');
+  var components = require('./components');
+  var _ = require('lodash');
 
   var reporter = new HtmlScreenshotReporter({
     dest: reporterPath,
@@ -158,4 +160,9 @@
       }
     }
   };
+
+  var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
+  exports.config.suites.components = _.map(componentTestFiles, function (glob) {
+    return '../' + glob;
+  });
 })();

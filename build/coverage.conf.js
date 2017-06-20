@@ -22,11 +22,6 @@
   exports.config.plugins = [{path: path.join(__dirname, 'waitPlugin.js')}];
   exports.config.params.port = 4000;
 
-  var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
-  exports.config.suites.components = _.map(componentTestFiles, function (glob) {
-    return '../' + glob;
-  });
-
   exports.config.onPrepare = function () {
     onPrepare();
 
