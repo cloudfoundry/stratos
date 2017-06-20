@@ -38,6 +38,16 @@ run:
             "username": "${CF_E2E_USER}",
             "password": "${CF_E2E_USER_PASSWORD}"
           }
+       },
+        "console": {
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
         },
         "githubPat": "${GITHUB_TOKEN}"
       }

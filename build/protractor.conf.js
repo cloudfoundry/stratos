@@ -70,14 +70,8 @@
       host: 'localhost',
       port: '3100',
       credentials: {
-        admin: {
-          username: 'admin',
-          password: 'hscadmin'
-        },
-        user: {
-          username: 'user',
-          password: 'hscuser'
-        }
+        admin: secrets.console.admin,
+        user: secrets.console.user
       },
       skipSSlValidation: true,
       caCert: '',
