@@ -1,0 +1,10 @@
+<gallery-card class="cluster-gallery-card stack-tile"
+              card-data="stackTileCtrl.cardData">
+  <dl class="dl-horizontal">
+    <dd class="stack-description">{{stackTileCtrl.stack.entity.description}}</dd>
+    <dt translate>cf.stacks.labels.created</dt>
+    <dd>{{stackTileCtrl.stack.metadata.created_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+    <dt translate>cf.stacks.labels.updated</dt>
+    <dd>{{stackTileCtrl.stack.metadata.updated_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+  </dl>
+</gallery-card>
