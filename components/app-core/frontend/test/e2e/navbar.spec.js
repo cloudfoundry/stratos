@@ -8,7 +8,7 @@
 
   describe('Application Navigation Bar', function () {
 
-    beforeEach(function () {
+    beforeAll(function () {
       // Load the browser and navigate to app wall
       helpers.setBrowserNormal();
       var setupPromise = helpers.loadApp().then(function () {
