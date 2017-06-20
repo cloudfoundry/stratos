@@ -42,12 +42,14 @@ $cluster-gallery-card-layout-steps: 5;
   @media (min-width: $i * $cluster-gallery-card-max-width) {
     .navbar-icons-only div.cluster-gallery-card-container div.cluster-gallery-card-parent {
       flex: 0 0 percentage(1/$i);
+      max-width: percentage(1/$i);
     }
   }
 
   @media (min-width: $main-nav-width + $i * $cluster-gallery-card-max-width) {
     .navbar-normal div.cluster-gallery-card-container div.cluster-gallery-card-parent {
       flex: 0 0 percentage(1/$i);
+      max-width: percentage(1/$i);
     }
   }
 }
