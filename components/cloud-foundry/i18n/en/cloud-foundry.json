@@ -23,6 +23,32 @@
         "title": "CLI Commands",
         "deploy-title": "Deploy Using CLI"
       }
+    },
+    "buildpacks": {
+      "buildpacks": "Build Packs",
+      "labels": {
+        "position": "Position",
+        "locked": "Locked",
+        "unlocked": "Unlocked",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "created": "created",
+        "updated": "updated",
+        "filename": "file name"
+      },
+      "error": "An error occurred retrieving buildpack metadata",
+      "empty": "There are no buildpacks available"
+    },
+    "stacks": {
+      "stacks": "Stacks",
+      "labels":{
+        "name": "Name",
+        "description": "Description",
+        "created": "Created",
+        "updated": "Updated"
+      },
+      "error": "An error occurred retrieving stacks metadata",
+      "empty": "There are no stacks available"
     }
   }
 }
