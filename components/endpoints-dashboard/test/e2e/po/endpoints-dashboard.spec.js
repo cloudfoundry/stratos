@@ -558,6 +558,7 @@
             // This would be better in the 'non admin' section, however it's easier to test here with a service registered
             // This removes the need to go through/test the endpoint dashboard registration process alongside this test
             navbar.logout();
+            loginPage.waitForLogin();
             loginPage.login(helpers.getAdminUser(), helpers.getAdminPassword());
 
             expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
@@ -565,6 +566,7 @@
 
           it('should go directly to applications view on logout and login', function () {
             navbar.logout();
+            loginPage.waitForLogin();
             loginPage.login(helpers.getUser(), helpers.getPassword());
 
             expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
@@ -575,6 +577,7 @@
         describe('endpoint `Disconnect`', function () {
           it('should update row in table when disconnected', function () {
             endpointsPage.goToEndpoints();
+            endpointsPage.waitForEndpointTable();
             endpointsPage.endpointDisconnectLink(cfRowIndex)
               .then(function (button) {
                 return button.click();

@@ -8,12 +8,17 @@
 
   describe('Application Navigation Bar', function () {
 
-    beforeEach(function () {
+    beforeAll(function () {
       // Load the browser and navigate to app wall
       helpers.setBrowserNormal();
-      helpers.loadApp();
-      // Log in as a standard non-admin user
-      loginPage.loginAsNonAdmin();
+      var setupPromise = helpers.loadApp().then(function () {
+        return loginPage.loginAsAdmin();
+      });
+      browser.driver.wait(setupPromise);
+    });
+
+    beforeEach(function () {
+      navBar.waitForNavBarToggle();
     });
 
     afterEach(function () {
@@ -25,7 +30,6 @@
     });
 
     it('Should show labels by default', function () {
-      browser.driver.sleep(5000);
       expect(navBar.isIconsOnly()).toBe(false);
     });
 
