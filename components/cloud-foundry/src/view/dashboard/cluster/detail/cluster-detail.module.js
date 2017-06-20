@@ -5,7 +5,8 @@
     .module('cloud-foundry.view.dashboard.cluster.detail', [
       'cloud-foundry.view.dashboard.cluster.detail.organizations',
       'cloud-foundry.view.dashboard.cluster.detail.users',
-      'cloud-foundry.view.dashboard.cluster.detail.firehose'
+      'cloud-foundry.view.dashboard.cluster.detail.firehose',
+      'cloud-foundry.view.dashboard.cluster.detail.stacks'
     ])
     .config(registerRoute);
 
