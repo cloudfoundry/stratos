@@ -58,7 +58,6 @@
 
     var args = ['build', '-buildmode=plugin', '-o', pluginName + '.so'];
     args = args.concat(goFiles);
-
     return spawnProcess('go', args, pluginPath, env);
   }
 

@@ -388,6 +388,7 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (interfaces.EndpointP
 		endpointPlugin, err := plugin.GetEndpointPlugin()
 		if err != nil {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
 		}
 		endpointType := endpointPlugin.GetType()
 
