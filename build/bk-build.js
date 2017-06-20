@@ -30,9 +30,10 @@
     } else {
 
       _.each(plugins.enabledPlugins, function (plugin) {
-        var pluginInfo = require(path.join('../components', plugin, 'backend', 'plugin.json'));
+        var pluginInfo = {};
         pluginInfo.libraryPath = plugin + '.so';
         pluginInfo.pluginPath = plugin;
+        pluginInfo.pluginName = plugin;
         enabledPlugins.push(pluginInfo);
       });
     }

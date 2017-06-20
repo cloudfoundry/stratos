@@ -9,13 +9,10 @@ import (
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
-type pluginType string
-
 type pluginDef struct {
 	LibraryPath string     `json:"libraryPath"`
 	PluginPath  string     `json:"pluginPath"`
 	PluginName  string     `json:"pluginName"`
-	PluginType  pluginType `json:"pluginType"`
 }
 
 func (pp *portalProxy) loadPlugins() {
