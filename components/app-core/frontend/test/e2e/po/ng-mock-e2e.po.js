@@ -1,3 +1,4 @@
+/* eslint-disable angular/di, angular/window-service, no-eval */
 (function () {
   'use strict';
 
@@ -133,4 +134,3 @@
   ngMockE2E.$httpBackend.whenPOST = _.partial(ngMockE2E.$httpBackend.when, 'POST');
 
 })();
-/* eslint-disable angular/di, angular/window-service, no-eval */

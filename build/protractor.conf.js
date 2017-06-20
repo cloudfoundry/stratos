@@ -2,22 +2,6 @@
 (function () {
   'use strict';
 
-  // // Maintain Order
-  // var acceptanceTests = [
-  //   '../test/e2e/tests/acceptance/login-page.spec.js',
-  //   '../test/e2e/tests/acceptance/endpoints-dashboard.spec.js',
-  //   '../test/e2e/tests/acceptance/endpoints-list-cf.spec.js',
-  //   '../test/e2e/tests/acceptance/endpoints-pat.spec.js',
-  //   '../test/e2e/tests/acceptance/applications.add-app.spec.js',
-  //   '../test/e2e/tests/acceptance/application.delivery-pipeline.spec.js',
-  //   '../test/e2e/tests/acceptance/application.spec.js',
-  //   '../test/e2e/tests/acceptance/application.delete-app.spec.js',
-  //   '../test/e2e/tests/acceptance/cf.organizations.spaces.spec.js',
-  //   '../test/e2e/tests/acceptance/application-wall.spec.js',
-  //   '../test/e2e/tests/acceptance/navbar.spec.js',
-  //   '../test/e2e/tests/acceptance/log-stream.spec.js'
-  // ];
-
   var skipPlugin = require('../components/app-core/frontend/test/e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
   var path = require('path');
