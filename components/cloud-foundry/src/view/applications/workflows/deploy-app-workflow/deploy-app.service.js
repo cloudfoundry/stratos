@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.list.deployApplication', [])
+    .module('cloud-foundry.view.applications.list.deployApplication', ['ab-base64'])
     .factory('appDeployAppService', DeployAppService)
     .controller('cloud-foundry.view.applications.list.deployAppController', DeployAppController);
 
@@ -38,18 +38,18 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function DeployAppController($scope, $q, $timeout, $uibModalInstance, $state, modelManager) {
+  function DeployAppController($scope, $q, $timeout, $uibModalInstance, $state, $location, $websocket, base64, modelManager) {
 
     var vm = this;
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    // var buildPacks = modelManager.retrieve('cloud-foundry.model.build-pack');
 
     vm.data = {
       serviceInstances: [],
-      buildPacks: [],
-      webSocketUrl: 'wss://invalid'
+      logFilter: logFilter
+      // buildPacks: [],
+      // webSocketUrl: 'wss://invalid'
     };
 
     vm.userInput = {
@@ -57,10 +57,11 @@
       organization: null,
       space: null,
       manifest: {
-        location: '/manifest.yml',
-        mbMemory: 1024,
-        mbDiskQuota: 1024,
-        instances: 1
+        location: '/manifest.yml'
+        //   ,
+        // mbMemory: 1024,
+        // mbDiskQuota: 1024,
+        // instances: 1
       }
     };
 
@@ -76,15 +77,14 @@
 
     var path = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
 
-    var allowBack = true;
-    // var deploying = false;
+    var newAppGuid;
 
     vm.options = {
       workflow: {
         allowJump: false,
         allowCancelAtLastStep: true,
         allowBack: function () {
-          return allowBack;
+          return false;
         },
         title: 'deploy-app-dialog.title',
         btnText: {
@@ -93,12 +93,14 @@
         },
         steps: [
           {
-            title: 'deploy-app-dialog.step1.title',
+            title: 'deploy-app-dialog.step-info.title',
             templateUrl: path + 'deploy-app-bits.html',
             formName: 'deploy-info-form',
             data: vm.data,
             userInput: vm.userInput,
-            showBusyOnEnter: 'deploy-app-dialog.step1.busy',
+            showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
+            nextBtnText: 'deploy-app-dialog.button-deploy',
+            stepCommit: true,
             allowNext: function () {
               return vm.userInput.file || vm.userInput.github;
             },
@@ -116,74 +118,66 @@
                     .value();
                   [].push.apply(vm.data.serviceInstances, validServiceInstances);
                 }).catch(function () {
-                  return $q.reject('deploy-app-dialog.step1.enter-failed');
+                  return $q.reject('deploy-app-dialog.step-info.enter-failed');
                 });
-            },
-            onNext: function () {
-              return $q.resolve();
-              // return submitBits();
             }
+            // ,
+            // onNext: function () {
+            //   return $q.resolve();
+            //   // return submitBits();
+            // }
           },
+          // {
+          //   title: 'deploy-app-dialog.step-manifest.title',
+          //   templateUrl: path + 'deploy-app-manifest.html',
+          //   formName: 'deploy-manifest-form',
+          //   data: vm.data,
+          //   userInput: vm.userInput,
+          //   nextBtnText: 'deploy-app-dialog.button-deploy',
+          //   stepCommit: true,
+          //   showBusyOnEnter: 'deploy-app-dialog.step-manifest.busy',
+          //   onEnter: function () {
+          //   // Note: Upload (zip file|github url), cf + org + space guids
+          //   // Note: Expect manifest data in response (vm.userInfo.manifest.x)
+          //     return submitBits().catch(function () {
+          //       return $q.reject('deploy-app-dialog.step-manifest.submit-failed');
+          //     });
+          //   },
+          //   onNext: function () {
+          //     // deploying = true;
+          //   }
+          // },
           {
-            title: 'deploy-app-dialog.step2.title',
-            templateUrl: path + 'deploy-app-manifest.html',
-            formName: 'deploy-manifest-form',
-            data: vm.data,
-            userInput: vm.userInput,
-            nextBtnText: 'deploy-app-dialog.step2.button-next',
-            stepCommit: true,
-            showBusyOnEnter: 'deploy-app-dialog.step2.busy',
-            onEnter: function () {
-              // Upload/Process bits here to allow the wizard 'busy' process to handle screen in progress content
-              // var fetchBuildPacksPromise = buildPacks.listAllBuildPacks(vm.userInput.serviceInstance.guid).then(function (response) {
-              //   [].push.apply(vm.data.buildPacks, _.map(response.resources, cfUtilsService.selectOptionMapping));
-              // });
-              // return $q.all(submitManifest());
-              return submitBits().catch(function () {
-                return $q.reject('deploy-app-dialog.step2.submit-failed');
-              });
-            },
-            onNext: function () {
-              // deploying = true;
-            }
-          },
-          {
-            title: 'deploy-app-dialog.step3.title',
+            title: 'deploy-app-dialog.step-deploying.title',
             templateUrl: path + 'deploy-app-log.html',
             data: vm.data,
             userInput: vm.userInput,
             cancelBtnText: 'buttons.close',
-            nextBtnText: 'deploy-app-dialog.step3.next-button',
-            showBusyOnEnter: 'deploy-app-dialog.step3.busy',
+            nextBtnText: 'deploy-app-dialog.step-deploying.next-button',
+            showBusyOnEnter: 'deploy-app-dialog.step-deploying.busy',
             allowNext: function () {
-              return true;
-              // return !deploying;
+              return newAppGuid;
             },
             onEnter: function () {
-              allowBack = false;
-              waitForDeploy();
-              return submitManifest().catch(function () {
+              return startDeploy().catch(function () {
                 //TODO: Is the user ALWAYS safe to retry this step?
-                return $q.reject('deploy-app-dialog.step3.submit-failed');
+                return $q.reject('deploy-app-dialog.step-deploying.submit-failed');
               });
-              // return waitForDeploy().then(function () {
-              //   //TODO: Automatically move to the next step
-              // });
+
+              // return submitManifest()
+              //   .then(function () {
+              //     // TODO: Expected newly created/current app guid in response
+              //     // TODO: Create log stream url from app guid (see uses of cfLogViewer)
+              //     newAppGuid = '1234';
+              //     vm.data.webSocketUrl = 'wss://1234';
+              //   })
+              //   .catch(function () {
+              //     //TODO: Is the user ALWAYS safe to retry this step?
+              //     return $q.reject('deploy-app-dialog.step-deploying.submit-failed');
+              //   });
             },
             isLastStep: true
           }
-          // ,
-          // {
-          //   title: 'deploy-app-dialog.step4.title',
-          //   templateUrl: path + 'deploy-app-result.html',
-          //   data: vm.data,
-          //   userInput: vm.userInput,
-          //   onNext: function () {
-          //     return $q.resolve();
-          //   },
-          //   nextBtnText: 'Close',
-          //   isLastStep: true
-          // }
         ]
       }
     };
@@ -196,42 +190,102 @@
 
       finish: function () {
         $uibModalInstance.close();
-        console.error('TODO: Must receive new app\'s guid from back end');
         $state.go('cf.applications.application.summary', {
           cnsiGuid: vm.userInput.serviceInstance.guid,
-          guid: '',
-          newlyCreated: 'true'
+          guid: newAppGuid,
+          newlyCreated: 'false'
         });
       }
     };
 
-    function submitBits() {
-      // TODO: Upload (zip file|github url), cf + org + space guids
-      // var fd = new FormData();
-      // fd.append("file", files[0]);
-      // $http.post(settings.apiBaseUri + "/files", fd,
+    var deployAppSocketMessage = {
+      START: 'x',
+      LOG: 'y'
+    };
 
-      // TODO: Expect manifest data in response (vm.userInfo.manifest.x)
-      // TODO: Handle errors
-      return $timeout(function () {
-        console.log('bits sent and processed');
-      }, 2000);
+    var coloredLog = appUtilsService.coloredLog;
+    function logFilter(messageObj) {
+      if (messageObj.type !== deployAppSocketMessage.LOG) {
+        return '';
+      }
+
+      messageObj = {
+        message: base64.encode('hello world'),
+        timestamp: 1498064230908392507,
+        type: 3
+      };
+
+      //TODO: event is either for log (convert to something the cf-log-viewer filter works with OR for this service. Ignore the latter (handled above)
+      // CF timestamps are in nanoseconds
+      var msStamp = Math.round(messageObj.timestamp / 1000000);
+
+      return moment(msStamp).format('HH:mm:ss.SSS') + ': ' + coloredLog(base64.decode(messageObj.message)) + '\n';
     }
 
-    function submitManifest() {
-      // TODO: Expect web socker url in response (vm.userInfo.webSockerUrl)
-      return $timeout(function () {
-        console.log('manifest sent and deploy started');
-      }, 2000);
+    function startDeploy() {
+      var mockRequest = $q.resolve();
+      var mockDeployStarted;
+      return mockRequest
+        .then(function () {
+          var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
+          var mockWebSocketUrl = protocol + '://' + $location.host() + ':' + $location.port() + '/pp/v1/' +
+            '84ac2b65-3a9a-495f-ab5f-8d74a9b1cd9c' + '/apps/' + '54f684bd-1922-4796-b274-99e6da204974' + '/stream';
+
+          vm.data.webSocket = $websocket(mockWebSocketUrl, null, {
+            reconnectIfNotNormalClose: false
+          });
+          vm.data.webSocket.onMessage(function (message) {
+            var messageObj = angular.fromJson(message.data);
+            if (messageObj.type === deployAppSocketMessage.LOG) {
+              return;
+            }
+            //TODO:
+          }, {autoApply: true});
+
+          mockDeployStarted = $timeout(_.noop, 2000);
+        })
+        .then(function () {
+          // TODO: Start listening to log events/pass through to log viewer
+
+          // TODO: Start listening to app guid events
+          var appGuidPromise = $timeout(_.noop, 5000);
+          appGuidPromise.then(function () {
+            newAppGuid = '1234';
+          });
+
+          return mockDeployStarted;
+        });
     }
 
-    function waitForDeploy() {
-      // TODO: Watch socket for success deploy event
-      $timeout(function () {
-        // deploying = false;
-      }, 5000);
-      return $q.resolve();
-    }
+    // TODO: JUNK
+    // function submitBits() {
+    //   // TODO: Upload (zip file|github url), cf + org + space guids
+    //   // var fd = new FormData();
+    //   // fd.append("file", files[0]);
+    //   // $http.post(settings.apiBaseUri + "/files", fd,
+    //
+    //   // TODO: Expect manifest data in response (vm.userInfo.manifest.x)
+    //   console.error('TODO: Must receive new app\'s guid from back end');
+    //   // TODO: Handle errors
+    //   return $timeout(function () {
+    //     console.log('bits sent and processed');
+    //   }, 2000);
+    // }
+
+    // function submitManifest() {
+    //   return $timeout(function () {
+    //
+    //     console.log('manifest sent and deploy started');
+    //   }, 2000);
+    // }
+    //
+    // function waitForDeploy() {
+    //   // TODO: Watch socket for success deploy event
+    //   $timeout(function () {
+    //     // deploying = false;
+    //   }, 5000);
+    //   return $q.resolve();
+    // }
 
   }
 

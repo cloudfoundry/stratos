@@ -56,22 +56,23 @@
   },
   "deploy-app-dialog": {
     "title": "Deploy Application",
-    "step1": {
+    "button-deploy": "Deploy",
+    "step-info": {
       "title": "Information",
       "busy": "Updating Cloud Foundry Data",
       "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
     },
-    "step2": {
+    "step-manifest": {
       "title": "Manifest",
       "button-next": "Deploy",
       "busy": "Processing application files and extracting manifest data",
       "submit-failed": "Failed to submit information. Please try again. If this error persists, please contact the Administrator."
     },
-    "step3": {
+    "step-deploying": {
       "title": "Deploying",
-      "busy": "Submitting manifest and starting deployment",
+      "busy": "Starting deployment",
       "next-button": "App Summary",
-      "submit-failed": "Failed to submit manifest. Please try again. If this error persists, please contact the Administrator."
+      "submit-failed": "Failed to start deployment. Please try again. If this error persists, please contact the Administrator."
     }
   }
 }

@@ -10,7 +10,9 @@
       bindToController: true,
       templateUrl: 'plugins/cloud-foundry/view/applications/application/log-stream/cf-log-viewer.html',
       scope: {
-        webSocketUrl: '='
+        webSocketUrl: '=?',
+        webSocket: '=?',
+        filter: '=?'
       },
       controller: CfLogViewerController,
       controllerAs: 'cfLogViewer',
@@ -31,8 +33,6 @@
 
     var coloredLog = appUtilsService.coloredLog;
 
-    // vm.model = modelManager.retrieve('cloud-foundry.model.application');
-
     vm.autoScrollOn = true; // auto-scroll by default
 
     vm.jsonFilter = jsonFilter;
@@ -40,6 +40,13 @@
     function jsonFilter(jsonString) {
       try {
         var messageObj = angular.fromJson(jsonString);
+        if (!messageObj) {
+          return;
+        }
+        if (vm.filter) {
+          return vm.filter(messageObj);
+        }
+
         var msgColour, sourceColour, bold;
 
         // CF timestamps are in nanoseconds
