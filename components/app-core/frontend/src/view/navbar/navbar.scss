@@ -12,15 +12,18 @@ $navbar-active-fg: $white !default;
 $navbar-active-bg: #737373 !default;
 $navbar-text-color: $white !default;
 
-$seconday-nav-background-color: #fff !default;
-$seconday-nav-hover-color: #ccc !default;
+$secondary-nav-background-color: #fff !default;
+$secondary-nav-hover-color: #ccc !default;
 $secondary-nav-underline-size: 4px;
 $secondary-nav-bottom-border-color: darken($page-header-bg, 10%) !default;
+$secondary-nav-active-color: $brand-primary !default;
 
 $navbar-toggle-button-width: $page-header-height !default;
 $navbar-bottom-border-color: $page-header-bg !default;
 $navbar-primary-bottom-border-color: lighten($main-nav-background-color, 10%) !default;
 $user-menu-hover-color: $brand-primary !default;
+
+@import "navigation/navigation";
 
 nav.secondary-nav {
   color: $page-header-fg;
@@ -84,7 +87,7 @@ nav.secondary-nav {
   }
 }
 
-.navtab {
+.nav-item {
   white-space: nowrap;
   vertical-align: middle;
   margin: auto;
@@ -95,10 +98,10 @@ nav.secondary-nav {
   &:hover {
     cursor: pointer;
     padding-top: $secondary-nav-underline-size;
-    border-bottom: $secondary-nav-underline-size solid $seconday-nav-hover-color;
+    border-bottom: $secondary-nav-underline-size solid $secondary-nav-hover-color;
   }
 
-  > div.navtab-inner {
+  > div.nav-item-inner {
     display: flex;
     align-items: center;
     padding: 0 $console-unit-space * 0.5;
@@ -112,10 +115,14 @@ nav.secondary-nav {
       overflow-x: hidden;
       text-overflow: ellipsis;
     }
+
+    app-icon {
+      display: flex;
+    }
   }
 }
 
-.dropdown.open .navtab {
+.dropdown.open .nav-item {
     padding-top: $secondary-nav-underline-size;
     border-bottom: $secondary-nav-underline-size solid $page-header-active-fg;
 }
@@ -128,10 +135,17 @@ nav.secondary-nav {
   height: 100%;
   background-color: $main-nav-background-color;
   z-index: auto;
-  display: block;
+  display: flex;
   overflow: hidden;
   position: fixed;
   top: 0;
+  flex-direction: column;
+
+  .navbar-menu {
+    //height: 100%;
+    flex: 1 1 0;
+    height: auto;
+  }
 
   &.navbar-hidden {
     display: none;

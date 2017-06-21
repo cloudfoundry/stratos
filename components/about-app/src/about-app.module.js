@@ -44,7 +44,7 @@
     });
 
     function onLoggedIn() {
-      var menu = modelManager.retrieve('app.model.navigation').menu;
+      var menu = modelManager.retrieve('app.model.navigation').bottomMenu;
       menu.addMenuItem('about-app', 'about-app', 'menu.about', 99, 'help_outline');
     }
   }
