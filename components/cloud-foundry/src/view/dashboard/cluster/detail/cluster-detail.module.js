@@ -6,7 +6,7 @@
       'cloud-foundry.view.dashboard.cluster.detail.organizations',
       'cloud-foundry.view.dashboard.cluster.detail.users',
       'cloud-foundry.view.dashboard.cluster.detail.firehose',
-      'cloud-foundry.view.dashboard.cluster.detail.featureFlags'
+      'cloud-foundry.view.dashboard.cluster.detail.featureFlags',
       'cloud-foundry.view.dashboard.cluster.detail.buildPacks',
       'cloud-foundry.view.dashboard.cluster.detail.stacks'
     ])
