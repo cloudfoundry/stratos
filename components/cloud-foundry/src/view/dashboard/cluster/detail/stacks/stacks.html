@@ -5,8 +5,8 @@
 <div ng-if="clusterDetailController.organizations === false" class="cluster-loading col-md-9 col-sm-12">
   <div translate>cf.stacks.error</div>
 </div>
-<div class="cluster-gallery-card-container" ng-if="clusterDetailController.organizations">
-  <div ng-if="clusterDetailController.organizations.length < 1"
+<div class="cluster-gallery-card-container" ng-if="stacksCtrl.stacks">
+  <div ng-if="stacksCtrl.stacks.length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>cf.stacks.empty</div>
   </div>
