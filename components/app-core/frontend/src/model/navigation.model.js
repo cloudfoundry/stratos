@@ -33,8 +33,21 @@
    */
   function NavigationModel(appEventService, appLoggedInService, $state, $rootScope, $log) {
     var menu = new Menu($log);
+    var bottomMenu = new Menu($log);
+
+    var navModel = {
+      menu: menu,
+      secondary: [],
+      bottomMenu: bottomMenu,
+      secondaryMenus: {},
+      getSecondaryMenu: getSecondaryMenu,
+      clearSecondary: clearSecondary,
+      createSecondaryMenu: createSecondaryMenu
+    };
+
     appEventService.$on(appEventService.events.LOGIN, function () {
       onLogin();
+      updateSecondaryNav();
     });
     appEventService.$on(appEventService.events.LOGOUT, function () {
       onLogout();
@@ -51,6 +64,11 @@
     $rootScope.$on('$stateChangeSuccess', function (event, toState) { // eslint-disable-line angular/on-watch
       // Activate the correct menu entry or deactivate all menu entries if none match
       menu.currentState = _.get(toState, 'data.activeMenuState', '');
+      // The full state name
+      menu.absoluteState = toState.name;
+      menu.secondaryMenuState = _.get(toState, 'data.secondaryMenuState', '');
+
+      updateSecondaryNav();
 
       // Scroll to the console-view's top after a state transition
       var consoleViewScrollPanel = angular.element(document).find('#console-view-scroll-panel');
@@ -60,9 +78,49 @@
       appLoggedInService.userInteracted();
     });
 
-    return {
-      menu: menu
-    };
+    return navModel;
+
+    function updateSecondaryNav() {
+      if (menu.secondaryMenuState) {
+        if (navModel.secondaryMenus[menu.secondaryMenuState]) {
+          navModel.secondary = navModel.secondaryMenus[menu.secondaryMenuState];
+        } else {
+          navModel.secondary = [];
+        }
+      } else {
+        navModel.secondary = [];
+      }
+    }
+
+    function createSecondaryMenu(stateName) {
+      if (!stateName) {
+        stateName = $state.current.name;
+      }
+      var newMenu = getSecondaryMenu(stateName);
+      newMenu.reset();
+
+      // Check if we are creating the secondary nav for the currently active state
+      updateSecondaryNav();
+      return newMenu;
+    }
+
+    function clearSecondary() {
+      navModel.secondary = new Menu($log);
+      return navModel.secondary;
+    }
+
+    function getSecondaryMenu(stateName) {
+      if (!navModel.secondaryMenus[stateName]) {
+        navModel.secondaryMenus[stateName] = new Menu($log);
+      }
+      return navModel.secondaryMenus[stateName];
+    }
+
+    function reset() {
+      menu.reset();
+      bottomMenu.reset();
+      navModel.secondary = {};
+    }
 
     /**
      * @function onLogin
@@ -71,7 +129,7 @@
      * @private
      */
     function onLogin() {
-      menu.reset();
+      reset();
     }
 
     /**
@@ -81,7 +139,7 @@
      * @private
      */
     function onLogout() {
-      menu.reset();
+      reset();
     }
 
     /**
@@ -202,9 +260,11 @@
         that.push(item);
       });
 
-      item.svgIcon = item.icon.indexOf('svg://') === 0;
-      if (item.svgIcon) {
-        item.icon = 'svg/' + item.icon.substr(6);
+      if (item.icon) {
+        item.svgIcon = item.icon.indexOf('svg://') === 0;
+        if (item.svgIcon) {
+          item.icon = 'svg/' + item.icon.substr(6);
+        }
       }
       return item;
     },
