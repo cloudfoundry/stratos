@@ -1,0 +1,35 @@
+status-indicator {
+  display: block;
+
+  .console-status-indicator {
+    > * {
+      vertical-align: middle;
+    }
+
+    i {
+      font-size: 16px;
+      margin-right: 2px;
+
+      &.console-status-enabled {
+        color: $status-okay;
+      }
+
+      &.console-status-disabled {
+        color: $status-critical;
+      }
+
+      &.console-status-normal {
+        color: $text-color;
+      }
+      
+    }
+  }
+
+  &.status-indicator-large {
+    .console-status-indicator {
+      i {
+        font-size: 24px;
+      }
+    }
+  }
+}
