@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,6 +31,7 @@ import (
 	"code.cloudfoundry.org/cli/cf/trace"
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/words/generator"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -39,6 +40,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
 )
+
+type MessageType string
 
 const (
 	// Time allowed to read the next pong message from the peer
@@ -50,7 +53,11 @@ const (
 	// Time allowed to write a ping message
 	pingWriteTimeout = 10 * time.Second
 
-	projectUrlKey = "STRATOS_PROJECT_URL"
+	stratosProjectKey = "STRATOS_PROJECT"
+
+	DATA MessageType = "data"
+	CLOSE = "close"
+	MANIFEST = "manifest"
 )
 
 type ManifestResponse struct {
@@ -68,6 +75,13 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type StratosProject struct {
+	Url        string      `json:"url"`
+	CommitHash string      `json:"commit"`
+	Branch     string      `json:"branch"`
+	Timestamp  int64      `json:"timestamp"`
+}
+
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Info("Deploying app")
 
@@ -82,23 +96,22 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
 	projectUrl := fmt.Sprintf("https://github.com/%s", project)
-	clonePath, err := cloneRepository(projectUrl, branch)
+	clonePath, commitHash, err := cloneRepository(projectUrl, branch)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to clone repository %s", project))
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to download project",
+			"Failed to clone repository %s", err)
 	}
 
 	log.Infof("Cloned repository")
-	manifest, err := fetchManifest(clonePath, projectUrl)
+	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to fetch manifest in repository %s", project))
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to read manifest",
+			"Failed to fetch manifest in repository %s", err)
 	}
-
-	manifestBytes, err := json.Marshal(manifest)
-	if err != nil {
-		return err
-	}
-	manifestJson := string(manifestBytes)
-	log.Infof("Fetched Manifest: %s", manifestJson)
 
 	clientWebSocket, pingTicker, err := upgradeToWebSocket(echoContext)
 	if err != nil {
@@ -109,20 +122,14 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	defer pingTicker.Stop()
 	log.Infof("WebSocket upgraded!")
 
-	// TODO uncomment when UI is ready
-	//clientWebSocket.WriteMessage(websocket.TextMessage, manifestBytes)
-	//for {
-	//	messageType, messageBody, err := clientWebSocket.ReadMessage()
-	//	if err != nil {
-	//		log.Warnf("Failed to read websocket message. Error was %+v", err)
-	//		return err
-	//	}
-	//	if messageType == websocket.TextMessage {
-	//		manifestJson = string(messageBody)
-	//		break
-	//	}
-	//}
+	err = sendManifest(manifest, clientWebSocket)
+	if err != nil {
+		log.Warnf("Failed to read or send manifest due to %s", err)
+		sendErrorMessage(clientWebSocket, err)
+		return err
+	}
 
+	// Initialise push command
 	commandsloader.Load()
 
 	socketWriter := &SocketWriter{
@@ -133,6 +140,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Warnf("Error %+v", err)
 	if err != nil {
 		log.Warnf("Failed to initialise config repo due to error %+v", err)
+		sendErrorMessage(clientWebSocket, err)
 		return err
 	}
 
@@ -146,14 +154,31 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	err = cfAppPush.flagContext.Parse("-p", clonePath, "-f", clonePath + "/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
+		sendErrorMessage(clientWebSocket, err)
+		return err
 	}
 
 	err = cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
+		sendErrorMessage(clientWebSocket, err)
+		return err
 	}
 
+	closingMessage, _ := getMarshalledSocketMessage("Completed successfully!", CLOSE)
+	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
 	return nil
+}
+
+func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, error) {
+
+	messageStruct := SocketMessage{
+		Message:   string(data),
+		Timestamp: time.Now().Unix(),
+		Type:      messageType,
+	}
+	marshalledJson, err := json.Marshal(messageStruct)
+	return marshalledJson, err
 
 }
 
@@ -290,13 +315,13 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	return repo, nil
 }
 
-func cloneRepository(repoUrl string, branch string) (string, error) {
+func cloneRepository(repoUrl string, branch string) (string, string, error) {
 
 	dir, err := ioutil.TempDir("", "git-clone-")
 	fmt.Printf("Directory is: %s", dir)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	repo, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:               repoUrl,
@@ -305,26 +330,34 @@ func cloneRepository(repoUrl string, branch string) (string, error) {
 
 	if err != nil {
 		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
-		return "", err
+		return "", "", err
 	}
 
-	if branch != "" {
+	branchRef := fmt.Sprintf("refs/remotes/origin/%s", branch)
+	log.Infof("Will checkout branch %s", branchRef)
+	if branchRef != "" {
 		workTree, err := repo.Worktree()
 		checkoutOpts := &git.CheckoutOptions{
-			Branch: plumbing.ReferenceName(branch),
+			Branch: plumbing.ReferenceName(branchRef),
 		}
 		err = workTree.Checkout(checkoutOpts)
 		if err != nil {
-			log.Infof("Failed to checkout %s branch in repo %s due to %+v", branch, repoUrl, err)
-			return "", err
+			log.Infof("Failed to checkout %s branch in repo %s, %s due to %+v", branch, repoUrl, branchRef, err)
+			return "", "", err
 		}
 	}
 
-	return dir, nil
+	head, err := repo.Head()
+	if err != nil {
+		log.Infof("Unable to fetch HEAD in branch due to %s", err)
+		return "", "", err
+	}
+
+	return dir, head.Hash().String(), nil
 }
 
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, projectUrl string) (manifest.Applications, error) {
+func fetchManifest(repoPath string, projectUrl string, commitHash string, branch string) (manifest.Applications, error) {
 
 	var manifest manifest.Applications
 	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
@@ -344,7 +377,16 @@ func fetchManifest(repoPath string, projectUrl string) (manifest.Applications, e
 		if len(app.Env) == 0 {
 			app.Env = make(map[string]interface{})
 		}
-		app.Env[projectUrlKey] = projectUrl
+
+		stratosProject := StratosProject{
+			Url: projectUrl,
+			CommitHash: commitHash,
+			Branch: branch,
+			Timestamp: time.Now().Unix(),
+		}
+
+		marshalledJson, _ := json.Marshal(stratosProject)
+		app.Env[stratosProjectKey] = string(marshalledJson)
 		manifest.Applications[i] = app
 	}
 
@@ -359,26 +401,38 @@ func fetchManifest(repoPath string, projectUrl string) (manifest.Applications, e
 }
 
 type SocketMessage struct {
-	Message   string    `json:"message"`
-	Timestamp int64     `json:"timestamp"`
+	Message   string      `json:"message"`
+	Timestamp int64       `json:"timestamp"`
+	Type      MessageType `json:"type"`
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
 
-	messageStruct := SocketMessage{
-		Message: string(data),
-		Timestamp: time.Now().Unix(),
-	}
+	message, _ := getMarshalledSocketMessage(string(data), DATA)
 
-	marshalledJson, err := json.Marshal(messageStruct)
-	if err != nil {
-		log.Warnf("Marshalling of message failed!")
-		return 0, err
-	}
-
-	err = sw.clientWebSocket.WriteMessage(websocket.TextMessage, marshalledJson)
+	err := sw.clientWebSocket.WriteMessage(websocket.TextMessage, message)
 	if err != nil {
 		return 0, err
 	}
 	return len(data), nil
+}
+
+func sendManifest(manifest manifest.Applications, clientWebSocket *websocket.Conn) error {
+
+	manifestBytes, err := json.Marshal(manifest)
+	if err != nil {
+		return err
+	}
+	manifestJson := string(manifestBytes)
+	log.Infof("Fetched Manifest: %s", manifestJson)
+
+	message, _ := getMarshalledSocketMessage(manifestJson, MANIFEST)
+
+	clientWebSocket.WriteMessage(websocket.TextMessage, message)
+	return nil
+}
+
+func sendErrorMessage(clientWebSocket *websocket.Conn, err error) {
+	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), CLOSE)
+	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
 }
