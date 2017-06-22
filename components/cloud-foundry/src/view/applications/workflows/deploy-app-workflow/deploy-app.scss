@@ -17,6 +17,19 @@
     background-color: transparent;
   }
 
+  .deploy-app-log-status {
+    display: flex;
+    align-items: center;
+    padding-bottom: $console-unit-space;
+    & > span {
+      font-size: $font-size-medium;
+      padding-right: $console-unit-space;
+    }
+    bounce-spinner {
+      margin-top: 6px;
+    }
+  }
+
   cf-log-viewer {
     .panel-heading.action-header {
       background-color: $console-primary-bg;

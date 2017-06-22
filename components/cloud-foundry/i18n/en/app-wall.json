@@ -72,7 +72,7 @@
       "title": "Deploying",
       "busy": "Starting deployment",
       "next-button": "App Summary",
-      "submit-failed": "Failed to start deployment. Please try again. If this error persists, please contact the Administrator."
+      "submit-failed": "Failed to start deployment. Please try again. If this error persists, please contact the Administrator. Reason: {{reason}}"
     }
   }
 }

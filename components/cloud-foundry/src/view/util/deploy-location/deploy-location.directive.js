@@ -20,7 +20,7 @@
       scope: {
         serviceInstances: '=',
         serviceInstance: '=?',
-        organisation: '=?',
+        organization: '=?',
         space: '=?'
       }
     };
@@ -84,7 +84,7 @@
      * @function getOrganizations
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description get organizations
-     * @returns {promise} A resolved/rejected promise
+     * @returns {object} A resolved/rejected promise
      */
     function getOrganizations() {
       var cnsiGuid = vm.serviceInstance.guid;
@@ -123,7 +123,7 @@
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description get spaces for organization
      * @param {string} guid - the organization GUID
-     * @returns {promise} A resolved/rejected promise
+     * @returns {object} A resolved/rejected promise
      */
     function getSpacesForOrganization(guid) {
       var cnsiGuid = vm.serviceInstance.guid;

@@ -5,31 +5,44 @@
   space="step.userInput.space"
 ></deploy-location>
 
-<div class="" file-drop="step.userInput.file">
-  <p class="control-title" translate>Application Bits</p>
-  <p translate>
-    You can upload a zip file containing your application by either selecting the file below or by dragging and dropping
-    it onto this area. Alternatively provide a github URL in the box below.
-  </p>
-  <div>
-    <input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"></input>
-    <label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>
-  </div>
-  <br>
-  <div class="form-group form-group-large">
-    <label class="control-label" translate>Application File</label>
-    <input type="text" class="form-control" ng-value="step.userInput.file.name" readonly/>
-  </div>
-  <div class="form-group form-group-large" focusable-input>
-    <label class="control-label" translate>Github url</label>
-    <input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>
-  </div>
-  <p class="control-title" translate>For existing apps, if the relative path to your manifest.yml is not in the root
-    please supply it below. For example </p><code>/path/to/manifest/manifest.yml</code>
-  <div class="form-group form-group-large" focusable-input>
-    <label class="control-label" translate>Path to manifest</label>
-    <input type="text" class="form-control" ng-model="step.userInput.manifest.location"
-           placeholder="{{'Relative path of manifest to root of app directory' | translate}}"
-           required/>
-  </div>
+<!--<div class="" file-drop="step.userInput.file">-->
+  <!--<p class="control-title" translate>Application Bits</p>-->
+  <!--<p translate>-->
+    <!--You can upload a zip file containing your application by either selecting the file below or by dragging and dropping-->
+    <!--it onto this area. Alternatively provide a github URL in the box below.-->
+  <!--</p>-->
+  <!--<div>-->
+    <!--<input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"/>-->
+    <!--<label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>-->
+  <!--</div>-->
+  <!--<br>-->
+  <!--<div class="form-group form-group-large">-->
+    <!--<label class="control-label" translate>Application File</label>-->
+    <!--<input type="text" class="form-control" ng-value="step.userInput.file.name" readonly/>-->
+  <!--</div>-->
+  <!--<div class="form-group form-group-large" focusable-input>-->
+    <!--<label class="control-label" translate>Github url</label>-->
+    <!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
+  <!--</div>-->
+<!--</div>-->
+<p class="control-title" translate>Public Github</p>
+<div class="form-group form-group-large" focusable-input>
+  <label class="control-label" translate>Project</label>
+  <input type="text" class="form-control" ng-model="step.userInput.githubProject" required
+         placeholder="{{'suse/stratos-ui' | translate}}"
+  />
+</div>
+<div class="form-group form-group-large" focusable-input>
+  <label class="control-label" translate>Project Branch</label>
+  <input type="text" class="form-control" ng-model="step.userInput.githubBranch"/>
+</div>
+
+<p class="control-title" translate>Manifest</p>
+<p class="" translate>For existing apps, if the relative path to your manifest.yml is not in the root
+  please supply it below.</p>
+<div class="form-group form-group-large" focusable-input>
+  <label class="control-label" translate>Path to manifest</label>
+  <input type="text" class="form-control" ng-model="step.userInput.manifest.location"
+         placeholder="{{'Relative path of manifest to root of app directory' | translate}}"
+         required/>
 </div>
