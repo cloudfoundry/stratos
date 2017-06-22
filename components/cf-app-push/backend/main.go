@@ -1,18 +1,12 @@
 package main
 
 import (
-	"os"
-	"io/ioutil"
-	"gopkg.in/src-d/go-git.v4"
-	log "github.com/Sirupsen/logrus"
+	"errors"
+
 	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/flags"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"code.cloudfoundry.org/cli/cf/commandregistry"
-	"code.cloudfoundry.org/cli/cf/commandsloader"
-	"code.cloudfoundry.org/cli/cf/trace"
 	"github.com/labstack/echo"
-	"errors"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 type CFAppPush struct {
@@ -45,10 +39,8 @@ func (cfAppPush *CFAppPush) AddAdminGroupRoutes(echoGroup *echo.Group) {
 
 func (cfAppPush *CFAppPush) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Deploy Endpoint
-	echoGroup.POST("/:cnsiGuid/deploy", cfAppPush.deploy)
+	echoGroup.GET("/:cnsiGuid/:orgGuid/:spaceGuid/deploy", cfAppPush.deploy)
 }
-
-
 
 func (cfAppPush *CFAppPush) Init() error {
 	cfAppPush.pushCommand = &application.Push{}
@@ -57,57 +49,16 @@ func (cfAppPush *CFAppPush) Init() error {
 	return nil
 }
 
-func (cfAppPush *CFAppPush) Push(path string) error {
-	log.Printf("Pushing app")
-
-	commandsloader.Load()
-	deps := commandregistry.NewDependency(os.Stdout, trace.NewLogger(os.Stdout, true), os.Getenv("CF_DIAL_TIMEOUT"))
-
-	//deps.UI = nil
-	defer deps.Config.Close()
-	cfAppPush.pushCommand.SetDependency(deps, false)
-
-	// Set path
-
-	{
-		err := cfAppPush.flagContext.Parse("-p", path, "-f", path + "/manifest.yml")
-		if err != nil {
-			log.Printf("Failed to parse due to: %+v", err)
-		}
-	}
-	err := cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
-	if err != nil {
-		log.Printf("Failed to execute due to: %+v", err)
-	}
-	return nil
-}
-
-func (cfAppPush *CFAppPush) cloneRepo(url string) (string, error) {
-
-	dir, err := ioutil.TempDir("", "git-clone-")
-	if err != nil {
-		return "", err
-	}
-	_, err = git.PlainClone(dir, false, &git.CloneOptions{
-		URL:               url,
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-	});
-	return dir, err
-}
-//
 //func main() {
 //
-//  cfAppPush := Init()
-//  cfAppPush.Init()
-//  //cfAppPush.Execute("/workspace/gopath/src/github.com/irfanhabib/go-env/")
+//	cfApp := &CFAppPush{portalProxy: nil}
+//	cfApp.Init()
+//	manifest, err := cfApp.deps.ManifestRepo.ReadManifest("/workspace/gopath/src/github.com/irfanhabib/go-env/manifest.yml")
 //
-//  path := "https://github.com/irfanhabib/go-env"
-//  commandsloader.Load()
+//	if err != nil {
+//		fmt.Printf("Failed due to: %+v", err)
+//	}
 //
-//  // Determine if path is a URL
-//  _, err := url.ParseRequestURI(path)
-//  if err == nil {
-//    path, _ = cfAppPush.cloneRepo(path)
-//  }
-//  cfAppPush.Push(path)
+//	app, _  := manifest.Applications()
+//	fmt.Printf("%+v", app)
 //}

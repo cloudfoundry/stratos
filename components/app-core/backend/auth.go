@@ -30,13 +30,6 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
-// ConnectedUser - details about the user connected to a specific service or UAA
-type ConnectedUser struct {
-	GUID  string `json:"guid"`
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
-}
-
 // LoginHookFunc - function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
@@ -154,7 +147,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
-	userID, err := p.getSessionStringValue(c, "user_id")
+	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
@@ -249,7 +242,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	userID, err := p.getSessionStringValue(c, "user_id")
+	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
@@ -438,7 +431,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	sessionUser, err := p.getSessionStringValue(c, "user_id")
+	sessionUser, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		msg := "Could not find user_id in Session"
 		log.Error(msg)
@@ -508,7 +501,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
+func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("getUAAUser")
 	// get the uaa token record
 	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
@@ -530,7 +523,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.UAAAdminIdentifier)
 
 	// add the uaa entry to the output
-	uaaEntry := &ConnectedUser{
+	uaaEntry := &interfaces.ConnectedUser{
 		GUID:  userGUID,
 		Name:  userTokenInfo.UserName,
 		Admin: uaaAdmin,
@@ -539,8 +532,8 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 	return uaaEntry, nil
 }
 
-func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool) {
-	log.Debug("getCNSIUser")
+func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
+	log.Debug("GetCNSIUser")
 	// get the uaa token record
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
@@ -558,7 +551,7 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 	}
 
 	// add the uaa entry to the output
-	cnsiUser := &ConnectedUser{
+	cnsiUser := &interfaces.ConnectedUser{
 		GUID: userTokenInfo.UserGUID,
 		Name: userTokenInfo.UserName,
 	}

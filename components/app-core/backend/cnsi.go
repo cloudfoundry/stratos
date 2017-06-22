@@ -140,7 +140,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	p.unsetCNSIRecord(cnsiGUID)
 
-	userID, err := p.getSessionStringValue(c, "user_id")
+	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}

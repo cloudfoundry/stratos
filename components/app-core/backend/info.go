@@ -13,14 +13,14 @@ type Endpoint struct {
 	GUID     string         `json:"guid"`
 	Name     string         `json:"name"`
 	Version  string         `json:"version"`
-	User     *ConnectedUser `json:"user"`
+	User     *interfaces.ConnectedUser `json:"user"`
 	CNSIType string         `json:"type"`
 }
 
 // Info - this represents user specific info
 type Info struct {
 	Versions     *Versions                       `json:"version"`
-	User         *ConnectedUser                  `json:"user"`
+	User         *interfaces.ConnectedUser                  `json:"user"`
 	Endpoints    map[string]map[string]*Endpoint `json:"endpoints"`
 	CloudFoundry *interfaces.CFInfo              `json:"cloud-foundry,omitempty"`
 }
@@ -43,7 +43,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 	}
 
 	// get the user
-	userGUID, err := p.getSessionStringValue(c, "user_id")
+	userGUID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return nil, errors.New("Could not find session user_id")
 	}
@@ -77,7 +77,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 			Name: cnsi.Name,
 		}
 		// try to get the user info for this cnsi for the user
-		cnsiUser, ok := p.getCNSIUser(cnsi.GUID, userGUID)
+		cnsiUser, ok := p.GetCNSIUser(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
 		}
