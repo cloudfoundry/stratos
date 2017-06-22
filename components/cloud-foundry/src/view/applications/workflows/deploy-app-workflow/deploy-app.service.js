@@ -179,8 +179,8 @@
 
     // var coloredLog = appUtilsService.coloredLog;
     function logFilter(messageObj) {
-      console.log(messageObj);
-      return JSON.stringify(messageObj);
+      // console.log(messageObj);
+      // return JSON.stringify(messageObj);
       //TODO: event is either for log (convert to something the cf-log-viewer filter works with) OR for this service. Ignore the latter (handled above)
       // if (messageObj.type !== deployAppSocketMessage.LOG) {
       //   return '';
@@ -192,10 +192,10 @@
       //   type: 3
       // };
       //
-      // // CF timestamps are in nanoseconds
-      // var msStamp = Math.round(messageObj.timestamp / 1000000);
-      //
-      // return moment(msStamp).format('HH:mm:ss.SSS') + ': ' + coloredLog(base64.decode(messageObj.message)) + '\n';
+      // CF timestamps are in milliseconds
+      // var msStamp = Math.round(messageObj.timestamp / 1000);
+      // console.log(messageObj.timestamp, messageObj.message);
+      return moment(messageObj.timestamp * 1000).format('HH:mm:ss') + ': ' + messageObj.message.trim() + '\n';
     }
 
     function createSocketUrl(serviceInstance, org, space, project, branch) {
@@ -203,7 +203,7 @@
       var url = protocol + '://' + $location.host() + ':' + $location.port();
       // var url = 'wss://ddb03543.ngrok.io';
       url += '/pp/v1/' + serviceInstance.guid + '/' + org.metadata.guid + '/' + space.metadata.guid + '/deploy';
-      url += '?github_url=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
+      url += '?project=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
       if (branch) {
         url += '&branch=' + branch;
       }
