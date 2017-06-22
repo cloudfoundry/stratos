@@ -1,5 +1,5 @@
-hash: ddc8a6517e5f8623b35d1b15db5a24f5d04ad045738f8521f71280d4e8718199
-updated: 2017-06-19T14:47:28.660080697+01:00
+hash: d98076d53fc31960a739a8b2dda397e632365a5b472a04957b76f37128dffd9e
+updated: 2017-06-22T14:24:21.326785832+01:00
 imports:
 - name: code.cloudfoundry.org/cli
   version: 96e853b95d5a3b1c0afb79e61d9918a35037d041
@@ -151,14 +151,14 @@ imports:
   subpackages:
   - query
 - name: github.com/gorilla/context
-  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
+  repo: https://github.com/gorilla/context
 - name: github.com/gorilla/securecookie
   version: 667fe4e3466a040b780561fe9b51a83a3753eefc
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gorilla/websocket
   version: bb547c6c5c59732c29a3266d7125a84f6c3fce32
-  repo: https://github.com/gorilla/websocket
 - name: github.com/labstack/echo
   version: e08070379af60f5b9c0fb5bb2d1527ba9624fe43
   subpackages:

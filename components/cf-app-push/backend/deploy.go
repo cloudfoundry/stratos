@@ -37,6 +37,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -48,6 +49,8 @@ const (
 
 	// Time allowed to write a ping message
 	pingWriteTimeout = 10 * time.Second
+
+	projectUrlKey = "STRATOS_PROJECT_URL"
 )
 
 type ManifestResponse struct {
@@ -71,20 +74,23 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")
 	spaceGuid := echoContext.Param("spaceGuid")
-	githubUrl := echoContext.QueryParam("github_url")
+	project := echoContext.QueryParam("project")
 	branch := echoContext.QueryParam("branch")
+	spaceName := echoContext.QueryParam("space")
+	orgName := echoContext.QueryParam("org")
 
-	log.Infof("Received URL: %s for cnsiGuid", githubUrl, cnsiGUID)
+	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
-	clonePath, err := cloneRepository(githubUrl, branch)
+	projectUrl := fmt.Sprintf("https://github.com/%s", project)
+	clonePath, err := cloneRepository(projectUrl, branch)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to clone repository %s", githubUrl))
+		return errors.New(fmt.Sprintf("Failed to clone repository %s", project))
 	}
 
 	log.Infof("Cloned repository")
-	manifest, err := fetchManifest(clonePath)
+	manifest, err := fetchManifest(clonePath, projectUrl)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to fetch manifest in repository %s", githubUrl))
+		return errors.New(fmt.Sprintf("Failed to fetch manifest in repository %s", project))
 	}
 
 	manifestBytes, err := json.Marshal(manifest)
@@ -103,10 +109,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	defer pingTicker.Stop()
 	log.Infof("WebSocket upgraded!")
 
-	clientWebSocket.WriteMessage(websocket.TextMessage, manifestBytes)
-
-	// Loop until we get manifest back
 	// TODO uncomment when UI is ready
+	//clientWebSocket.WriteMessage(websocket.TextMessage, manifestBytes)
 	//for {
 	//	messageType, messageBody, err := clientWebSocket.ReadMessage()
 	//	if err != nil {
@@ -125,7 +129,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		clientWebSocket: clientWebSocket,
 	}
 
-	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid)
+	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName)
 	log.Warnf("Error %+v", err)
 	if err != nil {
 		log.Warnf("Failed to initialise config repo due to error %+v", err)
@@ -139,7 +143,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	cfAppPush.pushCommand.SetDependency(deps, false)
 
-	err = cfAppPush.flagContext.Parse("-p", clonePath, "-f", clonePath+"/manifest.yml")
+	err = cfAppPush.flagContext.Parse("-p", clonePath, "-f", clonePath + "/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 	}
@@ -236,7 +240,7 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	return deps
 
 }
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string) (coreconfig.Repository, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string) (coreconfig.Repository, error) {
 
 	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
@@ -276,9 +280,11 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	repo.SetColorEnabled("true")
 	repo.SetOrganizationFields(models.OrganizationFields{
 		GUID: orgGuid,
+		Name: orgName,
 	})
 	repo.SetSpaceFields(models.SpaceFields{
 		GUID: spaceGuid,
+		Name: spaceName,
 	})
 
 	return repo, nil
@@ -288,7 +294,7 @@ func cloneRepository(repoUrl string, branch string) (string, error) {
 
 	dir, err := ioutil.TempDir("", "git-clone-")
 	fmt.Printf("Directory is: %s", dir)
-	repoUrl = fmt.Sprintf("https://github.com/%s", repoUrl)
+
 	if err != nil {
 		return "", err
 	}
@@ -318,27 +324,59 @@ func cloneRepository(repoUrl string, branch string) (string, error) {
 }
 
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string) ([]models.AppParams, error) {
+func fetchManifest(repoPath string, projectUrl string) (manifest.Applications, error) {
 
-	var apps []models.AppParams
-
-	manifestRepo := manifest.NewDiskRepository()
+	var manifest manifest.Applications
 	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
-	fmt.Printf("Manifest Path: %s", manifestPath)
-	manifest, err := manifestRepo.ReadManifest(manifestPath)
+	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
-		return apps, errors.New("Unable to read manifest in location: " + repoPath)
+		log.Warnf("Failed to read manifest in path %s", manifestPath)
+		return manifest, err
 	}
-	apps, err = manifest.Applications()
+
+	err = yaml.Unmarshal(data, &manifest)
 	if err != nil {
-		return apps, errors.New("Unable to marshal manifest in location: " + repoPath)
+		log.Warnf("Failed to unmarshall manifest in path %s", manifestPath)
+		return manifest, err
 	}
-	return apps, nil
+
+	for i, app := range manifest.Applications {
+		if len(app.Env) == 0 {
+			app.Env = make(map[string]interface{})
+		}
+		app.Env[projectUrlKey] = projectUrl
+		manifest.Applications[i] = app
+	}
+
+	marshalledYaml, err := yaml.Marshal(manifest)
+	if err != nil {
+		log.Warnf("Failed to marshall manifest in path %v", manifest)
+		return manifest, err
+	}
+	ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
+
+	return manifest, nil
+}
+
+type SocketMessage struct {
+	Message   string    `json:"message"`
+	Timestamp int64     `json:"timestamp"`
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
 
-	err := sw.clientWebSocket.WriteMessage(websocket.TextMessage, data)
+	messageStruct := SocketMessage{
+		Message: string(data),
+		Timestamp: time.Now().Unix(),
+	}
+
+	marshalledJson, err := json.Marshal(messageStruct)
+	if err != nil {
+		log.Warnf("Marshalling of message failed!")
+		return 0, err
+	}
+
+	err = sw.clientWebSocket.WriteMessage(websocket.TextMessage, marshalledJson)
 	if err != nil {
 		return 0, err
 	}
