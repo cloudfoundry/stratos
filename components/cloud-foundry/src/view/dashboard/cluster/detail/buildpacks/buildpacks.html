@@ -6,9 +6,11 @@
   <div ng-if="!bpCtrl.error" class="panel-body" translate>cf.buildpacks.empty</div>
   <div ng-if="bpCtrl.error" class="panel-body" translate>cf.buildpacks.error</div>
 </div>
-<div
-  ng-if="bpCtrl.stateInitialised && bpCtrl.buildpacks.length > 0"
-  class="cluster-gallery-card-parent"
-  ng-repeat="buildpack in bpCtrl.buildpacks track by buildpack.metadata.guid">
-  <buildpack-tile buildpack="buildpack"></buildpack-tile>
+<div class="cluster-gallery-card-container" ng-if="bpCtrl.buildpacks.length > 0">
+  <div
+    class="cluster-gallery-card-parent"
+    ng-repeat="buildpack in bpCtrl.buildpacks track by buildpack.metadata.guid">
+    <buildpack-tile buildpack="buildpack"></buildpack-tile>
+  </div>
 </div>
+
