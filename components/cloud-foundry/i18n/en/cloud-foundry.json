@@ -49,6 +49,21 @@
       },
       "error": "An error occurred retrieving stacks metadata",
       "empty": "There are no stacks available"
+    },
+    "security-groups": {
+      "security-groups": "Security Groups",
+      "labels":{
+        "created": "Created",
+        "updated": "Updated",
+        "spaces": "Spaces",
+        "staging-default": "Staging Default",
+        "running-default": "Running Default",
+        "rules": "Rules",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "error": "An error occurred retrieving security group metadata",
+      "empty": "There are no security groups available"
     }
   }
 }
