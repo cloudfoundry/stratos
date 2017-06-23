@@ -1,7 +1,7 @@
 <div class="deploy-app-log-status">
-  <span ng-if="step.data.deployed === null" translate>deploy-app-dialog.step-deploying.title-deploying</span>
-  <span ng-if="step.data.deployed === false" translate>deploy-app-dialog.step-deploying.title-deploy-failed</span>
-  <span ng-if="step.data.deployed === true" translate>deploy-app-dialog.step-deploying.title-deploy-success</span>
-  <bounce-spinner ng-if="step.data.deployed === null" classes="bounce-spinner-sm"></bounce-spinner>
+  <span ng-if="step.data.deployStatus === step.data.deployState.DEPLOYING" translate>deploy-app-dialog.step-deploying.title-deploying</span>
+  <span ng-if="step.data.deployStatus === step.data.deployState.DEPLOYED" translate>deploy-app-dialog.step-deploying.title-deploy-success</span>
+  <span ng-if="step.data.deployStatus === step.data.deployState.FAILED" translate>{{ step.data.deployFailure }}</span>
+  <bounce-spinner ng-if="step.data.deployStatus === step.data.deployState.DEPLOYING" classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <cf-log-viewer web-socket="step.data.webSocket" filter="step.data.logFilter"/>

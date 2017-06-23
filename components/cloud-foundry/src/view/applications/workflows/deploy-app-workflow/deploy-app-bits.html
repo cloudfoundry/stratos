@@ -28,12 +28,12 @@
 <p class="control-title" translate>deploy-app-dialog.step-info.github.label</p>
 <div class="form-group form-group-large" focusable-input>
   <label class="control-label" translate>deploy-app-dialog.step-info.github.project-label</label>
-  <input type="text" class="form-control" ng-model="step.userInput.github.project" required
+  <input type="text" class="form-control" ng-model="step.userInput.githubProject" required
          placeholder="{{'deploy-app-dialog.step-info.github.project-placeholder' | translate}}"/>
 </div>
 <div class="form-group form-group-large" focusable-input>
   <label class="control-label" translate>deploy-app-dialog.step-info.github.branch-label</label>
-  <input type="text" class="form-control" ng-model="step.userInput.githubBranch"/>
+  <input type="text" class="form-control" ng-model="step.userInput.githubBranch" required/>
 </div>
 
 <p class="control-title" translate>deploy-app-dialog.step-info.manifest.label</p>

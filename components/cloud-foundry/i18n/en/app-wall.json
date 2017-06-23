@@ -84,10 +84,25 @@
       "title": "Deploying",
       "busy": "Starting deployment",
       "title-deploying": "Deploying",
-      "title-deploy-failed": "Failed to deploy",
+      "title-deploy-failed": "Failed to deploy. Reason: {{reason}}",
       "title-deploy-success": "Deployed",
       "next-button": "App Summary",
-      "submit-failed": "Failed to start deployment. Please try again. If this error persists, please contact the Administrator. Reason: {{reason}}"
+      "submit-failed": "Failed to deploy application. If this error persists, please contact the Administrator. Reason: {{reason}}."
+    },
+    "socket": {
+      "event-type": {
+        "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (invalid branch), please ensure github details are correct",
+        "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure github details are correct",
+        "CLOSE_FAILURE": "Unknown failure",
+        "CLOSE_INVALID_MANIFEST": "Invalid manifest in repository",
+        "CLOSE_NO_MANIFEST": "Failed to find manifest in repository",
+        "CLOSE_PUSH_ERROR": "Failed to run [[@:cloud-foundry]] push",
+        "CLOSE_NO_SESSION": "Failed to create session",
+        "CLOSE_NO_CNSI": "Unknown [[@:cloud-foundry]] instance",
+        "CLOSE_NO_CNSI_USERTOKEN": "Invalid [[@:cloud-foundry]] token"
+      },
+      "failed-connection": "Failed to open connection",
+      "failed-unknown": "Unknown failure"
     }
   }
 }

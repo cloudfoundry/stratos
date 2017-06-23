@@ -41,7 +41,7 @@
    * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function DeployAppController($q, $uibModalInstance, $state, $location, $websocket, $interval, $translate,
+  function DeployAppController($q, $uibModalInstance, $state, $location, $websocket, $interval, $translate, $log,
                                modelManager) {
 
     var vm = this;
@@ -51,15 +51,27 @@
 
     var stopPollingForAppGuid, polling, newAppGuid;
 
+    var allowBack = false;
+
     vm.data = {
       serviceInstances: [],
-      logFilter: logFilter
+      logFilter: logFilter,
+      deployState: {
+        UNKNOWN: 1,
+        CLONED: 2,
+        FETCHED_MANIFEST: 3,
+        DEPLOYING: 4,
+        DEPLOYED: 5,
+        FAILED: 6,
+        SOCKET_OPEN: 7
+      }
     };
 
     vm.userInput = {
       serviceInstance: null,
       organization: null,
       space: null,
+      githubBranch: 'master',
       manifest: {
         location: '/manifest.yml'
       }
@@ -86,10 +98,11 @@
       showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
-      // allowNext: function () {
-      //   return vm.userInput.file || vm.userInput.github;
-      // },
       onEnter: function () {
+        allowBack = false;
+        if (vm.data.deployStatus) {
+          return;
+        }
         return serviceInstanceModel.list()
           .then(function (serviceInstances) {
             var validServiceInstances = _.chain(_.values(serviceInstances))
@@ -146,12 +159,31 @@
       isLastStep: true
     };
 
+    var socketEventTypes = {
+      DATA: 20000,
+      MANIFEST: 20001,
+      CLOSE_SUCCESS: 20002,
+      CLOSE_PUSH_ERROR: 40003,
+      CLOSE_NO_MANIFEST: 40004,
+      CLOSE_INVALID_MANIFEST:40005,
+      CLOSE_FAILED_CLONE: 40006,
+      CLOSE_FAILED_NO_BRANCH: 40007,
+      CLOSE_FAILURE: 40008,
+      CLOSE_NO_SESSION: 40009,
+      CLOSE_NO_CNSI: 40010,
+      CLOSE_NO_CNSI_USERTOKEN: 40011,
+      EVENT_CLONED: 10012,
+      EVENT_FETCHED_MANIFEST: 10013,
+      EVENT_PUSH_STARTED: 10014,
+      EVENT_PUSH_COMPLETED: 10015
+    };
+
     vm.options = {
       workflow: {
         disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
-          return false;
+          return allowBack;
         },
         title: 'deploy-app-dialog.title',
         btnText: {
@@ -178,24 +210,11 @@
       }
     };
 
-    // var coloredLog = appUtilsService.coloredLog;
     function logFilter(messageObj) {
-      // console.log(messageObj);
-      // return JSON.stringify(messageObj);
-      //TODO: event is either for log (convert to something the cf-log-viewer filter works with) OR for this service. Ignore the latter (handled above)
-      // if (messageObj.type !== deployAppSocketMessage.LOG) {
-      //   return '';
-      // }
+      if (messageObj.type !== socketEventTypes.DATA) {
+        return '';
+      }
 
-      // messageObj = {
-      //   message: base64.encode('hello world'),
-      //   timestamp: 1498064230908392507,
-      //   type: 3
-      // };
-      //
-      // CF timestamps are in milliseconds
-      // var msStamp = Math.round(messageObj.timestamp / 1000);
-      // console.log(messageObj.timestamp, messageObj.message);
       return moment(messageObj.timestamp * 1000).format('HH:mm:ss') + ': ' + messageObj.message.trim() + '\n';
     }
 
@@ -211,41 +230,43 @@
       return url;
     }
 
-    function discoverAppGuid() {
+    function discoverAppGuid(appName) {
       var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       return spaceModel.listAllAppsForSpace(vm.userInput.serviceInstance.guid, vm.userInput.space.metadata.guid)
         .then(function (apps) {
-          var app = _.find(apps, 'entity.name', 'go-env-rc');
+          var app = _.find(apps, 'entity.name', appName);
           if (app) {
             newAppGuid = app.metadata.guid;
           }
         });
     }
 
-    function pollForAppGuid() {
-      stopPollingForAppGuid = $interval(function () {
-        if (polling) {
-          return;
-        }
-        polling = true;
-        discoverAppGuid().then(function () {
-          if (newAppGuid) {
-            stopPollingForAppGuid();
-          }
-          polling = false;
-        });
-      }, 3000);
-    }
-
     function startDeploy() {
-      vm.data.deployed = undefined;
-      // $timeout(function () {
-      //   // vm.data.deployed = true;
-      // }, 5000);
-      //
-      // return $timeout(function () {
-      // }, 1000);
+      vm.data.deployStatus = vm.data.deployState.UNKNOWN;
 
+      var deployingPromise = $q.defer();
+
+      function deployStarted() {
+        vm.data.deployStatus = vm.data.deployState.DEPLOYING;
+        deployingPromise.resolve();
+        $log.debug('Deploy Application: Push Started');
+      }
+
+      function deploySuccessful() {
+        vm.data.deployStatus = vm.data.deployState.DEPLOYED;
+        $log.debug('Deploy Application: Deploy Successful');
+      }
+
+      function deployFailed(errorString) {
+        allowBack = true;
+        vm.data.deployStatus = vm.data.deployState.FAILED;
+        var failureDescription = $translate.instant(errorString);
+        vm.data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', { reason:  failureDescription});
+        deployingPromise.reject(failureDescription);
+        $log.warn('Deploy Application: Failed: ' + failureDescription);
+      }
+
+      // Determine web socket url and open connection
       var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space,
         vm.userInput.githubProject, vm.userInput.githubBranch);
 
@@ -253,29 +274,91 @@
         reconnectIfNotNormalClose: false
       });
 
-      var deployingPromise = $q.defer();
-
+      // Handle Connection responses
       vm.data.webSocket.onOpen(function () {
-        pollForAppGuid();
-        vm.data.deployed = null;
-        deployingPromise.resolve();
+        vm.data.deployStatus = vm.data.deployState.SOCKET_OPEN;
+      });
+
+      vm.data.webSocket.onMessage(function (message) {
+        var logData = angular.fromJson(message.data);
+
+        switch (logData.type) {
+          case socketEventTypes.DATA:
+            // Ignore, handled by custom log viewer filter
+            break;
+          case socketEventTypes.CLOSE_FAILED_CLONE:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
+            break;
+          case socketEventTypes.CLOSE_FAILED_NO_BRANCH:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_NO_BRANCH');
+            break;
+          case socketEventTypes.CLOSE_FAILURE:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILURE');
+            break;
+          case socketEventTypes.CLOSE_INVALID_MANIFEST:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_INVALID_MANIFEST');
+            break;
+          case socketEventTypes.CLOSE_NO_MANIFEST:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_MANIFEST');
+            break;
+          case socketEventTypes.CLOSE_PUSH_ERROR:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_PUSH_ERROR');
+            break;
+          case socketEventTypes.CLOSE_NO_SESSION:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_SESSION');
+            break;
+          case socketEventTypes.CLOSE_NO_CNSI:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI');
+            break;
+          case socketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
+            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI_USERTOKEN');
+            break;
+          case socketEventTypes.CLOSE_SUCCESS:
+            deploySuccessful();
+            break;
+          case socketEventTypes.EVENT_CLONED:
+            vm.data.deployStatus = vm.data.deployState.CLONED;
+            $log.debug('Deploy Application: Cloned');
+            break;
+          case socketEventTypes.EVENT_FETCHED_MANIFEST:
+            vm.data.deployStatus = vm.data.deployState.FETCHED_MANIFEST;
+            $log.debug('Deploy Application: Fetched manifest');
+            break;
+          case socketEventTypes.EVENT_PUSH_STARTED:
+            deployStarted();
+            $log.debug('Deploy Application: Push Started');
+            break;
+          case socketEventTypes.EVENT_PUSH_COMPLETED:
+            $log.debug('Deploy Application: Push Completed');
+            break;
+          case socketEventTypes.MANIFEST:
+            console.log(logData);
+            var manifest = angular.fromJson(logData.message);
+            var app = _.get(manifest, 'Applications[0]', {});
+            if (app.Name) {
+              discoverAppGuid(app.Name);
+            }
+            break;
+          default:
+            $log.error('Unknown deploy application socket event type: ', logData.type);
+            console.log(message);
+            break;
+        }
+
       });
 
       vm.data.webSocket.onClose(function (event) {
-        if (stopPollingForAppGuid) {
-          stopPollingForAppGuid();
-        }
         console.log('CLOSING: ', event);
-        if (vm.data.deployed === null) {
-          vm.data.deployed = true;
-          //TODO: Determine if failed to open or successfully finished (currently fails case where fails half way through)
-        } else {
-          vm.data.deployed = false;
-          deployingPromise.reject('Failed to open connection');
+        if (vm.data.deployStatus === vm.data.deployState.UNKNOWN) {
+          // Closed before socket has successfully opened
+          deployFailed('deploy-app-dialog.socket.failed-connection');
+        } else if (vm.data.deployStatus !== vm.data.deployState.DEPLOYED && vm.data.deployStatus !== vm.data.deployState.FAILED) {
+          // Have connected to socket but not received a close message containing deploy result
+          deployFailed('deploy-app-dialog.socket.failed-unknown');
         }
       });
 
-      return $q.all(deployingPromise, discoverAppGuid());
+      return deployingPromise.promise;
     }
   }
 
