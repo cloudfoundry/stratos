@@ -31,7 +31,6 @@ import (
 	"code.cloudfoundry.org/cli/cf/trace"
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/words/generator"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -41,9 +40,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type MessageType string
+type MessageType int
 
 const (
+
+	DATA MessageType = iota + 20000
+	MANIFEST
+	CLOSE_SUCCESS
+	CLOSE_PUSH_ERROR = iota + 40000
+	CLOSE_NO_MANIFEST
+	CLOSE_INVALID_MANIFEST
+	CLOSE_FAILED_CLONE
+	CLOSE_FAILURE
+
 	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
 
@@ -55,9 +64,6 @@ const (
 
 	stratosProjectKey = "STRATOS_PROJECT"
 
-	DATA MessageType = "data"
-	CLOSE = "close"
-	MANIFEST = "manifest"
 )
 
 type ManifestResponse struct {
@@ -93,26 +99,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
-	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
-
-	projectUrl := fmt.Sprintf("https://github.com/%s", project)
-	clonePath, commitHash, err := cloneRepository(projectUrl, branch)
-	if err != nil {
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to download project",
-			"Failed to clone repository %s", err)
-	}
-
-	log.Infof("Cloned repository")
-	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch)
-	if err != nil {
-		return interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to read manifest",
-			"Failed to fetch manifest in repository %s", err)
-	}
-
 	clientWebSocket, pingTicker, err := upgradeToWebSocket(echoContext)
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
@@ -120,12 +106,30 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
+
+
+	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
+
+	projectUrl := fmt.Sprintf("https://github.com/%s", project)
+	clonePath, commitHash, err := cloneRepository(projectUrl, branch)
+	if err != nil {
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
+		return err
+	}
+
+	log.Infof("Cloned repository")
+	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch)
+	if err != nil {
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_MANIFEST)
+		return err
+	}
+
 	log.Infof("WebSocket upgraded!")
 
 	err = sendManifest(manifest, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to read or send manifest due to %s", err)
-		sendErrorMessage(clientWebSocket, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
 		return err
 	}
 
@@ -140,7 +144,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Warnf("Error %+v", err)
 	if err != nil {
 		log.Warnf("Failed to initialise config repo due to error %+v", err)
-		sendErrorMessage(clientWebSocket, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -154,18 +158,18 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	err = cfAppPush.flagContext.Parse("-p", clonePath, "-f", clonePath + "/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
-		sendErrorMessage(clientWebSocket, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
 	err = cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
-		sendErrorMessage(clientWebSocket, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
 		return err
 	}
 
-	closingMessage, _ := getMarshalledSocketMessage("Completed successfully!", CLOSE)
+	closingMessage, _ := getMarshalledSocketMessage("", CLOSE_SUCCESS)
 	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
 	return nil
 }
@@ -432,7 +436,7 @@ func sendManifest(manifest manifest.Applications, clientWebSocket *websocket.Con
 	return nil
 }
 
-func sendErrorMessage(clientWebSocket *websocket.Conn, err error) {
-	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), CLOSE)
+func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
+	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
 	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
 }
