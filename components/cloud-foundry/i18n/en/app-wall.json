@@ -74,12 +74,6 @@
       "busy": "Updating Cloud Foundry Data",
       "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
     },
-    "step-manifest": {
-      "title": "Manifest",
-      "button-next": "Deploy",
-      "busy": "Processing application files and extracting manifest data",
-      "submit-failed": "Failed to submit information. Please try again. If this error persists, please contact the Administrator."
-    },
     "step-deploying": {
       "title": "Deploying",
       "busy": "Starting deployment",

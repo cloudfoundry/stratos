@@ -60,7 +60,7 @@
         UNKNOWN: 1,
         CLONED: 2,
         FETCHED_MANIFEST: 3,
-        DEPLOYING: 4,
+        PUSHING: 4,
         DEPLOYED: 5,
         FAILED: 6,
         SOCKET_OPEN: 7
@@ -101,6 +101,7 @@
       onEnter: function () {
         allowBack = false;
         if (vm.data.deployStatus) {
+          // Previously been at this step, no need to fetch instances again
           return;
         }
         return serviceInstanceModel.list()
@@ -120,26 +121,6 @@
           });
       }
     };
-    var stepManifest = {
-      title: 'deploy-app-dialog.step-manifest.title',
-      templateUrl: path + 'deploy-app-manifest.html',
-      formName: 'deploy-manifest-form',
-      data: vm.data,
-      userInput: vm.userInput,
-      nextBtnText: 'deploy-app-dialog.button-deploy',
-      stepCommit: true,
-      showBusyOnEnter: 'deploy-app-dialog.step-manifest.busy',
-      onEnter: function () {
-        // Note: Upload (zip file|github url), cf + org + space guids
-        // Note: Expect manifest data in response (vm.userInfo.manifest.x)
-        return submitBits().catch(function () {
-          return $q.reject('deploy-app-dialog.step-manifest.submit-failed');
-        });
-      },
-      onNext: function () {
-        // deploying = true;
-      }
-    };
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
       templateUrl: path + 'deploy-app-deploying.html',
@@ -152,6 +133,7 @@
         return newAppGuid;
       },
       onEnter: function () {
+        allowBack = false;
         return startDeploy().catch(function (error) {
           return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', { reason: error }));
         });
@@ -205,7 +187,7 @@
         $state.go('cf.applications.application.summary', {
           cnsiGuid: vm.userInput.serviceInstance.guid,
           guid: newAppGuid,
-          newlyCreated: 'false'
+          newlyCreated: false
         });
       }
     };
@@ -246,8 +228,8 @@
 
       var deployingPromise = $q.defer();
 
-      function deployStarted() {
-        vm.data.deployStatus = vm.data.deployState.DEPLOYING;
+      function pushStarted() {
+        vm.data.deployStatus = vm.data.deployState.PUSHING;
         deployingPromise.resolve();
         $log.debug('Deploy Application: Push Started');
       }
@@ -281,9 +263,11 @@
 
       vm.data.webSocket.onMessage(function (message) {
         var logData = angular.fromJson(message.data);
+        console.log(logData.message);
 
         switch (logData.type) {
           case socketEventTypes.DATA:
+            console.log(logData.message);
             // Ignore, handled by custom log viewer filter
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
@@ -325,7 +309,7 @@
             $log.debug('Deploy Application: Fetched manifest');
             break;
           case socketEventTypes.EVENT_PUSH_STARTED:
-            deployStarted();
+            pushStarted();
             $log.debug('Deploy Application: Push Started');
             break;
           case socketEventTypes.EVENT_PUSH_COMPLETED:
