@@ -185,7 +185,7 @@
           <percent-gauge value="{{ instance.stats.usage.disk / instance.stats.disk_quota }}"
                          value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
         </td>
-        <td class="instance-uptime-td">{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
+        <td class="instance-uptime-td">{{ applicationSummaryCtrl.cfUtilsService.formatUptime(instance.stats.uptime) }}</td>
         <td ng-if="!applicationSummaryCtrl.hideInstanceActions">
           <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
                         action-target="$index"

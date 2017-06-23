@@ -7,14 +7,14 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
-	"github.com/satori/go.uuid"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+
+	"errors"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"errors"
 )
 
 const (
@@ -33,18 +33,17 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
-func (ch CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+func (ch CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return ch, nil
 }
 
-func (ch CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+func (ch CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (ch CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error){
+func (ch CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
-
 
 func (ch CFHosting) Init() error {
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
@@ -100,7 +99,7 @@ func (ch CFHosting) Init() error {
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
-		newCNSI, err := cfEndpointSpec.Info(appData.API, true)
+		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
 			log.Fatal("Could not get the info for Cloud Foundry", err)
 			return nil

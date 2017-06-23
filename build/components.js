@@ -153,6 +153,15 @@
         _.defaults(deps, o);
         depends[name] = { dependencies: deps };
       });
+      // Allow the main files for a component to be overridden
+      _.each(component.frontend.overrides, function (o, name) {
+        if (o.main) {
+          if (!depends[name]) {
+            depends[name] = {};
+          }
+          depends[name].main = o.main;
+        }
+      });
     });
     return depends;
   }

@@ -73,6 +73,7 @@
    * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {cfApplicationTabs} cfApplicationTabs - provides collection of configuration objects for tabs on the application page
+   * @param {cfUtilsService} cfUtilsService - utils service (uptime helper is used here)
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
@@ -84,13 +85,14 @@
   function ApplicationSummaryController($state, $stateParams, $log, $q, $translate,
                                         modelManager, cfAddRoutes, cfEditApp, appUtilsService,
                                         appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
-                                        cfApplicationTabs) {
+                                        cfApplicationTabs, cfUtilsService) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     vm.appCreatedInstructions = [];
     vm.appUtilsService = appUtilsService;
     vm.appClusterRoutesService = appClusterRoutesService;
+    vm.cfUtilsService = cfUtilsService;
 
     _.forEach(cfApplicationTabs.tabs, function (tab) {
       if (tab.appCreatedInstructions && tab.appCreatedInstructions.length) {
@@ -166,7 +168,7 @@
     vm.showAddRouteForm = showAddRouteForm;
     vm.editApp = editApp;
     vm.getEndpoint = getEndpoint;
-    vm.formatUptime = formatUptime;
+    //vm.formatUptime = formatUptime;
 
     vm.appUtilsService.chainStateResolve('cf.applications.application.summary', $state, init);
 
@@ -252,50 +254,5 @@
     function getEndpoint() {
       return vm.appUtilsService.getClusterEndpoint(vm.userCnsiModel.serviceInstances[vm.cnsiGuid]);
     }
-
-    /**
-     * @function formatUptime
-     * @description format an uptime in seconds into a days, hours, minutes, seconds string
-     * @param {number} uptime in seconds
-     * @returns {string} formatted uptime string
-     */
-    function formatUptime(uptime) {
-      if (angular.isUndefined(uptime) || uptime === null) {
-        return '-';
-      }
-
-      function getFormattedTime(isPlural, value, unit) {
-        var formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
-        return $translate.instant(formatString, { value: value, unit: unit });
-      }
-
-      if (uptime === 0) {
-        return getFormattedTime(false, '0', $translate.instant('dateTime.singular.second'));
-      }
-      var days = Math.floor(uptime / 86400);
-      uptime = uptime % 86400;
-      var hours = Math.floor(uptime / 3600);
-      uptime = uptime % 3600;
-      var minutes = Math.floor(uptime / 60);
-      var seconds = uptime % 60;
-
-      function formatPart(count, single, plural) {
-        if (count === 0) {
-          return '';
-        } else if (count === 1) {
-          return getFormattedTime(false, count, single) + ' ';
-        } else {
-          return getFormattedTime(true, count, plural) + ' ';
-        }
-      }
-
-      return (
-      formatPart(days, $translate.instant('dateTime.singular.day'), $translate.instant('dateTime.plural.days')) +
-      formatPart(hours, $translate.instant('dateTime.singular.hour'), $translate.instant('dateTime.plural.hours')) +
-      formatPart(minutes, $translate.instant('dateTime.singular.minute'), $translate.instant('dateTime.plural.minutes')) +
-      formatPart(seconds, $translate.instant('dateTime.singular.second'), $translate.instant('dateTime.plural.seconds')))
-        .trim();
-    }
   }
-
 })();

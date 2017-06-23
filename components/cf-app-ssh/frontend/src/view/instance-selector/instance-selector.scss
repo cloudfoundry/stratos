@@ -1,0 +1,60 @@
+app-instance-selector {
+  .app-instance-selector {
+    display: block;
+    width: 100%;
+    margin: auto;
+    z-index: 3;
+    margin-top: $console-unit-space;
+    background-color: transparent;
+    position: absolute;
+
+    > .panel {
+      width: 90%;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: $cf-app-ssh-box-shadow;
+
+      h1 {
+        font-size: $font-size-large;
+        text-align: center;
+        padding-top: $cf-app-ssh-padding;
+        padding-bottom: $cf-app-ssh-padding;
+        border-bottom: 1px solid $table-border-color;;
+        margin: 0;
+        flex: 0;
+      }
+
+      .app-instance-selector-table {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 50%;
+
+        .app-instance-selector-empty {
+          font-size: $font-size-large;
+        }
+
+        table.table tr {
+          &.app-instance-item:hover {
+            cursor: pointer;
+            background-color: $brand-primary;
+            color: $text-color;
+          }
+
+          percent-gauge {
+            display: flex;
+            > .percent-gauge {
+              width: 100%;
+              padding: 0;
+
+              > .gauge-label {
+                padding: 0;
+                margin: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
