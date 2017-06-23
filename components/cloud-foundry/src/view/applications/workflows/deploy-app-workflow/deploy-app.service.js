@@ -129,7 +129,7 @@
     };
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
-      templateUrl: path + 'deploy-app-log.html',
+      templateUrl: path + 'deploy-app-deploying.html',
       data: vm.data,
       userInput: vm.userInput,
       cancelBtnText: 'buttons.close',
@@ -148,6 +148,7 @@
 
     vm.options = {
       workflow: {
+        disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
           return false;

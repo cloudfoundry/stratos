@@ -1,7 +1,0 @@
-<div class="deploy-app-log-status">
-  <span ng-if="step.data.deployed === null" class="">Deploying</span>
-  <span ng-if="step.data.deployed === false" class="">Failed to deploy</span>
-  <span ng-if="step.data.deployed === true" class="">Deployed</span>
-  <bounce-spinner ng-if="step.data.deployed === null" classes="bounce-spinner-sm"></bounce-spinner>
-</div>
-<cf-log-viewer web-socket="step.data.webSocket" filter="step.data.logFilter"/>

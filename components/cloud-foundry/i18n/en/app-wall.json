@@ -59,6 +59,18 @@
     "button-deploy": "Deploy",
     "step-info": {
       "title": "Information",
+      "github": {
+        "label": "Public Github",
+        "project-label": "Project",
+        "project-placeholder": "suse/stratos-ui",
+        "branch-label": "Project Branch"
+      },
+      "manifest": {
+        "label": "Manifest",
+        "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",
+        "path-label": "Path to manifest",
+        "path-placeholder": "Relative path of manifest to root of app directory"
+      },
       "busy": "Updating Cloud Foundry Data",
       "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
     },
@@ -71,6 +83,9 @@
     "step-deploying": {
       "title": "Deploying",
       "busy": "Starting deployment",
+      "title-deploying": "Deploying",
+      "title-deploy-failed": "Failed to deploy",
+      "title-deploy-success": "Deployed",
       "next-button": "App Summary",
       "submit-failed": "Failed to start deployment. Please try again. If this error persists, please contact the Administrator. Reason: {{reason}}"
     }
