@@ -1,112 +1,13 @@
-hash: d98076d53fc31960a739a8b2dda397e632365a5b472a04957b76f37128dffd9e
-updated: 2017-06-22T14:24:21.326785832+01:00
+hash: 0b86257919abe086a9df305790078bca21cf466b63b73022c910aed8d7b1915c
+updated: 2017-06-23T14:18:02.255119818+01:00
 imports:
-- name: code.cloudfoundry.org/cli
-  version: 96e853b95d5a3b1c0afb79e61d9918a35037d041
-  subpackages:
-  - cf
-  - cf/actors
-  - cf/actors/brokerbuilder
-  - cf/actors/planbuilder
-  - cf/actors/plugininstaller
-  - cf/actors/pluginrepo
-  - cf/actors/servicebuilder
-  - cf/actors/userprint
-  - cf/api
-  - cf/api/appevents
-  - cf/api/appfiles
-  - cf/api/appinstances
-  - cf/api/applicationbits
-  - cf/api/applications
-  - cf/api/authentication
-  - cf/api/copyapplicationsource
-  - cf/api/environmentvariablegroups
-  - cf/api/featureflags
-  - cf/api/logs
-  - cf/api/organizations
-  - cf/api/password
-  - cf/api/quotas
-  - cf/api/resources
-  - cf/api/securitygroups
-  - cf/api/securitygroups/defaults
-  - cf/api/securitygroups/defaults/running
-  - cf/api/securitygroups/defaults/staging
-  - cf/api/securitygroups/spaces
-  - cf/api/spacequotas
-  - cf/api/spaces
-  - cf/api/stacks
-  - cf/appfiles
-  - cf/commandregistry
-  - cf/commands
-  - cf/commands/application
-  - cf/commands/buildpack
-  - cf/commands/domain
-  - cf/commands/environmentvariablegroup
-  - cf/commands/featureflag
-  - cf/commands/organization
-  - cf/commands/plugin
-  - cf/commands/pluginrepo
-  - cf/commands/quota
-  - cf/commands/route
-  - cf/commands/routergroups
-  - cf/commands/securitygroup
-  - cf/commands/service
-  - cf/commands/serviceaccess
-  - cf/commands/serviceauthtoken
-  - cf/commands/servicebroker
-  - cf/commands/servicekey
-  - cf/commands/space
-  - cf/commands/spacequota
-  - cf/commands/user
-  - cf/commandsloader
-  - cf/configuration
-  - cf/configuration/confighelpers
-  - cf/configuration/coreconfig
-  - cf/configuration/pluginconfig
-  - cf/errors
-  - cf/flagcontext
-  - cf/flags
-  - cf/formatters
-  - cf/help
-  - cf/i18n
-  - cf/manifest
-  - cf/models
-  - cf/net
-  - cf/requirements
-  - cf/resources
-  - cf/ssh
-  - cf/ssh/options
-  - cf/ssh/sigwinch
-  - cf/ssh/terminal
-  - cf/terminal
-  - cf/trace
-  - cf/uihelpers
-  - plugin
-  - plugin/models
-  - plugin/rpc
-  - util
-  - util/configv3
-  - util/downloader
-  - util/generic
-  - util/glob
-  - util/json
-  - util/sorting
-  - util/ui
-  - util/words
-  - util/words/generator
-  - version
-- name: code.cloudfoundry.org/gofileutils
-  version: 4d0c80011a0f37da1711c184028bc40137cd45af
-  repo: https://github.com/cloudfoundry/gofileutils
-  subpackages:
-  - fileutils
 - name: github.com/Azure/go-ansiterm
   version: fa152c58bc15761d0200cb75fe958b89a9d4888e
   repo: https://github.com/Azure/go-ansiterm
   subpackages:
   - winterm
 - name: github.com/blang/semver
-  version: 4a1e882c79dcf4ec00d2e29fac74b9c8938d5052
+  version: 3a37c301dda64cbe17f16f661b4c976803c0e2d2
   repo: https://github.com/blang/semver
 - name: github.com/cloudfoundry-incubator/cli-plugin-repo
   version: c617dd749bce96b5357933bfde859cb9a01c6012
@@ -114,27 +15,23 @@ imports:
   subpackages:
   - web
 - name: github.com/cloudfoundry/noaa
-  version: ea8759ba3628ce69b0c332ccea75ac6e373a938b
+  version: dd6ec6bd0a0182d44fbd738bcb044adeed8171bb
   repo: https://github.com/cloudfoundry/noaa
   subpackages:
   - consumer
   - consumer/internal
   - errors
 - name: github.com/cloudfoundry/sonde-go
-  version: 5f5bca3bcb61dbf9371b8db82497c6396cc0ea9b
+  version: 64ff74a60c9558e7fcb55c9d22eff49412ec5826
   repo: https://github.com/cloudfoundry/sonde-go
   subpackages:
   - events
 - name: github.com/docker/docker
-  version: c9f26eaaf8b9f7977319d6d596f8701bbc58a108
+  version: a7c3389a8223449ed72d796b33a667e603811db8
   repo: https://github.com/docker/docker
   subpackages:
   - pkg/term
   - pkg/term/windows
-  - vendor/github.com/Azure/go-ansiterm
-  - vendor/github.com/sirupsen/logrus
-  - vendor/golang.org/x/sys/unix
-  - vendor/golang.org/x/sys/windows
 - name: github.com/fatih/color
   version: 42c364ba490082e4815b5222728711b3440603eb
   repo: https://github.com/fatih/color
@@ -158,9 +55,9 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gorilla/websocket
-  version: bb547c6c5c59732c29a3266d7125a84f6c3fce32
+  version: 3ab3a8b8831546bd18fd182c20687ca853b2bb13
 - name: github.com/labstack/echo
-  version: e08070379af60f5b9c0fb5bb2d1527ba9624fe43
+  version: 04e6901d05b58ddbae579a6252a3d1bb3f334adc
   subpackages:
   - context
   - engine
@@ -171,18 +68,20 @@ imports:
   subpackages:
   - color
   - log
-- name: github.com/lunixbochs/vtclean
-  version: 4428d67a89b36ecae7998e983e5814d0d9c45a04
-  repo: https://github.com/lunixbochs/vtclean
 - name: github.com/mattn/go-colorable
   version: d228849504861217f796da67fae4f6e347643f15
   repo: https://github.com/mattn/go-colorable
 - name: github.com/mattn/go-isatty
   version: 30a891c33c7cde7b02a981314b4228ec99380cca
   repo: https://github.com/mattn/go-isatty
-- name: github.com/mattn/go-runewidth
-  version: 14207d285c6c197daabb5c9793d63e7af9ab2d50
-  repo: https://github.com/mattn/go-runewidth
+- name: github.com/nicksnyder/go-i18n
+  version: f757c9f9b69c16ff69d38dbf224be28a7b6537bb
+  repo: https://github.com/nicksnyder/go-i18n
+  subpackages:
+  - i18n
+  - i18n/bundle
+  - i18n/language
+  - i18n/translation
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/sergi/go-diff
@@ -204,19 +103,18 @@ imports:
   - scanner
   - token
   - types
+- name: github.com/SUSE/stratos-ui
+  version: d4a7c934a8dba3765f88175117837c3031114f7e
+  subpackages:
+  - components/app-core/backend/repository/interfaces
 - name: github.com/valyala/bytebufferpool
   version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
 - name: github.com/valyala/fasttemplate
   version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
-- name: github.com/vito/go-interact
-  version: 6928e8fe3693603deb4d861856effaee10db7bcf
-  repo: https://github.com/vito/go-interact
-  subpackages:
-  - interact
-  - interact/terminal
+- name: github.com/xanzy/ssh-agent
+  version: ba9c9e33906f58169366275e3450db66139a31a9
 - name: golang.org/x/crypto
   version: e7ba82683099cae71475961448ab8f903ea77c26
-  repo: https://go.googlesource.com/crypto
   subpackages:
   - curve25519
   - ed25519
@@ -226,36 +124,25 @@ imports:
   - ssh/knownhosts
   - ssh/terminal
 - name: golang.org/x/net
-  version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   repo: https://go.googlesource.com/net
   subpackages:
   - context
-  - html
   - websocket
 - name: golang.org/x/sys
-  version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   repo: https://go.googlesource.com/sys
   subpackages:
   - unix
-  - windows
-- name: golang.org/x/text
-  version: 210eee5cf7323015d097341bcf7166130d001cd8
-  repo: https://go.googlesource.com/text
+- name: gopkg.in/src-d/go-billy.v3
+  version: e501c17e5a47cc1adfdf16fbf54e60e6dafb92c2
   subpackages:
-  - encoding
-  - internal/gen
-  - internal/tag
-  - internal/utf8internal
-  - language
-  - runes
-  - transform
-  - unicode/cldr
-- name: gopkg.in/src-d/go-billy.v2
-  version: 52497601f113730d14baa00453674376fca22f22
-  subpackages:
+  - helper/chroot
+  - helper/polyfill
   - osfs
+  - util
 - name: gopkg.in/src-d/go-git.v4
-  version: 7e249dfcf28765939bde8f38784b3274b522f880
+  version: ad02bf020460c210660db4fffda7f926b6aae95a
   subpackages:
   - config
   - internal/revision
@@ -264,6 +151,7 @@ imports:
   - plumbing/filemode
   - plumbing/format/config
   - plumbing/format/diff
+  - plumbing/format/gitignore
   - plumbing/format/idxfile
   - plumbing/format/index
   - plumbing/format/objfile
@@ -299,5 +187,4 @@ imports:
   version: 8a331561fe74dadba6edfc59f3be66c22c3b065d
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
-  repo: https://gopkg.in/yaml.v2
 testImports: []
