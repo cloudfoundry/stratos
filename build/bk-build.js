@@ -85,7 +85,6 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor');
-      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', '__vendor');
       // sequentially chain promise
       promise
         .then(function () {
@@ -93,15 +92,15 @@
           return Q.resolve();
         })
         .then(function () {
+          // TODO fix hack for CF CLI symlink
+          var cfCliFixtures = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor', 'code.cloudfoundry.org', 'cli', 'fixtures');
+          fs.removeSync(cfCliFixtures);
+          return Q.resolve();
+        })
+        .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
-          // If checked in vendors exist, merge does in as well
-          console.log("processing plugin: " + JSON.stringify(pluginInfo))
-          if (fs.existsSync(pluginCheckedInVendorPath)){
-            console.log("merging plugin: " + JSON.stringify(pluginInfo) + " " + pluginCheckedInVendorPath)
-            mergeDirs.default(pluginCheckedInVendorPath, goSrc);
-          }
-          // Promise did not guarantee that the operation completed
+          // Promise did not gaurentee that the operation completed
           fs.removeSync(pluginVendorPath);
           return Q.resolve();
         }).catch(function (err) {
@@ -131,6 +130,7 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
+      console.log('Plugin files: ' + fs.readdirSync(fullPluginPath))
       var promise = buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       promises.push(promise);
 
@@ -216,13 +216,6 @@
     return runSequence(
       'init-build',
       'write-plugins-yaml'
-    );
-  });
-  gulp.task('dedup', function () {
-
-    return runSequence(
-      'init-build',
-      'dedup-vendor'
     );
   });
 
