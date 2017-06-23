@@ -56,6 +56,10 @@ const (
 	CLOSE_NO_SESSION
 	CLOSE_NO_CNSI
 	CLOSE_NO_CNSI_USERTOKEN
+	EVENT_CLONED = iota + 10000
+	EVENT_FETCHED_MANIFEST
+	EVENT_PUSH_STARTED
+	EVENT_PUSH_COMPLETED
 
 	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
@@ -86,11 +90,12 @@ var upgrader = websocket.Upgrader{
 }
 
 type StratosProject struct {
-	Url        string      `json:"url"`
-	CommitHash string      `json:"commit"`
-	Branch     string      `json:"branch"`
+	Url        string     `json:"url"`
+	CommitHash string     `json:"commit"`
+	Branch     string     `json:"branch"`
 	Timestamp  int64      `json:"timestamp"`
 }
+
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Info("Deploying app")
@@ -108,6 +113,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
 	}
+	log.Infof("WebSocket upgraded!")
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
 
@@ -115,18 +121,23 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
 	projectUrl := fmt.Sprintf("https://github.com/%s", project)
-	clonePath, commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket)
+	tempDir, err := ioutil.TempDir("", "git-clone-")
+	defer os.RemoveAll(tempDir)
+
+	commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket, tempDir)
 	if err != nil {
 		return err
 	}
+
+	sendEvent(clientWebSocket, EVENT_CLONED)
 
 	log.Infof("Cloned repository")
-	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch, clientWebSocket)
+	manifest, err := fetchManifest(tempDir, projectUrl, commitHash, branch, clientWebSocket)
 	if err != nil {
 		return err
 	}
 
-	log.Infof("WebSocket upgraded!")
+	sendEvent(clientWebSocket, EVENT_FETCHED_MANIFEST)
 
 	err = sendManifest(manifest, clientWebSocket)
 	if err != nil {
@@ -156,12 +167,14 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	cfAppPush.pushCommand.SetDependency(deps, false)
 
-	err = cfAppPush.flagContext.Parse("-p", clonePath, "-f", clonePath + "/manifest.yml")
+	err = cfAppPush.flagContext.Parse("-p", tempDir, "-f", tempDir + "/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
+
+	sendEvent(clientWebSocket, EVENT_PUSH_STARTED)
 
 	err = cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
 	if err != nil {
@@ -169,6 +182,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
 		return err
 	}
+	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
 	closingMessage, _ := getMarshalledSocketMessage("", CLOSE_SUCCESS)
 	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
@@ -323,15 +337,11 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	return repo, nil
 }
 
-func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn) (string, string, error) {
+func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-	dir, err := ioutil.TempDir("", "git-clone-")
-	fmt.Printf("Directory is: %s", dir)
+	fmt.Printf("Directory is: %s", tempDir)
 
-	if err != nil {
-		return "", "", err
-	}
-	repo, err := git.PlainClone(dir, false, &git.CloneOptions{
+	repo, err := git.PlainClone(tempDir, false, &git.CloneOptions{
 		URL:               repoUrl,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
@@ -339,7 +349,7 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 	if err != nil {
 		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
-		return "", "", err
+		return "", err
 	}
 
 	branchRef := fmt.Sprintf("refs/remotes/origin/%s", branch)
@@ -353,17 +363,17 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 		if err != nil {
 			log.Infof("Failed to checkout %s branch in repo %s, %s due to %+v", branch, repoUrl, branchRef, err)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
-			return "", "", err
+			return "", err
 		}
 	}
 
 	head, err := repo.Head()
 	if err != nil {
 		log.Infof("Unable to fetch HEAD in branch due to %s", err)
-		return "", "", err
+		return "", err
 	}
 
-	return dir, head.Hash().String(), nil
+	return head.Hash().String(), nil
 }
 
 // This assumes manifest lives in the root of the app
@@ -448,4 +458,9 @@ func sendManifest(manifest manifest.Applications, clientWebSocket *websocket.Con
 func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
 	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
 	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
+}
+
+func sendEvent(clientWebSocket *websocket.Conn, event MessageType){
+	msg, _ := getMarshalledSocketMessage("", event)
+	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }
