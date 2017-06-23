@@ -31,20 +31,22 @@
   }
 
   /**
-   * @memberof cloud-foundry.view.dashboard.cluster
-   * @name AssignUsersWorkflowController
+   * @memberof appDeployAppService
+   * @name DeployAppController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @param {object} $state - the angular $state service
    * @param {object} $location - the angular $location service
    * @param {object} $websocket - the angular $websocket service
-   * @param {object} $interval - the angular $interval service
    * @param {object} $translate - the angular $translate service
+   * @param {object} $log - the angular $log service
+   * @oaram {object} appEventService - the application event service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log,
-                               modelManager) {
+                               modelManager, appEventService) {
 
     var vm = this;
 
@@ -110,7 +112,7 @@
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
       onEnter: function () {
-        vm.allowBack = false;
+        allowBack = false;
         if (vm.data.deployStatus) {
           // Previously been at this step, no need to fetch instances again
           return;
@@ -172,11 +174,7 @@
     // Actions for the wizard controller
     vm.actions = {
       stop: function () {
-        $uibModalInstance.dismiss();
-        if (hasPushStarted) {
-          // Refresh app list, cf app could have been created (this is the same as when we delete an app)
-          appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-        }
+        $uibModalInstance.dismiss({ reload: !!hasPushStarted });
         resetSocket();
       },
 

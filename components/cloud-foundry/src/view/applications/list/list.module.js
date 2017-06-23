@@ -533,7 +533,13 @@
     }
 
     function deployApplication() {
-      appDeployAppService.deploy();
+      appDeployAppService.deploy().result.catch(function (result) {
+        // Do we need to reload the app collection to show the newly added app?
+        if (_.get(result, 'reload')) {
+          // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+          _reload();
+        }
+      });
     }
 
     /**

@@ -90,7 +90,7 @@
         "CLOSE_FAILURE": "Unknown failure",
         "CLOSE_INVALID_MANIFEST": "Invalid manifest in repository",
         "CLOSE_NO_MANIFEST": "Failed to find manifest in repository",
-        "CLOSE_PUSH_ERROR": "Failed to run [[@:cloud-foundry]] push",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push unsuccessful",
         "CLOSE_NO_SESSION": "Failed to create session",
         "CLOSE_NO_CNSI": "Unknown [[@:cloud-foundry]] instance",
         "CLOSE_NO_CNSI_USERTOKEN": "Invalid [[@:cloud-foundry]] token"
