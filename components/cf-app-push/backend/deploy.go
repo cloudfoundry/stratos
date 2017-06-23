@@ -51,7 +51,11 @@ const (
 	CLOSE_NO_MANIFEST
 	CLOSE_INVALID_MANIFEST
 	CLOSE_FAILED_CLONE
+	CLOSE_FAILED_NO_BRANCH
 	CLOSE_FAILURE
+	CLOSE_NO_SESSION
+	CLOSE_NO_CNSI
+	CLOSE_NO_CNSI_USERTOKEN
 
 	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
@@ -111,16 +115,14 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
 	projectUrl := fmt.Sprintf("https://github.com/%s", project)
-	clonePath, commitHash, err := cloneRepository(projectUrl, branch)
+	clonePath, commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket)
 	if err != nil {
-		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return err
 	}
 
 	log.Infof("Cloned repository")
-	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch)
+	manifest, err := fetchManifest(clonePath, projectUrl, commitHash, branch, clientWebSocket)
 	if err != nil {
-		sendErrorMessage(clientWebSocket, err, CLOSE_NO_MANIFEST)
 		return err
 	}
 
@@ -129,7 +131,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	err = sendManifest(manifest, clientWebSocket)
 	if err != nil {
 		log.Warnf("Failed to read or send manifest due to %s", err)
-		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -140,11 +142,10 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		clientWebSocket: clientWebSocket,
 	}
 
-	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName)
+	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName, clientWebSocket)
 	log.Warnf("Error %+v", err)
 	if err != nil {
 		log.Warnf("Failed to initialise config repo due to error %+v", err)
-		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -269,12 +270,13 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	return deps
 
 }
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string) (coreconfig.Repository, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (coreconfig.Repository, error) {
 
 	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
 	if err != nil {
 		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGuid, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI)
 		return configRepo, err
 	}
 
@@ -284,6 +286,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 
 	if err != nil {
 		log.Warnf("Failed to retrieve session user")
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return configRepo, err
 	}
 	log.Infof("Found User Session ID")
@@ -292,6 +295,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGuid, userId)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGuid)
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
 		return configRepo, errors.New("Failed to find token record")
 	}
 
@@ -319,7 +323,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	return repo, nil
 }
 
-func cloneRepository(repoUrl string, branch string) (string, string, error) {
+func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn) (string, string, error) {
 
 	dir, err := ioutil.TempDir("", "git-clone-")
 	fmt.Printf("Directory is: %s", dir)
@@ -334,6 +338,7 @@ func cloneRepository(repoUrl string, branch string) (string, string, error) {
 
 	if err != nil {
 		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", "", err
 	}
 
@@ -347,6 +352,7 @@ func cloneRepository(repoUrl string, branch string) (string, string, error) {
 		err = workTree.Checkout(checkoutOpts)
 		if err != nil {
 			log.Infof("Failed to checkout %s branch in repo %s, %s due to %+v", branch, repoUrl, branchRef, err)
+			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 			return "", "", err
 		}
 	}
@@ -361,19 +367,21 @@ func cloneRepository(repoUrl string, branch string) (string, string, error) {
 }
 
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, projectUrl string, commitHash string, branch string) (manifest.Applications, error) {
+func fetchManifest(repoPath string, projectUrl string, commitHash string, branch string, clientWebSocket *websocket.Conn) (manifest.Applications, error) {
 
 	var manifest manifest.Applications
 	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
 		log.Warnf("Failed to read manifest in path %s", manifestPath)
+		sendErrorMessage(clientWebSocket, err, CLOSE_NO_MANIFEST)
 		return manifest, err
 	}
 
 	err = yaml.Unmarshal(data, &manifest)
 	if err != nil {
 		log.Warnf("Failed to unmarshall manifest in path %s", manifestPath)
+		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
 		return manifest, err
 	}
 
@@ -397,6 +405,7 @@ func fetchManifest(repoPath string, projectUrl string, commitHash string, branch
 	marshalledYaml, err := yaml.Marshal(manifest)
 	if err != nil {
 		log.Warnf("Failed to marshall manifest in path %v", manifest)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return manifest, err
 	}
 	ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
