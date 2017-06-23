@@ -12,7 +12,8 @@
       scope: {
         webSocketUrl: '=?',
         webSocket: '=?',
-        filter: '=?'
+        filter: '=?',
+        disableStatus: '=?'
       },
       controller: CfLogViewerController,
       controllerAs: 'cfLogViewer',

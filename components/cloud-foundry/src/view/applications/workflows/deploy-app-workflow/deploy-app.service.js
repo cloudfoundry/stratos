@@ -20,7 +20,9 @@
           {
             detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/deploy-app.html',
             controller: DeployAppController,
-            controllerAs: 'deployApp'
+            controllerAs: 'deployApp',
+            dialog: true,
+            class: 'dialog-form-wizard'
           },
           context
         );
@@ -41,7 +43,7 @@
    * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function DeployAppController($q, $uibModalInstance, $state, $location, $websocket, $interval, $translate, $log,
+  function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log,
                                modelManager) {
 
     var vm = this;
@@ -49,9 +51,30 @@
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-    var stopPollingForAppGuid, polling, newAppGuid;
+    var hasPushStarted, newAppGuid;
 
     var allowBack = false;
+
+    var templatePath = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
+
+    var socketEventTypes = {
+      DATA: 20000,
+      MANIFEST: 20001,
+      CLOSE_SUCCESS: 20002,
+      CLOSE_PUSH_ERROR: 40003,
+      CLOSE_NO_MANIFEST: 40004,
+      CLOSE_INVALID_MANIFEST:40005,
+      CLOSE_FAILED_CLONE: 40006,
+      CLOSE_FAILED_NO_BRANCH: 40007,
+      CLOSE_FAILURE: 40008,
+      CLOSE_NO_SESSION: 40009,
+      CLOSE_NO_CNSI: 40010,
+      CLOSE_NO_CNSI_USERTOKEN: 40011,
+      EVENT_CLONED: 10012,
+      EVENT_FETCHED_MANIFEST: 10013,
+      EVENT_PUSH_STARTED: 10014,
+      EVENT_PUSH_COMPLETED: 10015
+    };
 
     vm.data = {
       serviceInstances: [],
@@ -77,21 +100,9 @@
       }
     };
 
-    // $scope.$watch(function () {
-    //   return vm.userInput.file;
-    // }, function (val) {
-    //   if (val) {
-    //     vm.userInput.filename = val.name;
-    //   } else {
-    //     vm.userInput.filename = '';
-    //   }
-    // });
-
-    var path = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
-
     var stepInfo = {
       title: 'deploy-app-dialog.step-info.title',
-      templateUrl: path + 'deploy-app-bits.html',
+      templateUrl: templatePath + 'deploy-app-bits.html',
       formName: 'deploy-info-form',
       data: vm.data,
       userInput: vm.userInput,
@@ -99,7 +110,7 @@
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
       onEnter: function () {
-        allowBack = false;
+        vm.allowBack = false;
         if (vm.data.deployStatus) {
           // Previously been at this step, no need to fetch instances again
           return;
@@ -123,41 +134,23 @@
     };
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
-      templateUrl: path + 'deploy-app-deploying.html',
+      templateUrl: templatePath + 'deploy-app-deploying.html',
       data: vm.data,
       userInput: vm.userInput,
       cancelBtnText: 'buttons.close',
       nextBtnText: 'deploy-app-dialog.step-deploying.next-button',
       showBusyOnEnter: 'deploy-app-dialog.step-deploying.busy',
       allowNext: function () {
-        return newAppGuid;
+        return !!newAppGuid;
       },
       onEnter: function () {
         allowBack = false;
         return startDeploy().catch(function (error) {
+          allowBack = false;
           return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', { reason: error }));
         });
       },
       isLastStep: true
-    };
-
-    var socketEventTypes = {
-      DATA: 20000,
-      MANIFEST: 20001,
-      CLOSE_SUCCESS: 20002,
-      CLOSE_PUSH_ERROR: 40003,
-      CLOSE_NO_MANIFEST: 40004,
-      CLOSE_INVALID_MANIFEST:40005,
-      CLOSE_FAILED_CLONE: 40006,
-      CLOSE_FAILED_NO_BRANCH: 40007,
-      CLOSE_FAILURE: 40008,
-      CLOSE_NO_SESSION: 40009,
-      CLOSE_NO_CNSI: 40010,
-      CLOSE_NO_CNSI_USERTOKEN: 40011,
-      EVENT_CLONED: 10012,
-      EVENT_FETCHED_MANIFEST: 10013,
-      EVENT_PUSH_STARTED: 10014,
-      EVENT_PUSH_COMPLETED: 10015
     };
 
     vm.options = {
@@ -180,6 +173,11 @@
     vm.actions = {
       stop: function () {
         $uibModalInstance.dismiss();
+        if (hasPushStarted) {
+          // Refresh app list, cf app could have been created (this is the same as when we delete an app)
+          appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        }
+        resetSocket();
       },
 
       finish: function () {
@@ -189,8 +187,43 @@
           guid: newAppGuid,
           newlyCreated: false
         });
+        resetSocket();
       }
     };
+
+    $scope.$on('$destroy', resetSocket);
+
+    function createSocketUrl(serviceInstance, org, space, project, branch) {
+      var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
+      var url = protocol + '://' + $location.host() + ':' + $location.port();
+      url += '/pp/v1/' + serviceInstance.guid + '/' + org.metadata.guid + '/' + space.metadata.guid + '/deploy';
+      url += '?project=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
+      if (branch) {
+        url += '&branch=' + branch;
+      }
+      return url;
+    }
+
+    function resetSocket() {
+      if (vm.data.webSocket) {
+        vm.data.webSocket.onMessage = _.noop;
+        vm.data.webSocket.onClose = _.noop;
+        vm.data.webSocket.close(true);
+      }
+    }
+
+    function discoverAppGuid(appName) {
+      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      return spaceModel.listAllAppsForSpace(vm.userInput.serviceInstance.guid, vm.userInput.space.metadata.guid)
+        .then(function (apps) {
+          var app = _.find(apps, 'entity.name', appName);
+          console.log('discoverAppGuid: name', appName);
+          console.log('discoverAppGuid: app', app);
+          if (app) {
+            newAppGuid = app.metadata.guid;
+          }
+        });
+    }
 
     function logFilter(messageObj) {
       if (messageObj.type !== socketEventTypes.DATA) {
@@ -200,35 +233,15 @@
       return moment(messageObj.timestamp * 1000).format('HH:mm:ss') + ': ' + messageObj.message.trim() + '\n';
     }
 
-    function createSocketUrl(serviceInstance, org, space, project, branch) {
-      var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
-      var url = protocol + '://' + $location.host() + ':' + $location.port();
-      // var url = 'wss://ddb03543.ngrok.io';
-      url += '/pp/v1/' + serviceInstance.guid + '/' + org.metadata.guid + '/' + space.metadata.guid + '/deploy';
-      url += '?project=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
-      if (branch) {
-        url += '&branch=' + branch;
-      }
-      return url;
-    }
-
-    function discoverAppGuid(appName) {
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      return spaceModel.listAllAppsForSpace(vm.userInput.serviceInstance.guid, vm.userInput.space.metadata.guid)
-        .then(function (apps) {
-          var app = _.find(apps, 'entity.name', appName);
-          if (app) {
-            newAppGuid = app.metadata.guid;
-          }
-        });
-    }
-
     function startDeploy() {
       vm.data.deployStatus = vm.data.deployState.UNKNOWN;
+      hasPushStarted = false;
+      newAppGuid = null;
 
       var deployingPromise = $q.defer();
 
       function pushStarted() {
+        hasPushStarted = true;
         vm.data.deployStatus = vm.data.deployState.PUSHING;
         deployingPromise.resolve();
         $log.debug('Deploy Application: Push Started');
@@ -248,6 +261,8 @@
         $log.warn('Deploy Application: Failed: ' + failureDescription);
       }
 
+      resetSocket();
+
       // Determine web socket url and open connection
       var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space,
         vm.userInput.githubProject, vm.userInput.githubBranch);
@@ -263,12 +278,11 @@
 
       vm.data.webSocket.onMessage(function (message) {
         var logData = angular.fromJson(message.data);
-        console.log(logData.message);
 
         switch (logData.type) {
           case socketEventTypes.DATA:
-            console.log(logData.message);
             // Ignore, handled by custom log viewer filter
+            console.log(logData.message);
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
             deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
@@ -316,10 +330,13 @@
             $log.debug('Deploy Application: Push Completed');
             break;
           case socketEventTypes.MANIFEST:
-            console.log(logData);
+            console.log('1manifest: ', logData);
             var manifest = angular.fromJson(logData.message);
             var app = _.get(manifest, 'Applications[0]', {});
+            console.log('2manifest: ', manifest);
+            console.log('3manifest: ', app);
             if (app.Name) {
+              console.log('3manifest: ', app.Name);
               discoverAppGuid(app.Name);
             }
             break;

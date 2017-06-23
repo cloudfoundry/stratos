@@ -86,7 +86,7 @@
     "socket": {
       "event-type": {
         "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (invalid branch), please ensure github details are correct",
-        "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure github details are correct",
+        "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure github details are correct and try again",
         "CLOSE_FAILURE": "Unknown failure",
         "CLOSE_INVALID_MANIFEST": "Invalid manifest in repository",
         "CLOSE_NO_MANIFEST": "Failed to find manifest in repository",

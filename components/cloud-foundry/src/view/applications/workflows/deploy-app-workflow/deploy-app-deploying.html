@@ -4,4 +4,4 @@
   <span ng-if="step.data.deployStatus === step.data.deployState.FAILED" translate>{{ step.data.deployFailure }}</span>
   <bounce-spinner ng-if="step.data.deployStatus === step.data.deployState.PUSHING" classes="bounce-spinner-sm"></bounce-spinner>
 </div>
-<cf-log-viewer web-socket="step.data.webSocket" filter="step.data.logFilter"/>
+<cf-log-viewer web-socket="step.data.webSocket" filter="step.data.logFilter" disable-status="true"/>

@@ -2,15 +2,11 @@
   'use strict';
 
   /* eslint-disable angular/no-private-call */
-  fdescribe('deploy location directive', function () {
+  describe('deploy location directive', function () {
     var $httpBackend, $scope, that, $q, appModel, authModel, cfOrganizationModel;
 
     beforeEach(module('templates'));
     beforeEach(module('console-app'));
-
-    var values = {
-      serviceInstances: []
-    };
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -22,7 +18,9 @@
       $q = $injector.get('$q');
       cfOrganizationModel = $injector.get('cfOrganizationModel');
 
-      $scope.values = values;
+      $scope.values = {
+        serviceInstances: []
+      };
 
       var markup = '<deploy-location service-instances="values.serviceInstances" service-instance="values.serviceInstance" organization="values.organization" space="values.space"></deploy-location>';
 
@@ -55,10 +53,10 @@
     describe('- after init', function () {
 
       it('should watch userInput.serviceInstance', function () {
-        spyOn(cfOrganizationModel, 'listAllOrganizations').and.returnValue($q.resolve());
+        spyOn(that, 'getOrganizations');
         that.serviceInstance = {};
         $scope.$apply();
-        expect(cfOrganizationModel.listAllOrganizations).toHaveBeenCalled();
+        expect(that.getOrganizations).toHaveBeenCalled();
       });
 
       it('should watch userInput.organization', function () {
@@ -71,8 +69,9 @@
           }
         };
 
-        spyOn(cfOrganizationModel, 'listAllOrganizations').and.returnValue($q.resolve([]));
-        spyOn(cfOrganizationModel, 'listAllSpacesForOrganization').and.returnValue($q.resolve([]));
+        spyOn(that, 'getOrganizations');
+        spyOn(that, 'getSpacesForOrganization');
+
         that.serviceInstance = {
           guid: 'guid'
         };
@@ -83,22 +82,20 @@
           }
         };
         $scope.$apply();
-        expect(cfOrganizationModel.listAllOrganizations).toHaveBeenCalled();
         expect(that.space).toBe(null);
-        expect(cfOrganizationModel.listAllSpacesForOrganization).toHaveBeenCalledWith('guid', 'organization-guid');
-
+        expect(that.getSpacesForOrganization).toHaveBeenCalled();
       });
 
     });
 
-    fdescribe('#getOrganizations', function () {
+    describe('#getOrganizations', function () {
       var organizations;
 
       beforeEach(function () {
         stopWatch();
         _.set(that, 'serviceInstance.guid', 'guid');
-        // simulateUserInput();
-        // $scope.$apply();
+        simulateUserInput();
+        $scope.$apply();
       });
 
       afterEach(function () {
@@ -143,7 +140,7 @@
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
         expect(that.organizations.length).toBe(0);
-        expect(that.userInput.organization).toBeUndefined();
+        expect(that.organization).toBe(null);
       });
     });
 
@@ -192,7 +189,7 @@
         $scope.$apply();
         expect(p.$$state.status).toBe(1);
         expect(that.spaces.length).toBe(0);
-        expect(that.space).toBeUndefined();
+        expect(that.space).toBe(null);
       });
     });
   });
