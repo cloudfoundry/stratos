@@ -5,41 +5,60 @@
   space="step.userInput.space"
 ></deploy-location>
 <!--<div class="" file-drop="step.userInput.file">-->
-  <!--<p class="control-title" translate>Application Bits</p>-->
-  <!--<p translate>-->
-    <!--You can upload a zip file containing your application by either selecting the file below or by dragging and dropping-->
-    <!--it onto this area. Alternatively provide a github URL in the box below.-->
-  <!--</p>-->
-  <!--<div>-->
-    <!--<input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"/>-->
-    <!--<label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>-->
-  <!--</div>-->
-  <!--<br>-->
-  <!--<div class="form-group form-group-large">-->
-    <!--<label class="control-label" translate>Application File</label>-->
-    <!--<input type="text" class="form-control" ng-value="step.userInput.file.name" readonly/>-->
-  <!--</div>-->
-  <!--<div class="form-group form-group-large" focusable-input>-->
-    <!--<label class="control-label" translate>Github url</label>-->
-    <!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
-  <!--</div>-->
+<!--<p class="control-title" translate>Application Bits</p>-->
+<!--<p translate>-->
+<!--You can upload a zip file containing your application by either selecting the file below or by dragging and dropping-->
+<!--it onto this area. Alternatively provide a github URL in the box below.-->
+<!--</p>-->
+<!--<div>-->
+<!--<input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"/>-->
+<!--<label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>-->
+<!--</div>-->
+<!--<br>-->
+<!--<div class="form-group form-group-large">-->
+<!--<label class="control-label" translate>Application File</label>-->
+<!--<input type="text" class="form-control" ng-value="step.userInput.file.name" readonly/>-->
+<!--</div>-->
+<!--<div class="form-group form-group-large" focusable-input>-->
+<!--<label class="control-label" translate>Github url</label>-->
+<!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
+<!--</div>-->
 <!--</div>-->
 <p class="control-title" translate>deploy-app-dialog.step-info.github.label</p>
-<div class="form-group form-group-large" focusable-input>
-  <label class="control-label" translate>deploy-app-dialog.step-info.github.project-label</label>
-  <input type="text" class="form-control" ng-model="step.userInput.githubProject" required
-         placeholder="{{'deploy-app-dialog.step-info.github.project-placeholder' | translate}}"/>
+<div class="deploy-app-github">
+  <div class="deploy-app-github-form">
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
+      <label class="control-label" translate>deploy-app-dialog.step-info.github.project-label</label>
+      <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
+          Project not found
+      </span>
+      <input type="text" class="form-control" name="githubProject" ng-model="step.userInput.githubProject" required
+             placeholder="{{'deploy-app-dialog.step-info.github.project-placeholder' | translate}}"/>
+    </div>
+    <div class="form-group form-group-large" focusable-input>
+      <label class="control-label" translate>deploy-app-dialog.step-info.github.branch-label</label>
+      <input type="text" class="form-control" ng-model="step.userInput.githubBranch" required/>
+    </div>
+  </div>
+  <div ng-if="step.userInput.githubProjectValid && step.data.githubProject" class="deploy-app-github-info">
+    <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
+    <div>
+      <span>{{ step.data.githubProject.description}}</span>
+      <div><span translate>Created At: </span> {{ step.data.githubProject.created_at | amDateFormat: 'L HH:mm:ss'}}</div>
+      <div><span translate>Updated At: </span> {{ step.data.githubProject.updated_at | amDateFormat: 'L HH:mm:ss'}}</div>
+      <div><span translate>Pushed At: </span> {{ step.data.githubProject.pushed_at | amDateFormat: 'L HH:mm:ss'}}</div>
+    </div>
+  </div>
 </div>
-<div class="form-group form-group-large" focusable-input>
-  <label class="control-label" translate>deploy-app-dialog.step-info.github.branch-label</label>
-  <input type="text" class="form-control" ng-model="step.userInput.githubBranch" required/>
-</div>
+
+
 
 <!--<p class="control-title" translate>deploy-app-dialog.step-info.manifest.label</p>-->
 <!--<p class="" translate>deploy-app-dialog.step-info.manifest.description</p>-->
 <!--<div class="form-group form-group-large" focusable-input>-->
-  <!--<label class="control-label" translate>deploy-app-dialog.step-info.manifest.path-label</label>-->
-  <!--<input type="text" class="form-control" ng-model="step.userInput.manifest.location"-->
-         <!--placeholder="{{'deploy-app-dialog.step-info.manifest.path-placeholder' | translate}}"-->
-         <!--required/>-->
+<!--<label class="control-label" translate>deploy-app-dialog.step-info.manifest.path-label</label>-->
+<!--<input type="text" class="form-control" ng-model="step.userInput.manifest.location"-->
+<!--placeholder="{{'deploy-app-dialog.step-info.manifest.path-placeholder' | translate}}"-->
+<!--required/>-->
 <!--</div>-->

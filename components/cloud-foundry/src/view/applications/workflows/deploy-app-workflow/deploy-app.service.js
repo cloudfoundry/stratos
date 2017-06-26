@@ -42,20 +42,17 @@
    * @param {object} $websocket - the angular $websocket service
    * @param {object} $translate - the angular $translate service
    * @param {object} $log - the angular $log service
-   * @oaram {object} appEventService - the application event service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log,
-                               modelManager, appEventService, $timeout) {
+  function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
+                               $timeout, modelManager) {
 
     var vm = this;
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-    var hasPushStarted, newAppGuid;
-
-    var discoverAppTimer;
+    var hasPushStarted, newAppGuid, discoverAppTimer;
 
     // How often to check for the app being created
     var DISCOVER_APP_TIMER_PERIOD = 2000;
@@ -116,6 +113,9 @@
       showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
+      allowNext: function () {
+        return vm.userInput.githubProjectValid;
+      },
       onEnter: function () {
         allowBack = false;
         if (vm.data.deployStatus) {
@@ -199,6 +199,29 @@
       $timeout.cancel(discoverAppTimer);
     });
 
+    var debounceGithubProjectFetch = _.debounce(function () {
+      var project = vm.userInput.githubProject;
+      if (!project || project.length === 0) {
+        vm.userInput.githubProjectValid = false;
+        return;
+      }
+
+      $http.get('https://api.github.com/repos/' + project)
+        .then(function (response) {
+          vm.userInput.githubProjectValid = true;
+          vm.data.githubProject = response.data;
+        })
+        .catch(function (response) {
+          if (response.status === 404) {
+            vm.userInput.githubProjectValid = false;
+          }
+        });
+    }, 1000);
+
+    $scope.$watch(function () {
+      return vm.userInput.githubProject;
+    }, debounceGithubProjectFetch);
+
     function createSocketUrl(serviceInstance, org, space, project, branch) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
       var url = protocol + '://' + $location.host() + ':' + $location.port();
@@ -220,10 +243,10 @@
 
     function discoverAppGuid(appName) {
       if (discoverAppTimer) {
-        return ;
+        return;
       }
 
-      // Poll eveyr 2 seconds to try and locate the app once it has been created
+      // Poll every 2 seconds to try and locate the app once it has been created
       discoverAppTimer = $timeout(function () {
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
         var params = {
