@@ -64,6 +64,25 @@
       },
       "error": "An error occurred retrieving security group metadata",
       "empty": "There are no security groups available"
+    },
+    "events": {
+      "events": "Events",
+      "total": "Total: {{total}}",
+      "empty": "No events available",
+      "error": "An error occurred retrieving events",
+      "detail": "Event Detail",
+      "labels":{
+        "timestamp": "Timestamp",
+        "type": "Type",
+        "actor-name": "Actor Name",
+        "detail": "Detail"
+      },
+      "page-sizes": {
+        "five": "5 per page",
+        "ten": "10 per page",
+        "twenty": "20 per page",
+        "fifty": "50 per page"
+      }
     }
   }
 }
