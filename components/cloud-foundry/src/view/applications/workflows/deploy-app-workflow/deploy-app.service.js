@@ -98,6 +98,7 @@
       serviceInstance: null,
       organization: null,
       space: null,
+      githubProject: '',
       githubBranch: 'master',
       manifest: {
         location: '/manifest.yml'
@@ -220,7 +221,11 @@
 
     $scope.$watch(function () {
       return vm.userInput.githubProject;
-    }, debounceGithubProjectFetch);
+    }, function (oldVal, newVal) {
+      if (oldVal !== newVal) {
+        debounceGithubProjectFetch();
+      }
+    });
 
     function createSocketUrl(serviceInstance, org, space, project, branch) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
