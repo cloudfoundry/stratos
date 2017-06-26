@@ -46,7 +46,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log,
-                               modelManager, appEventService) {
+                               modelManager, appEventService, $timeout) {
 
     var vm = this;
 
@@ -54,6 +54,11 @@
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var hasPushStarted, newAppGuid;
+
+    var discoverAppTimer;
+
+    // How often to check for the app being created
+    var DISCOVER_APP_TIMER_PERIOD = 2000;
 
     var allowBack = false;
 
@@ -190,6 +195,9 @@
     };
 
     $scope.$on('$destroy', resetSocket);
+    $scope.$on('$destroy', function () {
+      $timeout.cancel(discoverAppTimer);
+    });
 
     function createSocketUrl(serviceInstance, org, space, project, branch) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
@@ -211,16 +219,30 @@
     }
 
     function discoverAppGuid(appName) {
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      return spaceModel.listAllAppsForSpace(vm.userInput.serviceInstance.guid, vm.userInput.space.metadata.guid)
-        .then(function (apps) {
-          var app = _.find(apps, 'entity.name', appName);
-          console.log('discoverAppGuid: name', appName);
-          console.log('discoverAppGuid: app', app);
-          if (app) {
-            newAppGuid = app.metadata.guid;
-          }
-        });
+      if (discoverAppTimer) {
+        return ;
+      }
+
+      // Poll eveyr 2 seconds to try and locate the app once it has been created
+      discoverAppTimer = $timeout(function () {
+        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+        var params = {
+          q: 'name:' + appName
+        };
+        spaceModel.listAllAppsForSpace(vm.userInput.serviceInstance.guid, vm.userInput.space.metadata.guid, params)
+          .then(function (apps) {
+            if (apps.length === 1) {
+              newAppGuid = apps[0].metadata.guid;
+            }
+          })
+          .finally(function () {
+            discoverAppTimer = undefined;
+            // Did not find the app - try again
+            if (!newAppGuid) {
+              discoverAppGuid(appName);
+            }
+          });
+      }, DISCOVER_APP_TIMER_PERIOD);
     }
 
     function logFilter(messageObj) {
