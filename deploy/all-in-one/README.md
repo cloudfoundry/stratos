@@ -6,7 +6,7 @@ The All-in-One container sets up the following components in a single container:
 
 ## Requirements:
 
-You will need to have installed both Docker, see:
+You will need to have installed Docker, see:
 
 * [Docker](https://docs.docker.com/engine/installation/)
 
