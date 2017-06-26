@@ -2,30 +2,28 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model.buildPacks
+   * @namespace cloud-foundry.model.events
    * @memberof cloud-foundry.model
    * @name service
-   * @description Build Packs model
+   * @description Events model
    */
   angular
     .module('cloud-foundry.model')
-    .run(registerServiceModel);
+    .run(registerEventsModel);
 
-  function registerServiceModel(modelManager, apiManager, modelUtils) {
+  function registerEventsModel(modelManager, apiManager, modelUtils) {
     modelManager.register('cloud-foundry.model.events', new Events(apiManager, modelUtils));
   }
 
   /**
-   * @name BuildPacks
-   * @description Fetches buildpack metadata for a CF
+   * @name Events
+   * @description Fetches event metadata for CF
    * @param {object} apiManager - Api Manager
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
    * @returns {object}
    */
   function Events(apiManager, modelUtils) {
-
     var eventsApi = apiManager.retrieve('cloud-foundry.api.Events');
-
     var model = {
       fetch: fetch
     };
@@ -34,7 +32,7 @@
 
     /**
      * @name fetch
-     * @description fetch buildpack metadata
+     * @description fetch CF event metadata
      * @param {Object} cnsiGuid - Cluster Guid
      * @param {string} actee - Guid fo the actee to return the events for
      * @param {int} page - Page number to return (first page is 1)

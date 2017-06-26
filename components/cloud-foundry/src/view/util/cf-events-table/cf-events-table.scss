@@ -12,6 +12,14 @@ table.cf-events-table tr {
     }
   }
 
+  th.cf-events-col-timestamp {
+    min-width: 90px;
+  }
+
+  th.cf-events-col-actor-name {
+    min-width: 110px;
+  }
+
   .cf-event-detail-item {
     display: flex;
     flex-direction: row;

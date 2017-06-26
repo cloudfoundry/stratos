@@ -104,8 +104,9 @@
       frameworkDetailView(
         {
           templateUrl: 'plugins/cloud-foundry/view/util/cf-events-table/cf-events-detail.html',
-          class: 'detail-view-dialog cf-events-detail-dialog',
-          title: 'cf.events.detail'
+          dialog: true,
+          title: 'cf.events.detail',
+          class: 'cf-events-detail-dialog'
         },
         item
       );
