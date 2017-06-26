@@ -58,7 +58,7 @@
     "title": "Deploy Application",
     "button-deploy": "Deploy",
     "step-info": {
-      "title": "Information",
+      "title": "Application",
       "github": {
         "label": "Public Github",
         "project-label": "Project",
@@ -75,7 +75,7 @@
       "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
     },
     "step-deploying": {
-      "title": "Deploying",
+      "title": "Deploy",
       "busy": "Starting deployment",
       "title-deploying": "Deploying",
       "title-deploy-failed": "Failed to deploy. Reason: {{reason}}",
