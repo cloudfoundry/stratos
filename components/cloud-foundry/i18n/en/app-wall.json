@@ -63,7 +63,13 @@
         "label": "Public Github",
         "project-label": "Project",
         "project-placeholder": "suse/stratos-ui",
-        "branch-label": "Project Branch"
+        "branch-label": "Project Branch",
+        "branch-placeholder": "Select Branch",
+        "branch-last-commit": "Last Commit",
+        "branch-last-commit-date": "Date: ",
+        "branch-last-commit-sha": "Sha: ",
+        "branch-last-commit-message": "Message: ",
+        "branch-last-commit-committer": "Committer: "
       },
       "manifest": {
         "label": "Manifest",

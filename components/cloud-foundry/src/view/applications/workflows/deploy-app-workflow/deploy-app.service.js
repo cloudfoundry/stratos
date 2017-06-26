@@ -91,7 +91,8 @@
         DEPLOYED: 5,
         FAILED: 6,
         SOCKET_OPEN: 7
-      }
+      },
+      githubBranches: []
     };
 
     vm.userInput = {
@@ -211,6 +212,21 @@
         .then(function (response) {
           vm.userInput.githubProjectValid = true;
           vm.data.githubProject = response.data;
+
+          $http.get('https://api.github.com/repos/' + project + '/branches')
+            .then(function (response) {
+              vm.data.githubBranches.length = 0;
+              [].push.apply(vm.data.githubBranches, _.map(response.data, function selectOptionMapping(o) {
+                return {
+                  label: o.name,
+                  value: o
+                };
+              }));
+            })
+            .catch(function () {
+              vm.data.githubBranches.length = 0;
+            });
+
         })
         .catch(function (response) {
           if (response.status === 404) {
@@ -224,6 +240,20 @@
     }, function (oldVal, newVal) {
       if (oldVal !== newVal) {
         debounceGithubProjectFetch();
+      }
+    });
+
+    $scope.$watch(function () {
+      return vm.userInput.githubBranch;
+    }, function (oldVal, newVal) {
+      if (oldVal !== newVal) {
+        $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + vm.userInput.githubBranch.commit.sha)
+          .then(function (response) {
+            vm.data.githubCommit = response.data;
+          })
+          .catch(function () {
+            delete vm.data.githubCommit;
+          });
       }
     });
 
@@ -313,7 +343,7 @@
 
       // Determine web socket url and open connection
       var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space,
-        vm.userInput.githubProject, vm.userInput.githubBranch);
+        vm.userInput.githubProject, vm.userInput.githubBranch.name);
 
       vm.data.webSocket = $websocket(socketUrl, null, {
         reconnectIfNotNormalClose: false

@@ -333,13 +333,11 @@
       }
 
       var realAppend = function () {
-        console.log('realAppend 1');
         if (paused) {
           deferredAppend = true;
           return;
         }
         deferredAppend = false;
-        console.log('realAppend 2');
         logTextArea.innerHTML = logViewer.currentLog;
         rollNextLogDiv();
         autoScroll();
@@ -386,9 +384,7 @@
       }
 
       function closeWebSocket() {
-        console.log('1closeWebSocket');
         if (logViewer.streaming && logViewer.webSocketConnection) {
-          console.log('2closeWebSocket');
           logViewer.normalClose = true;
           logViewer.webSocketConnection.close(true);
         }
@@ -396,7 +392,6 @@
 
       /* eslint-disable angular/no-private-call */
       function safeApply() {
-        console.log('!!!!safeApply', $rootScope.$$phase);
         if ($scope.$$destroyed || $scope.$$phase || $rootScope.$$phase) {
           return;
         }
@@ -424,7 +419,6 @@
             closeWebSocket();//logViewer.webSocketConnection.close(true)
           }
           logViewer.webSocketConnection = logViewer.websocket;
-          console.log('requestStreamingLog', logViewer.webSocketConnection.readyState);
           if (logViewer.webSocketConnection.readyState === 1) {
             onOpen();
           } else {
@@ -437,11 +431,9 @@
 
         logViewer.webSocketConnection.onMessage(function (message) {
           var logData = message.data;
-          // console.log('1logViewer:', logData);
           if (angular.isFunction(logViewer.filter)) {
             logData = logViewer.filter(logData);
           }
-          // console.log('2logViewer:', logData);
           if (logData.length < 1) {
             return;
           }
@@ -452,8 +444,6 @@
             htmlMessage = logData.replace(/</g, '&lt;'); // Escape embedded markup
           }
           logViewer.currentLog += htmlMessage;
-          // console.log('3logViewer:', htmlMessage);
-          // console.log('4logViewer:', logViewer.currentLog);
           appendLog();
         }, {autoApply: false});
 
