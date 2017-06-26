@@ -1,0 +1,48 @@
+  <div ng-show="cfeCtrl.isLoading" class="cf-event-table-loading">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <table class="table cf-events-table"
+        ng-class="{'cf-event-table-loading': cfeCtrl.isLoading}"
+        st-table="cfeCtrl.events"
+        st-pipe="cfeCtrl.middleware">
+    <thead>
+      <tr>
+        <td class="text-center"
+        st-template="plugins/cloud-foundry/view/util/cf-events-table/cf-events-table-paginator.html"
+        st-pagination=""
+        st-displayed-pages="5"
+        ng-init="options=cfeCtrl"
+        st-items-by-page="cfeCtrl.itemsPerPage" colspan="4">
+        </td>
+      </tr>
+      <tr >
+        <th translate class="column">cf.events.labels.timestamp</th>
+        <th translate class="column">cf.events.labels.type</th>
+        <th translate class="column">cf.events.labels.actor-name</th>
+        <th translate class="column">cf.events.labels.detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-click="cfeCtrl.showDetail(row)" class="cf-event-row" ng-repeat="row in cfeCtrl.events">
+        <td class="cf-event-timestamp">{{ row.entity.timestamp | amDateFormat: 'L HH:mm:ss'}}</td>
+        <td><div class="cf-event-type-part" ng-repeat="typePart in row.entity.type.split('.')">{{typePart}}</div></td>
+        <td>
+          <div class="cf-event-actor-type">
+            <i class="material-icons">{{ cfeCtrl.iconForType( row.entity.actor_type) }}</i>
+            <span>{{ row.entity.actor_name }}</span>
+          </td>
+        <td>
+          <div class="cf-event-detail-item" ng-repeat="(field, value) in row.entity.metadata">
+            <div class="cf-event-field">{{ field }}</div>
+            <div class="cf-event-value">{{ value }}</div>
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="cfeCtrl.totalItemCount === 0">
+        <td colspan="4">cf.events.empty</td>
+      </tr>
+      <tr ng-if="cfeCtrl.totalItemCount === -1">
+        <td colspan="4">cf.events.error</td>
+      </tr>
+    </tbody>
+  </table>
