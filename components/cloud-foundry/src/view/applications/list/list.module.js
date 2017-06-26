@@ -3,8 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.list', [
-      'cloud-foundry.view.applications.list.gallery-view',
-      'cloud-foundry.view.applications.list.deployApplication'
+      'cloud-foundry.view.applications.list.gallery-view'
     ])
     .config(registerRoute);
 
@@ -31,10 +30,9 @@
    * @param {object} appUtilsService - the appUtilsService service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @param {object} appDeployAppService - the appDeployAppService service
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, frameworkDetailView, cfOrganizationModel, appDeployAppService) {
+                                      appUtilsService, frameworkDetailView, cfOrganizationModel) {
 
     var vm = this;
 
@@ -86,9 +84,6 @@
     vm.toggleFilterPanel = toggleFilterPanel;
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
-    vm.showAddApplicationButton = showAddApplicationButton;
-    vm.addApplication = addApplication;
-    vm.deployApplication = deployApplication;
     vm.goToGalleryView = goToGalleryView;
 
     angular.element($window).on('resize', onResize);
@@ -506,41 +501,26 @@
       }
     }
 
-    /**
-     * @function showAddApplicationButton
-     * @description Implements the logic for showing the `Add Application` button
-     * @returns {boolean} true if the user is an admin or a Space developer to any CF
-     */
-    function showAddApplicationButton() {
-      if (isAdminInAnyCf()) {
-        return true;
+    vm.model.applicationActions.push({
+      label: 'app-wall.add-application',
+      position: 1,
+      show: function showAddApplicationButton() {
+        if (isAdminInAnyCf()) {
+          return true;
+        }
+        return !disableAddApplicationButton();
+      },
+      disable: disableAddApplicationButton,
+      action: function addApplication() {
+        frameworkDetailView(
+          {
+            templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
+            dialog: true,
+            class: 'dialog-form-large'
+          }
+        );
       }
-      return !disableAddApplicationButton();
-    }
-
-    /**
-     * @function addApplication
-     * @description Shows the Add Application dialog
-     */
-    function addApplication() {
-      frameworkDetailView(
-        {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
-          dialog: true,
-          class: 'dialog-form-large'
-        }
-      );
-    }
-
-    function deployApplication() {
-      appDeployAppService.deploy().result.catch(function (result) {
-        // Do we need to reload the app collection to show the newly added app?
-        if (_.get(result, 'reload')) {
-          // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
-          _reload();
-        }
-      });
-    }
+    });
 
     /**
      * @function disableAddApplicationButton

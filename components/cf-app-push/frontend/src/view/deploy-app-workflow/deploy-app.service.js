@@ -3,11 +3,37 @@
 
   // 'ab-base64'
   angular
-    .module('cloud-foundry.view.applications.list.deployApplication', [])
+    .module('cf-app-push')
     .factory('appDeployAppService', DeployAppService)
-    .controller('cloud-foundry.view.applications.list.deployAppController', DeployAppController);
+    .controller('cf-app-push.deployAppController', DeployAppController);
 
-  function DeployAppService(frameworkDetailView) {
+  function DeployAppService(modelManager, frameworkDetailView) {
+    var model = modelManager.retrieve('cloud-foundry.model.application');
+    model.applicationActions.push({
+      label: 'app-wall.deploy-application',
+      position: 2,
+      show: function showAddApplicationButton() {
+        // if (isAdminInAnyCf()) {
+        //   return true;
+        // }
+        // return !disableAddApplicationButton();
+        return true;
+      },
+      disable: function () {
+        // return disableAddApplicationButton;
+        return false;
+      },
+      action: function addApplication() {
+        // appDeployAppService.deploy().result.catch(function (result) {
+        //   // Do we need to reload the app collection to show the newly added app?
+        //   if (_.get(result, 'reload')) {
+        //     // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+        //     _reload();
+        //   }
+        // });
+      }
+    });
+
     return {
       /**
        * @memberof appDeployAppService
@@ -18,7 +44,7 @@
       deploy: function (context) {
         return frameworkDetailView(
           {
-            detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/deploy-app.html',
+            detailViewTemplateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-app.html',
             controller: DeployAppController,
             controllerAs: 'deployApp',
             dialog: true,
@@ -59,7 +85,7 @@
 
     var allowBack = false;
 
-    var templatePath = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
+    var templatePath = 'plugins/cf-app-push/view/deploy-app-workflow/';
 
     var socketEventTypes = {
       DATA: 20000,
