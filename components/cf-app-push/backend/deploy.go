@@ -18,12 +18,14 @@ import (
 	"code.cloudfoundry.org/cli/cf/actors/servicebuilder"
 	"code.cloudfoundry.org/cli/cf/api"
 	"code.cloudfoundry.org/cli/cf/appfiles"
+	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
 	"code.cloudfoundry.org/cli/cf/commandsloader"
 	"code.cloudfoundry.org/cli/cf/configuration"
 	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
 	"code.cloudfoundry.org/cli/cf/configuration/coreconfig"
 	"code.cloudfoundry.org/cli/cf/configuration/pluginconfig"
+	"code.cloudfoundry.org/cli/cf/flags"
 	"code.cloudfoundry.org/cli/cf/manifest"
 	"code.cloudfoundry.org/cli/cf/models"
 	"code.cloudfoundry.org/cli/cf/net"
@@ -99,6 +101,11 @@ type StratosProject struct {
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Info("Deploying app")
+
+
+	cfAppPush.pushCommand = &application.Push{}
+	metaData := cfAppPush.pushCommand.MetaData()
+	cfAppPush.flagContext = flags.NewFlagContext(metaData.Flags)
 
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")

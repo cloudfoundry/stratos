@@ -43,9 +43,7 @@ func (cfAppPush *CFAppPush) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (cfAppPush *CFAppPush) Init() error {
-	cfAppPush.pushCommand = &application.Push{}
-	metaData := cfAppPush.pushCommand.MetaData()
-	cfAppPush.flagContext = flags.NewFlagContext(metaData.Flags)
+
 	return nil
 }
 
