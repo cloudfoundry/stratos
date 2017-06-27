@@ -11,6 +11,7 @@
         "label": "Public Github",
         "project-label": "Project",
         "project-placeholder": "suse/stratos-ui",
+        "project-not-found": "Project not found",
         "branch-label": "Project Branch",
         "branch-placeholder": "Select Branch",
         "branch-last-commit": "Last Commit",

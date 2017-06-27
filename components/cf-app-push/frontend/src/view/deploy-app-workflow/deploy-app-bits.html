@@ -31,7 +31,7 @@
          ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
       <label class="control-label" translate>deploy-app-dialog.step-info.github.project-label</label>
       <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
-          Project not found
+          deploy-app-dialog.step-info.github.project-not-found
       </span>
       <input type="text" class="form-control" name="githubProject" ng-model="step.userInput.githubProject" required
              placeholder="{{'deploy-app-dialog.step-info.github.project-placeholder' | translate}}"/>

@@ -127,11 +127,6 @@
       });
 
       it('#getOrganizations - no organizations', function () {
-        // spyOn(cfOrganizationModel, 'listAllOrganizations').and.returnValue($q.resolve(organizations));
-        // cfOrganizationModel.listAllOrganizations = function () {
-        //   return $q.resolve([]); // empty array, no organizations
-        // };
-        // organizations = mock.cloudFoundryAPI.Organizations.ListAllOrganizations(123).response['200'].body.resources;
         spyOn(cfOrganizationModel, 'listAllOrganizations').and.returnValue($q.resolve([]));
         appModel.filterParams.orgGuid = 'not all';
         authModel.isAdmin = function () { return true; };
