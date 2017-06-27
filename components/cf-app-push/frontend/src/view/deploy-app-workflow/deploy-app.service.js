@@ -1,59 +1,60 @@
 (function () {
   'use strict';
 
-  // 'ab-base64'
   angular
     .module('cf-app-push')
     .factory('appDeployAppService', DeployAppService)
     .controller('cf-app-push.deployAppController', DeployAppController);
 
-  function DeployAppService(modelManager, frameworkDetailView) {
-    var model = modelManager.retrieve('cloud-foundry.model.application');
-    model.applicationActions.push({
+  function DeployAppService(frameworkDetailView, cfAppWallActions) {
+    cfAppWallActions.actions.push({
       label: 'app-wall.deploy-application',
       position: 2,
-      show: function showAddApplicationButton() {
-        // if (isAdminInAnyCf()) {
-        //   return true;
-        // }
-        // return !disableAddApplicationButton();
+      show: function (context) {
+        if (angular.isFunction(context.show)) {
+          return context.show();
+        }
         return true;
       },
-      disable: function () {
-        // return disableAddApplicationButton;
+      disable: function (context) {
+        if (angular.isFunction(context.disable)) {
+          return context.disable();
+        }
         return false;
       },
-      action: function addApplication() {
-        // appDeployAppService.deploy().result.catch(function (result) {
-        //   // Do we need to reload the app collection to show the newly added app?
-        //   if (_.get(result, 'reload')) {
-        //     // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
-        //     _reload();
-        //   }
-        // });
+      action: function (context) {
+        deploy().result.catch(function (result) {
+          // Do we need to reload the app collection to show the newly added app?
+          if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
+            // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+            context.reload();
+          }
+        });
       }
     });
 
     return {
-      /**
-       * @memberof appDeployAppService
-       * @name deploy
-       * @constructor
-       * @param {object} context - the context for the modal. Used to pass in data
-       */
-      deploy: function (context) {
-        return frameworkDetailView(
-          {
-            detailViewTemplateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-app.html',
-            controller: DeployAppController,
-            controllerAs: 'deployApp',
-            dialog: true,
-            class: 'dialog-form-wizard'
-          },
-          context
-        );
-      }
+      deploy: deploy
     };
+
+    /**
+     * @memberof appDeployAppService
+     * @name deploy
+     * @constructor
+     * @param {object?} context - the context for the modal. Used to pass in data
+     */
+    function deploy(context) {
+      return frameworkDetailView(
+        {
+          detailViewTemplateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-app.html',
+          controller: DeployAppController,
+          controllerAs: 'deployApp',
+          dialog: true,
+          class: 'dialog-form-wizard'
+        },
+        context
+      );
+    }
   }
 
   /**

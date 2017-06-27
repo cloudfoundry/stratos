@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cf-app-push', [ ])
+    .module('cf-app-push', [ 'cloud-foundry' ])
     .run(register);
 
   /* eslint-disable no-unused-vars */

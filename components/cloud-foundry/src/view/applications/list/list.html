@@ -4,12 +4,11 @@
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
   <div class="application-header-right">
-    !!{{ applicationsListCtrl.model.applicationActions}}!!
-    <button ng-repeat="action in applicationsListCtrl.model.applicationActions | orderBy:'position'"
+    <button ng-repeat="action in applicationsListCtrl.appWallActions | orderBy:'position'"
             class="btn btn-primary"
-            ng-if="action.show()"
-            ng-disabled="action.disable()"
-            ng-click="action.action()">{{action.label | translate}}
+            ng-if="action.show(applicationsListCtrl.appWallActionContext)"
+            ng-disabled="action.disable(applicationsListCtrl.appWallActionContext)"
+            ng-click="action.action(applicationsListCtrl.appWallActionContext)">{{action.label | translate}}
     </button>
 
     <!--<button class="btn btn-primary"-->

@@ -1,5 +1,7 @@
 {
-  "deploy-application": "Deploy Application",
+  "app-wall": {
+    "deploy-application": "Deploy Application"
+  },
   "deploy-app-dialog": {
     "title": "Deploy Application",
     "button-deploy": "Deploy",

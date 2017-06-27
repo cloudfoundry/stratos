@@ -32,7 +32,7 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, frameworkDetailView, cfOrganizationModel) {
+                                      appUtilsService, frameworkDetailView, cfOrganizationModel, cfAppWallActions) {
 
     var vm = this;
 
@@ -85,7 +85,12 @@
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
     vm.goToGalleryView = goToGalleryView;
-
+    vm.appWallActions = cfAppWallActions.actions;
+    vm.appWallActionContext = {
+      show: showChangeAppListAction,
+      disable: disableChangeAppListAction,
+      reload: _reload
+    };
     angular.element($window).on('resize', onResize);
 
     appUtilsService.chainStateResolve('cf.applications.list', $state, init);
@@ -501,34 +506,17 @@
       }
     }
 
-    vm.model.applicationActions.push({
-      label: 'app-wall.add-application',
-      position: 1,
-      show: function showAddApplicationButton() {
-        if (isAdminInAnyCf()) {
-          return true;
-        }
-        return !disableAddApplicationButton();
-      },
-      disable: disableAddApplicationButton,
-      action: function addApplication() {
-        frameworkDetailView(
-          {
-            templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
-            dialog: true,
-            class: 'dialog-form-large'
-          }
-        );
-      }
-    });
+    function showChangeAppListAction() {
+      return isAdminInAnyCf() || vm.isSpaceDeveloper;
+    }
 
     /**
-     * @function disableAddApplicationButton
+     * @function disableChangeAppListAction
      * @description Implements the logic for disabling the `Add Application` button
      * @returns {boolean} true is App module is initialising,
      * there no connected endpoints or user is not a space developer
      */
-    function disableAddApplicationButton() {
+    function disableChangeAppListAction() {
       return !vm.ready || vm.model.clusterCount <= 0 || !vm.isSpaceDeveloper;
     }
 

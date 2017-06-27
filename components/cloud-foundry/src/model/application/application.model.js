@@ -100,8 +100,7 @@
       getAppStats: getAppStats,
       returnAppStats: returnAppStats,
       getEnv: getEnv,
-      onAppStateChange: onAppStateChange,
-      applicationActions: []
+      onAppStateChange: onAppStateChange
     };
 
     clearApplication();
