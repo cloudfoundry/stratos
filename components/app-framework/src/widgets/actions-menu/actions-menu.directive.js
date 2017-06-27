@@ -123,7 +123,7 @@
       vm.visibleActions = visibleActions > 0;
       vm.buttonMode = vm.enableButtonMode && visibleActions === 1;
     });
-    
+
     // Allow the menu to be closed by the user of the directive
     vm.menuClose = function () {
       vm.open = false;

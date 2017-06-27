@@ -8,6 +8,8 @@
   /**
    * @name appToolbar
    * @description An application tool bar
+   * @param {object} $window - Angular $window service
+   * @param {object} $timeout - Angular $timeout service
    * @returns {*}
    */
   function appToolbar($window, $timeout) {
