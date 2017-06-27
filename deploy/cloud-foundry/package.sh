@@ -8,6 +8,12 @@ CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TOP_LEVEL=${CF_DIR}/../../
 BOWER_PATH=${NODE_HOME}/bin
 
+# Clean up any previous state
+pushd ${TOP_LEVEL}
+rm -rf node_modules
+rm -rf bower_components
+rm -rf dist
+popd
 
 # Copy the config file
 cp ${CF_DIR}/config.properties ${TOP_LEVEL}

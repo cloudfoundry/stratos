@@ -124,7 +124,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	projectUrl := fmt.Sprintf("https://github.com/%s", project)
 	tempDir, err := ioutil.TempDir("", "git-clone-")
-	//defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(tempDir)
 
 	commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket, tempDir)
 	if err != nil {
