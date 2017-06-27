@@ -31,9 +31,12 @@
         actionTarget: '=?',
         actions: '=',
         menuIcon: '@?',
+        menuIconName: '@?',
         menuLabel: '@?',
         menuPosition: '@?',
-        enableButtonMode: '=?'
+        enableButtonMode: '=?',
+        menuBeforeOpen: '=?',
+        menuClose: '=?'
       },
       controller: ActionsMenuController,
       controllerAs: 'actionsMenuCtrl',
@@ -43,12 +46,12 @@
         var clickAndNamespace = 'click.' + _.uniqueId('actionMenu');
 
         iconElt.on('click', function (event) {
-          handleClick(event, scope, ctrl);
+          handleClick(event, scope, ctrl, element);
         });
 
         iconElt.on('keypress', function (event) {
           if (event.which === enterKeyCode) {
-            handleClick(event, scope, ctrl);
+            handleClick(event, scope, ctrl, element);
           }
         });
 
@@ -71,8 +74,11 @@
       templateUrl: 'framework/widgets/actions-menu/actions-menu.html'
     };
 
-    function handleClick(event, scope, ctrl) {
+    function handleClick(event, scope, ctrl, element) {
       if (!ctrl.open) {
+        if (ctrl.menuBeforeOpen) {
+          ctrl.menuBeforeOpen(element);
+        }
         $document.triggerHandler('click');
       }
 
@@ -102,6 +108,7 @@
     vm.position = vm.menuPosition || '';
     vm.open = false;
     vm.buttonMode = false;
+    vm.menuIconName = vm.menuIconName || 'more_horiz';
 
     vm.executeAction = executeAction;
 
@@ -116,6 +123,11 @@
       vm.visibleActions = visibleActions > 0;
       vm.buttonMode = vm.enableButtonMode && visibleActions === 1;
     });
+    
+    // Allow the menu to be closed by the user of the directive
+    vm.menuClose = function () {
+      vm.open = false;
+    };
 
     /**
      * @function executeAction

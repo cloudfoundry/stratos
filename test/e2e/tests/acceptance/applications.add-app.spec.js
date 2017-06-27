@@ -203,7 +203,7 @@
       }
 
       application.showSummary();
-      application.invokeAction('CLI Instructions');
+      application.invokeAction('CLI Info');
 
       // cf push acceptance.e2e.1484149644648
       // Check copy to clipboard

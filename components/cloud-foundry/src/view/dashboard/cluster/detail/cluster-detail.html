@@ -1,5 +1,13 @@
-<div class="cluster-detail endpoints"  ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterController.hasActions !== false}">
-  <h3 translate>Cluster : {{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name }}</h3>
+<div class="cluster-detail endpoints" class="col-md-12 col-sm-12 col-xs-12">
+
+  <div class="application-header font-semi-bold">
+    <h3 translate>Cluster : {{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name }}</h3>
+    <!--
+    <span class="app-header-app-name">{{ appCtrl.model.application.summary.name }}</span>
+    <app-state-icon class="app-summary-app-state-icon" state="appCtrl.model.application.state.indicator"></app-state-icon>
+    -->
+    <cluster-actions ng-show="clusterController.hasActions" has-actions="clusterController.hasActions"></cluster-actions>
+  </div>
 
   <div class="cluster-summary-tile">
     <div class="card panel panel-default">
@@ -84,6 +92,3 @@
   </ul>
   <ui-view></ui-view>
 </div>
-<cluster-actions ng-show="clusterController.hasActions"
-                 has-actions="clusterController.hasActions"
-                 class="col-md-3 col-sm-1 col-xs-1"></cluster-actions>

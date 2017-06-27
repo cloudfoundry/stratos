@@ -1,0 +1,21 @@
+<div class="app-toolbar">
+  <button
+    ng-repeat="appAction in appToolbarCtrl.items"
+    class="no-focus btn btn-link btn-border-less app-toolbar-btn"
+    ng-disabled="appAction.disabled"
+    ng-hide="appAction.hidden"
+    ng-click="appAction.execute()">
+    <app-icon icon-class="{{appAction.iconClass}}" class="app-toolbar-icon" icon="{{appAction.icon}}"></app-icon>
+    <span>{{ appAction.name | translate }}</span>
+  </button>
+</div>
+
+<actions-menu actions="appToolbarCtrl.items"
+  menu-before-open="appToolbarCtrl.onOpenMenu"
+  menu-icon-name="more_vert"
+  menu-icon="app-icon"
+  menu-position="actions-menu-right"
+  bn--ng-show="appCtrl.ready"
+  menu-close="appToolbarCtrl.closeMenuFn"
+  ng-show="appToolbarCtrl.truncated">
+</actions-menu>

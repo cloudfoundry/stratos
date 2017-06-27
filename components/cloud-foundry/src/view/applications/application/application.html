@@ -1,13 +1,8 @@
-<div ng-class="{ 'col-md-9 col-sm-12': appCtrl.visibleActions !== false}">
+<div class="col-md-12 col-sm-12">
   <div class="application-header font-semi-bold">
     <span class="app-header-app-name">{{ appCtrl.model.application.summary.name }}</span>
     <app-state-icon class="app-summary-app-state-icon" state="appCtrl.model.application.state.indicator"></app-state-icon>
-    <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
-      menu-icon="app-icon-2x"
-      menu-position="actions-menu-right"
-      ng-show="appCtrl.ready"
-      ng-if="appCtrl.visibleActions">
-    </actions-menu>
+    <app-toolbar ready="appCtrl.ready" items="appCtrl.appActions"></app-toolbar>
   </div>
 
   <ul class="application-nav nav nav-tabs col-sm-12">
@@ -23,16 +18,3 @@
     <div ui-view class="row"></div>
   </div>
 </div>
-<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col"
-    ng-show="appCtrl.ready"
-    ng-if="appCtrl.visibleActions">
-  <li class="side-action-item" ng-repeat="appAction in appCtrl.appActions">
-    <button class="no-focus btn btn-link btn-border-less"
-      ng-disabled="appAction.disabled"
-      ng-hide="appAction.hidden"
-      ng-click="appAction.execute()">
-      <app-icon class="{{appAction.iconClass}}" icon-class="app-icon-lg" icon="{{appAction.icon}}"></app-icon>
-      <span>{{ appAction.name | translate }}</span>
-    </button>
-  </li>
-</ul>
