@@ -45,4 +45,3 @@ services:
     extends:
       file: common.yml
       service: uaa
-      

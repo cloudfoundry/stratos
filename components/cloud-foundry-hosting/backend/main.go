@@ -33,20 +33,20 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
-func (ch CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
 	return ch, nil
 }
 
-func (ch CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
 	return nil, errors.New("Not implemented!")
 }
 
-func (ch CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error){
+func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error){
 	return nil, errors.New("Not implemented!")
 }
 
 
-func (ch CFHosting) Init() error {
+func (ch *CFHosting) Init() error {
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if config.IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")

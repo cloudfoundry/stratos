@@ -1,4 +1,4 @@
-hash: 702696251491eb53ebb34481932d358e6129a09274ab35a9448cdca6bc727957
+hash: 8bd34e0811d2512c3359801f8b2f5eee3a315f3858061851bd21373f488a9495
 updated: 2017-05-25T12:53:40.88151367+01:00
 imports:
 - name: github.com/cloudfoundry/noaa
@@ -11,12 +11,6 @@ imports:
   version: 78019103037ae46207993c8816e970d85bf1a9e4
   subpackages:
   - events
-- name: github.com/gogo/protobuf
-  version: 30433562cfbf487fe1df7cd26c7bab168d2f14d0
-  subpackages:
-  - gogoproto
-  - proto
-  - protoc-gen-gogo/descriptor
 - name: github.com/gorilla/context
   version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
 - name: github.com/gorilla/securecookie

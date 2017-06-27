@@ -37,15 +37,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
 )
 
 type MessageType int
 
 const (
-
 	DATA MessageType = iota + 20000
 	MANIFEST
 	CLOSE_SUCCESS
@@ -73,7 +70,6 @@ const (
 	pingWriteTimeout = 10 * time.Second
 
 	stratosProjectKey = "STRATOS_PROJECT"
-
 )
 
 type ManifestResponse struct {
@@ -123,7 +119,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Infof("WebSocket upgraded!")
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
-
 
 	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
@@ -348,39 +343,30 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 
 	fmt.Printf("Directory is: %s", tempDir)
 
-	repo, err := git.PlainClone(tempDir, false, &git.CloneOptions{
-		URL:               repoUrl,
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-	})
+	vcsGit := GetVCS()
 
+	err := vcsGit.Create(tempDir, repoUrl)
 	if err != nil {
 		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", err
 	}
 
-	branchRef := fmt.Sprintf("refs/remotes/origin/%s", branch)
-	log.Infof("Will checkout branch %s", branchRef)
-	if branchRef != "" {
-		workTree, err := repo.Worktree()
-		checkoutOpts := &git.CheckoutOptions{
-			Branch: plumbing.ReferenceName(branchRef),
-		}
-		err = workTree.Checkout(checkoutOpts)
-		if err != nil {
-			log.Infof("Failed to checkout %s branch in repo %s, %s due to %+v", branch, repoUrl, branchRef, err)
-			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
-			return "", err
-		}
+	log.Infof("Will checkout branch %s", branch)
+	err = vcsGit.Checkout(tempDir, branch)
+	if err != nil {
+		log.Infof("Failed to checkout %s branch in repo %s due to %+v", branch, repoUrl, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
+		return "", err
 	}
 
-	head, err := repo.Head()
+	head, err := vcsGit.Head(tempDir)
 	if err != nil {
 		log.Infof("Unable to fetch HEAD in branch due to %s", err)
 		return "", err
 	}
 
-	return head.Hash().String(), nil
+	return head, nil
 }
 
 // This assumes manifest lives in the root of the app
@@ -467,7 +453,7 @@ func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType Mess
 	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
 }
 
-func sendEvent(clientWebSocket *websocket.Conn, event MessageType){
+func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
 	clientWebSocket.WriteMessage(websocket.TextMessage, msg)
 }

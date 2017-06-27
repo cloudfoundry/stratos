@@ -18,6 +18,8 @@
     return tempPath;
   };
 
+  module.exports.buildTest = false;
+
   module.exports.getSourcePath = function () {
     return tempSrcPath;
   };

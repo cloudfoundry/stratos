@@ -50,7 +50,7 @@
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
       promise = promise
         .then(function () {
-          return buildUtils.runGlideInstall(fullPluginPath);
+          return buildUtils.runGlideInstall(fullPluginPath, prepareBuild.buildTest);
         });
 
     });
@@ -66,7 +66,7 @@
 
   gulp.task('prepare-core', ['prepare-plugins'], function (done) {
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
-    buildUtils.runGlideInstall(fullCorePath)
+    buildUtils.runGlideInstall(fullCorePath, prepareBuild.buildTest)
       .then(function () {
         done();
       })
@@ -85,6 +85,7 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', '__vendor');
       // sequentially chain promise
       promise
         .then(function () {
@@ -92,15 +93,15 @@
           return Q.resolve();
         })
         .then(function () {
-          // TODO fix hack for CF CLI symlink
-          var cfCliFixtures = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor', 'code.cloudfoundry.org', 'cli', 'fixtures');
-          fs.removeSync(cfCliFixtures);
-          return Q.resolve();
-        })
-        .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
-          // Promise did not gaurentee that the operation completed
+          // If checked in vendors exist, merge does in as well
+          console.log("processing plugin: " + JSON.stringify(pluginInfo))
+          if (fs.existsSync(pluginCheckedInVendorPath)){
+            console.log("merging plugin: " + JSON.stringify(pluginInfo) + " " + pluginCheckedInVendorPath)
+            mergeDirs.default(pluginCheckedInVendorPath, goSrc);
+          }
+          // Promise did not guarantee that the operation completed
           fs.removeSync(pluginVendorPath);
           return Q.resolve();
         }).catch(function (err) {
@@ -130,7 +131,6 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
-      console.log('Plugin files: ' + fs.readdirSync(fullPluginPath))
       var promise = buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       promises.push(promise);
 
@@ -144,10 +144,10 @@
       });
   });
 
-  gulp.task('run-tests', ['build-plugins'], function (done) {
+  gulp.task('build-core', ['build-plugins'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.test(corePath)
+    buildUtils.build(corePath, conf.coreName)
       .then(function () {
         done();
       })
@@ -157,10 +157,10 @@
 
   });
 
-  gulp.task('build-core', ['dedup-vendor'], function (done) {
+  gulp.task('run-tests', ['build-core'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.build(corePath, conf.coreName)
+    buildUtils.test(corePath)
       .then(function () {
         done();
       })
@@ -218,8 +218,17 @@
       'write-plugins-yaml'
     );
   });
+  gulp.task('dedup', function () {
+
+    return runSequence(
+      'init-build',
+      'dedup-vendor'
+    );
+  });
 
   gulp.task('test-backend', function () {
+
+    prepareBuild.buildTest = true;
 
     return runSequence(
       'init-build',

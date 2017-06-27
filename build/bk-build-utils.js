@@ -46,8 +46,13 @@
     return deferred.promise;
   }
 
-  function runGlideInstall(path) {
-    return spawnProcess('glide', ['install'], path, env);
+  function runGlideInstall(path, skipTest) {
+
+    var glideArgs = ['install'];
+    if (skipTest){
+       glideArgs.push('--skip-test')
+    }
+    return spawnProcess('glide', glideArgs, path, env);
   }
 
   function buildPlugin(pluginPath, pluginName) {
