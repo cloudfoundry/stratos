@@ -69,6 +69,8 @@
    * @param {object} $websocket - the angular $websocket service
    * @param {object} $translate - the angular $translate service
    * @param {object} $log - the angular $log service
+   * @param {object} $http - the angular $http service
+   * @param {object} $timeout - the angular $timeout service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
@@ -381,13 +383,13 @@
         vm.data.deployStatus = vm.data.deployState.SOCKET_OPEN;
       });
 
+      /* eslint-disable complexity */
       vm.data.webSocket.onMessage(function (message) {
         var logData = angular.fromJson(message.data);
 
         switch (logData.type) {
           case socketEventTypes.DATA:
             // Ignore, handled by custom log viewer filter
-            console.log(logData.message);
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
             deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
@@ -435,26 +437,21 @@
             $log.debug('Deploy Application: Push Completed');
             break;
           case socketEventTypes.MANIFEST:
-            console.log('1manifest: ', logData);
             var manifest = angular.fromJson(logData.message);
             var app = _.get(manifest, 'Applications[0]', {});
-            console.log('2manifest: ', manifest);
-            console.log('3manifest: ', app);
             if (app.Name) {
-              console.log('3manifest: ', app.Name);
               discoverAppGuid(app.Name);
             }
             break;
           default:
             $log.error('Unknown deploy application socket event type: ', logData.type);
-            console.log(message);
             break;
         }
 
       });
+      /* eslint-enable complexity */
 
-      vm.data.webSocket.onClose(function (event) {
-        console.log('CLOSING: ', event);
+      vm.data.webSocket.onClose(function () {
         if (vm.data.deployStatus === vm.data.deployState.UNKNOWN) {
           // Closed before socket has successfully opened
           deployFailed('deploy-app-dialog.socket.failed-connection');

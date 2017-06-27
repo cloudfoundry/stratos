@@ -25,7 +25,7 @@
       var errorService = $injector.get('appErrorService');
       var appUtilsService = $injector.get('appUtilsService');
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
-      var frameworkDetailView = $injector.get('frameworkDetailView');
+      var cfAppWallActions = $injector.get('cfAppWallActions');
       var $window = $injector.get('$window');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -52,7 +52,7 @@
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
       $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
-        errorService, appUtilsService, frameworkDetailView, cfOrganizationModel);
+        errorService, appUtilsService, cfOrganizationModel, cfAppWallActions);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
@@ -490,7 +490,7 @@
       });
 
       it('should show `Add Application` button to user', function () {
-        expect($controller.showAddApplicationButton()).toBe(true);
+        expect($controller.appWallActionContext.show()).toBe(true);
       });
     });
 
@@ -503,7 +503,7 @@
       it('should show `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.showAddApplicationButton()).toBe(true);
+        expect($controller.appWallActionContext.show()).toBe(true);
       });
     });
 
@@ -516,7 +516,7 @@
       it('should hide `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.showAddApplicationButton()).toBe(false);
+        expect($controller.appWallActionContext.show()).toBe(false);
       });
     });
 

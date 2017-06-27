@@ -28,11 +28,12 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
-   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
+   * deploy, etc)
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, frameworkDetailView, cfOrganizationModel, cfAppWallActions) {
+                                      appUtilsService, cfOrganizationModel, cfAppWallActions) {
 
     var vm = this;
 

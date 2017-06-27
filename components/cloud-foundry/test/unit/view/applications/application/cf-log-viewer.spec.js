@@ -42,7 +42,6 @@
     it('should have controller defined', function () {
       expect(logViewerCtrl).toBeDefined();
       expect(logViewerCtrl.autoScrollOn).toBe(true);
-      console.log(logViewerCtrl);
       expect(logViewerCtrl.webSocketUrl).toEqual(webSocketUrl);
     });
 

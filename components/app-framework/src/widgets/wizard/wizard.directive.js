@@ -107,8 +107,7 @@
     if (!_.isFunction(vm.workflow.disableJump)) {
       var disableJump = vm.workflow.disableJump;
       vm.workflow.disableJump = function () {
-        // return disableJump;
-        return true;
+        return disableJump;
       };
     }
 
