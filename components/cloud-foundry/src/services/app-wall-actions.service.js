@@ -26,6 +26,7 @@
     };
 
     service.actions.push({
+      id: 'app-wall-add-new-application-btn',
       label: 'app-wall.add-application',
       position: 1,
       show: function (context) {

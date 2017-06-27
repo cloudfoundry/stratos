@@ -5,26 +5,12 @@
   </div>
   <div class="application-header-right">
     <button ng-repeat="action in applicationsListCtrl.appWallActions | orderBy:'position'"
+            id="{{action.id}}"
             class="btn btn-primary"
             ng-if="action.show(applicationsListCtrl.appWallActionContext)"
             ng-disabled="action.disable(applicationsListCtrl.appWallActionContext)"
             ng-click="action.action(applicationsListCtrl.appWallActionContext)">{{action.label | translate}}
     </button>
-
-    <!--<button class="btn btn-primary"-->
-            <!--id="app-wall-add-new-application-btn"-->
-            <!--ng-if="applicationsListCtrl.showAddApplicationButton()"-->
-            <!--ng-disabled="applicationsListCtrl.disableAddApplicationButton()"-->
-            <!--translate-->
-            <!--ng-click="applicationsListCtrl.addApplication()">app-wall.add-application-->
-    <!--</button>-->
-    <!--&lt;!&ndash;id="app-wall-add-new-application-btn"&ndash;&gt;-->
-    <!--<button class="btn btn-primary"-->
-            <!--ng-if="applicationsListCtrl.showAddApplicationButton()"-->
-            <!--ng-disabled="applicationsListCtrl.disableAddApplicationButton()"-->
-            <!--translate-->
-            <!--ng-click="applicationsListCtrl.deployApplication()">app-wall.deploy-application-->
-    <!--</button>-->
   </div>
 </div>
 

@@ -8,6 +8,7 @@
 
   function DeployAppService(frameworkDetailView, cfAppWallActions) {
     cfAppWallActions.actions.push({
+      id: 'app-wall-deploy-application-btn',
       label: 'app-wall.deploy-application',
       position: 2,
       show: function (context) {
