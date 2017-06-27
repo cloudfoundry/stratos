@@ -69,6 +69,18 @@
         Firehose
       </a>
     </li>
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.featureFlags" translate>cf.feature-flags</a>
+    </li>
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.buildPacks" translate>cf.buildpacks</a>
+    </li>
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.stacks" translate>cf.stacks</a>
+    </li>
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.securityGroups" translate>cf.security-groups</a>
+    </li>
   </ul>
   <ui-view></ui-view>
 </div>

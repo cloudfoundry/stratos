@@ -1,0 +1,29 @@
+<gallery-card class="cluster-gallery-card buildpack-tile"
+              card-data="bpTileCtrl.cardData">
+  <dl class="dl-horizontal">
+    <dt translate>cf.buildpacks.labels.position</dt>
+    <dd>{{bpTileCtrl.buildpack.entity.position}}</dd>
+    <dt translate>cf.buildpacks.labels.enabled</dt>
+    <dd class="buildpack-status">
+      <i ng-class="{ 'buildpack-enabled': bpTileCtrl.buildpack.entity.enabled, 'buildpack-disabled': !bpTileCtrl.buildpack.entity.enabled}"
+        class="material-icons">{{ bpTileCtrl.buildpack.entity.enabled ? 'check_circle' : 'highlight_off'}}</i>
+      <span translate>{{ bpTileCtrl.buildpack.entity.enabled ? 'cf.buildpacks.labels.enabled' : 'cf.buildpacks.labels.disabled' }}</span>
+    </dd>
+    <dt translate>cf.buildpacks.labels.locked</dt>
+    <dd class="buildpack-status">
+      <i ng-class="{ 'buildpack-enabled': !bpTileCtrl.buildpack.entity.locked, 'buildpack-disabled': bpTileCtrl.buildpack.entity.locked}"
+        class="material-icons">{{ bpTileCtrl.buildpack.entity.locked ? 'lock_outline' : 'lock_open'}}</i>
+      <span translate>{{ bpTileCtrl.buildpack.entity.locked ? 'cf.buildpacks.labels.locked' : 'cf.buildpacks.labels.unlocked' }}</span>
+    </dd>
+    <dt translate>cf.buildpacks.labels.created</dt>
+    <dd>{{bpTileCtrl.buildpack.metadata.created_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+    <dt translate>cf.buildpacks.labels.updated</dt>
+    <dd>{{bpTileCtrl.buildpack.metadata.updated_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+    <dt translate>cf.buildpacks.labels.filename</dt>
+    <dd></dd>
+    <dt class="buildpack-filename">
+      <span>{{bpTileCtrl.buildpack.entity.filename}}</span>
+    </dt>
+    <dd></dd>
+  </dl>
+</gallery-card>

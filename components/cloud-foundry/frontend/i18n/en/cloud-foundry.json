@@ -23,6 +23,66 @@
         "title": "CLI Commands",
         "deploy-title": "Deploy Using CLI"
       }
+    },
+    "buildpacks": {
+      "buildpacks": "Build Packs",
+      "labels": {
+        "position": "Position",
+        "locked": "Locked",
+        "unlocked": "Unlocked",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "created": "created",
+        "updated": "updated",
+        "filename": "file name"
+      },
+      "error": "An error occurred retrieving buildpack metadata",
+      "empty": "There are no buildpacks available"
+    },
+    "stacks": {
+      "stacks": "Stacks",
+      "labels":{
+        "name": "Name",
+        "description": "Description",
+        "created": "Created",
+        "updated": "Updated"
+      },
+      "error": "An error occurred retrieving stacks metadata",
+      "empty": "There are no stacks available"
+    },
+    "security-groups": {
+      "security-groups": "Security Groups",
+      "labels":{
+        "created": "Created",
+        "updated": "Updated",
+        "spaces": "Spaces",
+        "staging-default": "Staging Default",
+        "running-default": "Running Default",
+        "rules": "Rules",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "error": "An error occurred retrieving security group metadata",
+      "empty": "There are no security groups available"
+    },
+    "events": {
+      "events": "Events",
+      "total": "Total: {{total}}",
+      "empty": "No events available",
+      "error": "An error occurred retrieving events",
+      "detail": "Event Detail",
+      "labels":{
+        "timestamp": "Timestamp",
+        "type": "Type",
+        "actor-name": "Actor Name",
+        "detail": "Detail"
+      },
+      "page-sizes": {
+        "five": "5 per page",
+        "ten": "10 per page",
+        "twenty": "20 per page",
+        "fifty": "50 per page"
+      }
     }
   }
 }

@@ -1,0 +1,7 @@
+<ul class="secondary-navbar-nav">
+  <li ng-repeat="menuItem in navCtrl.navigationModel.secondary"
+      ng-if="!menuItem.hidden"
+      ng-class="{ 'active': navCtrl.navigationModel.menu.absoluteState === menuItem.baseState }">
+      <nav-item item="menuItem"></nav-item>
+  </li>
+</ul>

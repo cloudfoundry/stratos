@@ -110,6 +110,10 @@ jobs:
        CF_ADMIN_PASSWORD: {{cf-admin-password}}
        CF_E2E_USER: {{cf-e2e-user}}
        CF_E2E_USER_PASSWORD: {{cf-e2e-user-password}}
+       CONSOLE_ADMIN_USER: {{console-admin-user}}
+       CONSOLE_ADMIN_PASSWORD: {{console-admin-password}}
+       CONSOLE_USER_USER: {{console-user-user}}
+       CONSOLE_USER_PASSWORD: {{console-user-password}}
        GITHUB_TOKEN: {{github-access-token}}
       on_success:
         put: stratos-ui
