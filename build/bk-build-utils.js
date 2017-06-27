@@ -49,8 +49,8 @@
   function runGlideInstall(path, skipTest) {
 
     var glideArgs = ['install'];
-    if (skipTest){
-       glideArgs.push('--skip-test')
+    if (skipTest) {
+      glideArgs.push('--skip-test');
     }
     return spawnProcess('glide', glideArgs, path, env);
   }

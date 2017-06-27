@@ -96,7 +96,7 @@
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
           // If checked in vendors exist, merge does in as well
-          if (fs.existsSync(pluginCheckedInVendorPath)){
+          if (fs.existsSync(pluginCheckedInVendorPath)) {
             mergeDirs.default(pluginCheckedInVendorPath, goSrc);
           }
           // Promise did not guarantee that the operation completed
