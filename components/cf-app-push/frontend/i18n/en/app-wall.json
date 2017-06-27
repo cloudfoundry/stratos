@@ -14,11 +14,9 @@
         "project-not-found": "Project not found",
         "branch-label": "Project Branch",
         "branch-placeholder": "Select Branch",
-        "branch-last-commit": "Last Commit",
-        "branch-last-commit-date": "Date: ",
-        "branch-last-commit-sha": "Sha: ",
-        "branch-last-commit-message": "Message: ",
-        "branch-last-commit-committer": "Committer: "
+        "branch-last-commit": "",
+        "branch-last-commit-date": "",
+        "branch-last-commit-committer": ""
       },
       "manifest": {
         "label": "Manifest",

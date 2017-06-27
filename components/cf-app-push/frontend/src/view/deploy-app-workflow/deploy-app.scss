@@ -26,32 +26,32 @@
     }
 
     .deploy-app-github-info {
-      display: flex;
       padding-left: $console-unit-space;
-      > img {
-        height: 75px;
-        width: 75px;
+
+      img {
+        height: 51px;
+        width: 51px;
       }
-      > div {
+
+      .project {
         display: flex;
-        padding-left: $console-unit-space / 2;
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
+
+        .project-info {
+          padding-left: $console-unit-space / 2;
+        }
       }
 
       .lastCommit {
-        padding-top: $console-unit-space / 4;
-        .lastCommitter {
-          display: flex;
-          flex-direction: row;
-          div:nth-of-type(2) {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            img {
-              height: 45px;
-              width: 45px;
-            }
-          }
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        padding-top: 3px;
+
+        .lastCommit-info {
+          padding-left: $console-unit-space / 2;
         }
       }
 
