@@ -78,6 +78,9 @@
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.stacks" translate>cf.stacks</a>
     </li>
+    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.securityGroups" translate>cf.security-groups</a>
+    </li>
   </ul>
   <ui-view></ui-view>
 </div>

@@ -52,7 +52,7 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables'];
+      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Events'];
       var cfFromConfig = helpers.getCfs() ? helpers.getCfs().cf1 : undefined;
       if (cfFromConfig && cfFromConfig.supportsVersions) {
         names.push('Versions');
