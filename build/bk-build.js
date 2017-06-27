@@ -218,7 +218,6 @@
     );
   });
   gulp.task('dedup', function () {
-
     return runSequence(
       'init-build',
       'dedup-vendor'
