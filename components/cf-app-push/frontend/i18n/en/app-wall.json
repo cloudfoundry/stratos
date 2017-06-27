@@ -1,0 +1,56 @@
+{
+  "app-wall": {
+    "deploy-application": "Deploy Application"
+  },
+  "deploy-app-dialog": {
+    "title": "Deploy Application",
+    "button-deploy": "Deploy",
+    "step-info": {
+      "title": "Application",
+      "github": {
+        "label": "Public Github",
+        "project-label": "Project",
+        "project-placeholder": "suse/stratos-ui",
+        "branch-label": "Project Branch",
+        "branch-placeholder": "Select Branch",
+        "branch-last-commit": "Last Commit",
+        "branch-last-commit-date": "Date: ",
+        "branch-last-commit-sha": "Sha: ",
+        "branch-last-commit-message": "Message: ",
+        "branch-last-commit-committer": "Committer: "
+      },
+      "manifest": {
+        "label": "Manifest",
+        "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",
+        "path-label": "Path to manifest",
+        "path-placeholder": "Relative path of manifest to root of app directory"
+      },
+      "busy": "Updating Cloud Foundry Data",
+      "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
+    },
+    "step-deploying": {
+      "title": "Deploy",
+      "busy": "Starting deployment",
+      "title-deploying": "Deploying",
+      "title-deploy-failed": "Failed to deploy. Reason: {{reason}}",
+      "title-deploy-success": "Deployed",
+      "next-button": "App Summary",
+      "submit-failed": "Failed to deploy application. If this error persists, please contact the Administrator. Reason: {{reason}}."
+    },
+    "socket": {
+      "event-type": {
+        "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (invalid branch), please ensure github details are correct",
+        "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure github details are correct and try again",
+        "CLOSE_FAILURE": "Unknown failure",
+        "CLOSE_INVALID_MANIFEST": "Invalid manifest in repository",
+        "CLOSE_NO_MANIFEST": "Failed to find manifest in repository",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push unsuccessful",
+        "CLOSE_NO_SESSION": "Failed to create session",
+        "CLOSE_NO_CNSI": "Unknown [[@:cloud-foundry]] instance",
+        "CLOSE_NO_CNSI_USERTOKEN": "Invalid [[@:cloud-foundry]] token"
+      },
+      "failed-connection": "Failed to open connection",
+      "failed-unknown": "Unknown failure"
+    }
+  }
+}

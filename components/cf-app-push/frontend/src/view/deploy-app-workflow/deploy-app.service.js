@@ -1,33 +1,60 @@
 (function () {
   'use strict';
 
-  // 'ab-base64'
   angular
-    .module('cloud-foundry.view.applications.list.deployApplication', [])
+    .module('cf-app-push')
     .factory('appDeployAppService', DeployAppService)
-    .controller('cloud-foundry.view.applications.list.deployAppController', DeployAppController);
+    .controller('cf-app-push.deployAppController', DeployAppController);
 
-  function DeployAppService(frameworkDetailView) {
-    return {
-      /**
-       * @memberof appDeployAppService
-       * @name deploy
-       * @constructor
-       * @param {object} context - the context for the modal. Used to pass in data
-       */
-      deploy: function (context) {
-        return frameworkDetailView(
-          {
-            detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/deploy-app.html',
-            controller: DeployAppController,
-            controllerAs: 'deployApp',
-            dialog: true,
-            class: 'dialog-form-wizard'
-          },
-          context
-        );
+  function DeployAppService(frameworkDetailView, cfAppWallActions) {
+    cfAppWallActions.actions.push({
+      label: 'app-wall.deploy-application',
+      position: 2,
+      show: function (context) {
+        if (angular.isFunction(context.show)) {
+          return context.show();
+        }
+        return true;
+      },
+      disable: function (context) {
+        if (angular.isFunction(context.disable)) {
+          return context.disable();
+        }
+        return false;
+      },
+      action: function (context) {
+        deploy().result.catch(function (result) {
+          // Do we need to reload the app collection to show the newly added app?
+          if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
+            // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+            context.reload();
+          }
+        });
       }
+    });
+
+    return {
+      deploy: deploy
     };
+
+    /**
+     * @memberof appDeployAppService
+     * @name deploy
+     * @constructor
+     * @param {object?} context - the context for the modal. Used to pass in data
+     */
+    function deploy(context) {
+      return frameworkDetailView(
+        {
+          detailViewTemplateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-app.html',
+          controller: DeployAppController,
+          controllerAs: 'deployApp',
+          dialog: true,
+          class: 'dialog-form-wizard'
+        },
+        context
+      );
+    }
   }
 
   /**
@@ -42,6 +69,8 @@
    * @param {object} $websocket - the angular $websocket service
    * @param {object} $translate - the angular $translate service
    * @param {object} $log - the angular $log service
+   * @param {object} $http - the angular $http service
+   * @param {object} $timeout - the angular $timeout service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
@@ -59,7 +88,7 @@
 
     var allowBack = false;
 
-    var templatePath = 'plugins/cloud-foundry/view/applications/workflows/deploy-app-workflow/';
+    var templatePath = 'plugins/cf-app-push/view/deploy-app-workflow/';
 
     var socketEventTypes = {
       DATA: 20000,
@@ -354,13 +383,13 @@
         vm.data.deployStatus = vm.data.deployState.SOCKET_OPEN;
       });
 
+      /* eslint-disable complexity */
       vm.data.webSocket.onMessage(function (message) {
         var logData = angular.fromJson(message.data);
 
         switch (logData.type) {
           case socketEventTypes.DATA:
             // Ignore, handled by custom log viewer filter
-            console.log(logData.message);
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
             deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
@@ -408,26 +437,21 @@
             $log.debug('Deploy Application: Push Completed');
             break;
           case socketEventTypes.MANIFEST:
-            console.log('1manifest: ', logData);
             var manifest = angular.fromJson(logData.message);
             var app = _.get(manifest, 'Applications[0]', {});
-            console.log('2manifest: ', manifest);
-            console.log('3manifest: ', app);
             if (app.Name) {
-              console.log('3manifest: ', app.Name);
               discoverAppGuid(app.Name);
             }
             break;
           default:
             $log.error('Unknown deploy application socket event type: ', logData.type);
-            console.log(message);
             break;
         }
 
       });
+      /* eslint-enable complexity */
 
-      vm.data.webSocket.onClose(function (event) {
-        console.log('CLOSING: ', event);
+      vm.data.webSocket.onClose(function () {
         if (vm.data.deployStatus === vm.data.deployState.UNKNOWN) {
           // Closed before socket has successfully opened
           deployFailed('deploy-app-dialog.socket.failed-connection');
