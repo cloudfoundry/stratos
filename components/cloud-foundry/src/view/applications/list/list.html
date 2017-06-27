@@ -5,6 +5,7 @@
   </div>
   <div class="application-header-right">
     <button ng-repeat="action in applicationsListCtrl.appWallActions | orderBy:'position'"
+            id="{{action.id}}"
             class="btn btn-primary"
             ng-if="action.show(applicationsListCtrl.appWallActionContext)"
             ng-disabled="action.disable(applicationsListCtrl.appWallActionContext)"

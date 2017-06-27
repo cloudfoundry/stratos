@@ -92,6 +92,7 @@
       disable: disableChangeAppListAction,
       reload: _reload
     };
+    vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);
 
     appUtilsService.chainStateResolve('cf.applications.list', $state, init);
@@ -509,6 +510,13 @@
 
     function showChangeAppListAction() {
       return isAdminInAnyCf() || vm.isSpaceDeveloper;
+    }
+
+    function addApplication() {
+      var addAppAction = _.find(cfAppWallActions.actions, 'id', 'app-wall-add-new-application-btn');
+      if (addAppAction) {
+        addAppAction.action();
+      }
     }
 
     /**
