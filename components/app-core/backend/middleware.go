@@ -14,7 +14,6 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-
 )
 
 const cfSessionCookieName = "JSESSIONID"

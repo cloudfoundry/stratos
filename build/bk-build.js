@@ -1,3 +1,4 @@
+/* eslint-disable no-sync */
 (function () {
   'use strict';
 
@@ -17,7 +18,6 @@
   var enabledPlugins = [];
 
   var fsMoveQ = Q.denodeify(fs.move);
-  var fsRemoveQ = Q.denodeify(fs.remove);
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
@@ -30,9 +30,10 @@
     } else {
 
       _.each(plugins.enabledPlugins, function (plugin) {
-        var pluginInfo = require(path.join('../components', plugin, 'backend', 'plugin.json'));
+        var pluginInfo = {};
         pluginInfo.libraryPath = plugin + '.so';
         pluginInfo.pluginPath = plugin;
+        pluginInfo.pluginName = plugin;
         enabledPlugins.push(pluginInfo);
       });
     }
@@ -87,12 +88,23 @@
       // sequentially chain promise
       promise
         .then(function () {
-          return fsRemoveQ(conf.getVendorPath(prepareBuild.getSourcePath()));
+          fs.removeSync(conf.getVendorPath(prepareBuild.getSourcePath()));
+          return Q.resolve();
+        })
+        .then(function () {
+          var cfCliFixtures = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor', 'code.cloudfoundry.org', 'cli', 'fixtures');
+          fs.removeSync(cfCliFixtures);
+          return Q.resolve();
         })
         .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
-          return fsRemoveQ(pluginVendorPath);
+          // Promise did not guarantee that the operation completed
+          fs.removeSync(pluginVendorPath);
+          return Q.resolve();
+        })
+        .catch(function (err) {
+          done(err);
         });
       promises.push(promise);
     });
@@ -101,12 +113,14 @@
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
         var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
         mergeDirs.default(coreVendorPath, goSrc);
-        return fsRemoveQ(coreVendorPath);
+        fs.removeSync(coreVendorPath);
+        return Q.resolve();
       })
       .then(function () {
         done();
       })
       .catch(function (err) {
+
         done(err);
       });
   });

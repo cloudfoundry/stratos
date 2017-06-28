@@ -61,6 +61,13 @@ type SessionStorer interface {
 	Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error
 }
 
+// ConnectedUser - details about the user connected to a specific service or UAA
+type ConnectedUser struct {
+	GUID  string `json:"guid"`
+	Name  string `json:"name"`
+	Admin bool   `json:"admin"`
+}
+
 type PortalConfig struct {
 	HTTPClientTimeoutInSecs     int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
 	HTTPConnectionTimeoutInSecs int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`

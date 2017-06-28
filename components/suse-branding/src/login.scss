@@ -101,6 +101,19 @@ $login-label-color: #e0e0e0;
               visibility: hidden;
             }
           }
+
+          .login-form-spinner {
+            color: $suse-text;
+
+            .spinner-notification {
+              text-transform: none;
+              font-size: 16px;
+            }
+
+            .bounce-spinner > div {
+              background-color: $suse-text;
+            }
+          }
         }
       }
     }

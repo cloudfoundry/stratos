@@ -105,7 +105,7 @@
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.instanceViewLimit = 5;
 
-    // Show a "suggested next steps" if this app is newly created (transitionned from add app flow)
+    // Show a "suggested next steps" if this app is newly created (transitioned from add app flow)
     vm.newlyCreated = $stateParams.newlyCreated;
 
     // Hide these options by default until we can ascertain that user can perform them
