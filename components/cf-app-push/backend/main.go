@@ -43,22 +43,5 @@ func (cfAppPush *CFAppPush) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (cfAppPush *CFAppPush) Init() error {
-	cfAppPush.pushCommand = &application.Push{}
-	metaData := cfAppPush.pushCommand.MetaData()
-	cfAppPush.flagContext = flags.NewFlagContext(metaData.Flags)
 	return nil
 }
-
-//func main() {
-//
-//	cfApp := &CFAppPush{portalProxy: nil}
-//	cfApp.Init()
-//	manifest, err := cfApp.deps.ManifestRepo.ReadManifest("/workspace/gopath/src/github.com/irfanhabib/go-env/manifest.yml")
-//
-//	if err != nil {
-//		fmt.Printf("Failed due to: %+v", err)
-//	}
-//
-//	app, _  := manifest.Applications()
-//	fmt.Printf("%+v", app)
-//}

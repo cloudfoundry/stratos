@@ -19,6 +19,7 @@
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry",
+    "cf-app-push": "./components/cf-app-push",
     "cf-app-ssh": "./components/cf-app-ssh"
   },
   "devDependencies": {

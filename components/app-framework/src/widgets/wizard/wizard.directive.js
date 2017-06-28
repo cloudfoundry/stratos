@@ -103,8 +103,16 @@
       };
     }
 
+    // // because allow jump only works to enable jump in all cases also have a disable in all cases option
+    if (!_.isFunction(vm.workflow.disableJump)) {
+      var disableJump = vm.workflow.disableJump;
+      vm.workflow.disableJump = function () {
+        return disableJump;
+      };
+    }
+
     vm.isNavEntryDisabled = function ($index) {
-      if (vm.workflow.allowJump()) {
+      if (vm.workflow.disableJump() || vm.workflow.allowJump()) {
         return true;
       }
       if (vm.workflow.allowBack() && $index < vm.currentIndex) {

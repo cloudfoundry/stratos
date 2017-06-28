@@ -3,8 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.list', [
-      'cloud-foundry.view.applications.list.gallery-view',
-      'cloud-foundry.view.applications.list.deployApplication'
+      'cloud-foundry.view.applications.list.gallery-view'
     ])
     .config(registerRoute);
 
@@ -29,12 +28,12 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {appErrorService} appErrorService - the error service
    * @param {object} appUtilsService - the appUtilsService service
-   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - The console's frameworkDetailView service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
-   * @param {object} appDeployAppService - the appDeployAppService service
+   * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
+   * deploy, etc)
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, frameworkDetailView, cfOrganizationModel, appDeployAppService) {
+                                      appUtilsService, cfOrganizationModel, cfAppWallActions) {
 
     var vm = this;
 
@@ -86,11 +85,14 @@
     vm.toggleFilterPanel = toggleFilterPanel;
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
-    vm.showAddApplicationButton = showAddApplicationButton;
-    vm.addApplication = addApplication;
-    vm.deployApplication = deployApplication;
     vm.goToGalleryView = goToGalleryView;
-
+    vm.appWallActions = cfAppWallActions.actions;
+    vm.appWallActionContext = {
+      show: showChangeAppListAction,
+      disable: disableChangeAppListAction,
+      reload: _reload
+    };
+    vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);
 
     appUtilsService.chainStateResolve('cf.applications.list', $state, init);
@@ -506,43 +508,24 @@
       }
     }
 
-    /**
-     * @function showAddApplicationButton
-     * @description Implements the logic for showing the `Add Application` button
-     * @returns {boolean} true if the user is an admin or a Space developer to any CF
-     */
-    function showAddApplicationButton() {
-      if (isAdminInAnyCf()) {
-        return true;
-      }
-      return !disableAddApplicationButton();
+    function showChangeAppListAction() {
+      return isAdminInAnyCf() || vm.isSpaceDeveloper;
     }
 
-    /**
-     * @function addApplication
-     * @description Shows the Add Application dialog
-     */
     function addApplication() {
-      frameworkDetailView(
-        {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
-          dialog: true,
-          class: 'dialog-form-large'
-        }
-      );
-    }
-
-    function deployApplication() {
-      appDeployAppService.deploy();
+      var addAppAction = _.find(cfAppWallActions.actions, 'id', 'app-wall-add-new-application-btn');
+      if (addAppAction) {
+        addAppAction.action();
+      }
     }
 
     /**
-     * @function disableAddApplicationButton
+     * @function disableChangeAppListAction
      * @description Implements the logic for disabling the `Add Application` button
      * @returns {boolean} true is App module is initialising,
      * there no connected endpoints or user is not a space developer
      */
-    function disableAddApplicationButton() {
+    function disableChangeAppListAction() {
       return !vm.ready || vm.model.clusterCount <= 0 || !vm.isSpaceDeveloper;
     }
 

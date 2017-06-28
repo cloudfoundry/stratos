@@ -24,7 +24,7 @@ type PortalProxy interface {
 	GetCNSIRecord(guid string) (CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetSessionStringValue(c echo.Context, key string) (string, error)
-    GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
+	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
 
 	GetClientId(cnsiType string) (string, error)

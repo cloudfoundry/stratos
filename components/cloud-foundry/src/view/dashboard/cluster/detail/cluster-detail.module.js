@@ -8,7 +8,8 @@
       'cloud-foundry.view.dashboard.cluster.detail.firehose',
       'cloud-foundry.view.dashboard.cluster.detail.featureFlags',
       'cloud-foundry.view.dashboard.cluster.detail.buildPacks',
-      'cloud-foundry.view.dashboard.cluster.detail.stacks'
+      'cloud-foundry.view.dashboard.cluster.detail.stacks',
+      'cloud-foundry.view.dashboard.cluster.detail.securityGroups'
     ])
     .config(registerRoute);
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-sync */
 (function () {
   'use strict';
 
@@ -17,7 +18,6 @@
   var enabledPlugins = [];
 
   var fsMoveQ = Q.denodeify(fs.move);
-  var fsRemoveQ = Q.denodeify(fs.remove);
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
@@ -92,7 +92,6 @@
           return Q.resolve();
         })
         .then(function () {
-          // TODO fix hack for CF CLI symlink
           var cfCliFixtures = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor', 'code.cloudfoundry.org', 'cli', 'fixtures');
           fs.removeSync(cfCliFixtures);
           return Q.resolve();
@@ -100,12 +99,13 @@
         .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
-          // Promise did not gaurentee that the operation completed
+          // Promise did not guarantee that the operation completed
           fs.removeSync(pluginVendorPath);
           return Q.resolve();
-        }).catch(function (err) {
-        console.log('Failed due to: ' + err)
-      });
+        })
+        .catch(function (err) {
+          done(err);
+        });
       promises.push(promise);
     });
     Q.all(promises)
@@ -130,7 +130,6 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
-      console.log('Plugin files: ' + fs.readdirSync(fullPluginPath))
       var promise = buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       promises.push(promise);
 

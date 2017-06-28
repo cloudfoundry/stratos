@@ -1,0 +1,21 @@
+.security-groups-list {
+  width: 100%;
+
+  .security-group-rule {
+    border: 1px solid #777;
+    padding: 4px;
+    border-radius: 2px;
+    background-color: #f8f8f8;
+    text-align: left;
+    margin-bottom: 2px;
+
+    > div {
+      display: inline-block;
+    }
+
+    > div:first-child {
+      text-transform: uppercase;
+      min-width: 32px;
+    }
+  }
+}

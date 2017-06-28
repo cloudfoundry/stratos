@@ -10,14 +10,7 @@
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      // var modelManager = $injector.get('modelManager');
-      // var appUtilsService = $injector.get('appUtilsService');
       var $stateParams = $injector.get('$stateParams');
-      // var $location = $injector.get('$location');
-      // var $log = $injector.get('$log');
-      // var base64 = $injector.get('base64');
-      // var $state = $injector.get('$state');
-
       var $scope = $injector.get('$rootScope').$new();
       var $compile = $injector.get('$compile');
       var markup = '<cf-log-viewer web-socket-url="webSocketUrl"></cf-log-viewer>';
@@ -30,8 +23,6 @@
       $stateParams.guid = 'appGuid';
       $stateParams.cnsiGuid = 'cnsiGuid';
 
-      // var ApplicationLogStreamController = $state.get('cf.applications.application.log-stream').controller;
-      // appLogStreamController = new ApplicationLogStreamController(base64, modelManager, appUtilsService, $stateParams, $location, $log);
     }));
 
     afterEach(function () {
@@ -42,7 +33,6 @@
     it('should have controller defined', function () {
       expect(logViewerCtrl).toBeDefined();
       expect(logViewerCtrl.autoScrollOn).toBe(true);
-      console.log(logViewerCtrl);
       expect(logViewerCtrl.webSocketUrl).toEqual(webSocketUrl);
     });
 

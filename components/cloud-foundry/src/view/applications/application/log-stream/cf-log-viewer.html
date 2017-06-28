@@ -1,12 +1,12 @@
 <div class="panel panel-default summary">
   <div class="panel-heading action-header">
     <span class="log-stream-title" translate>Log Stream</span>
-    <span ng-if="cfLogViewer.streamingStatus !== 2" class="app-log-stream-indicator material-icons"
+    <span ng-if="cfLogViewer.streamingStatus !== 2 && !cfLogViewer.disableStatus" class="app-log-stream-indicator material-icons"
     ng-class="{
                 'log-stream-ok text-primary': cfLogViewer.streamingStatus === 1,
                 'log-stream-error text-danger': cfLogViewer.streamingStatus === 3
               }"></span>
-    <bounce-spinner classes="bounce-spinner-sm" ng-if="cfLogViewer.streamingStatus === 2"></bounce-spinner>
+    <bounce-spinner classes="bounce-spinner-sm" ng-if="cfLogViewer.streamingStatus === 2 && !cfLogViewer.disableStatus"></bounce-spinner>
     <!--// After the user has scrolled up we disable auto-scroll-->
     <!--// They can re-enable auto-scroll either by:-->
     <!--// - manually scrolling to the bottom-->

@@ -18,7 +18,7 @@
    * Note: the streaming log part is not fully enabled yet since we can't write a service for it until TEAMFOUR-353
    */
 
-  function logViewer($rootScope, AnsiColorsService, $websocket, $log) {
+  function logViewer($rootScope, $websocket, $log, AnsiColorsService) {
 
     // logContainer, logTextArea: Access elements directly for better performance with large and fast logs
     // handleScroll, handleWheel: Scroll handler defined in controller needs to be attached by link
@@ -82,6 +82,9 @@
       // Keep track of what's left to resize
       var divsToResize = [];
       var resizedDivsMap = {};
+
+      //
+      var deferredAppend = false;
 
       handleScroll = scrollHandler;
       handleWheel = wheelHandler;
@@ -331,8 +334,10 @@
 
       var realAppend = function () {
         if (paused) {
+          deferredAppend = true;
           return;
         }
+        deferredAppend = false;
         logTextArea.innerHTML = logViewer.currentLog;
         rollNextLogDiv();
         autoScroll();
@@ -396,8 +401,7 @@
 
       // Handle streaming logs
       function requestStreamingLog() {
-        function onOpen(event) {
-          $log.debug('WebSocket connection opened', event);
+        function onOpen() {
           logViewer.streaming = STREAMING_STATUS.ONLINE;
           safeApply();
         }
@@ -405,6 +409,7 @@
         resetLog();
 
         if (logViewer.websocketUrl) {
+          closeWebSocket();
           logViewer.streaming = STREAMING_STATUS.CONNECTING;
           logViewer.webSocketConnection = $websocket(logViewer.websocketUrl, null, {
             reconnectIfNotNormalClose: false
@@ -415,9 +420,10 @@
           }
           logViewer.webSocketConnection = logViewer.websocket;
           if (logViewer.webSocketConnection.readyState === 1) {
+            $log.debug('Supplied WebSocket is open');
             onOpen();
           } else {
-            $log.warn('Supplied WebSocket connection not open');
+            $log.warn('Supplied WebSocket not open');
             return;
           }
         } else {
@@ -443,6 +449,7 @@
         }, {autoApply: false});
 
         logViewer.webSocketConnection.onOpen(function (event) {
+          $log.debug('WebSocket connection opened', event);
           onOpen(event);
         });
 
@@ -530,6 +537,9 @@
       var onResize = _.debounce(function () {
         resizeAllDivs();
         paused = false;
+        if (deferredAppend) {
+          realAppend();
+        }
       }, 150);
 
       // If the logViewer is hidden and shown again we need to skip a scroll event

@@ -18,12 +18,14 @@ import (
 	"code.cloudfoundry.org/cli/cf/actors/servicebuilder"
 	"code.cloudfoundry.org/cli/cf/api"
 	"code.cloudfoundry.org/cli/cf/appfiles"
+	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
 	"code.cloudfoundry.org/cli/cf/commandsloader"
 	"code.cloudfoundry.org/cli/cf/configuration"
 	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
 	"code.cloudfoundry.org/cli/cf/configuration/coreconfig"
 	"code.cloudfoundry.org/cli/cf/configuration/pluginconfig"
+	"code.cloudfoundry.org/cli/cf/flags"
 	"code.cloudfoundry.org/cli/cf/manifest"
 	"code.cloudfoundry.org/cli/cf/models"
 	"code.cloudfoundry.org/cli/cf/net"
@@ -98,7 +100,10 @@ type StratosProject struct {
 
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
-	log.Info("Deploying app")
+
+	cfAppPush.pushCommand = &application.Push{}
+	metaData := cfAppPush.pushCommand.MetaData()
+	cfAppPush.flagContext = flags.NewFlagContext(metaData.Flags)
 
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")
@@ -113,7 +118,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
 	}
-	log.Infof("WebSocket upgraded!")
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
 
@@ -122,7 +126,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	projectUrl := fmt.Sprintf("https://github.com/%s", project)
 	tempDir, err := ioutil.TempDir("", "git-clone-")
-	defer os.RemoveAll(tempDir)
+	//defer os.RemoveAll(tempDir)
 
 	commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket, tempDir)
 	if err != nil {
@@ -131,7 +135,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	sendEvent(clientWebSocket, EVENT_CLONED)
 
-	log.Infof("Cloned repository")
 	manifest, err := fetchManifest(tempDir, projectUrl, commitHash, branch, clientWebSocket)
 	if err != nil {
 		return err
@@ -154,7 +157,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	configRepo, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGuid, spaceGuid, spaceName, orgName, clientWebSocket)
-	log.Warnf("Error %+v", err)
 	if err != nil {
 		log.Warnf("Failed to initialise config repo due to error %+v", err)
 		return err
@@ -184,8 +186,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
-	closingMessage, _ := getMarshalledSocketMessage("", CLOSE_SUCCESS)
-	clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage)
+	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 	return nil
 }
 
@@ -294,8 +295,6 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 		return configRepo, err
 	}
 
-	log.Infof("Found CNSI Record")
-
 	userId, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
 
 	if err != nil {
@@ -303,17 +302,12 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return configRepo, err
 	}
-	log.Infof("Found User Session ID")
-
-	log.Infof("User Info %+v", userId)
 	cnsiTokenRecord, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGuid, userId)
 	if !found {
 		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGuid)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
 		return configRepo, errors.New("Failed to find token record")
 	}
-
-	log.Infof("Found CNSI user token info")
 
 	var filePath = fmt.Sprintf("/tmp/%s", uuid.NewV1())
 	repo := coreconfig.NewRepositoryFromFilepath(filePath, func(error) {})
@@ -339,8 +333,6 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 
 func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-	fmt.Printf("Directory is: %s", tempDir)
-
 	repo, err := git.PlainClone(tempDir, false, &git.CloneOptions{
 		URL:               repoUrl,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
@@ -353,7 +345,6 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 	}
 
 	branchRef := fmt.Sprintf("refs/remotes/origin/%s", branch)
-	log.Infof("Will checkout branch %s", branchRef)
 	if branchRef != "" {
 		workTree, err := repo.Worktree()
 		checkoutOpts := &git.CheckoutOptions{
@@ -447,8 +438,6 @@ func sendManifest(manifest manifest.Applications, clientWebSocket *websocket.Con
 		return err
 	}
 	manifestJson := string(manifestBytes)
-	log.Infof("Fetched Manifest: %s", manifestJson)
-
 	message, _ := getMarshalledSocketMessage(manifestJson, MANIFEST)
 
 	clientWebSocket.WriteMessage(websocket.TextMessage, message)

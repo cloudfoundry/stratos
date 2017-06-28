@@ -1,0 +1,32 @@
+// Styles to adjust the wizard presentaion when inside a detail view dialog
+.modal.detail-view.detail-view-dialog {
+
+  div.wizard-body {
+    flex-direction: column;
+
+    .wizard-step {
+      width: 100%;
+    }
+  }
+
+  ul.wizard-nav.nav {
+    width: 100%;
+    border-bottom: 1px solid $rule;
+    background-color: transparent;
+    margin-bottom: $console-unit-space;
+
+    > li.wizard-nav-item {
+      display: inline-block;
+
+      > a {
+        padding: 6px 20px;
+      }
+
+      &:not(.active) {
+        > a {
+          background-color: $console-primary-bg;
+        }
+      }
+    }
+  }
+}

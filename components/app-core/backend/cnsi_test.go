@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/satori/go.uuid"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 func TestRegisterCFCluster(t *testing.T) {
@@ -33,7 +34,7 @@ func TestRegisterCFCluster(t *testing.T) {
 		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err != nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {
 		t.Errorf("Failed to register cluster: %v", err)
 	}
 
@@ -61,9 +62,25 @@ func TestRegisterCFClusterWithMissingName(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err == nil {
 		t.Error("Should not be able to register cluster without cluster name")
 	}
+}
+
+func getCFPlugin(p *portalProxy, endpointType string) interfaces.EndpointPlugin {
+
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
+		}
+
+		if endpointType == endpointPlugin.GetType() {
+			return endpointPlugin
+		}
+	}
+	return nil
 }
 
 func TestRegisterCFClusterWithMissingAPIEndpoint(t *testing.T) {
@@ -85,7 +102,7 @@ func TestRegisterCFClusterWithMissingAPIEndpoint(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err == nil {
 		t.Error("Should not be able to register cluster without api endpoint")
 	}
 }
@@ -112,7 +129,7 @@ func TestRegisterCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err == nil {
 		t.Error("Should not be able to register cluster without a valid api endpoint")
 	}
 }
@@ -137,7 +154,7 @@ func TestRegisterCFClusterWithBadV2Request(t *testing.T) {
 
 	defer db.Close()
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err == nil {
 		t.Error("Should not register cluster if call to v2/info fails")
 	}
 }
@@ -165,7 +182,7 @@ func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	mock.ExpectExec(insertIntoCNSIs).
 		WillReturnError(errors.New("Unknown Database Error"))
 
-	if err := pp.RegisterEndpoint(ctx, pp.EndpointPlugins["cf"].Info); err == nil {
+	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err == nil {
 		t.Errorf("Unexpected success - should not be able to register cluster without token save.")
 	}
 }
@@ -217,8 +234,9 @@ func TestGetCFv2InfoWithBadURL(t *testing.T) {
 
 	cfPlugin := initCFPlugin(&portalProxy{})
 
+	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
 	invalidEndpoint := "%zzzz"
-	if _, err := cfPlugin.Info(invalidEndpoint, true); err == nil {
+	if _, err := endpointPlugin.Info(invalidEndpoint, true); err == nil{
 		t.Error("getCFv2Info should not return a valid response when the URL is bad.")
 	}
 }
@@ -227,8 +245,10 @@ func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	t.Parallel()
 
 	cfPlugin := initCFPlugin(&portalProxy{})
+	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
+
 	ep := "http://invalid.net"
-	if _, err := cfPlugin.Info(ep, true); err == nil {
+	if _, err :=  endpointPlugin.Info(ep, true); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
 }

@@ -47,15 +47,17 @@
 
     init();
 
+    var initialServiceInstance = _.get(vm.serviceInstance, 'metadata.guid') || appModel.filterParams.cnsiGuid;
+    var initialOrganization = _.get(vm.organization, 'metadata.guid') || appModel.filterParams.orgGuid;
+    var initialSpace = _.get(vm.space, 'metadata.guid') || appModel.filterParams.spaceGuid;
+
     function init() {
       vm.organizations = [];
       vm.spaces = [];
 
-      if (!vm.serviceInstance &&
-        appModel.filterParams.cnsiGuid &&
-        appModel.filterParams.cnsiGuid !== 'all') {
+      if (initialServiceInstance && initialServiceInstance !== 'all') {
         // Find the option to set. If the user has no permissions this may be null
-        var preSelectedService = _.find(vm.serviceInstances, {value: {guid: appModel.filterParams.cnsiGuid}}) || {};
+        var preSelectedService = _.find(vm.serviceInstances, {value: {guid: initialServiceInstance}}) || {};
         vm.serviceInstance = preSelectedService.value;
       }
 
@@ -65,7 +67,7 @@
         vm.organization = null;
         vm.space = null;
         if (serviceInstance) {
-          getOrganizations();
+          vm.getOrganizations();
         }
       });
 
@@ -74,7 +76,7 @@
       }, function (organization) {
         vm.space = null;
         if (organization) {
-          getSpacesForOrganization(organization.metadata.guid);
+          vm.getSpacesForOrganization(organization.metadata.guid);
         }
       });
 
@@ -108,11 +110,9 @@
           }
           [].push.apply(vm.organizations, _.map(filteredOrgs, cfUtilsService.selectOptionMapping));
 
-          if (!vm.organization &&
-            appModel.filterParams.orgGuid &&
-            appModel.filterParams.orgGuid !== 'all') {
+          if (initialOrganization && initialOrganization !== 'all') {
             // Find the option to set. If the user has no permissions this may be null
-            var preSelectedOrg = _.find(vm.organizations, {value: {metadata: {guid: appModel.filterParams.orgGuid}}}) || {};
+            var preSelectedOrg = _.find(vm.organizations, {value: {metadata: {guid: initialOrganization}}}) || {};
             vm.organization = preSelectedOrg.value;
           }
         });
@@ -140,11 +140,9 @@
           }
           [].push.apply(vm.spaces, _.map(filteredSpaces, cfUtilsService.selectOptionMapping));
 
-          if (!vm.space &&
-            appModel.filterParams.spaceGuid &&
-            appModel.filterParams.spaceGuid !== 'all') {
+          if (initialSpace && initialSpace !== 'all') {
             // Find the option to set. If the user has no permissions this may be null
-            var preSelectedOrg = _.find(vm.spaces, {value: {metadata: {guid: appModel.filterParams.spaceGuid}}}) || {};
+            var preSelectedOrg = _.find(vm.spaces, {value: {metadata: {guid: initialSpace}}}) || {};
             vm.space = preSelectedOrg.value;
           }
         });
