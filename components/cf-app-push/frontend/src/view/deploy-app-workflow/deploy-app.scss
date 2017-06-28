@@ -1,7 +1,16 @@
+$github-avatar-height: 51px;
+$github-avatar-width: 51px;
+$github-info-commit-spacer: 3px;
+
+$deploy-status-bounce-spacer: 6px;
+
+// Select option height is text size + margin
+$select-option-height: 39px;
+
 .modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content .detail-view-content.deploy-app wizard .wizard-step {
-  padding-bottom: 24px;
-  padding-left: 24px;
+  padding-bottom: 0 $console-unit-space $console-unit-space $console-unit-space;
 }
+
 .deploy-app {
   deploy-location {
     .control-title {
@@ -18,48 +27,44 @@
 
     .deploy-app-github-form {
       .deploy-app-github-branch {
-        margin-bottom: 100px;
+        margin-bottom: $select-option-height * 3;
         .dropdown-menu {
-          max-height: 120px;
+          max-height: $select-option-height * 3;
         }
       }
     }
 
     .deploy-app-github-info {
-      display: flex;
       padding-left: $console-unit-space;
-      > img {
-        height: 75px;
-        width: 75px;
-      }
-      > div {
-        display: flex;
-        padding-left: $console-unit-space / 2;
-        flex-direction: column;
+
+      img {
+        height: $github-avatar-height;
+        width: $github-avatar-width;
       }
 
-      .lastCommit {
-        padding-top: $console-unit-space / 4;
-        .lastCommitter {
-          display: flex;
-          flex-direction: row;
-          div:nth-of-type(2) {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            img {
-              height: 45px;
-              width: 45px;
-            }
-          }
+      .project {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .project-info {
+          padding-left: $console-unit-space / 2;
         }
       }
 
+      .lastCommit {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
+        padding-top: $github-info-commit-spacer;
+
+        .lastCommit-info {
+          padding-left: $console-unit-space / 2;
+        }
+      }
     }
   }
-
-
 
   .rm-background{
     background-color: transparent;
@@ -74,7 +79,7 @@
       padding-right: $console-unit-space;
     }
     bounce-spinner {
-      margin-top: 6px;
+      margin-top: $deploy-status-bounce-spacer;
     }
   }
 

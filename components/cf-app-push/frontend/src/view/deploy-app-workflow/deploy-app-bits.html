@@ -43,31 +43,45 @@
         ng-model="step.userInput.githubBranch"
         input-options="step.data.githubBranches"
         placeholder="{{ 'deploy-app-dialog.step-info.github.branch-placeholder' | translate}}"
+        disabled="!step.userInput.githubProjectValid"
         required>
       </search-box>
     </div>
   </div>
   <div ng-if="step.userInput.githubProjectValid && step.data.githubProject" class="deploy-app-github-info">
-    <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
-    <div>
-      <span>{{ step.data.githubProject.description}}</span>
-      <div ng-if="step.data.githubCommit" class="lastCommit">
-        <span translate>deploy-app-dialog.step-info.github.branch-last-commit</span>
+
+    <div class="project">
+      <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
+      <div class="project-info">
+        <div>
+          <a href="https://www.github.com/{{step.userInput.githubProjectCached}}"
+             rel="noopener noreferrer" target="_blank">{{step.userInput.githubProjectCached}}
+          </a>
+        </div>
+        {{ step.data.githubProject.description | limitTo:50}} <span ng-if="step.data.githubProject.description.length > 50">...</span>
+      </div>
+    </div>
+
+    <div ng-if="step.data.githubCommit" class="lastCommit">
+      <div ng-show="step.data.githubCommit.author.avatar_url" class="committerAvatar">
+        <img ng-src="{{step.data.githubCommit.author.avatar_url}}"/>
+      </div>
+      <div class="lastCommit-info">
+        <div>
+          <span translatE>deploy-app-dialog.step-info.github.branch-last-commit</span>
+          <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
+             rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
+          </a>
+        </div>
         <div>
           <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | amDateFormat: 'L HH:mm:ss'}}
         </div>
-        <div>
-          <span translate>deploy-app-dialog.step-info.github.branch-last-commit-sha</span> {{ step.data.githubCommit.sha | limitTo:6}}
-        </div>
-        <div>
-          <span translate>deploy-app-dialog.step-info.github.branch-last-commit-message</span> {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
-        </div>
         <div class="lastCommitter">
-          <div><span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span></div>
-          <div> {{ step.data.githubCommit.author.login}}<img ng-src="{{step.data.githubCommit.author.avatar_url}}"/></div>
+          <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
         </div>
       </div>
     </div>
+
   </div>
 </div>
 

@@ -7,42 +7,17 @@
     .controller('cf-app-push.deployAppController', DeployAppController);
 
   function DeployAppService(frameworkDetailView, cfAppWallActions) {
-    cfAppWallActions.actions.push({
-      id: 'app-wall-deploy-application-btn',
-      label: 'app-wall.deploy-application',
-      position: 2,
-      show: function (context) {
-        if (angular.isFunction(context.show)) {
-          return context.show();
-        }
-        return true;
-      },
-      disable: function (context) {
-        if (angular.isFunction(context.disable)) {
-          return context.disable();
-        }
-        return false;
-      },
-      action: function (context) {
-        deploy().result.catch(function (result) {
-          // Do we need to reload the app collection to show the newly added app?
-          if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
-            // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
-            context.reload();
-          }
-        });
-      }
-    });
 
     return {
-      deploy: deploy
+      deploy: deploy,
+      register: register
     };
 
     /**
      * @memberof appDeployAppService
      * @name deploy
-     * @constructor
      * @param {object?} context - the context for the modal. Used to pass in data
+     * @returns {object} frameworkDetailView promise
      */
     function deploy(context) {
       return frameworkDetailView(
@@ -55,6 +30,39 @@
         },
         context
       );
+    }
+
+    /**
+     * @memberof appDeployAppService
+     * @name register
+     */
+    function register() {
+      cfAppWallActions.actions.push({
+        id: 'app-wall-deploy-application-btn',
+        label: 'app-wall.deploy-application',
+        position: 2,
+        show: function (context) {
+          if (angular.isFunction(context.show)) {
+            return context.show();
+          }
+          return true;
+        },
+        disable: function (context) {
+          if (angular.isFunction(context.disable)) {
+            return context.disable();
+          }
+          return false;
+        },
+        action: function (context) {
+          deploy().result.catch(function (result) {
+            // Do we need to reload the app collection to show the newly added app?
+            if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
+              // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+              context.reload();
+            }
+          });
+        }
+      });
     }
   }
 
@@ -97,7 +105,7 @@
       CLOSE_SUCCESS: 20002,
       CLOSE_PUSH_ERROR: 40003,
       CLOSE_NO_MANIFEST: 40004,
-      CLOSE_INVALID_MANIFEST:40005,
+      CLOSE_INVALID_MANIFEST: 40005,
       CLOSE_FAILED_CLONE: 40006,
       CLOSE_FAILED_NO_BRANCH: 40007,
       CLOSE_FAILURE: 40008,
@@ -130,7 +138,6 @@
       organization: null,
       space: null,
       githubProject: '',
-      githubBranch: 'master',
       manifest: {
         location: '/manifest.yml'
       }
@@ -186,7 +193,7 @@
         allowBack = false;
         return startDeploy().catch(function (error) {
           allowBack = false;
-          return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', { reason: error }));
+          return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
         });
       },
       isLastStep: true
@@ -211,7 +218,7 @@
     // Actions for the wizard controller
     vm.actions = {
       stop: function () {
-        $uibModalInstance.dismiss({ reload: !!hasPushStarted });
+        $uibModalInstance.dismiss({reload: !!hasPushStarted});
         resetSocket();
       },
 
@@ -242,6 +249,7 @@
         .then(function (response) {
           vm.userInput.githubProjectValid = true;
           vm.data.githubProject = response.data;
+          vm.userInput.githubProjectCached = project;
 
           $http.get('https://api.github.com/repos/' + project + '/branches')
             .then(function (response) {
@@ -261,6 +269,9 @@
         .catch(function (response) {
           if (response.status === 404) {
             vm.userInput.githubProjectValid = false;
+            vm.data.githubBranches.length = 0;
+            delete vm.userInput.githubBranch;
+            delete vm.data.githubCommit;
           }
         });
     }, 1000);
@@ -275,9 +286,9 @@
 
     $scope.$watch(function () {
       return vm.userInput.githubBranch;
-    }, function (oldVal, newVal) {
-      if (oldVal !== newVal) {
-        $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + vm.userInput.githubBranch.commit.sha)
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + newVal.commit.sha)
           .then(function (response) {
             vm.data.githubCommit = response.data;
           })
@@ -364,7 +375,7 @@
         allowBack = true;
         vm.data.deployStatus = vm.data.deployState.FAILED;
         var failureDescription = $translate.instant(errorString);
-        vm.data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', { reason:  failureDescription});
+        vm.data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', {reason: failureDescription});
         deployingPromise.reject(failureDescription);
         $log.warn('Deploy Application: Failed: ' + failureDescription);
       }
@@ -393,31 +404,18 @@
             // Ignore, handled by custom log viewer filter
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
-            break;
           case socketEventTypes.CLOSE_FAILED_NO_BRANCH:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_NO_BRANCH');
-            break;
           case socketEventTypes.CLOSE_FAILURE:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILURE');
-            break;
           case socketEventTypes.CLOSE_INVALID_MANIFEST:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_INVALID_MANIFEST');
-            break;
           case socketEventTypes.CLOSE_NO_MANIFEST:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_MANIFEST');
-            break;
           case socketEventTypes.CLOSE_PUSH_ERROR:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_PUSH_ERROR');
-            break;
           case socketEventTypes.CLOSE_NO_SESSION:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_SESSION');
-            break;
           case socketEventTypes.CLOSE_NO_CNSI:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI');
-            break;
           case socketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI_USERTOKEN');
+            var type = _.findKey(socketEventTypes, function (type) {
+              return type === logData.type;
+            });
+            deployFailed('deploy-app-dialog.socket.event-type.' + type);
             break;
           case socketEventTypes.CLOSE_SUCCESS:
             deploySuccessful();
