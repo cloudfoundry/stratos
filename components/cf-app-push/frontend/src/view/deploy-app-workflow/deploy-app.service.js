@@ -97,7 +97,7 @@
       CLOSE_SUCCESS: 20002,
       CLOSE_PUSH_ERROR: 40003,
       CLOSE_NO_MANIFEST: 40004,
-      CLOSE_INVALID_MANIFEST:40005,
+      CLOSE_INVALID_MANIFEST: 40005,
       CLOSE_FAILED_CLONE: 40006,
       CLOSE_FAILED_NO_BRANCH: 40007,
       CLOSE_FAILURE: 40008,
@@ -186,7 +186,7 @@
         allowBack = false;
         return startDeploy().catch(function (error) {
           allowBack = false;
-          return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', { reason: error }));
+          return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
         });
       },
       isLastStep: true
@@ -211,7 +211,7 @@
     // Actions for the wizard controller
     vm.actions = {
       stop: function () {
-        $uibModalInstance.dismiss({ reload: !!hasPushStarted });
+        $uibModalInstance.dismiss({reload: !!hasPushStarted});
         resetSocket();
       },
 
@@ -242,6 +242,7 @@
         .then(function (response) {
           vm.userInput.githubProjectValid = true;
           vm.data.githubProject = response.data;
+          vm.userInput.githubProjectCached = project;
 
           $http.get('https://api.github.com/repos/' + project + '/branches')
             .then(function (response) {
@@ -364,7 +365,7 @@
         allowBack = true;
         vm.data.deployStatus = vm.data.deployState.FAILED;
         var failureDescription = $translate.instant(errorString);
-        vm.data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', { reason:  failureDescription});
+        vm.data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', {reason: failureDescription});
         deployingPromise.reject(failureDescription);
         $log.warn('Deploy Application: Failed: ' + failureDescription);
       }
@@ -393,31 +394,18 @@
             // Ignore, handled by custom log viewer filter
             break;
           case socketEventTypes.CLOSE_FAILED_CLONE:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_CLONE');
-            break;
           case socketEventTypes.CLOSE_FAILED_NO_BRANCH:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILED_NO_BRANCH');
-            break;
           case socketEventTypes.CLOSE_FAILURE:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_FAILURE');
-            break;
           case socketEventTypes.CLOSE_INVALID_MANIFEST:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_INVALID_MANIFEST');
-            break;
           case socketEventTypes.CLOSE_NO_MANIFEST:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_MANIFEST');
-            break;
           case socketEventTypes.CLOSE_PUSH_ERROR:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_PUSH_ERROR');
-            break;
           case socketEventTypes.CLOSE_NO_SESSION:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_SESSION');
-            break;
           case socketEventTypes.CLOSE_NO_CNSI:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI');
-            break;
           case socketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
-            deployFailed('deploy-app-dialog.socket.event-type.CLOSE_NO_CNSI_USERTOKEN');
+            var type = _.findKey(socketEventTypes, function (type) {
+              return type === logData.type;
+            });
+            deployFailed('deploy-app-dialog.socket.event-type.' + type);
             break;
           case socketEventTypes.CLOSE_SUCCESS:
             deploySuccessful();

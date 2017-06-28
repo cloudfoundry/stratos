@@ -3,13 +3,7 @@
 
   angular
     .module('cloud-foundry.service')
-    .factory('cfAppWallActions', appWallActions)
-    .run(register);
-
-  /* eslint-disable no-unused-vars */
-  // Ensure that an instance of cfAppWallActions is created by injecting it here.
-  function register(cfAppWallActions) { }
-  /* eslint-enable no-unused-vars */
+    .factory('cfAppWallActions', appWallActions);
 
   /**
    * @namespace cloud-foundry.service

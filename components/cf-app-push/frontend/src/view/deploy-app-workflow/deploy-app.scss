@@ -1,7 +1,13 @@
+$github-avatar-height: 51px;
+$github-avatar-width: 51px;
+$github-info-commit-spacer: 3px;
+
+$deploy-status-bounce-spacer: 6px;
+
 .modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content .detail-view-content.deploy-app wizard .wizard-step {
-  padding-bottom: 24px;
-  padding-left: 24px;
+  padding-bottom: 0 $console-unit-space $console-unit-space $console-unit-space;
 }
+
 .deploy-app {
   deploy-location {
     .control-title {
@@ -29,8 +35,8 @@
       padding-left: $console-unit-space;
 
       img {
-        height: 51px;
-        width: 51px;
+        height: $github-avatar-height;
+        width: $github-avatar-width;
       }
 
       .project {
@@ -48,18 +54,14 @@
         flex-direction: row;
         align-items: center;
 
-        padding-top: 3px;
+        padding-top: $github-info-commit-spacer;
 
         .lastCommit-info {
           padding-left: $console-unit-space / 2;
         }
       }
-
-
     }
   }
-
-
 
   .rm-background{
     background-color: transparent;
@@ -74,7 +76,7 @@
       padding-right: $console-unit-space;
     }
     bounce-spinner {
-      margin-top: 6px;
+      margin-top: $deploy-status-bounce-spacer;
     }
   }
 

@@ -53,8 +53,8 @@
       <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
       <div class="project-info">
         <div>
-          <a href="https://www.github.com/{{step.userInput.githubProject}}"
-             rel="noopener noreferrer" target="_blank">{{step.userInput.githubProject}}
+          <a href="https://www.github.com/{{step.userInput.githubProjectCached}}"
+             rel="noopener noreferrer" target="_blank">{{step.userInput.githubProjectCached}}
           </a>
         </div>
         {{ step.data.githubProject.description | limitTo:50}} <span ng-if="step.data.githubProject.description.length > 50">...</span>

@@ -112,10 +112,7 @@
     }
 
     vm.isNavEntryDisabled = function ($index) {
-      if (vm.workflow.disableJump()) {
-        return true;
-      }
-      if (vm.workflow.allowJump()) {
+      if (vm.workflow.disableJump() || vm.workflow.allowJump()) {
         return true;
       }
       if (vm.workflow.allowBack() && $index < vm.currentIndex) {

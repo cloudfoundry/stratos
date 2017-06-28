@@ -18,7 +18,7 @@
    * Note: the streaming log part is not fully enabled yet since we can't write a service for it until TEAMFOUR-353
    */
 
-  function logViewer($rootScope, AnsiColorsService, $websocket, $log) {
+  function logViewer($rootScope, $websocket, $log, AnsiColorsService) {
 
     // logContainer, logTextArea: Access elements directly for better performance with large and fast logs
     // handleScroll, handleWheel: Scroll handler defined in controller needs to be attached by link
@@ -410,6 +410,7 @@
         resetLog();
 
         if (logViewer.websocketUrl) {
+          closeWebSocket();
           logViewer.streaming = STREAMING_STATUS.CONNECTING;
           logViewer.webSocketConnection = $websocket(logViewer.websocketUrl, null, {
             reconnectIfNotNormalClose: false
