@@ -17,7 +17,7 @@
   </div>
 </div>
 
-<div class="panel panel-default summary" ng-init="applicationSummaryCtrl.appCtrl = appCtrl">
+<div class="panel panel-default summary app-summary" ng-init="applicationSummaryCtrl.appCtrl = appCtrl">
 
   <div class="panel-heading action-header">
     <span translate>Summary</span>
@@ -35,7 +35,8 @@
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
           <span class="app-status material-icons {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
-          <span class="app-status" translate>{{ appCtrl.model.application.state.label }}
+          <span class="app-status app-status-label">
+            <span translate>{{ appCtrl.model.application.state.label }}</span>
             <span ng-if="appCtrl.model.application.state.subLabel" >&nbsp;-
               <span translate>{{ appCtrl.model.application.state.subLabel }}</span>
             </span>

@@ -66,6 +66,10 @@
       .app-status {
         margin-left: 0;
         margin-right: 2px;
+
+        &.app-status-label {
+          text-transform: uppercase;
+        }
       }
     }
 
