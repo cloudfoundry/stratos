@@ -56,8 +56,6 @@
     switch (type) {
       case 'cf':
         return registerButtons.get(0).click();
-      case 'hce':
-        return registerButtons.get(1).click();
       default:
         fail('Cannot select known type: ', type);
         break;
@@ -71,8 +69,6 @@
       switch (text) {
         case 'Register a Cloud Foundry Endpoint':
           return 'cf';
-        case 'Register a Code Engine Endpoint':
-          return 'hce';
         default:
           fail('Unknown endpoint type: ', text);
           break;

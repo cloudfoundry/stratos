@@ -146,23 +146,8 @@
                       }
                     }
 
-                    // service = _.find(helpers.getCNSIs(), function (cf) {
-                    //   if (cf.register.cnsi_name === name) {
-                    //     return cf;
-                    //   }
-                    // });
-                    // if (!service) {
-                    //   service = _.find(helpers.getHces(), function (hce) {
-                    //     if (hce.register.cnsi_name === name) {
-                    //       return hce;
-                    //     }
-                    //   });
-                    // }
                     if (service) {
                       // 1) we show the correct type
-                      if (serviceType === 'hce') {
-                        expect(endpointsPage.endpointType(index)).toBe('Code Engine');
-                      } else
                       if (serviceType === 'cf') {
                         expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
@@ -387,10 +372,6 @@
           });
         }
 
-        // describe('Register hce', function () {
-        //   registerTests('hce');
-        // }).skipWhen(helpers.skipIfNoHCE);
-
         describe('Register cf', function () {
           registerTests('cf');
         });
@@ -547,7 +528,7 @@
 
           it('should update service instance data on register', function () {
             endpointsPage.credentialsFormEndpointConnect().then(function () {
-              helpers.checkAndCloseToast(/Successfully connected to '(?:cf|hce)'/);
+              helpers.checkAndCloseToast(/Successfully connected to '(?:cf)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
               expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('DISCONNECT');
               expect(endpointsPage.endpointIsConnected(cfRowIndex)).toBeTruthy();
@@ -583,7 +564,7 @@
                 return button.click();
               })
               .then(function () {
-                helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf|hce)'/);
+                helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
                 expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('CONNECT');
               });

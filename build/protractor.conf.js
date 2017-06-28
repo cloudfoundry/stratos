@@ -29,7 +29,6 @@
   exports.config = {
 
     suites: {
-      all: '../components/**/frontend/test/e2e/**/*.spec.js',
       components: ''
     },
 
