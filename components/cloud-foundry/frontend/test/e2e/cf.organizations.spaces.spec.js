@@ -52,11 +52,6 @@
           loginPage.loginAsAdmin();
           // NOTE - This will break if we have multiple cf endpoints...
           return endpointsListCf.showCfEndpoints();
-          // return navBar.goToView('Endpoints');
-        }).then(function () {
-          // var requiredRowIndex = endpointDashboard.getRowWithEndpointName(cfFromConfig.register.cnsi_name);
-          // expect(requiredRowIndex).toBeDefined();
-          // return endpointDashboard.endpointNameClick(requiredRowIndex);
         });
       // Ensure we don't continue until everything is set up
       return browser.driver.wait(init);

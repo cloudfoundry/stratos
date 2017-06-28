@@ -11,7 +11,6 @@
   var addAppCfApp = require('./po/applications/add-application-cf-app.po');
   var addAppService = require('./po/applications/add-application-services.po');
   var application = require('./po/applications/application.po');
-  // var deliveryPipeline = require('./po/applications/application-delivery-pipeline.po');
   var cfModel = require('./po/models/cf-model.po');
   var inputText = require('../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
