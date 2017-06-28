@@ -8,8 +8,11 @@
 
   /**
    * @name terminalViewer
+   * @param {object} $websocket -$websocket Service
+   * @param {object} $log - the angular $log Service
+   * @returns {object} Terminal Viewer directive
    */
-  function terminalViewer(AnsiColorsService, $websocket, $log, $window) {
+  function terminalViewer($websocket, $log) {
 
     var term;
 

@@ -1,5 +1,4 @@
 (function () {
-
   'use strict';
 
   angular
@@ -8,10 +7,11 @@
 
   /**
    * @name cfAppSshResize
+   * @param {object} $window - the angular $window Service
+   * @param {object} $timeout - the Angular $timeout service
+   * @returns {object} App SSH Resize directive
    */
   function cfAppSshResize($window, $timeout) {
-
-    //var BOTTOM_MARGIN = 24;
 
     function cfAppSshResizeLink(scope, element) {
 

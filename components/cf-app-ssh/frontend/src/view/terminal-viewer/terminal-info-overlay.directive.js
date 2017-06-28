@@ -8,6 +8,8 @@
 
   /**
    * @name terminalInfoOverlay
+   * @param {object} $timeout - the Angular $timeout service
+   * @returns {object} Terminal Info Overlay directive
    */
   function terminalInfoOverlay($timeout) {
 
