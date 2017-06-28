@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	_ "github.com/satori/go.uuid"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 func TestRegisterCFCluster(t *testing.T) {
@@ -236,7 +236,7 @@ func TestGetCFv2InfoWithBadURL(t *testing.T) {
 
 	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
 	invalidEndpoint := "%zzzz"
-	if _, err := endpointPlugin.Info(invalidEndpoint, true); err == nil{
+	if _, _, err := endpointPlugin.Info(invalidEndpoint, true); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the URL is bad.")
 	}
 }
@@ -248,7 +248,7 @@ func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
 
 	ep := "http://invalid.net"
-	if _, err :=  endpointPlugin.Info(ep, true); err == nil {
+	if _, _, err := endpointPlugin.Info(ep, true); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
 }

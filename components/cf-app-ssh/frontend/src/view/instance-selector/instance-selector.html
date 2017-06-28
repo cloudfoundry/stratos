@@ -1,0 +1,36 @@
+<div class="app-instance-selector" ng-show="aiSelectCtrl.shown">
+  <div class="panel panel-default">
+    <h1 translate>cf.app-ssh.select-instance</h1>
+    <div class="app-instance-selector-table">
+      <div class="panel-body app-instance-selector-empty" ng-if="!aiSelectCtrl.model.application.instances" translate>
+        cf.app-ssh.empty
+      </div>
+      <table class="table" ng-if="aiSelectCtrl.model.application.instances">
+        <thead>
+        <tr>
+          <th translate>cf.instance.labels.index</th>
+          <th translate>cf.instance.labels.status</th>
+          <th translate>cf.instance.labels.memory</th>
+          <th translate>cf.instance.labels.disk</th>
+          <th translate>cf.instance.labels.uptime</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-click="aiSelectCtrl.selectItem(index)" class="app-instance-item" ng-repeat="(index,instance) in aiSelectCtrl.model.application.instances">
+          <td>{{ index }}</td>
+          <td>{{ instance.state }}</td>
+          <td class="instance-percent-gauge">
+            <percent-gauge value="{{ instance.stats.usage.mem / instance.stats.mem_quota }}"
+                          value-text="{{ [instance.stats.usage.mem, instance.stats.mem_quota] | usageBytes:0 }}"/>
+          </td>
+          <td class="instance-percent-gauge">
+            <percent-gauge value="{{ instance.stats.usage.disk / instance.stats.disk_quota }}"
+                          value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
+          </td>
+          <td class="instance-uptime-td">{{ aiSelectCtrl.cfUtilsService.formatUptime(instance.stats.uptime) }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

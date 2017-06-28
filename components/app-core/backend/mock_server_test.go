@@ -280,13 +280,13 @@ var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "au
 
 var mockEncryptionKey = make([]byte, 32)
 
-var mockV2InfoResponse = v2Info{
+var mockV2InfoResponse = interfaces.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
 }
 
-var mockInfoResponse = v2Info{
+var mockInfoResponse = interfaces.V2Info{
 	AuthorizationEndpoint: mockAuthEndpoint,
 	TokenEndpoint:         mockTokenEndpoint,
 }

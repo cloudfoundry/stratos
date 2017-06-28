@@ -7,14 +7,15 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
-	"github.com/satori/go.uuid"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	uuid "github.com/satori/go.uuid"
+
+	"errors"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"errors"
 )
 
 const (
@@ -100,7 +101,7 @@ func (ch *CFHosting) Init() error {
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
-		newCNSI, err := cfEndpointSpec.Info(appData.API, true)
+		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
 			log.Fatal("Could not get the info for Cloud Foundry", err)
 			return nil
