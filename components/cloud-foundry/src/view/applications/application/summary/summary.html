@@ -78,6 +78,27 @@
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
+        <dt translate ng-if="applicationSummaryCtrl.stratosProject">console deploy</dt>
+        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject">
+          {{ applicationSummaryCtrl.stratosProject.timestamp * 1000 | amDateFormat: 'L - LTS' }}
+        </dd>
+
+        <dt translate ng-if="applicationSummaryCtrl.stratosProject">console deploy source</dt>
+        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject">
+          <a href="{{applicationSummaryCtrl.stratosProject.url}}/commit/{{applicationSummaryCtrl.stratosProject.commit}}"
+             rel="noopener noreferrer" target="_blank">
+            {{applicationSummaryCtrl.stratosProject.commit | limitTo:8}}
+          </a>
+        </dd>
+
+        <dt translate>ssh enabled</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.enable_ssh }}
+        </dd>
+      </dl>
+    </div>
+    <div class="col-md-6">
+      <dl class="dl-horizontal">
         <dt translate>memory</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.memory)}}
@@ -88,10 +109,6 @@
           {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
         </dd>
 
-      </dl>
-    </div>
-    <div class="col-md-6">
-      <dl class="dl-horizontal">
         <dt translate>buildpack</dt>
         <dd class="nowrap align-right">
           <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack || '-' }}</span>
@@ -104,11 +121,6 @@
         <dt translate>production</dt>
         <dd class="pull-right">
           {{ appCtrl.model.application.summary.production }}
-        </dd>
-
-        <dt translate>ssh enabled</dt>
-        <dd class="pull-right">
-          {{ appCtrl.model.application.summary.enable_ssh }}
         </dd>
 
         <dt translate>stack</dt>

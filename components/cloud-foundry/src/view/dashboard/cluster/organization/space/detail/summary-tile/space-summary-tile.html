@@ -16,6 +16,9 @@
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
       <dt translate>memory</dt>
       <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
+      <dt translate>ssh enabled</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.space.entity.allow_ssh || 'false' }}</dd>
+
     </dl>
   </div>
   <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
