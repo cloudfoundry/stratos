@@ -7,11 +7,12 @@ import (
 	"io"
 	"net/url"
 
+	"errors"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"errors"
 )
 
 type CloudFoundrySpecification struct {
@@ -28,15 +29,15 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CloudFoundrySpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
-func (c CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+func (c CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return c, nil
 }
 
-func (c CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error){
+func (c CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return c, nil
 }
 
-func (c CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+func (c CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -74,7 +75,7 @@ func (c CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) 
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
 }
 
-func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, error) {
+func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -83,7 +84,7 @@ func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bo
 
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
-		return newCNSI, err
+		return newCNSI, nil, err
 	}
 
 	uri.Path = "v2/info"
@@ -91,7 +92,7 @@ func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bo
 
 	res, err := h.Get(uri.String())
 	if err != nil {
-		return newCNSI, err
+		return newCNSI, nil, err
 	}
 
 	if res.StatusCode != 200 {
@@ -99,17 +100,17 @@ func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bo
 		io.Copy(buf, res.Body)
 		defer res.Body.Close()
 
-		return newCNSI, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
 
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&v2InfoResponse); err != nil {
-		return newCNSI, err
+		return newCNSI, nil, err
 	}
 
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
 	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
 	newCNSI.DopplerLoggingEndpoint = v2InfoResponse.DopplerLoggingEndpoint
 
-	return newCNSI, nil
+	return newCNSI, v2InfoResponse, nil
 }

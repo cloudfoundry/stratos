@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"net/http"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 )
@@ -25,4 +26,6 @@ type PortalProxy interface {
 	GetSessionStringValue(c echo.Context, key string) (string, error)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+
+	GetClientId(cnsiType string) (string, error)
 }

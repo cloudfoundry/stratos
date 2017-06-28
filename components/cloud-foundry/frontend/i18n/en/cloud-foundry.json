@@ -24,6 +24,15 @@
         "deploy-title": "Deploy Using CLI"
       }
     },
+    "instance": {
+      "labels": {
+        "index": "Index",
+        "status": "Status",
+        "memory": "Memory",
+        "disk": "Disk",
+        "uptime": "Uptime"
+      }
+    },
     "buildpacks": {
       "buildpacks": "Build Packs",
       "labels": {
