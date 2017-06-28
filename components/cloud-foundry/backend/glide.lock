@@ -42,11 +42,13 @@ imports:
 - name: github.com/valyala/fasttemplate
   version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
 - name: golang.org/x/net
-  version: 84f0e6f92b10139f986b1756e149a7d9de270cdc
+  version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
   subpackages:
-  - context
+   - context
+   - html
+   - websocket
 - name: golang.org/x/sys
-  version: 1e99a4f9d247b28c670884b9a8d6801f39a47b77
+  version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:
   - unix
 testImports: []

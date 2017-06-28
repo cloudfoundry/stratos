@@ -39,7 +39,6 @@ imports:
   repo: https://go.googlesource.com/sys
   subpackages:
   - unix
-  - windows
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []

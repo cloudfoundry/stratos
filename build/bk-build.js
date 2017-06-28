@@ -50,7 +50,7 @@
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
       promise = promise
         .then(function () {
-          return buildUtils.runGlideInstall(fullPluginPath, prepareBuild.buildTest);
+          return buildUtils.runGlideInstall(fullPluginPath);
         });
 
     });
@@ -66,7 +66,7 @@
 
   gulp.task('prepare-core', ['prepare-plugins'], function (done) {
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
-    buildUtils.runGlideInstall(fullCorePath, prepareBuild.buildTest)
+    buildUtils.runGlideInstall(fullCorePath)
       .then(function () {
         done();
       })
@@ -112,7 +112,11 @@
       .then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
         var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
+        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', '__vendor');
         mergeDirs.default(coreVendorPath, goSrc);
+        if (fs.existsSync(coreCheckedInVendorPath)) {
+          mergeDirs.default(coreCheckedInVendorPath, goSrc);
+        }
         fs.removeSync(coreVendorPath);
         return Q.resolve();
       })
