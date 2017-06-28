@@ -43,6 +43,7 @@
         ng-model="step.userInput.githubBranch"
         input-options="step.data.githubBranches"
         placeholder="{{ 'deploy-app-dialog.step-info.github.branch-placeholder' | translate}}"
+        disabled="!step.userInput.githubProjectValid"
         required>
       </search-box>
     </div>

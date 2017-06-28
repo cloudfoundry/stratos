@@ -401,8 +401,7 @@
 
       // Handle streaming logs
       function requestStreamingLog() {
-        function onOpen(event) {
-          $log.debug('WebSocket connection opened', event);
+        function onOpen() {
           logViewer.streaming = STREAMING_STATUS.ONLINE;
           safeApply();
         }
@@ -421,9 +420,10 @@
           }
           logViewer.webSocketConnection = logViewer.websocket;
           if (logViewer.webSocketConnection.readyState === 1) {
+            $log.debug('Supplied WebSocket is open');
             onOpen();
           } else {
-            $log.warn('Supplied WebSocket connection not open');
+            $log.warn('Supplied WebSocket not open');
             return;
           }
         } else {
@@ -449,6 +449,7 @@
         }, {autoApply: false});
 
         logViewer.webSocketConnection.onOpen(function (event) {
+          $log.debug('WebSocket connection opened', event);
           onOpen(event);
         });
 

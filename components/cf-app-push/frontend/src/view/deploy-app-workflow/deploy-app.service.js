@@ -7,42 +7,17 @@
     .controller('cf-app-push.deployAppController', DeployAppController);
 
   function DeployAppService(frameworkDetailView, cfAppWallActions) {
-    cfAppWallActions.actions.push({
-      id: 'app-wall-deploy-application-btn',
-      label: 'app-wall.deploy-application',
-      position: 2,
-      show: function (context) {
-        if (angular.isFunction(context.show)) {
-          return context.show();
-        }
-        return true;
-      },
-      disable: function (context) {
-        if (angular.isFunction(context.disable)) {
-          return context.disable();
-        }
-        return false;
-      },
-      action: function (context) {
-        deploy().result.catch(function (result) {
-          // Do we need to reload the app collection to show the newly added app?
-          if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
-            // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
-            context.reload();
-          }
-        });
-      }
-    });
 
     return {
-      deploy: deploy
+      deploy: deploy,
+      register: register
     };
 
     /**
      * @memberof appDeployAppService
      * @name deploy
-     * @constructor
      * @param {object?} context - the context for the modal. Used to pass in data
+     * @returns {object} frameworkDetailView promise
      */
     function deploy(context) {
       return frameworkDetailView(
@@ -55,6 +30,39 @@
         },
         context
       );
+    }
+
+    /**
+     * @memberof appDeployAppService
+     * @name register
+     */
+    function register() {
+      cfAppWallActions.actions.push({
+        id: 'app-wall-deploy-application-btn',
+        label: 'app-wall.deploy-application',
+        position: 2,
+        show: function (context) {
+          if (angular.isFunction(context.show)) {
+            return context.show();
+          }
+          return true;
+        },
+        disable: function (context) {
+          if (angular.isFunction(context.disable)) {
+            return context.disable();
+          }
+          return false;
+        },
+        action: function (context) {
+          deploy().result.catch(function (result) {
+            // Do we need to reload the app collection to show the newly added app?
+            if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
+              // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+              context.reload();
+            }
+          });
+        }
+      });
     }
   }
 
@@ -130,7 +138,6 @@
       organization: null,
       space: null,
       githubProject: '',
-      githubBranch: 'master',
       manifest: {
         location: '/manifest.yml'
       }
@@ -262,6 +269,9 @@
         .catch(function (response) {
           if (response.status === 404) {
             vm.userInput.githubProjectValid = false;
+            vm.data.githubBranches.length = 0;
+            delete vm.userInput.githubBranch;
+            delete vm.data.githubCommit;
           }
         });
     }, 1000);
@@ -276,9 +286,9 @@
 
     $scope.$watch(function () {
       return vm.userInput.githubBranch;
-    }, function (oldVal, newVal) {
-      if (oldVal !== newVal) {
-        $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + vm.userInput.githubBranch.commit.sha)
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + newVal.commit.sha)
           .then(function (response) {
             vm.data.githubCommit = response.data;
           })
