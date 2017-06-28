@@ -28,11 +28,6 @@ imports:
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
-- name: github.com/SUSE/stratos-ui
-  version: 91a21d06b0607983e61bab1a45fa42081c3bc615
-  subpackages:
-  - components/app-core/backend/config
-  - components/app-core/backend/repository/interfaces
 - name: github.com/valyala/bytebufferpool
   version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
 - name: github.com/valyala/fasttemplate
