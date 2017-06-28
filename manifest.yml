@@ -1,7 +1,7 @@
 applications:
 - name: console
-  memory: 768M
-  disk_quota: 1G
+  memory: 1G
+  disk_quota: 2G
   host: console
   timeout: 180
   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack

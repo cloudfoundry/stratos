@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update && \
-    apk add ca-certificates &&\
+    apk add ca-certificates git &&\
     mkdir -p /srv
 
 WORKDIR /srv
