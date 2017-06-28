@@ -1,6 +1,6 @@
 {
   "enabledPlugins": [
     "cloud-foundry",
-    "cf-app-push"
+    "cf-app-ssh"
   ]
 }

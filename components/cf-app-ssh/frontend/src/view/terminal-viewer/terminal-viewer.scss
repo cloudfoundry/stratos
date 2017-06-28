@@ -1,0 +1,43 @@
+$terminal-overlay-bg: $console-primary;
+$terminal-overlay-fg: $text-color;
+
+.terminal-container {
+  .terminal {
+    background-color: transparent;
+  }
+
+  .terminal-info-overlay {
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+    pointer-events: none;
+
+    &.terminal-info-hidden {
+      display: none;
+    }
+
+    .terminal-overlay {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.75s ease-in-out;
+
+      > div {
+        padding: 4px 8px;
+        background-color: $terminal-overlay-bg;
+        color: $terminal-overlay-fg;
+        font-size: $font-size-large;
+        border-radius: 4px;
+      }
+
+      &.terminal-overlay-shown {
+        opacity: 1;
+        transition: opacity 0.35s ease-in-out;
+      }
+    }
+  }
+}

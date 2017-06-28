@@ -1,0 +1,28 @@
+<div cf-app-ssh-resize>
+  <app-instance-selector shown="applicationSSHController.showInstanceSelector" instance="applicationSSHController.instance"></app-instance-selector>
+  <div ng-if="applicationSSHController.showOptions" class="app-ssh-disconnected">
+    <div>
+      <h1 translate>cf.app-ssh.labels.disconnected</h1>
+      <div>
+        <button ng-click="applicationSSHController.reconnect()" class="btn btn-primary" translate>cf.app-ssh.labels.reconnect</button>
+        <button ng-click="applicationSSHController.selectInstance()" class="btn btn-primary" translate>cf.app-ssh.labels.select</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-ssh-glass-panel" ng-show="applicationSSHController.showOptions || applicationSSHController.showInstanceSelector"></div>
+
+  <div class="app-ssh-terminal">
+    <div class="panel-heading action-header app-ssh-header">
+      <span class="log-stream-title" translate-values="{id: applicationSSHController.instance}" translate>{{ applicationSSHController.title }}</span>
+      <span class="app-ssh-disconnect-btn" ng-if="applicationSSHController.streaming === 1"><a href="#" ng-click="applicationSSHController.terminal.close()">Disconnect</a></span>
+      <span ng-if="applicationSSHController.streaming !== 2" class="app-log-stream-indicator material-icons"
+        ng-class="{
+                  'log-stream-ok text-primary': applicationSSHController.streaming === 1,
+                  'log-stream-error text-danger': applicationSSHController.streaming === 3
+                }"></span>
+      <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationSSHController.streaming === 2"></bounce-spinner>
+    </div>
+    <terminal-viewer terminal="applicationSSHController.terminal" streaming="applicationSSHController.streaming" websocket-url="applicationSSHController.websocketUrl"></terminal-viewer>
+  </div>
+</div>

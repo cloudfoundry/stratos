@@ -16,14 +16,14 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/antonlindstrom/pgstore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
+	log "github.com/Sirupsen/logrus"
+	"github.com/antonlindstrom/pgstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -34,13 +34,13 @@ import (
 // server to come online before we bail out.
 const (
 	TimeoutBoundary = 10
-	SessionExpiry = 20 * 60 // Session cookies expire after 20 minutes
+	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
 )
 
 var appVersion string
 
 var (
-	httpClient = http.Client{}
+	httpClient        = http.Client{}
 	httpClientSkipSSL = http.Client{}
 )
 
@@ -370,13 +370,21 @@ func start(p *portalProxy) error {
 			return err
 		}
 
-		engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
-		e.Run(engine)
+		address := p.Config.TLSAddress
+		log.Infof("Starting HTTPS Server at address: %s", address)
+		engine := standard.WithTLS(address, certFile, certKeyFile)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTPS server", engineErr)
+		}
 	} else {
 		address := p.Config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
 		engine := standard.New(address)
-		e.Run(engine)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTP server", engineErr)
+		}
 	}
 
 	return nil
@@ -495,7 +503,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 		}
 
 		endpointType := endpointPlugin.GetType()
-		adminGroup.POST("/register/" + endpointType, endpointPlugin.Register)
+		adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
 
 		routePlugin, err := plugin.GetRoutePlugin()
 		if err == nil {
