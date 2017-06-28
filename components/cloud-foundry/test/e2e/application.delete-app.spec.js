@@ -51,7 +51,7 @@
     it('Should delete app with routes', function () {
       var until = protractor.ExpectedConditions;
 
-      expect(application.getHeader().getText()).toBe(testAppName);
+      expect(application.getHeaderAppName().getText()).toBe(testAppName);
 
       application.invokeAction('Delete');
       browser.wait(until.presenceOf(detailView.getElement()), 5000);
@@ -77,7 +77,7 @@
 
     it('Should delete app with no routes or services', function () {
 
-      expect(application.getHeader().getText()).toBe(testAppName);
+      expect(application.getHeaderAppName().getText()).toBe(testAppName);
 
       // Delete the only route
       var routes = table.wrap(element(by.css('.summary-routes table')));

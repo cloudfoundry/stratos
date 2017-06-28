@@ -75,8 +75,8 @@
       });
 
       it('Should go to summary tab', function () {
-        expect(application.getHeader().isDisplayed()).toBe(true);
-        expect(application.getHeader().getText()).toBe(testAppName);
+        expect(application.getHeaderAppName().isDisplayed()).toBe(true);
+        expect(application.getHeaderAppName().getText()).toBe(testAppName);
         expect(application.getActiveTab().getText()).toBe('Summary');
       });
 
@@ -253,7 +253,7 @@
           var until = protractor.ExpectedConditions;
 
           // Initial Values - Name
-          var originalAppName = application.getHeader().getText();
+          var originalAppName = application.getHeaderAppName().getText();
           expect(originalAppName).toBe(testAppName);
 
           // Initial Values - Memory Utilisation
@@ -323,7 +323,7 @@
           browser.wait(until.not(until.presenceOf(editApplicationModal.getElement())), 5000);
 
           // App values should be correct
-          expect(application.getHeader().getText()).toBe(newName);
+          expect(application.getHeaderAppName().getText()).toBe(newName);
           expect(getMemoryUtilisation()).toBe(newMem);
           expect(getInstances()).toBe(newInstance);
         });

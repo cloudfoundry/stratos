@@ -13,7 +13,7 @@
     isNewlyCreated: isNewlyCreated,
     isIncomplete: isIncomplete,
 
-    getHeader: getHeader,
+    getHeaderAppName: getHeaderAppName,
     getActiveTab: getActiveTab,
     getTabs: getTabs,
 
@@ -65,8 +65,8 @@
     return element(by.id('new-app-panel')).isDisplayed();
   }
 
-  function getHeader() {
-    return element(by.css('.application-header'));
+  function getHeaderAppName() {
+    return element(by.css('.application-header .app-header-app-name'));
   }
 
   function isIncomplete() {
@@ -93,7 +93,7 @@
   }
 
   function invokeAction(actionName) {
-    var actions = element.all(by.css('ul.application-action-col > li > button > span'));
+    var actions = element.all(by.css('.application-header .app-toolbar > button > span'));
     var matchingAction = actions.filter(function (elem) {
       return elem.getText().then(function (text) {
         return text === actionName;

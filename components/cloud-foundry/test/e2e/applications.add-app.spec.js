@@ -149,8 +149,8 @@
       browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
 
       // Should now have reached the application page
-      expect(application.getHeader().isDisplayed()).toBe(true);
-      expect(application.getHeader().getText()).toBe(appName);
+      expect(application.getHeaderAppName().isDisplayed()).toBe(true);
+      expect(application.getHeaderAppName().getText()).toBe(appName);
       expect(application.getActiveTab().getText()).toBe('Summary');
       expect(application.isIncomplete()).toBe(true);
       expect(application.isNewlyCreated()).toBe(true);
