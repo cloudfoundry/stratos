@@ -29,14 +29,12 @@ imports:
   version: dcecefd839c4193db0d35b88ec65b4c12d360ab0
 - name: golang.org/x/net
   version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
-  repo: https://go.googlesource.com/net
   subpackages:
-  - context
-  - html
-  - websocket
+   - context
+   - html
+   - websocket
 - name: golang.org/x/sys
   version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
-  repo: https://go.googlesource.com/sys
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
