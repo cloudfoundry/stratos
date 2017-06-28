@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var inputText = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
-  var inputSelect = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
+  var helpers = require('../../../../../../app-core/frontend/test/e2e/po/helpers.po');
+  var inputText = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
+  var inputSelect = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
 
   module.exports = {
     createOrganisation: createOrganisation,

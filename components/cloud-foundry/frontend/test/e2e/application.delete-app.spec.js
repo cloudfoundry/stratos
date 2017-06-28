@@ -6,13 +6,13 @@
   var addAppWizard = require('./po/applications/add-application-wizard.po');
   var addAppCfApp = require('./po/applications/add-application-cf-app.po');
   var application = require('./po/applications/application.po');
-  var detailView = require('../../../app-core/frontend/test/e2e/po/widgets/detail-view.po');
+  var detailView = require('../../../../app-core/frontend/test/e2e/po/widgets/detail-view.po');
   var cfModel = require('./po/models/cf-model.po');
-  var wizard = require('../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
-  var table = require('../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var wizard = require('../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
+  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
+  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
 
   describe('Application Delete', function () {
     var testTime = (new Date()).toISOString();

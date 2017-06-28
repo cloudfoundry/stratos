@@ -2,15 +2,15 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
   var cfHelpers = require('./helpers.po');
-  var resetTo = require('../../../../app-core/frontend/test/e2e/po/resets.po');
-  var loginPage = require('../../../../app-core/frontend/test/e2e/po/login-page.po');
+  var resetTo = require('../../../../../app-core/frontend/test/e2e/po/resets.po');
+  var loginPage = require('../../../../../app-core/frontend/test/e2e/po/login-page.po');
   var galleryWall = require('./applications/applications.po');
   var _ = require('lodash');
   var cfModel = require('./models/cf-model.po');
-  var proxyModel = require('../../../../app-core/frontend/test/e2e/po/models/proxy-model.po');
-  var searchBox = require('../../../../app-core/frontend/test/e2e/po/widgets/input-search-box.po');
+  var proxyModel = require('../../../../../app-core/frontend/test/e2e/po/models/proxy-model.po');
+  var searchBox = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-search-box.po');
 
   module.exports = {
     appSetup: appSetup,

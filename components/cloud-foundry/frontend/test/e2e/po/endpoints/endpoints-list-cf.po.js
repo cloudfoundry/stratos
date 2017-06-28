@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var navbar = require('../../../../../app-core/frontend/test/e2e/po/navbar.po');
+  var helpers = require('../../../../../../app-core/frontend/test/e2e/po/helpers.po');
+  var navbar = require('../../../../../../app-core/frontend/test/e2e/po/navbar.po');
 
   module.exports = {
     showCfEndpoints: showCfEndpoints,

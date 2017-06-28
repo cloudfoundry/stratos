@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var inputText = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
-  var inputSearchBox = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-search-box.po');
+  var inputText = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
+  var inputSearchBox = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-search-box.po');
   var addAppWizard = require('../applications/add-application-wizard.po');
 
   module.exports = {

@@ -5,19 +5,19 @@
   var _ = require('lodash');
   var Q = require('q');
   var appSetupHelper = require('./po/app-setup.po');
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
   var galleryWall = require('./po/applications/applications.po');
   var addAppWizard = require('./po/applications/add-application-wizard.po');
   var addAppCfApp = require('./po/applications/add-application-cf-app.po');
   var addAppService = require('./po/applications/add-application-services.po');
   var application = require('./po/applications/application.po');
   var cfModel = require('./po/models/cf-model.po');
-  var inputText = require('../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
+  var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
-  var navbar = require('../../../app-core/frontend/test/e2e/po/navbar.po');
-  var table = require('../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
+  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
+  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';

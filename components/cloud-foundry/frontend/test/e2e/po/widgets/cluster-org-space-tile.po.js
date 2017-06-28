@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var actionsMenuHelper = require('../../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var actionsMenuHelper = require('../../../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
 
   // We should split this out into separate po's when we need specific org/space functionality
 

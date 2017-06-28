@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../../../app-core/frontend/test/e2e/po/helpers.po');
 
   module.exports = {
     goToApp: goToApp,

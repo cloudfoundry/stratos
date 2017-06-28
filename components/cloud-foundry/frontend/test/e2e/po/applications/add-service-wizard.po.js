@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var inputText = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
-  var wizard = require('../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
+  var inputText = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
+  var wizard = require('../../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
 
   module.exports = {
     getSelectedAddServiceTab: getSelectedAddServiceTab,

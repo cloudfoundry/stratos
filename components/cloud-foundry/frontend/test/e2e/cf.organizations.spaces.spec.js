@@ -1,13 +1,13 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
   var cfHelpers = require('./po/helpers.po');
-  var resetTo = require('../../../app-core/frontend/test/e2e/po/resets.po');
-  var loginPage = require('../../../app-core/frontend/test/e2e/po/login-page.po');
-  var proxyModel = require('../../../app-core/frontend/test/e2e/po/models/proxy-model.po');
-  var actionsMenuHelper = require('../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmationModalHelper = require('../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var resetTo = require('../../../../app-core/frontend/test/e2e/po/resets.po');
+  var loginPage = require('../../../../app-core/frontend/test/e2e/po/login-page.po');
+  var proxyModel = require('../../../../app-core/frontend/test/e2e/po/models/proxy-model.po');
+  var actionsMenuHelper = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var confirmationModalHelper = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
   var endpointsListCf = require('./po/endpoints/endpoints-list-cf.po');
   var cfModel = require('./po/models/cf-model.po');
   var clusterActions = require('./po/widgets/cluster-actions.po');

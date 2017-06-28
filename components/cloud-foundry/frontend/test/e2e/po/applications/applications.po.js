@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  var navbar = require('../../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var inputSelectInput = require('../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
+  var navbar = require('../../../../../../app-core/frontend/test/e2e/po/navbar.po');
+  var helpers = require('../../../../../../app-core/frontend/test/e2e/po/helpers.po');
+  var inputSelectInput = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
 
   module.exports = {
 
