@@ -22,6 +22,8 @@
 
   function serviceFactory($uibModal, $document, frameworkDialogEvents, $timeout) {
 
+    var STACKED_HORIZONTAL_MARGIN = 12;
+
     var detailViewContainer;
 
     var openDetailViewCount = 0;
@@ -98,6 +100,19 @@
         }
       });
 
+      if (config.dialog && openDetailViewCount > 1) {
+        $timeout(function () {
+          var dialog = angular.element('.detail-view-dialog .modal-dialog');
+          // Latest dialog will be the first element
+          var thisDialog = angular.element(dialog.get(0));
+          var parentDialog = angular.element(dialog.get(1));
+
+          var overlap = STACKED_HORIZONTAL_MARGIN * 2;
+          thisDialog.width(parentDialog.width() + overlap);
+          thisDialog.height(parentDialog.height());
+        });
+      }
+
       modal.rendered.then(function () {
         $timeout(function () {
           // If dialog mode then we need to fix the width after rendering, so that
@@ -105,8 +120,12 @@
           // since this is jarring if it does
           if (config.dialog) {
             var dialog = angular.element('.detail-view-dialog .modal-dialog');
-            var width = dialog.width();
-            dialog.width(width);
+            // Latest dialog will be the first element
+            var thisDialog = angular.element(dialog.get(0));
+            if (openDetailViewCount === 1) {
+              // Set the width as a style attribute so the dialog won't resize if the content changes
+              thisDialog.width(thisDialog.width());
+            }
           }
         });
       });
