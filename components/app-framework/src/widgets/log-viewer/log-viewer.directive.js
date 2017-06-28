@@ -18,7 +18,7 @@
    * Note: the streaming log part is not fully enabled yet since we can't write a service for it until TEAMFOUR-353
    */
 
-  function logViewer(AnsiColorsService, $websocket, $log) {
+  function logViewer($rootScope, $websocket, $log, AnsiColorsService) {
 
     // logContainer, logTextArea: Access elements directly for better performance with large and fast logs
     // handleScroll, handleWheel: Scroll handler defined in controller needs to be attached by link
@@ -82,6 +82,9 @@
       // Keep track of what's left to resize
       var divsToResize = [];
       var resizedDivsMap = {};
+
+      //
+      var deferredAppend = false;
 
       handleScroll = scrollHandler;
       handleWheel = wheelHandler;
@@ -331,8 +334,10 @@
 
       var realAppend = function () {
         if (paused) {
+          deferredAppend = true;
           return;
         }
+        deferredAppend = false;
         logTextArea.innerHTML = logViewer.currentLog;
         rollNextLogDiv();
         autoScroll();
@@ -387,7 +392,7 @@
 
       /* eslint-disable angular/no-private-call */
       function safeApply() {
-        if ($scope.$$destroyed || $scope.$$phase) {
+        if ($scope.$$destroyed || $scope.$$phase || $rootScope.$$phase) {
           return;
         }
         $scope.$apply();
@@ -396,17 +401,34 @@
 
       // Handle streaming logs
       function requestStreamingLog() {
+        function onOpen() {
+          logViewer.streaming = STREAMING_STATUS.ONLINE;
+          safeApply();
+        }
+
         resetLog();
 
-        var websocketUrl = logViewer.websocketUrl;
-        if (_.isUndefined(websocketUrl)) {
+        if (logViewer.websocketUrl) {
+          closeWebSocket();
+          logViewer.streaming = STREAMING_STATUS.CONNECTING;
+          logViewer.webSocketConnection = $websocket(logViewer.websocketUrl, null, {
+            reconnectIfNotNormalClose: false
+          });
+        } else if (logViewer.websocket) {
+          if (logViewer.webSocketConnection) {
+            closeWebSocket();//logViewer.webSocketConnection.close(true)
+          }
+          logViewer.webSocketConnection = logViewer.websocket;
+          if (logViewer.webSocketConnection.readyState === 1) {
+            $log.debug('Supplied WebSocket is open');
+            onOpen();
+          } else {
+            $log.warn('Supplied WebSocket not open');
+            return;
+          }
+        } else {
           return;
         }
-        closeWebSocket();
-        logViewer.streaming = STREAMING_STATUS.CONNECTING;
-        logViewer.webSocketConnection = $websocket(websocketUrl, null, {
-          reconnectIfNotNormalClose: false
-        });
 
         logViewer.webSocketConnection.onMessage(function (message) {
           var logData = message.data;
@@ -428,8 +450,7 @@
 
         logViewer.webSocketConnection.onOpen(function (event) {
           $log.debug('WebSocket connection opened', event);
-          logViewer.streaming = STREAMING_STATUS.ONLINE;
-          safeApply();
+          onOpen(event);
         });
 
         logViewer.webSocketConnection.onClose(function (event) {
@@ -457,6 +478,12 @@
       });
 
       $scope.$watch('logViewer.websocketUrl', function (newVal) {
+        if (!_.isUndefined(newVal)) {
+          requestStreamingLog();
+        }
+      });
+
+      $scope.$watch('logViewer.websocket', function (newVal) {
         if (!_.isUndefined(newVal)) {
           requestStreamingLog();
         }
@@ -510,6 +537,9 @@
       var onResize = _.debounce(function () {
         resizeAllDivs();
         paused = false;
+        if (deferredAppend) {
+          realAppend();
+        }
       }, 150);
 
       // If the logViewer is hidden and shown again we need to skip a scroll event
@@ -554,6 +584,7 @@
       replace: true,
       scope: {
         websocketUrl: '=?', // streaming mode
+        websocket: '=?', // existing socket
         logText: '=?', // static mode
         autoScrollOn: '=?',
         filter: '=?',

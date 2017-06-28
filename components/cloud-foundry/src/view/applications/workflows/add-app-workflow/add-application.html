@@ -31,37 +31,12 @@
     auto-focus="300"/>
 </div>
 
-<p class="control-title" translate>Select deploy location</p>
-
-<div class="form-group form-group-large">
-  <label class="control-label" required translate>Cloud Foundry Endpoint</label>
-  <search-box
-    ng-model="wizardCtrl.options.userInput.serviceInstance"
-    input-options="wizardCtrl.options.serviceInstances"
-    placeholder="{{'Select Endpoint' | translate}}"
-    tabindex="0" required>
-  </search-box>
-</div>
-
-<div class="form-group form-group-large">
-  <label class="control-label" required translate>Organization</label>
-  <search-box
-    ng-model="wizardCtrl.options.userInput.organization"
-    input-options="wizardCtrl.options.organizations"
-    placeholder="{{'Select Organization' | translate}}"
-    tabindex="0" required>
-  </search-box>
-</div>
-
-<div class="form-group form-group-large">
-  <label class="control-label" required translate>Space</label>
-  <search-box
-    ng-model="wizardCtrl.options.userInput.space"
-    input-options="wizardCtrl.options.spaces"
-    placeholder="{{'Select Space' | translate}}"
-    tabindex="0" required>
-  </search-box>
-</div>
+<deploy-location
+  service-instances="wizardCtrl.options.serviceInstances"
+  service-instance="wizardCtrl.options.userInput.serviceInstance"
+  organization="wizardCtrl.options.userInput.organization"
+  space="wizardCtrl.options.userInput.space"
+></deploy-location>
 
 <p class="control-title">
   <span translate>Create a route</span>

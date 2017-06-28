@@ -56,8 +56,8 @@ func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, e
 	return intf.(int64), nil
 }
 
-func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, error) {
-	log.Debug("getSessionStringValue")
+func (p *portalProxy) GetSessionStringValue(c echo.Context, key string) (string, error) {
+	log.Debug("GetSessionStringValue")
 	intf, err := p.GetSessionValue(c, key)
 	if err != nil {
 		return "", err

@@ -20,7 +20,8 @@
     "delete": "Delete",
     "rename": "Rename",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "close": "Close"
   },
   "auth": {
     "username": "Username",

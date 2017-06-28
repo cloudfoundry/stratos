@@ -103,8 +103,16 @@
       };
     }
 
+    // // because allow jump only works to enable jump in all cases also have a disable in all cases option
+    if (!_.isFunction(vm.workflow.disableJump)) {
+      var disableJump = vm.workflow.disableJump;
+      vm.workflow.disableJump = function () {
+        return disableJump;
+      };
+    }
+
     vm.isNavEntryDisabled = function ($index) {
-      if (vm.workflow.allowJump()) {
+      if (vm.workflow.disableJump() || vm.workflow.allowJump()) {
         return true;
       }
       if (vm.workflow.allowBack() && $index < vm.currentIndex) {
@@ -216,6 +224,7 @@
       // Allow a step to support an onEnter property which can return a promise (use resolved promise if not)
       var step = vm.steps[index];
       var readyToGo = step.onEnter ? step.onEnter(vm) || $q.resolve() : $q.resolve();
+      var indexFrom = vm.currentIndex;
 
       // Show a busy indicator if desired
       if (step.onEnter && step.showBusyOnEnter) {
@@ -224,15 +233,29 @@
       }
 
       // Use finally for now so that we reset the buttons regardless of whether there is an error
-      return readyToGo.then(function () {
-        $scope.$broadcast(vm.wizardEvents.ON_SWITCH, {
-          from: vm.currentIndex,
-          to: index
+      return readyToGo
+        .then(function () {
+          $scope.$broadcast(vm.wizardEvents.ON_SWITCH, {
+            from: vm.currentIndex,
+            to: index
+          });
+          vm.currentIndex = index;
+          vm.busyMessage = false;
+          vm.resetButtons();
+        })
+        .catch(function (message) {
+          // Hide the loading indicator if we showed one
+          vm.currentIndex = indexFrom;
+          vm.busyMessage = false;
+          if (message) {
+            vm.showMessage(message, 'alert-danger');
+          } else {
+            vm.resetMessage();
+          }
+          vm.resetButtons();
+          // Ensure the rejection carries up via the promise chain
+          return $q.reject();
         });
-        vm.currentIndex = index;
-        vm.busyMessage = false;
-        vm.resetButtons();
-      });
     }
 
     /**
@@ -243,6 +266,7 @@
      */
     function next() {
       var step = vm.steps[vm.currentIndex];
+      vm.resetMessage();
 
       vm.busyMessage = false;
       vm.showNextCancel = false;
@@ -278,7 +302,7 @@
               vm.resetMessage();
               vm.actions.finish(vm);
             } else {
-              vm.switchTo(index + 1).finally(function () {
+              vm.switchTo(index + 1).then(function () {
                 vm.resetMessage();
               });
             }
