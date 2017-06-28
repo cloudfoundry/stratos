@@ -46,10 +46,10 @@
     return deferred.promise;
   }
 
-  function runGlideInstall(path, buildTest) {
+  function runGlideInstall(path) {
 
     var glideArgs = ['install'];
-    if (!buildTest) {
+    if (!prepareBuild.getBuildTest()) {
       glideArgs.push('--skip-test');
     }
     return spawnProcess('glide', glideArgs, path, env);

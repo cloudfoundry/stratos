@@ -9,7 +9,7 @@
   var _ = require('lodash');
   var conf = require('./bk-conf');
 
-  var tempPath, tempSrcPath;
+  var tempPath, tempSrcPath, buildTest;
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsRemoveQ = Q.denodeify(fs.remove);
   var fsCopyQ = Q.denodeify(fs.copy);
@@ -18,7 +18,13 @@
     return tempPath;
   };
 
-  module.exports.buildTest = false;
+  module.exports.getBuildTest = function(){
+    return buildTest;
+  };
+
+  module.exports.setBuildTest = function(build){
+    buildTest = build;
+  };
 
   module.exports.getSourcePath = function () {
     return tempSrcPath;

@@ -230,7 +230,7 @@
 
   gulp.task('test-backend', function () {
 
-    prepareBuild.buildTest = true;
+    prepareBuild.setBuildTest(true);
 
     return runSequence(
       'init-build',
