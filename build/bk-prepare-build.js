@@ -18,11 +18,11 @@
     return tempPath;
   };
 
-  module.exports.getBuildTest = function(){
+  module.exports.getBuildTest = function () {
     return buildTest;
   };
 
-  module.exports.setBuildTest = function(build){
+  module.exports.setBuildTest = function (build) {
     buildTest = build;
   };
 
