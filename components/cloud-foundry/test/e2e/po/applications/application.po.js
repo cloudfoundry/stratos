@@ -93,7 +93,7 @@
   }
 
   function invokeAction(actionName) {
-    var actions = element.all(by.css('.application-header .app-toolbar > button > span'));
+    var actions = element.all(by.css('.application-header .actions-toolbar > button > span'));
     var matchingAction = actions.filter(function (elem) {
       return elem.getText().then(function (text) {
         return text === actionName;

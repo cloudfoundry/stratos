@@ -9,7 +9,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: normal;
+    line-height: $console-unit-space;
   }
 
   // Give the headers a uniform padding

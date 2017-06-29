@@ -2,10 +2,6 @@
 
   <div class="application-header font-semi-bold">
     <h3 translate>Cluster : {{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name }}</h3>
-    <!--
-    <span class="app-header-app-name">{{ appCtrl.model.application.summary.name }}</span>
-    <app-state-icon class="app-summary-app-state-icon" state="appCtrl.model.application.state.indicator"></app-state-icon>
-    -->
     <cluster-actions ng-show="clusterController.hasActions" has-actions="clusterController.hasActions"></cluster-actions>
   </div>
 

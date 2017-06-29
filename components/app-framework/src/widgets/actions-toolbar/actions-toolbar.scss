@@ -1,25 +1,25 @@
-app-toolbar {
+actions-toolbar {
   width: 100%;
   display: flex;
   align-items: center;
 
   > actions-menu {
     flex: 0;
-    height: $app-toolbar-height;
+    height: $actions-toolbar-height;
 
     .actions-menu {
       > i.actions-menu-icon {
-        font-size: $app-toolbar-menu-gripper-size;
+        font-size: $actions-toolbar-menu-gripper-size;
       }
 
       &.open > i.actions-menu-icon {
-        color: $app-toolbar-menu-hover-color;
+        color: $actions-toolbar-menu-hover-color;
       }
     }
 
     // Max of 16 toolbar items
     @for $i from 1 through 16 {
-      &.app-toolbar-menu-hide-#{$i} {
+      &.actions-toolbar-menu-hide-#{$i} {
         ul > li:nth-of-type(-1n+#{$i}) {
           display: none;
         }
@@ -27,20 +27,23 @@ app-toolbar {
     }
   }
 
-  .app-toolbar {
+  .actions-toolbar {
     align-items: center;
     overflow: hidden;
     flex: 1;
-    height: $app-toolbar-height;
+    height: $actions-toolbar-height;
     text-align: right;
 
     > button.btn {
       outline: 0;
-      padding: $app-toolbar-spacing $app-toolbar-spacing * 2;
+      padding: $actions-toolbar-spacing $actions-toolbar-spacing * 2;
       display: inline-block;
 
       &:hover {
-        background-color: $app-toolbar-hover-bg;
+        background-color: $actions-toolbar-hover-bg;
+        > app-icon > svg > path {
+          stroke: $actions-toolbar-menu-hover-color;
+        }
       }
 
       &:focus {
@@ -53,19 +56,19 @@ app-toolbar {
         line-height: normal;
 
         > svg {
-          width: $app-toolbar-icon-svg-size;
-          height: $app-toolbar-icon-svg-size;
+          width: $actions-toolbar-icon-svg-size;
+          height: $actions-toolbar-icon-svg-size;
         }
 
         > i.material-icons {
-          font-size: $app-toolbar-icon-icon-size;
+          font-size: $actions-toolbar-icon-icon-size;
         }
       }
 
       > span {
-        font-size: $app-toolbar-icon-label-size;
+        font-size: $actions-toolbar-icon-label-size;
         text-transform: none;
-        margin-left: $app-toolbar-spacing;
+        margin-left: $actions-toolbar-spacing;
         display: inline-block;
       }
     }

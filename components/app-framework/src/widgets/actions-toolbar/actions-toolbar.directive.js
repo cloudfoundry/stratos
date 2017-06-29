@@ -3,37 +3,37 @@
 
   angular
     .module('app.framework.widgets')
-    .directive('appToolbar', appToolbar);
+    .directive('actionsToolbar', actionsToolbar);
 
   /**
-   * @name appToolbar
-   * @description An application tool bar
+   * @name actionsToolbar
+   * @description An actions tool bar
    * @param {object} $window - Angular $window service
    * @param {object} $timeout - Angular $timeout service
    * @returns {*}
    */
-  function appToolbar($window, $timeout) {
+  function actionsToolbar($window, $timeout) {
     return {
       bindToController: {
         items: '=',
         truncated: '=?',
         ready: '=?'
       },
-      controller: AppToolbarController,
-      controllerAs: 'appToolbarCtrl',
-      templateUrl: 'framework/widgets/app-toolbar/app-toolbar.html',
-      link: AppToolbarLink,
+      controller: ActionsToolbarController,
+      controllerAs: 'actionsToolbarCtrl',
+      templateUrl: 'framework/widgets/actions-toolbar/actions-toolbar.html',
+      link: ActionsToolbarLink,
       scope: {}
     };
 
-    function AppToolbarLink(scope, element, attrs, ctrl) {
+    function ActionsToolbarLink(scope, element, attrs, ctrl) {
       var resizeTimer;
       ctrl.lastVisibleItem = -1;
 
       // Check the toolbar to see if it all fits in view or not
       function checkForTruncation() {
         var h = element.get(0).offsetHeight + 4;
-        var toolbar = element.find('.app-toolbar');
+        var toolbar = element.find('.actions-toolbar');
         var w = toolbar.get(0).offsetWidth;
         ctrl.truncated = toolbar.get(0).scrollHeight > h;
         ctrl.lastVisibleItem = -1;
@@ -95,7 +95,7 @@
     }
   }
 
-  function AppToolbarController() {
+  function ActionsToolbarController() {
     var vm = this;
 
     // Before we open the menu, set the class to hide the items that are not truncated
@@ -103,7 +103,7 @@
       var el = angular.element(e);
       el.removeClass();
       if (vm.lastVisibleItem >= 0) {
-        el.addClass('app-toolbar-menu-hide-' + vm.lastVisibleItem);
+        el.addClass('actions-toolbar-menu-hide-' + vm.lastVisibleItem);
       }
     };
   }
