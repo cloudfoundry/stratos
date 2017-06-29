@@ -1,14 +1,15 @@
 <div ng-if="!clusterSpaceController.stateInitialised"
-     class="cluster-loading"
-     ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterSpaceController.hasActions !== false}"
->
+     class="cluster-loading col-md-12 col-sm-12 col-xs-12">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 
 <div ng-if="clusterSpaceController.stateInitialised"
-     class="cluster-detail endpoints"
-     ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterSpaceController.hasActions !== false}">
-  <h3 translate>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
+     class="cluster-detail endpoints col-md-12 col-sm-12 col-xs-12">
+
+  <div class="application-header font-semi-bold">
+    <h3 translate>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
+    <cluster-actions ng-show="clusterSpaceController.hasActions" has-actions="clusterSpaceController.hasActions"></cluster-actions>
+  </div>
   <space-summary-tile ng-if="clusterSpaceController.space()"
                       cluster-guid="clusterSpaceController.clusterGuid"
                       space="clusterSpaceController.space()">
@@ -38,6 +39,3 @@
   </ul>
   <ui-view></ui-view>
 </div>
-<cluster-actions ng-show="clusterSpaceController.hasActions"
-                 has-actions="clusterSpaceController.hasActions"
-                 class="col-md-3 col-sm-1 col-xs-1"></cluster-actions>

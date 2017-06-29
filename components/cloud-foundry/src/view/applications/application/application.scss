@@ -38,6 +38,10 @@
   padding: 0;
   height: $main-nav-title-height;
 
+  .app-header-app-name {
+    white-space: nowrap;
+  }
+
   .app-summary-app-state-icon, .bounce-spinner {
     margin-left: $console-unit-space;
   }
