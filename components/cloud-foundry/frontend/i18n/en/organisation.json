@@ -1,0 +1,19 @@
+{
+  "org-info": {
+    "summary": {
+      "title": "Summary"
+    },
+    "edit-action": "Edit Organization",
+    "edit-dialog": {
+      "title": "Edit Organization",
+      "success-notification": "Organization '{{name}}' successfully updated"
+    },
+    "delete-action": "Delete Organisation",
+    "delete-dialog": {
+      "title": "Delete Organization",
+      "description": "Are you sure you want to delete organization '{{name}}'?",
+      "success-notification": "Organization '{{name}}' successfully deleted",
+      "error-message": "Failed to delete organization"
+    }
+  }
+}

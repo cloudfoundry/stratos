@@ -131,8 +131,8 @@
           });
 
           it('should have right title and button labels', function () {
-            expect($translate.instant(step.nextBtnText)).toBe(gettext('Add'));
-            expect($translate.instant(step.cancelBtnText)).toBe(gettext('Cancel'));
+            expect($translate.instant(step.nextBtnText)).toBe('Add');
+            expect($translate.instant(step.cancelBtnText)).toBe('Cancel');
             expect(step.showBusyOnNext).toBe(true);
           });
 
@@ -191,7 +191,7 @@
             var p = step.onNext();
             $scope.$apply();
             expect(p.$$state.status).toBe(2);
-            expect(p.$$state.value).toBe(gettext('There was a problem creating your application. Please try again or contact your administrator if the problem persists.'));
+            expect(p.$$state.value).toBe('There was a problem creating your application. Please try again or contact your administrator if the problem persists.');
           });
 
           it('onNext - valid route', function () {
@@ -253,7 +253,7 @@
 
           expect(routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
-          expect(p.$$state.value).toBe(gettext('This route already exists. Choose a new one.'));
+          expect(p.$$state.value).toBe('This route already exists. Choose a new one.');
         });
 
         it('#validateNewRoute - valid route', function () {
@@ -294,7 +294,7 @@
 
           expect(routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
-          expect(p.$$state.value).toBe(gettext('There was a problem validating your route. Please try again or contact your administrator if the problem persists.'));
+          expect(p.$$state.value).toBe('There was a problem validating your route. Please try again or contact your administrator if the problem persists.');
         });
 
         it('#getAppsForSpace', function () {

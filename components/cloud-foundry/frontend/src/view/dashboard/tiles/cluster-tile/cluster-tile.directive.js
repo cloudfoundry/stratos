@@ -57,13 +57,13 @@
     var expiredStatus = {
       classes: 'danger',
       icon: 'app-icon-lg material-icons cluster-status-icon-error',
-      description: gettext('Token has expired')
+      description: 'cf.tile.token-expired'
     };
 
     var erroredStatus = {
       classes: 'danger',
       icon: 'app-icon-lg material-icons cluster-status-icon-error',
-      description: gettext('Cannot contact endpoint')
+      description: 'cf.tile.uncontactable'
     };
 
     cardData.title = vm.service.name;

@@ -44,7 +44,7 @@
     vm.spaceGuid = $stateParams.space;
     vm.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     vm.cardData = {
-      title: gettext('Summary')
+      title: 'space-info.summary.title'
     };
     vm.roles = [];
     vm.memory = '';
@@ -59,16 +59,16 @@
     var spaceDetailObj;
 
     var renameAction = {
-      name: gettext('Rename Space'),
+      name: 'space-info.rename-action',
       disabled: true,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: gettext('Rename Space'),
+            title: 'space-info.rename-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-space.html',
             submitCommit: true,
             buttonTitles: {
-              submit: gettext('Save')
+              submit: 'buttons.save'
             },
             class: 'dialog-form',
             dialog: true
@@ -89,8 +89,8 @@
               return spaceModel.updateSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid,
                 {name: spaceData.name})
                 .then(function () {
-                  appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
-                    {name: spaceData.name});
+                  appNotificationsService.notify('success',
+                    $translate.instant('space-info.rename-dialog.success-notification', {name: spaceData.name}));
                 });
             } else {
               return $q.reject('Invalid Name!');
@@ -100,24 +100,24 @@
       }
     };
     var deleteAction = {
-      name: gettext('Delete Space'),
+      name: 'space-info.delete-action',
       disabled: true,
       execute: function () {
         return frameworkDialogConfirm({
-          title: gettext('Delete Space'),
-          description: gettext('Are you sure you want to delete space') +
-          " '" + spaceDetail().details.space.entity.name + "'?",
+          title: 'space-info.delete-dialog.title',
+          description: $translate.instant('space-info.delete-dialog.description',
+            {name: spaceDetail().details.space.entity.name}),
           submitCommit: true,
           buttonText: {
-            yes: gettext('Delete'),
-            no: gettext('Cancel')
+            yes: 'buttons.delete',
+            no: 'buttons.cancel'
           },
-          errorMessage: gettext('Failed to delete space'),
+          errorMessage: 'space-info.delete-dialog.error-message',
           callback: function () {
             return spaceModel.deleteSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid)
               .then(function () {
-                appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
-                  {name: spaceDetail().details.space.entity.name});
+                appNotificationsService.notify('success', $translate.instant('space-info.delete-dialog.success-notification',
+                  {name: spaceDetail().details.space.entity.name}));
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
               });
