@@ -4,7 +4,7 @@
     class="no-focus btn btn-link btn-border-less actions-toolbar-btn"
     ng-disabled="action.disabled"
     ng-hide="action.hidden"
-    ng-click=".execute()">
+    ng-click="action.execute()">
     <app-icon icon-class="{{action.iconClass}}" class="actions-toolbar-icon" icon="{{action.icon}}"></app-icon>
     <span>{{ action.name | translate }}</span>
   </button>
