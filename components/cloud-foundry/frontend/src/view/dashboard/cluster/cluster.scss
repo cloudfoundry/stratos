@@ -4,6 +4,14 @@
 
 .cluster {
 
+  .application-header > h1, h3 {
+    min-width: 35%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: $console-unit-space;
+  }
+
   // Give the headers a uniform padding
   h3 {
     margin: $console-unit-space 0;

@@ -85,6 +85,7 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', '__vendor');
       // sequentially chain promise
       promise
         .then(function () {
@@ -92,13 +93,12 @@
           return Q.resolve();
         })
         .then(function () {
-          var cfCliFixtures = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor', 'code.cloudfoundry.org', 'cli', 'fixtures');
-          fs.removeSync(cfCliFixtures);
-          return Q.resolve();
-        })
-        .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
+          // If checked in vendors exist, merge does in as well
+          if (fs.existsSync(pluginCheckedInVendorPath)) {
+            mergeDirs.default(pluginCheckedInVendorPath, goSrc);
+          }
           // Promise did not guarantee that the operation completed
           fs.removeSync(pluginVendorPath);
           return Q.resolve();
@@ -112,7 +112,11 @@
       .then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
         var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
+        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', '__vendor');
         mergeDirs.default(coreVendorPath, goSrc);
+        if (fs.existsSync(coreCheckedInVendorPath)) {
+          mergeDirs.default(coreCheckedInVendorPath, goSrc);
+        }
         fs.removeSync(coreVendorPath);
         return Q.resolve();
       })
@@ -143,10 +147,10 @@
       });
   });
 
-  gulp.task('run-tests', ['build-plugins'], function (done) {
+  gulp.task('build-core', ['build-plugins'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.test(corePath)
+    buildUtils.build(corePath, conf.coreName)
       .then(function () {
         done();
       })
@@ -156,10 +160,10 @@
 
   });
 
-  gulp.task('build-core', ['dedup-vendor'], function (done) {
+  gulp.task('run-tests', ['build-core'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.build(corePath, conf.coreName)
+    buildUtils.test(corePath)
       .then(function () {
         done();
       })
@@ -217,8 +221,16 @@
       'write-plugins-yaml'
     );
   });
+  gulp.task('dedup', function () {
+    return runSequence(
+      'init-build',
+      'dedup-vendor'
+    );
+  });
 
   gulp.task('test-backend', function () {
+
+    prepareBuild.setBuildTest(true);
 
     return runSequence(
       'init-build',

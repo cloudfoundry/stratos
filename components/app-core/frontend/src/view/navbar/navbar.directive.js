@@ -22,10 +22,16 @@
     };
   }
 
-  function NavBarController(showLanguageSelection, modelManager) {
+  function NavBarController($window, showLanguageSelection, modelManager) {
     var vm = this;
     vm.showLanguageSelection = showLanguageSelection || false;
     vm.accountModel = modelManager.retrieve('app.model.account');
+
+    // Toggle the side navigation and send a window resize event
+    vm.toggleNav = function (v) {
+      v.navbarIconsOnly = !v.navbarIconsOnly;
+      $window.dispatchEvent(new Event('resize'));
+    };
   }
 
 })();

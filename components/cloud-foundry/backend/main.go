@@ -29,23 +29,23 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CloudFoundrySpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
-func (c CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (c *CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
 	return c, nil
 }
 
-func (c CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (c *CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error){
 	return c, nil
 }
 
-func (c CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (c *CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
 	return nil, errors.New("Not implemented!")
 }
 
-func (c CloudFoundrySpecification) GetType() string {
+func (c *CloudFoundrySpecification) GetType() string {
 	return EndpointType
 }
 
-func (c CloudFoundrySpecification) GetClientId() string {
+func (c *CloudFoundrySpecification) GetClientId() string {
 	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
 		return clientId
 	}
@@ -53,21 +53,21 @@ func (c CloudFoundrySpecification) GetClientId() string {
 	return "cf"
 }
 
-func (c CloudFoundrySpecification) Register(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	log.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c CloudFoundrySpecification) Init() error {
+func (c *CloudFoundrySpecification) Init() error {
 	// No-op
 	return nil
 }
 
-func (c CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
+func (c *CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
-func (c CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
+func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// Firehose Stream
 	echoGroup.GET("/:cnsiGuid/firehose", c.firehose)
 
@@ -75,7 +75,7 @@ func (c CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group) 
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
 }
 
-func (c CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord

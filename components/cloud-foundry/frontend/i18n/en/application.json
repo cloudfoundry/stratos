@@ -5,7 +5,7 @@
     "restart": "Restart",
     "delete": "Delete",
     "start": "Start",
-    "cli": "CLI Instructions"
+    "cli": "CLI Info"
   },
   "app-route-actions": {
     "unmap": "Unmap from App",

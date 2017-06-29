@@ -8,7 +8,7 @@
   <div ng-show="!actionsMenuCtrl.buttonMode"
        class="actions-menu dropdown"
        ng-class="{ 'open': actionsMenuCtrl.open }">
-    <i class="actions-menu-icon dropdown-toggle material-icons" ng-class="actionsMenuCtrl.icon" tabindex="0">more_horiz</i>
+    <i class="actions-menu-icon dropdown-toggle material-icons" ng-class="actionsMenuCtrl.icon" tabindex="0">{{actionsMenuCtrl.menuIconName}}</i>
     <ul class="actions-menu-list dropdown-menu" ng-class="actionsMenuCtrl.position">
       <li class="actions-menu-label dropdown-header" ng-if="actionsMenuCtrl.menuLabel">
         <span translate>{{ actionsMenuCtrl.menuLabel }}</span>
