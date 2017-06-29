@@ -23,8 +23,9 @@
     "logo": "svg:SUSE_Geeko.svg"
   },
   "login": {
-    "title":"SUSE",
-    "title2":"Cloud Foundry Console",
+    "title":"Sign in",
+    "title2":"",
+    "console": "SUSE<br>Cloud Foundry Console",
     "footer": {
       "company.terms-href": "",
       "company.privacy-href": ""
