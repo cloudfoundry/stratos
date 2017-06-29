@@ -68,19 +68,43 @@ Bind this ASG to your `ORG` and `SPACE` with:
 cf bind-security-group NAME ORG SPACE
 ```
 
-### node_modules and bower_components
-
-Check the log for deploying Stratos UI with:
-
-```
-cf logs console
-```
-
-If you see errors relating to bower, check to see if you have local `node_modules` and `bower_components` folders. If you do, delete these and try to push the application again.
-
 ### Console fails to start
 
-The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest for the console by adding an environment variable `CF_API_URL`, for example:
+The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api` value inside the `VCAP_APPLICATION` environment variable.  
+To check if the variable is present, use the CF CLI to list environment variables, and inspect the `VCAP_APPLICATION` variable under `System-Provided`. 
+
+```
+$ cf env console
+Getting env variables for app console in org SUSE / space dev as admin...
+OK
+ 
+System-Provided:
+ 
+ 
+ {
+  "VCAP_APPLICATION": {
+   "application_id": ...,
+   "application_name": "console",
+   "application_uris": ...
+   "application_version": ...,
+   "cf_api": "http://api.cf-dev.io",
+   ...
+ }
+ 
+ No user-defined env variables have been set
+ ...
+```
+
+If the `cf_api` environment variable is absent then set the `CF_API_URL` variable. See the following _Setting the `CF_API_URL` env variable in the manifest_ section.
+
+
+However, if the `cf_api` environment variable is present, and an HTTP address is specified, it is possible that insecure traffic may be blocked. See the following _Setting the `CF_API_FORCE_SECURE` env variable in the manifest_ section.
+
+
+
+#### Setting the `CF_API_URL` env variable in the manifest
+
+To specify the Cloud Foundry API endpoint, add the `CF_API_URL` variable to the manifest, for example:
 
 ```
 applications:
@@ -95,3 +119,19 @@ applications:
     CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
 ```
 
+#### Setting the `CF_API_FORCE_SECURE` env variable in the manifest
+
+To force the console to use secured communication with the Cloud Foundry API endpoint (HTTPS rather than HTTP), specify the `CF_API_FORCE_SECURE` environment in the manifest, for example:
+
+```
+applications:
+- name: console
+  memory: 768M
+  disk_quota: 1G
+  host: console
+  timeout: 180
+  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  health-check-type: port
+  env:
+    CF_API_FORCE_SECURE: true
+```
