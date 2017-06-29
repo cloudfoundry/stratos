@@ -64,6 +64,8 @@
 
   });
 
+  // `prepare-core` is not really dependant on `prepare-plugins`,
+  // but due to CPU constraints in a cloud-foundry environment these should be serialised
   gulp.task('prepare-core', ['prepare-plugins'], function (done) {
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
     buildUtils.runGlideInstall(fullCorePath)
