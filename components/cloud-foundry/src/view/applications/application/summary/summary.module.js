@@ -213,6 +213,14 @@
         authModel.actions.update, vm.model.application.summary.space_guid);
       vm.hideInstanceActions = !_.find(vm.instancesActionMenu, {hidden: false});
 
+      vm.model.getAppVariables(vm.cnsiGuid, vm.id)
+        .then(function () {
+          vm.stratosProject = vm.model.application.variables.environment_json.STRATOS_PROJECT;
+          if (vm.stratosProject) {
+            vm.stratosProject = angular.fromJson(vm.stratosProject);
+          }
+        });
+
       return $q.resolve();
     }
 

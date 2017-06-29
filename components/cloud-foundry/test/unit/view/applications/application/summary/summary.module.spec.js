@@ -42,6 +42,8 @@
       var appModel = modelManager.retrieve('cloud-foundry.model.application');
       _.set(appModel, 'application.summary.space_guid', spaceGuid);
 
+      spyOn(appModel, 'getAppVariables').and.returnValue($q.reject());
+
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
       $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $translate, modelManager,
         addRoutesService, editAppService, appUtilsService, appClusterRoutesService, frameworkDialogConfirm,
@@ -56,7 +58,6 @@
 
       beforeEach(inject(function ($injector) {
         initController($injector, true);
-
       }));
 
       describe('buildpack links', function () {
@@ -90,38 +91,41 @@
       });
     });
 
-    describe('summary action permission', function () {
-      var roles = ['admin', 'space_developer'];
-
-      _.each(roles, function (role) {
-
-        beforeEach(inject(function ($injector) {
-          initController($injector, false, role);
-        }));
-
-        it('should have `Edit` enabled for ' + role, function () {
-          expect($controller.hideEditApp).toBe(false);
-        });
-
-        it('should have `Add Route` enabled for ' + role, function () {
-          expect($controller.hideAddRoutes).toBe(false);
-        });
-
-        it('should have `Unmap route from app` enabled for ' + role, function () {
-          expect($controller.routesActionMenu[0].disabled).toBe(false);
-          expect($controller.routesActionMenu[0].hidden).toBe(false);
-        });
-
-        it('should have `delete route` enabled for ' + role, function () {
-          expect($controller.routesActionMenu[1].disabled).toBe(false);
-          expect($controller.routesActionMenu[1].hidden).toBe(false);
-        });
-
-        it('should have `manage services` enabled for ' + role, function () {
-          expect($controller.hideManageServices).toBe(false);
-        });
-      });
+    describe('summary action permission - admin', function () {
+      testSummaryAction('admin');
     });
+
+    describe('summary action permission - space dev', function () {
+      testSummaryAction('space_developer');
+    });
+
+    function testSummaryAction(role) {
+      beforeEach(inject(function ($injector) {
+        initController($injector, false, role);
+      }));
+
+      it('should have `Edit` enabled for ' + role, function () {
+        expect($controller.hideEditApp).toBe(false);
+      });
+
+      it('should have `Add Route` enabled for ' + role, function () {
+        expect($controller.hideAddRoutes).toBe(false);
+      });
+
+      it('should have `Unmap route from app` enabled for ' + role, function () {
+        expect($controller.routesActionMenu[0].disabled).toBe(false);
+        expect($controller.routesActionMenu[0].hidden).toBe(false);
+      });
+
+      it('should have `delete route` enabled for ' + role, function () {
+        expect($controller.routesActionMenu[1].disabled).toBe(false);
+        expect($controller.routesActionMenu[1].hidden).toBe(false);
+      });
+
+      it('should have `manage services` enabled for ' + role, function () {
+        expect($controller.hideManageServices).toBe(false);
+      });
+    }
 
     describe('summary for non dev user', function () {
 
