@@ -181,7 +181,7 @@ $suse-login-top-margin: 160px;
 }
 
 // Even smaller - hide the info panel and move the produce name to the top of the page
-@media screen and (max-width: 720px) {
+@media screen and (max-width: 770px) {
   .brand .login-outer {
     .login-page {
       .login-background {
@@ -200,6 +200,18 @@ $suse-login-top-margin: 160px;
   }
 }
 
+
+// Even smaller - hide the info panel and move the produce name to the top of the page
+@media screen and (max-width: 420px) {
+  .brand .login-outer {
+    .login-page {
+      .login-panel > login-form {
+        width: 100%;
+      }
+    }
+  }
+}
+
 // On taller screens, add more margin at the top
 @media screen and (min-height: 1200px) {
   .brand .login-outer  {
@@ -210,7 +222,7 @@ $suse-login-top-margin: 160px;
 }
 
 // Onshorter screens, use less margin at the top
-@media screen and (max-height: 610px) {
+@media screen and (max-height: 700px) {
   .brand .login-outer {
     .login-page {
       margin: $login-padding auto 0 auto;
