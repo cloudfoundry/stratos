@@ -2,26 +2,12 @@
 (function () {
   'use strict';
 
-  // Maintain Order
-  var acceptanceTests = [
-    '../test/e2e/tests/acceptance/login-page.spec.js',
-    '../test/e2e/tests/acceptance/endpoints-dashboard.spec.js',
-    '../test/e2e/tests/acceptance/endpoints-list-cf.spec.js',
-    '../test/e2e/tests/acceptance/endpoints-pat.spec.js',
-    '../test/e2e/tests/acceptance/applications.add-app.spec.js',
-    '../test/e2e/tests/acceptance/application.delivery-pipeline.spec.js',
-    '../test/e2e/tests/acceptance/application.spec.js',
-    '../test/e2e/tests/acceptance/application.delete-app.spec.js',
-    '../test/e2e/tests/acceptance/cf.organizations.spaces.spec.js',
-    '../test/e2e/tests/acceptance/application-wall.spec.js',
-    '../test/e2e/tests/acceptance/navbar.spec.js',
-    '../test/e2e/tests/acceptance/log-stream.spec.js'
-  ];
-
-  var skipPlugin = require('../test/e2e/po/skip-plugin.js');
+  var skipPlugin = require('../components/app-core/frontend/test/e2e/po/skip-plugin.js');
   var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
   var path = require('path');
   var reporterPath = path.resolve(__dirname, '..', 'out/e2e-failures');
+  var components = require('./components');
+  var _ = require('lodash');
 
   var reporter = new HtmlScreenshotReporter({
     dest: reporterPath,
@@ -43,14 +29,11 @@
   exports.config = {
 
     suites: {
-      all: '../test/e2e/tests/**/*.spec.js',
-      localhost: '../test/e2e/tests/localhost/**/*.spec.js',
-      other: '../test/e2e/tests/other/**/*.spec.js',
-      acceptance: acceptanceTests
+      components: ''
     },
 
     // Default suite to run
-    suite: 'acceptance',
+    suite: 'components',
 
     framework: 'jasmine2',
 
@@ -70,14 +53,8 @@
       host: 'localhost',
       port: '3100',
       credentials: {
-        admin: {
-          username: 'admin',
-          password: 'hscadmin'
-        },
-        user: {
-          username: 'user',
-          password: 'hscuser'
-        }
+        admin: secrets.console.admin,
+        user: secrets.console.user
       },
       skipSSlValidation: true,
       caCert: '',
@@ -176,4 +153,9 @@
       }
     }
   };
+
+  var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
+  exports.config.suites.components = _.map(componentTestFiles, function (glob) {
+    return '../' + glob;
+  });
 })();

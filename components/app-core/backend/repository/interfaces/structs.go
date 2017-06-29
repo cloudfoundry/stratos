@@ -9,12 +9,15 @@ import (
 )
 
 type V2Info struct {
-	AuthorizationEndpoint  string `json:"authorization_endpoint"`
-	TokenEndpoint          string `json:"token_endpoint"`
-	DopplerLoggingEndpoint string `json:"doppler_logging_endpoint"`
+	AuthorizationEndpoint    string `json:"authorization_endpoint"`
+	TokenEndpoint            string `json:"token_endpoint"`
+	DopplerLoggingEndpoint   string `json:"doppler_logging_endpoint"`
+	AppSSHEndpoint           string `json:"app_ssh_endpoint"`
+	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint"`
+	AppSSHOauthCLient        string `json:"app_ssh_oauth_client"`
 }
 
-type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, error)
+type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
 
 //TODO this could be moved back to cnsis subpackage, and extensions could import it?
 type CNSIRecord struct {
@@ -59,6 +62,13 @@ type LoginHookFunc func(c echo.Context) error
 type SessionStorer interface {
 	Get(r *http.Request, name string) (*sessions.Session, error)
 	Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error
+}
+
+// ConnectedUser - details about the user connected to a specific service or UAA
+type ConnectedUser struct {
+	GUID  string `json:"guid"`
+	Name  string `json:"name"`
+	Admin bool   `json:"admin"`
 }
 
 type PortalConfig struct {

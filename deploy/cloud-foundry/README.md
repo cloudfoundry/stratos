@@ -25,7 +25,7 @@ Note:
 1. You need the cf CLI command line tool installed and available on the path.
 1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
 1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
-
+1. The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
 ## Troubleshooting
 
@@ -77,4 +77,21 @@ cf logs console
 ```
 
 If you see errors relating to bower, check to see if you have local `node_modules` and `bower_components` folders. If you do, delete these and try to push the application again.
+
+### Console fails to start
+
+The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest for the console by adding an environment variable `CF_API_URL`, for example:
+
+```
+applications:
+- name: console
+  memory: 768M
+  disk_quota: 1G
+  host: console
+  timeout: 180
+  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  health-check-type: port
+  env:
+    CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
+```
 

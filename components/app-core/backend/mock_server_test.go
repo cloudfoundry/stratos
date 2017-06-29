@@ -112,15 +112,16 @@ func setupMockPGStore(db *sql.DB) *mockPGStore {
 	return pgs
 }
 
-func initCFPlugin(pp *portalProxy) interfaces.EndpointPlugin {
+func initCFPlugin(pp *portalProxy) interfaces.StratosPlugin {
 	p, err := plugin.Open("../../cloud-foundry/backend/cloud-foundry.so")
 	if err != nil {
 		log.Printf("Failed to load plugin!")
 	}
 	init, _ := p.Lookup("Init")
 
-	initialisedEndpoint, _ := init.(func(interfaces.PortalProxy) (interfaces.EndpointPlugin, error))(pp)
-	return initialisedEndpoint
+	plugin, _ := init.(func(interfaces.PortalProxy) (interfaces.StratosPlugin, error))(pp)
+
+	return plugin
 }
 
 func setupPortalProxy(db *sql.DB) *portalProxy {
@@ -141,8 +142,8 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	pp := newPortalProxy(pc, db, nil)
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
-	pp.EndpointPlugins = make(map[string]interfaces.EndpointPlugin)
-	pp.EndpointPlugins[initialisedEndpoint.GetType()] = initialisedEndpoint
+	pp.Plugins = make(map[string]interfaces.StratosPlugin)
+	pp.Plugins["cf"] = initialisedEndpoint
 	return pp
 }
 
@@ -279,13 +280,13 @@ var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "au
 
 var mockEncryptionKey = make([]byte, 32)
 
-var mockV2InfoResponse = v2Info{
+var mockV2InfoResponse = interfaces.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
 }
 
-var mockInfoResponse = v2Info{
+var mockInfoResponse = interfaces.V2Info{
 	AuthorizationEndpoint: mockAuthEndpoint,
 	TokenEndpoint:         mockTokenEndpoint,
 }

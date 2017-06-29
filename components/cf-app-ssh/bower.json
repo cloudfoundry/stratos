@@ -1,0 +1,17 @@
+{
+  "name": "cf-app-ssh",
+  "description": "",
+  "license": "Apache-2.0",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "frontend/src/view/cf-app-ssh.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "cloud-foundry": "./components/cloud-foundry",
+    "xterm.js": "2.5.0"
+  }
+}

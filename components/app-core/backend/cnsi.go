@@ -10,7 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
@@ -18,20 +18,6 @@ import (
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
-
-type v2Info struct {
-	AuthorizationEndpoint  string `json:"authorization_endpoint"`
-	TokenEndpoint          string `json:"token_endpoint"`
-	DopplerLoggingEndpoint string `json:"doppler_logging_endpoint"`
-}
-
-type hceInfo struct {
-	AuthorizationEndpoint string `json:"auth_endpoint"`
-}
-
-type hsmInfo struct {
-	AuthorizationEndpoint string `json:"auth_url"`
-}
 
 func isSSLRelatedError(err error) (bool, string) {
 	if urlErr, ok := err.(*url.Error); ok {
@@ -96,7 +82,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		)
 	}
 
-	newCNSI, err := fetchInfo(apiEndpoint, skipSSLValidation)
+	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
 		if ok, detail := isSSLRelatedError(err); ok {
 			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -140,7 +126,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	p.unsetCNSIRecord(cnsiGUID)
 
-	userID, err := p.getSessionStringValue(c, "user_id")
+	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
@@ -253,8 +239,6 @@ func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) 
 	}
 	return jsonString, nil
 }
-
-
 
 func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) {
 	log.Debug("GetCNSIRecord")

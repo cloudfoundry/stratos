@@ -3,7 +3,7 @@ search-box {
   position: relative;
   bottom: $console-form-label-spacing;
 
-  &:hover, label:hover, input:hover {
+  &:hover, label:hover, input:not([disabled]):hover {
     cursor: pointer;
   }
 

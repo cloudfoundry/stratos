@@ -1,9 +1,8 @@
 package interfaces
 
-import 	"github.com/labstack/echo"
+import "github.com/labstack/echo"
 
-type GeneralPlugin interface {
-	Init() error
+type MiddlewarePlugin interface {
 	EchoMiddleware(middleware echo.HandlerFunc) echo.HandlerFunc
 	SessionEchoMiddleware(middleware echo.HandlerFunc) echo.HandlerFunc
 }

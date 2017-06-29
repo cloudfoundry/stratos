@@ -57,7 +57,7 @@ jobs:
   - do:
     - task: run-proxy-unit-tests
       privileged: true
-      timeout: 5m
+      timeout: 10m
       file: stratos-ui/deploy/ci/tasks/portal-proxy/run-unit-tests.yml
       on_success:
         put: stratos-ui
@@ -85,11 +85,6 @@ jobs:
   - do:
     - task: build-proxy-image
       file: stratos-ui/deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
-      on_success:
-        put: stratos-ui
-        params:
-          path: stratos-ui
-          status: success
       on_failure:
         put: stratos-ui
         params:
@@ -98,7 +93,7 @@ jobs:
 
     - task: run-e2e-tests
       privileged: true
-      timeout: 12m
+      timeout: 15m
       file:  stratos-ui/deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
        REGISTRY_NAME: {{insecure-registry}}
@@ -110,6 +105,10 @@ jobs:
        CF_ADMIN_PASSWORD: {{cf-admin-password}}
        CF_E2E_USER: {{cf-e2e-user}}
        CF_E2E_USER_PASSWORD: {{cf-e2e-user-password}}
+       CONSOLE_ADMIN_USER: {{console-admin-user}}
+       CONSOLE_ADMIN_PASSWORD: {{console-admin-password}}
+       CONSOLE_USER_USER: {{console-user-user}}
+       CONSOLE_USER_PASSWORD: {{console-user-password}}
        GITHUB_TOKEN: {{github-access-token}}
       on_success:
         put: stratos-ui

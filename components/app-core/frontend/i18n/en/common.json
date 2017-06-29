@@ -20,7 +20,8 @@
     "delete": "Delete",
     "rename": "Rename",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "close": "Close"
   },
   "auth": {
     "username": "Username",
@@ -28,7 +29,8 @@
   },
   "navbar": {
     "title": "@:product.name",
-    "logo": "home"
+    "logo": "home",
+    "copyright": "&copy; SUSE 2017"
   },
   "menu": {
     "applications": "@:applications",

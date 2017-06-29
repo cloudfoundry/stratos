@@ -1,0 +1,43 @@
+.cluster-gallery-card-container .cluster-gallery-card-parent gallery-card.buildpack-tile .card {
+  .dl-horizontal {
+    dd {
+      margin-left: 10px;
+
+      &.buildpack-status {
+        > * {
+          vertical-align: middle;
+        }
+
+        i {
+          font-size: 16px;
+          margin-right: 2px;
+
+          &.buildpack-enabled {
+            color: $status-okay;
+          }
+
+          &.buildpack-disabled {
+            color: $status-critical;
+          }
+        }
+      }
+    }
+  
+    dt {
+      width: 70px;
+      &.buildpack-filename {
+        white-space: nowrap;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        overflow-x: hidden;
+
+        > span {
+          font-size: 10px;
+          text-overflow: ellipsis;
+          overflow-x: hidden;
+        }
+      }
+    }
+  }
+}

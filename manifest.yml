@@ -1,6 +1,6 @@
 applications:
 - name: console
-  memory: 768M
+  memory: 1G
   disk_quota: 2G
   host: console
   timeout: 180

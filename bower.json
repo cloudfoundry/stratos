@@ -18,7 +18,9 @@
     "suse-branding": "./components/suse-branding",
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
-    "cloud-foundry": "./components/cloud-foundry"
+    "cloud-foundry": "./components/cloud-foundry",
+    "cf-app-push": "./components/cf-app-push",
+    "cf-app-ssh": "./components/cf-app-ssh"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

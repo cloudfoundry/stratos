@@ -16,14 +16,14 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/antonlindstrom/pgstore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
+	log "github.com/Sirupsen/logrus"
+	"github.com/antonlindstrom/pgstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -143,8 +143,8 @@ func main() {
 	portalProxy.loadPlugins()
 
 	// Initialise general plugins
-	for _, generalPlugin := range portalProxy.GeneralPlugins {
-		generalPlugin.Init()
+	for _, plugin := range portalProxy.Plugins {
+		plugin.Init()
 	}
 
 	log.Info("Initialised general plugins.")
@@ -370,13 +370,21 @@ func start(p *portalProxy) error {
 			return err
 		}
 
-		engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
-		e.Run(engine)
+		address := p.Config.TLSAddress
+		log.Infof("Starting HTTPS Server at address: %s", address)
+		engine := standard.WithTLS(address, certFile, certKeyFile)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTPS server", engineErr)
+		}
 	} else {
 		address := p.Config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
 		engine := standard.New(address)
-		e.Run(engine)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTP server", engineErr)
+		}
 	}
 
 	return nil
@@ -384,11 +392,19 @@ func start(p *portalProxy) error {
 
 func (p *portalProxy) GetEndpointTypeSpec(typeName string) (interfaces.EndpointPlugin, error) {
 
-	endpointSpec, ok := p.EndpointPlugins[typeName]
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
+		}
+		endpointType := endpointPlugin.GetType()
 
-	if ok {
-		return endpointSpec, nil
+		if endpointType == typeName {
+			return endpointPlugin, nil
+		}
 	}
+
 	return nil, errors.New("Endpoint type plugin not loaded")
 }
 
@@ -405,8 +421,13 @@ func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	log.Debug("registerRoutes")
 
-	for _, generalPlugin := range p.GeneralPlugins {
-		e.Use(generalPlugin.EchoMiddleware)
+	for _, plugin := range p.Plugins {
+		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
+		if err != nil {
+			// Plugin doesn't implement an middleware Plugin interface, skip
+			continue
+		}
+		e.Use(middlewarePlugin.EchoMiddleware)
 	}
 
 	// Allow the backend to run under /pp if running combined
@@ -428,8 +449,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 
-	for _, generalPlugin := range p.GeneralPlugins {
-		e.Use(generalPlugin.SessionEchoMiddleware)
+	for _, plugin := range p.Plugins {
+		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
+		if err != nil {
+			// Plugin doesn't implement an middleware Plugin interface, skip
+			continue
+		}
+		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
 	// Connect to CF cluster
@@ -451,8 +477,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Info
 	sessionGroup.GET("/info", p.info)
 
-	for _, endpoint := range p.EndpointPlugins {
-		endpoint.AddSessionGroupRoutes(sessionGroup)
+	for _, plugin := range p.Plugins {
+		routePlugin, err := plugin.GetRoutePlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
+		}
+		routePlugin.AddSessionGroupRoutes(sessionGroup)
 	}
 
 	// This is used for passthru of CF/HCE requests
@@ -464,11 +495,20 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	adminGroup := sessionGroup
 	adminGroup.Use(p.adminMiddleware)
 
-	for _, endpoint := range p.EndpointPlugins {
-		endpointType := endpoint.GetType()
-		adminGroup.POST("/register/" + endpointType, endpoint.Register)
-		endpoint.AddAdminGroupRoutes(adminGroup)
-		// Add Endpoint registration
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
+		}
+
+		endpointType := endpointPlugin.GetType()
+		adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
+
+		routePlugin, err := plugin.GetRoutePlugin()
+		if err == nil {
+			routePlugin.AddAdminGroupRoutes(adminGroup)
+		}
 
 	}
 

@@ -207,7 +207,7 @@
 
     return gulp
       .src(path.join(distPath, 'index.html'))
-      .pipe(wiredep(config.bower))
+      .pipe(wiredep(components.getWiredep()))
       .pipe(gulpinject(sources, {relative: true}))
       .pipe(concat.header())
       .pipe(gulpreplace('@@PRODUCT_NAME@@', enStrings.product.name))
