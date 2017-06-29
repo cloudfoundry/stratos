@@ -1,7 +1,7 @@
 /* eslint-disable angular/json-functions */
 (function () {
   'use strict';
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
   var applicationWall = require('./po/applications/applications.po');
 
   var appWallConfig3 = require('./app-wall/3-apps.js');
@@ -9,7 +9,7 @@
   var appWallConfigNoClusters = require('./app-wall/no-clusters.js');
   var appWallConfigNoApps = require('./app-wall/no-apps.js');
 
-  var ngMockE2E = require('../../../app-core/frontend/test/e2e/po/ng-mock-e2e.po');
+  var ngMockE2E = require('../../../../app-core/frontend/test/e2e/po/ng-mock-e2e.po');
 
   describe('Application Wall', function () {
 

@@ -7,14 +7,14 @@
   var addAppWizard = require('./po/applications/add-application-wizard.po');
   var addAppCfApp = require('./po/applications/add-application-cf-app.po');
   var application = require('./po/applications/application.po');
-  var table = require('../../../app-core/frontend/test/e2e/po/widgets/table.po');
+  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
   var addRouteDialog = require('./po/applications/add-application-route.po');
-  var actionMenu = require('../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
   var editApplicationModal = require('./po/applications/edit-application.po');
-  var navbar = require('../../../app-core/frontend/test/e2e/po/navbar.po');
+  var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
   var cfHelpers = require('./po/helpers.po');
 
   describe('Application View', function () {

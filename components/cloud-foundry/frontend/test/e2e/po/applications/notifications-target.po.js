@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var asyncDialog = require('../../../../../app-core/frontend/test/e2e/po/widgets/async-dialog-view.po');
-  var wizard = require('../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
+  var asyncDialog = require('../../../../../../app-core/frontend/test/e2e/po/widgets/async-dialog-view.po');
+  var wizard = require('../../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
 
   module.exports = {
     doneButton: doneButton,

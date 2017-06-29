@@ -1,10 +1,10 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../app-core/frontend/test/e2e/po/helpers.po');
+  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
   var cfHelpers = require('./po/helpers.po');
-  var resetTo = require('../../../app-core/frontend/test/e2e/po/resets.po');
-  var loginPage = require('../../../app-core/frontend/test/e2e/po/login-page.po');
+  var resetTo = require('../../../../app-core/frontend/test/e2e/po/resets.po');
+  var loginPage = require('../../../../app-core/frontend/test/e2e/po/login-page.po');
   var endpointsCf = require('./po/endpoints/endpoints-list-cf.po');
   var Q = require('q');
 
