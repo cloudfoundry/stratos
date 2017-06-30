@@ -1,3 +1,4 @@
+/* eslint-disable no-process-env */
 (function () {
   'use strict';
 
@@ -43,7 +44,7 @@
   gulp.task('create-temp', [], function (done) {
     // If STRATOS_TEMP is set, then a staged build is being carried out
     // see CF deployment script deploy/cloud-foundry/package.sh
-    if (process.env.STRATOS_TEMP){
+    if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
       tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
       return done();
@@ -54,7 +55,7 @@
             throw err;
           }
           tempPath = path_;
-          tempSrcPath = path.join(tempPath, conf.goPath,'components');
+          tempSrcPath = path.join(tempPath, conf.goPath, 'components');
           done();
         });
     }

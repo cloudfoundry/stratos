@@ -123,30 +123,29 @@
   });
 
   gulp.task('build-all', [], function (done) {
-      buildUtils.init();
-      var promise = Q.resolve();
-      // Build all plugins
-      _.each(enabledPlugins, function (pluginInfo) {
-        var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
-        promise = promise.then(function () {
-          return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
-        });
-
+    buildUtils.init();
+    var promise = Q.resolve();
+    // Build all plugins
+    _.each(enabledPlugins, function (pluginInfo) {
+      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
+      promise = promise.then(function () {
+        return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       });
-      var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-       promise
-        .then(function () {
-          // Build app-core
-          return buildUtils.build(corePath, conf.coreName);
-        })
-        .then(function () {
-          done();
-        })
-        .catch(function (err) {
-          done(err);
-        });
-    }
-  );
+
+    });
+    var corePath = conf.getCorePath(prepareBuild.getSourcePath());
+    promise
+      .then(function () {
+        // Build app-core
+        return buildUtils.build(corePath, conf.coreName);
+      })
+      .then(function () {
+        done();
+      })
+      .catch(function (err) {
+        done(err);
+      });
+  });
 
   gulp.task('run-tests', ['build-all'], function (done) {
 
