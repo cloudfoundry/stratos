@@ -32,6 +32,10 @@
   }
 }
 
+.auto-update-popover {
+  z-index: 1500;
+}
+
 .application-header {
   @include flex-vertical-centered();
   font-size: $console-unit-space;
@@ -42,13 +46,13 @@
     white-space: nowrap;
   }
 
-  .app-summary-app-state-icon, .bounce-spinner {
-    margin-left: $console-unit-space;
+  .app-summary-app-state-icon, .app-summary-auto-update {
+    margin-left: $console-unit-space / 2;
+    padding-top: 3px;
   }
-
-  .popover {
-    margin-left: 111px;
-    margin-top: 20px;
+  .bounce-spinner {
+    margin-left: $console-unit-space / 8;
+    display: block;
   }
 }
 
