@@ -74,7 +74,7 @@
           </a>
         </div>
         <div>
-          <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | amDateFormat: 'L HH:mm:ss'}}
+          <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
         </div>
         <div class="lastCommitter">
           <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}

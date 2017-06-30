@@ -80,10 +80,11 @@
    * @param {object} $log - the angular $log service
    * @param {object} $http - the angular $http service
    * @param {object} $timeout - the angular $timeout service
+   * @param {object} $filter - the angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
-                               $timeout, modelManager) {
+                               $timeout, $filter, modelManager) {
 
     var vm = this;
 
@@ -349,7 +350,7 @@
         return '';
       }
 
-      return moment(messageObj.timestamp * 1000).format('HH:mm:ss') + ': ' + messageObj.message.trim() + '\n';
+      return $filter('momentDateFormat')(messageObj.timestamp * 1000) + ': ' + messageObj.message.trim() + '\n';
     }
 
     function startDeploy() {

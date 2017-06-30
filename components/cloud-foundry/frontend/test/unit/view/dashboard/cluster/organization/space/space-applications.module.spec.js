@@ -3,7 +3,8 @@
 
   describe('cluster space detail (applications) module', function () {
 
-    var $controller, $httpBackend, $state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService, spaceModel;
+    var $controller, $httpBackend, $state, $stateParams, $q, $scope, $filter, modelManager, appUtilsService,
+      cfAppStateService, spaceModel;
 
     beforeEach(module('templates'));
     beforeEach(module('console-app'));
@@ -39,6 +40,7 @@
       $stateParams.space = spaceGuid;
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope').$new();
+      $filter = $injector.get('$filter');
       modelManager = $injector.get('modelManager');
       appUtilsService = $injector.get('appUtilsService');
       cfAppStateService = $injector.get('cfAppStateService');
@@ -48,8 +50,10 @@
     }));
 
     function createController() {
-      var SpaceapplicationsController = $state.get('endpoint.clusters.cluster.organization.space.detail.applications').controller;
-      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService);
+      var SpaceapplicationsController =
+        $state.get('endpoint.clusters.cluster.organization.space.detail.applications').controller;
+      $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, $filter, modelManager,
+        appUtilsService, cfAppStateService);
     }
 
     afterEach(function () {

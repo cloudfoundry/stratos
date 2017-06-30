@@ -68,19 +68,19 @@
 
         <dt translate>created</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.metadata.created_at">
-          {{ appCtrl.model.application.metadata.created_at | amDateFormat: 'L - LTS' }}
+          {{ appCtrl.model.application.metadata.created_at | momentDateFormat }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.metadata.created_at">-</dd>
 
         <dt translate>modified</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
-          {{ appCtrl.model.application.summary.package_updated_at | amDateFormat: 'L - LTS' }}
+          {{ appCtrl.model.application.summary.package_updated_at | momentDateFormat }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
         <dt translate ng-if="applicationSummaryCtrl.stratosProject">console deploy</dt>
         <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject">
-          {{ applicationSummaryCtrl.stratosProject.timestamp * 1000 | amDateFormat: 'L - LTS' }}
+          {{ applicationSummaryCtrl.stratosProject.timestamp * 1000 | momentDateFormat }}
         </dd>
 
         <dt translate ng-if="applicationSummaryCtrl.stratosProject">console deploy source</dt>

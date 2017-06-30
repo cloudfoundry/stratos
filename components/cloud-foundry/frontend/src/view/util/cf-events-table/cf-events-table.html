@@ -24,7 +24,7 @@
     </thead>
     <tbody>
       <tr ng-click="cfeCtrl.showDetail(row)" class="cf-event-row" ng-repeat="row in cfeCtrl.events">
-        <td class="cf-event-timestamp">{{ row.entity.timestamp | amDateFormat: 'L HH:mm:ss'}}</td>
+        <td class="cf-event-timestamp">{{ row.entity.timestamp | momentDateFormat}}</td>
         <td><div class="cf-event-type-part" ng-repeat="typePart in row.entity.type.split('.')">{{typePart}}</div></td>
         <td>
           <div class="cf-event-actor-type">
