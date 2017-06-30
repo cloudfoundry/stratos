@@ -14,6 +14,10 @@
       "description": "Are you sure you want to delete space '{{name}}'?",
       "success-notification": "Space '{{name}}' successfully deleted",
       "error-message": "Failed to delete space"
-    }
+    },
+    "delete-route-action": "Delete Route",
+    "unmap-route-action": "Unmap Route",
+    "detach-service-action": "Detach Service",
+    "delete-service-action": "Delete Service"
   }
 }
