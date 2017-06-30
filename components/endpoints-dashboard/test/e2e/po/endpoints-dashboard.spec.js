@@ -13,8 +13,8 @@
 
   // These are pretty tied into the tests. The dashboard will need to know about specific endpoints to determine
   // behaviour on log in, out, etc. These could, if a problem, be split out into the cf app if this becomes a problem
-  var cfHelpers = require('../../../../cloud-foundry/test/e2e/po/helpers.po');
-  var applications = require('../../../../cloud-foundry/test/e2e/po/applications/applications.po');
+  var cfHelpers = require('../../../../cloud-foundry/frontend/test/e2e/po/helpers.po');
+  var applications = require('../../../../cloud-foundry/frontend/test/e2e/po/applications/applications.po');
 
   describe('Endpoints Dashboard', function () {
 

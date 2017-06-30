@@ -8,7 +8,7 @@ $deploy-status-bounce-spacer: 6px;
 $select-option-height: 39px;
 
 .modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content .detail-view-content.deploy-app wizard .wizard-step {
-  padding-bottom: 0 $console-unit-space $console-unit-space $console-unit-space;
+  padding: 0 $console-unit-space $console-unit-space $console-unit-space;
 }
 
 .deploy-app {
@@ -27,7 +27,7 @@ $select-option-height: 39px;
 
     .deploy-app-github-form {
       .deploy-app-github-branch {
-        margin-bottom: $select-option-height * 3;
+        margin-bottom: $select-option-height * 3 - $console-unit-space;
         .dropdown-menu {
           max-height: $select-option-height * 3;
         }

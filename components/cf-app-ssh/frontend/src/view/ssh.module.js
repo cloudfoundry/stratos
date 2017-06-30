@@ -15,11 +15,12 @@
     });
   }
 
-  function registerAppTab($stateParams, $q, cfApplicationTabs) {
+  function registerAppTab(cfApplicationTabs, modelManager) {
     cfApplicationTabs.tabs.push({
       position: 8,
       hide: function () {
-        return false;
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        return !model.application.summary.enable_ssh;
       },
       uiSref: 'cf.applications.application.ssh',
       label: 'cf.app-ssh',
