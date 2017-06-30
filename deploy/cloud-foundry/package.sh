@@ -8,12 +8,7 @@ CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TOP_LEVEL=${CF_DIR}/../../
 BOWER_PATH=${NODE_HOME}/bin
 
-# Clean up any previous state
-pushd ${TOP_LEVEL}
-rm -rf node_modules
-rm -rf bower_components
-rm -rf dist
-popd
+export STRATOS_TEMP=$(mktemp -d)
 
 # Copy the config file
 cp ${CF_DIR}/config.properties ${TOP_LEVEL}
@@ -37,16 +32,19 @@ npm install --only=prod & NPM_INSTALL=$!
 ${BOWER_PATH}/bower install & BOWER_INSTALL=$!
 
 wait ${NPM_INSTALL}
-npm run build-backend & BK_BUILD=$!
+# Fetch Glide dependencies, since this is I/O intensive
+# it won't interfere with UI build
+npm run cf-get-backend-deps & BK_BUILD=$!
 
 wait ${BOWER_INSTALL}
 npm run build & UI_BUILD=$!
-
 wait ${BK_BUILD}
 wait ${UI_BUILD}
+# Build backend components
+npm run cf-build-backend
+
 npm run build-cf
 
 chmod +x portal-proxy
 
 ./portal-proxy
-

@@ -43,7 +43,7 @@
     buildUtils.init();
   });
 
-  gulp.task('prepare-plugins', ['get-plugins-data'], function (done) {
+  gulp.task('prepare-deps', ['get-plugins-data'], function (done) {
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function (pluginInfo) {
@@ -54,21 +54,12 @@
         });
 
     });
+    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
+
     promise
       .then(function () {
-        done();
+        return buildUtils.runGlideInstall(fullCorePath);
       })
-      .catch(function (err) {
-        done(err);
-      });
-
-  });
-
-  // `prepare-core` is not really dependant on `prepare-plugins`,
-  // but due to CPU constraints in a cloud-foundry environment these should be serialised
-  gulp.task('prepare-core', ['prepare-plugins'], function (done) {
-    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
-    buildUtils.runGlideInstall(fullCorePath)
       .then(function () {
         done();
       })
@@ -81,7 +72,7 @@
   // If plugins are using different version of the same dependency,
   // than we will end up overwriting one of them. Therefore, plugins should use
   // the same version of dependencies.
-  gulp.task('dedup-vendor', ['prepare-core'], function (done) {
+  gulp.task('dedup-vendor', ['prepare-deps'], function (done) {
 
     var promise = Q.resolve();
     var promises = [];
@@ -131,38 +122,33 @@
       });
   });
 
-  gulp.task('build-plugins', ['dedup-vendor'], function (done) {
+  gulp.task('build-all', [], function (done) {
+      buildUtils.init();
+      var promise = Q.resolve();
+      // Build all plugins
+      _.each(enabledPlugins, function (pluginInfo) {
+        var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
+        promise = promise.then(function () {
+          return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
+        });
 
-    var promises = [];
-    _.each(enabledPlugins, function (pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
-      var promise = buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
-      promises.push(promise);
-
-    });
-    Q.all(promises)
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
       });
-  });
+      var corePath = conf.getCorePath(prepareBuild.getSourcePath());
+       promise
+        .then(function () {
+          // Build app-core
+          return buildUtils.build(corePath, conf.coreName);
+        })
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    }
+  );
 
-  gulp.task('build-core', ['build-plugins'], function (done) {
-
-    var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.build(corePath, conf.coreName)
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
-      });
-
-  });
-
-  gulp.task('run-tests', ['build-core'], function (done) {
+  gulp.task('run-tests', ['build-all'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
@@ -175,7 +161,7 @@
 
   });
 
-  gulp.task('copy-artefacts', ['build-core', 'build-plugins'], function (done) {
+  gulp.task('copy-artefacts', ['build-all'], function (done) {
     var outputPath = conf.outputPath + path.sep;
     var promise = fsEnsureDirQ(outputPath);
     _.each(enabledPlugins, function (pluginInfo) {
@@ -220,10 +206,20 @@
 
     return runSequence(
       'init-build',
+      'dedup-vendor',
       'write-plugins-yaml'
     );
   });
-  gulp.task('dedup', function () {
+
+  gulp.task('cf-build-backend', function () {
+
+    return runSequence(
+      'init-build',
+      'get-plugins-data',
+      'write-plugins-yaml'
+    );
+  });
+  gulp.task('cf-get-backend-deps', function () {
     return runSequence(
       'init-build',
       'dedup-vendor'
