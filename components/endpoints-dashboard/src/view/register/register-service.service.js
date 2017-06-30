@@ -10,6 +10,7 @@
    * @description Register a service via a slide out
    * @namespace app.view
    * @param {object} $q - the Angular $q service
+   * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService The console notification service
@@ -18,7 +19,7 @@
    *  dashboard with cnsi type endpoints
    * @returns {object} Object containing 'show' function
    */
-  function ServiceRegistrationFactory($q, modelManager, appUtilsService, appNotificationsService,
+  function ServiceRegistrationFactory($q, $translate, modelManager, appUtilsService, appNotificationsService,
                                       frameworkDetailView, appEndpointsCnsiService) {
 
     function createInstanceUrls(serviceInstances, filter) {

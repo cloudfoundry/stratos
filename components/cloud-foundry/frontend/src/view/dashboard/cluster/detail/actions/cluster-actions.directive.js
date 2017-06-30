@@ -30,6 +30,7 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $stateParams - the ui-router $stateParams service
+   * @param {object} $translate - the angular $translate service
    * @param {object} appUtilsService - our appUtilsService service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} appClusterAssignUsers - service vm allows assigning roles to users
@@ -38,7 +39,7 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions vm can be executed against cluster
    */
-  function ClusterActionsController($scope, modelManager, $state, $q, $stateParams, appUtilsService,
+  function ClusterActionsController($scope, modelManager, $state, $q, $stateParams, $translate, appUtilsService,
                                     frameworkAsyncTaskDialog, appClusterAssignUsers, appUserSelection,
                                     appNotificationsService, cfOrganizationModel) {
     var vm = this;

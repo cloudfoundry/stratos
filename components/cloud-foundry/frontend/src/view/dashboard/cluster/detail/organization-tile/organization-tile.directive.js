@@ -25,6 +25,7 @@
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
+   * @param {object} $translate - the angular $translate service
    * @param {object} appUtilsService - our appUtilsService service
    * @param {object} appClusterAssignUsers - our assign users slide out service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -33,8 +34,9 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, $translate, appUtilsService, // eslint-disable-line complexity
-                                      appClusterAssignUsers, appNotificationsService, frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, $translate, appUtilsService,
+                                      appClusterAssignUsers, appNotificationsService, frameworkDialogConfirm,
+                                      frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
     this.$state = $state;
 

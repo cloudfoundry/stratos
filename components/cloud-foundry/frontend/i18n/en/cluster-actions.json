@@ -13,8 +13,8 @@
       "dialog": {
         "title": "Create Space",
         "submit-button": "Create",
-        "success-notification-plural": "Spaces '{{names}}' successfully created",
-        "success-notification-singular": "Space '{{name}}' successfully created",
+        "success-notification-plural": "Spaces '{{ names }}' successfully created",
+        "success-notification-singular": "Space '{{ name }}' successfully created"
       }
     },
     "assign-users": {

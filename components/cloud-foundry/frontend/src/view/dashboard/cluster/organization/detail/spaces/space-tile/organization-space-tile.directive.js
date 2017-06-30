@@ -24,6 +24,7 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {appClusterAssignUsers} appClusterAssignUsers - our assign users slide out service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -33,9 +34,9 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, appClusterAssignUsers,
-                                           appNotificationsService, appUtilsService, frameworkDialogConfirm,
-                                           frameworkAsyncTaskDialog, cfOrganizationModel) {
+  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, $translate, modelManager,
+                                           appClusterAssignUsers, appNotificationsService, appUtilsService,
+                                           frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;

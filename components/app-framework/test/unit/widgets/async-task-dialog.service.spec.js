@@ -1,4 +1,4 @@
-(function (global) {
+(function () {
   'use strict';
 
   var delay = 10;
