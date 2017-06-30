@@ -7,10 +7,10 @@
     .constant('cfHideEndpoint', false)
     .run(register);
 
-  /* eslint-disable no-unused-vars */
-  // Ensure that an instance of cfEndpointService is created by injecting it here.
-  function register(cfEndpointService) { }
-  /* eslint-enable no-unused-vars */
+  function register(cfEndpointService) {
+    // Ensure we call something such that cfEndpointService is not optimised out
+    cfEndpointService.add();
+  }
 
   /**
    * @namespace cloud-foundry.service
@@ -31,6 +31,9 @@
   function endpointService(cfHideEndpoint, $q, $state, $translate, apiManager, modelManager, appEndpointsCnsiService) {
 
     var service = {
+      add: function () {
+        appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
+      },
       cnsi_type: 'cf',
       refreshToken: refreshToken,
       update: updateEndpoint,
@@ -58,8 +61,6 @@
         nameOfUrlInput: 'cfUrl'
       }
     };
-
-    appEndpointsCnsiService.cnsiEndpointProviders[service.cnsi_type] = service;
 
     return service;
 
