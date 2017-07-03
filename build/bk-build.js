@@ -231,6 +231,7 @@
 
     return runSequence(
       'init-build',
+      'dedup-vendor',
       'run-tests'
     );
   });
