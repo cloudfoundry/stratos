@@ -39,7 +39,12 @@
     secure: false
   });
 
-  app.use(function (req, res, next) {
+  // Handle errors - otherwise teh proxy library will just abort
+  proxy.on('error', function (err) {
+    console.log('\x1b[31mError proxying request: %s\x1b[0m', err.code);
+  });
+
+  app.use(function (req, res) {
     // Only proxy requests that start /pp
     if (req.url.indexOf('/pp/') !== 0) {
       console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
@@ -48,12 +53,7 @@
       if (!doNotLogRequests) {
         console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
       }
-      try {
-        return proxy.web(req, res);
-      } catch (e) {
-        console.log('\x1b[31mError proxying request: %s\x1b[0m', req.url);
-      }
-      return next();
+      return proxy.web(req, res);
     }
   });
 

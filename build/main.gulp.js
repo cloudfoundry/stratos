@@ -329,7 +329,14 @@
           var url = target + req.url;
           var method = (req.method + '        ').substring(0, 8);
           gutil.log(method, req.url);
-          req.pipe(proxiedRequest(url)).pipe(res);
+          var p = proxiedRequest(url);
+          p.on('error', function (e) {
+            gutil.log(e);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.write(e.toString());
+            res.end();
+          });
+          req.pipe(p).pipe(res);
         }
       };
       middleware.push(proxyMiddleware);
