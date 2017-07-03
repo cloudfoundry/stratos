@@ -7,6 +7,12 @@
     "start": "Start",
     "cli": "CLI Info"
   },
+  "edit-app": {
+    "edit-app": "Edit App",
+    "ssh-access": "Enable SSH Access",
+    "ssh-restart-warning": "Note: Enabling or disabling SSH Access will restart all application instances.",
+    "ssh-no-edit": "Note: SSH Access for this application can not be modified as the Space is set to disallow all SSH access."
+  },
   "app-route-actions": {
     "unmap": "Unmap from App",
     "delete": "Delete Route"

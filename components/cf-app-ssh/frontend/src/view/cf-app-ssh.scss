@@ -71,3 +71,22 @@ $cf-app-ssh-box-shadow: 0 0 20px 6px $gray-dark;
   z-index: 2;
   opacity: 0.5;
 }
+
+.app-ssh-enable-msg {
+    text-align: left;
+    margin: $console-unit-space auto;
+    padding: 0;
+    max-width: 520px;
+
+    > p {
+      font-size: $font-size-large;
+
+      &.app-ssh-warning {
+        color: $status-critical;
+      }
+
+      &:last-child {
+        margin: 0;
+      }
+    }
+}

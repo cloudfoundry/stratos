@@ -18,7 +18,7 @@
   }
 
   /**
-   * @name SpaceSummaryTileController
+* @name SpaceSummaryTileController
    * @constructor
    * @param {object} $state - the angular $state service
    * @param {object} $scope - the angular $scope service
@@ -32,11 +32,12 @@
    * @param {object} frameworkDialogConfirm - our confirmation dialog service
    * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
+   * @param {cfUtilsService} cfUtilsService - the cfUtilsService service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, $translate, modelManager, appUtilsService,
                                       appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
-                                      frameworkAsyncTaskDialog, cfOrganizationModel) {
+                                      frameworkAsyncTaskDialog, cfOrganizationModel, cfUtilsService) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;
@@ -51,12 +52,15 @@
     vm.spaceDetail = spaceDetail;
     vm.getEndpoint = getEndpoint;
     vm.showCliCommands = showCliCommands;
+    vm.hasSshAccess = hasSshAccess;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
     var user = consoleInfo.info.endpoints.cf[vm.clusterGuid].user;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var spaceDetailObj;
+
+    vm.spaceModel = spaceModel;
 
     var renameAction = {
       name: 'space-info.rename-action',
@@ -126,6 +130,47 @@
       }
     };
 
+    var sshAction = {
+      name: 'space-info.ssh-action',
+      disabled: true,
+      execute: function () {
+
+        var dialog;
+        if (spaceDetailObj.details.space.entity.allow_ssh) {
+          dialog = {
+            value: false,
+            title: 'space-info.ssh.disable.title',
+            confirm: 'space-info.ssh.disable.confirm',
+            prompt: 'space-info.ssh.disable.prompt',
+            error: 'space-info.ssh.disable.error'
+          };
+        } else {
+          dialog = {
+            value: true,
+            title: 'space-info.ssh.enable.title',
+            confirm: 'space-info.ssh.enable.confirm',
+            prompt: 'space-info.ssh.enable.prompt',
+            error: 'space-info.ssh.enable.error'
+          };
+
+        }
+        return frameworkDialogConfirm({
+          title: dialog.title,
+          description: $translate.instant(dialog.prompt,
+            {name: spaceDetail().details.space.entity.name}),
+          submitCommit: true,
+          buttonText: {
+            yes: dialog.confirm,
+            no: 'buttons.cancel'
+          },
+          errorMessage: dialog.error,
+          callback: function () {
+            return vm.spaceModel.updateSshAccess(vm.clusterGuid, vm.spaceGuid, dialog.value);
+          }
+        });
+      }
+    };
+
     vm.isAdmin = user.admin;
 
     $scope.$watchCollection(function () {
@@ -173,9 +218,21 @@
         vm.actions.push(deleteAction);
       }
 
+      // SSH
+      if (vm.isAdmin) {
+        vm.actions.push(sshAction);
+        sshAction.disabled = false;
+        updateSshAction();
+      }
+
       if (vm.actions.length < 1) {
         delete vm.actions;
       }
+    }
+
+    function updateSshAction() {
+      var enabled = spaceDetailObj.details.space.entity.allow_ssh;
+      sshAction.name = enabled ? 'space-info.ssh.disable' : 'space-info.ssh.enable';
     }
 
     function init() {
@@ -205,6 +262,10 @@
           enableActions();
         });
 
+        $scope.$watch(function () {
+          return spaceDetailObj.details.space.entity.allow_ssh;
+        }, updateSshAction);
+
         enableActions();
         return $q.resolve();
       });
@@ -213,6 +274,11 @@
 
     function spaceDetail() {
       return spaceModel.fetchSpace(vm.clusterGuid, vm.spaceGuid);
+    }
+
+    function hasSshAccess() {
+      var service = vm.userServiceInstance.serviceInstances[vm.clusterGuid];
+      return cfUtilsService.hasSshAccess(service);
     }
 
   }

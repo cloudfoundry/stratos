@@ -96,6 +96,14 @@
     "tile": {
       "token-expired": "Token has expired",
       "uncontactable": "Cannot contact endpoint"
+    },
+    "ssh": {
+      "access": "SSH Access",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "space-disallowed": "Disallowed by Space"
     }
   }
 }

@@ -18,7 +18,8 @@
     });
   }
 
-  function ClusterController($stateParams, $log, appUtilsService, $state, $q, appClusterRolesService, modelManager, appUserSelection, cfOrganizationModel) {
+  function ClusterController($stateParams, $log, appUtilsService, $state, $q, appClusterRolesService,
+                             modelManager, appUserSelection, cfOrganizationModel, cfUtilsService) {
     var that = this;
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -31,6 +32,11 @@
 
     this.getEndpoint = function () {
       return appUtilsService.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
+    };
+
+    this.hasSshAccess = function () {
+      var service = this.userServiceInstanceModel.serviceInstances[this.guid];
+      return cfUtilsService.hasSshAccess(service);
     };
 
     function init() {

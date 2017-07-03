@@ -15,12 +15,13 @@
     });
   }
 
-  function registerAppTab(cfApplicationTabs, modelManager) {
+  function registerAppTab($stateParams, cfApplicationTabs, modelManager, cfUtilsService) {
     cfApplicationTabs.tabs.push({
       position: 8,
       hide: function () {
-        var model = modelManager.retrieve('cloud-foundry.model.application');
-        return !model.application.summary.enable_ssh;
+        var cnsiGuid = $stateParams.cnsiGuid;
+        var cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+        return !cfUtilsService.hasSshAccess(cnsiModel.serviceInstances[cnsiGuid]);
       },
       uiSref: 'cf.applications.application.ssh',
       label: 'cf.app-ssh',
@@ -34,9 +35,12 @@
    * @constructor
    * @param {object} $location - the Angular $location service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $state - the UI router $state service
    * @param {object} $scope - the angular $scope service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function ApplicationSSHController($location, $stateParams, $scope) {
+  function ApplicationSSHController($location, $stateParams, $state, $scope, modelManager, appUtilsService) {
     var vm = this;
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.id = $stateParams.guid;
@@ -44,6 +48,17 @@
     vm.instance = undefined;
     vm.showOptions = false;
     vm.showInstanceSelector = false;
+
+    vm.isEnabling = false;
+    vm.ready = false;
+
+    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+
+    appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
+
+    function init() {
+      vm.ready = true;
+    }
 
     $scope.$watch('applicationSSHController.instance', function (val) {
       if (angular.isDefined(val)) {
@@ -82,6 +97,17 @@
       vm.showOptions = false;
       vm.connect(vm.instance);
     };
-  }
 
+    vm.enable = function () {
+      var updatedAppSpec = {
+        enable_ssh: true
+      };
+      vm.isEnabling = true;
+      return vm.model.update(vm.cnsiGuid , vm.id, updatedAppSpec).then(function () {
+        vm.application.model.summary.enable_ssh = true;
+      }).finally(function () {
+        vm.isEnabling = false;
+      });
+    };
+  }
 })();

@@ -32,23 +32,26 @@
         var data = {
           name: model.application.summary.name,
           memory: model.application.summary.memory,
-          instances: model.application.summary.instances
+          instances: model.application.summary.instances,
+          enable_ssh: model.application.summary.enable_ssh
         };
 
         return frameworkAsyncTaskDialog(
           {
-            title: 'Edit App',
+            title: 'edit-app',
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/summary/edit-app/edit-app.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'Save'
+              submit: 'buttons.save'
             },
             class: 'dialog-form',
             dialog: true
           },
           {
-            data: data
+            data: data,
+            initial_ssh: model.application.summary.enable_ssh,
+            space_allowed: model.application.space.entity.allow_ssh
           },
           updateAppPromise
         );

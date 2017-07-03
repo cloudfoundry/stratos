@@ -5,6 +5,15 @@
       "select-instance": "Select an Instance",
       "instance-title": "Instance # {{id}}",
       "empty": "This application has no instances available for SSH access",
+      "not-enabled": "SSH is not enabled for this Application.",
+      "space-not-enabled": "SSH Access is disallowed by the space '{{name}}'.",
+      "space-enable-prompt": "A Space administrator will need to enable access for the space.",
+      "enable-prompt": "You can enable and disable SSH access by using the 'Edit' link on the Summary tab.",
+      "quick-enable": {
+        "quick-enable": "You can also quickly enable SSH access by clicking the button below.",
+        "warning" : "NOTE: Enabling SSH access will restart ALL application instances.",
+        "button": "Enable SSH Access"
+      },
       "labels": {
         "disconnected": "Disconnected",
         "reconnect": "Reconnect",

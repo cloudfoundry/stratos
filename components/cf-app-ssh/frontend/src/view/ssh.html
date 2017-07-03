@@ -1,4 +1,21 @@
-<div cf-app-ssh-resize>
+<div ng-if="applicationSSHController.ready && !applicationSSHController.model.application.space.entity.allow_ssh" class="applications-empty">
+  <app-icon icon-class="app-icon-3x" icon="error_outline"></app-icon>
+  <div class="applications-msg" translate translate-values="{name: applicationSSHController.model.application.space.entity.name}">cf.app-ssh.space-not-enabled</div>
+  <div class="applications-cta" translate>cf.app-ssh.space-enable-prompt</div>
+</div>
+<div ng-if="applicationSSHController.ready && applicationSSHController.model.application.space.entity.allow_ssh &&
+!applicationSSHController.model.application.summary.enable_ssh" class="applications-empty">
+  <app-icon icon-class="app-icon-3x" icon="error_outline"></app-icon>
+  <div class="applications-msg" translate>cf.app-ssh.not-enabled</div>
+  <div class="applications-cta" translate>cf.app-ssh.enable-prompt</div>
+  <div class="app-ssh-enable-msg">
+    <p translate>cf.app-ssh.quick-enable</p>
+    <p translate class="app-ssh-warning">cf.app-ssh.quick-enable.warning</p>
+  </div>
+  <button ng-if="!applicationSSHController.isEnabling" ng-click="applicationSSHController.enable()" class="btn btn-primary" translate>cf.app-ssh.quick-enable.button</button>
+  <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationSSHController.isEnabling"></bounce-spinner>
+</div>
+<div ng-if="applicationSSHController.ready && applicationSSHController.model.application.summary.enable_ssh" cf-app-ssh-resize>
   <app-instance-selector shown="applicationSSHController.showInstanceSelector" instance="applicationSSHController.instance"></app-instance-selector>
   <div ng-if="applicationSSHController.showOptions" class="app-ssh-disconnected">
     <div>
