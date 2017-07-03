@@ -5,22 +5,75 @@
     .module('app.view')
     .factory('appCredentialsDialog', CredentialsDialogFactory);
 
-  function CredentialsDialogFactory(frameworkDetailView) {
+  function CredentialsDialogFactory($translate, $q, frameworkAsyncTaskDialog, modelManager, appNotificationsService) {
+
     return {
       /**
        * @memberof app.view
        * @name appCredentialsDialog
-       * @param {object} context - the context for the credentials dialog.
+       * @param {object} incContext - the context for the credentials dialog.
        * @returns {object} Dialog object for chaining promises and closing the dialog
        */
-      show: function (context) {
-        return frameworkDetailView(
-          {
-            templateUrl: 'app/view/endpoints/credentials/credentials-dialog.html',
-            class: 'detail-view-thin'
+      show: function (incContext) {
+
+        var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+        var config = {
+          title: 'endpoints.connect.title',
+          templateUrl: 'app/view/endpoints/credentials/credentials-form.html',
+          submitCommit: true,
+          buttonTitles: {
+            submit: 'endpoints.connect.connect-button'
           },
-          context
+          class: 'dialog-form',
+          dialog: true
+        };
+
+        // Pull in specific properties to ensure context.data is free from incoming context
+        var context = {
+          cnsi: incContext.cnsi,
+          formName: incContext.formName
+        };
+        context.data = {};
+
+        return frameworkAsyncTaskDialog(
+          config,
+          context,
+          connect
         );
+
+        /**
+         * @function connect
+         * @memberOf app.view.appCredentialsDialog
+         * @description Connect service instance for user
+         * @returns {object} promise
+         */
+        function connect() {
+          return userServiceInstanceModel.connect(context.cnsi.guid, context.cnsi.name, context.data.username, context.data.password)
+            .then(function success() {
+              appNotificationsService.notify('success', $translate.instant('endpoints.connect.success-notification', {name: context.cnsi.name}));
+              context.data = {};
+            })
+            .catch(function (response) {
+              // Only reset these on fail, for success the dialog is removed
+              context.errorMsg = null;
+              context.failedRegister = null;
+
+              if (response.status === -1) {
+                context.errorMsg = 'endpoints.connect.error-no-connect';
+              } else {
+                if (response.status >= 400) {
+                  if (response.status >= 500) {
+                    context.errorMsg = 'endpoints.connect.error-server-failure';
+                  } else {
+                    context.failedRegister = true;
+                    context.errorMsg = 'endpoints.connect.error-user-input';
+                  }
+                }
+              }
+              return $q.reject();
+            });
+        }
       }
     };
   }
