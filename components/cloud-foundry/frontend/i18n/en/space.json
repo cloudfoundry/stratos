@@ -1,0 +1,23 @@
+{
+  "space-info": {
+    "summary": {
+      "title": "Summary"
+    },
+    "rename-action": "Rename Space",
+    "rename-dialog": {
+      "title": "Rename Space",
+      "success-notification": "Space '{{name}}' successfully updated"
+    },
+    "delete-action": "Delete Space",
+    "delete-dialog": {
+      "title": "Delete Space",
+      "description": "Are you sure you want to delete space '{{name}}'?",
+      "success-notification": "Space '{{name}}' successfully deleted",
+      "error-message": "Failed to delete space"
+    },
+    "delete-route-action": "Delete Route",
+    "unmap-route-action": "Unmap Route",
+    "detach-service-action": "Detach Service",
+    "delete-service-action": "Delete Service"
+  }
+}

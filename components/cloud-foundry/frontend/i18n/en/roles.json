@@ -1,4 +1,11 @@
 {
+  "common-roles-actions": {
+    "manage-roles": "Manage Roles",
+    "remove-all-roles": "Remove all roles",
+    "remove-from-org": "Remove from Organization",
+    "remove-from-space": "Remove from Space",
+    "assign-users": "Assign User(s)"
+  },
   "assign-user-roles": {
     "title": "Assign User(s)",
     "step1": {

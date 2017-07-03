@@ -24,6 +24,7 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
+   * @param {object} $translate - the angular $translate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {appClusterAssignUsers} appClusterAssignUsers - our assign users slide out service
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
@@ -33,9 +34,9 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, appClusterAssignUsers,
-                                           appNotificationsService, appUtilsService, frameworkDialogConfirm,
-                                           frameworkAsyncTaskDialog, cfOrganizationModel) {
+  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, $translate, modelManager,
+                                           appClusterAssignUsers, appNotificationsService, appUtilsService,
+                                           frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;
@@ -63,16 +64,16 @@
     cardDataObj.title = vm.space.entity.name;
 
     var renameAction = {
-      name: gettext('Rename Space'),
+      name: 'space-info.rename-action',
       disabled: true,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: gettext('Rename Space'),
+            title: 'space-info.rename-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-space.html',
             submitCommit: true,
             buttonTitles: {
-              submit: gettext('Save')
+              submit: 'buttons.save'
             },
             class: 'dialog-form',
             dialog: true
@@ -93,8 +94,8 @@
               return spaceModel.updateSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid,
                 {name: spaceData.name})
                 .then(function () {
-                  appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
-                    {name: spaceData.name});
+                  appNotificationsService.notify('success',
+                    $translate.instant('space-info.rename-dialog.success-notification', {name: spaceData.name}));
                   cardDataObj.title = spaceData.name;
                 });
             } else {
@@ -105,31 +106,31 @@
       }
     };
     var deleteAction = {
-      name: gettext('Delete Space'),
+      name: 'space-info.delete-action',
       disabled: true,
       execute: function () {
         return frameworkDialogConfirm({
-          title: gettext('Delete Space'),
-          description: gettext('Are you sure you want to delete space') +
-          " '" + spaceDetail().details.space.entity.name + "'?",
+          title: 'space-info.delete-dialog.title',
+          description: $translate.instant('space-info.delete-dialog.description',
+            {name: spaceDetail().details.space.entity.name}),
           submitCommit: true,
           buttonText: {
-            yes: gettext('Delete'),
-            no: gettext('Cancel')
+            yes: 'buttons.delete',
+            no: 'buttons.cancel'
           },
-          errorMessage: gettext('Failed to delete space'),
+          errorMessage: 'space-info.delete-dialog.error-message',
           callback: function () {
             return spaceModel.deleteSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid)
               .then(function () {
-                appNotificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
-                  {name: spaceDetail().details.space.entity.name});
+                appNotificationsService.notify('success', $translate.instant('space-info.delete-dialog.success-notification',
+                  {name: spaceDetail().details.space.entity.name}));
               });
           }
         });
       }
     };
     var assignAction = {
-      name: gettext('Assign User(s)'),
+      name: 'common-roles-actions.assign-users',
       disabled: true,
       execute: function () {
         appClusterAssignUsers.assign({

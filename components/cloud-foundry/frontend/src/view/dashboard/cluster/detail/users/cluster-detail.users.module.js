@@ -165,14 +165,14 @@
     function createUserActions() {
       return [
         {
-          name: gettext('Manage Roles'),
+          name: 'common-roles-actions.manage-roles',
           disabled: true,
           execute: function (aUser) {
             return appClusterManageUsers.show(that.guid, false, [aUser]).result;
           }
         },
         {
-          name: gettext('Remove all roles'),
+          name: 'common-roles-actions.remove-all-roles',
           disabled: true,
           execute: function (aUser) {
             return appClusterRolesService.removeAllRoles(that.guid, [aUser]);

@@ -10,6 +10,7 @@
    * @description Register a service via a slide out
    * @namespace app.view
    * @param {object} $q - the Angular $q service
+   * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
    * @param {app.view.appNotificationsService} appNotificationsService The console notification service
@@ -18,7 +19,7 @@
    *  dashboard with cnsi type endpoints
    * @returns {object} Object containing 'show' function
    */
-  function ServiceRegistrationFactory($q, modelManager, appUtilsService, appNotificationsService,
+  function ServiceRegistrationFactory($q, $translate, modelManager, appUtilsService, appNotificationsService,
                                       frameworkDetailView, appEndpointsCnsiService) {
 
     function createInstanceUrls(serviceInstances, filter) {
@@ -45,7 +46,7 @@
               lastStepCommit: true,
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
-              title: gettext('Register an Endpoint'),
+              title: 'register-dialog.title',
               allowBack: function () {
                 return allowBack;
               },
@@ -88,20 +89,17 @@
           templateUrl: 'plugins/endpoints-dashboard/view/register/register-service-details.html',
           showBusyOnNext: true,
           isLastStep: true,
-          nextBtnText: gettext('Register'),
+          nextBtnText: 'register-dialog.register-button',
           onNext: function () {
             var userInput = context.wizardOptions.userInput;
             return serviceInstanceModel.create(userInput.endpoint.cnsi_type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
-              appNotificationsService.notify('success',
-                gettext('Endpoint \'{{name}}\' successfully registered'),
-                {name: userInput.name});
+              appNotificationsService.notify('success', $translate.instant('register-dialog.success-notice', {name: userInput.name}));
               return serviceInstance;
             }).catch(function (response) {
               if (response.status === 403) {
-                return $q.reject(response.data.error + gettext('. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                return $q.reject($translate.instant('register-dialog.failure-ssl-notice', { sllError: response.data.error}));
               }
-              return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
-                'is correct and try again. If this error persists, please contact the administrator.'));
+              return $q.reject('register-dialog.failure-notice');
             });
           },
           onEnter: function () {

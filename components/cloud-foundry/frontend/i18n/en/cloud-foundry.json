@@ -92,6 +92,10 @@
         "twenty": "20 per page",
         "fifty": "50 per page"
       }
+    },
+    "tile": {
+      "token-expired": "Token has expired",
+      "uncontactable": "Cannot contact endpoint"
     }
   }
 }

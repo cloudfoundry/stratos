@@ -1,4 +1,4 @@
-(function (global) {
+(function () {
   'use strict';
 
   var delay = 10;
@@ -34,9 +34,6 @@
       };
       var context = {
         test: '123456e'
-      };
-      global.gettext = function (message) {
-        return message;
       };
       asynTaskDialog(content, context, _.partial(successfulActionPromise, $q, $timeout));
       $rootScope.$digest();
