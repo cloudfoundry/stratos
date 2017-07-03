@@ -24,14 +24,16 @@
 
     .register-service-type {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
 
       .register-content-left {
         flex: 3 1 0px;
+        padding-right: 0;
       }
 
       .register-content-right {
         flex: 5 1 0px;
+        flex-basis: auto;
 
         .media-list .media {
           .media-object {
@@ -73,35 +75,15 @@
 
     .register-service-details {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
 
       .register-content-left {
         flex-grow: 1;
+        padding-right: 0;
       }
 
       .register-content-right {
         flex-grow: 1;
-      }
-    }
-  }
-
-  @media (max-width: $screen-lg) {
-    height: 100%;
-    .wizard {
-      .register-service-type {
-        flex-direction: column;
-        .register-content-left {
-          padding-right: 0;
-        }
-        .register-content-right {
-          flex-basis: auto;
-        }
-      }
-      .register-service-details {
-        flex-direction: column;
-        .register-content-left {
-          padding-right: 0;
-        }
       }
     }
   }
