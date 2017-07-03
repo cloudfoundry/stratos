@@ -36,11 +36,7 @@
         };
         context.data = {};
 
-        return frameworkAsyncTaskDialog(
-          config,
-          context,
-          connect
-        );
+        return frameworkAsyncTaskDialog(config, context, connect);
 
         /**
          * @function connect

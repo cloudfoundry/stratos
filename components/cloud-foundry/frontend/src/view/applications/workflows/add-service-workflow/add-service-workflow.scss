@@ -45,6 +45,7 @@
       padding: $console-unit-space 0;
 
       .existing-instances-table {
+        margin-bottom: 0;
         tbody > tr td {
           vertical-align: middle;
         }
