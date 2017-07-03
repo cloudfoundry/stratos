@@ -294,10 +294,7 @@
     }
 
     function _connect(serviceInstance) {
-      that.dialog = appCredentialsDialog.show({
-        cnsi: serviceInstance,
-        formName: 'registerCnsi'
-      }).result.then(function () {
+      that.dialog = appCredentialsDialog.show(serviceInstance, 'registerCnsi').result.then(function () {
         updateInstances()
           .then(function () {
             createEndpointEntries();

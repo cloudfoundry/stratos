@@ -11,10 +11,11 @@
       /**
        * @memberof app.view
        * @name appCredentialsDialog
-       * @param {object} incContext - the context for the credentials dialog.
+       * @param {string=} cnsiGuid - The GUID of the cloud-foundry server.
+       * @param {string=} formName - the name of the credentials form
        * @returns {object} Dialog object for chaining promises and closing the dialog
        */
-      show: function (incContext) {
+      show: function (cnsiGuid, formName) {
 
         var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
@@ -31,8 +32,8 @@
 
         // Pull in specific properties to ensure context.data is free from incoming context
         var context = {
-          cnsi: incContext.cnsi,
-          formName: incContext.formName
+          cnsi: cnsiGuid,
+          formName: formName
         };
         context.data = {};
 
