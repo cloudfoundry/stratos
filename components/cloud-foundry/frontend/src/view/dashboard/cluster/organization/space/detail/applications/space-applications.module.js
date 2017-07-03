@@ -20,7 +20,8 @@
     });
   }
 
-  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, appUtilsService, cfAppStateService) {
+  function SpaceApplicationsController($state, $stateParams, $q, $scope, $filter,
+                                       modelManager, appUtilsService, cfAppStateService) {
     var that = this;
 
     var clusterGuid = $stateParams.guid;
@@ -35,7 +36,7 @@
           application.state = cfAppStateService.get(application.entity);
           var theMoment = moment(application.metadata.created_at);
           application.invertedCreatedTimestamp = -theMoment.unix();
-          application.createdTimestampString = theMoment.format('L - LTS');
+          application.createdTimestampString = $filter('momentDateFormat')(theMoment);
         });
       });
 

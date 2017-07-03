@@ -16,9 +16,9 @@
       <span translate>{{ bpTileCtrl.buildpack.entity.locked ? 'cf.buildpacks.labels.locked' : 'cf.buildpacks.labels.unlocked' }}</span>
     </dd>
     <dt translate>cf.buildpacks.labels.created</dt>
-    <dd>{{bpTileCtrl.buildpack.metadata.created_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+    <dd>{{bpTileCtrl.buildpack.metadata.created_at | momentDateFormat}}</dd>
     <dt translate>cf.buildpacks.labels.updated</dt>
-    <dd>{{bpTileCtrl.buildpack.metadata.updated_at | amDateFormat: 'L HH:mm:ss'}}</dd>
+    <dd>{{bpTileCtrl.buildpack.metadata.updated_at | momentDateFormat}}</dd>
     <dt translate>cf.buildpacks.labels.filename</dt>
     <dd></dd>
     <dt class="buildpack-filename">

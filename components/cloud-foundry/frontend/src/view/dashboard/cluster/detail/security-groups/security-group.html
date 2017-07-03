@@ -9,13 +9,13 @@
       <dl class="dl-horizontal">
         <dt translate>cf.security-groups.labels.created</dt>
         <dd ng-if="secGroupDetailCtrl.model.metadata.created_at">
-          {{ secGroupDetailCtrl.model.metadata.created_at | amDateFormat: 'L - LTS' }}
+          {{ secGroupDetailCtrl.model.metadata.created_at | momentDateFormat }}
         </dd>
         <dd ng-if="!secGroupDetailCtrl.model.metadata.created_at">-</dd>
 
         <dt translate>cf.security-groups.labels.updated</dt>
         <dd ng-if="secGroupDetailCtrl.model.metadata.updated_at">
-          {{ secGroupDetailCtrl.model.metadata.updated_at | amDateFormat: 'L - LTS' }}
+          {{ secGroupDetailCtrl.model.metadata.updated_at | momentDateFormat }}
         </dd>
         <dd ng-if="!secGroupDetailCtrl.model.metadata.updated_at">-</dd>
 
