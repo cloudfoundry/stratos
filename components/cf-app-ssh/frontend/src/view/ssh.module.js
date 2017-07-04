@@ -103,9 +103,7 @@
         enable_ssh: true
       };
       vm.isEnabling = true;
-      return vm.model.update(vm.cnsiGuid , vm.id, updatedAppSpec).then(function () {
-        vm.application.model.summary.enable_ssh = true;
-      }).finally(function () {
+      return vm.model.update(vm.cnsiGuid , vm.id, updatedAppSpec).finally(function () {
         vm.isEnabling = false;
       });
     };

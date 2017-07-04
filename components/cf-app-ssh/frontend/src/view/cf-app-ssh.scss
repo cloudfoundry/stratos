@@ -73,20 +73,33 @@ $cf-app-ssh-box-shadow: 0 0 20px 6px $gray-dark;
 }
 
 .app-ssh-enable-msg {
-    text-align: left;
-    margin: $console-unit-space auto;
-    padding: 0;
-    max-width: 520px;
+  margin: $console-unit-space auto;
+  padding: 0;
+  max-width: 520px;
+
+  > p {
+    font-size: $font-size-large;
+  }
+
+  .app-ssh-warning {
+    display: flex;
+    margin-top: $console-unit-space * 0.5;
 
     > p {
       font-size: $font-size-large;
-
-      &.app-ssh-warning {
-        color: $status-critical;
-      }
-
-      &:last-child {
-        margin: 0;
-      }
     }
+
+    > i {
+      color: $status-critical;
+      margin-right: $console-unit-space * 0.25;
+    }
+  }
+
+  &:last-child {
+    margin: 0;
+  }
+}
+
+.app-ssh-space-link {
+  margin-top: $console-unit-space;
 }

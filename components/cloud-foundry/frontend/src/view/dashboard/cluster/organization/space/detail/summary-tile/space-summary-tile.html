@@ -17,7 +17,7 @@
       <dt translate>memory</dt>
       <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
       <dt translate>cf.ssh.access</dt>
-      <dd ng-if="spaceSummaryTileCtrl.hasSshAccess()">
+      <dd ng-if="!spaceSummaryTileCtrl.hasSshAccess()">
         <status-indicator status="spaceSummaryTileCtrl.hasSshAccess()"
           on-icon="check_box" off-icon="check_box_outline_blank"
           on-label="cf.ssh.available" off-label="cf.ssh.unavailable"
@@ -27,7 +27,7 @@
       <dd ng-if="spaceSummaryTileCtrl.hasSshAccess()">
         <status-indicator status="spaceSummaryTileCtrl.spaceDetail().details.space.entity.allow_ssh"
           on-icon="check_box" off-icon="check_box_outline_blank"
-          on-label="cf.ssh.enabled" off-label="cf.ssh.disabled"
+          on-label="cf.ssh.allowed" off-label="cf.ssh.disallowed"
           off-class="console-status-normal" on-class="console-status-normal">
         </status-indicator>
       </dd>

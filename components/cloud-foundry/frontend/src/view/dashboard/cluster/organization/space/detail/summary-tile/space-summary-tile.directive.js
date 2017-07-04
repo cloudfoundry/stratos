@@ -138,18 +138,18 @@
         if (spaceDetailObj.details.space.entity.allow_ssh) {
           dialog = {
             value: false,
-            title: 'space-info.ssh.disable.title',
-            confirm: 'space-info.ssh.disable.confirm',
-            prompt: 'space-info.ssh.disable.prompt',
-            error: 'space-info.ssh.disable.error'
+            title: 'space-info.ssh.disallow.title',
+            confirm: 'space-info.ssh.disallow.confirm',
+            prompt: 'space-info.ssh.disallow.prompt',
+            error: 'space-info.ssh.disallow.error'
           };
         } else {
           dialog = {
             value: true,
-            title: 'space-info.ssh.enable.title',
-            confirm: 'space-info.ssh.enable.confirm',
-            prompt: 'space-info.ssh.enable.prompt',
-            error: 'space-info.ssh.enable.error'
+            title: 'space-info.ssh.allow.title',
+            confirm: 'space-info.ssh.allow.confirm',
+            prompt: 'space-info.ssh.allow.prompt',
+            error: 'space-info.ssh.allow.error'
           };
         }
         return frameworkDialogConfirm({
@@ -217,7 +217,9 @@
       }
 
       // Enable/disable SSH Access
-      if (vm.isAdmin) {
+      var canUpdate = authModel.isAllowed(vm.clusterGuid, authModel.resources.space, authModel.actions.update,
+        spaceDetailObj.details.guid, vm.organizationGuid);
+      if (canUpdate || vm.isAdmin) {
         vm.actions.push(sshAction);
         sshAction.disabled = false;
         updateSshAction();
@@ -230,7 +232,7 @@
 
     function updateSshAction() {
       var enabled = spaceDetailObj.details.space.entity.allow_ssh;
-      sshAction.name = enabled ? 'space-info.ssh.disable' : 'space-info.ssh.enable';
+      sshAction.name = enabled ? 'space-info.ssh.disallow' : 'space-info.ssh.allow';
     }
 
     function init() {

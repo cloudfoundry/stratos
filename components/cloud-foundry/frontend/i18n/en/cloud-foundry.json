@@ -101,6 +101,8 @@
       "access": "SSH Access",
       "enabled": "Enabled",
       "disabled": "Disabled",
+      "allowed": "Allowed",
+      "disallowed": "Disallowed",
       "available": "Available",
       "unavailable": "Unavailable",
       "space-disallowed": "Disallowed by Space"

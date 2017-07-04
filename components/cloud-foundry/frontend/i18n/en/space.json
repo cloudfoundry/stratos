@@ -20,19 +20,19 @@
     "detach-service-action": "Detach Service",
     "delete-service-action": "Delete Service",
     "ssh": {
-      "enable": {
-        "enable": "Enable SSH Access",
-        "title": "Enable SSH Access",
-        "prompt": "Please confirm that you wish to enable SSH access for space '{{name}}'.",
-        "confirm": "Enable",
-        "error": "An error occurred enabling SSH Access for the space."
+      "allow": {
+        "allow": "Allow SSH Access",
+        "title": "Allow SSH Access",
+        "prompt": "Please confirm that you wish to allow SSH access for space '{{name}}'.",
+        "confirm": "Allow",
+        "error": "An error occurred allowing SSH Access for the space."
       },
-      "disable": {
-        "disable": "Disable SSH Access",
-        "title": "Disable SSH Access",
-        "prompt": "Please confirm that you wish to disable SSH access for space '{{name}}'.",
-        "confirm": "Disable",
-        "error": "An error occurred disabling SSH Access for the space."
+      "disallow": {
+        "disallow": "Disallow SSH Access",
+        "title": "Disallow SSH Access",
+        "prompt": "Please confirm that you wish to disallow SSH access for space '{{name}}'.",
+        "confirm": "Disallow",
+        "error": "An error occurred disallowing SSH Access for the space."
       }
     }
   }
