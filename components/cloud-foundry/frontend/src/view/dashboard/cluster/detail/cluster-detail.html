@@ -1,32 +1,34 @@
 <div class="cluster-detail endpoints" class="col-md-12 col-sm-12 col-xs-12">
 
   <div class="application-header font-semi-bold">
-    <h3 translate>Cluster : {{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name }}</h3>
+    <h3>
+      <span translate>cf.summary.title</span>{{clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name}}
+    </h3>
     <cluster-actions ng-show="clusterController.hasActions" has-actions="clusterController.hasActions"></cluster-actions>
   </div>
 
   <div class="cluster-summary-tile">
     <div class="card panel panel-default">
       <div class="panel-heading action-header">
-        <span translate>Summary</span>
+        <span translate>cf.summary.panel.title</span>
       </div>
 
       <div class="panel-body cluster-summary-panel row">
         <div class="col-md-5">
           <dl class="dl-horizontal">
-            <dt translate>Applications</dt>
+            <dt translate>cf.summary.panel.label.apps</dt>
             <dd>
               {{ clusterDetailController.totalApps }}
             </dd>
-            <dt translate>Memory Usage</dt>
+            <dt translate>cf.summary.panel.label.memory</dt>
             <dd>
               {{ clusterDetailController.totalMemoryUsed }}
             </dd>
-          <dt ng-if="clusterDetailController.orgCount >= 0" translate>Organizations</dt>
+          <dt ng-if="clusterDetailController.orgCount >= 0" translate>cf.summary.panel.label.orgs</dt>
           <dd ng-if="clusterDetailController.orgCount >= 0">
             {{ clusterDetailController.orgCount }}
           </dd>
-          <dt ng-if="clusterDetailController.userCount >= 0" translate>Users</dt>
+          <dt ng-if="clusterDetailController.userCount >= 0" translate>cf.summary.panel.label.users</dt>
           <dd ng-if="clusterDetailController.userCount >= 0">
             {{ clusterDetailController.userCount }}
           </dd>
@@ -34,19 +36,19 @@
         </div>
         <div class="col-md-7">
           <dl class="dl-horizontal">
-            <dt ng-if="clusterDetailController.initialized" translate>INSTANCE ADDRESS</dt>
+            <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.address</dt>
             <dd ng-if="clusterDetailController.initialized">
               {{ clusterController.getEndpoint() }}
             </dd>
-            <dt translate>CF Interactions</dt>
+            <dt translate>cf.summary.panel.label.cli</dt>
             <dd>
               <a ng-click="clusterDetailController.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
             </dd>
-            <dt ng-if="clusterDetailController.initialized" translate>Account Username</dt>
+            <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.username</dt>
             <dd ng-if="clusterDetailController.initialized">
               {{ clusterDetailController.userName }}
             </dd>
-            <dt ng-if="clusterDetailController.initialized" translate>Account Status</dt>
+            <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.status</dt>
             <dd ng-if="clusterDetailController.initialized" translate>
               {{ clusterDetailController.isAdmin ? 'administrator' : 'user' }}
             </dd>

@@ -131,7 +131,11 @@
         "all": "All Services"
       },
       "manage": {
-        "title": "Manage Service Instances"
+        "title": "Manage Service Instances",
+        "name-label": "name",
+        "plan-label": "plan",
+        "env-vars-label": "env.variables",
+        "detach-button": "detach"
       },
       "card": {
         "version": "Version",
@@ -199,6 +203,19 @@
     },
     "variables": {
       "title": "Variables",
+      "table": {
+        "title": "[[@:app-tabs.variables.title]]",
+        "none": "You have no variables.",
+        "name-label": "Name",
+        "value-label": "Value",
+        "actions-label": "Actions",
+        "add-button": "Add Variable"
+      },
+      "all": {
+        "title": "[[@:app-tabs.variables.title]]",
+        "error": "An error occurred retrieving application variables",
+        "refresh-button": "Refresh"
+      },
       "actions": {
         "edit": "Edit Variable",
         "delete": "Delete Variable"
