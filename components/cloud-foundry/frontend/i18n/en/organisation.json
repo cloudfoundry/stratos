@@ -1,4 +1,9 @@
 {
+  "cf": {
+    "organisations": {
+      "organisations": "Organizations"
+    }
+  },
   "org-info": {
     "summary": {
       "title": "Summary"
@@ -15,5 +20,12 @@
       "success-notification": "Organization '{{name}}' successfully deleted",
       "error-message": "Failed to delete organization"
     }
+  },
+  "org-tile": {
+    "role-label": "role",
+    "applications-label": "applications",
+    "instances-label": "instances",
+    "memory-label": "memory usage"
   }
+
 }

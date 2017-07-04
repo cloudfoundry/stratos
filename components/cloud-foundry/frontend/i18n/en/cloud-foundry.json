@@ -20,8 +20,29 @@
     },
     "cli": {
       "commands": {
+        "button-text": "CLI Commands",
         "title": "CLI Commands",
         "deploy-title": "Deploy Using CLI"
+      }
+    },
+    "tile": {
+      "token-expired": "Token has expired",
+      "uncontactable": "Cannot contact endpoint"
+    },
+    "summary": {
+      "title": "Cluster : ",
+      "panel": {
+        "title": "Summary",
+        "label": {
+          "apps": "applications",
+          "memory": "memory usage",
+          "orgs": "organisations",
+          "users": "users",
+          "address": "instance address",
+          "cli": "cf interactions",
+          "username": "account username",
+          "status": "account status"
+        }
       }
     },
     "instance": {
@@ -92,26 +113,6 @@
         "twenty": "20 per page",
         "fifty": "50 per page"
       }
-    },
-    "summary": {
-      "title": "Cluster : ",
-      "panel": {
-        "title": "Summary",
-        "label": {
-          "apps": "applications",
-          "memory": "memory usage",
-          "orgs": "organisations",
-          "users": "users",
-          "address": "instance address",
-          "cli": "cf interactions",
-          "username": "account username",
-          "status": "account status"
-        }
-      }
-    },
-    "tile": {
-      "token-expired": "Token has expired",
-      "uncontactable": "Cannot contact endpoint"
     }
   }
 }

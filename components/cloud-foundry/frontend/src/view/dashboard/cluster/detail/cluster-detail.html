@@ -42,7 +42,7 @@
             </dd>
             <dt translate>cf.summary.panel.label.cli</dt>
             <dd>
-              <a ng-click="clusterDetailController.showCliCommands()" class="btn btn-link" translate>CLI Commands</a>
+              <a ng-click="clusterDetailController.showCliCommands()" class="btn btn-link" translate>cf.cli.commands.button-text</a>
             </dd>
             <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.username</dt>
             <dd ng-if="clusterDetailController.initialized">
@@ -50,7 +50,7 @@
             </dd>
             <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.status</dt>
             <dd ng-if="clusterDetailController.initialized" translate>
-              {{ clusterDetailController.isAdmin ? 'administrator' : 'user' }}
+              {{ clusterDetailController.isAdmin ? 'roles.cf-admin' : 'roles.cf-user' }}
             </dd>
           </dl>
         </div>
@@ -61,19 +61,13 @@
 
   <ul class="application-nav nav nav-tabs col-sm-12">
     <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.organizations" translate>
-        Organizations
-      </a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.organizations" translate>cf.organisations</a>
     </li>
     <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>
-        Users
-      </a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>cf.users</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>
-        Firehose
-      </a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>cf.firehose</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.featureFlags" translate>cf.feature-flags</a>

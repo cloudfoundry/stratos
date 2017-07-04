@@ -36,7 +36,9 @@
         "space_auditor": "[[@:space]] [[@:roles.space.short.space_auditor]]",
         "space_developer": "[[@:space]] [[@:roles.space.short.space_developer]]"
       }
-    }
+    },
+    "cf-admin": "administrator",
+    "cf-user": "user"
   },
 
   "routes": {
