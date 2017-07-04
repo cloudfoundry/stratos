@@ -54,7 +54,7 @@
         .forEach(function (endpoint) {
           endpoint.label = endpoint.label || $translate.instant(endpoint.register.html.type.name);
         })
-        .sort('label')
+        .sortBy('label')
         .value();
     }
 
