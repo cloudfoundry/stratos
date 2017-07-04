@@ -71,24 +71,27 @@ type ConnectedUser struct {
 	Admin bool   `json:"admin"`
 }
 
+type ConsoleConfig struct {
+	UAAEndpoint          *url.URL `json:"uaa_endpoint"`
+	ConsoleAdminRole     string   `json:"console_admin_role"`
+	ConsoleClient        string   `json:"console_client"`
+	ConsoleClientSecret  string   `json:"console_client"`
+	SkipSSLValidation    bool     `json:"skip_ssl_validation"`
+}
+
 type PortalConfig struct {
 	HTTPClientTimeoutInSecs     int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
 	HTTPConnectionTimeoutInSecs int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	SkipTLSVerification         bool     `configName:"SKIP_TLS_VERIFICATION"`
 	TLSAddress                  string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
 	TLSCert                     string   `configName:"CONSOLE_PROXY_CERT"`
 	TLSCertKey                  string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	ConsoleClient               string   `configName:"CONSOLE_CLIENT"`
-	ConsoleClientSecret         string   `configName:"CONSOLE_CLIENT_SECRET"`
 	CFClient                    string   `configName:"CF_CLIENT"`
 	CFClientSecret              string   `configName:"CF_CLIENT_SECRET"`
-	UAAEndpoint                 string   `configName:"UAA_ENDPOINT"`
 	AllowedOrigins              []string `configName:"ALLOWED_ORIGINS"`
 	SessionStoreSecret          string   `configName:"SESSION_STORE_SECRET"`
 	EncryptionKeyVolume         string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
-	UAAAdminIdentifier          string
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool
@@ -97,4 +100,5 @@ type PortalConfig struct {
 	IsCloudFoundry              bool
 	LoginHook                   LoginHookFunc
 	SessionStore                SessionStorer
+	ConsoleConfig               *ConsoleConfig
 }

@@ -46,7 +46,8 @@ const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
 func (p *portalProxy) getUAAIdentityEndpoint() string {
-	return fmt.Sprintf("%s/oauth/token", p.Config.UAAEndpoint)
+	log.Info("getUAAIdentityEndpoint")
+	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
@@ -59,7 +60,7 @@ func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
-	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		err = interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
@@ -84,7 +85,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg + " - ", err)
+		log.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -101,7 +102,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		}
 	}
 
-	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminRole)
 
 	resp := &interfaces.LoginRes{
 		Account:     c.FormValue("username"),
@@ -449,7 +450,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 
 		// UAA Token has expired, refresh the token, if that fails, fail the request
-		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, tr.RefreshToken, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 		if tokenErr != nil {
 			msg := "Could not refresh UAA token"
 			log.Error(msg, tokenErr)
@@ -483,7 +484,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg + " - ", err)
+		log.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -520,7 +521,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 	}
 
 	// is the user a UAA admin?
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.UAAAdminIdentifier)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.ConsoleConfig.ConsoleAdminRole)
 
 	// add the uaa entry to the output
 	uaaEntry := &interfaces.ConnectedUser{

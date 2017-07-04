@@ -16,18 +16,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/console_config"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -43,6 +45,11 @@ var (
 	httpClient        = http.Client{}
 	httpClientSkipSSL = http.Client{}
 )
+
+type setupMiddleware struct {
+	addSetup    bool
+	consoleRepo console_config.Repository
+}
 
 func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 	log.Info("Attempting to shut down gracefully...")
@@ -95,6 +102,7 @@ func main() {
 
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
+	console_config.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
@@ -139,6 +147,9 @@ func main() {
 		os.Exit(1)
 	}()
 
+	// Initialise configuration
+	addSetupMiddleware := initialiseConsoleConfiguration(portalProxy)
+
 	// Initialise Plugins
 	portalProxy.loadPlugins()
 
@@ -150,11 +161,50 @@ func main() {
 	log.Info("Initialised general plugins.")
 
 	// Start the back-end
-	if err := start(portalProxy); err != nil {
+	if err := start(portalProxy, addSetupMiddleware); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start proxy!")
 
+}
+func initialiseConsoleConfiguration(portalProxy *portalProxy) *setupMiddleware {
+
+	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf("Unable to intialise console backend config due to: %+v", err)
+	}
+	//consoleConfig, err := consoleRepo.GetConsoleConfig()
+	isInitialised, err := consoleRepo.IsInitialised()
+
+	addSetupMiddleware := new(setupMiddleware)
+	if err != nil || !isInitialised {
+		// Exception occurred when trying determine
+		// if its initialised or instance isn't initialised,
+		// will attempt to initialise it from the env vars.
+
+		consoleConfig, err := portalProxy.initialiseConsoleConfig(consoleRepo)
+		if err != nil {
+			log.Warnf("Failed to initialise console config due to: %+v", err)
+
+			addSetupMiddleware.addSetup = true
+			addSetupMiddleware.consoleRepo = consoleRepo
+			log.Info("Will add `setup` route and middleware")
+
+		} else {
+			log.Infof("Console is intialised with the following settings: %+v", consoleConfig)
+			portalProxy.Config.ConsoleConfig = consoleConfig
+		}
+
+	} else if err == nil && isInitialised {
+		consoleConfig, err := consoleRepo.GetConsoleConfig()
+		if err != nil {
+			log.Infof("Instance is initialised, but console_config table may consist junk data! %+v", err)
+		}
+		log.Infof("Console is intialised with the following settings: %+v", consoleConfig)
+		portalProxy.Config.ConsoleConfig = consoleConfig
+	}
+
+	return addSetupMiddleware
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
@@ -248,7 +298,6 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	}
 
 	// Add custom properties
-	pc.UAAAdminIdentifier = UAAAdminIdentifier
 	pc.CFAdminIdentifier = CFAdminIdentifier
 	pc.HTTPS = true
 
@@ -346,7 +395,7 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 
 }
 
-func start(p *portalProxy) error {
+func start(p *portalProxy, addSetupMiddleware *setupMiddleware) error {
 	log.Debug("start")
 	e := echo.New()
 
@@ -362,7 +411,7 @@ func start(p *portalProxy) error {
 	e.Use(errorLoggingMiddleware)
 	e.Use(retryAfterUpgradeMiddleware)
 
-	p.registerRoutes(e)
+	p.registerRoutes(e, addSetupMiddleware)
 
 	if p.Config.HTTPS {
 		certFile, certKeyFile, err := createTempCertFiles(p.Config)
@@ -418,7 +467,7 @@ func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
 	return client
 }
 
-func (p *portalProxy) registerRoutes(e *echo.Echo) {
+func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMiddleware) {
 	log.Debug("registerRoutes")
 
 	for _, plugin := range p.Plugins {
@@ -437,6 +486,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 		pp = e.Group("/pp")
 	} else {
 		pp = e.Group("")
+	}
+
+	// Add middleware to block requests if unconfigured
+	if addSetupMiddleware.addSetup {
+		e.Use(p.SetupMiddleware(addSetupMiddleware))
+		pp.POST("/v1/setup", p.setupConsole)
 	}
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	log "github.com/Sirupsen/logrus"
 )
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error) {
