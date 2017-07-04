@@ -1,7 +1,7 @@
 <div class="card panel panel-default">
   <div class="panel-heading" ng-class="{'linked': galleryCardCtrl.cardClickable }"
     ng-click="galleryCardCtrl.onCardClick({ card: galleryCardCtrl.cardData })">
-    <span class="gallery-card-title">{{ galleryCardCtrl.cardData.title }}</span>
+    <span class="gallery-card-title" translate>{{ galleryCardCtrl.cardData.title }}</span>
     <actions-menu class="gallery-card-actions" ng-if="galleryCardCtrl.cardActions"
       actions="galleryCardCtrl.cardActions" action-target="galleryCardCtrl.cardData"
       menu-position="{{galleryCardCtrl.actionsPosition}}">
@@ -17,6 +17,6 @@
     <div class="gallery-card-status" ng-class="galleryCardCtrl.cardData.status.classes">
       <span ng-class="galleryCardCtrl.cardData.status.icon"></span>
     </div>
-    <div class="gallery-card-status-text">{{ galleryCardCtrl.cardData.status.description }}</div>
+    <div class="gallery-card-status-text" translate>{{ galleryCardCtrl.cardData.status.description }}</div>
   </div>
 </div>

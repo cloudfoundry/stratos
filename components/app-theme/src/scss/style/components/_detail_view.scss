@@ -62,8 +62,10 @@ $detail-view-margin: $console-unit-space * 4;
       height: $console-unit-space * 4;
       padding: $console-unit-space * 1.5 0;
       border: none;
+      display: flex;
+      align-items: center;
       h4 {
-        font-size: $console-unit-space;
+        font-size: $font-size-heading;
         font-weight: 600;
       }
     }
@@ -71,7 +73,7 @@ $detail-view-margin: $console-unit-space * 4;
     .detail-view-close {
       @extend .material-icons;
       position: absolute;
-      top: $console-unit-space * 2;
+      top: #{($console-unit-space * 4 - 28px) /2};
       right: $console-unit-space * 2.5;
       font-size: 28px;
       speak: none;
@@ -113,7 +115,7 @@ $detail-view-margin: $console-unit-space * 4;
       margin-top: $console-unit-space * 0.5;
 
       h4 {
-        font-size: $console-unit-space;
+        font-size: $font-size-heading;
         font-weight: 600;
         margin: auto 0;
       }

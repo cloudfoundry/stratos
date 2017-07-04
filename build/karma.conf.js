@@ -133,7 +133,7 @@
     var pluginFiles = components.removeEmptyGlobs(components.getGlobs('src/plugin.config.js').local);
     var moduleFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.module.js').local);
     var srcFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.js').local);
-    var testFiles = components.removeEmptyGlobs(components.getGlobs(['test/**/*.mock.js', 'test/**/*.spec.js']).local);
+    var testFiles = components.removeEmptyGlobs(components.getGlobs(['test/unit/**/*.mock.js', 'test/unit/**/*.spec.js']).local);
 
     karmaConfig.files = _.concat(karmaConfig.files, pluginFiles, moduleFiles, srcFiles, testFiles);
 

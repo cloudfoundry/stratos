@@ -1,0 +1,24 @@
+{
+  "cluster-actions": {
+    "create-org": {
+      "action-name": "Create Organization",
+      "dialog": {
+        "title": "Create Organization",
+        "submit-button": "Create",
+        "success-notification": "Organisation '{{name}}' successfully created"
+      }
+    },
+    "create-space": {
+      "action-name": "Create Space",
+      "dialog": {
+        "title": "Create Space",
+        "submit-button": "Create",
+        "success-notification-plural": "Spaces '{{ names }}' successfully created",
+        "success-notification-singular": "Space '{{ name }}' successfully created"
+      }
+    },
+    "assign-users": {
+      "action-name": "Assign Users"
+    }
+  }
+}

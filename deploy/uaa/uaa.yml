@@ -1,15 +1,15 @@
 scim:
   username_pattern: '[A-Za-z0-9+\-_.@!'']+'
   groups:
-    hcp.user: Users of the Helion Control Plane
-    hcp.admin: Administrators of the Helion Control Plane
-    hcp.publisher: Helion Control Plane users allowed to publish Service Definitions
+    stratos.user: Users of the Stratos UI Console
+    stratos.admin: Administrators of the Stratos UI Console
+    stratos.publisher: Stratos UI Console users
   userids_enabled: true
   username_pattern: '[a-z0-9+\-_.@]+'
   users:
-    - admin|hscadmin|admin@test.org|Admin|User|hcp.admin,hcp.user,hcp.publisher
-    - user|hscuser|user@test.org|Developer|User|hcp.user
-    
+    - admin|hscadmin|admin@test.org|Admin|User|stratos.admin,stratos.user,stratos.publisher
+    - user|hscuser|user@test.org|Developer|User|stratos.user
+
 disableInternalAuth: false
 disableInternalUserManagement: false
 
@@ -25,7 +25,7 @@ oauth:
       - openid
       - scim.me
       - uaa.user
-      - hcp.user
+      - stratos.user
       - cloud_controller.read
       - cloud_controller.write
       - cloud_controller_service_permissions.read
@@ -43,8 +43,8 @@ oauth:
       id: console
       override: true
       authorized-grant-types: client_credentials,implicit,password,refresh_token
-      scope: scim.me,hcp.user,openid,profile,roles,notification_preferences.read user_attributes,uaa.user,notification_preferences.write,hcp.publisher,cloud_controller.read,password.write,approvals.me,cloud_controller.write,cloud_controller_service_permissions.read,hcp.admin,oauth.approvals
-      authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,zone.admin,hcp.admin,hcp.user,hcp.publisher
+      scope: scim.me,stratos.user,openid,profile,roles,notification_preferences.read user_attributes,uaa.user,notification_preferences.write,stratos.publisher,cloud_controller.read,password.write,approvals.me,cloud_controller.write,cloud_controller_service_permissions.read,stratos.admin,oauth.approvals
+      authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,zone.admin,stratos.admin,stratos.user,stratos.publisher
       access-token-validity: 3600
       refresh-token-validity: 2592000
 login:
@@ -92,7 +92,7 @@ login:
 
 jwt:
   token:
-    signing-key: tokenKey    
+    signing-key: tokenKey
     verification-key: verificationKey
 
 zones:
@@ -103,4 +103,3 @@ zones:
 
 #The secret that an external login server will use to authenticate to the uaa using the id `login`
 LOGIN_SECRET: secret
-      

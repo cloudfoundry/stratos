@@ -10,8 +10,11 @@ DEV_DOCKER_COMPOSE_ALL="docker-compose.development.yml"
 DEV_DOCKER_COMPOSE_NO_UI="docker-compose.no-ui.development.yml"
 
 # Stratos Paths:
-PROXY_DIR="../stratos-ui/"
 ENV_RC="development.rc"
+
+STRATOS_UI_PATH=${PROG_DIR}/../
+PROXY_PATH=${STRATOS_UI_PATH}
+DEPLOY_PATH=${STRATOS_UI_PATH}/deploy
 
 NO_UI=false
 CLEAN=false
@@ -28,7 +31,7 @@ function clean {
 
     if [ "$NO_UI" != true ]; then
         echo "----- stratos-ui"
-        pushd ../stratos-ui
+        pushd ${STRATOS_UI_PATH}
         rm -rf dist/
         rm -rf nginx/
         rm -rf src/lib/
@@ -37,7 +40,7 @@ function clean {
     fi
 
     echo "----- containers, images"
-    pushd ../stratos-deploy
+    pushd ${DEPLOY_PATH}
     # it's ok if this section fails
     set +e
     docker-compose -f ${DEV_DOCKER_COMPOSE_ALL} down --rmi 'all'
@@ -46,7 +49,7 @@ function clean {
     popd
 
     echo "----- portal-proxy"
-    pushd ${PROXY_DIR}
+    pushd ${PROXY_PATH}
     [ -d outputs ] && rm -rf outputs
     popd
 }
@@ -75,16 +78,16 @@ function build {
     export USER_NAME=$(id -nu)
     echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
 
-    pushd ${PROXY_DIR}tools/
+    pushd ${PROXY_PATH}/deploy/
     ./build_portal_proxy.sh
     popd
 
     if [ "$NO_UI" = true ]; then
-        echo "===== Standing up the Stackato Console without the UI"
+        echo "===== Standing up the Stratos UI Console without the UI"
     else
-        echo "===== Standing up the whole Helion Stackato Console"
+        echo "===== Standing up the Stratos UI Console with the UI"
         # Prevent docker from creating dist as root if it doesn't exist
-        mkdir -p ../stratos-ui/dist
+        mkdir -p ${STRATOS_UI_PATH}/dist
     fi
 
     # Prevent docker from creating the migration volume as root if it doesn't exist

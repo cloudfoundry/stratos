@@ -1,3 +1,8 @@
+$console-form-label-height: 16px;
+$console-form-label-spacing: 1px;
+$console-form-margin-top: 5px;
+
+
 .has-error .form-control,
 .has-warning .form-control,
 .has-success .form-control,
@@ -5,6 +10,10 @@
   &, &:focus {
     @include box-shadow(none);
   }
+}
+
+.form-control {
+  font-size: $font-size-medium;
 }
 
 form, [ng-form] {
@@ -30,7 +39,8 @@ form, [ng-form] {
       color: $console-input-label-fg;
       font-weight: normal;
       font-size: $font-size-small;
-      margin-bottom: 0;
+      margin-bottom: $console-form-label-spacing;
+      margin-top: $console-form-margin-top;
     }
 
     .material-icons.form-control-feedback {
@@ -64,8 +74,12 @@ form, [ng-form] {
       line-height: $line-height-computed; // Required for bug in Chrome
 
       &:not(.input-lg):not(.input-sm) {
-        font-size: $font-size-base;
+        font-size: $font-size-medium;
       }
+    }
+
+    select-input {
+      height: $console-unit-space;
     }
 
     &.focus {
@@ -123,6 +137,11 @@ form.form-horizontal, [ng-form].form-horizontal {
     display: inline-block;
     margin-left: 0;
     margin-right: $form-group-margin-bottom;
+  }
+
+  .control-label {
+    padding-top: 0;
+    margin-bottom: $console-form-label-spacing;
   }
 }
 

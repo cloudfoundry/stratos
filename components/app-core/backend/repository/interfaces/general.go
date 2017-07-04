@@ -1,0 +1,8 @@
+package interfaces
+
+import "github.com/labstack/echo"
+
+type MiddlewarePlugin interface {
+	EchoMiddleware(middleware echo.HandlerFunc) echo.HandlerFunc
+	SessionEchoMiddleware(middleware echo.HandlerFunc) echo.HandlerFunc
+}

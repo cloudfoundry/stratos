@@ -1,0 +1,20 @@
+<div class="col-md-12 col-sm-12">
+  <div class="application-header font-semi-bold">
+    <span class="app-header-app-name">{{ appCtrl.model.application.summary.name }}</span>
+    <app-state-icon class="app-summary-app-state-icon" state="appCtrl.model.application.state.indicator"></app-state-icon>
+    <actions-toolbar ready="appCtrl.ready" items="appCtrl.appActions"></actions-toolbar>
+  </div>
+
+  <ul class="application-nav nav nav-tabs col-sm-12">
+    <li ng-repeat="feature in appCtrl.cfApplicationTabs.tabs | orderBy:'position'"
+        ui-sref-active="active" class="nav-item" ng-hide="feature.hide ? feature.hide() : feature.hide">
+      <a class="nav-link" ui-sref="{{feature.uiSref}}({guid: appCtrl.id})" translate>
+        {{ feature.label }}
+      </a>
+    </li>
+  </ul>
+
+  <div class="application-details col-sm-12">
+    <div ui-view class="row"></div>
+  </div>
+</div>

@@ -2,7 +2,7 @@
 
 ENV_RC="development.rc"
 TOOLSDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MAINDIR="$( cd "$( dirname "${TOOLSDIR}" )" && pwd )"
+DEPLOYDIR="$( cd "$( dirname "${DEPLOYDIR}" )" && pwd )/.."
 
 function env_vars {
     echo "===== Environment variables"
@@ -15,17 +15,20 @@ function env_vars {
     fi
 }
 
-pushd "${MAINDIR}"
+pushd "${DEPLOYDIR}"
+ls
 env_vars
 
 docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-pushd $GOPATH/src/github.com/hpcloud/stratos-ui/
-./tools/build_portal_proxy.sh
+./build_portal_proxy.sh
 ret=$?
-popd
+cd ../
+docker build . -f deploy/Dockerfile.bk.dev -t deploy_proxy
+cd ${DEPLOYDIR}
+ls
 
 if [ ${ret} -eq 0 ]; then
     # nginx also restarts the proxy

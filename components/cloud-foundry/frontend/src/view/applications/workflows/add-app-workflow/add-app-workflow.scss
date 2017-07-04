@@ -1,0 +1,17 @@
+
+.media-list.console-add-option-list > .media.service-panel {
+  padding: $console-unit-space 0;
+}
+
+add-app-workflow {
+  height: 100%;
+  display: flex;
+
+}
+
+.offline-route-value {
+  color: $gray-darker;
+  background: none;
+  word-wrap: break-word;
+  line-height: 1;
+}

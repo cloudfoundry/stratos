@@ -106,42 +106,47 @@
    * @property {object} optionsMap - the input options map
    */
   function SelectInputController($scope, $q) {
-    this.$scope = $scope;
-    this.$q = $q;
-    this.ngModelCtrl = null;
-    this.placeholder = this.placeholder || 'Select';
-    this.open = false;
-    this.modelLabel = null;
-    this.init();
-  }
 
-  angular.extend(SelectInputController.prototype, {
+    var vm = this;
+
+    vm.ngModelCtrl = null;
+    vm.placeholder = vm.placeholder || 'Select';
+    vm.open = false;
+    vm.modelLabel = null;
+
+    vm.searchAndSetValue = searchAndSetValue;
+    vm.setLabel = setLabel;
+    vm.setValue = setValue;
+    vm.toggleMenu = toggleMenu;
+    vm.refreshActionWrapper = refreshActionWrapper;
+
+    init();
+
     /**
      * @function init
      * @memberof app.framework.widgets.SelectInputController
      * @description initialize the widget
      * @returns {void}
      */
-    init: function () {
-      var that = this;
-      this.$scope.$watch(function () {
-        return that.inputOptions.length;
+    function init() {
+      $scope.$watch(function () {
+        return vm.inputOptions.length;
       }, function (length) {
         if (length === 1) {
-          that.setValue(that.inputOptions[0]);
+          vm.setValue(vm.inputOptions[0]);
         }
       });
 
       // If input options is rebuilt, we may show an outdated label (viewValue)
-      this.$scope.$watch(function () {
-        return that.inputOptions;
+      $scope.$watch(function () {
+        return vm.inputOptions;
       }, function (newVal, oldVal) {
         if (newVal === oldVal) {
           return;
         }
-        that.ngModelCtrl.$render();
+        vm.ngModelCtrl.$render();
       });
-    },
+    }
 
     /**
      * @function searchAndSetValue
@@ -151,21 +156,21 @@
      * @param {string} searchTerm - the character to search for
      * @returns {void}
      */
-    searchAndSetValue: function (searchTerm) {
+    function searchAndSetValue(searchTerm) {
       if (searchTerm) {
         var searchRegex = new RegExp('^' + searchTerm, 'i');
 
-        for (var i = 0; i < this.inputOptions.length; i++) {
-          var option = this.inputOptions[i];
+        for (var i = 0; i < vm.inputOptions.length; i++) {
+          var option = vm.inputOptions[i];
           if (searchRegex.test(option.label)) {
-            if (option.value !== this.ngModelCtrl.$modelValue) {
-              this.setValue(option);
+            if (option.value !== vm.ngModelCtrl.$modelValue) {
+              vm.setValue(option);
               return;
             }
           }
         }
       }
-    },
+    }
 
     /**
      * @function setLabel
@@ -174,14 +179,14 @@
      * @param {object} modelValue - the input field's value
      * @returns {void}
      */
-    setLabel: function (modelValue) {
+    function setLabel(modelValue) {
       if (angular.isDefined(modelValue) && modelValue !== null) {
-        var initialValue = _.find(this.inputOptions, {value: modelValue});
-        this.modelLabel = initialValue ? initialValue.label : null;
+        var initialValue = _.find(vm.inputOptions, {value: modelValue});
+        vm.modelLabel = initialValue ? initialValue.label : null;
       } else {
-        this.modelLabel = null;
+        vm.modelLabel = null;
       }
-    },
+    }
 
     /**
      * @function setValue
@@ -190,12 +195,12 @@
      * @param {object} option - the option object (label and value)
      * @returns {void}
      */
-    setValue: function (option) {
+    function setValue(option) {
       if (!option.disabled) {
-        this.ngModelCtrl.$setViewValue(option.value);
-        this.ngModelCtrl.$render();
+        vm.ngModelCtrl.$setViewValue(option.value);
+        vm.ngModelCtrl.$render();
       }
-    },
+    }
 
     /**
      * @function toggleMenu
@@ -203,9 +208,9 @@
      * @description Toggle the menu
      * @returns {void}
      */
-    toggleMenu: function () {
-      this.open = !this.open;
-    },
+    function toggleMenu() {
+      vm.open = !vm.open;
+    }
 
     /**
      * @function refreshActionWrapper
@@ -214,21 +219,20 @@
      * @param {object} $event - click event
      * @returns {boolean} true
      * */
-    refreshActionWrapper: function ($event) {
-      var that = this;
+    function refreshActionWrapper($event) {
       $event.stopPropagation();
 
-      if (that.refreshing) {
+      if (vm.refreshing) {
         return true;
       }
 
-      that.refreshing = true;
-      that.$q.when(this.refreshAction.execute()).finally(function () {
-        that.refreshing = false;
+      vm.refreshing = true;
+      $q.when(vm.refreshAction.execute()).finally(function () {
+        vm.refreshing = false;
       });
       return true;
     }
 
-  });
+  }
 
 })();

@@ -1,1 +1,1 @@
-web: ./tools/cloud-foundry/package.sh
+web: ./deploy/cloud-foundry/package.sh

@@ -1,3 +1,4 @@
+/* eslint-disable no-sync */
 (function () {
   'use strict';
 
@@ -17,7 +18,6 @@
   var enabledPlugins = [];
 
   var fsMoveQ = Q.denodeify(fs.move);
-  var fsRemoveQ = Q.denodeify(fs.remove);
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
@@ -30,9 +30,10 @@
     } else {
 
       _.each(plugins.enabledPlugins, function (plugin) {
-        var pluginInfo = require(path.join('../components', plugin, 'backend', 'plugin.json'));
+        var pluginInfo = {};
         pluginInfo.libraryPath = plugin + '.so';
         pluginInfo.pluginPath = plugin;
+        pluginInfo.pluginName = plugin;
         enabledPlugins.push(pluginInfo);
       });
     }
@@ -64,7 +65,7 @@
   });
 
   gulp.task('prepare-core', ['prepare-plugins'], function (done) {
-    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'core', 'backend');
+    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
     buildUtils.runGlideInstall(fullCorePath)
       .then(function () {
         done();
@@ -84,29 +85,46 @@
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
       var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', '__vendor');
       // sequentially chain promise
       promise
         .then(function () {
-          return fsRemoveQ(conf.getVendorPath(prepareBuild.getSourcePath()));
+          fs.removeSync(conf.getVendorPath(prepareBuild.getSourcePath()));
+          return Q.resolve();
         })
         .then(function () {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
           mergeDirs.default(pluginVendorPath, goSrc);
-          return fsRemoveQ(pluginVendorPath);
+          // If checked in vendors exist, merge does in as well
+          if (fs.existsSync(pluginCheckedInVendorPath)) {
+            mergeDirs.default(pluginCheckedInVendorPath, goSrc);
+          }
+          // Promise did not guarantee that the operation completed
+          fs.removeSync(pluginVendorPath);
+          return Q.resolve();
+        })
+        .catch(function (err) {
+          done(err);
         });
       promises.push(promise);
     });
     Q.all(promises)
       .then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'core', 'backend', 'vendor');
+        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
+        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', '__vendor');
         mergeDirs.default(coreVendorPath, goSrc);
-        return fsRemoveQ(coreVendorPath);
+        if (fs.existsSync(coreCheckedInVendorPath)) {
+          mergeDirs.default(coreCheckedInVendorPath, goSrc);
+        }
+        fs.removeSync(coreVendorPath);
+        return Q.resolve();
       })
       .then(function () {
         done();
       })
       .catch(function (err) {
+
         done(err);
       });
   });
@@ -129,10 +147,10 @@
       });
   });
 
-  gulp.task('run-tests', ['build-plugins'], function (done) {
+  gulp.task('build-core', ['build-plugins'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.test(corePath)
+    buildUtils.build(corePath, conf.coreName)
       .then(function () {
         done();
       })
@@ -142,10 +160,10 @@
 
   });
 
-  gulp.task('build-core', ['dedup-vendor'], function (done) {
+  gulp.task('run-tests', ['build-core'], function (done) {
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    buildUtils.build(corePath, conf.coreName)
+    buildUtils.test(corePath)
       .then(function () {
         done();
       })
@@ -203,8 +221,16 @@
       'write-plugins-yaml'
     );
   });
+  gulp.task('dedup', function () {
+    return runSequence(
+      'init-build',
+      'dedup-vendor'
+    );
+  });
 
   gulp.task('test-backend', function () {
+
+    prepareBuild.setBuildTest(true);
 
     return runSequence(
       'init-build',

@@ -1,0 +1,15 @@
+{
+  "cf": {
+    "app-ssh": {
+      "app-ssh": "SSH",
+      "select-instance": "Select an Instance",
+      "instance-title": "Instance # {{id}}",
+      "empty": "This application has no instances available for SSH access",
+      "labels": {
+        "disconnected": "Disconnected",
+        "reconnect": "Reconnect",
+        "select": "Select Instance"
+      }
+    }
+  }
+}

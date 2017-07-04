@@ -1,0 +1,35 @@
+$bootstrap-dropdown-width: 160px;
+
+applications-sorting {
+  ul.dropdown-menu {
+    max-height: initial;
+    width: $bootstrap-dropdown-width - $console-unit-space * 2;
+    overflow-x: hidden;
+
+    li {
+      min-width: $bootstrap-dropdown-width - $console-unit-space * 2;
+      padding-right: $console-unit-space * 0.5;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .sort-asc-desc-btn {
+    width: $console-unit-space;
+    height: $console-unit-space;
+    cursor: pointer;
+    margin-top: -1px;
+  }
+
+  form .form-group {
+    select-input {
+      margin-left: 2 * $console-unit-space;
+      margin-bottom: 4px;
+
+      .select-input-field {
+        margin-left: 4px;
+        user-select: none;
+      }
+    }
+  }
+}

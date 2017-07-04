@@ -1,7 +1,7 @@
 {
   "name": "console-app",
   "description": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "moduleType": [],
   "homepage": "",
   "ignore": [
@@ -14,12 +14,13 @@
   "dependencies": {
     "app-theme": "./components/app-theme",
     "app-framework": "./components/app-framework",
-    "app-shell": "./components/app-shell",
+    "app-core": "./components/app-core",
     "suse-branding": "./components/suse-branding",
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry",
-    "cf-versions": "./components/cf-versions"
+    "cf-app-push": "./components/cf-app-push",
+    "cf-app-ssh": "./components/cf-app-ssh"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

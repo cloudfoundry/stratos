@@ -1,8 +1,5 @@
 (function () {
   'use strict';
-  /* eslint-disable */
-  // TODO woodnt: This list needs to be translated once gettext works.
-  /* eslint-enable */
 
   var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
 

@@ -6,7 +6,7 @@
   <div class="wizard-body row">
     <ul class="wizard-nav tabbed-nav nav nav-pills nav-stacked col-xs-12 col-sm-3"
       ng-if="!wizardCtrl.workflow.hideStepNavStack">
-      <li class="wizard-nav-item nav-item"
+      <li class="wizard-nav-item"
         ng-class="{
                     'complete': wizardCtrl.currentIndex > $index,
                     'active': wizardCtrl.currentIndex === $index,
@@ -15,7 +15,7 @@
         ng-click="!wizardCtrl.isNavEntryDisabled($index) && wizardCtrl.switchTo($index)"
         ng-repeat="step in wizardCtrl.steps"
         ng-if="step.ready">
-        <a>{{ ::step.title }}</a>
+        <a translate>{{ ::step.title }}</a>
       </li>
     </ul>
 
@@ -31,7 +31,7 @@
       ng-class="{ 'col-xs-12 col-sm-9': !wizardCtrl.workflow.hideStepNavStack, 'wizard-step-full': wizardCtrl.workflow.hideStepNavStack}"
       ng-if="wizardCtrl.currentIndex === -1">
       <div class="message-box message-box-no-bg">
-        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy">{{wizardCtrl.busyMessage}}</div>
+        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy" translate>{{wizardCtrl.busyMessage}}</div>
         <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
       </div>
     </div>
@@ -55,7 +55,7 @@
   </div>
 
   <div>
-    <div class="wizard-message alert" ng-show="wizardCtrl.hasMessage" ng-class="wizardCtrl.messageClass">
+    <div class="wizard-message alert" ng-show="wizardCtrl.hasMessage" ng-class="wizardCtrl.messageClass" translate>
       {{ wizardCtrl.message }}
     </div>
   </div>

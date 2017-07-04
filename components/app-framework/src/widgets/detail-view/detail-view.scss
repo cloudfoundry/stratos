@@ -7,6 +7,16 @@
   }
 }
 
+// Generate styles for the stacked detail views when in dialog mode
+@for $i from 1 through 10 {
+  .detail-view.detail-view-dialog.detail-view-stack-#{$i} {
+      left: 0px;
+      right: 0px;
+      top: $i * $detail-view-inset;
+      bottom: $i * $detail-view-inset;
+  }
+}
+
 .detail-view {
 
   > .modal-dialog {

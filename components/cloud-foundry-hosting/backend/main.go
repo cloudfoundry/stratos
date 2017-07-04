@@ -7,20 +7,22 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/labstack/echo"
-	"github.com/satori/go.uuid"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	uuid "github.com/satori/go.uuid"
 
-	"github.com/hpcloud/stratos-ui/components/core/backend/config"
-	"github.com/hpcloud/stratos-ui/components/core/backend/repository/interfaces"
+	"errors"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 const (
-	VCapApplication        = "VCAP_APPLICATION"
-	CFApiURLOverride       = "CF_API_URL"
-	CFApiForceSecure       = "CF_API_FORCE_SECURE"
-	cfSessionCookieName    = "JSESSIONID"
+	VCapApplication     = "VCAP_APPLICATION"
+	CFApiURLOverride    = "CF_API_URL"
+	CFApiForceSecure    = "CF_API_FORCE_SECURE"
+	cfSessionCookieName = "JSESSIONID"
 )
 
 type CFHosting struct {
@@ -28,18 +30,31 @@ type CFHosting struct {
 	endpointType string
 }
 
-func Init(portalProxy interfaces.PortalProxy) (interfaces.GeneralPlugin, error) {
+func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
-func (ch CFHosting) Init() error {
+func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+	return ch, nil
+}
+
+func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+	return nil, errors.New("Not implemented!")
+}
+
+func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error){
+	return nil, errors.New("Not implemented!")
+}
+
+
+func (ch *CFHosting) Init() error {
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if config.IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
-		ch.portalProxy.GetConfig().ConsoleClient = ch.portalProxy.GetConfig().HCFClient
-		ch.portalProxy.GetConfig().ConsoleClientSecret = ch.portalProxy.GetConfig().HCFClientSecret
+		ch.portalProxy.GetConfig().ConsoleClient = ch.portalProxy.GetConfig().CFClient
+		ch.portalProxy.GetConfig().ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
 
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().UAAAdminIdentifier = ch.portalProxy.GetConfig().CFAdminIdentifier
@@ -85,8 +100,8 @@ func (ch CFHosting) Init() error {
 		}
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
-		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("hcf")
-		newCNSI, err := cfEndpointSpec.Info(appData.API, true)
+		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
+		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
 		if err != nil {
 			log.Fatal("Could not get the info for Cloud Foundry", err)
 			return nil
@@ -109,9 +124,9 @@ func (ch CFHosting) Init() error {
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-			SpaceGUID: appData.SpaceID,
-			AppGUID:   appData.ApplicationID,
-			EndpointGUID:   cfCnsi.GUID,
+			SpaceGUID:    appData.SpaceID,
+			AppGUID:      appData.ApplicationID,
+			EndpointGUID: cfCnsi.GUID,
 		}
 
 		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
@@ -133,7 +148,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
-		if  c.Request().Header().Contains("Upgrade") &&
+		if c.Request().Header().Contains("Upgrade") &&
 			c.Request().Header().Contains("Sec-Websocket-Key") {
 			log.Infof("Not redirecting this request")
 			return h(c)
@@ -159,7 +174,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
-func (ch *CFHosting)  SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Make sure there is a JSESSIONID cookie set to the session ID
 		session, err := ch.portalProxy.GetSession(c)
@@ -180,4 +195,3 @@ func (ch *CFHosting)  SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc
 		return h(c)
 	}
 }
-

@@ -1,0 +1,76 @@
+actions-toolbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+
+  > actions-menu {
+    flex: 0;
+    height: $actions-toolbar-height;
+
+    .actions-menu {
+      > i.actions-menu-icon {
+        font-size: $actions-toolbar-menu-gripper-size;
+      }
+
+      &.open > i.actions-menu-icon {
+        color: $actions-toolbar-menu-hover-color;
+      }
+    }
+
+    // Max of 16 toolbar items
+    @for $i from 1 through 16 {
+      &.actions-toolbar-menu-hide-#{$i} {
+        ul > li:nth-of-type(-1n+#{$i}) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .actions-toolbar {
+    align-items: center;
+    overflow: hidden;
+    flex: 1;
+    height: $actions-toolbar-height;
+    text-align: right;
+
+    > button.btn {
+      outline: 0;
+      padding: $actions-toolbar-spacing $actions-toolbar-spacing * 2;
+      display: inline-block;
+
+      &:hover {
+        background-color: $actions-toolbar-hover-bg;
+        > app-icon > svg > path {
+          stroke: $actions-toolbar-menu-hover-color;
+        }
+      }
+
+      &:focus {
+        outline: 0;
+      }
+
+      > app-icon {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: normal;
+
+        > svg {
+          width: $actions-toolbar-icon-svg-size;
+          height: $actions-toolbar-icon-svg-size;
+        }
+
+        > i.material-icons {
+          font-size: $actions-toolbar-icon-icon-size;
+        }
+      }
+
+      > span {
+        font-size: $actions-toolbar-icon-label-size;
+        text-transform: none;
+        margin-left: $actions-toolbar-spacing;
+        display: inline-block;
+      }
+    }
+  }
+}

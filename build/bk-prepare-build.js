@@ -9,13 +9,21 @@
   var _ = require('lodash');
   var conf = require('./bk-conf');
 
-  var tempPath, tempSrcPath;
+  var tempPath, tempSrcPath, buildTest;
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsRemoveQ = Q.denodeify(fs.remove);
   var fsCopyQ = Q.denodeify(fs.copy);
 
   module.exports.getGOPATH = function () {
     return tempPath;
+  };
+
+  module.exports.getBuildTest = function () {
+    return buildTest;
+  };
+
+  module.exports.setBuildTest = function (build) {
+    buildTest = build;
   };
 
   module.exports.getSourcePath = function () {
@@ -51,12 +59,13 @@
       if (err) {
         throw err;
       }
+
       // Only copy the components that are enabled
       var promises = [];
       _.each(plugins.enabledPlugins, function (plugin) {
         promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
       });
-      promises.push(fsCopyQ('./components/core', tempSrcPath + '/core'));
+      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
 
       Q.all(promises)
         .then(function () {

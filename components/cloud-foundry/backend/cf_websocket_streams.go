@@ -87,7 +87,6 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 	}
 
 	ac.refreshToken = func() error {
-		//newTokenRecord, err := p.refreshToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
 		newTokenRecord, err := c.portalProxy.RefreshToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, "", "", cnsiRecord.TokenEndpoint)
 		if err != nil {
 			msg := fmt.Sprintf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)
@@ -128,7 +127,7 @@ func upgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker
 	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
 	request := echoContext.Request().(*standard.Request).Request
 
-	// We're now ok talking to HCF, time to upgrade the request to a WebSocket connection
+	// We're now ok talking to CF, time to upgrade the request to a WebSocket connection
 	log.Debugf("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
 	if err != nil {

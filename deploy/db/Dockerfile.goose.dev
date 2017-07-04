@@ -1,0 +1,12 @@
+FROM splatform/stratos-goose
+
+WORKDIR /src
+
+COPY db/dbconf.yml db/dbconf.yml
+COPY db/migrations db/migrations
+COPY db/scripts/development.sh .
+COPY db/scripts/wait-for-it.sh .
+RUN chmod +x wait-for-it.sh
+RUN chmod +x development.sh
+
+CMD bash /src/wait-for-it.sh -t 90 postgres:5432 && bash /src/development.sh

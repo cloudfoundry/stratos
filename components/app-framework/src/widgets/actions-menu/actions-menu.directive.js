@@ -31,9 +31,12 @@
         actionTarget: '=?',
         actions: '=',
         menuIcon: '@?',
+        menuIconName: '@?',
         menuLabel: '@?',
         menuPosition: '@?',
-        enableButtonMode: '=?'
+        enableButtonMode: '=?',
+        menuBeforeOpen: '=?',
+        menuClose: '=?'
       },
       controller: ActionsMenuController,
       controllerAs: 'actionsMenuCtrl',
@@ -43,12 +46,12 @@
         var clickAndNamespace = 'click.' + _.uniqueId('actionMenu');
 
         iconElt.on('click', function (event) {
-          handleClick(event, scope, ctrl);
+          handleClick(event, scope, ctrl, element);
         });
 
         iconElt.on('keypress', function (event) {
           if (event.which === enterKeyCode) {
-            handleClick(event, scope, ctrl);
+            handleClick(event, scope, ctrl, element);
           }
         });
 
@@ -71,8 +74,11 @@
       templateUrl: 'framework/widgets/actions-menu/actions-menu.html'
     };
 
-    function handleClick(event, scope, ctrl) {
+    function handleClick(event, scope, ctrl, element) {
       if (!ctrl.open) {
+        if (ctrl.menuBeforeOpen) {
+          ctrl.menuBeforeOpen(element);
+        }
         $document.triggerHandler('click');
       }
 
@@ -90,35 +96,39 @@
    * @constructor
    * @param {object} $scope - the angular $scope service
    * @property {string} icon - the actions menu icon
-   * @property {boolean} position - the actions menu position
+   * @property {string} position - the actions menu position
    * @property {boolean} open - flag whether actions menu should be visible
    * @property {boolean} buttonMode - do not show the drop down instead the single action as a button
    */
   function ActionsMenuController($scope) {
-    var that = this;
+    var vm = this;
 
     // Optional extra classes (e.g. to change size of icon)
-    this.icon = this.menuIcon || '';
-    this.position = this.menuPosition || '';
-    this.open = false;
-    this.buttonMode = false;
+    vm.icon = vm.menuIcon || '';
+    vm.position = vm.menuPosition || '';
+    vm.open = false;
+    vm.buttonMode = false;
+    vm.menuIconName = vm.menuIconName || 'more_horiz';
 
-    if (this.enableButtonMode) {
-      $scope.$watch(function () {
-        if (that.actions && that.actions.length > 1) {
-          var hidden = _.countBy(that.actions, function (action) {
-            return !!action.hidden;
-          }).true;
-          return that.actions.length - (hidden ? hidden : 0) > 1;
-        }
-        return false;
-      }, function (moreThanOneVisibleAction) {
-        that.buttonMode = !moreThanOneVisibleAction;
-      });
-    }
-  }
+    vm.executeAction = executeAction;
 
-  angular.extend(ActionsMenuController.prototype, {
+    $scope.$watch(function () {
+      if (vm.actions && vm.actions.length > 0) {
+        return _.countBy(vm.actions, function (action) {
+          return !!action.hidden;
+        }).false;
+      }
+      return 0;
+    }, function (visibleActions) {
+      vm.visibleActions = visibleActions > 0;
+      vm.buttonMode = vm.enableButtonMode && visibleActions === 1;
+    });
+
+    // Allow the menu to be closed by the user of the directive
+    vm.menuClose = function () {
+      vm.open = false;
+    };
+
     /**
      * @function executeAction
      * @memberof app.framework.widgets.ActionsMenuController
@@ -128,13 +138,13 @@
      * @param {object} action - the action object
      * @returns {void}
      */
-    executeAction: function ($event, action) {
+    function executeAction($event, action) {
       if (!action.disabled) {
-        action.execute(this.actionTarget);
+        action.execute(vm.actionTarget);
         this.open = false;
       }
       $event.stopPropagation();
     }
-  });
+  }
 
 })();

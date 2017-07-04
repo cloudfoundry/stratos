@@ -32,8 +32,6 @@
    * @constructor
    * @param {object} $scope - the $scope
    * @param {object} $q - the $q service
-   * @property {object} $scope - the $scope
-   * @property {object} $q - the $q service
    * @property {object} btnText - mapping of text on buttons
    * @property {object} wizardEvents - mapping of wizard internal events
    * @property {boolean} nextBtnDisabled - a flag indicating if the next button disabled
@@ -50,107 +48,125 @@
    * @property {array} steps - an array of steps defined for the wizard
    */
   function WizardController($scope, $q) {
-    var that = this;
+    var vm = this;
 
-    this.$scope = $scope;
-    this.$q = $q;
-
-    this.wizardEvents = {
+    vm.wizardEvents = {
       ON_INIT_SUCCESS: 'ON_INIT_SUCCESS',
       ON_INIT_ERROR: 'ON_INIT_ERROR',
       ON_SWITCH: 'ON_SWITCH',
       BEFORE_SUBMIT: 'BEFORE_SUBMIT',
       AFTER_SUBMIT: 'AFTER_SUBMIT'
     };
-    this.nextBtnDisabled = true;
-    this.backBtnDisabled = true;
-    this.cancelBtnDisabled = true;
+    vm.nextBtnDisabled = true;
+    vm.backBtnDisabled = true;
+    vm.cancelBtnDisabled = true;
 
-    this.initTask = this.$q.defer();
-    this.initPromise = this.initTask.promise;
+    vm.initTask = $q.defer();
+    vm.initPromise = vm.initTask.promise;
 
-    this.postInitTask = this.$q.defer();
+    vm.postInitTask = $q.defer();
 
-    this.showNextCancel = false;
-    this.cancelNextTask = null;
+    vm.showNextCancel = false;
+    vm.cancelNextTask = null;
 
-    this.currentIndex = -1;
-    this.workflow = this.options.workflow || {};
-    this.message = '';
-    this.messageClass = null;
-    this.hasMessage = false;
-    this.busyMessage = false;
+    vm.currentIndex = -1;
+    vm.workflow = vm.options.workflow || {};
+    vm.message = '';
+    vm.messageClass = null;
+    vm.hasMessage = false;
+    vm.busyMessage = false;
 
-    if (this.workflow.initControllers) {
-      this.workflow.initControllers(this);
+    if (vm.workflow.initControllers) {
+      vm.workflow.initControllers(vm);
     }
 
-    this.btnText = this.workflow.btnText;
-    this.steps = this.workflow.steps || [];
+    vm.btnText = vm.workflow.btnText;
+    vm.steps = vm.workflow.steps || [];
 
-    if (this.options.scope) {
-      _.assign($scope, this.options.scope);
+    if (vm.options.scope) {
+      _.assign($scope, vm.options.scope);
     }
 
     // allowBack can be a value or function
-    if (!_.isFunction(this.workflow.allowBack)) {
-      var allowBack = this.workflow.allowBack;
-      this.workflow.allowBack = function () {
+    if (!_.isFunction(vm.workflow.allowBack)) {
+      var allowBack = vm.workflow.allowBack;
+      vm.workflow.allowBack = function () {
         return allowBack;
       };
     }
 
     // allowJump can be a value or function
-    if (!_.isFunction(this.workflow.allowJump)) {
-      var allowJump = this.workflow.allowJump;
-      this.workflow.allowJump = function () {
+    if (!_.isFunction(vm.workflow.allowJump)) {
+      var allowJump = vm.workflow.allowJump;
+      vm.workflow.allowJump = function () {
         return allowJump;
       };
     }
 
-    this.isNavEntryDisabled = function ($index) {
-      if (this.workflow.allowJump()) {
+    // // because allow jump only works to enable jump in all cases also have a disable in all cases option
+    if (!_.isFunction(vm.workflow.disableJump)) {
+      var disableJump = vm.workflow.disableJump;
+      vm.workflow.disableJump = function () {
+        return disableJump;
+      };
+    }
+
+    vm.isNavEntryDisabled = function ($index) {
+      if (vm.workflow.disableJump() || vm.workflow.allowJump()) {
         return true;
       }
-      if (this.workflow.allowBack() && $index < this.currentIndex) {
+      if (vm.workflow.allowBack() && $index < vm.currentIndex) {
         return false;
       }
-      return this.currentIndex !== $index;
+      return vm.currentIndex !== $index;
     };
 
-    this.initPromise.then(function () {
-      that.onInitSuccess();
-      that.postInitTask.resolve();
+    vm.disableButtons = disableButtons;
+    vm.resetButtons = resetButtons;
+    vm.disableNext = disableNext;
+    vm.switchTo = switchTo;
+    vm.next = next;
+    vm.back = back;
+    vm.cancel = cancel;
+    vm.showMessage = showMessage;
+    vm.resetMessage = resetMessage;
+    vm.onInitSuccess = onInitSuccess;
+    vm.onInitError = onInitError;
+    vm.checkAllReadiness = checkAllReadiness;
+    vm.switchToFirstReadyStep = switchToFirstReadyStep;
+    vm.always = always;
+
+    vm.initPromise.then(function () {
+      vm.onInitSuccess();
+      vm.postInitTask.resolve();
     }, function () {
-      that.onInitError();
-      that.postInitTask.reject();
+      vm.onInitError();
+      vm.postInitTask.reject();
     });
 
-    this.checkAllReadiness().then(function () {
-      that.always();
+    vm.checkAllReadiness().then(function () {
+      vm.always();
     }, function () {
-      that.always();
+      vm.always();
     });
 
-    this.$scope.$watch(function () {
-      return that.steps.length;
+    $scope.$watch(function () {
+      return vm.steps.length;
     }, function () {
-      that.resetButtons();
+      vm.resetButtons();
     });
-  }
 
-  angular.extend(WizardController.prototype, {
     /**
      * @function disableButtons
      * @memberof app.framework.widgets.wizard.WizardController
      * @description disable buttons in button bar
      * @returns {void}
      */
-    disableButtons: function () {
-      this.nextBtnDisabled = true;
-      this.backBtnDisabled = true;
-      this.cancelBtnDisabled = true;
-    },
+    function disableButtons() {
+      vm.nextBtnDisabled = true;
+      vm.backBtnDisabled = true;
+      vm.cancelBtnDisabled = true;
+    }
 
     /**
      * @function resetButtons
@@ -158,13 +174,13 @@
      * @description reset buttons in button bar
      * @returns {void}
      */
-    resetButtons: function () {
-      if (!this.busyMessage) {
-        this.backBtnDisabled = !this.steps[this.currentIndex - 1];
-        this.nextBtnDisabled = false;
-        this.cancelBtnDisabled = false;
+    function resetButtons() {
+      if (!vm.busyMessage) {
+        vm.backBtnDisabled = !vm.steps[vm.currentIndex - 1];
+        vm.nextBtnDisabled = false;
+        vm.cancelBtnDisabled = false;
       }
-    },
+    }
 
     /**
      * @function disableNext
@@ -172,15 +188,15 @@
      * @description Takes into account local nextBtnDisabled AND the validation state of the form
      * @returns {boolean}
      */
-    disableNext: function () {
-      var step = this.steps[this.currentIndex] || {};
-      var form = this.$scope.wizardForm[step.formName];
+    function disableNext() {
+      var step = vm.steps[vm.currentIndex] || {};
+      var form = $scope.wizardForm[step.formName];
 
       if (_.isFunction(step.allowNext) && !step.allowNext()) {
         return true;
       }
-      return this.nextBtnDisabled || form && form.$invalid;
-    },
+      return vm.nextBtnDisabled || form && form.$invalid;
+    }
 
     /**
      * @function switchTo
@@ -189,44 +205,58 @@
      * @param {number} index - the index of the step to switch to
      * @returns {*}
      */
-    switchTo: function (index) {
-      if (!this.steps[index]) {
+    function switchTo(index) {
+      if (!vm.steps[index]) {
         return null;
       }
 
-      var that = this;
-      this.busyMessage = false;
-      this.disableButtons();
+      vm.busyMessage = false;
+      vm.disableButtons();
 
-      this.btnText = this.btnText || {};
+      vm.btnText = vm.btnText || {};
 
       // Set step commit from current step or lastStepCommit
-      this.stepCommit = this.steps[index].stepCommit || this.workflow.lastStepCommit && index === this.steps.length - 1;
+      vm.stepCommit = vm.steps[index].stepCommit || vm.workflow.lastStepCommit && index === vm.steps.length - 1;
 
       // Persist next button text to avoid flicker during transitions
-      this.btnText.next = this.steps[index].nextBtnText;
+      vm.btnText.next = vm.steps[index].nextBtnText;
 
       // Allow a step to support an onEnter property which can return a promise (use resolved promise if not)
-      var step = this.steps[index];
-      var readyToGo = step.onEnter ? step.onEnter(this) || this.$q.resolve() : this.$q.resolve();
+      var step = vm.steps[index];
+      var readyToGo = step.onEnter ? step.onEnter(vm) || $q.resolve() : $q.resolve();
+      var indexFrom = vm.currentIndex;
 
       // Show a busy indicator if desired
       if (step.onEnter && step.showBusyOnEnter) {
-        this.busyMessage = step.showBusyOnEnter;
-        this.currentIndex = -1;
+        vm.busyMessage = step.showBusyOnEnter;
+        vm.currentIndex = -1;
       }
 
       // Use finally for now so that we reset the buttons regardless of whether there is an error
-      return readyToGo.then(function () {
-        that.$scope.$broadcast(that.wizardEvents.ON_SWITCH, {
-          from: that.currentIndex,
-          to: index
+      return readyToGo
+        .then(function () {
+          $scope.$broadcast(vm.wizardEvents.ON_SWITCH, {
+            from: vm.currentIndex,
+            to: index
+          });
+          vm.currentIndex = index;
+          vm.busyMessage = false;
+          vm.resetButtons();
+        })
+        .catch(function (message) {
+          // Hide the loading indicator if we showed one
+          vm.currentIndex = indexFrom;
+          vm.busyMessage = false;
+          if (message) {
+            vm.showMessage(message, 'alert-danger');
+          } else {
+            vm.resetMessage();
+          }
+          vm.resetButtons();
+          // Ensure the rejection carries up via the promise chain
+          return $q.reject();
         });
-        that.currentIndex = index;
-        that.busyMessage = false;
-        that.resetButtons();
-      });
-    },
+    }
 
     /**
      * @function next
@@ -234,32 +264,32 @@
      * @description switch to next step if there is one
      * @returns {void}
      */
-    next: function () {
-      var that = this;
-      var step = this.steps[this.currentIndex];
+    function next() {
+      var step = vm.steps[vm.currentIndex];
+      vm.resetMessage();
 
-      this.busyMessage = false;
-      this.showNextCancel = false;
-      this.disableButtons();
+      vm.busyMessage = false;
+      vm.showNextCancel = false;
+      vm.disableButtons();
       // NOTE - We could use a resolved promise when there is no onNext to simplify the flow below
-      var onNext = this.steps[this.currentIndex].onNext;
-      var index = this.currentIndex;
+      var onNext = vm.steps[vm.currentIndex].onNext;
+      var index = vm.currentIndex;
       if (onNext) {
-        var currentStep = this.steps[index];
+        var currentStep = vm.steps[index];
         // Show a busy indicator if desired
         if (currentStep.showBusyOnNext) {
-          this.busyMessage = step.showBusyOnNext;
-          this.currentIndex = -2;
+          vm.busyMessage = step.showBusyOnNext;
+          vm.currentIndex = -2;
         }
 
         var p = onNext();
         if (p) {
-          this.$q(function (resolve, reject) {
+          $q(function (resolve, reject) {
             p.then(resolve, reject);
 
             if (currentStep.onNextCancellable) {
-              that.showNextCancel = true;
-              that.cancelNextTask = function cancelTask() {
+              vm.showNextCancel = true;
+              vm.cancelNextTask = function cancelTask() {
                 if (currentStep.onNextCancel) {
                   currentStep.onNextCancel();
                 }
@@ -269,39 +299,39 @@
           })
           .then(function () {
             if (step.isLastStep) {
-              that.resetMessage();
-              that.actions.finish(that);
+              vm.resetMessage();
+              vm.actions.finish(vm);
             } else {
-              that.switchTo(index + 1).finally(function () {
-                that.resetMessage();
+              vm.switchTo(index + 1).then(function () {
+                vm.resetMessage();
               });
             }
           }, function (message) {
             // Hide the loading indicator if we showed one
-            that.currentIndex = index;
-            that.busyMessage = false;
+            vm.currentIndex = index;
+            vm.busyMessage = false;
             if (message) {
-              that.showMessage(message, 'alert-danger');
+              vm.showMessage(message, 'alert-danger');
             } else {
-              that.resetMessage();
+              vm.resetMessage();
             }
-            that.resetButtons();
+            vm.resetButtons();
           });
         } else {
           if (step.isLastStep) {
-            this.actions.finish(this);
+            vm.actions.finish(vm);
           } else {
-            this.switchTo(index + 1);
+            vm.switchTo(index + 1);
           }
         }
       } else {
         if (step.isLastStep) {
-          this.actions.finish(this);
+          vm.actions.finish(vm);
         } else {
-          this.switchTo(index + 1);
+          vm.switchTo(index + 1);
         }
       }
-    },
+    }
 
     /**
      * @function back
@@ -309,9 +339,9 @@
      * @description switch back to previous step if there is one
      * @returns {void}
      */
-    back: function () {
-      this.switchTo(this.currentIndex - 1);
-    },
+    function back() {
+      vm.switchTo(vm.currentIndex - 1);
+    }
 
     /**
      * @function stop
@@ -319,9 +349,9 @@
      * @description stop workflow
      * @returns {void}
      */
-    cancel: function () {
-      this.actions.stop();
-    },
+    function cancel() {
+      vm.actions.stop();
+    }
 
     /**
      * @function showMessage
@@ -331,13 +361,13 @@
      * @param {string} messageClass - a CSS class name for the message
      * @returns {void}
      */
-    showMessage: function (message, messageClass) {
-      this.showNextCancel = false;
-      this.showSpinner = false;
-      this.message = message;
-      this.messageClass = messageClass;
-      this.hasMessage = true;
-    },
+    function showMessage(message, messageClass) {
+      vm.showNextCancel = false;
+      vm.showSpinner = false;
+      vm.message = message;
+      vm.messageClass = messageClass;
+      vm.hasMessage = true;
+    }
 
     /**
      * @function resetMessage
@@ -345,13 +375,13 @@
      * @description reset message
      * @returns {void}
      */
-    resetMessage: function () {
-      this.showNextCancel = false;
-      this.showSpinner = false;
-      this.message = '';
-      this.messageClass = '';
-      this.hasMessage = false;
-    },
+    function resetMessage() {
+      vm.showNextCancel = false;
+      vm.showSpinner = false;
+      vm.message = '';
+      vm.messageClass = '';
+      vm.hasMessage = false;
+    }
 
     /**
      * @function onInitSuccess
@@ -359,10 +389,10 @@
      * @description initialization success handler
      * @returns {void}
      */
-    onInitSuccess: function () {
-      this.resetButtons();
-      this.$scope.$broadcast(this.wizardEvents.ON_INIT_SUCCESS);
-    },
+    function onInitSuccess() {
+      vm.resetButtons();
+      $scope.$broadcast(vm.wizardEvents.ON_INIT_SUCCESS);
+    }
 
     /**
      * @function onInitError
@@ -370,21 +400,20 @@
      * @description initialization error handler
      * @returns {void}
      */
-    onInitError: function () {
-      this.$scope.$broadcast(this.wizardEvents.ON_INIT_ERROR);
-    },
+    function onInitError() {
+      $scope.$broadcast(vm.wizardEvents.ON_INIT_ERROR);
+    }
 
     /**
      * @function checkAllReadiness
      * @memberof app.framework.widgets.wizard.WizardController
      * @description check if each step is ready
-     * @returns {void}
+     * @returns {object}
      */
-    checkAllReadiness: function () {
+    function checkAllReadiness() {
       var stepReadyPromises = [];
-      var that = this;
 
-      angular.forEach(this.steps, function (step, index) {
+      angular.forEach(vm.steps, function (step, index) {
         step.ready = !step.checkReadiness;
 
         if (step.checkReadiness) {
@@ -393,14 +422,14 @@
           promise.then(function () {
             step.ready = true;
           }, function () {
-            that.steps.splice(index, 1);
+            vm.steps.splice(index, 1);
           });
         }
       });
 
-      this.ready = stepReadyPromises.length === 0;
-      return this.$q.all(stepReadyPromises);
-    },
+      vm.ready = stepReadyPromises.length === 0;
+      return $q.all(stepReadyPromises);
+    }
 
     /**
      * @function switchToFirstReadyStep
@@ -408,18 +437,18 @@
      * @description switch to the first ready step
      * @returns {void}
      */
-    switchToFirstReadyStep: function () {
+    function switchToFirstReadyStep() {
       var stepIndex = -1;
-      angular.forEach(this.steps, function (step, index) {
+      angular.forEach(vm.steps, function (step, index) {
         if (stepIndex < 0 && step.ready) {
           stepIndex = index;
         }
-      }, this);
+      }, vm);
 
       if (stepIndex !== -1) {
-        this.switchTo(stepIndex);
+        vm.switchTo(stepIndex);
       }
-    },
+    }
 
     /**
      * @function always
@@ -427,11 +456,12 @@
      * @description the always handler for initialization
      * @returns {void}
      */
-    always: function () {
-      this.initTask.resolve();
-      this.ready = true;
-      this.switchToFirstReadyStep();
+    function always() {
+      vm.initTask.resolve();
+      vm.ready = true;
+      vm.switchToFirstReadyStep();
     }
-  });
+
+  }
 
 })();

@@ -1,7 +1,6 @@
 ---
 platform: linux
 inputs:
-- name: stratos-deploy
 - name: stratos-ui
 - name: portal-proxy-output
 # Parameterised task files are currently not supported in Concourse
@@ -9,7 +8,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  10.4.21.241:5000/stackatotest/hsc-dcind
+   repository:  10.4.21.241:5000/concourse-dcind
    tag: "latest"
    insecure_registries: [ "10.4.21.241:5000" ]
 
@@ -25,36 +24,47 @@ run:
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
-      cd stratos-deploy
-      # Load images from image
-      for image in stackatotest/goose debian:jessie postgres:latest nginx susetest/uaa java:openjdk-8u66-jre stackatotest/hsc-concourse:latest; do
+      cd stratos-ui/deploy
+
+      cat << EOF > ../build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+       },
+        "console": {
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
+        },
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      cat ../build/secrets.json
+
+      for image in splatform/stratos-goose postgres:latest nginx:1.11 splatform/stratos-uaa java:openjdk-8u66-jre alpine:latest splatform/stratos-concourse; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done
       mkdir uaa/tmp
       cp /tarballs/* ./uaa/tmp/
 
-      # Add protractor.conf file
-       cat << EOF >> ../stratos-ui/build/secrets.json
-       {
-         "cloudFoundry": {
-           "url": "${CF_LOCATION}",
-           "admin": {
-             "username": "${CF_ADMIN_USER}",
-             "password": "${CF_ADMIN_PASSWORD}"
-           },
-           "user": {
-             "username": "${CF_E2E_USER}",
-             "password": "${CF_E2E_USER_PASSWORD}"
-           }
-         },
-         "githubPat": "${GITHUB_TOKEN}"
-       }
-       EOF
-
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
-      docker logs -f stratosdeploy_ui_1
+      docker logs -f deploy_ui_1
 
       CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
       mkdir e2e-output

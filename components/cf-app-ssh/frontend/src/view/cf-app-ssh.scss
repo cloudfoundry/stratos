@@ -1,0 +1,73 @@
+$cf-app-ssh-padding: $console-unit-space * 0.5;
+$cf-app-ssh-box-shadow: 0 0 20px 6px $gray-dark;
+
+@import "terminal-viewer/terminal-viewer";
+@import "instance-selector/instance-selector";
+
+
+.panel-heading.action-header.app-ssh-header {
+  background-color: #fff;
+  padding-left: $cf-app-ssh-padding;
+  padding-top: $cf-app-ssh-padding;
+  padding-right: $cf-app-ssh-padding;
+  display: flex;
+  height: $console-unit-space * 2;
+
+  .log-stream-title {
+    flex: 1 1 0;
+  }
+
+  .app-log-stream-indicator {
+    font-size: 18px;
+  }
+
+  .app-ssh-disconnect-btn {
+    padding-right: $cf-app-ssh-padding;
+    font-size: $font-size-medium;
+  }
+}
+
+.app-ssh-disconnected {
+  position: absolute;
+  margin-top: $console-unit-space;
+  width: 100%;
+  z-index: 3;
+
+  > div {
+    width: 50%;
+    max-width: 320px;
+    background-color: $message-box-bg;
+    margin: auto;
+    box-shadow: $cf-app-ssh-box-shadow;
+
+    div {
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      padding: $cf-app-ssh-padding;
+
+      > button {
+        margin: $cf-app-ssh-padding;
+      }
+    }
+
+    h1 {
+      font-size: $font-size-large;
+      text-align: center;
+      padding-top: $cf-app-ssh-padding;
+      padding-bottom: $cf-app-ssh-padding;
+      border-bottom: 1px solid $table-border-color;
+      margin: 0;
+    }    
+  }
+
+}
+
+.app-ssh-glass-panel {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  background-color: $gray-darker;
+  z-index: 2;
+  opacity: 0.5;
+}

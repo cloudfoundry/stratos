@@ -1,4 +1,0 @@
-FROM governmentpaas/cf-uaac
-ADD config-uaa.sh /config.sh
-
-ENTRYPOINT ["/config.sh"]

@@ -1,0 +1,39 @@
+<gallery-card class="cluster-gallery-card space-summary-tile"
+              card-data="spaceSummaryTileCtrl.cardData"
+              card-actions="spaceSummaryTileCtrl.actions"
+              card-actions-position="actions-menu-right">
+  <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail().details">
+    <dl class="dl-horizontal">
+      <dt translate>applications</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
+      <dt translate>application instances</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalAppInstances }} / {{ spaceSummaryTileCtrl.spaceDetail().details.appInstancesQuota | infinityFilter }}</dd>
+      <dt translate>services</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }} / {{ spaceSummaryTileCtrl.spaceDetail().details.servicesQuota | infinityFilter }}</dd>
+      <dt translate>routes</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }} / {{ spaceSummaryTileCtrl.spaceDetail().details.routesQuota | infinityFilter }}</dd>
+      <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
+      <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
+      <dt translate>memory</dt>
+      <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
+      <dt translate>ssh enabled</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.space.entity.allow_ssh || 'false' }}</dd>
+
+    </dl>
+  </div>
+  <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
+    <dl class="dl-horizontal">
+      <dt translate>CF SPACE ROLE</dt>
+      <dd>{{ spaceSummaryTileCtrl.roles.join(', ') }}</dd>
+      <dt translate>INSTANCE ADDRESS</dt>
+      <dd>{{ spaceSummaryTileCtrl.getEndpoint() }}</dd>
+      <dt translate>CF Interactions</dt>
+      <dd><a ng-click="spaceSummaryTileCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a></dd>
+      <dt translate>Account Username</dt>
+      <dd>{{ spaceSummaryTileCtrl.userName }}</dd>
+      <dt translate>Account Status</dt>
+      <dd translate>{{ spaceSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
+    </dl>
+  </div>
+</gallery-card>
+

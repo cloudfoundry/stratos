@@ -1,8 +1,9 @@
 search-box {
   display: block;
   position: relative;
+  bottom: $console-form-label-spacing;
 
-  &:hover, label:hover, input:hover {
+  &:hover, label:hover, input:not([disabled]):hover {
     cursor: pointer;
   }
 
@@ -16,10 +17,12 @@ search-box {
     flex-flow: row nowrap;
     justify-content: space-between;
     align-items: flex-start;
+    font-size: $font-size-base;
   }
 
   input {
     flex: 1 1 0px;
+    margin-top: $console-form-margin-top;
 
     &:hover,
     &:focus,
@@ -28,7 +31,7 @@ search-box {
     }
   }
 
-  .search-icon-icon {
+  .search-icon-icon:before {
     content: 'search'
   }
 
@@ -63,6 +66,6 @@ search-box {
   }
 }
 
-.app-icon-seacrh-plus:before {
+.app-icon-search-plus:before {
   content: 'add';
 }

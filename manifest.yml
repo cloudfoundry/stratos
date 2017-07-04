@@ -5,6 +5,4 @@ applications:
   host: console
   timeout: 180
   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
-  health-check-type: process
-  env:
-    CF_API_FORCE_SECURE: true
+  health-check-type: port

@@ -20,4 +20,4 @@ $breadcrumb-padding-horizontal:  $console-unit-space !default;
 
 $breadcrumb-border-width:        1px !default;
 $breadcrumb-border-style:        solid !default;
-$breadcrumb-border-color:        $rule !default; // Should likely be converted to $gray-light or $gray (depending) at some point.
+$breadcrumb-border-color:        darken($white, 10%) !default;

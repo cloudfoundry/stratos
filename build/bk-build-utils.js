@@ -47,7 +47,12 @@
   }
 
   function runGlideInstall(path) {
-    return spawnProcess('glide', ['install'], path, env);
+
+    var glideArgs = ['install'];
+    if (!prepareBuild.getBuildTest()) {
+      glideArgs.push('--skip-test');
+    }
+    return spawnProcess('glide', glideArgs, path, env);
   }
 
   function buildPlugin(pluginPath, pluginName) {
@@ -58,7 +63,6 @@
 
     var args = ['build', '-buildmode=plugin', '-o', pluginName + '.so'];
     args = args.concat(goFiles);
-
     return spawnProcess('go', args, pluginPath, env);
   }
 

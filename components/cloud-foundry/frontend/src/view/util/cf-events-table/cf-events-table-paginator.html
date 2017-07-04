@@ -1,0 +1,26 @@
+<div class="cf-events-paginator">
+  <div class="cf-events-total" translate translate-values="{total: totalItemCount}">cf.events.total</div>
+  <div class="cf-events-spacer"></div>
+  <nav ng-if="numPages && pages.length >= 1">
+    <ul class="pagination">
+      <li ng-if="pages[0] != 1">
+        <a href="javascript: void(0);" class="cf-page-button-icon" ng-click="selectPage(1)">
+          <i class="material-icons">first_page</i>
+        </a>
+      </li>
+      <li ng-repeat="page in pages" ng-class="{active: page === currentPage}">
+        <a href="javascript: void(0);" ng-click="selectPage(page)">{{page}}</a>
+      </li>
+      <li ng-if="pages[0] + stDisplayedPages <= numPages">
+        <a href="javascript: void(0);" class="cf-page-button-icon" ng-click="selectPage(numPages)">
+          <i class="material-icons">last_page</i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <select-input
+    ng-model="stItemsByPage"
+    input-options="$parent.cfeCtrl.itemsByPageOptions"
+    tabindex="0">
+  </select-input>
+</div>

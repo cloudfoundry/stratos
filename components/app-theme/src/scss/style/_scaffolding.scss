@@ -2,6 +2,10 @@ body {
   padding-top: $navbar-height;
 }
 
+p {
+  font-size: $font-size-medium;
+}
+
 .font-thin {
   font-weight: 100;
 }
@@ -48,4 +52,8 @@ a {
 
 .app-icon-r270 {
   transform: rotate(270deg);
+}
+
+.translate-cloak {
+  display: none;
 }
