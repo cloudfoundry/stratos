@@ -23,6 +23,7 @@
       var cfApplicationTabs = $injector.get('cfApplicationTabs');
       var appNotificationsService = $injector.get('appNotificationsService');
       var frameworkDialogConfirm = $injector.get('frameworkDialogConfirm');
+      var cfUtilsService = $injector.get('cfUtilsService');
 
       $stateParams.cnsiGuid = cnsiGuid;
       if (mockAuthModel) {
@@ -47,7 +48,7 @@
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
       $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $translate, modelManager,
         addRoutesService, editAppService, appUtilsService, appClusterRoutesService, frameworkDialogConfirm,
-        appNotificationsService, cfApplicationTabs);
+        appNotificationsService, cfApplicationTabs, cfUtilsService);
 
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);

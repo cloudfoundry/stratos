@@ -134,7 +134,6 @@
       name: 'space-info.ssh-action',
       disabled: true,
       execute: function () {
-
         var dialog;
         if (spaceDetailObj.details.space.entity.allow_ssh) {
           dialog = {
@@ -152,7 +151,6 @@
             prompt: 'space-info.ssh.enable.prompt',
             error: 'space-info.ssh.enable.error'
           };
-
         }
         return frameworkDialogConfirm({
           title: dialog.title,
@@ -218,7 +216,7 @@
         vm.actions.push(deleteAction);
       }
 
-      // SSH
+      // Enable/disable SSH Access
       if (vm.isAdmin) {
         vm.actions.push(sshAction);
         sshAction.disabled = false;

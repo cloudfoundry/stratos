@@ -51,7 +51,7 @@
           {
             data: data,
             initial_ssh: model.application.summary.enable_ssh,
-            space_allowed: model.application.space.entity.allow_ssh
+            space_allowed: model.application.space ? model.application.space.entity.allow_ssh : false
           },
           updateAppPromise
         );
