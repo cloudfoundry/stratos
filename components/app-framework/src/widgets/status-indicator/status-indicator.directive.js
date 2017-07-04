@@ -18,11 +18,11 @@
     return {
       bindToController: {
         status: '=',
-        onIcon: '@',
+        onIcon: '@?',
         offIcon: '@',
-        onLabel: '@',
+        onLabel: '@?',
         offLabel: '@',
-        onClass: '@',
+        onClass: '@?',
         offClass: '@'
       },
       controller: StatusIndicatorController,
@@ -44,10 +44,6 @@
     vm.offIcon = vm.offIcon || 'check_box_outline_blank';
     vm.onClass = vm.onClass || 'console-status-enabled';
     vm.offClass = vm.offClass || 'console-status-disabled';
-
-    vm.iconText = function () {
-      return vm.status ? vm.onIcon : vm.offIcon;
-    };
   }
 
 })();
