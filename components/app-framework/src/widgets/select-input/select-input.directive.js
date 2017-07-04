@@ -110,7 +110,7 @@
     var vm = this;
 
     vm.ngModelCtrl = null;
-    vm.placeholder = vm.placeholder || 'Select';
+    vm.placeholder = vm.placeholder || 'select-input.placeholder';
     vm.open = false;
     vm.modelLabel = null;
 

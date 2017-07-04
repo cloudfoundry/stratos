@@ -1,31 +1,31 @@
-<p class="control-title" translate>Select deploy location</p>
+<p class="control-title" translate>deploy-location.title</p>
 
 <div class="form-group form-group-large">
-  <label class="control-label" required translate>Cloud Foundry Endpoint</label>
+  <label class="control-label" required translate>deploy-location.cf-label</label>
   <search-box
     ng-model="deployLocation.serviceInstance"
     input-options="deployLocation.serviceInstances"
-    placeholder="{{'Select Endpoint' | translate}}"
+    placeholder="{{'deploy-location.cf-placeholder' | translate}}"
     tabindex="0" required>
   </search-box>
 </div>
 
 <div class="form-group form-group-large">
-  <label class="control-label" required translate>Organization</label>
+  <label class="control-label" required translate>deploy-location.org-label</label>
   <search-box
     ng-model="deployLocation.organization"
     input-options="deployLocation.organizations"
-    placeholder="{{'Select Organization' | translate}}"
+    placeholder="{{'deploy-location.org-placeholder' | translate}}"
     tabindex="0" required>
   </search-box>
 </div>
 
 <div class="form-group form-group-large">
-  <label class="control-label" required translate>Space</label>
+  <label class="control-label" required translate>deploy-location.space-label</label>
   <search-box
     ng-model="deployLocation.space"
     input-options="deployLocation.spaces"
-    placeholder="{{'Select Space' | translate}}"
+    placeholder="{{'deploy-location.space-placeholder' | translate}}"
     tabindex="0" required>
   </search-box>
 </div>

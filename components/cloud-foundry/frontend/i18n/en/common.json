@@ -1,6 +1,7 @@
 {
   "cloud-foundry": "Cloud Foundry",
   "org": "Org",
+  "organization": "Organisation",
   "space": "Space",
 
   "menu": {

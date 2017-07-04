@@ -104,7 +104,7 @@
         hideStepNavStack: true,
         lastStepCommit: false,
         btnText: {
-          cancel: config.confirm ? $translate.instant('buttons.cancel')
+          cancel: config.confirm ? 'buttons.cancel'
             : $translate.instant('app-tabs.services.add.back-to-services')
         },
         steps: [

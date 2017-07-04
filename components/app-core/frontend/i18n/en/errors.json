@@ -8,7 +8,8 @@
     "upgrade-wait": "Please wait for the upgrade to complete and then refresh or contact your administrator for further information.",
     "nothing-registered": "There are no registered endpoints.",
     "nothing-connected": "There are no connected endpoints.",
-    "endpoint-retrieval": "The [[@:product.console]] could not retrieve Endpoint information."
+    "endpoint-retrieval": "The [[@:product.console]] could not retrieve Endpoint information.",
+    "generic-async-failure": "There was a problem carrying out the action. Please try again. If this error persists, please contact the administrator."
   },
   "error-format": "{{errorMsg}}, Error Code: {{errorCode}}"
 }

@@ -22,7 +22,7 @@
         return false;
       },
       uiSref: 'cf.applications.application.events',
-      label: 'Events',
+      label: 'app-tabs.events.title',
       clearState: function () {}
     });
   }

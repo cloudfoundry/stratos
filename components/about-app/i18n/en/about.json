@@ -2,6 +2,9 @@
   "about": {
     "about": "About",
     "title": "[[@:product.name]] [[@:product.version]]",
+    "console-version": "Console Version",
+    "db-version": "Database Version",
+    "user": "User",
     "footer": {
       "title": "@:footer.title",
       "copyright": "@:footer.copyright",

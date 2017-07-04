@@ -13,8 +13,7 @@
         </div>
         <div ng-show="asyncTaskDialogCtrl.context.showErrorBar" class="alert alert-danger">
           <p ng-if="!asyncTaskDialogCtrl.hasErrorMessage()" translate>
-            There was a problem carrying out the action. Please try again. If this error persists,
-            please contact the administrator.
+            errors.generic-async-failure
           </p>
           <p ng-if="asyncTaskDialogCtrl.hasErrorMessage()">
             {{ asyncTaskDialogCtrl.context.showErrorBar | translate }}
