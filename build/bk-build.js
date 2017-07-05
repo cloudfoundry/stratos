@@ -206,7 +206,8 @@
     return runSequence(
       'init-build',
       'dedup-vendor',
-      'write-plugins-yaml'
+      'write-plugins-yaml',
+      'delete-temp'
     );
   });
 
@@ -215,7 +216,8 @@
     return runSequence(
       'init-build',
       'get-plugins-data',
-      'write-plugins-yaml'
+      'write-plugins-yaml',
+      'delete-temp'
     );
   });
   gulp.task('cf-get-backend-deps', function () {
@@ -232,7 +234,8 @@
     return runSequence(
       'init-build',
       'dedup-vendor',
-      'run-tests'
+      'run-tests',
+      'delete-temp'
     );
   });
 

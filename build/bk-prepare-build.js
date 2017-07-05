@@ -49,7 +49,7 @@
       tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
       return done();
     } else {
-      mktemp.createDir('/tmp/temp-XXXX.build',
+      mktemp.createDir('/tmp/stratos-ui-XXXX.build',
         function (err, path_) {
           if (err) {
             throw err;
@@ -60,6 +60,16 @@
         });
     }
 
+  });
+
+  gulp.task('delete-temp', [], function (done) {
+    fsRemoveQ(tempPath)
+      .then(function () {
+        done();
+      })
+      .catch(function (err) {
+        done(err);
+      });
   });
 
   gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
