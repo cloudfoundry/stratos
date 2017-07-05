@@ -16,7 +16,7 @@ var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client
 							FROM console_config`
 
 var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, is_setup_complete)
-						VALUES ($1, $2, $3, $4, $5,'n')`
+						VALUES ($1, $2, $3, $4, $5, $6)`
 
 var updateConsoleConfig = `UPDATE console_config SET console_admin_scope = $1, is_setup_complete = 'y'`
 
@@ -91,8 +91,10 @@ func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleCo
 	if err != nil {
 		return fmt.Errorf("Unable to truncate Console Config table: %v", err)
 	}
+
+	isComplete := config.ConsoleAdminScope != ""
 	if _, err := c.db.Exec(saveConsoleConfig, fmt.Sprintf("%s", config.UAAEndpoint),
-		config.ConsoleAdminScope, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation); err != nil {
+		config.ConsoleAdminScope, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation, isComplete); err != nil {
 		return fmt.Errorf("Unable to Save Console Config record: %v", err)
 	}
 

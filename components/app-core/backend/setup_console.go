@@ -139,7 +139,8 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 
 	consoleClientSecret, err := config.GetValue("CONSOLE_CLIENT_SECRET")
 	if err != nil {
-		return consoleConfig, errors.New("CONSOLE_CLIENT_SECRET not found")
+		// Special case, mostly this is blank, so assume its blank
+		consoleClientSecret = ""
 	}
 
 	consoleAdminScope, err := config.GetValue("CONSOLE_ADMIN_SCOPE")
@@ -166,6 +167,12 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 
 	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
 	err = consoleRepo.SaveConsoleConfig(consoleConfig)
+	if err != nil {
+		log.Printf("Failed to store Console Config: %+v", err)
+		return consoleConfig, fmt.Errorf("Failed to store Console Config: %+v", err)
+	}
+	// Store
+	err = consoleRepo.UpdateConsoleConfig(consoleConfig)
 	if err != nil {
 		log.Printf("Failed to store Console Config: %+v", err)
 		return consoleConfig, fmt.Errorf("Failed to store Console Config: %+v", err)
