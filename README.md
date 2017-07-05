@@ -36,6 +36,12 @@ Note:
 
 If you run into issues, please refer to the [Troubleshooting Guide](docs/troubleshooting.md).
 
+## Further Reading
+
+Take a look at the [Feature Set](docs/features.md) for details on the feature set that Stratos UI provides.
+
+Get an [Overview](docs/overview.md) of Stratos UI, its components and the different ways in which it can be deployed.
+
 ## Contributing
 
 We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
