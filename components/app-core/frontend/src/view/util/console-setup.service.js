@@ -45,8 +45,7 @@
      * @returns {boolean} Flag indicating if upgrade in progress
      */
     function setupRequired(response) {
-      return true;
-      // return response.status === 503 && !!response.headers('Stratos-Setup-Required') && response.config.url.indexOf('/pp') === 0;
+      return response.status === 503 && !!response.headers('Stratos-Setup-Required') && response.config.url.indexOf('/pp') === 0;
     }
 
     /**
