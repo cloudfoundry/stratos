@@ -49,10 +49,14 @@
     options.env = _.clone(process.env);
     options.env.NODE_ENV = 'development';
     options.env.env = 'development';
-    var c = fork(cmd,
-      // You can add a spec file if you just want to run one set of test specs
-      ['./build/coverage.conf.js'],
-      options);
+
+    var args = ['./build/coverage.conf.js'];
+    if (process.env.STRATOS_E2E_SUITE) {
+      args.push('--suite');
+      args.push(process.env.STRATOS_E2E_SUITE);
+    }
+
+    var c = fork(cmd, args, options);
     c.on('close', function () {
       cb();
     });
@@ -93,4 +97,16 @@
       'e2e:clean:dist'
     );
   });
+
+
+  gulp.task('e2e:runq', function () {
+    paths.browserSyncDist = paths.instrumented;
+    config.browserSyncPort = 4000;
+    config.disableServerLogging = true;
+    runSequence(
+      'start-server',
+      'e2e:tests',
+      'stop-server'
+    );
+  });  
 })();
