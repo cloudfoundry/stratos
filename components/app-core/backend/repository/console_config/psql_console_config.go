@@ -12,13 +12,19 @@ import (
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
-var getConsoleConfig = `SELECT uaa_endpoint, console_admin_role, console_client, console_client_secret, skip_ssl_validation
+var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation
 							FROM console_config`
 
-var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, console_admin_role, console_client, console_client_secret, skip_ssl_validation)
-						VALUES ($1, $2, $3, $4, $5)`
+var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, is_setup_complete)
+						VALUES ($1, $2, $3, $4, $5,'n')`
+
+var updateConsoleConfig = `UPDATE console_config SET console_admin_scope = $1, is_setup_complete = 'y'`
 
 var getTableCount = `SELECT count(uaa_endpoint) FROM console_config`
+
+var hasSetupCompleted = `SELECT is_setup_complete FROM console_config`
+
+var deleteConsoleConfig = `TRUNCATE console_config`
 
 // PostgresCNSIRepository is a PostgreSQL-backed ConsoleConfig repository
 type ConsoleConfigRepository struct {
@@ -36,6 +42,9 @@ func InitRepositoryProvider(databaseProvider string) {
 	getConsoleConfig = datastore.ModifySQLStatement(getConsoleConfig, databaseProvider)
 	saveConsoleConfig = datastore.ModifySQLStatement(saveConsoleConfig, databaseProvider)
 	getTableCount = datastore.ModifySQLStatement(getTableCount, databaseProvider)
+	hasSetupCompleted = datastore.ModifySQLStatement(hasSetupCompleted, databaseProvider)
+	updateConsoleConfig = datastore.ModifySQLStatement(updateConsoleConfig, databaseProvider)
+	deleteConsoleConfig = datastore.ModifySQLStatement(deleteConsoleConfig, databaseProvider)
 }
 
 // ListByUser - Returns a list of CNSIs registered by a user
@@ -60,7 +69,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 		}
 
 		consoleConfig = new(interfaces.ConsoleConfig)
-		err := rows.Scan(&authEndpoint, &consoleConfig.ConsoleAdminRole, &consoleConfig.ConsoleClient,
+		err := rows.Scan(&authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan config record: %v", err)
@@ -73,23 +82,86 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 	return consoleConfig, nil
 }
-// Save - Persist a CNSI Record to a datastore
+// Save - Persist a Console setup to a datastore
 func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleConfig) error {
-	log.Printf("Saving ConsoleConfig: %+v", config)
+	log.Debug("Saving ConsoleConfig: %+v", config)
+
+	// First wipe any values that may exist in the table
+	err := c.deleteConsoleConfig()
+	if err != nil {
+		return fmt.Errorf("Unable to truncate Console Config table: %v", err)
+	}
 	if _, err := c.db.Exec(saveConsoleConfig, fmt.Sprintf("%s", config.UAAEndpoint),
-		config.ConsoleAdminRole, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation); err != nil {
-		return fmt.Errorf("Unable to Save CNSI record: %v", err)
+		config.ConsoleAdminScope, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation); err != nil {
+		return fmt.Errorf("Unable to Save Console Config record: %v", err)
+	}
+
+	return nil
+}
+
+func (c *ConsoleConfigRepository) UpdateConsoleConfig(config *interfaces.ConsoleConfig) error {
+	log.Debug("Saving ConsoleConfig: %+v", config)
+	if _, err := c.db.Exec(updateConsoleConfig, config.ConsoleAdminScope); err != nil {
+		return fmt.Errorf("Unable to Save Console Config record: %v", err)
+	}
+
+	return nil
+}
+
+func (c *ConsoleConfigRepository) deleteConsoleConfig() error {
+	if _, err := c.db.Exec(deleteConsoleConfig); err != nil {
+		return fmt.Errorf("Unable to delete Console Config record: %v", err)
 	}
 
 	return nil
 }
 
 func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
+
+	rowCount, err := c.getTableCount()
+	if err != nil {
+		return false, err
+	}
+
+	if rowCount == 0{
+		return false, nil
+	}
+
+	// A row exists, check if is_setup_complete is set
+	isSetupComplete, err := c.isSetupComplete()
+	if err != nil {
+		return false, err
+	}
+
+	return isSetupComplete, nil
+}
+
+func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
+	rows, err := c.db.Query(hasSetupCompleted)
+	defer rows.Close()
+
+	if err != nil {
+		return false, fmt.Errorf("Exception occurred when fetching row: %v", err)
+	}
+
+	isSetupComplete := false
+	for rows.Next() {
+
+		err := rows.Scan(&isSetupComplete)
+		if err != nil {
+			return false, fmt.Errorf("Unable to scan config record: %v", err)
+		}
+	}
+
+	return isSetupComplete, nil
+}
+
+func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	rows, err := c.db.Query(getTableCount)
 	defer rows.Close()
 
 	if err != nil {
-		return false, fmt.Errorf("Exception occurred when fetching row count: %v", err)
+		return 0, fmt.Errorf("Exception occurred when fetching row count: %v", err)
 	}
 
 	count := 0
@@ -97,10 +169,10 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 
 		err := rows.Scan(&count)
 		if err != nil {
-			return false, fmt.Errorf("Unable to scan config record: %v", err)
+			return 0, fmt.Errorf("Unable to scan config record: %v", err)
 		}
 	}
 
-	return count == 1, nil
+	return count, nil
 }
 

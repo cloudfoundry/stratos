@@ -40,7 +40,8 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
 	}
 	consoleConfig.UAAEndpoint = url
-	consoleConfig.ConsoleAdminRole = c.FormValue("console_admin_role")
+	username := c.FormValue("username")
+	password := c.FormValue("password")
 	consoleConfig.ConsoleClient = c.FormValue("console_client")
 	consoleConfig.ConsoleClientSecret = c.FormValue("console_client_secret")
 	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
@@ -57,7 +58,60 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Failed to establish DB connection due to %s", err)
 	}
 
+	// Authenticate with UAA
+	authEndpoint := fmt.Sprintf("%s/oauth/token", url)
+	uaaRes, err := p.getUAATokenWithCreds(skipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to authenticate with UAA",
+			"Failed to authenticate with UAA due to %s", err)
+	}
+
+	userTokenInfo, err := getUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to authenticate with UAA2",
+			"Failed to authenticate with UAA due to %s", err)
+	}
+
+	// Check if partial data already exists
 	err = consoleRepo.SaveConsoleConfig(consoleConfig)
+	if err != nil {
+		return interfaces.NewHTTPShadowError(
+			http.StatusInternalServerError,
+			"Failed to store Console configuration data",
+			"Console configuration data storage failed due to %s", err)
+	}
+	c.JSON(http.StatusOK, userTokenInfo)
+	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
+	return nil
+}
+
+func (p *portalProxy) setupConsoleUpdate(c echo.Context) error {
+
+	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Failed to connect to Database!")
+	}
+	initialised, _ := consoleRepo.IsInitialised()
+	if initialised {
+		return echo.NewHTTPError(http.StatusForbidden, "Console already setup!")
+	}
+
+	consoleConfig := new(interfaces.ConsoleConfig)
+	consoleConfig.ConsoleAdminScope = c.FormValue("console_admin_scope")
+
+	if err != nil {
+		return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
+		return interfaces.NewHTTPShadowError(
+			http.StatusInternalServerError,
+			"Failed to store Console configuration data",
+			"Failed to establish DB connection due to %s", err)
+	}
+
+	err = consoleRepo.UpdateConsoleConfig(consoleConfig)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
@@ -88,9 +142,9 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, errors.New("CONSOLE_CLIENT_SECRET not found")
 	}
 
-	consoleAdminRole, err := config.GetValue("CONSOLE_ADMIN_ROLE")
+	consoleAdminScope, err := config.GetValue("CONSOLE_ADMIN_SCOPE")
 	if err != nil {
-		return consoleConfig, errors.New("CONSOLE_ADMIN_ROLE not found")
+		return consoleConfig, errors.New("CONSOLE_ADMIN_SCOPE not found")
 	}
 
 	skipSslValidation, err := config.GetValue("SKIP_SSL_VALIDATION")
@@ -102,7 +156,7 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, fmt.Errorf("Unable to parse UAA Endpoint: %v", err)
 	}
 
-	consoleConfig.ConsoleAdminRole = consoleAdminRole
+	consoleConfig.ConsoleAdminScope = consoleAdminScope
 	consoleConfig.ConsoleClient = consoleClient
 	consoleConfig.ConsoleClientSecret = consoleClientSecret
 	consoleConfig.SkipSSLValidation, err = strconv.ParseBool(skipSslValidation)
@@ -143,7 +197,7 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 			}
 		}
 		return func(c echo.Context) error {
-			if c.Request().URL().Path() == "/v1/setup" {
+			if c.Request().URL().Path() == "/v1/setup" ||  c.Request().URL().Path() == "/v1/setup/update" {
 				return h(c)
 			}
 			c.Response().Header().Add("Stratos-Setup-Required", "true")

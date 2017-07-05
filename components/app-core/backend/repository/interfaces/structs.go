@@ -72,11 +72,12 @@ type ConnectedUser struct {
 }
 
 type ConsoleConfig struct {
-	UAAEndpoint          *url.URL `json:"uaa_endpoint"`
-	ConsoleAdminRole     string   `json:"console_admin_role"`
-	ConsoleClient        string   `json:"console_client"`
-	ConsoleClientSecret  string   `json:"console_client"`
-	SkipSSLValidation    bool     `json:"skip_ssl_validation"`
+	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
+	ConsoleAdminScope   string   `json:"console_admin_scope"`
+	ConsoleClient       string   `json:"console_client"`
+	ConsoleClientSecret string   `json:"console_client"`
+	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
+	IsSetupComplete     bool     `json:"is_setup_complete"`
 }
 
 type PortalConfig struct {

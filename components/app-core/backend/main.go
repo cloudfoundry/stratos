@@ -488,6 +488,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		go p.SetupPoller(addSetupMiddleware)
 		e.Use(p.SetupMiddleware(addSetupMiddleware))
 		pp.POST("/v1/setup", p.setupConsole)
+		pp.POST("/v1/setup/update", p.setupConsoleUpdate)
 	}
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)

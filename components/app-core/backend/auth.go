@@ -102,7 +102,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		}
 	}
 
-	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminRole)
+	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	resp := &interfaces.LoginRes{
 		Account:     c.FormValue("username"),
@@ -337,6 +337,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	defer res.Body.Close()
 
 	var response UAAResponse
+
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {
 		log.Errorf("Error decoding response: %v", err)
@@ -521,7 +522,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 	}
 
 	// is the user a UAA admin?
-	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.ConsoleConfig.ConsoleAdminRole)
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	// add the uaa entry to the output
 	uaaEntry := &interfaces.ConnectedUser{
