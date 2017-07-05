@@ -17,6 +17,12 @@ import (
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
+type setupMiddleware struct {
+	addSetup    bool
+	consoleRepo console_config.Repository
+	wg          sync.WaitGroup
+}
+
 func (p *portalProxy) setupConsole(c echo.Context) error {
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
@@ -112,45 +118,36 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	}
 	return consoleConfig, nil
 }
-func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.MiddlewareFunc {
 
-	var wg sync.WaitGroup
-	// Continuously check if console_config has been initialised
-	configured := false
-	go func() {
-		isInitialised, err := setupMiddleware.consoleRepo.IsInitialised()
-		for err != nil || !isInitialised {
-			time.Sleep(10 * time.Second)
-			isInitialised, err = setupMiddleware.consoleRepo.IsInitialised()
-		}
-		p.Config.ConsoleConfig, _ = setupMiddleware.consoleRepo.GetConsoleConfig()
-		wg.Add(1)
-		configured = true
-		wg.Done()
-	}()
+func (p *portalProxy) SetupPoller(setupMiddleware *setupMiddleware) {
+	isInitialised, err := setupMiddleware.consoleRepo.IsInitialised()
+	for err != nil || !isInitialised {
+		time.Sleep(10 * time.Second)
+		isInitialised, err = setupMiddleware.consoleRepo.IsInitialised()
+	}
+	p.Config.ConsoleConfig, _ = setupMiddleware.consoleRepo.GetConsoleConfig()
+	setupMiddleware.wg.Add(1)
+	setupMiddleware.addSetup = false
+	setupMiddleware.wg.Done()
+}
+
+func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.MiddlewareFunc {
 
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
 
-		wg.Wait()
-		log.Printf("Is Initialised: %+v", configured)
-		if configured {
-			// Noop in case its configured
-			log.Printf("Already configured path!")
+		setupMiddleware.wg.Wait()
+		if !setupMiddleware.addSetup {
+			// No-op in case the instance has been setup
 			return func(c echo.Context) error {
 				return h(c)
 			}
 		}
 		return func(c echo.Context) error {
-
-			log.Printf("URI: %+v" + c.Request().URL().Path())
 			if c.Request().URL().Path() == "/v1/setup" {
 				return h(c)
 			}
-			return interfaces.NewHTTPShadowError(
-				http.StatusInternalServerError,
-				"Console is not setup",
-				"Console is not setup",
-			)
+			c.Response().Header().Add("Stratos-Setup-Required", "true")
+			return c.NoContent(http.StatusServiceUnavailable)
 		}
 	}
 }

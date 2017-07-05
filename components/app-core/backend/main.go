@@ -46,11 +46,6 @@ var (
 	httpClientSkipSSL = http.Client{}
 )
 
-type setupMiddleware struct {
-	addSetup    bool
-	consoleRepo console_config.Repository
-}
-
 func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 	log.Info("Attempting to shut down gracefully...")
 	log.Info(`--- Closing databaseConnectionPool`)
@@ -490,6 +485,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	// Add middleware to block requests if unconfigured
 	if addSetupMiddleware.addSetup {
+		go p.SetupPoller(addSetupMiddleware)
 		e.Use(p.SetupMiddleware(addSetupMiddleware))
 		pp.POST("/v1/setup", p.setupConsole)
 	}
