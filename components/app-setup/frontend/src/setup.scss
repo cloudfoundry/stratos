@@ -1,0 +1,8 @@
+.setup {
+  @include flex-align(center, center, column);
+
+  //TODO:
+  background-color: #003358;
+  border-top: 60px solid #00243e;
+  color: white;
+}

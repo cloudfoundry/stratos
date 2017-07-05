@@ -22,11 +22,21 @@
    * @memberof app.view
    * @name app.view.consoleSetupCheck
    * @param {object} $q - the Angular Promise service
+   * @param {object} $state - the Angular $state service
    * @param {object} appEventService - the event bus service
    * @description The utility will intercept all HTTP responses and check for 503/upgrade responses
    * @returns {object} The upgrade check service
    */
   function consoleSetupServiceFactory($q, appEventService) {
+
+    var service = {
+      setupRequired: setupRequired,
+      responseError: responseError,
+      setupState: null
+    };
+
+    return service;
+
     /**
      * @function setupRequired
      * @memberof app.view.consoleSetupCheck
@@ -34,32 +44,32 @@
      * @description Checks if the supplied response indicates an upgrade in progress
      * @returns {boolean} Flag indicating if upgrade in progress
      */
-
     function setupRequired(response) {
-      return response.status === 503 && !!response.headers('Stratos-Setup-Required') && response.config.url.indexOf('/pp') === 0;
+      return true;
+      // return response.status === 503 && !!response.headers('Stratos-Setup-Required') && response.config.url.indexOf('/pp') === 0;
     }
 
-    return {
-      setupRequired: setupRequired,
-
-      /**
-       * @function responseError
-       * @memberof app.view.consoleSetupCheck
-       * @param {object} rejection - $http response object
-       * @description HTTP Interceptor function for processing response errors
-       * @returns {promise} For onward error processing
-       */
-      responseError: function (rejection) {
-        // rejection is a response object
-        // Must be a 503 with the Stratos-Setup-Required header and must request must be to the backend
-        if (setupRequired(rejection)) {
+    /**
+     * @function responseError
+     * @memberof app.view.consoleSetupCheck
+     * @param {object} rejection - $http response object
+     * @description HTTP Interceptor function for processing response errors
+     * @returns {object} Promise for onward error processing
+     */
+    function responseError(rejection) {
+      // rejection is a response object
+      // Must be a 503 with the Stratos-Setup-Required header and must request must be to the backend
+      if (setupRequired(rejection)) {
+        if (service.setupState) {
+          appEventService.$emit(appEventService.events.TRANSFER, service.setupState);
+        } else {
           // This indicates upgrade in progress, so change state to an upgrade error page
           appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'setupRequired'});
         }
-        // Always return the rejection as it was
-        return $q.reject(rejection);
       }
-    };
+      // Always return the rejection as it was
+      return $q.reject(rejection);
+    }
   }
 
 })();
