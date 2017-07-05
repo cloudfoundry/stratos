@@ -19,6 +19,17 @@ console-view {
     margin-left: 0;
   }
 
+  &.second-navbar-hidden {
+    padding-top: 0;
+    .container-fluid {
+      padding: 0;
+    }
+  }
+
+  .content {
+    height: 100%;
+  }
+
   & > * {
     display: flex;
     flex-direction: column;

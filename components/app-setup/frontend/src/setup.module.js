@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app-setup', [])
+    .module('app-setup', ['app-setup.view'])
     .config(registerState)
     .run(registerSetup);
 
@@ -18,6 +18,8 @@
       params: {
         hideNavigation: true,
         hideAccount: true,
+        hideBottomNavigation: true,
+        hideSecondNavigation: true,
         error: ''
       }
     });
@@ -27,18 +29,9 @@
     consoleSetupCheck.setupState = SETUP_STATE;
   }
 
-  function setupController() {
-
+  function setupController(appSetupService) {
     var vm = this;
-
-    vm.wizardActions = {
-
-    };
-
-    vm.wizardOptions = {
-
-    };
-
+    vm.startSetup = appSetupService.show;
   }
 
 })();

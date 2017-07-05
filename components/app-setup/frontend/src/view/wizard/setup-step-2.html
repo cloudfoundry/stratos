@@ -1,1 +1,15 @@
-setup wizard 1
+<div class="app-setup-step-2">
+  <p class="control-title" translate>app-setup.step-2.intro</p>
+  <div class="form-group console-scopes" focusable-input
+       ng-class="{'has-error': wizardForm['step2'].consoleScope.$invalid && wizardForm['step2'].consoleScope.$dirty}">
+    <label class="control-label" translate>app-setup.step-2.console-scope.label</label>
+
+    <!--disabled="!step.userInput.githubProjectValid"-->
+    <search-box
+      ng-model="step.userInput.consoleScope"
+      input-options="step.data.consoleScopes"
+      placeholder="{{ 'app-setup.step-2.console-scope.placeholder' | translate}}"
+      required>
+    </search-box>
+  </div>
+</div>

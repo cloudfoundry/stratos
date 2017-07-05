@@ -1,8 +1,64 @@
-.setup {
-  @include flex-align(center, center, column);
-
-  //TODO:
-  background-color: #003358;
-  border-top: 60px solid #00243e;
-  color: white;
+.modal.detail-view.detail-view-dialog ul.wizard-nav.nav {
+  margin-bottom: 0;
 }
+.modal.detail-view.detail-view-dialog > .modal-dialog > .modal-content .detail-view-content.setup-wizard wizard .wizard-step {
+  padding: 0 $console-unit-space $console-unit-space $console-unit-space;
+  min-height: 460px;
+}
+.setup {
+
+  //.app-setup-step-2 {
+  //  .console-scopes {
+      //margin-bottom: $console-unit-space * 5;
+    //}
+  //}
+
+  //@include flex-align(center, center, column);
+
+
+  //background-color: #003358;
+  //border-top: 60px solid #00243e;
+  //color: white;
+
+  //.login-page {
+  //  height: 80%;
+  //}
+  //
+  //wizard .wizard{
+  //  //TODO: RC
+  //  background-color: #f2f2f2;
+  //  padding: $console-unit-space;
+  //
+  //  @include flex-align(flex-start, stretch, column);
+  //
+  //  .wizard-nav {
+  //    width: 100%;
+  //    border-bottom: 1px solid #ccc;
+  //    background-color: transparent;
+  //    //margin-bottom: $console-unit-space;
+  //    //margin-left: 15px;
+  //
+  //    .wizard-nav-item {
+  //      display: inline-block;
+  //    }
+  //  }
+  //
+  //  .wizard-body {
+  //    padding-bottom: $console-unit-space;
+  //    margin-left: 0;
+  //    margin-right: 0;
+  //  }
+  //
+  //  .wizard-foot {
+  //    button:last-of-type {
+  //      float: right;
+  //    }
+  //  }
+  //}
+
+
+
+
+
+}
+
