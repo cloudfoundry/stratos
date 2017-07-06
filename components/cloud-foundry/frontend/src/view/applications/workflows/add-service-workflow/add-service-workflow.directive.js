@@ -104,8 +104,7 @@
         hideStepNavStack: true,
         lastStepCommit: false,
         btnText: {
-          cancel: config.confirm ? 'buttons.cancel'
-            : $translate.instant('app-tabs.services.add.back-to-services')
+          cancel: config.confirm ? 'buttons.cancel' : 'app-tabs.services.add.back-to-services'
         },
         steps: [
           {
@@ -122,7 +121,8 @@
                   return _onServiceBindingError();
                 });
               }, function () {
-                return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-create'));
+                //TODO: RC TEST ME
+                return $q.reject('app-tabs.services.add.notifications.failure-create');
               });
             }
           }
@@ -334,7 +334,7 @@
         vm.addService().then(function () {
           vm.addBinding().then(function () {
             // show notification for successful binding
-            var successMsg = $translate.instant('app-tabs.services.add.title', {
+            var successMsg = $translate.instant('app-tabs.services.add.notifications.success', {
               service: vm.options.serviceInstance.entity.name,
               appName: vm.data.app.summary.name
             });
@@ -344,7 +344,8 @@
             return _onServiceBindingError();
           });
         }, function () {
-          return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-create'));
+          //TODO: RC TEST ME
+          return $q.reject('app-tabs.services.add.notifications.failure-create');
         });
       } else {
         vm.modal.close();
@@ -367,7 +368,8 @@
                                                           function (o) { return o.metadata.guid === guid; });
         });
       }
-      return $q.reject($translate.instant('app-tabs.services.add.notifications.failure-bind'));
+      //TODO: RC TEST ME
+      return $q.reject('app-tabs.services.add.notifications.failure-bind');
     }
   }
 

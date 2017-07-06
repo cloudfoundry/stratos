@@ -8,39 +8,6 @@
     "cloud-foundry": "@:cloud-foundry"
   },
 
-  "roles": {
-    "none": "none assigned",
-    "org": {
-      "short": {
-        "org_user": "User",
-        "org_manager": "Manager",
-        "org_auditor": "Auditor",
-        "billing_manager": "Billing Manager"
-      },
-      "long": {
-        "org_user": "[[@:org]] [[@:roles.org.short.org_user]]",
-        "org_manager": "[[@:org]] [[@:roles.org.short.org_manager]]",
-        "org_auditor": "[[@:org]] [[@:roles.org.short.org_auditor]]",
-        "billing_manager": "[[@:org]] [[@:roles.org.short.billing_manager]]"
-      }
-    },
-    "space": {
-      "none": "none assigned",
-      "short": {
-        "space_manager": "Manager",
-        "space_auditor": "Auditor",
-        "space_developer": "Developer"
-      },
-      "long": {
-        "space_manager": "[[@:space]] [[@:roles.space.short.space_manager]]",
-        "space_auditor": "[[@:space]] [[@:roles.space.short.space_auditor]]",
-        "space_developer": "[[@:space]] [[@:roles.space.short.space_developer]]"
-      }
-    },
-    "cf-admin": "administrator",
-    "cf-user": "user"
-  },
-
   "routes": {
     "unknown-domain": "Unknown",
     "unmap-app": {

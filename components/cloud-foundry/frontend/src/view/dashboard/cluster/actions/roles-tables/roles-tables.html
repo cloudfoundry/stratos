@@ -12,7 +12,7 @@
       <table class="table table-outlined table-selectable">
         <thead>
         <tr>
-          <th st-sort="details.org.entity.name" st-sort-default="true" st-skip-natural="true" translate>ORGANIZATION</th>
+          <th st-sort="details.org.entity.name" st-sort-default="true" st-skip-natural="true" translate>update-roles-table.org</th>
           <th ng-repeat="(key, role) in rolesTablesCtrl.config.orgRoles">{{role | translate}}</th>
           <th></th>
         </tr>
@@ -27,7 +27,7 @@
           <td>
             <a ng-if="rolesTablesCtrl.config.containsRoles(org.details.org.metadata.guid) && !rolesTablesCtrl.disableAssignOrgRoles(org.details.org)"
                ng-click="rolesTablesCtrl.config.removeFromOrg(org.details.org.metadata.guid)" translate>
-              Remove from Org</a>
+              update-roles-table.button-remove-from-org</a>
           </td>
         </tr>
       </table>
@@ -43,7 +43,7 @@
       <table class="table table-outlined table-selectable">
         <thead>
         <tr>
-          <th st-sort="label" st-sort-default="true" st-skip-natural="true" translate>SPACE</th>
+          <th st-sort="label" st-sort-default="true" st-skip-natural="true" translate>update-roles-table.space</th>
           <th
             ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles"
             ng-if="role || !rolesTablesCtrl.config.disableOrg">{{role | translate}}</th>
@@ -70,7 +70,7 @@
         <tr>
           <td colspan="6" class="text-center">
             <a ng-click="rolesTablesCtrl.ctrl.pagesSpaceCount = rolesTablesCtrl.spaces.length">
-              <span translate>Show All</span> ({{rolesTablesCtrl.spaces.length}})
+              <span translate>update-roles-table.button-show-all</span> ({{rolesTablesCtrl.spaces.length}})
             </a>
             <div ng-show="false" st-pagination="" st-items-by-page="rolesTablesCtrl.ctrl.pagesSpaceCount"></div>
           </td>

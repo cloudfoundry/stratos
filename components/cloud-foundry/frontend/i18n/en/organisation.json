@@ -4,6 +4,10 @@
       "organisations": "Organizations"
     }
   },
+  "org-list": {
+    "error": "An error occurred retrieving organizations",
+    "no-orgs": "You have no organizations"
+  },
   "org-info": {
     "summary": {
       "title": "Summary"

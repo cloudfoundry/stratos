@@ -10,16 +10,26 @@
     "title": "Assign User(s)",
     "step1": {
       "title": "Select User(s)",
+      "user-count": "Users",
+      "no-matching-users": "There are no users matching this search term",
+      "user-label": "User",
       "busy-message": "Fetching Users..."
     },
     "step2": {
       "title": "Assign Roles",
+      "intro": "Select an organization to assign roles to.",
+      "org-label": "Organization",
+      "org-placeholder": "Select organization",
       "button-yes": "Assign"
     }
   },
   "manage-user-roles": {
     "title-singular": "Manage User: {{ name }}",
     "title-plural": "Change User's Roles",
+    "error-init-load": "Failed to update list of user/s roles",
+    "intro-plural-roles": "Change roles for the following users.",
+    "warning-plural-roles": "All previously assigned roles will be updated.",
+    "button-clear-all": "Clear All User's Roles",
     "button-submit": "Save Changes"
   },
   "change-roles-confirmation": {
@@ -48,5 +58,49 @@
       "failure-plural": "Failed to update role(s) for users {{failedUsers}}. ",
       "failure-reason": "Reason: '{{reason}}'"
     }
+  },
+  "selected-users-roles-change": {
+    "singular": "SELECTED USER",
+    "plural": "SELECTED USERS",
+    "button-view-all": "View All",
+    "button-view-less": "View Less"
+  },
+  "update-roles-table": {
+    "org": "ORGANIZATION",
+    "button-remove-from-org": "Remove from Org",
+    "space": "SPACE",
+    "button-show-all": "Show All"
+  },
+  "roles": {
+    "none": "none assigned",
+    "org": {
+      "short": {
+        "org_user": "User",
+        "org_manager": "Manager",
+        "org_auditor": "Auditor",
+        "billing_manager": "Billing Manager"
+      },
+      "long": {
+        "org_user": "[[@:org]] [[@:roles.org.short.org_user]]",
+        "org_manager": "[[@:org]] [[@:roles.org.short.org_manager]]",
+        "org_auditor": "[[@:org]] [[@:roles.org.short.org_auditor]]",
+        "billing_manager": "[[@:org]] [[@:roles.org.short.billing_manager]]"
+      }
+    },
+    "space": {
+      "none": "none assigned",
+      "short": {
+        "space_manager": "Manager",
+        "space_auditor": "Auditor",
+        "space_developer": "Developer"
+      },
+      "long": {
+        "space_manager": "[[@:space]] [[@:roles.space.short.space_manager]]",
+        "space_auditor": "[[@:space]] [[@:roles.space.short.space_auditor]]",
+        "space_developer": "[[@:space]] [[@:roles.space.short.space_developer]]"
+      }
+    },
+    "cf-admin": "administrator",
+    "cf-user": "user"
   }
 }
