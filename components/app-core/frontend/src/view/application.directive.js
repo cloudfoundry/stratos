@@ -49,7 +49,7 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, consoleSetupCheck, $timeout, $state, $stateParams, $window, $rootScope, $scope) {
+                                 appSelectLanguage, appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
