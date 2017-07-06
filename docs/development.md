@@ -40,7 +40,7 @@ Components can include both frontend and backend code. The source code for these
 
 The Console Frontend is written using AngularJS and the backend written in Go.
 
-The Cconsole build determines the location of the frotnend and backend code via a configuration file
+The Cconsole build determines the location of the frontend and backend code via a configuration file
 named `[component name].component.json`.
 When no frontend configuration is found in *.component.json it is assumed the component is purely for the frontend and that its source
 code sites directly in the component folder, father than a `frontend` subfolder.
@@ -102,6 +102,8 @@ lint | Executes linting via eslint. See ./.eslintrc for rules
 
 Some tasks can be accessed via npm, by running `npm script target` along with additional test 
 functionality:
+
+> Note: When using the `dev` task, web sockets do not get forwarded, so log streaming and ssh access will not work - use the `run` task to test these.
 
 NPM script name | Description
 ----------------|------------
