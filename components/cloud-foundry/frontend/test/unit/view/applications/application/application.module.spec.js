@@ -183,13 +183,13 @@
 
       it('should stop polling when a modal interaction starts', function () {
         appEventService.$emit(appEventService.events.MODAL_INTERACTION_START);
-        expect(_.isUndefined(controller.scheduledUpdate)).toBe(true);
+        expect(controller.autoUpdate.run).toBe(false);
       });
 
       it('should resume polling when a modal interaction starts', function () {
         appEventService.$emit(appEventService.events.MODAL_INTERACTION_END);
         $httpBackend.flush();
-        expect(controller.scheduledUpdate).toBe('interval_created');
+        expect(controller.autoUpdate.run).toBe(true);
       });
     });
 
