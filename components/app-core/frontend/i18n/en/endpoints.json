@@ -16,8 +16,18 @@
       "success": "Successfully unregistered endpoint '{{name}}'"
     },
     "connect": {
-      "connect": "Connect",
-      "success": "Successfully connected to '{{name}}'"
+      "connect-action": "Connect",
+      "title": "Provide Credentials",
+      "description": "You should have received an email from your administrator with credentials for endpoints you have access to. Please contact your administrator for help.",
+      "service-label": "Service",
+      "url-label": "URL",
+      "username-label": "Username",
+      "password-label": "Password",
+      "connect-button": "Connect",
+      "success-notification": "Successfully connected to '{{name}}'",
+      "error-no-connect": "The authentication server failed to respond. Please try again. If this error persists, please contact the administrator.",
+      "error-server-failure": "A server error occurred when attempting to register your service. Please try again. If this error persists, please contact the administrator.",
+      "error-user-input": "The username and password combination you used are incorrect. Please try again."
     },
     "disconnect": {
       "disconnect": "Disconnect",

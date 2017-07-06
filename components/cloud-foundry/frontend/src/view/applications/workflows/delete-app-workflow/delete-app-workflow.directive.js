@@ -223,7 +223,7 @@
               .filter(function (o) { return o && o.bound_app_count === 1; })
               .map('guid')
               .value();
-            return cfServiceDeleteAppWorkflow.deleteServiceInstances(safeServiceInstances);
+            return cfServiceDeleteAppWorkflow.deleteServiceInstances(vm.cnsiGuid, safeServiceInstances);
           });
       } else {
         var deferred = $q.defer();

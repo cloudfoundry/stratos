@@ -83,7 +83,8 @@
           templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/actions/manage-user/manage-user.html',
           buttonTitles: {
             submit: $translate.instant('manage-user-roles.button-submit')
-          }
+          },
+          dialog: true
         },
         {
           data: {

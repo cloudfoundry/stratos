@@ -132,7 +132,9 @@
           'class="register-service-wizard" ' +
           'actions="context.wizardActions" ' +
           'options="context.wizardOptions">' +
-          '</wizard>'
+          '</wizard>',
+          dialog: true,
+          class: 'dialog-form-large'
         }, context);
 
         return modal.result;

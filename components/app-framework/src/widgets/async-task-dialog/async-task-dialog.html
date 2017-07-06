@@ -37,7 +37,8 @@
                         'btn-commit': asyncTaskDialogCtrl.context.submitCommit()
                       }"
             ng-click="asyncTaskDialogCtrl.invokeAction()"
-            ng-disabled="asyncTaskDialogCtrl.disableSubmit()">
+            ng-disabled="asyncTaskDialogCtrl.disableSubmit()"
+            type="submit">
       {{ asyncTaskDialogCtrl.context.buttonTitles.submit }}
     </button>
   </div>
