@@ -33,11 +33,6 @@ Open a terminal and cd to the `deploy/kubernetes` directory:
 $ cd deploy/kubernetes
 ```
 
-Create the persistent volumes needed by the Console:
-
-```
-kubectl create -f optional/console-pv.yaml
-```
 Run helm install:
 
 ```
@@ -74,3 +69,30 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 > Note: For some environments like Minikube, you are not given an IP Address - it may show as `<nodes>`. In this case, run `kubectl cluster-info` and use the IP address of your node shown in the output of this command.
 
+## UAA for Testing
+A UAA Helm chart has been provided to quickly bring up an UAA instance for testing the console.
+
+To setup the UAA, install it via Helm
+```
+$ cd test
+$  helm install uaa --namespace uaa --name my-uaa
+```
+
+After setup, the UAA should be available on the service port mapped to the external IP. In the following example it would be `192.168.77.1:31249`.
+
+```
+15:26 $ helm status my-uaa
+LAST DEPLOYED: Thu Jul  6 14:47:10 2017
+NAMESPACE: uaa
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/Service
+NAME             CLUSTER-IP  EXTERNAL-IP  PORT(S)         AGE
+console-uaa-int  10.0.0.82   192.168.77.1      8080:31249/TCP  40m
+
+==> v1beta1/Deployment
+NAME  DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+uaa   1        1        1           1          4m
+
+```

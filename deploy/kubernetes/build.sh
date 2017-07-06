@@ -260,9 +260,9 @@ buildUI
 
 # Patch Values.yaml file
 cp values.yaml.tmpl values.yaml
-sed -ie 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
-sed -ie 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
-sed -ie 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
+sed -i -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
+sed -i -e 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
+sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 
 # Done
 echo
