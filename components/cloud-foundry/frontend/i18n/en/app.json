@@ -1,6 +1,6 @@
 {
   "app": {
-    "auto-update": "app auto update",
+    "auto-update": "Auto update",
     "state": {
       "separator": "&nbsp;-&nbsp;",
       "deployed": "Deployed",
