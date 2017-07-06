@@ -1,4 +1,5 @@
 package main
+// Based on https://github.com/golang/go/blob/master/src/cmd/go/internal/get/vcs.go
 
 import (
 	"bytes"
