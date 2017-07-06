@@ -12,10 +12,10 @@
     <div ng-if="!applicationCtrl.hideNavigation" class="navbar-toggle-labels navbar-toggle-width">
       <i ng-click="navBarCtrl.toggleNav(applicationCtrl)" class="material-icons">menu</i>
     </div>
-    <div class="secondary-navbar">
+    <div class="secondary-navbar" ng-class="{'second-navbar-hidden' : applicationCtrl.hideSecondNavigation}">
       <secondary-nav></secondary-nav>
     </div>
-    <div class="user-avatar" id="navbar-user-menu-dropdown">
+    <div class="user-avatar" id="navbar-user-menu-dropdown" ng-if="!applicationCtrl.hideAccount">
       <div class="action-menu-wrapper">
         <div class="actions-menu dropdown">
           <div class="nav-item actions-menu-icon dropdown-toggle user-avatar-action-button" data-toggle="dropdown">

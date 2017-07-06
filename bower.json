@@ -20,7 +20,8 @@
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry",
     "cf-app-push": "./components/cf-app-push",
-    "cf-app-ssh": "./components/cf-app-ssh"
+    "cf-app-ssh": "./components/cf-app-ssh",
+    "app-setup": "./components/app-setup"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

@@ -1,0 +1,51 @@
+{
+  "app-setup": {
+    "intro-title": "@:product.console",
+    "intro-description": "To start using [[@:product.console]] please configure",
+    "start-button": "Start Setup",
+    "wizard-title": "Setup the Console",
+    "step-1": {
+      "title": "UAA Part 1",
+      "uaa-intro": "UAA Endpoint",
+      "uaa-url": {
+        "label": "API URL",
+        "placeholder": "URL of UAA API",
+        "error-required": "Url is required",
+        "error-pattern": "Invalid URL"
+      },
+      "uaa-url-skip-ssl": {
+        "label": "Skip SSL validation for the endpoint"
+      },
+      "console-intro": "Console details in UAA",
+      "console-client": {
+        "label": "Client Id",
+        "placeholder": "",
+        "error-required": "Id is required"
+      },
+      "console-secret": {
+        "label": "Client Secret",
+        "placeholder": "",
+        "error-required": "Secret is required"
+      },
+      "console-admin": {
+        "label": "Admin Account",
+        "placeholder": "username",
+        "error-required": "Username is required"
+      },
+      "console-password": {
+        "label": "Password",
+        "placeholder": "",
+        "error-required": "Password is required"
+      }
+    },
+    "step-2": {
+      "title": "UAA Part 2",
+      "enter-message": "Validating ...",
+      "intro": "Console Scope",
+      "console-scope": {
+        "label": "Scope",
+        "placeholder": "UAA scope containing admin role"
+      }
+    }
+  }
+}
