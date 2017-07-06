@@ -1,6 +1,6 @@
 # Developing the Stratos UI Console
 
-> NOTE: This document is work in progress.
+> **Note:** This document is work in progress.
 
 The Stratos Console UI provides a single comprehensive and ubiquitous user 
 experience for: discovering, composing, developing and managing Cloud Native 
@@ -81,7 +81,7 @@ i18n | Internationalization strings per locale. By default the console contains 
 src | Javascript, html and scss related to the component
 test | Unit tests for the component
 
-**Note** the bower.json is in the root of the component 
+> **Note:** The bower.json is in the root of the component 
 
 ### Style Sheets
 The frontend defines styles in SCSS which is converted to CSS at build time. 
@@ -100,10 +100,10 @@ dev | Executes a developer build and serves the console via browser sync
 run | Executes a production build and serves the console via express
 lint | Executes linting via eslint. See ./.eslintrc for rules
 
+> **Note:** When using the `dev` task, web sockets do not get forwarded, so log streaming and ssh access will not work - use the `run` task to test these.
+
 Some tasks can be accessed via npm, by running `npm script target` along with additional test 
 functionality:
-
-> Note: When using the `dev` task, web sockets do not get forwarded, so log streaming and ssh access will not work - use the `run` task to test these.
 
 NPM script name | Description
 ----------------|------------
