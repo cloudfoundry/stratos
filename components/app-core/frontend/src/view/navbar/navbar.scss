@@ -38,6 +38,10 @@ nav.secondary-nav {
   z-index: 1030;
   display: flex;
 
+  &.navbar-hidden {
+    padding-left: 0;
+  }
+
   &.navbar-icons-only {
     padding-left: $main-nav-icons-width;
   }

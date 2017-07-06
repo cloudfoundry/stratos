@@ -43,6 +43,14 @@ bottom-nav {
   left: 0;
   width: $main-nav-width;
 
+  &.navbar-hidden {
+    width: 100%;
+
+    > div .bottom-nav-menu {
+      display: none;
+    }
+  }
+
   > div {
     display: flex;
     height: 100%;
