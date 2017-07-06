@@ -1,7 +1,6 @@
 # Developing the Stratos UI Console
 
-> We are in the process of creating this documentation and will update it 
-shortly.
+> NOTE: This document is work in progress.
 
 The Stratos Console UI provides a single comprehensive and ubiquitous user 
 experience for: discovering, composing, developing and managing Cloud Native 
@@ -14,31 +13,40 @@ cloud/compute providers.
 
 ## Components
 
-All console code can be found in the [components](../components) folder. 
-This contains core functionality that can be independently added to if required.
+The top-level repository contains three folders worth calling out:
+
+Folder | Description
+-------|------------
+build | Contains build scripts (mainly gulp-based) for both the backend and frontend
+components | Contains the source code for the Console
+deploy | Contains scripts and artifacts for deploying the Console.
+
+The Console code can be found in the [components](../components) folder. The following components are currently included:
 
 Component Name | Description
 ---------------|------------
-about-app | Component shows general console information as a navbar item
-app-core | Contains core front and back end code
-app-framework | Set of UI widgets
-app-theme | Style information for the console
+about-app | Provides an "about" view for the Console
+app-core | Contains core funtionality, such as login and navigation
+app-framework | Providers a set of UI widgets and utilities
+app-theme | Style information for the app-framework
 cloud-foundry | All Cloud Foundry specific code
-cloud-foundry-hosting | Specific component used for hosting the console as an app in a single cloud foundry
-endpoints-dashboard | Manage console endpoints, specifically cloud foundry's. The inclusion allows additional cloud foundry endpoints to be added
-suse-branding | Override styles to show the console with SUSE branding
+cloud-foundry-hosting | Specific component used for hosting the Console as an app in a single cloud foundry
+endpoints-dashboard | Manage Console endpoints, specifically cloud foundry's. The inclusion allows additional cloud foundry endpoints to be added
+suse-branding | Overrides styles to show the Console with SUSE branding
 
 ### Component architecture
-A standard component can contain frontend and backend code. The console 
-determines their location via the configuration file [component name].component.json.
-When no frontend configuration is found in *.component.json it is assumed 
-the component is purely for the frontend.
+
+Components can include both frontend and backend code. The source code for these sits together under a single component folder.
+
+The Console Frontend is written using AngularJS and the backend written in Go.
+
+The Cconsole build determines the location of the frotnend and backend code via a configuration file
+named `[component name].component.json`.
+When no frontend configuration is found in *.component.json it is assumed the component is purely for the frontend and that its source
+code sites directly in the component folder, father than a `frontend` subfolder.
 
 ### Including your own components
-Other components may be included to add additional items to the navigation 
-bar and their associated content. This can include additional types of 'endpoints' 
-(an existing endpoint for example is cloud foundry). Instructions on how to 
- carry out this will be added at a later date.
+Other components can be included to add additional items to the navigation bar and their associated content. This can include additional types of 'endpoints' (an existing endpoint for example is cloud foundry). Instructions on how to carry out this will be added at a later date.
 
 ## Working on the front end component
 
@@ -48,8 +56,8 @@ The frontend code is split into component directories as listed above.
 The standard set of components that exist in the console contain functionality 
 to manage cloud foundry instances and their applications.
 
-The frontend code is usually found within a 'frontend' folder and contains 
-a struture such as that in app-core/frontend
+The frontend code is usually found within a `frontend` folder and contains 
+a structure such as that in app-core/frontend component, for example:
 ```
 |-- frontend
 |   |-- assets     
@@ -66,11 +74,10 @@ a struture such as that in app-core/frontend
 `-- bower.json
 ```
 
-
 Directory | Contains
 ----------|------------
 assets | Any images required by the front end
-i18n | Internationalisation strings per locale. By default the console contains English (US)
+i18n | Internationalization strings per locale. By default the console contains English (US)
 src | Javascript, html and scss related to the component
 test | Unit tests for the component
 
@@ -78,13 +85,13 @@ test | Unit tests for the component
 
 ### Style Sheets
 The frontend defines styles in SCSS which is converted to CSS at build time. 
-Each component is responible for specifying it's root scss as a 'main' file 
+Each component is responsible for specifying it's root scss as a 'main' file 
 in it's bower.json. From this all other 
 component scss are gathered.
 
 ### Build Process
 The build process uses gulp, see the the root gulpfile.js. Below is a list 
-of important gulp task. 
+of important gulp tasks.
 
 Gulp task name | Description
 ----------|------------
@@ -93,13 +100,13 @@ dev | Executes a developer build and serves the console via browser sync
 run | Executes a production build and serves the console via express
 lint | Executes linting via eslint. See ./.eslintrc for rules
 
-Some tasks can be accessed via npm script target along with additional test 
-functionality
+Some tasks can be accessed via npm, by running `npm script target` along with additional test 
+functionality:
 
 NPM script name | Description
 ----------------|------------
 lint | Same as gulp lint
-coverage | Executes both unit and e2e tests and provides a combined coverage report in ./out/coverage-report
+coverage | Executes both unit and e2e tests and provides a combined coverage report in `./out/coverage-report`
 gate-check | Executes lint and unit tests, very handy to use before creating a PR 
 e2e | Executes end to end tests via protractor, also handy to use before creating a PR. Screenshots of the console for each failure can be found in ./out/e2e-failures
 test | Executes unit tests
@@ -108,12 +115,12 @@ test | Executes unit tests
 ### Run the frontend via gulp
 
 #### Requirements
-The console backend must be up and contactable by the developers machine. 
+The Console backend must be up and contactable by the developers machine. 
 This can be achieved via any of the methods 
 described in the [deploy](../deploy/README.md) instructions.
 
 #### Configuration
-The console frontend must know the address of the backend. This can be 
+The Console frontend must know the address of the backend. This can be 
 set by creating the file ./build/dev_config.js 
 with contents such as
 ```
@@ -122,8 +129,7 @@ with contents such as
 }
 ```
 
-For example, if the console was deployed and accessable via 
-`https://localhost`
+For example, if the console was deployed and accessible via `https://localhost`
 
 the following configuration should be used
 ```

@@ -35,6 +35,8 @@ Get an [Overview](docs/overview.md) of Stratos UI, its components and the differ
 
 We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
 
+For information to help getting started with development, please read the [Developer's Guide](docs/development.md).
+
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.md).
