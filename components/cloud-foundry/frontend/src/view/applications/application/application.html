@@ -2,11 +2,6 @@
   <div class="application-header font-semi-bold">
     <span class="app-header-app-name">{{ appCtrl.model.application.summary.name }}</span>
     <app-state-icon class="app-summary-app-state-icon" state="appCtrl.model.application.state.indicator"></app-state-icon>
-    <auto-update class="app-summary-auto-update"
-                 update="appCtrl.autoUpdate.update"
-                 interval="appCtrl.autoUpdate.interval"
-                 run="appCtrl.autoUpdate.run"
-                 popover="app.auto-update"></auto-update>
     <actions-toolbar ready="appCtrl.ready" items="appCtrl.appActions"></actions-toolbar>
   </div>
 
@@ -17,6 +12,11 @@
         {{ feature.label }}
       </a>
     </li>
+    <auto-update class="app-summary-auto-update"
+                 update="appCtrl.autoUpdate.update"
+                 interval="appCtrl.autoUpdate.interval"
+                 run="appCtrl.autoUpdate.run"
+                 popover-on="app.auto-update"></auto-update>
   </ul>
 
   <div class="application-details col-sm-12">
