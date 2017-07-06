@@ -1,0 +1,11 @@
+<span
+  class="material-icons auto-update-icon"
+  uib-popover="{{ autoUpdateCtrl.popover | translate }}"
+  popover-trigger="'mouseenter'"
+  popover-placement="top"
+  popover-popup-delay="200"
+  popover-class="auto-update-popover"
+  popover-append-to-body="true"
+  ng-class="{ 'auto-update-running': autoUpdateCtrl.animate,'auto-update-scheduled': autoUpdateCtrl.intervalRunning}"
+  ng-click="autoUpdateCtrl.run = !autoUpdateCtrl.run"
+>autorenew</span>

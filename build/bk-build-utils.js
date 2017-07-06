@@ -61,13 +61,13 @@
       return path.extname(file) === '.go';
     });
 
-    var args = ['build', '-buildmode=plugin', '-o', pluginName + '.so'];
+    var args = ['build', '-i', '-buildmode=plugin', '-o', pluginName + '.so'];
     args = args.concat(goFiles);
     return spawnProcess('go', args, pluginPath, env);
   }
 
   function build(path, exeName) {
-    return spawnProcess('go', ['build', '-o', exeName], path, env);
+    return spawnProcess('go', ['build', '-i', '-o', exeName], path, env);
   }
 
   function test(path) {
