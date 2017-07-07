@@ -166,19 +166,39 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 		return consoleConfig, fmt.Errorf("Invalid value for Skip SSL Validation property %v", err)
 	}
 
+	err = p.SaveConsoleConfig(consoleConfig, consoleRepo)
+	if err != nil {
+		return consoleConfig, fmt.Errorf("Failed to save config due to:  %v", err)
+	}
+	return consoleConfig, nil
+}
+
+func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig, consoleRepoInterface interface{}) error {
+
+	var consoleRepo console_config.Repository
+	if (consoleRepoInterface == nil ){
+		newConsoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
+		if err != nil {
+			return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
+		}
+		consoleRepo = newConsoleRepo
+	} else {
+		consoleRepo = consoleRepoInterface.(console_config.Repository)
+	}
+
 	log.Infof("Console has been setup with the following settings: %+v", consoleConfig)
-	err = consoleRepo.SaveConsoleConfig(consoleConfig)
+	err := consoleRepo.SaveConsoleConfig(consoleConfig)
 	if err != nil {
 		log.Printf("Failed to store Console Config: %+v", err)
-		return consoleConfig, fmt.Errorf("Failed to store Console Config: %+v", err)
+		return fmt.Errorf("Failed to store Console Config: %+v", err)
 	}
 	// Store
 	err = consoleRepo.UpdateConsoleConfig(consoleConfig)
 	if err != nil {
 		log.Printf("Failed to store Console Config: %+v", err)
-		return consoleConfig, fmt.Errorf("Failed to store Console Config: %+v", err)
+		return fmt.Errorf("Failed to store Console Config: %+v", err)
 	}
-	return consoleConfig, nil
+	return nil
 }
 
 func (p *portalProxy) SetupPoller(setupMiddleware *setupMiddleware) {

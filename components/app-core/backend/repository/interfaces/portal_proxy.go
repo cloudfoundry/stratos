@@ -17,6 +17,7 @@ type PortalProxy interface {
 	GetSession(c echo.Context) (*sessions.Session, error)
 	GetSessionValue(c echo.Context, key string) (interface{}, error)
 	SaveSession(c echo.Context, session *sessions.Session) error
+	SaveConsoleConfig(consoleConfig *ConsoleConfig, consoleRepoInterface interface{}) error
 
 	RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)

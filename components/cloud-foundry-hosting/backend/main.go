@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,8 +14,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	uuid "github.com/satori/go.uuid"
-
-	"errors"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
@@ -34,30 +35,30 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
-func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return ch, nil
 }
 
-func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error){
+func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
-
 
 func (ch *CFHosting) Init() error {
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if config.IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
+		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
-		ch.portalProxy.GetConfig().ConsoleClient = ch.portalProxy.GetConfig().CFClient
-		ch.portalProxy.GetConfig().ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
+		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
+		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClientSecret = ch.portalProxy.GetConfig().CFClientSecret
 
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
-		ch.portalProxy.GetConfig().UAAAdminIdentifier = ch.portalProxy.GetConfig().CFAdminIdentifier
+		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 
 		// Need to run as HTTP on the port we were told to use
 		ch.portalProxy.GetConfig().HTTPS = false
@@ -108,8 +109,33 @@ func (ch *CFHosting) Init() error {
 		}
 
 		// Override the configuration to set the authorization endpoint
-		ch.portalProxy.GetConfig().UAAEndpoint = newCNSI.AuthorizationEndpoint
-		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().UAAEndpoint)
+		url, err := url.Parse(newCNSI.AuthorizationEndpoint)
+		if err != nil {
+			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+		}
+
+		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
+		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
+
+		skipSsl, err := config.GetValue("SKIP_SSL_VALIDATION")
+		if err != nil {
+			// Not set in the environment and failed to read from the Secrets file
+			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
+		}
+
+		skipSslBool, err := strconv.ParseBool(skipSsl)
+		if err != nil {
+			// Not set in the environment and failed to read from the Secrets file
+			ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = false
+		}
+
+		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = skipSslBool
+
+		// Save to Console DB
+		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
+		if err != nil {
+			return fmt.Errorf("Failed to save console configuration due to %s", err)
+		}
 
 		// Auto-register the Cloud Foundry
 		cfCnsi, regErr := ch.portalProxy.DoRegisterEndpoint("Cloud Foundry", appData.API, true, cfEndpointSpec.Info)
