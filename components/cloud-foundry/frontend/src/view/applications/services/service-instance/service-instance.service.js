@@ -194,7 +194,8 @@
               var instanceVars = _.find(vcap[serviceKey], { name: instance.name });
               var config = {
                 templateUrl: 'plugins/cloud-foundry/view/applications/services/service-instance/env-variables.html',
-                title: $translate.instant('app-tabs.services.view-envs.title', {instanceName: instance.name}),
+                title: 'app-tabs.services.view-envs.title',
+                titleTranslateValues: {instanceName: instance.name},
                 dialog: true
               };
               var context = {

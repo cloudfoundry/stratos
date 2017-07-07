@@ -300,7 +300,8 @@
     function startWorkflow() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: $translate.instant('app-tabs.services.add.title', { appName: vm.data.app.summary.name }),
+        title: 'app-tabs.services.add.title',
+        titleTranslateValues: { appName: vm.data.app.summary.name },
         dialog: true,
         class: 'dialog-form-larger'
       };
