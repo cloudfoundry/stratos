@@ -1,3 +1,4 @@
+/* eslint-disable no-process-env */
 (function () {
   'use strict';
 
@@ -41,26 +42,44 @@
   });
 
   gulp.task('create-temp', [], function (done) {
-    mktemp.createDir('/tmp/temp-XXXX.build',
-      function (err, path) {
-        if (err) {
-          throw err;
-        }
-        tempPath = path;
+    // If STRATOS_TEMP is set, then a staged build is being carried out
+    // see CF deployment script deploy/cloud-foundry/package.sh
+    if (process.env.STRATOS_TEMP) {
+      tempPath = process.env.STRATOS_TEMP;
+      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
+      return done();
+    } else {
+      mktemp.createDir('/tmp/stratos-ui-XXXX.build',
+        function (err, path_) {
+          if (err) {
+            throw err;
+          }
+          tempPath = path_;
+          tempSrcPath = path.join(tempPath, conf.goPath, 'components');
+          done();
+        });
+    }
+
+  });
+
+  gulp.task('delete-temp', [], function (done) {
+    fsRemoveQ(tempPath)
+      .then(function () {
         done();
+      })
+      .catch(function (err) {
+        done(err);
       });
   });
 
   gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
 
-    tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
     var plugins = require('./../plugins.json');
     fs.ensureDir(tempSrcPath, function (err) {
       if (err) {
         throw err;
       }
 
-      // Only copy the components that are enabled
       var promises = [];
       _.each(plugins.enabledPlugins, function (plugin) {
         promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
