@@ -28,7 +28,8 @@
         addAction: '=?',
         inputOptions: '=',
         refreshAction: '=?',
-        placeholder: '@?'
+        placeholder: '@?',
+        translateOptionLabels: '=?'
       },
       controller: SelectInputController,
       controllerAs: 'selectInputCtrl',

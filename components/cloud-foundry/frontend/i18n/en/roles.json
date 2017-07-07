@@ -12,6 +12,7 @@
       "title": "Select User(s)",
       "user-count": "Users",
       "no-matching-users": "There are no users matching this search term",
+      "show-all-users": "Show All",
       "user-label": "User",
       "busy-message": "Fetching Users..."
     },
