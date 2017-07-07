@@ -65,6 +65,7 @@
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       var canUpdate = authModel.isAllowed(vm.cnsiGuid, authModel.resources.space, authModel.actions.update, spaceGuid, organizationGuid);
       vm.canManageSpaceSsh = canUpdate || user.isAdmin;
+      vm.canManageAppSsh = authModel.isAllowed(vm.cnsiGuid, authModel.resources.application, authModel.actions.update, spaceGuid);
 
       vm.ready = true;
     }

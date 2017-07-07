@@ -15,7 +15,7 @@
   <app-icon icon-class="app-icon-3x" icon="error_outline"></app-icon>
   <div class="applications-msg" translate>cf.app-ssh.not-enabled</div>
   <div class="applications-cta" translate>cf.app-ssh.enable-prompt</div>
-  <div class="app-ssh-enable-msg">
+  <div class="app-ssh-enable-msg" ng-if="applicationSSHController.canManageAppSsh">
     <p translate>cf.app-ssh.quick-enable</p>
     <div class="app-ssh-warning">
       <i class="material-icons">warning</i>
