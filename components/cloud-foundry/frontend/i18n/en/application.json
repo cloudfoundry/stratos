@@ -241,5 +241,46 @@
     "events": {
       "title": "Events"
     }
+  },
+  "cli-dialog-app": {
+    "title": "@:cf.cli-common.title",
+    "intro": "@:cf.cli-common.intro",
+    "get-started": "@:cf.cli-common.get-started",
+    "get-started-intro": "@:cf.cli-common.get-started-intro",
+    "step1": "@:cf.cli-common.step1",
+    "step1-link-text": "@:cf.cli-common.step1-link-text",
+    "step2": "@:cf.cli-common.step2",
+    "step3": "@:cf.cli-common.step3",
+    "step4": "@:cf.cli-common.step4",
+    "app-commands": {
+      "title": "Application Management Commands",
+      "summary": "Summary",
+      "summary-intro": "To get the application summary",
+      "start": "Start",
+      "start-intro": "To start the application",
+      "stop": "Stop",
+      "stop-intro": "To stop the application",
+      "restart": "Restart",
+      "restart-intro": "To restart the application"
+    },
+    "scaling-commands": {
+      "title": "Scaling the Application",
+      "instances": "Instances",
+      "instances-intro": "To change the number of application instances",
+      "memory": "Memory",
+      "memory-intro": "To change the memory allocated to application instances"
+    }
+  },
+  "cli-dialog-deploy": {
+    "title": "Deploy Using CLI",
+    "intro": "To deploy your app using the CLI, follow these steps:",
+    "step1": "1. Download and install the CLI - ",
+    "step1-link-text": "see here",
+    "step2": "2. Add a <strong>manifest.yml</strong> file to your source code or update your existing one using the content below. Cloud Foundry uses the manifest file to set the application's name, route(s) and service binding(s). Please ensure that the application name and route(s) of your manifest file match that shown below. If the application name and route(s) are not correct in the manifest file, multiple applications and routes will get created.",
+    "step3": "3. Enter the following commands in the CLI:",
+    "step3-1": "Set the api endpoint",
+    "step3-2": "Login",
+    "step3-3": "Target the org and space",
+    "step3-4": "Push to the Cloud Foundry endpoint - Navigate to the project directory and execute the following."
   }
 }

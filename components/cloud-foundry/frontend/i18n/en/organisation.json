@@ -10,7 +10,20 @@
   },
   "org-info": {
     "summary": {
-      "title": "Summary"
+      "title": "Summary",
+      "label": {
+        "apps": "applications",
+        "instances": "application instances",
+        "services": "services",
+        "routes": "routes",
+        "private-domains": "private domains",
+        "memory": "memory usage",
+        "orgRole": "cf org role",
+        "address": "instance address",
+        "cli": "cf interactions",
+        "username": "account username",
+        "status": "account status"
+      }
     },
     "edit-action": "Edit Organization",
     "edit-dialog": {
