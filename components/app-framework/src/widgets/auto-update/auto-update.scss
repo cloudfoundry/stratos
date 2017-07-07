@@ -1,0 +1,21 @@
+.auto-update-icon {
+  @include flex-vertical-centered();
+
+  cursor: default;
+
+  animation: spin 1s infinite linear;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+
+  &.auto-update-running {
+    animation-play-state: running;
+  }
+  &.auto-update-scheduled {
+    color: $console-primary;
+  }
+
+  @keyframes spin {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+  }
+}
