@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"sync"
 	"time"
@@ -204,9 +205,21 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 			}
 		}
 		return func(c echo.Context) error {
-			if c.Request().URL().Path() == "/v1/setup" ||  c.Request().URL().Path() == "/v1/setup/update" {
+			isSetupRequest := false
+			isSetupRequest, _ = regexp.MatchString("/v1/setup$", c.Request().URL().Path())
+			if !isSetupRequest {
+				isSetupRequest, _ = regexp.MatchString("/v1/setup/update$", c.Request().URL().Path())
+			}
+			if isSetupRequest {
 				return h(c)
 			}
+
+			// Non portal-proxy request, when the Portal proxy is hosting the frontend as well
+			isNonBackendRequest, _ := regexp.MatchString("^/pp", c.Request().URL().Path())
+			if ! isNonBackendRequest {
+				return h(c)
+			}
+
 			c.Response().Header().Add("Stratos-Setup-Required", "true")
 			return c.NoContent(http.StatusServiceUnavailable)
 		}

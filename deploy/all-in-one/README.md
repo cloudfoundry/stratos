@@ -1,8 +1,6 @@
 # Deploying with the All-In-One Docker Container
 
-The All-in-One container sets up the following components in a single container:
-1. The Stratos UI frontend and backend
-2. An UAA instance
+The All-in-One container sets up the Stratos Console components in a single container.
 
 ## Requirements:
 
