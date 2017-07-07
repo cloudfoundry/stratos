@@ -36,8 +36,7 @@
     function getRouteId(route) {
       var routeEntity = _.get(route, 'entity', route);
       var domain = _.get(routeEntity, 'domain.entity', routeEntity.domain);
-      //TODO: RC TEST ME
-      var domainName = domain ? domain.name : 'routes.unknown-domain';
+      var domainName = domain ? domain.name : $translate.instant('routes.unknown-domain');
 
       var host = routeEntity.host ? routeEntity.host + '.' : '';
       var port = routeEntity.port ? ':' + routeEntity.port : '';

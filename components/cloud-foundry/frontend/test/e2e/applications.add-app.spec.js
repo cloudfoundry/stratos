@@ -22,7 +22,7 @@
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
 
-  describe('Applications - Add application', function () {
+  describe('Applications - Add application -', function () {
 
     /**
      * This spec will ..
@@ -193,7 +193,7 @@
 
       // cf push acceptance.e2e.1484149644648
       // Check copy to clipboard
-      element.all(by.css('code-block .console-copy')).get(2).click();
+      element.all(by.css('code-block .console-copy')).get(3).click();
       element(by.css('button.close')).click();
 
       galleryWall.showApplications();
@@ -227,7 +227,7 @@
       addAppWizard.getWizard().cancel();
     });
 
-    describe('check application on the cf endpoints dashboard', function () {
+    describe('check application on the cf endpoints dashboard -', function () {
 
       var serviceName = appSetupHelper.getServiceName(testTime, true);
 

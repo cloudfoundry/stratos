@@ -121,7 +121,6 @@
                   return _onServiceBindingError();
                 });
               }, function () {
-                //TODO: RC TEST ME
                 return $q.reject('app-tabs.services.add.notifications.failure-create');
               });
             }
@@ -344,7 +343,6 @@
             return _onServiceBindingError();
           });
         }, function () {
-          //TODO: RC TEST ME
           return $q.reject('app-tabs.services.add.notifications.failure-create');
         });
       } else {
@@ -368,7 +366,6 @@
                                                           function (o) { return o.metadata.guid === guid; });
         });
       }
-      //TODO: RC TEST ME
       return $q.reject('app-tabs.services.add.notifications.failure-bind');
     }
   }

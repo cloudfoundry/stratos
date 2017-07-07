@@ -527,7 +527,6 @@
 
       var multipleRoles = assigns.length + removes.length > 1;
 
-      //TODO: RC TEST ME
       // Determine the title
       var title = multipleRoles ? 'change-roles-confirmation.title.update-plural'
         : 'change-roles-confirmation.title.update-singular';
@@ -557,7 +556,6 @@
         (removes.length > 0 ? line3 + '<br>' : '') +
         '<br>' + line4;
 
-      //TODO: RC TEST ME
       // Success and error messages
       var successMessage = multipleRoles ? 'change-roles-confirmation.success-one'
         : 'change-roles-confirmation.success-two';

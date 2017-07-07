@@ -28,7 +28,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Cloud Foundry'
+      type: 'cloud-foundry'
     };
     var invalidService = {
       api_endpoint: {
@@ -44,7 +44,7 @@
     var invalidServicesEndpoint = {
       key: 'cnsi_2',
       name: 'c2',
-      type: 'Cloud Foundry'
+      type: 'cloud-foundry'
     };
     var expiredService = {
       api_endpoint: {
@@ -59,7 +59,7 @@
     var expiredServicesEndpoint = {
       key: 'cnsi_3',
       name: 'c3',
-      type: 'Cloud Foundry'
+      type: 'cloud-foundry'
     };
 
     function createController($injector) {
@@ -150,19 +150,19 @@
             key: 'cnsi_1',
             guid: '1',
             valid: true,
-            type: 'Cloud Foundry',
+            type: 'cloud-foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'cnsi_2',
             guid: '2',
             valid: true,
-            type: 'Cloud Foundry',
+            type: 'cloud-foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'somethingElse-guid',
             guid: 'guid',
             valid: true,
-            type: 'Cloud Foundry',
+            type: 'cloud-foundry',
             token_expiry: Number.MAX_VALUE
           }];
           service.createEndpointEntries();
