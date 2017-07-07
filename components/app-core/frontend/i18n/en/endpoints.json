@@ -23,7 +23,7 @@
     "connect": {
       "connect-action": "Connect",
       "title": "Provide Credentials",
-      "description": "You should have received an email from your administrator with credentials for endpoints you have access to. Please contact your administrator for help.",
+      "description": "Enter your username and password to connect to the endpoint below.",
       "service-label": "Service",
       "url-label": "URL",
       "username-label": "Username",

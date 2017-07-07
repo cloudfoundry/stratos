@@ -1,13 +1,13 @@
 <div class="register-service-details" ng-init="endpoint=wizardCtrl.options.userInput.endpoint.register">
 
   <div class="register-content-left">
-    <p translate>{{ endpoint.html.details.p1 }}</p>
+    <p ng-if="!wizardCtrl.options.showCompact" translate>{{ endpoint.html.details.p1 }}</p>
     <p translate>{{ endpoint.html.details.p2 }}</p>
     <p translate>{{ endpoint.html.details.p3 }}</p>
   </div>
 
-  <div class="register-content-right">
-    <h4 translate>{{endpoint.html.details.title}}</h4>
+  <div class="register-content-right" ng-class="{'register-content-fill': wizardCtrl.options.showCompact}">
+    <h4 ng-if="!wizardCtrl.options.showCompact" translate>{{endpoint.html.details.title}}</h4>
     <div>
       <div class="form-group" focusable-input
            ng-class="{'has-error': wizardForm[step.formName][endpoint.nameOfUrlInput].$invalid && wizardForm[step.formName][endpoint.nameOfUrlInput].$dirty}">
