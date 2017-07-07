@@ -149,6 +149,11 @@
       }
     ];
     vm.scheduledUpdate = undefined;
+    vm.autoUpdate = {
+      update: update,
+      interval: UPDATE_INTERVAL,
+      run: false
+    };
 
     vm.isActionHidden = isActionHidden;
 
@@ -275,11 +280,7 @@
      * @public
      */
     function startUpdate() {
-      if (!vm.scheduledUpdate) {
-        vm.scheduledUpdate = $interval(function () {
-          update();
-        }, UPDATE_INTERVAL);
-      }
+      vm.autoUpdate.run = true;
     }
 
     /**
@@ -288,10 +289,7 @@
      * @public
      */
     function stopUpdate() {
-      if (vm.scheduledUpdate) {
-        $interval.cancel(vm.scheduledUpdate);
-        vm.scheduledUpdate = undefined;
-      }
+      vm.autoUpdate.run = false;
     }
 
     /**

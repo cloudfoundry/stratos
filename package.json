@@ -7,6 +7,8 @@
     "clean": "gulp clean",
     "build": "gulp clean:dist && gulp",
     "build-backend": "gulp build-backend",
+    "cf-get-backend-deps": "gulp cf-get-backend-deps",
+    "cf-build-backend": "gulp cf-build-backend",
     "build-cf": "gulp deploy:cf",
     "precoverage": "npm run update-webdriver",
     "coverage": "npm test && gulp e2e:run && gulp coverage-combine",

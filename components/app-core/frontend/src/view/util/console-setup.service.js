@@ -22,7 +22,6 @@
    * @memberof app.view
    * @name app.view.consoleSetupCheck
    * @param {object} $q - the Angular Promise service
-   * @param {object} $state - the Angular $state service
    * @param {object} appEventService - the event bus service
    * @description The utility will intercept all HTTP responses and check for 503/upgrade responses
    * @returns {object} The upgrade check service
