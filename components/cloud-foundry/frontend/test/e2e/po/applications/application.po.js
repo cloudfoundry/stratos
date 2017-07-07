@@ -53,7 +53,7 @@
   function showServices() {
     applicationAction(2).click();
   }
-  
+
   function goToTab(index) {
     return applicationAction(index).click();
   }

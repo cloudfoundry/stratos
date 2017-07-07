@@ -98,7 +98,6 @@
     );
   });
 
-
   gulp.task('e2e:runq', function () {
     paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
@@ -108,5 +107,5 @@
       'e2e:tests',
       'stop-server'
     );
-  });  
+  });
 })();
