@@ -174,7 +174,7 @@
     });
 
     // The following tests are all carried out as non-admin
-    fdescribe('Dashboard tests - ', function () {
+    describe('Dashboard tests - ', function () {
 
       describe('Register endpoints - ', function () {
 
