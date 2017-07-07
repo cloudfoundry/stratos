@@ -57,6 +57,15 @@
     appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
 
     function init() {
+      // Check that the user has permissions to be able to change the SSH status on the space
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      var user = consoleInfo.info.endpoints.cf[vm.cnsiGuid].user;
+      var spaceGuid = vm.model.application.space.metadata.guid;
+      var organizationGuid = vm.model.application.organization.metadata.guid;
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      var canUpdate = authModel.isAllowed(vm.cnsiGuid, authModel.resources.space, authModel.actions.update, spaceGuid, organizationGuid);
+      vm.canManageSpaceSsh = canUpdate || user.isAdmin;
+
       vm.ready = true;
     }
 

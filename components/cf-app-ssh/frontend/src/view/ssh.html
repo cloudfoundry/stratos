@@ -2,10 +2,12 @@
   <app-icon icon-class="app-icon-3x" icon="error_outline"></app-icon>
   <div class="applications-msg" translate translate-values="{name: applicationSSHController.model.application.space.entity.name}">cf.app-ssh.space-not-enabled</div>
   <div class="applications-cta" translate>cf.app-ssh.space-enable-prompt</div>
-    <a class="btn btn-link app-ssh-space-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications({
-          guid: applicationSSHController.cnsiGuid,
-          organization: applicationSSHController.model.application.organization.metadata.guid,
-          space: applicationSSHController.model.application.space.metadata.guid
+  <a ng-if="applicationSSHController.canManageSpaceSsh"
+     class="btn btn-link app-ssh-space-link"
+     ui-sref="endpoint.clusters.cluster.organization.space.detail.applications({
+       guid: applicationSSHController.cnsiGuid,
+       organization: applicationSSHController.model.application.organization.metadata.guid,
+       space: applicationSSHController.model.application.space.metadata.guid
   })" translate>cf.app-ssh.space-enable-link</a>
 </div>
 <div ng-if="applicationSSHController.ready && applicationSSHController.model.application.space.entity.allow_ssh &&
