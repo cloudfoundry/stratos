@@ -1,11 +1,28 @@
 {
   "space-info": {
+    "title": "Space : {{name}}",
     "summary": {
-      "title": "Summary"
+      "title": "Summary",
+      "label": {
+        "apps": "applications",
+        "instances": "application instances",
+        "services": "services",
+        "routes": "routes",
+        "memory": "memory usage",
+        "ssh": "ssh enabled",
+        "orgRole": "cf space role",
+        "address": "instance address",
+        "cli": "cf interactions",
+        "username": "account username",
+        "status": "account status"
+      }
     },
     "rename-action": "Rename Space",
     "rename-dialog": {
       "title": "Rename Space",
+      "space-label": "Space Name",
+      "space-error-required": "Name is required",
+      "space-error-unique": "Name must be unique",
       "success-notification": "Space '{{name}}' successfully updated"
     },
     "delete-action": "Delete Space",
@@ -18,6 +35,56 @@
     "delete-route-action": "Delete Route",
     "unmap-route-action": "Unmap Route",
     "detach-service-action": "Detach Service",
-    "delete-service-action": "Delete Service"
+    "delete-service-action": "Delete Service",
+    "tabs": {
+      "show-all-button": "Show All",
+      "column.action": "action",
+      "applications": {
+        "title": "Applications",
+        "columns": {
+          "applications": "applications",
+          "state": "state",
+          "created": "created on",
+          "instances": "instances"
+        },
+        "none": "There are no applications in this space",
+        "show-all-button": "@:space-info.tabs.show-all-button"
+      },
+      "services": {
+        "title": "Service Instances",
+        "columns": {
+          "services": "service instances",
+          "type": "type",
+          "plan": "plan",
+          "attached": "application attached",
+          "action": "@:space-info.tabs.column.action"
+        },
+        "none": "You have no service instances",
+        "show-all-button": "@:space-info.tabs.show-all-button"
+      },
+      "routes": {
+        "title": "Routes",
+        "columns": {
+          "route": "route",
+          "attached": "application attached",
+          "action": "@:space-info.tabs.column.action"
+        },
+        "none": "You have no routes",
+        "show-all-button": "@:space-info.tabs.show-all-button"
+      },
+      "users": {
+        "title": "Users"
+      }
+    }
+  },
+  "space-tile": {
+    "role-label": "role",
+    "applications-label": "applications",
+    "instances-label": "app instances",
+    "services-label": "service instances",
+    "memory-label": "memory utilization"
+  },
+  "space-list": {
+    "none": "You have no spaces"
   }
 }

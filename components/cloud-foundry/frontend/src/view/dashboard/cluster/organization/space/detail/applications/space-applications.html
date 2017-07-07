@@ -1,9 +1,7 @@
 <div class="space-services-table">
   <div ng-if="spaceAppsCtrl.spaceDetail().apps.length < 1"
        class="panel panel-default cluster-empty-list">
-    <div class="panel-body" translate>
-      There are no applications in this space
-    </div>
+    <div class="panel-body" translate>space-info.tabs.applications.none</div>
   </div>
 
   <div ng-if="spaceAppsCtrl.spaceDetail().apps.length > 0"
@@ -15,10 +13,10 @@
         <table class="table" >
           <thead>
           <tr>
-            <th class="sortable" st-sort="entity.name" st-skip-natural="true" translate>APPLICATIONS</th>
-            <th class="sortable" st-sort="entity.state" st-skip-natural="true" translate>STATE</th>
-            <th class="sortable" st-sort="invertedCreatedTimestamp" st-sort-default="true" st-skip-natural="true" translate>CREATED ON</th>
-            <th translate>INSTANCES</th>
+            <th class="sortable" st-sort="entity.name" st-skip-natural="true" translate>space-info.tabs.applications.columns.applications</th>
+            <th class="sortable" st-sort="entity.state" st-skip-natural="true" translate>space-info.tabs.applications.columns.state</th>
+            <th class="sortable" st-sort="invertedCreatedTimestamp" st-sort-default="true" st-skip-natural="true" translate>space-info.tabs.applications.columns.created</th>
+            <th translate>space-info.tabs.applications.columns.instances</th>
           </tr>
           </thead>
           <tbody>
@@ -34,7 +32,7 @@
           <tr>
             <td colspan="4" class="text-center">
               <a ng-click="spaceAppsCtrl.showApps = spaceAppsCtrl.spaceDetail().apps.length">
-                <span translate>Show All</span> ({{spaceAppsCtrl.spaceDetail().apps.length}})
+                <span translate>space-info.tabs.applications.show-all-button</span> ({{spaceAppsCtrl.spaceDetail().apps.length}})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="spaceAppsCtrl.showApps"></div>
             </td>

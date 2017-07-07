@@ -28,7 +28,9 @@
         }
       },
       "logStream": {
-        "label": "Log Stream"
+        "label": "Log Stream",
+        "title": "Log Stream",
+        "scroll-button": "Scroll To Bottom"
       },
       "services": {
         "label": "Services"

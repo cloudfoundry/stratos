@@ -27,12 +27,12 @@
       <dt translate>org-info.summary.label.cli</dt>
       <dd>
         <a ng-click="orgSummaryTileCtrl.showCliCommands()"
-           class="btn btn-link" translate>CLI Commands</a>
+           class="btn btn-link" translate>cf.cli-common.button-text</a>
       </dd>
       <dt translate>org-info.summary.label.username</dt>
       <dd>{{ orgSummaryTileCtrl.userName }}</dd>
       <dt translate>org-info.summary.label.status</dt>
-      <dd translate>{{ orgSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
+      <dd translate>{{ orgSummaryTileCtrl.isAdmin ? 'roles.cf-admin' : 'roles.cf-user' }}</dd>
     </dl>
   </div>
 </gallery-card>

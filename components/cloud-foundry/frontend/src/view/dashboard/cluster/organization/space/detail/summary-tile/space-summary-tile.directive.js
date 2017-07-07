@@ -44,7 +44,7 @@
     vm.spaceGuid = $stateParams.space;
     vm.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     vm.cardData = {
-      title: 'space-info.summary.title'
+      titleTranslate: 'space-info.summary.title'
     };
     vm.roles = [];
     vm.memory = '';

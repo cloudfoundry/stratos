@@ -1,9 +1,7 @@
 <div class="cluster-detail endpoints" class="col-md-12 col-sm-12 col-xs-12">
 
   <div class="application-header font-semi-bold">
-    <h3>
-      <span translate>cf.summary.title</span>{{clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name}}
-    </h3>
+    <h3 translate translate-value-name="{{clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name}}">cf.summary.title</h3>
     <cluster-actions ng-show="clusterController.hasActions" has-actions="clusterController.hasActions"></cluster-actions>
   </div>
 

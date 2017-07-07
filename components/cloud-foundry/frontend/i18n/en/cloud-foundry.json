@@ -35,7 +35,7 @@
       "step4": "4. Target an org and space"
     },
     "summary": {
-      "title": "Cluster : ",
+      "title": "Cluster : {{name}}",
       "panel": {
         "title": "Summary",
         "label": {
