@@ -7,10 +7,10 @@
       <span translate ng-if="wizardForm['step1'].uaaUrl.$error.required">app-setup.step-1.uaa-url.error-required</span>
       <span translate ng-if="wizardForm['step1'].uaaUrl.$error.pattern">app-setup.step-1.uaa-url.error-pattern</span>
     </span>
+    <!--ng-pattern="step.data.urlValidationExpr" fails http://uaa:8080-->
     <input type="text" class="form-control"
            name="uaaUrl"
            ng-model="step.userInput.uaaUrl"
-           ng-pattern="step.data.urlValidationExpr"
            required
            placeholder="{{'app-setup.step-1.uaa-url.placeholder' | translate}}"/>
   </div>
@@ -34,11 +34,7 @@
   <div class="form-group form-group-large" focusable-input
        ng-class="{'has-error': wizardForm['step1'].consoleSecret.$invalid && wizardForm['step1'].consoleSecret.$dirty}">
     <label class="control-label" translate>app-setup.step-1.console-secret.label</label>
-    <span class="control-message" ng-if="wizardForm['step1'].consoleSecret.$dirty">
-      <span translate
-            ng-if="wizardForm['step1'].consoleSecret.$error.required">app-setup.step-1.console-secret.error-required</span>
-    </span>
-    <input type="text" class="form-control" name="consoleSecret" ng-model="step.userInput.consoleSecret" required
+    <input type="text" class="form-control" name="consoleSecret" ng-model="step.userInput.consoleSecret"
            placeholder="{{'app-setup.step-1.console-secret.placeholder' | translate}}"/>
   </div>
   <div class="form-group form-group-large" focusable-input
@@ -51,13 +47,13 @@
     <input type="text" class="form-control" name="consoleAdmin" ng-model="step.userInput.consoleAdmin" required
            placeholder="{{'app-setup.step-1.console-admin.placeholder' | translate}}"/>
   </div>
-  <div class="form-group form-group-large" focusable-input
+  <div class="form-group form-group-large has-feedback" focusable-input
        ng-class="{'has-error': wizardForm['step1'].consolePassword.$invalid && wizardForm['step1'].consolePassword.$dirty}">
     <label class="control-label" translate>app-setup.step-1.console-password.label</label>
     <span class="control-message" ng-if="wizardForm['step1'].consolePassword.$dirty">
       <span translate ng-if="wizardForm['step1'].consolePassword.$error.required">app-setup.step-1.console-password.error-required</span>
     </span>
     <input type="password" class="form-control" name="consolePassword" ng-model="step.userInput.consolePassword" required
-           placeholder="{{'app-setup.step-1.console-password.placeholder' | translate}}"/>
+           password-reveal placeholder="{{'app-setup.step-1.console-password.placeholder' | translate}}"/>
   </div>
 </div>

@@ -2,7 +2,11 @@
   'use strict';
 
   angular
-    .module('app-setup', ['app-setup.view'])
+    .module('app-setup', [
+      'app-setup.view',
+      'app-setup.api',
+      'app-setup.model'
+    ])
     .config(registerState)
     .run(registerSetup);
 
@@ -19,8 +23,7 @@
         hideNavigation: true,
         hideAccount: true,
         hideBottomNavigation: true,
-        hideSecondNavigation: true,
-        error: ''
+        hideSecondNavigation: true
       }
     });
   }
@@ -29,9 +32,9 @@
     consoleSetupCheck.setupState = SETUP_STATE;
   }
 
-  function setupController(appSetupService) {
+  function setupController(appSetupWizardService) {
     var vm = this;
-    vm.startSetup = appSetupService.show;
+    vm.startSetup = appSetupWizardService.show;
   }
 
 })();

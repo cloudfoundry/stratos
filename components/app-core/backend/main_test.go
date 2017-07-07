@@ -84,21 +84,10 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get HTTPClientTimeoutInSecs from config")
 	}
 
-	if result.ConsoleConfig.SkipSSLValidation != true {
-		t.Error("Unable to get SkipTLSVerification from config")
-	}
-
 	if result.TLSAddress != ":8080" {
 		t.Error("Unable to get TLSAddress from config")
 	}
 
-	if result.ConsoleConfig.ConsoleClient != "portal-proxy" {
-		t.Error("Unable to get ConsoleClient from config")
-	}
-
-	if result.ConsoleConfig.ConsoleClientSecret != "ohsosecret!" {
-		t.Error("Unable to get ConsoleClientSecret from config")
-	}
 
 	if result.CFClient != "portal-proxy" {
 		t.Error("Unable to get CFClient from config")
@@ -106,10 +95,6 @@ func TestLoadPortalConfig(t *testing.T) {
 
 	if result.CFClientSecret != "ohsosecret!" {
 		t.Error("Unable to get CFClientSecret from config")
-	}
-
-	if result.ConsoleConfig.UAAEndpoint != "https://login.cf.org.com:443" {
-		t.Error("Unable to get UAAEndpoint from config")
 	}
 
 	if len(result.AllowedOrigins) != 2 {
