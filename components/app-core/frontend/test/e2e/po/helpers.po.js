@@ -36,6 +36,7 @@
     setBrowserNormal: setBrowserNormal,
     setBrowserSmall: setBrowserSmall,
     setBrowserWidthSmall: setBrowserWidthSmall,
+    setBrowserSize: setBrowserSize,
 
     getForm: getForm,
     getFormFields: getFormFields,
@@ -113,6 +114,10 @@
 
   function setBrowserWidthSmall() {
     browser.manage().window().setSize(640, 768);
+  }
+
+  function setBrowserSize(width, height) {
+    browser.manage().window().setSize(width, height);
   }
 
   /*
