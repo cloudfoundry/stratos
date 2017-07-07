@@ -16,6 +16,7 @@
     getHeaderAppName: getHeaderAppName,
     getActiveTab: getActiveTab,
     getTabs: getTabs,
+    goToTab: goToTab,
 
     // Summary Tab
     addRoute: addRoute,
@@ -51,6 +52,10 @@
 
   function showServices() {
     applicationAction(2).click();
+  }
+  
+  function goToTab(index) {
+    return applicationAction(index).click();
   }
 
   function applicationActionsBar() {
