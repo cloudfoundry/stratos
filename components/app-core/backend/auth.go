@@ -84,7 +84,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
-		
+		msg := "Could not get session expiry"		
 		log.Error(msg + " - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
