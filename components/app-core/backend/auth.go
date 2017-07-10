@@ -30,7 +30,7 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
-// LoginHookFunc - function that can be hooked into a successful user login
+// LoginHookFunc - Function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
