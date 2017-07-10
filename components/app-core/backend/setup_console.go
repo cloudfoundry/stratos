@@ -176,7 +176,7 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig, consoleRepoInterface interface{}) error {
 
 	var consoleRepo console_config.Repository
-	if (consoleRepoInterface == nil ){
+	if consoleRepoInterface == nil {
 		newConsoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 		if err != nil {
 			return fmt.Errorf("Unable to intialise console backend config due to: %+v", err)
@@ -204,7 +204,7 @@ func (p *portalProxy) SaveConsoleConfig(consoleConfig *interfaces.ConsoleConfig,
 func (p *portalProxy) SetupPoller(setupMiddleware *setupMiddleware) {
 	isInitialised, err := setupMiddleware.consoleRepo.IsInitialised()
 	for err != nil || !isInitialised {
-		time.Sleep(10 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 		isInitialised, err = setupMiddleware.consoleRepo.IsInitialised()
 	}
 	p.Config.ConsoleConfig, _ = setupMiddleware.consoleRepo.GetConsoleConfig()
@@ -226,20 +226,35 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 		}
 		return func(c echo.Context) error {
 			isSetupRequest := false
-			isSetupRequest, _ = regexp.MatchString("/v1/setup$", c.Request().URL().Path())
+
+			requestURLPath := c.Request().URL().Path()
+
+			// When running in Cloud Foundry or in the combined Docker container URL path starts with /pp
+			inCFMode, _ := regexp.MatchString("^/pp", requestURLPath)
+
+			setupRequestRegex := "/v1/setup$"
+			setupUpdateRequestRegex := "/v1/setup/update$"
+
+			if inCFMode {
+				setupRequestRegex = fmt.Sprintf("^/pp%s", setupRequestRegex)
+				setupUpdateRequestRegex = fmt.Sprintf("^/pp%s", setupUpdateRequestRegex)
+			}
+
+			isSetupRequest, _ = regexp.MatchString(setupRequestRegex, requestURLPath)
 			if !isSetupRequest {
-				isSetupRequest, _ = regexp.MatchString("/v1/setup/update$", c.Request().URL().Path())
+				isSetupRequest, _ = regexp.MatchString("/v1/setup/update$", requestURLPath)
 			}
 			if isSetupRequest {
 				return h(c)
 			}
 
-			// Non portal-proxy request, when the Portal proxy is hosting the frontend as well
-			isNonBackendRequest, _ := regexp.MatchString("^/pp", c.Request().URL().Path())
-			if ! isNonBackendRequest {
+			// Request is not a setup request, refuse backend requests and allow all others
+			isBackendRequest, _ := regexp.MatchString("/v1/", requestURLPath)
+
+			if !isBackendRequest {
 				return h(c)
 			}
-
+			// Request was a backend request other than a setup request.
 			c.Response().Header().Add("Stratos-Setup-Required", "true")
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
