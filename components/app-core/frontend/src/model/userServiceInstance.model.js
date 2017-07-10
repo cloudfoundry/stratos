@@ -202,6 +202,8 @@
           _.each(data, function (cnsiData, cnsiGuid) {
             // Record error status
             serviceInstances[cnsiGuid].error = !!cnsiData.error;
+            // Store the JSON from the info call for later use
+            serviceInstances[cnsiGuid].info = cnsiData;
           });
         });
       }

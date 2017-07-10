@@ -32,4 +32,16 @@
            required
     />
   </div>
+
+  <div class="form-group edit-app-ssp-access" focusable-input>
+    <checkbox-input input-disabled="!asyncTaskDialogCtrl.context.space_allowed" ng-model="asyncTaskDialogCtrl.context.data.enable_ssh"
+                    input-label="{{'edit-app.ssh-access' | translate}}">
+    </checkbox-input>
+  </div>
+
+  <div class="edit-app-ssh-change-warning" ng-class="{'edit-app-ssh-changed' : asyncTaskDialogCtrl.context.data.enable_ssh !== asyncTaskDialogCtrl.context.initial_ssh}">
+    <p ng-if="asyncTaskDialogCtrl.context.space_allowed" translate>edit-app.ssh-restart-warning</p>
+    <p ng-if="!asyncTaskDialogCtrl.context.space_allowed" translate>edit-app.ssh-no-edit</p>
+  </div>
+
 </form>
