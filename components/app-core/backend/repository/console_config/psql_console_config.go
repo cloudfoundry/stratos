@@ -140,11 +140,11 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 
 func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
 	rows, err := c.db.Query(hasSetupCompleted)
-	defer rows.Close()
 
 	if err != nil {
 		return false, fmt.Errorf("Exception occurred when fetching row: %v", err)
 	}
+	defer rows.Close()
 
 	isSetupComplete := false
 	for rows.Next() {
@@ -160,11 +160,11 @@ func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
 
 func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	rows, err := c.db.Query(getTableCount)
-	defer rows.Close()
 
 	if err != nil {
 		return 0, fmt.Errorf("Exception occurred when fetching row count: %v", err)
 	}
+	defer rows.Close()
 
 	count := 0
 	for rows.Next() {
