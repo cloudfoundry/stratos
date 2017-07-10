@@ -36,7 +36,7 @@ type LoginHookFunc func(c echo.Context) error
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
 const UAAAdminIdentifier = "stratos.admin"
 
-// CFAdminIdentifier - The identifier that Cloud Foundry uses to convey administrative level perms
+// CFAdminIdentifier - The scope that Cloud Foundry uses to convey administrative level perms
 const CFAdminIdentifier = "cloud_controller.admin"
 
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
