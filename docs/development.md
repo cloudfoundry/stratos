@@ -26,12 +26,12 @@ The Console code can be found in the [components](../components) folder. The fol
 Component Name | Description
 ---------------|------------
 about-app | Provides an "about" view for the Console
-app-core | Contains core funtionality, such as login and navigation
+app-core | Contains core functionality, such as login and navigation
 app-framework | Providers a set of UI widgets and utilities
 app-theme | Style information for the app-framework
 cloud-foundry | All Cloud Foundry specific code
-cloud-foundry-hosting | Specific component used for hosting the Console as an app in a single cloud foundry
-endpoints-dashboard | Manage Console endpoints, specifically cloud foundry's. The inclusion allows additional cloud foundry endpoints to be added
+cloud-foundry-hosting | Specific component used for hosting the Console as an app in a single Cloud Foundry
+endpoints-dashboard | Manage Console endpoints, specifically Cloud Foundry's. The inclusion allows additional Cloud Foundry endpoints to be added
 suse-branding | Overrides styles to show the Console with SUSE branding
 
 ### Component architecture
@@ -40,13 +40,13 @@ Components can include both frontend and backend code. The source code for these
 
 The Console Frontend is written using AngularJS and the backend written in Go.
 
-The Cconsole build determines the location of the frontend and backend code via a configuration file
+The Console build determines the location of the frontend and backend code via a configuration file
 named `[component name].component.json`.
 When no frontend configuration is found in *.component.json it is assumed the component is purely for the frontend and that its source
 code sites directly in the component folder, father than a `frontend` subfolder.
 
 ### Including your own components
-Other components can be included to add additional items to the navigation bar and their associated content. This can include additional types of 'endpoints' (an existing endpoint for example is cloud foundry). Instructions on how to carry out this will be added at a later date.
+Other components can be included to add additional items to the navigation bar and their associated content. This can include additional types of 'endpoints' (an existing endpoint for example is Cloud Foundry). Instructions on how to carry out this will be added at a later date.
 
 ## Working on the front end component
 
@@ -54,7 +54,7 @@ Other components can be included to add additional items to the navigation bar a
 
 The frontend code is split into component directories as listed above. 
 The standard set of components that exist in the console contain functionality 
-to manage cloud foundry instances and their applications.
+to manage Cloud Foundry instances and their applications.
 
 The frontend code is usually found within a `frontend` folder and contains 
 a structure such as that in app-core/frontend component, for example:

@@ -6,7 +6,7 @@ Stratos UI provides the feature set outline below. Some of these are illustrated
    * User authentication using a configured UAA instance
    * Two supported personas - Console admins and Console users
 
-* Endpoint Management
+* Endpoint Management<sup>1</sup>
    * The ability for an administrator to register one or more Cloud Foundry clusters to be managed through the UI.
    * Ability for users to connect to Cloud Foundry clusters with their own credentials so that they receive the correct level of access to these clusters
 
@@ -36,7 +36,7 @@ Stratos UI provides the feature set outline below. Some of these are illustrated
     * Allows users to view Cloud Foundry metadata and quota information and drill down in the Organization and Space structures.
     * Administrators can additionally view Feature Flags, Buildpacks, Stacks and Security Groups.
     * Administrations can view a streaming log of the Cloud Foundry Firehose.
-    * Manager users and their roles
+    * Manage users and their roles
     * Manage Spaces
        * Create, rename and delete spaces
        * View the applications, service instances and routes for a given space
@@ -45,9 +45,4 @@ Stratos UI provides the feature set outline below. Some of these are illustrated
 
 
   
-
-
-
-
-
-
+> (1): Endpoint Management is disabled by default when the Console is deployed as a Cloud Foundry application.
