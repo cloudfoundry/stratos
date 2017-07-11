@@ -16,9 +16,21 @@
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
       <dt translate>memory</dt>
       <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
-      <dt translate>ssh enabled</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.space.entity.allow_ssh || 'false' }}</dd>
-
+      <dt translate>cf.ssh.access</dt>
+      <dd ng-if="!spaceSummaryTileCtrl.hasSshAccess()">
+        <status-indicator status="false"
+          on-icon="check_box" off-icon="check_box_outline_blank"
+          on-label="cf.ssh.available" off-label="cf.ssh.unavailable"
+          off-class="console-status-normal" on-class="console-status-normal">
+        </status-indicator>
+      </dd>
+      <dd ng-if="spaceSummaryTileCtrl.hasSshAccess()">
+        <status-indicator status="spaceSummaryTileCtrl.spaceDetail().details.space.entity.allow_ssh"
+          on-icon="check_box" off-icon="check_box_outline_blank"
+          on-label="cf.ssh.allowed" off-label="cf.ssh.disallowed"
+          off-class="console-status-normal" on-class="console-status-normal">
+        </status-indicator>
+      </dd>
     </dl>
   </div>
   <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">

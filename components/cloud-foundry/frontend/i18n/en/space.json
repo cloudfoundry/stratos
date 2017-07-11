@@ -18,6 +18,22 @@
     "delete-route-action": "Delete Route",
     "unmap-route-action": "Unmap Route",
     "detach-service-action": "Detach Service",
-    "delete-service-action": "Delete Service"
+    "delete-service-action": "Delete Service",
+    "ssh": {
+      "allow": {
+        "allow": "Allow SSH Access",
+        "title": "Allow SSH Access",
+        "prompt": "Please confirm that you wish to allow SSH access for space '{{name}}'.",
+        "confirm": "Allow",
+        "error": "An error occurred allowing SSH Access for the space."
+      },
+      "disallow": {
+        "disallow": "Disallow SSH Access",
+        "title": "Disallow SSH Access",
+        "prompt": "Please confirm that you wish to disallow SSH access for space '{{name}}'.",
+        "confirm": "Disallow",
+        "error": "An error occurred disallowing SSH Access for the space."
+      }
+    }
   }
 }

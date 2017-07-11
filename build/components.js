@@ -56,6 +56,10 @@
     return components;
   }
 
+  function getComponents() {
+    return components;
+  }
+
   // Find local path components referenced in the main bower.json
   // Assumes the location if a path starting with '.'
   // Only used to ensure that these are synced into the bower_components folder when
@@ -268,5 +272,6 @@
   module.exports.reverseTransformPath = reverseTransformPath;
   module.exports.removeEmptyGlobs = removeEmptyGlobs;
   module.exports.findLocalPathComponentFolders = findLocalPathComponentFolders;
+  module.exports.getComponents = getComponents;
 
 })();

@@ -17,8 +17,14 @@
 
     return {
       selectOptionMapping: selectOptionMapping,
-      formatUptime: formatUptime
+      formatUptime: formatUptime,
+      hasSshAccess: hasSshAccess
     };
+
+    function hasSshAccess(userService) {
+      return !!(userService && userService.info && userService.info.app_ssh_endpoint &&
+      userService.info.app_ssh_host_key_fingerprint && userService.info.app_ssh_oauth_client);
+    }
 
     /**
      * @function selectOptionMapping

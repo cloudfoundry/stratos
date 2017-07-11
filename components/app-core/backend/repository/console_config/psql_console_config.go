@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
@@ -56,14 +56,14 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	}
 	defer rows.Close()
 
-	rowCount := 0;
+	rowCount := 0
 
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
 			authEndpoint string
 		)
-		rowCount++;
+		rowCount++
 		if rowCount > 1 {
 			return nil, errors.New("Multiple configuration data detected!")
 		}
@@ -82,6 +82,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 	return consoleConfig, nil
 }
+
 // Save - Persist a Console setup to a datastore
 func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleConfig) error {
 	log.Debug("Saving ConsoleConfig: %+v", config)
@@ -125,7 +126,7 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 		return false, err
 	}
 
-	if rowCount == 0{
+	if rowCount == 0 {
 		return false, nil
 	}
 
@@ -177,4 +178,3 @@ func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 
 	return count, nil
 }
-

@@ -63,8 +63,6 @@
     vm.failedLogin = false;
     vm.serverErrorOnLogin = false;
     vm.hideNavigation = $stateParams.hideNavigation;
-    vm.hideSecondNavigation = $stateParams.hideSecondNavigation;
-    vm.hideBottomNavigation = $stateParams.hideBottomNavigation;
     vm.hideAccount = $stateParams.hideAccount;
     vm.navbarIconsOnly = false;
     vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
@@ -87,8 +85,6 @@
     // Navigation options
     $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
       vm.hideNavigation = toParams.hideNavigation;
-      vm.hideSecondNavigation = toParams.hideSecondNavigation;
-      vm.hideBottomNavigation = toParams.hideBottomNavigation;
       vm.hideAccount = toParams.hideAccount;
     });
 

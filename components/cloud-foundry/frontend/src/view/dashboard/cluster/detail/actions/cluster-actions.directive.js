@@ -185,7 +185,7 @@
             buttonTitles: {
               submit: 'cluster-actions.create-space.dialog.submit-button'
             },
-            class: 'space-dialog-form',
+            class: 'space-dialog-form dialog-form',
             dialog: true
           },
           {
