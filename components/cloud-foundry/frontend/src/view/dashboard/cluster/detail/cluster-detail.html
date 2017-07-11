@@ -23,13 +23,21 @@
               {{ clusterDetailController.totalMemoryUsed }}
             </dd>
           <dt ng-if="clusterDetailController.orgCount >= 0" translate>cf.summary.panel.label.orgs</dt>
-          <dd ng-if="clusterDetailController.orgCount >= 0">
-            {{ clusterDetailController.orgCount }}
-          </dd>
+            <dd ng-if="clusterDetailController.orgCount >= 0">
+              {{ clusterDetailController.orgCount }}
+            </dd>
           <dt ng-if="clusterDetailController.userCount >= 0" translate>cf.summary.panel.label.users</dt>
-          <dd ng-if="clusterDetailController.userCount >= 0">
-            {{ clusterDetailController.userCount }}
-          </dd>
+            <dd ng-if="clusterDetailController.userCount >= 0">
+              {{ clusterDetailController.userCount }}
+            </dd>
+            <dt translate>cf.ssh.access</dt>
+            <dd>
+              <status-indicator status="clusterDetailController.sshAccess"
+                on-icon="check_box" off-icon="check_box_outline_blank"
+                on-label="cf.ssh.enabled" off-label="cf.ssh.disabled"
+                off-class="console-status-normal" on-class="console-status-normal">
+              </status-indicator>
+            </dd>
           </dl>
         </div>
         <div class="col-md-7">

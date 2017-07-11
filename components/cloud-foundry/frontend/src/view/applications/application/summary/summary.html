@@ -91,9 +91,20 @@
           </a>
         </dd>
 
-        <dt translate>app-tabs.summary.summary-panel.ssh-enabled-label</dt>
+        <dt translate>cf.ssh.access</dt>
         <dd class="pull-right">
-          {{ appCtrl.model.application.summary.enable_ssh }}
+          <status-indicator ng-if="!applicationSummaryCtrl.cfSshAccess"
+            status="false" off-icon="check_box_outline_blank" off-label="cf.ssh.unavailable" off-class="console-status-normal">
+          </status-indicator>
+          <status-indicator ng-if="applicationSummaryCtrl.cfSshAccess && !appCtrl.model.application.space.entity.allow_ssh"
+            status="false" off-icon="check_box_outline_blank" off-label="cf.ssh.space-disallowed" off-class="console-status-normal">
+          </status-indicator>
+          <status-indicator ng-if="applicationSummaryCtrl.cfSshAccess && appCtrl.model.application.space.entity.allow_ssh"
+            status="appCtrl.model.application.summary.enable_ssh"
+            on-icon="check_box" off-icon="check_box_outline_blank"
+            on-label="cf.ssh.enabled" off-label="cf.ssh.disabled"
+            off-class="console-status-normal" on-class="console-status-normal">
+          </status-indicator>
         </dd>
       </dl>
     </div>

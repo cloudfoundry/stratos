@@ -30,8 +30,7 @@
       expect(editAppFactory.display).toBeDefined();
     });
 
-    it('should be send PUT request on update ', function () {
-
+    it('should send PUT request on update ', function () {
       $httpBackend.expectPUT('/pp/v1/proxy/v2/apps/appGuid').respond(201, {});
       var asynContext = editAppFactory.display(cnsiGuid, appGuid);
       asynContext.actionTask({});

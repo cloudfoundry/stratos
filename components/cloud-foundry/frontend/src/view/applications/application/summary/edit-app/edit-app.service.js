@@ -32,7 +32,8 @@
         var data = {
           name: model.application.summary.name,
           memory: model.application.summary.memory,
-          instances: model.application.summary.instances
+          instances: model.application.summary.instances,
+          enable_ssh: model.application.summary.enable_ssh
         };
 
         return frameworkAsyncTaskDialog(
@@ -48,7 +49,9 @@
             dialog: true
           },
           {
-            data: data
+            data: data,
+            initial_ssh: model.application.summary.enable_ssh,
+            space_allowed: model.application.space ? model.application.space.entity.allow_ssh : false
           },
           updateAppPromise
         );

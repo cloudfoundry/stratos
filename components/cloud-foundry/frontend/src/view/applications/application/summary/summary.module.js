@@ -213,6 +213,9 @@
         authModel.actions.update, vm.model.application.summary.space_guid);
       vm.hideInstanceActions = !_.find(vm.instancesActionMenu, {hidden: false});
 
+      // Global SSH Access state for the Cloud Foundry instance
+      vm.cfSshAccess = cfUtilsService.hasSshAccess(vm.userCnsiModel.serviceInstances[vm.cnsiGuid]);
+
       vm.model.getAppVariables(vm.cnsiGuid, vm.id)
         .then(function () {
           vm.stratosProject = vm.model.application.variables.environment_json.STRATOS_PROJECT;

@@ -151,6 +151,16 @@
         "twenty": "20 per page",
         "fifty": "50 per page"
       }
+    },
+    "ssh": {
+      "access": "SSH Access",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "allowed": "Allowed",
+      "disallowed": "Disallowed",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "space-disallowed": "Disallowed by Space"
     }
   }
 }

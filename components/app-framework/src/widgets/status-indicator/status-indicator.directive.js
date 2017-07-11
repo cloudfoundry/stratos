@@ -18,11 +18,11 @@
     return {
       bindToController: {
         status: '=',
-        onIcon: '@',
+        onIcon: '@?',
         offIcon: '@',
-        onLabel: '@',
+        onLabel: '@?',
         offLabel: '@',
-        onClass: '@',
+        onClass: '@?',
         offClass: '@'
       },
       controller: StatusIndicatorController,

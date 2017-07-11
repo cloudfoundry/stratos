@@ -14,8 +14,13 @@
     .register-content-right {
       display: flex;
       flex-direction: column;
-
       padding-bottom: $console-unit-space;
+
+      &.register-content-fill {
+        .form-group {
+          width: 100%;
+        }
+      }
 
       h4 {
         margin-top: 0;

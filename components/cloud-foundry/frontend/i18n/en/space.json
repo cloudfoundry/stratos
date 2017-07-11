@@ -14,7 +14,23 @@
         "address": "instance address",
         "cli": "cf interactions",
         "username": "account username",
-        "status": "account status"
+        "status": "account status",
+            "ssh": {
+      "allow": {
+        "allow": "Allow SSH Access",
+        "title": "Allow SSH Access",
+        "prompt": "Please confirm that you wish to allow SSH access for space '{{name}}'.",
+        "confirm": "Allow",
+        "error": "An error occurred allowing SSH Access for the space."
+      },
+      "disallow": {
+        "disallow": "Disallow SSH Access",
+        "title": "Disallow SSH Access",
+        "prompt": "Please confirm that you wish to disallow SSH access for space '{{name}}'.",
+        "confirm": "Disallow",
+        "error": "An error occurred disallowing SSH Access for the space."
+      }
+    }
       }
     },
     "rename-action": "Rename Space",
