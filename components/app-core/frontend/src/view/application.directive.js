@@ -33,6 +33,7 @@
    * @param {object} appLocalStorage - the Local Storage In Service
    * @param {object} appSelectLanguage - the Language Selection dialogService
    * @param {object} appUtilsService - the App Utils service
+   * @param {app.view.consoleSetupCheck} consoleSetupCheck - the Console Setup checkservice
    * @param {object} $timeout - Angular $timeout service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
@@ -48,11 +49,12 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, $timeout, $stateParams, $window, $rootScope, $scope) {
+                                 appSelectLanguage, appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
     vm.appUpgradeCheck = appUpgradeCheck;
+    vm.consoleSetupCheck = consoleSetupCheck;
     vm.showLanguageSelection = showLanguageSelection;
     vm.loggedIn = false;
     vm.serverFailedToRespond = false;
@@ -134,6 +136,12 @@
           // Upgrade service will cause the upgrade page to be displayed to the user
           appUpgradeCheck.responseError(response);
           // Need to pretend that we are logged in to hide the login page and show the upgrade page
+          vm.loggedIn = true;
+        }
+
+        // Check if console is not setup
+        if (consoleSetupCheck.setupRequired(response)) {
+          consoleSetupCheck.responseError(response);
           vm.loggedIn = true;
         }
       }).finally(function () {
@@ -270,7 +278,7 @@
         vm.failedLogin = false;
       } else if (response.status >= 500 && response.status < 600) {
         // Check for upgrade - the upgrade handler will show the error - but we need to hide the login panel
-        if (appUpgradeCheck.isUpgrading(response)) {
+        if (appUpgradeCheck.isUpgrading(response) || consoleSetupCheck.setupRequired(response)) {
           vm.loggedIn = true;
           return;
         }

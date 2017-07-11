@@ -25,9 +25,10 @@
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {object} appErrorService - the error service
    * @param {object} appUpgradeCheck - the upgrade check service
+   * @param {app.view.consoleSetupCheck} consoleSetupCheck - the Console Setup checkservice
    * @returns {object} The response error function
    */
-  function interceptor($q, appErrorService, appUpgradeCheck) {
+  function interceptor($q, appErrorService, appUpgradeCheck, consoleSetupCheck) {
 
     var commsErrorMsg = 'errors.server_comms';
     return {
@@ -44,7 +45,7 @@
       // Network failure
       if (response.status === -1) {
         appErrorService.setSystemError(commsErrorMsg);
-      } else if (response.status === 503 && !appUpgradeCheck.isUpgrading(response)) {
+      } else if (response.status === 503 && !appUpgradeCheck.isUpgrading(response) && !consoleSetupCheck.setupRequired(response)) {
         appErrorService.setSystemError(commsErrorMsg);
       }
       return $q.reject(response);

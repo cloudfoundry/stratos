@@ -37,7 +37,7 @@ export PGSQL_CONNECT_TIMEOUT_IN_SECS=100
 export PGSQL_SSL_MODE='disable'
 
 export HTTP_CLIENT_TIMEOUT_IN_SECS=100
-export SKIP_TLS_VERIFICATION='true'
+export SKIP_SSL_VALIDATION='true'
 export TLS_ADDRESS=':8080'
 export CONSOLE_CLIENT='portal-proxy'
 export CONSOLE_CLIENT_SECRET='ohsosecret!'

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/gorilla/sessions"
 )
 
 type portalProxy struct {
@@ -19,6 +19,6 @@ type portalProxy struct {
 type HttpSessionStore interface {
 	sessions.Store
 	Close()
-	StopCleanup(quit chan <- struct{}, done <-chan struct{})
-	Cleanup(interval time.Duration) (chan <- struct{}, <-chan struct{})
+	StopCleanup(quit chan<- struct{}, done <-chan struct{})
+	Cleanup(interval time.Duration) (chan<- struct{}, <-chan struct{})
 }
