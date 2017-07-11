@@ -44,11 +44,7 @@ bottom-nav {
   width: $main-nav-width;
 
   &.navbar-hidden {
-    width: 100%;
-
-    > div .bottom-nav-menu {
-      display: none;
-    }
+    display: none;
   }
 
   > div {

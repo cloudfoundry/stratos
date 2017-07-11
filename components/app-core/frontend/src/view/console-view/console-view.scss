@@ -17,6 +17,15 @@ console-view {
   &.navbar-hidden {
     width: 100vw;
     margin-left: 0;
+
+    padding-top: 0;
+    .container-fluid {
+      padding: 0;
+    }
+  }
+
+  .content {
+    height: 100%;
   }
 
   & > * {

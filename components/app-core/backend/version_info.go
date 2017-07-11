@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/goose-db-version"
+	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 

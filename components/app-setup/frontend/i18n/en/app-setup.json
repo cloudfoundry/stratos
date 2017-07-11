@@ -1,0 +1,56 @@
+{
+  "app-setup": {
+    "intro-title": "@:product.console",
+    "intro-description": "To start using the [[@:product.console]] please run through configuration setup steps",
+    "start-button": "Start Setup",
+    "wizard-title": "Setup the Console",
+    "step-1": {
+      "title": "UAA Part 1",
+      "busy-message": "Validating ...",
+      "uaa-intro": "UAA Endpoint",
+      "uaa-url": {
+        "label": "API URL",
+        "placeholder": "URL of UAA API",
+        "error-required": "Url is required",
+        "error-pattern": "Invalid URL"
+      },
+      "uaa-url-skip-ssl": {
+        "label": "Skip SSL validation for the endpoint"
+      },
+      "console-intro": "Console credentials for UAA",
+      "console-client": {
+        "label": "Client Id",
+        "placeholder": "",
+        "error-required": "Id is required"
+      },
+      "console-secret": {
+        "label": "Client Secret",
+        "placeholder": "",
+        "error-required": "Secret is required"
+      },
+      "console-admin": {
+        "label": "Console Admin",
+        "placeholder": "Username",
+        "error-required": "Username is required"
+      },
+      "console-password": {
+        "label": "Password",
+        "placeholder": "",
+        "error-required": "Password is required"
+      },
+      "error-request": "Unable to send setup information. If this error persists, please contact the Administrator.",
+      "error-request-reason": "[[@:app-setup.step-1.error-request]]. Reason: {{reason}}."
+    },
+    "step-2": {
+      "title": "UAA Part 2",
+      "busy-message": "Applying ...",
+      "intro": "Console Admin Scope",
+      "console-scope": {
+        "label": "Scope",
+        "placeholder": "UAA admin scope identifying console admin"
+      },
+      "error-request": "Unable to send setup information. If this error persists, please contact the Administrator.",
+      "error-request-reason": "[[@:app-setup.step-2.error-request]]. Reason: {{reason}}."
+    }
+  }
+}

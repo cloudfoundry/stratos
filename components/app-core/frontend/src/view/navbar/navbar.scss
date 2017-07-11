@@ -39,7 +39,7 @@ nav.secondary-nav {
   display: flex;
 
   &.navbar-hidden {
-    padding-left: 0;
+    display: none;
   }
 
   &.navbar-icons-only {

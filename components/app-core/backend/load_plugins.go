@@ -5,14 +5,14 @@ import (
 	"io/ioutil"
 	"plugin"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	log "github.com/Sirupsen/logrus"
 )
 
 type pluginDef struct {
-	LibraryPath string     `json:"libraryPath"`
-	PluginPath  string     `json:"pluginPath"`
-	PluginName  string     `json:"pluginName"`
+	LibraryPath string `json:"libraryPath"`
+	PluginPath  string `json:"pluginPath"`
+	PluginName  string `json:"pluginName"`
 }
 
 func (pp *portalProxy) loadPlugins() {

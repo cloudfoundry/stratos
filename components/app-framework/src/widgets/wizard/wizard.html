@@ -41,7 +41,7 @@
       ng-class="{ 'col-xs-12 col-sm-9': !wizardCtrl.workflow.hideStepNavStack, 'wizard-step-full': wizardCtrl.workflow.hideStepNavStack}"
       ng-if="wizardCtrl.currentIndex === -2">
       <div class="message-box message-box-no-bg">
-        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy">{{wizardCtrl.busyMessage}}</div>
+        <div ng-if="wizardCtrl.busyMessage.length" class="message-box-busy" translate>{{wizardCtrl.busyMessage}}</div>
         <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
         <div>
           <button type="button" class="btn btn-sm btn-default"
