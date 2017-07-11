@@ -125,7 +125,19 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 
 	rowCount, err := c.getTableCount()
 	if err != nil {
-		return false, err
+		for strings.Contains(err.Error(), "does not exist") {
+			// Schema isn't initialised yet. Wait a few secs and retry
+			log.Warnf("It appears schema isn't initialised yet, sleeping and trying again %s", err)
+			time.Sleep(1 * time.Second)
+			rowCount, err = c.getTableCount()
+			if err == nil {
+				break
+			}
+		}
+		if err != nil {
+			return false, err
+		}
+
 	}
 
 	if rowCount == 0 {
@@ -165,12 +177,6 @@ func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	rows, err := c.db.Query(getTableCount)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "does not exist") {
-			// Schema isn't initialised yet. Wait a few secs and retry
-			log.Warnf("It appears schema isn't initialised yet, sleeping and trying again %s", err)
-			time.Sleep(1 * time.Second)
-			c.getTableCount()
-		}
 		return 0, fmt.Errorf("Exception occurred when fetching row count: %v", err)
 	}
 	defer rows.Close()
