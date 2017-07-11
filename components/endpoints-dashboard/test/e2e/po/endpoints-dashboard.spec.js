@@ -16,7 +16,7 @@
   var cfHelpers = require('../../../../cloud-foundry/frontend/test/e2e/po/helpers.po');
   var applications = require('../../../../cloud-foundry/frontend/test/e2e/po/applications/applications.po');
 
-  describe('Endpoints Dashboard', function () {
+  describe('Endpoints Dashboard - ', function () {
 
     function resetToLoggedIn(stateSetter, isAdmin) {
       return browser.driver.wait(stateSetter())
@@ -27,8 +27,8 @@
         });
     }
 
-    describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints)', function () {
-      describe('As Admin', function () {
+    describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints) - ', function () {
+      describe('As Admin - ', function () {
 
         describe('No registered endpoints', function () {
           beforeAll(function () {
@@ -76,7 +76,7 @@
 
       });
 
-      describe('As Non-Admin', function () {
+      describe('As Non-Admin - ', function () {
 
         describe('No registered endpoints', function () {
           beforeAll(function () {
@@ -174,9 +174,9 @@
     });
 
     // The following tests are all carried out as non-admin
-    describe('Dashboard tests', function () {
+    describe('Dashboard tests - ', function () {
 
-      describe('Register endpoints', function () {
+      describe('Register endpoints - ', function () {
 
         function registerTests(type) {
           beforeAll(function () {
@@ -378,7 +378,7 @@
 
       });
 
-      describe('Unregister Endpoints', function () {
+      describe('Unregister Endpoints - ', function () {
 
         describe('As Admin', function () {
           var endpointCount;
@@ -468,7 +468,7 @@
 
       });
 
-      describe('Connect/Disconnect endpoints', function () {
+      describe('Connect/Disconnect endpoints - ', function () {
         var cf = helpers.getRegisteredService();
         var cfRowIndex;
         beforeAll(function (done) {
@@ -489,7 +489,7 @@
             });
         });
 
-        describe('endpoint `Connect` clicked', function () {
+        describe('endpoint `Connect` - ', function () {
 
           beforeAll(function (done) {
             endpointsPage.endpointConnectLink(cfRowIndex).then(function (button) {
@@ -555,7 +555,7 @@
 
         });
 
-        describe('endpoint `Disconnect`', function () {
+        describe('endpoint `Disconnect` - ', function () {
           it('should update row in table when disconnected', function () {
             endpointsPage.goToEndpoints();
             endpointsPage.waitForEndpointTable();
@@ -574,7 +574,7 @@
 
       });
 
-      describe('Error States', function () {
+      describe('Error States - ', function () {
 
         it('Unconnected', function () {
           // See checks in 'Workflow on log in (admin/non-admin + no endpoints/some endpoints)/Some As Admin/registered

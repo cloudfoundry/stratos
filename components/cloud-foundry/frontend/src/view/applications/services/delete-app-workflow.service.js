@@ -54,15 +54,16 @@
      * @function deleteServiceInstances
      * @memberOf cloud-foundry.view.applications.services.cfServiceDeleteAppWorkflow
      * @description Delete service instances
+     * @param {string} cnsiGuid - the service instance GUID
      * @param {array} safeServiceInstances - the service instance GUIDs
      * @returns {object} A resolved/rejected promise
      */
-    function deleteServiceInstances(safeServiceInstances) {
+    function deleteServiceInstances(cnsiGuid, safeServiceInstances) {
       var funcStack = [];
 
       angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
         funcStack.push(function () {
-          return deleteServiceInstanceIfPossible(serviceInstanceGuid);
+          return deleteServiceInstanceIfPossible(cnsiGuid, serviceInstanceGuid);
         });
       });
 

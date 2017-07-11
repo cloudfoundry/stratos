@@ -21,9 +21,7 @@
       controllerAs: 'setupController',
       params: {
         hideNavigation: true,
-        hideAccount: true,
-        hideBottomNavigation: true,
-        hideSecondNavigation: true
+        hideAccount: true
       }
     });
   }

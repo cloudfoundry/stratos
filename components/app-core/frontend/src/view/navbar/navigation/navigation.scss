@@ -35,9 +35,6 @@ secondary-nav {
 }
 
 bottom-nav {
-  &.bottom-navbar-hidden {
-    display: none;
-  }
   height: $bottom-nav-height;
   background-color: $bottom-nav-bg-color;
   flex: 0 0 $bottom-nav-height;
@@ -47,11 +44,7 @@ bottom-nav {
   width: $main-nav-width;
 
   &.navbar-hidden {
-    width: 100%;
-
-    > div .bottom-nav-menu {
-      display: none;
-    }
+    display: none;
   }
 
   > div {

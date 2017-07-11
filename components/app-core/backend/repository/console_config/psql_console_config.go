@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
@@ -18,7 +18,7 @@ var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client
 var saveConsoleConfig = `INSERT INTO console_config (uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation, is_setup_complete)
 						VALUES ($1, $2, $3, $4, $5, $6)`
 
-var updateConsoleConfig = `UPDATE console_config SET console_admin_scope = $1, is_setup_complete = 'y'`
+var updateConsoleConfig = `UPDATE console_config SET console_admin_scope = $1, is_setup_complete = '1'`
 
 var getTableCount = `SELECT count(uaa_endpoint) FROM console_config`
 
@@ -56,14 +56,14 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 	}
 	defer rows.Close()
 
-	rowCount := 0;
+	rowCount := 0
 
 	var consoleConfig *interfaces.ConsoleConfig
 	for rows.Next() {
 		var (
 			authEndpoint string
 		)
-		rowCount++;
+		rowCount++
 		if rowCount > 1 {
 			return nil, errors.New("Multiple configuration data detected!")
 		}
@@ -82,6 +82,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 	return consoleConfig, nil
 }
+
 // Save - Persist a Console setup to a datastore
 func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleConfig) error {
 	log.Debug("Saving ConsoleConfig: %+v", config)
@@ -125,7 +126,7 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 		return false, err
 	}
 
-	if rowCount == 0{
+	if rowCount == 0 {
 		return false, nil
 	}
 
@@ -140,11 +141,11 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 
 func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
 	rows, err := c.db.Query(hasSetupCompleted)
-	defer rows.Close()
 
 	if err != nil {
 		return false, fmt.Errorf("Exception occurred when fetching row: %v", err)
 	}
+	defer rows.Close()
 
 	isSetupComplete := false
 	for rows.Next() {
@@ -160,11 +161,11 @@ func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
 
 func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	rows, err := c.db.Query(getTableCount)
-	defer rows.Close()
 
 	if err != nil {
 		return 0, fmt.Errorf("Exception occurred when fetching row count: %v", err)
 	}
+	defer rows.Close()
 
 	count := 0
 	for rows.Next() {
@@ -177,4 +178,3 @@ func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 
 	return count, nil
 }
-

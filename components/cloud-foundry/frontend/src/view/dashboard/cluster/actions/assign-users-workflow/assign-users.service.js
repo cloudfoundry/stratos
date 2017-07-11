@@ -20,7 +20,9 @@
             detailViewTemplateUrl:
               'plugins/cloud-foundry/view/dashboard/cluster/actions/assign-users-workflow/assign-users.html',
             controller: AssignUsersWorkflowController,
-            controllerAs: 'assignUsers'
+            controllerAs: 'assignUsers',
+            dialog: true,
+            class: 'dialog-form-larger'
           },
           context
         );

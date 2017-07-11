@@ -18,24 +18,6 @@
     }
   }
 }
-.add-variable-dialog {
-  margin-right: $console-unit-space * 5;
-
-  .alert {
-    margin-top: $console-unit-space;
-  }
-
-  .form-actions {
-    clear: both;
-    margin-top: $console-unit-space * 2;
-    padding: $console-unit-space / 2;
-    text-align: right;
-
-    button:not(:first-child) {
-      margin-left: $console-unit-space / 2;
-    }
-  }
-}
 
 table.app-variables-table {
 

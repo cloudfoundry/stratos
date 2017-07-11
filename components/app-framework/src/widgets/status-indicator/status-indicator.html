@@ -1,5 +1,6 @@
-<div class="console-status-indicator" ng-init="iconText = statusCtrl.status ? statusCtrl.onIcon : statusCtrl.offIcon">
-  <i ng-class="{ '{{statusCtrl.onClass}}': statusCtrl.status, '{{statusCtrl.offClass}}': !statusCtrl.status }"
-    class="material-icons">{{ iconText }}</i>
-  <span translate>{{ statusCtrl.status ? statusCtrl.onLabel : statusCtrl.offLabel }}</span>
+<div class="console-status-indicator">
+  <i ng-if="statusCtrl.status" ng-class="{{ statusCtrl.onClass }}" class="material-icons">{{ statusCtrl.onIcon }}</i>
+  <span ng-if="statusCtrl.status" translate>{{statusCtrl.onLabel}}</span>
+  <i ng-if="!statusCtrl.status" ng-class="{{ statusCtrl.offClass }}" class="material-icons">{{ statusCtrl.offIcon }}</i>
+  <span ng-if="!statusCtrl.status" translate>{{statusCtrl.offLabel}}</span>
 </div>

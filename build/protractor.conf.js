@@ -29,7 +29,10 @@
   exports.config = {
 
     suites: {
-      components: ''
+      components: '',
+      screenshots: [
+        '../test/e2e/screenshots/*.spec.js'
+      ]
     },
 
     // Default suite to run

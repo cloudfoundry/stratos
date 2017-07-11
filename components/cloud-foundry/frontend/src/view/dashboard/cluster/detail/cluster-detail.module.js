@@ -28,7 +28,8 @@
   }
 
   function ClusterDetailController($stateParams, $scope, $state, $q,
-                                   modelManager, apiManager, appUtilsService, appClusterCliCommands, modelUtils, cfOrganizationModel) {
+                                   modelManager, apiManager, appUtilsService, appClusterCliCommands,
+                                   modelUtils, cfOrganizationModel, cfUtilsService) {
     var that = this;
     this.guid = $stateParams.guid;
     this.appClusterCliCommands = appClusterCliCommands;
@@ -91,6 +92,8 @@
       }, function () {
         updateFromModel();
       });
+
+      that.sshAccess = cfUtilsService.hasSshAccess(that.userService);
 
       that.initialized = true;
 

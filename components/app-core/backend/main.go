@@ -143,7 +143,11 @@ func main() {
 	}()
 
 	// Initialise configuration
-	addSetupMiddleware := initialiseConsoleConfiguration(portalProxy)
+	addSetupMiddleware, err := initialiseConsoleConfiguration(portalProxy)
+	if err != nil {
+		log.Infof("Failed to initialise console config due to: %s", err)
+		return
+	}
 
 	// Initialise Plugins
 	portalProxy.loadPlugins()
@@ -162,18 +166,18 @@ func main() {
 	log.Info("Unable to start proxy!")
 
 }
-func initialiseConsoleConfiguration(portalProxy *portalProxy) *setupMiddleware {
+func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
 
+	addSetupMiddleware := new(setupMiddleware)
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to intialise console backend config due to: %+v", err)
+		return addSetupMiddleware, err
 	}
-	//consoleConfig, err := consoleRepo.GetConsoleConfig()
 	isInitialised, err := consoleRepo.IsInitialised()
 
-	addSetupMiddleware := new(setupMiddleware)
 	if err != nil || !isInitialised {
-		// Exception occurred when trying determine
+		// Exception occurred when trying to determine
 		// if its initialised or instance isn't initialised,
 		// will attempt to initialise it from the env vars.
 
@@ -199,7 +203,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) *setupMiddleware {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 	}
 
-	return addSetupMiddleware
+	return addSetupMiddleware, nil
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
