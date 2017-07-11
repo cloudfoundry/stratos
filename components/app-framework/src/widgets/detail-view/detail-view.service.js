@@ -91,7 +91,7 @@
       });
       frameworkDialogEvents.notifyOpened();
       openDetailViewCount++;
-      modal.closed.then(function () {
+      modal.result.finally(function () {
         openDetailViewCount--;
         frameworkDialogEvents.notifyClosed();
 
