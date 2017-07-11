@@ -22,48 +22,101 @@ $select-option-height: 39px;
     display: none;
   }
 
+  .deploy-app-source-area {
+    display: flex;
+    margin-top: $console-unit-space;
+
+    > div {
+      flex: 1;
+    }
+
+    p.control-title {
+      margin-top: 0;
+    }
+
+    radio-input {
+      margin-bottom: $console-unit-space / 4;
+    }
+
+    .deploy-app-source-local {
+      radio-input {
+        margin-top: $console-unit-space / 2;
+      }
+    }
+
+    &.file-drop-active {
+      outline: 3px dashed $brand-primary;
+      outline-offset: 4px;
+
+      > * {
+        opacity: 0.5;
+      }
+    }
+
+    .deploy-app-source-details {
+
+      &.deploy-app-source-help {
+        display: flex;
+        align-items: center;
+        padding: $console-unit-space / 2;
+        border: 1px solid #ccc;
+
+        > p {
+          text-align: center;
+
+        }
+      }
+
+      &.deploy-app-github-details {
+        .deploy-app-github-info {
+          border: 1px solid #ccc;
+          padding: $console-unit-space / 2;
+
+          img {
+            height: $github-avatar-height;
+            width: $github-avatar-width;
+          }
+
+          .project {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            .project-info {
+              padding-left: $console-unit-space / 2;
+            }
+          }
+
+          .lastCommit {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            padding-top: $github-info-commit-spacer;
+
+            .lastCommit-info {
+              padding-left: $console-unit-space / 2;
+            }
+          }
+        }
+
+      }
+
+    }
+  }
+
   .deploy-app-github {
     display: flex;
 
     .deploy-app-github-form {
       .deploy-app-github-branch {
-        margin-bottom: $select-option-height * 3 - $console-unit-space;
+        //margin-bottom: $select-option-height * 3 - $console-unit-space;
         .dropdown-menu {
           max-height: $select-option-height * 3;
         }
       }
     }
 
-    .deploy-app-github-info {
-      padding-left: $console-unit-space;
-
-      img {
-        height: $github-avatar-height;
-        width: $github-avatar-width;
-      }
-
-      .project {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        .project-info {
-          padding-left: $console-unit-space / 2;
-        }
-      }
-
-      .lastCommit {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        padding-top: $github-info-commit-spacer;
-
-        .lastCommit-info {
-          padding-left: $console-unit-space / 2;
-        }
-      }
-    }
   }
 
   .rm-background{
@@ -88,4 +141,11 @@ $select-option-height: 39px;
       background-color: $console-primary-bg;
     }
   }
+}
+
+
+.folder-drop-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

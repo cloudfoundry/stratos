@@ -84,7 +84,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
-                               $timeout, $filter, modelManager) {
+                               $timeout, $filter, modelManager, itemDropHelper, frameworkDetailView) {
 
     var vm = this;
 
@@ -141,7 +141,10 @@
       githubProject: '',
       manifest: {
         location: '/manifest.yml'
-      }
+      },
+      sourceType: 'github',
+      localPath: '',
+      fileScanData: null
     };
 
     var stepInfo = {
@@ -154,8 +157,15 @@
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
       allowNext: function () {
-        return vm.userInput.githubProjectValid;
+        console.log('allow next');
+        console.log(vm.userInput.sourceType);
+        console.log(vm.userInput.githubProjectValid);
+        console.log(vm.userInput.fileScanData);
+        var a = vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
+        console.log(a);
+        return a;
       },
+      dropItemHandler: dropHandler,
       onEnter: function () {
         allowBack = false;
         if (vm.data.deployStatus) {
@@ -179,6 +189,27 @@
           });
       }
     };
+
+    function dropHandler(items) {
+      console.log('ITEMS WERE DROPPED');
+      console.log(items);
+      vm.userInput.sourceType = 'local';
+
+      itemDropHelper.identify(items).then(function (info) {
+        console.log(info);
+        vm.userInput.localPath = info.value ? info.value.name : '';
+        if (info.isFiles) {
+          vm.options.wizardCtrl.showBusy('Scanning for files and folders');
+          itemDropHelper.traverseFiles(info.value, '.cfignore').then(function (results) {
+            console.log('scan complete');
+            console.log(results);
+            vm.userInput.fileScanData = results;
+            vm.options.wizardCtrl.showBusy();
+          });
+        }
+      });
+    }
+
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
       templateUrl: templatePath + 'deploy-app-deploying.html',
@@ -202,6 +233,9 @@
 
     vm.options = {
       workflow: {
+        initControllers: function (wizardCtrl) {
+          vm.options.wizardCtrl = wizardCtrl;
+        },
         disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
