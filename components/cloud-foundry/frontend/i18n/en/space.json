@@ -1,7 +1,17 @@
 {
   "cf": {
+    "space": {
+      "space": "space",
+      "capitalised": "Space",
+      "uppercase": "SPACE"
+    },
+    "spaces": {
+      "spaces": "spaces",
+      "capitalised": "Spaces",
+      "uppercase": "SPACES"
+    },
     "space-info": {
-      "title": "Space : {{name}}",
+      "title": "[[@:cf.space.capitalised]] : {{name}}",
       "summary": {
         "title": "Summary",
         "label": {
@@ -18,20 +28,20 @@
           "status": "account status"
         }
       },
-      "rename-action": "Rename Space",
+      "rename-action": "Rename [[@:cf.space.capitalised]]",
       "rename-dialog": {
-        "title": "Rename Space",
-        "space-label": "Space Name",
+        "title": "Rename [[@:cf.space.capitalised]]",
+        "space-label": "[[@:cf.space.capitalised]] Name",
         "space-error-required": "Name is required",
         "space-error-unique": "Name must be unique",
-        "success-notification": "Space '{{name}}' successfully updated"
+        "success-notification": "[[@:cf.space.capitalised]] '{{name}}' successfully updated"
       },
-      "delete-action": "Delete Space",
+      "delete-action": "Delete [[@:cf.space.capitalised]]",
       "delete-dialog": {
-        "title": "Delete Space",
-        "description": "Are you sure you want to delete space '{{name}}'?",
-        "success-notification": "Space '{{name}}' successfully deleted",
-        "error-message": "Failed to delete space"
+        "title": "Delete [[@:cf.space.capitalised]]",
+        "description": "Are you sure you want to delete [[@:cf.space.space]] '{{name}}'?",
+        "success-notification": "[[@:cf.space.capitalised]] '{{name}}' successfully deleted",
+        "error-message": "Failed to delete [[@:cf.space.space]]"
       },
       "delete-route-action": "Delete Route",
       "unmap-route-action": "Unmap Route",
@@ -48,7 +58,7 @@
             "created": "created on",
             "instances": "instances"
           },
-          "none": "There are no applications in this space",
+          "none": "There are no applications in this [[@:cf.space.space]]",
           "show-all-button": "@:cf.space-info.tabs.show-all-button"
         },
         "services": {
@@ -81,16 +91,16 @@
         "allow": {
           "allow": "Allow SSH Access",
           "title": "Allow SSH Access",
-          "prompt": "Please confirm that you wish to allow SSH access for space '{{name}}'.",
+          "prompt": "Please confirm that you wish to allow SSH access for [[@:cf.space.space]] '{{name}}'.",
           "confirm": "Allow",
-          "error": "An error occurred allowing SSH Access for the space."
+          "error": "An error occurred allowing SSH Access for the [[@:cf.space.space]]."
         },
         "disallow": {
           "disallow": "Disallow SSH Access",
           "title": "Disallow SSH Access",
-          "prompt": "Please confirm that you wish to disallow SSH access for space '{{name}}'.",
+          "prompt": "Please confirm that you wish to disallow SSH access for [[@:cf.space.space]] '{{name}}'.",
           "confirm": "Disallow",
-          "error": "An error occurred disallowing SSH Access for the space."
+          "error": "An error occurred disallowing SSH Access for the [[@:cf.space.space]]."
         }
       }
     },
@@ -102,7 +112,7 @@
       "memory-label": "memory utilization"
     },
     "space-list": {
-      "none": "You have no spaces"
+      "none": "You have no [[@:cf.spaces.spaces]]"
     }
   }
 }

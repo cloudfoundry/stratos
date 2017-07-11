@@ -1,7 +1,7 @@
 {
   "cloud-foundry": "Cloud Foundry",
   "org": "Org",
-  "space": "Space",
+  "space": "@:cf.space.capitalised",
   "menu": {
     "cloud-foundry": "@:cloud-foundry"
   },
@@ -32,7 +32,7 @@
       "step1-link-text": "see here",
       "step2": "2. Set the api endpoint",
       "step3": "3. Login",
-      "step4": "4. Target an org and space"
+      "step4": "4. Target an org and [[@:cf.space.space]]"
     },
     "summary": {
       "title": "Cluster : {{name}}",
@@ -41,7 +41,7 @@
         "label": {
           "apps": "applications",
           "memory": "memory usage",
-          "orgs": "organisations",
+          "orgs": "@:cf.organisation.organisation",
           "users": "users",
           "address": "instance address",
           "cli": "cf interactions",
@@ -59,7 +59,7 @@
           "step3": "@:cf.cli-common.step3",
           "step4": "@:cf.cli-common.step4",
           "org-commands": {
-            "title": "Organization Commands",
+            "title": "[[@:cf.organisation.capitalised]] Commands",
             "list": "List",
             "list-intro": "To list all orgs",
             "rename": "Rename",
@@ -70,15 +70,15 @@
             "users-intro": "List each org role's users"
           },
           "space-commands": {
-            "title": "Space Commands",
+            "title": "[[@:cf.space.capitalised]] Commands",
             "list": "List",
-            "list-intro": "To list the spaces in the targeted org",
+            "list-intro": "To list the [[@:cf.spaces.spaces]] in the targeted org",
             "rename": "Rename",
-            "rename-intro": "To rename a space",
+            "rename-intro": "To rename a [[@:cf.space.space]]",
             "info": "Information",
-            "info-intro": "To fetch space information",
+            "info-intro": "To fetch [[@:cf.space.space]] information",
             "users": "Users",
-            "users-intro": "List each space role's users"
+            "users-intro": "List each [[@:cf.space.space]] role's users"
           }
         }
       }
@@ -115,7 +115,7 @@
         "labels":{
           "created": "Created",
           "updated": "Updated",
-          "spaces": "Spaces",
+          "spaces": "[[@:cf.spaces.capitalised]]",
           "staging-default": "Staging Default",
           "running-default": "Running Default",
           "rules": "Rules",
@@ -134,7 +134,7 @@
       "disallowed": "Disallowed",
       "available": "Available",
       "unavailable": "Unavailable",
-      "space-disallowed": "Disallowed by Space"
+      "space-disallowed": "Disallowed by [[@:cf.space.capitalised]]"
     }
   }
 }

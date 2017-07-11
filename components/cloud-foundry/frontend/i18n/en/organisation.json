@@ -1,14 +1,21 @@
 {
   "cf": {
+    "organisation": {
+      "organisation": "organization",
+      "capitalised": "Organization",
+      "uppercase": "ORGANIZATION"
+    },
     "organisations": {
-      "organisations": "Organizations"
+      "organisations": "organizations",
+      "capitalised": "Organizations",
+      "uppercase": "ORGANIZATIONS"
     },
     "org-list": {
-      "error": "An error occurred retrieving organizations",
-      "no-orgs": "You have no organizations"
+      "error": "An error occurred retrieving [[@:cf.organisations.organisations]]",
+      "no-orgs": "You have no [[@:cf.organisations.organisations]]"
     },
     "org-info": {
-      "title": "Organization : {{name}}",
+      "title": "[[@:cf.organisation.capitalised]] : {{name}}",
       "summary": {
         "title": "Summary",
         "label": {
@@ -25,22 +32,22 @@
           "status": "account status"
         }
       },
-      "edit-action": "Edit Organization",
+      "edit-action": "Edit [[@:cf.organisation.capitalised]]",
       "edit-dialog": {
-        "title": "Edit Organization",
-        "org-label": "Organization Name",
+        "title": "Edit [[@:cf.organisation.capitalised]]",
+        "org-label": "[[@:cf.organisation.capitalised]] Name",
         "org-error-required": "Name is required",
         "org-error-unique": "Name must be unique",
-        "success-notification": "Organization '{{name}}' successfully updated"
+        "success-notification": "[[@:cf.organisation.capitalised]] '{{name}}' successfully updated"
       },
-      "delete-action": "Delete Organisation",
+      "delete-action": "Delete [[@:cf.organisation.capitalised]]",
       "delete-dialog": {
-        "title": "Delete Organization",
-        "description": "Are you sure you want to delete organization '{{name}}'?",
-        "success-notification": "Organization '{{name}}' successfully deleted",
-        "error-message": "Failed to delete organization"
+        "title": "Delete [[@:cf.organisation.capitalised]]",
+        "description": "Are you sure you want to delete [[@:cf.organisation.organisation]] '{{name}}'?",
+        "success-notification": "[[@:cf.organisation.capitalised]] '{{name}}' successfully deleted",
+        "error-message": "Failed to delete [[@:cf.organisation.organisation]]"
       },
-      "space-tab-title": "Spaces",
+      "space-tab-title": "[[@:cf.spaces.capitalised]]",
       "users-tab-title": "Users"
     },
     "org-tile": {

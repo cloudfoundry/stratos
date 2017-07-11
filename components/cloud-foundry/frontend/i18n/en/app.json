@@ -45,7 +45,7 @@
         "edit-app": "Edit App",
         "ssh-access": "Enable SSH Access",
         "ssh-restart-warning": "Note: Enabling or disabling SSH Access will restart all application instances.",
-        "ssh-no-edit": "Note: SSH Access for this application can not be modified as the Space is set to disallow all SSH access."
+        "ssh-no-edit": "Note: SSH Access for this application can not be modified as the [[@:cf.space.capitalised]] is set to disallow all SSH access."
       },
       "app-instances-actions" :{
         "terminate": "Terminate"
@@ -100,8 +100,8 @@
             "stack-label": "stack",
             "endpoint-url-label": "endpoint url",
             "endpoint-label": "[[@:endpoint]]",
-            "org-label": "[[@:organization]]",
-            "space-label": "[[@:space]]",
+            "org-label": "@:cf.organisation.organisation",
+            "space-label": "@:cf.space.space",
             "edit-button": "Edit",
             "edit-dialog": {
               "title": "Edit App",
@@ -343,7 +343,7 @@
         "step3": "3. Enter the following commands in the CLI:",
         "step3-1": "Set the api endpoint",
         "step3-2": "Login",
-        "step3-3": "Target the org and space",
+        "step3-3": "Target the org and [[@:cf.space.space]]",
         "step3-4": "Push to the Cloud Foundry endpoint - Navigate to the project directory and execute the following."
       }
     }

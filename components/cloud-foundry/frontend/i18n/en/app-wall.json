@@ -24,9 +24,9 @@
       "none-space-developer": {
         "admin": {
           "line1": "You have no applications and",
-          "line2": "there are no spaces where you can add any.",
+          "line2": "there are no [[@:cf.spaces.spaces]] where you can add any.",
           "link-text": "Click here",
-          "link-message": "to manage spaces."
+          "link-message": "to manage [[@:cf.spaces.spaces]]."
         },
         "non-admin": {
           "line1": "You have no applications and cannot add any.",
@@ -35,8 +35,8 @@
       },
       "space-developer": {
         "default": "You have no applications",
-        "empty-space": "This space has no applications",
-        "empty-org": "This organization has no applications",
+        "empty-space": "This [[@:cf.space.space]] has no applications",
+        "empty-org": "This [[@:cf.organisation.organisation]] has no applications",
         "empty-endpoint": "This endpoint has no applications",
         "empty-x-due-to-search": "{{emptyXMessage}} matching the search term",
         "add": "Add an application"

@@ -6,9 +6,9 @@
       "instance-title": "Instance # {{id}}",
       "empty": "This application has no instances available for SSH access",
       "not-enabled": "SSH access is not enabled for this Application.",
-      "space-not-enabled": "SSH access is disallowed by the space '{{name}}'.",
-      "space-enable-prompt": "An administrator or space manager will need to enable access for the space.",
-      "space-enable-link": "View Space",
+      "space-not-enabled": "SSH access is disallowed by the [[@:cf.space.space]] '{{name}}'.",
+      "space-enable-prompt": "An administrator or space manager will need to enable access for the [[@:cf.space.space]].",
+      "space-enable-link": "View [[@:cf.space.capitalised]]",
       "enable-prompt": "You can enable and disable SSH access by using the 'Edit' link on the Summary tab.",
       "quick-enable": {
         "quick-enable": "You can also enable SSH access using the button below.",
