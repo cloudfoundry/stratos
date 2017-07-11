@@ -30,7 +30,7 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
-// LoginHookFunc - Function that can be hooked into a successful user login
+// LoginHookFunc - function that can be hooked into a successful user login
 type LoginHookFunc func(c echo.Context) error
 
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms
@@ -84,8 +84,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
-		msg := "Could not get session expiry"		
-		log.Error(msg + " - ", err)
+		msg := "Could not get session expiry"
+		log.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
