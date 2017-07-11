@@ -236,7 +236,7 @@
 
       if (!isConnected) {
         actions.push({
-          name: 'endpoints.connect',
+          name: 'endpoints.connect.connect-action',
           execute: function (serviceInstance) {
             _connect(serviceInstance);
           }
@@ -294,28 +294,15 @@
     }
 
     function _connect(serviceInstance) {
-      that.dialog = appCredentialsDialog.show({
-        activeServiceInstance: serviceInstance,
-        onConnectCancel: function () {
-          if (that.dialog) {
-            that.dialog.close();
-            that.dialog = undefined;
-          }
-        },
-        onConnectSuccess: function () {
-          if (that.dialog) {
-            that.dialog.close();
-            that.dialog = undefined;
-          }
-          updateInstances()
-            .then(function () {
-              createEndpointEntries();
-              return callEndpointProvidersOfType(serviceInstance.cnsi_type, 'connect', serviceInstance);
-            })
-            .then(function () {
-              appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
-            });
-        }
+      that.dialog = appCredentialsDialog.show(serviceInstance, 'registerCnsi').result.then(function () {
+        updateInstances()
+          .then(function () {
+            createEndpointEntries();
+            return callEndpointProvidersOfType(serviceInstance.cnsi_type, 'connect', serviceInstance);
+          })
+          .then(function () {
+            appEventService.$emit(appEventService.events.ENDPOINT_CONNECT_CHANGE, true);
+          });
       });
     }
 

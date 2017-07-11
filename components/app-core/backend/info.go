@@ -10,17 +10,17 @@ import (
 
 // Endpoint - This represents the CNSI endpoint
 type Endpoint struct {
-	GUID     string         `json:"guid"`
-	Name     string         `json:"name"`
-	Version  string         `json:"version"`
+	GUID     string                    `json:"guid"`
+	Name     string                    `json:"name"`
+	Version  string                    `json:"version"`
 	User     *interfaces.ConnectedUser `json:"user"`
-	CNSIType string         `json:"type"`
+	CNSIType string                    `json:"type"`
 }
 
 // Info - this represents user specific info
 type Info struct {
 	Versions     *Versions                       `json:"version"`
-	User         *interfaces.ConnectedUser                  `json:"user"`
+	User         *interfaces.ConnectedUser       `json:"user"`
 	Endpoints    map[string]map[string]*Endpoint `json:"endpoints"`
 	CloudFoundry *interfaces.CFInfo              `json:"cloud-foundry,omitempty"`
 }

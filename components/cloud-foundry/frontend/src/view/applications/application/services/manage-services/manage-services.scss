@@ -1,10 +1,14 @@
 .manage-instances {
+  padding: 0 $console-unit-space;
+  // env vars window shown over needs some space
+  min-height: 400px;
+
   .service-description {
     display: flex;
-    padding: $console-unit-space 0;
+    padding: 0;
 
     .service-icon {
-      padding: $console-unit-space;
+      padding: 0 $console-unit-space/2 $console-unit-space 0;
 
       img {
         max-height: $console-unit-space * 4;
@@ -29,7 +33,7 @@
 }
 
 .env-variables {
-  margin-top: $console-unit-space;
+  margin: $console-unit-space;
 
   pre {
     white-space: pre-wrap;

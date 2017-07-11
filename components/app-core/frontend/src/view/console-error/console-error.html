@@ -12,6 +12,11 @@
           <div class="applications-msg" translate>errors.nothing-registered</div>
           <div class="applications-cta" translate>errors.contact-admin</div>
         </div>
+        <div ng-if="errPageCtrl.error === 'setupRequired'">
+          <app-icon icon="device_hub" icon-class="app-icon-3x app-icon-r90"></app-icon>
+          <div class="applications-msg" translate>errors.setup-required</div>
+          <div class="applications-cta" translate>errors.contact-admin</div>
+        </div>
         <div ng-if="errPageCtrl.error === 'notConnected'">
           <app-icon icon="device_hub" icon-class="app-icon-3x app-icon-r90"></app-icon>
           <div class="applications-msg" translate>errors.nothing-connected</div>

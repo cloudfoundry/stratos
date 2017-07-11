@@ -103,8 +103,24 @@
       }
     },
     "variables": {
+      "add-dialog": {
+        "title": "Add New Variable",
+        "description": "New variables will not be applied until the application is manually restarted.",
+        "name-label": "Name",
+        "name-required": "Name is required",
+        "value-label": "Value",
+        "value-required": "Value is required",
+        "submit-button": "Add",
+        "error": "There was a problem adding this variable. Please try again. If this error persists, please contact the administrator."
+      },
       "actions": {
         "edit": "Edit Variable",
+        "edit-dialog": {
+          "title": "Edit Variable",
+          "description": "Changes to this variable will not be applied until the application is manually restarted.",
+          "submit-button": "Update",
+          "error": "There was a problem updating this variable. Please try again. If this error persists, please contact the administrator."
+        },
         "delete": "Delete Variable"
       },
       "deleteError": "An error occurred deleting this variable. Please try again."
