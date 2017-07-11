@@ -3,7 +3,8 @@
 
   // Service instances registration helpers
   var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
+  var asyncDialog = require('../../../../../app-core/frontend/test/e2e/po/widgets/async-dialog.po');
+  var credentialsFormName = 'form.registerCnsi';
 
   module.exports = {
 
@@ -25,13 +26,11 @@
   }
 
   function connectButton() {
-    return helpers.getForm(credentialsFormName)
-      .element(by.buttonText('Connect'));
+    return asyncDialog.getCommit();
   }
 
   function cancel() {
-    helpers.getForm(credentialsFormName)
-      .element(by.buttonText('Cancel')).click();
+    asyncDialog.cancel();
   }
 
   function fillCredentialsForm(username, password) {
@@ -43,6 +42,6 @@
   }
 
   function connect() {
-    return connectButton().click();
+    return asyncDialog.commit();
   }
 })();

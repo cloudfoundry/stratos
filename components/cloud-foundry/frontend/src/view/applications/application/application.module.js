@@ -356,7 +356,9 @@
       frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.details" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
-          title: 'delete-app.complex.title'
+          title: 'delete-app.complex.title',
+          dialog: true,
+          class: 'dialog-form-larger'
         },
         {
           details: details

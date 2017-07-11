@@ -45,7 +45,9 @@
         return frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/actions/cli-commands/cli-commands.html',
-            title: 'cf.cli.commands.title'
+            title: 'cf.cli.commands.title',
+            dialog: true,
+            class: 'cluster-cli-commands'
           },
           {
             api: api,

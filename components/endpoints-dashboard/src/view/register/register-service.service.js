@@ -122,6 +122,10 @@
             delete context.wizardOptions.userInput.skipSslValidation;
             allowBack = false;
           };
+
+          // Make the title of the dialog the title of the endpoint - since there is only one
+          context.wizardOptions.workflow.title = context.wizardOptions.userInput.endpoint.register.html.details.title;
+          context.wizardOptions.showCompact = true;
         }
         // Append Step 2
         wizardSteps.push(registrationStep);
@@ -132,7 +136,9 @@
           'class="register-service-wizard" ' +
           'actions="context.wizardActions" ' +
           'options="context.wizardOptions">' +
-          '</wizard>'
+          '</wizard>',
+          dialog: true,
+          class: 'dialog-form-large'
         }, context);
 
         return modal.result;

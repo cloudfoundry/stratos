@@ -51,7 +51,7 @@
       var safeServiceInstances = ['1', '2', '3'];
       spyOn(serviceInstanceModel, 'deleteServiceInstance').and.returnValue($q.resolve());
 
-      cfServiceDeleteAppWorkflow.deleteServiceInstances(safeServiceInstances);
+      cfServiceDeleteAppWorkflow.deleteServiceInstances('', safeServiceInstances);
       $scope.$apply();
 
       expect(serviceInstanceModel.deleteServiceInstance).toHaveBeenCalledTimes(safeServiceInstances.length);
