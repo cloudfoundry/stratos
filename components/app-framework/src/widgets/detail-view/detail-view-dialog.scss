@@ -14,19 +14,19 @@
 
   // Standard dialog widths
 
-  &.dialog-form > .modal-dialog .detail-view-content {
+  &.dialog-form > .modal-dialog {
     width: $console-input-width + 2 * $console-unit-space;
   }
 
-  &.dialog-form-large > .modal-dialog .detail-view-content {
+  &.dialog-form-large > .modal-dialog {
     width: $console-input-width * 1.25 + 2 * $console-unit-space;
   }
 
-  &.dialog-form-larger > .modal-dialog .detail-view-content {
+  &.dialog-form-larger > .modal-dialog {
     width: $console-input-width * 2 + 2 * $console-unit-space;
   }
 
-  &.dialog-form-wizard > .modal-dialog .detail-view-content {
+  &.dialog-form-wizard > .modal-dialog {
     width: $console-input-width * 3 + 2 * $console-unit-space;
   }
 
