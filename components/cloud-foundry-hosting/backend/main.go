@@ -108,7 +108,7 @@ func (ch *CFHosting) Init() error {
 			return nil
 		}
 
-		// Override the configuration to set the authorization endpoint
+		// Override the configuration to set the authorisation endpoint
 		url, err := url.Parse(newCNSI.AuthorizationEndpoint)
 		if err != nil {
 			return fmt.Errorf("Invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
