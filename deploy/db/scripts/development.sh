@@ -8,8 +8,8 @@ $GOPATH/bin/goose --env=development dbversion
 EXITVAL=$?
 while [ $EXITVAL -ne 0 ]
 do
-  echo "Failed to execute dbversion check, retrying after five sec sleep"
-  sleep 5
+  echo "Failed to execute dbversion check, retrying after one second"
+  sleep 1
   $GOPATH/bin/goose --env=development dbversion
   EXITVAL=$?
 done
