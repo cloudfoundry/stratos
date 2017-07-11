@@ -85,7 +85,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg + " - ", err)
+		log.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
