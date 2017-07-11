@@ -3,7 +3,9 @@
 
   module.exports = {
     cancel: cancel,
+    getCancel: getCancel,
     commit: commit,
+    getCommit: getCommit,
     getTitle: getTitle,
     isDisplayed: isDisplayed,
     getElement: getElement,
@@ -27,12 +29,20 @@
     return getElement().isDisplayed();
   }
 
+  function getCancel() {
+    return getButtonsElement().element(by.css('.btn-default'));
+  }
+
   function cancel() {
-    return getButtonsElement().element(by.css('.btn-default')).click();
+    return getCancel().click();
+  }
+
+  function getCommit() {
+    return getButtonsElement().element(by.css('.btn-commit'));
   }
 
   function commit() {
-    return getButtonsElement().element(by.css('.btn-commit')).click();
+    return getCommit().click();
   }
 
   function getTitle() {

@@ -7,10 +7,9 @@
    **/
   angular
     .module('cloud-foundry.view.applications.application.variables')
-    .factory('cfVariablesManager', serviceFactory)
-    .controller('cloud-foundry.view.applications.application.variables.applicationVariablesDialogController', ApplicationVariablesDialogController);
+    .factory('cfVariablesManager', serviceFactory);
 
-  function serviceFactory($q, modelManager, frameworkDetailView) {
+  function serviceFactory($q, modelManager, frameworkAsyncTaskDialog) {
     return {
       /**
        * @function add
@@ -21,15 +20,7 @@
        * @public
        **/
       add: function (cnsiGuid, id) {
-        return frameworkDetailView({
-          controller: ApplicationVariablesDialogController,
-          controllerAs: 'appVarCtrl',
-          detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
-          class: 'detail-view-thin' // NOTE: turning this into a dialog doesn't work well for some reason (width is incorrect)
-        }, {
-          cnsiGuid: cnsiGuid,
-          guid: id
-        }).result;
+        return show(cnsiGuid, id);
       },
       /**
        * @function edit
@@ -41,16 +32,7 @@
        * @public
        **/
       edit: function (cnsiGuid, id, variableName) {
-        return frameworkDetailView({
-          controller: ApplicationVariablesDialogController,
-          controllerAs: 'appVarCtrl',
-          detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
-          class: 'detail-view-thin'
-        }, {
-          cnsiGuid: cnsiGuid,
-          guid: id,
-          variableName: variableName
-        }).result;
+        return show(cnsiGuid, id, variableName);
       },
 
       /**
@@ -74,44 +56,51 @@
         });
       }
     };
-  }
 
-  function ApplicationVariablesDialogController(modelManager, $uibModalInstance, context) {
+    function show(cnsiGuid, id, variableName) {
+      var isEdit = !!variableName;
+      var model = modelManager.retrieve('cloud-foundry.model.application');
 
-    var vm = this;
+      var context = {
+        cnsiGuid: cnsiGuid,
+        guid: id,
+        variableName: variableName,
+        isEdit: isEdit,
+        data: {
+          varName: isEdit ? variableName : '',
+          varValue: isEdit ? model.application.variables.environment_json[variableName] : ''
+        },
+        description: isEdit ? 'app-tabs.variables.actions.edit-dialog.description' : 'app-tabs.variables.add-dialog.description'
+      };
 
-    var $modal = $uibModalInstance;
-    var cnsiGuid = context.cnsiGuid;
+      return frameworkAsyncTaskDialog({
+        title: isEdit ? 'app-tabs.variables.actions.edit-dialog.title' : 'app-tabs.variables.add-dialog.title',
+        templateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
+        submitCommit: true,
+        buttonTitles: {
+          submit: isEdit ? 'app-tabs.variables.actions.edit-dialog.submit-button' : 'app-tabs.variables.add-dialog.submit-button'
+        },
+        dialog: true,
+        class: 'dialog-form'
+      }, context, applyChange).result;
 
-    vm.model = modelManager.retrieve('cloud-foundry.model.application');
-    vm.id = context.guid;
-    vm.addError = false;
-    vm.isEdit = !!(context && context.variableName);
-    if (vm.isEdit) {
-      vm.varName = context.variableName;
-      vm.varValue = vm.model.application.variables.environment_json[vm.varName];
-    } else {
-      vm.varName = '';
-      vm.varValue = '';
-    }
-
-    vm.applyChange = applyChange;
-
-    /**
-     * @function applyChange
-     * @description Add or Update the application variable
-     * @public
-     **/
-    function applyChange() {
-      vm.addError = false;
-      var vars = _.clone(vm.model.application.variables.environment_json);
-      vars[vm.varName] = vm.varValue;
-      var updateData = {environment_json: vars};
-      vm.model.update(cnsiGuid, vm.id, updateData).then(function () {
-        $modal.close();
-      }).catch(function () {
-        vm.addError = true;
-      });
+      /**
+       * @function applyChange
+       * @description Add or Update the application variable
+       * @param {object} data - async dialog context.data object
+       * @public
+       * @returns {object} promise
+       **/
+      function applyChange(data) {
+        var vars = _.clone(model.application.variables.environment_json);
+        vars[data.varName] = data.varValue;
+        var updateData = {environment_json: vars};
+        return model.update(cnsiGuid, id, updateData).catch(function () {
+          context.errorMsg = isEdit ? 'app-tabs.variables.actions.edit-dialog.error'
+            : 'app-tabs.variables.add-dialog.error';
+          return $q.reject();
+        });
+      }
     }
   }
 
