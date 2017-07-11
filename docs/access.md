@@ -4,7 +4,7 @@ Depending on the deployment mode, you may require access to an UAA.
 
 ## Deploying in Docker-Compose
 
-In Docker-Compose a UAA instance is deployed. 
+In Docker Compose a UAA instance is deployed. 
 The default login credentials for the Console admin user are:
 
  - username: `admin`,
