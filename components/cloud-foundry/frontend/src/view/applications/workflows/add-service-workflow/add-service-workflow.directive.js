@@ -104,13 +104,13 @@
         hideStepNavStack: true,
         lastStepCommit: false,
         btnText: {
-          cancel: config.confirm ? 'buttons.cancel' : 'app-tabs.services.add.back-to-services'
+          cancel: config.confirm ? 'buttons.cancel' : 'app.app-info.app-tabs.services.add.back-to-services'
         },
         steps: [
           {
             templateUrl: path + 'instance.html',
             formName: 'addInstanceForm',
-            nextBtnText: 'app-tabs.services.add.add',
+            nextBtnText: 'app.app-info.app-tabs.services.add.add',
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
@@ -121,7 +121,7 @@
                   return _onServiceBindingError();
                 });
               }, function () {
-                return $q.reject('app-tabs.services.add.notifications.failure-create');
+                return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-create');
               });
             }
           }
@@ -300,7 +300,7 @@
     function startWorkflow() {
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: 'app-tabs.services.add.title',
+        title: 'app.app-info.app-tabs.services.add.title',
         titleTranslateValues: { appName: vm.data.app.summary.name },
         dialog: true,
         class: 'dialog-form-larger'
@@ -334,7 +334,7 @@
         vm.addService().then(function () {
           vm.addBinding().then(function () {
             // show notification for successful binding
-            var successMsg = $translate.instant('app-tabs.services.add.notifications.success', {
+            var successMsg = $translate.instant('app.app-info.app-tabs.services.add.notifications.success', {
               service: vm.options.serviceInstance.entity.name,
               appName: vm.data.app.summary.name
             });
@@ -344,7 +344,7 @@
             return _onServiceBindingError();
           });
         }, function () {
-          return $q.reject('app-tabs.services.add.notifications.failure-create');
+          return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-create');
         });
       } else {
         vm.modal.close();
@@ -367,7 +367,7 @@
                                                           function (o) { return o.metadata.guid === guid; });
         });
       }
-      return $q.reject('app-tabs.services.add.notifications.failure-bind');
+      return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-bind');
     }
   }
 

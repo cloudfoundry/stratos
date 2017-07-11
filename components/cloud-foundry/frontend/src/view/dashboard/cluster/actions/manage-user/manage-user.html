@@ -5,20 +5,20 @@
   </div>
   <div class="manage-users-load-failed"
        ng-if="asyncTaskDialogCtrl.context.state.initialised === false">
-    <span translate>manage-user-roles.error-init-load</span>
+    <span translate>cf.roles.manage-user-roles.error-init-load</span>
   </div>
   <div class="manage-users-loaded"
        ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
     <div class="manage-users-info"
       ng-if="asyncTaskDialogCtrl.context.tableConfig.users.length > 1">
       <div class="manage-users-info-message"
-        translate>manage-user-roles.intro-plural-roles
+        translate>cf.roles.manage-user-roles.intro-plural-roles
       </div>
       <div>
         <selected-users-list selected-users="asyncTaskDialogCtrl.context.tableConfig.users"></selected-users-list>
       </div>
       <div class="manage-users-alert-info alert alert-info alert-no-bg alert-bordered" translate>
-        manage-user-roles.warning-plural-roles
+        cf.roles.manage-user-roles.warning-plural-roles
       </div>
     </div>
     <div class="manage-users-filter">
@@ -39,7 +39,7 @@
           <a
             ng-if="!asyncTaskDialogCtrl.context.tableConfig.disableClearAll"
             ng-click="asyncTaskDialogCtrl.context.clearSelections()"
-            translate>manage-user-roles.button-clear-all</a>
+            translate>cf.roles.manage-user-roles.button-clear-all</a>
         </div>
       </div>
     </div>

@@ -45,7 +45,7 @@
     vm.spaceGuid = $stateParams.space;
     vm.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     vm.cardData = {
-      titleTranslate: 'space-info.summary.title'
+      titleTranslate: 'cf.space-info.summary.title'
     };
     vm.roles = [];
     vm.memory = '';
@@ -63,12 +63,12 @@
     vm.spaceModel = spaceModel;
 
     var renameAction = {
-      name: 'space-info.rename-action',
+      name: 'cf.space-info.rename-action',
       disabled: true,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: 'space-info.rename-dialog.title',
+            title: 'cf.space-info.rename-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-space.html',
             submitCommit: true,
             buttonTitles: {
@@ -94,7 +94,7 @@
                 {name: spaceData.name})
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('space-info.rename-dialog.success-notification', {name: spaceData.name}));
+                    $translate.instant('cf.space-info.rename-dialog.success-notification', {name: spaceData.name}));
                 });
             } else {
               return $q.reject('Invalid Name!');
@@ -104,23 +104,23 @@
       }
     };
     var deleteAction = {
-      name: 'space-info.delete-action',
+      name: 'cf.space-info.delete-action',
       disabled: true,
       execute: function () {
         return frameworkDialogConfirm({
-          title: 'space-info.delete-dialog.title',
-          description: $translate.instant('space-info.delete-dialog.description',
+          title: 'cf.space-info.delete-dialog.title',
+          description: $translate.instant('cf.space-info.delete-dialog.description',
             {name: spaceDetail().details.space.entity.name}),
           submitCommit: true,
           buttonText: {
             yes: 'buttons.delete',
             no: 'buttons.cancel'
           },
-          errorMessage: 'space-info.delete-dialog.error-message',
+          errorMessage: 'cf.space-info.delete-dialog.error-message',
           callback: function () {
             return spaceModel.deleteSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid)
               .then(function () {
-                appNotificationsService.notify('success', $translate.instant('space-info.delete-dialog.success-notification',
+                appNotificationsService.notify('success', $translate.instant('cf.space-info.delete-dialog.success-notification',
                   {name: spaceDetail().details.space.entity.name}));
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
@@ -131,25 +131,25 @@
     };
 
     var sshAction = {
-      name: 'space-info.ssh-action',
+      name: 'cf.space-info.ssh-action',
       disabled: true,
       execute: function () {
         var dialog;
         if (spaceDetailObj.details.space.entity.allow_ssh) {
           dialog = {
             value: false,
-            title: 'space-info.ssh.disallow.title',
-            confirm: 'space-info.ssh.disallow.confirm',
-            prompt: 'space-info.ssh.disallow.prompt',
-            error: 'space-info.ssh.disallow.error'
+            title: 'cf.space-info.ssh.disallow.title',
+            confirm: 'cf.space-info.ssh.disallow.confirm',
+            prompt: 'cf.space-info.ssh.disallow.prompt',
+            error: 'cf.space-info.ssh.disallow.error'
           };
         } else {
           dialog = {
             value: true,
-            title: 'space-info.ssh.allow.title',
-            confirm: 'space-info.ssh.allow.confirm',
-            prompt: 'space-info.ssh.allow.prompt',
-            error: 'space-info.ssh.allow.error'
+            title: 'cf.space-info.ssh.allow.title',
+            confirm: 'cf.space-info.ssh.allow.confirm',
+            prompt: 'cf.space-info.ssh.allow.prompt',
+            error: 'cf.space-info.ssh.allow.error'
           };
         }
         return frameworkDialogConfirm({
@@ -232,7 +232,7 @@
 
     function updateSshAction() {
       var enabled = spaceDetailObj.details.space.entity.allow_ssh;
-      sshAction.name = enabled ? 'space-info.ssh.disallow' : 'space-info.ssh.allow';
+      sshAction.name = enabled ? 'cf.space-info.ssh.disallow' : 'cf.space-info.ssh.allow';
     }
 
     function init() {

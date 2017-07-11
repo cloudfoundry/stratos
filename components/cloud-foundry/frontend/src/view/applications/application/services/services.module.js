@@ -20,7 +20,7 @@
       position: 3,
       hide: false,
       uiSref: 'cf.applications.application.services',
-      label: 'app.tabs.services.label'
+      label: 'app.app-info.app-tabs.services.label'
     });
   }
 
@@ -48,8 +48,8 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.services = [];
     this.serviceCategories = [
-      { label: 'app-tabs.services.categories.attached', value: 'attached' },
-      { label: 'app-tabs.services.categories.all', value: 'all' }
+      { label: 'app.app-info.app-tabs.services.categories.attached', value: 'attached' },
+      { label: 'app.app-info.app-tabs.services.categories.all', value: 'all' }
     ];
     this.searchCategory = 'all';
     this.search = {};

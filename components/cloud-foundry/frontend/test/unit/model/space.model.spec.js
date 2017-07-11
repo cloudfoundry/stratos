@@ -71,17 +71,17 @@
     });
 
     it('spaceRoleToString', function () {
-      expect(spaceModel.spaceRoleToString('space_user')).toBe('roles.space.short.space_user');
-      expect(spaceModel.spaceRoleToString('space_manager')).toBe('roles.space.short.space_manager');
-      expect(spaceModel.spaceRoleToString('space_auditor')).toBe('roles.space.short.space_auditor');
-      expect(spaceModel.spaceRoleToString('space_developer')).toBe('roles.space.short.space_developer');
-      expect(spaceModel.spaceRoleToString('JUNK')).toBe('roles.space.short.JUNK');
+      expect(spaceModel.spaceRoleToString('space_user')).toBe('cf.roles.role-labels.space.short.space_user');
+      expect(spaceModel.spaceRoleToString('space_manager')).toBe('cf.roles.role-labels.space.short.space_manager');
+      expect(spaceModel.spaceRoleToString('space_auditor')).toBe('cf.roles.role-labels.space.short.space_auditor');
+      expect(spaceModel.spaceRoleToString('space_developer')).toBe('cf.roles.role-labels.space.short.space_developer');
+      expect(spaceModel.spaceRoleToString('JUNK')).toBe('cf.roles.role-labels.space.short.JUNK');
     });
 
     it('spaceRolesToStrings', function () {
-      expect(spaceModel.spaceRolesToStrings()).toEqual(['roles.none']);
+      expect(spaceModel.spaceRolesToStrings()).toEqual(['cf.roles.role-labels.none']);
       expect(spaceModel.spaceRolesToStrings(['space_developer', 'space_auditor', 'space_manager']))
-        .toEqual(['roles.space.short.space_manager', 'roles.space.short.space_auditor', 'roles.space.short.space_developer']);
+        .toEqual(['cf.roles.role-labels.space.short.space_manager', 'cf.roles.role-labels.space.short.space_auditor', 'cf.roles.role-labels.space.short.space_developer']);
     });
 
     it('fetch space', function () {

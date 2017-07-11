@@ -51,7 +51,7 @@
     this.appUtilsService = appUtilsService;
 
     this.cardData = {
-      titleTranslate: 'org-info.summary.title'
+      titleTranslate: 'cf.org-info.summary.title'
     };
 
     this.getEndpoint = function () {
@@ -72,12 +72,12 @@
     that.userName = user.name;
 
     var renameAction = {
-      name: 'org-info.edit-action',
+      name: 'cf.org-info.edit-action',
       disabled: true,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: 'org-info.edit-dialog.title',
+            title: 'cf.org-info.edit-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-organization.html',
             submitCommit: true,
             buttonTitles: {
@@ -101,7 +101,7 @@
                 {name: orgData.name})
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('org-info.edit-dialog.success-notification', {name: orgData.name}));
+                    $translate.instant('cf.org-info.edit-dialog.success-notification', {name: orgData.name}));
                 });
             } else {
               return $q.reject('Invalid Name!');
@@ -112,24 +112,24 @@
     };
 
     var deleteAction = {
-      name: 'org-info.delete-action',
+      name: 'cf.org-info.delete-action',
       disabled: true,
       execute: function () {
         frameworkDialogConfirm({
-          title: 'org-info.delete-dialog.title',
-          description: $translate.instant('org-info.delete-dialog.description', { name: that.organization.details.org.entity.name}),
+          title: 'cf.org-info.delete-dialog.title',
+          description: $translate.instant('cf.org-info.delete-dialog.description', { name: that.organization.details.org.entity.name}),
           submitCommit: true,
           buttonText: {
             yes: 'buttons.delete',
             no: 'buttons.cancel'
           },
-          errorMessage: 'org-info.delete-dialog.error-message',
+          errorMessage: 'cf.org-info.delete-dialog.error-message',
           callback: function () {
             var name = that.organization.details.org.entity.name;
             return that.cfOrganizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
               .then(function () {
                 appNotificationsService.notify('success',
-                  $translate.instant('org-info.delete-dialog.success-notification', {name: name}));
+                  $translate.instant('cf.org-info.delete-dialog.success-notification', {name: name}));
                 // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                 return $state.go($state.current.ncyBreadcrumb.parent());
               });

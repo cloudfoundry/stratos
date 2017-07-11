@@ -38,7 +38,7 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: 'app-tabs.summary.summary-panel.edit-dialog.title',
+            title: 'app.app-info.app-tabs.summary.summary-panel.edit-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/summary/edit-app/edit-app.html',
             submitCommit: true,

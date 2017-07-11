@@ -2,19 +2,19 @@
   <form name="form.addRouteForm">
     <fieldset>
     <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (form.addRouteForm.host.$invalid && form.addRouteForm.host.$dirty)}" focusable-input>
-      <label class="control-label" translate>app-tabs.summary.routes-panel.add-route-dialog.host-label</label>
-      <span class="control-message" translate-namespace="app-tabs.summary.routes-panel.add-route-dialog">
+      <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-label</label>
+      <span class="control-message" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
         <span translate ng-if="asyncTaskDialogCtrl.context.routeExists()">.host-error-exists</span>
         <span translate ng-if="form.addRouteForm.host.$error.required">.host-error-required</span>
       </span>
       <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
         ng-required="asyncTaskDialogCtrl.context.isType('http')"
         ng-change="asyncTaskDialogCtrl.context.resetRouteExists()"
-        placeholder="{{'app-tabs.summary.routes-panel.add-route-dialog.host-placeholder' | translate}}"
+        placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-placeholder' | translate}}"
       />
     </div>
     <div class="form-group" focusable-input>
-      <label class="control-label" translate>app-tabs.summary.routes-panel.add-route-dialog.domain-label</label>
+      <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.domain-label</label>
       <select-input
         class="form-control"
         ng-model="asyncTaskDialogCtrl.context.data.domain_guid"
@@ -23,22 +23,22 @@
       />
     </div>
 
-    <div ng-if="asyncTaskDialogCtrl.context.isType('http')" translate-namespace="app-tabs.summary.routes-panel.add-route-dialog">
+    <div ng-if="asyncTaskDialogCtrl.context.isType('http')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
       <div class="add-route-form-section" translate>.route-options-label</div>
       <div ng-if="asyncTaskDialogCtrl.context.isType('http')" class="form-group" focusable-input>
         <label class="control-label" translate>.path-label</label>
         <div class="add-route-path-prefix">/</div>
         <input type="text" name="path" class="add-route-path-prefix form-control" ng-model="asyncTaskDialogCtrl.context.data.path"
-              placeholder="{{'app-tabs.summary.routes-panel.add-route-dialog.path-placeholder' | translate}}"
+              placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.path-placeholder' | translate}}"
         />
       </div>
     </div>
 
-    <div ng-if="asyncTaskDialogCtrl.context.isType('tcp')" translate-namespace="app-tabs.summary.routes-panel.add-route-dialog">
+    <div ng-if="asyncTaskDialogCtrl.context.isType('tcp')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
       <div class="add-route-form-section" translate>.tcp-label</div>
       <div class="form-group add-route-checkbox" focusable-input>
         <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.useRandomPort"
-          input-label="{{'app-tabs.summary.routes-panel.add-route-dialog.port-random-label' | translate}}">
+          input-label="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-random-label' | translate}}">
         </checkbox-input>
       </div>
       <div class="form-group" focusable-input>
@@ -46,7 +46,7 @@
         <input ng-disabled="asyncTaskDialogCtrl.context.data.useRandomPort"
           ng-required="!asyncTaskDialogCtrl.context.data.useRandomPort"
           type="number" name="port" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.port"
-          placeholder="{{'app-tabs.summary.routes-panel.add-route-dialog.port-placeholder' | translate}}"
+          placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-placeholder' | translate}}"
         />
       </div>
     </div>

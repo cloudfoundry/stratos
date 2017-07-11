@@ -31,7 +31,7 @@
         return frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/' + templateName,
-            title: incomplete ? 'cli-dialog-deploy.title' : 'cli-dialog-app.title',
+            title: incomplete ? 'app.app-info.cli-dialog-deploy.title' : 'app.app-info.cli-dialog-app.title',
             dialog: true,
             class: 'app-cli-commands dialog-form-larger'
           },

@@ -1,7 +1,7 @@
 <div class="space-services-table">
   <div ng-if="!spaceSrvsCtrl.serviceInstances || spaceSrvsCtrl.serviceInstances.length < 1"
        class="panel panel-default cluster-empty-list">
-    <div class="panel-body" translate>space-info.tabs.services.none</div>
+    <div class="panel-body" translate>cf.space-info.tabs.services.none</div>
   </div>
 
   <div ng-if="spaceSrvsCtrl.serviceInstances.length > 0"
@@ -15,11 +15,11 @@
           ng-class="{'table-actionable' : spaceSrvsCtrl.canDeleteOrUnbind}">
           <thead>
           <tr>
-            <th st-sort="entity.name" st-sort-default="true" st-skip-natural="true" translate>space-info.tabs.services.columns.services</th>
-            <th st-sort="entity.type" st-skip-natural="true" translate>space-info.tabs.services.columns.type</th>
-            <th translate>space-info.tabs.services.columns.plan</th>
-            <th translate>space-info.tabs.services.columns.attached</th>
-            <th translate ng-if="spaceSrvsCtrl.canDeleteOrUnbind">space-info.tabs.services.columns.action</th>
+            <th st-sort="entity.name" st-sort-default="true" st-skip-natural="true" translate>cf.space-info.tabs.services.columns.services</th>
+            <th st-sort="entity.type" st-skip-natural="true" translate>cf.space-info.tabs.services.columns.type</th>
+            <th translate>cf.space-info.tabs.services.columns.plan</th>
+            <th translate>cf.space-info.tabs.services.columns.attached</th>
+            <th translate ng-if="spaceSrvsCtrl.canDeleteOrUnbind">cf.space-info.tabs.services.columns.action</th>
           </tr>
           </thead>
           <tbody>
@@ -43,7 +43,7 @@
           <tr>
             <td colspan="{{spaceSrvsCtrl.canDeleteOrUnbind ? 5 : 4}}" class="text-center">
               <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.serviceInstances.length">
-                <span translate>space-info.tabs.services.show-all-button</span> ({{spaceSrvsCtrl.serviceInstances.length}})
+                <span translate>cf.space-info.tabs.services.show-all-button</span> ({{spaceSrvsCtrl.serviceInstances.length}})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
             </td>

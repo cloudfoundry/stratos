@@ -4,17 +4,17 @@
               card-actions-position="actions-menu-right"
               on-card-click="orgSpaceTileCtrl.summary()">
   <dl class="dl-horizontal" ng-if="orgSpaceTileCtrl.spaceDetail().details">
-    <dt translate>space-tile.role-label</dt>
+    <dt translate>cf.space-tile.role-label</dt>
     <dd><div ng-repeat="role in orgSpaceTileCtrl.roles">{{ role | translate}}</div></dd>
-    <dt translate>space-tile.applications-label</dt>
+    <dt translate>cf.space-tile.applications-label</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
-    <dt translate>space-tile.instances-label</dt>
+    <dt translate>cf.space-tile.instances-label</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalAppInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota }}</dd>
-    <dt translate>space-tile.services-label</dt>
+    <dt translate>cf.space-tile.services-label</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalServiceInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota }}</dd>
     <!--<dt ng-if="true" translate>DISK</dt>-->
     <!--<dd ng-if="true">{{'1'}}</dd>-->
-    <dt translate>space-tile.memory-label</dt>
+    <dt translate>cf.space-tile.memory-label</dt>
     <dd>{{ orgSpaceTileCtrl.memory }}</dd>
     <percent-gauge title=""
                    value="{{ orgSpaceTileCtrl.spaceDetail().details.memUsed / orgSpaceTileCtrl.spaceDetail().details.memQuota }}"

@@ -36,7 +36,7 @@
     function getRouteId(route) {
       var routeEntity = _.get(route, 'entity', route);
       var domain = _.get(routeEntity, 'domain.entity', routeEntity.domain);
-      var domainName = domain ? domain.name : $translate.instant('routes.unknown-domain');
+      var domainName = domain ? domain.name : $translate.instant('cf.routes.unknown-domain');
 
       var host = routeEntity.host ? routeEntity.host + '.' : '';
       var port = routeEntity.port ? ':' + routeEntity.port : '';
@@ -59,18 +59,18 @@
       var deferred = $q.defer();
 
       frameworkDialogConfirm({
-        title: 'routes.unmap-app.title',
-        description: $translate.instant('routes.unmap-app.description', { route: getRouteId(route) }),
+        title: 'cf.routes.unmap-app.title',
+        description: $translate.instant('cf.routes.unmap-app.description', { route: getRouteId(route) }),
         submitCommit: true,
         buttonText: {
-          yes: 'routes.unmap-app.button-yes',
+          yes: 'cf.routes.unmap-app.button-yes',
           no: 'buttons.cancel'
         },
-        errorMessage: 'routes.unmap-app.error',
+        errorMessage: 'cf.routes.unmap-app.error',
         callback: function () {
           return routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
-              appNotificationsService.notify('success', $translate.instant('routes.unmap-app.success'));
+              appNotificationsService.notify('success', $translate.instant('cf.routes.unmap-app.success'));
               deferred.resolve(1);
             })
             .catch(function (error) {
@@ -101,12 +101,12 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: 'routes.unmap-apps.title',
-        description: $translate.instant('routes.unmap-apps.description', { route: getRouteId(route) }),
-        errorMessage: 'routes.unmap-apps.error',
+        title: 'cf.routes.unmap-apps.title',
+        description: $translate.instant('cf.routes.unmap-apps.description', { route: getRouteId(route) }),
+        errorMessage: 'cf.routes.unmap-apps.error',
         submitCommit: true,
         buttonText: {
-          yes: 'routes.unmap-apps.button-yes',
+          yes: 'cf.routes.unmap-apps.button-yes',
           no: 'buttons.cancel'
         },
         callback: function () {
@@ -123,9 +123,9 @@
           return $q.all(promises)
             .then(function () {
               if (failures > 0) {
-                appNotificationsService.notify('warning', $translate.instant('routes.unmap-apps.partial-error'));
+                appNotificationsService.notify('warning', $translate.instant('cf.routes.unmap-apps.partial-error'));
               } else {
-                appNotificationsService.notify('success', $translate.instant('routes.unmap-apps.success'));
+                appNotificationsService.notify('success', $translate.instant('cf.routes.unmap-apps.success'));
               }
               deferred.resolve(appGuids.length - failures);
             }).catch(function (error) {
@@ -154,12 +154,12 @@
       var deferred = $q.defer();
 
       var dialog = frameworkDialogConfirm({
-        title: 'routes.delete.title',
-        description: $translate.instant('routes.delete.description', { route: getRouteId(route) }),
-        errorMessage: 'routes.delete.error',
+        title: 'cf.routes.delete.title',
+        description: $translate.instant('cf.routes.delete.description', { route: getRouteId(route) }),
+        errorMessage: 'cf.routes.delete.error',
         submitCommit: true,
         buttonText: {
-          yes: 'routes.delete.button-yes',
+          yes: 'cf.routes.delete.button-yes',
           no: 'buttons.cancel'
         },
         callback: function () {
@@ -168,7 +168,7 @@
             async: false
           })
             .then(function () {
-              appNotificationsService.notify('success', $translate.instant('routes.delete.success'));
+              appNotificationsService.notify('success', $translate.instant('cf.routes.delete.success'));
               deferred.resolve();
             })
             .catch(function (error) {

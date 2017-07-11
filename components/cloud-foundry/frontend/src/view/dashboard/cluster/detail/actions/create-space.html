@@ -1,7 +1,7 @@
 <form class="create-space-form" name="form.createSpace">
   <div class="form-group organizations-drop-down" focusable-input
        ng-class="{'has-error': form.createSpace.name.$invalid}">
-    <label class="control-label" translate>cluster-actions.create-space.dialog.org-label</label>
+    <label class="control-label" translate>cf.cluster-actions.create-space.dialog.org-label</label>
     <select-input
       ng-model="asyncTaskDialogCtrl.context.data.organization"
       input-options="asyncTaskDialogCtrl.context.data.organizations"
@@ -11,11 +11,11 @@
 
   <div ng-repeat="space in asyncTaskDialogCtrl.context.data.spaces track by $index" class="form-group" focusable-input
        ng-class="{'has-error': form.createSpace['name' + $index].$invalid && form.createSpace['name' + $index].$dirty}">
-    <label class="control-label" translate translate-value-index="{{$index > 0 ? ($index + 1) : ''}}">cluster-actions.create-space.dialog.space-label</label>
+    <label class="control-label" translate translate-value-index="{{$index > 0 ? ($index + 1) : ''}}">cf.cluster-actions.create-space.dialog.space-label</label>
     <span class="control-message">
-      <span translate ng-if="form.createSpace['name' + $index].$error.required">cluster-actions.create-space.dialog.space-error-required</span>
-      <span translate ng-if="form.createSpace['name' + $index].$error.stratosUnique">cluster-actions.create-space.dialog.space-error-unique</span>
-      <span translate ng-if="form.createSpace['name' + $index].$error.dupeName">cluster-actions.create-space.dialog.space-error-unique</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.required">cf.cluster-actions.create-space.dialog.space-error-required</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.stratosUnique">cf.cluster-actions.create-space.dialog.space-error-unique</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.dupeName">cf.cluster-actions.create-space.dialog.space-error-unique</span>
     </span>
     <input type="text" name="name{{ $index }}" auto-focus="300" class="form-control"
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
@@ -36,7 +36,7 @@
     <div>
       <svg-image class="add-icon" src="/svg/Add_Green.svg"></svg-image>
     </div>
-    <span translate>cluster-actions.create-space.dialog.create-another-button</span>
+    <span translate>cf.cluster-actions.create-space.dialog.create-another-button</span>
   </div>
 
 </form>

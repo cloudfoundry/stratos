@@ -24,14 +24,14 @@
 
   <uib-tabset class="select-instance-tabs col-sm-12"
     active="wizardCtrl.options.activeTab" ng-if="!wizardCtrl.options.spinners.loadingServiceInstances">
-    <uib-tab index="0" heading="{{ 'app-tabs.services.add.create.title' | translate }}">
+    <uib-tab index="0" heading="{{ 'app.app-info.app-tabs.services.add.create.title' | translate }}">
       <form name="createNewForm" ng-if="wizardCtrl.options.activeTab === 0">
         <div class="form-group" focusable-input
           ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
           <label class="control-label" required translate>
-            app-tabs.services.add.create.name-label
+            app.app-info.app-tabs.services.add.create.name-label
           </label>
-          <span class="control-message" translate-namespace="app-tabs.services.add.create" >
+          <span class="control-message" translate-namespace="app.app-info.app-tabs.services.add.create" >
             <span translate ng-if="addInstanceForm.createNewForm.name.$error.required">.name-error-required</span>
             <span translate ng-if="addInstanceForm.createNewForm.name.$error.stratosUnique">.name-error-unique</span>
             <span translate ng-if="addInstanceForm.createNewForm.name.$error.pattern">.name-error-pattern</span>
@@ -43,22 +43,22 @@
         </div>
 
         <div class="form-group">
-          <label class="control-label" translate>app-tabs.services.add.create.plan-label</label>
+          <label class="control-label" translate>app.app-info.app-tabs.services.add.create.plan-label</label>
           <select-input name="plan"
             ng-model="wizardCtrl.options.userInput.plan"
             input-options="wizardCtrl.options.servicePlans"
-            placeholder="app-tabs.services.add.create.plan-placeholder"
+            placeholder="app.app-info.app-tabs.services.add.create.plan-placeholder"
             tabindex="0" required>
           </select-input>
         </div>
       </form>
     </uib-tab>
-    <uib-tab index="1" heading="{{ 'app-tabs.services.add.existing.title' | translate }}"
+    <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.services.add.existing.title' | translate }}"
       disable="wizardCtrl.options.instances.length === 0">
       <form ng-if="wizardCtrl.options.activeTab === 1">
         <table class="table table-outlined existing-instances-table">
           <thead>
-            <tr translate-namespace="app-tabs.services.add.existing">
+            <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
               <th class="select-col"></th>
               <th translate>.name-label</th>
               <th translate>.plan-label</th>

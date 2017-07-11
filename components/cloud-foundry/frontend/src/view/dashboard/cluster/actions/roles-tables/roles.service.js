@@ -50,15 +50,15 @@
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
-      org_manager: 'roles.org.short.org_manager',
-      org_auditor: 'roles.org.short.org_auditor',
-      billing_manager: 'roles.org.short.billing_manager',
-      org_user: 'roles.org.short.org_user'
+      org_manager: 'cf.roles.role-labels.org.short.org_manager',
+      org_auditor: 'cf.roles.role-labels.org.short.org_auditor',
+      billing_manager: 'cf.roles.role-labels.org.short.billing_manager',
+      org_user: 'cf.roles.role-labels.org.short.org_user'
     };
     this.spaceRoles = {
-      space_manager: 'roles.space.short.space_manager',
-      space_auditor: 'roles.space.short.space_auditor',
-      space_developer: 'roles.space.short.space_developer',
+      space_manager: 'cf.roles.role-labels.space.short.space_manager',
+      space_auditor: 'cf.roles.role-labels.space.short.space_auditor',
+      space_developer: 'cf.roles.role-labels.space.short.space_developer',
       org_user_filler: ''
     };
 
@@ -528,23 +528,23 @@
       var multipleRoles = assigns.length + removes.length > 1;
 
       // Determine the title
-      var title = multipleRoles ? 'change-roles-confirmation.title.update-plural'
-        : 'change-roles-confirmation.title.update-singular';
+      var title = multipleRoles ? 'cf.roles.change-roles-confirmation.title.update-plural'
+        : 'cf.roles.change-roles-confirmation.title.update-singular';
       if (assigns.length === 0) {
-        title = multipleRoles ? 'change-roles-confirmation.title.remove-plural'
-          : 'change-roles-confirmation.title.remove-singular';
+        title = multipleRoles ? 'cf.roles.change-roles-confirmation.title.remove-plural'
+          : 'cf.roles.change-roles-confirmation.title.remove-singular';
       } else if (removes.length === 0) {
-        title = multipleRoles ? 'change-roles-confirmation.title.assign-plural'
-          : 'change-roles-confirmation.title.assign-singular';
+        title = multipleRoles ? 'cf.roles.change-roles-confirmation.title.assign-plural'
+          : 'cf.roles.change-roles-confirmation.title.assign-singular';
       }
 
       // Determine the description
       var line1 = usernames.length > 1
-        ? 'change-roles-confirmation.line-one-plural'
-        : 'change-roles-confirmation.line-one-singular';
-      var line2 = assigns.length > 1 ? 'change-roles-confirmation.line-assign-plural' : 'change-roles-confirmation.line-assign-singular';
-      var line3 = removes.length > 1 ? 'change-roles-confirmation.line-remove-plural' : 'change-roles-confirmation.line-remove-singular';
-      var line4 = $translate.instant('change-roles-confirmation.line-four');
+        ? 'cf.roles.change-roles-confirmation.line-one-plural'
+        : 'cf.roles.change-roles-confirmation.line-one-singular';
+      var line2 = assigns.length > 1 ? 'cf.roles.change-roles-confirmation.line-assign-plural' : 'cf.roles.change-roles-confirmation.line-assign-singular';
+      var line3 = removes.length > 1 ? 'cf.roles.change-roles-confirmation.line-remove-plural' : 'cf.roles.change-roles-confirmation.line-remove-singular';
+      var line4 = $translate.instant('cf.roles.change-roles-confirmation.line-four');
 
       line1 = $translate.instant(line1, {user: usernames[0], users: usernames.join(', ')});
       line2 = $translate.instant(line2, {count: assigns.length, role: $translate.instant(assigns[0])});
@@ -557,11 +557,11 @@
         '<br>' + line4;
 
       // Success and error messages
-      var successMessage = multipleRoles ? 'change-roles-confirmation.success-one'
-        : 'change-roles-confirmation.success-two';
+      var successMessage = multipleRoles ? 'cf.roles.change-roles-confirmation.success-one'
+        : 'cf.roles.change-roles-confirmation.success-two';
       if (usernames.length > 1) {
-        successMessage = multipleRoles ? 'change-roles-confirmation.success-three'
-          : 'change-roles-confirmation.success-four';
+        successMessage = multipleRoles ? 'cf.roles.change-roles-confirmation.success-three'
+          : 'cf.roles.change-roles-confirmation.success-four';
       }
 
       return {
@@ -665,7 +665,7 @@
       var delta = rolesDelta(oldRolesByUser, newRolesByUser, clusterGuid);
 
       if (!delta) {
-        appNotificationsService.notify('warning', $translate.instant('change-roles-confirmation.notifications.no-changes'));
+        appNotificationsService.notify('warning', $translate.instant('cf.roles.change-roles-confirmation.notifications.no-changes'));
         that.changingRoles = false;
         return $q.reject();
       }
@@ -696,15 +696,15 @@
 
               var errorMessage, reason;
               if (failures.length > 1) {
-                errorMessage = $translate.instant('change-roles-confirmation.notifications.failure-plural', {
+                errorMessage = $translate.instant('cf.roles.change-roles-confirmation.notifications.failure-plural', {
                   failedUsers: _.map(failures, 'user').join(', ')
                 });
               } else {
-                errorMessage = $translate.instant('change-roles-confirmation.notifications.failure-singular', {
+                errorMessage = $translate.instant('cf.roles.change-roles-confirmation.notifications.failure-singular', {
                   failedUsers: _.map(failures, 'user').join(', ')
                 });
                 reason = _.get(failures[0], 'error.data.description', '');
-                errorMessage += reason.length > 0 ? $translate.instant('change-roles-confirmation.notifications.failure-reason', {
+                errorMessage += reason.length > 0 ? $translate.instant('cf.roles.change-roles-confirmation.notifications.failure-reason', {
                   reason: reason
                 }) : '';
               }
