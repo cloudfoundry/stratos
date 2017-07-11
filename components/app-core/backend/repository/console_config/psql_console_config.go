@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation
