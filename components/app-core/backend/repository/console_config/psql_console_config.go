@@ -26,7 +26,7 @@ var getTableCount = `SELECT count(uaa_endpoint) FROM console_config`
 
 var hasSetupCompleted = `SELECT is_setup_complete FROM console_config`
 
-var deleteConsoleConfig = `TRUNCATE console_config`
+var deleteConsoleConfig = ` DELETE FROM console_config`
 
 // PostgresCNSIRepository is a PostgreSQL-backed ConsoleConfig repository
 type ConsoleConfigRepository struct {
@@ -177,6 +177,12 @@ func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	rows, err := c.db.Query(getTableCount)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			// Schema isn't initialised yet. Wait a few secs and retry
+			log.Warnf("It appears schema isn't initialised yet, sleeping and trying again %s", err)
+			time.Sleep(1 * time.Second)
+			c.getTableCount()
+		}
 		return 0, fmt.Errorf("Exception occurred when fetching row count: %v", err)
 	}
 	defer rows.Close()
