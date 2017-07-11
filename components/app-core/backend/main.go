@@ -174,11 +174,10 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		log.Errorf("Unable to intialise console backend config due to: %+v", err)
 		return addSetupMiddleware, err
 	}
-	//consoleConfig, err := consoleRepo.GetConsoleConfig()
 	isInitialised, err := consoleRepo.IsInitialised()
 
 	if err != nil || !isInitialised {
-		// Exception occurred when trying determine
+		// Exception occurred when trying to determine
 		// if its initialised or instance isn't initialised,
 		// will attempt to initialise it from the env vars.
 
