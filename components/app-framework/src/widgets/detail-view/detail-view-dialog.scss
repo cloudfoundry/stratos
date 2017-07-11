@@ -12,19 +12,6 @@
     max-width: 100%;
   }
 
-  &.fade {
-
-    .modal-dialog {
-      transition: bottom 0.25s ease-in;
-      bottom: 50vw;
-    }
-
-    &.in .modal-dialog {
-      transition: bottom 0.25s ease-in;
-      bottom: 0;
-    }
-  }
-
   // Standard dialog widths
 
   &.dialog-form > .modal-dialog .detail-view-content {

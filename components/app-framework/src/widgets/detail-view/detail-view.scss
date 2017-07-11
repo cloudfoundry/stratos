@@ -33,7 +33,17 @@
     }
   }
 
+  &.detail-view-dialog.fade {
+    transition-property: opacity, transform;
+    transform: scale(0);
+
+    &.in {
+      transform: scale(1);
+    }
+  }
+
   &.fade {
+    transition-property: left, bottom, top;
     .modal-dialog {
       transform: none;
       transition: left $detail-view-transition-duration ease-out;
@@ -41,7 +51,7 @@
     }
     &.in {
       transition: all $detail-view-shrink-transition-duration ease-out;
-      transition-property: left, bottom, top;
+      
       .modal-dialog {
         left: 100%-$detail-view-width;
       }
