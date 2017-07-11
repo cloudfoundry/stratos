@@ -39,7 +39,7 @@ nav.secondary-nav {
   display: flex;
 
   &.navbar-hidden {
-    padding-left: 0;
+    display: none;
   }
 
   &.navbar-icons-only {
@@ -68,9 +68,6 @@ nav.secondary-nav {
   }
     
   .secondary-navbar {
-    &.second-navbar-hidden {
-      display: none;
-    }
     flex: 1 1 0;
     background-color: $navbar-bottom-border-color;
     border-bottom: 1px solid $secondary-nav-bottom-border-color;
