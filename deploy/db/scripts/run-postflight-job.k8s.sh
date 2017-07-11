@@ -65,11 +65,11 @@ PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
 echo "Database operation(s) complete."
 
 
-# Remove the lock file on the shared volume
 # Check if Upgrade Lock file exists
 if [ ! -f "/$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME" ]; then
   exit 1
 fi
+# Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
 rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true
 
