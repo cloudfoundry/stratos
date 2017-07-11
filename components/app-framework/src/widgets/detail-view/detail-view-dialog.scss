@@ -8,17 +8,8 @@
   overflow: auto;
   bottom: 0;
 
-  &.fade {
-
-    .modal-dialog {
-      transition: bottom 0.25s ease-in;
-      bottom: 50vw;
-    }
-
-    &.in .modal-dialog {
-      transition: bottom 0.25s ease-in;
-      bottom: 0;
-    }
+  > .modal-dialog {
+    max-width: 100%;
   }
 
   // Standard dialog widths
@@ -29,6 +20,10 @@
 
   &.dialog-form-large > .modal-dialog .detail-view-content {
     width: $console-input-width * 1.25 + 2 * $console-unit-space;
+  }
+
+  &.dialog-form-larger > .modal-dialog .detail-view-content {
+    width: $console-input-width * 2 + 2 * $console-unit-space;
   }
 
   &.dialog-form-wizard > .modal-dialog .detail-view-content {

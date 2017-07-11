@@ -35,12 +35,16 @@
     return _getWizard().isDisplayed();
   }
 
+  // Step title may not be present if being shown in acompact mode - use the wizard title in thet case
   function _getStepTitle() {
-    return _getWizard().element(by.css('.register-content-right > h4'));
+    var stepTitle = _getWizard().element(by.css('.register-content-right > h4'));
+    return stepTitle.isPresent().then(function (hasStepTitle) {
+      return hasStepTitle ? stepTitle.getText() : _getWizard().element(by.css('.wizard-head h4')).getText();
+    });
   }
 
   function getStep() {
-    return _getStepTitle().getText().then(function (text) {
+    return _getStepTitle().then(function (text) {
       text = text.trim();
       if (text.indexOf('Select an Endpoint Type') === 0) {
         return 1;
@@ -63,7 +67,7 @@
   }
 
   function getStepTwoType() {
-    return _getStepTitle().getText().then(function (text) {
+    return _getStepTitle().then(function (text) {
       text = text.trim();
 
       switch (text) {

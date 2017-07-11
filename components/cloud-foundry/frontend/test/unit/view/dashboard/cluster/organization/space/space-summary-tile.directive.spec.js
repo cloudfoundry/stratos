@@ -13,7 +13,8 @@
         guid: spaceGuid
       },
       entity: {
-        name: 'spaceName'
+        name: 'spaceName',
+        allow_ssh: false
       }
     };
     var modelSpace = {
@@ -114,7 +115,8 @@
         expect(controller.space).toBeDefined();
         expect(controller.cardData).toBeDefined();
         expect(controller.actions).toBeDefined();
-        expect(controller.actions.length).toEqual(2);
+        // Actions: rename, delete, enable/disable ssh
+        expect(controller.actions.length).toEqual(3);
         expect(controller.getEndpoint).toBeDefined();
         expect(controller.showCliCommands).toBeDefined();
         expect(controller.spaceDetail).toBeDefined();

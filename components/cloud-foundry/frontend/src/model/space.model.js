@@ -57,7 +57,8 @@
       removeAuditorFromSpace: removeAuditorFromSpace,
       associateAuditorWithSpace: associateAuditorWithSpace,
       removeDeveloperFromSpace: removeDeveloperFromSpace,
-      associateDeveloperWithSpace: associateDeveloperWithSpace
+      associateDeveloperWithSpace: associateDeveloperWithSpace,
+      updateSshAccess: updateSshAccess
     };
 
     return model;
@@ -727,6 +728,16 @@
       return cfOrganizationModel;
     }
 
+    function updateSshAccess(cnsiGuid, spaceGuid, enabled) {
+      var updateData = {
+        allow_ssh: enabled
+      };
+      return spaceApi.UpdateSpace(spaceGuid, updateData, null,
+        modelUtils.makeHttpConfig(cnsiGuid)).then(function (response) {
+          // Refresh the space itself
+          return getSpaceDetails(cnsiGuid, response.data);
+        });
+    }
   }
 
   var SPACE_ROLE_TO_KEY = {

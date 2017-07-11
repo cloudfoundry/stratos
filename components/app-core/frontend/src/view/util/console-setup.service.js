@@ -56,7 +56,7 @@
      */
     function responseError(rejection) {
       // rejection is a response object
-      // Must be a 503 with the Stratos-Setup-Required header and must request must be to the backend
+      // Must be a 503 with the Stratos-Setup-Required header and request must be to the backend
       if (setupRequired(rejection)) {
         if (service.setupState) {
           appEventService.$emit(appEventService.events.TRANSFER, service.setupState);

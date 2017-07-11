@@ -2,16 +2,17 @@
   'use strict';
 
   describe('variables manager service', function () {
-    var $controller, $q, modelManager, dialogContext, dialog;
+    var $q, modelManager, dialogContext, dialogPromise, applyChange;
 
     beforeEach(module('console-app'));
-    beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+    beforeEach(module({
+      frameworkAsyncTaskDialog: function (content, context, actionTask) {
         dialogContext = context;
-        $controller = config.controller;
-        return $q.reject();
-      };
-      $provide.value('frameworkDetailView', mock);
+        applyChange = actionTask;
+        return {
+          result: $q.defer().promise
+        };
+      }
     }));
 
     beforeEach(inject(function ($injector) {
@@ -30,63 +31,54 @@
     describe('add', function () {
       beforeEach(inject(function ($injector) {
         var appVarsManager = $injector.get('cfVariablesManager');
-        dialog = appVarsManager.add('test_guid', 'test_id');
-        expect(dialog).not.toBe(null);
+        dialogPromise = appVarsManager.add('test_guid', 'test_id');
+        expect(dialogPromise).toBeDefined();
       }));
 
       it('check var name and value are empty', function () {
-        var controller = new $controller(modelManager, undefined, dialogContext);
-        expect(controller.varName).toBe('');
-        expect(controller.varValue).toBe('');
-        expect(controller.isEdit).toBe(false);
+        expect(dialogContext.data.varName).toBe('');
+        expect(dialogContext.data.varValue).toBe('');
+        expect(dialogContext.isEdit).toBe(false);
       });
     });
 
     describe('edit', function () {
       beforeEach(inject(function ($injector) {
         var appVarsManager = $injector.get('cfVariablesManager');
-        dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
-        expect(dialog).not.toBe(null);
+        dialogPromise = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
+        expect(dialogPromise).toBeDefined();
       }));
       it('check var name and value are not empty', function () {
-        var controller = new $controller(modelManager, undefined, dialogContext);
-        expect(controller.varName).toBe('edit_var');
-        expect(controller.varValue).toBe('edit_value');
-        expect(controller.isEdit).toBe(true);
+        expect(dialogContext.data.varName).toBe('edit_var');
+        expect(dialogContext.data.varValue).toBe('edit_value');
+        expect(dialogContext.isEdit).toBe(true);
       });
     });
 
     describe('apply changes', function () {
       var APP_VAR_UPDATE = '/pp/v1/proxy/v2/apps/test_id';
       var $httpBackend;
-      var fakeModal = {close: jasmine.createSpy('dialogClose')};
 
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
         $httpBackend.expectPUT(APP_VAR_UPDATE);
         var appVarsManager = $injector.get('cfVariablesManager');
-        dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
-        expect(dialog).not.toBe(null);
+        dialogPromise = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
+        expect(dialogPromise).toBeDefined();
       }));
 
       it('should update variable and close dialog', function () {
-        fakeModal.close.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {}});
-        var controller = new $controller(modelManager, fakeModal, dialogContext);
-        controller.applyChange();
-        $httpBackend.flush();
-        expect(fakeModal.close).toHaveBeenCalled();
-        expect(controller.addError).toBe(false);
+        applyChange({}).catch(function () {
+          fail('applyChange func should not fail');
+        });
       });
 
       it('should have error and not close dialog', function () {
-        fakeModal.close.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(400, {test_guid: {}});
-        var controller = new $controller(modelManager, fakeModal, dialogContext);
-        controller.applyChange();
-        $httpBackend.flush();
-        expect(fakeModal.close).not.toHaveBeenCalled();
-        expect(controller.addError).toBe(true);
+        applyChange({}).then(function () {
+          fail('applyChange func should not pass');
+        });
       });
     });
 

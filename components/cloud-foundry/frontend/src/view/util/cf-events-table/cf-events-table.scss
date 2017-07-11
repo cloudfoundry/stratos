@@ -125,7 +125,7 @@ table.cf-event-table-loading {
 
   .cf-event-detail-content {
     min-width: 480px;
-    margin: 0 $console-unit-space;
+    margin: 0 $console-unit-space $console-unit-space $console-unit-space;
     
     pre {
       white-space: pre-wrap;

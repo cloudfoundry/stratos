@@ -1,0 +1,22 @@
+.app-cli-commands ng-include {
+  padding: $console-unit-space;
+}
+
+.modal.detail-view.detail-view-dialog.app-cli-commands {
+  > .modal-dialog {
+    height: 80%;
+
+    ng-include {
+      overflow-y: scroll;
+    }
+  }
+}
+
+// Use the full height on smaller devices
+@media(max-height: 799px) {
+  .modal.detail-view.detail-view-dialog.app-cli-commands {
+    > .modal-dialog {
+      height: 100%;
+    }
+  }
+}
