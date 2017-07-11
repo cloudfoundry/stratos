@@ -1,6 +1,6 @@
 # Deploying with the All-In-One Docker Container
 
-The all-in-One container sets up the Stratos Console components in a single container.
+The all-in-one container sets up the Stratos Console components in a single container.
 
 ## Requirements:
 
