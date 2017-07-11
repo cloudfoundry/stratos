@@ -46,6 +46,7 @@
       // If dialog mode then set ensure we are using the dialog class
       if (config.dialog) {
         config.class = config.class || '';
+        config.autoResize = config.class.length === 0;
         config.class += ' detail-view-dialog';
       }
 
@@ -118,7 +119,7 @@
           // If dialog mode then we need to fix the width after rendering, so that
           // if content is shown/hidden (e.g. error box) then the dialog width will not change
           // since this is jarring if it does
-          if (config.dialog) {
+          if (config.dialog && config.autoResize) {
             var dialog = angular.element('.detail-view-dialog .modal-dialog');
             // Latest dialog will be the first element
             var thisDialog = angular.element(dialog.get(0));
