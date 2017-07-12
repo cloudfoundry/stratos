@@ -21,6 +21,8 @@
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
+  buildUtils.localDevSetup();
+
   gulp.task('get-plugins-data', [], function () {
 
     var plugins = require('../plugins.json');
@@ -73,7 +75,6 @@
   // than we will end up overwriting one of them. Therefore, plugins should use
   // the same version of dependencies.
   gulp.task('dedup-vendor', ['prepare-deps'], function (done) {
-
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
@@ -201,13 +202,30 @@
       });
   });
 
+  gulp.task('local-dev-build', function (done) {
+    if (!buildUtils.isLocalDevBuild()) {
+      return done();
+    } else {
+      // Copy SQLite script and prepared config to the outputs folder
+      var scriptOutFolder = path.join(conf.outputPath, 'deploy/db');
+      fs.ensureDirSync(scriptOutFolder);
+      fs.copySync(path.resolve(__dirname, '../deploy/db/sqlite_schema.sql'), path.join(scriptOutFolder, 'sqlite_schema.sql'));
+      // Copy config.properties if there is not one already
+      fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
+        overwrite: false
+      });
+      return done();
+    }
+  });
+
   gulp.task('build-backend', function () {
 
     return runSequence(
       'init-build',
       'dedup-vendor',
       'write-plugins-yaml',
-      'delete-temp'
+      'delete-temp',
+      'local-dev-build'
     );
   });
 
