@@ -1,57 +1,79 @@
-login-form, [login-form] {
-  width: 100%;
-  margin-bottom: 10px;
-  z-index: 2;
+$login-panel-width: 420px;
+$login-padding: 24px;
+$login-logo-size: 128px;
 
-  @media (min-height: 600px) {
-    margin-top: 100px;
-  }
 
-  .login-error {
-    margin-top: 20px;
-  }
+login-form {
+  margin: 0;
+  width: $login-panel-width;
 
   .login-form {
-    display: block;
-    max-width: 350px;
-    padding: 15px;
+    max-width: $login-panel-width;
 
-    button {
+    padding: 0 $login-padding;
+
+    > h1 {
+      //margin: 12px 0;
+      margin-bottom: 36px;
+      margin-top: 0;
+      color: $brand-primary;
+      font-weight: 300;
+    }
+
+    .form-group {
+      width: auto;
+      //background-color: $suse-secondary;
+      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
+      // error z-index (see focus below)
+      //border-color: lighten($suse-secondary, 10%);
+      //color: $suse-text;
+      &.focus {
+        z-index: 2;
+      }
+
+      .control-label {
+        font-size: 14px;
+        margin-top: 3px;
+      }
+
+      &.focus {
+        //border-color: $suse-primary;
+      }
+
+      input {
+        //color: $suse-text;
+        //text-shadow: 0 0 0 $suse-text;
+        //-webkit-text-fill-color: $suse-text;
+      }
+    }
+
+    > button {
+      float: none;
       margin-top: 40px;
       width: 200px;
     }
 
-    .form-group:first-of-type {
-      margin-top: 40px;
-    }
+    .login-form-spinner.ng-hide {
+      display: block !important;
 
-    .app-icon-view {
-      content: 'visibility'
-    }
-
-    .app-icon-view.form-control-feedback {
-      cursor: pointer;
-      pointer-events: auto;
-    }
-
-    .login-form-spinner {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: $console-unit-space;
-
-      .spinner-notification {
-        margin-right: 20px;
-        text-transform: uppercase;
+      > * {
+        visibility: hidden;
       }
     }
+  }
 
-    .login-button {
-      float: left;
+  .login-form-spinner {
+    text-align: center;
+    color: $white;
+    margin-top: 24px;
+
+    .spinner-notification {
+      text-transform: none;
+      font-size: 16px;
     }
 
-    .login-clear-both {
-      clear: both;
+    .bounce-spinner > div {
+      background-color: $white;
     }
   }
 }
