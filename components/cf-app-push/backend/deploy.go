@@ -18,8 +18,8 @@ import (
 	"code.cloudfoundry.org/cli/cf/actors/servicebuilder"
 	"code.cloudfoundry.org/cli/cf/api"
 	"code.cloudfoundry.org/cli/cf/appfiles"
-	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
+	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/commandsloader"
 	"code.cloudfoundry.org/cli/cf/configuration"
 	"code.cloudfoundry.org/cli/cf/configuration/confighelpers"
@@ -37,13 +37,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
-	"gopkg.in/yaml.v2"
 )
 
 type MessageType int
 
 const (
-
 	DATA MessageType = iota + 20000
 	MANIFEST
 	CLOSE_SUCCESS
@@ -60,6 +58,8 @@ const (
 	EVENT_FETCHED_MANIFEST
 	EVENT_PUSH_STARTED
 	EVENT_PUSH_COMPLETED
+	SOURCE_REQUIRED = iota + 50000
+	SOURCE_METADATA
 
 	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
@@ -71,7 +71,6 @@ const (
 	pingWriteTimeout = 10 * time.Second
 
 	stratosProjectKey = "STRATOS_PROJECT"
-
 )
 
 type ManifestResponse struct {
@@ -90,12 +89,22 @@ var upgrader = websocket.Upgrader{
 }
 
 type StratosProject struct {
-	Url        string     `json:"url"`
-	CommitHash string     `json:"commit"`
-	Branch     string     `json:"branch"`
-	Timestamp  int64      `json:"timestamp"`
+	Url        string `json:"url"`
+	CommitHash string `json:"commit"`
+	Branch     string `json:"branch"`
+	Timestamp  int64  `json:"timestamp"`
 }
 
+// Structure used to provide metadata about the type of source
+type SourceInfo struct {
+	SourceType string `json:"type"`
+}
+
+// Structure used to provide metadata about the GitHub source
+type GitHubSourceInfo struct {
+	Project string `json:"project"`
+	Branch  string `json:"branch"`
+}
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
@@ -119,6 +128,37 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	defer clientWebSocket.Close()
 	defer pingTicker.Stop()
 
+	// We use a simple protocol to get the source to use for cf push
+	// This can either be a github project or one or more files
+
+	// Send a message to the client to say that we are awaiting source details
+
+	sendEvent(clientWebSocket, SOURCE_REQUIRED)
+
+	// Wait for a message from the client
+	log.Info("Waiting for source information from client")
+
+	msg := SocketMessage{}
+	if err := clientWebSocket.ReadJSON(msg); err != nil {
+		return err
+	}
+
+	// Check that the message type is SOURCE_METADATA
+	if msg.Type != MessageType.SOURCE_METADATA {
+		return errors.New("Unexpected message; expecting SOURCE_METADATA")
+	}
+
+	log.Infof("Source Type is %s", msg.Message)
+
+	// 'Message' contains a string source type
+
+	// Message should be source info message
+	// sourceInfo := SourceInfo{}
+	// if err := json.Unmarshal(msg, &dat); err != nil {
+	// 	return err
+	// }
+
+	// log.InfoF("Source Typs is %s", sourceInfo.SourceType)
 
 	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
 
@@ -167,7 +207,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	cfAppPush.pushCommand.SetDependency(deps, false)
 
-	err = cfAppPush.flagContext.Parse("-p", tempDir, "-f", tempDir + "/manifest.yml")
+	err = cfAppPush.flagContext.Parse("-p", tempDir, "-f", tempDir+"/manifest.yml")
 	if err != nil {
 		log.Warnf("Failed to parse due to: %+v", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -331,8 +371,6 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 
 func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-
-
 	vcsGit := GetVCS()
 
 	err := vcsGit.Create(tempDir, repoUrl)
@@ -384,10 +422,10 @@ func fetchManifest(repoPath string, projectUrl string, commitHash string, branch
 		}
 
 		stratosProject := StratosProject{
-			Url: projectUrl,
+			Url:        projectUrl,
 			CommitHash: commitHash,
-			Branch: branch,
-			Timestamp: time.Now().Unix(),
+			Branch:     branch,
+			Timestamp:  time.Now().Unix(),
 		}
 
 		marshalledJson, _ := json.Marshal(stratosProject)

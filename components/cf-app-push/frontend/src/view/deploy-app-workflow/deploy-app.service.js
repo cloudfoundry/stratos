@@ -116,7 +116,9 @@
       EVENT_CLONED: 10012,
       EVENT_FETCHED_MANIFEST: 10013,
       EVENT_PUSH_STARTED: 10014,
-      EVENT_PUSH_COMPLETED: 10015
+      EVENT_PUSH_COMPLETED: 10015,
+      SOURCE_REQUIRED: 50000,
+      SOURCE_METADATA: 50001
     };
 
     vm.data = {
@@ -415,6 +417,19 @@
         $log.warn('Deploy Application: Failed: ' + failureDescription);
       }
 
+      function sendSourceMetadata() {
+        console.log('Back-end has requested source metadata');
+
+        var msg = {
+          message: 'github',
+          timestamp: Date.now(),
+          type: socketEventTypes.SOURCE_METADATA
+        };
+
+        // Send the source metadata
+        vm.data.webSocket.send(JSON.stringify(msg));
+      }
+
       resetSocket();
 
       // Determine web socket url and open connection
@@ -476,6 +491,9 @@
             if (app.Name) {
               discoverAppGuid(app.Name);
             }
+            break;
+          case socketEventTypes.SOURCE_REQUIRED:
+            sendSourceMetadata();
             break;
           default:
             $log.error('Unknown deploy application socket event type: ', logData.type);
