@@ -5,7 +5,7 @@ resources:
     repo: SUSE/stratos-ui
     uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
-    branch: build-pipeline
+    branch: {{stratos-ui-branch}}
 - name: aio-docker-image
   type: docker-image
   source:
