@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/kat-co/vala"
 	// SQL Lite 3
@@ -121,7 +123,10 @@ func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 }
 
 func GetSQLLiteConnection() (*sql.DB, error) {
-	os.Remove(SQLiteDatabaseFile)
+
+	if !config.IsSet("SQLITE_KEEP_DB") {
+		os.Remove(SQLiteDatabaseFile)
+	}
 
 	db, err := sql.Open("sqlite3", SQLiteDatabaseFile)
 	if err != nil {
