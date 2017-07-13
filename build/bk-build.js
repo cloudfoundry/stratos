@@ -47,6 +47,10 @@
 
   gulp.task('prepare-deps', ['get-plugins-data'], function (done) {
 
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
+
     var promise = Q.resolve();
     _.each(enabledPlugins, function (pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
@@ -75,6 +79,11 @@
   // than we will end up overwriting one of them. Therefore, plugins should use
   // the same version of dependencies.
   gulp.task('dedup-vendor', ['prepare-deps'], function (done) {
+
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
+
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
@@ -214,6 +223,12 @@
       fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
         overwrite: false
       });
+      // Copy the dev certs as well if they exist
+      var devCerts = path.resolve(__dirname, '../dev-certs');
+      if (fs.existsSync(devCerts)) {
+        fs.copySync(devCerts, path.join(conf.outputPath, 'dev-certs'));
+      }
+
       return done();
     }
   });
