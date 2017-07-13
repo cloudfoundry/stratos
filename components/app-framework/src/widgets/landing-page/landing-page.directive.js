@@ -9,38 +9,17 @@
    * @namespace app.framework.widgets.landingPage
    * @memberof app.framework.widgets
    * @name landingPage
-   * @description ????
+   * @description Container template to provide consistent screen layout to landing pages
    * @example
    * <landing-page>
-   * This is the internal content
+   *  <div>This is the internal, custom content</div>
    * </landing-page>
-   * @returns {object} ????
+   * @returns {object} Directive config
    */
   function landingPage() {
     return {
-      bindToController: {
-        theme: '@',
-        hideCopy: '='
-      },
-      controller: LandingPageController,
-      controllerAs: 'landingPageCtrl',
-      scope: {},
       templateUrl: 'framework/widgets/landing-page/landing-page.html',
       transclude: true
     };
-  }
-
-  /**
-   * @namespace app.framework.widgets.landingPage
-   * @memberof app.framework.widgets
-   * @name LandingPageController
-   * @constructor
-   * @param {object} $document - Angular $document service
-   * @param {object} $timeout - Angular $timeout service
-   */
-  function LandingPageController($document, $timeout) {
-
-    var vm = this;
-
   }
 })();
