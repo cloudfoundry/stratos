@@ -26,6 +26,7 @@
   module.exports.test = test;
   module.exports.localDevSetup = localDevSetup;
   module.exports.isLocalDevBuild = isLocalDevBuild;
+  module.exports.skipGlideInstall = skipGlideInstall;
 
   function localDevSetup() {
     if (isLocalDevBuild()) {
@@ -45,6 +46,15 @@
       }
     }
     return devConfig;
+  }
+
+  function skipGlideInstall() {
+    if (isLocalDevBuild()) {
+      // Check if we can find the golang folder - indicates glide has run before
+      var folder = path.join(env.GOPATH, 'src', 'golang.org');
+      return fs.existsSync(folder);
+    }
+    return false;
   }
 
   function spawnProcess(processName, args, cwd, env) {
@@ -81,9 +91,11 @@
   }
 
   function createArgsWithInstallFlag(command, args) {
-    var newArgs = [command];
-    if (!isLocalDevBuild()) {
-      newArgs.push('-i');
+    var newArgs = [command, '-i'];
+
+    if (isLocalDevBuild()) {
+      newArgs.push('-pkgdir');
+      newArgs.push(path.join(env.GOPATH, 'pkg'));
     }
     return newArgs.concat(args);
   }
