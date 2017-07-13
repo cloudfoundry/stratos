@@ -1,14 +1,13 @@
-<landing-page>
-  <div class="login-page">
-    <div class="login-page-left-space"></div>
-    <div class="login-left text-left">
-      <h1 class="login-page-headline " translate>app-setup.intro-title</h1>
-      <p class="login-page-tagline" translate>app-setup.intro-description</p>
+<landing-page >
+  <div class="app-setup">
+    <div class="app-setup-left-space"></div>
+    <div class="app-setup-container">
+      <h1 class="app-setup-headline" translate>app-setup.intro-title</h1>
+      <div class="app-setup-wizard">
+        <app-setup-wizard></app-setup-wizard>
+      </div>
     </div>
-    <div id="section-login-panel" class="login-right text-left setup-login-right">
-        <button class="btn btn-commit" ng-click="setupController.startSetup()" translate>app-setup.start-button</button>
-    </div>
-    <div class="login-page-right-space"></div>
+    <div class="app-setup-right-space"></div>
   </div>
 </landing-page>
 

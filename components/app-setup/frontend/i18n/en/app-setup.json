@@ -1,11 +1,21 @@
 {
   "app-setup": {
-    "intro-title": "@:product.console",
-    "intro-description": "To start using the [[@:product.console]] please run through configuration setup steps",
-    "start-button": "Start Setup",
-    "wizard-title": "Setup the Console",
+    "intro-title": "[[@:product.console]] Setup",
+    "step-intro": {
+      "title": "Intro",
+      "p1": "Welcome to [[@:product.console]].",
+      "p2": "Before getting started some configuration information is required.",
+      "p3": "Press <b>NEXT</b> to get started.",
+      "p4": "",
+      "p5": ""
+    },
     "step-1": {
       "title": "UAA Part 1",
+      "p1": "[[@:product.console]] authenticates users with a Cloud Foundry User Account and Authentication (UAA) service. The console must be configured with the details necessary to communicate with the UAA.",
+      "p2": "The address of the UAA api endpoint must be provided and whether SSL validation is required.",
+      "p3": "The client credentials are required, including a UAA admin username and password.",
+      "p4": "The configuration will be validated before moving on to the next step.",
+      "p5": "For further information about Cloud Foundry UAA see <a href=\"https://docs.cloudfoundry.org/concepts/architecture/uaa.html\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>.",
       "busy-message": "Validating ...",
       "uaa-intro": "UAA Endpoint",
       "uaa-url": {
@@ -43,7 +53,12 @@
     },
     "step-2": {
       "title": "UAA Part 2",
-      "busy-message": "Applying ...",
+      "p1": "Basic configuration has been validated and a set of UAA scopes have been discovered.",
+      "p2": "The Console uses a scope to identify Console administrators from regular users.",
+      "p3": "Please select which scope you would like to use for this.",
+      "p4": "",
+      "p5": "",
+      "busy-message": "Applying Configuration and Restarting Console ...",
       "intro": "Console Admin Scope",
       "console-scope": {
         "label": "Scope",

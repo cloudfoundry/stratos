@@ -67,7 +67,7 @@
             class="btn btn-default cancel"
             ng-click="wizardCtrl.cancel()"
             ng-disabled="wizardCtrl.cancelBtnDisabled"
-            ng-if="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
+            ng-if="wizardCtrl.allowCancel()">
       {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'buttons.cancel' }}
     </button>
 

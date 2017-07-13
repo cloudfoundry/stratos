@@ -1,0 +1,26 @@
+
+.app-setup-intro {
+  flex-direction: column;
+}
+
+.app-setup-step {
+  display: flex;
+  .app-setup-step-left {
+    //padding: 0 $console-unit-space;
+    padding-right: $console-unit-space;
+    flex: 3;
+  }
+  .app-setup-step-right {
+    padding-left: $console-unit-space;
+    //padding: 0 $console-unit-space / 2 0 $console-unit-space;
+    flex: 2;
+  }
+
+
+}
+@media (max-width: $screen-md-min) {
+  .app-setup-step {
+    flex-direction: column;
+  }
+}
+
