@@ -11,7 +11,6 @@
       <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
       <div class="applications-msg" translate>errors.no-cf-connected</div>
       <div class="applications-cta" ng-show="clustersCtrl.isAdmin(true)">
-        <a class="btn-link" ui-sref="endpoint.dashboard" translate>errors.no-cf-connected-link</a>
         <span translate>errors.no-cf-connected-text</span>
       </div>
       <div class="applications-cta" ng-show="!clustersCtrl.isAdmin()">
