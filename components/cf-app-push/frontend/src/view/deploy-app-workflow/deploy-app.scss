@@ -1,3 +1,4 @@
+
 $github-avatar-height: 51px;
 $github-avatar-width: 51px;
 $github-info-commit-spacer: 3px;
@@ -143,9 +144,29 @@ $select-option-height: 39px;
   }
 }
 
-
 .folder-drop-progress {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+percent-gauge.deploy-app-file-progress {
+
+  .percent-gauge .percent-gauge-bar:after {
+    background-image: none;
+  }
+
+  .percent-gauge .percent-gauge-bar .percent-gauge-utilized-bar {
+    background-color: $brand-primary;
+
+    &.percent-gauge-at-max {
+      background-color: $brand-primary;
+    }
+  }
+}
+
+.deploy-app-file-upload-title {
+  margin-bottom: 24px;
+  font-size: 18px;
+  font-weight: 600;
 }

@@ -104,21 +104,25 @@
       DATA: 20000,
       MANIFEST: 20001,
       CLOSE_SUCCESS: 20002,
-      CLOSE_PUSH_ERROR: 40003,
-      CLOSE_NO_MANIFEST: 40004,
-      CLOSE_INVALID_MANIFEST: 40005,
-      CLOSE_FAILED_CLONE: 40006,
-      CLOSE_FAILED_NO_BRANCH: 40007,
-      CLOSE_FAILURE: 40008,
-      CLOSE_NO_SESSION: 40009,
-      CLOSE_NO_CNSI: 40010,
-      CLOSE_NO_CNSI_USERTOKEN: 40011,
-      EVENT_CLONED: 10012,
-      EVENT_FETCHED_MANIFEST: 10013,
-      EVENT_PUSH_STARTED: 10014,
-      EVENT_PUSH_COMPLETED: 10015,
-      SOURCE_REQUIRED: 50000,
-      SOURCE_METADATA: 50001
+      CLOSE_PUSH_ERROR: 40000,
+      CLOSE_NO_MANIFEST: 40001,
+      CLOSE_INVALID_MANIFEST: 40002,
+      CLOSE_FAILED_CLONE: 40003,
+      CLOSE_FAILED_NO_BRANCH: 40004,
+      CLOSE_FAILURE: 40005,
+      CLOSE_NO_SESSION: 40006,
+      CLOSE_NO_CNSI: 40007,
+      CLOSE_NO_CNSI_USERTOKEN: 40008,
+      EVENT_CLONED: 10000,
+      EVENT_FETCHED_MANIFEST: 10001,
+      EVENT_PUSH_STARTED: 10002,
+      EVENT_PUSH_COMPLETED: 10003,
+      SOURCE_REQUIRED: 30000,
+      SOURCE_GITHUB: 30001,
+      SOURCE_FOLDER: 30002,
+      SOURCE_FILE: 30003,
+      SOURCE_FILE_DATA: 30004,
+      SOURCE_FILE_ACK: 30005
     };
 
     vm.data = {
@@ -159,13 +163,7 @@
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
       allowNext: function () {
-        console.log('allow next');
-        console.log(vm.userInput.sourceType);
-        console.log(vm.userInput.githubProjectValid);
-        console.log(vm.userInput.fileScanData);
-        var a = vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
-        console.log(a);
-        return a;
+        return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
       },
       dropItemHandler: dropHandler,
       onEnter: function () {
@@ -193,18 +191,13 @@
     };
 
     function dropHandler(items) {
-      console.log('ITEMS WERE DROPPED');
-      console.log(items);
       vm.userInput.sourceType = 'local';
 
       itemDropHelper.identify(items).then(function (info) {
-        console.log(info);
         vm.userInput.localPath = info.value ? info.value.name : '';
         if (info.isFiles) {
           vm.options.wizardCtrl.showBusy('Scanning for files and folders');
           itemDropHelper.traverseFiles(info.value, '.cfignore').then(function (results) {
-            console.log('scan complete');
-            console.log(results);
             vm.userInput.fileScanData = results;
             vm.options.wizardCtrl.showBusy();
           });
@@ -335,14 +328,11 @@
       }
     });
 
-    function createSocketUrl(serviceInstance, org, space, project, branch) {
+    function createSocketUrl(serviceInstance, org, space) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
       var url = protocol + '://' + $location.host() + ':' + $location.port();
       url += '/pp/v1/' + serviceInstance.guid + '/' + org.metadata.guid + '/' + space.metadata.guid + '/deploy';
-      url += '?project=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
-      if (branch) {
-        url += '&branch=' + branch;
-      }
+      url += '?org=' + org.entity.name + '&space=' + space.entity.name;
       return url;
     }
 
@@ -400,6 +390,7 @@
         hasPushStarted = true;
         vm.data.deployStatus = vm.data.deployState.PUSHING;
         deployingPromise.resolve();
+        vm.data.uploadingFiles = undefined;
         $log.debug('Deploy Application: Push Started');
       }
 
@@ -418,26 +409,107 @@
       }
 
       function sendSourceMetadata() {
-        console.log('Back-end has requested source metadata');
+        if (vm.userInput.sourceType === 'github') {
+          sendGitHubSourceMetadata();
+        } else if (vm.userInput.sourceType === 'local') {
+          sendLocalSourceMetadata();
+        }
+      }
+
+      function sendGitHubSourceMetadata() {
+        var github = {
+          project:vm.userInput.githubProject,
+          branch: vm.userInput.githubBranch.name
+        };
 
         var msg = {
-          message: 'github',
-          timestamp: Date.now(),
-          type: socketEventTypes.SOURCE_METADATA
+          message: angular.toJson(github),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_GITHUB
         };
 
         // Send the source metadata
-        vm.data.webSocket.send(JSON.stringify(msg));
+        vm.data.webSocket.send(angular.toJson(msg));
+      }
+
+      function sendLocalSourceMetadata() {
+        var metadata = {
+          files: [],
+          folders: []
+        };
+
+        collectFoldersAndFiles(metadata, null, vm.userInput.fileScanData.root);
+
+        vm.userInput.fileTransfers = metadata.files;
+        metadata.files = metadata.files.length;
+        vm.data.uploadingFiles = {
+          remaining: metadata.files,
+          bytes: 0,
+          total: vm.userInput.fileScanData.total,
+          fileName: ''
+        };
+
+        deployingPromise.resolve();
+
+        var msg = {
+          message: angular.toJson(metadata),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_FOLDER
+        };
+
+        // Send the source metadata
+        vm.data.webSocket.send(angular.toJson(msg));
+      }
+
+      function collectFoldersAndFiles(metadata, base, folder) {
+        _.each(folder.files, function (file) {
+          var filePath = base ? base + '/' + file.name : file.name;
+          file.fullPath = filePath;
+          metadata.files.push(file);
+        });
+
+        _.each(folder.folders, function (sub, name) {
+          var fullPath = base ? base + '/' + name : name;
+          metadata.folders.push(fullPath);
+          collectFoldersAndFiles(metadata, fullPath, sub);
+        });
+      }
+
+      function sendNextFile() {
+        if (vm.userInput.fileTransfers.length > 0) {
+          var file = vm.userInput.fileTransfers.shift();
+
+          // Send file metadata
+          var msg = {
+            message: file.fullPath,
+            timestamp: Math.round((new Date()).getTime() / 1000),
+            type: socketEventTypes.SOURCE_FILE
+          };
+
+          vm.data.uploadingFiles.fileName = file.fullPath;
+
+          // Send the file name metadata
+          vm.data.webSocket.send(angular.toJson(msg));
+
+          // Now send the file data as a binary message
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var output = e.target.result;
+            vm.data.webSocket.send(output);
+            vm.data.uploadingFiles.bytes += file.size;
+          };
+          reader.readAsArrayBuffer(file);
+        }
       }
 
       resetSocket();
 
       // Determine web socket url and open connection
-      var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space,
-        vm.userInput.githubProject, vm.userInput.githubBranch.name);
+      var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space);
 
       vm.data.webSocket = $websocket(socketUrl, null, {
-        reconnectIfNotNormalClose: false
+        reconnectIfNotNormalClose: false,
+        binaryType: 'arraybuffer'
       });
 
       // Handle Connection responses
@@ -494,6 +566,9 @@
             break;
           case socketEventTypes.SOURCE_REQUIRED:
             sendSourceMetadata();
+            break;
+          case socketEventTypes.SOURCE_FILE_ACK:
+            sendNextFile();
             break;
           default:
             $log.error('Unknown deploy application socket event type: ', logData.type);

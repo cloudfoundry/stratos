@@ -30,7 +30,6 @@
       if (items.length === 1 && items[0].kind === 'file') {
         var fileEntry = items[0].webkitGetAsEntry();
         if (fileEntry.isFile) {
-          console.log(fileEntry);
           // Check extension
           if (archiveRegex.test(fileEntry.name)) {
             result.isArchiveFile = true;
@@ -123,7 +122,7 @@
         excludes: [],
         root: {
           files: [],
-          folders: []
+          folders: {}
         },
 
         file: function (context, file, path) {

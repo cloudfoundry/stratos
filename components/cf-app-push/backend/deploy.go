@@ -37,15 +37,21 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type MessageType int
 
+// Success
 const (
 	DATA MessageType = iota + 20000
 	MANIFEST
 	CLOSE_SUCCESS
-	CLOSE_PUSH_ERROR = iota + 40000
+)
+
+// Close - error cases
+const (
+	CLOSE_PUSH_ERROR MessageType = iota + 40000
 	CLOSE_NO_MANIFEST
 	CLOSE_INVALID_MANIFEST
 	CLOSE_FAILED_CLONE
@@ -54,12 +60,27 @@ const (
 	CLOSE_NO_SESSION
 	CLOSE_NO_CNSI
 	CLOSE_NO_CNSI_USERTOKEN
-	EVENT_CLONED = iota + 10000
+)
+
+// Events
+const (
+	EVENT_CLONED MessageType = iota + 10000
 	EVENT_FETCHED_MANIFEST
 	EVENT_PUSH_STARTED
 	EVENT_PUSH_COMPLETED
-	SOURCE_REQUIRED = iota + 50000
-	SOURCE_METADATA
+)
+
+// Source exchange messages
+const (
+	SOURCE_REQUIRED MessageType = iota + 30000
+	SOURCE_GITHUB
+	SOURCE_FOLDER
+	SOURCE_FILE
+	SOURCE_FILE_DATA
+	SOURCE_FILE_ACK
+)
+
+const (
 
 	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
@@ -75,6 +96,12 @@ const (
 
 type ManifestResponse struct {
 	Manifest string
+}
+
+type SocketMessage struct {
+	Message   string      `json:"message"`
+	Timestamp int64       `json:"timestamp"`
+	Type      MessageType `json:"type"`
 }
 
 type SocketWriter struct {
@@ -95,15 +122,15 @@ type StratosProject struct {
 	Timestamp  int64  `json:"timestamp"`
 }
 
-// Structure used to provide metadata about the type of source
-type SourceInfo struct {
-	SourceType string `json:"type"`
-}
-
 // Structure used to provide metadata about the GitHub source
 type GitHubSourceInfo struct {
 	Project string `json:"project"`
 	Branch  string `json:"branch"`
+}
+
+type FolderSourceInfo struct {
+	Files   int      `json:"files"`
+	Folders []string `json:"folders"`
 }
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
@@ -115,8 +142,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGuid := echoContext.Param("orgGuid")
 	spaceGuid := echoContext.Param("spaceGuid")
-	project := echoContext.QueryParam("project")
-	branch := echoContext.QueryParam("branch")
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
@@ -132,48 +157,42 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	// This can either be a github project or one or more files
 
 	// Send a message to the client to say that we are awaiting source details
-
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
 
 	// Wait for a message from the client
 	log.Info("Waiting for source information from client")
 
 	msg := SocketMessage{}
-	if err := clientWebSocket.ReadJSON(msg); err != nil {
+	if err := clientWebSocket.ReadJSON(&msg); err != nil {
+		log.Errorf("Error reading JSON: %v+", err)
 		return err
 	}
 
-	// Check that the message type is SOURCE_METADATA
-	if msg.Type != MessageType.SOURCE_METADATA {
-		return errors.New("Unexpected message; expecting SOURCE_METADATA")
-	}
+	log.Infof("%v+", msg)
 
-	log.Infof("Source Type is %s", msg.Message)
-
-	// 'Message' contains a string source type
-
-	// Message should be source info message
-	// sourceInfo := SourceInfo{}
-	// if err := json.Unmarshal(msg, &dat); err != nil {
-	// 	return err
-	// }
-
-	// log.InfoF("Source Typs is %s", sourceInfo.SourceType)
-
-	log.Infof("Received URL: %s for cnsiGuid", project, cnsiGUID)
-
-	projectUrl := fmt.Sprintf("https://github.com/%s", project)
-	tempDir, err := ioutil.TempDir("", "git-clone-")
+	// Temporary folder for the application source
+	tempDir, err := ioutil.TempDir("", "cf-push-")
 	defer os.RemoveAll(tempDir)
 
-	commitHash, err := cloneRepository(projectUrl, branch, clientWebSocket, tempDir)
+	var sourceEnvVarMetadata string
+
+	// Get the source, depending on the source type
+	switch msg.Type {
+	case SOURCE_GITHUB:
+		sourceEnvVarMetadata, err = getGitHubSource(clientWebSocket, tempDir, msg)
+	case SOURCE_FOLDER:
+		sourceEnvVarMetadata, err = getFolderSource(clientWebSocket, tempDir, msg)
+	default:
+		err = errors.New("Unsupported source type; don't know how to get the source for the application")
+	}
+
 	if err != nil {
+		log.Errorf("Failed to fetch source: %v+", err)
 		return err
 	}
 
-	sendEvent(clientWebSocket, EVENT_CLONED)
-
-	manifest, err := fetchManifest(tempDir, projectUrl, commitHash, branch, clientWebSocket)
+	// Source fetched - read manifest
+	manifest, err := fetchManifest(tempDir, sourceEnvVarMetadata, clientWebSocket)
 	if err != nil {
 		return err
 	}
@@ -226,6 +245,98 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 	return nil
+}
+
+func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, error) {
+	// The msg data is JSON for the Folder info
+	info := FolderSourceInfo{}
+	if err := json.Unmarshal([]byte(msg.Message), &info); err != nil {
+		return "", err
+	}
+
+	// Create all of the folders
+	for _, folder := range info.Folders {
+		path := filepath.Join(tempDir, folder)
+		err := os.Mkdir(path, 0700)
+		if err != nil {
+			return "", errors.New("Failed to create folder")
+		}
+	}
+
+	var transfers = info.Files
+	for transfers > 0 {
+		log.Infof("Waiting for a file: %d remaining", transfers)
+
+		// Send an ACK to ask the client to start sending us files
+		sendEvent(clientWebSocket, SOURCE_FILE_ACK)
+
+		// We should get a SOURCE_FILE message next
+		msg := SocketMessage{}
+		if err := clientWebSocket.ReadJSON(&msg); err != nil {
+			log.Errorf("Error reading JSON: %v+", err)
+			return "", err
+		}
+
+		// Expecting a file
+		if msg.Type != SOURCE_FILE {
+			return "", errors.New("Unexpected web socket message type")
+		}
+
+		log.Infof("Transferring file: %s", msg.Message)
+
+		// Now expecting a binary message
+		messageType, p, err := clientWebSocket.ReadMessage()
+
+		if err != nil {
+			return "", err
+		}
+
+		if messageType != websocket.BinaryMessage {
+			return "", errors.New("Expecting binary file data")
+		}
+
+		// Write the file
+		path := filepath.Join(tempDir, msg.Message)
+		err = ioutil.WriteFile(path, p, 0644)
+		if err != nil {
+			return "", err
+		}
+
+		transfers--
+	}
+
+	// All done!
+	return "", nil
+}
+
+func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, error) {
+
+	// The msg data is JSON for the GitHub info
+	info := GitHubSourceInfo{}
+	if err := json.Unmarshal([]byte(msg.Message), &info); err != nil {
+		return "", err
+	}
+
+	projectUrl := fmt.Sprintf("https://github.com/%s", info.Project)
+	log.Infof("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, projectUrl)
+
+	commitHash, err := cloneRepository(projectUrl, info.Branch, clientWebSocket, tempDir)
+	if err != nil {
+		return "", err
+	}
+
+	sendEvent(clientWebSocket, EVENT_CLONED)
+
+	// Return a string that can be added to the manifest as an application env var to trace where the source originated
+	stratosProject := StratosProject{
+		Url:        projectUrl,
+		CommitHash: commitHash,
+		Branch:     info.Branch,
+		Timestamp:  time.Now().Unix(),
+	}
+
+	marshalledJson, _ := json.Marshal(stratosProject)
+	return string(marshalledJson), nil
 }
 
 func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, error) {
@@ -398,7 +509,7 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 }
 
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, projectUrl string, commitHash string, branch string, clientWebSocket *websocket.Conn) (manifest.Applications, error) {
+func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket *websocket.Conn) (manifest.Applications, error) {
 
 	var manifest manifest.Applications
 	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
@@ -416,38 +527,26 @@ func fetchManifest(repoPath string, projectUrl string, commitHash string, branch
 		return manifest, err
 	}
 
-	for i, app := range manifest.Applications {
-		if len(app.Env) == 0 {
-			app.Env = make(map[string]interface{})
+	// If we have metadata to indicate the source origin, add it to the manifest
+	if len(sourceEnvVarMetadata) > 0 {
+		for i, app := range manifest.Applications {
+			if len(app.Env) == 0 {
+				app.Env = make(map[string]interface{})
+			}
+			app.Env[stratosProjectKey] = sourceEnvVarMetadata
+			manifest.Applications[i] = app
 		}
 
-		stratosProject := StratosProject{
-			Url:        projectUrl,
-			CommitHash: commitHash,
-			Branch:     branch,
-			Timestamp:  time.Now().Unix(),
+		marshalledYaml, err := yaml.Marshal(manifest)
+		if err != nil {
+			log.Warnf("Failed to marshall manifest in path %v", manifest)
+			sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
+			return manifest, err
 		}
-
-		marshalledJson, _ := json.Marshal(stratosProject)
-		app.Env[stratosProjectKey] = string(marshalledJson)
-		manifest.Applications[i] = app
+		ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
 	}
-
-	marshalledYaml, err := yaml.Marshal(manifest)
-	if err != nil {
-		log.Warnf("Failed to marshall manifest in path %v", manifest)
-		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
-		return manifest, err
-	}
-	ioutil.WriteFile(manifestPath, marshalledYaml, 0600)
 
 	return manifest, nil
-}
-
-type SocketMessage struct {
-	Message   string      `json:"message"`
-	Timestamp int64       `json:"timestamp"`
-	Type      MessageType `json:"type"`
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
