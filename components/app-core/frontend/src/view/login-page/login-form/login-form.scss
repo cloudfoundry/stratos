@@ -22,11 +22,8 @@ login-form {
 
     .form-group {
       width: auto;
-      //background-color: $suse-secondary;
       // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
       // error z-index (see focus below)
-      //border-color: lighten($suse-secondary, 10%);
-      //color: $suse-text;
       &.focus {
         z-index: 2;
       }
@@ -36,15 +33,6 @@ login-form {
         margin-top: 3px;
       }
 
-      &.focus {
-        //border-color: $suse-primary;
-      }
-
-      input {
-        //color: $suse-text;
-        //text-shadow: 0 0 0 $suse-text;
-        //-webkit-text-fill-color: $suse-text;
-      }
     }
 
     > button {
