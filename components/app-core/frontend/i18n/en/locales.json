@@ -1,7 +1,8 @@
 {
   "locales": {
-    "locales": "en,fr",
+    "locales": "en,fr,on",
     "en": "English",
-    "fr": "French"
+    "fr": "French",
+    "on": ""
   }
 }
