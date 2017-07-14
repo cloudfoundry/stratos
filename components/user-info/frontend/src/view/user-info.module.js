@@ -4,30 +4,20 @@
   angular
     .module('user-info', ['cloud-foundry'])
     .config(registerRoute)
-    .run(registerAppTab);
+    .run(registerUserMenu);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('user-info', {
       url: '/user-info',
       templateUrl: 'user-info/view/user-info.html',
       controller: UserInfoController,
-      controllerAs: 'userInfoController'
+      controllerAs: 'userCtrl'
     });
   }
 
-  function registerAppTab($stateParams, cfApplicationTabs, modelManager, cfUtilsService) {
-    cfApplicationTabs.tabs.push({
-      position: 8,
-      hide: function () {
-        var cnsiGuid = $stateParams.cnsiGuid;
-        var cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-        return !cfUtilsService.hasSshAccess(cnsiModel.serviceInstances[cnsiGuid]);
-      },
-      uiSref: 'cf.applications.application.ssh',
-      label: 'cf.app-ssh',
-      clearState: function () {
-      }
-    });
+  function registerUserMenu(modelManager) {
+    var userNavModel = modelManager.retrieve('app.model.navigation').user;
+    userNavModel.addMenuItem('user-info', 'user-info', 'user-info', 0);
   }
 
   /**
@@ -52,23 +42,33 @@
     vm.isEnabling = false;
     vm.ready = false;
 
-    vm.model = modelManager.retrieve('cloud-foundry.model.application');
+    vm.actions = [
+      {
+        name: 'user-info.edit',
+        execute: function () {
+          console.log('EDIT');
+        },
+        disabled: false,
+        id: 'edit',
+        icon: 'edit'
+      },
+    ];
 
     appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
 
     // Testing
     $http.get('/pp/v1/uaa/userinfo').then(function (response) {
-      console.log('Made request to UAA backend');
-      console.log(response);
-
+      vm.userInfo = response.data;
       var userId = response.data.user_id;
-      console.log(userId);
-
       $http.get('/pp/v1/uaa/Users/' + userId).then(function (response) {
-        console.log('Got User info');
-        console.log(response);
+        vm.user = response.data;
+        vm.user.groups = _.sortBy(vm.user.groups, 'display');
       });
-      
+    });
+
+    $http.get('/pp/v1/uaa/Groups').then(function (response) {
+      console.log('GROUPS');
+      console.log(response);
     });
 
     function init() {

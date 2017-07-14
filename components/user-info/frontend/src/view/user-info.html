@@ -1,1 +1,31 @@
-<h1>User Info</h1>
+<div class="col-md-12 col-sm-12">
+  <div class="application-header font-semi-bold">
+    <span translate class="app-header-app-name">user-info</span>
+    <actions-toolbar ready="userCtrl.ready" items="userCtrl.actions"></actions-toolbar>
+  </div>
+
+  <div class="application-details col-sm-12">
+    <div class="row">
+      <dl class="user-info-list">
+        <dt translate>user id</dt>
+        <dd>{{ userCtrl.userInfo.user_name }}</dd>
+        <dt translate>name</dt>
+        <dd>{{ userCtrl.userInfo.name }}</dd>
+        <dt translate>email</dt>
+        <dd>{{ userCtrl.userInfo.email }}</dd>
+        <dt translate>account created</dt>
+        <dd>{{ userCtrl.user.meta.created }}</dd>
+        <dt translate>account last modified</dt>
+        <dd>{{ userCtrl.user.meta.lastModified }}</dd>
+        <dt translate>password last modified</dt>
+        <dd>{{ userCtrl.user.passwordLastModified }}</dd>
+        <dt translate>groups</dt>
+        <dd>
+          <div class="user-info-group" ng-repeat="group in userCtrl.user.groups">
+            <div>{{ group.display }}</div>
+          </div>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
