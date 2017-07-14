@@ -90,7 +90,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -347,7 +347,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	return &response, nil
 }
 
-func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
+func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
 	log.Debug("saveUAAToken")
 	key := u.UserGUID
 	tokenRecord := interfaces.TokenRecord{
@@ -358,10 +358,10 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 
 	err := p.setUAATokenRecord(key, tokenRecord)
 	if err != nil {
-		return err
+		return tokenRecord, err
 	}
 
-	return nil
+	return tokenRecord, nil
 }
 
 func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
@@ -392,8 +392,8 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	return nil
 }
 
-func (p *portalProxy) getUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
-	log.Debug("getUAATokenRecord")
+func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
+	log.Debug("GetUAATokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for UAA token: %v", err)
@@ -426,7 +426,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
-	sessionExpireTime, err := p.getSessionInt64Value(c, "exp")
+	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 	if err != nil {
 		msg := "Could not find session date"
 		log.Error(msg)
@@ -440,7 +440,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	tr, err := p.getUAATokenRecord(sessionUser)
+	tr, err := p.GetUAATokenRecord(sessionUser)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
 		log.Error(msg, err)
@@ -463,7 +463,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			return userTokenErr
 		}
 
-		if err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
+		if _, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
 			return err
 		}
 		sessionValues := make(map[string]interface{})
@@ -506,7 +506,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("getUAAUser")
 	// get the uaa token record
-	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
+	uaaTokenRecord, err := p.GetUAATokenRecord(userGUID)
 	if err != nil {
 		msg := "Unable to retrieve UAA token record."
 		log.Error(msg)
@@ -572,4 +572,34 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	}
 
 	return cnsiUser, true
+}
+
+// Refresh the UAA Token for the user
+func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord, err error) {
+	log.Debug("RefreshUAAToken")
+
+	userToken, err := p.GetUAATokenRecord(userGUID)
+	if err != nil {
+		return t, fmt.Errorf("UAA Token info could not be found for user with GUID %s", userGUID)
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
+		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	if err != nil {
+		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
+	}
+
+	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return t, fmt.Errorf("Could not get user token info from access token")
+	}
+
+	u.UserGUID = userGUID
+
+	t, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
+	}
+
+	return t, nil
 }
