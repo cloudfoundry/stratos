@@ -11,17 +11,17 @@
               ng-if="organizationUsersController.selectedUsersCount() < 2 && organizationUsersController.showManageRoles()"
               ng-disabled="organizationUsersController.disableManageRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
-              translate>Manage Roles</button>
+              translate>cf.users.table.buttons.manage</button>
       <button class="btn btn-default"
               ng-if="organizationUsersController.selectedUsersCount() > 1 && organizationUsersController.showManageRoles()"
               ng-disabled="organizationUsersController.disableChangeRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
-              translate>Change Roles</button>
+              translate>cf.users.table.buttons.change</button>
       <button class="btn btn-default"
               ng-if="organizationUsersController.showRemoveFromOrg()"
               ng-disabled="organizationUsersController.disableRemoveFromOrg()"
               ng-click="organizationUsersController.removeFromOrganization()"
-              translate>Remove From Organization</button><br>
+              translate>cf.users.table.buttons.remove</button><br>
     </div>
     <div class="panel panel-default">
       <table class="table"
@@ -31,9 +31,11 @@
           <th ng-if="organizationUsersController.canAction()">
             <checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input>
           </th>
-          <th class="sortable" translate st-sort-default="true" st-skip-natural="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
-          <th translate>Space Roles</th>
-          <th ng-if="organizationUsersController.canAction()" translate>ACTION</th>
+          <th class="sortable" st-sort-default="true" st-skip-natural="true" st-sort="entity.username">
+            <span translate>cf.users.table.users-label</span>({{ organizationUsersController.users.length }})
+          </th>
+          <th translate>cf.users.table.space-roles-label</th>
+          <th ng-if="organizationUsersController.canAction()" translate>cf.users.table.action-label</th>
         </tr>
         </thead>
         <tbody>
@@ -55,8 +57,8 @@
                  ng-if="organizationUsersController.canRemoveSpaceRole(spaceRole.space.details.space.metadata.guid)">close</i>
             </div>
             <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0">
-              <span ng-if="user.entity.username" translate>None assigned</span>
-              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+              <span ng-if="user.entity.username" translate>cf.users.table.no-roles.none-assigned</span>
+              <span ng-if="!user.entity.username" translate>cf.users.table.no-roles.not-applicable</span>
             </div>
 
           </td>
@@ -75,7 +77,7 @@
         <tr>
           <td colspan="{{organizationUsersController.canAction() ? 4 : 3}}" class="text-center">
             <a ng-click="organizationUsersController.showUsers = organizationUsersController.users.length">
-              <span translate>Show All</span> ({{ organizationUsersController.users.length }})
+              <span translate>cf.users.table.show-all-users</span> ({{ organizationUsersController.users.length }})
             </a>
             <div ng-show="false" st-pagination="" st-items-by-page="organizationUsersController.showUsers"></div>
           </td>

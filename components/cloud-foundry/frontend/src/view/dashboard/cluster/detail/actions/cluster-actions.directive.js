@@ -65,16 +65,16 @@
     }
 
     var createOrg = {
-      name: 'cluster-actions.create-org.action-name',
+      name: 'cf.cluster-actions.create-org.action-name',
       disabled: false,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: 'cluster-actions.create-org.dialog.title',
+            title: 'cf.cluster-actions.create-org.dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/create-organization.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'cluster-actions.create-org.dialog.submit-button'
+              submit: 'cf.cluster-actions.create-org.dialog.submit-button'
             },
             class: 'dialog-form',
             dialog: true
@@ -89,7 +89,7 @@
             if (orgData.name && orgData.name.length > 0) {
               return cfOrganizationModel.createOrganization(vm.clusterGuid, orgData.name).then(function () {
                 appNotificationsService.notify('success',
-                  $translate.instant('cluster-actions.create-org.dialog.success-notification', {name: orgData.name}));
+                  $translate.instant('cf.cluster-actions.create-org.dialog.success-notification', {name: orgData.name}));
               });
             } else {
               return $q.reject('Invalid Name!');
@@ -103,7 +103,7 @@
     };
 
     var createSpace = {
-      name: 'cluster-actions.create-space.action-name',
+      name: 'cf.cluster-actions.create-space.action-name',
       disabled: false,
       execute: function () {
 
@@ -179,11 +179,11 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: 'cluster-actions.create-space.dialog.title',
+            title: 'cf.cluster-actions.create-space.dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/create-space.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'cluster-actions.create-space.dialog.submit-button'
+              submit: 'cf.cluster-actions.create-space.dialog.submit-button'
             },
             class: 'space-dialog-form dialog-form',
             dialog: true
@@ -205,8 +205,8 @@
             return spaceModel.createSpaces(vm.clusterGuid, contextData.organization.details.guid, toCreate)
               .then(function () {
                 appNotificationsService.notify('success', toCreate.length > 1
-                  ? $translate.instant('cluster-actions.create-space.dialog.success-notification-plural', {names: toCreate.join(',')})
-                  : $translate.instant('cluster-actions.create-space.dialog.success-notification-singular', {name: toCreate[0]}));
+                  ? $translate.instant('cf.cluster-actions.create-space.dialog.success-notification-plural', {names: toCreate.join(',')})
+                  : $translate.instant('cf.cluster-actions.create-space.dialog.success-notification-singular', {name: toCreate[0]}));
               });
           }
         );
@@ -216,7 +216,7 @@
     };
 
     var assignUsers = {
-      name: 'cluster-actions.assign-users.action-name',
+      name: 'cf.cluster-actions.assign-users.action-name',
       disabled: false,
       execute: function () {
         return appClusterAssignUsers.assign({

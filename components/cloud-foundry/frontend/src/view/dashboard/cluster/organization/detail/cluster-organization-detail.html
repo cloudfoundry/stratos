@@ -8,7 +8,7 @@
      class="col-md-12 col-sm-12 col-xs-12"
     >
   <div class="application-header font-semi-bold">
-    <h3 translate>Organization : {{ clusterOrgDetailController.organization().details.org.entity.name }}</h3>
+    <h3 translate translate-value-name="{{ clusterOrgDetailController.organization().details.org.entity.name }}">cf.org-info.title</h3>
     <cluster-actions
       ng-show="clusterOrgDetailController.hasActions"
       has-actions="clusterOrgDetailController.hasActions"></cluster-actions>
@@ -23,12 +23,12 @@
   <ul class="application-nav nav nav-tabs col-sm-12">
     <li class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces" translate>
-        Spaces
+        cf.org-info.space-tab-title
       </a>
     </li>
     <li class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.detail.users" translate>
-        Users
+        cf.org-info.users-tab-title
       </a>
     </li>
   </ul>

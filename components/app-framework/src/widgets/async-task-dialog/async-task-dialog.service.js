@@ -253,7 +253,7 @@
         // If multiple forms are present,
         // nest them in an ng-form element
         var form = _.values($scope.form)[0];
-        isInvalid = form.$invalid;
+        isInvalid = form && form.$invalid;
       }
       return isInvalid;
     }

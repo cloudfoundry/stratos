@@ -1,0 +1,8 @@
+{
+  "select-input": {
+    "placeholder": "Select"
+  },
+  "code-block": {
+    "copied-msg": "Copied to clipboard"
+  }
+}

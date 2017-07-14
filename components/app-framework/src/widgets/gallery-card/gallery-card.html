@@ -1,7 +1,8 @@
 <div class="card panel panel-default">
   <div class="panel-heading" ng-class="{'linked': galleryCardCtrl.cardClickable }"
     ng-click="galleryCardCtrl.onCardClick({ card: galleryCardCtrl.cardData })">
-    <span class="gallery-card-title" translate>{{ galleryCardCtrl.cardData.title }}</span>
+    <span ng-if="galleryCardCtrl.cardData.title" class="gallery-card-title">{{ galleryCardCtrl.cardData.title }}</span>
+    <span ng-if="galleryCardCtrl.cardData.titleTranslate" class="gallery-card-title" translate>{{ galleryCardCtrl.cardData.titleTranslate }}</span>
     <actions-menu class="gallery-card-actions" ng-if="galleryCardCtrl.cardActions"
       actions="galleryCardCtrl.cardActions" action-target="galleryCardCtrl.cardData"
       menu-position="{{galleryCardCtrl.actionsPosition}}">

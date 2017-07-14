@@ -4,7 +4,6 @@
   "endpoints": "Endpoints",
   "privacy": "privacy",
   "terms": "Terms of Use",
-  "console.version": "Console Version",
   "endpoint": "Endpoint",
 
   "buttons": {
@@ -67,5 +66,8 @@
       "seconds": "s",
       "format": "{{value}}{{unit}}"
     }
+  },
+  "memory": {
+    "megabyte": "MB"
   }
 }

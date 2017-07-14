@@ -11,11 +11,11 @@
       <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
       <div class="applications-msg" translate>errors.no-cf-connected</div>
       <div class="applications-cta" ng-show="clustersCtrl.isAdmin(true)">
-        <a class="btn-link" ui-sref="endpoint.dashboard" translate>Use the Endpoints Dashboard</a>
-        <span translate>to fix your connections or connect to new endpoints.</span>
+        <a class="btn-link" ui-sref="endpoint.dashboard" translate>errors.no-cf-connected-link</a>
+        <span translate>errors.no-cf-connected-text</span>
       </div>
       <div class="applications-cta" ng-show="!clustersCtrl.isAdmin()">
-        <span translate>Please contact your administrator.</span>
+        <span translate>errors.no-cf-connected-cant-fix-text</span>
       </div>
     </div>
     <div ng-switch-default>

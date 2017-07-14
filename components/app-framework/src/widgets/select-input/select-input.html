@@ -2,7 +2,7 @@
   <div class="select-input-field">
     <span class="select-input-value"
       ng-class="{ 'text-muted': !selectInputCtrl.ngModelCtrl.$modelValue }">
-      {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder | translate}}
+      {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder | conditionalTranslate:selectInputCtrl.translateOptionLabels }}
     </span>
     <i class="dropdown-toggle material-icons">arrow_drop_down</i>
   </div>
@@ -22,9 +22,8 @@
     <li ng-if="!selectInputCtrl.refreshAction" class="dropdown-menu-header" disabled translate>{{ selectInputCtrl.placeholder }}</li>
     <li class="select-option" ng-repeat="option in selectInputCtrl.inputOptions"
         ng-click="selectInputCtrl.setValue(option)" ng-disabled="option.disabled"
-        ng-class="{ 'selected': option.value === selectInputCtrl.ngModelCtrl.$modelValue }"
-        translate>
-      {{ option.label }}
+        ng-class="{ 'selected': option.value === selectInputCtrl.ngModelCtrl.$modelValue }">
+      {{ option.label | conditionalTranslate:selectInputCtrl.translateOptionLabels}}
     </li>
     <li class="select-option select-add-option" ng-if="selectInputCtrl.addAction"
       ng-click="selectInputCtrl.addAction.execute()">

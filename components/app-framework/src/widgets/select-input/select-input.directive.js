@@ -28,7 +28,8 @@
         addAction: '=?',
         inputOptions: '=',
         refreshAction: '=?',
-        placeholder: '@?'
+        placeholder: '@?',
+        translateOptionLabels: '=?'
       },
       controller: SelectInputController,
       controllerAs: 'selectInputCtrl',
@@ -110,7 +111,7 @@
     var vm = this;
 
     vm.ngModelCtrl = null;
-    vm.placeholder = vm.placeholder || 'Select';
+    vm.placeholder = vm.placeholder || 'select-input.placeholder';
     vm.open = false;
     vm.modelLabel = null;
 

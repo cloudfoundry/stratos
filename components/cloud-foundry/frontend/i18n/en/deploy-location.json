@@ -1,0 +1,11 @@
+{
+  "app.deploy-location": {
+    "title": "Select deploy location",
+    "cf-label": "[[@:cloud-foundry]]",
+    "cf-placeholder": "Select [[@:cf.organisation.capitalised]]",
+    "org-label": "[[@:cf.organisation.capitalised]]",
+    "org-placeholder": "Select [[@:cf.organisation.capitalised]]",
+    "space-label": "[[@:space]]",
+    "space-placeholder": "Select [[@:space]]"
+  }
+}

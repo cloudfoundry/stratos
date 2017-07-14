@@ -1,12 +1,11 @@
 <div
   ng-init="context = context || detailViewCtrl.context">
 
-  <p translate>To deploy your app using the CLI, follow these steps:</p>
-  <p >1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
-  <p >2. Add a <strong>manifest.yml</strong> file to your source code or update your existing one using the content below.
-  Cloud Foundry uses the manifest file to set the application's name, route(s) and service binding(s).
-  Please ensure that the application name and route(s) of your manifest file match that shown below.
-  If the application name and route(s) are not correct in the manifest file, multiple applications and routes will get created.</p>
+  <p translate>app.app-info.cli-dialog-deploy.intro</p>
+  <span translate>app.app-info.cli-dialog-deploy.step1</span>
+  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank" translate>app.app-info.cli-dialog-deploy.step1-link-text</a>
+
+  <p translate>app.app-info.cli-dialog-deploy.step2</p>
   <div class="row">
     <div class="col-sm-12 col-md-12">
       <code-block>---
@@ -19,11 +18,11 @@
     </div>
   </div>
   <br/>
-  <p translate>3. Enter the following commands in the CLI:</p>
+  <p translate>app.app-info.cli-dialog-deploy.step3</p>
 
-  <h5 translate>Set the api endpoint</h5>
+  <h5 translate>app.app-info.cli-dialog-deploy.step3-1</h5>
   <code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</code-block>
-  <h5 translate>Login</h5>
+  <h5 translate>app.app-info.cli-dialog-deploy.step3-2</h5>
   <code-block hide-copy="true">$ cf login
     API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
 
@@ -33,7 +32,9 @@
     Authenticating...
     OK
   </code-block>
-  <h5 translate>Push to the Cloud Foundry endpoint</h5>
-  <p translate>Navigate to the project directory and execute the following.</p>
+  <h5 translate>app.app-info.cli-dialog-deploy.step3-3</h5>
+  <code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}
+  </code-block>
+  <h5 translate>app.app-info.cli-dialog-deploy.step3-4</h5>
   <code-block>cf push {{context.appName || '[app name]'}}</code-block></p>
 </div>

@@ -9,7 +9,8 @@
     "nothing-registered": "There are no registered endpoints.",
     "setup-required": "[[@:product.console]] has not been setup.",
     "nothing-connected": "There are no connected endpoints.",
-    "endpoint-retrieval": "[[@:product.console]] could not retrieve Endpoint information."
+    "endpoint-retrieval": "[[@:product.console]] could not retrieve Endpoint information.",
+    "generic-async-failure": "There was a problem carrying out the action. Please try again. If this error persists, please contact the administrator."
   },
   "error-format": "{{errorMsg}}, Error Code: {{errorCode}}"
 }

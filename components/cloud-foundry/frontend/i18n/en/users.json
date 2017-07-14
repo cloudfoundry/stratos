@@ -1,0 +1,25 @@
+{
+  "cf": {
+    "users": {
+      "users": "Users",
+      "table": {
+        "buttons": {
+          "manage": "manage roles",
+          "change": "change roles",
+          "remove": "remove all roles",
+          "remove-org": "remove from [[@:cf.organisation.organisation]]"
+        },
+        "users-label": "USERS ",
+        "org-roles-label": "[[@:cf.organisation.uppercase]] ROLES",
+        "space-roles-label": "[[@:cf.space.uppercase]] ROLES",
+        "action-label": "ACTION",
+        "no-roles": {
+          "none-assigned": "None assigned",
+          "not-applicable": "Not Applicable"
+        },
+        "show-all-users": "Show All"
+      }
+
+    }
+  }
+}

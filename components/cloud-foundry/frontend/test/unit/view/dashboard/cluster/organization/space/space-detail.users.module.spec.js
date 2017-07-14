@@ -263,7 +263,7 @@
         expect($controller.userRoles[users[0].metadata.guid]).toEqual([
           {
             role: 'space_developer',
-            roleLabel: 'roles.space.short.space_developer'
+            roleLabel: 'cf.roles.role-labels.space.short.space_developer'
           }
         ]);
 
