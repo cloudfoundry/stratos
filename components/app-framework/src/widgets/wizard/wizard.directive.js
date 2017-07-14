@@ -97,7 +97,7 @@
 
     // allowCancel can be a value or function
     if (!_.isFunction(vm.workflow.allowCancel)) {
-      var cachedAllowCancel = vm.workflow.allowCancel;
+      var cachedAllowCancel = _.isUndefined(vm.workflow.allowCancel) ? true : vm.workflow.allowCancel;
       vm.workflow.allowCancel = function () {
         return cachedAllowCancel;
       };

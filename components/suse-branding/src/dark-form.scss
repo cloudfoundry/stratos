@@ -10,7 +10,7 @@
       border-color: $suse-primary;
     }
 
-    .control-label, .checkbox-input-label {
+    .control-label, .checkbox-input, .checkbox-input.checked .checkbox-input-label {
       color: darken($suse-text, 10%);
     }
 

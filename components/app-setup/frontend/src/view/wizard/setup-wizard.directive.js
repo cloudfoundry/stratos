@@ -30,15 +30,7 @@
       consoleScopes: []
     };
 
-    var userInput = {
-      //TODO: RC REMOVE
-      uaaUrl: 'http://uaa:8080',
-      consoleClient: 'console',
-      consoleSecret: '',
-      uaaUrlSkipSsl: true,
-      consoleAdmin: 'admin',
-      consolePassword: 'hscadmin'
-    };
+    var userInput = { };
 
     var stepIntro = {
       title: 'app-setup.step-intro.title',
