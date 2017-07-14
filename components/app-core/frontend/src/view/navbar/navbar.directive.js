@@ -3,7 +3,7 @@
 
   angular
     .module('app.view')
-    .constant('showLanguageSelection', false)
+    .constant('showLanguageSelection', true)
     .directive('navbar', navbar);
 
   /**

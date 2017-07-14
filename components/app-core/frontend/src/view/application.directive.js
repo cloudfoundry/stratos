@@ -56,6 +56,7 @@
     vm.appUpgradeCheck = appUpgradeCheck;
     vm.consoleSetupCheck = consoleSetupCheck;
     vm.showLanguageSelection = showLanguageSelection;
+    vm.getCurrentLanguageSelection = getCurrentLanguageSelection;
     vm.loggedIn = false;
     vm.serverFailedToRespond = false;
     vm.showGlobalSpinner = false;
@@ -106,6 +107,10 @@
      */
     function showLanguageSelection() {
       appSelectLanguage.show();
+    }
+
+    function getCurrentLanguageSelection() {
+      return appSelectLanguage.getCurrent();
     }
 
     /**

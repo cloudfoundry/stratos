@@ -5,14 +5,32 @@
     .module('app.view')
     .factory('appSelectLanguage', selectLanguageFactory);
 
+  var localeStorageId = 'locale';
+
   /**
    * @name selectLanguageFactory
    * @description Factory to get the Language Selection App dialog
    * @constructor
    * @param {object} $translate - the i18n $translate service
-   * @param {app.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
+   * @param {frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
-  function selectLanguageFactory($translate, frameworkAsyncTaskDialog) {
+  function selectLanguageFactory($translate, frameworkAsyncTaskDialog, appLocalStorage) {
+
+    // TODO: RC Detect from browser/os??
+    var defaultLocale = 'en';
+
+    setLocale({
+      currentLocale: appLocalStorage.getItem(localeStorageId, defaultLocale)
+    });
+
+    function setLocale(data) {
+      var locale = data.currentLocale;
+      $translate.fallbackLanguage('en');
+      appLocalStorage.setItem(localeStorageId, locale);
+      return $translate.use(locale);
+    }
+
     return {
       /**
        * @name show
@@ -27,11 +45,6 @@
             label: $translate.instant('locales.' + locale.trim())
           });
         });
-
-        var setLocalePromise = function (data) {
-          $translate.fallbackLanguage('en');
-          return $translate.use(data.currentLocale);
-        };
 
         return frameworkAsyncTaskDialog(
           {
@@ -50,8 +63,11 @@
               currentLocale: $translate.use()
             }
           },
-          setLocalePromise
+          setLocale
         );
+      },
+      getCurrent: function () {
+        return $translate.instant('locales.' + $translate.use());
       }
     };
   }

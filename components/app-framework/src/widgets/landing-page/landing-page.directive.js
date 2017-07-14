@@ -19,7 +19,25 @@
   function landingPage() {
     return {
       templateUrl: 'framework/widgets/landing-page/landing-page.html',
-      transclude: true
+      transclude: true,
+      controller: landingPageController,
+      controllerAs: 'landingPageCtrl'
     };
+  }
+
+  function landingPageController(appSelectLanguage) {
+    var vm = this;
+
+    vm.showLanguageSelection = showLanguageSelection;
+
+    /**
+     * @function showLanguageSelection
+     * @memberof app.framework.widgets.landingPage
+     * @description Shows the Language Selection dialog
+     * @public
+     */
+    function showLanguageSelection() {
+      appSelectLanguage.show();
+    }
   }
 })();

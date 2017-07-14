@@ -8,6 +8,17 @@
   flex-direction: column;
 
   .landing-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: $console-unit-space / 2;
+    color: white;
+
+    i {
+      font-size: 34px;
+      cursor: pointer;
+    }
+
     background-color: $brand-secondary;
     flex: 0 0 60px;
   }
