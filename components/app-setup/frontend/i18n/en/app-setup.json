@@ -2,20 +2,21 @@
   "app-setup": {
     "intro-title": "[[@:product.console]] Setup",
     "step-intro": {
-      "title": "Intro",
+      "title": "Introduction",
       "p1": "Welcome to [[@:product.console]].",
-      "p2": "Before getting started some configuration information is required.",
-      "p3": "Press <b>NEXT</b> to get started.",
-      "p4": "",
+      "p2": "[[@:product.console]] is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.",
+      "p3": "Before accessing the console for the first time some configuration information is required.",
+      "p4": "Press <b>NEXT</b> to get started.",
       "p5": ""
     },
     "step-1": {
       "title": "UAA Part 1",
       "p1": "[[@:product.console]] authenticates users with a Cloud Foundry User Account and Authentication (UAA) service. The console must be configured with the details necessary to communicate with the UAA.",
-      "p2": "The address of the UAA api endpoint must be provided and whether SSL validation is required.",
+      "p2": "The address of the UAA api endpoint must be provided and whether SSL validation should be enforced.",
       "p3": "The client credentials are required, including a UAA admin username and password.",
       "p4": "The configuration will be validated before moving on to the next step.",
       "p5": "For further information about Cloud Foundry UAA see <a href=\"https://docs.cloudfoundry.org/concepts/architecture/uaa.html\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>.",
+      "p6": "For further information about the Console and UAA in various deployment types see <a href=\"https://github.com/SUSE/stratos-ui/blob/master/docs/access.md\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>.",
       "busy-message": "Validating ...",
       "uaa-intro": "UAA Endpoint",
       "uaa-url": {
@@ -35,8 +36,7 @@
       },
       "console-secret": {
         "label": "Client Secret",
-        "placeholder": "",
-        "error-required": "Secret is required"
+        "placeholder": ""
       },
       "console-admin": {
         "label": "Console Admin",
