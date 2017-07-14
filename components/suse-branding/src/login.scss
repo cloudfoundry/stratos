@@ -1,4 +1,5 @@
 $login-label-color: #e0e0e0;
+$login-form-border-color: lighten($brand-secondary, 10%);
 
 .brand {
   .landing-container {
@@ -20,27 +21,7 @@ $login-label-color: #e0e0e0;
       color: $suse-text-gray;
     }
 
-    .form-group {
-      background-color: $suse-secondary;
-      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
-      // error z-index (see focus below)
-      border-color: lighten($suse-secondary, 10%);
-      color: $suse-text;
-
-      &.focus {
-        border-color: $suse-primary;
-      }
-
-      .control-label {
-        color: $login-label-color;
-      }
-
-      input {
-        color: $suse-text;
-        text-shadow: 0 0 0 $suse-text;
-        -webkit-text-fill-color: $suse-text;
-      }
-    }
+    @include dark-form();
 
     .login-form-spinner {
       color: $suse-text;

@@ -3,7 +3,7 @@ app-setup-wizard {
   display: flex;
   flex: 1;
 
-  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog {
+  .app-setup-wizard-model-wrapper.modal {
     display: flex;
     flex: 1;
     overflow-y: hidden;
@@ -16,33 +16,32 @@ app-setup-wizard {
       wizard {
         display: flex;
         flex: 1;
+
         .wizard {
           height: auto;
           width: 100%;
 
-
           .wizard-body {
-
-            color: $suse-text;
+            color: $text-color;
 
             .wizard-nav {
               flex-shrink: 0;
               margin-bottom: 0;
-              border-bottom-color: $suse-secondary;
+              border-bottom-color: $brand-secondary;
 
               &.nav-stacked > li.disabled {
 
                 &.active {
                   & > a, & > a:hover {
-                    color: $suse-text;
+                    color: $text-color;
                     border-color: transparent;
                   }
                 }
                 & > a, & > a:hover {
-                  color: $suse-secondary;
+                  color: $brand-secondary;
                   padding-left: 10px;
                   padding-right: 10px;
-                  border-left: 1px solid $suse-secondary;
+                  border-left: 1px solid $brand-secondary;
                 }
               }
 
@@ -64,7 +63,7 @@ app-setup-wizard {
 
               &.wizard-loading-indicator {
                 .bounce-spinner > div {
-                  background-color: $suse-text;
+                  background-color: $text-color;
                 }
                 .message-box {
                   min-width: inherit;
@@ -90,41 +89,12 @@ app-setup-wizard {
                     padding: 0 $console-unit-space;
                     flex: 2;
 
-
+                    @include dark-form();
 
                     .control-title:first-of-type {
                       margin-top: 0;
                     }
-                    search-box {
-                      .dropdown-menu {
-                        border-color: $landing-page-form-border-color;
-                        background: $suse-secondary;
-                      }
-                    }
-                    //TODO: RC This is a c&p from branding
-                    .form-group {
-                      $landing-page-form-border-color: lighten($suse-secondary, 10%);
 
-                      background-color: $suse-secondary;
-                      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
-                      // error z-index (see focus below)
-                      border-color: $landing-page-form-border-color;
-                      color: $suse-text;
-
-                      &.focus {
-                        border-color: $suse-primary;
-                      }
-
-                      .control-label, .checkbox-input-label {
-                        color: $login-label-color;
-                      }
-
-                      input {
-                        color: $suse-text;
-                        text-shadow: 0 0 0 $suse-text;
-                        -webkit-text-fill-color: $suse-text;
-                      }
-                    }
                   }
                 }
               }
@@ -132,9 +102,7 @@ app-setup-wizard {
           }
 
           .wizard-foot {
-            //TODO: RC branding
             background: transparent;
-            //TODO: RC branding
             border-top: 0;
 
             height: 70px;
@@ -145,13 +113,13 @@ app-setup-wizard {
 
             .btn-default.cancel, .btn-default.back {
               float: left;
-              background-color: $suse-text;
-              color: $suse-secondary;
+              background-color: $text-color;
+              color: $brand-secondary;
             }
 
             .btn-primary.next {
-              background-color: $suse-primary;
-              color: $suse-text;
+              background-color: $brand-primary;
+              color: $text-color;
             }
           }
         }
@@ -164,8 +132,11 @@ app-setup-wizard {
   .app-setup-step {
     flex-direction: column;
   }
-  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .wizard-body .control-title:first-of-type {
-    margin-top: $console-unit-space / 2;
+  app-setup-wizard .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .detail-view-content wizard .wizard .wizard-body .wizard-step ng-include .app-setup-step .app-setup-step-right {
+    padding-left: $console-unit-space / 2;
+    .control-title:first-of-type {
+      margin-top: $console-unit-space / 2;
+    }
   }
 }
 
