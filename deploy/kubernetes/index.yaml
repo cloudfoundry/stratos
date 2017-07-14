@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  console:
+  - apiVersion: v1
+    created: 2017-07-14T13:49:19.428833616+01:00
+    description: A Helm chart for deploying Console
+    digest: c7bc1678370fa100759ac0fe050c1f0292e699728390c6a0b9e1a53320d710bb
+    name: Stratos-UI Console
+    sources:
+    - https://github.com/SUSE/stratus-ui
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/test/console-0.1.0.tgz
+    version: 0.1.0
+generated: 2017-07-14T13:49:19.428329593+01:00
