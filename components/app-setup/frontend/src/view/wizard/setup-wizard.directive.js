@@ -31,6 +31,7 @@
     };
 
     var userInput = {
+      //TODO: RC REMOVE
       uaaUrl: 'http://uaa:8080',
       consoleClient: 'console',
       consoleSecret: '',
@@ -119,7 +120,6 @@
         allowBack: function () {
           return true;
         },
-        // title: 'app-setup.wizard-title',
         btnText: {
           cancel: 'buttons.cancel',
           back: 'buttons.previous',
@@ -132,13 +132,11 @@
     // Actions for the wizard controller
     vm.wizardActions = {
       stop: function () {
-        // vm.showWizard = false;
         userInput = {};
-        // $uibModalInstance.dismiss();
       },
 
       finish: function () {
-        // $uibModalInstance.close();
+        userInput = {};
         $window.location.reload();
       }
     };

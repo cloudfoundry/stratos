@@ -1,182 +1,161 @@
-.app-setup-intro {
-  flex-direction: column;
-}
-
-.app-setup-step {
+app-setup-wizard {
+  align-self: stretch;
   display: flex;
-  &.app-setup-intro {
-    padding-left: $console-unit-space / 2;
-    padding-right: $console-unit-space / 2;
-  }
-  .app-setup-step-left {
-    //padding: 0 $console-unit-space;
-    padding-left: $console-unit-space / 2;
-    padding-right: $console-unit-space;
-    //padding-top: $console-unit-space;
-    flex: 3;
-  }
-  .app-setup-step-right {
-    //padding-left: $console-unit-space;
-    //padding-right: $console-unit-space / 2;
-    //padding-top: $console-unit-space;
-    //padding: 0 $console-unit-space / 2 0 $console-unit-space;
-    padding: 0 $console-unit-space;
-    flex: 2;
-  }
+  flex: 1;
 
-
-}
-
-.app-setup-wizard {
-  display: flex;
-  app-setup-wizard {
+  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog {
     display: flex;
     flex: 1;
-    .app-setup-wizard-wrapper.modal.detail-view.detail-view-dialog {
-      display: flex;
-      flex: 1;
-      overflow-y: hidden;
+    overflow-y: hidden;
+    position: static;
+
+    .detail-view-content {
+      width: 100%;
+      margin: 0;
+
       wizard {
         display: flex;
         flex: 1;
         .wizard {
           height: auto;
           width: 100%;
-          .wizard-nav {
-            flex-shrink: 0;
-            margin-bottom: 0;
-          }
-          .wizard-step ng-include {
-            //padding-top: 24px;
-            margin: 24px;
-            //overflow-y: hidden;
-          }
-        }
-      }
-    }
-  }
-}
 
-.app-setup-wizard-wrapper.modal.detail-view.detail-view-dialog {
-  position: static;
 
-  .detail-view-content {
-    width: 100%;
-    margin: 0;
-  }
+          .wizard-body {
 
-  .wizard-body {
-
-    color: $suse-text;
-
-    .wizard-nav {
-      border-bottom-color: $suse-secondary;
-
-      &.nav-stacked>li.disabled {
-
-        &.active {
-          & > a, & > a:hover {
             color: $suse-text;
-            border-color: transparent;
+
+            .wizard-nav {
+              flex-shrink: 0;
+              margin-bottom: 0;
+              border-bottom-color: $suse-secondary;
+
+              &.nav-stacked > li.disabled {
+
+                &.active {
+                  & > a, & > a:hover {
+                    color: $suse-text;
+                    border-color: transparent;
+                  }
+                }
+                & > a, & > a:hover {
+                  color: $suse-secondary;
+                  padding-left: 10px;
+                  padding-right: 10px;
+                  border-left: 1px solid $suse-secondary;
+                }
+              }
+
+              .wizard-nav-item {
+                opacity: 0.3;
+                &.complete a:after {
+                  display: none;
+                }
+
+                &.active {
+                  opacity: 1;
+                }
+              }
+            }
+
+            .wizard-step {
+              min-height: 441px;
+              padding: 0;
+
+              &.wizard-loading-indicator {
+                .bounce-spinner > div {
+                  background-color: $suse-text;
+                }
+                .message-box {
+                  min-width: inherit;
+                }
+              }
+
+              ng-include {
+                margin: 24px;
+
+                .app-setup-step {
+                  display: flex;
+                  &.app-setup-intro {
+                    flex-direction: column;
+                    padding-left: $console-unit-space / 2;
+                    padding-right: $console-unit-space / 2;
+                  }
+                  .app-setup-step-left {
+                    padding-left: $console-unit-space / 2;
+                    padding-right: $console-unit-space;
+                    flex: 3;
+                  }
+                  .app-setup-step-right {
+                    padding: 0 $console-unit-space;
+                    flex: 2;
+
+
+
+                    .control-title:first-of-type {
+                      margin-top: 0;
+                    }
+                    search-box {
+                      .dropdown-menu {
+                        border-color: $landing-page-form-border-color;
+                        background: $suse-secondary;
+                      }
+                    }
+                    //TODO: RC This is a c&p from branding
+                    .form-group {
+                      $landing-page-form-border-color: lighten($suse-secondary, 10%);
+
+                      background-color: $suse-secondary;
+                      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
+                      // error z-index (see focus below)
+                      border-color: $landing-page-form-border-color;
+                      color: $suse-text;
+
+                      &.focus {
+                        border-color: $suse-primary;
+                      }
+
+                      .control-label, .checkbox-input-label {
+                        color: $login-label-color;
+                      }
+
+                      input {
+                        color: $suse-text;
+                        text-shadow: 0 0 0 $suse-text;
+                        -webkit-text-fill-color: $suse-text;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          .wizard-foot {
+            //TODO: RC branding
+            background: transparent;
+            //TODO: RC branding
+            border-top: 0;
+
+            height: 70px;
+            min-height: 70px;
+
+            display: block;
+            text-align: right;
+
+            .btn-default.cancel, .btn-default.back {
+              float: left;
+              background-color: $suse-text;
+              color: $suse-secondary;
+            }
+
+            .btn-primary.next {
+              background-color: $suse-primary;
+              color: $suse-text;
+            }
           }
         }
-        & > a, & > a:hover {
-          color: $suse-secondary;
-          padding-left: 10px;
-          padding-right: 10px;
-          border-left: 1px solid $suse-secondary;
-        }
       }
-
-      .wizard-nav-item {
-        opacity: 0.3;
-        &.complete a:after {
-          display: none;
-        }
-
-        &.active {
-          opacity: 1;
-        }
-      }
-    }
-
-    .wizard-step {
-
-      min-height: 441px;
-      .message-box {
-        min-width: inherit;
-      }
-
-      padding: 0;
-      &.wizard-loading-indicator .bounce-spinner > div {
-        background-color: $suse-text;
-      }
-    }
-
-    .control-title {
-      //TODO: RC branding
-      //color: $suse-text-gray;
-      &:first-of-type {
-        margin-top: 0;
-      }
-    }
-
-    .open>.dropdown-menu {
-      background: $suse-secondary;
-    }
-    //TODO: RC This is a c&p from branding
-    .form-group {
-      $landing-page-form-border-color: lighten($suse-secondary, 10%);
-
-      background-color: $suse-secondary;
-      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
-      // error z-index (see focus below)
-      border-color: $landing-page-form-border-color;
-      color: $suse-text;
-
-      &.focus {
-        border-color: $suse-primary;
-      }
-
-      .control-label, .checkbox-input-label {
-        color: $login-label-color;
-      }
-
-      input {
-        color: $suse-text;
-        text-shadow: 0 0 0 $suse-text;
-        -webkit-text-fill-color: $suse-text;
-      }
-
-      search-box {
-        .dropdown-menu {
-          border-color: $landing-page-form-border-color;
-        }
-      }
-    }
-  }
-
-  .wizard-foot {
-    //TODO: RC branding
-    background: transparent;
-    //TODO: RC branding
-    border-top: 0;
-
-    height: 70px;
-    min-height: 70px;
-
-    display: block;
-    text-align: right;
-
-    .btn-default.cancel, .btn-default.back {
-      float: left;
-      background-color: $suse-text;
-      color: $suse-secondary;
-    }
-
-    .btn-primary.next {
-      background-color: $suse-primary;
-      color: $suse-text;
     }
   }
 }
@@ -184,21 +163,14 @@
 @media (max-width: $screen-md-min) {
   .app-setup-step {
     flex-direction: column;
-    .app-setup-step-right {
-      //padding-left: 0;
-    }
   }
-  .app-setup-wizard-wrapper.modal.detail-view.detail-view-dialog .wizard-body .control-title:first-of-type {
+  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .wizard-body .control-title:first-of-type {
     margin-top: $console-unit-space / 2;
   }
 }
 
 @media (max-height: 820px) {
-  .app-setup-wizard-wrapper.modal.detail-view.detail-view-dialog {
-    .wizard-body {
-      .wizard-step {
-        min-height: 0;
-      }
-    }
+  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .wizard-body .wizard-step {
+    min-height: 0;
   }
 }

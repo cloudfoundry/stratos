@@ -6,7 +6,7 @@
   height: 100%;
   width: 100%;
 
-  .app-setup-left-space, .app-setup-right-space {
+  .app-setup-left-spacer, .app-setup-right-spacer {
     flex: 1;
   }
   .app-setup-container {
@@ -22,14 +22,11 @@
       padding: 12px 0;
     }
 
-    .app-setup-wizard {
-      align-self: stretch;
-    }
   }
 }
 @media (max-width: $screen-md-min) {
   .app-setup {
-    .app-setup-left-space, .app-setup-right-space {
+    .app-setup-left-spacer, .app-setup-right-spacer {
       flex: 0.5;
     }
   }

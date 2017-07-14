@@ -11,8 +11,6 @@
     <div class="form-group console-scopes" focusable-input
          ng-class="{'has-error': wizardForm['step2'].consoleScope.$invalid && wizardForm['step2'].consoleScope.$dirty}">
       <label class="control-label" translate>app-setup.step-2.console-scope.label</label>
-
-      <!--disabled="!step.userInput.githubProjectValid"-->
       <search-box
         ng-model="step.userInput.consoleScope"
         input-options="step.data.consoleScopes"
