@@ -72,7 +72,11 @@ func main() {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
 	log.Info("Configuration loaded.")
+	isUpgrading := isConsoleUpgrading()
 
+	if isUpgrading {
+		startEchoForUpgrade(portalConfig)
+	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
 	log.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
@@ -588,4 +592,72 @@ func getStaticFiles() (string, error) {
 		}
 	}
 	return "", errors.New("UI folder not found")
+}
+
+func isConsoleUpgrading() bool {
+
+	upgradeVolume, noUpgradeVolumeErr := config.GetValue("UPGRADE_VOLUME")
+	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue("UPGRADE_LOCK_FILENAME")
+
+	// If any of those properties are not set, consider Console is running in a non-upgradeable environment
+	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+		return false
+	}
+
+	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+
+	if _, err := os.Stat(upgradeLockPath); err == nil {
+		return true
+	}
+	return false
+}
+
+func startEchoForUpgrade(config interfaces.PortalConfig) {
+	log.Info("Starting Echo middleware for serving Upgrade warning")
+	e := echo.New()
+
+	// Root level middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     config.AllowedOrigins,
+		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
+		AllowCredentials: true,
+	}))
+	e.Use(retryAfterUpgradeMiddleware)
+	if config.HTTPS {
+		certFile, certKeyFile, err := createTempCertFiles(config)
+		if err != nil {
+			log.Fatalf("Failed to load cert files for HTTPS deployment due to %s", err)
+		}
+
+		address := config.TLSAddress
+		log.Infof("Starting HTTPS Server at address: %s", address)
+		engine := standard.WithTLS(address, certFile, certKeyFile)
+		go stopEchoWhenUpgraded(e)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTPS server", engineErr)
+		}
+	} else {
+		address := config.TLSAddress
+		log.Infof("Starting HTTP Server at address: %s", address)
+		engine := standard.New(address)
+		go stopEchoWhenUpgraded(e)
+		engineErr := e.Run(engine)
+		if engineErr != nil {
+			log.Warnf("Failed to start HTTP server", engineErr)
+		}
+	}
+
+	log.Info("Upgrade Echo instance has been killed, resuming with normal startup sequence.")
+}
+
+func stopEchoWhenUpgraded(e *echo.Echo) {
+	for isConsoleUpgrading() {
+		time.Sleep(1 * time.Second)
+	}
+	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
+	e.Stop()
+
 }
