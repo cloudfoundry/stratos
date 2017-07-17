@@ -27,14 +27,20 @@
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
   function selectLanguageFactory($q, $log, $translate, frameworkAsyncTaskDialog, appLocalStorage) {
-
     setLocale({
       currentLocale: appLocalStorage.getItem(localeStorageId)
     });
 
     function setLocale(data) {
-      var locale = data.currentLocale || $translate.resolveClientLocale();
-      appLocalStorage.setItem(localeStorageId, locale);
+      var locale = data.currentLocale;
+      if (locale) {
+        // Only store the locale if it's explicitly been set...
+        appLocalStorage.setItem(localeStorageId, locale);
+      } else {
+        // .. otherwise use a best guess from the browser
+        locale = $translate.resolveClientLocale().replace('-', '_');
+      }
+
       return $translate.use(locale).then(function () {
         $log.info("Changed locale to '" + $translate.use() + "'");
       }).catch(function (reason) {

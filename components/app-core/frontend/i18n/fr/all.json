@@ -97,5 +97,15 @@
   "endpoints": "Terminaison",
   "select-input": {
     "placeholder": "Sélectionnez"
+  },
+  "login": {
+    "login": "Connexion",
+    "console": "@:product.console",
+    "logo": "",
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "username": "@:auth.username",
+    "password": "@:auth.password",
+    "authenticating": "Authentification des informations d'identification",
+    "welcome": "Utilisez la [[@:product.console]] pour développer, composer et gérer des charges de travail natives Cloud."
   }
 }
