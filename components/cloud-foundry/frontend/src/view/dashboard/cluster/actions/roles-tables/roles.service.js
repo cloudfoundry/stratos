@@ -50,15 +50,15 @@
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
-      org_manager: $translate.instant('roles.org.short.org_manager'),
-      org_auditor: $translate.instant('roles.org.short.org_auditor'),
-      billing_manager: $translate.instant('roles.org.short.billing_manager'),
-      org_user: $translate.instant('roles.org.short.org_user')
+      org_manager: 'roles.org.short.org_manager',
+      org_auditor: 'roles.org.short.org_auditor',
+      billing_manager: 'roles.org.short.billing_manager',
+      org_user: 'roles.org.short.org_user'
     };
     this.spaceRoles = {
-      space_manager: $translate.instant('roles.space.short.space_manager'),
-      space_auditor: $translate.instant('roles.space.short.space_auditor'),
-      space_developer: $translate.instant('roles.space.short.space_developer'),
+      space_manager: 'roles.space.short.space_manager',
+      space_auditor: 'roles.space.short.space_auditor',
+      space_developer: 'roles.space.short.space_developer',
       org_user_filler: ''
     };
 
@@ -528,14 +528,14 @@
       var multipleRoles = assigns.length + removes.length > 1;
 
       // Determine the title
-      var title = multipleRoles ? $translate.instant('change-roles-confirmation.title.update-plural')
-        : $translate.instant('change-roles-confirmation.title.update-singular');
+      var title = multipleRoles ? 'change-roles-confirmation.title.update-plural'
+        : 'change-roles-confirmation.title.update-singular';
       if (assigns.length === 0) {
-        title = multipleRoles ? $translate.instant('change-roles-confirmation.title.remove-plural')
-          : $translate.instant('change-roles-confirmation.title.remove-singular');
+        title = multipleRoles ? 'change-roles-confirmation.title.remove-plural'
+          : 'change-roles-confirmation.title.remove-singular';
       } else if (removes.length === 0) {
-        title = multipleRoles ? $translate.instant('change-roles-confirmation.title.assign-plural')
-          : $translate.instant('change-roles-confirmation.title.assign-singular');
+        title = multipleRoles ? 'change-roles-confirmation.title.assign-plural'
+          : 'change-roles-confirmation.title.assign-singular';
       }
 
       // Determine the description
@@ -547,8 +547,8 @@
       var line4 = $translate.instant('change-roles-confirmation.line-four');
 
       line1 = $translate.instant(line1, {user: usernames[0], users: usernames.join(', ')});
-      line2 = $translate.instant(line2, {count: assigns.length, role: assigns[0]});
-      line3 = $translate.instant(line3, {count: removes.length, role: removes[0]});
+      line2 = $translate.instant(line2, {count: assigns.length, role: $translate.instant(assigns[0])});
+      line3 = $translate.instant(line3, {count: removes.length, role: $translate.instant(removes[0])});
 
       var description =
         line1 + '<br><br>' +
@@ -557,11 +557,11 @@
         '<br>' + line4;
 
       // Success and error messages
-      var successMessage = multipleRoles ? $translate.instant('change-roles-confirmation.success-one')
-        : $translate.instant('change-roles-confirmation.success-two');
+      var successMessage = multipleRoles ? 'change-roles-confirmation.success-one'
+        : 'change-roles-confirmation.success-two';
       if (usernames.length > 1) {
-        successMessage = multipleRoles ? $translate.instant('change-roles-confirmation.success-three')
-          : $translate.instant('change-roles-confirmation.success-four');
+        successMessage = multipleRoles ? 'change-roles-confirmation.success-three'
+          : 'change-roles-confirmation.success-four';
       }
 
       return {
@@ -712,7 +712,7 @@
               return $q.reject(errorMessage);
             } else {
               // Otherwise notify success, hurrah
-              appNotificationsService.notify('success', confirmationConfig.successMessage);
+              appNotificationsService.notify('success', $translate.instant(confirmationConfig.successMessage));
             }
           });
       };

@@ -5,20 +5,20 @@
   </div>
   <div class="manage-users-load-failed"
        ng-if="asyncTaskDialogCtrl.context.state.initialised === false">
-    <span translate>Failed to update list of user/s roles</span>
+    <span translate>manage-user-roles.error-init-load</span>
   </div>
   <div class="manage-users-loaded"
        ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
     <div class="manage-users-info"
       ng-if="asyncTaskDialogCtrl.context.tableConfig.users.length > 1">
       <div class="manage-users-info-message"
-        translate>Change roles for the following users.
+        translate>manage-user-roles.intro-plural-roles
       </div>
       <div>
         <selected-users-list selected-users="asyncTaskDialogCtrl.context.tableConfig.users"></selected-users-list>
       </div>
       <div class="manage-users-alert-info alert alert-info alert-no-bg alert-bordered" translate>
-        All previously assigned roles will be updated.
+        manage-user-roles.warning-plural-roles
       </div>
     </div>
     <div class="manage-users-filter">
@@ -38,7 +38,8 @@
         <div class="manage-users-clear">
           <a
             ng-if="!asyncTaskDialogCtrl.context.tableConfig.disableClearAll"
-            ng-click="asyncTaskDialogCtrl.context.clearSelections()">Clear All User's Roles</a>
+            ng-click="asyncTaskDialogCtrl.context.clearSelections()"
+            translate>manage-user-roles.button-clear-all</a>
         </div>
       </div>
     </div>

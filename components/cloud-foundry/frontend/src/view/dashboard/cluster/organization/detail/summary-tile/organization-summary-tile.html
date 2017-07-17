@@ -4,35 +4,35 @@
               card-actions-position="actions-menu-right">
   <div class="col-md-5" ng-if="orgSummaryTileCtrl.organization.details">
     <dl class="dl-horizontal">
-      <dt translate>applications</dt>
+      <dt translate>org-info.summary.label.apps</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.totalApps}}</dd>
-      <dt translate>application instances</dt>
+      <dt translate>org-info.summary.label.instances</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.instances}} / {{ orgSummaryTileCtrl.organization.details.instancesQuota | infinityFilter }}</dd>
-      <dt translate>services</dt>
+      <dt translate>org-info.summary.label.services</dt>
       <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota | infinityFilter }}</dd>
-      <dt translate>routes</dt>
+      <dt translate>org-info.summary.label.routes</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}} / {{ orgSummaryTileCtrl.organization.details.routesQuota | infinityFilter }}</dd>
-      <dt translate>private domains</dt>
+      <dt translate>org-info.summary.label.private-domains</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.privateDomains}} / {{ orgSummaryTileCtrl.organization.details.privateDomainsQuota | infinityFilter }}</dd>
-      <dt translate>memory usage</dt>
+      <dt translate>org-info.summary.label.memory</dt>
       <dd>{{ orgSummaryTileCtrl.memory }}</dd>
     </dl>
   </div>
   <div class="col-md-7">
     <dl class="dl-horizontal" ng-if="orgSummaryTileCtrl.roles">
-      <dt translate>CF ORG ROLE</dt>
+      <dt translate>org-info.summary.label.orgRole</dt>
       <dd>{{ orgSummaryTileCtrl.roles.join(', ') }}</dd>
-      <dt translate>INSTANCE ADDRESS</dt>
+      <dt translate>org-info.summary.label.address</dt>
       <dd>{{ orgSummaryTileCtrl.getEndpoint() }}</dd>
-      <dt translate>CF Interactions</dt>
+      <dt translate>org-info.summary.label.cli</dt>
       <dd>
         <a ng-click="orgSummaryTileCtrl.showCliCommands()"
-           class="btn btn-link" translate>CLI Commands</a>
+           class="btn btn-link" translate>cf.cli-common.button-text</a>
       </dd>
-      <dt translate>Account Username</dt>
+      <dt translate>org-info.summary.label.username</dt>
       <dd>{{ orgSummaryTileCtrl.userName }}</dd>
-      <dt translate>Account Status</dt>
-      <dd translate>{{ orgSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
+      <dt translate>org-info.summary.label.status</dt>
+      <dd translate>{{ orgSummaryTileCtrl.isAdmin ? 'roles.cf-admin' : 'roles.cf-user' }}</dd>
     </dl>
   </div>
 </gallery-card>

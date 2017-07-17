@@ -1,6 +1,6 @@
 <div class="panel panel-default summary">
   <div class="panel-heading action-header">
-    <span class="log-stream-title" translate>Log Stream</span>
+    <span class="log-stream-title" translate>app.tabs.logStream.title</span>
     <span ng-if="cfLogViewer.streamingStatus !== 2 && !cfLogViewer.disableStatus" class="app-log-stream-indicator material-icons"
     ng-class="{
                 'log-stream-ok text-primary': cfLogViewer.streamingStatus === 1,
@@ -13,7 +13,7 @@
     <!--// - clicking the auto-scroll button-->
     <a class="app-log-stream-autoScroll btn btn-link" ng-click="cfLogViewer.autoScrollOn = true">
       <i class="material-icons">arrow_forward</i>
-      <span translate>Scroll to bottom</span>
+      <span translate>app.tabs.logStream.scroll-button</span>
     </a>
   </div>
   <log-viewer class="log-viewer"

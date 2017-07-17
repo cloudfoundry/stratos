@@ -18,10 +18,69 @@
       "tagline": "[[@:cf.registration.name]] supports the full application lifecycle, from initial development, through testing to deployment.",
       "urlHint": "[[@:cf.registration.name]] API endpoint"
     },
-    "cli": {
-      "commands": {
-        "title": "CLI Commands",
-        "deploy-title": "Deploy Using CLI"
+    "tile": {
+      "token-expired": "Token has expired",
+      "uncontactable": "Cannot contact endpoint"
+    },
+    "cli-common": {
+      "title": "CLI Commands",
+      "button-text": "CLI Commands",
+      "intro": "Use the Cloud Foundry CLI to execute commands directly against a Cloud Foundry instance.",
+      "get-started": "Getting Started",
+      "get-started-intro": "Before starting follow these steps:",
+      "step1": "1. Download and install the CLI - ",
+      "step1-link-text": "see here",
+      "step2": "2. Set the api endpoint",
+      "step3": "3. Login",
+      "step4": "4. Target an org and space"
+    },
+    "summary": {
+      "title": "Cluster : {{name}}",
+      "panel": {
+        "title": "Summary",
+        "label": {
+          "apps": "applications",
+          "memory": "memory usage",
+          "orgs": "organisations",
+          "users": "users",
+          "address": "instance address",
+          "cli": "cf interactions",
+          "username": "account username",
+          "status": "account status"
+        },
+        "cli-dialog-cluster": {
+          "title": "@:cf.cli-common.title",
+          "intro": "@:cf.cli-common.intro",
+          "get-started": "@:cf.cli-common.get-started",
+          "get-started-intro": "@:cf.cli-common.get-started-intro",
+          "step1": "@:cf.cli-common.step1",
+          "step1-link-text": "@:cf.cli-common.step1-link-text",
+          "step2": "@:cf.cli-common.step2",
+          "step3": "@:cf.cli-common.step3",
+          "step4": "@:cf.cli-common.step4",
+          "org-commands": {
+            "title": "Organization Commands",
+            "list": "List",
+            "list-intro": "To list all orgs",
+            "rename": "Rename",
+            "rename-intro": "To rename an org",
+            "info": "Information",
+            "info-intro": "To fetch org information",
+            "users": "Users",
+            "users-intro": "List each org role's users"
+          },
+          "space-commands": {
+            "title": "Space Commands",
+            "list": "List",
+            "list-intro": "To list the spaces in the targeted org",
+            "rename": "Rename",
+            "rename-intro": "To rename a space",
+            "info": "Information",
+            "info-intro": "To fetch space information",
+            "users": "Users",
+            "users-intro": "List each space role's users"
+          }
+        }
       }
     },
     "instance": {
@@ -92,10 +151,6 @@
         "twenty": "20 per page",
         "fifty": "50 per page"
       }
-    },
-    "tile": {
-      "token-expired": "Token has expired",
-      "uncontactable": "Cannot contact endpoint"
     },
     "ssh": {
       "access": "SSH Access",

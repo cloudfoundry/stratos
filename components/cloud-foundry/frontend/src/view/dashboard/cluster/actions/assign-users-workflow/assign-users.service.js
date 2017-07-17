@@ -162,7 +162,7 @@
             formName: 'select-user-form',
             data: that.data,
             userInput: that.userInput,
-            showBusyOnEnter: $translate.instant('assign-user-roles.step1.busy-message'),
+            showBusyOnEnter: 'assign-user-roles.step1.busy-message',
             checkReadiness: function () {
               return initialiseSelect();
             },

@@ -1,24 +1,22 @@
-<p translate>
-  Enter a unique name for your application.
-</p>
+<p translate>add-app-dialog.name-message</p>
 
 <div class="form-group form-group-large"
   ng-class="{'has-error': wizardForm['application-name-form'].appName.$invalid && wizardForm['application-name-form'].appName.$dirty}"
   focusable-input>
   <label class="control-label"
     for="add-app-workflow-application-name" required translate>
-    Application name
+    add-app-dialog.app-name-label
   </label>
   <span class="control-message" >
     <span
       translate
       ng-if="wizardForm['application-name-form'].appName.$error.required">
-      Application name is required
+      add-app-dialog.app-name-error-required
     </span>
     <span
       translate
       ng-if="wizardForm['application-name-form'].appName.$error.stratosUnique">
-      This name already exists. Choose a new one.
+      add-app-dialog.app-name-error-used
     </span>
   </span>
   <input
@@ -39,17 +37,17 @@
 ></deploy-location>
 
 <p class="control-title">
-  <span translate>Create a route</span>
+  <span translate>add-app-dialog.route-message</span>
   <code class="offline-route-value" ng-show="wizardCtrl.options.userInput.host">{{ '(' + wizardCtrl.options.userInput.host + '.' +  wizardCtrl.options.userInput.domain.entity.name + (wizardCtrl.options.userInput.port ? ':' : '') + wizardCtrl.options.userInput.port + wizardCtrl.options.userInput.path + ')' }}
   </code>
 </p>
 
 <div class="form-group form-group-large">
-  <label class="control-label" required translate>Domain</label>
+  <label class="control-label" required translate>add-app-dialog.domain-label</label>
   <search-box
     ng-model="wizardCtrl.options.userInput.domain"
     input-options="wizardCtrl.options.domains"
-    placeholder="{{'Select Domain' | translate}}"
+    placeholder="{{'add-app-dialog.domain-placeholder' | translate}}"
     tabindex="0" required>
   </search-box>
 </div>
@@ -59,18 +57,18 @@
   focusable-input>
   <label class="control-label"
     for="add-app-workflow-application-host" required translate>
-    Host
+    add-app-dialog.host-label
   </label>
   <span class="control-message">
     <span
       translate
       ng-if="wizardForm['application-name-form'].routeName.$error.required">
-      Host is required
+      add-app-dialog.host-error-required
     </span>
     <span
       translate
       ng-if="wizardForm['application-name-form'].routeName.$error.pattern">
-      Invalid format
+      add-app-dialog.host-error-format
     </span>
   </span>
   <input

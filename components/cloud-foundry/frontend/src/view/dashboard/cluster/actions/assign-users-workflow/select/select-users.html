@@ -8,7 +8,7 @@
     <div class="filter-container select-users-bordered">
       <div class="select-users-count">
         <div class="select-users-bordered">
-          <div translate>Users</div>
+          <div translate>assign-user-roles.step1.user-count</div>
           <div>{{ step.data.users.length }}</div>
         </div>
       </div>
@@ -29,14 +29,14 @@
   <div class="select-users-table">
     <div ng-if="!filteredCollection.length" class="panel">
       <div class="panel-body" translate>
-        There are no users matching this search term
+        assign-user-roles.step1.no-matching-users
       </div>
     </div>
     <table ng-if="filteredCollection.length" class="table table-outlined table-selectable">
       <thead>
       <tr>
         <th></th>
-        <th st-sort="entity.username" st-sort-default="true" st-skip-natural="true" translate>User</th>
+        <th st-sort="entity.username" st-sort-default="true" st-skip-natural="true" translate>assign-user-roles.step1.user-label</th>
       </tr>
       </thead>
       <tbody>
@@ -51,7 +51,7 @@
       <tr>
         <td colspan="5" class="text-center">
           <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
-            <span translate>Show All</span> ({{ filteredCollection.length }})
+            <span translate>assign-user-roles.step1.show-all-users</span> ({{ filteredCollection.length }})
           </a>
           <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
         </td>

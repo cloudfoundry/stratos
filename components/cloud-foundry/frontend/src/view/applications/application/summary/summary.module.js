@@ -117,7 +117,7 @@
 
     vm.routesActionMenu = [
       {
-        name: 'app-route-actions.unmap',
+        name: 'app-tabs.summary.routes-panel.route-actions.unmap',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.unmapAppRoute(vm.cnsiGuid, route, route.guid, vm.id).finally(function () {
@@ -126,7 +126,7 @@
         }
       },
       {
-        name: 'app-route-actions.delete',
+        name: 'app-tabs.summary.routes-panel.route-actions.delete',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.deleteRoute(vm.cnsiGuid, route, route.guid).finally(function () {

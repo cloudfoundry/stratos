@@ -18,7 +18,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Cloud Foundry'
+      type: 'cloud-foundry'
     };
 
     beforeEach(module('templates'));

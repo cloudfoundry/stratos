@@ -1,9 +1,7 @@
 <div class="space-services-table">
   <div ng-if="!spaceRoutesCtrl.spaceDetail() || spaceRoutesCtrl.spaceDetail().routes.length < 1"
        class="panel panel-default cluster-empty-list">
-    <div class="panel-body" translate>
-      You have no routes
-    </div>
+    <div class="panel-body" translate>space-info.tabs.routes.none</div>
   </div>
 
   <div ng-if="spaceRoutesCtrl.spaceDetail().routes.length > 0"
@@ -16,9 +14,9 @@
           ng-class="{'table-actionable' : spaceRoutesCtrl.canDeleteOrUnmap}">
           <thead>
           <tr>
-            <th st-sort="entity.host" st-sort-default="true" st-skip-natural="true" translate>ROUTE</th>
-            <th translate>APPLICATION ATTACHED</th>
-            <th translate ng-if="spaceRoutesCtrl.canDeleteOrUnmap">ACTION</th>
+            <th st-sort="entity.host" st-sort-default="true" st-skip-natural="true" translate>space-info.tabs.routes.columns.route</th>
+            <th translate>space-info.tabs.routes.columns.attached</th>
+            <th translate ng-if="spaceRoutesCtrl.canDeleteOrUnmap">space-info.tabs.routes.columns.action</th>
           </tr>
           </thead>
           <tbody>
@@ -40,7 +38,7 @@
           <tr>
             <td colspan="{{spaceRoutesCtrl.canDeleteOrUnmap ? 3 : 2}}" class="text-center">
               <a ng-click="spaceRoutesCtrl.showRoutes = spaceRoutesCtrl.spaceDetail().routes.length">
-                <span translate>Show All</span> ({{spaceRoutesCtrl.spaceDetail().routes.length}})
+                <span translate>space-info.tabs.routes.show-all-button</span> ({{spaceRoutesCtrl.spaceDetail().routes.length}})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="spaceRoutesCtrl.showRoutes"></div>
             </td>

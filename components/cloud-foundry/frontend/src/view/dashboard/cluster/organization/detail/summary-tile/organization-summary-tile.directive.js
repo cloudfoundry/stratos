@@ -51,7 +51,7 @@
     this.appUtilsService = appUtilsService;
 
     this.cardData = {
-      title: 'org-info.summary.title'
+      titleTranslate: 'org-info.summary.title'
     };
 
     this.getEndpoint = function () {
