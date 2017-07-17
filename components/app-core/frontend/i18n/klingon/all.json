@@ -19,18 +19,9 @@
   "buttons": {
     "ok": "",
     "cancel": "",
-    "next": "Next",
-    "previous": "Previous",
-    "back": "Back",
-    "done": "Done",
-    "add": "Add",
     "set": "",
-    "save": "Save",
-    "delete": "Delete",
-    "rename": "Rename",
     "yes": "",
-    "no": "",
-    "close": "Close"
+    "no": ""
   },
   "auth": {
     "username": "",

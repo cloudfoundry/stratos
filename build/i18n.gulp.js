@@ -119,8 +119,7 @@
         return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
       }
 
-      var parentDir = path.dirname(file.relative);
-      var locale = parentDir.substr(parentDir.length - 2, 2);
+      var locale = path.dirname(file.relative);
       addStrings(locale, file);
       cb();
     }

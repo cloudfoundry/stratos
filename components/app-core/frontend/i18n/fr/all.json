@@ -1,0 +1,101 @@
+{
+  "fr-i18n-info": {
+    "description": "These are demoware translations and should not be used in the wild.",
+    "description2": "Additionally, this file contains i18n strings that should live in other plugins i18n structure"
+  },
+
+  "language": {
+    "select": "Sélectionner une langue"
+  },
+  "buttons": {
+    "cancel": "Annuler",
+    "set": "Régler"
+  },
+  "locales": {
+    "locales": "en_US,fr,klingon",
+    "en_US": "English (US)",
+    "fr": "Français",
+    "klingon": ""
+  },
+  "app": {
+    "state": {
+      "separator": "&nbsp;-&nbsp;",
+      "deployed": "Déployé",
+      "incomplete": "Incomplète",
+      "failed": "Définir Pas",
+      "pending": "En",
+      "loading": "Chargement",
+      "offline": "Hors",
+      "updating": "Hors ligne lors de la mise à jour",
+      "no-instances": "Aucun cas",
+      "staging": "App de mise en scène",
+      "starting": "Démarrage de l'app",
+      "online": "Ligne",
+      "crashed": "Écrasé",
+      "crashing": "Faire faillite",
+      "partial": "Partiellement en ligne",
+      "unknown": "Inconnu"
+    }
+  },
+  "app-wall": {
+    "deploy-application": "Déployer l'application",
+    "app-wall": "@:applications",
+    "search-placeholder": "Recherche par nom",
+    "add-application": "Ajouter une application",
+    "reset": "Réinitialiser",
+    "options": {
+      "show": "Afficher les options",
+      "hide": "Masquer les options"
+    },
+    "sort-by": "Trier par",
+    "total-apps": "Total des demandes",
+    "filtered-apps": "Applications filtrées",
+    "instances": "Instances",
+    "disk-quota": "Quota de disque",
+    "memory": "Mémoire",
+    "table": {
+      "columns": {
+        "appName": "Nom de l'application",
+        "appName-sort-by": "Nom",
+        "status": "Statut",
+        "instances": "Instances",
+        "instances-sort-by": "[[@:app-wall.table.columns.instances]]",
+        "disk": "Quota de disque",
+        "disk-sort-by": "[[@:app-wall.table.columns.disk]]",
+        "memory": "Mémoire",
+        "memory-sort-by": "[[@:app-wall.table.columns.memory]]",
+        "creation": "Date de création",
+        "creation-sort-by": "[[@:app-wall.table.columns.creation]]"
+      }
+    }
+  },
+  "cloud-foundry": "Cloud Foundry",
+  "org": "Org",
+  "space": "@:cf.space.capitalised",
+  "navbar": {
+    "title": "@:product.name",
+    "logo": "home",
+    "copyright": "&copy; SUSE 2017"
+  },
+  "menu": {
+    "applications": "@:applications",
+    "endpoints": "@:endpoints",
+    "about": "@:about",
+    "language": "Langue ({{current}})",
+    "logout": "Déconnexion",
+    "profile": "Profile",
+    "cloud-foundry": "@:cloud-foundry"
+  },
+  "endpoint": "Terminaison",
+  "product": {
+    "name": "Cloud Foundry",
+    "console": "Web Console",
+    "logo": "",
+    "www-link": ""
+  },
+  "applications": "Applications",
+  "endpoints": "Terminaison",
+  "select-input": {
+    "placeholder": "Sélectionnez"
+  }
+}

@@ -46,10 +46,6 @@
     $logProvider.debugEnabled(false);
 
     // Configure i18n
-    $translateProvider.preferredLanguage('en');
-    $translateProvider.fallbackLanguage('en');
-    $translateProvider.useSanitizeValueStrategy(null);
-
     $translateProvider.useStaticFilesLoader({
       prefix: '/i18n/locale-',
       suffix: '.json'

@@ -3,32 +3,44 @@
 
   angular
     .module('app.view')
+    .config(languageConfig)
     .factory('appSelectLanguage', selectLanguageFactory);
 
   var localeStorageId = 'locale';
+  var defaultLocale = 'en_US';
+
+  function languageConfig($translateProvider) {
+    // Configure i18n
+    $translateProvider.preferredLanguage(defaultLocale);
+    $translateProvider.fallbackLanguage(defaultLocale);
+    $translateProvider.useSanitizeValueStrategy(null);
+  }
 
   /**
    * @name selectLanguageFactory
    * @description Factory to get the Language Selection App dialog
    * @constructor
+   * @param {object} $q - the angular $q service
+   * @param {object} $log - the angular $log service
    * @param {object} $translate - the i18n $translate service
    * @param {frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - Async Task Dialog service
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
-  function selectLanguageFactory($translate, frameworkAsyncTaskDialog, appLocalStorage) {
-
-    // TODO: RC Detect from browser/os??
-    var defaultLocale = 'en';
+  function selectLanguageFactory($q, $log, $translate, frameworkAsyncTaskDialog, appLocalStorage) {
 
     setLocale({
-      currentLocale: appLocalStorage.getItem(localeStorageId, defaultLocale)
+      currentLocale: appLocalStorage.getItem(localeStorageId)
     });
 
     function setLocale(data) {
-      var locale = data.currentLocale;
-      $translate.fallbackLanguage('en');
+      var locale = data.currentLocale || $translate.resolveClientLocale();
       appLocalStorage.setItem(localeStorageId, locale);
-      return $translate.use(locale);
+      return $translate.use(locale).then(function () {
+        $log.info("Changed locale to '" + $translate.use() + "'");
+      }).catch(function (reason) {
+        $log.warn("Failed to load language for locale '" + locale + "', falling back to '" + $translate.use() + "'");
+        return $q.reject(reason);
+      });
     }
 
     return {
