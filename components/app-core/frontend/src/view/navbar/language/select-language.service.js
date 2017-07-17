@@ -40,9 +40,24 @@
         // .. otherwise use a best guess from the browser
         locale = $translate.resolveClientLocale().replace('-', '_');
       }
+      // Take into account moment naming conventions. For a list of supported moment locales see
+      // https://github.com/moment/moment/tree/2.10.6/locale
+      var momentLocale = locale.replace('_', '-');
+      // Moment calls 'en-US' just 'en'
+      momentLocale = momentLocale === 'en-US' ? 'en' : momentLocale;
+
+      if (locale === $translate.use() && momentLocale === moment.locale()) {
+        return $q.resolve();
+      }
 
       return $translate.use(locale).then(function () {
         $log.info("Changed locale to '" + $translate.use() + "'");
+        var newMomentLocale = moment.locale(momentLocale);
+        if (newMomentLocale === momentLocale) {
+          $log.info("Changed moment locale to '" + newMomentLocale + "'");
+        } else {
+          $log.warn("Failed to load moment locale for '" + momentLocale + "', falling back to '" + newMomentLocale + "'");
+        }
       }).catch(function (reason) {
         $log.warn("Failed to load language for locale '" + locale + "', falling back to '" + $translate.use() + "'");
         return $q.reject(reason);
