@@ -30,7 +30,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function UserInfoController($location, $stateParams, $state, $scope, modelManager, appUtilsService, $http) {
+  function UserInfoController($location, $stateParams, $state, $scope, modelManager, appUtilsService, $http, editUserInfoService) {
     var vm = this;
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.id = $stateParams.guid;
@@ -46,7 +46,13 @@
       {
         name: 'user-info.edit',
         execute: function () {
-          console.log('EDIT');
+          var modal = editUserInfoService.show({
+            userInfo: vm.userInfo,
+            user: vm.user
+          });
+          modal.closed.then(function () {
+            vm.fetchData();
+          })
         },
         disabled: false,
         id: 'edit',
@@ -54,22 +60,19 @@
       },
     ];
 
-    appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
-
-    // Testing
-    $http.get('/pp/v1/uaa/userinfo').then(function (response) {
-      vm.userInfo = response.data;
-      var userId = response.data.user_id;
-      $http.get('/pp/v1/uaa/Users/' + userId).then(function (response) {
-        vm.user = response.data;
-        vm.user.groups = _.sortBy(vm.user.groups, 'display');
+    vm.fetchData = function () {
+      // Testing
+      $http.get('/pp/v1/uaa/userinfo').then(function (response) {
+        vm.userInfo = response.data;
+        var userId = response.data.user_id;
+        $http.get('/pp/v1/uaa/Users/' + userId).then(function (response) {
+          vm.user = response.data;
+          vm.user.groups = _.sortBy(vm.user.groups, 'display');
+        });
       });
-    });
+    }
 
-    $http.get('/pp/v1/uaa/Groups').then(function (response) {
-      console.log('GROUPS');
-      console.log(response);
-    });
+    appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
 
     function init() {
       // // Check that the user has permissions to be able to change the SSH status on the space
@@ -81,6 +84,8 @@
       // var canUpdate = authModel.isAllowed(vm.cnsiGuid, authModel.resources.space, authModel.actions.update, spaceGuid, organizationGuid);
       // vm.canManageSpaceSsh = canUpdate || user.isAdmin;
       // vm.canManageAppSsh = authModel.isAllowed(vm.cnsiGuid, authModel.resources.application, authModel.actions.update, spaceGuid);
+
+      vm.fetchData();
 
       vm.ready = true;
     }

@@ -22,3 +22,10 @@ dl.user-info-list {
 
   }
 }
+
+.row.user-info-summary {
+  display: flex;
+  > div {
+    flex: 1;
+  }
+}

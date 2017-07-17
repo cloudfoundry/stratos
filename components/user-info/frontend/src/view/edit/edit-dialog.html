@@ -1,0 +1,50 @@
+<div class="edit-user-info-form">
+  <p translate>endpoints.connect.description</p>
+  <form class="form-stacked center-block" name="asyncTaskDialogCtrl.editUserInfoForm" role="form">
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-givenName" translate>
+        Given name
+      </label>
+      <input autofocus type="text" class="form-control"
+        id="user-info-form-givenName" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.givenName }}"
+        ng-model="asyncTaskDialogCtrl.context.data.givenName"/>
+    </div>
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-familyName" translate>
+        Family name
+      </label>
+      <input autofocus type="text" class="form-control"
+        id="user-info-form-familyName" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.familyName }}"
+        ng-model="asyncTaskDialogCtrl.context.data.familyName"/>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-email" translate>
+        Email Address
+      </label>
+      <input autofocus type="text" class="form-control"
+        id="user-info-form-email" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.emailAddress }}"
+        ng-model="asyncTaskDialogCtrl.context.data.emailAddress"/>
+    </div>
+    
+    <div class="form-group" focusable-input ng-class="asyncTaskDialogCtrl.context.failedRegister ? 'has-error' : ''">
+      <label class="control-label required" for="credentials-form-username" translate>
+        endpoints.connect.username-label
+      </label>
+      <input type="text" class="form-control"
+        id="credentials-form-username" name="{{ asyncTaskDialogCtrl.context.cnsi.cnsi_type }}Username"
+        ng-model="asyncTaskDialogCtrl.context.data.username" required />
+    </div>
+    <div class="form-group has-feedback" focusable-input ng-class="asyncTaskDialogCtrl.context.failedRegister ? 'has-error' : ''">
+      <label class="control-label required" for="credentials-form-password" translate>
+        endpoints.connect.password-label
+      </label>
+      <input type="password" class="form-control" id="credentials-form-password" name="{{ asyncTaskDialogCtrl.context.cnsi.cnsi_type }}Password"
+        ng-model="asyncTaskDialogCtrl.context.data.password" password-reveal required/>
+    </div>
+
+  </form>
+</div>

@@ -227,6 +227,14 @@
       var devCerts = path.resolve(__dirname, '../dev-certs');
       if (fs.existsSync(devCerts)) {
         fs.copySync(devCerts, path.join(conf.outputPath, 'dev-certs'));
+      } else {
+        var devCerts = path.resolve(conf.outputPath, 'dev-certs');
+        if (!fs.existsSync(devCerts)) {
+          fs.mkdir(devCerts)
+          var browserSyncCerts = path.resolve(__dirname, '../node_modules/browser-sync/lib/server/certs');
+          fs.copySync(path.join(browserSyncCerts, 'server.crt'), path.join(devCerts, 'pproxy.crt'));
+          fs.copySync(path.join(browserSyncCerts, 'server.key'), path.join(devCerts, 'pproxy.key'));
+        }
       }
 
       return done();

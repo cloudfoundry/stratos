@@ -8,15 +8,12 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine"
 )
 
 func (userInfo *UserInfo) uaa(c echo.Context) error {
 
 	log.Info("UAA REQUEST")
-
-	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
-
-	// Proxy the request to the UAA on behalf of the user
 
 	// Check session
 	sessionExpireTime, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
@@ -35,30 +32,58 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	tokenRec, err := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Can not locate token for user")
-	}
-
-	log.Info(c.Path())
-
+	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
 	path := c.Path()
 	// We know this is a wildcard path, so remove the trailing '*'
 	//path = path[:len(path)-1]
 
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
 	target := c.Request().URL().Path()
-
-	log.Infof("Target URL: %s", target)
 	target = target[(len(path) - 1):]
-
-	log.Infof("Target URL: %s", target)
-
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
 
-	log.Info(url)
+	statusCode, body, err := userInfo.doApiRequest(sessionUser, url, c.Request())
+	if err != nil {
+		return err
+	}
 
-	uaaRequest := c.Request()
+	log.Info("Call finished")
+	log.Infof("Status code: %d", statusCode)
+
+	// Refresh the access token
+	if statusCode == 401 {
+		log.Info("Updating access token for the UAA")
+		_, err := userInfo.portalProxy.RefreshUAAToken(sessionUser)
+		if err != nil {
+			log.Error("Failed to refresh UAA Token")
+			log.Error(err)
+			return err
+		}
+
+		statusCode, body, err = userInfo.doApiRequest(sessionUser, url, c.Request())
+		if err != nil {
+			log.Error("Failed to make API Call")
+			return err
+		}
+	}
+
+	c.Response().WriteHeader(statusCode)
+
+	// we don't care if this fails
+	_, _ = c.Response().Write(body)
+
+	return nil
+}
+
+func (userInfo *UserInfo) doApiRequest(sessionUser string, url string, echoReq engine.Request) (stausCode int, body []byte, err error) {
+	// Proxy the request to the UAA on behalf of the user
+
+	log.Infof("doApiRequest: %s", url)
+
+	tokenRec, err := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
+	if err != nil {
+		return 0, nil, echo.NewHTTPError(http.StatusForbidden, "Can not locate token for user")
+	}
 
 	// Proxy the request
 	//	var body io.Reader
@@ -68,43 +93,31 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	// if len(uaaRequest.Body) > 0 {
 	// 	body = bytes.NewReader(uaaRequest.Body)
 	// }
-	req, err = http.NewRequest(uaaRequest.Method(), url, uaaRequest.Body())
+	req, err = http.NewRequest(echoReq.Method(), url, echoReq.Body())
 	if err != nil {
-		return err
+		return 0, nil, err
 	}
 
 	// Copy original headers through, except custom portal-proxy Headers
-	//fwdCNSIStandardHeaders(uaaRequest, req)
+	fwdHeaders(echoReq, req)
 
 	req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
 
 	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation)
 	res, err = client.Do(req)
 	if err != nil {
-		return fmt.Errorf("Request failed: %v", err)
+		return 0, nil, fmt.Errorf("Request failed: %v", err)
 	}
 
 	data, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 
-	// in passthrough mode, set the status code to that of the single response
-	c.Response().WriteHeader(res.StatusCode)
-
-	// we don't care if this fails
-	_, _ = c.Response().Write(data)
-
-	// if res.StatusCode != 401 {
-	// 	return nil
-	// }
-
-	// Access token must have expired
-
-	return nil
+	return res.StatusCode, data, err
 }
 
-func fwdCNSIStandardHeaders(uaaReq *http.Request, req *http.Request) {
-	log.Debug("fwdCNSIStandardHeaders")
-	for k, v := range uaaReq.Header {
+func fwdHeaders(uaaReq engine.Request, req *http.Request) {
+	log.Debug("fwdHeaders")
+	for _, k := range uaaReq.Header().Keys() {
 		switch {
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
@@ -113,7 +126,7 @@ func fwdCNSIStandardHeaders(uaaReq *http.Request, req *http.Request) {
 
 		// Forwarding everything else
 		default:
-			req.Header[k] = v
+			req.Header[k] = []string{uaaReq.Header().Get(k)}
 		}
 	}
 }

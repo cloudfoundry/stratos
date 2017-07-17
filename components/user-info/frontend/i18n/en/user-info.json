@@ -1,3 +1,6 @@
 {
-  "user-info": "User Info"
+  "user-info": {
+    "user-info": "User Info",
+    "edit": "Edit"
+  }
 }
