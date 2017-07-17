@@ -1,0 +1,24 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: helm-build
+image_resource:
+  type: docker-image
+  source:
+   repository:  10.4.21.241:5000/github-release
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Create Github release
+
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+      github-release release --tag ${GIT_TAG}
+      cd helm-build
+      CHART_PACKAGE=$(ls *.tgz)
+      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name ${CHART_PACKAGE}

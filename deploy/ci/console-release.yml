@@ -1,0 +1,59 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    branch: {{stratos-ui-branch}}
+    private_key: {{github-private-key}}
+    uri: git@github.com:irfanhabib/stratos-ui.git
+    tag_filter: release-*
+
+groups:
+- name: tests
+  jobs:
+  - build-helm-images
+  - update-repo
+  - update-github-release
+
+jobs:
+- name: build-helm-images
+  plan:
+  - get: stratos-ui
+    trigger: true
+  - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/build-helm.yml
+
+- name: update-repo
+  plan:
+  - get: stratos-ui
+    passed: [build-helm-images]
+    trigger: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/create-chart.yml
+      params:
+        GIT_USER: {{concourse-user}}
+        GIT_EMAIL: {{concourse-email}}
+        GIT_PRIVATE_KEY: {{github-private-key}}
+
+- name: update-github-release
+  plan:
+  - get: stratos-ui
+    passed: [update-repo]
+    trigger: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/create-chart.yml
+      params:
+        GITHUB_TOKEN: {{github-access-token}}
+        GITHUB_USER: {{github-organization}}
+        GITHUB_REPO: {{github-repository}}

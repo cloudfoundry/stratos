@@ -1,0 +1,49 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: dev-certs-output
+- name: helm-build
+outputs:
+- helm-chart
+image_resource:
+  type: docker-image
+  source:
+   repository:  10.4.21.241:5000/linkyard/helm
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      helm init
+      ROOT_DIR=$PWD
+      STRATOS_UI=${ROOT_DIR}/stratos-ui
+      cd ${STRATOS_UI}/deploy/kubernetes/
+
+      cp -f ${ROOT_DIR}/helm-chart/values.yaml console/values.yaml
+      cp -f ${ROOT_DIR}/helm-chart/Chart.yaml console/Chart.yaml
+      helm package console
+      cp console*.tgz ${ROOT_DIR}/helm-chart/
+      cd ${ROOT_DIR}/helm-chart/
+      if [ -f ${STRATOS_UI}/index.yml ]; then
+        cp ${STRATOS_UI}/index.yml ${ROOT_DIR}/helm-chart/
+        MERGE_INDEX="--merge index.yaml"
+      fi
+      helm index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
+      cp index.yaml ${STRATOS_UI}/
+
+      cd ${STRATOS_UI}
+      git config --global user.name ${GIT_USER}
+      git config --global user.email ${GIT_EMAIL}
+
+      mkdir -p /root/.ssh/
+      cat ${GIT_PRIVATE_KEY} > /root/.ssh/id_rsa
+      chmod 600 /root/.ssh/id_rsa
+
+      git add index.yaml
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+      git commit -m "Helm repository updated for tag: ${GIT_TAG}"
+      git push
