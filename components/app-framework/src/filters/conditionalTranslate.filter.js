@@ -9,8 +9,9 @@
    * @namespace app.framework.filters.conditionalTranslate
    * @memberof app.framework.filters
    * @name conditionalTranslate
-   * @description ???????
+   * @description Conditionally run text through translate filter given a boolean param
    * @param {object} $filter - Angular $filter service
+   * @example { 'i18n.string' | conditionalTranslate:imaginaryController.shouldTranslate }
    * @returns {Function} The filter itself
    */
   function conditionalTranslate($filter) {

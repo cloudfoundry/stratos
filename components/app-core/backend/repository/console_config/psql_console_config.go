@@ -26,7 +26,7 @@ var getTableCount = `SELECT count(uaa_endpoint) FROM console_config`
 
 var hasSetupCompleted = `SELECT is_setup_complete FROM console_config`
 
-var deleteConsoleConfig = `TRUNCATE console_config`
+var deleteConsoleConfig = ` DELETE FROM console_config`
 
 // PostgresCNSIRepository is a PostgreSQL-backed ConsoleConfig repository
 type ConsoleConfigRepository struct {

@@ -5,7 +5,6 @@ COPY gulpfile.js ./
 COPY components ./components
 COPY build ./build/
 COPY deploy/ci/scripts/generate_cert.sh generate_cert.sh
-COPY deploy/uaa/uaa.yml /uaa/uaa.yml
 COPY deploy/db deploy/db
 COPY deploy/all-in-one/config.all-in-one.properties config.properties
 
@@ -20,13 +19,6 @@ RUN npm install -g gulp bower \
 RUN DEV_CERTS_PATH=/go/dev-certs ./generate_cert.sh \
     && chmod +x portal-proxy
 
-EXPOSE 8080
 EXPOSE 443
 
-RUN  touch /run.sh && \
-  echo '#!/bin/sh' >> /run.sh && \
-  echo '/tomcat/bin/catalina.sh run &' >> /run.sh && \
-  echo './portal-proxy' >> /run.sh && \
-  chmod +x /run.sh
-
-ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["./portal-proxy"]

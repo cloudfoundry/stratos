@@ -61,3 +61,17 @@ CREATE TABLE IF NOT EXISTS goose_db_version (
 );
 
 INSERT INTO goose_db_version (version_id, is_applied, id) VALUES(1, "t", "SQLite 1.0");
+
+-- console_config
+CREATE TABLE IF NOT EXISTS console_config (
+  uaa_endpoint              VARCHAR(255)              NOT NULL,
+  console_admin_scope       VARCHAR(255)              NOT NULL,
+  console_client            VARCHAR(255)              NOT NULL,
+  console_client_secret     VARCHAR(255)              NOT NULL,
+  skip_ssl_validation       BOOLEAN                   NOT NULL DEFAULT FALSE,
+  is_setup_complete         BOOLEAN                   NOT NULL DEFAULT FALSE
+--  last_updated              DATETIME                  DEFAULT CURRENT_TIMESTAMP
+);
+
+-- create trigger
+CREATE TRIGGER config_no_insert BEFORE INSERT ON console_config WHEN (SELECT COUNT(*) FROM console_config) >= 1 BEGIN SELECT RAISE(FAIL, "only one row!"); END;
