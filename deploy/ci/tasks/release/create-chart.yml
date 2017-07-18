@@ -2,8 +2,8 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: helm-chart-Chart
 - name: stratos-ui-git
+- name: helm-chart-Chart
 - name: helm-chart-values
 outputs:
 - name: helm-chart
