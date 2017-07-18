@@ -80,11 +80,11 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: 'Edit User',
+            title: 'user-info.edit',
             templateUrl: 'user-info/view/edit/edit-dialog.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'Apply'
+              submit: 'user-info.update'
             },
             class: 'dialog-form',
             dialog: true

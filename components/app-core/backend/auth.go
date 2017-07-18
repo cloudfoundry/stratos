@@ -57,6 +57,21 @@ func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req.Header.Set("Cookie", cleanCookie)
 }
 
+// Get the user name for the specified user
+func (p *portalProxy) GetUsername(userid string) (string, error) {
+	tr, err := p.GetUAATokenRecord(userid)
+	if err != nil {
+		return "", err
+	}
+
+	u, userTokenErr := getUserTokenInfo(tr.AuthToken)
+	if userTokenErr != nil {
+		return "", userTokenErr
+	}
+
+	return u.UserName, nil
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 

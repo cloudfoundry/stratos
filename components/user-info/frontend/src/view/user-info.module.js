@@ -2,7 +2,11 @@
   'use strict';
 
   angular
-    .module('user-info', ['cloud-foundry'])
+    .module('user-info', [
+      'cloud-foundry',
+      'user-info.api',
+      'user-info.model'
+    ])
     .config(registerRoute)
     .run(registerUserMenu);
 
@@ -30,7 +34,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function UserInfoController($location, $stateParams, $state, $scope, modelManager, appUtilsService, $http, editUserInfoService) {
+  function UserInfoController($location, $stateParams, $state, $scope, modelManager, appUtilsService, $http, editUserInfoService, changePasswordService) {
     var vm = this;
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.id = $stateParams.guid;
@@ -42,6 +46,8 @@
     vm.isEnabling = false;
     vm.ready = false;
 
+    vm.userInfoModel = modelManager.retrieve('user-info.model');
+
     vm.actions = [
       {
         name: 'user-info.edit',
@@ -52,25 +58,36 @@
           });
           modal.closed.then(function () {
             vm.fetchData();
-          })
+          });
         },
         disabled: false,
         id: 'edit',
         icon: 'edit'
       },
+      {
+        name: 'user-info.password-change',
+        execute: function () {
+          var modal = changePasswordService.show({
+            userInfo: vm.userInfo,
+            user: vm.user
+          });
+          modal.closed.then(function () {
+            vm.fetchData();
+          });
+        },
+        disabled: false,
+        id: 'edit',
+        icon: 'edit'
+      }
     ];
 
     vm.fetchData = function () {
-      // Testing
-      $http.get('/pp/v1/uaa/userinfo').then(function (response) {
-        vm.userInfo = response.data;
-        var userId = response.data.user_id;
-        $http.get('/pp/v1/uaa/Users/' + userId).then(function (response) {
-          vm.user = response.data;
-          vm.user.groups = _.sortBy(vm.user.groups, 'display');
-        });
+      vm.userInfoModel.getCurrentUser().then(function (data) {
+        console.log(data);
+        vm.userInfo = data.userInfo;
+        vm.user = data.user;
       });
-    }
+    };
 
     appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
 

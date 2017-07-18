@@ -32,6 +32,12 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
+	tr, _ := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
+	log.Info("================================================================================")
+	log.Info("GOT UAA TOKEN")
+	log.Info("================================================================================")
+	log.Info(tr)
+
 	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
 	path := c.Path()
 	// We know this is a wildcard path, so remove the trailing '*'
@@ -41,6 +47,19 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	target := c.Request().URL().Path()
 	target = target[(len(path) - 1):]
 	url := fmt.Sprintf("%s/%s", uaaEndpoint, target)
+
+	username, err := userInfo.portalProxy.GetUsername(sessionUser)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("Got uername: %s", username)
+
+	// Check for custom header - if present, verify the user's password before making the request
+	password := c.Request().Header().Get("x-stratos-password")
+	if len(password) > 0 {
+		// Need to verify the user's login
+	}
 
 	statusCode, body, err := userInfo.doApiRequest(sessionUser, url, c.Request())
 	if err != nil {
@@ -65,6 +84,12 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 			log.Error("Failed to make API Call")
 			return err
 		}
+	}
+
+	// If we have the user's password, log them in again
+	// This is used when the API call that is being made revokes the current access and refresh tokens
+	if len(password) > 0 {
+		log.Info("Logging user in again")
 	}
 
 	c.Response().WriteHeader(statusCode)

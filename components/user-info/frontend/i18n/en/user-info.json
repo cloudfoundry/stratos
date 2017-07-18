@@ -1,6 +1,22 @@
 {
   "user-info": {
-    "user-info": "User Info",
-    "edit": "Edit"
+    "user-info": "User Profile",
+    "edit": "Edit Profile",
+
+    "update": "Update",
+
+    "password-change": {
+      "change": "Change",
+      "password-change": "Change Password",
+      "introduction": "Please provide your existing (old) password together with your new password.",
+      "old": "Old Password",
+      "new": "New Password",
+      "confirm": "Confirm new Password",
+      "plahcholders": {
+        "old": "Enter your current password",
+        "new": "Enter your new password",
+        "confirm": "Re-enter your new password"
+      }
+    }
   }
 }

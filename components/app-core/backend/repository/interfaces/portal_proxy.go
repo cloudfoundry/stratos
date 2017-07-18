@@ -37,4 +37,6 @@ type PortalProxy interface {
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
 	RefreshUAAToken(userGUID string) (TokenRecord, error)
+
+	GetUsername(userid string) (string, error)
 }
