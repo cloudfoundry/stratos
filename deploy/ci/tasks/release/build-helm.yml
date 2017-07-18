@@ -1,0 +1,34 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: dev-certs-output
+outputs:
+- name: helm-build
+image_resource:
+  type: docker-image
+  source:
+   repository:  10.4.21.241:5000/concourse-dcind
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      source /docker-lib.sh
+      start_docker
+      ROOT_DIR=${PWD}
+      # Move dev-certs
+      mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
+      cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
+
+      # Login to Docker to push images
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+
+      # Build images
+      ./build.sh -T -c
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+      cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}
+      cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml-${GIT_TAG}
