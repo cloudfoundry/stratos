@@ -9,6 +9,9 @@
       "hide": "Hide Options"
     },
     "sort-by": "Sort By",
+    "select-endpoint-all": "All Endpoints",
+    "select-org-all": "All [[@:cf.organisations.capitalised]]",
+    "select-space-all": "All [[@:cf.spaces.capitalised]]",
     "total-apps": "Total Applications",
     "filtered-apps": "Filtered Applications",
     "instances": "Instances",

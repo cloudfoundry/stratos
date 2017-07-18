@@ -46,9 +46,9 @@
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.loading = true;
     vm.isSpaceDeveloper = false;
-    vm.clusters = [{label: 'All Endpoints', value: 'all'}];
-    vm.organizations = [{label: 'All Organizations', value: 'all'}];
-    vm.spaces = [{label: 'All Spaces', value: 'all'}];
+    vm.clusters = [{label: 'app-wall.select-endpoint-all', value: 'all', translateLabel: true}];
+    vm.organizations = [{label: 'app-wall.select-org-all', value: 'all', translateLabel: true}];
+    vm.spaces = [{label: 'app-wall.select-space-all', value: 'all', translateLabel: true}];
     vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
     vm.filter = {
       cnsiGuid: 'all',
