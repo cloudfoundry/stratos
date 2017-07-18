@@ -1,29 +1,29 @@
 {
   "cf.cluster-actions": {
     "create-org": {
-      "action-name": "Create [[@:cf.organisation.capitalised]]",
+      "action-name": "Create Organization",
       "dialog": {
-        "title": "Create [[@:cf.organisation.capitalised]]",
-        "org-label": "[[@:cf.organisation.capitalised]] Name",
+        "title": "Create Organization",
+        "org-label": "Organization Name",
         "org-error-required": "Name is required",
         "org-error-unique": "Name must be unique",
         "submit-button": "Create",
-        "success-notification": "[[@:cf.organisation.capitalised]] '{{name}}' successfully created"
+        "success-notification": "Organisation '{{name}}' successfully created"
       }
     },
     "create-space": {
-      "action-name": "Create [[@:cf.space.capitalised]]",
+      "action-name": "Create Space",
       "dialog": {
-        "title": "Create [[@:cf.space.capitalised]]",
-        "org-label": "[[@:cf.organisation.capitalised]]",
-        "space-label": "[[@:cf.space.capitalised]] Name {{index}}",
+        "title": "Create Space",
+        "org-label": "Organization",
+        "space-label": "Space Name {{index}}",
         "space-error-required": "Name is required",
         "space-error-unique": "Name must be unique",
         "remove-button": "Remove",
-        "create-another-button": "Create Another [[@:cf.space.capitalised]]",
+        "create-another-button": "Create Another Space",
         "submit-button": "Create",
-        "success-notification-plural": "[[@:cf.spaces.capitalised]] '{{ names }}' successfully created",
-        "success-notification-singular": "[[@:cf.space.capitalised]] '{{ name }}' successfully created"
+        "success-notification-plural": "Spaces '{{ names }}' successfully created",
+        "success-notification-singular": "Space '{{ name }}' successfully created"
       }
     },
     "assign-users": {
