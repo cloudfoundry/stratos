@@ -16,9 +16,10 @@ run:
     - -exc
     - |
       # Create Github release
-      cd stratos-ui
+      ROOT_DIR=${PWD}
+      cd ${ROOT_DIR}/stratos-ui
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       github-release release --tag ${GIT_TAG}
-      cd helm-chart-tarball
+      cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
       github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name ${CHART_PACKAGE}
