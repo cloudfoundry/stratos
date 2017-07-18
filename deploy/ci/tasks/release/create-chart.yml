@@ -33,8 +33,8 @@ run:
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/
       cd ${ROOT_DIR}/helm-chart/
-      if [ -f ${STRATOS_UI}/index.yml ]; then
-        cp ${STRATOS_UI}/index.yml ${ROOT_DIR}/helm-chart/
+      if [ -f ${STRATOS_UI}/index.yaml ]; then
+        cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
       fi
 
