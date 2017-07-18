@@ -33,7 +33,7 @@ run:
         cp ${STRATOS_UI}/index.yml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
       fi
-      helm index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
       cp index.yaml ${STRATOS_UI}/
 
       cd ${STRATOS_UI}
