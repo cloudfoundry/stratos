@@ -34,8 +34,8 @@ run:
         MERGE_INDEX="--merge index.yaml"
       fi
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
-      cp index.yaml ${STRATOS_UI_GIT}/
-
+      cp index.yaml ${STRATOS_UI}/
+      cd ${STRATOS_UI}
       git config --global user.name ${GIT_USER}
       git config --global user.email ${GIT_EMAIL}
 
