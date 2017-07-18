@@ -21,7 +21,8 @@
       show: function (userId) {
         var data = {
           oldPassword: '',
-          newPassword: ''
+          newPassword: '',
+          newPasswordConfirm: ''
         };
 
         var userInfoModel = modelManager.retrieve('user-info.model');
@@ -30,6 +31,14 @@
         var changePassword = function () {
           return userInfoModel.changePassword(userId, data.oldPassword, data.newPassword);
         };
+
+        // Is the form valid
+        var isFormInvalid = function () {
+          var valid = data.oldPassword && data.newPassword && data.newPasswordConfirm &&
+            data.newPassword === data.newPasswordConfirm &&
+            data.oldPassword !== data.newPassword;
+          return !valid;
+        }
 
         return frameworkAsyncTaskDialog(
           {
@@ -43,10 +52,10 @@
             dialog: true
           },
           {
-            user: user,
             data: data
           },
-          changePassword
+          changePassword,
+          isFormInvalid
         );
       }
     };

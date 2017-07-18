@@ -8,28 +8,28 @@
     <div class="row user-info-summary">
       <div>
         <dl class="user-info-list">
-          <dt translate>user id</dt>
+          <dt translate>user-info.labels.username</dt>
           <dd>{{ userCtrl.userInfo.user_name }}</dd>
-          <dt translate>name</dt>
+          <dt translate>user-info.labels.fullname</dt>
           <dd>{{ userCtrl.userInfo.name }}</dd>
-          <dt translate>email</dt>
+          <dt translate>user-info.labels.email</dt>
           <dd>{{ userCtrl.userInfo.email }}</dd>
         </dl>
       </div>
       <div>
         <dl class="user-info-list">
-          <dt translate>account created</dt>
+          <dt translate>user-info.labels.created</dt>
           <dd>{{ userCtrl.user.meta.created | momentDateFormat }}</dd>
-          <dt translate>account last modified</dt>
+          <dt translate>user-info.labels.modified</dt>
           <dd>{{ userCtrl.user.meta.lastModified | momentDateFormat }}</dd>
-          <dt translate>password last modified</dt>
+          <dt translate>user-info.labels.password-modified</dt>
           <dd>{{ userCtrl.user.passwordLastModified | momentDateFormat }}</dd>
         </dl>
       </div>
     </div>
     <div class="row user-info-groups">
         <dl class="user-info-list">
-          <dt translate>groups</dt>
+          <dt translate>user-info.labels.groups</dt>
           <dd>
             <div class="user-info-group" ng-repeat="group in userCtrl.user.groups">
               <div>{{ group.display }}</div>

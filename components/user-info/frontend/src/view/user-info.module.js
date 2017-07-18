@@ -27,27 +27,13 @@
   /**
    * @name UserInfoController
    * @constructor
-   * @param {object} $location - the Angular $location service
-   * @param {object} $stateParams - the UI router $stateParams service
-   * @param {object} $state - the UI router $state service
-   * @param {object} $scope - the angular $scope service
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function UserInfoController($location, $stateParams, $state, $scope, $translate, modelManager, appUtilsService, appNotificationsService, editUserInfoService, changePasswordService) {
+  function UserInfoController($translate, modelManager, appNotificationsService, editUserInfoService, changePasswordService) {
     var vm = this;
-    vm.cnsiGuid = $stateParams.cnsiGuid;
-    vm.id = $stateParams.guid;
-
-    vm.instance = undefined;
-    vm.showOptions = false;
-    vm.showInstanceSelector = false;
-
-    vm.isEnabling = false;
     vm.ready = false;
-
     vm.userInfoModel = modelManager.retrieve('user-info.model');
 
+    // Toolbar actions
     vm.actions = [
       {
         name: 'user-info.edit',
@@ -56,7 +42,7 @@
             userInfo: vm.userInfo,
             user: vm.user
           });
-          modal.closed.then(function () {
+          modal.result.then(function () {
             vm.fetchData();
             appNotificationsService.notify('success', $translate.instant('user-info.edit.success'));
           });
@@ -68,7 +54,7 @@
       {
         name: 'user-info.password-change',
         execute: function () {
-          changePasswordService.show(vm.user.id).closed.then(function () {
+          changePasswordService.show(vm.user.id).result.then(function () {
             vm.fetchData();
             appNotificationsService.notify('success', $translate.instant('user-info.password-change.success'));
           })
@@ -80,30 +66,14 @@
     ];
 
     vm.fetchData = function () {
-      vm.userInfoModel.getCurrentUser().then(function (data) {
-        console.log(data);
+      return vm.userInfoModel.getCurrentUser().then(function (data) {
         vm.userInfo = data.userInfo;
         vm.user = data.user;
       });
     };
 
-    appUtilsService.chainStateResolve('cf.applications.application.ssh', $state, init);
-
-    function init() {
-      // // Check that the user has permissions to be able to change the SSH status on the space
-      // var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
-      // var user = consoleInfo.info.endpoints.cf[vm.cnsiGuid].user;
-      // var spaceGuid = vm.model.application.space.metadata.guid;
-      // var organizationGuid = vm.model.application.organization.metadata.guid;
-      // var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      // var canUpdate = authModel.isAllowed(vm.cnsiGuid, authModel.resources.space, authModel.actions.update, spaceGuid, organizationGuid);
-      // vm.canManageSpaceSsh = canUpdate || user.isAdmin;
-      // vm.canManageAppSsh = authModel.isAllowed(vm.cnsiGuid, authModel.resources.application, authModel.actions.update, spaceGuid);
-
-      vm.fetchData();
-
+    vm.fetchData().finally(function () {
       vm.ready = true;
-    }
-
+    });
   }
 })();

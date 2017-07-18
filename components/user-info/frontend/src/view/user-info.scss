@@ -1,12 +1,12 @@
 dl.user-info-list {
   > dt {
-    color: #555;
+    color: $gray-darker;
   }
 
   > dd {
-    font-size: 18px;
+    font-size: $font-size-large;
     margin-top: 4px;
-    margin-bottom: 12px;
+    margin-bottom: $console-unit-space * 0.5;;
   }
 
   .user-info-group {
@@ -14,11 +14,11 @@ dl.user-info-list {
     padding: 6px;
 
     > div {
-      background-color: #555;
+      background-color: $gray-darker;
       padding: 0px 6px;
-      color: #fff;
+      color: $white;
       border-radius: 4px;
-      font-size: 16px;
+      font-size: $font-size-large;
     }
   }
 }

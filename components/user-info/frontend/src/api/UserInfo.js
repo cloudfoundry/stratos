@@ -34,6 +34,9 @@
      */
     GetUser: function (userId) {
       return this.$http.get('/pp/v1/uaa/Users/' + userId).then(function (response) {
+        if (response.data && response.data.groups) {
+          response.data.groups = _.sortBy(response.data.groups, 'display');
+        }
         return response.data;
       });
     },

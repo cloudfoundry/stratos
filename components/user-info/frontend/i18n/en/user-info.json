@@ -1,6 +1,15 @@
 {
   "user-info": {
     "user-info": "User Profile",
+    "labels": {
+      "username": "Username",
+      "fullname": "Full name",
+      "email": "Email address",
+      "created": "Account created",
+      "modified": "Account last modified",
+      "password-modified": "Password last modified",
+      "groups": "Groups"
+    },
 
     "edit": {
       "edit": "Edit Profile",
@@ -22,6 +31,7 @@
       "old": "Old Password",
       "new": "New Password",
       "confirm": "Confirm new Password",
+      "error-confirm": "Password do not match",
       "placeholders": {
         "old": "Enter your current password",
         "new": "Enter your new password",
