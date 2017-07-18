@@ -5,7 +5,7 @@ inputs:
 - name: dev-certs-output
 - name: helm-build
 outputs:
-- helm-chart
+- name: helm-chart
 image_resource:
   type: docker-image
   source:
