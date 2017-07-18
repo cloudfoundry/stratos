@@ -55,7 +55,7 @@ jobs:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos-ui/deploy/ci/tasks/release/create-chart.yml
+      file: stratos-ui/deploy/ci/tasks/release/upgrade-gh-release.yml
       params:
         GITHUB_TOKEN: {{github-access-token}}
         GITHUB_USER: {{github-organization}}
