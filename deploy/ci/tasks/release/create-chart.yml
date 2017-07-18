@@ -5,7 +5,7 @@ inputs:
 - name: helm-chart-Chart
 - name: helm-chart-values
 outputs:
-- name: stratos-ui
+- name: modified-stratos-ui
 image_resource:
   type: docker-image
   source:
@@ -43,3 +43,5 @@ run:
 
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${GIT_TAG}"
+
+      cp -R ${STRATOS_UI} ${ROOT_DIR}/modified-stratos-ui
