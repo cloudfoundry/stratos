@@ -1,8 +1,8 @@
 {
   "cloud-foundry": "Cloud Foundry",
   "org": "Org",
-  "organization": "[[@:cf.organisation.capitalised]]",
-  "space": "[[@:cf.space.capitalised]]",
+  "organization": "Organisation",
+  "space": "Space",
 
   "menu": {
     "cloud-foundry": "@:cloud-foundry"
