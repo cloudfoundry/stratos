@@ -2,7 +2,7 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: helm-build
+- name: helm-chart-tarball
 image_resource:
   type: docker-image
   source:
@@ -19,6 +19,6 @@ run:
 
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       github-release release --tag ${GIT_TAG}
-      cd helm-build
+      cd helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
       github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name ${CHART_PACKAGE}
