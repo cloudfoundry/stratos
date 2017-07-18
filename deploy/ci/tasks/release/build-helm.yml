@@ -23,7 +23,11 @@ run:
       # Move dev-certs
       mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
       cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
+
+      # Login to Docker to push images
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+
+      # Build images
       ./build.sh -T -c
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}

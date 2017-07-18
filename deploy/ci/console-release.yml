@@ -5,30 +5,33 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:irfanhabib/stratos-ui.git
-    tag_filter: release-*
+    tag_filter: release-v[0-9]+\.[0-9]+\.[0-9]+-[a-zA-z0-9]*
 - name: helm-chart-values
   type: s3
   source:
     bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
     regexp: temp-artifacts/values.yaml-(?P<version>.*)
-    access_key_id: AKIAIV7CQCLXZCFESAPQ
-    secret_access_key: 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
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
 - name: helm-chart-Chart
   type: s3
   source:
     bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
     regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
-    access_key_id: AKIAIV7CQCLXZCFESAPQ
-    secret_access_key: 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
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
 - name: helm-chart-tarball
   type: s3
   source:
     bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
     regexp: temp-artifacts/console-(?P<version>.*).tgz
-    access_key_id: AKIAIV7CQCLXZCFESAPQ
-    secret_access_key: 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
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
 
 groups:
@@ -70,12 +73,7 @@ jobs:
     passed: [build-helm-images]
     trigger: true
   - get: helm-chart-Chart
-    params:
-      version: release-*
   - get: helm-chart-values
-    params:
-      version: release-*
-
   - do:
     - task: build
       privileged: true
@@ -84,6 +82,8 @@ jobs:
       params:
         GIT_USER: {{concourse-user}}
         GIT_EMAIL: {{concourse-email}}
+        GITHUB_ORG: {{github-organization}}
+        GITHUB_REPO: {{github-repository}}
         GIT_PRIVATE_KEY: {{github-private-key}}
     - put: helm-chart-tarball
       params:
@@ -97,8 +97,6 @@ jobs:
     passed: [update-repo]
     trigger: true
   - get: helm-chart-tarball
-    params:
-      version: release-*
   - do:
     - task: build
       privileged: true

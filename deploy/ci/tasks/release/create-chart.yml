@@ -18,6 +18,8 @@ run:
   args:
     - -exc
     - |
+
+      # Expect this command to fail since k8s isn't available but it will initialise helm locally
       helm init || true
       ROOT_DIR=$PWD
       STRATOS_UI=${ROOT_DIR}/stratos-ui
@@ -26,14 +28,18 @@ run:
 
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml* console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
+
+      # Generate Helm package
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/
       cd ${ROOT_DIR}/helm-chart/
-      if [ -f ${STRATOS_UI}/index.yml ]; then
-        cp ${STRATOS_UI}/index.yml ${ROOT_DIR}/helm-chart/
+      if [ -f ${STRATOS_UI}/index.yaml ]; then
+        cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
       fi
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
+
+      # Update Helm Repository
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/archive/$(ls *.tgz)
       cp index.yaml ${STRATOS_UI}/
       cd ${STRATOS_UI}
       git config --global user.name ${GIT_USER}
@@ -43,6 +49,7 @@ run:
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
 
+      # Update Helm repo
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${GIT_TAG}"
       git config --global push.default simple
