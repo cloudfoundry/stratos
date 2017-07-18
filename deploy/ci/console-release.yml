@@ -1,3 +1,10 @@
+resource_types:
+- name: ftp
+  type: ftp
+  source:
+    repository: aequitas/ftp-resource
+    tag: latest
+
 resources:
 - name: stratos-ui
   type: git
@@ -6,6 +13,29 @@ resources:
     private_key: {{github-private-key}}
     uri: git@github.com:irfanhabib/stratos-ui.git
     tag_filter: release-*
+- name: upload-helm-chart-values
+  type: ftp
+  source: ftp://concourse@10.4.21.241:concourse-build/
+  regex: values.yaml-release-*
+- name: helm-chart-values
+  type: ftp
+  source: ftp://concourse@10.4.21.241:concourse-build/
+  regex: (?P<file>values\.yaml-(?P<version>release-.*))
+- name: helm-chart-Chart
+  type: ftp
+  source: ftp://concourse@10.4.21.241:concourse-build/
+  regex: (?P<file>Chart\.yaml-(?P<version>release-.*))
+- name: helm-chart-tarball
+  type: ftp
+  source: ftp://concourse@10.4.21.241:concourse-build/
+  regex: (?P<file>console-(?P<version>release-.*)\.tgz)
+- name: helm-chart-repo
+  type: ftp
+  source: ftp://concourse@10.4.21.241:concourse-build/
+  regex: (?P<file>index.yaml-(?P<version>release-.*))
+
+
+
 
 groups:
 - name: tests
@@ -30,12 +60,25 @@ jobs:
       params:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
+      put: helm-chart-values
+      params:
+        file: helm-build/values.yaml-*
+      put: helm-chart-Chart
+      params:
+        file: helm-build/Chart.yaml-*
 
 - name: update-repo
   plan:
   - get: stratos-ui
     passed: [build-helm-images]
     trigger: true
+  - get: helm-chart-Chart
+    params:
+      version: release-*
+  - get: helm-chart-values
+    params:
+      version: release-*
+
   - do:
     - task: build
       privileged: true
@@ -45,12 +88,26 @@ jobs:
         GIT_USER: {{concourse-user}}
         GIT_EMAIL: {{concourse-email}}
         GIT_PRIVATE_KEY: {{github-private-key}}
+      put: helm-chart-tarball
+      params:
+        file: helm-chart/*.tgz
+      put: helm-chart-repo
+      params:
+        file: helm-chart/index*
+
+
 
 - name: update-github-release
   plan:
   - get: stratos-ui
     passed: [update-repo]
     trigger: true
+  - get: helm-chart-tarball
+    params:
+      version: release*
+  - get: helm-chart-repo
+    params:
+      version: release*
   - do:
     - task: build
       privileged: true
