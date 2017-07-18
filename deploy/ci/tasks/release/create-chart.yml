@@ -26,8 +26,8 @@ run:
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
 
-      cp -f ${ROOT_DIR}/helm-chart-values/values.yaml-${GIT_TAG} console/values.yaml
-      cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-${GIT_TAG} console/Chart.yaml
+      cp -f ${ROOT_DIR}/helm-chart-values/values.yaml* console/values.yaml
+      cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/
       cd ${ROOT_DIR}/helm-chart/
