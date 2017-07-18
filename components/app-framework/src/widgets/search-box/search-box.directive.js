@@ -114,6 +114,8 @@
    * @name SelectInputController
    * @constructor
    * @param {object} $scope - the Angular $scope
+   * @param {object} $rootScope - the Angular $rootScope
+   * @param {object} $filter - the Angular $filter
    * @param {object} searchBoxCloser - searchBox Closer Service
    * @property {object} $scope - the Angular $scope
    * @property {object} ngModelCtrl - the ng-model controller
