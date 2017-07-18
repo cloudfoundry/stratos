@@ -16,6 +16,9 @@
   /* eslint-disable camelcase */
   angular.extend(UserInfoApi.prototype, {
 
+    /*
+     * Get user metadata for the current user
+     */
     GetCurrentUser: function () {
       var user = {};
       var that = this;
@@ -29,7 +32,7 @@
       });
     },
 
-    /**
+    /*
      * Get user metadata for the specified user
      */
     GetUser: function (userId) {
@@ -41,7 +44,7 @@
       });
     },
 
-    /**
+    /*
      * Update the user record
      */
     UpdateUser: function (userId, data, httpConfigOptions) {
@@ -57,7 +60,7 @@
       return this.$http(config);
     },
 
-    /**
+    /*
      * Change the password of the gievn user
      */
     ChangePassword: function (user_id, oldPassword, newPassword, httpConfigOptions) {

@@ -223,17 +223,18 @@
       fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
         overwrite: false
       });
+
       // Copy the dev certs as well if they exist
       var devCerts = path.resolve(__dirname, '../dev-certs');
+      var outDevCerts = path.resolve(conf.outputPath, 'dev-certs');
       if (fs.existsSync(devCerts)) {
-        fs.copySync(devCerts, path.join(conf.outputPath, 'dev-certs'));
+        fs.copySync(devCerts, outDevCerts);
       } else {
-        var devCerts = path.resolve(conf.outputPath, 'dev-certs');
-        if (!fs.existsSync(devCerts)) {
-          fs.mkdir(devCerts)
+        if (!fs.existsSync(outDevCerts)) {
+          fs.mkdir(outDevCerts);
           var browserSyncCerts = path.resolve(__dirname, '../node_modules/browser-sync/lib/server/certs');
-          fs.copySync(path.join(browserSyncCerts, 'server.crt'), path.join(devCerts, 'pproxy.crt'));
-          fs.copySync(path.join(browserSyncCerts, 'server.key'), path.join(devCerts, 'pproxy.key'));
+          fs.copySync(path.join(browserSyncCerts, 'server.crt'), path.join(outDevCerts, 'pproxy.crt'));
+          fs.copySync(path.join(browserSyncCerts, 'server.key'), path.join(outDevCerts, 'pproxy.key'));
         }
       }
 

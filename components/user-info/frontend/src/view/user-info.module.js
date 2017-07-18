@@ -27,6 +27,12 @@
   /**
    * @name UserInfoController
    * @constructor
+   * @constructor
+   * @param {object} $translate - the Angular $translate service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} appNotificationsService - the notification  service
+   * @param {object} editUserInfoService - the edit user dialgo service
+   * @param {object} changePasswordService - the change password dialog service
    */
   function UserInfoController($translate, modelManager, appNotificationsService, editUserInfoService, changePasswordService) {
     var vm = this;
@@ -57,7 +63,7 @@
           changePasswordService.show(vm.user.id).result.then(function () {
             vm.fetchData();
             appNotificationsService.notify('success', $translate.instant('user-info.password-change.success'));
-          })
+          });
         },
         disabled: false,
         id: 'change-password',

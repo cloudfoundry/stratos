@@ -38,7 +38,7 @@
             data.newPassword === data.newPasswordConfirm &&
             data.oldPassword !== data.newPassword;
           return !valid;
-        }
+        };
 
         return frameworkAsyncTaskDialog(
           {

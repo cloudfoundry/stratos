@@ -8,6 +8,7 @@
   /**
    * @name EditUserInfoService
    * @description Edit User Info dialog service
+   * @param {object} $q - the Angular $q service
    * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async task dialog
@@ -36,7 +37,7 @@
           if (data.givenName) {
             update.name.givenName = data.givenName;
           }
-          
+
           if (data.emailAddress) {
             update.emails[0].value = data.emailAddress;
             password = data.password;
@@ -75,7 +76,7 @@
           isFormInvalid
         );
       }
-    };        
+    };
   }
 
 })();
