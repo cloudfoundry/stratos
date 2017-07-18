@@ -2,7 +2,6 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: stratos-ui-git
 - name: helm-chart-Chart
 - name: helm-chart-values
 outputs:
@@ -22,7 +21,6 @@ run:
       helm init || true
       ROOT_DIR=$PWD
       STRATOS_UI=${ROOT_DIR}/stratos-ui
-      STRATOS_UI_GIT=${ROOT_DIR}/stratos-ui-git
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
 
@@ -38,9 +36,13 @@ run:
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/irfanhabib/stratos-ui/archive/$(ls *.tgz)
       cp index.yaml ${STRATOS_UI_GIT}/
 
-      cd ${STRATOS_UI_GIT}
       git config --global user.name ${GIT_USER}
       git config --global user.email ${GIT_EMAIL}
 
+      mkdir -p /root/.ssh/
+      echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
+      chmod 600 /root/.ssh/id_rsa
+
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${GIT_TAG}"
+      git push
