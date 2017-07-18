@@ -26,7 +26,8 @@
 
     var model = {
       getCurrentUser: getCurrentUser,
-      changePassword: changePassword
+      changePassword: changePassword,
+      updateUser: updateUser
     };
 
     return model;
@@ -41,7 +42,26 @@
     }
 
     function changePassword(userId, oldPassword, newPassword) {
-      return userInfoApi.ChangePassword(userId, oldPassword, newPassword);
+      var config = {
+        headers: {
+          'x-stratos-password': oldPassword,
+          'x-stratos-password-new': newPassword
+        }
+      };
+      return userInfoApi.ChangePassword(userId, oldPassword, newPassword, config);
+    }
+
+    function updateUser(userId, data, version, password) {
+      var config = {
+        headers: {
+          'If-Match': version
+        }
+      };
+      if (password) {
+        config.headers['x-stratos-password'] = password;
+      }
+
+      return userInfoApi.UpdateUser(userId, data, config);
     }
   }
 

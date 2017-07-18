@@ -38,12 +38,14 @@
       });
     },
 
-    UpdateUser: function (user_id, data, params, httpConfigOptions) {
+    /**
+     * Update the user record
+     */
+    UpdateUser: function (userId, data, httpConfigOptions) {
       var config = {};
-      config.params = params;
-      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/uaa/Users/' + userId;
       config.method = 'PUT';
-      config.data = value;
+      config.data = data;
 
       for (var option in httpConfigOptions) {
         if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
@@ -52,9 +54,11 @@
       return this.$http(config);
     },
 
-    ChangePassword: function (user_id, oldPassword, newPassword) {
+    /**
+     * Change the password of the gievn user
+     */
+    ChangePassword: function (user_id, oldPassword, newPassword, httpConfigOptions) {
       var config = {};
-      //config.params = params;
       config.url = '/pp/v1/uaa/Users/' + user_id + '/password';
       config.method = 'PUT';
       config.data = {
@@ -62,6 +66,10 @@
         password: newPassword
       };
 
+      for (var option in httpConfigOptions) {
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
+      }
       return this.$http(config);
     }
 

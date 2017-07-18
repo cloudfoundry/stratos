@@ -29,3 +29,9 @@ dl.user-info-list {
     flex: 1;
   }
 }
+
+.edit-user-info-form {
+  .form-note {
+    margin-top: $console-unit-space * 0.5;
+  }
+}

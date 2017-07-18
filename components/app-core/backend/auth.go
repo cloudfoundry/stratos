@@ -268,6 +268,28 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
+	log.Debug("RefreshUAALogin")
+	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	if err != nil {
+		return err
+	}
+
+	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	if err != nil {
+		return err
+	}
+
+	if store {
+		_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")

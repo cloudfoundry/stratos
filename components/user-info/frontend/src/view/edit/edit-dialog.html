@@ -1,49 +1,43 @@
 <div class="edit-user-info-form">
-  <p translate>endpoints.connect.description</p>
+  <p translate>user-info.edit.introduction</p>
   <form class="form-stacked center-block" name="asyncTaskDialogCtrl.editUserInfoForm" role="form">
     <div class="form-group">
       <label class="control-label" for="user-info-form-givenName" translate>
-        Given name
+        user-info.edit.given-name
       </label>
-      <input autofocus type="text" class="form-control"
+      <input autofocus type="text" class="form-control" focusable-input
         id="user-info-form-givenName" name="name"
         placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.givenName }}"
         ng-model="asyncTaskDialogCtrl.context.data.givenName"/>
     </div>
     <div class="form-group">
       <label class="control-label" for="user-info-form-familyName" translate>
-        Family name
+        user-info.edit.family-name
       </label>
-      <input autofocus type="text" class="form-control"
+      <input type="text" class="form-control" focusable-input
         id="user-info-form-familyName" name="name"
         placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.familyName }}"
         ng-model="asyncTaskDialogCtrl.context.data.familyName"/>
     </div>
 
+    <p class="form-note" translate>user-info.edit.note</p>
+
     <div class="form-group">
       <label class="control-label" for="user-info-form-email" translate>
-        Email Address
+        user-info.edit.email
       </label>
-      <input autofocus type="text" class="form-control"
+      <input type="text" class="form-control" focusable-input
         id="user-info-form-email" name="name"
         placeholder="{{ asyncTaskDialogCtrl.context.emailAddress }}"
         ng-model="asyncTaskDialogCtrl.context.data.emailAddress"/>
     </div>
     
-    <div class="form-group" focusable-input ng-class="asyncTaskDialogCtrl.context.failedRegister ? 'has-error' : ''">
-      <label class="control-label required" for="credentials-form-username" translate>
-        endpoints.connect.username-label
-      </label>
-      <input type="text" class="form-control"
-        id="credentials-form-username" name="{{ asyncTaskDialogCtrl.context.cnsi.cnsi_type }}Username"
-        ng-model="asyncTaskDialogCtrl.context.data.username" required />
-    </div>
-    <div class="form-group has-feedback" focusable-input ng-class="asyncTaskDialogCtrl.context.failedRegister ? 'has-error' : ''">
+    <div ng-disabled="true" class="form-group has-feedback disabled" focusable-input >
       <label class="control-label required" for="credentials-form-password" translate>
-        endpoints.connect.password-label
+        user-info.edit.current-password
       </label>
-      <input type="password" class="form-control" id="credentials-form-password" name="{{ asyncTaskDialogCtrl.context.cnsi.cnsi_type }}Password"
-        ng-model="asyncTaskDialogCtrl.context.data.password" password-reveal required/>
+      <input ng-disabled="!asyncTaskDialogCtrl.context.data.emailAddress" type="password" class="form-control" id="credentials-form-password" name="user-info-form-password"
+        ng-model="asyncTaskDialogCtrl.context.data.password" password-reveal ng-required="asyncTaskDialogCtrl.context.data.emailAddress"/>
     </div>
 
   </form>

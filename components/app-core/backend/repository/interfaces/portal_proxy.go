@@ -39,4 +39,5 @@ type PortalProxy interface {
 	RefreshUAAToken(userGUID string) (TokenRecord, error)
 
 	GetUsername(userid string) (string, error)
+	RefreshUAALogin(username, password string, store bool) error
 }

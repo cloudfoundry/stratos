@@ -34,7 +34,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appUtilsService} appUtilsService - utils service
    */
-  function UserInfoController($location, $stateParams, $state, $scope, modelManager, appUtilsService, $http, editUserInfoService, changePasswordService) {
+  function UserInfoController($location, $stateParams, $state, $scope, $translate, modelManager, appUtilsService, appNotificationsService, editUserInfoService, changePasswordService) {
     var vm = this;
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.id = $stateParams.guid;
@@ -58,6 +58,7 @@
           });
           modal.closed.then(function () {
             vm.fetchData();
+            appNotificationsService.notify('success', $translate.instant('user-info.edit.success'));
           });
         },
         disabled: false,
@@ -67,17 +68,14 @@
       {
         name: 'user-info.password-change',
         execute: function () {
-          var modal = changePasswordService.show({
-            userInfo: vm.userInfo,
-            user: vm.user
-          });
-          modal.closed.then(function () {
+          changePasswordService.show(vm.user.id).closed.then(function () {
             vm.fetchData();
-          });
+            appNotificationsService.notify('success', $translate.instant('user-info.password-change.success'));
+          })
         },
         disabled: false,
-        id: 'edit',
-        icon: 'edit'
+        id: 'change-password',
+        icon: 'lock_outline'
       }
     ];
 

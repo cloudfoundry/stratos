@@ -7,24 +7,17 @@
 
   /**
    * @name EditUserInfoService
-   * @description Register a service via a slide out
-   * @namespace app.view
-   * @param {object} $q - the Angular $q service
+   * @description Edit User Info dialog service
    * @param {object} $translate - the Angular $translate service
    * @param {app.model.modelManager} modelManager The console model manager service
-   * @param {app.utils.appUtilsService} appUtilsService - the console appUtilsService service
-   * @param {app.view.appNotificationsService} appNotificationsService The console notification service
-   * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView The framework async detail view
-   * @param {app.view.endpoints.dashboard.appEndpointsCnsiService} appEndpointsCnsiService - service to support
-   *  dashboard with cnsi type endpoints
+   * @param {app.framework.widgets.frameworkAsyncTaskDialog} frameworkAsyncTaskDialog The framework async task dialog
    * @returns {object} Object containing 'show' function
    */
-  function EditUserInfoService($q, $translate, $http, modelManager, appUtilsService, appNotificationsService,
-                                      frameworkAsyncTaskDialog) {
+  function EditUserInfoService($q, $translate, modelManager, frameworkAsyncTaskDialog) {
 
     return {
       show: function (user) {
-          console.log(user);
+        var userInfoModel = modelManager.retrieve('user-info.model');
 
         var data = {
           familyName: '',
@@ -33,49 +26,33 @@
         };
 
         var applyEdit = function () {
-          console.log('EDIT');
-          console.log(user);
-          console.log(data);
-
-          var update = {
-            id: user.user.id
-            //userName: user.user.userName
-          };
+          var update = _.clone(user.user);
+          var password;
 
           if (data.familyName) {
-            update.name = update.name || {};
             update.name.familyName = data.familyName;
           }
 
           if (data.givenName) {
-            update.name = update.name || {};
             update.name.givenName = data.givenName;
           }
           
           if (data.emailAddress) {
-            var emails = user.user.emails ? _.clone(user.user.emails) : [];
-            var e2 = {
-              value: data.emailAddress,
-              primary: true
-            };
-            emails.push(e2);
-            update.emails = emails;
-          }
-
-          console.log(update);
-
-
-          // Must supply the version number to udpate
-          var options = {
-            headers: {
-              'If-Match': user.user.meta.version
+            update.emails[0].value = data.emailAddress;
+            password = data.password;
+            if (!password) {
+              return $q.reject();
             }
-          };
+          }
+          return userInfoModel.updateUser(update.id, update, user.user.meta.version, password);
+        };
 
-          return $http.patch('/pp/v1/uaa/Users/' + update.id, update, options).then(function (response) {
-            console.log('OKAY');
-            console.log(response);
-          });
+        var isFormInvalid = function () {
+          var valid = data.familyName || data.givenName || data.emailAddress;
+          if (data.emailAddress) {
+            valid = valid && data.password;
+          }
+          return !valid;
         };
 
         return frameworkAsyncTaskDialog(
@@ -94,7 +71,8 @@
             user: user,
             data: data
           },
-          applyEdit
+          applyEdit,
+          isFormInvalid
         );
       }
     };        

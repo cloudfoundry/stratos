@@ -12,8 +12,7 @@ import (
 )
 
 func (userInfo *UserInfo) uaa(c echo.Context) error {
-
-	log.Info("UAA REQUEST")
+	log.Debug("uaa request")
 
 	// Check session
 	sessionExpireTime, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
@@ -23,8 +22,6 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	log.Info(sessionExpireTime)
-
 	sessionUser, err := userInfo.portalProxy.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		msg := "Could not find user_id in Session"
@@ -33,15 +30,8 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	}
 
 	tr, _ := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
-	log.Info("================================================================================")
-	log.Info("GOT UAA TOKEN")
-	log.Info("================================================================================")
-	log.Info(tr)
-
 	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
 	path := c.Path()
-	// We know this is a wildcard path, so remove the trailing '*'
-	//path = path[:len(path)-1]
 
 	// Now get the URL of the request and remove the path to give the path of the API that is being requested
 	target := c.Request().URL().Path()
@@ -53,12 +43,15 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return err
 	}
 
-	log.Infof("Got uername: %s", username)
-
 	// Check for custom header - if present, verify the user's password before making the request
 	password := c.Request().Header().Get("x-stratos-password")
+	log.Infof("PASSWORD: %s", password)
 	if len(password) > 0 {
 		// Need to verify the user's login
+		err := userInfo.portalProxy.RefreshUAALogin(username, password, false)
+		if err != nil {
+			return err
+		}
 	}
 
 	statusCode, body, err := userInfo.doApiRequest(sessionUser, url, c.Request())
@@ -66,22 +59,14 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return err
 	}
 
-	log.Info("Call finished")
-	log.Infof("Status code: %d", statusCode)
-
 	// Refresh the access token
 	if statusCode == 401 {
-		log.Info("Updating access token for the UAA")
 		_, err := userInfo.portalProxy.RefreshUAAToken(sessionUser)
 		if err != nil {
-			log.Error("Failed to refresh UAA Token")
-			log.Error(err)
 			return err
 		}
-
 		statusCode, body, err = userInfo.doApiRequest(sessionUser, url, c.Request())
 		if err != nil {
-			log.Error("Failed to make API Call")
 			return err
 		}
 	}
@@ -89,12 +74,17 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	// If we have the user's password, log them in again
 	// This is used when the API call that is being made revokes the current access and refresh tokens
 	if len(password) > 0 {
-		log.Info("Logging user in again")
+		newPassword := c.Request().Header().Get("x-stratos-password-new")
+		if len(newPassword) > 0 {
+			password = newPassword
+		}
+		err := userInfo.portalProxy.RefreshUAALogin(username, password, true)
+		if err != nil {
+			return err
+		}
 	}
 
 	c.Response().WriteHeader(statusCode)
-
-	// we don't care if this fails
 	_, _ = c.Response().Write(body)
 
 	return nil
