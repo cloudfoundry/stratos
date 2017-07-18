@@ -16,7 +16,7 @@ run:
     - -exc
     - |
       # Create Github release
-
+      cd stratos-ui
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       github-release release --tag ${GIT_TAG}
       cd helm-chart-tarball
