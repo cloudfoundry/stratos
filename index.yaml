@@ -9,4 +9,12 @@ entries:
     urls:
     - https://github.com/irfanhabib/stratos-ui/archive/console-release-v1.0.0-alpha28-g0662eb7.tgz/console-release-v1.0.0-alpha28-g0662eb7.tgz
     version: release-v1.0.0-alpha28-g0662eb7
-generated: 2017-07-18T16:34:27.11683788Z
+  - apiVersion: v1
+    created: 2017-07-18T17:08:36.209485455Z
+    description: A Helm chart for deploying Console
+    digest: 1ebb6df95367eee87cdb5226981461e10cf4d99cd2512607a587151ff2fd46fc
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/archive/console-release-v1.0.0-alpha29-g46e6b60.tgz/console-release-v1.0.0-alpha29-g46e6b60.tgz
+    version: release-v1.0.0-alpha29-g46e6b60
+generated: 2017-07-18T17:08:36.209068855Z
