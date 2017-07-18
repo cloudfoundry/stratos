@@ -7,11 +7,11 @@
           "manage": "manage roles",
           "change": "change roles",
           "remove": "remove all roles",
-          "remove-org": "remove from [[@:cf.organisation.organisation]]"
+          "remove-org": "remove from organization"
         },
         "users-label": "USERS ",
-        "org-roles-label": "[[@:cf.organisation.uppercase]] ROLES",
-        "space-roles-label": "[[@:cf.space.uppercase]] ROLES",
+        "org-roles-label": "ORGANIZATION ROLES",
+        "space-roles-label": "SPACE ROLES",
         "action-label": "ACTION",
         "no-roles": {
           "none-assigned": "None assigned",
