@@ -121,8 +121,8 @@
     },
     "sort-by": " ",
     "select-endpoint-all": " ",
-    "select-org-all": " [[@:cf.organisations.capitalised]]",
-    "select-space-all": " [[@:cf.spaces.capitalised]]",
+    "select-org-all": " ",
+    "select-space-all": " ",
     "total-apps": " ",
     "filtered-apps": "Filtered Applications",
     "instances": "",
@@ -147,28 +147,5 @@
 
   "cloud-foundry": "",
   "org": "",
-  "space": "",
-
-  "cf": {
-    "organisation": {
-      "organisation": "",
-      "capitalised": "",
-      "uppercase": ""
-    },
-    "organisations": {
-      "organisations": "",
-      "capitalised": "",
-      "uppercase": ""
-    },
-    "space": {
-      "space": "",
-      "capitalised": "",
-      "uppercase": ""
-    },
-    "spaces": {
-      "space": "",
-      "capitalised": "",
-      "uppercase": ""
-    }
-  }
+  "space": ""
 }

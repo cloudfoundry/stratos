@@ -49,8 +49,8 @@
     },
     "sort-by": "Trier par",
     "select-endpoint-all": "Tous les Endpoints",
-    "select-org-all": "Tous les [[@:cf.organisations.capitalised]]",
-    "select-space-all": "Tous les [[@:cf.spaces.capitalised]]",
+    "select-org-all": "Tous les Organizations",
+    "select-space-all": "Tous les Espaces",
     "total-apps": "Total des demandes",
     "filtered-apps": "Applications filtrées",
     "instances": "Instances",
@@ -74,7 +74,7 @@
   },
   "cloud-foundry": "Cloud Foundry",
   "org": "Org",
-  "space": "@:cf.space.capitalised",
+  "space": "Espace",
   "navbar": {
     "title": "@:product.name",
     "logo": "home",
@@ -110,27 +110,5 @@
     "password": "@:auth.password",
     "authenticating": "Authentification des informations d'identification",
     "welcome": "Utilisez la [[@:product.console]] pour développer, composer et gérer des charges de travail natives Cloud."
-  },
-  "cf": {
-    "organisation": {
-      "organisation": "organization",
-      "capitalised": "Organization",
-      "uppercase": "ORGANIZATION"
-    },
-    "organisations": {
-      "organisations": "organizations",
-      "capitalised": "Organizations",
-      "uppercase": "ORGANIZATIONS"
-    },
-    "space": {
-      "space": "espace",
-      "capitalised": "Espace",
-      "uppercase": "ESPACE"
-    },
-    "spaces": {
-      "space": "espaces",
-      "capitalised": "Espaces",
-      "uppercase": "ESPACEs"
-    }
   }
 }
