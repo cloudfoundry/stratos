@@ -23,5 +23,6 @@ run:
       # Move dev-certs
       mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
       cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
       ./build.sh -T -c
       cp console/values.yaml console/Chart.yaml ${ROOT_DIR}/helm-build/

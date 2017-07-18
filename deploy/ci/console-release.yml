@@ -27,6 +27,9 @@ jobs:
       privileged: true
       timeout: 30m
       file: stratos-ui/deploy/ci/tasks/release/build-helm.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
 
 - name: update-repo
   plan:
