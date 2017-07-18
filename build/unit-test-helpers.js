@@ -1,15 +1,18 @@
 (function () {
   'use strict';
 
+  beforeEach(module('console-app', function ($injector) {
+    // Override whatever language the running browser is in, this removes unexpected http request to
+    // locale_<browser locale>.json
+    var languageServiceProvider = $injector.get('languageServiceProvider');
+    languageServiceProvider.setBrowserLocale('en_US');
+  }));
+
   beforeEach(module('pascalprecht.translate', function ($injector) {
     var $translateProvider = $injector.get('$translateProvider');
     jasmine.getJSONFixtures().fixturesPath = 'base/dist/i18n';
     var json = getJSONFixture('locale-en_US.json');
     $translateProvider.translations('en_US', json);
-
-    // Would be nicer to do this in a way that covers all locales, however can't find a way to change the locale of
-    // phantomjs or override the $translate.resolveClientLocale function in a global clean way
-    $translateProvider.translations('en_GB', json);
   }));
 
   beforeEach(module('console-templates'));

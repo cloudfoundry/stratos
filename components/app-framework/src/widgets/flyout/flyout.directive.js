@@ -20,21 +20,17 @@
    */
   function flyout() {
     return {
-      link: link,
       restrict: 'E',
       scope: {
         flyoutActive: '='
       },
+      bindToController: true,
       templateUrl: 'framework/widgets/flyout/flyout.html',
       transclude: true,
-      controller: FlyoutController
+      controller: FlyoutController,
+      controllerAs: 'flyoutCtrl'
     };
 
-    function link(scope) {
-      scope.close = function () {
-        scope.flyoutActive = false;
-      };
-    }
   }
 
   /**
@@ -44,6 +40,12 @@
    * @param {object} frameworkDialogEvents - Dialog Events service
    */
   function FlyoutController($scope, frameworkDialogEvents) {
+    var vm = this;
+
+    vm.close = function () {
+      vm.flyoutActive = false;
+    };
+
     $scope.$watch('flyoutActive', function (nv, ov) {
       if (!ov && nv === true) {
         frameworkDialogEvents.notifyOpened();
