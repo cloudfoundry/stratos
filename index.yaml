@@ -2,11 +2,11 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v1
-    created: 2017-07-18T15:43:15.276068407Z
+    created: 2017-07-18T15:45:41.83636874Z
     description: A Helm chart for deploying Console
     digest: 2fc154b8cc8721e2e0e2bef226400f97dbba77cceb02890f149e73b0e8c1a6a2
     name: console
     urls:
     - https://github.com/irfanhabib/stratos-ui/archive/console-0.1.0.tgz/console-0.1.0.tgz
     version: 0.1.0
-generated: 2017-07-18T15:43:15.275645712Z
+generated: 2017-07-18T15:45:41.835972637Z
