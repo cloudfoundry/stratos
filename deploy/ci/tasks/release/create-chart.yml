@@ -6,6 +6,7 @@ inputs:
 - name: helm-chart-values
 outputs:
 - name: modified-stratos-ui
+- name: helm-chart
 image_resource:
   type: docker-image
   source:
@@ -20,7 +21,6 @@ run:
     - |
       helm init || true
       ROOT_DIR=$PWD
-      mkdir helm-chart
       STRATOS_UI=${ROOT_DIR}/stratos-ui
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
