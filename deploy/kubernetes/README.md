@@ -22,6 +22,22 @@ For convenience the guide assumes that the helm client has been added to your PA
 ```
 helm init
 ```
+## Deploy using the Helm repository
+
+Add the Helm repository to your helm installation
+```
+helm repo add  https://suse.github.io/stratos-ui
+```
+Check the repository was successfully added by searching for the `console`
+```
+helm search console 
+NAME                    VERSION DESCRIPTION                       
+stratos-ui/console      0.9.0 A Helm chart for deploying Console
+```
+To install the Console
+```
+helm install stratos-ui/console --namespace=console --name my-console
+```
 
 ## Deploying
 
