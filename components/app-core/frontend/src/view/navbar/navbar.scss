@@ -394,3 +394,15 @@ nav.secondary-nav {
     display: none;
   }
 }
+
+
+#navbar-user-menu-dropdown {
+
+  .dropdown-menu .divider {
+    margin: 0;
+
+    &:hover {
+      background-color: $dropdown-divider-bg;
+    }
+  }
+}
