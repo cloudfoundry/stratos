@@ -1,8 +1,6 @@
 {
   "locales": {
-    "locales": "en_US,fr,klingon",
-    "en_US": "English (US)",
-    "fr": "Français",
-    "klingon": ""
+    "locales": "en_US",
+    "en_US": "English (US)"
   }
 }
