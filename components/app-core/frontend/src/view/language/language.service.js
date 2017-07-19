@@ -7,7 +7,7 @@
     .provider('languageService', languageServiceProvider)
     .factory('missingTranslateHandler', missingTranslateHandler);
 
-  var localeStorageId = 'locale';
+  var localeStorageId = 'stratos-ui_locale';
   var defaultLocale = 'en_US';
   var browserLocale;
 
@@ -104,7 +104,7 @@
       $log.info('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
       // Attempt to set the fallback + preferred
       $translate.preferredLanguage(locales[0]);
-      $translate.fallbackLanguage(locales[0]);
+      $translate.useFallbackLanguage(locales[0]);
       // Ensure that the user pref is this one. This avoids instances where older, unsupported locales have not been
       // cleared out of the source tree
       userPreference = locales[0];
