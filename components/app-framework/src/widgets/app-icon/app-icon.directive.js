@@ -23,11 +23,16 @@
     };
   }
 
-  function AppIconController() {
-    this.svgIcon = this.icon.indexOf('svg:') === 0;
-    if (this.svgIcon) {
-      this.svg = 'svg/' + this.icon.substr(4);
-    }
+  function AppIconController($scope) {
+    var vm = this;
+
+    $scope.$watch('appIconCtrl.icon', function () {
+      vm.svgIcon = vm.icon.indexOf('svg:') === 0;
+      if (vm.svgIcon) {
+        vm.svg = 'svg/' + vm.icon.substr(4);
+      }
+    });
+
   }
 
 })();
