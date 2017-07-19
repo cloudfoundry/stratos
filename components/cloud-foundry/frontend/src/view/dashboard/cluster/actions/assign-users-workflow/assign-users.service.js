@@ -150,19 +150,19 @@
         allowJump: false,
         allowBack: true,
         allowCancelAtLastStep: true,
-        title: 'assign-user-roles.title',
+        title: 'cf.roles.assign-user-roles.title',
         btnText: {
           cancel: 'buttons.cancel',
           back: 'buttons.previous'
         },
         steps: [
           {
-            title: 'assign-user-roles.step1.title',
+            title: 'cf.roles.assign-user-roles.step1.title',
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
             data: that.data,
             userInput: that.userInput,
-            showBusyOnEnter: 'assign-user-roles.step1.busy-message',
+            showBusyOnEnter: 'cf.roles.assign-user-roles.step1.busy-message',
             checkReadiness: function () {
               return initialiseSelect();
             },
@@ -199,12 +199,12 @@
             }
           },
           {
-            title: 'assign-user-roles.step2.title',
+            title: 'cf.roles.assign-user-roles.step2.title',
             templateUrl: path + 'assign/assign-selected-users.html',
             formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
-            nextBtnText: 'assign-user-roles.step2.button-yes',
+            nextBtnText: 'cf.roles.assign-user-roles.step2.button-yes',
             stepCommit: true,
             onNext: function () {
               // Make the call to the role service to assign new roles. To do this we need to create the params in the

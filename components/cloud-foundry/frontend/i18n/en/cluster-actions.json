@@ -1,5 +1,5 @@
 {
-  "cluster-actions": {
+  "cf.cluster-actions": {
     "create-org": {
       "action-name": "Create Organization",
       "dialog": {

@@ -82,7 +82,7 @@
     vm.cfApplicationTabs = cfApplicationTabs;
     vm.appActions = [
       {
-        name: 'app-actions.view',
+        name: 'app.app-info.app-actions.view',
         execute: function () {
           var routes = vm.model.application.summary.routes;
           if (routes.length) {
@@ -97,7 +97,7 @@
         icon: 'launch'
       },
       {
-        name: 'app-actions.stop',
+        name: 'app.app-info.app-actions.stop',
         id: 'stop',
         execute: function () {
           vm.model.stopApp(cnsiGuid, vm.id);
@@ -106,7 +106,7 @@
         icon: 'stop'
       },
       {
-        name: 'app-actions.restart',
+        name: 'app.app-info.app-actions.restart',
         id: 'restart',
         execute: function () {
           vm.model.restartApp(cnsiGuid, vm.id);
@@ -115,7 +115,7 @@
         icon: 'settings_backup_restore'
       },
       {
-        name: 'app-actions.delete',
+        name: 'app.app-info.app-actions.delete',
         id: 'delete',
         execute: function () {
           deleteApp();
@@ -124,7 +124,7 @@
         icon: 'delete'
       },
       {
-        name: 'app-actions.start',
+        name: 'app.app-info.app-actions.start',
         id: 'start',
         execute: function () {
           vm.model.startApp(cnsiGuid, vm.id);
@@ -133,7 +133,7 @@
         icon: 'play_circle_outline'
       },
       {
-        name: 'app-actions.cli',
+        name: 'app.app-info.app-actions.cli',
         id: 'cli',
         execute: function () {
 
@@ -356,7 +356,7 @@
       frameworkDetailView(
         {
           template: '<delete-app-workflow guids="context.details" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
-          title: 'delete-app.complex.title',
+          title: 'app.app-info.delete-app.complex.title',
           dialog: true,
           class: 'dialog-form-larger'
         },
@@ -368,18 +368,18 @@
 
     function simpleDeleteAppDialog() {
       frameworkDialogConfirm({
-        title: 'delete-app.simple.title',
-        description: $translate.instant('delete-app.simple.description', { appName: vm.model.application.summary.name }),
+        title: 'app.app-info.delete-app.simple.title',
+        description: $translate.instant('app.app-info.delete-app.simple.description', { appName: vm.model.application.summary.name }),
         submitCommit: true,
         buttonText: {
-          yes: 'delete-app.simple.button.yes',
-          no: 'delete-app.simple.button.no'
+          yes: 'app.app-info.delete-app.simple.button.yes',
+          no: 'app.app-info.delete-app.simple.button.no'
         },
         callback: function () {
           var appName = vm.model.application.summary.name;
           vm.model.deleteApp(cnsiGuid, vm.id).then(function () {
             // show notification for successful binding
-            var message = $translate.instant('delete-app.simple.success', {appName: appName});
+            var message = $translate.instant('app.app-info.delete-app.simple.success', {appName: appName});
             appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
             appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });

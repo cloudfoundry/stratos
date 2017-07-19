@@ -45,7 +45,7 @@
 
     function addDescription() {
       _.each(vm.flags, function (flag) {
-        flag.description = $translate.instant('cf.feature-flags.descriptions.' + flag.name);
+        flag.description = $translate.instant('cf.cf-tabs.feature-flags.descriptions.' + flag.name);
       });
     }
   }

@@ -56,7 +56,7 @@
             </dd>
             <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.status</dt>
             <dd ng-if="clusterDetailController.initialized" translate>
-              {{ clusterDetailController.isAdmin ? 'roles.cf-admin' : 'roles.cf-user' }}
+              {{ clusterDetailController.isAdmin ? 'cf.roles.role-labels.cf-admin' : 'cf.roles.role-labels.cf-user' }}
             </dd>
           </dl>
         </div>
@@ -73,19 +73,19 @@
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>cf.users</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>cf.firehose</a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>cf.cf-tabs.firehose</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.featureFlags" translate>cf.feature-flags</a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.featureFlags" translate>cf.cf-tabs.feature-flags</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.buildPacks" translate>cf.buildpacks</a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.buildPacks" translate>cf.cf-tabs.buildpacks</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.stacks" translate>cf.stacks</a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.stacks" translate>cf.cf-tabs.stacks</a>
     </li>
     <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.securityGroups" translate>cf.security-groups</a>
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.securityGroups" translate>cf.cf-tabs.security-groups</a>
     </li>
   </ul>
   <ui-view></ui-view>

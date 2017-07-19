@@ -1,10 +1,10 @@
 <form name="form.createOrganization">
   <div class="form-group" focusable-input
        ng-class="{'has-error': form.createOrganization.orgName.$invalid && form.createOrganization.orgName.$dirty}">
-    <label class="control-label" translate>cluster-actions.create-org.dialog.org-label</label>
+    <label class="control-label" translate>cf.cluster-actions.create-org.dialog.org-label</label>
     <span class="control-message">
-      <span translate ng-if="form.createOrganization.orgName.$error.required">cluster-actions.create-org.dialog.org-error-required</span>
-      <span translate ng-if="form.createOrganization.orgName.$error.stratosUnique">cluster-actions.create-org.dialog.org-error-unique</span>
+      <span translate ng-if="form.createOrganization.orgName.$error.required">cf.cluster-actions.create-org.dialog.org-error-required</span>
+      <span translate ng-if="form.createOrganization.orgName.$error.stratosUnique">cf.cluster-actions.create-org.dialog.org-error-unique</span>
     </span>
     <input type="text" name="orgName" auto-focus="300" class="form-control"
            stratos-unique items="asyncTaskDialogCtrl.context.data.organizationNames"

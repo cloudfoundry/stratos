@@ -1,5 +1,5 @@
 {
-  "deploy-location": {
+  "app.deploy-location": {
     "title": "Select deploy location",
     "cf-label": "[[@:cloud-foundry]]",
     "cf-placeholder": "Select [[@:cloud-foundry]]",

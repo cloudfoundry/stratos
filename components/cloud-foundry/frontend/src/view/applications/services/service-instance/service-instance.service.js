@@ -39,13 +39,13 @@
        */
       unbindServiceFromApp: function (cnsiGuid, appGuid, serviceBindingGuid, serviceInstanceName, callbackFunc) {
         return frameworkDialogConfirm({
-          title: 'app-tabs.services.unbind.title',
-          description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.unbind.error-message',
+          title: 'app.app-info.app-tabs.services.unbind.title',
+          description: $translate.instant('app.app-info.app-tabs.services.unbind.description', {name: serviceInstanceName}),
+          errorMessage: 'app.app-info.app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.unbind.button.yes',
-            no: 'app-tabs.services.unbind.button.no'
+            yes: 'app.app-info.app-tabs.services.unbind.button.yes',
+            no: 'app.app-info.app-tabs.services.unbind.button.no'
           },
           callback: function () {
             return bindingModel.deleteServiceBinding(cnsiGuid, serviceBindingGuid)
@@ -79,13 +79,13 @@
        */
       unbindServiceFromApps: function (cnsiGuid, serviceBindings, serviceInstanceName, callbackFunc) {
         return frameworkDialogConfirm({
-          title: 'app-tabs.services.unbind.title',
-          description: $translate.instant('app-tabs.services.unbind.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.unbind.error-message',
+          title: 'app.app-info.app-tabs.services.unbind.title',
+          description: $translate.instant('app.app-info.app-tabs.services.unbind.description', {name: serviceInstanceName}),
+          errorMessage: 'app.app-info.app-tabs.services.unbind.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.unbind.button.yes',
-            no: 'app-tabs.services.unbind.button.no'
+            yes: 'app.app-info.app-tabs.services.unbind.button.yes',
+            no: 'app.app-info.app-tabs.services.unbind.button.no'
           },
           callback: function () {
             var promises = [];
@@ -105,9 +105,9 @@
             return $q.all(promises)
               .then(function () {
                 if (failedCount > 0) {
-                  appNotificationsService.notify('warning', 'app-tabs.services.unbind.error');
+                  appNotificationsService.notify('warning', 'app.app-info.app-tabs.services.unbind.error');
                 } else {
-                  appNotificationsService.notify('success', $translate.instant('app-tabs.services.unbind.success'));
+                  appNotificationsService.notify('success', $translate.instant('app.app-info.app-tabs.services.unbind.success'));
                 }
 
                 if (angular.isDefined(callbackFunc)) {
@@ -145,13 +145,13 @@
        */
       deleteService: function (cnsiGuid, serviceInstanceGuid, serviceInstanceName, callbackFunc) {
         return frameworkDialogConfirm({
-          title: 'app-tabs.services.delete.title',
-          description: $translate.instant('app-tabs.services.delete.description', {name: serviceInstanceName}),
-          errorMessage: 'app-tabs.services.delete.error-message',
+          title: 'app.app-info.app-tabs.services.delete.title',
+          description: $translate.instant('app.app-info.app-tabs.services.delete.description', {name: serviceInstanceName}),
+          errorMessage: 'app.app-info.app-tabs.services.delete.error-message',
           submitCommit: true,
           buttonText: {
-            yes: 'app-tabs.services.delete.button.yes',
-            no: 'app-tabs.services.delete.button.no'
+            yes: 'app.app-info.app-tabs.services.delete.button.yes',
+            no: 'app.app-info.app-tabs.services.delete.button.no'
           },
           callback: function () {
             var params = {
@@ -160,7 +160,7 @@
             };
             return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params)
               .then(function () {
-                appNotificationsService.notify('success', $translate.instant('app-tabs.services.delete.success'));
+                appNotificationsService.notify('success', $translate.instant('app.app-info.app-tabs.services.delete.success'));
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
@@ -194,7 +194,7 @@
               var instanceVars = _.find(vcap[serviceKey], { name: instance.name });
               var config = {
                 templateUrl: 'plugins/cloud-foundry/view/applications/services/service-instance/env-variables.html',
-                title: 'app-tabs.services.view-envs.title',
+                title: 'app.app-info.app-tabs.services.view-envs.title',
                 titleTranslateValues: {instanceName: instance.name},
                 dialog: true
               };

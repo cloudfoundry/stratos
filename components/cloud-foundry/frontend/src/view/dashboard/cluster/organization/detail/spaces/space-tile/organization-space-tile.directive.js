@@ -64,12 +64,12 @@
     cardDataObj.title = vm.space.entity.name;
 
     var renameAction = {
-      name: 'space-info.rename-action',
+      name: 'cf.space-info.rename-action',
       disabled: true,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: 'space-info.rename-dialog.title',
+            title: 'cf.space-info.rename-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-space.html',
             submitCommit: true,
             buttonTitles: {
@@ -95,7 +95,7 @@
                 {name: spaceData.name})
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('space-info.rename-dialog.success-notification', {name: spaceData.name}));
+                    $translate.instant('cf.space-info.rename-dialog.success-notification', {name: spaceData.name}));
                   cardDataObj.title = spaceData.name;
                 });
             } else {
@@ -106,23 +106,23 @@
       }
     };
     var deleteAction = {
-      name: 'space-info.delete-action',
+      name: 'cf.space-info.delete-action',
       disabled: true,
       execute: function () {
         return frameworkDialogConfirm({
-          title: 'space-info.delete-dialog.title',
-          description: $translate.instant('space-info.delete-dialog.description',
+          title: 'cf.space-info.delete-dialog.title',
+          description: $translate.instant('cf.space-info.delete-dialog.description',
             {name: spaceDetail().details.space.entity.name}),
           submitCommit: true,
           buttonText: {
             yes: 'buttons.delete',
             no: 'buttons.cancel'
           },
-          errorMessage: 'space-info.delete-dialog.error-message',
+          errorMessage: 'cf.space-info.delete-dialog.error-message',
           callback: function () {
             return spaceModel.deleteSpace(vm.clusterGuid, vm.organizationGuid, vm.spaceGuid)
               .then(function () {
-                appNotificationsService.notify('success', $translate.instant('space-info.delete-dialog.success-notification',
+                appNotificationsService.notify('success', $translate.instant('cf.space-info.delete-dialog.success-notification',
                   {name: spaceDetail().details.space.entity.name}));
               });
           }
@@ -130,7 +130,7 @@
       }
     };
     var assignAction = {
-      name: 'common-roles-actions.assign-users',
+      name: 'cf.roles.common-roles-actions.assign-users',
       disabled: true,
       execute: function () {
         appClusterAssignUsers.assign({
