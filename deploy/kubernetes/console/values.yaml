@@ -1,11 +1,22 @@
+# Tag for images
 consoleVersion: latest
+# Docker Org
 dockerOrg: splatform
+# Docker Registry where images are available
 dockerRegistry: docker.io
+# Specify default DB password
 dbPassword: changeme
+# Provide Proxy settings if required
+#httpProxy: proxy.corp.net
+#httpsProxy: proxy.corp.net
+#noProxy: localhost
+#ftpProxy: proxy.corp.net
+#socksProxy: sock-proxy.corp.net
 images:
   console: stratos-console
   proxy: stratos-proxy
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job
-
+# Specify which storage class should be used for PVCs
+#storageClass: default

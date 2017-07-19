@@ -26,11 +26,11 @@
       position: 1,
       hide: false,
       uiSref: 'cf.applications.application.summary',
-      label: 'app.tabs.summary.label',
+      label: 'app.app-info.app-tabs.summary.label',
       appCreatedInstructions: [{
         id: 'new-app-deploy-cli',
         position: 2,
-        description: 'app.tabs.summary.instructions.cli',
+        description: 'app.app-info.app-tabs.summary.instructions.cli',
         show: function () {
           return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.application, authModel.actions.update,
             model.application.summary.space_guid);
@@ -44,7 +44,7 @@
       }, {
         id: 'new-app-add-services',
         position: 3,
-        description: 'app.tabs.summary.instructions.service',
+        description: 'app.app-info.app-tabs.summary.instructions.service',
         show: function () {
           return authModel.isAllowed($stateParams.cnsiGuid, authModel.resources.managed_service_instance,
             authModel.actions.create, model.application.summary.space_guid);
@@ -117,7 +117,7 @@
 
     vm.routesActionMenu = [
       {
-        name: 'app-route-actions.unmap',
+        name: 'app.app-info.app-tabs.summary.routes-panel.route-actions.unmap',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.unmapAppRoute(vm.cnsiGuid, route, route.guid, vm.id).finally(function () {
@@ -126,7 +126,7 @@
         }
       },
       {
-        name: 'app-route-actions.delete',
+        name: 'app.app-info.app-tabs.summary.routes-panel.route-actions.delete',
         disabled: false,
         execute: function (route) {
           vm.appClusterRoutesService.deleteRoute(vm.cnsiGuid, route, route.guid).finally(function () {
@@ -138,23 +138,23 @@
 
     vm.instancesActionMenu = [
       {
-        name: 'app-instances-actions.terminate',
+        name: 'app.app-info.app-instances-actions.terminate',
         disabled: false,
         execute: function (instanceIndex) {
           frameworkDialogConfirm({
-            title: 'terminate-instance.title',
-            description: $translate.instant('terminate-instance.description', { index: instanceIndex }),
-            errorMessage: 'terminate-instance.error-message',
+            title: 'app.app-info.terminate-instance.title',
+            description: $translate.instant('app.app-info.terminate-instance.description', { index: instanceIndex }),
+            errorMessage: 'app.app-info.terminate-instance.error-message',
             submitCommit: true,
             buttonText: {
-              yes: 'terminate-instance.button.yes',
-              no: 'terminate-instance.button.no'
+              yes: 'app.app-info.terminate-instance.button.yes',
+              no: 'app.app-info.terminate-instance.button.no'
             },
             callback: function () {
               return vm.model.terminateRunningAppInstanceAtGivenIndex(vm.cnsiGuid, vm.id, instanceIndex)
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('terminate.success', { index: instanceIndex }));
+                    $translate.instant('app.app-info.terminate-instance.terminate.success', { index: instanceIndex }));
                   update();
                 });
             }

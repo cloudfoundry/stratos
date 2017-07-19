@@ -3,12 +3,12 @@
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <div ng-if="sgCtrl.stateInitialised && sgCtrl.error === true" class="cluster-loading">
-  <div translate>cf.security-groups.error</div>
+  <div translate>cf.cf-tabs.security-groups.error</div>
 </div>
 <div class="cluster-gallery-card-container" ng-if="sgCtrl.stateInitialised && sgCtrl.secGroups">
   <div ng-if="sgCtrl.secGroups.length < 1"
        class="panel panel-default cluster-empty-list">
-    <div class="panel-body" translate>cf.security-groups.empty</div>
+    <div class="panel-body" translate>cf.cf-tabs.security-groups.empty</div>
   </div>
   <div class="security-groups-list" ng-repeat="secGroup in sgCtrl.secGroups track by secGroup.metadata.guid">
     <security-group-detail model="secGroup"></security-group-detail>

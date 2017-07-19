@@ -94,7 +94,7 @@
         steps: [
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-services-and-routes.html',
-            nextBtnText: 'delete-app.complex.title',
+            nextBtnText: 'app.app-info.delete-app.complex.title',
             isLastStep: true
           }
         ]
@@ -316,7 +316,7 @@
       return vm.deleteApp().then(function () {
         vm.deletingApplication = false;
         // show notification for successful binding
-        var successMsg = $translate.instant('delete-app.complex.success', {appName: appName});
+        var successMsg = $translate.instant('app.app-info.delete-app.complex.success', {appName: appName});
         appEventService.$emit('events.NOTIFY_SUCCESS', {message: successMsg});
         appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         vm.dismissDialog();

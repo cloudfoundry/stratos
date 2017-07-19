@@ -7,7 +7,7 @@
   },
   "product": {
     "cf": "@:cloud-foundry"
-  },  
+  },
   "cf": {
     "registration": {
       "name": "@:cloud-foundry",
@@ -18,84 +18,113 @@
       "tagline": "[[@:cf.registration.name]] supports the full application lifecycle, from initial development, through testing to deployment.",
       "urlHint": "[[@:cf.registration.name]] API endpoint"
     },
-    "cli": {
-      "commands": {
-        "title": "CLI Commands",
-        "deploy-title": "Deploy Using CLI"
-      }
-    },
-    "instance": {
-      "labels": {
-        "index": "Index",
-        "status": "Status",
-        "memory": "Memory",
-        "disk": "Disk",
-        "uptime": "Uptime"
-      }
-    },
-    "buildpacks": {
-      "buildpacks": "Build Packs",
-      "labels": {
-        "position": "Position",
-        "locked": "Locked",
-        "unlocked": "Unlocked",
-        "enabled": "Enabled",
-        "disabled": "Disabled",
-        "created": "created",
-        "updated": "updated",
-        "filename": "file name"
-      },
-      "error": "An error occurred retrieving buildpack metadata",
-      "empty": "There are no buildpacks available"
-    },
-    "stacks": {
-      "stacks": "Stacks",
-      "labels":{
-        "name": "Name",
-        "description": "Description",
-        "created": "Created",
-        "updated": "Updated"
-      },
-      "error": "An error occurred retrieving stacks metadata",
-      "empty": "There are no stacks available"
-    },
-    "security-groups": {
-      "security-groups": "Security Groups",
-      "labels":{
-        "created": "Created",
-        "updated": "Updated",
-        "spaces": "Spaces",
-        "staging-default": "Staging Default",
-        "running-default": "Running Default",
-        "rules": "Rules",
-        "yes": "Yes",
-        "no": "No"
-      },
-      "error": "An error occurred retrieving security group metadata",
-      "empty": "There are no security groups available"
-    },
-    "events": {
-      "events": "Events",
-      "total": "Total: {{total}}",
-      "empty": "No events available",
-      "error": "An error occurred retrieving events",
-      "detail": "Event Detail",
-      "labels":{
-        "timestamp": "Timestamp",
-        "type": "Type",
-        "actor-name": "Actor Name",
-        "detail": "Detail"
-      },
-      "page-sizes": {
-        "five": "5 per page",
-        "ten": "10 per page",
-        "twenty": "20 per page",
-        "fifty": "50 per page"
-      }
-    },
     "tile": {
       "token-expired": "Token has expired",
       "uncontactable": "Cannot contact endpoint"
+    },
+    "cli-common": {
+      "title": "CLI Commands",
+      "button-text": "CLI Commands",
+      "intro": "Use the Cloud Foundry CLI to execute commands directly against a Cloud Foundry instance.",
+      "get-started": "Getting Started",
+      "get-started-intro": "Before starting follow these steps:",
+      "step1": "1. Download and install the CLI - ",
+      "step1-link-text": "see here",
+      "step2": "2. Set the api endpoint",
+      "step3": "3. Login",
+      "step4": "4. Target an org and space"
+    },
+    "summary": {
+      "title": "Cluster : {{name}}",
+      "panel": {
+        "title": "Summary",
+        "label": {
+          "apps": "applications",
+          "memory": "memory usage",
+          "orgs": "organisations",
+          "users": "users",
+          "address": "instance address",
+          "cli": "cf interactions",
+          "username": "account username",
+          "status": "account status"
+        },
+        "cli-dialog-cluster": {
+          "title": "@:cf.cli-common.title",
+          "intro": "@:cf.cli-common.intro",
+          "get-started": "@:cf.cli-common.get-started",
+          "get-started-intro": "@:cf.cli-common.get-started-intro",
+          "step1": "@:cf.cli-common.step1",
+          "step1-link-text": "@:cf.cli-common.step1-link-text",
+          "step2": "@:cf.cli-common.step2",
+          "step3": "@:cf.cli-common.step3",
+          "step4": "@:cf.cli-common.step4",
+          "org-commands": {
+            "title": "Organization Commands",
+            "list": "List",
+            "list-intro": "To list all orgs",
+            "rename": "Rename",
+            "rename-intro": "To rename an org",
+            "info": "Information",
+            "info-intro": "To fetch org information",
+            "users": "Users",
+            "users-intro": "List each org role's users"
+          },
+          "space-commands": {
+            "title": "Space Commands",
+            "list": "List",
+            "list-intro": "To list the spaces in the targeted org",
+            "rename": "Rename",
+            "rename-intro": "To rename a space",
+            "info": "Information",
+            "info-intro": "To fetch space information",
+            "users": "Users",
+            "users-intro": "List each space role's users"
+          }
+        }
+      }
+    },
+    "cf-tabs": {
+      "buildpacks": {
+        "buildpacks": "Build Packs",
+        "labels": {
+          "position": "Position",
+          "locked": "Locked",
+          "unlocked": "Unlocked",
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "created": "created",
+          "updated": "updated",
+          "filename": "file name"
+        },
+        "error": "An error occurred retrieving buildpack metadata",
+        "empty": "There are no buildpacks available"
+      },
+      "stacks": {
+        "stacks": "Stacks",
+        "labels":{
+          "name": "Name",
+          "description": "Description",
+          "created": "Created",
+          "updated": "Updated"
+        },
+        "error": "An error occurred retrieving stacks metadata",
+        "empty": "There are no stacks available"
+      },
+      "security-groups": {
+        "security-groups": "Security Groups",
+        "labels":{
+          "created": "Created",
+          "updated": "Updated",
+          "spaces": "Spaces",
+          "staging-default": "Staging Default",
+          "running-default": "Running Default",
+          "rules": "Rules",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "error": "An error occurred retrieving security group metadata",
+        "empty": "There are no security groups available"
+      }
     },
     "ssh": {
       "access": "SSH Access",

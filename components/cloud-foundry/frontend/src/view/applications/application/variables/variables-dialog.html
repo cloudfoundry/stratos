@@ -2,13 +2,13 @@
   <p translate>{{asyncTaskDialogCtrl.context.description}}</p>
   <form name="form.addVariableForm">
     <div class="form-group" focusable-input ng-class="{'has-error': form.addVariableForm.var_name.$invalid && form.addVariableForm.var_name.$dirty}">
-      <label class="control-label" translate>app-tabs.variables.add-dialog.name-label</label>
-      <span class="control-message"><span translate ng-if="form.addVariableForm.var_name.$error.required">app-tabs.variables.add-dialog.name-required</span></span>
+      <label class="control-label" translate>app.app-info.app-tabs.variables.add-dialog.name-label</label>
+      <span class="control-message"><span translate ng-if="form.addVariableForm.var_name.$error.required">app.app-info.app-tabs.variables.add-dialog.name-required</span></span>
       <input type="text" name="var_name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.varName" required ng-readonly="asyncTaskDialogCtrl.context.isEdit"/>
     </div>
     <div class="form-group" focusable-input ng-class="{'has-error': form.addVariableForm.var_value.$invalid && form.addVariableForm.var_value.$dirty}">
-      <label class="control-label" translate>app-tabs.variables.add-dialog.value-label</label>
-      <span class="control-message"><span translate ng-if="form.addVariableForm.var_value.$error.required">app-tabs.variables.add-dialog.value-required</span></span>
+      <label class="control-label" translate>app.app-info.app-tabs.variables.add-dialog.value-label</label>
+      <span class="control-message"><span translate ng-if="form.addVariableForm.var_value.$error.required">app.app-info.app-tabs.variables.add-dialog.value-required</span></span>
       <input type="text" name="var_value" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.varValue" required/>
     </div>
   </form>

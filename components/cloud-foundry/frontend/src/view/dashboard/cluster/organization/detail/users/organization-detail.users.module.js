@@ -134,14 +134,14 @@
     }
 
     var manageRoles = {
-      name: 'common-roles-actions.manage-roles',
+      name: 'cf.roles.common-roles-actions.manage-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterManageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
       }
     };
     var removeFromOrg = {
-      name: 'common-roles-actions.remove-all-roles',
+      name: 'cf.roles.common-roles-actions.remove-all-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);

@@ -12,7 +12,7 @@
       controller: BuildPacksController,
       controllerAs: 'bpCtrl',
       ncyBreadcrumb: {
-        label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name ||"..." }}',
+        label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.tiles';
         }

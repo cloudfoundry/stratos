@@ -31,9 +31,9 @@
         return frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/cli-commands/' + templateName,
-            title: incomplete ? 'cf.cli.commands.deploy-title' : 'cf.cli.commands.title',
+            title: incomplete ? 'app.app-info.cli-dialog-deploy.title' : 'app.app-info.cli-dialog-app.title',
             dialog: true,
-            class: 'app-cli-commands'
+            class: 'app-cli-commands dialog-form-larger'
           },
           {
             apiEndpoint: appUtilsService.getClusterEndpoint(appModel.cluster),
