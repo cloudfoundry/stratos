@@ -8,12 +8,18 @@
     var constants = {
       clusterGuid: 'clusterGuid',
       organizationGuid: 'organizationGuid',
-      users: {
-        user1: {
+      users: [
+        {
+          entity: {
+            username: 'user1'
+          }
         },
-        user2: {
+        {
+          entity: {
+            username: 'user2'
+          }
         }
-      },
+      ],
       organizations: {
         organizationGuid : {
           details: {
@@ -52,7 +58,7 @@
       expect(manageUsersService.show).toBeDefined();
     });
 
-    it('intialise', function () {
+    it('initialise', function () {
       // Set these to exercise more of the init. Should consider moving/better way of doing this in the future
       _.set(cfOrganizationModel, 'organizations.' + constants.clusterGuid, constants.organizations);
       _.set(authModel, 'principal.' + constants.clusterGuid + '.isAllowed.apply', _.noop);

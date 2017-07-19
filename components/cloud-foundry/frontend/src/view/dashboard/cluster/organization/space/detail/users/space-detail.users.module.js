@@ -127,14 +127,14 @@
       return that.showManageRoles() || that.showRemoveFromOrg() || that.showRemoveFromSpace();
     };
     var manageRoles = {
-      name: 'common-roles-actions.manage-roles',
+      name: 'cf.roles.common-roles-actions.manage-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterManageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
       }
     };
     var removeFromOrg = {
-      name: 'common-roles-actions.remove-from-org',
+      name: 'cf.roles.common-roles-actions.remove-from-org',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
@@ -142,7 +142,7 @@
       }
     };
     var removeFromSpace = {
-      name: 'common-roles-actions.remove-from-space',
+      name: 'cf.roles.common-roles-actions.remove-from-space',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,

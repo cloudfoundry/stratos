@@ -145,7 +145,7 @@
      * @public
      */
     function organizationRoleToString(role) {
-      return 'roles.org.short.' + role;
+      return 'cf.roles.role-labels.org.short.' + role;
     }
 
     /**
@@ -162,7 +162,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return ['roles.none'];
+        return ['cf.roles.role-labels.none'];
       } else {
         roles.sort(function (r1, r2) {
           return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);

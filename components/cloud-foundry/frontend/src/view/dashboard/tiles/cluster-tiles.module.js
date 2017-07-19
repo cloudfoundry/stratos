@@ -18,6 +18,7 @@
       },
       ncyBreadcrumb: {
         label: 'product.cf',
+        translate: true,
         parent: function () {
           if (_.has(env.plugins, 'endpointsDashboard')) {
             return 'endpoint.dashboard';

@@ -66,7 +66,7 @@
     function getInitialActions() {
       return [
         {
-          name: 'space-info.delete-route-action',
+          name: 'cf.space-info.delete-route-action',
           disabled: false,
           execute: function (route) {
             appClusterRoutesService.deleteRoute(vm.clusterGuid, route.entity, route.metadata.guid).then(function () {
@@ -75,7 +75,7 @@
           }
         },
         {
-          name: 'space-info.unmap-route-action',
+          name: 'cf.space-info.unmap-route-action',
           disabled: true,
           execute: function (route) {
             var promise;

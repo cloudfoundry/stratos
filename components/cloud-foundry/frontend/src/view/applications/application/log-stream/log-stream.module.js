@@ -21,7 +21,7 @@
       position: 2,
       hide: false,
       uiSref: 'cf.applications.application.log-stream',
-      label: 'app.tabs.logStream.label'
+      label: 'app.app-info.app-tabs.log-stream.label'
     });
   }
 

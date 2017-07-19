@@ -17,17 +17,17 @@
               ng-if="clusterUsersController.selectedUsersCount() < 2 && clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableManageRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
-              translate>Manage Roles</button>
+              translate>cf.users.table.buttons.manage</button>
       <button class="btn btn-default"
               ng-if="clusterUsersController.selectedUsersCount() > 1 && clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableChangeRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
-              translate>Change Roles</button>
+              translate>cf.users.table.buttons.change</button>
       <button class="btn btn-default"
               ng-if="clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableRemoveFromOrg()"
               ng-click="clusterUsersController.removeAllRoles()"
-              translate>Remove All Roles</button><br>
+              translate>cf.users.table.buttons.remove</button><br>
     </div>
     <div class="panel panel-default">
       <table class="table"
@@ -37,9 +37,11 @@
           <th ng-if="clusterUsersController.haveShownAnAction">
             <checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input>
           </th>
-          <th class="sortable" translate st-sort-default="true" st-skip-natural="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
-          <th translate>Organization Roles</th>
-          <th translate ng-if="clusterUsersController.haveShownAnAction">ACTION</th>
+          <th class="sortable" st-sort-default="true" st-skip-natural="true" st-sort="entity.username">
+            <span translate>cf.users.table.users-label</span>({{ clusterUsersController.users.length }})
+          </th>
+          <th translate>cf.users.table.org-roles-label</th>
+          <th translate ng-if="clusterUsersController.haveShownAnAction">cf.users.table.action-label</th>
         </tr>
         </thead>
         <tbody>
@@ -61,8 +63,8 @@
                  ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)">close</i>
             </div>
             <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0">
-              <span ng-if="user.entity.username" translate>None assigned</span>
-              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+              <span ng-if="user.entity.username" translate>cf.users.table.no-roles.none-assigned</span>
+              <span ng-if="!user.entity.username" translate>cf.users.table.no-roles.not-applicable</span>
             </div>
           </td>
           <td ng-if="clusterUsersController.userActions[user.metadata.guid]">
@@ -80,7 +82,7 @@
         <tr>
           <td colspan="{{clusterUsersController.haveShownAnAction ? 4 : 3}}" class="text-center">
             <a ng-click="clusterUsersController.showUsers = clusterUsersController.users.length">
-              <span translate>Show All</span> ({{ clusterUsersController.users.length }})
+              <span translate>cf.users.table.show-all-users</span> ({{ clusterUsersController.users.length }})
             </a>
             <div ng-show="false" st-pagination="" st-items-by-page="clusterUsersController.showUsers"></div>
           </td>

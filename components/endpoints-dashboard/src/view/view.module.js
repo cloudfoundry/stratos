@@ -12,7 +12,8 @@
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl',
       ncyBreadcrumb: {
-        label: 'endpoints'
+        label: 'endpoints',
+        translate: true
       }
     });
   }

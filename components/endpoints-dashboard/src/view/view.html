@@ -1,13 +1,13 @@
 <div class="endpoints endpoints-dashboard">
   <div class="header">
     <div class="applications-header font-semi-bold pull-left" translate>
-      Endpoints
+      endpoints-dashboard.title
       <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
     </div>
     <button ng-if="endpointsDashboardCtrl.initialised &&
                      endpointsDashboardCtrl.isUserAdmin()"
             class="btn btn-primary" stlye="position: absolute; right: 0px;"
-            ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint
+            ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.register-button
     </button>
   </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
@@ -23,28 +23,26 @@
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
       <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
       <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
-        <span translate>endpoints.intro.start</span>
-        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints.intro.link</span>
-        <span translate>endpoints.intro.end</span>
+        <span translate>endpoints-dashboard.intro.start</span>
+        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.intro.link</span>
+        <span translate>endpoints-dashboard.intro.end</span>
       </div>
       <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
-          <span translate>
-            To access your cloud native workloads and other related third party services, connect with your personal
-            credentials to the corresponding registered services. Registered services are provided by your systems administrator.
-          </span>
+          <span translate>endpoints-dashboard.intro.non-admin</span>
       </div>
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"
          class="applications-empty">
       <app-icon icon-class="app-icon-3x" icon="svg:Cluster.svg"></app-icon>
-      <div class="applications-msg" translate>There are no registered endpoints.</div>
-      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+      <div class="applications-msg" translate>endpoints-dashboard.no-endpoints.message</div>
+      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta">
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            Register an endpoint
-          </span> to make it available to developers
+            endpoints-dashboard.no-endpoints.admin-message-link-text
+          </span>
+        <span translate>endpoints-dashboard.no-endpoints.admin-message-text</span>
       </div>
       <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
-        Please contact your administrator.
+        endpoints-dashboard.no-endpoints.non-admin-message
       </div>
     </div>
     <div ng-show="endpointsDashboardCtrl.endpoints.length"
@@ -54,10 +52,10 @@
              st-safe-src="endpointsDashboardCtrl.endpoints">
         <thead>
         <tr>
-          <th translate st-sort="name" st-skip-natural="true">Name</th>
-          <th translate st-sort="connected" st-skip-natural="true">Connection</th>
-          <th translate st-sort="type" st-sort-default="true" st-skip-natural="true">Type</th>
-          <th translate st-sort="url" st-skip-natural="true">Address</th>
+          <th translate st-sort="name" st-skip-natural="true" translate>endpoints-dashboard.table.name</th>
+          <th translate st-sort="connected" st-skip-natural="true" translate>endpoints-dashboard.table.connection</th>
+          <th translate st-sort="type" st-sort-default="true" st-skip-natural="true" translate>endpoints-dashboard.table.type</th>
+          <th translate st-sort="url" st-skip-natural="true" translate>endpoints-dashboard.table.address</th>
           <th></th>
         </tr>
         </thead>
@@ -78,7 +76,7 @@
             <span class="material-icons app-icon-lg text-primary endpoint-connected-icon"
                   ng-switch-when="connected">check_circle</span>
             <div ng-switch-when="unconnected"
-                 uib-popover="{{ 'Disconnected' | translate }}"
+                 uib-popover="{{ 'endpoints-dashboard.table.connection-disconnected' | translate }}"
                  popover-trigger="'mouseenter'"
                  popover-placement="top-left"
                  popover-popup-delay="1000">

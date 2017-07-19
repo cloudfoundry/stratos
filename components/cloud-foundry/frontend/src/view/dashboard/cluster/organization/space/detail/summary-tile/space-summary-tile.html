@@ -4,17 +4,17 @@
               card-actions-position="actions-menu-right">
   <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail().details">
     <dl class="dl-horizontal">
-      <dt translate>applications</dt>
+      <dt translate>cf.space-info.summary.label.apps</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
-      <dt translate>application instances</dt>
+      <dt translate>cf.space-info.summary.label.instances</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalAppInstances }} / {{ spaceSummaryTileCtrl.spaceDetail().details.appInstancesQuota | infinityFilter }}</dd>
-      <dt translate>services</dt>
+      <dt translate>cf.space-info.summary.label.services</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }} / {{ spaceSummaryTileCtrl.spaceDetail().details.servicesQuota | infinityFilter }}</dd>
-      <dt translate>routes</dt>
+      <dt translate>cf.space-info.summary.label.routes</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }} / {{ spaceSummaryTileCtrl.spaceDetail().details.routesQuota | infinityFilter }}</dd>
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
-      <dt translate>memory</dt>
+      <dt translate>cf.space-info.summary.label.memory</dt>
       <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
       <dt translate>cf.ssh.access</dt>
       <dd ng-if="!spaceSummaryTileCtrl.hasSshAccess()">
@@ -35,16 +35,16 @@
   </div>
   <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
     <dl class="dl-horizontal">
-      <dt translate>CF SPACE ROLE</dt>
+      <dt translate>cf.space-info.summary.label.orgRole</dt>
       <dd>{{ spaceSummaryTileCtrl.roles.join(', ') }}</dd>
-      <dt translate>INSTANCE ADDRESS</dt>
+      <dt translate>cf.space-info.summary.label.address</dt>
       <dd>{{ spaceSummaryTileCtrl.getEndpoint() }}</dd>
-      <dt translate>CF Interactions</dt>
-      <dd><a ng-click="spaceSummaryTileCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a></dd>
-      <dt translate>Account Username</dt>
+      <dt translate>cf.space-info.summary.label.cli</dt>
+      <dd><a ng-click="spaceSummaryTileCtrl.showCliCommands()" class="btn btn-link" translate>cf.cli-common.button-text</a></dd>
+      <dt translate>cf.space-info.summary.label.username</dt>
       <dd>{{ spaceSummaryTileCtrl.userName }}</dd>
-      <dt translate>Account Status</dt>
-      <dd translate>{{ spaceSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
+      <dt translate>cf.space-info.summary.label.status</dt>
+      <dd translate>{{ spaceSummaryTileCtrl.isAdmin ? 'cf.roles.role-labels.cf-admin' : 'cf.roles.role-labels.cf-user' }}</dd>
     </dl>
   </div>
 </gallery-card>

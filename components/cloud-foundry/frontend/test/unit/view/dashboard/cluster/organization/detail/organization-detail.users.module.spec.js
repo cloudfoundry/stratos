@@ -313,17 +313,17 @@
           {
             space: space1,
             role: 'space_developer',
-            roleLabel: 'roles.space.short.space_developer'
+            roleLabel: 'cf.roles.role-labels.space.short.space_developer'
           },
           {
             space: space2,
             role: 'space_manager',
-            roleLabel: 'roles.space.short.space_manager'
+            roleLabel: 'cf.roles.role-labels.space.short.space_manager'
           },
           {
             space: space3,
             role: 'space_developer',
-            roleLabel: 'roles.space.short.space_developer'
+            roleLabel: 'cf.roles.role-labels.space.short.space_developer'
           }
         ]);
 
