@@ -2,8 +2,8 @@
   <button
     ng-repeat="action in actionsToolbarCtrl.items"
     class="no-focus btn btn-link btn-border-less actions-toolbar-btn"
-    ng-disabled="action.disabled"
-    ng-hide="action.hidden"
+    ng-disabled="actionsToolbarCtrl.executeOrReturn(action, 'disabled')"
+    ng-hide="actionsToolbarCtrl.executeOrReturn(action, 'hidden')"
     ng-click="action.execute()">
     <app-icon icon-class="{{action.iconClass}}" class="actions-toolbar-icon" icon="{{action.icon}}"></app-icon>
     <span>{{ action.name | translate }}</span>

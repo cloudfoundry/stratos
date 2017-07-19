@@ -92,6 +92,15 @@
           onResize();
         }
       });
+
+      scope.executeOrReturn = executeOrReturn;
+
+      function executeOrReturn(action, property) {
+        if (angular.isFunction(action[property])) {
+          return action[property]();
+        }
+        return action[property];
+      }
     }
   }
 

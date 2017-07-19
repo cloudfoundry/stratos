@@ -111,6 +111,7 @@
     vm.menuIconName = vm.menuIconName || 'more_horiz';
 
     vm.executeAction = executeAction;
+    vm.executeOrReturn = executeOrReturn;
 
     $scope.$watch(function () {
       if (vm.actions && vm.actions.length > 0) {
@@ -145,6 +146,14 @@
       }
       $event.stopPropagation();
     }
+
+    function executeOrReturn(action, property) {
+      if (angular.isFunction(action[property])) {
+        return action[property]();
+      }
+      return action[property];
+    }
+
   }
 
 })();
