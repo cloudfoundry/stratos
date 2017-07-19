@@ -5,7 +5,7 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:irfanhabib/stratos-ui.git
-    tag_filter: release-v[0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9]*
+    tag_filter: "[0-9]*"
 - name: helm-chart-values
   type: s3
   source:

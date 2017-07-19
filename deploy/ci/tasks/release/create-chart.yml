@@ -25,6 +25,7 @@ run:
       STRATOS_UI=${ROOT_DIR}/stratos-ui
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+      SHORT_GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
 
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml* console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
@@ -39,7 +40,7 @@ run:
       fi
 
       # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/archive/$(ls *.tgz)
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${SHORT_GIT_TAG}/
       cp index.yaml ${STRATOS_UI}/
       cd ${STRATOS_UI}
       git config --global user.name ${GIT_USER}

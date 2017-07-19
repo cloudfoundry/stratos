@@ -29,6 +29,7 @@ while getopts ":ho:r:t:dTc" opt; do
       ;;
     T)
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       ;;
     d)
       BUILD_DOCKER_COMPOSE_IMAGES="true"
@@ -275,12 +276,6 @@ buildPreflightJob
 buildPostflightJob
 buildUI
 
-# Patch Values.yaml file
-cp values.yaml.tmpl values.yaml
-sed -i -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
-sed -i -e 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
-sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
-
 if [ -z ${CONCOURSE_BUILD} ]; then
   # Patch Values.yaml file
   cp values.yaml.tmpl values.yaml
@@ -289,7 +284,7 @@ if [ -z ${CONCOURSE_BUILD} ]; then
   sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 else
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
-  sed -i -e 's/version: 0.1.0/version: '"${TAG}"'/g' console/Chart.yaml
+  sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
 fi
 
 echo

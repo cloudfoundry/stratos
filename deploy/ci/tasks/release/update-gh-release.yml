@@ -18,9 +18,9 @@ run:
       # Create Github release
       ROOT_DIR=${PWD}
       cd ${ROOT_DIR}/stratos-ui
-      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       github-release release --tag ${GIT_TAG}
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
       # Upload Helm chart to release
-      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name ${CHART_PACKAGE}
+      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "Helm Chart package"
