@@ -8,5 +8,5 @@ entries:
     name: console
     urls:
     - https://github.com/irfanhabib/stratos-ui/releases/download/release-v1.0.0-alpha30/console-release-v1.0.0-alpha30-gc63fce2.tgz
-    version: release-v1.0.0-alpha30
+    version: v1.0.0-alpha30
 generated: 2017-07-19T08:31:27.747005711Z
