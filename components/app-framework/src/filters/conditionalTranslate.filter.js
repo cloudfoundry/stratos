@@ -20,6 +20,7 @@
       return translate ? $filter('translate')(input) : input;
     };
 
+    // Ensure the filter is reapplied on change of language
     conditionalTranslate.$stateful = true;
 
     return conditionalTranslate;
