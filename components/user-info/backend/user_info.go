@@ -15,7 +15,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 	log.Debug("uaa request")
 
 	// Check session
-	sessionExpireTime, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
+	_, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
 	if err != nil {
 		msg := "Could not find session date"
 		log.Error(msg)
@@ -29,7 +29,6 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	tr, _ := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
 	uaaEndpoint := userInfo.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint
 	path := c.Path()
 
@@ -45,7 +44,6 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 
 	// Check for custom header - if present, verify the user's password before making the request
 	password := c.Request().Header().Get("x-stratos-password")
-	log.Infof("PASSWORD: %s", password)
 	if len(password) > 0 {
 		// Need to verify the user's login
 		err := userInfo.portalProxy.RefreshUAALogin(username, password, false)
@@ -92,8 +90,7 @@ func (userInfo *UserInfo) uaa(c echo.Context) error {
 
 func (userInfo *UserInfo) doApiRequest(sessionUser string, url string, echoReq engine.Request) (stausCode int, body []byte, err error) {
 	// Proxy the request to the UAA on behalf of the user
-
-	log.Infof("doApiRequest: %s", url)
+	log.Debugf("doApiRequest: %s", url)
 
 	tokenRec, err := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
 	if err != nil {
@@ -101,13 +98,9 @@ func (userInfo *UserInfo) doApiRequest(sessionUser string, url string, echoReq e
 	}
 
 	// Proxy the request
-	//	var body io.Reader
 	var res *http.Response
 	var req *http.Request
 
-	// if len(uaaRequest.Body) > 0 {
-	// 	body = bytes.NewReader(uaaRequest.Body)
-	// }
 	req, err = http.NewRequest(echoReq.Method(), url, echoReq.Body())
 	if err != nil {
 		return 0, nil, err
