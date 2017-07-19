@@ -32,14 +32,6 @@
           return userInfoModel.changePassword(userId, data.oldPassword, data.newPassword);
         };
 
-        // Is the form valid
-        var isFormInvalid = function () {
-          var valid = data.oldPassword && data.newPassword && data.newPasswordConfirm &&
-            data.newPassword === data.newPasswordConfirm &&
-            data.oldPassword !== data.newPassword;
-          return !valid;
-        };
-
         return frameworkAsyncTaskDialog(
           {
             title: 'user-info.password-change',
@@ -54,8 +46,7 @@
           {
             data: data
           },
-          changePassword,
-          isFormInvalid
+          changePassword
         );
       }
     };

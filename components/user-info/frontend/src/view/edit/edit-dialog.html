@@ -1,6 +1,6 @@
 <div class="edit-user-info-form">
   <p translate>user-info.edit.introduction</p>
-  <form class="form-stacked center-block" name="asyncTaskDialogCtrl.editUserInfoForm" role="form">
+  <form class="form-stacked center-block" name="form.editUserInfoForm" role="form">
     <div class="form-group">
       <label class="control-label" for="user-info-form-givenName" translate>
         user-info.edit.given-name
@@ -32,11 +32,15 @@
         ng-model="asyncTaskDialogCtrl.context.data.emailAddress"/>
     </div>
     
-    <div ng-disabled="true" class="form-group has-feedback disabled" focusable-input >
+    <div ng-disabled="true" class="form-group has-feedback disabled" focusable-input
+      ng-class="{'has-error': form.editUserInfoForm.password.$invalid}">
       <label class="control-label required" for="credentials-form-password" translate>
         user-info.edit.current-password
       </label>
-      <input ng-disabled="!asyncTaskDialogCtrl.context.data.emailAddress" type="password" class="form-control" id="credentials-form-password" name="user-info-form-password"
+      <span class="control-message" ng-if="form.editUserInfoForm.password.$invalid">
+        <span translate>user-info.edit.error-need-password</span>
+      </span>
+      <input ng-disabled="!asyncTaskDialogCtrl.context.data.emailAddress" type="password" class="form-control" id="user-info-form-password" name="password"
         ng-model="asyncTaskDialogCtrl.context.data.password" password-reveal ng-required="asyncTaskDialogCtrl.context.data.emailAddress"/>
     </div>
 
