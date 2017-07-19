@@ -73,12 +73,12 @@
     this.user = consoleInfo.info.endpoints.cf[that.organization.cnsiGuid].user;
 
     var editOrgAction = {
-      name: 'org-info.edit-action',
+      name: 'cf.org-info.edit-action',
       disabled: false,
       execute: function () {
         return frameworkAsyncTaskDialog(
           {
-            title: 'org-info.edit-dialog.title',
+            title: 'cf.org-info.edit-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/detail/actions/edit-organization.html',
             submitCommit: true,
             buttonTitles: {
@@ -102,7 +102,7 @@
                 {name: orgData.name})
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('org-info.edit-dialog.success-notification', {name: orgData.name}));
+                    $translate.instant('cf.org-info.edit-dialog.success-notification', {name: orgData.name}));
                 });
             } else {
               return $q.reject('Invalid Name!');
@@ -113,24 +113,24 @@
     };
 
     var deleteOrgAction = {
-      name: 'org-info.delete-action',
+      name: 'cf.org-info.delete-action',
       disabled: false,
       execute: function () {
         return frameworkDialogConfirm({
-          title: 'org-info.delete-dialog.title',
-          description: $translate.instant('org-info.delete-dialog.description', { name: organizationName()}),
+          title: 'cf.org-info.delete-dialog.title',
+          description: $translate.instant('cf.org-info.delete-dialog.description', { name: organizationName()}),
           submitCommit: true,
           buttonText: {
             yes: 'buttons.delete',
             no: 'buttons.cancel'
           },
-          errorMessage: 'org-info.delete-dialog.error-message',
+          errorMessage: 'cf.org-info.delete-dialog.error-message',
           callback: function () {
             var orgName = organizationName();
             return that.cfOrganizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
               .then(function () {
                 appNotificationsService.notify('success',
-                  $translate.instant('org-info.delete-dialog.success-notification', {name: orgName}));
+                  $translate.instant('cf.org-info.delete-dialog.success-notification', {name: orgName}));
               });
           }
         });
@@ -139,7 +139,7 @@
     };
 
     var assignUsersAction = {
-      name: 'common-roles-actions.assign-users',
+      name: 'cf.roles.common-roles-actions.assign-users',
       disabled: false,
       execute: function () {
         appClusterAssignUsers.assign({
