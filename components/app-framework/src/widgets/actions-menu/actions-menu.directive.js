@@ -116,7 +116,7 @@
     $scope.$watch(function () {
       if (vm.actions && vm.actions.length > 0) {
         return _.countBy(vm.actions, function (action) {
-          return executeOrReturn(action, 'hidden');
+          return !!executeOrReturn(action, 'hidden');
         }).false;
       }
       return 0;

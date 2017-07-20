@@ -38,11 +38,13 @@
 
     vm.endpoints = undefined;
     vm.initialised = false;
+    vm.register = register;
     vm.hideWelcomeMessage = hideWelcomeMessage;
     vm.isUserAdmin = isUserAdmin;
     vm.reload = reload;
     vm.headerActions = [
       {
+        id: 'endpoints-dashboard.register-button',
         name: 'endpoints-dashboard.register-button',
         execute: register,
         hidden: function () {
