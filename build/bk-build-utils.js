@@ -90,29 +90,19 @@
     return !!getDevConfig().localDevBuild;
   }
 
-  function createArgsWithInstallFlag(command, args) {
-    var newArgs = [command, '-i'];
-
-    if (isLocalDevBuild()) {
-      newArgs.push('-pkgdir');
-      newArgs.push(path.join(env.GOPATH, 'pkg'));
-    }
-    return newArgs.concat(args);
-  }
-
   function buildPlugin(pluginPath, pluginName) {
 
     var goFiles = _.filter(fs.readdirSync(pluginPath), function (file) {
       return path.extname(file) === '.go';
     });
 
-    var args = createArgsWithInstallFlag('build', ['-buildmode=plugin', '-o', pluginName + '.so']);
+    var args = ['build', '-i', '-buildmode=plugin', '-o', pluginName + '.so'];
     args = args.concat(goFiles);
     return spawnProcess('go', args, pluginPath, env);
   }
 
   function build(path, exeName) {
-    var args = createArgsWithInstallFlag('build', ['-o', exeName]);
+    var args = ['build', '-i', '-o', exeName];
     return spawnProcess('go', args, path, env);
   }
 
