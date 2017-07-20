@@ -46,4 +46,25 @@ imports:
   - ed25519
   - ed25519/internal/edwards25519
   - ssh
+- name: github.com/mholt/archiver
+  version: cdc68dd1f170b8dfc1a0d2231b5bb0967ed67006
+  subpackages:
+  - cmd/archiver
+- name: github.com/nwaples/rardecode
+  version: f22b7ef81a0afac9ce1447d37e5ab8e99fbd2f73
+- name: github.com/dsnet/compress
+  version: 0ae8e136a5df9e3caf6c0f69983608b07438411b
+  subpackages:
+  - bzip2
+  - bzip2/internal/sais
+  - internal
+  - internal/errors
+  - internal/prefix
+- name: github.com/ulikunitz/xz
+  version: 0c6b41e72360850ca4f98dc341fd999726ea007f
+  subpackages:
+  - internal/hash
+  - internal/xlog
+  - lzma
+  
 testImports: []
