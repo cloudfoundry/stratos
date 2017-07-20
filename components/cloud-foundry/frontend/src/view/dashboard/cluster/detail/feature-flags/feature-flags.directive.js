@@ -21,11 +21,11 @@
     });
   }
 
-  function registerTab(cfClusterTabs) {
-    cfClusterTabs.clusterTabs.push({
+  function registerTab(cfTabs) {
+    cfTabs.clusterTabs.push({
       position: 4,
       hide: function () {
-        return !cfClusterTabs.isAdmin();
+        return !cfTabs.isAdmin();
       },
       uiSref: 'endpoint.clusters.cluster.detail.featureFlags',
       uiSrefParam: _.noop,

@@ -21,8 +21,8 @@
     });
   }
 
-  function registerTab(cfClusterTabs) {
-    cfClusterTabs.spaceTabs.push({
+  function registerTab(cfTabs) {
+    cfTabs.spaceTabs.push({
       position: 3,
       hide: false,
       uiSref: 'endpoint.clusters.cluster.organization.space.detail.routes',

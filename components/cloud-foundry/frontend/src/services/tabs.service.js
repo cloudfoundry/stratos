@@ -2,18 +2,18 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.dashboard.cluster')
-    .factory('cfClusterTabs', ClusterTabs);
+    .module('cloud-foundry.service')
+    .factory('cfTabs', CfClusterTabs);
 
   /**
-   * @name cfClusterTabs
+   * @name cfTabs
    * @description Provides collection of configuration objects for tabs on the cluster, org and space pages
    * @param {object} $q - the Angular $q service
    * @param {object} $stateParams - the Angular $stateParams service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @returns {object} The cfClusterTabs service
+   * @returns {object} The cfTabs service
    */
-  function ClusterTabs($q, $stateParams, modelManager) {
+  function CfClusterTabs($q, $stateParams, modelManager) {
 
     return {
       applicationTabs: [],

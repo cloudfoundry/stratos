@@ -23,8 +23,8 @@
     });
   }
 
-  function registerTab(cfClusterTabs) {
-    cfClusterTabs.orgTabs.push({
+  function registerTab(cfTabs) {
+    cfTabs.orgTabs.push({
       position: 1,
       hide: false,
       uiSref: 'endpoint.clusters.cluster.organization.detail.spaces',

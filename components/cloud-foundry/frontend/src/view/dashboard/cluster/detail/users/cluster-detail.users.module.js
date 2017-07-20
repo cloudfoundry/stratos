@@ -21,8 +21,8 @@
     });
   }
 
-  function registerTab(cfClusterTabs) {
-    cfClusterTabs.clusterTabs.push({
+  function registerTab(cfTabs) {
+    cfTabs.clusterTabs.push({
       position: 2,
       hide: false,
       uiSref: 'endpoint.clusters.cluster.detail.users',
