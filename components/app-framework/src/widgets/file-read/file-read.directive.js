@@ -10,7 +10,8 @@
       link: link,
       restrict: 'A',
       scope: {
-        fileread: '='
+        fileread: '=',
+        filereadMultiple: '='
       }
     };
     return directive;
@@ -18,7 +19,11 @@
     function link(scope, element) {
       element.bind('change', function (changeEvent) {
         scope.$apply(function () {
-          scope.fileread = changeEvent.target.files[0];
+          if (scope.filereadMultiple) {
+            scope.fileread = changeEvent.target.files;
+          } else {
+            scope.fileread = changeEvent.target.files[0];
+          }
         });
       });
 

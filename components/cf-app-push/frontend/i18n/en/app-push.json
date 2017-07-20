@@ -18,6 +18,23 @@
         "branch-last-commit-date": "",
         "branch-last-commit-committer": ""
       },
+      "source": {
+        "file": "Select a GitHub project, select a local archive file, or drag and drop a GitHub url or an archive file",
+        "folder": "Select a GitHub project, select a local archive file or folder, or drag and drop a GitHub url, an archive file or folder"
+      },
+      "local": {
+        "file": {
+          "label": "Local archive file",
+          "field": "File",
+          "prompt": "Choose a local archive file"
+        },
+        "folder": {
+          "label": "Local archive file or folder",
+          "field": "File / Folder",
+          "prompt": "Choose a local file or folder"
+        },
+        "info": "{{files}} file(s) - {{total}} bytes to upload"
+      },
       "manifest": {
         "label": "Manifest",
         "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",

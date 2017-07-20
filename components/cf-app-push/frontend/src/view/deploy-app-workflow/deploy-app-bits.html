@@ -24,6 +24,8 @@
 <!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
 <!--</div>-->
 <!--</div>-->
+<p ng-if="!step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-info.source.file</p>
+<p ng-if="step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-info.source.folder</p>
 <div class="deploy-app-source-area" file-drop item-drop="step.dropItemHandler">
   <div class="deploy-app-source">
     <div class="deploy-app-source-github">
@@ -51,76 +53,95 @@
               disabled="!step.userInput.githubProjectValid || step.userInput.sourceType !== 'github'">
             </search-box>
           </div>
+
+          <!-- Information about the selected GitHub project -->
+          <div class="deploy-app-source-details deploy-app-github-details"
+            ng-class="{'deploy-app-inivisible': !(step.userInput.githubProjectValid && step.data.githubProject)}" >
+            <div class="deploy-app-github-info">
+              <div class="project">
+                <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
+                <div class="project-info">
+                  <div>
+                    <a href="https://www.github.com/{{step.userInput.githubProjectCached}}"
+                      rel="noopener noreferrer" target="_blank">{{step.userInput.githubProjectCached}}
+                    </a>
+                  </div>
+                  {{ step.data.githubProject.description | limitTo:50}} <span ng-if="step.data.githubProject.description.length > 50">...</span>
+                </div>
+              </div>
+
+              <div class="lastCommit">
+                <div ng-show="step.data.githubCommit.author.avatar_url" class="committerAvatar">
+                  <img ng-src="{{step.data.githubCommit.author.avatar_url}}"/>
+                </div>
+                <div class="lastCommit-info">
+                  <div>
+                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit</span>
+                    <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
+                      rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
+                    </a>
+                  </div>
+                  <div>
+                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
+                  </div>
+                  <div class="lastCommitter">
+                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="deploy-app-source-local">
-      <radio-input ng-model="step.userInput.sourceType" input-value="'local'" input-label="Local file or folder"></radio-input>
+      <radio-input ng-if="!step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-info.local.file.label"></radio-input>
+      <radio-input ng-if="step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-info.local.folder.label"></radio-input>
       <div class="deploy-app-github">
         <div class="deploy-app-github-form">
           <div class="form-group form-group-large" focusable-input
               ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
-            <label class="control-label" translate>File / Folder</label>
+            <label ng-if="!step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.file.field</label>
+            <label ng-if="step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.folder.field</label>
             <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
                 deploy-app-dialog.step-info.github.project-not-found
             </span>
-            <input ng-disabled="step.userInput.sourceType !== 'local'" type="text" class="form-control" name="localPath" ng-model="step.userInput.localPath"/>
+            <div ng-if="!step.folderSupport">
+            </div>
+            <div ng-if="step.folderSupport">
+            <input fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPath" id="localPathSelectFile" ng-model="step.userInput.localPath"/>
+            <input webkitdirectory fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPath" id="localPathSelectFolder" ng-model="step.userInput.localPath"/>
+            <!-- File support only -->
+            <label ng-if="!step.folderSupport" class="form-control clickable" for="localPathSelectFile">
+              <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
+              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.file.prompt</span>
+            </label>
+            <!-- File and Folder support -->
+            <label  ng-if="step.folderSupport" class="form-control">
+              <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
+              <span ng-if="!step.userInput.localPath && step.folderSupport" translate>deploy-app-dialog.step-info.local.folder.prompt</span>
+              <label for="localPathSelectFile">
+                <i class="material-icons">insert_drive_file</i>
+              </label>
+              <label for="localPathSelectFolder">
+                <i class="material-icons">folder</i>
+              </label>
+            </label>
+            </div>
           </div>
+
+          <!-- File info -->
+          <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.fileScanData" >
+            <div class="deploy-app-github-info deploy-app-file-details">
+              <i class="material-icons">file_upload</i>
+              <p translate translate-values="step.userInput.fileScanData">deploy-app-dialog.step-info.local.info</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Information about the selected GitHub project -->
-  <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.sourceType === 'github' && step.userInput.githubProjectValid && step.data.githubProject" >
-    <p class="control-title" translate>Project Details</p>
-    <div class="deploy-app-github-info">
-      <div class="project">
-        <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
-        <div class="project-info">
-          <div>
-            <a href="https://www.github.com/{{step.userInput.githubProjectCached}}"
-              rel="noopener noreferrer" target="_blank">{{step.userInput.githubProjectCached}}
-            </a>
-          </div>
-          {{ step.data.githubProject.description | limitTo:50}} <span ng-if="step.data.githubProject.description.length > 50">...</span>
-        </div>
-      </div>
-
-      <div ng-if="step.data.githubCommit" class="lastCommit">
-        <div ng-show="step.data.githubCommit.author.avatar_url" class="committerAvatar">
-          <img ng-src="{{step.data.githubCommit.author.avatar_url}}"/>
-        </div>
-        <div class="lastCommit-info">
-          <div>
-            <span translatE>deploy-app-dialog.step-info.github.branch-last-commit</span>
-            <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
-              rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
-            </a>
-          </div>
-          <div>
-            <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
-          </div>
-          <div class="lastCommitter">
-            <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Information for a local file or folder selection or drop -->
-  <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.sourceType === 'local' && step.userInput.fileScanData" >
-    <p class="control-title" translate>File/Folder Details</p>
-    <p>{{step.userInput.fileScanData.files}} Files</p>
-    <p>{{step.userInput.fileScanData.folders}} Folders</p>
-    <p>{{step.userInput.fileScanData.total}} Size of data</p>
-  </div>
-
-  <!-- information when no selection has been made -->
-  <div class="deploy-app-source-details deploy-app-source-help" ng-if="!(step.userInput.githubProjectValid && step.data.githubProject) && !(step.userInput.sourceType === 'local' && step.userInput.fileScanData)">
-    <p>Select a GitHub project, select a local archive file or folder, or drag and drop an archive file or folder on this dialog.</p>
   </div>
 </div>
 

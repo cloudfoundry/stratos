@@ -19,16 +19,25 @@ $select-option-height: 39px;
     }
   }
 
+  p.deploy-app-choose-source {
+    margin: 12px 0;
+  }
+
   #deploy-app-choose-bits {
     display: none;
   }
 
   .deploy-app-source-area {
     display: flex;
-    margin-top: $console-unit-space;
+    //margin-top: $console-unit-space;
 
-    > div {
+    > .deploy-app-source {
+      display: flex;
       flex: 1;
+
+      > div {
+        flex: 1;
+      }
     }
 
     p.control-title {
@@ -37,12 +46,6 @@ $select-option-height: 39px;
 
     radio-input {
       margin-bottom: $console-unit-space / 4;
-    }
-
-    .deploy-app-source-local {
-      radio-input {
-        margin-top: $console-unit-space / 2;
-      }
     }
 
     &.file-drop-active {
@@ -72,6 +75,21 @@ $select-option-height: 39px;
         .deploy-app-github-info {
           border: 1px solid #ccc;
           padding: $console-unit-space / 2;
+
+          &.deploy-app-file-details {
+            height: $console-input-height;
+            display: flex;
+            align-items: center;
+            padding-left: 18px;
+
+            > p {
+              margin: 0;
+            }
+
+            > i {
+              margin-right: 6px;
+            }
+          }
 
           img {
             height: $github-avatar-height;
@@ -169,4 +187,49 @@ percent-gauge.deploy-app-file-progress {
   margin-bottom: 24px;
   font-size: 18px;
   font-weight: 600;
+}
+
+.form-control.file-chooser {
+  width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+  z-index: -1;
+  
+  + label {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    ///margin-bottom: 6px;
+    height: 19px;
+    line-height: 19px;
+    font-size: 14px;
+    margin: 0;
+    display: flex;
+
+    &.clickable {
+      cursor: pointer;
+    }
+
+    > i {
+      font-size: 20px;
+      margin-right: 6px;
+    }
+
+    > span {
+      margin: 0;
+      padding: 0;
+      flex: 1;
+    }
+
+    > label {
+      margin: 0;
+      cursor: pointer;
+    }
+  }
+}
+
+.deploy-app-inivisible {
+  visibility: hidden;
 }

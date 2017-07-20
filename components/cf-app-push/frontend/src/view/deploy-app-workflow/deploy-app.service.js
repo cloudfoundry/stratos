@@ -88,6 +88,8 @@
 
     var vm = this;
 
+    var gitHubUrlBase = 'https://github.com/';
+
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
@@ -153,12 +155,22 @@
       fileScanData: null
     };
 
+    function isInputDirSupported() {
+      /* eslint-disable angular/document-service */
+      var tmpInput = document.createElement('input');
+      /* eslint-enable angular/document-service */
+      return 'webkitdirectory' in tmpInput;
+    }
+
+    vm.folderSupport = isInputDirSupported();
+
     var stepInfo = {
       title: 'deploy-app-dialog.step-info.title',
       templateUrl: templatePath + 'deploy-app-bits.html',
       formName: 'deploy-info-form',
       data: vm.data,
       userInput: vm.userInput,
+      folderSupport: vm.folderSupport,
       showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
@@ -191,19 +203,31 @@
     };
 
     function dropHandler(items) {
-      vm.userInput.sourceType = 'local';
-
       itemDropHelper.identify(items).then(function (info) {
         vm.userInput.localPath = info.value ? info.value.name : '';
         if (info.isFiles) {
           vm.options.wizardCtrl.showBusy('Scanning for files and folders');
           itemDropHelper.traverseFiles(info.value, '.cfignore').then(function (results) {
             vm.userInput.fileScanData = results;
+            vm.userInput.sourceType = 'local';
             vm.options.wizardCtrl.showBusy();
           });
+        } else if (info.isArchiveFile) {
+          vm.userInput.sourceType = 'local';
+          var res = itemDropHelper.initScanner();
+          vm.userInput.fileScanData = res.addFile(info.value);
+          vm.userInput.sourceType = 'local';
+        } else if (info.isWebLink) {
+          // Check if this is a GitHub link
+          if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
+            vm.userInput.sourceType = 'github';
+            vm.userInput.githubProject = info.value.substring(gitHubUrlBase.length);
+          }
         }
       });
     }
+
+    vm.dropHandler = dropHandler;
 
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
@@ -327,6 +351,27 @@
           });
       }
     });
+
+    $scope.$watch(function () {
+      return vm.userInput.localPathFile;
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        handleFileInputSelect(newVal);
+      }
+    });
+
+    // Handle result of a file input form field seclection
+    function handleFileInputSelect(items) {
+      // File list from a file input form field
+      if (items.length === 1) {
+        if (itemDropHelper.isArchiveFile(items[0].name)) {
+          var res = itemDropHelper.initScanner();
+          vm.userInput.fileScanData = res.addFile(items[0]);
+          vm.userInput.sourceType = 'local';
+          vm.userInput.localPath = items[0].name;
+        }
+      }
+    }
 
     function createSocketUrl(serviceInstance, org, space) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';

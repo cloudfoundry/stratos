@@ -7,10 +7,18 @@
 
   function itemDropHelper($q, cfIgnoreParser) {
 
+    var archiveRegex = /\.(tar|zip|tar.gz)$/i;
+
     return {
       identify: identify,
-      traverseFiles: traverseFiles
+      traverseFiles: traverseFiles,
+      isArchiveFile: isArchiveFile,
+      initScanner: initScanner
     };
+
+    function isArchiveFile(name) {
+      return archiveRegex.test(name);
+    }
 
     /**
      * @description Identify what has been dropped
@@ -24,15 +32,14 @@
         value: undefined
       };
 
-      var archiveRegex = /\.(tar|zip|tar.gz)$/i;
-
       // Check single file item
       if (items.length === 1 && items[0].kind === 'file') {
         var fileEntry = items[0].webkitGetAsEntry();
         if (fileEntry.isFile) {
           // Check extension
-          if (archiveRegex.test(fileEntry.name)) {
+          if (isArchiveFile(fileEntry.name)) {
             result.isArchiveFile = true;
+            result.value = fileEntry;
           }
         } else if (fileEntry.isDirectory) {
           result.isFiles = true;
@@ -156,6 +163,15 @@
           };
           context.folders[name] = newContext;
           return newContext;
+        },
+
+        addFile: function (file) {
+          scanner.root.files.push(file);
+          scanner.total += file.size;
+          scanner.files++;
+
+          //webkitRelativePath
+          return scanner;
         }
       };
       return scanner;
