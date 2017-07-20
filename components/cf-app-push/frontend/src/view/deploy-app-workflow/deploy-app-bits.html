@@ -104,21 +104,15 @@
               ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
             <label ng-if="!step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.file.field</label>
             <label ng-if="step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.folder.field</label>
-            <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
-                deploy-app-dialog.step-info.github.project-not-found
-            </span>
-            <div ng-if="!step.folderSupport">
-            </div>
-            <div ng-if="step.folderSupport">
-            <input fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPath" id="localPathSelectFile" ng-model="step.userInput.localPath"/>
-            <input webkitdirectory fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPath" id="localPathSelectFolder" ng-model="step.userInput.localPath"/>
+            <input fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"/>
+            <input webkitdirectory fileread="step.userInput.localPathFolder" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"/>
             <!-- File support only -->
             <label ng-if="!step.folderSupport" class="form-control clickable" for="localPathSelectFile">
               <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
               <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.file.prompt</span>
             </label>
             <!-- File and Folder support -->
-            <label  ng-if="step.folderSupport" class="form-control">
+            <label ng-if="step.folderSupport" class="form-control">
               <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
               <span ng-if="!step.userInput.localPath && step.folderSupport" translate>deploy-app-dialog.step-info.local.folder.prompt</span>
               <label for="localPathSelectFile">
@@ -128,7 +122,6 @@
                 <i class="material-icons">folder</i>
               </label>
             </label>
-            </div>
           </div>
 
           <!-- File info -->

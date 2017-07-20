@@ -90,6 +90,8 @@
 
     var gitHubUrlBase = 'https://github.com/';
 
+    var cfDefaultIgnores = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn;';
+
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
@@ -227,8 +229,6 @@
       });
     }
 
-    vm.dropHandler = dropHandler;
-
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
       templateUrl: templatePath + 'deploy-app-deploying.html',
@@ -360,16 +360,55 @@
       }
     });
 
+    $scope.$watch(function () {
+      return vm.userInput.localPathFolder;
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        handleFileInputSelect(newVal);
+      }
+    });
+
     // Handle result of a file input form field seclection
     function handleFileInputSelect(items) {
       // File list from a file input form field
+
+      console.log(cfDefaultIgnores);
+      var res = itemDropHelper.initScanner(cfDefaultIgnores);
       if (items.length === 1) {
         if (itemDropHelper.isArchiveFile(items[0].name)) {
-          var res = itemDropHelper.initScanner();
           vm.userInput.fileScanData = res.addFile(items[0]);
           vm.userInput.sourceType = 'local';
           vm.userInput.localPath = items[0].name;
         }
+      } else {
+        _.each(items, function (file) {
+          res.addFile(file);
+        });
+
+        console.log('done 1');
+
+        // Check root folder
+        if (res.root.files.length === 0 && _.keys(res.root.folders).length === 1) {
+          var rootFolderName = _.keys(res.root.folders)[0];
+
+          console.log('got root folder name: ' + rootFolderName);
+          //res.root = _.values(res.root.folders)[0];
+          res = itemDropHelper.initScanner(cfDefaultIgnores);
+          res.rootFolderName = rootFolderName;
+          console.log('round 2');
+          _.each(items, function (file) {
+            console.log('FILE: ' + file.name);
+            res.addFile(file);
+            console.log('DONE: ' + file.name);
+          });
+        }
+
+        vm.userInput.fileScanData = res;
+        vm.userInput.sourceType = 'local';
+        vm.userInput.localPath = 'Folder';
+
+        console.log('PROCESS FILE LIST');
+        console.log(res);
       }
     }
 

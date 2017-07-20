@@ -18,6 +18,8 @@
 
     function link(scope, element) {
       element.bind('change', function (changeEvent) {
+        changeEvent.preventDefault();
+        changeEvent.stopPropagation();
         scope.$apply(function () {
           if (scope.filereadMultiple) {
             scope.fileread = changeEvent.target.files;
@@ -35,3 +37,4 @@
     }
   }
 })();
+

@@ -121,7 +121,7 @@
       return p.promise;
     }
 
-    function initScanner() {
+    function initScanner(ignores) {
       var scanner = {
         total: 0,
         files: 0,
@@ -148,6 +148,10 @@
         },
 
         folder: function (context, name, fullName) {
+          if (context.folders[name]) {
+            return context.folders[name];
+          }
+
           if (fullName.indexOf('/') === 0) {
             fullName = fullName.substr(1);
           }
@@ -166,14 +170,30 @@
         },
 
         addFile: function (file) {
-          scanner.root.files.push(file);
-          scanner.total += file.size;
-          scanner.files++;
-
-          //webkitRelativePath
+          // Make the folder for the file
+          var fileParts = file.webkitRelativePath.split('/');
+          var context = scanner.root;
+          var fullPath = '';
+          if (fileParts.length > 1) {
+            for (var i = 0; i < fileParts.length - 1; i++) {
+              if (!(scanner.rootFolderName && i === 0 && fileParts[i] === scanner.rootFolderName)) {
+                fullPath += '/' + fileParts[i];
+                context = scanner.folder(context, fileParts[i], fullPath);
+                if (!context) {
+                  // Ignored folder
+                  return scanner;
+                }
+              }
+            }
+          }
+          scanner.file(context, file, fullPath);
           return scanner;
         }
       };
+
+      if (ignores) {
+        scanner.filter = cfIgnoreParser.compile(ignores);
+      }
       return scanner;
     }
 
