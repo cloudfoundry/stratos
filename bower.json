@@ -21,7 +21,8 @@
     "cloud-foundry": "./components/cloud-foundry",
     "cf-app-push": "./components/cf-app-push",
     "cf-app-ssh": "./components/cf-app-ssh",
-    "app-setup": "./components/app-setup"
+    "app-setup": "./components/app-setup",
+    "user-info": "./components/user-info"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

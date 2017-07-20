@@ -74,4 +74,4 @@ CREATE TABLE IF NOT EXISTS console_config (
 );
 
 -- create trigger
-CREATE TRIGGER config_no_insert BEFORE INSERT ON console_config WHEN (SELECT COUNT(*) FROM console_config) >= 1 BEGIN SELECT RAISE(FAIL, "only one row!"); END;
+CREATE TRIGGER IF NOT EXISTS config_no_insert BEFORE INSERT ON console_config WHEN (SELECT COUNT(*) FROM console_config) >= 1 BEGIN SELECT RAISE(FAIL, "only one row!"); END;
