@@ -9,11 +9,14 @@
    * @name cfClusterTabs
    * @description Provides collection of configuration objects for tabs on the cluster, org and space pages
    * @param {object} $q - the Angular $q service
+   * @param {object} $stateParams - the Angular $stateParams service
+   * @param {app.model.modelManager} modelManager - the application model manager
    * @returns {object} The cfClusterTabs service
    */
   function ClusterTabs($q, $stateParams, modelManager) {
 
-    var service = {
+    return {
+      applicationTabs: [],
       clusterTabs: [ ],
       orgTabs: [],
       spaceTabs: [],
@@ -21,9 +24,11 @@
       callTabs: callTabs
     };
 
-    return service;
-
-    //TODO: Comment convienence + safety + timining (need on demand not available at register time)
+    /**
+     * @function isAdmin
+     * @description Convenience method to safely fetch the cf user's admin status
+     * @returns {boolean} True if user connected to cluster is an admin
+     */
     function isAdmin() {
       var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
       if (consoleInfo.info &&
