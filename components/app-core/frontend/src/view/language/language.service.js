@@ -91,10 +91,11 @@
    * @param {object} $log - the angular $log service
    * @param {object} $translate - the i18n $translate service
    * @param {frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - the i18n $translate service
+   * @param {modelManager} modelManager - the model manager service
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @returns {object} Logged In Service
    */
-  function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, appLocalStorage) {
+  function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, modelManager, appLocalStorage) {
 
     var userPreference = appLocalStorage.getItem(localeStorageId);
 
@@ -115,7 +116,7 @@
       currentLocale: userPreference
     });
 
-    return {
+    var service = {
       /**
        * @name enableLanguageSelection
        * @description Defines if language selection is enabled
@@ -135,6 +136,15 @@
        */
       getCurrent: getCurrent
     };
+
+    if (enableLanguageSelection()) {
+      var userNavModel = modelManager.retrieve('app.model.navigation').user;
+      userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', function () {
+        return { current: service.getCurrent() };
+      }, 2);
+    }
+
+    return service;
 
     function _setLocale(data) {
       var locale = data.currentLocale;
