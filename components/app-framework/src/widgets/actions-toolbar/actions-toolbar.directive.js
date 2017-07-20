@@ -84,7 +84,7 @@
         var s = '';
         _.each(ctrl.items, function (item) {
           s += '(' + item.id || item.name;
-          s += '-' + item.hidden + '-' + item.disabled + ')';
+          s += '-' + executeOrReturn(item, 'hidden') + '-' + executeOrReturn(item, 'disabled') + ')';
         });
         return s;
       }, function (newValue, oldValue) {

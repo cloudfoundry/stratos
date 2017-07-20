@@ -43,7 +43,6 @@
         icon: 'add_to_queue',
         position: 2,
         hidden: function () {
-          // return false;
           var hidden = _.get(this.context, 'hidden');
           if (angular.isFunction(hidden)) {
             return hidden();

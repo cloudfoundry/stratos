@@ -116,7 +116,7 @@
     $scope.$watch(function () {
       if (vm.actions && vm.actions.length > 0) {
         return _.countBy(vm.actions, function (action) {
-          return !!action.hidden;
+          return executeOrReturn(action, 'hidden');
         }).false;
       }
       return 0;
@@ -140,7 +140,7 @@
      * @returns {void}
      */
     function executeAction($event, action) {
-      if (!action.disabled) {
+      if (!executeOrReturn(action, 'disabled')) {
         action.execute(vm.actionTarget);
         this.open = false;
       }
