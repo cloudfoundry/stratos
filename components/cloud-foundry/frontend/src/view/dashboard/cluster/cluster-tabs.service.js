@@ -11,27 +11,29 @@
    * @param {object} $q - the Angular $q service
    * @returns {object} The cfClusterTabs service
    */
-  function ClusterTabs($q) {
-
-    var exampleTab = {
-      // position: 8,
-      // hide: function () {
-      //   var cnsiGuid = $stateParams.cnsiGuid;
-      //   var cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-      //   return !cfUtilsService.hasSshAccess(cnsiModel.serviceInstances[cnsiGuid]);
-      // },
-      // uiSref: 'cf.applications.application.ssh',
-      // label: 'cf.app-ssh',
-    };
+  function ClusterTabs($q, $stateParams, modelManager) {
 
     var service = {
       clusterTabs: [ ],
       orgTabs: [],
       spaceTabs: [],
+      isAdmin: isAdmin,
       callTabs: callTabs
     };
 
     return service;
+
+    //TODO: Comment convienence + safety + timining (need on demand not available at register time)
+    function isAdmin() {
+      var consoleInfo = modelManager.retrieve('app.model.consoleInfo');
+      if (consoleInfo.info &&
+        consoleInfo.info.endpoints &&
+        consoleInfo.info.endpoints.cf[$stateParams.guid] &&
+        consoleInfo.info.endpoints.cf[$stateParams.guid].user) {
+        return consoleInfo.info.endpoints.cf[$stateParams.guid].user.admin;
+      }
+      return false;
+    }
 
     function callTabs(tabTypes, method) {
       var tasks = [];
