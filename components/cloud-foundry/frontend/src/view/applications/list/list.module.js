@@ -91,22 +91,13 @@
       disabled: disableChangeAppListAction,
       reload: _reload
     };
-    var appWallActions = [
-      {
-        name: 'app.app-info.app-actions.view',
-        execute: function () {
-        },
-        disabled: true,
-        id: 'launch',
-        icon: 'launch'
-      }
-    ];
-    //TODO: RC chain
-    appWallActions = _.map(cfAppWallActions.actions, function (action) {
-      action.context = appWallActionContext;
-      return action;
-    });
-    vm.appWallActions = _.orderBy(appWallActions, 'position', 'asc');
+    vm.appWallActions = _.chain(cfAppWallActions.actions)
+      .map(function (action) {
+        action.context = appWallActionContext;
+        return action;
+      })
+      .orderBy('position', 'asc')
+      .value();
 
     vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);

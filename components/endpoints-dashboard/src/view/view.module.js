@@ -38,10 +38,20 @@
 
     vm.endpoints = undefined;
     vm.initialised = false;
-    vm.register = register;
     vm.hideWelcomeMessage = hideWelcomeMessage;
     vm.isUserAdmin = isUserAdmin;
     vm.reload = reload;
+    vm.headerActions = [
+      {
+        name: 'endpoints-dashboard.register-button',
+        execute: register,
+        hidden: function () {
+          return !isUserAdmin();
+        },
+        disabled: vm.initialised,
+        icon: 'add_box'
+      }
+    ];
 
     appEndpointsDashboardService.refreshFromCache();
     if (appEndpointsDashboardService.endpoints.length !== 0) {

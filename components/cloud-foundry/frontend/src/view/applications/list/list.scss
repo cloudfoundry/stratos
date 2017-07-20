@@ -6,9 +6,11 @@ $applications-msg-height: 50px;
 .applications-header {
   @include flex-vertical-centered();
   font-size: $console-unit-space;
-  padding: 0 15px;
   height: $main-nav-title-height;
 
+  &.apps-header {
+    padding: 0 15px;
+  }
 
   bounce-spinner {
     margin-left: $console-unit-space / 2;
