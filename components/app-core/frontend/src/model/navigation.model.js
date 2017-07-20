@@ -38,6 +38,7 @@
     var navModel = {
       menu: menu,
       secondary: [],
+      user: new Menu($log),
       bottomMenu: bottomMenu,
       secondaryMenus: {},
       getSecondaryMenu: getSecondaryMenu,

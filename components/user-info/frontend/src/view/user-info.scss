@@ -1,0 +1,37 @@
+dl.user-info-list {
+  > dt {
+    color: $gray-darker;
+  }
+
+  > dd {
+    font-size: $font-size-large;
+    margin-top: 4px;
+    margin-bottom: $console-unit-space * 0.5;;
+  }
+
+  .user-info-group {
+    display: inline-block;
+    padding: 6px;
+
+    > div {
+      background-color: $gray-darker;
+      padding: 2px 6px;
+      color: $white;
+      border-radius: 4px;
+      font-size: $font-size-medium;
+    }
+  }
+}
+
+.row.user-info-summary {
+  display: flex;
+  > div {
+    flex: 1;
+  }
+}
+
+.edit-user-info-form {
+  .form-note {
+    margin-top: $console-unit-space * 0.5;
+  }
+}
