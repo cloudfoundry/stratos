@@ -5,19 +5,17 @@
     <actions-toolbar ready="appCtrl.ready" items="appCtrl.appActions"></actions-toolbar>
   </div>
 
-  <ul class="application-nav nav nav-tabs col-sm-12">
-    <li ng-repeat="feature in appCtrl.cfApplicationTabs.tabs | orderBy:'position'"
-        ui-sref-active="active" class="nav-item" ng-hide="feature.hide ? feature.hide() : feature.hide">
-      <a class="nav-link" ui-sref="{{feature.uiSref}}({guid: appCtrl.id})" translate>
-        {{ feature.label }}
-      </a>
-    </li>
+
+  <div class="application-tabs">
+    <cf-tabs tabs="appCtrl.cfApplicationTabs.tabs"></cf-tabs>
     <auto-update class="app-summary-auto-update"
                  update="appCtrl.autoUpdate.update"
                  interval="appCtrl.autoUpdate.interval"
                  run="appCtrl.autoUpdate.run"
                  popover="app.auto-update"></auto-update>
-  </ul>
+  </div>
+
+
 
   <div class="application-details col-sm-12">
     <div ui-view class="row"></div>
