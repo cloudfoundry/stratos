@@ -29,7 +29,6 @@
       suffix: '.json'
     });
 
-    // Uncomment this for development to see which strings need localizing
     $translateProvider.useMissingTranslationHandler('missingTranslateHandler');
   }
 
@@ -93,7 +92,7 @@
    * @param {frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - the i18n $translate service
    * @param {modelManager} modelManager - the model manager service
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
-   * @returns {object} Logged In Service
+   * @returns {object} Language Service
    */
   function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, modelManager, appLocalStorage) {
 
@@ -102,7 +101,7 @@
     // Determine if there is only one locale which the user should always use
     var locales = _getLocales();
     if (locales.length === 1) {
-      $log.info('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
+      $log.debug('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
       // Attempt to set the fallback + preferred
       $translate.preferredLanguage(locales[0]);
       $translate.useFallbackLanguage(locales[0]);
