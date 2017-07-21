@@ -6,9 +6,9 @@
     .directive('passwordReveal', passwordReveal);
 
   function passwordReveal($compile) {
-    var showPassword = false;
     return {
       link: function (scope, element) {
+        var showPassword = false;
 
         var markup = '<i class="material-icons password-reveal form-control-feedback text-muted">visibility</i>';
         var eyeElement = angular.element(markup);
