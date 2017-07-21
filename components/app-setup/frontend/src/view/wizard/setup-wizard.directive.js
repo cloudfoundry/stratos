@@ -83,7 +83,7 @@
       data: data,
       userInput: userInput,
       btnText: {
-        next: 'Complete'
+        next: 'app-setup.buttonComplete'
       },
       showBusyOnNext: 'app-setup.step-2.busy-message',
       onNext: function () {

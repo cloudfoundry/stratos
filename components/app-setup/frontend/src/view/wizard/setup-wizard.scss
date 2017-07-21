@@ -1,3 +1,5 @@
+$app-setup-wizard-step-label-padding: 10px;
+
 app-setup-wizard {
   align-self: stretch;
   display: flex;
@@ -39,8 +41,8 @@ app-setup-wizard {
                 }
                 & > a, & > a:hover {
                   color: $brand-secondary;
-                  padding-left: 10px;
-                  padding-right: 10px;
+                  padding-left: $app-setup-wizard-step-label-padding;
+                  padding-right: $app-setup-wizard-step-label-padding;
                   border-left: 1px solid $brand-secondary;
                 }
               }
@@ -75,6 +77,10 @@ app-setup-wizard {
 
                 .app-setup-step {
                   display: flex;
+                  p {
+                    font-size: $font-size-large;
+                  }
+
                   &.app-setup-intro {
                     flex-direction: column;
                     padding-left: $console-unit-space / 2;
@@ -105,8 +111,8 @@ app-setup-wizard {
             background: transparent;
             border-top: 0;
 
-            height: 70px;
-            min-height: 70px;
+            height: $console-unit-space * 1.25 + $button-height;
+            min-height: $console-unit-space * 1.25 + $button-height;
 
             display: block;
             text-align: right;
