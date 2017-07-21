@@ -2,8 +2,7 @@
   ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''"
   method="post">
   <img class="login-form-logo-image" translate-img="login.logo"></img>
-  <h1 class="login-form-title text-center" translate>login.title</h1>
-  <h1 translate-cloak="login.title2" class="login-form-title text-center" translate>login.title2</h1>
+  <h1 class="login-form-title" translate>login.title</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>login.username</label>
     <input type="text" class="form-control"
@@ -27,13 +26,14 @@
     <span class="spinner-notification" translate>login.authenticating</span>
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
+
+  <div ng-if="applicationCtrl.failedLogin" class="alert alert-danger login-error">
+    <p translate>login.error.credentials</p>
+  </div>
+  <div ng-if="applicationCtrl.serverErrorOnLogin" class="alert alert-danger login-error">
+    <p translate>login.error.server</p>
+  </div>
+  <div ng-if="applicationCtrl.serverFailedToRespond" class="alert alert-danger login-error">
+    <p translate>login.error.no-response</p>
+  </div>
 </form>
-<div ng-if="applicationCtrl.failedLogin" class="alert alert-danger login-error">
-  <p translate>login.error.credentials</p>
-</div>
-<div ng-if="applicationCtrl.serverErrorOnLogin" class="alert alert-danger login-error">
-  <p translate>login.error.server</p>
-</div>
-<div ng-if="applicationCtrl.serverFailedToRespond" class="alert alert-danger login-error">
-  <p translate>login.error.no-response</p>
-</div>

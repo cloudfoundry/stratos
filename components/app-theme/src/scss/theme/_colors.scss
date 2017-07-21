@@ -58,6 +58,7 @@ $status-resolved:       $silver-sand !default;
 $console-primary:           $gossamer !default;
 $console-primary-bg:        $concrete !default;
 $console-primary-fg:        $mine-shaft !default;
+$console-secondary:         $slate !default;
 
 
 // Bootstrap binding names
@@ -69,6 +70,7 @@ $gray-light:            $rule !default;
 $gray-lighter:          $seashell !default;
 
 $brand-primary:         $console-primary !default;
+$brand-secondary:       $console-secondary !default;
 $brand-success:         $gossamer !default;
 $brand-info:            $cutty-sark !default;
 $brand-warning:         $sunglow !default;

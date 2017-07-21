@@ -1,27 +1,14 @@
-<div class="login-outer setup">
-  <!--<div class="login-outer" ng-class="{'setup': setupController.showWizard}">-->
-  <div class="login-page" >
-    <div class="login-background">
-      <!--<div class="login-background" ng-if="!setupController.showWizard">-->
-      <div class="login-page-text">
-        <h1 class="login-page-headline text-center" translate>app-setup.intro-title</h1>
-        <p class="login-page-tagline text-center" translate>app-setup.intro-description</p>
-      </div>
+<landing-page>
+  <div class="login-page">
+    <div class="login-page-left-space"></div>
+    <div class="login-left text-left">
+      <h1 class="login-page-headline " translate>app-setup.intro-title</h1>
+      <p class="login-page-tagline" translate>app-setup.intro-description</p>
     </div>
-    <div id="section-login-panel" class="login-panel">
-      <!--<div class="" ng-if="!setupController.showWizard">-->
-      <div>
+    <div id="section-login-panel" class="login-right text-left setup-login-right">
         <button class="btn btn-commit" ng-click="setupController.startSetup()" translate>app-setup.start-button</button>
-      </div>
-      <!--<wizard ng-if="setupController.showWizard"-->
-              <!--actions="setupController.wizardActions"-->
-              <!--options="setupController.wizardOptions"></wizard>-->
-      <div class="login-panel-product-logo">
-        <img translate-img="product.logo" class="company-logo"/>
-      </div>
-      <page-footer context="login.footer" class="position-bottom login-footer brand-footer"></page-footer>
     </div>
+    <div class="login-page-right-space"></div>
   </div>
-
-</div>
+</landing-page>
 

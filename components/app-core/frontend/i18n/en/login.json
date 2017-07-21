@@ -13,16 +13,6 @@
       "server": "A server error occurred when attempting to log you in. Please try again. If this error persists, please contact the administrator.",
       "no-response": "The authentication server failed to respond. Please try again. If this error persists, please contact the administrator."
     },
-    "footer": {
-      "title": "@:footer.title",
-      "copyright": "@:footer.copyright",
-      "company.logo": "@:company.logo",
-      "product.logo": "@:product.logo",
-      "company.www-link": "@:company.www-link",
-      "product.www-link": "@:product.www-link",
-      "company.terms-href": "@:company.terms.href",
-      "company.privacy-href": "@:company.privacy.href"
-    },
     "timeout": {
       "prompt": "Are you still there?",
       "notice": "You have been inactive for a while. For your protection, we will automatically log you out in {{timeout}}",

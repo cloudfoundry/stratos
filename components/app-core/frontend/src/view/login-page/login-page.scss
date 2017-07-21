@@ -1,101 +1,57 @@
 @import "login-form/login-form";
 
-$login-page-text-panel-align: center !default;
-$login-page-text-panel-display: block !default;
-$login-page-text-fg: $white !default;
-
 .login-page {
-
   display: flex;
   flex-flow: row nowrap;
+  flex: 1;
 
-  .login-background {
-    flex: 8 1 0px;
-    background: url('images/login_bg.jpg') no-repeat center center;
-    background-size: cover;
-    color: $login-page-text-fg;
-    height: 100vh;
-    display: flex;
-    align-items: $login-page-text-panel-align;
-    justify-content: center;
-    padding: 1em 3em;
-
-    h1 {
-      font-size: 42px;
-    }
-
-    p {
-      font-size: 20px;
-      margin-top: 24px;
-      margin-bottom: 24px;
-
-      > span {
-        max-width: 90%;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: 20px;
-      }
-    }
-
-    .login-page-text {
-      display: $login-page-text-panel-display;
-    }
-
-    .login-panel-company-logo {
-      position: absolute;
-      width: 100%;
-      height: 100vh;
-      top: 0;
-      left: 0;
-
-      > img {
-        position: absolute;
-        bottom: 2 * $console-unit-space;
-        left: $console-unit-space;
-      }
-    }
-
+  .login-page-left-space, .login-page-right-space {
+    flex: 1;
   }
 
-  .login-panel {
-    position: relative;
-    flex: 4 0 0px;
-    min-width: 362px;
+  @media (max-width: $screen-lg) {
+    .login-page-left-space, .login-page-right-space {
+      flex: 0.5;
+    }
+  }
+
+  .login-left, .login-right {
+    flex: 5;
+    max-width: 600px;
+  }
+
+  .login-left {
     display: flex;
     flex-direction: column;
-    background-color: white;
-    height: 100vh;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: space-between;
-    border-left: 1px solid black;
-    overflow-y: auto;
-    padding: 0;
-
-    login-form {
-      flex: 1 1 auto;
-    }
-
-    .login-form {
-      > h1 {
-        text-align: left;
-      }
-    }
-
-    .login-panel-product-logo {
-      width: 100%;
-
-      .company-logo {
-        flex: 0 0 auto;
-        padding: 0 0 4 * $console-unit-space $console-unit-space;
-      }
-    }
   }
 
   @media (max-width: $screen-sm-min) {
-    .login-background {
+    .login-left {
       display: none;
     }
+  }
+
+  .login-page-headline {
+    font-weight: $console-font-weight-light;
+    color: $brand-primary;
+    font-size: 52px;
+
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .login-page-tagline {
+    font-weight: normal;
+    color: $text-color;
+
+    font-size: $font-size-large;
+    margin-top: $console-unit-space;
+    margin-bottom: $console-unit-space;
+  }
+
+  .login-right {
+    min-width: 362px;
+    min-height: 392px;
   }
 
 }
