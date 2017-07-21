@@ -26,6 +26,9 @@
       position: 1,
       hide: false,
       uiSref: 'cf.applications.application.summary',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'app.app-info.app-tabs.summary.label',
       appCreatedInstructions: [{
         id: 'new-app-deploy-cli',

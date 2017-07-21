@@ -64,29 +64,7 @@
     </div>
   </div>
 
+  <cf-tabs tabs="clusterDetailController.cfTabs.clusterTabs"></cf-tabs>
 
-  <ul class="application-nav nav nav-tabs col-sm-12">
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.organizations" translate>cf.organisations</a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>cf.users</a>
-    </li>
-    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.firehose" translate>cf.cf-tabs.firehose</a>
-    </li>
-    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.featureFlags" translate>cf.cf-tabs.feature-flags</a>
-    </li>
-    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.buildPacks" translate>cf.cf-tabs.buildpacks</a>
-    </li>
-    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.stacks" translate>cf.cf-tabs.stacks</a>
-    </li>
-    <li ng-if="clusterDetailController.isAdmin" class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.securityGroups" translate>cf.cf-tabs.security-groups</a>
-    </li>
-  </ul>
   <ui-view></ui-view>
 </div>
