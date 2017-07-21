@@ -1,14 +1,8 @@
 <div class="endpoints endpoints-dashboard">
-  <div class="header">
-    <div class="applications-header font-semi-bold pull-left" translate>
-      endpoints-dashboard.title
-      <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
-    </div>
-    <button ng-if="endpointsDashboardCtrl.initialised &&
-                     endpointsDashboardCtrl.isUserAdmin()"
-            class="btn btn-primary" stlye="position: absolute; right: 0px;"
-            ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.register-button
-    </button>
+  <div class="applications-header font-semi-bold pull-left">
+    <span translate>endpoints-dashboard.title</span>
+    <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
+    <actions-toolbar ready="endpointsDashboardCtrl.initialised" items="endpointsDashboardCtrl.headerActions"></actions-toolbar>
   </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>

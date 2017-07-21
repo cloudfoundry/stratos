@@ -16,11 +16,14 @@
     });
   }
 
-  function registerAppTab(cfApplicationTabs) {
+  function registerAppTab($stateParams, cfApplicationTabs) {
     cfApplicationTabs.tabs.push({
       position: 2,
       hide: false,
       uiSref: 'cf.applications.application.log-stream',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'app.app-info.app-tabs.log-stream.label'
     });
   }

@@ -1,17 +1,7 @@
-<div class="app-top-bar action-bar app-actions-bar panel-less application-wall-header">
-  <div class="applications-header font-semi-bold">
-    <span translate>app-wall</span>
-    <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
-  </div>
-  <div class="application-header-right">
-    <button ng-repeat="action in applicationsListCtrl.appWallActions | orderBy:'position'"
-            id="{{action.id}}"
-            class="btn btn-primary"
-            ng-if="action.show(applicationsListCtrl.appWallActionContext)"
-            ng-disabled="action.disable(applicationsListCtrl.appWallActionContext)"
-            ng-click="action.action(applicationsListCtrl.appWallActionContext)">{{action.label | translate}}
-    </button>
-  </div>
+<div class="applications-header apps-header font-semi-bold">
+  <span translate>app-wall</span>
+  <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
+  <actions-toolbar ready="applicationsListCtrl.ready" items="applicationsListCtrl.appWallActions"></actions-toolbar>
 </div>
 
 <div ng-if="applicationsListCtrl.ready">

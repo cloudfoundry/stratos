@@ -39,26 +39,30 @@
     function register() {
       cfAppWallActions.actions.push({
         id: 'app-wall-deploy-application-btn',
-        label: 'app-wall.deploy-application',
+        name: 'app-wall.deploy-application',
+        icon: 'add_to_queue',
         position: 2,
-        show: function (context) {
-          if (angular.isFunction(context.show)) {
-            return context.show();
-          }
-          return true;
-        },
-        disable: function (context) {
-          if (angular.isFunction(context.disable)) {
-            return context.disable();
+        hidden: function () {
+          var hidden = _.get(this.context, 'hidden');
+          if (angular.isFunction(hidden)) {
+            return hidden();
           }
           return false;
         },
-        action: function (context) {
+        disabled: function () {
+          var disabled = _.get(this.context, 'disabled');
+          if (angular.isFunction(disabled)) {
+            return disabled();
+          }
+          return false;
+        },
+        execute: function () {
+          var reload = _.get(this.context, 'reload');
           deploy().result.catch(function (result) {
             // Do we need to reload the app collection to show the newly added app?
-            if (_.get(result, 'reload') && angular.isFunction(context.reload)) {
+            if (_.get(result, 'reload') && angular.isFunction(reload)) {
               // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
-              context.reload();
+              reload();
             }
           });
         }

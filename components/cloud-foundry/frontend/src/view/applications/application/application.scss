@@ -36,13 +36,12 @@
   z-index: 1500;
 }
 
-.application-nav {
+.application-tabs {
 
   .app-summary-auto-update {
-    margin-top: 12px;
-    float: right;
-    margin-left: $console-unit-space / 2;
-    padding-top: 3px;
+    position: fixed;
+    right: 60px;
+    padding-top: 13px;
 
     > span {
       cursor: pointer;

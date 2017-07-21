@@ -53,6 +53,10 @@
       if (!doNotLogRequests) {
         console.log('\x1b[36m%s %s\x1b[0m', req.method, req.url);
       }
+
+      // Remove the /pp
+      req.url = req.url.substr(3);
+      console.log(req.url);
       return proxy.web(req, res);
     }
   });
@@ -60,6 +64,8 @@
   var server = https.createServer(opts, app);
 
   server.on('upgrade', function (req, socket, head) {
+    req.url = req.url.substr(3);
+    console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
     proxy.ws(req, socket, head);
   });
 

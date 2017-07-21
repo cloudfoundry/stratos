@@ -1,0 +1,8 @@
+<ul class="application-nav nav nav-tabs col-sm-12">
+  <li ng-repeat="tab in tabs | orderBy:'position'"
+      ui-sref-active="active" class="nav-item" ng-hide="tab.hide ? tab.hide() : tab.hide">
+    <a class="nav-link" ui-sref="{{tab.uiSref}}(tab.uiSrefParam())" translate>
+      {{ tab.label }}
+    </a>
+  </li>
+</ul>

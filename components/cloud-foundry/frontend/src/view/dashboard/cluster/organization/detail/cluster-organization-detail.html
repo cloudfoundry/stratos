@@ -20,17 +20,7 @@
     organization-names="clusterOrgDetailController.organizationNames">
   </organization-summary-tile>
 
-  <ul class="application-nav nav nav-tabs col-sm-12">
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces" translate>
-        cf.org-info.space-tab-title
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.detail.users" translate>
-        cf.org-info.users-tab-title
-      </a>
-    </li>
-  </ul>
+  <cf-tabs tabs="clusterOrgDetailController.cfTabs.orgTabs"></cf-tabs>
+
   <ui-view></ui-view>
 </div>

@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.detail.organizations', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.organizations', {
@@ -19,6 +20,16 @@
           }
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.clusterTabs.push({
+      position: 1,
+      hide: false,
+      uiSref: 'endpoint.clusters.cluster.detail.organizations',
+      uiSrefParam: _.noop,
+      label: 'cf.organisations'
     });
   }
 

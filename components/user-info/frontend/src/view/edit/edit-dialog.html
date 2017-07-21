@@ -1,0 +1,48 @@
+<div class="edit-user-info-form">
+  <p translate>user-info.edit.introduction</p>
+  <form class="form-stacked center-block" name="form.editUserInfoForm" role="form">
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-givenName" translate>
+        user-info.edit.given-name
+      </label>
+      <input autofocus type="text" class="form-control" focusable-input
+        id="user-info-form-givenName" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.givenName }}"
+        ng-model="asyncTaskDialogCtrl.context.data.givenName"/>
+    </div>
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-familyName" translate>
+        user-info.edit.family-name
+      </label>
+      <input type="text" class="form-control" focusable-input
+        id="user-info-form-familyName" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.user.user.name.familyName }}"
+        ng-model="asyncTaskDialogCtrl.context.data.familyName"/>
+    </div>
+
+    <p class="form-note" translate>user-info.edit.note</p>
+
+    <div class="form-group">
+      <label class="control-label" for="user-info-form-email" translate>
+        user-info.edit.email
+      </label>
+      <input type="text" class="form-control" focusable-input
+        id="user-info-form-email" name="name"
+        placeholder="{{ asyncTaskDialogCtrl.context.emailAddress }}"
+        ng-model="asyncTaskDialogCtrl.context.data.emailAddress"/>
+    </div>
+    
+    <div ng-disabled="true" class="form-group has-feedback disabled" focusable-input
+      ng-class="{'has-error': form.editUserInfoForm.password.$invalid}">
+      <label class="control-label required" for="credentials-form-password" translate>
+        user-info.edit.current-password
+      </label>
+      <span class="control-message" ng-if="form.editUserInfoForm.password.$invalid">
+        <span translate>user-info.edit.error-need-password</span>
+      </span>
+      <input ng-disabled="!asyncTaskDialogCtrl.context.data.emailAddress" type="password" class="form-control" id="user-info-form-password" name="password"
+        ng-model="asyncTaskDialogCtrl.context.data.password" password-reveal ng-required="asyncTaskDialogCtrl.context.data.emailAddress"/>
+    </div>
+
+  </form>
+</div>

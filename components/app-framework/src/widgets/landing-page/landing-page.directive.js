@@ -25,19 +25,9 @@
     };
   }
 
-  function landingPageController(appSelectLanguage) {
+  function landingPageController(languageService) {
     var vm = this;
 
-    vm.showLanguageSelection = showLanguageSelection;
-
-    /**
-     * @function showLanguageSelection
-     * @memberof app.framework.widgets.landingPage
-     * @description Shows the Language Selection dialog
-     * @public
-     */
-    function showLanguageSelection() {
-      appSelectLanguage.show();
-    }
+    vm.languageService = languageService;
   }
 })();

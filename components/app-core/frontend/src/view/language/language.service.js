@@ -2,18 +2,18 @@
   'use strict';
 
   angular
-    .module('app.utils')
+    .module('app.view')
     .config(languageConfig)
     .provider('languageService', languageServiceProvider)
     .factory('missingTranslateHandler', missingTranslateHandler);
 
-  var localeStorageId = 'locale';
+  var localeStorageId = 'stratos-ui_locale';
   var defaultLocale = 'en_US';
   var browserLocale;
 
   /**
    * @namespace app.utils.languageConfig
-   * @memberof app.utils
+   * @memberof app.view
    * @name missingTranslateHandler
    * @description Initialise the $translate service with the required config
    * @param {object} $translateProvider - the angular $translateProvider provider
@@ -34,8 +34,8 @@
   }
 
   /**
-   * @namespace app.utils.missingTranslateHandler
-   * @memberof app.utils
+   * @namespace app.view.missingTranslateHandler
+   * @memberof app.view
    * @name missingTranslateHandler
    * @description Custom missing translation handler only logs each missing translation id once
    * @param {object} $log - the angular $log service
@@ -57,8 +57,8 @@
   }
 
   /**
-   * @namespace app.utils.languageServiceProvider
-   * @memberof app.utils
+   * @namespace app.view.languageServiceProvider
+   * @memberof app.view
    * @name languageServiceProvider
    * @description Provide a way to override the default browser locale
    * @returns {object} language service provider
@@ -84,26 +84,69 @@
   }
 
   /**
-   * @namespace app.utils.languageServiceFactory
-   * @memberof app.utils
+   * @namespace app.view.languageServiceFactory
+   * @memberof app.view
    * @name languageServiceFactory
    * @param {object} $q - the angular $q service
    * @param {object} $log - the angular $log service
    * @param {object} $translate - the i18n $translate service
+   * @param {frameworkAsyncTaskDialog} frameworkAsyncTaskDialog - the i18n $translate service
+   * @param {modelManager} modelManager - the model manager service
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @returns {object} Logged In Service
    */
-  function languageServiceFactory($q, $log, $translate, appLocalStorage) {
+  function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, modelManager, appLocalStorage) {
 
-    setLocale({
-      currentLocale: appLocalStorage.getItem(localeStorageId)
+    var userPreference = appLocalStorage.getItem(localeStorageId);
+
+    // Determine if there is only one locale which the user should always use
+    var locales = _getLocales();
+    if (locales.length === 1) {
+      $log.info('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
+      // Attempt to set the fallback + preferred
+      $translate.preferredLanguage(locales[0]);
+      $translate.useFallbackLanguage(locales[0]);
+      // Ensure that the user pref is this one. This avoids instances where older, unsupported locales have not been
+      // cleared out of the source tree
+      userPreference = locales[0];
+    }
+
+    // Ensure that the locale is set to the user's pref (or forced to the only locale)
+    _setLocale({
+      currentLocale: userPreference
     });
 
-    return {
-      setLocale: setLocale
+    var service = {
+      /**
+       * @name enableLanguageSelection
+       * @description Defines if language selection is enabled
+       * @returns {boolean} true if the language can be selected
+       */
+      enableLanguageSelection: enableLanguageSelection,
+      /**
+       * @name showLanguageSelection
+       * @description Display Language Selection Dialog
+       * @returns {*} frameworkAsyncTaskDialog
+       */
+      showLanguageSelection: showLanguageSelection,
+      /**
+       * @name getCurrent
+       * @description Gets the current language
+       * @returns {string} the current language
+       */
+      getCurrent: getCurrent
     };
 
-    function setLocale(data) {
+    if (enableLanguageSelection()) {
+      var userNavModel = modelManager.retrieve('app.model.navigation').user;
+      userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', function () {
+        return { current: service.getCurrent() };
+      }, 2);
+    }
+
+    return service;
+
+    function _setLocale(data) {
       var locale = data.currentLocale;
       if (locale) {
         // Only store the locale if it's explicitly been set...
@@ -124,10 +167,10 @@
       }
 
       return $translate.use(locale).then(function () {
-        $log.info("Changed locale to '" + $translate.use() + "'");
+        $log.debug("Changed locale to '" + $translate.use() + "'");
         var newMomentLocale = moment.locale(momentLocale);
         if (newMomentLocale === momentLocale) {
-          $log.info("Changed moment locale to '" + newMomentLocale + "'");
+          $log.debug("Changed moment locale to '" + newMomentLocale + "'");
         } else {
           $log.warn("Failed to load moment locale for '" + momentLocale + "', falling back to '" + newMomentLocale + "'");
         }
@@ -135,6 +178,49 @@
         $log.warn("Failed to load language for locale '" + locale + "', falling back to '" + $translate.use() + "'");
         return $q.reject(reason);
       });
+    }
+
+    function _getLocales() {
+      var locales = $translate.instant('locales');
+      return locales ? locales.split(',') : [];
+    }
+
+    function enableLanguageSelection() {
+      return _getLocales().length > 1;
+    }
+
+    function showLanguageSelection() {
+      var locales = [];
+      _.each($translate.instant('locales').split(','), function (locale) {
+        locales.push({
+          value: locale.trim(),
+          label: $translate.instant('locales.' + locale.trim())
+        });
+      });
+
+      return frameworkAsyncTaskDialog(
+        {
+          title: 'language.select',
+          templateUrl: 'app/view/language/select-language.html',
+          submitCommit: true,
+          buttonTitles: {
+            submit: 'buttons.set'
+          },
+          class: 'dialog-form',
+          dialog: true
+        },
+        {
+          data: {
+            locales: locales,
+            currentLocale: $translate.use()
+          }
+        },
+        _setLocale
+      );
+    }
+
+    function getCurrent() {
+      return $translate.instant('locales.' + $translate.use());
     }
   }
 

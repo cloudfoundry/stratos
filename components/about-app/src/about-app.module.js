@@ -45,7 +45,7 @@
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').bottomMenu;
-      menu.addMenuItem('about-app', 'about-app', 'menu.about', 99, 'help_outline');
+      menu.addMenuItem('about-app', 'about-app', 'menu.about', undefined, 99, 'help_outline');
     }
   }
 

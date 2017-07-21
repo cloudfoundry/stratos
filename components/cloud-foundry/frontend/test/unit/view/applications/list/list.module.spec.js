@@ -3,7 +3,7 @@
 
   describe('list module', function () {
 
-    var $controller, $httpBackend, $scope, $state;
+    var $controller, $httpBackend, $scope, $state, appWallActionContext;
 
     var cnsiGuid = 'cnsiGuid';
     // Matches org from ListAllOrganizations
@@ -72,6 +72,7 @@
         $httpBackend.whenGET(GetDetailedStatsForStartedApp.url).respond(200, GetDetailedStatsForStartedApp.response[200].body);
       });
 
+      appWallActionContext = $controller.appWallActions[0].context;
     }
 
     afterEach(function () {
@@ -490,7 +491,7 @@
       });
 
       it('should show `Add Application` button to user', function () {
-        expect($controller.appWallActionContext.show()).toBe(true);
+        expect(appWallActionContext.hidden()).toBe(false);
       });
     });
 
@@ -503,7 +504,7 @@
       it('should show `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.appWallActionContext.show()).toBe(true);
+        expect(appWallActionContext.hidden()).toBe(false);
       });
     });
 
@@ -516,7 +517,7 @@
       it('should hide `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.appWallActionContext.show()).toBe(false);
+        expect(appWallActionContext.hidden()).toBe(true);
       });
     });
 

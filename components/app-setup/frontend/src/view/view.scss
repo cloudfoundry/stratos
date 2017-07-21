@@ -17,9 +17,9 @@
 
     .app-setup-headline {
       color: $brand-primary;
-      font-weight: 300;
+      font-weight: $console-font-weight-light;
       align-self: flex-start;
-      padding: 12px 0;
+      padding: $console-unit-space / 2 0;
     }
 
   }
