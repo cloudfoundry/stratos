@@ -19,7 +19,15 @@
   function landingPage() {
     return {
       templateUrl: 'framework/widgets/landing-page/landing-page.html',
-      transclude: true
+      transclude: true,
+      controller: landingPageController,
+      controllerAs: 'landingPageCtrl'
     };
+  }
+
+  function landingPageController(languageService) {
+    var vm = this;
+
+    vm.languageService = languageService;
   }
 })();

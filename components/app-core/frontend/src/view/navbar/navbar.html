@@ -28,14 +28,12 @@
           <ul class="actions-menu-list dropdown-menu actions-menu-right">
             <li ng-repeat-start="menuItem in navBarCtrl.userNavModel" ng-if="!menuItem.hidden && menuItem.href"
               id="user-navmenu-item-{{menuItem.name}}"
-              translate class="actions-menu-item" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}" tabindex="0">{{ menuItem.text || menuItem.name }}</li>
+              translate translate-values="{{menuItem.textValues()}}"
+              class="actions-menu-item" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}" tabindex="0">{{ menuItem.text || menuItem.name }}</li>
             <li ng-repeat-end ng-if="!menuItem.hidden && menuItem.onClick"
               id="user-navmenu-item-{{menuItem.name}}"
-              translate class="actions-menu-item" ng-click="menuItem.onClick()" tabindex="0">{{ menuItem.text || menuItem.name }}</li>
-            <!--
-            <li ng-show="false" translate class="actions-menu-item" ui-sref="account-settings" ui-sref-opts="{reload: true}" tabindex="0">menu.profile</li>
-            <li ng-if="navBarCtrl.showLanguageSelection" translate class="actions-menu-item" ng-click="applicationCtrl.showLanguageSelection()" tabindex="0">menu.language</li>
-            -->
+              translate translate-values="{{menuItem.textValues()}}"
+              class="actions-menu-item" ng-click="menuItem.onClick()" tabindex="0">{{ menuItem.text || menuItem.name }}</li>
             <li ng-if="navBarCtrl.userNavModel.length > 0" role="separator" class="divider"></li>
             <li id="navbar-item-logout" translate class="actions-menu-item" ng-click="applicationCtrl.logout()" tabindex="0">menu.logout</li>
           </ul>

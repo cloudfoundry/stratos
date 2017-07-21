@@ -3,7 +3,6 @@
 
   angular
     .module('app.view')
-    .constant('showLanguageSelection', false)
     .directive('navbar', navbar);
 
   /**
@@ -22,9 +21,11 @@
     };
   }
 
-  function NavBarController($window, showLanguageSelection, modelManager) {
+  function NavBarController($window, languageService, modelManager) {
     var vm = this;
-    vm.showLanguageSelection = showLanguageSelection || false;
+
+    vm.languageService = languageService;
+
     vm.accountModel = modelManager.retrieve('app.model.account');
     vm.userNavModel = modelManager.retrieve('app.model.navigation').user;
 

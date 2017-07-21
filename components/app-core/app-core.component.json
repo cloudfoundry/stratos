@@ -1,6 +1,13 @@
 {
   "frontend": {
     "base": "frontend",
-    "root": "app"
+    "root": "app",
+    "overrides": {
+      "moment": {
+        "main": [
+          "min/moment-with-locales.min.js"
+        ]
+      }
+    }
   }
 }
