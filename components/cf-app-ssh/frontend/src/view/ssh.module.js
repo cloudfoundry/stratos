@@ -24,6 +24,9 @@
         return !cfUtilsService.hasSshAccess(cnsiModel.serviceInstances[cnsiGuid]);
       },
       uiSref: 'cf.applications.application.ssh',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'cf.app-ssh',
       clearState: function () {
       }

@@ -1,15 +1,16 @@
 <div class="actions-toolbar">
+
   <button
     ng-repeat="action in actionsToolbarCtrl.items"
+    id="{{action.id}}"
     class="no-focus btn btn-link btn-border-less actions-toolbar-btn"
-    ng-disabled="action.disabled"
-    ng-hide="action.hidden"
+    ng-disabled="executeOrReturn(action, 'disabled')"
+    ng-hide="executeOrReturn(action, 'hidden')"
     ng-click="action.execute()">
     <app-icon icon-class="{{action.iconClass}}" class="actions-toolbar-icon" icon="{{action.icon}}"></app-icon>
     <span>{{ action.name | translate }}</span>
   </button>
 </div>
-
 <actions-menu actions="actionsToolbarCtrl.items"
   menu-before-open="actionsToolbarCtrl.onOpenMenu"
   menu-icon-name="more_vert"

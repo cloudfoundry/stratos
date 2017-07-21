@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.detail.securityGroups', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.securityGroups', {
@@ -17,6 +18,18 @@
           return 'endpoint.clusters.tiles';
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.clusterTabs.push({
+      position: 7,
+      hide: function () {
+        return !cfTabs.isAdmin();
+      },
+      uiSref: 'endpoint.clusters.cluster.detail.securityGroups',
+      uiSrefParam: _.noop,
+      label: 'cf.cf-tabs.security-groups'
     });
   }
 

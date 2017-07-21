@@ -110,7 +110,7 @@
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.register();
+        controller.headerActions[0].execute();
         $scope.$digest();
         expect(registerServiceCalled).toBe(true);
         $httpBackend.flush();

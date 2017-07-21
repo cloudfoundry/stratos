@@ -15,11 +15,14 @@
     });
   }
 
-  function registerAppTab(cfApplicationTabs) {
+  function registerAppTab($stateParams, cfApplicationTabs) {
     cfApplicationTabs.tabs.push({
       position: 3,
       hide: false,
       uiSref: 'cf.applications.application.services',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'app.app-info.app-tabs.services.label'
     });
   }

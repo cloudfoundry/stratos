@@ -3,68 +3,25 @@
 
 $applications-msg-height: 50px;
 
-.application-wall-header.action-bar {
-  display: flex;
-  flex-wrap: wrap;
-  line-height: $main-nav-item-height;
+.applications-header {
+  @include flex-vertical-centered();
+  font-size: $console-unit-space;
+  height: $main-nav-title-height;
 
-  .application-header-right {
-    flex-grow: 1;
-    justify-content: flex-end;
-    align-items: center;
-    display: flex;
-    min-height: $main-nav-item-height;
+  &.apps-header {
+    padding: 0 $panel-body-padding;
+  }
 
-    .btn-primary {
-      font-size: $font-size-base;
-      font-weight: $console-font-weight-strongbold;
-      height: auto;
-      padding: 4px $console-unit-space;
+  bounce-spinner {
+    margin-left: $console-unit-space / 2;
+    vertical-align: middle;
+    line-height: 1;
+    .bounce-spinner {
+      display: block;
+      width: 46px;
     }
   }
-}
 
-.application-header-centre {
-  flex-grow: 1;
-
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-left: $console-unit-space;
-
-  .form-group.search-field {
-    height: 40px;
-    display: flex;
-    margin-top: -1px;
-    align-items: center;
-    input {
-      margin-bottom: 0;
-    }
-  }
-}
-
-@media (max-width: 745px) {
-  .application-header-centre {
-    margin-left: 0;
-    justify-content: flex-start;
-  }
-  .application-header-right {
-    & > button.btn {
-      margin-left: 0;
-    }
-  }
-}
-
-@media (max-width: 549px) {
-  .application-header-centre {
-    .view-buttons {
-      margin-left: 0;
-      button {
-        border: none;
-      }
-    }
-  }
 }
 
 .applications-filter {
