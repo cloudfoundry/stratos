@@ -70,15 +70,15 @@
           varName: isEdit ? variableName : '',
           varValue: isEdit ? model.application.variables.environment_json[variableName] : ''
         },
-        description: isEdit ? 'app-tabs.variables.actions.edit-dialog.description' : 'app-tabs.variables.add-dialog.description'
+        description: isEdit ? 'app.app-info.app-tabs.variables.actions.edit-dialog.description' : 'app.app-info.app-tabs.variables.add-dialog.description'
       };
 
       return frameworkAsyncTaskDialog({
-        title: isEdit ? 'app-tabs.variables.actions.edit-dialog.title' : 'app-tabs.variables.add-dialog.title',
+        title: isEdit ? 'app.app-info.app-tabs.variables.actions.edit-dialog.title' : 'app.app-info.app-tabs.variables.add-dialog.title',
         templateUrl: 'plugins/cloud-foundry/view/applications/application/variables/variables-dialog.html',
         submitCommit: true,
         buttonTitles: {
-          submit: isEdit ? 'app-tabs.variables.actions.edit-dialog.submit-button' : 'app-tabs.variables.add-dialog.submit-button'
+          submit: isEdit ? 'app.app-info.app-tabs.variables.actions.edit-dialog.submit-button' : 'app.app-info.app-tabs.variables.add-dialog.submit-button'
         },
         dialog: true,
         class: 'dialog-form'
@@ -96,8 +96,8 @@
         vars[data.varName] = data.varValue;
         var updateData = {environment_json: vars};
         return model.update(cnsiGuid, id, updateData).catch(function () {
-          context.errorMsg = isEdit ? 'app-tabs.variables.actions.edit-dialog.error'
-            : 'app-tabs.variables.add-dialog.error';
+          context.errorMsg = isEdit ? 'app.app-info.app-tabs.variables.actions.edit-dialog.error'
+            : 'app.app-info.app-tabs.variables.add-dialog.error';
           return $q.reject();
         });
       }

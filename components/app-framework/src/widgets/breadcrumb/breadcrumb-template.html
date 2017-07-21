@@ -1,6 +1,6 @@
 <ol class="breadcrumb">
   <li ng-repeat="step in steps" ng-class="{active: $last}" ng-switch="$last || !!step.abstract">
-    <a translate ng-switch-when="false" href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel}}</a>
-    <span translate ng-switch-when="true">{{step.ncyBreadcrumbLabel}}</span>
+    <a ng-switch-when="false" href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel | conditionalTranslate:step.ncyBreadcrumb.translate}}</a>
+    <span ng-switch-when="true">{{step.ncyBreadcrumbLabel | conditionalTranslate:step.ncyBreadcrumb.translate}}</span>
   </li>
 </ol>

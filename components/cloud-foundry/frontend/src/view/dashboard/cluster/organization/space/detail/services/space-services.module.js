@@ -72,7 +72,7 @@
     function getInitialActions() {
       return [
         {
-          name: 'space-info.delete-service-action',
+          name: 'cf.space-info.delete-service-action',
           disabled: false,
           execute: function (serviceInstance) {
             cfServiceInstanceService.deleteService(vm.clusterGuid, serviceInstance.metadata.guid,
@@ -80,7 +80,7 @@
           }
         },
         {
-          name: 'space-info.detach-service-action',
+          name: 'cf.space-info.detach-service-action',
           disabled: true,
           execute: function (serviceInstance) {
             cfServiceInstanceService.unbindServiceFromApps(vm.clusterGuid, serviceInstance.entity.service_bindings,

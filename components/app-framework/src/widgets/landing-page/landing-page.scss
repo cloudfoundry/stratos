@@ -2,7 +2,7 @@
   height: 100%;
   width: 100%;
 
-  font-weight: 400;
+  font-weight: normal;
 
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@
 
   page-footer {
     position: static;
-    bottom: 12px;
+    bottom: $console-unit-space / 2;
 
     animation: fadein 2s ease;
 
@@ -41,7 +41,7 @@
       }
     }
     .company-logo {
-      width: 96px;
+      width: $console-company-logo-width;
     }
   }
 

@@ -150,21 +150,21 @@
      * @public
      */
     function getNoAppsMessage() {
-      var text = 'app-wall.no-apps.default';
+      var text = 'app-wall.no-apps.space-developer.default';
       if (vm.model.filterParams.cnsiGuid !== 'all') {
         if (vm.model.filterParams.orgGuid !== 'all') {
           if (vm.model.filterParams.spaceGuid !== 'all') {
-            text = 'app-wall.no-apps.empty-space';
+            text = 'app-wall.no-apps.space-developer.empty-space';
           } else {
-            text = 'app-wall.no-apps.empty-org';
+            text = 'app-wall.no-apps.space-developer.empty-org';
           }
         } else {
-          text = 'app-wall.no-apps.empty-endpoint';
+          text = 'app-wall.no-apps.space-developer.empty-endpoint';
         }
       }
       text = $translate.instant(text);
       return vm.model.filterParams.text && vm.model.filterParams.text.length
-        ? $translate.instant('app-wall.no-apps.empty-x-due-to-search', { emptyXMessage: text })
+        ? $translate.instant('app-wall.no-apps.space-developer.empty-x-due-to-search', { emptyXMessage: text })
         : text;
     }
 

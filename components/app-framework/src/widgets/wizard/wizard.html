@@ -1,6 +1,6 @@
 <div class="wizard" ng-form="wizardForm" ng-keydown="$event.keyCode === 13 && !wizardCtrl.disableNext() && wizardCtrl.next()">
   <div ng-if="wizardCtrl.workflow.title" class="wizard-head">
-    <h4 translate>{{ ::wizardCtrl.workflow.title }}</h4>
+    <h4 translate>{{ wizardCtrl.workflow.title }}</h4>
   </div>
 
   <div class="wizard-body row">

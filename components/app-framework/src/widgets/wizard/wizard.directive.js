@@ -199,12 +199,14 @@
      */
     function disableNext() {
       var step = vm.steps[vm.currentIndex] || {};
-      var form = $scope.wizardForm[step.formName];
-
       if (_.isFunction(step.allowNext) && !step.allowNext()) {
         return true;
       }
-      return vm.nextBtnDisabled || form && form.$invalid;
+      if ($scope.wizardForm) {
+        var form = $scope.wizardForm[step.formName];
+        return vm.nextBtnDisabled || form && form.$invalid;
+      }
+      return vm.nextBtnDisabled;
     }
 
     function allowCancel() {

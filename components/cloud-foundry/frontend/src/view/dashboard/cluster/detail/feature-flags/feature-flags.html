@@ -3,8 +3,8 @@
 </div>
 <div ng-if="ffCtrl.stateInitialised && ffCtrl.flags.length === 0"
      class="panel panel-default cluster-empty-list">
-  <div ng-if="!ffCtrl.error" class="panel-body" translate>cf.feature-flags.empty</div>
-  <div ng-if="ffCtrl.error" class="panel-body" translate>cf.feature-flags.error</div>
+  <div ng-if="!ffCtrl.error" class="panel-body" translate>cf.cf-tabs.feature-flags.empty</div>
+  <div ng-if="ffCtrl.error" class="panel-body" translate>cf.cf-tabs.feature-flags.error</div>
 </div>
 
 <div ng-if="ffCtrl.stateInitialised && ffCtrl.flags.length > 0"
@@ -16,9 +16,9 @@
       <table class="table">
         <thead>
           <tr>
-            <th class="sortable" st-sort-default="true" st-skip-natural="true" st-sort="name"><span translate>cf.feature-flags.labels.name</span></th>
-            <th class="sortable" st-skip-natural="true" st-sort="description"><span translate>cf.feature-flags.labels.description</span></th>
-            <th class="sortable" st-skip-natural="true" st-sort="enabled"><span translate>cf.feature-flags.labels.state</span></th>
+            <th class="sortable" st-sort-default="true" st-skip-natural="true" st-sort="name"><span translate>cf.cf-tabs.feature-flags.labels.name</span></th>
+            <th class="sortable" st-skip-natural="true" st-sort="description"><span translate>cf.cf-tabs.feature-flags.labels.description</span></th>
+            <th class="sortable" st-skip-natural="true" st-sort="enabled"><span translate>cf.cf-tabs.feature-flags.labels.state</span></th>
           </tr>
         </thead>
         <tbody>
@@ -28,7 +28,7 @@
             <td class="feature-flag-status">
               <i ng-class="{ 'flag-enabled': flag.enabled, 'flag-disabled': !flag.enabled}"
                 class="material-icons">{{ flag.enabled ? 'check_circle' : 'highlight_off'}}</i>
-              <span translate>{{ flag.enabled ? 'cf.feature-flags.labels.enabled' : 'cf.feature-flags.labels.disabled' }}</span>
+              <span translate>{{ flag.enabled ? 'cf.cf-tabs.feature-flags.labels.enabled' : 'cf.cf-tabs.feature-flags.labels.disabled' }}</span>
             </td>
           </tr>
         </tbody>

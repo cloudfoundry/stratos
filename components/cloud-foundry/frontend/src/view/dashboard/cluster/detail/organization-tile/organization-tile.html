@@ -4,13 +4,13 @@
               card-actions-position="actions-menu-right"
               on-card-click="organizationTileCtrl.summary()">
   <dl class="dl-horizontal">
-    <dt translate>role</dt>
+    <dt translate>cf.org-tile.role-label</dt>
     <dd><div ng-repeat="role in organizationTileCtrl.roles">{{ role | translate }}</div></dd>
-    <dt translate>applications</dt>
+    <dt translate>cf.org-tile.applications-label</dt>
     <dd>{{organizationTileCtrl.organization.totalApps}}</dd>
-    <dt translate>instances</dt>
+    <dt translate>cf.org-tile.instances-label</dt>
     <dd>{{organizationTileCtrl.instances}}</dd>
-    <dt translate>memory usage</dt>
+    <dt translate>cf.org-tile.memory-label</dt>
     <dd>{{ organizationTileCtrl.memory }}</dd>
       <percent-gauge title=""
                      value="{{ organizationTileCtrl.organization.memUsed / organizationTileCtrl.organization.memQuota }}"
