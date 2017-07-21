@@ -10,7 +10,7 @@
       "p5": ""
     },
     "step-1": {
-      "title": "UAA Part 1",
+      "title": "UAA Step 1",
       "p1": "[[@:product.console]] authenticates users with a Cloud Foundry User Account and Authentication (UAA) service. The console must be configured with the details necessary to communicate with the UAA.",
       "p2": "The address of the UAA api endpoint must be provided and whether SSL validation should be enforced.",
       "p3": "The client credentials are required, including a UAA admin username and password.",
@@ -39,12 +39,12 @@
         "placeholder": ""
       },
       "console-admin": {
-        "label": "Console Admin",
-        "placeholder": "Username",
+        "label": "Admin Username",
+        "placeholder": "",
         "error-required": "Username is required"
       },
       "console-password": {
-        "label": "Password",
+        "label": "Admin Password",
         "placeholder": "",
         "error-required": "Password is required"
       },
@@ -52,13 +52,13 @@
       "error-request-reason": "[[@:app-setup.step-1.error-request]]. Reason: {{reason}}."
     },
     "step-2": {
-      "title": "UAA Part 2",
+      "title": "UAA Step 2",
       "p1": "Basic configuration has been validated and a set of UAA scopes have been discovered.",
       "p2": "The Console uses a scope to identify Console administrators from regular users.",
       "p3": "Please select which scope you would like to use for this.",
       "p4": "",
       "p5": "",
-      "busy-message": "Applying Configuration and Restarting Console ...",
+      "busy-message": "Applying Configuration ...",
       "intro": "Console Admin Scope",
       "console-scope": {
         "label": "Scope",
@@ -66,6 +66,7 @@
       },
       "error-request": "Unable to send setup information. If this error persists, please contact the Administrator.",
       "error-request-reason": "[[@:app-setup.step-2.error-request]]. Reason: {{reason}}."
-    }
+    },
+    "buttonComplete": "Complete"
   }
 }

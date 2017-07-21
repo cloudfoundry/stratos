@@ -32,7 +32,7 @@
   }
 
   .login-page-headline {
-    font-weight: 300;
+    font-weight: $console-font-weight-light;
     color: $brand-primary;
     font-size: 52px;
 
@@ -41,10 +41,10 @@
   }
 
   .login-page-tagline {
-    font-weight: 400;
+    font-weight: normal;
     color: $text-color;
 
-    font-size: 16px;
+    font-size: $font-size-large;
     margin-top: $console-unit-space;
     margin-bottom: $console-unit-space;
   }
