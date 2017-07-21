@@ -33,19 +33,3 @@ spec:
   selector:
     app: console-postgres
   type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: console-uaa
-  name: console-uaa-int
-spec:
-  ports:
-  - name: uaa
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
-  selector:
-        app: console-uaa
-  type: ClusterIP

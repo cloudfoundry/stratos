@@ -222,7 +222,7 @@
   }
 
   function getHeaderRegister() {
-    return element(by.css('.endpoints-dashboard .header button'));
+    return element(by.id('endpoints-dashboard.register-button'));
   }
 
   function headerRegister() {
@@ -230,7 +230,7 @@
   }
 
   function headerRegisterVisible() {
-    return getHeaderRegister().isPresent();
+    return getHeaderRegister().isDisplayed();
   }
 
   function credentialsForm() {

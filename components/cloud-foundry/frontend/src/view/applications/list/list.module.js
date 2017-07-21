@@ -86,12 +86,19 @@
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
     vm.goToGalleryView = goToGalleryView;
-    vm.appWallActions = cfAppWallActions.actions;
-    vm.appWallActionContext = {
-      show: showChangeAppListAction,
-      disable: disableChangeAppListAction,
+    var appWallActionContext = {
+      hidden: hideChangeAppListAction,
+      disabled: disableChangeAppListAction,
       reload: _reload
     };
+    vm.appWallActions = _.chain(cfAppWallActions.actions)
+      .map(function (action) {
+        action.context = appWallActionContext;
+        return action;
+      })
+      .orderBy('position', 'asc')
+      .value();
+
     vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);
 
@@ -508,14 +515,14 @@
       }
     }
 
-    function showChangeAppListAction() {
-      return isAdminInAnyCf() || vm.isSpaceDeveloper;
+    function hideChangeAppListAction() {
+      return !isAdminInAnyCf() && !vm.isSpaceDeveloper;
     }
 
     function addApplication() {
       var addAppAction = _.find(cfAppWallActions.actions, 'id', 'app-wall-add-new-application-btn');
       if (addAppAction) {
-        addAppAction.action();
+        addAppAction.execute();
       }
     }
 

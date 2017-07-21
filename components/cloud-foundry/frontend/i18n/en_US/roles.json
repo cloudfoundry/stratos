@@ -4,7 +4,7 @@
       "common-roles-actions": {
         "manage-roles": "Manage Roles",
         "remove-all-roles": "Remove all roles",
-        "remove-from-org": "Remove from [[@:cf.organisation.capitalised]]",
+        "remove-from-org": "Remove from Organization",
         "remove-from-space": "Remove from Space",
         "assign-users": "Assign User(s)"
       },
@@ -20,9 +20,9 @@
         },
         "step2": {
           "title": "Assign Roles",
-          "intro": "Select an [[@:cf.organisation.organisation]] to assign roles to.",
-          "org-label": "[[@:cf.organisation.capitalised]]",
-          "org-placeholder": "Select [[@:cf.organisation.organisation]]",
+          "intro": "Select an organization to assign roles to.",
+          "org-label": "Organization",
+          "org-placeholder": "Select organization",
           "button-yes": "Assign"
         }
       },
@@ -69,9 +69,9 @@
         "button-view-less": "View Less"
       },
       "update-roles-table": {
-        "org": "[[@:cf.organisation.uppercase]]",
+        "org": "ORGANIZATION",
         "button-remove-from-org": "Remove from Org",
-        "space": "[[@:cf.space.uppercase]]",
+        "space": "SPACE",
         "button-show-all": "Show All"
       },
       "role-labels": {

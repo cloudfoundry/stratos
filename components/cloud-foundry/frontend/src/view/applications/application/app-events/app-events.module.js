@@ -22,6 +22,9 @@
         return false;
       },
       uiSref: 'cf.applications.application.events',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'app.app-info.app-tabs.events',
       clearState: function () {}
     });

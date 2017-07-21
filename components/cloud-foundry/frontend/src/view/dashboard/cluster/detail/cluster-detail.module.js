@@ -29,7 +29,7 @@
 
   function ClusterDetailController($stateParams, $scope, $state, $q,
                                    modelManager, apiManager, appUtilsService, appClusterCliCommands,
-                                   modelUtils, cfOrganizationModel, cfUtilsService) {
+                                   modelUtils, cfOrganizationModel, cfUtilsService, cfTabs) {
     var that = this;
     this.guid = $stateParams.guid;
     this.appClusterCliCommands = appClusterCliCommands;
@@ -41,6 +41,8 @@
     this.orgCount = $stateParams.orgCount;
     this.service = {};
     this.userService = {};
+    this.cfTabs = cfTabs;
+
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var userApi = apiManager.retrieve('cloud-foundry.api.Users');
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');

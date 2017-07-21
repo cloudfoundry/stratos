@@ -21,21 +21,24 @@
 
     service.actions.push({
       id: 'app-wall-add-new-application-btn',
-      label: 'app-wall.add-application',
+      name: 'app-wall.add-application',
+      icon: 'add_to_queue',
       position: 1,
-      show: function (context) {
-        if (angular.isFunction(context.show)) {
-          return context.show();
-        }
-        return true;
-      },
-      disable: function (context) {
-        if (angular.isFunction(context.disable)) {
-          return context.disable();
+      hidden: function () {
+        var hidden = _.get(this.context, 'hidden');
+        if (angular.isFunction(hidden)) {
+          return hidden();
         }
         return false;
       },
-      action: function addApplication() {
+      disabled: function () {
+        var disabled = _.get(this.context, 'disabled');
+        if (angular.isFunction(disabled)) {
+          return disabled();
+        }
+        return false;
+      },
+      execute: function addApplication() {
         frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',

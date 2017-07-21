@@ -11,7 +11,7 @@
 
   var prepareBuild = require('./bk-prepare-build');
 
-  var env;
+  var env, devConfig;
 
   module.exports.init = function () {
     env = process.env;
@@ -24,6 +24,38 @@
   module.exports.build = build;
   module.exports.buildPlugin = buildPlugin;
   module.exports.test = test;
+  module.exports.localDevSetup = localDevSetup;
+  module.exports.isLocalDevBuild = isLocalDevBuild;
+  module.exports.skipGlideInstall = skipGlideInstall;
+
+  function localDevSetup() {
+    if (isLocalDevBuild()) {
+      process.env.STRATOS_TEMP = path.resolve(__dirname, '../tmp');
+      fs.mkdirpSync(process.env.STRATOS_TEMP);
+      prepareBuild.localDevSetup = true;
+    }
+  }
+
+  // Get dev config from the dev config file if it exists
+  function getDevConfig() {
+    if (!devConfig) {
+      devConfig = {};
+      var devConfigFile = path.join(__dirname, 'dev_config.json');
+      if (fs.existsSync(devConfigFile)) {
+        devConfig = require(devConfigFile);
+      }
+    }
+    return devConfig;
+  }
+
+  function skipGlideInstall() {
+    if (isLocalDevBuild()) {
+      // Check if we can find the golang folder - indicates glide has run before
+      var folder = path.join(env.GOPATH, 'src', 'golang.org');
+      return fs.existsSync(folder);
+    }
+    return false;
+  }
 
   function spawnProcess(processName, args, cwd, env) {
     var deferred = Q.defer();
@@ -47,12 +79,15 @@
   }
 
   function runGlideInstall(path) {
-
     var glideArgs = ['install'];
     if (!prepareBuild.getBuildTest()) {
       glideArgs.push('--skip-test');
     }
     return spawnProcess('glide', glideArgs, path, env);
+  }
+
+  function isLocalDevBuild() {
+    return !!getDevConfig().localDevBuild;
   }
 
   function buildPlugin(pluginPath, pluginName) {
@@ -67,7 +102,8 @@
   }
 
   function build(path, exeName) {
-    return spawnProcess('go', ['build', '-i', '-o', exeName], path, env);
+    var args = ['build', '-i', '-o', exeName];
+    return spawnProcess('go', args, path, env);
   }
 
   function test(path) {

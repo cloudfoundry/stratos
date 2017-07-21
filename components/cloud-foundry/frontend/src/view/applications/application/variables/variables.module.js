@@ -37,6 +37,9 @@
         return !canEditApp;
       },
       uiSref: 'cf.applications.application.variables',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
       label: 'app.app-info.app-tabs.variables.title',
       clearState: function () {
         canEditApp = undefined;
