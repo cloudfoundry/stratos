@@ -4,21 +4,11 @@
   // https://github.com/codemix/gitignore-parser
 
   /**
-   * @name app.framework.widgets.frameworkAsyncTaskDialog
-   * @example:
-   *  ```
-   *  frameworkAsyncTaskDialog({
-   *    title: 'Async Task Dialog Title',
-   *    templateUrl: 'html/template/path.html'
-   *    },
-   *    {
-   *      data: {}
-   *    }
-   *  }, actionPromise);
+   * @name app.framework.widgets.gitIgnoreParser
    */
   angular
     .module('app.framework.widgets')
-    .factory('cfIgnoreParser', serviceFactory);
+    .factory('gitIgnoreParser', serviceFactory);
 
   function serviceFactory() {
     var exports = {};
@@ -31,23 +21,29 @@
      *
      *
      * @param  {String} content The `.gitignore` content to compile.
-     * @return {Object}         The helper object with methods that operate on the compiled content.
+     * @returns {Object}         The helper object with methods that operate on the compiled content.
      */
     exports.compile = function (content) {
-      var parsed = exports.parse(content),
-          positives = parsed[0],
-          negatives = parsed[1];
+      var parsed = exports.parse(content);
+      var positives = parsed[0];
+      var negatives = parsed[1];
       return {
         accepts: function (input) {
-          if (input[0] === '/') input = input.slice(1);
+          if (input[0] === '/') {
+            input = input.slice(1);
+          }
           return negatives[0].test(input) || !positives[0].test(input);
         },
         denies: function (input) {
-          if (input[0] === '/') input = input.slice(1);
+          if (input[0] === '/') {
+            input = input.slice(1);
+          }
           return !(negatives[0].test(input) || !positives[0].test(input));
         },
         maybe: function (input) {
-          if (input[0] === '/') input = input.slice(1);
+          if (input[0] === '/') {
+            input = input.slice(1);
+          }
           return negatives[1].test(input) || !positives[1].test(input);
         }
       };
@@ -60,7 +56,7 @@
      * strict and one for 'maybe'.
      *
      * @param  {String} content  The content to parse,
-     * @return {Array[]}         The parsed positive and negatives definitions.
+     * @returns {Array[]}         The parsed positive and negatives definitions.
      */
     exports.parse = function (content) {
       return content.split('\n')
@@ -76,12 +72,12 @@
         if (isNegative) {
           line = line.slice(1);
         }
-        if (line[0] === '/')
+        if (line[0] === '/') {
           line = line.slice(1);
+        }
         if (isNegative) {
           lists[1].push(line);
-        }
-        else {
+        } else {
           lists[0].push(line);
         }
         return lists;
@@ -100,37 +96,38 @@
         return [
           item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
           item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
-        ]
+        ];
       });
     };
 
-    function prepareRegexes (pattern) {
+    function prepareRegexes(pattern) {
       return [
         // exact regex
         prepareRegexPattern(pattern),
         // partial regex
         preparePartialRegex(pattern)
       ];
-    };
+    }
 
-    function prepareRegexPattern (pattern) {
+    function prepareRegexPattern(pattern) {
       return escapeRegex(pattern).replace('**', '(.+)').replace('*', '([^\\/]+)');
     }
 
-    function preparePartialRegex (pattern) {
+    function preparePartialRegex(pattern) {
       return pattern
       .split('/')
       .map(function (item, index) {
-        if (index)
+        if (index) {
           return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
-        else
+        } else {
           return '(' + prepareRegexPattern(item) + '\\b)';
+        }
       })
       .join('');
     }
 
-    function escapeRegex (pattern) {
-      return pattern.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
+    function escapeRegex(pattern) {
+      return pattern.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
     }
 
     return exports;

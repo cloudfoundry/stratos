@@ -5,7 +5,7 @@
     .module('app.framework.widgets')
     .factory('itemDropHelper', itemDropHelper);
 
-  function itemDropHelper($q, cfIgnoreParser) {
+  function itemDropHelper($q, gitIgnoreParser) {
 
     var archiveRegex = /\.(tar|zip|tar.gz)$/i;
 
@@ -13,7 +13,8 @@
       identify: identify,
       traverseFiles: traverseFiles,
       isArchiveFile: isArchiveFile,
-      initScanner: initScanner
+      initScanner: initScanner,
+      readFileContents: readFileContents
     };
 
     function isArchiveFile(name) {
@@ -21,7 +22,10 @@
     }
 
     /**
+     * @name identify
      * @description Identify what has been dropped
+     * @param {object} items - items object from a drop event
+     * @returns {object} metadata about the dropped item(s)
      */
     function identify(items) {
       var p = $q.defer();
@@ -39,7 +43,11 @@
           // Check extension
           if (isArchiveFile(fileEntry.name)) {
             result.isArchiveFile = true;
-            result.value = fileEntry;
+            fileEntry.file(function (file) {
+              result.value = file;
+              p.resolve(result);
+            });
+            return p.promise;
           }
         } else if (fileEntry.isDirectory) {
           result.isFiles = true;
@@ -51,7 +59,7 @@
       }
 
       for (var i = 0; i < items.length; i++) {
-        if (items[i].kind === 'string' && items[i].type === 'text/uri-list') {
+        if (items[i].kind === 'string' && (items[i].type === 'text/uri-list' || items[i].type === 'text/plain')) {
           items[i].getAsString(function (url) {
             result.isWebLink = true;
             result.value = url;
@@ -66,10 +74,10 @@
       return p.promise;
     }
 
-    function traverseFiles(item, ignoresFile) {
+    function traverseFiles(item, ignoresFile, defaultIgnores) {
       var scanner = initScanner();
       var p = $q.defer();
-      findIgnoreFile(scanner, item, ignoresFile).then(function () {
+      findIgnoreFile(scanner, item, ignoresFile, defaultIgnores).then(function () {
         return traverseFileTree(scanner, scanner.root, item, '', 0).then(function () {
           p.resolve(scanner);
         });
@@ -192,12 +200,12 @@
       };
 
       if (ignores) {
-        scanner.filter = cfIgnoreParser.compile(ignores);
+        scanner.filter = gitIgnoreParser.compile(ignores);
       }
       return scanner;
     }
 
-    function findIgnoreFile(scanner, item, fileName) {
+    function findIgnoreFile(scanner, item, fileName, defaultIgnores) {
       var p = $q.defer();
       if (item.isDirectory && fileName) {
         var dirReader = item.createReader();
@@ -207,7 +215,8 @@
             var childItem = entries[i];
             if (childItem.isFile && childItem.name === fileName) {
               chain.push(readItemContents(childItem).then(function (data) {
-                scanner.filter = cfIgnoreParser.compile(data);
+                scanner.filter = gitIgnoreParser.compile(defaultIgnores + data);
+                scanner.foundIgnoreFile = true;
               }));
             }
           }
@@ -223,14 +232,22 @@
 
     function readItemContents(item) {
       var p = $q.defer();
+      item.file(function (file) {
+        readFileContents(file).then(function (data) {
+          p.resolve(data);
+        });
+      });
+      return p.promise;
+    }
+
+    function readFileContents(file) {
+      var p = $q.defer();
       var reader = new FileReader();
       reader.onload = function (e) {
         var output = e.target.result;
         p.resolve(output);
       };
-      item.file(function (file) {
-        reader.readAsText(file);
-      });
+      reader.readAsText(file);
       return p.promise;
     }
   }

@@ -56,7 +56,7 @@
 
           <!-- Information about the selected GitHub project -->
           <div class="deploy-app-source-details deploy-app-github-details"
-            ng-class="{'deploy-app-inivisible': !(step.userInput.githubProjectValid && step.data.githubProject)}" >
+            ng-class="{'deploy-app-invisible': !(step.userInput.githubProjectValid && step.data.githubProject)}" >
             <div class="deploy-app-github-info">
               <div class="project">
                 <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
@@ -81,11 +81,13 @@
                       rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
                     </a>
                   </div>
-                  <div>
-                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
-                  </div>
-                  <div class="lastCommitter">
-                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
+                  <div class="lastCommit-date-committer">
+                    <div class="lastCommitter">
+                      <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
+                    </div>
+                    <div>
+                      <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -100,35 +102,37 @@
       <radio-input ng-if="step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-info.local.folder.label"></radio-input>
       <div class="deploy-app-github">
         <div class="deploy-app-github-form">
-          <div class="form-group form-group-large" focusable-input
-              ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
-            <label ng-if="!step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.file.field</label>
-            <label ng-if="step.folderSupport" class="control-label" translate> deploy-app-dialog.step-info.local.folder.field</label>
-            <input fileread="step.userInput.localPathFile" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"/>
-            <input webkitdirectory fileread="step.userInput.localPathFolder" fileread-multiple="true" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"/>
+          <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
+            <label ng-if="!step.folderSupport" class="control-label" translate>deploy-app-dialog.step-info.local.file.field</label>
+            <label ng-if="step.folderSupport" class="control-label" translate>deploy-app-dialog.step-info.local.folder.field</label>
+            <input fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"></input>
+            <input webkitdirectory fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"></input>
             <!-- File support only -->
             <label ng-if="!step.folderSupport" class="form-control clickable" for="localPathSelectFile">
-              <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
+              <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
               <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.file.prompt</span>
             </label>
             <!-- File and Folder support -->
             <label ng-if="step.folderSupport" class="form-control">
-              <span ng-if="step.userInput.localPath" translate>{{ step.userInput.localPath }}</span>
-              <span ng-if="!step.userInput.localPath && step.folderSupport" translate>deploy-app-dialog.step-info.local.folder.prompt</span>
-              <label for="localPathSelectFile">
+              <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
+              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.folder.prompt</span>
+              <label class="deploy-app-form-btn" for="localPathSelectFile">
                 <i class="material-icons">insert_drive_file</i>
               </label>
-              <label for="localPathSelectFolder">
+              <label class="deploy-app-form-btn" for="localPathSelectFolder">
                 <i class="material-icons">folder</i>
               </label>
             </label>
           </div>
 
           <!-- File info -->
-          <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.fileScanData" >
+          <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.fileScanData.files">
             <div class="deploy-app-github-info deploy-app-file-details">
               <i class="material-icons">file_upload</i>
-              <p translate translate-values="step.userInput.fileScanData">deploy-app-dialog.step-info.local.info</p>
+              <p translate translate-values="{files: step.userInput.fileScanData.files, total: step.bytesToHumanSize(step.userInput.fileScanData.total)}">deploy-app-dialog.step-info.local.info</p>
+            </div>
+            <div class="deploy-app-found-cfignore" ng-if="step.userInput.cfIgnoreFile">
+              <p translate>deploy-app-dialog.step-info.local.cfignore</p>
             </div>
           </div>
 

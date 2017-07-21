@@ -29,12 +29,15 @@
           "prompt": "Choose a local archive file"
         },
         "folder": {
+          "folder": "Folder",
           "label": "Local archive file or folder",
           "field": "File / Folder",
           "prompt": "Choose a local file or folder"
         },
-        "info": "{{files}} file(s) - {{total}} bytes to upload"
+        "info": "{{files}} file(s) - {{total}} to upload",
+        "cfignore": ".cfignore was found and applied"
       },
+      "scanning": "Scanning for files and folders",
       "manifest": {
         "label": "Manifest",
         "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",
@@ -51,7 +54,8 @@
       "title-deploy-failed": "Failed to deploy. Reason: {{reason}}",
       "title-deploy-success": "Deployed",
       "next-button": "App Summary",
-      "submit-failed": "Failed to deploy application. If this error persists, please contact the Administrator. Reason: {{reason}}."
+      "submit-failed": "Failed to deploy application. If this error persists, please contact the Administrator. Reason: {{reason}}.",
+      "uploading": "Uploading files"
     },
     "socket": {
       "event-type": {

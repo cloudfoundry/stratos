@@ -10,27 +10,20 @@
       link: link,
       restrict: 'A',
       scope: {
-        fileread: '=',
-        filereadMultiple: '='
+        fileread: '='
       }
     };
     return directive;
 
     function link(scope, element) {
       element.bind('change', function (changeEvent) {
-        changeEvent.preventDefault();
-        changeEvent.stopPropagation();
         scope.$apply(function () {
-          if (scope.filereadMultiple) {
-            scope.fileread = changeEvent.target.files;
-          } else {
-            scope.fileread = changeEvent.target.files[0];
-          }
+          scope.fileread = changeEvent.target.files;
         });
       });
 
       scope.$watch('fileread', function (nv, ov) {
-        if (ov && ov.name && nv && !nv.name) {
+        if (ov && ov.length && nv && !nv.length) {
           element.val(null);
         }
       });

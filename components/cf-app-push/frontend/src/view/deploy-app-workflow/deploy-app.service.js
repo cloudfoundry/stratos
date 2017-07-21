@@ -82,15 +82,18 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $filter - the angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} itemDropHelper - the item drop helper service
+   * @param {object} appUtilsService - the App Utils service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
-                               $timeout, $filter, modelManager, itemDropHelper, frameworkDetailView) {
+                               $timeout, $filter, modelManager, itemDropHelper, appUtilsService) {
 
     var vm = this;
 
-    var gitHubUrlBase = 'https://github.com/';
+    var CF_IGNORE_FILE = '.cfignore';
+    var CF_DEFAULT_IGNORES = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn\n';
 
-    var cfDefaultIgnores = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn;';
+    var gitHubUrlBase = 'https://github.com/';
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -154,9 +157,13 @@
       },
       sourceType: 'github',
       localPath: '',
+      localPathFile: null,
       fileScanData: null
     };
 
+    /*
+     * Not all browsers allows a folder to be selected by an input field
+     */
     function isInputDirSupported() {
       /* eslint-disable angular/document-service */
       var tmpInput = document.createElement('input');
@@ -176,6 +183,7 @@
       showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
+      bytesToHumanSize: appUtilsService.bytesToHumanSize,
       allowNext: function () {
         return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
       },
@@ -204,15 +212,21 @@
       }
     };
 
+    /*
+     * Handle a drop event
+     */
     function dropHandler(items) {
+      vm.userInput.cfIgnoreFile = false;
+      // Find out what has been dropped and take appropriate action
       itemDropHelper.identify(items).then(function (info) {
         vm.userInput.localPath = info.value ? info.value.name : '';
         if (info.isFiles) {
-          vm.options.wizardCtrl.showBusy('Scanning for files and folders');
-          itemDropHelper.traverseFiles(info.value, '.cfignore').then(function (results) {
+          vm.options.wizardCtrl.showBusy('deploy-app-dialog.step-info.scanning');
+          itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
             vm.userInput.fileScanData = results;
             vm.userInput.sourceType = 'local';
             vm.options.wizardCtrl.showBusy();
+            vm.userInput.cfIgnoreFile = results.foundIgnoreFile;
           });
         } else if (info.isArchiveFile) {
           vm.userInput.sourceType = 'local';
@@ -352,6 +366,7 @@
       }
     });
 
+    // Watch for the file or folder being selected by the input field and process
     $scope.$watch(function () {
       return vm.userInput.localPathFile;
     }, function (newVal, oldVal) {
@@ -360,20 +375,12 @@
       }
     });
 
-    $scope.$watch(function () {
-      return vm.userInput.localPathFolder;
-    }, function (newVal, oldVal) {
-      if (newVal && oldVal !== newVal) {
-        handleFileInputSelect(newVal);
-      }
-    });
-
-    // Handle result of a file input form field seclection
+    // Handle result of a file input form field selection
     function handleFileInputSelect(items) {
       // File list from a file input form field
-
-      console.log(cfDefaultIgnores);
-      var res = itemDropHelper.initScanner(cfDefaultIgnores);
+      var res, rootFolderName, cfIgnoreFile;
+      res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES);
+      vm.userInput.cfIgnoreFile = false;
       if (items.length === 1) {
         if (itemDropHelper.isArchiveFile(items[0].name)) {
           vm.userInput.fileScanData = res.addFile(items[0]);
@@ -381,34 +388,38 @@
           vm.userInput.localPath = items[0].name;
         }
       } else {
-        _.each(items, function (file) {
-          res.addFile(file);
-        });
-
-        console.log('done 1');
-
-        // Check root folder
-        if (res.root.files.length === 0 && _.keys(res.root.folders).length === 1) {
-          var rootFolderName = _.keys(res.root.folders)[0];
-
-          console.log('got root folder name: ' + rootFolderName);
-          //res.root = _.values(res.root.folders)[0];
-          res = itemDropHelper.initScanner(cfDefaultIgnores);
-          res.rootFolderName = rootFolderName;
-          console.log('round 2');
-          _.each(items, function (file) {
-            console.log('FILE: ' + file.name);
-            res.addFile(file);
-            console.log('DONE: ' + file.name);
-          });
+        // See if we can find the .cfignore file
+        for (var j = 0; j < items.length; j++) {
+          var filePath = items[j].webkitRelativePath.split('/');
+          // First part is the root folder name
+          if (filePath.length === 2 && !rootFolderName) {
+            rootFolderName = filePath[0];
+          }
+          if (filePath.length > 2) {
+            break;
+          } else if (filePath.length === 2 && filePath[1] === CF_IGNORE_FILE) {
+            cfIgnoreFile = items[j];
+            break;
+          }
         }
 
-        vm.userInput.fileScanData = res;
-        vm.userInput.sourceType = 'local';
-        vm.userInput.localPath = 'Folder';
+        var promise = $q.resolve('');
+        // Did we find an ignore file?
+        if (cfIgnoreFile) {
+          promise = itemDropHelper.readFileContents(cfIgnoreFile);
+        }
 
-        console.log('PROCESS FILE LIST');
-        console.log(res);
+        promise.then(function (ignores) {
+          res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES + ignores);
+          vm.userInput.cfIgnoreFile = !!ignores;
+          res.rootFolderName = rootFolderName;
+          _.each(items, function (file) {
+            res.addFile(file);
+          });
+          vm.userInput.fileScanData = res;
+          vm.userInput.sourceType = 'local';
+          vm.userInput.localPath = rootFolderName || $translate.instant('deploy-app-dialog.step-info.local.folder');
+        });
       }
     }
 
