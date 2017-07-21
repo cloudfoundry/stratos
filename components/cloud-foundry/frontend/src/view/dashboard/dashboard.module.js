@@ -41,7 +41,7 @@
 
     function onLoggedIn() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', 'menu.cloud-foundry', undefined, 1, 'cloud_queue');
+      menu.addMenuItem('endpoint.clusters', 'endpoint.clusters.router', 'menu.cloud-foundry', 1, 'cloud_queue');
       initialized.resolve();
     }
   }

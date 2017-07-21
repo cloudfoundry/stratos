@@ -21,7 +21,7 @@
 
   function registerUserMenu(modelManager) {
     var userNavModel = modelManager.retrieve('app.model.navigation').user;
-    userNavModel.addMenuItem('user-info', 'user-info', 'user-info', undefined, 0);
+    userNavModel.addMenuItem('user-info', 'user-info', 'user-info', 0);
   }
 
   /**

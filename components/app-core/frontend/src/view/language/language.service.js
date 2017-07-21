@@ -138,9 +138,10 @@
 
     if (enableLanguageSelection()) {
       var userNavModel = modelManager.retrieve('app.model.navigation').user;
-      userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', function () {
+      var item = userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', 2);
+      item.setTextValues(function () {
         return { current: service.getCurrent() };
-      }, 2);
+      });
     }
 
     return service;
