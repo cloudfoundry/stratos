@@ -32,7 +32,7 @@
 
     function registerNavigation() {
       var menu = modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', undefined, 0, 'apps');
+      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', 'menu.applications', 0, 'apps');
     }
   }
 
