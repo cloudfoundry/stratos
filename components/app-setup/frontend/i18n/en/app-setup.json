@@ -1,11 +1,22 @@
 {
   "app-setup": {
-    "intro-title": "@:product.console",
-    "intro-description": "To start using the [[@:product.console]] please run through configuration setup steps",
-    "start-button": "Start Setup",
-    "wizard-title": "Setup the Console",
+    "intro-title": "[[@:product.console]] Setup",
+    "step-intro": {
+      "title": "Introduction",
+      "p1": "Welcome to [[@:product.console]].",
+      "p2": "[[@:product.console]] is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.",
+      "p3": "Before accessing the console for the first time some configuration information is required.",
+      "p4": "Press <b>NEXT</b> to get started.",
+      "p5": ""
+    },
     "step-1": {
-      "title": "UAA Part 1",
+      "title": "UAA Step 1",
+      "p1": "[[@:product.console]] authenticates users with a Cloud Foundry User Account and Authentication (UAA) service. The console must be configured with the details necessary to communicate with the UAA.",
+      "p2": "The address of the UAA api endpoint must be provided and whether SSL validation should be enforced.",
+      "p3": "The client credentials are required, including a UAA admin username and password.",
+      "p4": "The configuration will be validated before moving on to the next step.",
+      "p5": "For further information about Cloud Foundry UAA see <a href=\"https://docs.cloudfoundry.org/concepts/architecture/uaa.html\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>.",
+      "p6": "For further information about the Console and UAA in various deployment types see <a href=\"https://github.com/SUSE/stratos-ui/blob/master/docs/access.md\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>.",
       "busy-message": "Validating ...",
       "uaa-intro": "UAA Endpoint",
       "uaa-url": {
@@ -25,16 +36,15 @@
       },
       "console-secret": {
         "label": "Client Secret",
-        "placeholder": "",
-        "error-required": "Secret is required"
+        "placeholder": ""
       },
       "console-admin": {
-        "label": "Console Admin",
-        "placeholder": "Username",
+        "label": "Admin Username",
+        "placeholder": "",
         "error-required": "Username is required"
       },
       "console-password": {
-        "label": "Password",
+        "label": "Admin Password",
         "placeholder": "",
         "error-required": "Password is required"
       },
@@ -42,8 +52,13 @@
       "error-request-reason": "[[@:app-setup.step-1.error-request]]. Reason: {{reason}}."
     },
     "step-2": {
-      "title": "UAA Part 2",
-      "busy-message": "Applying ...",
+      "title": "UAA Step 2",
+      "p1": "Basic configuration has been validated and a set of UAA scopes have been discovered.",
+      "p2": "The Console uses a scope to identify Console administrators from regular users.",
+      "p3": "Please select which scope you would like to use for this.",
+      "p4": "",
+      "p5": "",
+      "busy-message": "Applying Configuration ...",
       "intro": "Console Admin Scope",
       "console-scope": {
         "label": "Scope",
@@ -51,6 +66,7 @@
       },
       "error-request": "Unable to send setup information. If this error persists, please contact the Administrator.",
       "error-request-reason": "[[@:app-setup.step-2.error-request]]. Reason: {{reason}}."
-    }
+    },
+    "buttonComplete": "Complete"
   }
 }

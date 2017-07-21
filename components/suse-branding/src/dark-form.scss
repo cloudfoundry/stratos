@@ -1,0 +1,31 @@
+@mixin dark-form() {
+  .form-group {
+    background-color: $suse-secondary;
+    // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
+    // error z-index (see focus below)
+    border-color: $login-form-border-color;
+    color: $suse-text;
+
+    &.focus {
+      border-color: $suse-primary;
+    }
+
+    .control-label, .checkbox-input, .checkbox-input.checked .checkbox-input-label {
+      color: darken($suse-text, 10%);
+    }
+
+    input {
+      color: $suse-text;
+      text-shadow: 0 0 0 $suse-text;
+      -webkit-text-fill-color: $suse-text;
+    }
+
+    search-box {
+      .dropdown-menu {
+        border-color: $login-form-border-color;
+        background: $suse-secondary;
+      }
+    }
+  }
+}
+

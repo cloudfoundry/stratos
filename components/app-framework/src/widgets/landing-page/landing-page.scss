@@ -19,7 +19,7 @@
   }
 
   page-footer {
-    position: fixed;
+    position: static;
     bottom: $console-unit-space / 2;
 
     animation: fadein 2s ease;

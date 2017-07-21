@@ -2,49 +2,25 @@
   'use strict';
 
   angular
-    .module('app-setup.view', [])
-    .factory('appSetupWizardService', DeployAppService)
-    .controller('app-setup.view.appSetupController', AppSetupController);
-
-  function DeployAppService(frameworkDetailView) {
-
-    return {
-      show: show
-    };
-
-    /**
-     * @memberof appSetupWizardService
-     * @name show
-     * @returns {object} frameworkDetailView promise
-     */
-    function show() {
-      return frameworkDetailView(
-        {
-          detailViewTemplateUrl: 'plugins/app-setup/view/wizard/setup-wizard.html',
-          controller: AppSetupController,
-          controllerAs: 'appSetup',
-          dialog: true,
-          class: ''
-        }
-      );
-    }
-
-  }
+    .module('app-setup.view')
+    .directive('appSetupWizard', setupWizard);
 
   /**
+   * @namespace app-setup.view
    * @memberof app-setup.view
-   * @name appSetupWizardService
-   * @constructor
-   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
-   * @param {object} $q - the angular $q service
-   * @param {object} $translate - the angular $translate service
-   * @param {object} $window - the angular $window service
-   * @param {object} $timeout - the angular $timeout service
-   * @param {object} appUtilsService - the appUtilsService service
-   * @param {object} modelManager - the model manager service
+   * @name setupWizard
+   * @description Container template to provide consistent screen layout to landing pages
+   * @returns {object} Directive config
    */
-  function AppSetupController($uibModalInstance, $q, $translate, $window, $timeout, appUtilsService, modelManager) {
+  function setupWizard() {
+    return {
+      templateUrl: 'plugins/app-setup/view/wizard/setup-wizard.html',
+      controller: setupWizardController,
+      controllerAs: 'setupWizard'
+    };
+  }
 
+  function setupWizardController($q, $translate, $window, $timeout, appUtilsService, modelManager) {
     var vm = this;
 
     var templatePath = 'plugins/app-setup/view/wizard/';
@@ -56,6 +32,10 @@
 
     var userInput = { };
 
+    var stepIntro = {
+      title: 'app-setup.step-intro.title',
+      templateUrl: templatePath + 'setup-step-intro.html'
+    };
     var stepUaa1 = {
       title: 'app-setup.step-1.title',
       templateUrl: templatePath + 'setup-step-1.html',
@@ -102,6 +82,7 @@
       formName: 'step2',
       data: data,
       userInput: userInput,
+      nextBtnText: 'app-setup.buttonComplete',
       showBusyOnNext: 'app-setup.step-2.busy-message',
       onNext: function () {
         var setupModel = modelManager.retrieve('app-setup.model.setup');
@@ -110,7 +91,7 @@
         })
           .then(function () {
             // Give it some time to kick in
-            return $timeout(_.noop, 7000);
+            return $timeout(_.noop, 10000);
           })
           .catch(function (response) {
             var error = _.isString(response.data) ? response.data : _.isString(response.data.error) ? response.data.error : '';
@@ -123,35 +104,31 @@
 
     vm.wizardOptions = {
       workflow: {
+        allowCancel: false,
         disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
           return true;
         },
-        title: 'app-setup.wizard-title',
         btnText: {
           cancel: 'buttons.cancel',
           back: 'buttons.previous',
           next: 'buttons.next'
         },
-        steps: [stepUaa1, stepUaa2]
+        steps: [stepIntro, stepUaa1, stepUaa2]
       }
     };
 
     // Actions for the wizard controller
     vm.wizardActions = {
       stop: function () {
-        // vm.showWizard = false;
         userInput = {};
-        $uibModalInstance.dismiss();
       },
 
       finish: function () {
-        $uibModalInstance.close();
+        userInput = {};
         $window.location.reload();
       }
     };
-
   }
-
 })();
