@@ -73,7 +73,7 @@ app-setup-wizard {
               }
 
               ng-include {
-                margin: 24px;
+                margin: $console-unit-space;
 
                 .app-setup-step {
                   display: flex;
