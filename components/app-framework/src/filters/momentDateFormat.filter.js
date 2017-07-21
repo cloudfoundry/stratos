@@ -14,9 +14,14 @@
    * @returns {Function} The filter itself
    */
   function momentDateFormat($filter) {
-    return function (input) {
+    var momentDateFormat = function (input) {
       return $filter('amDateFormat')(input, 'L LTS');
     };
+
+    // Ensure the filter is reapplied on change of language
+    momentDateFormat.$stateful = true;
+
+    return momentDateFormat;
   }
 
 })();
