@@ -1,5 +1,5 @@
 $login-panel-width: 420px;
-$login-padding: 24px;
+$login-padding: $console-unit-space;
 $login-logo-size: 128px;
 
 
@@ -13,11 +13,10 @@ login-form {
     padding: 0 $login-padding;
 
     > h1 {
-      //margin: 12px 0;
-      margin-bottom: 36px;
+      margin-bottom: $console-unit-space * 1.5;
       margin-top: 0;
       color: $brand-primary;
-      font-weight: 300;
+      font-weight: $console-font-weight-light;
     }
 
     .form-group {
@@ -29,7 +28,7 @@ login-form {
       }
 
       .control-label {
-        font-size: 14px;
+        font-size: $font-size-medium;
         margin-top: 3px;
       }
 
@@ -53,11 +52,11 @@ login-form {
   .login-form-spinner {
     text-align: center;
     color: $white;
-    margin-top: 24px;
+    margin-top: $console-unit-space;
 
     .spinner-notification {
       text-transform: none;
-      font-size: 16px;
+      font-size: $font-size-large;
     }
 
     .bounce-spinner > div {
