@@ -52,19 +52,19 @@
     // Page size options to present to the user
     vm.itemsByPageOptions = [
       {
-        label: 'cf.events.page-sizes.five',
+        label: 'app.app-info.app-tabs.events.page-sizes.five',
         value: 5
       },
       {
-        label: 'cf.events.page-sizes.ten',
+        label: 'app.app-info.app-tabs.events.page-sizes.ten',
         value: 10
       },
       {
-        label: 'cf.events.page-sizes.twenty',
+        label: 'app.app-info.app-tabs.events.page-sizes.twenty',
         value: 20
       },
       {
-        label: 'cf.events.page-sizes.fifty',
+        label: 'app.app-info.app-tabs.events.page-sizes.fifty',
         value: 50
       }
     ];
@@ -105,7 +105,7 @@
         {
           templateUrl: 'plugins/cloud-foundry/view/util/cf-events-table/cf-events-detail.html',
           dialog: true,
-          title: 'cf.events.detail',
+          title: 'app.app-info.app-tabs.events.detail',
           class: 'cf-events-detail-dialog'
         },
         item

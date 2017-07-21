@@ -2,6 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: hsc-encryption-key-volume
+  annotations:
+  {{- if .Values.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,6 +19,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: hsc-upgrade-volume
+  annotations:
+  {{- if .Values.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -24,6 +36,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
  name: postgres-volume
+ annotations:
+  {{- if .Values.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
 spec:
  accessModes:
    - ReadWriteMany
@@ -95,9 +113,6 @@ spec:
       containers:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
-        env:
-        - name: UAA_ENDPOINT
-          value: http://console-uaa-int:8080
         volumeMounts:
         - mountPath: /etc/secrets/
           name: console-secret
@@ -137,12 +152,6 @@ spec:
           value: "false"
         - name: CONSOLE_PROXY_TLS_ADDRESS
           value: :3003
-        - name: CONSOLE_CLIENT
-          value: console
-        - name: HCE_CLIENT
-          value: hce
-        - name: HSM_CLIENT
-          value: hsm
         - name: CF_CLIENT
           value: cf
         - name: ALLOWED_ORIGINS
@@ -152,12 +161,25 @@ spec:
         - name: ENCRYPTION_KEY_FILENAME
           value: key
         - name: HTTP_PROXY
+        {{- if .Values.httpProxy }}
+          value: {{.Values.httpProxy}}
+        {{- end }}
         - name: HTTPS_PROXY
+        {{- if .Values.httpsProxy }}
+          value: {{.Values.httpsProxy}}
+        {{- end }}
         - name: NO_PROXY
+        {{- if .Values.noProxy }}
+          value: {{.Values.noProxy}}
+        {{- end }}
         - name: FTP_PROXY
+        {{- if .Values.ftpProxy }}
+          value: {{.Values.ftpProxy}}
+        {{- end }}
         - name: SOCKS_PROXY
-        - name: UAA_ENDPOINT
-          value: http://console-uaa-int:8080
+        {{- if .Values.socksProxy }}
+          value: {{.Values.socksProxy}}
+        {{- end }}
         ports:
         - containerPort: 3003
           name: proxy
@@ -206,9 +228,25 @@ spec:
         - name: PGDATA
           value: /stolon-data/postgres
         - name: HTTP_PROXY
+        {{- if .Values.httpProxy }}
+          value: {{.Values.httpProxy}}
+        {{- end }}
         - name: HTTPS_PROXY
+        {{- if .Values.httpsProxy }}
+          value: {{.Values.httpsProxy}}
+        {{- end }}
+        - name: NO_PROXY
+        {{- if .Values.noProxy }}
+          value: {{.Values.noProxy}}
+        {{- end }}
         - name: FTP_PROXY
+        {{- if .Values.ftpProxy }}
+          value: {{.Values.ftpProxy}}
+        {{- end }}
         - name: SOCKS_PROXY
+        {{- if .Values.socksProxy }}
+          value: {{.Values.socksProxy}}
+        {{- end }}
         volumeMounts:
         - mountPath: /stolon-data
           name: postgres-volume
@@ -268,10 +306,25 @@ spec:
           - name: UPGRADE_LOCK_FILENAME
             value: upgrade.lock
           - name: HTTP_PROXY
+          {{- if .Values.httpProxy }}
+            value: {{.Values.httpProxy}}
+          {{- end }}
           - name: HTTPS_PROXY
+          {{- if .Values.httpsProxy }}
+            value: {{.Values.httpsProxy}}
+          {{- end }}
           - name: NO_PROXY
+          {{- if .Values.noProxy }}
+            value: {{.Values.noProxy}}
+          {{- end }}
           - name: FTP_PROXY
+          {{- if .Values.ftpProxy }}
+            value: {{.Values.ftpProxy}}
+          {{- end }}
           - name: SOCKS_PROXY
+          {{- if .Values.socksProxy }}
+            value: {{.Values.socksProxy}}
+          {{- end }}
           image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
           name: postflight-job
           volumeMounts:
@@ -287,33 +340,3 @@ spec:
        - name: console-secret
          secret:
            secretName: console-secret
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: uaa
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: console-uaa
-    spec:
-      containers:
-      - image: splatform/stratos-uaa:latest
-        name: console-identity
-        ports:
-        - containerPort: 8080
-          name: uaa
-          protocol: TCP
-      volumes:
-      - name: postgres-volume
-        persistentVolumeClaim:
-          claimName: postgres-volume
-      - name: hsc-encryption-key-volume
-        persistentVolumeClaim:
-          claimName: hsc-encryption-key-volume
-      - name: console-secret
-        secret:
-          secretName: console-secret
-

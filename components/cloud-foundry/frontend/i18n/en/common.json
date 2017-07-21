@@ -1,66 +1,10 @@
 {
   "cloud-foundry": "Cloud Foundry",
   "org": "Org",
+  "organization": "Organisation",
   "space": "Space",
 
   "menu": {
     "cloud-foundry": "@:cloud-foundry"
-  },
-
-  "roles": {
-    "none": "none assigned",
-    "org": {
-      "short": {
-        "org_user": "User",
-        "org_manager": "Manager",
-        "org_auditor": "Auditor",
-        "billing_manager": "Billing Manager"
-      },
-      "long": {
-        "org_user": "[[@:org]] [[@:roles.org.short.org_user]]",
-        "org_manager": "[[@:org]] [[@:roles.org.short.org_manager]]",
-        "org_auditor": "[[@:org]] [[@:roles.org.short.org_auditor]]",
-        "billing_manager": "[[@:org]] [[@:roles.org.short.billing_manager]]"
-      }
-    },
-    "space": {
-      "none": "none assigned",
-      "short": {
-        "space_manager": "Manager",
-        "space_auditor": "Auditor",
-        "space_developer": "Developer"
-      },
-      "long": {
-        "space_manager": "[[@:space]] [[@:roles.space.short.space_manager]]",
-        "space_auditor": "[[@:space]] [[@:roles.space.short.space_auditor]]",
-        "space_developer": "[[@:space]] [[@:roles.space.short.space_developer]]"
-      }
-    }
-  },
-
-  "routes": {
-    "unknown-domain": "Unknown",
-    "unmap-app": {
-      "title": "Unmap Route from Application",
-      "description": "Are you sure you want to unmap '{{ route }}'",
-      "button-yes": "Unmap",
-      "error": "There was a problem detaching this route. Please try again. If this error persists, please contact the Administrator.",
-      "success": "Route successfully unmapped"
-    },
-    "unmap-apps": {
-      "title": "Unmap Route from Applications",
-      "description": "@:routes.unmap-app.description",
-      "button-yes": "@:routes.unmap-app.button-yes",
-      "error": "@:routes.unmap-app.error",
-      "partial-error": "Some applications failed to unmap from route",
-      "success": "@:routes.unmap-app.success"
-    },
-    "delete": {
-      "title": "Delete Route",
-      "description": "Are you sure you want to delete '{{ route }}'?",
-      "button-yes": "Delete",
-      "error": "There was a problem deleting this route. Please try again. If this error persists, please contact the Administrator.",
-      "success": "Route successfully deleted"
-    }
   }
 }

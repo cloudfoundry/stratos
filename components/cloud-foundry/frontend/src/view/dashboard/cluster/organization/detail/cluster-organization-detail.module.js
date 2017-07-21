@@ -18,12 +18,13 @@
     });
   }
 
-  function ClusterOrgDetailController(appUtilsService, cfOrganizationModel, $state, $stateParams, $q) {
+  function ClusterOrgDetailController(appUtilsService, cfOrganizationModel, cfTabs, $state, $stateParams, $q) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;
     vm.organizationGuid = $stateParams.organization;
     vm.organizationNames = [];
+    vm.cfTabs = cfTabs;
     vm.organization = organization;
 
     // Ensure the parent state is fully initialised before we start our own init

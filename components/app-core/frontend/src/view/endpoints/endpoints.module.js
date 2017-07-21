@@ -15,7 +15,8 @@
         activeMenuState: 'endpoints'
       },
       ncyBreadcrumb: {
-        label: 'endpoints'
+        label: 'endpoints',
+        translate: true
       }
     });
   }

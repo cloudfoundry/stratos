@@ -81,7 +81,8 @@
             return {
               templateUrl: config.templateUrl,
               template: config.template,
-              title: config.title
+              title: config.title,
+              titleTranslateValues: config.titleTranslateValues
             };
           }
         },

@@ -384,7 +384,7 @@
      * @public
      */
     function spaceRoleToString(role) {
-      return 'roles.space.short.' + role;
+      return 'cf.roles.role-labels.space.short.' + role;
     }
 
     /**
@@ -401,7 +401,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the space
-        return ['roles.none'];
+        return ['cf.roles.role-labels.none'];
       }
       roles.sort(function (r1, r2) {
         return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);

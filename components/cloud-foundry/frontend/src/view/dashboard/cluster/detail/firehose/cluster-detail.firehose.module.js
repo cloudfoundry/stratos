@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.detail.firehose', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.firehose', {
@@ -17,6 +18,18 @@
           return 'endpoint.clusters.tiles';
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.clusterTabs.push({
+      position: 3,
+      hide: function () {
+        return !cfTabs.isAdmin();
+      },
+      uiSref: 'endpoint.clusters.cluster.detail.firehose',
+      uiSrefParam: _.noop,
+      label: 'cf.cf-tabs.firehose'
     });
   }
 

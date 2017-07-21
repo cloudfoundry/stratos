@@ -26,6 +26,7 @@
     var vm = this;
     vm.showLanguageSelection = showLanguageSelection || false;
     vm.accountModel = modelManager.retrieve('app.model.account');
+    vm.userNavModel = modelManager.retrieve('app.model.navigation').user;
 
     // Toggle the side navigation and send a window resize event
     vm.toggleNav = function (v) {

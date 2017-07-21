@@ -77,7 +77,7 @@
     }
 
     function updateEndpoint(serviceInstance, isValid, serviceEndpoint) {
-      serviceEndpoint.type = $translate.instant('cloud-foundry');
+      serviceEndpoint.type = 'cloud-foundry';
       if (isValid) {
         serviceEndpoint.visit = function () {
           return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});

@@ -1,0 +1,16 @@
+{
+  "name": "user-info",
+  "description": "",
+  "license": "Apache-2.0",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "frontend/src/view/user-info.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+    "cloud-foundry": "./components/cloud-foundry"
+  }
+}

@@ -50,8 +50,8 @@
       });
 
       it('should use default placeholder text when value is not defined', function () {
-        expect(selectInputCtrl.placeholder).toBe('Select');
-        expect(element.find('span').text().trim()).toBe('Select');
+        expect(selectInputCtrl.placeholder).toBe('select-input.placeholder');
+        expect(element.find('span').text().trim()).toBe('select-input.placeholder');
       });
 
       it('should toggle menu on click', function () {

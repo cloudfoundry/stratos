@@ -182,7 +182,7 @@
         });
 
         describe('manageInstances', function () {
-          it('should emit cf.events.START_MANAGE_SERVICES event', function () {
+          it('should emit cf.START_MANAGE_SERVICES event', function () {
             spyOn(appEventService, '$emit');
             serviceCardCtrl.manageInstances();
             expect(appEventService.$emit).toHaveBeenCalled();
