@@ -30,13 +30,13 @@
     var model = modelManager.retrieve('cloud-foundry.model.application');
 
     vm.sortOptions = [
-      {label: 'App Name', value: 'entity.name'},
+      {label: 'app-wall.table.columns.appName-sort-by', value: 'entity.name'},
       // This one relies on app state, which we don't have yet
       //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label'},
-      {label: 'Instances', value: 'entity.instances', descendingFirst: true},
-      {label: 'Disk Quota', value: 'entity.disk_quota', descendingFirst: true},
-      {label: 'Memory', value: 'entity.memory', descendingFirst: true},
-      {label: 'Creation Date', value: 'metadata.created_at', descendingFirst: true}
+      {label: 'app-wall.table.columns.instances-sort-by', value: 'entity.instances', descendingFirst: true},
+      {label: 'app-wall.table.columns.disk-sort-by', value: 'entity.disk_quota', descendingFirst: true},
+      {label: 'app-wall.table.columns.memory-sort-by', value: 'entity.memory', descendingFirst: true},
+      {label: 'app-wall.table.columns.creation-sort-by', value: 'metadata.created_at', descendingFirst: true}
     ];
 
     vm.setSort = setSort;

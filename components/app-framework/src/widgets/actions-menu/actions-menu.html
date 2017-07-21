@@ -14,8 +14,10 @@
         <span translate>{{ actionsMenuCtrl.menuLabel }}</span>
       </li>
       <li class="actions-menu-item" ng-repeat="action in actionsMenuCtrl.actions"
-          ng-click="actionsMenuCtrl.executeAction($event, action)" tabindex="0"
-          ng-disabled="action.disabled" ng-hide="action.hidden">
+          ng-click="actionsMenuCtrl.executeAction($event, action)"
+          tabindex="0"
+          ng-disabled="actionsMenuCtrl.executeOrReturn(action, 'disabled')"
+          ng-hide="actionsMenuCtrl.executeOrReturn(action, 'hidden')">
         <i ng-class="action.icon" ng-if="action.icon"></i>
         <span translate>{{ action.name }}</span>
       </li>

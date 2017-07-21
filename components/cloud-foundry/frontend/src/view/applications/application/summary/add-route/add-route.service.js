@@ -117,11 +117,11 @@
 
         return frameworkAsyncTaskDialog(
           {
-            title: 'add-route.title',
+            title: 'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.title',
             templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/add-route/add-route.html',
             submitCommit: true,
             buttonTitles: {
-              submit: 'add-route.button.submit'
+              submit: 'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.button.submit'
             },
             class: 'dialog-form',
             dialog: true

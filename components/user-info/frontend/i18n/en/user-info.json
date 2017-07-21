@@ -1,0 +1,45 @@
+{
+  "user-info": {
+    "user-info": "User Profile",
+    "labels": {
+      "username": "Username",
+      "fullname": "Full name",
+      "email": "Email address",
+      "created": "Account created",
+      "modified": "Account last modified",
+      "password-modified": "Password last modified",
+      "groups": "Groups"
+    },
+
+    "edit": {
+      "edit": "Edit Profile",
+      "introduction": "Please supply profile updates below - ommitting a field will not update it.",
+      "note": "When changing your email address, you must provide your current password.",
+      "success": "User profile updated successfully",
+      "given-name": "Given name",
+      "family-name": "Family name",
+      "email": "Email Address",
+      "current-password": "Current Password",
+      "error-need-password": "Current password is required"
+    },
+
+    "update": "Update",
+
+    "password-change": {
+      "change": "Change",
+      "password-change": "Change Password",
+      "introduction": "Please provide your existing password together with your new password.",
+      "old": "Old password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "error-confirm": "Passwords do not match",
+      "error-not-changed": "New password must be different",
+      "placeholders": {
+        "old": "Enter your current password",
+        "new": "Enter your new password",
+        "confirm": "Re-enter your new password"
+      },
+      "success": "Password updated successfully"
+    }
+  }
+}

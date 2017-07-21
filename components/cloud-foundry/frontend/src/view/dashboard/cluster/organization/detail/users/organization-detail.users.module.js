@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.organization.users', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.detail.users', {
@@ -19,6 +20,16 @@
           return 'endpoint.clusters.cluster.detail.users';
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.orgTabs.push({
+      position: 2,
+      hide: false,
+      uiSref: 'endpoint.clusters.cluster.organization.detail.users',
+      uiSrefParam: _.noop,
+      label: 'cf.org-info.users-tab-title'
     });
   }
 
@@ -134,14 +145,14 @@
     }
 
     var manageRoles = {
-      name: 'common-roles-actions.manage-roles',
+      name: 'cf.roles.common-roles-actions.manage-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterManageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
       }
     };
     var removeFromOrg = {
-      name: 'common-roles-actions.remove-all-roles',
+      name: 'cf.roles.common-roles-actions.remove-all-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);

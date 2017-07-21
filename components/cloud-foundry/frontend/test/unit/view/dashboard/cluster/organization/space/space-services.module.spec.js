@@ -3,7 +3,7 @@
 
   describe('cluster space detail (services) module', function () {
 
-    var $controller, $httpBackend, $scope, $state, $stateParams, $q, $filter, modelManager,
+    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager,
       cfServiceInstanceService, appUtilsService;
 
     beforeEach(module('templates'));
@@ -40,7 +40,6 @@
       $stateParams.organization = organizationGuid;
       $stateParams.space = spaceGuid;
       $q = $injector.get('$q');
-      $filter = $injector.get('$filter');
       modelManager = $injector.get('modelManager');
       cfServiceInstanceService = $injector.get('cfServiceInstanceService');
       appUtilsService = $injector.get('appUtilsService');
@@ -55,7 +54,7 @@
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, space);
 
       var SpaceServicesController = $state.get('endpoint.clusters.cluster.organization.space.detail.services').controller;
-      $controller = new SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager,
+      $controller = new SpaceServicesController($scope, $state, $stateParams, $q, modelManager,
         cfServiceInstanceService, appUtilsService);
     }
 

@@ -1,0 +1,157 @@
+$app-setup-wizard-step-label-padding: 10px;
+
+app-setup-wizard {
+  align-self: stretch;
+  display: flex;
+  flex: 1;
+
+  .app-setup-wizard-model-wrapper.modal {
+    display: flex;
+    flex: 1;
+    overflow-y: hidden;
+    position: static;
+
+    .detail-view-content {
+      width: 100%;
+      margin: 0;
+
+      wizard {
+        display: flex;
+        flex: 1;
+
+        .wizard {
+          height: auto;
+          width: 100%;
+
+          .wizard-body {
+            color: $text-color;
+
+            .wizard-nav {
+              flex-shrink: 0;
+              margin-bottom: 0;
+              border-bottom-color: $brand-secondary;
+
+              &.nav-stacked > li.disabled {
+
+                &.active {
+                  & > a, & > a:hover {
+                    color: $text-color;
+                    border-color: transparent;
+                  }
+                }
+                & > a, & > a:hover {
+                  color: $brand-secondary;
+                  padding-left: $app-setup-wizard-step-label-padding;
+                  padding-right: $app-setup-wizard-step-label-padding;
+                  border-left: 1px solid $brand-secondary;
+                }
+              }
+
+              .wizard-nav-item {
+                opacity: 0.3;
+                &.complete a:after {
+                  display: none;
+                }
+
+                &.active {
+                  opacity: 1;
+                }
+              }
+            }
+
+            .wizard-step {
+              min-height: 441px;
+              padding: 0;
+
+              &.wizard-loading-indicator {
+                .bounce-spinner > div {
+                  background-color: $text-color;
+                }
+                .message-box {
+                  min-width: 100%;
+                }
+              }
+
+              ng-include {
+                margin: $console-unit-space;
+
+                .app-setup-step {
+                  display: flex;
+                  p {
+                    font-size: $font-size-large;
+                  }
+
+                  &.app-setup-intro {
+                    flex-direction: column;
+                    padding-left: $console-unit-space / 2;
+                    padding-right: $console-unit-space / 2;
+                  }
+                  .app-setup-step-left {
+                    padding-left: $console-unit-space / 2;
+                    padding-right: $console-unit-space;
+                    flex: 3;
+                  }
+                  .app-setup-step-right {
+                    padding: 0 $console-unit-space;
+                    flex: 2;
+
+                    @include dark-form();
+
+                    .control-title:first-of-type {
+                      margin-top: 0;
+                    }
+
+                  }
+                }
+              }
+            }
+          }
+
+          .wizard-foot {
+            background: transparent;
+            border-top: 0;
+
+            height: $console-unit-space * 1.25 + $button-height;
+            min-height: $console-unit-space * 1.25 + $button-height;
+
+            display: block;
+            text-align: right;
+
+            .btn-default.cancel, .btn-default.back {
+              float: left;
+              background-color: $text-color;
+              color: $brand-secondary;
+            }
+
+            .btn-primary.next {
+              background-color: $brand-primary;
+              color: $text-color;
+            }
+          }
+
+          .wizard-message {
+            margin-top: $console-unit-space;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: $screen-md-min) {
+  .app-setup-step {
+    flex-direction: column;
+  }
+  app-setup-wizard .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .detail-view-content wizard .wizard .wizard-body .wizard-step ng-include .app-setup-step .app-setup-step-right {
+    padding-left: $console-unit-space / 2;
+    .control-title:first-of-type {
+      margin-top: $console-unit-space / 2;
+    }
+  }
+}
+
+@media (max-height: 820px) {
+  app-setup-wizard .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .detail-view-content wizard .wizard .wizard-body .wizard-step {
+    min-height: 0;
+  }
+}

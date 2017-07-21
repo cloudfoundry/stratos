@@ -37,7 +37,10 @@
         return !canEditApp;
       },
       uiSref: 'cf.applications.application.variables',
-      label: 'Variables',
+      uiSrefParam: function () {
+        return {guid: $stateParams.guid};
+      },
+      label: 'app.app-info.app-tabs.variables.title',
       clearState: function () {
         canEditApp = undefined;
       }
@@ -62,10 +65,10 @@
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.id = $stateParams.guid;
     vm.variableActions = [
-      {name: 'app-tabs.variables.actions.edit', execute: _.bind(editVariable, vm)},
-      {name: 'app-tabs.variables.actions.delete', execute: _.bind(deleteVariable, vm)}
+      {name: 'app.app-info.app-tabs.variables.actions.edit', execute: _.bind(editVariable, vm)},
+      {name: 'app.app-info.app-tabs.variables.actions.delete', execute: _.bind(deleteVariable, vm)}
     ];
-    vm.deleteErrorMsg = 'app-tabs.variables.deleteError';
+    vm.deleteErrorMsg = 'app.app-info.app-tabs.variables.deleteError';
 
     vm.isBusy = false;
     vm.fetchError = false;

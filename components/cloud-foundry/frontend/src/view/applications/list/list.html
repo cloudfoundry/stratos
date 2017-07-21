@@ -1,17 +1,7 @@
-<div class="app-top-bar action-bar app-actions-bar panel-less application-wall-header">
-  <div class="applications-header font-semi-bold">
-    <span translate>app-wall</span>
-    <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
-  </div>
-  <div class="application-header-right">
-    <button ng-repeat="action in applicationsListCtrl.appWallActions | orderBy:'position'"
-            id="{{action.id}}"
-            class="btn btn-primary"
-            ng-if="action.show(applicationsListCtrl.appWallActionContext)"
-            ng-disabled="action.disable(applicationsListCtrl.appWallActionContext)"
-            ng-click="action.action(applicationsListCtrl.appWallActionContext)">{{action.label | translate}}
-    </button>
-  </div>
+<div class="applications-header apps-header font-semi-bold">
+  <span translate>app-wall</span>
+  <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
+  <actions-toolbar ready="applicationsListCtrl.ready" items="applicationsListCtrl.appWallActions"></actions-toolbar>
 </div>
 
 <div ng-if="applicationsListCtrl.ready">
@@ -128,35 +118,34 @@
 
 
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
-    <div ng-if="applicationsListCtrl.model.clusterCount === 0">
+    <div ng-if="applicationsListCtrl.model.clusterCount === 0" translate-namespace="app-wall.no-cf">
       <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
-      <div class="applications-msg" translate>You cannot view any applications.</div>
+      <div class="applications-msg" translate>.warning</div>
       <div class="applications-cta">
         <div ng-if="applicationsListCtrl.isEndpointsDashboardAvailable">
-          <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
-            Dashboard</a>
-          <span translate>to fix your connections or connect to new endpoints.</span>
+          <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>.advice-can-fix-link</a>
+          <span translate>.advice-can-fix-text</span>
         </div>
         <div ng-if="!applicationsListCtrl.isEndpointsDashboardAvailable">
-          <span translate>Contact your administrator.</span>
+          <span translate>.advice-cant-fix</span>
         </div>
       </div>
     </div>
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
-      <div ng-if="!applicationsListCtrl.isSpaceDeveloper">
+      <div ng-if="!applicationsListCtrl.isSpaceDeveloper" translate-namespace="app-wall.no-apps.none-space-developer">
         <div ng-if="applicationsListCtrl.isAdminInAnyCf()">
           <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
-          <div class="applications-msg" translate>You have no applications and</div>
-          <div class="applications-msg" translate>there are no spaces where you can add any.</div>
+          <div class="applications-msg" translate>.admin.line1</div>
+          <div class="applications-msg" translate>.admin.line2</div>
           <div class="applications-cta">
-            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Click here</a>
-            <span translate>to manage spaces.</span>
+            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>.admin.link-text</a>
+            <span translate>.admin.link-message</span>
           </div>
         </div>
         <div ng-if="!applicationsListCtrl.isAdminInAnyCf()">
           <app-icon icon="svg:Cluster.svg" icon-class="app-icon-3x"></app-icon>
-          <div class="applications-msg" translate>You have no applications and cannot add any.</div>
-          <div class="applications-msg" translate>Please contact your administrator.</div>
+          <div class="applications-msg" translate>.non-admin.line1</div>
+          <div class="applications-msg" translate>.non-admin.line2</div>
         </div>
       </div>
       <div ng-if="applicationsListCtrl.isSpaceDeveloper">
@@ -164,9 +153,7 @@
         <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
         <div class="applications-cta">
           <a class="btn btn-link" ng-click="applicationsListCtrl.addApplication()"
-             translate>
-            Add an application
-          </a>
+             translate>app-wall.no-apps.space-developer.add</a>
         </div>
       </div>
     </div>

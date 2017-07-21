@@ -18,7 +18,7 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      type: 'Cloud Foundry'
+      type: 'cloud-foundry'
     };
 
     beforeEach(module('templates'));
@@ -110,7 +110,7 @@
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.register();
+        controller.headerActions[0].execute();
         $scope.$digest();
         expect(registerServiceCalled).toBe(true);
         $httpBackend.flush();

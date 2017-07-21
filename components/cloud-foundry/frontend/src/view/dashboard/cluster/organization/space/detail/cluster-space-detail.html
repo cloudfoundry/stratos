@@ -7,7 +7,7 @@
      class="cluster-detail endpoints col-md-12 col-sm-12 col-xs-12">
 
   <div class="application-header font-semi-bold">
-    <h3 translate>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
+    <h3 translate translate-value-name="{{ clusterSpaceController.space().details.space.entity.name }}">cf.space-info.title</h3>
     <cluster-actions ng-show="clusterSpaceController.hasActions" has-actions="clusterSpaceController.hasActions"></cluster-actions>
   </div>
   <space-summary-tile ng-if="clusterSpaceController.space()"
@@ -15,27 +15,7 @@
                       space="clusterSpaceController.space()">
   </space-summary-tile>
 
-  <ul class="application-nav nav nav-tabs col-sm-12">
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications" translate>
-        Applications
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.services" translate>
-        Service Instances
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.routes" translate>
-        Routes
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.users" translate>
-        Users
-      </a>
-    </li>
-  </ul>
+  <cf-tabs tabs="clusterSpaceController.cfTabs.spaceTabs"></cf-tabs>
+
   <ui-view></ui-view>
 </div>

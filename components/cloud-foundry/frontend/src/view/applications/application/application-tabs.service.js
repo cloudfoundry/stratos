@@ -8,13 +8,12 @@
   /**
    * @name cfApplicationTabs
    * @description Provides collection of configuration objects for tabs on the application page
-   * @param {object} $q - the Angular $q service
+   * @param {object} cfTabs - the core cf tabs service
    * @returns {object} The cfApplicationTabs object
    */
-  function ApplicationTabs($q) {
+  function ApplicationTabs(cfTabs) {
     var service = {
-      tabs: [ ],
-      callAppTabs: callAppTabs,
+      tabs: cfTabs.applicationTabs,
       clearState: clearState,
       appUpdated: appUpdated,
       appDeleting: appDeleting,
@@ -23,34 +22,20 @@
 
     return service;
 
-    function callAppTabs(method) {
-      var tasks = [];
-      var args = Array.prototype.slice.call(arguments, 1);
-      _.forEach(service.tabs, function (tab) {
-        var promise = _safeCallFunction.apply(tab, [tab, tab[method]].concat(args));
-        tasks.push(promise || $q.resolve());
-      });
-      return $q.all(tasks);
-    }
-
     function clearState() {
-      return callAppTabs.apply(service, ['clearState']);
+      return cfTabs.callTabs([service.tabs], 'clearState');
     }
 
     function appUpdated(cnsiGuid, refresh) {
-      return callAppTabs.apply(service, ['appUpdated', cnsiGuid, refresh]);
+      return cfTabs.callTabs([service.tabs], 'appUpdated', cnsiGuid, refresh);
     }
 
     function appDeleting() {
-      return callAppTabs.apply(service, ['appDeleting']);
+      return cfTabs.callTabs([service.tabs], 'appDeleting');
     }
 
     function appDeleted() {
-      return callAppTabs.apply(service, ['appDeleted']);
-    }
-
-    function _safeCallFunction(tab, func) {
-      return angular.isFunction(func) ? func.apply(tab, _.slice(arguments, 2)) : $q.resolve;
+      return cfTabs.callTabs([service.tabs], 'appDeleted');
     }
 
   }

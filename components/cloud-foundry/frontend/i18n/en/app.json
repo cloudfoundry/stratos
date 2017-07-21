@@ -19,19 +19,332 @@
       "partial": "Partially Online",
       "unknown": "Unknown"
     },
-    "tabs": {
-      "summary": {
-        "label": "Summary",
-        "instructions": {
-          "cli": "Deploy your application using the CLI",
-          "service": "Add services to your application"
+    "app-instance": {
+      "labels": {
+        "index": "Index",
+        "status": "Status",
+        "memory": "Memory",
+        "disk": "Disk",
+        "uptime": "Uptime"
+      }
+    },
+    "new-app": {
+      "headline": "Your application has been created.",
+      "suggestions": "You may want to:"
+    },
+    "app-info": {
+      "app-actions": {
+        "view": "View App",
+        "stop": "Stop",
+        "restart": "Restart",
+        "delete": "Delete",
+        "start": "Start",
+        "cli": "CLI Info"
+      },
+      "edit-app": {
+        "edit-app": "Edit App",
+        "ssh-access": "Enable SSH Access",
+        "ssh-restart-warning": "Note: Enabling or disabling SSH Access will restart all application instances.",
+        "ssh-no-edit": "Note: SSH Access for this application can not be modified as the Space is set to disallow all SSH access."
+      },
+      "app-instances-actions" :{
+        "terminate": "Terminate"
+      },
+      "terminate-instance": {
+        "title": "Terminate Instance",
+        "description": "Are you sure you want to terminate instance {{index}}?",
+        "error-message": "There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.",
+        "button": {
+          "yes": "Terminate",
+          "no": "@:buttons.cancel"
+        },
+        "success": "Instance {{index}} successfully terminated"
+      },
+      "delete-app": {
+        "complex": {
+          "title": "Delete App and Associated Items",
+          "success": "'{{appName}}' has been deleted"
+        },
+        "simple": {
+          "title": "Delete Application",
+          "description": "Are you sure you want to delete '{{appName}}'?",
+          "button": {
+            "yes": "Delete",
+            "no": "@:buttons.cancel"
+          },
+          "success": "'{{appName}}' has been deleted"
         }
       },
-      "logStream": {
-        "label": "Log Stream"
+      "app-tabs": {
+        "summary": {
+          "label": "Summary",
+          "instructions": {
+            "cli": "Deploy your application using the CLI",
+            "service": "Add services to your application"
+          },
+          "summary-panel": {
+            "title": "Summary",
+            "state-label": "state",
+            "state-app-label": "app state",
+            "state-package-label": "package state",
+            "instances-label": "instances",
+            "created-label": "created",
+            "modified-label": "modified",
+            "deployed-label": "console deploy",
+            "deployed-source-label": "console deploy source",
+            "ssh-enabled-label": "ssh enabled",
+            "memory-label": "memory",
+            "disk-quota-label": "disk quota",
+            "buildpack-label": "buildpack",
+            "production-label": "production",
+            "stack-label": "stack",
+            "endpoint-url-label": "endpoint url",
+            "endpoint-label": "[[@:endpoint]]",
+            "org-label": "[[@:organization]]",
+            "space-label": "[[@:space]]",
+            "edit-button": "Edit",
+            "edit-dialog": {
+              "title": "Edit App",
+              "name-label": "Application Name",
+              "name-error-required": "Name is required",
+              "memory-label": "Memory Usage",
+              "memory-error-required": "Memory is required",
+              "memory-error-min": "Memory must be higher than 0",
+              "instances-label": "Instances",
+              "instances-error-required": "Instances is required",
+              "instances-error-min": "Instances must be 0 or more",
+              "instances-error-whole": "Instances must be whole number"
+            }
+          },
+          "instances-panel": {
+            "title": "Instances",
+            "none": "This application has no running instances.",
+            "index-label": "Index",
+            "status-label": "Status",
+            "memory-label": "Memory",
+            "disk-label": "Disk",
+            "uptime-label": "Uptime",
+            "action-label": "Action",
+            "show-all": "Show All"
+          },
+          "routes-panel": {
+            "title": "Routes",
+            "add-button": "Add route",
+            "none": "You have no routes.",
+            "route-label": "Route",
+            "action-label": "Action",
+            "route-actions": {
+              "unmap": "Unmap from App",
+              "delete": "Delete Route"
+            },
+            "add-route-dialog": {
+              "title": "Add a Route",
+              "host-label": "Host",
+              "host-error-exists": "A route with this name already exists. Choose a new one",
+              "host-error-required": "Host is required",
+              "host-placeholder": "a unique identifier for this route",
+              "domain-label": "Domain",
+              "route-options-label": "HTTP Route Options",
+              "path-label": "Path (Optional)",
+              "path-placeholder": "optional path for this route",
+              "tcp-label": "TCP Route Options",
+              "port-random-label": "Use random port",
+              "port-label": "Port",
+              "port-placeholder": "port for this route",
+              "button": {
+                "submit": "Create route"
+              }
+            }
+          },
+          "service-instances-panel": {
+            "title": "Service Instances",
+            "manage-button": "Manage Services",
+            "none": "You have no service instances.",
+            "name-label": "Name",
+            "service-label": "Service",
+            "plan-label": "Plan"
+          }
+        },
+        "log-stream": {
+          "label": "Log Stream",
+          "title": "Log Stream",
+          "scroll-button": "Scroll To Bottom"
+        },
+        "services": {
+          "label": "Services",
+          "categories": {
+            "show": "Show",
+            "attached": "Attached Service Instances",
+            "all": "All Services"
+          },
+          "manage": {
+            "title": "Manage Service Instances",
+            "name-label": "name",
+            "plan-label": "plan",
+            "env-vars-label": "env.variables",
+            "detach-button": "detach"
+          },
+          "card": {
+            "version": "Version",
+            "attached": "Attached",
+            "cannot-bind": "This service cannot be bound to an Application",
+            "actions": {
+              "add": "Add Service",
+              "detach": "Detach",
+              "manage": "Manage Instances"
+            }
+          },
+          "unbind": {
+            "title": "Detach Service",
+            "description": "Are you sure you want to detach {{name}}?",
+            "error-message": "There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.",
+            "button": {
+              "yes": "Detach",
+              "no": "@:buttons.cancel"
+            },
+            "error": "Some applications failed to detach from the service instance",
+            "success": "Service instance successfully detached"
+          },
+          "delete": {
+            "title": "Delete Service",
+            "description": "Are you sure you want to delete {{name}}?",
+            "error-message": "There was a problem deleting this service. Please try again. If this error persists, please contact the Administrator.",
+            "button": {
+              "yes": "Delete",
+              "no": "@:buttons.cancel"
+            },
+            "success": "Service instance successfully deleted"
+          },
+          "view-envs": {
+            "title": "{{instanceName}}: Variables"
+          },
+          "add": {
+            "title": "Add Service to {{ appName }}",
+            "back-to-services": "Back to Services",
+            "add": "Add Service Instance",
+            "create": {
+              "title": "Create New Instance",
+              "name-label": "Name",
+              "name-error-required": "Name is required",
+              "name-error-unique": "Name must be unique",
+              "name-error-pattern": "Name contains invalid pattern",
+              "plan-label": "Plan",
+              "plan-placeholder": "Select a Plan"
+            },
+            "existing": {
+              "title": "Choose Existing Instance",
+              "name-label": "Name",
+              "plan-label": "Plan",
+              "apps-label": "Apps Attached"
+            },
+            "notifications": {
+              "success": "The '{{ service }}' service has been successfully attached to application '{{ appName }}'",
+              "failure-create": "There was a problem creating the instance. Please try again. If this error persists, please contact the administrator.",
+              "failure-bind": "There was a problem binding the service instance to the application. Please try again. If this error persists, please contact the administrator."
+            },
+            "acknowledge": {
+              "info": "A best practice for persisting the binding of this service to your application is to update your application's manifest file.",
+              "add-to-manifest": "Add to Manifest"
+            }
+          }
+        },
+        "variables": {
+          "title": "Variables",
+          "table": {
+            "title": "[[@:app.app-info.app-tabs.variables.title]]",
+            "none": "You have no variables.",
+            "name-label": "Name",
+            "value-label": "Value",
+            "actions-label": "Actions",
+            "add-button": "Add Variable"
+          },
+          "add-dialog": {
+            "title": "Add New Variable",
+            "description": "New variables will not be applied until the application is manually restarted.",
+            "name-label": "Name",
+            "name-required": "Name is required",
+            "value-label": "Value",
+            "value-required": "Value is required",
+            "submit-button": "Add",
+            "error": "There was a problem adding this variable. Please try again. If this error persists, please contact the administrator."
+          },
+          "all": {
+            "title": "[[@:app.app-info.app-tabs.variables.title]]",
+            "error": "An error occurred retrieving application variables",
+            "refresh-button": "Refresh"
+          },
+          "actions": {
+            "edit": "Edit Variable",
+            "edit-dialog": {
+              "title": "Edit Variable",
+              "description": "Changes to this variable will not be applied until the application is manually restarted.",
+              "submit-button": "Update",
+              "error": "There was a problem updating this variable. Please try again. If this error persists, please contact the administrator."
+            },
+            "delete": "Delete Variable"
+          },
+          "deleteError": "An error occurred deleting this variable. Please try again."
+        },
+        "events": {
+          "events": "Events",
+          "total": "Total: {{total}}",
+          "empty": "No events available",
+          "error": "An error occurred retrieving events",
+          "detail": "Event Detail",
+          "labels":{
+            "timestamp": "Timestamp",
+            "type": "Type",
+            "actor-name": "Actor Name",
+            "detail": "Detail"
+          },
+          "page-sizes": {
+            "five": "5 per page",
+            "ten": "10 per page",
+            "twenty": "20 per page",
+            "fifty": "50 per page"
+          }
+        }
       },
-      "services": {
-        "label": "Services"
+      "cli-dialog-app": {
+        "title": "@:cf.cli-common.title",
+        "intro": "@:cf.cli-common.intro",
+        "get-started": "@:cf.cli-common.get-started",
+        "get-started-intro": "@:cf.cli-common.get-started-intro",
+        "step1": "@:cf.cli-common.step1",
+        "step1-link-text": "@:cf.cli-common.step1-link-text",
+        "step2": "@:cf.cli-common.step2",
+        "step3": "@:cf.cli-common.step3",
+        "step4": "@:cf.cli-common.step4",
+        "app-commands": {
+          "title": "Application Management Commands",
+          "summary": "Summary",
+          "summary-intro": "To get the application summary",
+          "start": "Start",
+          "start-intro": "To start the application",
+          "stop": "Stop",
+          "stop-intro": "To stop the application",
+          "restart": "Restart",
+          "restart-intro": "To restart the application"
+        },
+        "scaling-commands": {
+          "title": "Scaling the Application",
+          "instances": "Instances",
+          "instances-intro": "To change the number of application instances",
+          "memory": "Memory",
+          "memory-intro": "To change the memory allocated to application instances"
+        }
+      },
+      "cli-dialog-deploy": {
+        "title": "Deploy Using CLI",
+        "intro": "To deploy your app using the CLI, follow these steps:",
+        "step1": "1. Download and install the CLI - ",
+        "step1-link-text": "see here",
+        "step2": "2. Add a <strong>manifest.yml</strong> file to your source code or update your existing one using the content below. Cloud Foundry uses the manifest file to set the application's name, route(s) and service binding(s). Please ensure that the application name and route(s) of your manifest file match that shown below. If the application name and route(s) are not correct in the manifest file, multiple applications and routes will get created.",
+        "step3": "3. Enter the following commands in the CLI:",
+        "step3-1": "Set the api endpoint",
+        "step3-2": "Login",
+        "step3-3": "Target the org and space",
+        "step3-4": "Push to the Cloud Foundry endpoint - Navigate to the project directory and execute the following."
       }
     }
   }

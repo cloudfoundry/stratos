@@ -10,7 +10,7 @@
       </div>
       <div class="service-metadata">
         <dl>
-          <dt class="font-semi-bold" translate>Version</dt>
+          <dt class="font-semi-bold" translate>app.app-info.app-tabs.services.card.version</dt>
           <dd>{{ ::serviceCardCtrl.service.entity.extra.Version || serviceCardCtrl.service.entity.version || '-'}}</dd>
         </dl>
       </div>
@@ -28,32 +28,32 @@
       <div class="service-attached-msg">
         <div class="service-attached font-semi-bold"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
-          {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+          {{ serviceCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
         </div>
       </div>
       <div class="service-actions">
         <div class="font-semi-bold" ng-if="!serviceCardCtrl.canBind" translate>
-          This service cannot be bound to an Application
+          app.app-info.app-tabs.services.card.cannot-bind
         </div>
         <div class="service-added font-semi-bold text-uppercase"
           ng-if="serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
-          {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+          {{ serviceCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
         </div>
         <button class="btn btn-sm btn-link"
           ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
           ng-click="serviceCardCtrl.addService()" ng-hide="serviceCardCtrl.hideServiceActions()">
-          <span translate>Add Service</span>
+          <span translate>app.app-info.app-tabs.services.card.actions.add</span>
           <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"
           ng-click="serviceCardCtrl.detach()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
-          Detach
+          app.app-info.app-tabs.services.card.actions.detach
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 1"
           ng-click="serviceCardCtrl.manageInstances()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
-          Manage Instances
+          app.app-info.app-tabs.services.card.actions.manage
         </button>
       </div>
     </div>

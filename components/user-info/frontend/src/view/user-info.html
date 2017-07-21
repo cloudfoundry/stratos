@@ -1,0 +1,41 @@
+<div class="col-md-12 col-sm-12">
+  <div class="application-header font-semi-bold">
+    <span translate class="app-header-app-name">user-info</span>
+    <actions-toolbar ready="userCtrl.ready" items="userCtrl.actions"></actions-toolbar>
+  </div>
+
+  <div class="application-details col-sm-12">
+    <div class="row user-info-summary">
+      <div>
+        <dl class="user-info-list">
+          <dt translate>user-info.labels.username</dt>
+          <dd>{{ userCtrl.userInfo.user_name }}</dd>
+          <dt translate>user-info.labels.fullname</dt>
+          <dd>{{ userCtrl.userInfo.name }}</dd>
+          <dt translate>user-info.labels.email</dt>
+          <dd>{{ userCtrl.userInfo.email }}</dd>
+        </dl>
+      </div>
+      <div>
+        <dl class="user-info-list">
+          <dt translate>user-info.labels.created</dt>
+          <dd>{{ userCtrl.user.meta.created | momentDateFormat }}</dd>
+          <dt translate>user-info.labels.modified</dt>
+          <dd>{{ userCtrl.user.meta.lastModified | momentDateFormat }}</dd>
+          <dt translate>user-info.labels.password-modified</dt>
+          <dd>{{ userCtrl.user.passwordLastModified | momentDateFormat }}</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="row user-info-groups">
+        <dl class="user-info-list">
+          <dt translate>user-info.labels.groups</dt>
+          <dd>
+            <div class="user-info-group" ng-repeat="group in userCtrl.user.groups">
+              <div>{{ group.display }}</div>
+            </div>
+          </dd>
+        </dl>
+    </div>
+  </div>
+</div>

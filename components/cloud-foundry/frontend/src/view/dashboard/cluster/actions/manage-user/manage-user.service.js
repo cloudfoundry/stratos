@@ -78,11 +78,12 @@
       return frameworkAsyncTaskDialog(
         {
           title: users.length < 2
-            ? $translate.instant('manage-user-roles.title-singular', { name: users[0].entity.username})
-            : $translate.instant('manage-user-roles.title-plural'),
+            ? 'cf.roles.manage-user-roles.title-singular'
+            : 'cf.roles.manage-user-roles.title-plural',
+          titleTranslateValues: { name: users[0].entity.username},
           templateUrl: 'plugins/cloud-foundry/view/dashboard/cluster/actions/manage-user/manage-user.html',
           buttonTitles: {
-            submit: $translate.instant('manage-user-roles.button-submit')
+            submit: 'cf.roles.manage-user-roles.button-submit'
           },
           dialog: true
         },

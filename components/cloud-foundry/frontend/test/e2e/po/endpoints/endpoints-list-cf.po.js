@@ -77,7 +77,7 @@
   }
 
   function headerRegisterVisible() {
-    return getHeaderRegister().isPresent();
+    return getHeaderRegister().isDisplayed();
   }
 
   function getHeaderRegister() {

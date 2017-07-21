@@ -24,8 +24,9 @@
   },
   "login": {
     "title":"Sign in",
-    "title2":"",
-    "console": "SUSE<br>Cloud Foundry Console",
+    "console": "SUSE<br>Cloud Foundry Console"
+  },
+  "landing": {
     "footer": {
       "company.terms-href": "",
       "company.privacy-href": ""

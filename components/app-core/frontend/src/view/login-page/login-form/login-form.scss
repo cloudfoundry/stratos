@@ -1,57 +1,66 @@
-login-form, [login-form] {
-  width: 100%;
-  margin-bottom: 10px;
-  z-index: 2;
+$login-panel-width: 420px;
+$login-padding: $console-unit-space;
+$login-logo-size: 128px;
 
-  @media (min-height: 600px) {
-    margin-top: 100px;
-  }
 
-  .login-error {
-    margin-top: 20px;
-  }
+login-form {
+  margin: 0;
+  width: $login-panel-width;
 
   .login-form {
-    display: block;
-    max-width: 350px;
-    padding: 15px;
+    max-width: $login-panel-width;
 
-    button {
+    padding: 0 $login-padding;
+
+    > h1 {
+      margin-bottom: $console-unit-space * 1.5;
+      margin-top: 0;
+      color: $brand-primary;
+      font-weight: $console-font-weight-light;
+    }
+
+    .form-group {
+      width: auto;
+      // We override the border color in all cases, so we also need to ensure the focus z-index overrides the
+      // error z-index (see focus below)
+      &.focus {
+        z-index: 2;
+      }
+
+      .control-label {
+        font-size: $font-size-medium;
+        margin-top: 3px;
+      }
+
+    }
+
+    > button {
+      float: none;
       margin-top: 40px;
       width: 200px;
     }
 
-    .form-group:first-of-type {
-      margin-top: 40px;
-    }
+    .login-form-spinner.ng-hide {
+      display: block !important;
 
-    .app-icon-view {
-      content: 'visibility'
-    }
-
-    .app-icon-view.form-control-feedback {
-      cursor: pointer;
-      pointer-events: auto;
-    }
-
-    .login-form-spinner {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: $console-unit-space;
-
-      .spinner-notification {
-        margin-right: 20px;
-        text-transform: uppercase;
+      > * {
+        visibility: hidden;
       }
     }
+  }
 
-    .login-button {
-      float: left;
+  .login-form-spinner {
+    text-align: center;
+    color: $white;
+    margin-top: $console-unit-space;
+
+    .spinner-notification {
+      text-transform: none;
+      font-size: $font-size-large;
     }
 
-    .login-clear-both {
-      clear: both;
+    .bounce-spinner > div {
+      background-color: $white;
     }
   }
 }

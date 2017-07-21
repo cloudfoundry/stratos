@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.organization.space.detail.users', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.users', {
@@ -17,6 +18,16 @@
           return 'endpoint.clusters.cluster.organization.detail.users';
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.spaceTabs.push({
+      position: 4,
+      hide: false,
+      uiSref: 'endpoint.clusters.cluster.organization.space.detail.users',
+      uiSrefParam: _.noop,
+      label: 'cf.space-info.tabs.users.title'
     });
   }
 
@@ -127,14 +138,14 @@
       return that.showManageRoles() || that.showRemoveFromOrg() || that.showRemoveFromSpace();
     };
     var manageRoles = {
-      name: 'common-roles-actions.manage-roles',
+      name: 'cf.roles.common-roles-actions.manage-roles',
       disabled: true,
       execute: function (aUser) {
         return appClusterManageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
       }
     };
     var removeFromOrg = {
-      name: 'common-roles-actions.remove-from-org',
+      name: 'cf.roles.common-roles-actions.remove-from-org',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
@@ -142,7 +153,7 @@
       }
     };
     var removeFromSpace = {
-      name: 'common-roles-actions.remove-from-space',
+      name: 'cf.roles.common-roles-actions.remove-from-space',
       disabled: true,
       execute: function (aUser) {
         return appClusterRolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
