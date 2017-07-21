@@ -82,9 +82,7 @@
       formName: 'step2',
       data: data,
       userInput: userInput,
-      btnText: {
-        next: 'app-setup.buttonComplete'
-      },
+      nextBtnText: 'app-setup.buttonComplete',
       showBusyOnNext: 'app-setup.step-2.busy-message',
       onNext: function () {
         var setupModel = modelManager.retrieve('app-setup.model.setup');
