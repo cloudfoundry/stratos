@@ -1,30 +1,116 @@
+$wizard-step-indicator-size: 24px;
+$wizard-step-indicator-margin: 6px;
+
 // Styles to adjust the wizard presentaion when inside a detail view dialog
-.modal.detail-view.detail-view-dialog {
+.modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content {
 
-  div.wizard-body {
-    flex-direction: column;
+  .detail-view-content wizard {
 
-    .wizard-step {
-      width: 100%;
+    div.wizard-body {
+      flex-direction: column;
+      margin: 0 0 $console-half-space 0;
+
+      .wizard-step {
+        width: initial;
+        margin: 0 $console-unit-space;
+      }
     }
-  }
 
-  ul.wizard-nav.nav {
-    width: 100%;
-    border-bottom: 1px solid $rule;
-    background-color: transparent;
-    margin-bottom: $console-unit-space;
+    ul.wizard-nav.nav {
+      width: 100%;
+      border-top: 1px solid $rule;
+      border-bottom: 1px solid $rule;
+      background-color: transparent;
+      margin-bottom: $console-unit-space;
+      padding: $console-half-space $console-unit-space;
+      display: flex;
 
-    > li.wizard-nav-item {
-      display: inline-block;
-
-      > a {
-        padding: 6px 20px;
+      &:not(.wizard-nav-few-steps) {
+        > li.wizard-nav-item-sep {
+          flex: 1;
+        }
       }
 
-      &:not(.active) {
+      & {
+        > li.wizard-nav-item-sep {
+          min-width: 15%;
+        }
+      }
+
+      > li.wizard-nav-item-sep {
+        display: inline-block;
+        border-top: 1px solid $rule;
+        margin-top: $console-half-space;
+        margin-left: $wizard-step-indicator-margin;
+        margin-right: $wizard-step-indicator-margin;
+
+        &:last-of-type {
+          display: none;
+        }
+      }
+
+      > li.wizard-nav-item {
+        display: inline-block;
+
+        + li:not(.wizard-nav-item-sep) {
+          margin-top: 0;
+        }
+
         > a {
-          background-color: $console-primary-bg;
+          display: flex;
+          padding: 0;
+          background-color: transparent;
+          color: $text-color;
+          letter-spacing: normal;
+          font-size: $font-size-medium;
+          align-items: center;
+
+          .wizard-nav-step-number, .wizard-nav-step-number-complete {
+            width: $wizard-step-indicator-size;
+            height: $wizard-step-indicator-size;
+            color: $nav-tabs-step-number-color;
+            border-radius: $wizard-step-indicator-size;
+            text-align: center;
+            margin-right: $wizard-step-indicator-margin;
+            background-color: $nav-tabs-step-number-inactive-bg-color;
+          }
+
+          .wizard-nav-step-number {
+            display: inline-block;
+          }
+        }
+
+        &.complete {
+
+          > a {
+            &:after {
+              content: '';
+            }
+
+            .wizard-nav-step-number-complete {
+              display: inline-block;
+              background-color: $nav-tabs-step-number-active-bg-color;
+
+              > i {
+                font-size: $font-size-large1;
+                padding-top: #{($wizard-step-indicator-size - $font-size-large) / 2};
+              }
+            }
+
+            .wizard-nav-step-number {
+              display: none;
+            }
+          }
+        }
+
+        &.active {
+          > a {
+            font-weight: $console-font-weight-semibold;
+
+            .wizard-nav-step-number {
+              background-color: $nav-tabs-step-number-active-bg-color;
+            }
+          }
         }
       }
     }
