@@ -1,4 +1,4 @@
-<div class="panel panel-default summary">
+<div class="panel panel-default summary log-viewer-panel">
   <div class="panel-heading action-header">
     <span class="log-stream-title" translate>app.app-info.app-tabs.log-stream.title</span>
     <span ng-if="cfLogViewer.streamingStatus !== 2 && !cfLogViewer.disableStatus" class="app-log-stream-indicator material-icons"
@@ -17,6 +17,7 @@
     </a>
   </div>
   <log-viewer class="log-viewer"
+              cf-log-viewer-resize
               auto-scroll-on="cfLogViewer.autoScrollOn"
               websocket-url="cfLogViewer.webSocketUrl"
               websocket="cfLogViewer.webSocket"
