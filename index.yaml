@@ -1,0 +1,44 @@
+apiVersion: v1
+entries:
+  console:
+  - apiVersion: v1
+    created: 2017-07-19T13:13:36.610362934Z
+    description: A Helm chart for deploying Console
+    digest: d08b62741db9ad840de3899e960f622f499a402751339fe65ba1a223a72ae65b
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/releases/download/1.1.2/console-helm-chart.tgz
+    version: 1.1.2
+  - apiVersion: v1
+    created: 2017-07-19T12:13:09.263801459Z
+    description: A Helm chart for deploying Console
+    digest: 22bb9d386a8f013b7a67f710873f9923c159cf5f3b454d290b7830eab080e76d
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/releases/download/1.1.1/console-1.1.1.tgz
+    version: 1.1.1
+  - apiVersion: v1
+    created: 2017-07-19T11:52:16.467748015Z
+    description: A Helm chart for deploying Console
+    digest: 5c84e7f74b437fc9383ed65b6fd1b7271013858e2672f32e650fd7bd0e1e37de
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/releases/download/1.1.0/console-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v1
+    created: 2017-07-19T10:02:16.944949667Z
+    description: A Helm chart for deploying Console
+    digest: b680ec46c6e9a9db21410665780ca1a5b3e58a347c4f985cb05ce6cbb1e5d692
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/releases/download/v1.0.12/console-v1.0.12.tgz
+    version: v1.0.12
+  - apiVersion: v1
+    created: 2017-07-19T08:31:27.747417706Z
+    description: A Helm chart for deploying Console
+    digest: 275344742424e50bbae142e75bb7af21bc66d7f780d827cae87258158304f392
+    name: console
+    urls:
+    - https://github.com/irfanhabib/stratos-ui/releases/download/release-v1.0.0-alpha30/console-release-v1.0.0-alpha30-gc63fce2.tgz
+    version: v1.0.0-alpha30
+generated: 2017-07-19T13:13:36.609988034Z

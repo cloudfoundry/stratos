@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:d" opt; do
+while getopts ":ho:r:t:dTc" opt; do
   case $opt in
     h)
       echo
@@ -27,8 +27,15 @@ while getopts ":ho:r:t:d" opt; do
     t)
       TAG="${OPTARG}"
       ;;
+    T)
+      TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      ;;
     d)
       BUILD_DOCKER_COMPOSE_IMAGES="true"
+      ;;
+    c)
+      CONCOURSE_BUILD="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -139,7 +146,7 @@ function updateTagForRelease {
   pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
-  TAG="${TAG}-0-g${GIT_HASH}"
+  TAG="${TAG}-g${GIT_HASH}"
   echo "New TAG: ${TAG}"
   popd > /dev/null 2>&1
 }
@@ -269,17 +276,23 @@ buildPreflightJob
 buildPostflightJob
 buildUI
 
-# Patch Values.yaml file
-cp values.yaml.tmpl values.yaml
-sed -i -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
-sed -i -e 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
-sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
+if [ -z ${CONCOURSE_BUILD} ]; then
+  # Patch Values.yaml file
+  cp values.yaml.tmpl values.yaml
+  sed -i -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
+  sed -i -e 's/DOCKER_REGISTRY/'"${DOCKER_REGISTRY}"'/g' values.yaml
+  sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
+else
+  sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
+  sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
+fi
 
-# Done
 echo
 echo "Build complete...."
 echo "Registry: ${DOCKER_REGISTRY}"
 echo "Org: ${DOCKER_ORG}"
 echo "Tag: ${TAG}"
-echo "To deploy using Helm, execute the following: "
-echo "helm install console -f values.yaml --namespace console --name my-console"
+if [ -z ${CONCOURSE_BUILD} ]; then
+  echo "To deploy using Helm, execute the following: "
+  echo "helm install console -f values.yaml --namespace console --name my-console"
+fi

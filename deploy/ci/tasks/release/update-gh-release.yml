@@ -1,0 +1,26 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: helm-chart-tarball
+image_resource:
+  type: docker-image
+  source:
+   repository:  10.4.21.241:5000/github-release
+   tag: "latest"
+   insecure_registries: [ "10.4.21.241:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Create Github release
+      ROOT_DIR=${PWD}
+      cd ${ROOT_DIR}/stratos-ui
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      github-release release --tag ${GIT_TAG}
+      cd ${ROOT_DIR}/helm-chart-tarball
+      CHART_PACKAGE=$(ls *.tgz)
+      # Upload Helm chart to release
+      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart.tgz"

@@ -1,0 +1,108 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    branch: {{stratos-ui-branch}}
+    private_key: {{github-private-key}}
+    uri: git@github.com:irfanhabib/stratos-ui.git
+    tag_filter: ^[0-9]+\.[0-9]+\.[0-9]+[-]*[-a-zA-Z0-9]*
+- name: helm-chart-values
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/values.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+- name: helm-chart-Chart
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+- name: helm-chart-tarball
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/console-(?P<version>.*).tgz
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+
+groups:
+- name: tests
+  jobs:
+  - build-helm-images
+  - update-repo
+  - update-github-release
+
+jobs:
+- name: build-helm-images
+  plan:
+  - get: stratos-ui
+    trigger: true
+  - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/build-helm.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
+    - put: helm-chart-values
+      params:
+        file: helm-build/values.yaml-*
+        acl: public-read
+    - put: helm-chart-Chart
+      params:
+        file: helm-build/Chart.yaml-*
+        acl: public-read
+
+
+- name: update-repo
+  plan:
+  - get: stratos-ui
+    passed: [build-helm-images]
+    trigger: true
+  - get: helm-chart-Chart
+  - get: helm-chart-values
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/create-chart.yml
+      params:
+        GIT_USER: {{concourse-user}}
+        GIT_EMAIL: {{concourse-email}}
+        GITHUB_ORG: {{github-organization}}
+        GITHUB_REPO: {{github-repository}}
+        GIT_PRIVATE_KEY: {{github-private-key}}
+    - put: helm-chart-tarball
+      params:
+        file: helm-chart/*.tgz
+        acl: public-read
+
+
+- name: update-github-release
+  plan:
+  - get: stratos-ui
+    passed: [update-repo]
+    trigger: true
+  - get: helm-chart-tarball
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/update-gh-release.yml
+      params:
+        GITHUB_TOKEN: {{github-access-token}}
+        GITHUB_USER: {{github-organization}}
+        GITHUB_REPO: {{github-repository}}
