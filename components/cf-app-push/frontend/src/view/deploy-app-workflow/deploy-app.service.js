@@ -241,7 +241,14 @@
           // Check if this is a GitHub link
           if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
             vm.userInput.sourceType = 'github';
-            vm.userInput.githubProject = info.value.substring(gitHubUrlBase.length);
+            var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
+            if (urlParts.length > 1) {
+              vm.userInput.githubProject = urlParts[0] + '/' + urlParts[1];
+              // Pick up the branch name from the URL
+              if (urlParts.length > 3 && urlParts[2] === 'tree') {
+                vm.userInput.autoSelectGithubBranch = urlParts[3];
+              }
+            }
           }
         }
       });
@@ -332,6 +339,14 @@
                   value: o
                 };
               }));
+
+              if (vm.userInput.autoSelectGithubBranch) {
+                var foundBranch = _.find(vm.data.githubBranches, function (o) {
+                  return o.value && o.value.name === vm.userInput.autoSelectGithubBranch;
+                });
+                vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
+                vm.userInput.autoSelectGithubBranch = undefined;
+              }
             })
             .catch(function () {
               vm.data.githubBranches.length = 0;
