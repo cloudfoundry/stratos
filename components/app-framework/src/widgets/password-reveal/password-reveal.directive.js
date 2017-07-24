@@ -8,15 +8,15 @@
   function passwordReveal($compile) {
     return {
       link: function (scope, element) {
-        scope.showPassword = false;
+        var showPassword = false;
 
         var markup = '<i class="material-icons password-reveal form-control-feedback text-muted">visibility</i>';
         var eyeElement = angular.element(markup);
 
         eyeElement.on('click', function clickHandler() {
-          scope.showPassword = !scope.showPassword;
+          showPassword = !showPassword;
 
-          var inputType = scope.showPassword ? 'text' : 'password';
+          var inputType = showPassword ? 'text' : 'password';
           element.attr('type', inputType);
           eyeElement.toggleClass('text-muted');
         });

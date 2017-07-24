@@ -1,7 +1,7 @@
-<div class="modal-backdrop fade in" ng-if="flyoutActive"></div>
+<div class="modal-backdrop fade in" ng-if="flyoutCtrl.flyoutActive"></div>
 <div class="flyout">
-  <div class="flyout-content" ng-class="{'active': flyoutActive}">
-    <ng-transclude ng-if="flyoutActive"></ng-transclude>
-    <button type="button" class="close material-icons" ng-click="close()"></button>
+  <div class="flyout-content" ng-class="{'active': flyoutCtrl.flyoutActive}">
+    <ng-transclude ng-if="flyoutCtrl.flyoutActive"></ng-transclude>
+    <button type="button" class="close material-icons" ng-click="flyoutCtrl.close()"></button>
   </div>
 </div>

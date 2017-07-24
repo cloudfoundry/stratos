@@ -27,6 +27,7 @@
       box-shadow: $actions-menu-box-shadow;
       position: absolute;
       padding: 0;
+      min-width: 170px;
 
       &.actions-menu-right {
         left: 100%;

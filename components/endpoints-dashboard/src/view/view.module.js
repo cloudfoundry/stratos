@@ -51,7 +51,7 @@
           return !isUserAdmin();
         },
         disabled: vm.initialised,
-        icon: 'add_box'
+        icon: 'add_circle'
       }
     ];
 

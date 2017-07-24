@@ -218,7 +218,7 @@
      * @memberof app.model.navigation.Menu
      * @description Appends a new menu item into the menu list, where the menu item has a click handler.
      * @param {string} name - the name/ID of the menu item
-     * @param {string} fn - the click handlerfor the menu item
+     * @param {function} fn - the click handler for the menu item
      * @param {string} text - the displayed text of the menu item
      * @param {number=} pos - optional position in the menu to insert at
      * @param {string=} icon - the icon of the menu item
@@ -267,6 +267,16 @@
           item.icon = 'svg/' + item.icon.substr(6);
         }
       }
+
+      /**
+       * @function setTextValue
+       * @description Set an optional function to provide values to $translate directive
+       * @param {function} func - function to execute to fetch $translate values
+       */
+      item.setTextValues = function (func) {
+        item.textValues = func;
+      };
+
       return item;
     },
 

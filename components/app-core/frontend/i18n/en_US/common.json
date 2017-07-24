@@ -35,7 +35,7 @@
     "applications": "@:applications",
     "endpoints": "@:endpoints",
     "about": "@:about",
-    "language": "Language",
+    "language": "Language ({{current}})",
     "logout": "Logout",
     "profile": "Profile"
   },

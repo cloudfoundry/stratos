@@ -22,7 +22,7 @@
     service.actions.push({
       id: 'app-wall-add-new-application-btn',
       name: 'app-wall.add-application',
-      icon: 'add_to_queue',
+      icon: 'add_box',
       position: 1,
       hidden: function () {
         var hidden = _.get(this.context, 'hidden');

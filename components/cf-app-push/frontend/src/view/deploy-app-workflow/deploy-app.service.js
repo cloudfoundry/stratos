@@ -40,7 +40,7 @@
       cfAppWallActions.actions.push({
         id: 'app-wall-deploy-application-btn',
         name: 'app-wall.deploy-application',
-        icon: 'add_to_queue',
+        icon: 'file_upload',
         position: 2,
         hidden: function () {
           var hidden = _.get(this.context, 'hidden');

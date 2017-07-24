@@ -9,7 +9,7 @@ $applications-msg-height: 50px;
   height: $main-nav-title-height;
 
   &.apps-header {
-    padding: 0 $panel-body-padding;
+    padding: 0 $padding-base-horizontal;
   }
 
   bounce-spinner {
