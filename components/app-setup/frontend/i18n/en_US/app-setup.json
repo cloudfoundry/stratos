@@ -10,7 +10,7 @@
       "p5": ""
     },
     "step-1": {
-      "title": "UAA Step 1",
+      "title": "Configure UAA Endpoint",
       "p1": "[[@:product.console]] authenticates users with a Cloud Foundry User Account and Authentication (UAA) service. The console must be configured with the details necessary to communicate with the UAA.",
       "p2": "The address of the UAA api endpoint must be provided and whether SSL validation should be enforced.",
       "p3": "The client credentials are required, including a UAA admin username and password.",
@@ -52,7 +52,7 @@
       "error-request-reason": "[[@:app-setup.step-1.error-request]]. Reason: {{reason}}."
     },
     "step-2": {
-      "title": "UAA Step 2",
+      "title": "Configure Console Admin Scope",
       "p1": "Basic configuration has been validated and a set of UAA scopes have been discovered.",
       "p2": "The Console uses a scope to identify Console administrators from regular users.",
       "p3": "Please select which scope you would like to use for this.",
