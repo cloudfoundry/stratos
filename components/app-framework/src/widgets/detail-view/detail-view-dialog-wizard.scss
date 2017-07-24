@@ -1,7 +1,7 @@
 $wizard-step-indicator-size: 24px;
 $wizard-step-indicator-margin: 6px;
 
-// Styles to adjust the wizard presentation when inside a detail view dialog
+// Styles to adjust the wizard presentation when inside a detail view dialog or with the 'detail-view-horizontal' class
 .modal.detail-view.detail-view-dialog {
 
   >.modal-dialog>.modal-content, &.detail-view-horizontal {
