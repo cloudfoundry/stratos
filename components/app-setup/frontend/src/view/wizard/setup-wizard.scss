@@ -10,6 +10,7 @@ app-setup-wizard {
     flex: 1;
     overflow-y: hidden;
     position: static;
+    z-index: 0;
 
     .detail-view-content {
       width: 100%;

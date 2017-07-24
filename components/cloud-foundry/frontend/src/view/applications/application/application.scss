@@ -39,9 +39,9 @@
 .application-tabs {
 
   .app-summary-auto-update {
-    position: fixed;
-    right: 60px;
-    padding-top: 13px;
+    position: absolute;
+    right: $console-unit-space;
+    top: $main-nav-title-height + 13px;
 
     > span {
       cursor: pointer;

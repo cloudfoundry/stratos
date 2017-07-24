@@ -1,6 +1,4 @@
 .auto-update-icon {
-  @include flex-vertical-centered();
-
   cursor: default;
 
   animation: spin 1s infinite linear;
