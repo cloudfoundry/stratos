@@ -127,8 +127,7 @@
   }
 
   function platformSupportsPlugins() {
-    var isWin = /^win/.test(process.platform);
-    return !isWin;
+    return process.platform === 'linux';
   }
 
   function prepareBuildWithoutPluginSupport(srcPath) {
