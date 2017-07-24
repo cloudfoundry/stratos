@@ -434,6 +434,10 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		address := config.TLSAddress
 		log.Infof("Starting HTTPS Server at address: %s", address)
 		engine := standard.WithTLS(address, certFile, certKeyFile)
+		if isUpgrade {
+			go stopEchoWhenUpgraded(e)
+		}
+
 		engineErr := e.Run(engine)
 		if engineErr != nil {
 			log.Warnf("Failed to start HTTPS server", engineErr)
@@ -442,13 +446,13 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		address := config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
 		engine := standard.New(address)
+		if isUpgrade {
+			go stopEchoWhenUpgraded(e)
+		}
 		engineErr := e.Run(engine)
 		if engineErr != nil {
 			log.Warnf("Failed to start HTTP server", engineErr)
 		}
-	}
-	if isUpgrade {
-		go stopEchoWhenUpgraded(e)
 	}
 
 	return nil
