@@ -99,8 +99,8 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
-	upgradeVolume, noUpgradeVolumeErr := config.GetValue("UPGRADE_VOLUME")
-	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue("UPGRADE_LOCK_FILENAME")
+	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
 
 	// If any of those properties are not set, disable upgrade middleware
 	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
@@ -110,8 +110,6 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 
 	return func(c echo.Context) error {
-		// if the upgrade lockfile exists, return a 503 for all API requests
-		// TODO: check for actual upgrade lock file once we know how to address it correctly
 		if _, err := os.Stat(fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)); err == nil {
 			c.Response().Header().Add("Retry-After", "10")
 			return c.NoContent(http.StatusServiceUnavailable)
