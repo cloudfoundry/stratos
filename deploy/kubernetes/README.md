@@ -140,3 +140,5 @@ To create it in your kubernetes cluster, execute the following.
 ```
 kubectl create -f storageclass.yaml
 ```
+
+See [Storage Class documentation] ( https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more insformation.
