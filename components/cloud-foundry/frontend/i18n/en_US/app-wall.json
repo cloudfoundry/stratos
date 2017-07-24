@@ -1,0 +1,95 @@
+{
+  "app-wall": {
+    "app-wall": "@:applications",
+    "search-placeholder": "Search by name",
+    "add-application": "Add Application",
+    "reset": "Reset",
+    "options": {
+      "show": "Show Options",
+      "hide": "Hide Options"
+    },
+    "sort-by": "Sort By",
+    "select-endpoint-all": "All Endpoints",
+    "select-org-all": "All Organizations",
+    "select-space-all": "All Spaces",
+    "total-apps": "Total Applications",
+    "filtered-apps": "Filtered Applications",
+    "instances": "Instances",
+    "disk-quota": "Disk Quota",
+    "memory": "Memory",
+    "no-cf": {
+      "warning": "You cannot view any applications.",
+      "advice-can-fix-link": "Use the Endpoints Dashboard",
+      "advice-can-fix-text": "to fix your connections or connect to new endpoints.",
+      "advice-cant-fix": "Please contact your administrator."
+    },
+    "no-apps": {
+      "none-space-developer": {
+        "admin": {
+          "line1": "You have no applications and",
+          "line2": "there are no spaces where you can add any.",
+          "link-text": "Click here",
+          "link-message": "to manage spaces."
+        },
+        "non-admin": {
+          "line1": "You have no applications and cannot add any.",
+          "line2": "Please contact your administrator."
+        }
+      },
+      "space-developer": {
+        "default": "You have no applications",
+        "empty-space": "This space has no applications",
+        "empty-org": "This organization has no applications",
+        "empty-endpoint": "This endpoint has no applications",
+        "empty-x-due-to-search": "{{emptyXMessage}} matching the search term",
+        "add": "Add an application"
+      }
+    },
+    "errors": {
+      "single-endpoint-down": "The Console could not connect to the endpoint named \"{{name}}\". Try reconnecting to this endpoint to resolve this problem.",
+      "multiple-endpoint-down": "The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints."
+    },
+    "table": {
+      "columns": {
+        "appName": "Application Name",
+        "appName-sort-by": "App Name",
+        "status": "Status",
+        "instances": "Instances",
+        "instances-sort-by": "[[@:app-wall.table.columns.instances]]",
+        "disk": "Disk Quota",
+        "disk-sort-by": "[[@:app-wall.table.columns.disk]]",
+        "memory": "Memory",
+        "memory-sort-by": "[[@:app-wall.table.columns.memory]]",
+        "creation": "Creation Date",
+        "creation-sort-by": "[[@:app-wall.table.columns.creation]]"
+      }
+    }
+  },
+  "add-app-dialog": {
+    "title": "@:app-wall.add-application",
+    "name-message": "Enter a unique name for your application.",
+    "app-name-label": "Application name",
+    "app-name-error-required": "Application name is required",
+    "app-name-error-used": "This name already exists. Choose a new one.",
+    "route-message": "Create a route",
+    "domain-label": "Domain",
+    "domain-placeholder": "Select Domain",
+    "host-label": "Host",
+    "host-error-required": "Host is required",
+    "host-error-format": "Invalid format",
+    "step1": {
+      "notifications": {
+        "success": "A new application and route have been created for '{{ appName }}'",
+        "failure-part-1": "There was a problem creating your application. ",
+        "failure-part-1-alt": "The following exception occurred when creating your application: {{ error }}. ",
+        "failure-part-2": "Please try again or contact your administrator if the problem persists."
+      },
+      "route": {
+        "exists": "This route already exists. Choose a new one.",
+        "failure-part-1": "There was a problem validating your route. ",
+        "failure-part-1-alt": "The following exception occurred when validating your route: {{ error }}. ",
+        "failure-part-2": "Please try again or contact your administrator if the problem persists."
+      }
+    }
+  }
+}

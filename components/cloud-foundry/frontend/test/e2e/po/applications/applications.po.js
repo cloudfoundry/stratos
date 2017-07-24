@@ -6,6 +6,7 @@
   var inputSelectInput = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
 
   module.exports = {
+    getTitle: getTitle,
 
     applicationGalleryCards: applicationGalleryCards,
     applicationGalleryCard: applicationGalleryCard,
@@ -36,6 +37,10 @@
     isListView: isListView
 
   };
+
+  function getTitle() {
+    return element(by.css('.applications-header > span')).getText();
+  }
 
   function applicationGalleryCard(idx) {
     return applicationGalleryCards().get(idx)

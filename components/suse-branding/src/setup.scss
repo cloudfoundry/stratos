@@ -1,0 +1,28 @@
+app-setup-wizard .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog .detail-view-content wizard .wizard {
+
+  .wizard-body {
+    color: $suse-text;
+    .wizard-nav.nav-stacked > li.disabled.active {
+      & > a, & > a:hover {
+        color: $suse-text;
+      }
+    }
+
+    .wizard-step {
+      &.wizard-loading-indicator {
+        .bounce-spinner > div {
+          background-color: $suse-text;
+        }
+      }
+    }
+  }
+
+  .wizard-foot {
+    .btn-default.cancel, .btn-default.back {
+      background-color: $suse-text;
+    }
+    .btn-primary.next {
+      color: $suse-text;
+    }
+  }
+}

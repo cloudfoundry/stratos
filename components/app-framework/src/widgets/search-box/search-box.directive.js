@@ -53,7 +53,8 @@
         inputOptions: '=',
         placeholder: '@?',
         searchIcon: '@?',
-        disabled: '=?'
+        disabled: '=?',
+        translateOptionLabels: '=?'
       },
       controller: SearchBoxController,
       controllerAs: 'searchBoxCtrl',
@@ -113,11 +114,13 @@
    * @name SelectInputController
    * @constructor
    * @param {object} $scope - the Angular $scope
+   * @param {object} $rootScope - the Angular $rootScope
+   * @param {object} $filter - the Angular $filter
    * @param {object} searchBoxCloser - searchBox Closer Service
    * @property {object} $scope - the Angular $scope
    * @property {object} ngModelCtrl - the ng-model controller
    */
-  function SearchBoxController($scope, searchBoxCloser) {
+  function SearchBoxController($scope, $rootScope, $filter, searchBoxCloser) {
 
     var vm = this;
 
@@ -171,6 +174,14 @@
           vm.autoPick();
         }
       });
+
+      var $translateChangeSuccess = $rootScope.$on('$translateChangeSuccess', function () {
+        vm.searchText = $filter('conditionalTranslate')(vm.lastPick.label, vm.translateOptionLabels || vm.lastPick.translateLabel);
+      });
+
+      $scope.$on('$destroy', function () {
+        $translateChangeSuccess();
+      });
     }
 
     /**
@@ -183,7 +194,7 @@
       if (vm.searchText) {
         var searchRegex = new RegExp(vm.searchText, 'i');
         suggestions = _.filter(vm.inputOptions, function (option) {
-          return searchRegex.test(option.label);
+          return searchRegex.test($filter('conditionalTranslate')(option.label, vm.translateOptionLabels || option.translateLabel));
         });
       } else {
         suggestions = vm.inputOptions;
@@ -207,7 +218,7 @@
       }
       vm.lastPick = suggestion;
       vm.isDirty = false;
-      vm.searchText = suggestion.label;
+      vm.searchText = $filter('conditionalTranslate')(suggestion.label, vm.translateOptionLabels || suggestion.translateLabel);
       vm.suggestions = vm.inputOptions;
       setValue(suggestion.value);
       return vm.closeIt($event);

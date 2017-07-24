@@ -21,6 +21,8 @@
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
+  buildUtils.localDevSetup();
+
   gulp.task('get-plugins-data', [], function () {
 
     var plugins = require('../plugins.json');
@@ -44,6 +46,10 @@
   });
 
   gulp.task('prepare-deps', ['get-plugins-data'], function (done) {
+
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function (pluginInfo) {
@@ -73,6 +79,10 @@
   // than we will end up overwriting one of them. Therefore, plugins should use
   // the same version of dependencies.
   gulp.task('dedup-vendor', ['prepare-deps'], function (done) {
+
+    if (buildUtils.skipGlideInstall()) {
+      return done();
+    }
 
     var promise = Q.resolve();
     var promises = [];
@@ -201,13 +211,45 @@
       });
   });
 
+  gulp.task('local-dev-build', function (done) {
+    if (!buildUtils.isLocalDevBuild()) {
+      return done();
+    } else {
+      // Copy SQLite script and prepared config to the outputs folder
+      var scriptOutFolder = path.join(conf.outputPath, 'deploy/db');
+      fs.ensureDirSync(scriptOutFolder);
+      fs.copySync(path.resolve(__dirname, '../deploy/db/sqlite_schema.sql'), path.join(scriptOutFolder, 'sqlite_schema.sql'));
+      // Copy config.properties if there is not one already
+      fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
+        overwrite: false
+      });
+
+      // Copy the dev certs as well if they exist
+      var devCerts = path.resolve(__dirname, '../dev-certs');
+      var outDevCerts = path.resolve(conf.outputPath, 'dev-certs');
+      if (fs.existsSync(devCerts)) {
+        fs.copySync(devCerts, outDevCerts);
+      } else {
+        if (!fs.existsSync(outDevCerts)) {
+          fs.mkdir(outDevCerts);
+          var browserSyncCerts = path.resolve(__dirname, '../node_modules/browser-sync/lib/server/certs');
+          fs.copySync(path.join(browserSyncCerts, 'server.crt'), path.join(outDevCerts, 'pproxy.crt'));
+          fs.copySync(path.join(browserSyncCerts, 'server.key'), path.join(outDevCerts, 'pproxy.key'));
+        }
+      }
+
+      return done();
+    }
+  });
+
   gulp.task('build-backend', function () {
 
     return runSequence(
       'init-build',
       'dedup-vendor',
       'write-plugins-yaml',
-      'delete-temp'
+      'delete-temp',
+      'local-dev-build'
     );
   });
 

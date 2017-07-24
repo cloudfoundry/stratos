@@ -95,6 +95,14 @@
       };
     }
 
+    // allowCancel can be a value or function
+    if (!_.isFunction(vm.workflow.allowCancel)) {
+      var cachedAllowCancel = _.isUndefined(vm.workflow.allowCancel) ? true : vm.workflow.allowCancel;
+      vm.workflow.allowCancel = function () {
+        return cachedAllowCancel;
+      };
+    }
+
     // allowJump can be a value or function
     if (!_.isFunction(vm.workflow.allowJump)) {
       var allowJump = vm.workflow.allowJump;
@@ -135,6 +143,7 @@
     vm.checkAllReadiness = checkAllReadiness;
     vm.switchToFirstReadyStep = switchToFirstReadyStep;
     vm.always = always;
+    vm.allowCancel = allowCancel;
 
     vm.initPromise.then(function () {
       vm.onInitSuccess();
@@ -198,6 +207,13 @@
         return vm.nextBtnDisabled || form && form.$invalid;
       }
       return vm.nextBtnDisabled;
+    }
+
+    function allowCancel() {
+      if (vm.workflow.allowCancel) {
+        return vm.workflow.allowCancel();
+      }
+      return !vm.steps[vm.currentIndex].isLastStep || vm.workflow.allowCancelAtLastStep;
     }
 
     /**

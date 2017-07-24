@@ -9,6 +9,7 @@
   var Q = require('q');
   var _ = require('lodash');
   var conf = require('./bk-conf');
+  var glob = require('glob');
 
   var tempPath, tempSrcPath, buildTest;
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
@@ -32,13 +33,25 @@
   };
 
   gulp.task('clean-backend', function (done) {
-    fsRemoveQ(conf.outputPath)
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
+    // Local dev build - only remove plugins and main binary
+    if (module.exports.localDevSetup) {
+      var files = glob.sync('+(portal-proxy|*.so|plugins.json)', { cwd: conf.outputPath});
+      _.each(files, function (file) {
+        /* eslint-disable no-sync */
+        fs.removeSync(path.join(conf.outputPath, file));
+        /* eslint-enable no-sync */
       });
+      return done();
+    } else {
+      // Remove folder in 'normal' build
+      fsRemoveQ(conf.outputPath)
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    }
   });
 
   gulp.task('create-temp', [], function (done) {
@@ -63,13 +76,17 @@
   });
 
   gulp.task('delete-temp', [], function (done) {
-    fsRemoveQ(tempPath)
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
-      });
+    if (module.exports.localDevSetup) {
+      return done();
+    } else {
+      fsRemoveQ(tempPath)
+        .then(function () {
+          done();
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    }
   });
 
   gulp.task('copy-portal-proxy', ['create-temp'], function (done) {

@@ -19,7 +19,7 @@
     });
   }
 
-  function ClusterSpaceController($q, $state, $stateParams, modelManager, appUtilsService) {
+  function ClusterSpaceController($q, $state, $stateParams, modelManager, appUtilsService, cfTabs) {
     var vm = this;
 
     vm.space = space;
@@ -28,6 +28,7 @@
     vm.organizationGuid = $stateParams.organization;
     vm.spaceGuid = $stateParams.space;
     vm.stateInitialised = false;
+    vm.cfTabs = cfTabs;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 

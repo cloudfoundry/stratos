@@ -1,59 +1,69 @@
-<div class="app-setup-step-1">
-  <p class="control-title" translate>app-setup.step-1.uaa-intro</p>
-  <div class="form-group form-group-large" focusable-input
-       ng-class="{'has-error': wizardForm['step1'].uaaUrl.$invalid && wizardForm['step1'].uaaUrl.$dirty}">
-    <label class="control-label" translate>app-setup.step-1.uaa-url.label</label>
-    <span class="control-message" ng-if="wizardForm['step1'].uaaUrl.$dirty">
+<div class="app-setup-step app-setup-step-1">
+  <div class="app-setup-step-left">
+    <p translate>app-setup.step-1.p1</p>
+    <p translate>app-setup.step-1.p2</p>
+    <p translate>app-setup.step-1.p3</p>
+    <p translate>app-setup.step-1.p4</p>
+    <p translate>app-setup.step-1.p5</p>
+    <p translate>app-setup.step-1.p6</p>
+  </div>
+  <div class="app-setup-step-right">
+    <p class="control-title" translate>app-setup.step-1.uaa-intro</p>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': wizardForm['step1'].uaaUrl.$invalid && wizardForm['step1'].uaaUrl.$dirty}">
+      <label class="control-label" translate>app-setup.step-1.uaa-url.label</label>
+      <span class="control-message" ng-if="wizardForm['step1'].uaaUrl.$dirty">
       <span translate ng-if="wizardForm['step1'].uaaUrl.$error.required">app-setup.step-1.uaa-url.error-required</span>
       <span translate ng-if="wizardForm['step1'].uaaUrl.$error.pattern">app-setup.step-1.uaa-url.error-pattern</span>
     </span>
-    <!--ng-pattern="step.data.urlValidationExpr" fails http://uaa:8080-->
-    <input type="text" class="form-control"
-           name="uaaUrl"
-           ng-model="step.userInput.uaaUrl"
-           required
-           placeholder="{{'app-setup.step-1.uaa-url.placeholder' | translate}}"/>
-  </div>
-  <div class="form-group form-group-large skip-ssl-validation-checkbox" focusable-input>
-    <checkbox-input ng-model="step.userInput.uaaUrlSkipSsl"
-                    input-label="{{'app-setup.step-1.uaa-url-skip-ssl.label' | translate}}">
-    </checkbox-input>
-  </div>
+      <!--ng-pattern="step.data.urlValidationExpr" fails http://uaa:8080-->
+      <input type="text" class="form-control"
+             name="uaaUrl"
+             ng-model="step.userInput.uaaUrl"
+             required
+             placeholder="{{'app-setup.step-1.uaa-url.placeholder' | translate}}"/>
+    </div>
+    <div class="form-group form-group-large skip-ssl-validation-checkbox" focusable-input>
+      <checkbox-input ng-model="step.userInput.uaaUrlSkipSsl"
+                      input-label="{{'app-setup.step-1.uaa-url-skip-ssl.label' | translate}}">
+      </checkbox-input>
+    </div>
 
-  <p class="control-title" translate>app-setup.step-1.console-intro</p>
-  <div class="form-group form-group-large" focusable-input
-       ng-class="{'has-error': wizardForm['step1'].consoleClient.$invalid && wizardForm['step1'].consoleClient.$dirty}">
-    <label class="control-label" translate>app-setup.step-1.console-client.label</label>
-    <span class="control-message" ng-if="wizardForm['step1'].consoleClient.$dirty">
+    <p class="control-title" translate>app-setup.step-1.console-intro</p>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': wizardForm['step1'].consoleClient.$invalid && wizardForm['step1'].consoleClient.$dirty}">
+      <label class="control-label" translate>app-setup.step-1.console-client.label</label>
+      <span class="control-message" ng-if="wizardForm['step1'].consoleClient.$dirty">
       <span translate
             ng-if="wizardForm['step1'].consoleClient.$error.required">app-setup.step-1.console-client.error-required</span>
     </span>
-    <input type="text" class="form-control" name="consoleClient" ng-model="step.userInput.consoleClient" required
-           placeholder="{{'app-setup.step-1.console-client.placeholder' | translate}}"/>
-  </div>
-  <div class="form-group form-group-large" focusable-input
-       ng-class="{'has-error': wizardForm['step1'].consoleSecret.$invalid && wizardForm['step1'].consoleSecret.$dirty}">
-    <label class="control-label" translate>app-setup.step-1.console-secret.label</label>
-    <input type="text" class="form-control" name="consoleSecret" ng-model="step.userInput.consoleSecret"
-           placeholder="{{'app-setup.step-1.console-secret.placeholder' | translate}}"/>
-  </div>
-  <div class="form-group form-group-large" focusable-input
-       ng-class="{'has-error': wizardForm['step1'].consoleAdmin.$invalid && wizardForm['step1'].consoleAdmin.$dirty}">
-    <label class="control-label" translate>app-setup.step-1.console-admin.label</label>
-    <span class="control-message" ng-if="wizardForm['step1'].consoleAdmin.$dirty">
+      <input type="text" class="form-control" name="consoleClient" ng-model="step.userInput.consoleClient" required
+             placeholder="{{'app-setup.step-1.console-client.placeholder' | translate}}"/>
+    </div>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': wizardForm['step1'].consoleSecret.$invalid && wizardForm['step1'].consoleSecret.$dirty}">
+      <label class="control-label" translate>app-setup.step-1.console-secret.label</label>
+      <input type="text" class="form-control" name="consoleSecret" ng-model="step.userInput.consoleSecret"
+             placeholder="{{'app-setup.step-1.console-secret.placeholder' | translate}}"/>
+    </div>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': wizardForm['step1'].consoleAdmin.$invalid && wizardForm['step1'].consoleAdmin.$dirty}">
+      <label class="control-label" translate>app-setup.step-1.console-admin.label</label>
+      <span class="control-message" ng-if="wizardForm['step1'].consoleAdmin.$dirty">
       <span translate
             ng-if="wizardForm['step1'].consoleAdmin.$error.required">app-setup.step-1.console-admin.error-required</span>
     </span>
-    <input type="text" class="form-control" name="consoleAdmin" ng-model="step.userInput.consoleAdmin" required
-           placeholder="{{'app-setup.step-1.console-admin.placeholder' | translate}}"/>
-  </div>
-  <div class="form-group form-group-large has-feedback" focusable-input
-       ng-class="{'has-error': wizardForm['step1'].consolePassword.$invalid && wizardForm['step1'].consolePassword.$dirty}">
-    <label class="control-label" translate>app-setup.step-1.console-password.label</label>
-    <span class="control-message" ng-if="wizardForm['step1'].consolePassword.$dirty">
+      <input type="text" class="form-control" name="consoleAdmin" ng-model="step.userInput.consoleAdmin" required
+             placeholder="{{'app-setup.step-1.console-admin.placeholder' | translate}}"/>
+    </div>
+    <div class="form-group form-group-large has-feedback" focusable-input
+         ng-class="{'has-error': wizardForm['step1'].consolePassword.$invalid && wizardForm['step1'].consolePassword.$dirty}">
+      <label class="control-label" translate>app-setup.step-1.console-password.label</label>
+      <span class="control-message" ng-if="wizardForm['step1'].consolePassword.$dirty">
       <span translate ng-if="wizardForm['step1'].consolePassword.$error.required">app-setup.step-1.console-password.error-required</span>
     </span>
-    <input type="password" class="form-control" name="consolePassword" ng-model="step.userInput.consolePassword" required
-           password-reveal placeholder="{{'app-setup.step-1.console-password.placeholder' | translate}}"/>
+      <input type="password" class="form-control" name="consolePassword" ng-model="step.userInput.consolePassword" required
+             password-reveal placeholder="{{'app-setup.step-1.console-password.placeholder' | translate}}"/>
+    </div>
   </div>
 </div>

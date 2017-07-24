@@ -31,7 +31,6 @@
    * @param {app.model.loginManager} loginManager - the login management service
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
-   * @param {object} appSelectLanguage - the Language Selection dialogService
    * @param {object} appUtilsService - the App Utils service
    * @param {app.view.consoleSetupCheck} consoleSetupCheck - the Console Setup checkservice
    * @param {object} $timeout - Angular $timeout service
@@ -49,13 +48,12 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
+                                 appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
     vm.appUpgradeCheck = appUpgradeCheck;
     vm.consoleSetupCheck = consoleSetupCheck;
-    vm.showLanguageSelection = showLanguageSelection;
     vm.loggedIn = false;
     vm.serverFailedToRespond = false;
     vm.showGlobalSpinner = false;
@@ -97,16 +95,6 @@
         appLocalStorage.setItem('navbarIconsOnly', nv);
       }
     });
-
-    /**
-     * @function showLanguageSelection
-     * @memberof app.view.application.ApplicationController
-     * @description Shows the Language Selection dialog
-     * @public
-     */
-    function showLanguageSelection() {
-      appSelectLanguage.show();
-    }
 
     /**
      * @function verifySession

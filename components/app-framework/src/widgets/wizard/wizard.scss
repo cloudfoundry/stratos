@@ -12,14 +12,3 @@
   z-index: 2;
 }
 
-.wizard {
-  // When wizard nav item is disabled (cannot jump straight to item) treat visually as normal (not as visually 'disabled')
-  li.wizard-nav-item.disabled {
-    &.active a {
-      color: $suse-text;
-    }
-    a:hover {
-      cursor: default;
-    }
-  }
-}

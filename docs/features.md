@@ -6,6 +6,10 @@ Stratos UI provides the feature set outline below. Some of these are illustrated
    * User authentication using a configured UAA instance
    * Two supported personas - Console admins and Console users
 
+* Internationalization
+   * All screen strings are localizable
+   * See the [i18n](i18n.md) page for more information
+
 * Endpoint Management<sup>1</sup>
    * The ability for an administrator to register one or more Cloud Foundry clusters to be managed through the UI.
    * Ability for users to connect to Cloud Foundry clusters with their own credentials so that they receive the correct level of access to these clusters

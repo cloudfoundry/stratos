@@ -81,9 +81,6 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 	log.Debug("refreshToken")
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
-	// TODO (wchrisjohnson): this call is unnecessary. The cnsi token record was retrieved
-	// a few lines above where this method was called. We should remove this and pass the
-	// token in.
 	userToken, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)

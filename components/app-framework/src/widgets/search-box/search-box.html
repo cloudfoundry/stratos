@@ -16,7 +16,7 @@
         }"
         ng-mousemove="searchBoxCtrl.onMouseMove($index)"
         ng-click="searchBoxCtrl.pick(suggestion, $event)">
-      {{ suggestion.label }}
+      {{ suggestion.label | conditionalTranslate:(searchBoxCtrl.translateOptionLabels || suggestion.translateLabel) }}
     </li>
     <li class="select-option select-add-option"
         ng-if="searchBoxCtrl.addAction"

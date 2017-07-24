@@ -46,9 +46,9 @@
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.loading = true;
     vm.isSpaceDeveloper = false;
-    vm.clusters = [{label: 'All Endpoints', value: 'all'}];
-    vm.organizations = [{label: 'All Organizations', value: 'all'}];
-    vm.spaces = [{label: 'All Spaces', value: 'all'}];
+    vm.clusters = [{label: 'app-wall.select-endpoint-all', value: 'all', translateLabel: true}];
+    vm.organizations = [{label: 'app-wall.select-org-all', value: 'all', translateLabel: true}];
+    vm.spaces = [{label: 'app-wall.select-space-all', value: 'all', translateLabel: true}];
     vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
     vm.filter = {
       cnsiGuid: 'all',
@@ -86,12 +86,19 @@
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
     vm.goToGalleryView = goToGalleryView;
-    vm.appWallActions = cfAppWallActions.actions;
-    vm.appWallActionContext = {
-      show: showChangeAppListAction,
-      disable: disableChangeAppListAction,
+    var appWallActionContext = {
+      hidden: hideChangeAppListAction,
+      disabled: disableChangeAppListAction,
       reload: _reload
     };
+    vm.appWallActions = _.chain(cfAppWallActions.actions)
+      .map(function (action) {
+        action.context = appWallActionContext;
+        return action;
+      })
+      .orderBy('position', 'asc')
+      .value();
+
     vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);
 
@@ -508,14 +515,14 @@
       }
     }
 
-    function showChangeAppListAction() {
-      return isAdminInAnyCf() || vm.isSpaceDeveloper;
+    function hideChangeAppListAction() {
+      return !isAdminInAnyCf() && !vm.isSpaceDeveloper;
     }
 
     function addApplication() {
       var addAppAction = _.find(cfAppWallActions.actions, 'id', 'app-wall-add-new-application-btn');
       if (addAppAction) {
-        addAppAction.action();
+        addAppAction.execute();
       }
     }
 

@@ -15,9 +15,15 @@
    * @returns {Function} The filter itself
    */
   function conditionalTranslate($filter) {
-    return function (input, translate) {
+
+    var conditionalTranslate = function (input, translate) {
       return translate ? $filter('translate')(input) : input;
     };
+
+    // Ensure the filter is reapplied on change of language
+    conditionalTranslate.$stateful = true;
+
+    return conditionalTranslate;
   }
 
 })();

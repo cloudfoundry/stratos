@@ -1,15 +1,22 @@
-<div class="app-setup-step-2">
-  <p class="control-title" translate>app-setup.step-2.intro</p>
-  <div class="form-group console-scopes" focusable-input
-       ng-class="{'has-error': wizardForm['step2'].consoleScope.$invalid && wizardForm['step2'].consoleScope.$dirty}">
-    <label class="control-label" translate>app-setup.step-2.console-scope.label</label>
-
-    <!--disabled="!step.userInput.githubProjectValid"-->
-    <search-box
-      ng-model="step.userInput.consoleScope"
-      input-options="step.data.consoleScopes"
-      placeholder="{{ 'app-setup.step-2.console-scope.placeholder' | translate}}"
-      required>
-    </search-box>
+<div class="app-setup-step app-setup-step-2">
+  <div class="app-setup-step-left">
+    <p translate>app-setup.step-2.p1</p>
+    <p translate>app-setup.step-2.p2</p>
+    <p translate>app-setup.step-2.p3</p>
+    <p translate>app-setup.step-2.p4</p>
+    <p translate>app-setup.step-2.p5</p>
+  </div>
+  <div class="app-setup-step-right">
+    <p class="control-title" translate>app-setup.step-2.intro</p>
+    <div class="form-group console-scopes" focusable-input
+         ng-class="{'has-error': wizardForm['step2'].consoleScope.$invalid && wizardForm['step2'].consoleScope.$dirty}">
+      <label class="control-label" translate>app-setup.step-2.console-scope.label</label>
+      <search-box
+        ng-model="step.userInput.consoleScope"
+        input-options="step.data.consoleScopes"
+        placeholder="{{ 'app-setup.step-2.console-scope.placeholder' | translate}}"
+        required>
+      </search-box>
+    </div>
   </div>
 </div>

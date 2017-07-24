@@ -1,0 +1,33 @@
+@import "wizard/setup-wizard";
+
+.app-setup {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+
+  .app-setup-left-spacer, .app-setup-right-spacer {
+    flex: 1;
+  }
+  .app-setup-container {
+    flex: 5;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+
+    .app-setup-headline {
+      color: $brand-primary;
+      font-weight: $console-font-weight-light;
+      align-self: flex-start;
+      padding: $console-unit-space / 2 0;
+    }
+
+  }
+}
+@media (max-width: $screen-md-min) {
+  .app-setup {
+    .app-setup-left-spacer, .app-setup-right-spacer {
+      flex: 0.5;
+    }
+  }
+}

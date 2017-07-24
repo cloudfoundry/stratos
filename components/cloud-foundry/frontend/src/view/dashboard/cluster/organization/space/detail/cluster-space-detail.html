@@ -15,27 +15,7 @@
                       space="clusterSpaceController.space()">
   </space-summary-tile>
 
-  <ul class="application-nav nav nav-tabs col-sm-12">
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications" translate>
-        cf.space-info.tabs.applications.title
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.services" translate>
-        cf.space-info.tabs.services.title
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.routes" translate>
-        cf.space-info.tabs.routes.title
-      </a>
-    </li>
-    <li class="nav-item" ui-sref-active="active">
-      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.users" translate>
-        cf.space-info.tabs.users.title
-      </a>
-    </li>
-  </ul>
+  <cf-tabs tabs="clusterSpaceController.cfTabs.spaceTabs"></cf-tabs>
+
   <ui-view></ui-view>
 </div>

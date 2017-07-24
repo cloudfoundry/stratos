@@ -89,6 +89,11 @@ nav.secondary-nav {
       }
     }
   }
+
+}
+
+.modal .select-language {
+  padding-bottom: $console-unit-space * 4;
 }
 
 .nav-item {
@@ -392,5 +397,17 @@ nav.secondary-nav {
 
   .navbar-toggle-width {
     display: none;
+  }
+}
+
+
+#navbar-user-menu-dropdown {
+
+  .dropdown-menu .divider {
+    margin: 0;
+
+    &:hover {
+      background-color: $dropdown-divider-bg;
+    }
   }
 }

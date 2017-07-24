@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.organization.space.detail.services', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.services', {
@@ -20,7 +21,17 @@
     });
   }
 
-  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, cfServiceInstanceService,
+  function registerTab(cfTabs) {
+    cfTabs.spaceTabs.push({
+      position: 2,
+      hide: false,
+      uiSref: 'endpoint.clusters.cluster.organization.space.detail.services',
+      uiSrefParam: _.noop,
+      label: 'cf.space-info.tabs.services.title'
+    });
+  }
+
+  function SpaceServicesController($scope, $state, $stateParams, $q, modelManager, cfServiceInstanceService,
                                    appUtilsService) {
     var vm = this;
 

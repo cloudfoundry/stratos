@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.dashboard.cluster.organization.space.detail.users', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(registerTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.users', {
@@ -17,6 +18,16 @@
           return 'endpoint.clusters.cluster.organization.detail.users';
         }
       }
+    });
+  }
+
+  function registerTab(cfTabs) {
+    cfTabs.spaceTabs.push({
+      position: 4,
+      hide: false,
+      uiSref: 'endpoint.clusters.cluster.organization.space.detail.users',
+      uiSrefParam: _.noop,
+      label: 'cf.space-info.tabs.users.title'
     });
   }
 

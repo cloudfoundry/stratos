@@ -18,9 +18,7 @@
       </div>
     </div>
     <div ng-switch-default>
-      <div class="header">
-        <div class="applications-header font-semi-bold pull-left" translate>cloud-foundry</div>
-      </div>
+      <div class="applications-header font-semi-bold pull-left" translate>cloud-foundry</div>
       <div class="cluster-gallery-card-container">
         <div class="cluster-gallery-card-parent clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersCtrl.serviceInstances">
           <cluster-tile service="service"/>

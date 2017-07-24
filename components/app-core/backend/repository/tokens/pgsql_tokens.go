@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	log "github.com/Sirupsen/logrus"
 )
 
 var findUAAToken = `SELECT auth_token, refresh_token, token_expiry
@@ -23,8 +23,8 @@ var insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, ref
 									VALUES ($1, $2, $3, $4, $5)`
 
 var updateUAAToken = `UPDATE tokens
-									SET auth_token = $3, refresh_token = $4, token_expiry = $5
-									WHERE user_guid = $1 AND token_type = $2`
+									SET auth_token = $1, refresh_token = $2, token_expiry = $3
+									WHERE user_guid = $4 AND token_type = $5`
 
 var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
 										FROM tokens
@@ -132,9 +132,8 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr interfaces.Token
 	default:
 
 		log.Println("Performing UPDATE of encrypted tokens")
-		if _, updateErr := p.db.Exec(updateUAAToken, userGUID, "uaa",
-			ciphertextAuthToken, ciphertextRefreshToken,
-			tr.TokenExpiry); updateErr != nil {
+		if _, updateErr := p.db.Exec(updateUAAToken, ciphertextAuthToken, ciphertextRefreshToken,
+			tr.TokenExpiry, userGUID, "uaa"); updateErr != nil {
 			msg := "Unable to UPDATE UAA token: %v"
 			log.Printf(msg, updateErr)
 			return fmt.Errorf(msg, updateErr)
