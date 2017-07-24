@@ -5,7 +5,7 @@ app-setup-wizard {
   display: flex;
   flex: 1;
 
-  .app-setup-wizard-model-wrapper.modal {
+  .app-setup-wizard-model-wrapper.modal.detail-view.detail-view-dialog.detail-view-horizontal {
     display: flex;
     flex: 1;
     overflow-y: hidden;
@@ -48,7 +48,7 @@ app-setup-wizard {
               }
 
               .wizard-nav-item {
-                opacity: 0.3;
+                //opacity: 0.3;
                 &.complete a:after {
                   display: none;
                 }
