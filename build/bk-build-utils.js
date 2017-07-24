@@ -10,6 +10,7 @@
   var path = require('path');
 
   var prepareBuild = require('./bk-prepare-build');
+  var nodePackageFile = require('../package.json');
 
   var env, devConfig;
 
@@ -103,11 +104,40 @@
 
   function build(path, exeName) {
     var args = ['build', '-i', '-o', exeName];
-    return spawnProcess('go', args, path, env);
+
+    // Set the console version from that of the package.json and the git commit
+    return getVersion().then(function (version) {
+      if (version) {
+        args.push('-ldflags');
+        args.push('-X=main.appVersion=' + version);
+      }
+      return spawnProcess('go', args, path, env);
+    });
   }
 
   function test(path) {
     return spawnProcess('go', ['test', '-v'], path, env);
+  }
+
+  function getVersion() {
+    var deferred = Q.defer();
+    var version = nodePackageFile.version;
+    if (version) {
+      var args = ['log', '-1', '--format="%h"'];
+      childProcess.execFile('git', args, function (error, stdout) {
+        if (error === null) {
+          var commitSha = _.trim(stdout);
+          commitSha = _.trimStart(commitSha, '"');
+          commitSha = _.trimEnd(commitSha, '"');
+          deferred.resolve(version + '-' + commitSha);
+        } else {
+          deferred.resolve(version);
+        }
+      });
+    } else {
+      deferred.resolve('dev');
+    }
+    return deferred.promise;
   }
 
 })();
