@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	"github.com/satori/go.uuid"
 
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
@@ -97,10 +98,19 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func retryAfterUpgradeMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+
+	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+
+	// If any of those properties are not set, disable upgrade middleware
+	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+		return func(c echo.Context) error {
+			return h(c)
+		}
+	}
+
 	return func(c echo.Context) error {
-		// if the upgrade lockfile exists, return a 503 for all API requests
-		// TODO: check for actual upgrade lock file once we know how to address it correctly
-		if _, err := os.Stat("/hsc-upgrade-volume/upgrade.lock"); err == nil {
+		if _, err := os.Stat(fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)); err == nil {
 			c.Response().Header().Add("Retry-After", "10")
 			return c.NoContent(http.StatusServiceUnavailable)
 		}

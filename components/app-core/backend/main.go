@@ -35,8 +35,10 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary = 10
-	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
+	TimeoutBoundary     = 10
+	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume       = "UPGRADE_VOLUME"
+	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
 )
 
 var appVersion string
@@ -72,7 +74,11 @@ func main() {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
 	log.Info("Configuration loaded.")
+	isUpgrading := isConsoleUpgrading()
 
+	if isUpgrading {
+		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
+	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
 	log.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
@@ -160,7 +166,7 @@ func main() {
 	log.Info("Initialised general plugins.")
 
 	// Start the back-end
-	if err := start(portalProxy, addSetupMiddleware); err != nil {
+	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start proxy!")
@@ -394,31 +400,38 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 
 }
 
-func start(p *portalProxy, addSetupMiddleware *setupMiddleware) error {
+func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
 
 	// Root level middleware
-	e.Use(sessionCleanupMiddleware)
+	if !isUpgrade {
+		e.Use(sessionCleanupMiddleware)
+	}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     p.Config.AllowedOrigins,
+		AllowOrigins:     config.AllowedOrigins,
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
-	e.Use(errorLoggingMiddleware)
+
+	if !isUpgrade {
+		e.Use(errorLoggingMiddleware)
+	}
 	e.Use(retryAfterUpgradeMiddleware)
 
-	p.registerRoutes(e, addSetupMiddleware)
+	if !isUpgrade {
+		p.registerRoutes(e, addSetupMiddleware)
+	}
 
-	if p.Config.HTTPS {
-		certFile, certKeyFile, err := createTempCertFiles(p.Config)
+	if config.HTTPS {
+		certFile, certKeyFile, err := createTempCertFiles(config)
 		if err != nil {
 			return err
 		}
 
-		address := p.Config.TLSAddress
+		address := config.TLSAddress
 		log.Infof("Starting HTTPS Server at address: %s", address)
 		engine := standard.WithTLS(address, certFile, certKeyFile)
 		engineErr := e.Run(engine)
@@ -426,13 +439,16 @@ func start(p *portalProxy, addSetupMiddleware *setupMiddleware) error {
 			log.Warnf("Failed to start HTTPS server", engineErr)
 		}
 	} else {
-		address := p.Config.TLSAddress
+		address := config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
 		engine := standard.New(address)
 		engineErr := e.Run(engine)
 		if engineErr != nil {
 			log.Warnf("Failed to start HTTP server", engineErr)
 		}
+	}
+	if isUpgrade {
+		go stopEchoWhenUpgraded(e)
 	}
 
 	return nil
@@ -588,4 +604,31 @@ func getStaticFiles() (string, error) {
 		}
 	}
 	return "", errors.New("UI folder not found")
+}
+
+func isConsoleUpgrading() bool {
+
+	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+
+	// If any of those properties are not set, consider Console is running in a non-upgradeable environment
+	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+		return false
+	}
+
+	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+
+	if _, err := os.Stat(upgradeLockPath); err == nil {
+		return true
+	}
+	return false
+}
+
+func stopEchoWhenUpgraded(e *echo.Echo) {
+	for isConsoleUpgrading() {
+		time.Sleep(1 * time.Second)
+	}
+	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
+	e.Stop()
+
 }

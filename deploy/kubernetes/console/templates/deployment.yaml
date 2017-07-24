@@ -1,41 +1,10 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: hsc-encryption-key-volume
-  annotations:
-  {{- if .Values.storageClass }}
-    volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
-  {{- else }}
-    volume.alpha.kubernetes.io/storage-class: default
-  {{- end }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Mi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hsc-upgrade-volume
-  annotations:
-  {{- if .Values.storageClass }}
-    volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
-  {{- else }}
-    volume.alpha.kubernetes.io/storage-class: default
-  {{- end }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
- name: postgres-volume
+ name: "{{ .Release.Name }}-postgres-volume"
+ labels:
+   app: "{{ .Release.Name }}"
  annotations:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
@@ -53,69 +22,35 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: console-secret
+  name: "{{ .Release.Name }}-secret"
+  labels:
+    app: "{{ .Release.Name }}"
 data:
   stolon: {{ .Values.dbPassword | b64enc }}
   pgsql-password: {{ .Values.dbPassword | b64enc }}
   console-cert-key: {{ .Files.Get "ssl/console.key" | b64enc }}
   console-cert: {{ .Files.Get "ssl/console.crt" | b64enc }}
+
 ---
-apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app: preflight-job
-  name: preflight-job
-spec:
- template:
-     metadata:
-       labels:
-         app: console
-         job: preflight
-     spec:
-       containers:
-         - env:
-           - name: UPGRADE_VOLUME
-             value: hsc-upgrade-volume
-           - name: UPGRADE_LOCK_FILENAME
-             value: upgrade.lock
-           - name: ENCRYPTION_KEY_VOLUME
-             value: hsc-encryption-key-volume
-           - name: ENCRYPTION_KEY_FILENAME
-             value: key
-           image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.preflight}}:{{.Values.consoleVersion}}
-           name: preflight-job
-           volumeMounts:
-           - mountPath: /hsc-upgrade-volume
-             name: hsc-upgrade-volume
-           - mountPath: /hsc-encryption-key-volume
-             name: hsc-encryption-key-volume
-       restartPolicy: Never
-       volumes:
-       - name: hsc-upgrade-volume
-         persistentVolumeClaim:
-           claimName: hsc-upgrade-volume
-       - name: hsc-encryption-key-volume
-         persistentVolumeClaim:
-           claimName: hsc-encryption-key-volume
----
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: console
 spec:
+  serviceName: console
   replicas: 1
   template:
     metadata:
       labels:
-        app: console
+        app: "{{ .Release.Name }}"
+        component: "console"
     spec:
       containers:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
         volumeMounts:
         - mountPath: /etc/secrets/
-          name: console-secret
+          name: "{{ .Release.Name }}-secret"
           readOnly: true
         ports:
         - containerPort: 80
@@ -132,16 +67,16 @@ spec:
         - name: PGSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: console-secret
+              name: "{{ .Release.Name }}-secret"
               key: pgsql-password
         - name: PGSQL_DATABASE
           value: console-db
         - name: PGSQL_HOST
-          value: console-postgres-int
+          value: "{{ .Release.Name }}-postgres-int"
         - name: PGSQL_PORT
           value: "5432"
         - name: PGSQL_CONNECT_TIMEOUT_IN_SECS
-          value: "100"
+          value: "5"
         - name: PGSQL_SSL_MODE
           value: disable
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
@@ -154,10 +89,14 @@ spec:
           value: :3003
         - name: CF_CLIENT
           value: cf
+        - name: UPGRADE_VOLUME
+          value: "{{ .Release.Name }}-upgrade-volume"
+        - name: UPGRADE_LOCK_FILENAME
+          value: upgrade.lock
         - name: ALLOWED_ORIGINS
           value: https://localhost
         - name: ENCRYPTION_KEY_VOLUME
-          value: hsc-encryption-key-volume
+          value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
         - name: HTTP_PROXY
@@ -185,37 +124,39 @@ spec:
           name: proxy
           protocol: TCP
         volumeMounts:
-        - mountPath: /hsc-upgrade-volume
-          name: hsc-upgrade-volume
-        - mountPath: /hsc-encryption-key-volume
-          name: hsc-encryption-key-volume
+        - mountPath: "/{{ .Release.Name }}-upgrade-volume"
+          name: "{{ .Release.Name }}-upgrade-volume"
+        - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
+          name: "{{ .Release.Name }}-encryption-key-volume"
         - mountPath: /etc/secrets/
-          name: console-secret
+          name: "{{ .Release.Name }}-secret"
           readOnly: true
       volumes:
-      - name: postgres-volume
+      - name: "{{ .Release.Name }}-postgres-volume"
         persistentVolumeClaim:
-          claimName: postgres-volume
-      - name: hsc-upgrade-volume
+          claimName: "{{ .Release.Name }}-postgres-volume"
+      - name: "{{ .Release.Name }}-upgrade-volume"
         persistentVolumeClaim:
-          claimName: hsc-upgrade-volume
-      - name: hsc-encryption-key-volume
+          claimName: "{{ .Release.Name }}-upgrade-volume"
+      - name: "{{ .Release.Name }}-encryption-key-volume"
         persistentVolumeClaim:
-          claimName: hsc-encryption-key-volume
-      - name: console-secret
+          claimName: "{{ .Release.Name }}-encryption-key-volume"
+      - name: "{{ .Release.Name }}-secret"
         secret:
-          secretName: console-secret
+          secretName: "{{ .Release.Name }}-secret"
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: postgres
 spec:
+  serviceName: "postgres"
   replicas: 1
   template:
     metadata:
       labels:
-        app: console-postgres
+        app: "{{ .Release.Name }}"
+        component: postgres
     spec:
       containers:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postgres}}:{{.Values.consoleVersion}}
@@ -249,94 +190,21 @@ spec:
         {{- end }}
         volumeMounts:
         - mountPath: /stolon-data
-          name: postgres-volume
+          name: "{{ .Release.Name }}-postgres-volume"
         - mountPath: /etc/secrets/
-          name: console-secret
+          name: "{{ .Release.Name }}-secret"
           readOnly: true
         ports:
         - containerPort: 5432
           name: postgres
           protocol: TCP
       volumes:
-      - name: postgres-volume
+      - name: "{{ .Release.Name }}-postgres-volume"
         persistentVolumeClaim:
-          claimName: postgres-volume
-      - name: hsc-encryption-key-volume
+          claimName: "{{ .Release.Name }}-postgres-volume"
+      - name: "{{ .Release.Name }}-encryption-key-volume"
         persistentVolumeClaim:
-          claimName: hsc-encryption-key-volume
-      - name: console-secret
+          claimName: "{{ .Release.Name }}-encryption-key-volume"
+      - name: "{{ .Release.Name }}-secret"
         secret:
-          secretName: console-secret
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app: postflight-job
-  name: postflight-job
-spec:
- template:
-     metadata:
-       labels:
-         app: console
-         job: postflight
-     spec:
-       containers:
-        - env:
-          - name: PGSQL_HOST
-            value: console-postgres-int
-          - name: PGSQL_PORT
-            value: "5432"
-          - name: POSTGRES_USER
-            value: postgres
-          - name: POSTGRES_PASSWORD_FILE
-            value: /etc/secrets/stolon
-          - name: PGSQL_DATABASE
-            value: console-db
-          - name: PGSQL_USER
-            value: console
-          - name: PGSQL_PASSWORDFILE
-            value: /etc/secrets/pgsql-password
-          - name: PGSQL_SSL_MODE
-            value: disable
-          - name: PGCONNECT_TIMEOUT
-            value: "10"
-          - name: UPGRADE_VOLUME
-            value: hsc-upgrade-volume
-          - name: UPGRADE_LOCK_FILENAME
-            value: upgrade.lock
-          - name: HTTP_PROXY
-          {{- if .Values.httpProxy }}
-            value: {{.Values.httpProxy}}
-          {{- end }}
-          - name: HTTPS_PROXY
-          {{- if .Values.httpsProxy }}
-            value: {{.Values.httpsProxy}}
-          {{- end }}
-          - name: NO_PROXY
-          {{- if .Values.noProxy }}
-            value: {{.Values.noProxy}}
-          {{- end }}
-          - name: FTP_PROXY
-          {{- if .Values.ftpProxy }}
-            value: {{.Values.ftpProxy}}
-          {{- end }}
-          - name: SOCKS_PROXY
-          {{- if .Values.socksProxy }}
-            value: {{.Values.socksProxy}}
-          {{- end }}
-          image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
-          name: postflight-job
-          volumeMounts:
-          - mountPath: /hsc-upgrade-volume
-            name: hsc-upgrade-volume
-          - mountPath: /etc/secrets/
-            name: console-secret
-       restartPolicy: OnFailure
-       volumes:
-       - name: hsc-upgrade-volume
-         persistentVolumeClaim:
-           claimName: hsc-upgrade-volume
-       - name: console-secret
-         secret:
-           secretName: console-secret
+          secretName: "{{ .Release.Name }}-secret"

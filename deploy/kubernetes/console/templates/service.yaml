@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: console
-  name: console-ui-ext
+    app: "{{ .Release.Name }}"
+  name: "{{ .Release.Name }}-ui-ext"
 spec:
   ports:
   - name: http
@@ -15,7 +15,8 @@ spec:
     protocol: TCP
     targetPort: 443
   selector:
-    app: console
+    app: "{{ .Release.Name }}"
+    component: console
   type: NodePort
 ---
 apiVersion: v1
@@ -23,7 +24,7 @@ kind: Service
 metadata:
   labels:
     app: console-postgres
-  name: console-postgres-int
+  name: "{{ .Release.Name }}-postgres-int"
 spec:
   ports:
   - name: postgres
@@ -31,5 +32,6 @@ spec:
     protocol: TCP
     targetPort: 5432
   selector:
-    app: console-postgres
+    app: "{{ .Release.Name }}"
+    component: postgres
   type: ClusterIP
