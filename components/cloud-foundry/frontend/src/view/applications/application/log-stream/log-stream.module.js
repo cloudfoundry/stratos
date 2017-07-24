@@ -13,7 +13,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.log-stream', {
       url: '/log-stream',
-      template: '<cf-log-viewer web-socket-url="applicationLogStreamCtrl.webSocketUrl"/>',
+      template: '<cf-log-viewer fit-height="true" web-socket-url="applicationLogStreamCtrl.webSocketUrl"/>',
       controller: ApplicationLogStreamController,
       controllerAs: 'applicationLogStreamCtrl'
     });

@@ -13,7 +13,7 @@
    */
   function cfLogViewerResize($window, $timeout) {
 
-    function cfLogViewerResizeLink(scope, element) {
+    function cfLogViewerResizeLink(scope, element, attrs) {
 
       function onResize() {
         var h = $window.innerHeight;
@@ -27,9 +27,12 @@
         angular.element($window).off('resize', onResize);
       }
 
-      angular.element($window).on('resize', onResize);
-      scope.$on('$destroy', cleanup);
-      $timeout(onResize, 100);
+      // Only resize if enabled
+      if (attrs.cfLogViewerResize === 'true') {
+        angular.element($window).on('resize', onResize);
+        scope.$on('$destroy', cleanup);
+        $timeout(onResize, 100);
+      }
     }
 
     return {
