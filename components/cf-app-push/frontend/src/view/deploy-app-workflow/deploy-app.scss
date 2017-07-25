@@ -131,6 +131,8 @@ $select-option-height: 39px;
       }
 
       &.deploy-app-github-details {
+        margin-top: $console-unit-space / 2;
+        
         .deploy-app-github-info {
           border: 1px solid $rule;
           padding: $console-unit-space / 2;

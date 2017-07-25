@@ -243,10 +243,17 @@
             vm.userInput.sourceType = 'github';
             var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
             if (urlParts.length > 1) {
-              vm.userInput.githubProject = urlParts[0] + '/' + urlParts[1];
-              // Pick up the branch name from the URL
+              var branch;
               if (urlParts.length > 3 && urlParts[2] === 'tree') {
-                vm.userInput.autoSelectGithubBranch = urlParts[3];
+                branch = urlParts[3];
+              }
+              var project = urlParts[0] + '/' + urlParts[1];
+              if (vm.userInput.githubProject === project) {
+                // Project is the same, so just change the branch
+                vm.selectBranch(branch ? branch : vm.data.githubProject.default_branch);
+              } else {
+                vm.userInput.autoSelectGithubBranch = branch;
+                vm.userInput.githubProject = project;
               }
             }
           }
@@ -317,6 +324,13 @@
       $timeout.cancel(discoverAppTimer);
     });
 
+    vm.selectBranch = function (branch) {
+      var foundBranch = _.find(vm.data.githubBranches, function (o) {
+        return o.value && o.value.name === branch;
+      });
+      vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
+    };
+
     var debounceGithubProjectFetch = _.debounce(function () {
       var project = vm.userInput.githubProject;
       if (!project || project.length === 0) {
@@ -340,13 +354,12 @@
                 };
               }));
 
-              if (vm.userInput.autoSelectGithubBranch) {
-                var foundBranch = _.find(vm.data.githubBranches, function (o) {
-                  return o.value && o.value.name === vm.userInput.autoSelectGithubBranch;
-                });
-                vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
-                vm.userInput.autoSelectGithubBranch = undefined;
-              }
+              var branch = vm.userInput.autoSelectGithubBranch ? vm.userInput.autoSelectGithubBranch : vm.data.githubProject.default_branch;
+              vm.userInput.autoSelectGithubBranch = undefined;
+              var foundBranch = _.find(vm.data.githubBranches, function (o) {
+                return o.value && o.value.name === branch;
+              });
+              vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
             })
             .catch(function () {
               vm.data.githubBranches.length = 0;
