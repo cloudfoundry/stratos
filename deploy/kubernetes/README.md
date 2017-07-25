@@ -96,3 +96,49 @@ NAME  DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
 uaa   1        1        1           1          4m
 
 ```
+
+## Persistent Volumes stuck in `Pending` state when deploying through Helm
+
+The issue may be that your Kubernetes does not have a `default` storage class. You can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+
+#### Provide Storage Class override
+```
+kubectl get storageclas
+$ kubectl get storageclass
+NAME                TYPE
+ssd                 kubernetes.io/host-path   
+persistent          kubernetes.io/host-path   
+```
+
+For instance to use the storage class `persistent` to deploy Console persistent volume claims, store the following to a file called `override.yaml`.
+
+```
+---
+persistence:
+    storageClass: persistent
+```
+
+Run Helm with the override:
+```
+helm install -f override.yaml stratos-ui/console
+```
+#### Create default Storage Class
+Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. Save the file to `storageclass.yaml`
+
+```
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: default
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/host-path
+```
+
+To create it in your kubernetes cluster, execute the following.
+```
+kubectl create -f storageclass.yaml
+```
+
+See [Storage Class documentation] ( https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more insformation.
