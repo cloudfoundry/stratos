@@ -23,4 +23,4 @@ run:
       cd ${ROOT_DIR}/helm-chart-tarball
       CHART_PACKAGE=$(ls *.tgz)
       # Upload Helm chart to release
-      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart.tgz"
+      github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart-${GIT_TAG}.tgz"

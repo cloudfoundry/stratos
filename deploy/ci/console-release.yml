@@ -73,7 +73,9 @@ jobs:
     passed: [build-helm-images]
     trigger: true
   - get: helm-chart-Chart
+    passed: [build-helm-images]
   - get: helm-chart-values
+    passed: [build-helm-images]
   - do:
     - task: build
       privileged: true
@@ -90,13 +92,13 @@ jobs:
         file: helm-chart/*.tgz
         acl: public-read
 
-
 - name: update-github-release
   plan:
   - get: stratos-ui
     passed: [update-repo]
     trigger: true
   - get: helm-chart-tarball
+    passed: [update-repo]
   - do:
     - task: build
       privileged: true
