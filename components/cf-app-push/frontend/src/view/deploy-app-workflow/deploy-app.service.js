@@ -524,6 +524,8 @@
       function deploySuccessful() {
         vm.data.deployStatus = vm.data.deployState.DEPLOYED;
         $log.debug('Deploy Application: Deploy Successful');
+        // Mark the wizard step as complete (so it gets a tick icon)
+        vm.options.workflow.steps[1].complete = true;
       }
 
       function deployFailed(errorString) {

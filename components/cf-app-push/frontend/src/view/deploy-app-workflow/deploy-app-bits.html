@@ -75,7 +75,7 @@
                   <img ng-src="{{step.data.githubCommit.author.avatar_url}}"/>
                 </div>
                 <div class="lastCommit-info">
-                  <div>
+                  <div class="lastCommit-info-commit-message">
                     <span translate>deploy-app-dialog.step-info.github.branch-last-commit</span>
                     <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
                       rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>

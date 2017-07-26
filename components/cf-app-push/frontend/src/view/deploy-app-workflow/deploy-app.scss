@@ -136,6 +136,7 @@ $select-option-height: 39px;
         .deploy-app-github-info {
           border: 1px solid $rule;
           padding: $console-unit-space / 2;
+          max-width: $console-input-width * 1.25;
 
           &.deploy-app-file-details {
             height: $console-input-height;
@@ -171,6 +172,7 @@ $select-option-height: 39px;
             display: flex;
             flex-direction: row;
             align-items: center;
+            overflow-x: hidden;
 
             padding-top: $github-info-commit-spacer;
 
@@ -179,6 +181,17 @@ $select-option-height: 39px;
               flex: 1;
               display: flex;
               flex-direction: column;
+              overflow-x: hidden;
+
+              > .lastCommit-info-commit-message {
+                display: flex;
+
+                > a {
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  overflow-x: hidden;
+                }
+              }
 
               .lastCommit-date-committer {
                 display: flex;
