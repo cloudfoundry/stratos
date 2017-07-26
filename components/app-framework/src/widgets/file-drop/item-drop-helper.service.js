@@ -46,6 +46,8 @@
             fileEntry.file(function (file) {
               result.value = file;
               p.resolve(result);
+            }, function (fileError) {
+              p.reject(fileError);
             });
             return p.promise;
           }
@@ -58,15 +60,22 @@
         return p.promise;
       }
 
+      // Go through the items seeing if we can find one that is a link
+      var linkItem;
       for (var i = 0; i < items.length; i++) {
         if (items[i].kind === 'string' && (items[i].type === 'text/uri-list' || items[i].type === 'text/plain')) {
-          items[i].getAsString(function (url) {
-            result.isWebLink = true;
-            result.value = url;
-            p.resolve(result);
-          });
-          return p.promise;
+          linkItem = items[i];
+          break;
         }
+      }
+
+      if (linkItem) {
+        linkItem.getAsString(function (url) {
+          result.isWebLink = true;
+          result.value = url;
+          p.resolve(result);
+        });
+        return p.promise;
       }
 
       // Not supported
@@ -109,6 +118,8 @@
               }
               $q.all(chain).then(function () {
                 p.resolve();
+              }).catch(function () {
+                p.reject();
               });
             });
           }
@@ -125,10 +136,13 @@
       item.file(function (file) {
         scanner.file(context, file, path);
         p.resolve();
+      }, function (fileErr) {
+        p.reject(fileErr);
       });
       return p.promise;
     }
 
+    // Scanner keeps track of files and folders as we discover them
     function initScanner(ignores) {
       var scanner = {
         total: 0,
@@ -205,6 +219,10 @@
       return scanner;
     }
 
+    /*
+     * Try and find the ignore file
+     */
+
     function findIgnoreFile(scanner, item, fileName, defaultIgnores) {
       var p = $q.defer();
       if (item.isDirectory && fileName) {
@@ -222,6 +240,8 @@
           }
           $q.all(chain).then(function () {
             p.resolve();
+          }).catch(function () {
+            p.reject();
           });
         });
       } else {
@@ -235,6 +255,8 @@
       item.file(function (file) {
         readFileContents(file).then(function (data) {
           p.resolve(data);
+        }).catch(function () {
+          p.reject();
         });
       });
       return p.promise;
@@ -246,6 +268,12 @@
       reader.onload = function (e) {
         var output = e.target.result;
         p.resolve(output);
+      };
+      reader.onerror = function () {
+        p.reject();
+      };
+      reader.onabort = function () {
+        p.reject();
       };
       reader.readAsText(file);
       return p.promise;

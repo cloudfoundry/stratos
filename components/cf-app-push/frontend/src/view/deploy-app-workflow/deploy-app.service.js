@@ -26,7 +26,7 @@
           controller: DeployAppController,
           controllerAs: 'deployApp',
           dialog: true,
-          class: 'dialog-form-wizard'
+          class: 'dialog-form-wizard deploy-app-wizard'
         },
         context
       );
@@ -229,8 +229,9 @@
           itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
             vm.userInput.fileScanData = results;
             vm.userInput.sourceType = 'local';
-            vm.options.wizardCtrl.showBusy();
             vm.userInput.cfIgnoreFile = results.foundIgnoreFile;
+          }).finally(function () {
+            vm.options.wizardCtrl.showBusy();
           });
         } else if (info.isArchiveFile) {
           vm.userInput.sourceType = 'local';
@@ -319,17 +320,26 @@
       }
     };
 
-    $scope.$on('$destroy', resetSocket);
-    $scope.$on('$destroy', function () {
-      $timeout.cancel(discoverAppTimer);
-    });
-
     vm.selectBranch = function (branch) {
       var foundBranch = _.find(vm.data.githubBranches, function (o) {
         return o.value && o.value.name === branch;
       });
       vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
     };
+
+    $scope.$on('$destroy', resetSocket);
+    $scope.$on('$destroy', function () {
+      $timeout.cancel(discoverAppTimer);
+    });
+
+    // Watch for the file or folder being selected by the input field and process
+    $scope.$watch(function () {
+      return vm.userInput.localPathFile;
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        handleFileInputSelect(newVal);
+      }
+    });
 
     var debounceGithubProjectFetch = _.debounce(function () {
       var project = vm.userInput.githubProject;
@@ -395,15 +405,6 @@
           .catch(function () {
             delete vm.data.githubCommit;
           });
-      }
-    });
-
-    // Watch for the file or folder being selected by the input field and process
-    $scope.$watch(function () {
-      return vm.userInput.localPathFile;
-    }, function (newVal, oldVal) {
-      if (newVal && oldVal !== newVal) {
-        handleFileInputSelect(newVal);
       }
     });
 

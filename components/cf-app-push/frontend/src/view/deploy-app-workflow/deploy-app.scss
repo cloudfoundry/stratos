@@ -135,7 +135,7 @@ $select-option-height: 39px;
         
         .deploy-app-github-info {
           border: 1px solid $rule;
-          padding: $console-unit-space / 2;
+          padding: $console-unit-space / 4 $console-unit-space / 2;
           max-width: $console-input-width * 1.25;
 
           &.deploy-app-file-details {
@@ -279,4 +279,8 @@ percent-gauge.deploy-app-file-progress {
   margin-bottom: $console-unit-space;
   font-size: $font-size-large1;
   font-weight: $console-font-weight-semibold;
+}
+
+.deploy-app-wizard.modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content .detail-view-content.deploy-app wizard .wizard-step {
+  padding-bottom: 6px;
 }

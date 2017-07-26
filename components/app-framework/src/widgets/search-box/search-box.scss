@@ -18,6 +18,10 @@ search-box {
     justify-content: space-between;
     align-items: flex-start;
     font-size: $font-size-base;
+
+    &.disabled {
+      cursor: not-allowed;
+    }
   }
 
   input {
@@ -29,7 +33,15 @@ search-box {
     &:active {
       outline: none;
     }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
+
+  .search-box.disabled > i {
+    cursor: not-allowed;
+  }  
 
   .search-icon-icon:before {
     content: 'search'
@@ -69,3 +81,4 @@ search-box {
 .app-icon-search-plus:before {
   content: 'add';
 }
+
