@@ -71,6 +71,7 @@
     var istanbul = require('gulp-istanbul');
     var sources = components.getGlobs([
       '**/*.js',
+      '!api/**/*.js',
       '!**/*.spec.js',
       '!**/*.mock.js'
     ]);
