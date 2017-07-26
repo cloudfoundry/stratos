@@ -1,7 +1,10 @@
 {
   "landing": {
+    "header": {
+      "header": "@:product.name"
+    },
     "footer": {
-      "title": "@:footer.title",
+      "title": "",
       "copyright": "@:footer.copyright",
       "company.logo": "@:company.logo",
       "product.logo": "@:product.logo",
