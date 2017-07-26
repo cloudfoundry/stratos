@@ -29,7 +29,8 @@
       suffix: '.json'
     });
 
-    $translateProvider.useMissingTranslationHandler('missingTranslateHandler');
+    // Un-comment this in dev to log missing strings
+    //$translateProvider.useMissingTranslationHandler('missingTranslateHandler');
   }
 
   /**
@@ -168,6 +169,7 @@
 
       return $translate.use(locale).then(function () {
         $log.debug("Changed locale to '" + $translate.use() + "'");
+        momentLocale = momentLocale.toLowerCase();
         var newMomentLocale = moment.locale(momentLocale);
         if (newMomentLocale === momentLocale) {
           $log.debug("Changed moment locale to '" + newMomentLocale + "'");
