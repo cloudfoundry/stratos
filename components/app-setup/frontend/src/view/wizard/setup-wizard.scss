@@ -10,6 +10,7 @@ app-setup-wizard {
     flex: 1;
     overflow-y: hidden;
     position: static;
+    z-index: 0;
 
     .detail-view-content {
       width: 100%;
@@ -43,12 +44,12 @@ app-setup-wizard {
                   color: $brand-secondary;
                   padding-left: $app-setup-wizard-step-label-padding;
                   padding-right: $app-setup-wizard-step-label-padding;
-                  border-left: 1px solid $brand-secondary;
                 }
               }
 
               .wizard-nav-item {
-                //opacity: 0.3;
+                white-space: nowrap;
+
                 &.complete a:after {
                   display: none;
                 }

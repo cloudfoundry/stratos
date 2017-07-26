@@ -33,7 +33,7 @@ $wizard-step-indicator-margin: 6px;
           }
         }
 
-        & {
+        &.wizard-nav-few-steps {
           > li.wizard-nav-item-sep {
             min-width: 15%;
           }
@@ -53,10 +53,7 @@ $wizard-step-indicator-margin: 6px;
 
         > li.wizard-nav-item {
           display: inline-block;
-
-          + li:not(.wizard-nav-item-sep) {
-            margin-top: 0;
-          }
+          margin-top: 0;
 
           > a {
             display: flex;
