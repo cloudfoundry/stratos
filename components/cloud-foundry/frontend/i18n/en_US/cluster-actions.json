@@ -8,7 +8,7 @@
         "org-error-required": "Name is required",
         "org-error-unique": "Name must be unique",
         "submit-button": "Create",
-        "success-notification": "Organisation '{{name}}' successfully created"
+        "success-notification": "Organization '{{name}}' successfully created"
       }
     },
     "create-space": {

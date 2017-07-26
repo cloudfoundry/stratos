@@ -1,6 +1,7 @@
 {
   "locales": {
-    "locales": "en_US",
-    "en_US": "English (US)"
+    "locales": "en_US,en_GB",
+    "en_US": "English (US)",
+    "en_GB": "English (UK)"
   }
 }
