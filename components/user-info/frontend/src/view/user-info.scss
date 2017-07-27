@@ -1,6 +1,8 @@
 dl.user-info-list {
   > dt {
-    color: $gray-darker;
+    color: $gray-dark;
+    text-transform: uppercase;
+    font-size: $font-size-small;
   }
 
   > dd {
