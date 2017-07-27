@@ -32,7 +32,7 @@ run:
 
       # Generate Helm package
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
       if [ -f ${STRATOS_UI}/index.yaml ]; then
         cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
@@ -52,6 +52,6 @@ run:
 
       # Update Helm repo
       git add index.yaml
-      git commit -m "Helm repository updated for tag: ${GIT_TAG}"
+      git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
       git config --global push.default simple
       git push origin HEAD:master

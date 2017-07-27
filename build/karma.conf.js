@@ -129,16 +129,17 @@
       singleRun: true
     };
 
-    // Add in the test folders only for the components that are referneced in the bower file
+    // Add in the test folders only for the components that are referenced in the bower file
     var pluginFiles = components.removeEmptyGlobs(components.getGlobs('src/plugin.config.js').local);
     var moduleFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.module.js').local);
     var srcFiles = components.removeEmptyGlobs(components.getGlobs('src/**/*.js').local);
+    var coverageFiles = components.removeEmptyGlobs(components.getGlobs('src/!(api)/**/*.js').local);
     var testFiles = components.removeEmptyGlobs(components.getGlobs(['test/unit/**/*.mock.js', 'test/unit/**/*.spec.js']).local);
 
     karmaConfig.files = _.concat(karmaConfig.files, pluginFiles, moduleFiles, srcFiles, testFiles);
 
-    // Add the cannotation and overage pre-processors for the component source
-    _.each(srcFiles, function (glob) {
+    // Add the annotation and coverage pre-processors for the component source
+    _.each(coverageFiles, function (glob) {
       karmaConfig.preprocessors[glob] = ['ngannotate', 'coverage'];
     });
 
