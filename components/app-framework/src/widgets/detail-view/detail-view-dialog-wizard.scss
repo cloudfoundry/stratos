@@ -42,7 +42,7 @@ $wizard-step-indicator-margin: 6px;
         > li.wizard-nav-item-sep {
           display: inline-block;
           border-top: 1px solid $rule;
-          margin-top: $console-half-space;
+          margin-top: $console-half-space + 2px;
           margin-left: $wizard-step-indicator-margin;
           margin-right: $wizard-step-indicator-margin;
 
