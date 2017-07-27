@@ -10,7 +10,8 @@
       link: link,
       restrict: 'A',
       scope: {
-        fileDrop: '='
+        fileDrop: '=',
+        itemDrop: '=?'
       }
     };
     return directive;
@@ -38,7 +39,14 @@
         element.removeClass('file-drop-active');
 
         var files = evt.dataTransfer.files;
-        if (files.length > 0) {
+        var items = evt.dataTransfer.items;
+
+        // Either notify the drop handler or set the model value
+        if (items.length > 0 && scope.itemDrop) {
+          scope.$apply(function () {
+            scope.itemDrop(items);
+          });
+        } else if (files.length > 0) {
           scope.$apply(function () {
             scope.fileDrop = files[0];
           });

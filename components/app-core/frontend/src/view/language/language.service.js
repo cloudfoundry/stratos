@@ -29,7 +29,8 @@
       suffix: '.json'
     });
 
-    $translateProvider.useMissingTranslationHandler('missingTranslateHandler');
+    // Un-comment this in dev to log missing strings
+    //$translateProvider.useMissingTranslationHandler('missingTranslateHandler');
   }
 
   /**
@@ -133,7 +134,20 @@
        * @description Gets the current language
        * @returns {string} the current language
        */
-      getCurrent: getCurrent
+      getCurrent: getCurrent,
+
+      /**
+       * @name getAll
+       * @description Get all languages
+       * @returns {array} collection of languages with an object for each containing name and label
+       */
+      getAll: getAll,
+
+      /**
+       * @name setLocale
+       * @description Set the locale
+       */
+      setLocale: setLocale
     };
 
     if (enableLanguageSelection()) {
@@ -148,6 +162,10 @@
 
     function _setLocale(data) {
       var locale = data.currentLocale;
+      return setLocale(locale);
+    }
+
+    function setLocale(locale) {
       if (locale) {
         // Only store the locale if it's explicitly been set...
         appLocalStorage.setItem(localeStorageId, locale);
@@ -168,6 +186,7 @@
 
       return $translate.use(locale).then(function () {
         $log.debug("Changed locale to '" + $translate.use() + "'");
+        momentLocale = momentLocale.toLowerCase();
         var newMomentLocale = moment.locale(momentLocale);
         if (newMomentLocale === momentLocale) {
           $log.debug("Changed moment locale to '" + newMomentLocale + "'");
@@ -180,6 +199,17 @@
       });
     }
 
+    function getAll() {
+      var locales = [];
+      _.each($translate.instant('locales').split(','), function (locale) {
+        locales.push({
+          value: locale.trim(),
+          label: $translate.instant('locales.' + locale.trim())
+        });
+      });
+      return locales;
+    }
+
     function _getLocales() {
       var locales = $translate.instant('locales');
       return locales ? locales.split(',') : [];
@@ -190,14 +220,6 @@
     }
 
     function showLanguageSelection() {
-      var locales = [];
-      _.each($translate.instant('locales').split(','), function (locale) {
-        locales.push({
-          value: locale.trim(),
-          label: $translate.instant('locales.' + locale.trim())
-        });
-      });
-
       return frameworkAsyncTaskDialog(
         {
           title: 'language.select',
@@ -211,7 +233,7 @@
         },
         {
           data: {
-            locales: locales,
+            locales: getAll(),
             currentLocale: $translate.use()
           }
         },

@@ -5,7 +5,12 @@
       <div class="landing-header">
         <span translate>landing.header</span>
       </div>
-      <i ng-show="landingPageCtrl.languageService.enableLanguageSelection()" class="material-icons" ng-click="landingPageCtrl.languageService.showLanguageSelection()">language</i>
+      <select-input
+        class="form-control"
+        ng-show="landingPageCtrl.languageService.enableLanguageSelection()"
+	ng-model="landingPageCtrl.currentLanguage"
+      	input-options="landingPageCtrl.languageOptions"
+      />
     </div>
     <div class="landing-spacer-right"></div>
   </div>

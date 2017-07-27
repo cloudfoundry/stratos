@@ -175,6 +175,20 @@
         }
       });
 
+      // Ensure that is the model value is changed (other than by interacting with the search box control)
+      // that the search box shows the correct label for the newly selected item
+      $scope.$watch(function () {
+        return vm.ngModelCtrl && vm.ngModelCtrl.$modelValue;
+      }, function (newValue, oldValue) {
+        if (newValue && newValue !== oldValue) {
+          // Update the text in the search box
+          var suggestion = _.find(vm.suggestions, {value: newValue});
+          if (suggestion) {
+            vm.searchText = $filter('conditionalTranslate')(suggestion.label, vm.translateOptionLabels || suggestion.translateLabel);
+          }
+        }
+      });
+
       var $translateChangeSuccess = $rootScope.$on('$translateChangeSuccess', function () {
         vm.searchText = $filter('conditionalTranslate')(vm.lastPick.label, vm.translateOptionLabels || vm.lastPick.translateLabel);
       });

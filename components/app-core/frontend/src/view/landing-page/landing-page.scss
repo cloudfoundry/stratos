@@ -1,5 +1,10 @@
 $landing-page-spacer-content-flex: 10;
 $landing-page-spacer-content-max-width: 1200px;
+$landing-page-menu-color: $white !default;
+$landing-page-drop-down-toggle-size: 24px !default;
+$landing-page-menu-hover-color: lighten($brand-secondary, 5%) !default;
+$landing-page-header-height: 60px !default;
+$landing-page-margin: 6px !default;
 
 .landing-container {
   height: 100%;
@@ -39,7 +44,7 @@ $landing-page-spacer-content-max-width: 1200px;
     }
 
     background-color: $brand-secondary;
-    flex: 0 0 60px;
+    flex: 0 0 $landing-page-header-height;
   }
 
   .landing-content {
@@ -85,7 +90,7 @@ $landing-page-spacer-content-max-width: 1200px;
     page-footer .product-name > span:first-child {
       position: fixed;
       top: 0;
-      line-height: 60px;
+      line-height: $landing-page-header-height;
       font-size: 22px;
       color: $brand-primary;
     }
@@ -96,4 +101,63 @@ $landing-page-spacer-content-max-width: 1200px;
     // Add some artificial space such that page content will be visually ok when centred
     flex: 0 0 10px;
   }
+
+  // Styles to make the select control look good on the landing page
+  select-input {
+    display: inline-block;
+    bottom: initial;
+    width: initial;
+    left: inherit;
+    right: inherit;
+    background-color: $brand-secondary;
+    border: none;
+    padding: 0;
+    height: initial;
+
+    .select-input-field {
+      margin: 0;
+      padding: $landing-page-margin $landing-page-margin*2 $landing-page-margin $landing-page-margin*3;
+
+      &:hover {
+        background-color: $landing-page-menu-hover-color;
+        i.dropdown-toggle {
+          color: $link-hover-color;
+        }
+      }
+
+      .select-input-value, i.dropdown-toggle {
+        color: $landing-page-menu-color;
+      }
+
+      i.dropdown-toggle {
+        font-size: $landing-page-drop-down-toggle-size;
+      }
+    }
+
+    .dropdown.open {
+      .select-input-field {
+        background-color: $landing-page-menu-hover-color;
+      }
+    }
+
+    .dropdown-menu {
+      top: $landing-page-header-height - 2 * $landing-page-margin;
+      right: 0;
+      left: initial;
+      background-color: $brand-secondary;
+      color: $landing-page-menu-color;
+
+      li.dropdown-menu-header {
+        display: none;
+      }
+
+      .select-option:hover {
+        background-color: $brand-secondary;
+        color: $brand-primary;
+      }
+    }
+
+  }
+
+
 }
