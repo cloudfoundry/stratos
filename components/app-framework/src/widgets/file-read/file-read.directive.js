@@ -18,15 +18,16 @@
     function link(scope, element) {
       element.bind('change', function (changeEvent) {
         scope.$apply(function () {
-          scope.fileread = changeEvent.target.files[0];
+          scope.fileread = changeEvent.target.files;
         });
       });
 
       scope.$watch('fileread', function (nv, ov) {
-        if (ov && ov.name && nv && !nv.name) {
+        if (ov && ov.length && nv && !nv.length) {
           element.val(null);
         }
       });
     }
   }
 })();
+

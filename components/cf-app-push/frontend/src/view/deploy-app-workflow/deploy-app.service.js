@@ -26,7 +26,7 @@
           controller: DeployAppController,
           controllerAs: 'deployApp',
           dialog: true,
-          class: 'dialog-form-wizard'
+          class: 'dialog-form-wizard deploy-app-wizard'
         },
         context
       );
@@ -86,11 +86,18 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $filter - the angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} itemDropHelper - the item drop helper service
+   * @param {object} appUtilsService - the App Utils service
    */
   function DeployAppController($scope, $q, $uibModalInstance, $state, $location, $websocket, $translate, $log, $http,
-                               $timeout, $filter, modelManager) {
+                               $timeout, $filter, modelManager, itemDropHelper, appUtilsService) {
 
     var vm = this;
+
+    var CF_IGNORE_FILE = '.cfignore';
+    var CF_DEFAULT_IGNORES = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn\n';
+
+    var gitHubUrlBase = 'https://github.com/';
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -108,19 +115,25 @@
       DATA: 20000,
       MANIFEST: 20001,
       CLOSE_SUCCESS: 20002,
-      CLOSE_PUSH_ERROR: 40003,
-      CLOSE_NO_MANIFEST: 40004,
-      CLOSE_INVALID_MANIFEST: 40005,
-      CLOSE_FAILED_CLONE: 40006,
-      CLOSE_FAILED_NO_BRANCH: 40007,
-      CLOSE_FAILURE: 40008,
-      CLOSE_NO_SESSION: 40009,
-      CLOSE_NO_CNSI: 40010,
-      CLOSE_NO_CNSI_USERTOKEN: 40011,
-      EVENT_CLONED: 10012,
-      EVENT_FETCHED_MANIFEST: 10013,
-      EVENT_PUSH_STARTED: 10014,
-      EVENT_PUSH_COMPLETED: 10015
+      CLOSE_PUSH_ERROR: 40000,
+      CLOSE_NO_MANIFEST: 40001,
+      CLOSE_INVALID_MANIFEST: 40002,
+      CLOSE_FAILED_CLONE: 40003,
+      CLOSE_FAILED_NO_BRANCH: 40004,
+      CLOSE_FAILURE: 40005,
+      CLOSE_NO_SESSION: 40006,
+      CLOSE_NO_CNSI: 40007,
+      CLOSE_NO_CNSI_USERTOKEN: 40008,
+      EVENT_CLONED: 10000,
+      EVENT_FETCHED_MANIFEST: 10001,
+      EVENT_PUSH_STARTED: 10002,
+      EVENT_PUSH_COMPLETED: 10003,
+      SOURCE_REQUIRED: 30000,
+      SOURCE_GITHUB: 30001,
+      SOURCE_FOLDER: 30002,
+      SOURCE_FILE: 30003,
+      SOURCE_FILE_DATA: 30004,
+      SOURCE_FILE_ACK: 30005
     };
 
     vm.data = {
@@ -145,8 +158,24 @@
       githubProject: '',
       manifest: {
         location: '/manifest.yml'
-      }
+      },
+      sourceType: 'github',
+      localPath: '',
+      localPathFile: null,
+      fileScanData: null
     };
+
+    /*
+     * Not all browsers allows a folder to be selected by an input field
+     */
+    function isInputDirSupported() {
+      /* eslint-disable angular/document-service */
+      var tmpInput = document.createElement('input');
+      /* eslint-enable angular/document-service */
+      return 'webkitdirectory' in tmpInput;
+    }
+
+    vm.folderSupport = isInputDirSupported();
 
     var stepInfo = {
       title: 'deploy-app-dialog.step-info.title',
@@ -154,12 +183,15 @@
       formName: 'deploy-info-form',
       data: vm.data,
       userInput: vm.userInput,
+      folderSupport: vm.folderSupport,
       showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
       nextBtnText: 'deploy-app-dialog.button-deploy',
       stepCommit: true,
+      bytesToHumanSize: appUtilsService.bytesToHumanSize,
       allowNext: function () {
-        return vm.userInput.githubProjectValid;
+        return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
       },
+      dropItemHandler: dropHandler,
       onEnter: function () {
         allowBack = false;
         if (vm.data.deployStatus) {
@@ -183,6 +215,53 @@
           });
       }
     };
+
+    /*
+     * Handle a drop event
+     */
+    function dropHandler(items) {
+      vm.userInput.cfIgnoreFile = false;
+      // Find out what has been dropped and take appropriate action
+      itemDropHelper.identify(items).then(function (info) {
+        vm.userInput.localPath = info.value ? info.value.name : '';
+        if (info.isFiles) {
+          vm.options.wizardCtrl.showBusy('deploy-app-dialog.step-info.scanning');
+          itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
+            vm.userInput.fileScanData = results;
+            vm.userInput.sourceType = 'local';
+            vm.userInput.cfIgnoreFile = results.foundIgnoreFile;
+          }).finally(function () {
+            vm.options.wizardCtrl.showBusy();
+          });
+        } else if (info.isArchiveFile) {
+          vm.userInput.sourceType = 'local';
+          var res = itemDropHelper.initScanner();
+          vm.userInput.fileScanData = res.addFile(info.value);
+          vm.userInput.sourceType = 'local';
+        } else if (info.isWebLink) {
+          // Check if this is a GitHub link
+          if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
+            vm.userInput.sourceType = 'github';
+            var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
+            if (urlParts.length > 1) {
+              var branch;
+              if (urlParts.length > 3 && urlParts[2] === 'tree') {
+                branch = urlParts[3];
+              }
+              var project = urlParts[0] + '/' + urlParts[1];
+              if (vm.userInput.githubProject === project) {
+                // Project is the same, so just change the branch
+                vm.selectBranch(branch ? branch : vm.data.githubProject.default_branch);
+              } else {
+                vm.userInput.autoSelectGithubBranch = branch;
+                vm.userInput.githubProject = project;
+              }
+            }
+          }
+        }
+      });
+    }
+
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
       templateUrl: templatePath + 'deploy-app-deploying.html',
@@ -206,6 +285,9 @@
 
     vm.options = {
       workflow: {
+        initControllers: function (wizardCtrl) {
+          vm.options.wizardCtrl = wizardCtrl;
+        },
         disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
@@ -238,9 +320,25 @@
       }
     };
 
+    vm.selectBranch = function (branch) {
+      var foundBranch = _.find(vm.data.githubBranches, function (o) {
+        return o.value && o.value.name === branch;
+      });
+      vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
+    };
+
     $scope.$on('$destroy', resetSocket);
     $scope.$on('$destroy', function () {
       $timeout.cancel(discoverAppTimer);
+    });
+
+    // Watch for the file or folder being selected by the input field and process
+    $scope.$watch(function () {
+      return vm.userInput.localPathFile;
+    }, function (newVal, oldVal) {
+      if (newVal && oldVal !== newVal) {
+        handleFileInputSelect(newVal);
+      }
     });
 
     var debounceGithubProjectFetch = _.debounce(function () {
@@ -265,6 +363,13 @@
                   value: o
                 };
               }));
+
+              var branch = vm.userInput.autoSelectGithubBranch ? vm.userInput.autoSelectGithubBranch : vm.data.githubProject.default_branch;
+              vm.userInput.autoSelectGithubBranch = undefined;
+              var foundBranch = _.find(vm.data.githubBranches, function (o) {
+                return o.value && o.value.name === branch;
+              });
+              vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
             })
             .catch(function () {
               vm.data.githubBranches.length = 0;
@@ -303,14 +408,59 @@
       }
     });
 
-    function createSocketUrl(serviceInstance, org, space, project, branch) {
+    // Handle result of a file input form field selection
+    function handleFileInputSelect(items) {
+      // File list from a file input form field
+      var res, rootFolderName, cfIgnoreFile;
+      res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES);
+      vm.userInput.cfIgnoreFile = false;
+      if (items.length === 1) {
+        if (itemDropHelper.isArchiveFile(items[0].name)) {
+          vm.userInput.fileScanData = res.addFile(items[0]);
+          vm.userInput.sourceType = 'local';
+          vm.userInput.localPath = items[0].name;
+        }
+      } else {
+        // See if we can find the .cfignore file
+        for (var j = 0; j < items.length; j++) {
+          var filePath = items[j].webkitRelativePath.split('/');
+          // First part is the root folder name
+          if (filePath.length === 2 && !rootFolderName) {
+            rootFolderName = filePath[0];
+          }
+          if (filePath.length > 2) {
+            break;
+          } else if (filePath.length === 2 && filePath[1] === CF_IGNORE_FILE) {
+            cfIgnoreFile = items[j];
+            break;
+          }
+        }
+
+        var promise = $q.resolve('');
+        // Did we find an ignore file?
+        if (cfIgnoreFile) {
+          promise = itemDropHelper.readFileContents(cfIgnoreFile);
+        }
+
+        promise.then(function (ignores) {
+          res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES + ignores);
+          vm.userInput.cfIgnoreFile = !!ignores;
+          res.rootFolderName = rootFolderName;
+          _.each(items, function (file) {
+            res.addFile(file);
+          });
+          vm.userInput.fileScanData = res;
+          vm.userInput.sourceType = 'local';
+          vm.userInput.localPath = rootFolderName || $translate.instant('deploy-app-dialog.step-info.local.folder');
+        });
+      }
+    }
+
+    function createSocketUrl(serviceInstance, org, space) {
       var protocol = $location.protocol() === 'https' ? 'wss' : 'ws';
       var url = protocol + '://' + $location.host() + ':' + $location.port();
       url += '/pp/v1/' + serviceInstance.guid + '/' + org.metadata.guid + '/' + space.metadata.guid + '/deploy';
-      url += '?project=' + project + '&org=' + org.entity.name + '&space=' + space.entity.name;
-      if (branch) {
-        url += '&branch=' + branch;
-      }
+      url += '?org=' + org.entity.name + '&space=' + space.entity.name;
       return url;
     }
 
@@ -368,12 +518,15 @@
         hasPushStarted = true;
         vm.data.deployStatus = vm.data.deployState.PUSHING;
         deployingPromise.resolve();
+        vm.data.uploadingFiles = undefined;
         $log.debug('Deploy Application: Push Started');
       }
 
       function deploySuccessful() {
         vm.data.deployStatus = vm.data.deployState.DEPLOYED;
         $log.debug('Deploy Application: Deploy Successful');
+        // Mark the wizard step as complete (so it gets a tick icon)
+        vm.options.workflow.steps[1].complete = true;
       }
 
       function deployFailed(errorString) {
@@ -385,14 +538,108 @@
         $log.warn('Deploy Application: Failed: ' + failureDescription);
       }
 
+      function sendSourceMetadata() {
+        if (vm.userInput.sourceType === 'github') {
+          sendGitHubSourceMetadata();
+        } else if (vm.userInput.sourceType === 'local') {
+          sendLocalSourceMetadata();
+        }
+      }
+
+      function sendGitHubSourceMetadata() {
+        var github = {
+          project:vm.userInput.githubProject,
+          branch: vm.userInput.githubBranch.name
+        };
+
+        var msg = {
+          message: angular.toJson(github),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_GITHUB
+        };
+
+        // Send the source metadata
+        vm.data.webSocket.send(angular.toJson(msg));
+      }
+
+      function sendLocalSourceMetadata() {
+        var metadata = {
+          files: [],
+          folders: []
+        };
+
+        collectFoldersAndFiles(metadata, null, vm.userInput.fileScanData.root);
+
+        vm.userInput.fileTransfers = metadata.files;
+        metadata.files = metadata.files.length;
+        vm.data.uploadingFiles = {
+          remaining: metadata.files,
+          bytes: 0,
+          total: vm.userInput.fileScanData.total,
+          fileName: ''
+        };
+
+        deployingPromise.resolve();
+
+        var msg = {
+          message: angular.toJson(metadata),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_FOLDER
+        };
+
+        // Send the source metadata
+        vm.data.webSocket.send(angular.toJson(msg));
+      }
+
+      function collectFoldersAndFiles(metadata, base, folder) {
+        _.each(folder.files, function (file) {
+          var filePath = base ? base + '/' + file.name : file.name;
+          file.fullPath = filePath;
+          metadata.files.push(file);
+        });
+
+        _.each(folder.folders, function (sub, name) {
+          var fullPath = base ? base + '/' + name : name;
+          metadata.folders.push(fullPath);
+          collectFoldersAndFiles(metadata, fullPath, sub);
+        });
+      }
+
+      function sendNextFile() {
+        if (vm.userInput.fileTransfers.length > 0) {
+          var file = vm.userInput.fileTransfers.shift();
+
+          // Send file metadata
+          var msg = {
+            message: file.fullPath,
+            timestamp: Math.round((new Date()).getTime() / 1000),
+            type: socketEventTypes.SOURCE_FILE
+          };
+
+          vm.data.uploadingFiles.fileName = file.fullPath;
+
+          // Send the file name metadata
+          vm.data.webSocket.send(angular.toJson(msg));
+
+          // Now send the file data as a binary message
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var output = e.target.result;
+            vm.data.webSocket.send(output);
+            vm.data.uploadingFiles.bytes += file.size;
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      }
+
       resetSocket();
 
       // Determine web socket url and open connection
-      var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space,
-        vm.userInput.githubProject, vm.userInput.githubBranch.name);
+      var socketUrl = createSocketUrl(vm.userInput.serviceInstance, vm.userInput.organization, vm.userInput.space);
 
       vm.data.webSocket = $websocket(socketUrl, null, {
-        reconnectIfNotNormalClose: false
+        reconnectIfNotNormalClose: false,
+        binaryType: 'arraybuffer'
       });
 
       // Handle Connection responses
@@ -446,6 +693,12 @@
             if (app.Name) {
               discoverAppGuid(app.Name);
             }
+            break;
+          case socketEventTypes.SOURCE_REQUIRED:
+            sendSourceMetadata();
+            break;
+          case socketEventTypes.SOURCE_FILE_ACK:
+            sendNextFile();
             break;
           default:
             $log.error('Unknown deploy application socket event type: ', logData.type);

@@ -144,6 +144,7 @@
     vm.switchToFirstReadyStep = switchToFirstReadyStep;
     vm.always = always;
     vm.allowCancel = allowCancel;
+    vm.showBusy = showBusy;
 
     vm.initPromise.then(function () {
       vm.onInitSuccess();
@@ -164,6 +165,20 @@
     }, function () {
       vm.resetButtons();
     });
+
+    function showBusy(msg) {
+      if (!msg) {
+        vm.currentIndex = vm.busyIndex;
+        vm.busyIndex = -1;
+        vm.busyMessage = false;
+        resetButtons();
+      } else {
+        vm.busyIndex = vm.currentIndex;
+        vm.busyMessage = msg;
+        vm.currentIndex = -1;
+        disableButtons();
+      }
+    }
 
     /**
      * @function disableButtons
