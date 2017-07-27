@@ -149,7 +149,7 @@
                     if (service) {
                       // 1) we show the correct type
                       if (serviceType === 'cf') {
-                        expect(endpointsPage.endpointType(index)).toBe('cloud-foundry');
+                        expect(endpointsPage.endpointType(index)).toBe('Cloud Foundry');
                       }
                       // 3) the address is correct
                       expect(endpointsPage.endpointUrl(index)).toBe(service.register.api_endpoint);
