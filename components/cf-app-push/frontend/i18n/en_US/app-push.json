@@ -5,8 +5,13 @@
   "deploy-app-dialog": {
     "title": "Deploy Application",
     "button-deploy": "Deploy",
-    "step-info": {
-      "title": "Destination and Source",
+    "step-destination": {
+      "title": "Destination",
+      "busy": "Updating Cloud Foundry Data",
+      "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
+    },
+    "step-source": {
+      "title": "Source",
       "github": {
         "label": "Public Github",
         "project-label": "Project",
@@ -43,9 +48,7 @@
         "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",
         "path-label": "Path to manifest",
         "path-placeholder": "Relative path of manifest to root of app directory"
-      },
-      "busy": "Updating Cloud Foundry Data",
-      "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
+      }
     },
     "step-deploying": {
       "title": "Deploy Application",

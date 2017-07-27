@@ -107,7 +107,7 @@
     // How often to check for the app being created
     var DISCOVER_APP_TIMER_PERIOD = 2000;
 
-    var allowBack = false;
+    var allowBack = true;
 
     var templatePath = 'plugins/cf-app-push/view/deploy-app-workflow/';
 
@@ -165,35 +165,21 @@
       fileScanData: null
     };
 
-    /*
-     * Not all browsers allows a folder to be selected by an input field
-     */
-    function isInputDirSupported() {
-      /* eslint-disable angular/document-service */
-      var tmpInput = document.createElement('input');
-      /* eslint-enable angular/document-service */
-      return 'webkitdirectory' in tmpInput;
-    }
-
     vm.folderSupport = isInputDirSupported();
 
-    var stepInfo = {
-      title: 'deploy-app-dialog.step-info.title',
-      templateUrl: templatePath + 'deploy-app-bits.html',
-      formName: 'deploy-info-form',
+  // ,
+  //   allowNext: function () {
+  //     return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
+  //   },
+
+    var stepLocation = {
+      title: 'deploy-app-dialog.step-destination.title',
+      templateUrl: templatePath + 'deploy-app-destination.html',
+      formName: 'deploy-destination-form',
       data: vm.data,
       userInput: vm.userInput,
-      folderSupport: vm.folderSupport,
-      showBusyOnEnter: 'deploy-app-dialog.step-info.busy',
-      nextBtnText: 'deploy-app-dialog.button-deploy',
-      stepCommit: true,
-      bytesToHumanSize: appUtilsService.bytesToHumanSize,
-      allowNext: function () {
-        return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && angular.isDefined(vm.userInput.fileScanData);
-      },
-      dropItemHandler: dropHandler,
+      showBusyOnEnter: 'deploy-app-dialog.step-destination.busy',
       onEnter: function () {
-        allowBack = false;
         if (vm.data.deployStatus) {
           // Previously been at this step, no need to fetch instances again
           return;
@@ -211,56 +197,27 @@
               .value();
             [].push.apply(vm.data.serviceInstances, validServiceInstances);
           }).catch(function () {
-            return $q.reject('deploy-app-dialog.step-info.enter-failed');
+            return $q.reject('deploy-app-dialog.step-destination.enter-failed');
           });
       }
     };
 
-    /*
-     * Handle a drop event
-     */
-    function dropHandler(items) {
-      vm.userInput.cfIgnoreFile = false;
-      // Find out what has been dropped and take appropriate action
-      itemDropHelper.identify(items).then(function (info) {
-        vm.userInput.localPath = info.value ? info.value.name : '';
-        if (info.isFiles) {
-          vm.options.wizardCtrl.showBusy('deploy-app-dialog.step-info.scanning');
-          itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
-            vm.userInput.fileScanData = results;
-            vm.userInput.sourceType = 'local';
-            vm.userInput.cfIgnoreFile = results.foundIgnoreFile;
-          }).finally(function () {
-            vm.options.wizardCtrl.showBusy();
-          });
-        } else if (info.isArchiveFile) {
-          vm.userInput.sourceType = 'local';
-          var res = itemDropHelper.initScanner();
-          vm.userInput.fileScanData = res.addFile(info.value);
-          vm.userInput.sourceType = 'local';
-        } else if (info.isWebLink) {
-          // Check if this is a GitHub link
-          if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
-            vm.userInput.sourceType = 'github';
-            var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
-            if (urlParts.length > 1) {
-              var branch;
-              if (urlParts.length > 3 && urlParts[2] === 'tree') {
-                branch = urlParts[3];
-              }
-              var project = urlParts[0] + '/' + urlParts[1];
-              if (vm.userInput.githubProject === project) {
-                // Project is the same, so just change the branch
-                vm.selectBranch(branch ? branch : vm.data.githubProject.default_branch);
-              } else {
-                vm.userInput.autoSelectGithubBranch = branch;
-                vm.userInput.githubProject = project;
-              }
-            }
-          }
-        }
-      });
-    }
+    var stepSource = {
+      title: 'deploy-app-dialog.step-source.title',
+      templateUrl: templatePath + 'deploy-app-bits.html',
+      formName: 'deploy-info-form',
+      data: vm.data,
+      userInput: vm.userInput,
+      folderSupport: vm.folderSupport,
+      showBusyOnEnter: 'deploy-app-dialog.step-source.busy',
+      nextBtnText: 'deploy-app-dialog.button-deploy',
+      stepCommit: true,
+      bytesToHumanSize: appUtilsService.bytesToHumanSize,
+      allowNext: function () {
+        return vm.userInput.sourceType === 'github' && vm.userInput.githubProjectValid || vm.userInput.sourceType === 'local' && vm.userInput.fileScanData;
+      },
+      dropItemHandler: dropHandler
+    };
 
     var stepDeploying = {
       title: 'deploy-app-dialog.step-deploying.title',
@@ -276,7 +233,7 @@
       onEnter: function () {
         allowBack = false;
         return startDeploy().catch(function (error) {
-          allowBack = false;
+          allowBack = true;
           return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
         });
       },
@@ -298,7 +255,7 @@
           cancel: 'buttons.cancel',
           back: 'buttons.previous'
         },
-        steps: [stepInfo, stepDeploying]
+        steps: [stepLocation, stepSource, stepDeploying]
       }
     };
 
@@ -407,6 +364,62 @@
           });
       }
     });
+
+    /*
+     * Handle a drop event
+     */
+    function dropHandler(items) {
+      vm.userInput.cfIgnoreFile = false;
+      // Find out what has been dropped and take appropriate action
+      itemDropHelper.identify(items).then(function (info) {
+        vm.userInput.localPath = info.value ? info.value.name : '';
+        if (info.isFiles) {
+          vm.options.wizardCtrl.showBusy('deploy-app-dialog.step-info.scanning');
+          itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
+            vm.userInput.fileScanData = results;
+            vm.userInput.sourceType = 'local';
+            vm.userInput.cfIgnoreFile = results.foundIgnoreFile;
+          }).finally(function () {
+            vm.options.wizardCtrl.showBusy();
+          });
+        } else if (info.isArchiveFile) {
+          vm.userInput.sourceType = 'local';
+          var res = itemDropHelper.initScanner();
+          vm.userInput.fileScanData = res.addFile(info.value);
+          vm.userInput.sourceType = 'local';
+        } else if (info.isWebLink) {
+          // Check if this is a GitHub link
+          if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
+            vm.userInput.sourceType = 'github';
+            var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
+            if (urlParts.length > 1) {
+              var branch;
+              if (urlParts.length > 3 && urlParts[2] === 'tree') {
+                branch = urlParts[3];
+              }
+              var project = urlParts[0] + '/' + urlParts[1];
+              if (vm.userInput.githubProject === project) {
+                // Project is the same, so just change the branch
+                vm.selectBranch(branch ? branch : vm.data.githubProject.default_branch);
+              } else {
+                vm.userInput.autoSelectGithubBranch = branch;
+                vm.userInput.githubProject = project;
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /*
+     * Not all browsers allows a folder to be selected by an input field
+     */
+    function isInputDirSupported() {
+      /* eslint-disable angular/document-service */
+      var tmpInput = document.createElement('input');
+      /* eslint-enable angular/document-service */
+      return 'webkitdirectory' in tmpInput;
+    }
 
     // Handle result of a file input form field selection
     function handleFileInputSelect(items) {

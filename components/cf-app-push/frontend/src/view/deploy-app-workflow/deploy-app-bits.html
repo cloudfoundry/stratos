@@ -1,9 +1,3 @@
-<deploy-location
-  service-instances="step.data.serviceInstances"
-  service-instance="step.userInput.serviceInstance"
-  organization="step.userInput.organization"
-  space="step.userInput.space"
-></deploy-location>
 <!--<div class="" file-drop="step.userInput.file">-->
 <!--<p class="control-title" translate>Application Bits</p>-->
 <!--<p translate>-->
@@ -24,32 +18,32 @@
 <!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
 <!--</div>-->
 <!--</div>-->
-<p ng-if="!step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-info.source.file</p>
-<p ng-if="step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-info.source.folder</p>
+<p ng-if="!step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.file</p>
+<p ng-if="step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.folder</p>
 <div class="deploy-app-source-area" file-drop item-drop="step.dropItemHandler">
   <div class="deploy-app-source">
     <div class="deploy-app-source-github">
-      <radio-input ng-model="step.userInput.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-info.github.label"></radio-input>
+      <radio-input ng-model="step.userInput.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-source.github.label"></radio-input>
       <div class="deploy-app-github">
         <div class="deploy-app-github-form">
           <div class="form-group form-group-large" focusable-input
               ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
-            <label class="control-label" translate>deploy-app-dialog.step-info.github.project-label</label>
+            <label class="control-label" translate>deploy-app-dialog.step-source.github.project-label</label>
             <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
-                deploy-app-dialog.step-info.github.project-not-found
+                deploy-app-dialog.step-source.github.project-not-found
             </span>
             <input
               ng-disabled="step.userInput.sourceType !== 'github'"
               type="text" class="form-control" name="githubProject" ng-model="step.userInput.githubProject"
-              placeholder="{{'deploy-app-dialog.step-info.github.project-placeholder' | translate}}"/>
+              placeholder="{{'deploy-app-dialog.step-source.github.project-placeholder' | translate}}"/>
           </div>
 
           <div class="form-group form-group-large deploy-app-github-branch" focusable-input>
-            <label class="control-label" translate>deploy-app-dialog.step-info.github.branch-label</label>
+            <label class="control-label" translate>deploy-app-dialog.step-source.github.branch-label</label>
             <search-box
               ng-model="step.userInput.githubBranch"
               input-options="step.data.githubBranches"
-              placeholder="{{ 'deploy-app-dialog.step-info.github.branch-placeholder' | translate}}"
+              placeholder="{{ 'deploy-app-dialog.step-source.github.branch-placeholder' | translate}}"
               disabled="!step.userInput.githubProjectValid || step.userInput.sourceType !== 'github'">
             </search-box>
           </div>
@@ -76,17 +70,17 @@
                 </div>
                 <div class="lastCommit-info">
                   <div class="lastCommit-info-commit-message">
-                    <span translate>deploy-app-dialog.step-info.github.branch-last-commit</span>
+                    <span translate>deploy-app-dialog.step-source.github.branch-last-commit</span>
                     <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
                       rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
                     </a>
                   </div>
                   <div class="lastCommit-date-committer">
                     <div class="lastCommitter">
-                      <span translate>deploy-app-dialog.step-info.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login}}
+                      <span translate>deploy-app-dialog.step-source.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login || step.data.githubCommit.commit.author.name}}
                     </div>
                     <div>
-                      <span translate>deploy-app-dialog.step-info.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
+                      <span translate>deploy-app-dialog.step-source.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
                     </div>
                   </div>
                 </div>
@@ -98,24 +92,24 @@
     </div>
 
     <div class="deploy-app-source-local">
-      <radio-input ng-if="!step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-info.local.file.label"></radio-input>
-      <radio-input ng-if="step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-info.local.folder.label"></radio-input>
+      <radio-input ng-if="!step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.file.label"></radio-input>
+      <radio-input ng-if="step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.folder.label"></radio-input>
       <div class="deploy-app-github">
         <div class="deploy-app-github-form">
           <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
-            <label ng-if="!step.folderSupport" class="control-label" translate>deploy-app-dialog.step-info.local.file.field</label>
-            <label ng-if="step.folderSupport" class="control-label" translate>deploy-app-dialog.step-info.local.folder.field</label>
+            <label ng-if="!step.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
+            <label ng-if="step.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
             <input fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"></input>
             <input webkitdirectory fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"></input>
             <!-- File support only -->
             <label ng-if="!step.folderSupport" class="form-control clickable" for="localPathSelectFile">
               <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
-              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.file.prompt</span>
+              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-source.local.file.prompt</span>
             </label>
             <!-- File and Folder support -->
             <label ng-if="step.folderSupport" class="form-control">
               <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
-              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-info.local.folder.prompt</span>
+              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-source.local.folder.prompt</span>
               <label class="deploy-app-form-btn" for="localPathSelectFile">
                 <i class="material-icons">insert_drive_file</i>
               </label>
@@ -129,10 +123,10 @@
           <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.fileScanData.files">
             <div class="deploy-app-github-info deploy-app-file-details">
               <i class="material-icons">file_upload</i>
-              <p translate translate-values="{files: step.userInput.fileScanData.files, total: step.bytesToHumanSize(step.userInput.fileScanData.total)}">deploy-app-dialog.step-info.local.info</p>
+              <p translate translate-values="{files: step.userInput.fileScanData.files, total: step.bytesToHumanSize(step.userInput.fileScanData.total)}">deploy-app-dialog.step-source.local.info</p>
             </div>
             <div class="deploy-app-found-cfignore" ng-if="step.userInput.cfIgnoreFile">
-              <p translate>deploy-app-dialog.step-info.local.cfignore</p>
+              <p translate>deploy-app-dialog.step-source.local.cfignore</p>
             </div>
           </div>
 
@@ -142,11 +136,11 @@
   </div>
 </div>
 
-<!--<p class="control-title" translate>deploy-app-dialog.step-info.manifest.label</p>-->
-<!--<p class="" translate>deploy-app-dialog.step-info.manifest.description</p>-->
+<!--<p class="control-title" translate>deploy-app-dialog.step-source.manifest.label</p>-->
+<!--<p class="" translate>deploy-app-dialog.step-source.manifest.description</p>-->
 <!--<div class="form-group form-group-large" focusable-input>-->
-<!--<label class="control-label" translate>deploy-app-dialog.step-info.manifest.path-label</label>-->
+<!--<label class="control-label" translate>deploy-app-dialog.step-source.manifest.path-label</label>-->
 <!--<input type="text" class="form-control" ng-model="step.userInput.manifest.location"-->
-<!--placeholder="{{'deploy-app-dialog.step-info.manifest.path-placeholder' | translate}}"-->
+<!--placeholder="{{'deploy-app-dialog.step-source.manifest.path-placeholder' | translate}}"-->
 <!--required/>-->
 <!--</div>-->
