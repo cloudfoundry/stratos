@@ -1,0 +1,23 @@
+$deploy-status-bounce-spacer: 6px;
+
+.deploy-app {
+
+  .deploy-app-log-status {
+    display: flex;
+    align-items: center;
+    padding-bottom: $console-unit-space;
+    & > span {
+      font-size: $font-size-large;
+      padding-right: $console-unit-space;
+    }
+    bounce-spinner {
+      margin-top: $deploy-status-bounce-spacer;
+    }
+  }
+
+  cf-log-viewer {
+    .panel-heading.action-header {
+      background-color: $console-primary-bg;
+    }
+  }
+}

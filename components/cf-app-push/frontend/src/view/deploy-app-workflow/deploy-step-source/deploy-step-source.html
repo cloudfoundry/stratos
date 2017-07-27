@@ -24,71 +24,12 @@
   <div class="deploy-app-source">
     <div class="deploy-app-source-github">
       <radio-input ng-model="step.userInput.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-source.github.label"></radio-input>
-      <div class="deploy-app-github">
-        <div class="deploy-app-github-form">
-          <div class="form-group form-group-large" focusable-input
-              ng-class="{'has-error': step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty}">
-            <label class="control-label" translate>deploy-app-dialog.step-source.github.project-label</label>
-            <span class="control-message" translate ng-if="step.userInput.githubProjectValid === false && wizardForm['deploy-info-form'].githubProject.$dirty">
-                deploy-app-dialog.step-source.github.project-not-found
-            </span>
-            <input
-              ng-disabled="step.userInput.sourceType !== 'github'"
-              type="text" class="form-control" name="githubProject" ng-model="step.userInput.githubProject"
-              placeholder="{{'deploy-app-dialog.step-source.github.project-placeholder' | translate}}"/>
-          </div>
-
-          <div class="form-group form-group-large deploy-app-github-branch" focusable-input>
-            <label class="control-label" translate>deploy-app-dialog.step-source.github.branch-label</label>
-            <search-box
-              ng-model="step.userInput.githubBranch"
-              input-options="step.data.githubBranches"
-              placeholder="{{ 'deploy-app-dialog.step-source.github.branch-placeholder' | translate}}"
-              disabled="!step.userInput.githubProjectValid || step.userInput.sourceType !== 'github'">
-            </search-box>
-          </div>
-
-          <!-- Information about the selected GitHub project -->
-          <div class="deploy-app-source-details deploy-app-github-details"
-            ng-class="{'deploy-app-invisible': !(step.userInput.githubProjectValid && step.data.githubProject)}" >
-            <div class="deploy-app-github-info">
-              <div class="project">
-                <img ng-src="{{step.data.githubProject.owner.avatar_url}}"/>
-                <div class="project-info">
-                  <div>
-                    <a href="https://www.github.com/{{step.userInput.githubProjectCached}}"
-                      rel="noopener noreferrer" target="_blank">{{step.userInput.githubProjectCached}}
-                    </a>
-                  </div>
-                  {{ step.data.githubProject.description | limitTo:50}} <span ng-if="step.data.githubProject.description.length > 50">...</span>
-                </div>
-              </div>
-
-              <div class="lastCommit">
-                <div class="committerAvatar">
-                  <img ng-src="{{step.data.githubCommit.author.avatar_url}}"/>
-                </div>
-                <div class="lastCommit-info">
-                  <div class="lastCommit-info-commit-message">
-                    <span translate>deploy-app-dialog.step-source.github.branch-last-commit</span>
-                    <a href="https://www.github.com/{{step.userInput.githubProject}}/commit/{{step.data.githubCommit.sha}}"
-                      rel="noopener noreferrer" target="_blank">{{ step.data.githubCommit.sha | limitTo:6}} {{ step.data.githubCommit.commit.message | limitTo:50}}<span ng-if="step.data.githubCommit.commit.message.length > 50">...</span>
-                    </a>
-                  </div>
-                  <div class="lastCommit-date-committer">
-                    <div class="lastCommitter">
-                      <span translate>deploy-app-dialog.step-source.github.branch-last-commit-committer</span>{{ step.data.githubCommit.author.login || step.data.githubCommit.commit.author.name}}
-                    </div>
-                    <div>
-                      <span translate>deploy-app-dialog.step-source.github.branch-last-commit-date</span> {{ step.data.githubCommit.commit.author.date | momentDateFormat }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <app-deploy-source-git
+        is-valid="step.userInput.isValid"
+        user-input="step.userInput"
+        data="step.data"
+        form-name="deploy-info-form">
+      </app-deploy-source-git>
     </div>
 
     <div class="deploy-app-source-local">
