@@ -4,8 +4,8 @@ resources:
   source:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
-    uri: git@github.com:irfanhabib/stratos-ui.git
-    tag_filter: ^[0-9]+\.[0-9]+\.[0-9]+[-]*[-a-zA-Z0-9]*
+    uri: git@github.com:{{github-organization}}/{{github-repository}}.git
+    tag_filter: "[0-9]*"
 - name: helm-chart-values
   type: s3
   source:
@@ -73,7 +73,9 @@ jobs:
     passed: [build-helm-images]
     trigger: true
   - get: helm-chart-Chart
+    passed: [build-helm-images]
   - get: helm-chart-values
+    passed: [build-helm-images]
   - do:
     - task: build
       privileged: true
@@ -90,13 +92,13 @@ jobs:
         file: helm-chart/*.tgz
         acl: public-read
 
-
 - name: update-github-release
   plan:
   - get: stratos-ui
     passed: [update-repo]
     trigger: true
   - get: helm-chart-tarball
+    passed: [update-repo]
   - do:
     - task: build
       privileged: true
