@@ -1,8 +1,8 @@
 <div class="deploy-app-log-status">
-  <span ng-if="step.data.deployStatus === step.deployState.PUSHING" translate>deploy-app-dialog.step-deploying.title-deploying</span>
-  <span ng-if="step.data.deployStatus === step.deployState.DEPLOYED" translate>deploy-app-dialog.step-deploying.title-deploy-success</span>
-  <span ng-if="step.data.deployStatus === step.deployState.FAILED" translate>{{ step.data.deployFailure }}</span>
-  <bounce-spinner ng-if="step.data.deployStatus === step.deployState.PUSHING" classes="bounce-spinner-sm"></bounce-spinner>
+  <span ng-if="step.data.deployStatus === step.data.deployState.PUSHING" translate>deploy-app-dialog.step-deploying.title-deploying</span>
+  <span ng-if="step.data.deployStatus === step.data.deployState.DEPLOYED" translate>deploy-app-dialog.step-deploying.title-deploy-success</span>
+  <span ng-if="step.data.deployStatus === step.data.deployState.FAILED" translate>{{ step.data.deployFailure }}</span>
+  <bounce-spinner ng-if="step.data.deployStatus === step.data.deployState.PUSHING" classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <cf-log-viewer ng-if="!step.data.uploadingFiles" web-socket="step.data.webSocket" filter="step.data.logFilter" disable-status="true"></cf-log-viewer>
 <div ng-if="step.data.uploadingFiles" class="deploy-app-file-upload-status">

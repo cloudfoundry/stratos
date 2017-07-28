@@ -5,7 +5,7 @@
     .module('cf-app-push')
     .factory('appDeployStepDeployingService', AppDeployStepDeployingService);
 
-  function AppDeployStepDeployingService($q, $location, $translate, $timeout) {
+  function AppDeployStepDeployingService($q, $location, $translate, $timeout, $websocket, $log, modelManager) {
 
     var socketEventTypes = {
       DATA: 20000,
@@ -48,33 +48,34 @@
     return {
       getStep: function (session) {
         var data = session.data.deploying;
-        var userInput = session.userInput.deploying;
+
+        data.deployState = deployState;
+        //TODO: RC not picked up? getting failure to filter
+        data.logFilter = logFilter;
+
+        var step = {
+          title: 'deploy-app-dialog.step-deploying.title',
+          templateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-step-deploying/deploy-step-deploying.html',
+          data: data,
+          cancelBtnText: 'buttons.close',
+          nextBtnText: 'deploy-app-dialog.step-deploying.next-button',
+          showBusyOnEnter: 'deploy-app-dialog.step-deploying.busy',
+          allowNext: function () {
+            return !!session.wizard.newAppGuid;
+          },
+          onEnter: function () {
+            session.wizard.allowBack = false;
+            return startDeploy(session, step).catch(function (error) {
+              session.wizard.allowBack = true;
+              return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
+            });
+          },
+          isLastStep: true
+        };
 
         return {
-          step: {
-            title: 'deploy-app-dialog.step-deploying.title',
-            templateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-step-deploying/deploy-step-deploying.html',
-            data: data,
-            userInput: userInput,
-            cancelBtnText: 'buttons.close',
-            nextBtnText: 'deploy-app-dialog.step-deploying.next-button',
-            showBusyOnEnter: 'deploy-app-dialog.step-deploying.busy',
-            allowNext: function () {
-              return !!session.wizard.newAppGuid;
-            },
-            onEnter: function () {
-              session.wizard.allowBack = false;
-              return startDeploy(session, data, userInput).catch(function (error) {
-                session.wizard.allowBack = true;
-                return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
-              });
-            },
-            isLastStep: true,
-            logFilter: logFilter,
-            deployState: deployState
-          },
+          step: step,
           destroy: function () {
-            //TODO: RC
             $timeout.cancel(session.data.discoverAppTimer);
             resetSocket(session.data.webSocket);
           }
@@ -82,7 +83,7 @@
       }
     };
 
-    function discoverAppGuid(data, userInput, appName) {
+    function discoverAppGuid(data, destinationUserInput, appName) {
       if (data.discoverAppTimer) {
         return;
       }
@@ -93,9 +94,10 @@
         var params = {
           q: 'name:' + appName
         };
-        spaceModel.listAllAppsForSpace(userInput.serviceInstance.guid, userInput.space.metadata.guid, params)
+        spaceModel.listAllAppsForSpace(destinationUserInput.serviceInstance.guid, destinationUserInput.space.metadata.guid, params)
           .then(function (apps) {
             if (apps.length === 1) {
+              //TODO: RC session undefined
               session.wizard.newAppGuid = apps[0].metadata.guid;
             }
           })
@@ -103,7 +105,7 @@
             data.discoverAppTimer = undefined;
             // Did not find the app - try again
             if (!session.wizard.newAppGuid) {
-              discoverAppGuid(data, userInput, appName);
+              discoverAppGuid(data, destinationUserInput, appName);
             }
           });
       }, DISCOVER_APP_TIMER_PERIOD);
@@ -125,9 +127,14 @@
       return url;
     }
 
-    function startDeploy(session, data, userInput) {
+    function startDeploy(session, step) {
 
-      data.deployStatus = data.deployState.UNKNOWN;
+      var data = session.data.deploying;
+
+      var destinationUserInput = session.userInput.destination;
+      var sourceUserInput = session.userInput.source;
+
+      data.deployStatus = deployState.UNKNOWN;
       session.wizard.hasPushStarted = false;
       session.wizard.newAppGuid = null;
 
@@ -135,22 +142,22 @@
 
       function pushStarted() {
         session.wizard.hasPushStarted = true;
-        data.deployStatus = data.deployState.PUSHING;
+        data.deployStatus = deployState.PUSHING;
         deployingPromise.resolve();
         data.uploadingFiles = undefined;
         $log.debug('Deploy Application: Push Started');
       }
 
-      function deploySuccessful() {
-        data.deployStatus = data.deployState.DEPLOYED;
+      function deploySuccessful(step) {
+        data.deployStatus = deployState.DEPLOYED;
         $log.debug('Deploy Application: Deploy Successful');
         // Mark the wizard step as complete (so it gets a tick icon)
-        vm.options.workflow.steps[1].complete = true;
+        step.complete = true;
       }
 
       function deployFailed(errorString) {
         session.wizard.allowBack = true;
-        data.deployStatus = data.deployState.FAILED;
+        data.deployStatus = deployState.FAILED;
         var failureDescription = $translate.instant(errorString);
         data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', {reason: failureDescription});
         deployingPromise.reject(failureDescription);
@@ -166,9 +173,10 @@
       }
 
       function sendGitHubSourceMetadata() {
+        //TODO: RC Add to validation check
         var github = {
-          project: userInput.githubProject,
-          branch: userInput.githubBranch.name
+          project: sourceUserInput.githubProject,
+          branch: sourceUserInput.githubBranch.name
         };
 
         var msg = {
@@ -187,14 +195,14 @@
           folders: []
         };
 
-        collectFoldersAndFiles(metadata, null, userInput.fileScanData.root);
+        collectFoldersAndFiles(metadata, null, sourceUserInput.fileScanData.root);
 
-        userInput.fileTransfers = metadata.files;
+        sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,
-          total: userInput.fileScanData.total,
+          total: sourceUserInput.fileScanData.total,
           fileName: ''
         };
 
@@ -224,8 +232,8 @@
       }
 
       function sendNextFile() {
-        if (userInput.fileTransfers.length > 0) {
-          var file = userInput.fileTransfers.shift();
+        if (sourceUserInput.fileTransfers.length > 0) {
+          var file = sourceUserInput.fileTransfers.shift();
 
           // Send file metadata
           var msg = {
@@ -253,7 +261,7 @@
       resetSocket(data.webSocket);
 
       // Determine web socket url and open connection
-      var socketUrl = createSocketUrl(userInput.serviceInstance, userInput.organization, userInput.space);
+      var socketUrl = createSocketUrl(destinationUserInput.serviceInstance, destinationUserInput.organization, destinationUserInput.space);
 
       data.webSocket = $websocket(socketUrl, null, {
         reconnectIfNotNormalClose: false,
@@ -262,7 +270,7 @@
 
       // Handle Connection responses
       data.webSocket.onOpen(function () {
-        data.deployStatus = data.deployState.SOCKET_OPEN;
+        data.deployStatus = deployState.SOCKET_OPEN;
       });
 
       /* eslint-disable complexity */
@@ -288,14 +296,14 @@
             deployFailed('deploy-app-dialog.socket.event-type.' + type);
             break;
           case socketEventTypes.CLOSE_SUCCESS:
-            deploySuccessful();
+            deploySuccessful(step);
             break;
           case socketEventTypes.EVENT_CLONED:
-            data.deployStatus = data.deployState.CLONED;
+            data.deployStatus = deployState.CLONED;
             $log.debug('Deploy Application: Cloned');
             break;
           case socketEventTypes.EVENT_FETCHED_MANIFEST:
-            data.deployStatus = data.deployState.FETCHED_MANIFEST;
+            data.deployStatus = deployState.FETCHED_MANIFEST;
             $log.debug('Deploy Application: Fetched manifest');
             break;
           case socketEventTypes.EVENT_PUSH_STARTED:
@@ -309,7 +317,7 @@
             var manifest = angular.fromJson(logData.message);
             var app = _.get(manifest, 'Applications[0]', {});
             if (app.Name) {
-              discoverAppGuid(data, userInput, app.Name);
+              discoverAppGuid(data, destinationUserInput, app.Name);
             }
             break;
           case socketEventTypes.SOURCE_REQUIRED:
@@ -327,10 +335,10 @@
       /* eslint-enable complexity */
 
       data.webSocket.onClose(function () {
-        if (data.deployStatus === data.deployState.UNKNOWN) {
+        if (data.deployStatus === deployState.UNKNOWN) {
           // Closed before socket has successfully opened
           deployFailed('deploy-app-dialog.socket.failed-connection');
-        } else if (data.deployStatus !== data.deployState.DEPLOYED && data.deployStatus !== data.deployState.FAILED) {
+        } else if (data.deployStatus !== deployState.DEPLOYED && data.deployStatus !== deployState.FAILED) {
           // Have connected to socket but not received a close message containing deploy result
           deployFailed('deploy-app-dialog.socket.failed-unknown');
         }
