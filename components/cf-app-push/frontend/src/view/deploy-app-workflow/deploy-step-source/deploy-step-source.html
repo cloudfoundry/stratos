@@ -1,87 +1,36 @@
-<!--<div class="" file-drop="step.userInput.file">-->
-<!--<p class="control-title" translate>Application Bits</p>-->
-<!--<p translate>-->
-<!--You can upload a zip file containing your application by either selecting the file below or by dragging and dropping-->
-<!--it onto this area. Alternatively provide a github URL in the box below.-->
-<!--</p>-->
-<!--<div>-->
-<!--<input id="deploy-app-choose-bits" fileread="step.userInput.file" type="file"/>-->
-<!--<label for="deploy-app-choose-bits" class="btn btn-default btn-sm">Select Deploy Bits</label>-->
-<!--</div>-->
-<!--<br>-->
-<!--<div class="form-group form-group-large">-->
-<!--<label class="control-label" translate>Application File</label>-->
-<!--<input type="text" class="form-control" ng-value="step.userInput.file.name" readonly/>-->
-<!--</div>-->
-<!--<div class="form-group form-group-large" focusable-input>-->
-<!--<label class="control-label" translate>Github url</label>-->
-<!--<input type="text" class="form-control" ng-model="step.userInput.github" ng-change="step.userInput.file = null"/>-->
-<!--</div>-->
-<!--</div>-->
-<p ng-if="!step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.file</p>
-<p ng-if="step.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.folder</p>
-<div class="deploy-app-source-area" file-drop item-drop="step.dropItemHandler">
+<p ng-if="!step.data.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.file</p>
+<p ng-if="step.data.folderSupport" class="deploy-app-choose-source" translate>deploy-app-dialog.step-source.source.folder</p>
+<div class="deploy-app-source-area" file-drop item-drop="step.data.dropItemHandler">
   <div class="deploy-app-source">
     <div class="deploy-app-source-github">
-      <radio-input ng-model="step.userInput.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-source.github.label"></radio-input>
+      <radio-input ng-model="step.wizard.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-source.github.label"></radio-input>
+      <!---->
       <app-deploy-source-git
-        is-valid="step.userInput.isValid"
+        source-type="step.wizard.sourceType"
         user-input="step.userInput"
         data="step.data"
-        form-name="deploy-info-form">
+        form-name="deploy-info-form"
+        valid="step.data.git.valid"
+        drop-info="step.data.dropInfo"
+      >
       </app-deploy-source-git>
     </div>
 
     <div class="deploy-app-source-local">
-      <radio-input ng-if="!step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.file.label"></radio-input>
-      <radio-input ng-if="step.folderSupport" ng-model="step.userInput.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.folder.label"></radio-input>
-      <div class="deploy-app-github">
-        <div class="deploy-app-github-form">
-          <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
-            <label ng-if="!step.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
-            <label ng-if="step.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
-            <input fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"></input>
-            <input webkitdirectory fileread="step.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"></input>
-            <!-- File support only -->
-            <label ng-if="!step.folderSupport" class="form-control clickable" for="localPathSelectFile">
-              <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
-              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-source.local.file.prompt</span>
-            </label>
-            <!-- File and Folder support -->
-            <label ng-if="step.folderSupport" class="form-control">
-              <span ng-if="step.userInput.localPath">{{ step.userInput.localPath }}</span>
-              <span ng-if="!step.userInput.localPath" translate>deploy-app-dialog.step-source.local.folder.prompt</span>
-              <label class="deploy-app-form-btn" for="localPathSelectFile">
-                <i class="material-icons">insert_drive_file</i>
-              </label>
-              <label class="deploy-app-form-btn" for="localPathSelectFolder">
-                <i class="material-icons">folder</i>
-              </label>
-            </label>
-          </div>
-
-          <!-- File info -->
-          <div class="deploy-app-source-details deploy-app-github-details" ng-if="step.userInput.fileScanData.files">
-            <div class="deploy-app-github-info deploy-app-file-details">
-              <i class="material-icons">file_upload</i>
-              <p translate translate-values="{files: step.userInput.fileScanData.files, total: step.bytesToHumanSize(step.userInput.fileScanData.total)}">deploy-app-dialog.step-source.local.info</p>
-            </div>
-            <div class="deploy-app-found-cfignore" ng-if="step.userInput.cfIgnoreFile">
-              <p translate>deploy-app-dialog.step-source.local.cfignore</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <radio-input ng-if="!step.data.folderSupport" ng-model="step.wizard.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.file.label"></radio-input>
+      <radio-input ng-if="step.data.folderSupport" ng-model="step.wizard.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.folder.label"></radio-input>
+      <!---->
+      <app-deploy-source-local
+        source-type="step.wizard.sourceType"
+        user-input="step.userInput"
+        data="step.data"
+        form-name="deploy-info-form"
+        valid="step.data.source.valid"
+        drop-info="step.data.dropInfo"
+        folder-support="step.data.folderSupport"
+        show-busy="step.showBusy"
+      >
+      </app-deploy-source-local>
     </div>
   </div>
 </div>
-
-<!--<p class="control-title" translate>deploy-app-dialog.step-source.manifest.label</p>-->
-<!--<p class="" translate>deploy-app-dialog.step-source.manifest.description</p>-->
-<!--<div class="form-group form-group-large" focusable-input>-->
-<!--<label class="control-label" translate>deploy-app-dialog.step-source.manifest.path-label</label>-->
-<!--<input type="text" class="form-control" ng-model="step.userInput.manifest.location"-->
-<!--placeholder="{{'deploy-app-dialog.step-source.manifest.path-placeholder' | translate}}"-->
-<!--required/>-->
-<!--</div>-->

@@ -5,7 +5,7 @@
     .module('cf-app-push')
     .factory('appDeployStepDeployingService', AppDeployStepDeployingService);
 
-  function AppDeployStepDeployingService($q, $location, $translate) {
+  function AppDeployStepDeployingService($q, $location, $translate, $timeout) {
 
     var socketEventTypes = {
       DATA: 20000,
@@ -64,7 +64,7 @@
             },
             onEnter: function () {
               session.wizard.allowBack = false;
-              return startDeploy(data, userInput).catch(function (error) {
+              return startDeploy(session, data, userInput).catch(function (error) {
                 session.wizard.allowBack = true;
                 return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
               });
@@ -125,7 +125,7 @@
       return url;
     }
 
-    function startDeploy(data, userInput) {
+    function startDeploy(session, data, userInput) {
 
       data.deployStatus = data.deployState.UNKNOWN;
       session.wizard.hasPushStarted = false;
@@ -158,9 +158,9 @@
       }
 
       function sendSourceMetadata() {
-        if (userInput.sourceType === 'github') {
+        if (session.wizard.sourceType === 'github') {
           sendGitHubSourceMetadata();
-        } else if (userInput.sourceType === 'local') {
+        } else if (session.wizard.sourceType === 'local') {
           sendLocalSourceMetadata();
         }
       }

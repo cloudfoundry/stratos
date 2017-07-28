@@ -101,18 +101,18 @@
         source: {}
       },
       userInput: {
-        sourceType: 'github',
         deploying: {},
         destination: {},
         source: {}
       },
       wizard: {
-        allowBack: true
+        allowBack: true,
+        sourceType: 'github'
       }
     };
 
     var stepLocation = appDeployStepDestinationService.getStep(session);
-    var stepSource = appDeployStepSourceService.getStep(session, $scope);
+    var stepSource = appDeployStepSourceService.getStep(session);
     var stepDeploy = appDeployStepDeployingService.getStep(session);
 
     function destroy() {
@@ -125,7 +125,7 @@
     vm.options = {
       workflow: {
         initControllers: function (wizardCtrl) {
-          vm.options.wizardCtrl = wizardCtrl;
+          session.showBusy = wizardCtrl.showBusy;
         },
         disableJump: true,
         allowCancelAtLastStep: true,

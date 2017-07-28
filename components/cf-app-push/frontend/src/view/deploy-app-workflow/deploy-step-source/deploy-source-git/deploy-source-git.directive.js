@@ -15,10 +15,12 @@
   function DeploySourceGit() {
     return {
       scope: {
+        sourceType: '=',
         userInput: '=',
         data: '=',
         formName: '@',
-        valid: '='
+        valid: '=',
+        dropInfo: '='
       },
       bindToController: true,
       controller: DeploySourceGitController,
@@ -38,7 +40,14 @@
   function DeploySourceGitController($http, $scope) {
     var vm = this;
 
-    vm.isValid = isValid;
+    $scope.$watch(function () {
+      //TODO: RC Improve - this should be valid if it has all the userInput fields required
+      return vm.userInput.githubProjectValid;
+    }, function () {
+      vm.valid = vm.userInput.githubProjectValid;
+    });
+
+    var gitHubUrlBase = 'https://github.com/';
 
     var debounceGithubProjectFetch = _.debounce(function () {
       var project = vm.userInput.githubProject;
@@ -63,7 +72,7 @@
                 };
               }));
 
-              var branch = vm.userInput.autoSelectGithubBranch ? vm.userInput.autoSelectGithubBranch : vm.githubProject.default_branch;
+              var branch = vm.userInput.autoSelectGithubBranch ? vm.userInput.autoSelectGithubBranch : vm.data.githubProject.default_branch;
               vm.userInput.autoSelectGithubBranch = undefined;
               var foundBranch = _.find(vm.data.githubBranches, function (o) {
                 return o.value && o.value.name === branch;
@@ -107,9 +116,40 @@
       }
     });
 
-    function isValid() {
-      return vm.userInput.githubProjectValid;
+    $scope.$watch(function () {
+      return vm.dropInfo;
+    }, function (newVal, oldVal) {
+      if (oldVal !== newVal) {
+        var info = newVal;
+        // Check if this is a GitHub link
+        if (angular.isString(info.value) && info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
+          vm.sourceType = 'github';
+          var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
+          if (urlParts.length > 1) {
+            var branch;
+            if (urlParts.length > 3 && urlParts[2] === 'tree') {
+              branch = urlParts[3];
+            }
+            var project = urlParts[0] + '/' + urlParts[1];
+            if (vm.userInput.githubProject === project) {
+              // Project is the same, so just change the branch
+              selectBranch(branch ? branch : vm.data.githubProject.default_branch);
+            } else {
+              vm.userInput.autoSelectGithubBranch = branch;
+              vm.userInput.githubProject = project;
+            }
+          }
+        }
+      }
+    });
+
+    function selectBranch(branch) {
+      var foundBranch = _.find(vm.data.githubBranches, function (o) {
+        return o.value && o.value.name === branch;
+      });
+      vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
     }
+
   }
 
 })();

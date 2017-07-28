@@ -1,13 +1,12 @@
 <div class="deploy-app-github">
   <div class="deploy-app-github-form">
     <div class="form-group form-group-large" focusable-input
-         ng-class="{'has-error': dplyGitCtrl.userInput.githubProjectValid === false && wizardForm[dplyGitCtrl.formName].githubProject.$dirty}">
+         ng-class="{'has-error': dplyGitCtrl.userInput.githubProjectValid === false}">
       <label class="control-label" translate>deploy-app-dialog.step-source.github.project-label</label>
-      <span class="control-message" translate ng-if="dplyGitCtrl.userInput.githubProjectValid === false && wizardForm[dplyGitCtrl.formName].githubProject.$dirty">
+      <span class="control-message" translate ng-if="dplyGitCtrl.userInput.githubProjectValid === false">
                 deploy-app-dialog.step-source.github.project-not-found
             </span>
       <input
-        ng-disabled="dplyGitCtrl.userInput.sourceType !== 'github'"
         type="text" class="form-control" name="githubProject" ng-model="dplyGitCtrl.userInput.githubProject"
         placeholder="{{'deploy-app-dialog.step-source.github.project-placeholder' | translate}}"/>
     </div>
@@ -18,23 +17,23 @@
         ng-model="dplyGitCtrl.userInput.githubBranch"
         input-options="dplyGitCtrl.data.githubBranches"
         placeholder="{{ 'deploy-app-dialog.step-source.github.branch-placeholder' | translate}}"
-        disabled="!dplyGitCtrl.userInput.githubProjectValid || dplyGitCtrl.userInput.sourceType !== 'github'">
+        disabled="!dplyGitCtrl.userInput.githubProjectValid">
       </search-box>
     </div>
 
     <!-- Information about the selected GitHub project -->
     <div class="deploy-app-source-details deploy-app-github-details"
-         ng-class="{'deploy-app-invisible': !(dplyGitCtrl.userInput.githubProjectValid && dplyGitCtrl.githubProject)}" >
+         ng-class="{'deploy-app-invisible': !(dplyGitCtrl.userInput.githubProjectValid && dplyGitCtrl.data.githubProject)}" >
       <div class="deploy-app-github-info">
         <div class="project">
-          <img ng-src="{{dplyGitCtrl.githubProject.owner.avatar_url}}"/>
+          <img ng-src="{{dplyGitCtrl.data.githubProject.owner.avatar_url}}"/>
           <div class="project-info">
             <div>
               <a href="https://www.github.com/{{dplyGitCtrl.userInput.githubProjectCached}}"
                  rel="noopener noreferrer" target="_blank">{{dplyGitCtrl.userInput.githubProjectCached}}
               </a>
             </div>
-            {{ dplyGitCtrl.githubProject.description | limitTo:50}} <span ng-if="dplyGitCtrl.githubProject.description.length > 50">...</span>
+            {{ dplyGitCtrl.data.githubProject.description | limitTo:50}} <span ng-if="dplyGitCtrl.data.githubProject.description.length > 50">...</span>
           </div>
         </div>
 
