@@ -39,11 +39,11 @@ To install the Console
 helm install stratos-ui/console --namespace=console --name my-console
 ```
 
-> You can change the namespace (--namespace) and the release name (--name) to value of your choice.
+> You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
 This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
-You should now be able to access the Console in a web browser by following [the instructions](Accessing the Console) below.
+You should now be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
 ## Deploying using the GitHub repository
 
@@ -61,7 +61,7 @@ Run helm install:
 $ helm install console --namespace console --name my-console
 ```
 
-> You can change the namespace (--namespace) and the release name (--name) to value of your choice.
+> You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
 This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
@@ -74,7 +74,7 @@ To check the status of the instance use the following command:
 helm status my-console
 ```
 
-> Note: Replace `my-console` with the value you used for the `name` paramemter, or if you did not provide one, use the `helm list` command to find the relase name that was automatically generated for you.
+> Note: Replace `my-console` with the value you used for the `name` parameter, or if you did not provide one, use the `helm list` command to find the release name that was automatically generated for you.
 
 Once the instance is in `DEPLOYED` state, find the IP address and port that the console is running on:
 
