@@ -64,15 +64,15 @@
       "event-type": {
         "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (invalid branch), please ensure github details are correct",
         "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure github details are correct and try again",
-        "CLOSE_FAILURE": "Unknown failure",
-        "CLOSE_INVALID_MANIFEST": "Invalid manifest in repository",
-        "CLOSE_NO_MANIFEST": "Failed to find manifest in repository",
-        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push unsuccessful",
+        "CLOSE_FAILURE": "Unknown failure. See log for more information.",
+        "CLOSE_INVALID_MANIFEST": "Invalid manifest",
+        "CLOSE_NO_MANIFEST": "Failed to find manifest",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push unsuccessful. See log for details.",
         "CLOSE_NO_SESSION": "Failed to create session",
         "CLOSE_NO_CNSI": "Unknown [[@:cloud-foundry]] instance",
         "CLOSE_NO_CNSI_USERTOKEN": "Invalid [[@:cloud-foundry]] token"
       },
-      "failed-connection": "Failed to open connection",
+      "failed-connection": "Failed to open socket connection",
       "failed-unknown": "Unknown failure"
     }
   }

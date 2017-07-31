@@ -17,8 +17,6 @@
       scope: {
         sourceType: '=',
         userInput: '=',
-        data: '=',
-        formName: '@',
         valid: '=',
         dropInfo: '=',
         folderSupport: '=',
@@ -35,20 +33,25 @@
    * @namespace cf-app-push.DeploySourceGitController
    * @memberof cf-app-push
    * @name DeploySourceGitController
-   * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.consoleInfo} consoleInfo - the consoleInfo model
+   * @param {object} $translate - the angular $translate service
+   * @param {object} $q - the angular $q service
+   * @param {object} $scope - the angular $scope service
+   * @param {object} itemDropHelper - the item drop helper service
+   * @param {object} appUtilsService - the App Utils service
    * @constructor
    */
-  function DeploySourceLocalController($timeout, $translate, $q, $scope, itemDropHelper) {
+  function DeploySourceLocalController($translate, $q, $scope, $timeout, itemDropHelper, appUtilsService) {
     var vm = this;
 
+    vm.data = {
+      bytesToHumanSize: appUtilsService.bytesToHumanSize
+    };
     vm.userInput.localPathFile = '';
 
     var CF_IGNORE_FILE = '.cfignore';
     var CF_DEFAULT_IGNORES = '.cfignore\n_darcs\n.DS_Store\n.git\n.gitignore\n.hg\n.svn\n';
 
     $scope.$watch(function () {
-      //TODO: RC Improve - this should be valid if it has all the userInput fields required
       return vm.userInput.fileScanData;
     }, function () {
       vm.valid = angular.isDefined(vm.userInput.fileScanData);
@@ -66,25 +69,45 @@
     $scope.$watch(function () {
       return vm.dropInfo;
     }, function (newVal, oldVal) {
-      if (oldVal !== newVal) {
-        vm.cfIgnoreFile = false;
-        var info = newVal;
-        vm.userInput.localPath = info.value ? info.value.name : '';
+      var info = newVal;
+      if (!info) {
+        return;
+      }
 
-        if (info.isFiles) {
-          vm.showBusy('deploy-app-dialog.step-source.scanning');
-          itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
-            vm.sourceType = 'local';
-            vm.userInput.fileScanData = results;
-            vm.cfIgnoreFile = results.foundIgnoreFile;
-          }).finally(function () {
-            vm.showBusy();
-          });
-        } else if (info.isArchiveFile) {
-          // vm.sourceType = 'local';
-          var res = itemDropHelper.initScanner();
-          vm.userInput.fileScanData = res.addFile(info.value);
-          vm.sourceType = 'local';
+      if (info.isFiles || info.isArchiveFile) {
+        // Ensure we always update the sourceType even if the val has not changed
+        vm.sourceType = 'local';
+
+        if (oldVal !== newVal) {
+          vm.cfIgnoreFile = false;
+          vm.userInput.localPath = info.value ? info.value.name : '';
+
+          if (info.isFiles) {
+            var showBusy = true;
+            var hasShownBusy = false;
+            // For small files the busy screen might only show for a few short moments. To avoid a UI blip pause before
+            // showing the screen
+            $timeout(function () {
+              if (showBusy) {
+                vm.showBusy('deploy-app-dialog.step-source.scanning');
+                hasShownBusy = true;
+              }
+            }, 100);
+
+            itemDropHelper.traverseFiles(info.value, CF_IGNORE_FILE, CF_DEFAULT_IGNORES).then(function (results) {
+              vm.userInput.fileScanData = results;
+              vm.cfIgnoreFile = results.foundIgnoreFile;
+            }).finally(function () {
+              showBusy = false;
+              if (hasShownBusy) {
+                vm.showBusy();
+              }
+            });
+          } else if (info.isArchiveFile) {
+            // vm.sourceType = 'local';
+            var res = itemDropHelper.initScanner();
+            vm.userInput.fileScanData = res.addFile(info.value);
+          }
         }
       }
     });

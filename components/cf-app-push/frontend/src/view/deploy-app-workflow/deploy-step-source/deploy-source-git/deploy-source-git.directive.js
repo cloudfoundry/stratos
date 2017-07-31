@@ -17,8 +17,6 @@
       scope: {
         sourceType: '=',
         userInput: '=',
-        data: '=',
-        formName: '@',
         valid: '=',
         dropInfo: '='
       },
@@ -33,19 +31,16 @@
    * @namespace cf-app-push.DeploySourceGitController
    * @memberof cf-app-push
    * @name DeploySourceGitController
-   * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.consoleInfo} consoleInfo - the consoleInfo model
+   * @param {object} $http - the angular $http service
+   * @param {object} $scope - the angular $scope service
    * @constructor
    */
   function DeploySourceGitController($http, $scope) {
     var vm = this;
 
-    $scope.$watch(function () {
-      //TODO: RC Improve - this should be valid if it has all the userInput fields required
-      return vm.userInput.githubProjectValid;
-    }, function () {
-      vm.valid = vm.userInput.githubProjectValid;
-    });
+    vm.data = {
+      githubBranches: []
+    };
 
     var gitHubUrlBase = 'https://github.com/';
 
@@ -95,8 +90,14 @@
     }, 1000);
 
     $scope.$watch(function () {
+      return vm.userInput.githubProjectValid && vm.userInput.githubProject && vm.userInput.githubBranch.name;
+    }, function (newVal) {
+      vm.valid = newVal;
+    });
+
+    $scope.$watch(function () {
       return vm.userInput.githubProject;
-    }, function (oldVal, newVal) {
+    }, function (newVal, oldVal) {
       if (oldVal !== newVal) {
         debounceGithubProjectFetch();
       }

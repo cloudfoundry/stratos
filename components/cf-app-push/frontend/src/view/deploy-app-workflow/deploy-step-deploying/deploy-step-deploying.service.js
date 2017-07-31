@@ -5,7 +5,20 @@
     .module('cf-app-push')
     .factory('appDeployStepDeployingService', AppDeployStepDeployingService);
 
-  function AppDeployStepDeployingService($q, $location, $translate, $timeout, $websocket, $log, modelManager) {
+  /**
+   * @memberof appDeployStepDeployingService
+   * @name AppDeployStepDeployingService
+   * @constructor
+   * @param {object} $q - the angular $q service
+   * @param {object} $location - the angular $location service
+   * @param {object} $translate - the angular $translate service
+   * @param {object} $timeout - the angular $timeout service
+   * @param {object} $websocket - the angular $websocket service
+   * @param {object} $log - the angular $log service
+   * @param {object} $filter - the angular $filter service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   */
+  function AppDeployStepDeployingService($q, $location, $translate, $timeout, $websocket, $log, $filter, modelManager) {
 
     var socketEventTypes = {
       DATA: 20000,
@@ -47,11 +60,11 @@
 
     return {
       getStep: function (session) {
-        var data = session.data.deploying;
-
-        data.deployState = deployState;
-        //TODO: RC not picked up? getting failure to filter
-        data.logFilter = logFilter;
+        var data = {
+          deployState: deployState,
+          logFilter: logFilter
+        };
+        var wizardData = session.wizard;
 
         var step = {
           title: 'deploy-app-dialog.step-deploying.title',
@@ -61,12 +74,12 @@
           nextBtnText: 'deploy-app-dialog.step-deploying.next-button',
           showBusyOnEnter: 'deploy-app-dialog.step-deploying.busy',
           allowNext: function () {
-            return !!session.wizard.newAppGuid;
+            return !!wizardData.newAppGuid;
           },
           onEnter: function () {
-            session.wizard.allowBack = false;
-            return startDeploy(session, step).catch(function (error) {
-              session.wizard.allowBack = true;
+            wizardData.allowBack = false;
+            return startDeploy(session, data, step).catch(function (error) {
+              wizardData.allowBack = true;
               return $q.reject($translate.instant('deploy-app-dialog.step-deploying.submit-failed', {reason: error}));
             });
           },
@@ -76,14 +89,14 @@
         return {
           step: step,
           destroy: function () {
-            $timeout.cancel(session.data.discoverAppTimer);
-            resetSocket(session.data.webSocket);
+            $timeout.cancel(data.discoverAppTimer);
+            resetSocket(data.webSocket);
           }
         };
       }
     };
 
-    function discoverAppGuid(data, destinationUserInput, appName) {
+    function discoverAppGuid(wizardData, data, destinationUserInput, appName) {
       if (data.discoverAppTimer) {
         return;
       }
@@ -97,15 +110,14 @@
         spaceModel.listAllAppsForSpace(destinationUserInput.serviceInstance.guid, destinationUserInput.space.metadata.guid, params)
           .then(function (apps) {
             if (apps.length === 1) {
-              //TODO: RC session undefined
-              session.wizard.newAppGuid = apps[0].metadata.guid;
+              wizardData.newAppGuid = apps[0].metadata.guid;
             }
           })
           .finally(function () {
             data.discoverAppTimer = undefined;
             // Did not find the app - try again
-            if (!session.wizard.newAppGuid) {
-              discoverAppGuid(data, destinationUserInput, appName);
+            if (!wizardData.newAppGuid) {
+              discoverAppGuid(wizardData, data, destinationUserInput, appName);
             }
           });
       }, DISCOVER_APP_TIMER_PERIOD);
@@ -127,21 +139,20 @@
       return url;
     }
 
-    function startDeploy(session, step) {
+    function startDeploy(session, data, step) {
 
-      var data = session.data.deploying;
-
+      var wizardData = session.wizard;
       var destinationUserInput = session.userInput.destination;
       var sourceUserInput = session.userInput.source;
 
       data.deployStatus = deployState.UNKNOWN;
-      session.wizard.hasPushStarted = false;
-      session.wizard.newAppGuid = null;
+      wizardData.hasPushStarted = false;
+      wizardData.newAppGuid = null;
 
       var deployingPromise = $q.defer();
 
       function pushStarted() {
-        session.wizard.hasPushStarted = true;
+        wizardData.hasPushStarted = true;
         data.deployStatus = deployState.PUSHING;
         deployingPromise.resolve();
         data.uploadingFiles = undefined;
@@ -156,7 +167,7 @@
       }
 
       function deployFailed(errorString) {
-        session.wizard.allowBack = true;
+        wizardData.allowBack = true;
         data.deployStatus = deployState.FAILED;
         var failureDescription = $translate.instant(errorString);
         data.deployFailure = $translate.instant('deploy-app-dialog.step-deploying.title-deploy-failed', {reason: failureDescription});
@@ -165,15 +176,14 @@
       }
 
       function sendSourceMetadata() {
-        if (session.wizard.sourceType === 'github') {
+        if (wizardData.sourceType === 'github') {
           sendGitHubSourceMetadata();
-        } else if (session.wizard.sourceType === 'local') {
+        } else if (wizardData.sourceType === 'local') {
           sendLocalSourceMetadata();
         }
       }
 
       function sendGitHubSourceMetadata() {
-        //TODO: RC Add to validation check
         var github = {
           project: sourceUserInput.githubProject,
           branch: sourceUserInput.githubBranch.name
@@ -317,7 +327,7 @@
             var manifest = angular.fromJson(logData.message);
             var app = _.get(manifest, 'Applications[0]', {});
             if (app.Name) {
-              discoverAppGuid(data, destinationUserInput, app.Name);
+              discoverAppGuid(wizardData, data, destinationUserInput, app.Name);
             }
             break;
           case socketEventTypes.SOURCE_REQUIRED:

@@ -5,6 +5,13 @@
     .module('cf-app-push')
     .factory('appDeployStepDestinationService', AppDeployStepDestinationService);
 
+  /**
+   * @memberof appDeployStepDestinationService
+   * @name AppDeployStepDestinationService
+   * @constructor
+   * @param {object} $q - the angular $q service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   */
   function AppDeployStepDestinationService($q, modelManager) {
 
     return {
@@ -12,13 +19,15 @@
         var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
         var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-        var data = session.data.destination;
-        var userInput = session.userInput.destination;
+        var data = {
+          serviceInstances: []
+        };
 
-        data.serviceInstances = [];
+        var userInput = session.userInput.destination;
         userInput.serviceInstance = null;
         userInput.organization = null;
         userInput.space = null;
+        var wizardData = session.wizard;
 
         return {
           step: {
@@ -29,7 +38,7 @@
             userInput: userInput,
             showBusyOnEnter: 'deploy-app-dialog.step-destination.busy',
             onEnter: function () {
-              if (data.deployStatus) {
+              if (wizardData.fetchedServiceInstances) {
                 // Previously been at this step, no need to fetch instances again
                 return;
               }
@@ -45,14 +54,13 @@
                     })
                     .value();
                   [].push.apply(data.serviceInstances, validServiceInstances);
+                  wizardData.fetchedServiceInstances = true;
                 }).catch(function () {
                   return $q.reject('deploy-app-dialog.step-destination.enter-failed');
                 });
             }
           },
-          destroy: function () {
-            //TODO: RC
-          }
+          destroy: angular.noop
         };
       }
     };

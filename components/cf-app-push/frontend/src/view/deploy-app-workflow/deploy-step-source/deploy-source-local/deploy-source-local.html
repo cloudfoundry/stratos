@@ -1,17 +1,17 @@
 <div class="deploy-app-github">
   <div class="deploy-app-github-form">
     <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
-      <label ng-if="!dplyLocalCtrl.data.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
-      <label ng-if="dplyLocalCtrl.data.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
+      <label ng-if="!dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
+      <label ng-if="dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
       <input fileread="dplyLocalCtrl.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"></input>
       <input webkitdirectory fileread="dplyLocalCtrl.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"></input>
       <!-- File support only -->
-      <label ng-if="!dplyLocalCtrl.data.folderSupport" class="form-control clickable" for="localPathSelectFile">
+      <label ng-if="!dplyLocalCtrl.folderSupport" class="form-control clickable" for="localPathSelectFile">
         <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
         <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.file.prompt</span>
       </label>
       <!-- File and Folder support -->
-      <label ng-if="dplyLocalCtrl.data.folderSupport" class="form-control">
+      <label ng-if="dplyLocalCtrl.folderSupport" class="form-control">
         <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
         <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.folder.prompt</span>
         <label class="deploy-app-form-btn" for="localPathSelectFile">

@@ -4,12 +4,9 @@
   <div class="deploy-app-source">
     <div class="deploy-app-source-github">
       <radio-input ng-model="step.wizard.sourceType" input-value="'github'" input-label="deploy-app-dialog.step-source.github.label"></radio-input>
-      <!---->
       <app-deploy-source-git
         source-type="step.wizard.sourceType"
         user-input="step.userInput"
-        data="step.data"
-        form-name="deploy-info-form"
         valid="step.data.git.valid"
         drop-info="step.data.dropInfo"
       >
@@ -19,12 +16,9 @@
     <div class="deploy-app-source-local">
       <radio-input ng-if="!step.data.folderSupport" ng-model="step.wizard.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.file.label"></radio-input>
       <radio-input ng-if="step.data.folderSupport" ng-model="step.wizard.sourceType" input-value="'local'" input-label="deploy-app-dialog.step-source.local.folder.label"></radio-input>
-      <!---->
       <app-deploy-source-local
         source-type="step.wizard.sourceType"
         user-input="step.userInput"
-        data="step.data"
-        form-name="deploy-info-form"
         valid="step.data.source.valid"
         drop-info="step.data.dropInfo"
         folder-support="step.data.folderSupport"

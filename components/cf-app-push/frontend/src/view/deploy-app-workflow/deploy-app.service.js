@@ -75,31 +75,19 @@
    * @name DeployAppController
    * @constructor
    * @param {object} $scope - the angular $scope service
-   * @param {object} $q - the angular $q service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @param {object} $state - the angular $state service
-   * @param {object} $location - the angular $location service
-   * @param {object} $websocket - the angular $websocket service
-   * @param {object} $translate - the angular $translate service
-   * @param {object} $log - the angular $log service
-   * @param {object} $http - the angular $http service
-   * @param {object} $timeout - the angular $timeout service
-   * @param {object} $filter - the angular $filter service
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} itemDropHelper - the item drop helper service
-   * @param {object} appUtilsService - the App Utils service
+   * @param {object} appDeployStepDestinationService - Service to provide the destination step (org/space of the app)
+   * @param {object} appDeployStepSourceService - Service to provide the source step (where the app source come from)
+   * @param {object} appDeployStepDeployingService - Service to provide the deploying step
    */
-  function DeployAppController($scope, $uibModalInstance, $state, appDeployStepDeployingService,
-                               appDeployStepDestinationService, appDeployStepSourceService) {
+  function DeployAppController($scope, $uibModalInstance, $state, appDeployStepDestinationService,
+                               appDeployStepSourceService, appDeployStepDeployingService) {
 
     var vm = this;
 
+    // Contains the info the user has submitted in all steps and any vars that are used in multiple wizard steps
     var session = {
-      data: {
-        deploying: {},
-        destination: {},
-        source: {}
-      },
       userInput: {
         deploying: {},
         destination: {},
@@ -130,7 +118,7 @@
         disableJump: true,
         allowCancelAtLastStep: true,
         allowBack: function () {
-          return session.wizard.allowBack;
+          return session ? session.wizard.allowBack : false;
         },
         title: 'deploy-app-dialog.title',
         btnText: {
