@@ -6,3 +6,4 @@ applications:
   timeout: 180
   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
   health-check-type: port
+  stack: cflinuxfs2
