@@ -167,7 +167,7 @@ spec:
         - name: POSTGRES_PASSWORD_FILE
           value: /etc/secrets/stolon
         - name: PGDATA
-          value: /stolon-data/postgres
+          value: /stolon-data
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
