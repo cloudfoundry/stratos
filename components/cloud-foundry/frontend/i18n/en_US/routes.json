@@ -10,11 +10,11 @@
     },
     "unmap-apps": {
       "title": "Unmap Route from Applications",
-      "description": "@:routes.unmap-app.description",
-      "button-yes": "@:routes.unmap-app.button-yes",
-      "error": "@:routes.unmap-app.error",
+      "description": "@:cf.routes.unmap-app.description",
+      "button-yes": "@:cf.routes.unmap-app.button-yes",
+      "error": "@:cf.routes.unmap-app.error",
       "partial-error": "Some applications failed to unmap from route",
-      "success": "@:routes.unmap-app.success"
+      "success": "@:cf.routes.unmap-app.success"
     },
     "delete": {
       "title": "Delete Route",
