@@ -41,9 +41,13 @@ helm install stratos-ui/console --namespace=console --name my-console
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
-This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
+This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster. If you are deploying into a cluster that is not configured with a dynamic storage provisioner like `glusterfs` or `ceph`. You should specify the `noShared` override when installing the chart. 
 
-You should now be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
+```
+helm install --set noShared=true stratos-ui/console --namespace=console --name my-console
+```
+
+After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
 ## Deploying using the GitHub repository
 
@@ -142,8 +146,7 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 
 ```
 ---
-persistence:
-    storageClass: persistent
+storageClass: persistent
 ```
 
 Run Helm with the override:
@@ -151,7 +154,9 @@ Run Helm with the override:
 helm install -f override.yaml stratos-ui/console
 ```
 #### Create default Storage Class
-Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. Save the file to `storageclass.yaml`
+Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link] (https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
+
+If the hostpath provisioner is available, save the file to `storageclass.yaml`
 
 ```
 ---
@@ -161,7 +166,7 @@ metadata:
   name: default
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/host-path
+provisioner: kubernetes.io/host-path # Or whatever the local hostpath provisioner is called
 ```
 
 To create it in your kubernetes cluster, execute the following.
