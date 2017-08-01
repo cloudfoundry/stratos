@@ -1,3 +1,4 @@
+{{- if not .Values.noShared }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -74,3 +75,4 @@ spec:
        - name: "{{ .Release.Name }}-secret"
          secret:
            secretName: "{{ .Release.Name }}-secret"
+{{- end }}
