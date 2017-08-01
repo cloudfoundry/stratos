@@ -1,12 +1,11 @@
+$deploy-app-step-height: 350px;
+$deploy-app-step-padding-bottom: 6px;
+
 @import "deploy-step-deploying/deploy-step-deploying";
 @import "deploy-step-destination/deploy-step-destination";
 @import "deploy-step-source/deploy-step-source";
 
 .deploy-app-wizard.modal.detail-view.detail-view-dialog>.modal-dialog>.modal-content .detail-view-content.deploy-app wizard .wizard-step {
-  padding: 0 $console-unit-space 6px $console-unit-space;
-  min-height: 320px;
-}
-
-.deploy-app {
-
+  padding: 0 $console-unit-space $deploy-app-step-padding-bottom $console-unit-space;
+  min-height: $deploy-app-step-height
 }

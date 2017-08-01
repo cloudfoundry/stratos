@@ -12,6 +12,8 @@
     },
     "step-source": {
       "title": "Source",
+      "choose-label": "Source Type",
+      "choose-placeholder": "Select the source type",
       "github": {
         "label": "Public Github",
         "project-label": "Project",
@@ -24,8 +26,8 @@
         "branch-last-commit-committer": ""
       },
       "source": {
-        "file": "Select a GitHub project, select a local archive file, or drag and drop a GitHub url or an archive file",
-        "folder": "Select a GitHub project, select a local archive file or folder, or drag and drop a GitHub url, an archive file or folder"
+        "file": "Select a source or drag and drop a GitHub url or an archive file",
+        "folder": "Select a source or drag and drop a GitHub url, an archive file or folder"
       },
       "local": {
         "file": {

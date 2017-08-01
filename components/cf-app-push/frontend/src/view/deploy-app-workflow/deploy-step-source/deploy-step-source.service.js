@@ -21,13 +21,23 @@
           dropInfo: undefined
         };
         data.dropItemHandler = _.partial(dropHandler, _, data);
+        data.sourceTypeOptions = [
+          {
+            value: 'github',
+            label: 'deploy-app-dialog.step-source.github.label'
+          },
+          {
+            value: 'local',
+            label: data.folderSupport ? 'deploy-app-dialog.step-source.local.folder.label' : 'deploy-app-dialog.step-source.local.file.label'
+          }
+        ];
 
         var userInput = session.userInput.source;
         var wizardData = session.wizard;
 
         userInput.githubProject = '';
         userInput.localPath = '';
-        userInput.fileScanData = '';
+        userInput.fileScanData = undefined;
 
         return {
           step: {

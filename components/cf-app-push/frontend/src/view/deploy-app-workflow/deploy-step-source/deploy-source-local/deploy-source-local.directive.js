@@ -36,6 +36,7 @@
    * @param {object} $translate - the angular $translate service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
+   * @param {object} $timeout - the angular $timeout service
    * @param {object} itemDropHelper - the item drop helper service
    * @param {object} appUtilsService - the App Utils service
    * @constructor
@@ -79,6 +80,9 @@
         vm.sourceType = 'local';
 
         if (oldVal !== newVal) {
+          // Clear the manually opened local path file (manual --> drag and drop --> manual)
+          delete vm.userInput.localPathFile;
+
           vm.cfIgnoreFile = false;
           vm.userInput.localPath = info.value ? info.value.name : '';
 
@@ -117,7 +121,7 @@
       // File list from a file input form field
       var res, rootFolderName, cfIgnoreFile;
       res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES);
-      vm.userInput.cfIgnoreFile = false;
+      vm.cfIgnoreFile = false;
       if (items.length === 1) {
         if (itemDropHelper.isArchiveFile(items[0].name)) {
           vm.userInput.fileScanData = res.addFile(items[0]);
@@ -148,7 +152,7 @@
 
         promise.then(function (ignores) {
           res = itemDropHelper.initScanner(CF_DEFAULT_IGNORES + ignores);
-          vm.userInput.cfIgnoreFile = !!ignores;
+          vm.cfIgnoreFile = !!ignores;
           res.rootFolderName = rootFolderName;
           _.each(items, function (file) {
             res.addFile(file);

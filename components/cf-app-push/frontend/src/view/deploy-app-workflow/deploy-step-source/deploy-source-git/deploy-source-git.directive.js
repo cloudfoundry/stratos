@@ -90,7 +90,10 @@
     }, 1000);
 
     $scope.$watch(function () {
-      return vm.userInput.githubProjectValid && vm.userInput.githubProject && vm.userInput.githubBranch.name;
+      return vm.userInput.githubProjectValid &&
+        vm.userInput.githubProject &&
+        vm.userInput.githubBranch &&
+        vm.userInput.githubBranch.name;
     }, function (newVal) {
       vm.valid = newVal;
     });

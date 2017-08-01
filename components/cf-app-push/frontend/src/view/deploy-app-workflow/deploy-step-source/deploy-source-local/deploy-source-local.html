@@ -1,5 +1,5 @@
-<div class="deploy-app-github">
-  <div class="deploy-app-github-form">
+<div class="deploy-app-local">
+  <div class="deploy-app-local-form">
     <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
       <label ng-if="!dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
       <label ng-if="dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
@@ -24,12 +24,12 @@
     </div>
 
     <!-- File info -->
-    <div class="deploy-app-source-details deploy-app-github-details" ng-if="dplyLocalCtrl.userInput.fileScanData.files">
-      <div class="deploy-app-github-info deploy-app-file-details">
+    <div class="deploy-app-source-details deploy-app-local-details" ng-if="dplyLocalCtrl.userInput.fileScanData.files">
+      <div class="deploy-app-local-info deploy-app-file-details">
         <i class="material-icons">file_upload</i>
         <p translate translate-values="{files: dplyLocalCtrl.userInput.fileScanData.files, total: dplyLocalCtrl.data.bytesToHumanSize(dplyLocalCtrl.userInput.fileScanData.total)}">deploy-app-dialog.step-source.local.info</p>
       </div>
-      <div class="deploy-app-found-cfignore" ng-if="dplyLocalCtrl.cfIgnoreFile">
+      <div class="deploy-app-local-info deploy-app-file-details deploy-app-found-cfignore" ng-if="dplyLocalCtrl.cfIgnoreFile">
         <p translate>deploy-app-dialog.step-source.local.cfignore</p>
       </div>
     </div>
