@@ -12,9 +12,11 @@ dbPassword: changeme
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+noShared: false
 images:
   console: stratos-console
   proxy: stratos-proxy
+  proxyNoShared: stratos-proxy-noshared
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job
