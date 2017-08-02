@@ -215,8 +215,8 @@
      */
     function disableNext() {
       var step = vm.steps[vm.currentIndex] || {};
-      if (_.isFunction(step.allowNext) && !step.allowNext()) {
-        return true;
+      if (_.isFunction(step.allowNext)) {
+        return !step.allowNext();
       }
       if ($scope.wizardForm) {
         var form = $scope.wizardForm[step.formName];

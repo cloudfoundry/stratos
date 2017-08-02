@@ -42,7 +42,8 @@
       SOURCE_FOLDER: 30002,
       SOURCE_FILE: 30003,
       SOURCE_FILE_DATA: 30004,
-      SOURCE_FILE_ACK: 30005
+      SOURCE_FILE_ACK: 30005,
+      SOURCE_GITURL: 30006
     };
 
     // How often to check for the app being created
@@ -176,10 +177,18 @@
       }
 
       function sendSourceMetadata() {
-        if (wizardData.sourceType === 'github') {
-          sendGitHubSourceMetadata();
+        if (wizardData.sourceType === 'git') {
+          sendGitMetadata();
         } else if (wizardData.sourceType === 'local') {
           sendLocalSourceMetadata();
+        }
+      }
+
+      function sendGitMetadata() {
+        if (sourceUserInput.gitType === 'github') {
+          sendGitHubSourceMetadata();
+        } else if (sourceUserInput.gitType === 'giturl') {
+          sendGitUrlSourceMetadata();
         }
       }
 
@@ -193,6 +202,28 @@
           message: angular.toJson(github),
           timestamp: Math.round((new Date()).getTime() / 1000),
           type: socketEventTypes.SOURCE_GITHUB
+        };
+
+        // Send the source metadata
+        data.webSocket.send(angular.toJson(msg));
+      }
+
+      function sendGitUrlSourceMetadata() {
+        // TODO: RC/IH
+        // - Sending a new socket event type to cover the git url source ('SOURCE_GITURL 30006', as opposed to event type 'SOURCE_GITHUB 30001')
+        // - Expecting two kinds of errors covered by existing socket events
+        // -- CLOSE_FAILED_CLONE: 40003
+        // -- CLOSE_FAILED_NO_BRANCH: 40004
+
+        var giturl = {
+          url: sourceUserInput.gitUrl,
+          branch: sourceUserInput.gitUrlBranch
+        };
+
+        var msg = {
+          message: angular.toJson(giturl),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_GITURL
         };
 
         // Send the source metadata
