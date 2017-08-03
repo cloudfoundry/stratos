@@ -11,7 +11,7 @@
    * @constructor
    * @param {object} itemDropHelper - the item drop helper service
    */
-  function AppDeployStepSourceService(itemDropHelper) {
+  function AppDeployStepSourceService(itemDropHelper, appDeploySourceExamples) {
 
     return {
       getStep: function (session) {
@@ -32,8 +32,16 @@
           }
         ];
 
+        if (appDeploySourceExamples && appDeploySourceExamples.length > 0) {
+          data.sourceTypeOptions.unshift({
+            value: 'example',
+            label: 'deploy-app-dialog.step-source.example'
+          });
+        }
+
         var userInput = session.userInput.source;
         var wizardData = session.wizard;
+        wizardData.sourceType = data.sourceTypeOptions[0].value;
 
         userInput.githubProject = '';
         userInput.localPath = '';
@@ -55,7 +63,8 @@
             stepCommit: true,
             allowNext: function () {
               return wizardData.sourceType === 'git' && _.get(data, 'git.valid') ||
-                wizardData.sourceType === 'local' && _.get(data, 'source.valid');
+                wizardData.sourceType === 'local' && _.get(data, 'source.valid') ||
+                wizardData.sourceType === 'example';
             }
           },
           destroy: angular.noop

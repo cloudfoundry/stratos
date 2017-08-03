@@ -15,6 +15,10 @@
     />
   </div>
   <div class="deploy-app-source-area-settings">
+    <div class="deploy-app-source-example"
+         ng-show="step.wizard.sourceType === 'example'">
+      <app-deploy-source-example source-type="step.wizard.sourceType" user-input="step.userInput"></app-deploy-source-example>
+    </div>
     <div class="deploy-app-source-github"
          ng-show="step.wizard.sourceType === 'git'">
       <app-deploy-source-git

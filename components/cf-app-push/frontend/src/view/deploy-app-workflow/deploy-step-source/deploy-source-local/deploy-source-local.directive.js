@@ -6,9 +6,9 @@
     .directive('appDeploySourceLocal', DeploySourceLocal);
 
   /**
-   * @namespace cf-app-push.accountActions
+   * @namespace cf-app-push
    * @memberof cf-app-push
-   * @name DeploySourceGit
+   * @name DeploySourceLocal
    * @description ????????
    * @returns {object} The ???????? directive definition object
    */
@@ -30,9 +30,9 @@
   }
 
   /**
-   * @namespace cf-app-push.DeploySourceGitController
+   * @namespace cf-app-push
    * @memberof cf-app-push
-   * @name DeploySourceGitController
+   * @name DeploySourceLocalController
    * @param {object} $translate - the angular $translate service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
