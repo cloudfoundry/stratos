@@ -17,9 +17,10 @@
     })
     .run(registerApplicationModel);
 
-  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils) {
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils,
+                                    appLocalStorage) {
     modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
-      cfAppStateService, $q, modelUtils));
+      cfAppStateService, $q, modelUtils, appLocalStorage));
   }
 
   /**
@@ -37,7 +38,7 @@
    * @property {number} pageSize - page size for pagination.
    * @class
    */
-  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils) {
+  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     var applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
     var loadingLimit = config.loadingLimit;
 
@@ -50,7 +51,7 @@
         appStateMap: {}
       },
       pageSize: config.pagination.pageSize,
-      filterParams: {
+      filterParams: angular.fromJson(appLocalStorage.getItem('cf.filterParams')) || {
         cnsiGuid: 'all',
         orgGuid: 'all',
         spaceGuid: 'all'
