@@ -31,6 +31,7 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
    * deploy, etc)
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
                                       appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {

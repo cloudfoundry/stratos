@@ -32,6 +32,7 @@
    * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
