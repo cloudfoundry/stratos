@@ -1,0 +1,25 @@
+<div class="deploy-app-example-modal-inner">
+
+  <table class="table table-outlined">
+    <thead>
+    <tr translate-namespace="deploy-app-dialog.step-source.example.table">
+      <th class="select-col"></th>
+      <th translate>.label</th>
+      <th translate>.description</th>
+      <th translate>.link</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="row-vertical-middle" ng-repeat="example in asyncTaskDialogCtrl.context.data.examples">
+      <td><radio-input ng-model="asyncTaskDialogCtrl.context.data.selection" input-value="example"></radio-input></td>
+      <td>{{ example.name || example.nameLocalised | translate }}</td>
+      <td>{{ example.description || example.descriptionLocalised | translate }}</td>
+      <td><a ng-if="example.link"
+             href="{{example.link}}"
+             rel="noopener noreferrer" target="_blank">{{example.link}}</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>

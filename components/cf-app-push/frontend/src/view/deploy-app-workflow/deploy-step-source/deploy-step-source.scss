@@ -45,4 +45,76 @@ $deploy-app-choose-source-height: 36px;
     align-items: center;
     justify-content: center;
   }
+
+  // Applies to buttons to choose a file or folder
+  .form-group.deploy-app-file-controls {
+    padding-right: 0;
+
+    .form-control.file-chooser {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+
+      + label {
+        border: none;
+        background-color: transparent;
+        padding: 0;
+        height: 19px;
+        line-height: 19px;
+        font-size: $font-size-medium;
+        margin: 0;
+        display: flex;
+
+        .deploy-app-form-btn {
+          height: $console-input-height;
+          width: $console-unit-space * 2;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: -25px;
+          border-right: 1px solid $rule;
+
+          &:hover {
+            background-color: $component-active-bg;
+            color: $component-active-color;
+          }
+
+          &:first-of-type {
+            border-left: 1px solid $rule;
+          }
+
+          &:last-child {
+            border-right: 0;
+          }
+        }
+
+        &.clickable {
+          cursor: pointer;
+        }
+
+        > i {
+          font-size: $icon-font-size-base;
+          margin-right: 6px;
+        }
+
+        > span {
+          margin: 0;
+          padding: 0;
+          flex: 1;
+        }
+
+        > span.file-placeholder {
+          opacity: 0.5;
+        }
+
+        > label {
+          margin: 0;
+          cursor: pointer;
+        }
+      }
+    }
+  }
 }

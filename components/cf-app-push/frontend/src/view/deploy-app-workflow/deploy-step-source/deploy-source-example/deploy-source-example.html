@@ -1,25 +1,15 @@
 <div class="deploy-app-example">
-  <!--existing-instances-table-->
-  <table class="table table-outlined ">
-    <thead>
-    <tr translate-namespace="deploy-app-dialog.step-source.example.table">
-      <th class="select-col"></th>
-      <th translate>.label</th>
-      <th translate>.description</th>
-      <th translate>.link</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr class="row-vertical-middle" ng-repeat="example in dplyExampleCtrl.examples">
-      <td><radio-input ng-model="dplyExampleCtrl.selection" input-value="example"></radio-input></td>
-      <td>{{ example.name || example.nameLocalised | translate }}</td>
-      <td>{{ example.description || example.descriptionLocalised | translate }}</td>
-      <td><a ng-if="example.link"
-             href="{{example.link}}"
-             rel="noopener noreferrer" target="_blank">{{example.link}}</a>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
+  <div class="form-group deploy-app-file-controls" focusable-input>
+    <label class="control-label" translate>deploy-app-dialog.step-source.example.input.title</label>
+    <input type="text" class="form-control file-chooser" name="exampleSelector" id="exampleSelector"/>
+    <label class="form-control">
+      <span ng-if="dplyExampleCtrl.userInput.example" translate>{{dplyExampleCtrl.userInput.example.name}}</span>
+      <span ng-if="!dplyExampleCtrl.userInput.example" class="file-placeholder" translate>
+            deploy-app-dialog.step-source.example.input.placeholder
+      </span>
+      <label class="deploy-app-form-btn" for="exampleSelector" ng-click="dplyExampleCtrl.showModal()">
+        <i class="material-icons">insert_drive_file</i>
+      </label>
+    </label>
+  </div>
 </div>

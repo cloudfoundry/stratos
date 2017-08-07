@@ -2,6 +2,10 @@
   margin-right: $detail-view-margin;
   margin-left: $detail-view-margin;
 
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   .spinner {
     display: flex;
     justify-content: center;

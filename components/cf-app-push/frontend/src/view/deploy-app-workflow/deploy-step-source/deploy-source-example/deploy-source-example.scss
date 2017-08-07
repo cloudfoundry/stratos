@@ -1,11 +1,15 @@
-.deploy-app-example {
-  table {
-    thead>tr th:nth-of-type(2) {
-      min-width: 100px;
-    }
-    tbody>tr td {
-      vertical-align: middle;
-    }
+.deploy-app-example-modal {
 
+  .deploy-app-example-modal-inner {
+    table {
+      thead>tr th:nth-of-type(2) {
+        min-width: 100px;
+      }
+      tbody>tr td {
+        vertical-align: middle;
+      }
+
+    }
   }
+
 }

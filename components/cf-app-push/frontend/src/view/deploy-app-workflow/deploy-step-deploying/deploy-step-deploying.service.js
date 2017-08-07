@@ -177,25 +177,44 @@
       }
 
       function sendSourceMetadata() {
-        if (wizardData.sourceType === 'git') {
-          sendGitMetadata();
-        } else if (wizardData.sourceType === 'local') {
+        var type = wizardData.sourceType;
+        var userInput = sourceUserInput;
+        if (type === 'example') {
+          type = 'git';
+          if (userInput.example.sourceType === 'github') {
+            userInput = {
+              gitType: 'github',
+              githubProject: userInput.example.userInput.githubProject,
+              githubBranch: userInput.example.userInput.githubBranch
+            };
+          } else if (userInput.example.sourceType === 'giturl') {
+            userInput = {
+              gitType: 'giturl',
+              gitUrl: userInput.example.userInput.gitUrl,
+              githubBranchName: userInput.example.userInput.gitUrlBranch
+            };
+          }
+        }
+
+        if (type === 'git') {
+          sendGitMetadata(userInput);
+        } else if (type === 'local') {
           sendLocalSourceMetadata();
         }
       }
 
-      function sendGitMetadata() {
-        if (sourceUserInput.gitType === 'github') {
-          sendGitHubSourceMetadata();
-        } else if (sourceUserInput.gitType === 'giturl') {
-          sendGitUrlSourceMetadata();
+      function sendGitMetadata(userInput) {
+        if (userInput.gitType === 'github') {
+          sendGitHubSourceMetadata(userInput.githubProject, userInput.githubBranch.name);
+        } else if (userInput.gitType === 'giturl') {
+          sendGitUrlSourceMetadata(userInput.gitUrl, userInput.githubBranchName);
         }
       }
 
-      function sendGitHubSourceMetadata() {
+      function sendGitHubSourceMetadata(githubProject, githubBranchName) {
         var github = {
-          project: sourceUserInput.githubProject,
-          branch: sourceUserInput.githubBranch.name
+          project: githubProject,
+          branch: githubBranchName
         };
 
         var msg = {
@@ -208,7 +227,7 @@
         data.webSocket.send(angular.toJson(msg));
       }
 
-      function sendGitUrlSourceMetadata() {
+      function sendGitUrlSourceMetadata(gitUrl, githubBranchName) {
         // TODO: RC/IH
         // - Sending a new socket event type to cover the git url source ('SOURCE_GITURL 30006', as opposed to event type 'SOURCE_GITHUB 30001')
         // - Expecting two kinds of errors covered by existing socket events
@@ -216,8 +235,8 @@
         // -- CLOSE_FAILED_NO_BRANCH: 40004
 
         var giturl = {
-          url: sourceUserInput.gitUrl,
-          branch: sourceUserInput.gitUrlBranch
+          url: gitUrl,
+          branch: githubBranchName
         };
 
         var msg = {

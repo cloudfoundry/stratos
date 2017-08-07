@@ -49,18 +49,20 @@
       }
     ];
   }
+
   /**
    * @namespace cf-app-push
    * @memberof cf-app-push
    * @name DeploySourceExample
-   * @description ????????
-   * @returns {object} The ???????? directive definition object
+   * @description Directive to aid user in selecting an example to deploy
+   * @returns {object} The appDeploySourceExample directive definition object
    */
   function DeploySourceExample() {
     return {
       scope: {
         sourceType: '=',
-        userInput: '='
+        userInput: '=',
+        valid: '='
       },
       bindToController: true,
       controller: DeploySourceExampleController,
@@ -73,23 +75,46 @@
    * @namespace cf-app-push.DeploySourceExampleController
    * @memberof cf-app-push
    * @name DeploySourceExampleController
-   * @param {object} $scope - the angular $scope service
+   * @param {object} $timeout - the angular $timeout service
+   * @param {object} $q - the angular $q service
    * @param {array} appDeploySourceExamples - collection of examples to display
+   * @param {object} frameworkAsyncTaskDialog - our async dialog service
    * @constructor
    */
-  function DeploySourceExampleController($scope, appDeploySourceExamples) {
+  function DeploySourceExampleController($timeout, $q, appDeploySourceExamples, frameworkAsyncTaskDialog) {
     var vm = this;
 
-    vm.examples = appDeploySourceExamples;
-    vm.selection = appDeploySourceExamples[0];
+    vm.showModal = showModal;
 
-    $scope.$watch(vm.selection, function (example) {
-      if (example) {
-        vm.userInput.exampleSourceType = example.sourceType;
-        vm.userInput.exampleuserInput = example.userInput;
-      }
-    });
-
+    function showModal() {
+      return frameworkAsyncTaskDialog(
+        {
+          title: 'deploy-app-dialog.step-source.example.modal',
+          templateUrl: 'plugins/cf-app-push/view/deploy-app-workflow/deploy-step-source/deploy-source-example/deploy-source-example-modal.html',
+          buttonTitles: {
+            submit: 'deploy-app-dialog.step-source.example.modal.select'
+          },
+          class: 'deploy-app-example-modal dialog-form-wizard',
+          dialog: true
+        },
+        {
+          data: {
+            examples: appDeploySourceExamples,
+            selection: appDeploySourceExamples[0]
+          }
+        },
+        function (exampleData) {
+          vm.userInput.example = exampleData.selection;
+          return $q.resolve();
+        }
+      ).result.then(function () {
+        // The deploy button based on this property can become visible quickly. This could lead a potential double
+        // clicker to deploy straight away. Leave some time to avoid this
+        $timeout(function () {
+          vm.valid = !!vm.userInput.example;
+        }, 350);
+      });
+    }
   }
 
 })();

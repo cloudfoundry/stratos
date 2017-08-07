@@ -16,6 +16,14 @@
       "choose-placeholder": "Select the source type",
       "example": {
         "example": "Examples",
+        "input": {
+          "title": "Example",
+          "placeholder": "Select an example"
+        },
+        "modal": {
+          "modal": "Select an Example",
+          "select": "@:buttons.ok"
+        },
         "table": {
           "label": "Name",
           "description": "Description",

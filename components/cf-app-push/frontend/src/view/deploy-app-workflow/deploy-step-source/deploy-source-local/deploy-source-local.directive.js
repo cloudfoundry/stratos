@@ -9,8 +9,8 @@
    * @namespace cf-app-push
    * @memberof cf-app-push
    * @name DeploySourceLocal
-   * @description ????????
-   * @returns {object} The ???????? directive definition object
+   * @description Directive to aid user in selecting an archive or folder as a source to deploy an app from
+   * @returns {object} The appDeploySourceLocal directive definition object
    */
   function DeploySourceLocal() {
     return {

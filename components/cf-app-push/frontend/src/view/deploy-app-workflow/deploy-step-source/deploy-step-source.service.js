@@ -10,6 +10,7 @@
    * @name AppDeployStepSourceService
    * @constructor
    * @param {object} itemDropHelper - the item drop helper service
+   * @param {object} appDeploySourceExamples - collection of example applications
    */
   function AppDeployStepSourceService(itemDropHelper, appDeploySourceExamples) {
 
@@ -63,8 +64,8 @@
             stepCommit: true,
             allowNext: function () {
               return wizardData.sourceType === 'git' && _.get(data, 'git.valid') ||
-                wizardData.sourceType === 'local' && _.get(data, 'source.valid') ||
-                wizardData.sourceType === 'example';
+                wizardData.sourceType === 'local' && _.get(data, 'local.valid') ||
+                wizardData.sourceType === 'example' && _.get(data, 'example.valid');
             }
           },
           destroy: angular.noop
