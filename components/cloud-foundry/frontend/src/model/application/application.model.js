@@ -57,8 +57,8 @@
         spaceGuid: 'all'
       },
       // Controls view of App Wall (Card layout or List layout)
-      // Try and get this from Browser local storage, if not, default to card layour
-      showCardLayout: appLocalStorage.getItem('cf.app.cardLayout', true) === 'true',
+      // Try and get this from Browser local storage, if not, default to card layout
+      showCardLayout: appLocalStorage.getItem('cf.app.cardLayout', 'true') === 'true',
       // This state should be in the model
       clusterCount: 0,
       hasApps: false,
