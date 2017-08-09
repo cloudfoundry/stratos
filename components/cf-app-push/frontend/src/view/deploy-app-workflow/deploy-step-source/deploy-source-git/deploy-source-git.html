@@ -4,19 +4,19 @@
       <radio-input ng-model="dplyGitCtrl.userInput.gitType" input-value="'github'" input-label="deploy-app-dialog.step-source.git.github"></radio-input>
     </div>
     <div class="form-group form-group-large" focusable-input
-         ng-class="{'has-error': dplyGitCtrl.isGithub() && dplyGitCtrl.userInput.githubProjectValid === false}">
+         ng-class="{'has-error': dplyGitCtrl.isGithub() && dplyGitCtrl.userInput.githubProjectValid === false, 'form-group-disabled': !dplyGitCtrl.isGithub()}">
       <label class="control-label" translate>deploy-app-dialog.step-source.git.github.project-label</label>
       <span class="control-message" translate ng-if="dplyGitCtrl.userInput.githubProjectValid === false">
-                deploy-app-dialog.step-source.git.github.project-not-found
-            </span>
+        deploy-app-dialog.step-source.git.github.project-not-found
+      </span>
       <input
         type="text" class="form-control" name="githubProject" ng-model="dplyGitCtrl.userInput.githubProject"
         placeholder="{{'deploy-app-dialog.step-source.git.github.project-placeholder' | translate}}"
-        ng-disabled="!dplyGitCtrl.isGithub()"
       />
     </div>
 
-    <div class="form-group form-group-large deploy-app-github-branch" focusable-input>
+    <div class="form-group form-group-large deploy-app-github-branch" ng-class="{'form-group-disabled': !dplyGitCtrl.isGithub()}"
+         focusable-input>
       <label class="control-label" translate>deploy-app-dialog.step-source.git.github.branch-label</label>
       <search-box
         ng-model="dplyGitCtrl.userInput.githubBranch"
@@ -71,7 +71,7 @@
       <radio-input ng-model="dplyGitCtrl.userInput.gitType" input-value="'giturl'" input-label="deploy-app-dialog.step-source.git.gitUrl"></radio-input>
     </div>
     <div class="form-group form-group-large" focusable-input
-         ng-class="{'has-error': dplyGitCtrl.isGitUrl() && formGitUrl.gitUrl.$invalid && formGitUrl.gitUrl.$dirty}">
+         ng-class="{'has-error': dplyGitCtrl.isGitUrl() && formGitUrl.gitUrl.$invalid && formGitUrl.gitUrl.$dirty, 'form-group-disabled': !dplyGitCtrl.isGitUrl()}">
       <label class="control-label" translate>deploy-app-dialog.step-source.git.gitUrl.url</label>
       <div class="control-message" ng-if="formGitUrl.gitUrl.$dirty">
         <span translate ng-if="formGitUrl.gitUrl.$error.required">deploy-app-dialog.step-source.git.gitUrl.url.error-required</span>
@@ -83,17 +83,19 @@
              required
              ng-pattern="dplyGitCtrl.gitUrlRegEx"
              placeholder="{{'deploy-app-dialog.step-source.git.gitUrl.url.placeholder' | translate}}"
-             ng-disabled="!dplyGitCtrl.isGitUrl()"
       />
     </div>
     <div class="form-group form-group-large" focusable-input
-         >
+         ng-class="{'has-error': dplyGitCtrl.isGitUrl() && formGitUrl.gitUrlBranch.$invalid && formGitUrl.gitUrlBranch.$dirty, 'form-group-disabled': !dplyGitCtrl.isGitUrl()}">
       <label class="control-label" translate>deploy-app-dialog.step-source.git.gitUrl.branch</label>
+      <div class="control-message" ng-if="formGitUrl.gitUrl.$dirty">
+        <span translate ng-if="formGitUrl.gitUrlBranch.$error.required">deploy-app-dialog.step-source.git.gitUrl.branch.error-required</span>
+      </div>
       <input type="text" class="form-control"
              name="gitUrlBranch"
              ng-model="dplyGitCtrl.userInput.gitUrlBranch"
+             required
              placeholder="{{'deploy-app-dialog.step-source.git.gitUrl.branch.placeholder' | translate}}"
-             ng-disabled="!dplyGitCtrl.isGitUrl()"
       />
     </div>
   </div>
