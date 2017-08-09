@@ -24,10 +24,14 @@
           // Connect the test admin user to all cnsis in params (required to ensure correct permissions are set when
           // creating orgs + spaces)
           return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
-        }).then(function () {
+        })
+        .then(function () {
           helpers.setBrowserNormal();
           helpers.loadApp();
           return loginPage.loginAsAdmin();
+        })
+        .then(function () {
+          return galleryWall.setGridView();
         });
       // Ensure we don't continue until everything is set up
       return browser.driver.wait(init);
