@@ -6,7 +6,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  10.4.21.241:5000/concourse-dcind
+   repository:  10.84.93.11:5000/concourse-dcind
    tag: "latest"
    insecure_registries: [ "10.4.21.241:5000" ]
 
@@ -21,4 +21,4 @@ run:
       ls .
       mv dev-certs-output/dev-certs stratos-ui/dev-certs
       cd stratos-ui/deploy/docker-compose/
-      ./build.sh -t test -r 10.4.21.241:5000
+      ./build.sh -t test -r 10.84.93.11:5000
