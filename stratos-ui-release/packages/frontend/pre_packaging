@@ -1,0 +1,14 @@
+# abort script on any command that exits with a non zero value
+set -e -x
+
+cd ${BUILD_DIR}/stratos-ui
+
+npm install
+export PATH=$PATH:$PWD/node_modules/.bin
+bower install
+npm run build
+
+# remove things we don't need
+find /space ! -iregex '(dist)' | xargs rm -f
+mv dist/* .
+rm -rf dist

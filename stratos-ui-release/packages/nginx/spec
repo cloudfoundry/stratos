@@ -1,6 +1,4 @@
 ---
 name: nginx
-
-dependencies:
-
 files:
+- nginx/nginx-1.11.13.tar.gz

@@ -1,6 +1,7 @@
 ---
-name: stratos-ui
+name: backend
 
 dependencies:
+- nginx
 
 files:
