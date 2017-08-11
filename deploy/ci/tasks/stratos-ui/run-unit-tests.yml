@@ -9,7 +9,7 @@ image_resource:
   source:
    repository:  10.84.93.11:5000/splatform/stratos-concourse
    tag: "latest"
-   insecure_registries: [ "10.4.21.241:5000" ]
+   insecure_registries: [ "10.84.93.11:5000" ]
 
 run:
   path: sh
