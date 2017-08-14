@@ -153,6 +153,13 @@ $ gulp dev
 
 In both cases the console should be available via https://localhost:3100
 
+> **Note:** If you see the following error when running 'gulp dev' you may need to increase your OS ulimit.
+```
+Error: ENFILE: file table overflow, scandir <snip>;
+    at Error (native)
+-bash: /dev/null: Too many open files in system
+```
+
 ### Linting
 We use eslint to executing linting. To run these execute...
 ```
