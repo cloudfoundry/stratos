@@ -3,7 +3,6 @@ name: frontend
 
 dependencies:
 - nginx
-#- nodejs
 
 files:
 - stratos-ui/{package.json,plugins.json,bower.json,gulpfile.js}

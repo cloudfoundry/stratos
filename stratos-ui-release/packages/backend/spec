@@ -2,6 +2,8 @@
 name: backend
 
 dependencies:
-- nginx
+- golang
 
 files:
+- stratos-ui/{package.json,plugins.json,bower.json,gulpfile.js}
+- stratos-ui/{build,components}/**/*

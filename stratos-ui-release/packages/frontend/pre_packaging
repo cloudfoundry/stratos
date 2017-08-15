@@ -9,6 +9,9 @@ bower install
 npm run build
 
 # remove things we don't need
-find /space ! -iregex '(dist)' | xargs rm -f
+find ../stratos-ui -type d ! -path '*/dist*' ! -path '../stratos-ui' -maxdepth 1 |  xargs rm -rf
+# Delete top level files
+rm -f *
+# Move dist to top level
 mv dist/* .
 rm -rf dist
