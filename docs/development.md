@@ -2,6 +2,7 @@
 
 > **Note:** This document is work in progress.
 
+
 The Stratos Console UI provides a single comprehensive and ubiquitous user 
 experience for: discovering, composing, developing and managing Cloud Native 
 workloads which are hosted in a myriad of: public, managed and private 
