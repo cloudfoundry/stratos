@@ -3,6 +3,7 @@
     "cloud-foundry",
     "cf-app-ssh",
     "cf-app-push",
-    "user-info"
+    "user-info",
+    "endpoints-dashboard"
   ]
 }
