@@ -157,7 +157,7 @@
               return vm.model.terminateRunningAppInstanceAtGivenIndex(vm.cnsiGuid, vm.id, instanceIndex)
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('app.app-info.terminate-instance.terminate.success', { index: instanceIndex }));
+                    $translate.instant('app.app-info.terminate-instance.success', { index: instanceIndex }));
                   update();
                 });
             }
