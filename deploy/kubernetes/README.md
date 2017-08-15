@@ -49,7 +49,7 @@ helm install --set noShared=true stratos-ui/console --namespace=console --name m
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
-#### Upgrading your instance
+#### Upgrading your deployment
 
 To upgrade your instance when using the Helm repository, fetch any updates to the repository:
 
