@@ -59,9 +59,19 @@
     </uib-tab>
     <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
       <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-user"
-        st-table="step.ctrl.displayedUsers"
-        st-safe-src="step.data.users"
+        st-table="asyncTaskDialogCtrl.displayedExistingRoutes"
+        st-safe-src="asyncTaskDialogCtrl.context.data.existingRoutes"
         st-filtered-collection>
+        <form>
+          <div class="form-group search-field" focusable-input>
+            <label class="control-label" for="route-search">
+              <i class="material-icons app-icon-lg">search</i>
+            </label>
+            <div class="control-input">
+              <input ng-model="asyncTaskDialogCtrl.filter" type="text" class="form-control" id="route-search" st-search="entity.id">
+            </div>
+          </div>
+        </form>
         <table class="table table-outlined existing-instances-table">
           <thead>
             <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
@@ -71,7 +81,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="row-vertical-middle" ng-repeat="route in asyncTaskDialogCtrl.context.data.existingRoutes">
+            <tr class="row-vertical-middle" ng-repeat="route in filteredCollection">
               <td>
                 <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
                   input-value="route" required>

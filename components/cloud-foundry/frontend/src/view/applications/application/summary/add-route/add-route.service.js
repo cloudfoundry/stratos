@@ -56,7 +56,7 @@
         };
 
         // Either returns a function that creates a new route
-        // or a function that return an already existing route.
+        // or a function that returns an already existing route.
         var getAssignableRouteFunction = function (contextData) {
           if (contextData.activeTab === 0) {
             return that.routeModel.createRoute;
