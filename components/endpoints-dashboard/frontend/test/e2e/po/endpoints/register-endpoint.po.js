@@ -3,7 +3,7 @@
 
   var _ = require('lodash');
   var Q = require('q');
-  var wizard = require('../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
+  var wizard = require('../../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
 
   module.exports = {
     isVisible: isVisible,

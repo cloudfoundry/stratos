@@ -1,10 +1,12 @@
 (function () {
   'use strict';
 
+  var appCore = '../../../../../../app-core/frontend/';
+
   var _ = require('lodash');
-  var navbar = require('../../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var actionMenu = require('../../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var navbar = require(appCore + 'test/e2e/po/navbar.po');
+  var helpers = require(appCore + 'test/e2e/po/helpers.po');
+  var actionMenu = require(appCore + 'test/e2e/po/widgets/actions-menu.po');
   var credentialsFormHelper = require('../widgets/credentials-form.po');
 
   module.exports = {
