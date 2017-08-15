@@ -12,7 +12,7 @@ npm run build-backend
 
 find ../stratos-ui -type d ! -path '*/outputs*'  ! -path '../stratos-ui' -maxdepth 1 |  xargs rm -rf
 # Delete top level files
-rm -f *
+rm -f *.*
 mv outputs/* .
 rm -rf outputs
 
