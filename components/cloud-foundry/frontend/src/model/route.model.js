@@ -26,7 +26,7 @@
   function Route(apiManager, modelUtils) {
 
     var routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
-    var appApi = apiManager.retrieve('cloud-foundry.api.App');
+    var appApi = apiManager.retrieve('cloud-foundry.api.Apps');
 
     var model = {
       route: {},
@@ -37,9 +37,7 @@
       deleteRoute: deleteRoute,
       listAllAppsForRoute: listAllAppsForRoute,
       listAllAppsForRouteWithoutStore: listAllAppsForRouteWithoutStore,
-      listAllRouteMappingsForRoute: listAllRouteMappingsForRoute,
-      getAllRoutesForApp: getAllRoutesForApp,
-      getAllUnboundRoutesForApp: getAllUnboundRoutesForApp
+      listAllRouteMappingsForRoute: listAllRouteMappingsForRoute
     };
 
     return model;
@@ -209,26 +207,5 @@
           return response.data.resources;
         });
     }
-    
-    function getAllRoutesForApp(cnsiGuid, guid, params, paginate) {
-      return appApi
-        .ListAllRoutesForApp(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
-        .then(function (response) {
-          if (!paginate) {
-            return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
-          }
-          return response.data.resources;
-        });
-    }
-
-    function getAllUnboundRoutesForApp(cnsiGuid, guid, params, paginate) {
-      return getAllRoutesForApp(cnsiGuid, guid, params, paginate)
-      .then(function (routes) {
-        return routes.filter(function (route) {
-          return !route.entity.apps_url;
-        });
-      });
-    }
   }
-
 })();

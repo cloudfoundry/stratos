@@ -11,9 +11,10 @@
    * @memberof cloud-foundry.view.applications.application.summary
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - async dialog service
+   * @param {object} $q - promise library
    * @constructor
    */
-  function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog) {
+  function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog, $q, appClusterRoutesService) {
     var that = this;
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     return {
@@ -29,6 +30,7 @@
         // Create a map of domain names -> domain guids
         var model = modelManager.retrieve('cloud-foundry.model.application');
         this.domainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
+        this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
         var domains = [];
         var routeExists = false;
@@ -112,7 +114,8 @@
 
         var options = {
           domains: domains,
-          domainMap: _.mapKeys(domains, function (domain) { return domain.value; })
+          domainMap: _.mapKeys(domains, function (domain) { return domain.value; }),
+          existingRoutes: []
         };
 
         return frameworkAsyncTaskDialog(
@@ -123,7 +126,7 @@
             buttonTitles: {
               submit: 'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.button.submit'
             },
-            class: 'dialog-form',
+            class: 'dialog-form-large',
             dialog: true
           },
           {
@@ -145,11 +148,34 @@
           },
           addRoute,
           undefined,
-          this.domainModel.listAllSharedDomains(cnsiGuid).then(function (domainInfo) {
-            _.each(domainInfo, function (domain) {
-              options.domainMap[domain.metadata.guid].type = options.domainMap[domain.metadata.guid] ? domain.entity.router_group_type || 'http' : 'http';
-            });
-          })
+          $q.all(
+            this.domainModel.listAllSharedDomains(cnsiGuid).then(function (domainInfo) {
+              return _.each(domainInfo, function (domain) {
+                options.domainMap[domain.metadata.guid].type = options.domainMap[domain.metadata.guid] ? domain.entity.router_group_type || 'http' : 'http';
+              });
+            }),
+            this.spaceModel.listAllRoutesForSpace(
+              cnsiGuid,
+              spaceGuid,
+              model.application.summary.guid
+            ).then(function (routes) {
+              options.existingRoutes = _.chain(routes)
+              .map(function (route) {
+                return route.entity;
+              })
+              .filter(function (route) {
+                return !_.find(route.apps, function (app) {
+                  return app.metadata.guid === model.application.metadata.guid;
+                });
+              })
+              .map(function (route) {
+                route.name = appClusterRoutesService.getRouteId(route);
+                return route;
+              })
+              .value();
+              console.table(options.existingRoutes);
+            })
+          )
         );
       }
     };
