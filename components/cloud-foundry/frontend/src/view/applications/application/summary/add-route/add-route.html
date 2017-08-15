@@ -73,11 +73,11 @@
           <tbody>
             <tr class="row-vertical-middle" ng-repeat="route in asyncTaskDialogCtrl.context.options.existingRoutes">
               <td>
-                <radio-input ng-model="asyncTaskDialogCtrl.context.options.userInput.existingServiceInstance"
-                  input-value="instance" required>
+                <radio-input ng-model="asyncTaskDialogCtrl.context.options.userInput.selectedExistingRoute"
+                  input-value="route" required>
                 </radio-input>
               </td>
-              <td>{{ route.name }}</td>
+              <td>{{ route.id }}</td>
               <td>{{ route.apps.length || 0 }}</td>
             </tr>
           </tbody>

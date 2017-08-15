@@ -115,8 +115,43 @@
         var options = {
           domains: domains,
           domainMap: _.mapKeys(domains, function (domain) { return domain.value; }),
-          existingRoutes: []
+          existingRoutes: [],
+          userInput: {
+            selectedExistingRoute: null
+          }
         };
+        
+        var listAllRoutesForThisSpace = _.partial(
+          this.spaceModel.listAllRoutesForSpace,
+          cnsiGuid,
+          spaceGuid
+        );
+
+        var getAllRoutes = function (getRoutesFn, getRouteIdFn, applicationGuid) {
+          getRoutesFn(applicationGuid).then(function (routes) {
+            options.existingRoutes = _.chain(routes)
+            .map(function (route) {
+              return route.entity;
+            })
+            .filter(function (route) {
+              return !_.find(route.apps, function (app) {
+                return app.metadata.guid === applicationGuid;
+              });
+            })
+            .map(function (route) {
+              route.id = getRouteIdFn(route);
+              return route;
+            })
+            .value();
+          });
+        };
+
+        var getReleventRoutes = _.partial(
+          getAllRoutes,
+          listAllRoutesForThisSpace,
+          appClusterRoutesService.getRouteId,
+          model.application.summary.guid
+        );
 
         return frameworkAsyncTaskDialog(
           {
@@ -154,27 +189,7 @@
                 options.domainMap[domain.metadata.guid].type = options.domainMap[domain.metadata.guid] ? domain.entity.router_group_type || 'http' : 'http';
               });
             }),
-            this.spaceModel.listAllRoutesForSpace(
-              cnsiGuid,
-              spaceGuid,
-              model.application.summary.guid
-            ).then(function (routes) {
-              options.existingRoutes = _.chain(routes)
-              .map(function (route) {
-                return route.entity;
-              })
-              .filter(function (route) {
-                return !_.find(route.apps, function (app) {
-                  return app.metadata.guid === model.application.metadata.guid;
-                });
-              })
-              .map(function (route) {
-                route.name = appClusterRoutesService.getRouteId(route);
-                return route;
-              })
-              .value();
-              console.table(options.existingRoutes);
-            })
+            getReleventRoutes()
           )
         );
       }
