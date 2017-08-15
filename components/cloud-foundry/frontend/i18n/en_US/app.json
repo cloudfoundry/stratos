@@ -76,6 +76,16 @@
         }
       },
       "app-tabs": {
+        "routes": {
+          "add": {
+            "create": {
+              "title": "Create New Route"
+            },
+            "reuse": {
+              "title": "Use Unbound Route"
+            }
+          }
+        },
         "summary": {
           "label": "Summary",
           "instructions": {
