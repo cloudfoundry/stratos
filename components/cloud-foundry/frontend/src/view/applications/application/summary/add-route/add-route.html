@@ -71,14 +71,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="row-vertical-middle" ng-repeat="route in asyncTaskDialogCtrl.context.options.existingRoutes">
+            <tr class="row-vertical-middle" ng-repeat="route in asyncTaskDialogCtrl.context.data.existingRoutes">
               <td>
                 <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
                   input-value="route" required>
                 </radio-input>
               </td>
-              <td>{{ route.id }}</td>
-              <td>{{ route.apps.length || 0 }}</td>
+              <td>{{ route.entity.id }}</td>
+              <td>{{ route.entity.apps.length || 0 }}</td>
             </tr>
           </tbody>
           <tfoot ng-init="step.ctrl.pagedUserCount = 6"

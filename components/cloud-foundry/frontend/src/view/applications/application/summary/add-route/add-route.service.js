@@ -43,6 +43,7 @@
             type: undefined
           });
         });
+
         var spaceGuid = model.application.summary.space_guid;
         var data = {
           host: null,
@@ -50,7 +51,24 @@
           path: null,
           space_guid: spaceGuid,
           domain_guid: domains[0].value,
-          useRandomPort: true
+          useRandomPort: true,
+          existingRoutes: null
+        };
+
+        // Either returns a function that creates a new route
+        // or a function that return an already existing route.
+        var getAssignableRouteFunction = function (contextData) {
+          if (contextData.activeTab === 0) {
+            return that.routeModel.createRoute;
+          } else {
+            return function () {
+              var route = _.find(contextData.existingRoutes, function (route) {
+                return contextData.selectedExistingRoute.entity.id === route.entity.id;
+              });
+              
+              return $q.when(route);
+            };
+          }
         };
 
         var addRoute = function (contextData, dialog) {
@@ -84,7 +102,9 @@
             }
           }
 
-          return that.routeModel.createRoute(cnsiGuid, data, params)
+          var getRoute = getAssignableRouteFunction(contextData);
+
+          return getRoute(cnsiGuid, data, params)
             .then(function (response) {
               if (!(response.metadata && response.metadata.guid)) {
                 throw response;
@@ -129,16 +149,13 @@
           return getRoutesFn(applicationGuid)
           .then(function (routes) {
             return _.chain(routes)
-              .map(function (route) {
-                return route.entity;
-              })
               .filter(function (route) {
-                return !_.find(route.apps, function (app) {
+                return !_.find(route.entity.apps, function (app) {
                   return app.metadata.guid === applicationGuid;
                 });
               })
               .map(function (route) {
-                route.id = getRouteIdFn(route);
+                route.entity.id = getRouteIdFn(route);
                 return route;
               })
               .value();
@@ -188,7 +205,6 @@
           },
           addRoute,
           function (contextData) {
-            // console.log(contextData);
             if (contextData.activeTab === 0) {
               return !contextData.addRouteForm.$valid;
             } else {
@@ -203,7 +219,7 @@
             }),
             getReleventRoutes()
             .then(function (routes) {
-              options.existingRoutes = routes;
+              data.existingRoutes = routes;
             })
           )
         );
