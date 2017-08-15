@@ -206,7 +206,10 @@
           addRoute,
           function (contextData) {
             if (contextData.activeTab === 0) {
-              return !contextData.addRouteForm.$valid;
+              return !(
+                contextData.addRouteForm &&
+                contextData.addRouteForm.$valid
+              );
             } else {
               return !contextData.selectedExistingRoute;
             }
