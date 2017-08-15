@@ -120,35 +120,40 @@
             selectedExistingRoute: null
           }
         };
-        
-        var listAllRoutesForThisSpace = _.partial(
+
+        var getAllRoutes = function (getRoutesFn, getRouteIdFn, applicationGuid) {
+          // 1) Get all routes in current space.
+          // 2) Filter out the one that the current application is already bound to.
+          // 3) Get the route id and add it to the route object
+          // 4) Return array of routes
+          return getRoutesFn(applicationGuid)
+          .then(function (routes) {
+            return _.chain(routes)
+              .map(function (route) {
+                return route.entity;
+              })
+              .filter(function (route) {
+                return !_.find(route.apps, function (app) {
+                  return app.metadata.guid === applicationGuid;
+                });
+              })
+              .map(function (route) {
+                route.id = getRouteIdFn(route);
+                return route;
+              })
+              .value();
+          });
+        };
+
+        var getAllRoutesForThisSpace = _.partial(
           this.spaceModel.listAllRoutesForSpace,
           cnsiGuid,
           spaceGuid
         );
 
-        var getAllRoutes = function (getRoutesFn, getRouteIdFn, applicationGuid) {
-          getRoutesFn(applicationGuid).then(function (routes) {
-            options.existingRoutes = _.chain(routes)
-            .map(function (route) {
-              return route.entity;
-            })
-            .filter(function (route) {
-              return !_.find(route.apps, function (app) {
-                return app.metadata.guid === applicationGuid;
-              });
-            })
-            .map(function (route) {
-              route.id = getRouteIdFn(route);
-              return route;
-            })
-            .value();
-          });
-        };
-
         var getReleventRoutes = _.partial(
           getAllRoutes,
-          listAllRoutesForThisSpace,
+          getAllRoutesForThisSpace,
           appClusterRoutesService.getRouteId,
           model.application.summary.guid
         );
@@ -182,7 +187,14 @@
             }
           },
           addRoute,
-          undefined,
+          function (contextData) {
+            // console.log(contextData);
+            if (contextData.activeTab === 0) {
+              return !contextData.addRouteForm.$valid;
+            } else {
+              return !contextData.selectedExistingRoute;
+            }
+          },
           $q.all(
             this.domainModel.listAllSharedDomains(cnsiGuid).then(function (domainInfo) {
               return _.each(domainInfo, function (domain) {
@@ -190,6 +202,9 @@
               });
             }),
             getReleventRoutes()
+            .then(function (routes) {
+              options.existingRoutes = routes;
+            })
           )
         );
       }

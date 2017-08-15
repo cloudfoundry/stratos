@@ -1,14 +1,14 @@
 <uib-tabset class="select-instance-tabs col-sm-12"
-    active="asyncTaskDialogCtrl.options.activeTab" ng-if="!asyncTaskDialogCtrl.options.spinners.loadingServiceInstances">
+    active="asyncTaskDialogCtrl.context.data.activeTab" ng-if="!asyncTaskDialogCtrl.options.spinners.loadingServiceInstances">
     <uib-tab index="0" heading="{{ 'app.app-info.app-tabs.routes.add.create.title' | translate }}">
       <div class="add-route">
-        <form name="form.addRouteForm">
+        <form name="asyncTaskDialogCtrl.context.data.addRouteForm">
           <fieldset>
-          <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (form.addRouteForm.host.$invalid && form.addRouteForm.host.$dirty)}" focusable-input>
+          <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (asyncTaskDialogCtrl.context.data.addRouteForm.host.$invalid && asyncTaskDialogCtrl.context.data.addRouteForm.host.$dirty)}" focusable-input>
             <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-label</label>
             <span class="control-message" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
               <span translate ng-if="asyncTaskDialogCtrl.context.routeExists()">.host-error-exists</span>
-              <span translate ng-if="form.addRouteForm.host.$error.required">.host-error-required</span>
+              <span translate ng-if="asyncTaskDialogCtrl.context.data.addRouteForm.host.$error.required">.host-error-required</span>
             </span>
             <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
               ng-required="asyncTaskDialogCtrl.context.isType('http')"
@@ -58,7 +58,7 @@
       </div>
     </uib-tab>
     <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
-      <div ng-if="asyncTaskDialogCtrl.options.activeTab === 1" class="select-user"
+      <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-user"
         st-table="step.ctrl.displayedUsers"
         st-safe-src="step.data.users"
         st-filtered-collection>
@@ -73,7 +73,7 @@
           <tbody>
             <tr class="row-vertical-middle" ng-repeat="route in asyncTaskDialogCtrl.context.options.existingRoutes">
               <td>
-                <radio-input ng-model="asyncTaskDialogCtrl.context.options.userInput.selectedExistingRoute"
+                <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
                   input-value="route" required>
                 </radio-input>
               </td>
