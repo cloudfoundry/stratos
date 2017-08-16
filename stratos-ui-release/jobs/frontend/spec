@@ -1,5 +1,20 @@
 ---
 name: frontend
 templates:
+    nginx.conf: /etc/nginx/nginx.conf
 
 packages:
+- nginx
+- frontend
+
+properties:
+ backend_host:
+    description: "Host deploying the backend"
+    default: localhost
+ backend_port:
+    description: "Port the backend is listening on"
+    default: 443
+ ssl_cert_path:
+    description: "SSL certificate path"
+ ssl_cert_key_path:
+    description: "SSL certificate key path"
