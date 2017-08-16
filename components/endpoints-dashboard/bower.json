@@ -5,7 +5,7 @@
   "moduleType": [],
   "homepage": "",
   "main": [
-    "frontend/src/endpoints-dashboard.scss"
+    "src/endpoints-dashboard.scss"
   ],
   "ignore": [
     ".*"

@@ -3,16 +3,16 @@
 
   angular
     .module('endpoints-dashboard', [])
-    .constant('endpointDashboardConfigKey', 'endpointsDashboard')
+    .constant('endpointsDashboardDisabledKey', 'endpointsDashboardDisabled')
     .run(register);
 
   function register($q, $state, modelManager, appEventService, appUtilsService,
-                    endpointDashboardConfigKey, appLoggedInService) {
+                    endpointsDashboardDisabledKey, appLoggedInService) {
     return new EndpointsDashboard($q, $state, modelManager, appEventService, appUtilsService,
-      endpointDashboardConfigKey, appLoggedInService);
+      endpointsDashboardDisabledKey, appLoggedInService);
   }
 
-  function EndpointsDashboard($q, $state, modelManager, appEventService, appUtilsService, endpointDashboardConfigKey,
+  function EndpointsDashboard($q, $state, modelManager, appEventService, appUtilsService, endpointsDashboardDisabledKey,
                               appLoggedInService) {
     var initialized = $q.defer();
 
@@ -40,16 +40,16 @@
 
     function getDashboardRedirect() {
       updateConfig();
-      if (config.enable) {
+      if (config.disable) {
+        delete env.plugins.endpointsDashboard;
+      } else {
         return 'endpoint.dashboard';
       }
-      delete env.plugins.endpointsDashboard;
     }
 
     function updateConfig() {
       var info = modelManager.retrieve('app.model.consoleInfo').info;
-      config = _.get(info, 'plugin-config.' + endpointDashboardConfigKey, {});
-      config = angular.fromJson(config);
+      config.disable = _.get(info, 'plugin-config.' + endpointsDashboardDisabledKey) === 'true';
     }
   }
 

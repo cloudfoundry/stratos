@@ -148,7 +148,7 @@ This method comes with two caveats.
 2. Multiple instances of the app will contain multiple separate stored data instances. This will mean the user may connect to a different one with a different storage when revisiting the console.
 
 
-To enable the dashboard change the environment variable 'ENABLE_ENDPOINT_DASHBOARD' in the manifest from false to true before the call to 'cf push' is made. For example
+To enable the dashboard add the environment variable 'FORCE_ENDPOINT_DASHBOARD' to the manifest before the call to 'cf push' is made. For example
 
 ```
 applications:
@@ -160,5 +160,5 @@ applications:
   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
   health-check-type: port
   env:
-    ENABLE_ENDPOINT_DASHBOARD: true
+    FORCE_ENDPOINT_DASHBOARD: true
 ```
