@@ -40,11 +40,10 @@
 
     function getDashboardRedirect() {
       updateConfig();
-      if (config.disable) {
-        delete env.plugins.endpointsDashboard;
-      } else {
+      if (config.enable) {
         return 'endpoint.dashboard';
       }
+      delete env.plugins.endpointsDashboard;
     }
 
     function updateConfig() {

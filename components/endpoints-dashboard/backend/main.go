@@ -12,11 +12,11 @@ import (
 
 const (
 	CONFIG_KEY = "endpointsDashboard"
-	DISABLE_KEY = "DISABLE_ENDPOINT_DASHBOARD"
+	ENABLE_KEY = "ENABLE_ENDPOINT_DASHBOARD"
 )
 
 type EndpointDashboardConfig struct {
-	Disable bool     `json:"disable"`
+	Enable bool     `json:"enable"`
 }
 
 type EndpointDashboard struct {
@@ -50,16 +50,16 @@ func (endpointDashboard *EndpointDashboard) AddSessionGroupRoutes(echoGroup *ech
 }
 
 func (endpointDashboard *EndpointDashboard) Init() error {
-	if disableStr, err := config.GetValue(DISABLE_KEY); err == nil {
-		if disable, err := strconv.ParseBool(disableStr); err == nil && disable == true {
-			endpointDashboardConfig := EndpointDashboardConfig{
-				Disable: true,
-			}
-			if jsonString, err := json.Marshal(endpointDashboardConfig); err == nil {
-				endpointDashboard.portalProxy.GetConfig().PluginConfig[CONFIG_KEY] = string(jsonString[:])
-			}
+	endpointDashboardConfig := EndpointDashboardConfig{
+		Enable: true,
+	}
+	if enableStr, err := config.GetValue(ENABLE_KEY); err == nil {
+		if enable, err := strconv.ParseBool(enableStr); err == nil {
+			endpointDashboardConfig.Enable = enable
 		}
-
+	}
+	if jsonString, err := json.Marshal(endpointDashboardConfig); err == nil {
+		endpointDashboard.portalProxy.GetConfig().PluginConfig[CONFIG_KEY] = string(jsonString[:])
 	}
 	return nil
 }

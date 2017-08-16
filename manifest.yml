@@ -7,3 +7,5 @@ applications:
   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
   health-check-type: port
   stack: cflinuxfs2
+  env:
+      ENABLE_ENDPOINT_DASHBOARD: false
