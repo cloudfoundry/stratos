@@ -123,7 +123,7 @@
 }
 
 .select-route-tabs {
-  form.use-existing-route{
+  form.use-existing-route {
     .form-group {
       input[type=text] {
         height: 100%;
@@ -136,15 +136,23 @@
     width: 100%;
   }
   .nav-tabs {
-    margin-bottom: 15px;
+    $outer-margin: 40px;
+    margin: 0 (-$outer-margin) 15px (-$outer-margin);
+    padding: 0 $outer-margin;
   }
   .search-field {
+    border-width: 2px;
     display: flex;
     height: auto;
     width: auto;
   }
   .control-label {
     margin-left: -15px;
+  }
+  .select-route {
+    table {
+      border-top-color: transparent;
+    }
   }
 }
 
