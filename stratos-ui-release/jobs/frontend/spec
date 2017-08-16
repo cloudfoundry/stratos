@@ -1,9 +1,9 @@
 ---
 name: frontend
 templates:
-    nginx.conf: /etc/nginx/nginx.conf
-    ssl_cert: /etc/nginx/nginx.crt
-    ssl_cert_key: /etc/nginx/nginx.key
+    nginx.conf: /var/vcap/jobs/nginx/nginx.conf
+    ssl_cert: /var/vcap/jobs/nginx/nginx.crt
+    ssl_cert_key: /var/vcap/jobs/nginx/nginx.key
 
 packages:
 - nginx
