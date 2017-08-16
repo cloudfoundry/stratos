@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var appCore = '../../../../../app-core/frontend/';
-  var cloudFoundry = '../../../../../cloud-foundry/frontend/';
+  var appCore = '../../../../app-core/frontend/';
+  var cloudFoundry = '../../../../cloud-foundry/frontend/';
 
   var helpers = require(appCore + 'test/e2e/po/helpers.po');
   var resetTo = require(appCore + 'test/e2e/po/resets.po');

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var appCore = '../../../../../../app-core/frontend/';
+  var appCore = '../../../../../app-core/frontend/';
 
   var _ = require('lodash');
   var navbar = require(appCore + 'test/e2e/po/navbar.po');

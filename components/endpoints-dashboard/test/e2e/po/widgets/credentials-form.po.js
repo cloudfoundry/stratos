@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var appCore = '../../../../../../app-core/frontend/';
+  var appCore = '../../../../../app-core/frontend/';
 
   // Service instances registration helpers
   var helpers = require(appCore + 'test/e2e/po/helpers.po');
