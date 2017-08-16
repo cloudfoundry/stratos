@@ -551,6 +551,7 @@
      */
     function goToGalleryView(showCardLayout) {
       vm.model.showCardLayout = showCardLayout;
+      appLocalStorage.setItem('cf.app.cardLayout', showCardLayout);
       return $state.go('cf.applications.list.gallery-view');
     }
 

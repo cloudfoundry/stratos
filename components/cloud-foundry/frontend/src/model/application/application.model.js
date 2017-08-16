@@ -17,8 +17,7 @@
     })
     .run(registerApplicationModel);
 
-  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils,
-                                    appLocalStorage) {
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
       cfAppStateService, $q, modelUtils, appLocalStorage));
   }
@@ -58,7 +57,8 @@
         spaceGuid: 'all'
       },
       // Controls view of App Wall (Card layout or List layout)
-      showCardLayout: true,
+      // Try and get this from Browser local storage, if not, default to card layout
+      showCardLayout: appLocalStorage.getItem('cf.app.cardLayout', 'true') === 'true',
       // This state should be in the model
       clusterCount: 0,
       hasApps: false,
