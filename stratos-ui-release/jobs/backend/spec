@@ -1,5 +1,49 @@
 ---
 name: backend
 templates:
+    config.properties: ./config.properties
 
 packages:
+ - backend
+
+ properties:
+    skip_ssl_validation:
+        description: "Skip SSL validation"
+        default: false
+    backend_port:
+        description: "Port the backend is listening on"
+        default: 443
+    uaa_address:
+        description: "UAA server address"
+    console_admin_scope:
+        description: "UAA scope identifying Stratos UI Console admin"
+    console_admin_scope:
+        description: "UAA scope identifying Stratos UI Console admin"
+    console_uaa_client:
+        description: "UAA client for Stratos UI Console"
+    frontend_origin_address:
+        description: "Frontend origin address"
+    ssl_cert_key:
+        description: "SSL Certificate key body"
+    ssl_cert:
+        description: "SSL Certificate body"
+    encryption_key:
+        description: "Hex encoded encryption key"
+    use_postgres:
+        description: "Use postgres, need to specify relevant postgres settings"
+    postgres_user:
+        description: "Postgres User"
+    postgres_user_passwd:
+        description: "Postgres user password"
+    postgres_db:
+        description: "Stratos UI Console DB name"
+    postgres_host:
+        description: "Postgres host"
+    postgres_port:
+        description: "Postgres port"
+    postgres_enable_ssl:
+        description: "Enable SSL for postgres"
+        default: false
+    use_sqlite:
+        description: "USe SQLLite"
+        default: true
