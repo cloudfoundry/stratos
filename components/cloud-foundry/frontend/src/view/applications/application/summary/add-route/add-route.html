@@ -1,4 +1,4 @@
-<uib-tabset class="select-instance-tabs col-sm-12"
+<uib-tabset class="select-route-tabs col-sm-12"
     active="asyncTaskDialogCtrl.context.data.activeTab" ng-if="!asyncTaskDialogCtrl.options.spinners.loadingServiceInstances">
     <uib-tab index="0" heading="{{ 'app.app-info.app-tabs.routes.add.create.title' | translate }}">
       <div class="add-route">
@@ -58,11 +58,11 @@
       </div>
     </uib-tab>
     <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
-      <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-user"
+      <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-route"
         st-table="asyncTaskDialogCtrl.displayedExistingRoutes"
         st-safe-src="asyncTaskDialogCtrl.context.data.existingRoutes"
         st-filtered-collection>
-        <form>
+        <form class="use-existing-route">
           <div class="form-group search-field" focusable-input>
             <label class="control-label" for="route-search">
               <i class="material-icons app-icon-lg">search</i>
@@ -72,37 +72,39 @@
             </div>
           </div>
         </form>
-        <table class="table table-outlined existing-instances-table">
-          <thead>
-            <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
-              <th class="select-col"></th>
-              <th translate>.name-label</th>
-              <th translate>.apps-label</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="row-vertical-middle" ng-repeat="route in filteredCollection">
-              <td>
-                <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
-                  input-value="route" required>
-                </radio-input>
-              </td>
-              <td>{{ route.entity.id }}</td>
-              <td>{{ route.entity.apps.length || 0 }}</td>
-            </tr>
-          </tbody>
-          <tfoot ng-init="step.ctrl.pagedUserCount = 6"
-             ng-show="step.ctrl.pagedUserCount < filteredCollection.length">
-            <tr>
-              <td colspan="5" class="text-center">
-                <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
-                  <span translate>cf.roles.assign-user-roles.step1.show-all-users</span> ({{ filteredCollection.length }})
-                </a>
-                <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+        <div class="">
+          <table class="table table-outlined existing-instances-table">
+            <thead>
+              <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
+                <th class="select-col"></th>
+                <th translate>.name-label</th>
+                <th translate>.apps-label</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-vertical-middle" ng-repeat="route in filteredCollection">
+                <td>
+                  <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
+                    input-value="route" required>
+                  </radio-input>
+                </td>
+                <td>{{ route.entity.id }}</td>
+                <td>{{ route.entity.apps.length || 0 }}</td>
+              </tr>
+            </tbody>
+            <tfoot ng-init="step.ctrl.pagedUserCount = 6"
+              ng-show="step.ctrl.pagedUserCount < filteredCollection.length">
+              <tr>
+                <td colspan="5" class="text-center">
+                  <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
+                    <span translate>cf.roles.assign-user-roles.step1.show-all-users</span> ({{ filteredCollection.length }})
+                  </a>
+                  <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </uib-tab>
 </uib-tabset>
