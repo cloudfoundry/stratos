@@ -2,6 +2,8 @@
 name: frontend
 templates:
     nginx.conf: /etc/nginx/nginx.conf
+    ssl_cert: /etc/nginx/nginx.crt
+    ssl_cert_key: /etc/nginx/nginx.key
 
 packages:
 - nginx
