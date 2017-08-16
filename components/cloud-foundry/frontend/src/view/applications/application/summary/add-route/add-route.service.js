@@ -12,6 +12,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - async dialog service
    * @param {object} $q - promise library
+   * @param {object} appClusterRoutesService - App cluster router service
    * @constructor
    */
   function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog, $q, appClusterRoutesService) {
@@ -65,7 +66,7 @@
               var route = _.find(contextData.existingRoutes, function (route) {
                 return contextData.selectedExistingRoute.entity.id === route.entity.id;
               });
-              
+
               return $q.when(route);
             };
           }
@@ -138,7 +139,8 @@
           existingRoutes: [],
           userInput: {
             selectedExistingRoute: null
-          }
+          },
+          tableLimit: 4
         };
 
         var getAllRoutes = function (getRoutesFn, getRouteIdFn, applicationGuid) {

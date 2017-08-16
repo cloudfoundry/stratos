@@ -164,7 +164,8 @@
               "button": {
                 "submit": "Add route"
               },
-              "search-placeholder": "Search by name"
+              "search-placeholder": "Search by name",
+              "no-routes-found": "No routes found"
             }
           },
           "service-instances-panel": {

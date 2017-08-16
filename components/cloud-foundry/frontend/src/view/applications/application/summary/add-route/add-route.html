@@ -72,8 +72,8 @@
             </div>
           </div>
         </form>
-        <div class="">
-          <table class="table table-outlined existing-instances-table">
+        <div class="existing-routes-table__wrapper">
+          <table class="table table-outlined existing-routes-table">
             <thead>
               <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
                 <th class="select-col"></th>
@@ -82,8 +82,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="row-vertical-middle" ng-repeat="route in filteredCollection">
-                <td>
+              <tr class="row-vertical-middle" ng-repeat="route in filteredCollection | limitTo:asyncTaskDialogCtrl.context.options.tableLimit">
+                <td class="select-route__cell">
                   <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
                     input-value="route" required>
                   </radio-input>
@@ -91,15 +91,18 @@
                 <td>{{ route.entity.id }}</td>
                 <td>{{ route.entity.apps.length || 0 }}</td>
               </tr>
+              <tr ng-if="filteredCollection.length === 0">
+                <td colspan="3">
+                  <span translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.no-routes-found</span>
+                </td>
+              </tr>
             </tbody>
-            <tfoot ng-init="step.ctrl.pagedUserCount = 6"
-              ng-show="step.ctrl.pagedUserCount < filteredCollection.length">
+            <tfoot ng-show="asyncTaskDialogCtrl.context.options.tableLimit < filteredCollection.length">
               <tr>
-                <td colspan="5" class="text-center">
-                  <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
+                <td colspan="3" class="text-center">
+                  <a ng-click="asyncTaskDialogCtrl.context.options.tableLimit = filteredCollection.length">
                     <span translate>cf.roles.assign-user-roles.step1.show-all-users</span> ({{ filteredCollection.length }})
                   </a>
-                  <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
                 </td>
               </tr>
             </tfoot>

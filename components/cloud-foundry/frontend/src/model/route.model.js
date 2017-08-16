@@ -26,7 +26,6 @@
   function Route(apiManager, modelUtils) {
 
     var routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
-    var appApi = apiManager.retrieve('cloud-foundry.api.Apps');
 
     var model = {
       route: {},

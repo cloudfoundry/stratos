@@ -122,8 +122,19 @@
   }
 }
 
+.existing-routes-table {
+  &__wrapper {
+    max-height: 350px;
+    overflow: auto;
+  }
+}
+
 .select-route-tabs {
   form.use-existing-route {
+      position: absolute;
+      right: 0;
+      left: 0;
+      margin-top: -36px;
     .form-group {
       input[type=text] {
         height: 100%;
@@ -157,8 +168,21 @@
     margin-left: -15px;
   }
   .select-route {
+    padding-top: 36px;
+    position: relative;
     table {
       border-top-color: transparent;
+    }
+    &__cell {
+      width: 60px;
+      position: relative;
+      radio-input {
+        $radio-height: 24px;
+        height: $radio-height;
+        margin-top: -($radio-height / 2);
+        position: absolute;
+        top: 50%;
+      }
     }
   }
 }
