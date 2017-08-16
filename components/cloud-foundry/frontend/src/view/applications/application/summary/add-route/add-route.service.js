@@ -148,7 +148,7 @@
           // 2) Filter out the one that the current application is already bound to.
           // 3) Get the route id and add it to the route object
           // 4) Return array of routes
-          return getRoutesFn(applicationGuid)
+          return getRoutesFn()
           .then(function (routes) {
             return _.chain(routes)
               .filter(function (route) {
