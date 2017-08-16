@@ -27,7 +27,8 @@
         })
         .then(function () {
           helpers.setBrowserNormal();
-          helpers.loadApp();
+          // Rest the cookies so that we get the default grid view and no saved org/space
+          helpers.loadApp(true);
           return loginPage.loginAsAdmin();
         })
         .then(function () {
