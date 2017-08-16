@@ -51,7 +51,7 @@
         appStateMap: {}
       },
       pageSize: config.pagination.pageSize,
-      filterParams: {
+      filterParams: angular.fromJson(appLocalStorage.getItem('cf.filterParams')) || {
         cnsiGuid: 'all',
         orgGuid: 'all',
         spaceGuid: 'all'
