@@ -1,9 +1,9 @@
 ---
 name: backend
 templates:
-    config.properties: /var/vcap/jobs/backend/config.properties
-    ssl_cert: /var/vcap/jobs/backend/dev_certs/pproxy.crt
-    ssl_cert_key: /var/vcap/jobs/backend/dev_certs/pproxy.key
+    config.properties.erb: /var/vcap/jobs/backend/config.properties
+    ssl_cert.erb: /var/vcap/jobs/backend/dev_certs/pproxy.crt
+    ssl_cert_key.erb: /var/vcap/jobs/backend/dev_certs/pproxy.key
 packages:
 - backend
 

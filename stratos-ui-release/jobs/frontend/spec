@@ -1,9 +1,9 @@
 ---
 name: frontend
 templates:
-    nginx.conf: /var/vcap/jobs/nginx/nginx.conf
-    ssl_cert: /var/vcap/jobs/nginx/nginx.crt
-    ssl_cert_key: /var/vcap/jobs/nginx/nginx.key
+    nginx.conf.erb: /var/vcap/jobs/nginx/nginx.conf
+    ssl_cert.erb: /var/vcap/jobs/nginx/nginx.crt
+    ssl_cert_key.erb: /var/vcap/jobs/nginx/nginx.key
 
 packages:
 - nginx
