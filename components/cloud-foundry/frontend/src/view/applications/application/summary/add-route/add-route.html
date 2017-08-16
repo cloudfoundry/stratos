@@ -57,7 +57,7 @@
         </form>
       </div>
     </uib-tab>
-    <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
+    <uib-tab ng-if="asyncTaskDialogCtrl.context.data.existingRoutes.length" index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
       <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-route"
         st-table="asyncTaskDialogCtrl.displayedExistingRoutes"
         st-safe-src="asyncTaskDialogCtrl.context.data.existingRoutes"
