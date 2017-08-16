@@ -222,12 +222,11 @@ nav.secondary-nav {
 
       &:hover {
         color: $navbar-hover-fg;
-        background-color: $navbar-hover-bg;
       }
 
       &.active {
-        background-color: $navbar-active-bg;
         color: $navbar-active-fg;
+        background-color: transparent;
       }
 
       > a {

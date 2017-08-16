@@ -136,9 +136,16 @@
     width: 100%;
   }
   .nav-tabs {
-    $outer-margin: 40px;
-    margin: 0 (-$outer-margin) 15px (-$outer-margin);
+    $outer-margin: 39px;
+    margin: 0 (-$outer-margin) 25px (-$outer-margin);
     padding: 0 $outer-margin;
+    .uib-tab {
+      > a, > a:hover, a.active {
+        background: none;
+        background-color: transparent;
+      }
+    }
+
   }
   .search-field {
     border-width: 2px;

@@ -163,7 +163,8 @@
               "port-placeholder": "port for this route",
               "button": {
                 "submit": "Add route"
-              }
+              },
+              "search-placeholder": "Search by name"
             }
           },
           "service-instances-panel": {
