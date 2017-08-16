@@ -17,9 +17,9 @@
     })
     .run(registerApplicationModel);
 
-  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils) {
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
-      cfAppStateService, $q, modelUtils));
+      cfAppStateService, $q, modelUtils, appLocalStorage));
   }
 
   /**
@@ -31,13 +31,14 @@
    * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @class
    */
-  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils) {
+  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     var applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
     var loadingLimit = config.loadingLimit;
 
@@ -56,7 +57,8 @@
         spaceGuid: 'all'
       },
       // Controls view of App Wall (Card layout or List layout)
-      showCardLayout: true,
+      // Try and get this from Browser local storage, if not, default to card layout
+      showCardLayout: appLocalStorage.getItem('cf.app.cardLayout', 'true') === 'true',
       // This state should be in the model
       clusterCount: 0,
       hasApps: false,
