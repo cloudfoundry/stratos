@@ -1,50 +1,62 @@
 ---
 name: backend
 templates:
-    config.properties.erb: /var/vcap/jobs/backend/config.properties
-    ssl_cert.erb: /var/vcap/jobs/backend/dev_certs/pproxy.crt
-    ssl_cert_key.erb: /var/vcap/jobs/backend/dev_certs/pproxy.key
+    config.properties.erb: config/config.properties
+    ssl_cert.erb: config/dev_certs/pproxy.crt
+    ssl_cert_key.erb: config/dev_certs/pproxy.key
+    backend_ctl.erb: bin/backend_ctl
+
 packages:
 - backend
+- utils
 
 properties:
-    skip_ssl_validation:
-        description: "Skip SSL validation"
+    stratos_ui.backend.skip_ssl_validation:
+        description: "Skip SSL validation for connections to UAA"
         default: false
-    backend_port:
+    stratos_ui.backend.address:
+        description: "Address the backend is binding to"
+        default: 0.0.0.0
+    stratos_ui.backend.port:
         description: "Port the backend is listening on"
         default: 443
-    uaa_address:
+    stratos_ui.backend.uaa_address:
         description: "UAA server address"
-    console_admin_scope:
+        default: ''
+    stratos_ui.backend.console_admin_scope:
         description: "UAA scope identifying Stratos UI Console admin"
-    console_admin_scope:
+        default: ''
+    stratos_ui.backend.console_admin_scope:
         description: "UAA scope identifying Stratos UI Console admin"
-    console_uaa_client:
+        default: ''
+    stratos_ui.backend.console_uaa_client:
         description: "UAA client for Stratos UI Console"
-    frontend_origin_address:
+        default: ''
+    stratos_ui.backend.frontend_origin_address:
         description: "Frontend origin address"
-    ssl_cert_key:
+    stratos_ui.backend.ssl_cert_key:
         description: "SSL Certificate key body"
-    ssl_cert:
+    stratos_ui.backend.ssl_cert:
         description: "SSL Certificate body"
-    encryption_key:
+    stratos_ui.backend.encryption_key:
         description: "Hex encoded encryption key"
-    use_postgres:
+    stratos_ui.backend.session_store_secret:
+        description: "Secret used to encrypt the backend session store"
+    stratos_ui.backend.use_postgres:
         description: "Use postgres, need to specify relevant postgres settings"
-    postgres_user:
+    stratos_ui.backend.postgres_user:
         description: "Postgres User"
-    postgres_user_passwd:
+    stratos_ui.backend.postgres_user_passwd:
         description: "Postgres user password"
-    postgres_db:
+    stratos_ui.backend.postgres_db:
         description: "Stratos UI Console DB name"
-    postgres_host:
+    stratos_ui.backend.postgres_host:
         description: "Postgres host"
-    postgres_port:
+    stratos_ui.backend.postgres_port:
         description: "Postgres port"
-    postgres_enable_ssl:
+    stratos_ui.backend.postgres_enable_ssl:
         description: "Enable SSL for postgres"
         default: false
-    use_sqlite:
+    stratos_ui.backend.use_sqlite:
         description: "USe SQLLite"
         default: true

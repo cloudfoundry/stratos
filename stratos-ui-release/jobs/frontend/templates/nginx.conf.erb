@@ -9,7 +9,7 @@ http {
 
     upstream portalproxy {
         least_conn;
-        server                      <%= @backend_host %>:<%= @backend_port %>;
+        server                      <%= p('stratos_ui.backend.host') %>:<%= p('stratos_ui.backend.port') %>;
         keepalive                   32;
     }
 
@@ -47,8 +47,8 @@ http {
     server {
         listen                      443 ssl;
 
-        ssl_certificate             /var/vcap/jobs/nginx/nginx.crt;
-        ssl_certificate_key         /var/vcap/jobs/nginx/nginx.key;
+        ssl_certificate             /var/vcap/jobs/nginx/config/nginx.crt;
+        ssl_certificate_key         /var/vcap/jobs/nginx/config/nginx.key;
         ssl_protocols               TLSv1 TLSv1.1 TLSv1.2;
         ssl_ciphers                 HIGH:!aNULL:!MD5;
 

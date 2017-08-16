@@ -1,22 +1,24 @@
 ---
 name: frontend
 templates:
-    nginx.conf.erb: /var/vcap/jobs/nginx/nginx.conf
-    ssl_cert.erb: /var/vcap/jobs/nginx/nginx.crt
-    ssl_cert_key.erb: /var/vcap/jobs/nginx/nginx.key
+    nginx.conf.erb: config/nginx.conf
+    ssl_cert.erb: config/nginx.crt
+    ssl_cert_key.erb: config/nginx.key
+    nginx_ctl.erb: bin/nginx_ctl
 
 packages:
 - nginx
 - frontend
+- utils
 
 properties:
-    backend_host:
+    stratos_ui.backend.host:
         description: "Host deploying the backend"
         default: localhost
-    backend_port:
+    stratos_ui.backend.port:
         description: "Port the backend is listening on"
         default: 443
-    ssl_cert_path:
-        description: "SSL certificate path"
-    ssl_cert_key_path:
-        description: "SSL certificate key path"
+    stratos_ui.frontend.ssl_cert:
+        description: "SSL certificate"
+    stratos_ui.frontend.ssl_cert_key:
+        description: "SSL certificate key"

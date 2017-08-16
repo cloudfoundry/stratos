@@ -1,0 +1,7 @@
+check process nginx
+  with pidfile /var/vcap/sys/run/nginx/nginx.pid
+  start program "/var/vcap/jobs/frontend/bin/nginx_ctl start"
+        as uid vcap and gid vcap
+  stop program "/var/vcap/jobs/bin/frontend/nginx_ctl stop"
+        as uid vcap and gid vcap
+  group vcap

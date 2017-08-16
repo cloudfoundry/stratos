@@ -1,31 +1,31 @@
 HTTP_CONNECTION_TIMEOUT_IN_SECS=10
 HTTP_CLIENT_TIMEOUT_IN_SECS=20
-SKIP_SSL_VALIDATION=<%= @skip_ssl_validation %> 
-CONSOLE_PROXY_TLS_ADDRESS=:=<%= @backend_port %> 
+SKIP_SSL_VALIDATION=<%= p('stratos_ui.backend.skip_ssl_validation') %>
+CONSOLE_PROXY_TLS_ADDRESS=<%= p('stratos_ui.backend.address') %>:<%= p('stratos_ui.backend.port') %>
 CF_CLIENT=cf
 CF_ADMIN_ROLE=cloud_controller.admin
 
-UAA_ENDPOINT=<%= @uaa_address %> 
-CONSOLE_ADMIN_SCOPE=<%= @console_admin_scope %> 
-CONSOLE_CLIENT=<%= @console_uaa_client %> 
-ALLOWED_ORIGINS==<%= @frontend_origin_address %> 
+UAA_ENDPOINT=<%= p('stratos_ui.backend.uaa_address') %>
+CONSOLE_ADMIN_SCOPE=<%= p('stratos_ui.backend.console_admin_scope') %>
+CONSOLE_CLIENT=<%= p('stratos_ui.backend.console_uaa_client') %>
+ALLOWED_ORIGINS=<%= p('stratos_ui.backend.frontend_origin_address') %>
 
-SESSION_STORE_SECRET=wheeee!
-CONSOLE_PROXY_CERT_KEY=<%= @ssl_cert_key %> 
-CONSOLE_PROXY_CERT==<%= @ssl_cert %> 
-ENCRYPTION_KEY=<%= @encryption_key %>
+SESSION_STORE_SECRET=<%= p('stratos_ui.backend.session_store_secret') %>
+CONSOLE_PROXY_CERT_KEY=<%= p('stratos_ui.backend.ssl_cert_key') %>
+CONSOLE_PROXY_CERT=<%= p('stratos_ui.backend.ssl_cert') %>
+ENCRYPTION_KEY=<%= p('stratos_ui.backend.encryption_key') %>
 
-<% if @use_postgres -%>
+<% if p('stratos_ui.backend.use_postgres') == true %>
 DATABASE_PROVIDER=postgres
-PGSQL_USER=<%= @postgres_user %>
-PGSQL_PASSWORD=<%= @postgres_user_passwd %>
-PGSQL_DATABASE=<%= @postgres_db %>
-PGSQL_HOST=<%= @postgres_host %>
-PGSQL_PORT=<%= @postgres_port %>
+PGSQL_USER=<%= p('stratos_ui.backend.postgres_user') %>
+PGSQL_PASSWORD=<%= p('stratos_ui.backend.postgres_user_passwd') %>
+PGSQL_DATABASE=<%= p('stratos_ui.backend.postgres_db') %>
+PGSQL_HOST=<%= p('stratos_ui.backend.postgres_host') %>
+PGSQL_PORT=<%= p('stratos_ui.backend.postgres_port') %>
 PGSQL_CONNECT_TIMEOUT_IN_SECS=100
-PGSQL_SSL_MODE=<%= @postgres_enable_ssl %>
-<% end -%>
+PGSQL_SSL_MODE=<%= p('stratos_ui.backend.postgres_enable_ssl') %>
+<% end %>
 
-<% if @use_sqlite -%>
+<% if p('stratos_ui.backend.use_sqlite') == true %>
 DATABASE_PROVIDER=sqlite
-<% end -%>
+<% end %>

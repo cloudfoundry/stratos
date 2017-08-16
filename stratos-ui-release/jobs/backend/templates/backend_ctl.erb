@@ -1,0 +1,44 @@
+#!/bin/bash
+
+RUN_DIR="/var/vcap/sys/run/backend"
+LOG_DIR="/var/vcap/sys/log/backend"
+PIDFILE="${RUN_DIR}/backend.pid"
+CONFIG_DIR="/var/vcap/jobs/backend/config"
+
+source /var/vcap/packages/utils/syslog_utils.sh
+source /var/vcap/packages/utils/pid_utils.sh
+
+tee_output_to_sys_log_and_file "${LOG_DIR}" "$(basename "$0")"
+
+function setup_environment() {
+  mkdir -p "${RUN_DIR}"
+}
+
+case $1 in
+
+  start)
+    setup_environment
+    pid_guard "$PIDFILE" "Nginx"
+
+    cp -r $CONFIG_DIR/* /var/vcap/packages/backend/
+    cd /var/vcap/packages/backend/
+
+    echo $$ > "$PIDFILE"
+
+    exec /var/vcap/packages/backend/portal-proxy
+
+    ;;
+
+  stop)
+    sigkill_on_timeout=0
+    timeout=0
+    kill_and_wait "${PIDFILE}" "${timeout}" "${sigkill_on_timeout}"
+
+    ;;
+
+  *)
+    echo "Usage: backend_ctl {start|stop}"
+
+    ;;
+
+esac
