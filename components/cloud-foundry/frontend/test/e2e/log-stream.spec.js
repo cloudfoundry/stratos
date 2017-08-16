@@ -27,11 +27,12 @@
         })
         .then(function () {
           helpers.setBrowserNormal();
-          // Rest the cookies so that we get the default grid view and no saved org/space
-          helpers.loadApp(true);
+          helpers.loadApp();
           return loginPage.loginAsAdmin();
         })
         .then(function () {
+          // Ensure that no org or space is selected when we come into the app wall
+          galleryWall.resetFilters();
           return galleryWall.setGridView();
         });
       // Ensure we don't continue until everything is set up
