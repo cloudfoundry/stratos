@@ -9,7 +9,7 @@ packages:
 
 properties:
     backend_host:
-       description: "Host deploying the backend"
+        description: "Host deploying the backend"
         default: localhost
     backend_port:
         description: "Port the backend is listening on"

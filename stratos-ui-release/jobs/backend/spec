@@ -4,9 +4,9 @@ templates:
     config.properties: ./config.properties
 
 packages:
- - backend
+- backend
 
- properties:
+properties:
     skip_ssl_validation:
         description: "Skip SSL validation"
         default: false
