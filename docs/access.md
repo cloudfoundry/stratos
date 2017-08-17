@@ -4,20 +4,20 @@ Depending on the deployment mode, you may require access to an UAA.
 
 ## Deploying in Docker-Compose
 
-In Docker Compose a UAA instance is deployed. 
+In Docker Compose a UAA instance is deployed.
 The default login credentials for the Console admin user are:
 
  - username: `admin`,
  - password: `hscadmin`
 
 The Console admin scope in this environment is `stratos.admin`. Any user with this scope will be identified as a user.
- 
- 
+
+
 ## Cloud Foundry deployment
 
-In a Cloud Foundry deployment, the Console will be configured to use the UAA used by the Cloud Foundry instance. 
+In a Cloud Foundry deployment, the Console will be configured to use the UAA used by the Cloud Foundry instance.
 Therefore, the login credentials will be the CF credentials for the user. A Cloud Foundry administrator (a user with the `cloud_controller.admin` scope) will also be a Console administrator.
- 
+
 ## Kubernetes deployment
 
 In a Kubernetes deployment using Helm, no UAA instance is deployed. Therefore users need to provide their own UAA to against.
@@ -38,12 +38,12 @@ The single container deployment does not contain a UAA, and all the instructions
 
 1. We will setup two containers that are linked to each other
 ```
-$ docker network create --driver=bridge dev-bridge 
+$ docker network create --driver=bridge dev-bridge
 ```
 
 1. Bring up the single container Console
 ```
-$ docker run -p 4443:443 --net=dev-bridge splatform/stratos-aio --name console
+$ docker run -p 4443:443 --net=dev-bridge splatform/stratos-ui --name console
 ```
 
 2. Bring up the UAA

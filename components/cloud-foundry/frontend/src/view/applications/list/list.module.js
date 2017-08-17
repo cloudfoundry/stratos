@@ -112,6 +112,12 @@
       angular.element($window).off('resize', onResize);
     });
 
+    $scope.$watch(function () {
+      return vm.model.filterParams.cnsiGuid + vm.model.filterParams.orgGuid + vm.model.filterParams.spaceGuid;
+    }, function () {
+      appLocalStorage.setItem('cf.filterParams', angular.toJson(vm.model.filterParams));
+    });
+
     function onResize() {
       var shouldForceCardLayout = $window.innerWidth <= FORCE_GRID_LAYOUT_WIDTH;
       if (shouldForceCardLayout !== vm.forceCardLayout) {
