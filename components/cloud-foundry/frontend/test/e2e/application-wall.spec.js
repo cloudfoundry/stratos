@@ -72,6 +72,7 @@
         appWallConfig3(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.setGridView();
       });
 
       afterAll(function () {
@@ -132,6 +133,7 @@
         appWallConfig500(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.setGridView();
       });
 
       afterAll(function () {

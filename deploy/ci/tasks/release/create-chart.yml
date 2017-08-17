@@ -9,9 +9,9 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  10.4.21.241:5000/linkyard/helm
+   repository:  ci-registry.ngrok.io:80/linkyard/helm
    tag: "latest"
-   insecure_registries: [ "10.4.21.241:5000" ]
+   insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
 run:
   path: sh

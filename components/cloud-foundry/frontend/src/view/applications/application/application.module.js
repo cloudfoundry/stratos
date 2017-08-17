@@ -149,6 +149,8 @@
       }
     ];
     vm.scheduledUpdate = undefined;
+    // Used in summary.module.js
+    vm.update = update;
     vm.autoUpdate = {
       update: update,
       interval: UPDATE_INTERVAL,
