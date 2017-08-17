@@ -1,20 +1,22 @@
 #!/bin/bash
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
-TAG=${TAG:-test}
+DOCKER_REGISTRY=10.84.93.11:5000
+TAG=${TAG:-latest}
+REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-registry.paas-ui}
+REGISTRY_USER=${REGISTRY_USER:-stack}
 
 DOWNLOAD_FOLDER=${DIRPATH}/tmp
 source ${DIRPATH}/build_common.sh
 
-# Generate Dropbear key for ssh'ing logs to registry.paas-ui
+# Generate Dropbear key for ssh'ing logs to $REGISTRY_ADDRESS
 PUBLIC_KEY=$(docker run -v $PWD:/key splatform/alpine-dropbear dropbearkey -t rsa -f key/id_rsa | grep "^ssh-rsa")
 
-# Get registry.paas-ui host key
+# Get n ${REGISTRY_ADDRESS} host key
 TMP_FILE=$(mktemp)
-ssh-keyscan registry.paas-ui > $TMP_FILE 2> /dev/null
+ssh-keyscan ${REGISTRY_ADDRESS} > $TMP_FILE 2> /dev/null
 ECDSA_FINGERPRINT=$(cat $TMP_FILE | grep ecdsa)
-echo ${PUBLIC_KEY} | ssh stack@registry.paas-ui "cat >> ~/.ssh/authorized_keys"
+echo ${PUBLIC_KEY} | ssh ${REGISTRY_USER}@${REGISTRY_ADDRESS} "cat >> ~/.ssh/authorized_keys"
 
 cat << EOT > Dockerfile.dcind
 FROM amidos/dcind:latest
