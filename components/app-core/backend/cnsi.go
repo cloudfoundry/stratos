@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -63,6 +64,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"CNSI Name or Endpoint were not provided when trying to register an CF Cluster")
 	}
 
+	apiEndpoint = strings.TrimRight(apiEndpoint, "/")
+
+	// Remove trailing slash, if there is one
 	apiEndpointURL, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -251,6 +255,9 @@ func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) 
 	if err != nil {
 		return interfaces.CNSIRecord{}, err
 	}
+
+	// Ensure that trailing slash is removed from the API Endpoint
+	rec.APIEndpoint.Path = strings.TrimRight(rec.APIEndpoint.Path, "/")
 
 	return rec, nil
 }
