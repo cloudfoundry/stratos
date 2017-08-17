@@ -15,7 +15,7 @@ http {
 
     add_header                      X-Frame-Options DENY;
 
-    include                         mime.types;
+    include                         /var/vcap/packages/nginx/conf/mime.types;
     default_type                    application/octet-stream;
     keepalive_timeout               70;
     proxy_read_timeout              200;
@@ -47,8 +47,8 @@ http {
     server {
         listen                      443 ssl;
 
-        ssl_certificate             /var/vcap/jobs/nginx/config/nginx.crt;
-        ssl_certificate_key         /var/vcap/jobs/nginx/config/nginx.key;
+        ssl_certificate             /var/vcap/jobs/frontend/config/nginx.crt;
+        ssl_certificate_key         /var/vcap/jobs/frontend/config/nginx.key;
         ssl_protocols               TLSv1 TLSv1.1 TLSv1.2;
         ssl_ciphers                 HIGH:!aNULL:!MD5;
 

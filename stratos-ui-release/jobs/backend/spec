@@ -2,8 +2,8 @@
 name: backend
 templates:
     config.properties.erb: config/config.properties
-    ssl_cert.erb: config/dev_certs/pproxy.crt
-    ssl_cert_key.erb: config/dev_certs/pproxy.key
+    ssl_cert.erb: config/dev-certs/pproxy.crt
+    ssl_cert_key.erb: config/dev-certs/pproxy.key
     backend_ctl.erb: bin/backend_ctl
 
 packages:

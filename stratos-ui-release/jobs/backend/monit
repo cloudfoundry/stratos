@@ -1,7 +1,5 @@
 check process backend
   with pidfile /var/vcap/sys/run/backend/backend.pid
-  start program "/var/vcap/jobs/backend/bin/backend_ctl start"
-        as uid vcap and gid vcap
-  stop program "/var/vcap/jobs/bin/backend_ctl stop"
-        as uid vcap and gid vcap
+  start program  = "/bin/bash -c '/var/vcap/jobs/backend/bin/backend_ctl start'"
+  stop program  = "/bin/bash -c '/var/vcap/jobs/backend/bin/backend_ctl stop'"
   group vcap

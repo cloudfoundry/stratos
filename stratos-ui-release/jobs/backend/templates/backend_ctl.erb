@@ -8,6 +8,9 @@ CONFIG_DIR="/var/vcap/jobs/backend/config"
 source /var/vcap/packages/utils/syslog_utils.sh
 source /var/vcap/packages/utils/pid_utils.sh
 
+if [ ! -d ${LOG_DIR} ]; then
+  mkdir ${LOG_DIR}
+fi
 tee_output_to_sys_log_and_file "${LOG_DIR}" "$(basename "$0")"
 
 function setup_environment() {
@@ -22,7 +25,10 @@ case $1 in
 
     cp -r $CONFIG_DIR/* /var/vcap/packages/backend/
     cd /var/vcap/packages/backend/
-
+    mkdir -p deploy/db
+    touch deploy/db/sqlite_schema.sql
+    
+    chmod +x portal-proxy
     echo $$ > "$PIDFILE"
 
     exec /var/vcap/packages/backend/portal-proxy
