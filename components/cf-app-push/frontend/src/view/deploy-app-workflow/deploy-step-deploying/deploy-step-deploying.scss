@@ -26,22 +26,20 @@ $deploy-status-bounce-spacer: 6px;
       margin-bottom: $console-unit-space;
       font-size: $font-size-large1;
       font-weight: $console-font-weight-semibold;
+    }
 
-      percent-gauge.deploy-app-file-progress {
+    percent-gauge.deploy-app-file-progress {
+      .percent-gauge .percent-gauge-bar:after {
+        background-image: none;
+      }
 
-        .percent-gauge .percent-gauge-bar:after {
-          background-image: none;
-        }
+      .percent-gauge .percent-gauge-bar .percent-gauge-utilized-bar {
+        background-color: $brand-primary;
 
-        .percent-gauge .percent-gauge-bar .percent-gauge-utilized-bar {
+        &.percent-gauge-at-max {
           background-color: $brand-primary;
-
-          &.percent-gauge-at-max {
-            background-color: $brand-primary;
-          }
         }
       }
     }
   }
-
 }
