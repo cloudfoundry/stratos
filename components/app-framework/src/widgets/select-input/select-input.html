@@ -2,7 +2,7 @@
   <div class="select-input-field">
     <span class="select-input-value"
       ng-class="{ 'text-muted': !selectInputCtrl.ngModelCtrl.$modelValue }">
-      {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder | conditionalTranslate:selectInputCtrl.translateOptionLabels }}
+      {{ (selectInputCtrl.modelLabel | conditionalTranslate:selectInputCtrl.translateOptionLabels) || (selectInputCtrl.placeholder | translate) }}
     </span>
     <i class="dropdown-toggle material-icons">arrow_drop_down</i>
   </div>
