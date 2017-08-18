@@ -61,7 +61,7 @@
     "wiredep": "^3.0.0"
   },
   "engines": {
-    "node": "6.x.x"
+    "node": "8.x.x"
   },
   "devDependencies": {
     "browser-sync": "^2.18.13",
