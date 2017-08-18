@@ -9,13 +9,13 @@
    * @name AddRouteServiceFactory
    * @description Factory for getting the Add Route Dialog
    * @memberof cloud-foundry.view.applications.application.summary
+   * @param {object} $q - promise library
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - async dialog service
-   * @param {object} $q - promise library
    * @param {object} appClusterRoutesService - App cluster router service
    * @constructor
    */
-  function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog, $q, appClusterRoutesService) {
+  function AddRouteServiceFactory($q, modelManager, frameworkAsyncTaskDialog, appClusterRoutesService) {
     var that = this;
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     return {

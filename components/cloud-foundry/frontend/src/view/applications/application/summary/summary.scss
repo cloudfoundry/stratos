@@ -151,22 +151,25 @@
     margin: 0 (-$outer-margin) 25px (-$outer-margin);
     padding: 0 $outer-margin;
     .uib-tab {
-      > a, > a:hover, a.active {
-        background: none;
-        background-color: transparent;
+      > a, > a.active {
+        &, &:hover, &:focus {
+          background: none;
+          background-color: transparent;
+        }
       }
     }
-
   }
+
   .search-field {
     border-width: 2px;
     display: flex;
     height: auto;
     width: auto;
+    .control-label {
+      margin-left: -15px;
+    }
   }
-  .control-label {
-    margin-left: -15px;
-  }
+
   .select-route {
     padding-top: 36px;
     position: relative;
