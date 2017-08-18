@@ -13,6 +13,7 @@
       "start": "To enable developers to use the [[@:console]] to interact with [[@:product.name]],",
       "link": "please register endpoints.",
       "end": "The process of registering these endpoints will make them discoverable for anyone who logs into the [[@:product.console]]. Once you register an endpoint, we recommend connecting it to your account so you can manage it.",
+      "admin": "To access your cloud native workloads and other related third party services, connect with your personal credentials to the corresponding registered services.",
       "non-admin": "To access your cloud native workloads and other related third party services, connect with your personal credentials to the corresponding registered services. Registered services are provided by your systems administrator."
     },
     "no-endpoints": {
