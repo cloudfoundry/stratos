@@ -48,7 +48,7 @@
    * @class
    */
   function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
+    appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
 
     var vm = this;
 
@@ -81,7 +81,7 @@
     }
 
     // Navigation options
-    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) { // eslint-disable-line angular/on-watch
       vm.hideNavigation = toParams.hideNavigation;
       vm.hideAccount = toParams.hideAccount;
     });

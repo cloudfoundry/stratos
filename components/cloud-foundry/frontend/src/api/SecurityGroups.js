@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(SecurityGroupsApi.prototype, {
 
-   /*
+    /*
     * Associate Space with the Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/associate_space_with_the_security_group.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/creating_a_security_group.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/delete_a_particular_security_group.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Security Groups
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/list_all_security_groups.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces for the Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/list_all_spaces_for_the_security_group.html
     */
@@ -104,7 +104,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Space from the Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/remove_space_from_the_security_group.html
     */
@@ -121,7 +121,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/retrieve_a_particular_security_group.html
     */
@@ -138,7 +138,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a Security Group
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/updating_a_security_group.html
     */

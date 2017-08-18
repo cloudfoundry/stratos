@@ -34,7 +34,7 @@
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
+    appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
 
     var vm = this;
 

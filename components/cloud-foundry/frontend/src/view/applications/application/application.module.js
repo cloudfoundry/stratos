@@ -48,8 +48,8 @@
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
-                                 cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $translate, $state, cfApplicationTabs) {
+    cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
+    $translate, $state, cfApplicationTabs) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

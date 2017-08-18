@@ -31,7 +31,7 @@
    * @constructor
    */
   function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
-                                        appEndpointsDashboardService) {
+    appEndpointsDashboardService) {
     var vm = this;
 
     var currentUserAccount = modelManager.retrieve('app.model.account');

@@ -22,7 +22,7 @@
    * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(appEventService, modelManager, loginManager, frameworkDialogConfirm,
-                                  $interval, $rootScope, $window, $log, $document, $translate) {
+    $interval, $rootScope, $window, $log, $document, $translate) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();

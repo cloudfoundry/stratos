@@ -77,10 +77,10 @@
       }
 
       return (
-      formatPart(days, $translate.instant('dateTime.singular.day'), $translate.instant('dateTime.plural.days')) +
-      formatPart(hours, $translate.instant('dateTime.singular.hour'), $translate.instant('dateTime.plural.hours')) +
-      formatPart(minutes, $translate.instant('dateTime.singular.minute'), $translate.instant('dateTime.plural.minutes')) +
-      formatPart(seconds, $translate.instant('dateTime.singular.second'), $translate.instant('dateTime.plural.seconds')))
+        formatPart(days, $translate.instant('dateTime.singular.day'), $translate.instant('dateTime.plural.days')) +
+        formatPart(hours, $translate.instant('dateTime.singular.hour'), $translate.instant('dateTime.plural.hours')) +
+        formatPart(minutes, $translate.instant('dateTime.singular.minute'), $translate.instant('dateTime.plural.minutes')) +
+        formatPart(seconds, $translate.instant('dateTime.singular.second'), $translate.instant('dateTime.plural.seconds')))
         .trim();
     }
   }

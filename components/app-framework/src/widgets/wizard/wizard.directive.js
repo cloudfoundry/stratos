@@ -331,26 +331,26 @@
               };
             }
           })
-          .then(function () {
-            if (step.isLastStep) {
-              vm.resetMessage();
-              vm.actions.finish(vm);
-            } else {
-              vm.switchTo(index + 1).then(function () {
+            .then(function () {
+              if (step.isLastStep) {
                 vm.resetMessage();
-              });
-            }
-          }, function (message) {
+                vm.actions.finish(vm);
+              } else {
+                vm.switchTo(index + 1).then(function () {
+                  vm.resetMessage();
+                });
+              }
+            }, function (message) {
             // Hide the loading indicator if we showed one
-            vm.currentIndex = index;
-            vm.busyMessage = false;
-            if (message) {
-              vm.showMessage(message, 'alert-danger');
-            } else {
-              vm.resetMessage();
-            }
-            vm.resetButtons();
-          });
+              vm.currentIndex = index;
+              vm.busyMessage = false;
+              if (message) {
+                vm.showMessage(message, 'alert-danger');
+              } else {
+                vm.resetMessage();
+              }
+              vm.resetButtons();
+            });
         } else {
           if (step.isLastStep) {
             vm.actions.finish(vm);
