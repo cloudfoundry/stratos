@@ -2,14 +2,20 @@
 
 > **Note:** This document is work in progress.
 
-The Stratos Console UI provides a single comprehensive and ubiquitous user 
-experience for: discovering, composing, developing and managing Cloud Native 
-workloads which are hosted in a myriad of: public, managed and private 
+The Stratos Console UI provides a single comprehensive and ubiquitous user
+experience for: discovering, composing, developing and managing Cloud Native
+workloads which are hosted in a myriad of: public, managed and private
 cloud/compute providers.
 
 1. [Working on the front-end component](#working-on-the-front-end-component)
 2. [Working on the back-end component](#working-on-the-backend-component)
 3. [Testing](#testing)
+
+## Dependencies
+
+### Node
+Please check the `engine` entry of the package.json file for the required node version.
+ > **Note:** To manage node versions we recommend using [nvm](https://github.com/creationix/nvm)
 
 ## Components
 
@@ -52,15 +58,15 @@ Other components can be included to add additional items to the navigation bar a
 
 ### Source Code Structure
 
-The frontend code is split into component directories as listed above. 
-The standard set of components that exist in the console contain functionality 
+The frontend code is split into component directories as listed above.
+The standard set of components that exist in the console contain functionality
 to manage Cloud Foundry instances and their applications.
 
-The frontend code is usually found within a `frontend` folder and contains 
+The frontend code is usually found within a `frontend` folder and contains
 a structure such as that in app-core/frontend component, for example:
 ```
 |-- frontend
-|   |-- assets     
+|   |-- assets
 |   |-- i18n
 |   |   -- en
 |   |-- src
@@ -81,16 +87,16 @@ i18n | Internationalization strings per locale. By default the console contains 
 src | Javascript, html and scss related to the component
 test | Unit tests for the component
 
-> **Note:** The bower.json is in the root of the component 
+> **Note:** The bower.json is in the root of the component
 
 ### Style Sheets
-The frontend defines styles in SCSS which is converted to CSS at build time. 
-Each component is responsible for specifying it's root scss as a 'main' file 
-in it's bower.json. From this all other 
+The frontend defines styles in SCSS which is converted to CSS at build time.
+Each component is responsible for specifying it's root scss as a 'main' file
+in it's bower.json. From this all other
 component scss are gathered.
 
 ### Build Process
-The build process uses gulp, see the the root gulpfile.js. Below is a list 
+The build process uses gulp, see the the root gulpfile.js. Below is a list
 of important gulp tasks.
 
 Gulp task name | Description
@@ -102,14 +108,14 @@ lint | Executes linting via eslint. See ./.eslintrc for rules
 
 > **Note:** When using the `dev` task, web sockets do not get forwarded, so log streaming and ssh access will not work - use the `run` task to test these.
 
-Some tasks can be accessed via npm, by running `npm script target` along with additional test 
+Some tasks can be accessed via npm, by running `npm script target` along with additional test
 functionality:
 
 NPM script name | Description
 ----------------|------------
 lint | Same as gulp lint
 coverage | Executes both unit and e2e tests and provides a combined coverage report in `./out/coverage-report`
-gate-check | Executes lint and unit tests, very handy to use before creating a PR 
+gate-check | Executes lint and unit tests, very handy to use before creating a PR
 e2e | Executes end to end tests via protractor, also handy to use before creating a PR. Screenshots of the console for each failure can be found in ./out/e2e-failures
 test | Executes unit tests
 
@@ -117,13 +123,13 @@ test | Executes unit tests
 ### Run the frontend via gulp
 
 #### Requirements
-The Console backend must be up and contactable by the developers machine. 
-This can be achieved via any of the methods 
+The Console backend must be up and contactable by the developers machine.
+This can be achieved via any of the methods
 described in the [deploy](../deploy/README.md) instructions.
 
 #### Configuration
-The Console frontend must know the address of the backend. This can be 
-set by creating the file ./build/dev_config.js 
+The Console frontend must know the address of the backend. This can be
+set by creating the file ./build/dev_config.js
 with contents such as
 ```
 {
@@ -161,8 +167,8 @@ $ gulp lint
 
 
 ### Creating a successful Pull Request in github
-For every new pull request, or commit to an existing request, the CI will 
-run a build against the requests HEAD. Before creating a PR or pushing to 
+For every new pull request, or commit to an existing request, the CI will
+run a build against the requests HEAD. Before creating a PR or pushing to
 one please ensure the following two requests execute successfully
 
 ```
@@ -234,8 +240,8 @@ $ npm run e2e
 
 #### Continuous Integration
 
-Pull request submitted to the stratos-ui project will run through 
-frontend unit tests, backend unit tests and integration tests. The 
-concourse server which executes these is currently not available 
-externally. The result however can still be seen by the usual 
+Pull request submitted to the stratos-ui project will run through
+frontend unit tests, backend unit tests and integration tests. The
+concourse server which executes these is currently not available
+externally. The result however can still be seen by the usual
 indications posted by github to the PR's page.
