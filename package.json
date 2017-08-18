@@ -91,6 +91,7 @@
     "protractor": "^5.1.2",
     "protractor-jasmine2-screenshot-reporter": "^0.4.0",
     "request": "^2.81.0",
+    "shelljs": "^0.7.8",
     "toSrc": "^0.1.4"
   }
 }

@@ -134,7 +134,7 @@
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
       // Optional. Really nice to see the progress of the tests while executing
-      var SpecReporter = require('jasmine-spec-reporter');
+      var SpecReporter = require('jasmine-spec-reporter').SpecReporter;
       jasmine.getEnv().addReporter(new SpecReporter({
         displayPendingSpec: false,
         displayPendingSummary: false,
