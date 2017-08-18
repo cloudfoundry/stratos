@@ -16,12 +16,12 @@
                               appLoggedInService) {
     var initialized = $q.defer();
 
-    var config = {};
-
-    appLoggedInService.setDashboardRedirect(getDashboardRedirect);
+    appLoggedInService.setDashboardRouteFunc(getDashboardRoute);
 
     appEventService.$on(appEventService.events.LOGIN, function () {
-      if (!config.disable) {
+      if (isDashboardDisabled()) {
+        delete env.plugins.endpointsDashboard;
+      } else {
         onLoggedIn();
       }
     });
@@ -38,18 +38,15 @@
       initialized.resolve();
     }
 
-    function getDashboardRedirect() {
-      updateConfig();
-      if (config.disable) {
-        delete env.plugins.endpointsDashboard;
-      } else {
+    function getDashboardRoute() {
+      if (!isDashboardDisabled()) {
         return 'endpoint.dashboard';
       }
     }
 
-    function updateConfig() {
+    function isDashboardDisabled() {
       var info = modelManager.retrieve('app.model.consoleInfo').info;
-      config.disable = _.get(info, 'plugin-config.' + endpointsDashboardDisabledKey) === 'true';
+      return _.get(info, 'plugin-config.' + endpointsDashboardDisabledKey) === 'true';
     }
   }
 

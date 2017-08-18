@@ -198,7 +198,7 @@
         .then(function () {
           var cfOnly = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'cf'}) || [];
           var noEndpoints = cfOnly.length === 0;
-          var dashboardRedirect = appLoggedInService.getDashboardRedirect();
+          var dashboardRedirect = appLoggedInService.getDashboardRoute();
 
           if (noEndpoints) {
             // Admin

@@ -26,7 +26,7 @@
 
     var loggedIn = false;
     var lastUserInteraction = moment();
-    var sessionChecker, dialog, dashboardRedirectFunc;
+    var sessionChecker, dialog, dashboardRouteFunc;
 
     // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
     var checkSessionInterval = 30 * 1000;
@@ -148,8 +148,8 @@
     return {
       isLoggedIn: isLoggedIn,
       userInteracted: userInteracted,
-      setDashboardRedirect: setDashboardRedirect,
-      getDashboardRedirect: getDashboardRedirect
+      setDashboardRouteFunc: setDashboardRouteFunc,
+      getDashboardRoute: getDashboardRoute
     };
 
     function isLoggedIn() {
@@ -160,14 +160,14 @@
       lastUserInteraction = moment();
     }
 
-    function setDashboardRedirect(func) {
-      dashboardRedirectFunc = func;
+    function setDashboardRouteFunc(func) {
+      dashboardRouteFunc = func;
     }
 
-    function getDashboardRedirect() {
+    function getDashboardRoute() {
       // At this point console-info must have been called
-      if (angular.isFunction(dashboardRedirectFunc)) {
-        return dashboardRedirectFunc();
+      if (angular.isFunction(dashboardRouteFunc)) {
+        return dashboardRouteFunc();
       }
     }
 
