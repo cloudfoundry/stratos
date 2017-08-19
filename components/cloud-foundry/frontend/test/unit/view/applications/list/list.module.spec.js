@@ -27,6 +27,7 @@
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
       var cfAppWallActions = $injector.get('cfAppWallActions');
       var $window = $injector.get('$window');
+      var appLocalStorage = $injector.get('appLocalStorage');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       if (Object.keys(userCnsiModel.serviceInstances).length === 0) {
@@ -52,7 +53,7 @@
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
       $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
-        errorService, appUtilsService, cfOrganizationModel, cfAppWallActions);
+        errorService, appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');

@@ -102,4 +102,5 @@ type PortalConfig struct {
 	LoginHook                   LoginHookFunc
 	SessionStore                SessionStorer
 	ConsoleConfig               *ConsoleConfig
+	PluginConfig                map[string]string
 }

@@ -49,6 +49,23 @@ helm install --set noShared=true stratos-ui/console --namespace=console --name m
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
+#### Upgrading your deployment
+
+To upgrade your instance when using the Helm repository, fetch any updates to the repository:
+
+```
+$ helm repo update
+```
+
+To update an instance, the following assumes your instance is called `my-console`, and overrides have been specified in a file called `overrides.yaml`.
+
+```
+$ helm upgrade -f overrides.yaml my-console stratos-ui/console --recreate-pods
+```
+
+After the upgrade, perform a `helm list` to ensure your console is the latest version.
+
+
 ## Deploying using the GitHub repository
 
 To deploy the Stratos UI Console:
