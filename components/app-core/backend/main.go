@@ -320,13 +320,6 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	// Determine database provider
-	if len(dc.Host) > 0 {
-		dc.DatabaseProvider = "pgsql"
-	} else {
-		dc.DatabaseProvider = "sqlite"
-	}
-
 	return dc, nil
 }
 

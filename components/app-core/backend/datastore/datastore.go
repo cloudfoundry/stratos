@@ -11,24 +11,35 @@ import (
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 
 	log "github.com/Sirupsen/logrus"
+	// Mysql driver
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
-	// SQL Lite 3
+	// Sqlite driver
 	_ "github.com/mattn/go-sqlite3"
+)
+
+const (
+	// SQLite DB Provider
+	SQLITE string = "sqlite"
+	// PGSQL DB Provider
+	PGSQL = "pgsql"
+	// MYSQL DB Provider
+	MYSQL = "mysql"
 )
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
 	DatabaseProvider        string `configName:"DATABASE_PROVIDER"`
-	Username                string `configName:"PGSQL_USER"`
-	Password                string `configName:"PGSQL_PASSWORD"`
-	Database                string `configName:"PGSQL_DATABASE"`
-	Host                    string `configName:"PGSQL_HOST"`
-	Port                    int    `configName:"PGSQL_PORT"`
-	SSLMode                 string `configName:"PGSQL_SSL_MODE"`
-	ConnectionTimeoutInSecs int    `configName:"PGSQL_CONNECT_TIMEOUT_IN_SECS"`
-	SSLCertificate          string `configName:"PGSQL_CERT"`
-	SSLKey                  string `configName:"PGSQL_CERT_KEY"`
-	SSLRootCertificate      string `configName:"PGSQL_ROOT_CERT"`
+	Username                string `configName:"DB_USER"`
+	Password                string `configName:"DB_PASSWORD"`
+	Database                string `configName:"DB_DATABASE_NAME"`
+	Host                    string `configName:"DB_HOST"`
+	Port                    int    `configName:"DB_PORT"`
+	SSLMode                 string `configName:"DB_SSL_MODE"`
+	ConnectionTimeoutInSecs int    `configName:"DB_CONNECT_TIMEOUT_IN_SECS"`
+	SSLCertificate          string `configName:"DB_CERT"`
+	SSLKey                  string `configName:"DB_CERT_KEY"`
+	SSLRootCertificate      string `configName:"DB_ROOT_CERT"`
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
@@ -48,7 +59,7 @@ const (
 	// SQLiteDatabaseFile - SQLite database file
 	SQLiteDatabaseFile = "./console-database.db"
 	// Default database provider when not specified
-	DefaultDatabaseProvider = "pgsql"
+	DefaultDatabaseProvider = MYSQL
 )
 
 const (
@@ -73,7 +84,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 	}
 
 	// No configuration needed for SQLite
-	if dc.DatabaseProvider == "sqlite" {
+	if dc.DatabaseProvider == SQLITE {
 		return dc, nil
 	}
 
@@ -84,12 +95,15 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, err
 	}
 
-	if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
-		dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
+	if dc.DatabaseProvider == PGSQL {
+		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
+			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
+			return dc, nil
+		}
+	} else if dc.DatabaseProvider == MYSQL {
 		return dc, nil
 	}
-
-	return dc, fmt.Errorf("Invalid SSL mode: %v", dc.SSLMode)
+	return dc, fmt.Errorf("Invalid provider %v", dc)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
@@ -114,8 +128,13 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
 	log.Debug("GetConnection")
 
-	if dc.DatabaseProvider == "pgsql" {
+	if dc.DatabaseProvider == PGSQL {
 		return sql.Open("postgres", buildConnectionString(dc))
+	}
+
+	if dc.DatabaseProvider == MYSQL {
+		return sql.Open("mysql", buildConnectionStringForMysql(dc))
+
 	}
 
 	// SQL Lite
@@ -206,6 +225,28 @@ func buildConnectionString(dc DatabaseConfig) string {
 		dc.Host,
 		dc.Port,
 		dc.ConnectionTimeoutInSecs)
+
+	return connStr
+}
+
+func buildConnectionStringForMysql(dc DatabaseConfig) string {
+	log.Println("buildConnectionString")
+	escapeStr := func(in string) string {
+		return strings.Replace(in, `'`, `\'`, -1)
+	}
+
+	connStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		escapeStr(dc.Username),
+		escapeStr(dc.Password),
+		dc.Host,
+		dc.Port,
+		escapeStr(dc.Database))
+
+	log.Printf("DB Connection string: %s:*********tcp(%s:%d)/%s?parseTime=true",
+		escapeStr(dc.Username),
+		dc.Host,
+		dc.Port,
+		escapeStr(dc.Database))
 
 	return connStr
 }
