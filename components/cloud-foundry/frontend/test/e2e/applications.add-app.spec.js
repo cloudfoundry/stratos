@@ -189,6 +189,22 @@
       });
 
       application.showSummary();
+
+      // Test that the service is shown in the summary page
+      // Check that we have at least one service
+      var serviceInstances = table.wrap(element(by.css('.summary-service-instances table')));
+      serviceInstances.getRows().then(function (rows) {
+        expect(rows.length).toBeGreaterThan(0);
+      });
+      // Table should contain our service
+      var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
+        return elem.getText().then(function (text) {
+          return text === SERVICE_NAME;
+        });
+      }).first();
+      expect(column).toBeDefined();
+
+      // Test CLI Info
       application.invokeAction('CLI Info');
 
       // cf push acceptance.e2e.1484149644648

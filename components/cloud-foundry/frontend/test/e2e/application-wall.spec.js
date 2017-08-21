@@ -19,6 +19,7 @@
         appWallConfigNoClusters(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.showApplications();
       });
 
       afterAll(function () {

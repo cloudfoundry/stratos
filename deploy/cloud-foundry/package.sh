@@ -21,9 +21,6 @@ sed '2 a"cloud-foundry-hosting",' ${TOP_LEVEL}/plugins.json.bk > ${TOP_LEVEL}/pl
 find . -name glide.lock -exec sed -i '/^testImports.*/q' {} \;
 find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
-# Delete endpoints-dashboard from bower.json
-sed -i '/"endpoints-dashboard.*/d' bower.json
-
 npm install -g gulp bower
 
 cd ${TOP_LEVEL}

@@ -279,11 +279,11 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-body"
-      ng-if="!applicationSummaryCtrl.serviceInstances.length" translate>
+      ng-if="!appCtrl.model.application.summary.services.length" translate>
       app.app-info.app-tabs.summary.service-instances-panel.none
     </div>
     <table class="table table-actionable"
-      ng-if="applicationSummaryCtrl.serviceInstances.length">
+      ng-if="appCtrl.model.application.summary.services.length">
       <thead>
         <tr>
           <th translate>app.app-info.app-tabs.summary.service-instances-panel.name-label</th>
@@ -295,7 +295,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="service in applicationSummaryCtrl.serviceInstances">
+        <tr ng-repeat="service in appCtrl.model.application.summary.services">
           <td>{{ service.name }}</td>
           <td>{{ service.service_plan.service.label }}</td>
           <td>{{ service.service_plan.name }}</td>

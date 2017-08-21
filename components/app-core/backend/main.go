@@ -305,6 +305,7 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	// Add custom properties
 	pc.CFAdminIdentifier = CFAdminIdentifier
 	pc.HTTPS = true
+	pc.PluginConfig = make(map[string]string)
 
 	return pc, nil
 }

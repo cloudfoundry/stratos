@@ -7,6 +7,8 @@
     .module('cloud-foundry.api')
     .run(registerApi);
 
+  var BASE_URL = '/pp/v1/proxy/v2/apps';
+
   function registerApi($http, apiManager) {
     apiManager.register('cloud-foundry.api.Apps', new AppsApi($http));
   }
@@ -25,7 +27,7 @@
     AssociateRouteWithApp: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/routes/' + route_guid + '';
+      config.url = BASE_URL + '/' + guid + '/routes/' + route_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -45,7 +47,7 @@
     CopyAppBitsForApp: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/copy_bits';
+      config.url = BASE_URL + '/' + guid + '/copy_bits';
       config.method = 'POST';
       config.data = value;
 
@@ -63,7 +65,7 @@
     CreateDockerAppExperimental: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps';
+      config.url = BASE_URL + '';
       config.method = 'POST';
       config.data = value;
 
@@ -81,7 +83,7 @@
     CreateApp: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps';
+      config.url = BASE_URL + '';
       config.method = 'POST';
       config.data = value;
 
@@ -99,7 +101,7 @@
     DeleteApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '';
+      config.url = BASE_URL + '/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -119,7 +121,7 @@
     DownloadsStagedDropletForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/droplet/download';
+      config.url = BASE_URL + '/' + guid + '/droplet/download';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -136,7 +138,7 @@
     GetAppSummary: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/summary';
+      config.url = BASE_URL + '/' + guid + '/summary';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -154,7 +156,7 @@
     GetDetailedStatsForStartedApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/stats';
+      config.url = BASE_URL + '/' + guid + '/stats';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -172,7 +174,7 @@
     GetEnvForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/env';
+      config.url = BASE_URL + '/' + guid + '/env';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -201,7 +203,7 @@
     GetInstanceInformationForStartedApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/instances';
+      config.url = BASE_URL + '/' + guid + '/instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -218,7 +220,7 @@
     ListAllApps: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps';
+      config.url = BASE_URL + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -235,7 +237,7 @@
     ListAllRoutesForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/routes';
+      config.url = BASE_URL + '/' + guid + '/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -252,7 +254,7 @@
     ListAllServiceBindingsForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/service_bindings';
+      config.url = BASE_URL + '/' + guid + '/service_bindings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -269,7 +271,7 @@
     RemoveRouteFromApp: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/routes/' + route_guid + '';
+      config.url = BASE_URL + '/' + guid + '/routes/' + route_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -286,7 +288,7 @@
     RemoveServiceBindingFromApp: function (guid, service_binding_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/service_bindings/' + service_binding_guid + '';
+      config.url = BASE_URL + '/' + guid + '/service_bindings/' + service_binding_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -303,7 +305,7 @@
     RestageApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/restage';
+      config.url = BASE_URL + '/' + guid + '/restage';
       config.method = 'POST';
 
       for (var option in httpConfigOptions) {
@@ -320,7 +322,7 @@
     RetrieveApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '';
+      config.url = BASE_URL + '/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -337,7 +339,7 @@
     TerminateRunningAppInstanceAtGivenIndex: function (guid, index, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '/instances/' + index + '';
+      config.url = BASE_URL + '/' + guid + '/instances/' + index + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -354,7 +356,7 @@
     UpdateApp: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/apps/' + guid + '';
+      config.url = BASE_URL + '/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
