@@ -1,0 +1,61 @@
+<div class="service-card">
+  <div class="service-icon">
+    <img ng-src="{{ serviceCatalogueCardCtrl.service.entity.extra.ImageURL }}"
+      default-image default-image-src="/images/services/App_services_72.png"/>
+  </div>
+  <div class="service-block">
+    <div class="service-title">
+      <div class="service-text">
+        <h4 class="font-semi-bold">{{ ::serviceCatalogueCardCtrl.service.entity.label }}</h4>
+      </div>
+      <div class="service-metadata">
+        <dl>
+          <dt class="font-semi-bold" translate>app.app-info.app-tabs.services.card.version</dt>
+          <dd>{{ ::serviceCatalogueCardCtrl.service.entity.extra.Version || serviceCatalogueCardCtrl.service.entity.version || '-'}}</dd>
+        </dl>
+      </div>
+      <div class="service-actions-menu" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()">
+        <actions-menu actions="serviceCatalogueCardCtrl.actions" ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.canBind"
+          action-target="service"
+          menu-position="actions-menu-right">
+        </actions-menu>
+      </div>
+    </div>
+    <div class="service-description">
+      <p>{{ ::serviceCatalogueCardCtrl.service.entity.extra.LongDescription || serviceCatalogueCardCtrl.service.entity.description }}</p>
+    </div>
+    <div class="service-action-block">
+      <div class="service-attached-msg">
+        <div class="service-attached font-semi-bold"
+          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 0">
+          {{ serviceCatalogueCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
+        </div>
+      </div>
+      <div class="service-actions">
+        <div class="font-semi-bold" ng-if="!serviceCatalogueCardCtrl.canBind" translate>
+          app.app-info.app-tabs.services.card.cannot-bind
+        </div>
+        <div class="service-added font-semi-bold text-uppercase"
+          ng-if="serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 0">
+          {{ serviceCatalogueCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
+        </div>
+        <button class="btn btn-sm btn-link"
+          ng-if="serviceCatalogueCardCtrl.canBind && (serviceCatalogueCardCtrl.allowAddOnly || serviceCatalogueCardCtrl.numAttached === 0)"
+          ng-click="serviceCatalogueCardCtrl.addService()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()">
+          <span translate>app.app-info.app-tabs.services.card.actions.add</span>
+          <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
+        </button>
+        <button class="btn btn-sm btn-link"
+          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached === 1"
+          ng-click="serviceCatalogueCardCtrl.detach()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()" translate>
+          app.app-info.app-tabs.services.card.actions.detach
+        </button>
+        <button class="btn btn-sm btn-link"
+          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 1"
+          ng-click="serviceCatalogueCardCtrl.manageInstances()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()" translate>
+          app.app-info.app-tabs.services.card.actions.manage
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

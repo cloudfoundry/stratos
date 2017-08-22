@@ -84,6 +84,9 @@
       return vm.service;
     }, function () {
       vm.canBind = vm.service._bindTarget === 'APP';
+      vm.cardData = {
+        title: vm.service.entity.name
+      };
     });
 
     vm.addService = addService;

@@ -1,10 +1,14 @@
-<div class="service-card">
+<gallery-card
+  class="cluster-gallery-card"
+  card-actions="serviceCardCtrl.actions"
+  card-data=serviceCardCtrl.cardData
+>
   <div class="service-icon">
     <img ng-src="{{ serviceCardCtrl.service.entity.extra.ImageURL }}"
       default-image default-image-src="/images/services/App_services_72.png"/>
   </div>
   <div class="service-block">
-    <div class="service-title">
+    <!-- <div class="service-title">
       <div class="service-text">
         <h4 class="font-semi-bold">{{ ::serviceCardCtrl.service.entity.name }}</h4>
         <h4 class="font-semi-bold">{{ ::serviceCardCtrl.service.entity.label }}</h4>
@@ -21,7 +25,7 @@
           menu-position="actions-menu-right">
         </actions-menu>
       </div>
-    </div>
+    </div> -->
     <div class="service-description">
       <p>{{ ::serviceCardCtrl.service.entity.extra.LongDescription || serviceCardCtrl.service.entity.description }}</p>
     </div>
@@ -59,4 +63,4 @@
       </div>
     </div>
   </div>
-</div>
+</gallery-card>
