@@ -23,7 +23,7 @@
       controllerAs: 'serviceCardCtrl',
       restrict: 'E',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/services/service-card/service-card.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/application/service-card/service-card.html'
     };
   }
 
