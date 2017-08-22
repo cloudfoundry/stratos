@@ -64,27 +64,28 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"CNSI Name or Endpoint were not provided when trying to register an CF Cluster")
 	}
 
-	apiEndpoint = strings.TrimRight(apiEndpoint, "/")
-
-	// Remove trailing slash, if there is one
-	apiEndpointURL, err := url.Parse(apiEndpoint)
-	if err != nil {
-		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get API Endpoint",
-			"Failed to get API Endpoint: %v", err)
-	}
-
-	// check if we've already got this endpoint in the DB
-	ok := p.cnsiRecordExists(apiEndpoint)
-	if ok {
-		// a record with the same api endpoint was found
-		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Can not register same endpoint multiple times",
-			"Can not register same endpoint multiple times",
-		)
-	}
+	//TODO: RC call EndpointExists
+	//apiEndpoint = strings.TrimRight(apiEndpoint, "/")
+	//
+	//// Remove trailing slash, if there is one
+	//apiEndpointURL, err := url.Parse(apiEndpoint)
+	//if err != nil {
+	//	return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+	//		http.StatusBadRequest,
+	//		"Failed to get API Endpoint",
+	//		"Failed to get API Endpoint: %v", err)
+	//}
+	//
+	//// check if we've already got this endpoint in the DB
+	//ok := p.cnsiRecordExists(apiEndpoint)
+	//if ok {
+	//	// a record with the same api endpoint was found
+	//	return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+	//		http.StatusBadRequest,
+	//		"Can not register same endpoint multiple times",
+	//		"Can not register same endpoint multiple times",
+	//	)
+	//}
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
@@ -114,6 +115,40 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.GUID = guid
 
 	return newCNSI, err
+}
+
+func (p *portalProxy) EndpointExists(apiEndpoint string) (bool, string, error) {
+
+	//TODO: RC change name, return if exists, return parsed api
+
+	//if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
+	//	return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+	//		http.StatusBadRequest,
+	//		"Needs CNSI Name and API Endpoint",
+	//		"CNSI Name or Endpoint were not provided when trying to register an CF Cluster")
+	//}
+
+	apiEndpoint = strings.TrimRight(apiEndpoint, "/")
+
+	// Remove trailing slash, if there is one
+	apiEndpointURL, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get API Endpoint",
+			"Failed to get API Endpoint: %v", err)
+	}
+
+	// check if we've already got this endpoint in the DB
+	ok := p.cnsiRecordExists(apiEndpoint)
+	if ok {
+		// a record with the same api endpoint was found
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Can not register same endpoint multiple times",
+			"Can not register same endpoint multiple times",
+		)
+	}
 }
 
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls

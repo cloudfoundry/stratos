@@ -12,6 +12,7 @@ type PortalProxy interface {
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
 
 	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo InfoFunc) (CNSIRecord, error)
+	EndpointExists(apiEndpoint string)
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
