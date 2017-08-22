@@ -5,15 +5,12 @@ import (
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
+	"strings"
 )
 
 const (
 	SERVICES_ENV = "VCAP_SERVICES"
 )
-
-type VCAPServices struct {
-	Postgresql []VCAPService `json:"postgresql"`
-}
 
 type VCAPService struct {
 	Credentials VCAPCredential `json:"credentials"`
@@ -28,38 +25,41 @@ type VCAPCredential struct {
 	Uri 					string `json:"uri"`
 }
 
+// Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
 func ParseCFEnvs(db *DatabaseConfig) (bool){
 	if (config.IsSet(SERVICES_ENV) == false) {
 		return false;
 	}
 
+	// Extract struts from VCAP_SERVICES env
 	vcapServicesStr := config.GetString(SERVICES_ENV)
-
-	var vcapServices VCAPServices
+	var vcapServices map[string][]VCAPService
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {
 		log.Warnf("Unable to convert %s env var into JSON", SERVICES_ENV)
 		return false;
 	}
 
-	// At the moment we only handle Postgres
-	if vcapServices.Postgresql != nil {
-		log.Info("Found postgres section in VCAP_SERVICES")
-
-		if (len(vcapServices.Postgresql) == 0) {
-			return false
+	for _, services := range vcapServices {
+		if (len(services) == 0) {
+			continue
 		}
+		service := services[0]
 
-		postgresqlCreds := vcapServices.Postgresql[0].Credentials
+		dbCredentials := service.Credentials
 
-		db.DatabaseProvider = "pgsql"
-		db.Username = postgresqlCreds.Username
-		db.Password = postgresqlCreds.Password
-		db.Database = postgresqlCreds.Dbname
-		db.Host = postgresqlCreds.Hostname
-		db.Port, err = strconv.Atoi(postgresqlCreds.Port)
-		db.SSLMode = "disable"
-		return true
+		if strings.HasPrefix(dbCredentials.Uri, "postgres") {
+			// At the moment we only handle Postgres
+			db.DatabaseProvider = "pgsql"
+			db.Username = dbCredentials.Username
+			db.Password = dbCredentials.Password
+			db.Database = dbCredentials.Dbname
+			db.Host = dbCredentials.Hostname
+			db.Port, err = strconv.Atoi(dbCredentials.Port)
+			db.SSLMode = "disable"
+			log.Info("Discovered Cloud Foundry postgres service and applied config")
+			return true
+		}
 	}
 
 	return false;
