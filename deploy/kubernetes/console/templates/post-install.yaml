@@ -18,21 +18,21 @@ spec:
      spec:
        containers:
         - env:
-          - name: DB_HOST
+          - name: PGSQL_HOST
             value: "{{ .Release.Name }}-postgres-int"
-          - name: DB_PORT
+          - name: PGSQL_PORT
             value: "5432"
           - name: POSTGRES_USER
             value: postgres
           - name: POSTGRES_PASSWORD_FILE
             value: /etc/secrets/stolon
-          - name: DB_DATABASE_NAME
+          - name: PGSQL_DATABASE
             value: console-db
-          - name: DB_USER
+          - name: PGSQL_USER
             value: console
-          - name: DB_PASSWORDFILE
+          - name: PGSQL_PASSWORDFILE
             value: /etc/secrets/pgsql-password
-          - name: DB_SSL_MODE
+          - name: PGSQL_SSL_MODE
             value: disable
           - name: PGCONNECT_TIMEOUT
             value: "10"

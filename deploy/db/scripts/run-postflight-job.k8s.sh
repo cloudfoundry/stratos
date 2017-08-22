@@ -3,52 +3,64 @@ set -e
 
 execStatement() {
     stmt=$1
-    PGPASSFILE=/tmp/pgpass psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d postgres -w -tc "$stmt"
+    PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $PGSQL_HOST -p $PGSQL_PORT -d postgres -w -tc "$stmt"
+}
+
+execBackupRestore() {
+    orig_server="hsc-stproxy-int"
+    dest_server=$PGSQL_HOST
+    bkup="pg_dump -U $PGSQL_USER -h $orig_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
+    stor="psql -U $PGSQL_USER -h $dest_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
+
+    PGPASSFILE=/tmp/pgpass $bkup | PGPASSFILE=/tmp/pgpass $stor
 }
 
 # Save the superuser info to file to ensure secure access
-echo "*:$DB_PORT:postgres:$DB_USER:$(cat $DB_PASSWORD_FILE)" > /tmp/pgpass
-echo "*:$DB_PORT:$DB_DATABASE_NAME:$DB_USER:$(cat $DB_PASSWORDFILE)" >> /tmp/pgpass
+echo "*:$PGSQL_PORT:postgres:$POSTGRES_USER:$(cat $POSTGRES_PASSWORD_FILE)" > /tmp/pgpass
+echo "*:$PGSQL_PORT:$PGSQL_DATABASE:$PGSQL_USER:$(cat $PGSQL_PASSWORDFILE)" >> /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
 # Get db user password from secrets file
-PWD=$(cat $DB_PASSWORDFILE)
+PWD=$(cat $PGSQL_PASSWORDFILE)
 
 # Create the database if necessary
-stratosDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$DB_DATABASE_NAME';")
+stratosDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
 if [ -z "$stratosDbExists" ] ; then
-    echo "Creating database $DB_DATABASE_NAME"
-    execStatement "CREATE DATABASE \"$DB_DATABASE_NAME\";"
-    echo "Creating user $DB_USER"
-    execStatement "CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$PWD';"
-    echo "Granting privs for $DB_DATABASE_NAME to $DB_USER"
-    execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$DB_DATABASE_NAME\" TO $DB_USER;"
+    echo "Creating database $PGSQL_DATABASE"
+    execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
+    echo "Creating user $PGSQL_USER"
+    execStatement "CREATE USER $PGSQL_USER WITH ENCRYPTED PASSWORD '$PWD';"
+    echo "Granting privs for $PGSQL_DATABASE to $PGSQL_USER"
+    execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$PGSQL_DATABASE\" TO $PGSQL_USER;"
 else
-    echo "$DB_DATABASE_NAME already exists"
+    echo "$PGSQL_DATABASE already exists"
 fi
+
+# Backup existing database from stolon cluster and restore it to the single instance
+#execBackupRestore
 
 # Migrate the database if necessary
 echo "Checking database to see if migration is necessary."
 
 # Check the version
 echo "Checking database version."
-DB_PASSWORD=$PWD goose --env=k8s dbversion
+PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
 
 # Check the status
 echo "Checking database status."
-DB_PASSWORD=$PWD goose --env=k8s status
+PGSQL_PASSWORD=$PWD goose --env=k8s status
 
 # Run migrations
 echo "Attempting database migrations."
-DB_PASSWORD=$PWD goose --env=k8s up
+PGSQL_PASSWORD=$PWD goose --env=k8s up
 
 # CHeck the status
 echo "Checking database status."
-DB_PASSWORD=$PWD goose --env=k8s status
+PGSQL_PASSWORD=$PWD goose --env=k8s status
 
 # Check the version
 echo "Checking database version."
-DB_PASSWORD=$PWD goose --env=k8s dbversion
+PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
 
 echo "Database operation(s) complete."
 

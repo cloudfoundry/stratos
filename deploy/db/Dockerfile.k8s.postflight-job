@@ -1,7 +1,7 @@
 FROM alpine
 
 RUN apk update && \
-    apk add postgresql-client mariadb-client 
+    apk add postgresql-client
 
 COPY goose /usr/local/bin/
 COPY deploy/db/dbconf.yml db/dbconf.yml
