@@ -201,8 +201,11 @@
           var plans = _.map(servicePlans, function (o) { return { label: o.entity.name, value: o }; });
           [].push.apply(vm.options.servicePlans, plans);
 
-          vm.options.servicePlanMap = _.keyBy(servicePlans,
-                                                function (o) { return o.metadata.guid; });
+          if (vm.options.servicePlans.length) {
+            vm.options.userInput.plan = vm.options.servicePlans[0].value;
+          }
+
+          vm.options.servicePlanMap = _.keyBy(servicePlans, function (o) { return o.metadata.guid; });
         });
     }
 
