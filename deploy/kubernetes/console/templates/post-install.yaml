@@ -19,23 +19,21 @@ spec:
        containers:
         - env:
           - name: DB_HOST
-            value: "{{ .Release.Name }}-postgres-int"
+            value: "{{ .Release.Name }}-mariadb"
           - name: DB_PORT
-            value: "5432"
-          - name: POSTGRES_USER
-            value: postgres
-          - name: POSTGRES_PASSWORD_FILE
-            value: /etc/secrets/stolon
-          - name: DB_DATABASE_NAME
-            value: console-db
+            value: "3306"
+          - name: DB_ADMIN_USER
+            value:  "{{ .Values.mariadb.adminUser }}"
+          - name: DB_ADMIN_PASSWORD
+            value:  "{{ .Values.mariadb.mariadbRootPassword }}"
+          - name: DATABASE_PROVIDER
+            value: "{{ .Values.dbProvider }}"
+          - name: DB_PASSWORD
+            value: "{{ .Values.mariadb.mariadbPassword }}"
           - name: DB_USER
-            value: console
-          - name: DB_PASSWORDFILE
-            value: /etc/secrets/pgsql-password
-          - name: DB_SSL_MODE
-            value: disable
-          - name: PGCONNECT_TIMEOUT
-            value: "10"
+            value: "{{ .Values.mariadb.mariadbUser }}"
+          - name: DB_DATABASE_NAME
+            value: "{{ .Values.mariadb.mariadbDatabase }}"
           - name: UPGRADE_VOLUME
             value: "{{ .Release.Name }}-upgrade-volume"
           - name: UPGRADE_LOCK_FILENAME

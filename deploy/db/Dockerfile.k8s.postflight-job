@@ -1,11 +1,11 @@
-FROM alpine
+FROM golang:1.8-alpine
 
 RUN apk update && \
-    apk add postgresql-client mariadb-client 
-
+    apk add postgresql-client mariadb-client git gcc musl-dev
+RUN go get bitbucket.org/liamstask/goose/lib/goose
+RUN go get github.com/go-sql-driver/mysql
 COPY goose /usr/local/bin/
 COPY deploy/db/dbconf.yml db/dbconf.yml
 COPY deploy/db/migrations db/migrations
 COPY deploy/db/scripts/run-postflight-job.k8s.sh /run-postflight-job.sh
-
 CMD ["/run-postflight-job.sh"]

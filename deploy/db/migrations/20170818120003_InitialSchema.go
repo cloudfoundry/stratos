@@ -22,10 +22,12 @@ func Up_20170818120003(txn *sql.Tx) {
 	createTokens += "auth_token    " + binaryDataType + "       NOT NULL, "
 	createTokens += "refresh_token " + binaryDataType + "       NOT NULL, "
 	createTokens += "token_expiry  BIGINT      NOT NULL, "
-	createTokens += "last_updated  TIMESTAMP NOT NULL DEFAULT (NOW()) )"
+	createTokens += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)"
 
 	if databaseProvider == "pgsql" {
 		createTokens += " WITH (OIDS=FALSE);"
+	} else {
+		createTokens += ";"
 	}
 
 	_, err := txn.Exec(createTokens)
@@ -42,7 +44,7 @@ func Up_20170818120003(txn *sql.Tx) {
 	createCnsisTable += "token_endpoint            VARCHAR(255)  NOT NULL,"
 	createCnsisTable += "doppler_logging_endpoint  VARCHAR(255)  NOT NULL,"
 	createCnsisTable += "skip_ssl_validation       BOOLEAN       NOT NULL DEFAULT FALSE,"
-	createCnsisTable += "last_updated              TIMESTAMP     NOT NULL DEFAULT (NOW()),"
+	createCnsisTable += "last_updated              TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 	createCnsisTable += "PRIMARY KEY (guid) );"
 
 	_, err = txn.Exec(createCnsisTable)
