@@ -1,5 +1,5 @@
-hash: b8f46cc025989f836948688fab9cf42c90ce19cf11f7ec1ce8ea712e7262baa9
-updated: 2017-08-17T17:00:29.633239729+01:00
+hash: c790bcfd2741c2e94175d40e1a44d7c595d4d57fd34753a61b065fecdfcc5f76
+updated: 2017-08-21T09:55:31.917609969+01:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 4f1dbba445e540bf071eb9572262edb8fe4a593a
@@ -24,6 +24,8 @@ imports:
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gorilla/websocket
   version: 3ab3a8b8831546bd18fd182c20687ca853b2bb13
+- name: github.com/irfanhabib/mysqlstore
+  version: 304308519d1355852f92cd88b31153c8a9a4e4db
 - name: github.com/kat-co/vala
   version: 43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b
 - name: github.com/labstack/echo
@@ -66,9 +68,9 @@ imports:
 - name: golang.org/x/net
   version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
   subpackages:
-   - context
-   - html
-   - websocket
+  - context
+  - html
+  - websocket
 - name: golang.org/x/sys
   version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:

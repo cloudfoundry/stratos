@@ -18,6 +18,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -273,6 +274,8 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
+	sessionsTable := "sessions"
+
 	// Store depends on the DB Type
 	if databaseProvider == "pgsql" {
 		log.Info("Creating Postgres session store")
@@ -283,9 +286,19 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.Secure = true
 		return sessionStore, err
 	}
+	// Store depends on the DB Type
+	if databaseProvider == "mysql" {
+		log.Info("Creating MySQL session store")
+		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		// Setup cookie-store options
+		sessionStore.Options.MaxAge = sessionExpiry
+		sessionStore.Options.HttpOnly = true
+		sessionStore.Options.Secure = true
+		return sessionStore, err
+	}
 
 	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true

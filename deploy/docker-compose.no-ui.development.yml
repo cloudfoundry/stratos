@@ -3,10 +3,10 @@ services:
 
   # The development docker-compose file. Starts everything but the UI, useful to run with "gulp dev"
 
-  postgres:
+  mariadb:
     extends:
       file: common.yml
-      service: postgres
+      service: mariadb
 
 
   goose:
@@ -14,7 +14,7 @@ services:
       file: common.yml
       service: goose
     links:
-      - postgres:postgres
+      - mariadb:mariadb
 
 
   proxy:
