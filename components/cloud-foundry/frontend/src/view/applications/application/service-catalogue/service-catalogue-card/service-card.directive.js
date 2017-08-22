@@ -97,7 +97,7 @@
 
     /**
      * @function init
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Fetch service bindings for this app and update content
      * @returns {undefined}
      */
@@ -113,7 +113,7 @@
 
     /**
      * @function getServiceInstanceGuids
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Get service instances for app
      * @returns {array} A list of service instance GUIDs
      */
@@ -130,7 +130,7 @@
 
     /**
      * @function getServiceBindings
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Get service bindings for specified service instances
      * @param {array} serviceInstanceGuids A list of service instance GUIDs
      * @returns {promise} A promise object
@@ -151,7 +151,7 @@
 
     /**
      * @function addService
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Show the add service detail view
      * @returns {undefined}
      */
@@ -168,7 +168,7 @@
 
     /**
      * @function detach
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Detach service instance from app
      * @returns {undefined}
      */
@@ -186,7 +186,7 @@
 
     /**
      * @function manageInstances
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Show the manage services detail view
      * @returns {void}
      */
@@ -202,7 +202,7 @@
 
     /**
      * @function updateActions
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Update service actions visibility
      * @returns {void}
      */
@@ -214,7 +214,7 @@
 
     /**
      * @function hideServiceActions
-     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
      * @description Update service actions visibility
      * @returns {*}
      */

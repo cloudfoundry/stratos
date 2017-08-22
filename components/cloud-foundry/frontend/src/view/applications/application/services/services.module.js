@@ -67,57 +67,60 @@
       return that.appModel.application.summary.guid;
     }, function () {
       var summary = that.appModel.application.summary;
+      // retrieve categories and attachment data for service filtering
+      // var categories = [];
+      // var attachedServices = _.chain(summary.services)
+      //   .filter(function (o) { return angular.isDefined(o.service_plan); })
+      //   .map(function (o) { return o.service_plan.service; })
+      //   .value();
       var spaceGuid = summary.space_guid;
-      if (angular.isDefined(spaceGuid)) {
-        that.model.listAllServicesForSpace(that.cnsiGuid, spaceGuid)
-          .then(function (services) {
-            // retrieve categories and attachment data for service filtering
-            var categories = [];
-            var attachedServices = _.chain(summary.services)
-                                    .filter(function (o) { return angular.isDefined(o.service_plan); })
-                                    .map(function (o) { return o.service_plan.service.guid; })
-                                    .value();
-            angular.forEach(services, function (service) {
-              if (attachedServices.length > 0) {
-                if (_.includes(attachedServices, service.metadata.guid)) {
-                  service.attached = true;
-                }
-              }
-
-              // Parse service entity extra data JSON string
-              if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                service.entity.extra = angular.fromJson(service.entity.extra);
-              }
-
-              // a service can belong to >1 category, so allow filtering by any of them
-              if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.Categories)) {
-                var _categories = service.entity.extra.Categories;
-                if (angular.isString(_categories)) {
-                  _categories = [_categories];
-                }
-                var serviceCategories = _.map(_categories, function (o) {
-                  return {
-                    label: o,
-                    value: { Categories: o },
-                    lower: o.toLowerCase()
-                  };
-                });
-                categories = _.unionBy(categories, serviceCategories, 'lower');
-              }
-            });
-
-            that.services.length = 0;
-            [].push.apply(that.services, services);
-
-            categories = _.sortBy(categories, 'lower');
-            that.serviceCategories.length = 2;
-            [].push.apply(that.serviceCategories, categories);
+      if (spaceGuid) {
+        that.model.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid)
+          .then(function (serviceInstances) {
+            // Get any extra service data
+            // and get the categories from services
+            return {
+              categories: that.getServiceCategories(serviceInstances),
+              services: that.getExtraServiceData(serviceInstances)
+            };
           })
-          .finally(function () {
+          .then(function (data) {
+            // Attach data to controller
+            that.categories = data.categories;
+            that.services = data.services;
             that.ready = true;
           });
       }
     });
+
+    that.getExtraServiceData = function (services) {
+      return _.chain(services)
+        .map(function (service) {
+          if (angular.isString(service.entity.extra)) {
+            service.entity.extra = angular.fromJson(service.entity.extra);
+          }
+          return service;
+        })
+        .value();
+    };
+
+    that.getServiceCategories = function (services) {
+      return _.chain(services)
+        .flatMap(function (service) {
+          return service.entity && service.entity.extra
+            ? service.entity.extra.Categories : [] || [];
+        })
+        .uniq()
+        .map(function (cat) {
+          return {
+            label: cat,
+            value: { Categories: cat },
+            lower: cat.toLowerCase()
+          };
+        })
+        .sortBy('lower')
+        .value();
+    };
 
     $scope.$watch(function () {
       return that.searchCategory;
