@@ -2,16 +2,16 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.services')
-    .directive('serviceCard', serviceCard);
+    .module('cloud-foundry.view.applications.application.service-catalogue')
+    .directive('serviceCatalogueCard', serviceCatalogueCard);
 
   /**
    * @memberof cloud-foundry.view.applications.application.services
-   * @name serviceCard
+   * @name serviceCatalogueCard
    * @description The service card directive
    * @returns {object} The service card directive definition object
    */
-  function serviceCard() {
+  function serviceCatalogueCard() {
     return {
       bindToController: {
         app: '=',
@@ -19,17 +19,17 @@
         service: '=',
         addOnly: '=?'
       },
-      controller: ServiceCardController,
-      controllerAs: 'serviceCardCtrl',
+      controller: ServiceCatalogueCardController,
+      controllerAs: 'serviceCatalogueCardCtrl',
       restrict: 'E',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/service-card/service-card.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/application//service-catalogue/service-catalogue-card/service-card.html'
     };
   }
 
   /**
-   * @memberof cloud-foundry.view.applications.application.services.serviceCard
-   * @name ServiceCardController
+   * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard
+   * @name serviceCatalogueCardController
    * @description Controller for service card directive
    * @constructor
    * @param {object} $scope - the Angular $scope service
@@ -44,7 +44,7 @@
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from vm.service card
    */
-  function ServiceCardController($scope, modelManager, appEventService, cfServiceInstanceService) {
+  function ServiceCatalogueCardController($scope, modelManager, appEventService, cfServiceInstanceService) {
     var vm = this;
 
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
