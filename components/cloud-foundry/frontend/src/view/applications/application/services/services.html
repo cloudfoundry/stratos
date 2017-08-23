@@ -1,3 +1,17 @@
+<div class="panel panel-default" ng-hide="!boundServices.length && !applicationServicesCtrl.search.$">
+  <div class="panel-body service-filter-panel">
+    <form class="form-horizontal">
+      <div class="form-group addon-form-group filter-form-group">
+        <div class="input-group">
+          <span class="input-group-addon">
+            <app-icon icon="svg:Filter.svg"></app-icon>
+          </span>
+          <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 <div ng-if="applicationServicesCtrl.ready && boundServices.length === 0"
   class="message-box message-box-no-bg">
   <p>
@@ -12,28 +26,13 @@
     </div>
     <div ng-if="applicationServicesCtrl.search.$">
       <h3 translate>
-        No bound service instances found matching your search.
+        No services instances found matching your search.
       </h3>
     </div>
   </p>
 </div>
 <div ng-if="!applicationServicesCtrl.ready" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
-</div>
-
-<div class="panel panel-default" ng-if="boundServices.length && !applicationServicesCtrl.searchCategory">
-  <div class="panel-body service-filter-panel">
-    <form class="form-horizontal">
-      <div class="form-group addon-form-group filter-form-group">
-        <div class="input-group">
-          <span class="input-group-addon">
-            <app-icon icon="svg:Filter.svg"></app-icon>
-          </span>
-          <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
-        </div>
-      </div>
-    </form>
-  </div>
 </div>
 <div class="cluster-gallery-card-container">
   <service-card class="cluster-gallery-card-parent" ng-repeat="service in boundServices = (applicationServicesCtrl.services | filter:applicationServicesCtrl.isBoundInstances | filter:applicationServicesCtrl.search) track by service.metadata.guid"

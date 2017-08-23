@@ -44,7 +44,7 @@
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from vm.service card
    */
-  function ServiceCatalogueCardController($scope, modelManager, appEventService, cfServiceInstanceService) {
+  function ServiceCatalogueCardController($scope, modelManager, appEventService) {
     var vm = this;
 
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -52,26 +52,6 @@
 
     vm.allowAddOnly = angular.isDefined(vm.addOnly) ? vm.addOnly : false;
     vm.numAttached = 0;
-    vm.actions = [
-      {
-        name: 'app.app-info.app-tabs.services.card.actions.add',
-        execute: function () {
-          addService();
-        }
-      },
-      {
-        name: 'app.app-info.app-tabs.services.card.actions.detach',
-        execute: function () {
-          detach();
-        }
-      },
-      {
-        name: 'app.app-info.app-tabs.services.card.actions.manage',
-        execute: function () {
-          manageInstances();
-        }
-      }
-    ];
     vm.serviceBindings = [];
 
     $scope.$watch(function () {
@@ -87,12 +67,9 @@
     });
 
     vm.addService = addService;
-    vm.detach = detach;
-    vm.manageInstances = manageInstances;
     vm.hideServiceActions = hideServiceActions;
     vm.getServiceInstanceGuids = getServiceInstanceGuids;
     vm.getServiceBindings = getServiceBindings;
-    vm.updateActions = updateActions;
     vm.init = init;
 
     /**
@@ -107,7 +84,6 @@
         return vm.getServiceBindings(serviceInstances);
       } else {
         vm.serviceBindings = [];
-        vm.updateActions();
       }
     }
 
@@ -145,7 +121,6 @@
             return o.entity.app_guid === appGuid;
           });
           vm.serviceBindings = appBindings;
-          vm.updateActions();
         });
     }
 
@@ -164,52 +139,6 @@
       };
 
       appEventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
-    }
-
-    /**
-     * @function detach
-     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
-     * @description Detach service instance from app
-     * @returns {undefined}
-     */
-    function detach() {
-      if (vm.serviceBindings.length === 1) {
-        var serviceBinding = vm.serviceBindings[0];
-        return cfServiceInstanceService.unbindServiceFromApp(
-          vm.cnsiGuid,
-          vm.app.summary.guid,
-          serviceBinding.metadata.guid,
-          serviceBinding.entity.service_instance.entity.name
-        );
-      }
-    }
-
-    /**
-     * @function manageInstances
-     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
-     * @description Show the manage services detail view
-     * @returns {void}
-     */
-    function manageInstances() {
-      var config = {
-        app: vm.app,
-        cnsiGuid: vm.cnsiGuid,
-        service: vm.service
-      };
-
-      appEventService.$emit('cf.events.START_MANAGE_SERVICES', config);
-    }
-
-    /**
-     * @function updateActions
-     * @memberof cloud-foundry.view.applications.application.services.serviceCatalogueCard.serviceCatalogueCardController
-     * @description Update service actions visibility
-     * @returns {void}
-     */
-    function updateActions() {
-      vm.numAttached = vm.serviceBindings.length;
-      vm.actions[1].hidden = vm.numAttached !== 1;
-      vm.actions[2].hidden = vm.numAttached === 0;
     }
 
     /**

@@ -30,6 +30,11 @@
           {{ ::serviceCardCtrl.service.metadata.created_at | amDateFormat:'MMM Do YYYY HH:mm:ss' }}
         </div>
       </div>
+      <div class="service-catalogue-card__meta-split">
+        <a ng-click="serviceCardCtrl.viewEnvVariables(serviceCardCtrl.service)">
+          Show environment variables
+        </a>
+      </div>
     </div>
     <div class="service-catalogue-card__icon">
       <img ng-src="{{ serviceCardCtrl.service.entity.extra.ImageURL }}"

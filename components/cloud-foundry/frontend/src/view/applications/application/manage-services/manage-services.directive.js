@@ -153,7 +153,7 @@
      */
     function startManageServices() {
       var config = {
-        templateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/manage-services.html',
+        templateUrl: 'plugins/cloud-foundry/view/applications/application/manage-services/manage-services.html',
         title: 'app.app-info.app-tabs.services.manage.title',
         dialog: true,
         class: 'dialog-form-larger'

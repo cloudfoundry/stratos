@@ -43,6 +43,7 @@
     var vm = this;
 
     vm.detach = detach;
+    vm.viewEnvVariables = viewEnvVariables;
 
     vm.actions = [
       {
@@ -86,6 +87,23 @@
       }
       return cb(serviceInstance);
     }
+
+    /**
+     * @function viewEnvVariables
+     * @memberof cloud-foundry.view.applications.ManageServicesController
+     * @description View environmental variables of service instance
+     * @param {object} instance - the service instance to view
+     * @returns {promise} A promise object
+     */
+    function viewEnvVariables(instance) {
+      return cfServiceInstanceService.viewEnvVariables(
+        vm.cnsiGuid,
+        vm.app.summary,
+        instance.entity.service_plan.entity.service.entity.label,
+        instance.entity
+      );
+    }
+
   }
 
 })();

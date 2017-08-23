@@ -14,12 +14,6 @@
           <dd>{{ ::serviceCatalogueCardCtrl.service.entity.extra.Version || serviceCatalogueCardCtrl.service.entity.version || '-'}}</dd>
         </dl>
       </div>
-      <div class="service-actions-menu" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()">
-        <actions-menu actions="serviceCatalogueCardCtrl.actions" ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.canBind"
-          action-target="service"
-          menu-position="actions-menu-right">
-        </actions-menu>
-      </div>
     </div>
     <div class="service-description">
       <p>{{ ::serviceCatalogueCardCtrl.service.entity.extra.LongDescription || serviceCatalogueCardCtrl.service.entity.description }}</p>
@@ -40,20 +34,15 @@
           {{ serviceCatalogueCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
         </div>
         <button class="btn btn-sm btn-link"
-          ng-if="serviceCatalogueCardCtrl.canBind && (serviceCatalogueCardCtrl.allowAddOnly || serviceCatalogueCardCtrl.numAttached === 0)"
+          ng-disabled="serviceCatalogueCardCtrl.numAttached < 1"
+          ui-sref="cf.applications.application.services" translate>
+          app.app-info.app-tabs.services.card.actions.manage
+        </button>
+        <button class="btn btn-sm btn-link"
+          ng-if="serviceCatalogueCardCtrl.canBind"
           ng-click="serviceCatalogueCardCtrl.addService()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()">
           <span translate>app.app-info.app-tabs.services.card.actions.add</span>
           <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
-        </button>
-        <button class="btn btn-sm btn-link"
-          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached === 1"
-          ng-click="serviceCatalogueCardCtrl.detach()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()" translate>
-          app.app-info.app-tabs.services.card.actions.detach
-        </button>
-        <button class="btn btn-sm btn-link"
-          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 1"
-          ng-click="serviceCatalogueCardCtrl.manageInstances()" ng-hide="serviceCatalogueCardCtrl.hideServiceActions()" translate>
-          app.app-info.app-tabs.services.card.actions.manage
         </button>
       </div>
     </div>
