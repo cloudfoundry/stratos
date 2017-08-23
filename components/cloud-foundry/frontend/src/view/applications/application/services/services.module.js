@@ -8,7 +8,7 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.services', {
-      url: '/services',
+      url: '/services?serviceType',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/services/services.html',
       controller: ApplicationServicesController,
       controllerAs: 'applicationServicesCtrl'
@@ -43,8 +43,13 @@
    * @property {object} search - the search object for filtering
    * @property {object} category - the search category object for filtering
    */
-  function ApplicationServicesController($scope, modelManager, $stateParams) {
+  function ApplicationServicesController(
+    $scope,
+    modelManager,
+    $stateParams
+  ) {
     var that = this;
+    that.$stateParams = $stateParams;
     this.model = modelManager.retrieve('cloud-foundry.model.space');
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
@@ -87,9 +92,12 @@
       }
     });
 
-    that.isBoundInstances = function (serviceInstance) {
+    that.showInstance = function (serviceInstance) {
+      var isOfType = !$stateParams.serviceType ||
+        $stateParams.serviceType === serviceInstance.entity.service_plan.entity.service.entity.label;
       return serviceInstance.entity.service_bindings &&
-        !!serviceInstance.entity.service_bindings.length;
+        !!serviceInstance.entity.service_bindings.length &&
+        isOfType;
     };
 
     that.getExtraServiceData = function (services) {

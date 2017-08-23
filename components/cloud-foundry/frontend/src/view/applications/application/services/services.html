@@ -35,7 +35,7 @@
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <div class="cluster-gallery-card-container">
-  <service-card class="cluster-gallery-card-parent" ng-repeat="service in boundServices = (applicationServicesCtrl.services | filter:applicationServicesCtrl.isBoundInstances | filter:applicationServicesCtrl.search) track by service.metadata.guid"
+  <service-card class="cluster-gallery-card-parent" ng-repeat="service in boundServices = (applicationServicesCtrl.services | filter:applicationServicesCtrl.showInstance | filter:applicationServicesCtrl.search) track by service.metadata.guid"
     service="service" app="applicationServicesCtrl.appModel.application"
     cnsi-guid="applicationServicesCtrl.cnsiGuid">
   </service-card>

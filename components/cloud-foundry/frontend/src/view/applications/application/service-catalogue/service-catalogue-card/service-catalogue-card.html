@@ -21,8 +21,8 @@
     <div class="service-action-block">
       <div class="service-attached-msg">
         <div class="service-attached font-semi-bold"
-          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 0">
-          {{ serviceCatalogueCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
+          ng-if="!serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.serviceBindings.length > 0">
+          {{ serviceCatalogueCardCtrl.serviceBindings.length }} <span translate>app.app-info.app-tabs.services.card.attached</span>
         </div>
       </div>
       <div class="service-actions">
@@ -30,12 +30,12 @@
           app.app-info.app-tabs.services.card.cannot-bind
         </div>
         <div class="service-added font-semi-bold text-uppercase"
-          ng-if="serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.numAttached > 0">
-          {{ serviceCatalogueCardCtrl.numAttached }} <span translate>app.app-info.app-tabs.services.card.attached</span>
+          ng-if="serviceCatalogueCardCtrl.allowAddOnly && serviceCatalogueCardCtrl.serviceBindings.length > 0">
+          {{ serviceCatalogueCardCtrl.serviceBindings.length }} <span translate>app.app-info.app-tabs.services.card.attached</span>
         </div>
         <button class="btn btn-sm btn-link"
-          ng-disabled="serviceCatalogueCardCtrl.numAttached < 1"
-          ui-sref="cf.applications.application.services" translate>
+          ng-disabled="serviceCatalogueCardCtrl.serviceBindings.length < 1"
+          ui-sref="cf.applications.application.services({serviceType: serviceCatalogueCardCtrl.service.entity.label})" translate>
           app.app-info.app-tabs.services.card.actions.manage
         </button>
         <button class="btn btn-sm btn-link"
