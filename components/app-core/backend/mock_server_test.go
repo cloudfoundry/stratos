@@ -131,12 +131,11 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	urlP, _ := url.Parse("https://login.52.38.188.107.nip.io:50450")
 	pc := interfaces.PortalConfig{
 		ConsoleConfig: &interfaces.ConsoleConfig{
-			ConsoleClient:        "console",
-			ConsoleClientSecret:  "",
-			UAAEndpoint:          urlP,
-			SkipSSLValidation:    true,
+			ConsoleClient:       "console",
+			ConsoleClientSecret: "",
+			UAAEndpoint:         urlP,
+			SkipSSLValidation:   true,
 			ConsoleAdminScope:   UAAAdminIdentifier,
-
 		},
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
@@ -263,21 +262,21 @@ var mockUAAResponse = UAAResponse{
 }
 
 const (
-	mockAPIEndpoint = "https://api.127.0.0.1"
-	mockAuthEndpoint = "https://login.127.0.0.1"
-	mockTokenEndpoint = "https://uaa.127.0.0.1"
+	mockAPIEndpoint     = "https://api.127.0.0.1"
+	mockAuthEndpoint    = "https://login.127.0.0.1"
+	mockTokenEndpoint   = "https://uaa.127.0.0.1"
 	mockDopplerEndpoint = "https://doppler.127.0.0.1"
-	mockProxyVersion = 20161117141922
+	mockProxyVersion    = 20161117141922
 
 	stringCFType = "cf"
 	stringCEType = "hce"
 
 	selectAnyFromTokens = `SELECT .+ FROM tokens WHERE .+`
-	insertIntoTokens = `INSERT INTO tokens`
-	updateTokens = `UPDATE tokens`
-	selectAnyFromCNSIs = `SELECT (.+) FROM cnsis WHERE (.+)`
-	insertIntoCNSIs = `INSERT INTO cnsis`
-	getDbVersion = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
+	insertIntoTokens    = `INSERT INTO tokens`
+	updateTokens        = `UPDATE tokens`
+	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
+	insertIntoCNSIs     = `INSERT INTO cnsis`
+	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
 )
 
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}

@@ -88,7 +88,6 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get TLSAddress from config")
 	}
 
-
 	if result.CFClient != "portal-proxy" {
 		t.Error("Unable to get CFClient from config")
 	}

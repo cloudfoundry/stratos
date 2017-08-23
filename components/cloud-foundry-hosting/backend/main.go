@@ -158,7 +158,7 @@ func (ch *CFHosting) Init() error {
 		var cfCnsi interfaces.CNSIRecord
 
 		cfCnsi, err = ch.portalProxy.GetCNSIRecordByEndpoint(appData.API)
-		if (err != nil) {
+		if err != nil {
 			return fmt.Errorf("Failed to discover if an endpoint for hosting cf exists due to %s", err)
 		} else if cfCnsi != nil {
 			log.Info("Found existing endpoint matching Cloud Foundry API. Will not auto-register or auto-connect")

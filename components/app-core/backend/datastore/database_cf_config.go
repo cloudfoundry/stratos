@@ -1,8 +1,8 @@
 package datastore
 
 import (
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"encoding/json"
+	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -14,22 +14,22 @@ const (
 
 type VCAPService struct {
 	Credentials VCAPCredential `json:"credentials"`
-	Tags []string `json:"tags"`
+	Tags        []string       `json:"tags"`
 }
 
 type VCAPCredential struct {
-	Username                string `json:"username"`
-	Password                string `json:"password"`
-	Dbname                	string `json:"dbname"`
-	Hostname                string `json:"hostname"`
-	Port                    string `json:"port"`
-	Uri 					string `json:"uri"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+	Hostname string `json:"hostname"`
+	Port     string `json:"port"`
+	Uri      string `json:"uri"`
 }
 
 // Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
-func ParseCFEnvs(db *DatabaseConfig) (bool){
-	if (config.IsSet(SERVICES_ENV) == false) {
-		return false;
+func ParseCFEnvs(db *DatabaseConfig) bool {
+	if config.IsSet(SERVICES_ENV) == false {
+		return false
 	}
 
 	// Extract struts from VCAP_SERVICES env
@@ -38,11 +38,11 @@ func ParseCFEnvs(db *DatabaseConfig) (bool){
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {
 		log.Warnf("Unable to convert %s env var into JSON", SERVICES_ENV)
-		return false;
+		return false
 	}
 
 	for _, services := range vcapServices {
-		if (len(services) == 0) {
+		if len(services) == 0 {
 			continue
 		}
 		service := services[0]
@@ -64,5 +64,5 @@ func ParseCFEnvs(db *DatabaseConfig) (bool){
 		}
 	}
 
-	return false;
+	return false
 }
