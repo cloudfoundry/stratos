@@ -21,6 +21,7 @@ type VCAPCredential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Dbname   string `json:"dbname"`
+	name     string `json:"name"`
 	Hostname string `json:"hostname"`
 	Port     string `json:"port"`
 	Uri      string `json:"uri"`
@@ -50,7 +51,6 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 		for _, tag := range service.Tags {
 			if strings.HasPrefix(tag, "postgresql") {
 				dbCredentials := service.Credentials
-				// At the moment we only handle Postgres
 				db.DatabaseProvider = "pgsql"
 				db.Username = dbCredentials.Username
 				db.Password = dbCredentials.Password
@@ -59,6 +59,17 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 				db.Port, err = strconv.Atoi(dbCredentials.Port)
 				db.SSLMode = "disable"
 				log.Info("Discovered Cloud Foundry postgres service and applied config")
+				return true
+			} else if strings.HasPrefix(tag, "mysql") {
+				dbCredentials := service.Credentials
+				db.DatabaseProvider = "mysql"
+				db.Username = dbCredentials.Username
+				db.Password = dbCredentials.Password
+				db.Database = dbCredentials.name
+				db.Host = dbCredentials.Hostname
+				db.Port, err = strconv.Atoi(dbCredentials.Port)
+				db.SSLMode = "disable"
+				log.Info("Discovered Cloud Foundry mysql service and applied config")
 				return true
 			}
 		}

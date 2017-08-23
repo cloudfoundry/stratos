@@ -7,7 +7,7 @@
   var envFile = args[0];
   var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
 
-  var DB_TYPE, DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME;
+  var DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE_NAME;
   var output = '';
 
   // Discover the db by finding the first service instance with a supported type
@@ -26,14 +26,22 @@
       for (var y = 0; y < serviceInstance.tags.length; y++) {
         var tag = serviceInstance.tags[y];
         if (tag === 'postgresql') {
-          var instance = vcapServices.postgresql[0];
-
           DB_TYPE = 'postgresql';
-          DB_HOST = instance.credentials.hostname;
-          DB_PORT = instance.credentials.port;
-          DB_USERNAME = instance.credentials.username;
-          DB_PASSWORD = instance.credentials.password;
-          DB_NAME = instance.credentials.dbname;
+          DB_HOST = serviceInstance.credentials.hostname;
+          DB_PORT = serviceInstance.credentials.port;
+          DB_USER = serviceInstance.credentials.username;
+          DB_PASSWORD = serviceInstance.credentials.password;
+          DB_DATABASE_NAME = serviceInstance.credentials.dbname;
+        } else if (tag === 'mysql') {
+          DB_TYPE = 'mysql';
+          DB_HOST = serviceInstance.credentials.hostname;
+          DB_PORT = serviceInstance.credentials.port;
+          DB_USER = serviceInstance.credentials.username;
+          DB_PASSWORD = serviceInstance.credentials.password;
+          DB_DATABASE_NAME = serviceInstance.credentials.name;
+        }
+        if (DB_TYPE) {
+          break;
         }
       }
       if (DB_TYPE) {
@@ -49,9 +57,9 @@
     output += exportString('DB_TYPE', DB_TYPE);
     output += exportString('DB_HOST', DB_HOST);
     output += exportString('DB_PORT', DB_PORT);
-    output += exportString('DB_USERNAME', DB_USERNAME);
+    output += exportString('DB_USER', DB_USER);
     output += exportString('DB_PASSWORD', DB_PASSWORD);
-    output += exportString('DB_NAME', DB_NAME);
+    output += exportString('DB_DATABASE_NAME', DB_DATABASE_NAME);
   }
 
   fs.writeFile(envFile, output, function (err) {
