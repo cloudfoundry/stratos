@@ -11,13 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
