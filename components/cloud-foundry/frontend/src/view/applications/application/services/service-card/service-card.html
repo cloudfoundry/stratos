@@ -10,7 +10,16 @@
           Type
         </div>
         <div class="service-catalogue-card__meta-right">
-          {{ ::serviceCardCtrl.service.entity.type }}
+          {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.label }}
+        </div>
+      </div>
+
+      <div class="service-catalogue-card__meta-split">
+        <div class="service-catalogue-card__meta-left">
+          Description
+        </div>
+        <div class="service-catalogue-card__meta-right">
+          {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.description }}
         </div>
       </div>
       <div class="service-catalogue-card__meta-split">

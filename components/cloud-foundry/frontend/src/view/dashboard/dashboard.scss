@@ -36,9 +36,9 @@
 // Take into account the app nav menu mode exapnded or icons only
 
 $cluster-gallery-card-max-width: 420px;
-$cluster-gallery-card-layout-steps: 5;
+$cluster-gallery-card-layout-steps: 3;
 
-@for $i from 2 through $cluster-gallery-card-layout-steps {
+@for $i from 1 through $cluster-gallery-card-layout-steps {
   @media (min-width: $i * $cluster-gallery-card-max-width) {
     .navbar-icons-only .cluster-gallery-card-container .cluster-gallery-card-parent {
       flex: 0 0 percentage(1/$i);

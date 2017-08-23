@@ -67,12 +67,6 @@
       return that.appModel.application.summary.guid;
     }, function () {
       var summary = that.appModel.application.summary;
-      // retrieve categories and attachment data for service filtering
-      // var categories = [];
-      // var attachedServices = _.chain(summary.services)
-      //   .filter(function (o) { return angular.isDefined(o.service_plan); })
-      //   .map(function (o) { return o.service_plan.service; })
-      //   .value();
       var spaceGuid = summary.space_guid;
       if (spaceGuid) {
         that.model.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid)
@@ -93,6 +87,11 @@
       }
     });
 
+    that.isBoundInstances = function (serviceInstance) {
+      return serviceInstance.entity.service_bindings &&
+        !!serviceInstance.entity.service_bindings.length;
+    };
+
     that.getExtraServiceData = function (services) {
       return _.chain(services)
         .map(function (service) {
@@ -101,6 +100,7 @@
           }
           return service;
         })
+        .sortBy('entity.type')
         .value();
     };
 
