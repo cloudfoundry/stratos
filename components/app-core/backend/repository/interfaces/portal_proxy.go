@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
+	"net/url"
 )
 
 type PortalProxy interface {
@@ -12,7 +13,7 @@ type PortalProxy interface {
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
 
 	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo InfoFunc) (CNSIRecord, error)
-	EndpointExists(apiEndpoint string)
+	EndpointExists(apiEndpoint string) (bool, *url.URL, error)
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
@@ -29,6 +30,7 @@ type PortalProxy interface {
 	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
+	GetCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig

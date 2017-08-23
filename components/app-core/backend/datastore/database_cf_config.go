@@ -14,6 +14,7 @@ const (
 
 type VCAPService struct {
 	Credentials VCAPCredential `json:"credentials"`
+	Tags []string `json:"tags"`
 }
 
 type VCAPCredential struct {
@@ -46,19 +47,20 @@ func ParseCFEnvs(db *DatabaseConfig) (bool){
 		}
 		service := services[0]
 
-		dbCredentials := service.Credentials
-
-		if strings.HasPrefix(dbCredentials.Uri, "postgres") {
-			// At the moment we only handle Postgres
-			db.DatabaseProvider = "pgsql"
-			db.Username = dbCredentials.Username
-			db.Password = dbCredentials.Password
-			db.Database = dbCredentials.Dbname
-			db.Host = dbCredentials.Hostname
-			db.Port, err = strconv.Atoi(dbCredentials.Port)
-			db.SSLMode = "disable"
-			log.Info("Discovered Cloud Foundry postgres service and applied config")
-			return true
+		for _, tag := range service.Tags {
+			if strings.HasPrefix(tag, "postgresql") {
+				dbCredentials := service.Credentials
+				// At the moment we only handle Postgres
+				db.DatabaseProvider = "pgsql"
+				db.Username = dbCredentials.Username
+				db.Password = dbCredentials.Password
+				db.Database = dbCredentials.Dbname
+				db.Host = dbCredentials.Hostname
+				db.Port, err = strconv.Atoi(dbCredentials.Port)
+				db.SSLMode = "disable"
+				log.Info("Discovered Cloud Foundry postgres service and applied config")
+				return true
+			}
 		}
 	}
 

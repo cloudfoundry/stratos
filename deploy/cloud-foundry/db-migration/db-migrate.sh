@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Migrating database"
+echo "Attempting to migrating database"
 
 DB_MIGRATE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DEPLOY_DIR=${DB_MIGRATE_DIR}/../../
@@ -19,7 +19,8 @@ source $STRATOS_DB_ENV
 
 cd $DEPLOY_DIR
 case $DB_TYPE in
-"postgres")
+"postgresql")
+    echo "Migrating postgresql instance on $DB_HOST"
     $GOBIN/goose -env cf_postgres up
     if [ $? -eq 0 ]; then
         while sleep 60; do echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'"; done
