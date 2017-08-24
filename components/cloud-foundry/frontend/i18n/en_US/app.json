@@ -183,7 +183,7 @@
           "scroll-button": "Scroll To Bottom"
         },
         "services": {
-          "label": "Services",
+          "label": "Service Instances",
           "types": {
             "show": "Show",
             "all": "All Types"
