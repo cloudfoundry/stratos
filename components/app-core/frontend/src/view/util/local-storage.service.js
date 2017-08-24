@@ -68,7 +68,7 @@
       /**
        * @function getItem
        * @memberof app.view.appLocalStorage
-       * @description Get the item in the local storage for the given key. Optioanlly return the default value if not found.
+       * @description Get the item in the local storage for the given key. Optionally return the default value if not found.
        * @param {string} key - key of value fo retrieve
        * @param {string=} defaultValue - default value to be returned if no value is found
        * @returns {string} value from local storage for the given key

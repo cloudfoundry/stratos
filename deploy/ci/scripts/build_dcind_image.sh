@@ -1,10 +1,10 @@
 #!/bin/bash
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKER_REGISTRY=10.84.93.11:5000
+DOCKER_REGISTRY=ci-registry.ngrok.io:80
 TAG=${TAG:-latest}
-REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-registry.paas-ui}
-REGISTRY_USER=${REGISTRY_USER:-stack}
+REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-ci-registry.ngrok.io}
+REGISTRY_USER=${REGISTRY_USER:-ubuntu}
 
 DOWNLOAD_FOLDER=${DIRPATH}/tmp
 source ${DIRPATH}/build_common.sh
@@ -33,6 +33,7 @@ ADD https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.
 ADD https://github.com/sequenceiq/uaa/releases/download/3.9.3/cloudfoundry-identity-uaa-3.9.3.war /tarballs/
 EOT
 
-docker build -f Dockerfile.dcind ./ -t ${DOCKER_REGISTRY}/concourse-dcind:${TAG} ${BUILD_ARGS}
+sudo docker build -f Dockerfile.dcind ./ -t ${DOCKER_REGISTRY}/concourse-dcind:${TAG} ${BUILD_ARGS}
 rm -f Dockerfile.dcind
+sudo rm -f id_rsa
 

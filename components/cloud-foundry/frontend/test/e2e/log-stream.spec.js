@@ -31,6 +31,8 @@
           return loginPage.loginAsAdmin();
         })
         .then(function () {
+          // Ensure that no org or space is selected when we come into the app wall
+          galleryWall.resetFilters();
           return galleryWall.setGridView();
         });
       // Ensure we don't continue until everything is set up

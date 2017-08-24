@@ -76,6 +76,8 @@
     vm.hasMessage = false;
     vm.busyMessage = false;
 
+    vm.showBusy = showBusy;
+
     if (vm.workflow.initControllers) {
       vm.workflow.initControllers(vm);
     }
@@ -144,7 +146,6 @@
     vm.switchToFirstReadyStep = switchToFirstReadyStep;
     vm.always = always;
     vm.allowCancel = allowCancel;
-    vm.showBusy = showBusy;
 
     vm.initPromise.then(function () {
       vm.onInitSuccess();

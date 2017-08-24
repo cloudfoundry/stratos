@@ -1,0 +1,42 @@
+<p ng-if="!step.data.folderSupport" class="deploy-app-choose-source" translate>
+  deploy-app-dialog.step-source.source.file</p>
+<p ng-if="step.data.folderSupport" class="deploy-app-choose-source" translate>
+  deploy-app-dialog.step-source.source.folder</p>
+
+<div class="deploy-app-source-area" file-drop item-drop="step.data.dropItemHandler">
+  <div class="deploy-app-source-area-select form-group">
+    <label class="control-label" translate>deploy-app-dialog.step-source.choose-label</label>
+    <select-input
+      class="form-control"
+      ng-model="step.wizard.sourceType"
+      input-options="step.data.sourceTypeOptions"
+      translate-option-labels="true"
+      placeholder="deploy-app-dialog.step-source.choose-placeholder"
+    />
+  </div>
+  <div class="deploy-app-source-area-settings">
+    <div class="deploy-app-source-github"
+         ng-show="step.wizard.sourceType === 'github'">
+      <app-deploy-source-git
+        source-type="step.wizard.sourceType"
+        user-input="step.userInput"
+        valid="step.data.git.valid"
+        drop-info="step.data.dropInfo"
+      >
+      </app-deploy-source-git>
+    </div>
+
+    <div class="deploy-app-source-local"
+         ng-show="step.wizard.sourceType === 'local'">
+      <app-deploy-source-local
+        source-type="step.wizard.sourceType"
+        user-input="step.userInput"
+        valid="step.data.source.valid"
+        drop-info="step.data.dropInfo"
+        folder-support="step.data.folderSupport"
+        show-busy="step.showBusy"
+      >
+      </app-deploy-source-local>
+    </div>
+  </div>
+</div>
