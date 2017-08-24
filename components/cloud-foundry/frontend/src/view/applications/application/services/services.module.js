@@ -46,13 +46,15 @@
   function ApplicationServicesController(
     $scope,
     modelManager,
-    $stateParams
+    $stateParams,
+    $state
   ) {
     var that = this;
     that.model = modelManager.retrieve('cloud-foundry.model.space');
     that.appModel = modelManager.retrieve('cloud-foundry.model.application');
     that.id = $stateParams.guid;
     that.cnsiGuid = $stateParams.cnsiGuid;
+    that.managingType = $stateParams.serviceType;
     that.services = [];
     that.ALL_FILTER = 'all';
     that.filterType = $stateParams.serviceType || that.ALL_FILTER;
@@ -68,6 +70,8 @@
         if (that.filterType !== $stateParams.serviceType) {
           stopFilterWatch();
           $stateParams.serviceType = null;
+          that.managingType = null;
+          $state.go('.', $stateParams, {notify: false});
         }
       });
     }
