@@ -113,7 +113,7 @@
             "org-label": "[[@:organization]]",
             "space-label": "[[@:space]]",
             "edit-button": "Edit",
-            "service-count": "Service count",
+            "service-count": "Services",
             "edit-dialog": {
               "title": "Edit App",
               "name-label": "Application Name",
