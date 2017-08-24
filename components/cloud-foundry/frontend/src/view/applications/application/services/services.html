@@ -21,7 +21,7 @@
     </form>
   </div>
 </div>
-<div class="service-manage-message" ng-if="applicationServicesCtrl.managingType">You are currently viewing <b>{{::applicationServicesCtrl.managingType}}</b> instances. <a ng-click="applicationServicesCtrl.filterType = applicationServicesCtrl.ALL_TYPE">Click here</a> to view all types.</div>
+<div class="service-manage-message" ng-if="applicationServicesCtrl.managingType">You are currently viewing <b>{{::applicationServicesCtrl.managingType}}</b> instances. <a ng-click="applicationServicesCtrl.filterType = applicationServicesCtrl.ALL_FILTER">Click here</a> to view all types.</div>
 <div ng-if="applicationServicesCtrl.ready && boundServices.length === 0"
   class="message-box message-box-no-bg">
   <p>
