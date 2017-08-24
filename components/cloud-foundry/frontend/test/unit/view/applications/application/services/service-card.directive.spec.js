@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  describe('service-card directive', function () {
-    var $compile, $httpBackend, $scope, mockBindingsApi, appEventService, cfServiceInstanceService;
+  fdescribe('service-card directive', function () {
+    var $compile, $httpBackend, $scope, mockBindingsApi;
 
     var cnsiGuid = 'cnsiGuid';
     var spaceGuid = 'spaceGuid';
@@ -15,8 +15,6 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('modelManager');
-      appEventService = $injector.get('appEventService');
-      cfServiceInstanceService = $injector.get('cfServiceInstanceService');
 
       if (mockAuthModel) {
         var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -80,15 +78,15 @@
         var serviceCardCtrl, element;
 
         beforeEach(function () {
-          var markup = '<service-card app="app" cnsi-guid="guid" service="service">' +
-            '</service-card>';
+          var markup = '<service-catalogue-card app="app" cnsi-guid="guid" service="service">' +
+            '</service-catalogue-card>';
           element = angular.element(markup);
           $compile(element)($scope);
 
           $scope.$apply();
           $httpBackend.flush();
 
-          serviceCardCtrl = element.controller('serviceCard');
+          serviceCardCtrl = element.controller('serviceCatalogueCard');
         });
 
         it('should be defined and initialized', function () {
@@ -96,15 +94,12 @@
           expect(serviceCardCtrl).toBeDefined();
 
           expect(serviceCardCtrl.serviceBindings).not.toEqual([]);
-          expect(serviceCardCtrl.numAttached).toBe(1);
-          expect(serviceCardCtrl.actions.length).toBe(3);
         });
 
         describe('init', function () {
           beforeEach(function () {
             spyOn(serviceCardCtrl, 'getServiceInstanceGuids').and.callThrough();
             spyOn(serviceCardCtrl, 'getServiceBindings').and.callThrough();
-            spyOn(serviceCardCtrl, 'updateActions').and.callThrough();
           });
 
           afterAll(function () {
@@ -123,9 +118,6 @@
           it('should set serviceBindings', function () {
             serviceCardCtrl.init().then(function () {
               expect(serviceCardCtrl.serviceBindings.length).toBe(1);
-              expect(serviceCardCtrl.numAttached).toBe(1);
-              expect(serviceCardCtrl.actions[1].hidden).toBeFalsy();
-              expect(serviceCardCtrl.actions[2].hidden).toBeFalsy();
             });
 
             $httpBackend.flush();
@@ -140,55 +132,8 @@
 
             expect(serviceCardCtrl.serviceBindings.length).toBe(0);
             expect(serviceCardCtrl.numAttached).toBe(0);
-            expect(serviceCardCtrl.actions[1].hidden).toBeTruthy();
-            expect(serviceCardCtrl.actions[2].hidden).toBeTruthy();
             expect(serviceCardCtrl.getServiceInstanceGuids).toHaveBeenCalled();
             expect(serviceCardCtrl.getServiceBindings).not.toHaveBeenCalled();
-            expect(serviceCardCtrl.updateActions).toHaveBeenCalled();
-          });
-        });
-
-        describe('addService', function () {
-          it('should emit cf.events.START_ADD_SERVICE_WORKFLOW event', function () {
-            spyOn(appEventService, '$emit');
-            serviceCardCtrl.addService();
-            expect(appEventService.$emit).toHaveBeenCalled();
-
-            var args = appEventService.$emit.calls.mostRecent().args;
-            expect(args[0]).toBe('cf.events.START_ADD_SERVICE_WORKFLOW');
-          });
-        });
-
-        describe('detach', function () {
-          it('should call unbindServiceFromApp', function () {
-            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
-            serviceCardCtrl.detach();
-            expect(cfServiceInstanceService.unbindServiceFromApp)
-              .toHaveBeenCalled();
-            var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
-            expect(args[0]).toBe('guid');
-            expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
-            expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
-            expect(args[3]).toBe('instance_123');
-          });
-
-          it('should not call unbindServiceFromApp if no services attached', function () {
-            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
-            serviceCardCtrl.serviceBindings.length = 0;
-            serviceCardCtrl.detach();
-            expect(cfServiceInstanceService.unbindServiceFromApp)
-              .not.toHaveBeenCalled();
-          });
-        });
-
-        describe('manageInstances', function () {
-          it('should emit cf.START_MANAGE_SERVICES event', function () {
-            spyOn(appEventService, '$emit');
-            serviceCardCtrl.manageInstances();
-            expect(appEventService.$emit).toHaveBeenCalled();
-
-            var args = appEventService.$emit.calls.mostRecent().args;
-            expect(args[0]).toBe('cf.events.START_MANAGE_SERVICES');
           });
         });
       });
@@ -204,7 +149,7 @@
       });
 
       describe('with defaults', function () {
-        var serviceCardCtrl, element;
+        var element;
 
         beforeEach(function () {
           var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
@@ -217,13 +162,6 @@
 
           serviceCardCtrl = element.controller('serviceCard');
         });
-
-        it('should display service actions', function () {
-          expect(element).toBeDefined();
-          expect(serviceCardCtrl).toBeDefined();
-          expect(serviceCardCtrl.hideServiceActions()).toBe(false);
-        });
-
       });
     });
 
@@ -238,7 +176,7 @@
       });
 
       describe('with defaults', function () {
-        var serviceCardCtrl, element;
+        var element;
 
         beforeEach(function () {
           var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
@@ -251,13 +189,6 @@
 
           serviceCardCtrl = element.controller('serviceCard');
         });
-
-        it('should disable service actions', function () {
-          expect(element).toBeDefined();
-          expect(serviceCardCtrl).toBeDefined();
-          expect(serviceCardCtrl.hideServiceActions()).toBe(true);
-        });
-
       });
     });
   });
