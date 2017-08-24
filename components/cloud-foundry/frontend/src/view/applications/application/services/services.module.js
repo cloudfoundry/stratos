@@ -49,46 +49,52 @@
     $stateParams
   ) {
     var that = this;
-    that.$stateParams = $stateParams;
-    this.model = modelManager.retrieve('cloud-foundry.model.space');
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.id = $stateParams.guid;
-    this.cnsiGuid = $stateParams.cnsiGuid;
-    this.services = [];
-    this.serviceCategories = [
-      { label: 'app.app-info.app-tabs.services.categories.attached', value: 'attached' },
-      { label: 'app.app-info.app-tabs.services.categories.all', value: 'all' }
-    ];
-    this.searchCategory = 'all';
-    this.search = {};
-    this.category = {
-      entity: {
-        extra: undefined
-      }
-    };
-    this.ready = false;
+    that.model = modelManager.retrieve('cloud-foundry.model.space');
+    that.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    that.id = $stateParams.guid;
+    that.cnsiGuid = $stateParams.cnsiGuid;
+    that.services = [];
+    that.ALL_FILTER = 'all';
+    that.filterType = $stateParams.serviceType || that.ALL_FILTER;
+    that.search = {};
 
-    $scope.$watch(function () {
-      return that.appModel.application.summary.guid;
-    }, function () {
-      var summary = that.appModel.application.summary;
-      var spaceGuid = summary.space_guid;
-      if (spaceGuid) {
-        that.model.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid)
-          .then(function (serviceInstances) {
-            // Get any extra service data
-            // and get the categories from services
-            return {
-              categories: that.getServiceCategories(serviceInstances),
-              services: that.getExtraServiceData(serviceInstances)
-            };
-          })
-          .then(function (data) {
-            // Attach data to controller
-            that.categories = data.categories;
-            that.services = data.services;
-            that.ready = true;
-          });
+    that.ready = false;
+
+    if ($stateParams.serviceType) {
+      // Make sure we clear the serviceType url param if the user changes the filter
+      var stopFilterWatch = $scope.$watch(function () {
+        return that.filterType;
+      }, function () {
+        if (that.filterType !== $stateParams.serviceType) {
+          stopFilterWatch();
+          $stateParams.serviceType = null;
+        }
+      });
+    }
+
+    var stopSummaryWatch = $scope.$watch(function () {
+      return that.appModel.application.summary;
+    }, function (summary) {
+      if (summary.guid) {
+        stopSummaryWatch();
+        var spaceGuid = summary.space_guid;
+        if (spaceGuid) {
+          that.model.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid)
+            .then(function (serviceInstances) {
+              // Get any extra service data
+              // and get the types from services
+              return {
+                filterTypes: that.getServiceFilterTypes(serviceInstances),
+                services: that.getExtraServiceData(serviceInstances)
+              };
+            })
+            .then(function (data) {
+              // Attach data to controller
+              that.filterTypes = data.filterTypes;
+              that.services = data.services;
+              that.ready = true;
+            });
+        }
       }
     });
 
@@ -108,9 +114,14 @@
       return serviceInstance.entity.service_plan.entity.service.entity.label;
     }
 
+    that.isFiltered = function () {
+      return !that.search.$ && that.filterType !== that.ALL_FILTER;
+    };
+
     that.showInstance = function (serviceInstance) {
-      var isOfType = !$stateParams.serviceType ||
-        $stateParams.serviceType === getServiceInstanceType(serviceInstance);
+      var isOfType = !that.filterType ||
+        that.filterType === that.ALL_FILTER ||
+        that.filterType === getServiceInstanceType(serviceInstance);
       var isBoundToThisApp = !!getCurrentAppBinding(serviceInstance);
 
       return isBoundToThisApp && isOfType;
@@ -128,35 +139,31 @@
         .value();
     };
 
-    that.getServiceCategories = function (services) {
-      return _.chain(services)
-        .flatMap(function (service) {
-          return service.entity && service.entity.extra
-            ? service.entity.extra.Categories : [] || [];
+    that.getServiceFilterTypes = function (serviceInstances) {
+      var baseFilters = [{
+        label: 'app.app-info.app-tabs.services.types.all',
+        value: that.ALL_FILTER,
+        lower: that.ALL_FILTER.toLowerCase()
+      }];
+
+      var typeFilters = _.chain(serviceInstances)
+        .flatMap(function (serviceInstance) {
+          return getServiceInstanceType(serviceInstance);
         })
+        .compact()
         .uniq()
-        .map(function (cat) {
+        .map(function (type) {
           return {
-            label: cat,
-            value: { Categories: cat },
-            lower: cat.toLowerCase()
+            label: type,
+            value: type,
+            lower: type.toLowerCase()
           };
         })
         .sortBy('lower')
         .value();
-    };
 
-    $scope.$watch(function () {
-      return that.searchCategory;
-    }, function (newSearchCategory) {
-      if (newSearchCategory === 'attached') {
-        that.category.entity.extra = undefined;
-        that.category.attached = true;
-      } else {
-        delete that.category.attached;
-        that.category.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
-      }
-    });
+      return baseFilters.concat(typeFilters);
+    };
   }
 
 })();

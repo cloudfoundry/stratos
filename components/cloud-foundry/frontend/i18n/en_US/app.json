@@ -184,26 +184,16 @@
         },
         "services": {
           "label": "Services",
-          "categories": {
+          "types": {
             "show": "Show",
-            "attached": "Attached Service Instances",
-            "all": "All Services"
-          },
-          "manage": {
-            "title": "Manage Service Instances",
-            "name-label": "name",
-            "plan-label": "plan",
-            "env-vars-label": "env.variables",
-            "detach-button": "detach"
+            "all": "All Types"
           },
           "card": {
             "version": "Version",
             "attached": "Attached",
             "cannot-bind": "This service cannot be bound to an Application",
             "actions": {
-              "add": "Add Service",
-              "detach": "Detach",
-              "manage": "Manage Instances"
+              "detach": "Detach"
             }
           },
           "unbind": {

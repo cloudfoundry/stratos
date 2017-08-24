@@ -1,6 +1,15 @@
-<div class="panel panel-default" ng-hide="!boundServices.length && !applicationServicesCtrl.search.$">
+<div class="panel panel-default" ng-hide="!boundServices.length && !applicationServicesCtrl.isFiltered()">
   <div class="panel-body service-filter-panel">
     <form class="form-horizontal">
+      <div class="form-group">
+        <label class="control-label" translate>app.app-info.app-tabs.services.types.show</label>
+        <select-input
+          ng-model="applicationServicesCtrl.filterType"
+          input-options="applicationServicesCtrl.filterTypes"
+          tabindex="0"
+          translate-option-labels="true">
+        </select-input>
+      </div>
       <div class="form-group addon-form-group filter-form-group">
         <div class="input-group">
           <span class="input-group-addon">
@@ -16,7 +25,7 @@
   class="message-box message-box-no-bg">
   <p>
     <img src="/images/services/App_services_72.png" />
-    <div ng-if="!applicationServicesCtrl.search.$">
+    <div ng-if="!applicationServicesCtrl.search.$ && !applicationServicesCtrl.isFiltered()">
       <h3>
         This application has no bound service instances.
       </h3>
@@ -24,7 +33,7 @@
         To view the avaliable services for this application, please visit the <a ui-sref="cf.applications.application.service-catalogue">service catalogue</a>.
       </h3>
     </div>
-    <div ng-if="applicationServicesCtrl.search.$">
+    <div ng-if="applicationServicesCtrl.isFiltered()">
       <h3 translate>
         No services instances found matching your search.
       </h3>

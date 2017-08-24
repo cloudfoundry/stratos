@@ -51,8 +51,8 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.services = [];
     this.serviceCategories = [
-      { label: 'app.app-info.app-tabs.services.categories.attached', value: 'attached' },
-      { label: 'app.app-info.app-tabs.services.categories.all', value: 'all' }
+      { label: 'app.app-info.app-tabs.service-catalogue.categories.attached', value: 'attached' },
+      { label: 'app.app-info.app-tabs.service-catalogue.categories.all', value: 'all' }
     ];
     this.searchCategory = 'all';
     this.search = {};
