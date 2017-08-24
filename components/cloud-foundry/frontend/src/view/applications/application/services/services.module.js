@@ -118,6 +118,7 @@
       return serviceInstance.entity.service_plan.entity.service.entity.label;
     }
 
+    // Works out if the current list is being filtered or searched.
     that.isFiltered = function () {
       return !that.search.$ && that.filterType !== that.ALL_FILTER;
     };
@@ -143,6 +144,7 @@
         .value();
     };
 
+    // Gets all of the types in the current list of instances
     that.getServiceFilterTypes = function (serviceInstances) {
       var baseFilters = [{
         label: 'app.app-info.app-tabs.services.types.all',
