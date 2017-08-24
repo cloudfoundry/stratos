@@ -275,7 +275,7 @@ const (
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
 	insertIntoCNSIs     = `INSERT INTO cnsis`
-	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
+	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}
