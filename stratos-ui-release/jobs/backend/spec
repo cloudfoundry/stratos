@@ -5,10 +5,13 @@ templates:
     ssl_cert.erb: config/dev-certs/pproxy.crt
     ssl_cert_key.erb: config/dev-certs/pproxy.key
     backend_ctl.erb: bin/backend_ctl
+    pre-start.erb: bin/pre-start
+    post-deploy.erb: bin/post-deploy
 
 packages:
 - backend
 - utils
+- golang
 
 properties:
     stratos_ui.backend.skip_ssl_validation:
@@ -38,25 +41,36 @@ properties:
         description: "SSL Certificate key body"
     stratos_ui.backend.ssl_cert:
         description: "SSL Certificate body"
-    stratos_ui.backend.encryption_key:
-        description: "Hex encoded encryption key"
     stratos_ui.backend.session_store_secret:
         description: "Secret used to encrypt the backend session store"
-    stratos_ui.backend.use_postgres:
-        description: "Use postgres, need to specify relevant postgres settings"
-    stratos_ui.backend.postgres_user:
-        description: "Postgres User"
-    stratos_ui.backend.postgres_user_passwd:
-        description: "Postgres user password"
-    stratos_ui.backend.postgres_db:
+    stratos_ui.backend.use_mysql:
+        description: "Use mysql, need to specify relevant mysql settings"
+    stratos_ui.backend.mysql_user:
+        description: "mysql User"
+    stratos_ui.backend.mysql_user_passwd:
+        description: "mysql user password"
+    stratos_ui.backend.mysql_db:
         description: "Stratos UI Console DB name"
-    stratos_ui.backend.postgres_host:
-        description: "Postgres host"
-    stratos_ui.backend.postgres_port:
-        description: "Postgres port"
-    stratos_ui.backend.postgres_enable_ssl:
-        description: "Enable SSL for postgres"
-        default: false
+    stratos_ui.backend.mysql_host:
+        description: "mysql host"
+    stratos_ui.backend.mysql_port:
+        description: "mysql port"
+    stratos_ui.backend.mysql_admin_user:
+        description: "Mysql Administrator to create DB and user"
+    stratos_ui.backend.mysql_admin_password:
+        description: "Mysql Administrator  port"
     stratos_ui.backend.use_sqlite:
-        description: "USe SQLLite"
+        description: "Use SQLLite"
         default: true
+    stratos_ui.backend.upgrade_volume_path:
+        description: "Upgrade volume path for pre-start data"
+        default: "/var/vcap/store/backend" 
+    stratos_ui.backend.upgrade_volume_file:
+        description: "Upgrade lock file"
+        default: "upgrade.lock" 
+    stratos_ui.backend.encryption_key_volume:
+        description: "Encryption key volume"
+        default: "/var/vcap/store/backend_encryption" 
+    stratos_ui.backend.encryption_key_filename:
+        description: "Encryption key file name"
+        default: "key" 

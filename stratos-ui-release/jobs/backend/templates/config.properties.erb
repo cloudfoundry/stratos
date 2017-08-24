@@ -11,21 +11,20 @@ CONSOLE_CLIENT=<%= p('stratos_ui.backend.console_uaa_client') %>
 ALLOWED_ORIGINS=<%= p('stratos_ui.backend.frontend_origin_address') %>
 
 SESSION_STORE_SECRET=<%= p('stratos_ui.backend.session_store_secret') %>
-# CONSOLE_PROXY_CERT_KEY=<%= p('stratos_ui.backend.ssl_cert_key') %>
-# CONSOLE_PROXY_CERT=<%= p('stratos_ui.backend.ssl_cert') %>
-ENCRYPTION_KEY=<%= p('stratos_ui.backend.encryption_key') %>
 
-<% if p('stratos_ui.backend.use_postgres') == true %>
-DATABASE_PROVIDER=postgres
-PGSQL_USER=<%= p('stratos_ui.backend.postgres_user') %>
-PGSQL_PASSWORD=<%= p('stratos_ui.backend.postgres_user_passwd') %>
-PGSQL_DATABASE=<%= p('stratos_ui.backend.postgres_db') %>
-PGSQL_HOST=<%= p('stratos_ui.backend.postgres_host') %>
-PGSQL_PORT=<%= p('stratos_ui.backend.postgres_port') %>
-PGSQL_CONNECT_TIMEOUT_IN_SECS=100
-PGSQL_SSL_MODE=<%= p('stratos_ui.backend.postgres_enable_ssl') %>
+<% if p('stratos_ui.backend.use_mysql') == true %>
+DATABASE_PROVIDER=mysql
+DB_USER=<%= p('stratos_ui.backend.mysql_user') %>
+DB_PASSWORD=<%= p('stratos_ui.backend.mysql_user_passwd') %>
+DB_DATABASE_NAME=<%= p('stratos_ui.backend.mysql_db') %>
+DB_HOST=<%= p('stratos_ui.backend.mysql_host') %>
+DB_PORT=<%= p('stratos_ui.backend.mysql_port') %>
 <% end %>
 
 <% if p('stratos_ui.backend.use_sqlite') == true %>
 DATABASE_PROVIDER=sqlite
 <% end %>
+UPGRADE_VOLUME=<%= p('stratos_ui.backend.upgrade_volume_path') %>
+UPGRADE_LOCK_FILENAME=<%= p('stratos_ui.backend.upgrade_volume_file') %>
+ENCRYPTION_KEY_VOLUME=<%= p('stratos_ui.backend.encryption_key_volume') %>
+ENCRYPTION_KEY_FILENAME=<%= p('stratos_ui.backend.encryption_key_filename') %>

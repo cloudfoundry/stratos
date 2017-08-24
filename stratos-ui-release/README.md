@@ -26,13 +26,13 @@ If you have outstanding changes locally add the `--force` flag.
 
 4. After a successful build, upload the release to your director.
 ```
-bosh -e vbox upload-release -d stratos-ui
+$ bosh -e vbox upload-release -d stratos-ui
 ```
 
 5. Deploy the release
 A sample bosh-lite deployment manifest has been provided in `bosh-lite/deployment.yaml`. The following will use that command to deploy the Console.
 ```
-$ bosh -e vbox -d stratos deploy bosh-lite/deployment.yml
+$ bosh -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
 ```
 
 6. List deployment
@@ -40,12 +40,12 @@ $ bosh -e vbox -d stratos deploy bosh-lite/deployment.yml
 List deployment to get the IP address of the frontend to access the Console. In the following example to access the Console the address is `https://10.0.16.4`.
 
 ```
-09:10 $ bosh -e vbox -d stratos instances
+09:10 $ bosh -e vbox -d stratos-ui instances
 Using environment '192.168.50.6' as client 'admin'                                                                                                                                                                
                                                                                                                                                                                                                   
 Task 22. Done                                                                                                                                                                                                     
                                                                                                                                                                                                                   
-Deployment 'stratos'                                                                                                                                                                                              
+Deployment 'stratos-ui'                                                                                                                                                                                              
                                                                                                                                                                                                                   
 Instance                                       Process State  AZ  IPs                                                                                                                                             
 backend/68580d76-a241-4de2-b246-82d0a184c9bb   running        -   10.0.16.103                                                                                                                                     

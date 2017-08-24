@@ -1,5 +1,5 @@
 ---
-name: stratos
+name: stratos-ui
 
 networks:
 - name: stratos-net
@@ -26,6 +26,11 @@ compilation:
   reuse_compilation_vms: true
   cloud_properties:
     availability_zone: az1
+
+disk_pools:
+- name: upgrade-volume
+  disk_size: 50
+  cloud_properties: {type: standard}
 
 releases:
 - name: stratos-ui
@@ -106,6 +111,7 @@ instance_groups:
 - name: backend
   instances: 1
   resource_pool: stratos_rp1
+  persistent_disk_pool: upgrade-volume
   jobs:
   - name: backend
     release: stratos-ui
@@ -170,16 +176,20 @@ instance_groups:
             LdXmd/Dyu/EVzgOYnEPiZmHbha4KuVsb0dtAQIT8hmVRXIIOIbndERBduxeVMkLm
             fw==
             -----END CERTIFICATE-----
-          encryption_key: B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF
+          upgrade_volume_path: /var/vcap/store/backend
+          upgrade_volume_file: upgrade.lock
+          encryption_key_volume: /var/vcap/store/backend
+          encryption_key_filename: key
           session_store_secret: foo
-          use_postgres: false
-          use_sqlite: true
-          # postgres_user:
-          # postgres_user_passwd:
-          # postgres_db:
-          # postgres_host:
-          # postgres_port:
-          # postgres_enable_ssl:
+          use_mysql: true
+          use_sqlite: false
+          mysql_user: stratos
+          mysql_admin_user: root
+          mysql_admin_password: changeme
+          mysql_passwd: strat0s
+          mysql_db: stratos-db
+          mysql_host: 10.4.21.245
+          mysql_port: 3306
   networks:
   - name: stratos-net
     static_ips: [10.0.16.103]

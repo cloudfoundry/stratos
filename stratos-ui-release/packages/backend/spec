@@ -7,3 +7,4 @@ dependencies:
 files:
 - stratos-ui/{package.json,plugins.json,bower.json,gulpfile.js}
 - stratos-ui/{build,components}/**/*
+- stratos-ui/deploy/db
