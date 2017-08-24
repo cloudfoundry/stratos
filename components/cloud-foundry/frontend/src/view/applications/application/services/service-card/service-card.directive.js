@@ -71,9 +71,11 @@
      * @returns {undefined}
      */
     function detach(serviceInstance, cb) {
-      var serviceBindings = serviceInstance.entity.service_bindings || [];
-      if (serviceBindings.length === 1) {
-        var serviceBinding = serviceBindings[0];
+      var serviceBinding = serviceInstance.entity.service_bindings
+      ? _.find(serviceInstance.entity.service_bindings, function (binding) {
+        return vm.app.summary.guid === binding.entity.app_guid;
+      }) : null;
+      if (serviceBinding) {
         return cfServiceInstanceService.unbindServiceFromApp(
           vm.cnsiGuid,
           vm.app.summary.guid,

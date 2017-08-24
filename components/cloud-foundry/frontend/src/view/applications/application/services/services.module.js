@@ -92,12 +92,28 @@
       }
     });
 
+    function getCurrentAppBinding(serviceInstance) {
+      if (
+        !serviceInstance.entity.service_bindings ||
+        serviceInstance.entity.service_bindings.length === 0
+      ) {
+        return null;
+      }
+      return _.find(serviceInstance.entity.service_bindings, function (binding) {
+        return binding.entity.app_guid === that.appModel.application.summary.guid;
+      }) || null;
+    }
+
+    function getServiceInstanceType(serviceInstance) {
+      return serviceInstance.entity.service_plan.entity.service.entity.label;
+    }
+
     that.showInstance = function (serviceInstance) {
       var isOfType = !$stateParams.serviceType ||
-        $stateParams.serviceType === serviceInstance.entity.service_plan.entity.service.entity.label;
-      return serviceInstance.entity.service_bindings &&
-        !!serviceInstance.entity.service_bindings.length &&
-        isOfType;
+        $stateParams.serviceType === getServiceInstanceType(serviceInstance);
+      var isBoundToThisApp = !!getCurrentAppBinding(serviceInstance);
+
+      return isBoundToThisApp && isOfType;
     };
 
     that.getExtraServiceData = function (services) {

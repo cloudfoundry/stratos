@@ -9,7 +9,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.service-catalogue', {
       url: '/service-catalogue',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/service-catalogue/services.html',
+      templateUrl: 'plugins/cloud-foundry/view/applications/application/service-catalogue/service-catalogue.html',
       controller: ApplicationServiceCatalogueController,
       controllerAs: 'applicationServiceCatalogueCtrl'
     });
