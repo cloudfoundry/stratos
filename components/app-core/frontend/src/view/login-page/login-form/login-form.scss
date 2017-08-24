@@ -14,7 +14,7 @@ login-form {
 
     > h1 {
       margin-bottom: $console-unit-space * 1.5;
-      margin-top: 0;
+      margin-top: $console-unit-space / 2;
       color: $brand-primary;
       font-weight: $console-font-weight-light;
     }

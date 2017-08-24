@@ -6,17 +6,35 @@ dockerOrg: splatform
 dockerRegistry: docker.io
 # Specify default DB password
 dbPassword: changeme
+dbProvider: mysql
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+noShared: false
 images:
   console: stratos-console
   proxy: stratos-proxy
+  proxyNoShared: stratos-proxy-noshared
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job
 # Specify which storage class should be used for PVCs
 #storageClass: default
+# MariaDB chart configuration
+mariadb:
+  # Only required for creating the databases
+  mariadbRootPassword: changeme
+  adminUser: root
+  # Credentials for user
+  mariadbUser: console
+  mariadbPassword: changeme
+  mariadbDatabase: console
+  persistence:
+    accessMode: ReadWriteMany
+    size: 1Gi
+#    storageClass: default
+  metrics:
+    enabled: false

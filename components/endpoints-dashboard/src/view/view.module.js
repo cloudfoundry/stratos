@@ -124,6 +124,18 @@
           if (!vm.endpoints) {
             vm.endpoints = appEndpointsDashboardService.endpoints;
           }
+
+          $scope.$watch(function () {
+            return vm.endpoints.length + !!_.find(vm.endpoints, {connected: 'connected'});
+          }, function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              // We only want the welcome error message to display on enter. Any changes should remove the message
+              // - Connected/Registered should remove error message
+              // - Disconnected/Unregistered should not warn afresh
+              vm.showWelcomeMessage = false;
+            }
+          });
+
           _updateWelcomeMessage();
         }).catch(function () {
           vm.listError = true;
@@ -131,15 +143,9 @@
     }
 
     function _updateWelcomeMessage() {
-      // Show the welcome message if either...
-      if (vm.isUserAdmin()) {
-        // The user is admin and there are no endpoints registered
-        vm.showWelcomeMessage = vm.endpoints.length === 0;
-      } else {
-        // The user is not admin and there are no connected endpoints (note - they should never reach here if there
-        // are no registered endpoints)
-        vm.showWelcomeMessage = !_.find(vm.endpoints, {connected: 'connected'});
-      }
+      vm.endpointsRegistered = vm.endpoints.length > 0;
+      vm.endpointsConnected = !!_.find(vm.endpoints, {connected: 'connected'});
+      vm.showWelcomeMessage = !vm.endpointsConnected;
     }
   }
 

@@ -1,0 +1,111 @@
+.deploy-app {
+  .deploy-app-local .deploy-app-local-form {
+
+    // Applies to buttons to choose a file or folder
+    .form-group.deploy-app-file-controls {
+      padding-right: 0;
+
+      .form-control.file-chooser {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+
+        + label {
+          border: none;
+          background-color: transparent;
+          padding: 0;
+          height: 19px;
+          line-height: 19px;
+          font-size: $font-size-medium;
+          margin: 0;
+          display: flex;
+
+          .deploy-app-form-btn {
+            height: $console-input-height;
+            width: $console-unit-space * 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -25px;
+            border-right: 1px solid $rule;
+
+            &:hover {
+              background-color: $component-active-bg;
+              color: $component-active-color;
+            }
+
+            &:first-of-type {
+              border-left: 1px solid $rule;
+            }
+
+            &:last-child {
+              border-right: 0;
+            }
+          }
+
+          &.clickable {
+            cursor: pointer;
+          }
+
+          > i {
+            font-size: $icon-font-size-base;
+            margin-right: 6px;
+          }
+
+          > span {
+            margin: 0;
+            padding: 0;
+            flex: 1;
+          }
+
+          > label {
+            margin: 0;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+
+    .deploy-app-source-details {
+
+      &.deploy-app-local-details {
+        margin-top: $console-unit-space / 2;
+
+        .deploy-app-local-info {
+          border: 1px solid $rule;
+          padding: $console-unit-space / 4 $console-unit-space / 2;
+          max-width: $console-input-width * 1.25;
+
+          &.deploy-app-file-details {
+            height: $console-input-height;
+            display: flex;
+            align-items: center;
+            padding-left: 18px;
+
+            &.deploy-app-found-cfignore {
+              border-top: 0;
+            }
+
+            > p {
+              margin: 0;
+            }
+
+            > i {
+              margin-right: 6px;
+            }
+          }
+
+          img {
+            height: $github-avatar-height;
+            width: $github-avatar-width;
+          }
+
+        }
+      }
+    }
+  }
+}
+

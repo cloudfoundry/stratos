@@ -1,0 +1,64 @@
+<div class="deploy-app-github">
+  <div class="deploy-app-github-form">
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': dplyGitCtrl.userInput.githubProjectValid === false}">
+      <label class="control-label" translate>deploy-app-dialog.step-source.github.project-label</label>
+      <span class="control-message" translate ng-if="dplyGitCtrl.userInput.githubProjectValid === false">
+                deploy-app-dialog.step-source.github.project-not-found
+            </span>
+      <input
+        type="text" class="form-control" name="githubProject" ng-model="dplyGitCtrl.userInput.githubProject"
+        placeholder="{{'deploy-app-dialog.step-source.github.project-placeholder' | translate}}"/>
+    </div>
+
+    <div class="form-group form-group-large deploy-app-github-branch" focusable-input>
+      <label class="control-label" translate>deploy-app-dialog.step-source.github.branch-label</label>
+      <search-box
+        ng-model="dplyGitCtrl.userInput.githubBranch"
+        input-options="dplyGitCtrl.data.githubBranches"
+        placeholder="{{ 'deploy-app-dialog.step-source.github.branch-placeholder' | translate}}"
+        disabled="!dplyGitCtrl.userInput.githubProjectValid">
+      </search-box>
+    </div>
+
+    <!-- Information about the selected GitHub project -->
+    <div class="deploy-app-source-details deploy-app-github-details"
+         ng-class="{'deploy-app-invisible': !(dplyGitCtrl.userInput.githubProjectValid && dplyGitCtrl.data.githubProject)}" >
+      <div class="deploy-app-github-info">
+        <div class="project">
+          <img ng-src="{{dplyGitCtrl.data.githubProject.owner.avatar_url}}"/>
+          <div class="project-info">
+            <div>
+              <a href="https://www.github.com/{{dplyGitCtrl.userInput.githubProjectCached}}"
+                 rel="noopener noreferrer" target="_blank">{{dplyGitCtrl.userInput.githubProjectCached}}
+              </a>
+            </div>
+            {{ dplyGitCtrl.data.githubProject.description | limitTo:50}} <span ng-if="dplyGitCtrl.data.githubProject.description.length > 50">...</span>
+          </div>
+        </div>
+
+        <div class="lastCommit">
+          <div class="committerAvatar">
+            <img ng-src="{{dplyGitCtrl.data.githubCommit.author.avatar_url}}"/>
+          </div>
+          <div class="lastCommit-info">
+            <div class="lastCommit-info-commit-message">
+              <span translate>deploy-app-dialog.step-source.github.branch-last-commit</span>
+              <a href="https://www.github.com/{{dplyGitCtrl.userInput.githubProject}}/commit/{{dplyGitCtrl.data.githubCommit.sha}}"
+                 rel="noopener noreferrer" target="_blank">{{ dplyGitCtrl.data.githubCommit.sha | limitTo:6}} {{ dplyGitCtrl.data.githubCommit.commit.message | limitTo:50}}<span ng-if="dplyGitCtrl.data.githubCommit.commit.message.length > 50">...</span>
+              </a>
+            </div>
+            <div class="lastCommit-date-committer">
+              <div class="lastCommitter">
+                <span translate>deploy-app-dialog.step-source.github.branch-last-commit-committer</span>{{ dplyGitCtrl.data.githubCommit.author.login || dplyGitCtrl.data.githubCommit.commit.author.name}}
+              </div>
+              <div>
+                <span translate>deploy-app-dialog.step-source.github.branch-last-commit-date</span> {{ dplyGitCtrl.data.githubCommit.commit.author.date | momentDateFormat }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -76,6 +76,8 @@
     vm.hasMessage = false;
     vm.busyMessage = false;
 
+    vm.showBusy = showBusy;
+
     if (vm.workflow.initControllers) {
       vm.workflow.initControllers(vm);
     }
@@ -164,6 +166,20 @@
     }, function () {
       vm.resetButtons();
     });
+
+    function showBusy(msg) {
+      if (!msg) {
+        vm.currentIndex = vm.busyIndex;
+        vm.busyIndex = -1;
+        vm.busyMessage = false;
+        resetButtons();
+      } else {
+        vm.busyIndex = vm.currentIndex;
+        vm.busyMessage = msg;
+        vm.currentIndex = -1;
+        disableButtons();
+      }
+    }
 
     /**
      * @function disableButtons

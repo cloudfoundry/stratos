@@ -31,9 +31,10 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
    * deploy, etc)
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, cfOrganizationModel, cfAppWallActions) {
+                                      appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
 
     var vm = this;
 
@@ -109,6 +110,12 @@
       appErrorService.clearAppError();
       // Ensure that remove the resize handler on the window
       angular.element($window).off('resize', onResize);
+    });
+
+    $scope.$watch(function () {
+      return vm.model.filterParams.cnsiGuid + vm.model.filterParams.orgGuid + vm.model.filterParams.spaceGuid;
+    }, function () {
+      appLocalStorage.setItem('cf.filterParams', angular.toJson(vm.model.filterParams));
     });
 
     function onResize() {
@@ -544,6 +551,7 @@
      */
     function goToGalleryView(showCardLayout) {
       vm.model.showCardLayout = showCardLayout;
+      appLocalStorage.setItem('cf.app.cardLayout', showCardLayout);
       return $state.go('cf.applications.list.gallery-view');
     }
 

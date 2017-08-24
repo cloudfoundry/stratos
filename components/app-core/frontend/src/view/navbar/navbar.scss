@@ -66,7 +66,7 @@ nav.secondary-nav {
       }
     }
   }
-    
+
   .secondary-navbar {
     flex: 1 1 0;
     background-color: $navbar-bottom-border-color;
@@ -198,7 +198,7 @@ nav.secondary-nav {
     svg {
       width: 28px;
       height: 28px;
-      
+
       > path {
         fill: $navbar-text-color;
       }
@@ -221,8 +221,8 @@ nav.secondary-nav {
       }
 
       &:hover {
-        color: $navbar-hover-fg;
         background-color: $navbar-hover-bg;
+        color: $navbar-hover-fg;
       }
 
       &.active {

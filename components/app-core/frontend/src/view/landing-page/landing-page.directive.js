@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('app.framework.widgets')
+    .module('app.view')
     .directive('landingPage', landingPage);
 
   /**
-   * @namespace app.framework.widgets.landingPage
-   * @memberof app.framework.widgets
+   * @namespace app.view.landingPage
+   * @memberof app.view
    * @name landingPage
    * @description Container template to provide consistent screen layout to landing pages
    * @example
@@ -18,16 +18,28 @@
    */
   function landingPage() {
     return {
-      templateUrl: 'framework/widgets/landing-page/landing-page.html',
+      templateUrl: 'app/view/landing-page/landing-page.html',
       transclude: true,
       controller: landingPageController,
       controllerAs: 'landingPageCtrl'
     };
   }
 
-  function landingPageController(languageService) {
+  function landingPageController($scope, languageService) {
     var vm = this;
-
     vm.languageService = languageService;
+    vm.languageOptions = vm.languageService.getAll();
+    languageService.getLocale(true).then(function (locale) {
+      vm.currentLanguage = locale;
+
+      $scope.$watch(function () {
+        return vm.currentLanguage;
+      }, function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+          languageService.setLocale(newValue);
+        }
+      });
+    });
+
   }
 })();

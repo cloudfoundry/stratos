@@ -2,22 +2,11 @@
 
 .login-page {
   display: flex;
-  flex-flow: row nowrap;
-  flex: 1;
-
-  .login-page-left-space, .login-page-right-space {
-    flex: 1;
-  }
-
-  @media (max-width: $screen-lg) {
-    .login-page-left-space, .login-page-right-space {
-      flex: 0.5;
-    }
-  }
+  margin-top: 100px;
 
   .login-left, .login-right {
-    flex: 5;
-    max-width: 600px;
+    flex: $landing-page-spacer-content-flex / 2;
+    max-width: $landing-page-spacer-content-max-width / 2;
   }
 
   .login-left {
@@ -41,7 +30,6 @@
   }
 
   .login-page-tagline {
-    font-weight: normal;
     color: $text-color;
 
     font-size: $font-size-large;
@@ -54,4 +42,22 @@
     min-height: 410px;
   }
 
+}
+
+@media (max-height: 650px) {
+  .login-page {
+    margin-top: 50px;
+  }
+}
+
+@media (max-height: 500px) {
+  .login-page {
+    margin-top: 25px;
+  }
+}
+
+@media (max-height: 350px) {
+  .login-page {
+    margin-top: 12px;
+  }
 }

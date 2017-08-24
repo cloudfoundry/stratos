@@ -27,7 +27,6 @@
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?page=1&results-per-page=48').respond(200, {guid: {}});
-      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond([]);
 
       // For some tests, the redirected state depends on whether the endpoints dashboard is available
       redirectStateName = $state.get('endpoint.dashboard') ? 'endpoint.dashboard' : 'error-page';
@@ -98,10 +97,11 @@
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/info').respond(200, {});
+        $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         // No endpoints are set up, so we should go to error page
-        $httpBackend.expectGET('/pp/v1/cnsis/registered').respond(200, []);
+        $httpBackend.expectGET('/pp/v1/cnsis/registered');
 
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
@@ -241,7 +241,7 @@
           expect($state.current.name).toBe(redirectStateName);
         });
 
-        it('should not show cluster registration if cluster count > 0', function () {
+        it('should go to endpoints dashboard if cluster count > 0 and none connected', function () {
           var responseData = [
             {id: 1, name: 'name', api_endpoint: {Scheme: 'http', Host: 'api.host.com'}, cnsi_type: 'cf'}
           ];
@@ -249,6 +249,27 @@
             .respond(200, responseData);
           $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+
+          applicationCtrl.login('admin', 'admin');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+
+        it('should not go to endpoints dashboard if cluster count > 0 and at least one connected', function () {
+          var responseData = [
+            {id: 1, name: 'name', api_endpoint: {Scheme: 'http', Host: 'api.host.com'}, cnsi_type: 'cf'}
+          ];
+          $httpBackend.when('GET', '/pp/v1/cnsis')
+            .respond(200, responseData);
+
+          var future = 50000 + (new Date()).getTime() / 1000;
+
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [
+            { account: 'test', token_expiry: future, guid: 'service', cnsi_type: 'cf', name: 'test', api_endpoint: testAptEndpoint }
+          ]);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
@@ -267,7 +288,7 @@
           ]);
         });
 
-        it('should show service instance registration if we dont not have registered services', function () {
+        it('should show service instance registration if we don\'t have registered services', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
@@ -275,10 +296,27 @@
           applicationCtrl.login('dev', 'dev');
           $httpBackend.flush();
 
+          expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
 
-        it('should not show service instance registration if we have registered services', function () {
+        it('should show service instance registration if we don\'t have connected services', function () {
+          var responseData = [
+            {id: 1, name: 'name', api_endpoint: {Scheme: 'http', Host: 'api.host.com'}, cnsi_type: 'cf'}
+          ];
+          $httpBackend.when('GET', '/pp/v1/cnsis')
+            .respond(200, responseData);
+          $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+
+          applicationCtrl.login('dev', 'dev');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+
+        it('should not show service instance registration if we have connected services', function () {
           var future = 50000 + (new Date()).getTime() / 1000;
 
           $httpBackend.when('GET', '/pp/v1/info').respond(200, []);
@@ -289,6 +327,7 @@
           applicationCtrl.login('dev', 'dev');
           $httpBackend.flush();
 
+          expect(applicationCtrl.redirectState).toBe(false);
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
       });

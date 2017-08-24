@@ -40,3 +40,4 @@ deploy/development.rc
 deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
 outputs/
+deploy/cloud-foundry/db-migration/goose

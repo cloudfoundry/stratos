@@ -88,7 +88,6 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get TLSAddress from config")
 	}
 
-
 	if result.CFClient != "portal-proxy" {
 		t.Error("Unable to get CFClient from config")
 	}
@@ -119,13 +118,13 @@ func TestLoadPortalConfig(t *testing.T) {
 func TestLoadDatabaseConfig(t *testing.T) {
 	t.Parallel()
 
-	os.Setenv("PGSQL_USER", "console")
-	os.Setenv("PGSQL_PASSWORD", "console")
-	os.Setenv("PGSQL_DATABASE", "console-db")
-	os.Setenv("PGSQL_HOST", "localhost")
-	os.Setenv("PGSQL_PORT", "5432")
-	os.Setenv("PGSQL_CONNECT_TIMEOUT_IN_SECS", "5")
-	os.Setenv("PGSQL_SSL_MODE", "disable")
+	os.Setenv("DB_USER", "console")
+	os.Setenv("DB_PASSWORD", "console")
+	os.Setenv("DB_DATABASE_NAME", "console-db")
+	os.Setenv("DB_HOST", "localhost")
+	os.Setenv("DB_PORT", "5432")
+	os.Setenv("DB_CONNECT_TIMEOUT_IN_SECS", "5")
+	os.Setenv("DB_SSL_MODE", "disable")
 
 	var dc datastore.DatabaseConfig
 
@@ -139,7 +138,7 @@ func TestLoadDatabaseConfig(t *testing.T) {
 func TestLoadDatabaseConfigWithInvalidSSLMode(t *testing.T) {
 	t.Parallel()
 
-	os.Setenv("PGSQL_SSL_MODE", "invalid.ssl.mode")
+	os.Setenv("DB_SSL_MODE", "invalid.ssl.mode")
 
 	var dc datastore.DatabaseConfig
 

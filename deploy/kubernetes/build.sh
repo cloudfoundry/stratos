@@ -192,6 +192,8 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  # Build merged preflight & proxy image, used when deploying into multi-node k8s cluster without a shared storage backend
+  buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
 }
 
 function buildPostgres {
@@ -276,7 +278,7 @@ buildPreflightJob
 buildPostflightJob
 buildUI
 
-if [ -z ${CONCOURSE_BUILD} ]; then
+if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   # Patch Values.yaml file
   cp values.yaml.tmpl values.yaml
   sed -i -e 's/CONSOLE_VERSION/'"${TAG}"'/g' values.yaml
@@ -292,7 +294,7 @@ echo "Build complete...."
 echo "Registry: ${DOCKER_REGISTRY}"
 echo "Org: ${DOCKER_ORG}"
 echo "Tag: ${TAG}"
-if [ -z ${CONCOURSE_BUILD} ]; then
+if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   echo "To deploy using Helm, execute the following: "
   echo "helm install console -f values.yaml --namespace console --name my-console"
 fi
