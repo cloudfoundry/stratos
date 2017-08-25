@@ -20,10 +20,11 @@ import (
 )
 
 const (
-	VCapApplication     = "VCAP_APPLICATION"
-	CFApiURLOverride    = "CF_API_URL"
-	CFApiForceSecure    = "CF_API_FORCE_SECURE"
-	cfSessionCookieName = "JSESSIONID"
+	VCapApplication        = "VCAP_APPLICATION"
+	CFApiURLOverride       = "CF_API_URL"
+	CFApiForceSecure       = "CF_API_FORCE_SECURE"
+	cfSessionCookieName    = "JSESSIONID"
+	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 )
 
 type CFHosting struct {
@@ -99,6 +100,23 @@ func (ch *CFHosting) Init() error {
 		} else {
 			log.Info("No forced override to HTTPS")
 		}
+
+		disableEndpointDashboard := true
+		if config.IsSet(ForceEndpointDashboard) {
+			// Force the Endpoint Dashboard to be visible?
+			if forceStr, err := config.GetValue(ForceEndpointDashboard); err == nil {
+				if force, err := strconv.ParseBool(forceStr); err == nil {
+					disableEndpointDashboard = !force
+				}
+			}
+		}
+
+		if disableEndpointDashboard {
+			log.Info("Endpoint Dashboard has been DISABLED")
+		} else {
+			log.Info("Endpoint Dashboard has been ENABLED")
+		}
+		ch.portalProxy.GetConfig().PluginConfig["endpointsDashboardDisabled"] = strconv.FormatBool(disableEndpointDashboard)
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")

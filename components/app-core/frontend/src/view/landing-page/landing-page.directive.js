@@ -28,9 +28,10 @@
   function landingPageController($scope, languageService) {
     var vm = this;
     vm.languageService = languageService;
-    vm.languageOptions = vm.languageService.getAll();
-    languageService.getLocale(true).then(function (locale) {
-      vm.currentLanguage = locale;
+    vm.languageOptions = [];
+    languageService.initialised.then(function () {
+      vm.languageOptions = languageService.getAll();
+      vm.currentLanguage = languageService.getLocale();
 
       $scope.$watch(function () {
         return vm.currentLanguage;

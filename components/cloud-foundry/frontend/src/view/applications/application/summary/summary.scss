@@ -122,6 +122,74 @@
   }
 }
 
+.existing-routes-table {
+  &__wrapper {
+    max-height: 350px;
+    overflow: auto;
+  }
+}
+
+.select-route-tabs {
+  form.use-existing-route {
+      position: absolute;
+      right: 0;
+      left: 0;
+      margin-top: -36px;
+    .form-group {
+      input[type=text] {
+        height: 100%;
+        margin-bottom: 0;
+        margin-left: 10px;
+      }
+    }
+  }
+  .control-input {
+    width: 100%;
+  }
+  .nav-tabs {
+    $outer-margin: 39px;
+    margin: 0 (-$outer-margin) 25px (-$outer-margin);
+    padding: 0 $outer-margin;
+    .uib-tab {
+      > a, > a.active {
+        &, &:hover, &:focus {
+          background: none;
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
+  .search-field {
+    border-width: 2px;
+    display: flex;
+    height: auto;
+    width: auto;
+    .control-label {
+      margin-left: -15px;
+    }
+  }
+
+  .select-route {
+    padding-top: 36px;
+    position: relative;
+    table {
+      border-top-color: transparent;
+    }
+    &__cell {
+      width: 60px;
+      position: relative;
+      radio-input {
+        $radio-height: 24px;
+        height: $radio-height;
+        margin-top: -($radio-height / 2);
+        position: absolute;
+        top: 50%;
+      }
+    }
+  }
+}
+
 .add-route-form-section {
   margin: $console-unit-space 0 $console-unit-space * 0.5 0;
   padding: 0;

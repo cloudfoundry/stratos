@@ -16,13 +16,17 @@
          class="endpoint-notification panel panel-default alert"
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
       <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
-      <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
-        <span translate>endpoints-dashboard.intro.start</span>
-        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.intro.link</span>
-        <span translate>endpoints-dashboard.intro.end</span>
+      <div ng-if="endpointsDashboardCtrl.endpointsRegistered && !endpointsDashboardCtrl.endpointsConnected">
+        <div ng-show="endpointsDashboardCtrl.isUserAdmin()" translate>endpoints-dashboard.intro.admin</div>
+        <div ng-show="!endpointsDashboardCtrl.isUserAdmin()" translate>endpoints-dashboard.intro.non-admin</div>
       </div>
-      <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
-          <span translate>endpoints-dashboard.intro.non-admin</span>
+      <div ng-if="!endpointsDashboardCtrl.endpointsRegistered">
+        <!-- If the user is not an admin and there are no connected endpoints they should never reach here-->
+        <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
+          <span translate>endpoints-dashboard.intro.start</span>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.intro.link</span>
+          <span translate>endpoints-dashboard.intro.end</span>
+        </div>
       </div>
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"

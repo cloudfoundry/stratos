@@ -1,55 +1,113 @@
-<div class="add-route">
-  <form name="form.addRouteForm">
-    <fieldset>
-    <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (form.addRouteForm.host.$invalid && form.addRouteForm.host.$dirty)}" focusable-input>
-      <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-label</label>
-      <span class="control-message" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
-        <span translate ng-if="asyncTaskDialogCtrl.context.routeExists()">.host-error-exists</span>
-        <span translate ng-if="form.addRouteForm.host.$error.required">.host-error-required</span>
-      </span>
-      <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
-        ng-required="asyncTaskDialogCtrl.context.isType('http')"
-        ng-change="asyncTaskDialogCtrl.context.resetRouteExists()"
-        placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-placeholder' | translate}}"
-      />
-    </div>
-    <div class="form-group" focusable-input>
-      <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.domain-label</label>
-      <select-input
-        class="form-control"
-        ng-model="asyncTaskDialogCtrl.context.data.domain_guid"
-        input-options="asyncTaskDialogCtrl.context.options.domains"
-        required
-      />
-    </div>
+<uib-tabset class="select-route-tabs col-sm-12"
+    active="asyncTaskDialogCtrl.context.data.activeTab" ng-if="!asyncTaskDialogCtrl.options.spinners.loadingServiceInstances">
+    <uib-tab index="0" heading="{{ 'app.app-info.app-tabs.routes.add.create.title' | translate }}">
+      <div class="add-route">
+        <form name="asyncTaskDialogCtrl.context.data.addRouteForm">
+          <fieldset>
+          <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (asyncTaskDialogCtrl.context.data.addRouteForm.host.$invalid && asyncTaskDialogCtrl.context.data.addRouteForm.host.$dirty)}" focusable-input>
+            <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-label</label>
+            <span class="control-message" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
+              <span translate ng-if="asyncTaskDialogCtrl.context.routeExists()">.host-error-exists</span>
+              <span translate ng-if="asyncTaskDialogCtrl.context.data.addRouteForm.host.$error.required">.host-error-required</span>
+            </span>
+            <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
+              ng-required="asyncTaskDialogCtrl.context.isType('http')"
+              ng-change="asyncTaskDialogCtrl.context.resetRouteExists()"
+              placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.host-placeholder' | translate}}"
+            />
+          </div>
+          <div class="form-group" focusable-input>
+            <label class="control-label" translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.domain-label</label>
+            <select-input
+              class="form-control"
+              ng-model="asyncTaskDialogCtrl.context.data.domain_guid"
+              input-options="asyncTaskDialogCtrl.context.options.domains"
+              required
+            />
+          </div>
 
-    <div ng-if="asyncTaskDialogCtrl.context.isType('http')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
-      <div class="add-route-form-section" translate>.route-options-label</div>
-      <div ng-if="asyncTaskDialogCtrl.context.isType('http')" class="form-group" focusable-input>
-        <label class="control-label" translate>.path-label</label>
-        <div class="add-route-path-prefix">/</div>
-        <input type="text" name="path" class="add-route-path-prefix form-control" ng-model="asyncTaskDialogCtrl.context.data.path"
-              placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.path-placeholder' | translate}}"
-        />
-      </div>
-    </div>
+          <div ng-if="asyncTaskDialogCtrl.context.isType('http')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
+            <div class="add-route-form-section" translate>.route-options-label</div>
+            <div ng-if="asyncTaskDialogCtrl.context.isType('http')" class="form-group" focusable-input>
+              <label class="control-label" translate>.path-label</label>
+              <div class="add-route-path-prefix">/</div>
+              <input type="text" name="path" class="add-route-path-prefix form-control" ng-model="asyncTaskDialogCtrl.context.data.path"
+                    placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.path-placeholder' | translate}}"
+              />
+            </div>
+          </div>
 
-    <div ng-if="asyncTaskDialogCtrl.context.isType('tcp')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
-      <div class="add-route-form-section" translate>.tcp-label</div>
-      <div class="form-group add-route-checkbox" focusable-input>
-        <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.useRandomPort"
-          input-label="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-random-label' | translate}}">
-        </checkbox-input>
+          <div ng-if="asyncTaskDialogCtrl.context.isType('tcp')" translate-namespace="app.app-info.app-tabs.summary.routes-panel.add-route-dialog">
+            <div class="add-route-form-section" translate>.tcp-label</div>
+            <div class="form-group add-route-checkbox" focusable-input>
+              <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.useRandomPort"
+                input-label="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-random-label' | translate}}">
+              </checkbox-input>
+            </div>
+            <div class="form-group" focusable-input>
+              <label class="control-label" translate>.port-label</label>
+              <input ng-disabled="asyncTaskDialogCtrl.context.data.useRandomPort"
+                ng-required="!asyncTaskDialogCtrl.context.data.useRandomPort"
+                type="number" name="port" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.port"
+                placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-placeholder' | translate}}"
+              />
+            </div>
+          </div>
+          </fieldset>
+        </form>
       </div>
-      <div class="form-group" focusable-input>
-        <label class="control-label" translate>.port-label</label>
-        <input ng-disabled="asyncTaskDialogCtrl.context.data.useRandomPort"
-          ng-required="!asyncTaskDialogCtrl.context.data.useRandomPort"
-          type="number" name="port" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.port"
-          placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.port-placeholder' | translate}}"
-        />
+    </uib-tab>
+    <uib-tab ng-if="asyncTaskDialogCtrl.context.data.existingRoutes.length" index="1" heading="{{ 'app.app-info.app-tabs.routes.add.reuse.title' | translate }}">
+      <div ng-if="asyncTaskDialogCtrl.context.data.activeTab === 1" class="select-route"
+        st-table="asyncTaskDialogCtrl.displayedExistingRoutes"
+        st-safe-src="asyncTaskDialogCtrl.context.data.existingRoutes"
+        st-filtered-collection>
+        <form class="use-existing-route">
+          <div class="form-group search-field" focusable-input>
+            <label class="control-label" for="route-search">
+              <i class="material-icons app-icon-lg">search</i>
+            </label>
+            <div class="control-input">
+              <input placeholder="{{'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.search-placeholder' | translate}}" ng-model="asyncTaskDialogCtrl.filter" type="text" class="form-control" id="route-search" st-search="entity.id">
+            </div>
+          </div>
+        </form>
+        <div class="existing-routes-table__wrapper">
+          <table class="table table-outlined existing-routes-table">
+            <thead>
+              <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
+                <th class="select-col"></th>
+                <th translate>.name-label</th>
+                <th translate>.apps-label</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-vertical-middle" ng-repeat="route in filteredCollection | limitTo:asyncTaskDialogCtrl.context.options.tableLimit">
+                <td class="select-route__cell">
+                  <radio-input ng-model="asyncTaskDialogCtrl.context.data.selectedExistingRoute"
+                    input-value="route" required>
+                  </radio-input>
+                </td>
+                <td>{{ route.entity.id }}</td>
+                <td>{{ route.entity.apps.length || 0 }}</td>
+              </tr>
+              <tr ng-if="filteredCollection.length === 0">
+                <td colspan="3">
+                  <span translate>app.app-info.app-tabs.summary.routes-panel.add-route-dialog.no-routes-found</span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot ng-show="asyncTaskDialogCtrl.context.options.tableLimit < filteredCollection.length">
+              <tr>
+                <td colspan="3" class="text-center">
+                  <a ng-click="asyncTaskDialogCtrl.context.options.tableLimit = filteredCollection.length">
+                    <span translate>cf.roles.assign-user-roles.step1.show-all-users</span> ({{ filteredCollection.length }})
+                  </a>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
-    </div>
-    </fieldset>
-  </form>
-</div>
+    </uib-tab>
+</uib-tabset>
