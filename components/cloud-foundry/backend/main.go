@@ -59,8 +59,75 @@ func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *CloudFoundrySpecification) Init() error {
-	// No-op
+
+	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
+
+	fmt.Println("!!!!!", cfAPI)
+
+	if (cfAPI == "") {
+		return nil
+	}
+	fmt.Printf("2!%s!", cfCnsi)
+	fmt.Printf("2!%s!", cfCnsi.CNSIType)
+
+	if cfCnsi.CNSIType != "" {
+		fmt.Println("4!!!!!", cfCnsi)
+		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
+	} else {
+		fmt.Println("5!!!!!", cfCnsi)
+		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
+
+		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
+
+		// Auto-register the Cloud Foundry
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint("Cloud Foundry", cfAPI, true, cfEndpointSpec.Info)
+		if err != nil {
+			log.Fatal("Could not auto-register Cloud Foundry endpoint", err)
+			return nil
+		}
+
+		if c.portalProxy.GetConfig().CloudFoundryInfo != nil {
+			c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
+		}
+
+	}
+
+	// Add login hook to automatically connect to the Cloud Foundry when the user logs in
+	c.portalProxy.GetConfig().LoginHook = c.cfLoginHook
+
 	return nil
+}
+
+func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
+
+	cfAPI, cfCnsi, _ := c.fetchAutoRegisterEndpoint()
+	if cfCnsi.CNSIType != "" {
+		log.Infof("Found existing cloud foundry endpoint matching %s. Will attempt to auto-connect", cfAPI)
+
+		cnsiGUID := context.Param("cnsiGuid")
+		userGUID := context.Get("user_id").(string)
+		cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID)
+		if ok && (cfTokenRecord.AuthToken == "" && cfTokenRecord.RefreshToken == ""){
+			// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
+			log.Infof("User previsouly disconnected, cancelling auto-connect to auto-reg cloud foundry %s. ", cfAPI)
+		} else {
+			_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
+			return err;
+		}
+	}
+
+	return nil
+}
+
+func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, interfaces.CNSIRecord, error) {
+	cfAPI := c.portalProxy.GetConfig().AutoRegisterCFUrl
+
+	if (cfAPI == "") {
+		return "", interfaces.CNSIRecord{}, nil
+	}
+	// Error is populated if there was an error OR there was no record
+	cfCnsi, err := c.portalProxy.GetCNSIRecordByEndpoint(cfAPI)
+	return cfAPI, cfCnsi, err
 }
 
 func (c *CloudFoundrySpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {

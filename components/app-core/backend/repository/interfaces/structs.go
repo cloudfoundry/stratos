@@ -93,6 +93,7 @@ type PortalConfig struct {
 	EncryptionKeyVolume         string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool

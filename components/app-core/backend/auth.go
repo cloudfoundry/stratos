@@ -258,12 +258,42 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	userID, err := p.GetSessionStringValue(c, "user_id")
+	userGUID, err := p.GetSessionStringValue(c, "user_id")
+	fmt.Println("logoutOfCNSI: : userGUID", userGUID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
-	p.deleteCNSIToken(cnsiGUID, userID)
+	userTokenInfo := userTokenInfo{
+		UserGUID: userGUID,
+	}
+
+	//TODO: CLOUD FOUNDRY SPECFICI logout (?) and conditional on if endpoint == CORE CF
+	p.saveCNSIToken(cnsiGUID, userTokenInfo, "", "")
+	//p.deleteCNSIToken(cnsiGUID, userID)
+
+
+
+	//p.GetCNSITokenRecord(cnsiGUID, userID)
+	//_, ok := p.GetCNSITokenRecord(cnsiGUID, userID)
+	//if !ok {
+	//	return interfaces.NewHTTPShadowError(
+	//		http.StatusBadRequest,
+	//		"Missing CNSI token, unable to log out",
+	//		"Attempt to delete a cnsi token that does not exist")
+	//}
+	//cfTokenRecord = interfaces.TokenRecord{}
+
+	//cnsiID string, u userTokenInfo, authTok string, refreshTok string
+
+	//type userTokenInfo struct {
+	//	UserGUID    string   `json:"user_id"`
+	//	UserName    string   `json:"user_name"`
+	//	TokenExpiry int64    `json:"exp"`
+	//	Scope       []string `json:"scope"`
+	//}
+
+
 
 	return nil
 }
