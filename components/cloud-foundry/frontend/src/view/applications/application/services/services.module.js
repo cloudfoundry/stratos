@@ -30,9 +30,9 @@
   /**
    * @name ApplicationServicesController
    * @constructor
-   * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @property {object} $scope - the Angular $scope service
    * @property {cloud-foundry.model.space} model - the Cloud Foundry space model
    * @property {cloud-foundry.model.application} model - the Cloud Foundry application model
    * @property {string} id - the application GUID

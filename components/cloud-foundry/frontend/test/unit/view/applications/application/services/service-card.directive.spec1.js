@@ -11,6 +11,7 @@
     beforeEach(module('console-app'));
 
     function initController($injector, mockAuthModel, role) {
+      console.log('Init'); // eslint-disable-line
       $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
@@ -85,85 +86,27 @@
           $compile(element)($scope);
 
           $scope.$apply();
+          $httpBackend.flush();
 
           serviceCardCtrl = element.controller('serviceCard');
         });
 
-        it('detach', function () {
-          it('should call unbindServiceFromApp', function () {
-            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
-            serviceCardCtrl.detach({
-              entity: {
-                service_bindings: [{
-                  entity: {
-                    app_guid: APP_GUID
-                  }
-                }]
-              }
-            });
-            expect(cfServiceInstanceService.unbindServiceFromApp)
-              .toHaveBeenCalled();
-            var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
-            expect(args[0]).toBe('guid');
-            expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
-            expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
-            expect(args[3]).toBe('instance_123');
+        it('will detach', function () {
+          spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
+          serviceCardCtrl.detach({
+            entity: {
+              service_bindings: [{
+                entity: {
+                  app_guid: APP_GUID
+                }
+              }]
+            }
           });
+          expect(cfServiceInstanceService.unbindServiceFromApp)
+            .toHaveBeenCalled();
         });
       });
-    });
-    describe('with authModel for admin', function () {
-      beforeEach(inject(function ($injector) {
-        initController($injector, false, 'admin');
-      }));
 
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
-      describe('with defaults', function () {
-        var element;
-
-        beforeEach(function () {
-          var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
-            '</service-card>';
-          element = angular.element(markup);
-          $compile(element)($scope);
-
-          $scope.$apply();
-          $httpBackend.flush();
-
-          serviceCardCtrl = element.controller('serviceCard');
-        });
-      });
-    });
-
-    describe('with authModel for non admin user', function () {
-      beforeEach(inject(function ($injector) {
-        initController($injector, false, 'space_manager');
-      }));
-
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
-      describe('with defaults', function () {
-        var element;
-
-        beforeEach(function () {
-          var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
-            '</service-card>';
-          element = angular.element(markup);
-          $compile(element)($scope);
-
-          $scope.$apply();
-          $httpBackend.flush();
-
-          serviceCardCtrl = element.controller('serviceCard');
-        });
-      });
     });
   });
 })();

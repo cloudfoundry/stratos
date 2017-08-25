@@ -83,7 +83,9 @@
           serviceInstance.entity.name,
           function () {
             serviceInstance.entity.service_bindings = [];
-            cb(serviceInstance);
+            if (cb) {
+              return cb(serviceInstance);
+            }
           }
         );
       }
