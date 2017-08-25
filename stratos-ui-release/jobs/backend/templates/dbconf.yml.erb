@@ -1,0 +1,3 @@
+bosh-mysql:
+    driver: mysql
+    open: <%= p('stratos_ui.backend.mysql_user') %>:<%= p('stratos_ui.backend.mysql_user_password') %>@tcp(<%= p('stratos_ui.backend.mysql_host') %>:<%= p('stratos_ui.backend.mysql_port') %>)/<%= p('stratos_ui.backend.mysql_db') %>?parseTime=true

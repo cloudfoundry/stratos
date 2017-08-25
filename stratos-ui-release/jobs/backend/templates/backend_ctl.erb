@@ -24,9 +24,8 @@ case $1 in
     pid_guard "$PIDFILE" "Nginx"
 
     cp -r $CONFIG_DIR/* /var/vcap/packages/backend/
+    cp -f $CONFIG_DIR/dbconf.yml /var/vcap/packages/backend/deploy/db/dbconf.yml
     cd /var/vcap/packages/backend/
-    mkdir -p deploy/db
-    touch deploy/db/sqlite_schema.sql
     
     chmod +x portal-proxy
     echo $$ > "$PIDFILE"

@@ -4,6 +4,7 @@ templates:
     config.properties.erb: config/config.properties
     ssl_cert.erb: config/dev-certs/pproxy.crt
     ssl_cert_key.erb: config/dev-certs/pproxy.key
+    dbconf.yml.erb: /config/dbconf.yml
     backend_ctl.erb: bin/backend_ctl
     pre-start.erb: bin/pre-start
     post-deploy.erb: bin/post-deploy
@@ -47,7 +48,7 @@ properties:
         description: "Use mysql, need to specify relevant mysql settings"
     stratos_ui.backend.mysql_user:
         description: "mysql User"
-    stratos_ui.backend.mysql_user_passwd:
+    stratos_ui.backend.mysql_user_password:
         description: "mysql user password"
     stratos_ui.backend.mysql_db:
         description: "Stratos UI Console DB name"

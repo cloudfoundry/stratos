@@ -186,7 +186,7 @@ instance_groups:
           mysql_user: stratos
           mysql_admin_user: root
           mysql_admin_password: changeme
-          mysql_passwd: strat0s
+          mysql_user_password: strat0s
           mysql_db: stratos-db
           mysql_host: 10.4.21.245
           mysql_port: 3306
