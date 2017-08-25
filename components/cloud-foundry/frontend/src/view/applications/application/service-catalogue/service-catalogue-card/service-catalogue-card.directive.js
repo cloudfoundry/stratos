@@ -35,7 +35,6 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
-   * @param {object} cfServiceInstanceService - the service instance service
    * @property {app.utils.appEventService} appEventService - the event management service
    * @property {object} cfServiceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model

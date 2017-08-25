@@ -33,11 +33,13 @@
    * @description Controller for service card directive
    * @constructor
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $q - the Angular $q service
    * @param {object} cfServiceInstanceService - the service instance service
    * @property {array} actions - the actions that can be performed from vm.service card
    */
   function ServiceCardController(
     $scope,
+    $q,
     cfServiceInstanceService
   ) {
     var vm = this;
@@ -49,7 +51,7 @@
       {
         name: 'app.app-info.app-tabs.services.card.actions.detach',
         execute: function () {
-          detach(vm.service, function (result) {
+          detach(vm.service).then(function (result) {
             vm.service = result;
           });
         }
@@ -67,29 +69,31 @@
     /**
      * @function detach
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @param serviceInstance The service instance to be detached from the application
      * @description Detach service instance from app
      * @returns {undefined}
      */
-    function detach(serviceInstance, cb) {
+    function detach(serviceInstance) {
       var serviceBinding = serviceInstance.entity.service_bindings
       ? _.find(serviceInstance.entity.service_bindings, function (binding) {
         return vm.app.summary.guid === binding.entity.app_guid;
+
       }) : null;
       if (serviceBinding) {
-        return cfServiceInstanceService.unbindServiceFromApp(
+        var deferred = $q.defer();
+        cfServiceInstanceService.unbindServiceFromApp(
           vm.cnsiGuid,
           vm.app.summary.guid,
           serviceBinding.metadata.guid,
           serviceInstance.entity.name,
           function () {
             serviceInstance.entity.service_bindings = [];
-            if (cb) {
-              return cb(serviceInstance);
-            }
+            return deferred.resolve(serviceInstance);
           }
         );
+        return deferred.promise;
       }
-      return cb(serviceInstance);
+      return $q.resolve(serviceInstance);
     }
 
     /**
