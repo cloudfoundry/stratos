@@ -19,3 +19,12 @@ mv outputs/* .
 rm -rf outputs
 
 
+# The following packages are required for the post-deploy task
+mkdir go
+export GOPATH=${PWD}/go
+
+# Fetch libraries
+go get bitbucket.org/liamstask/goose/cmd/goose
+go get bitbucket.org/liamstask/goose/lib/goose
+go get github.com/go-sql-driver/mysql
+

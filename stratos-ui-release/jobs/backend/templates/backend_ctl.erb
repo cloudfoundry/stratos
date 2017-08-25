@@ -24,7 +24,14 @@ case $1 in
     pid_guard "$PIDFILE" "Nginx"
 
     cp -r $CONFIG_DIR/* /var/vcap/packages/backend/
+
+    <% if p('stratos_ui.backend.use_mysql') == true %>
     cp -f $CONFIG_DIR/dbconf.yml /var/vcap/packages/backend/deploy/db/dbconf.yml
+    <% end %>
+
+    <% if p('stratos_ui.backend.use_sqlite') == true %>
+    touch deploy/db/sqlite_schema.sql
+    <% end %>
     cd /var/vcap/packages/backend/
     
     chmod +x portal-proxy

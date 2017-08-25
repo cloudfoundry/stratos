@@ -181,15 +181,15 @@ instance_groups:
           encryption_key_volume: /var/vcap/store/backend
           encryption_key_filename: key
           session_store_secret: foo
-          use_mysql: true
-          use_sqlite: false
-          mysql_user: stratos
-          mysql_admin_user: root
-          mysql_admin_password: changeme
-          mysql_user_password: strat0s
-          mysql_db: stratos-db
-          mysql_host: 10.4.21.245
-          mysql_port: 3306
+          use_mysql: false
+          use_sqlite: true
+          #mysql_user: 
+          #mysql_admin_user: 
+          #mysql_admin_password: 
+          #mysql_user_password: 
+          #mysql_db: 
+          #mysql_host: 
+          #mysql_port:
   networks:
   - name: stratos-net
     static_ips: [10.0.16.103]

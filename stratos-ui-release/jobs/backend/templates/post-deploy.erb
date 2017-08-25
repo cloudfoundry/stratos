@@ -9,14 +9,8 @@ apt-get install -y git mariadb-client
 
 echo "PWD: $PWD"
 export GOROOT="/var/vcap/packages/golang/"
-export GOPATH="/tmp"
+export GOPATH="/var/vcap/packages/backend/go"
 export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-
-echo "Installing Goose and dependant libraries"
-go get bitbucket.org/liamstask/goose/cmd/goose
-go get bitbucket.org/liamstask/goose/lib/goose
-go get github.com/go-sql-driver/mysql
-
 
 function execStatement {
     stmt=$1
