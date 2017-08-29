@@ -69,7 +69,7 @@
     /**
      * @function detach
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
-     * @param serviceInstance The service instance to be detached from the application
+     * @param {object} serviceInstance The service instance to be detached from the application
      * @description Detach service instance from app
      * @returns {undefined}
      */

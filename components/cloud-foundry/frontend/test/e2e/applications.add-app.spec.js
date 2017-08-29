@@ -16,8 +16,6 @@
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
   var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -244,8 +242,6 @@
     });
 
     describe('check application on the cf endpoints dashboard -', function () {
-
-      var serviceName = appSetupHelper.getServiceName(testTime, true);
 
       beforeAll(function () {
         // Load the app again - keep the cookies so we don't have to login
