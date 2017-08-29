@@ -15,7 +15,7 @@
   var Q = require('q');
   var _ = require('lodash');
 
-  describe('CF - Manage Organizations and Spaces', function () {
+  fdescribe('CF - Manage Organizations and Spaces', function () {
 
     var cfFromConfig = cfHelpers.getCfs().cf1;
     var testOrgName = cfHelpers.getCustomerOrgSpaceLabel(null, 'org');
