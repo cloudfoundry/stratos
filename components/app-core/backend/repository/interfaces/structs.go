@@ -36,6 +36,7 @@ type TokenRecord struct {
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
+	Disconnected bool
 }
 
 type CFInfo struct {

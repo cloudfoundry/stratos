@@ -100,7 +100,7 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 	log.Debugf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
 
 	// Get the auth token for the CNSI from the DB, refresh it if it's expired
-	if tokenRecord, ok := c.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID); ok {
+	if tokenRecord, ok := c.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID); ok && !tokenRecord.Disconnected {
 		ac.authToken = "bearer " + tokenRecord.AuthToken
 		expTime := time.Unix(tokenRecord.TokenExpiry, 0)
 		if expTime.Before(time.Now()) {

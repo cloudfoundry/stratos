@@ -62,19 +62,13 @@ func (c *CloudFoundrySpecification) Init() error {
 
 	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
 
-	fmt.Println("!!!!!", cfAPI)
-
 	if (cfAPI == "") {
 		return nil
 	}
-	fmt.Printf("2!%s!", cfCnsi)
-	fmt.Printf("2!%s!", cfCnsi.CNSIType)
 
 	if cfCnsi.CNSIType != "" {
-		fmt.Println("4!!!!!", cfCnsi)
 		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
 	} else {
-		fmt.Println("5!!!!!", cfCnsi)
 		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
 
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
@@ -104,10 +98,15 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	if cfCnsi.CNSIType != "" {
 		log.Infof("Found existing cloud foundry endpoint matching %s. Will attempt to auto-connect", cfAPI)
 
-		cnsiGUID := context.Param("cnsiGuid")
-		userGUID := context.Get("user_id").(string)
-		cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID)
-		if ok && (cfTokenRecord.AuthToken == "" && cfTokenRecord.RefreshToken == ""){
+		userGUID, err := c.portalProxy.GetSessionStringValue(context, "user_id")
+		if err != nil {
+			return fmt.Errorf("Could not determine user_id from session: %s", err)
+		}
+
+		cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
+		fmt.Println("cfTokenRecord: ", cfTokenRecord)//TODO: RC REMOVE
+		fmt.Println("ok: ", ok)//TODO: RC REMOVE
+		if ok && cfTokenRecord.Disconnected {
 			// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
 			log.Infof("User previsouly disconnected, cancelling auto-connect to auto-reg cloud foundry %s. ", cfAPI)
 		} else {

@@ -169,7 +169,9 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 	u.UserGUID = userID
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	fmt.Println("DoLoginToCNSI LOGGING IN!!!!")
+
+	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
 
 	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
 
@@ -259,41 +261,38 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	}
 
 	userGUID, err := p.GetSessionStringValue(c, "user_id")
-	fmt.Println("logoutOfCNSI: : userGUID", userGUID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+		return fmt.Errorf("Could not find correct session value: %s", err)
 	}
 
-	userTokenInfo := userTokenInfo{
-		UserGUID: userGUID,
+	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
+	if err != nil {
+		return fmt.Errorf("Unable to load CNSI record: %s", err)
 	}
 
-	//TODO: CLOUD FOUNDRY SPECFICI logout (?) and conditional on if endpoint == CORE CF
-	p.saveCNSIToken(cnsiGUID, userTokenInfo, "", "")
-	//p.deleteCNSIToken(cnsiGUID, userID)
+	// If cnsi is cf AND cf is auto-register only clear the entry
+	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
+		log.Info("Setting token record as disconnected")
 
+		cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
+		if !ok {
+			return fmt.Errorf("Unable to retrieve CNSI token record: %s", err)
+		}
 
+		userTokenInfo := userTokenInfo{
+			UserGUID: userGUID,
+			TokenExpiry: cfTokenRecord.TokenExpiry,
+		}
 
-	//p.GetCNSITokenRecord(cnsiGUID, userID)
-	//_, ok := p.GetCNSITokenRecord(cnsiGUID, userID)
-	//if !ok {
-	//	return interfaces.NewHTTPShadowError(
-	//		http.StatusBadRequest,
-	//		"Missing CNSI token, unable to log out",
-	//		"Attempt to delete a cnsi token that does not exist")
-	//}
-	//cfTokenRecord = interfaces.TokenRecord{}
-
-	//cnsiID string, u userTokenInfo, authTok string, refreshTok string
-
-	//type userTokenInfo struct {
-	//	UserGUID    string   `json:"user_id"`
-	//	UserName    string   `json:"user_name"`
-	//	TokenExpiry int64    `json:"exp"`
-	//	Scope       []string `json:"scope"`
-	//}
-
-
+		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, cfTokenRecord.AuthToken, cfTokenRecord.RefreshToken, true); err != nil {
+			return fmt.Errorf("Unable to clear token: %s", err)
+		}
+	} else {
+		log.Info("Deleting Token")
+		if err := p.deleteCNSIToken(cnsiGUID, userGUID); err != nil {
+			return fmt.Errorf("Unable to delete token: %s", err)
+		}
+	}
 
 	return nil
 }
@@ -431,12 +430,13 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
 	log.Debug("saveCNSIToken")
 	tokenRecord := interfaces.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
+		Disconnected: disconnect,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)

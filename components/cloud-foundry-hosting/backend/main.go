@@ -155,17 +155,8 @@ func (ch *CFHosting) Init() error {
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
-
 		log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
 		ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
-
-		//var cfCnsi interfaces.CNSIRecord
-		//cfCnsi, err = ch.portalProxy.GetCNSIRecordByEndpoint(appData.API)
-		//if err != nil {
-		//	return fmt.Errorf("Failed to discover if an endpoint for hosting cf exists due to %s", err)
-		//} else if cfCnsi.CNSIType == "" {
-		//	return fmt.Errorf("Endpoint of hosting cf has not been registered or registration failed")
-		//}
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{

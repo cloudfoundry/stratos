@@ -98,7 +98,7 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 
 	u.UserGUID = userGUID
 
-	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, t.Disconnected)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}

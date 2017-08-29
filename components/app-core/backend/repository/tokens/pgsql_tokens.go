@@ -26,13 +26,17 @@ var updateUAAToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
 									WHERE user_guid = $4 AND token_type = $5`
 
-var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
+var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected
 										FROM tokens
 										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
+var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected
+										FROM tokens
+										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = 0`
+
+var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, disconnected
 														FROM tokens
-														WHERE token_type = 'cnsi' AND user_guid = $1`
+														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = 0`
 
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
@@ -42,8 +46,8 @@ var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, aut
 										VALUES ($1, $2, $3, $4, $5, $6)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3
-										WHERE cnsi_guid = $4 AND user_guid = $5 AND token_type = $6`
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4
+										WHERE cnsi_guid = $5 AND user_guid = $6 AND token_type = $7`
 
 var deleteCNSIToken = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
@@ -190,6 +194,7 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	return *tr, nil
 }
 
+
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
 	log.Println("SaveCNSIToken")
@@ -229,6 +234,11 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return err
 	}
 
+	//localDisconnect := false
+	//if (disconnect != nil && disconnect == true) {
+	//	localDisconnect = true
+	//}
+
 	// Is there an existing token?
 	var count int
 	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
@@ -252,7 +262,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	default:
 
 		log.Println("Existing CNSI token found - attempting update.")
-		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, cnsiGUID, userGUID, "cnsi")
+		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, cnsiGUID, userGUID, "cnsi")
 		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Printf(msg, err)
@@ -278,9 +288,82 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	return nil
 }
 
+//func (p *PgsqlTokenRepository) ClearCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) error {
+//	log.Println("SaveCNSIToken")
+//	if cnsiGUID == "" {
+//		msg := "Unable to clear CNSI Token without a valid CNSI GUID."
+//		log.Println(msg)
+//		return errors.New(msg)
+//	}
+//
+//	if userGUID == "" {
+//		msg := "Unable to clear CNSI Token without a valid User GUID."
+//		log.Println(msg)
+//		return errors.New(msg)
+//	}
+//
+//
+//	// Is there an existing token?
+//	var count int
+//	err := p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
+//	if err != nil {
+//		log.Printf("Unknown error attempting to find CNSI token: %v", err)
+//	} else if (count == 0) {
+//		msg := "CNSI Token does not exist, cannot clear"
+//		log.Println(msg)
+//		return errors.New(msg)
+//	}
+//
+//
+//	log.Println("Encrypting Auth Token")
+//	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, "cleared")
+//	if err != nil {
+//		return err
+//	}
+//
+//	log.Println("Encrypting Refresh Token")
+//	ciphertextRefreshToken, err := crypto.EncryptToken(encryptionKey, "cleared")
+//	if err != nil {
+//		return err
+//	}
+//
+//	log.Println("Existing CNSI token found - attempting update.")
+//	result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, 0, cnsiGUID, userGUID, "cnsi")
+//	if err != nil {
+//		msg := "Unable to CLEAR CNSI token: %v"
+//		log.Printf(msg, err)
+//		return fmt.Errorf(msg, err)
+//	}
+//
+//	rowsUpdates, err := result.RowsAffected()
+//	if err != nil {
+//		return errors.New("Unable to CLEAR CNSI token: could not determine number of rows that were updated")
+//	}
+//
+//	if rowsUpdates < 1 {
+//		return errors.New("Unable to CLEAR CNSI token: no rows were updated")
+//	}
+//
+//	if rowsUpdates > 1 {
+//		log.Warn("CLEAR CNSI token: More than 1 row was updated (expected only 1)")
+//	}
+//
+//	log.Println("CNSI token CLEAR complete")
+//
+//	return nil
+//}
+
 // FindCNSIToken - retrieve a CNSI (UAA) token from the datastore
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
-	log.Println("FindCNSIToken")
+	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, false)
+}
+
+func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, true)
+}
+
+func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte, includeDisconnected bool) (interfaces.TokenRecord, error) {
+	log.Println("findCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to find CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
@@ -298,9 +381,16 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            int64
+		disconnected           bool
 	)
 
-	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+	var err error
+	if (includeDisconnected) {
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
+	} else {
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
+	}
+
 	if err != nil {
 		msg := "Unable to Find CNSI token: %v"
 		log.Printf(msg, err)
@@ -324,9 +414,11 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	tr.TokenExpiry = tokenExpiry
+	tr.Disconnected = disconnected
 
 	return *tr, nil
 }
+
 
 // ListCNSITokensForUser - <TBD>
 func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*interfaces.TokenRecord, error) {
@@ -360,9 +452,10 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 			ciphertextAuthToken    []byte
 			ciphertextRefreshToken []byte
 			tokenExpiry            int64
+			disconnected           bool
 		)
 
-		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
 		if err != nil {
 			msg := "Unable to scan token records: %v"
 			log.Printf(msg, err)
@@ -385,6 +478,7 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		tr.AuthToken = plaintextAuthToken
 		tr.RefreshToken = plaintextRefreshToken
 		tr.TokenExpiry = tokenExpiry
+		tr.Disconnected = disconnected
 
 		tokenRecordList = append(tokenRecordList, tr)
 	}

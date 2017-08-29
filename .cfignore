@@ -1,5 +1,11 @@
 # These folders are ignored when pushing the console to CF
-node_modules/
 bower_components/
-dist/
 components/*/backend/vendor
+dev-certs/
+dist/
+docs/
+node_modules/
+out/
+outputs/
+tmp/
+tools/

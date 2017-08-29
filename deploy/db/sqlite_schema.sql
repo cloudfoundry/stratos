@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS tokens (
   auth_token    BYTEA       NOT NULL,
   refresh_token BYTEA       NOT NULL,
   token_expiry  BIGINT      NOT NULL,
+  disconnected  BOOLEAN     NOT NULL DEFAULT 0,
   last_updated  TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
