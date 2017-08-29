@@ -4,5 +4,8 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  proxyAPIVersion: 'v1',
+  cfAPIVersion: 'v2',
+  baseURL: 'https://localhost:3100'
 };
