@@ -32,11 +32,11 @@ var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnecte
 
 var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected
 										FROM tokens
-										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = 0`
+										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = 'f'`
 
 var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, disconnected
 														FROM tokens
-														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = 0`
+														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = 'f'`
 
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
@@ -73,6 +73,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	insertUAAToken = datastore.ModifySQLStatement(insertUAAToken, databaseProvider)
 	updateUAAToken = datastore.ModifySQLStatement(updateUAAToken, databaseProvider)
 	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
+	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
 	listCNSITokensForUser = datastore.ModifySQLStatement(listCNSITokensForUser, databaseProvider)
 	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
@@ -234,11 +235,6 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return err
 	}
 
-	//localDisconnect := false
-	//if (disconnect != nil && disconnect == true) {
-	//	localDisconnect = true
-	//}
-
 	// Is there an existing token?
 	var count int
 	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
@@ -288,72 +284,6 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	return nil
 }
 
-//func (p *PgsqlTokenRepository) ClearCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) error {
-//	log.Println("SaveCNSIToken")
-//	if cnsiGUID == "" {
-//		msg := "Unable to clear CNSI Token without a valid CNSI GUID."
-//		log.Println(msg)
-//		return errors.New(msg)
-//	}
-//
-//	if userGUID == "" {
-//		msg := "Unable to clear CNSI Token without a valid User GUID."
-//		log.Println(msg)
-//		return errors.New(msg)
-//	}
-//
-//
-//	// Is there an existing token?
-//	var count int
-//	err := p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
-//	if err != nil {
-//		log.Printf("Unknown error attempting to find CNSI token: %v", err)
-//	} else if (count == 0) {
-//		msg := "CNSI Token does not exist, cannot clear"
-//		log.Println(msg)
-//		return errors.New(msg)
-//	}
-//
-//
-//	log.Println("Encrypting Auth Token")
-//	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, "cleared")
-//	if err != nil {
-//		return err
-//	}
-//
-//	log.Println("Encrypting Refresh Token")
-//	ciphertextRefreshToken, err := crypto.EncryptToken(encryptionKey, "cleared")
-//	if err != nil {
-//		return err
-//	}
-//
-//	log.Println("Existing CNSI token found - attempting update.")
-//	result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, 0, cnsiGUID, userGUID, "cnsi")
-//	if err != nil {
-//		msg := "Unable to CLEAR CNSI token: %v"
-//		log.Printf(msg, err)
-//		return fmt.Errorf(msg, err)
-//	}
-//
-//	rowsUpdates, err := result.RowsAffected()
-//	if err != nil {
-//		return errors.New("Unable to CLEAR CNSI token: could not determine number of rows that were updated")
-//	}
-//
-//	if rowsUpdates < 1 {
-//		return errors.New("Unable to CLEAR CNSI token: no rows were updated")
-//	}
-//
-//	if rowsUpdates > 1 {
-//		log.Warn("CLEAR CNSI token: More than 1 row was updated (expected only 1)")
-//	}
-//
-//	log.Println("CNSI token CLEAR complete")
-//
-//	return nil
-//}
-
-// FindCNSIToken - retrieve a CNSI (UAA) token from the datastore
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, false)
 }

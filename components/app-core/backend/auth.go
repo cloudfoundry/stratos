@@ -169,8 +169,6 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 	u.UserGUID = userID
 
-	fmt.Println("DoLoginToCNSI LOGGING IN!!!!")
-
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
 
 	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)

@@ -409,22 +409,3 @@ func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) err
 
 	return nil
 }
-
-//func (p *portalProxy) clearCNSITokenRecord(cnsiGUID string, userGUID string) error {
-//	log.Debug("clearCNSITokenRecord")
-//	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
-//	if err != nil {
-//		msg := "Unable to establish a database reference: '%v'"
-//		log.Errorf(msg, err)
-//		return fmt.Errorf(msg, err)
-//	}
-//
-//	err = tokenRepo.ClearCNSIToken(cnsiGUID, userGUID, p.Config.EncryptionKeyInBytes)
-//	if err != nil {
-//		msg := "Unable to clear a CNSI Token: %v"
-//		log.Errorf(msg, err)
-//		return fmt.Errorf(msg, err)
-//	}
-//
-//	return nil
-//}

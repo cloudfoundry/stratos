@@ -104,8 +104,6 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 		}
 
 		cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
-		fmt.Println("cfTokenRecord: ", cfTokenRecord)//TODO: RC REMOVE
-		fmt.Println("ok: ", ok)//TODO: RC REMOVE
 		if ok && cfTokenRecord.Disconnected {
 			// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
 			log.Infof("User previsouly disconnected, cancelling auto-connect to auto-reg cloud foundry %s. ", cfAPI)
