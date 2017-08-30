@@ -205,7 +205,7 @@
   }
 
   function endpointActionMenu(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
+    return helpers.getTableCellAt(getEndpointTable(), row, 5).element(by.css('actions-menu'));
   }
 
   function endpointUrl(row) {

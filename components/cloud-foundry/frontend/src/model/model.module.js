@@ -10,7 +10,7 @@
 
   /**
    * @name interceptor
-   * @description A $http interceptor that adds `x-cnap-cnsi-list`
+   * @description A $http interceptor that adds `x-cap-cnsi-list`
    * header to each request if the CNSI guid is present in the
    * URL (route).
    * @param {object} $stateParams - the UI router $stateParams service
@@ -27,8 +27,8 @@
       }
 
       var cnsiGuid = $stateParams.cnsiGuid;
-      if (angular.isUndefined(config.headers['x-cnap-cnsi-list']) && angular.isDefined(cnsiGuid)) {
-        config.headers['x-cnap-cnsi-list'] = cnsiGuid;
+      if (angular.isUndefined(config.headers['x-cap-cnsi-list']) && angular.isDefined(cnsiGuid)) {
+        config.headers['x-cap-cnsi-list'] = cnsiGuid;
       }
       return config;
     }

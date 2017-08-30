@@ -40,7 +40,7 @@ const UAAAdminIdentifier = "stratos.admin"
 const CFAdminIdentifier = "cloud_controller.admin"
 
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
-const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
+const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")

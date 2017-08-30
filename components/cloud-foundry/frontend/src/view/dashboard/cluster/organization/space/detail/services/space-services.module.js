@@ -60,11 +60,15 @@
 
     appUtilsService.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.services', $state, init);
 
+    function setServiceInstances(serviceInstances) {
+      vm.serviceInstances = _.sortBy(serviceInstances, function (o) { return o.entity.name.toLowerCase(); });
+    }
+
     function init() {
       if (angular.isUndefined(spaceDetail().instances)) {
         return update();
       }
-      vm.serviceInstances = spaceDetail().instances;
+      setServiceInstances(spaceDetail().instances);
       return $q.resolve();
     }
 
@@ -72,7 +76,7 @@
       return spaceModel.listAllServiceInstancesForSpace(vm.clusterGuid, vm.spaceGuid, {
         return_user_provided_service_instances: true
       }).then(function () {
-        vm.serviceInstances = spaceDetail().instances;
+        setServiceInstances(spaceDetail().instances);
         if (serviceInstance) {
           updateActions([serviceInstance]);
           spaceModel.updateServiceInstanceCount(vm.clusterGuid, vm.spaceGuid, _.keys(spaceDetail().instances).length);

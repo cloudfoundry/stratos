@@ -37,23 +37,24 @@
           "project-label": "Project",
           "project-placeholder": "suse/stratos-ui",
           "project-not-found": "Project not found",
-          "branch-label": "Project Branch",
+          "branch-label": "Branch",
           "branch-placeholder": "Select Branch",
           "branch-last-commit": "",
           "branch-last-commit-date": "",
           "branch-last-commit-committer": ""
         },
         "gitUrl": {
-          "gitUrl": "Git URL",
+          "gitUrl": "Public Git URL",
           "url": {
             "url": "URL",
-            "placeholder": "URL of git repository",
+            "placeholder": "HTTPS URL of git repository",
             "error-required": "URL is required",
             "error-pattern": "Invalid URL"
           },
           "branch": {
-            "branch": "Branch Name (optional)",
-            "placeholder": "Branch name will decrease clone time"
+            "branch": "Branch Name",
+            "placeholder": "Branch name will decrease clone time",
+            "error-required": "Branch is required"
           }
         }
       },
@@ -96,7 +97,7 @@
     },
     "socket": {
       "event-type": {
-        "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (invalid branch), please ensure git details are correct",
+        "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (no branch supplied), please ensure git details are correct",
         "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure git details are correct and try again",
         "CLOSE_FAILURE": "Unknown failure. See log for more information.",
         "CLOSE_INVALID_MANIFEST": "Invalid manifest",

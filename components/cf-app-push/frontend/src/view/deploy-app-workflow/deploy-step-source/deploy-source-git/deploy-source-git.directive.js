@@ -9,8 +9,8 @@
    * @namespace cf-app-push.accountActions
    * @memberof cf-app-push
    * @name DeploySourceGit
-   * @description ????????
-   * @returns {object} The ???????? directive definition object
+   * @description Directive to aid user in selecting a git source for their application
+   * @returns {object} The DeploySourceGit directive definition object
    */
   function DeploySourceGit() {
     return {
@@ -43,9 +43,13 @@
     };
 
     vm.userInput.gitType = vm.userInput.gitType || 'github';
+    vm.userInput.gitUrlBranch = vm.userInput.gitUrlBranch || 'master';
+
     vm.isGithub = isGithub;
     vm.isGitUrl = isGitUrl;
-    vm.gitUrlRegEx = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
+    // For now mandate https (pp container does not support ssh)
+    vm.gitUrlRegEx = /https:(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
+    // vm.gitUrlRegEx = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
 
     var gitHubUrlBase = 'https://github.com/';
 
@@ -99,7 +103,7 @@
       var gitHub = vm.userInput.githubProject &&
         vm.userInput.githubBranch &&
         vm.userInput.githubBranch.name || false;
-      var gitUrl = vm.userInput.gitUrl || false;
+      var gitUrl = vm.userInput.gitUrl && vm.userInput.gitUrlBranch || false;
       return gitType.toString() + gitHub.toString() + gitUrl.toString();
     }, updateValid);
 

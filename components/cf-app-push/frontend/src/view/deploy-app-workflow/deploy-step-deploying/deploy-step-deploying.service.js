@@ -228,12 +228,6 @@
       }
 
       function sendGitUrlSourceMetadata(gitUrl, githubBranchName) {
-        // TODO: RC/IH
-        // - Sending a new socket event type to cover the git url source ('SOURCE_GITURL 30006', as opposed to event type 'SOURCE_GITHUB 30001')
-        // - Expecting two kinds of errors covered by existing socket events
-        // -- CLOSE_FAILED_CLONE: 40003
-        // -- CLOSE_FAILED_NO_BRANCH: 40004
-
         var giturl = {
           url: gitUrl,
           branch: githubBranchName
