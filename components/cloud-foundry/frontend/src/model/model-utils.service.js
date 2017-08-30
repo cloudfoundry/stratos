@@ -33,10 +33,10 @@
      * @returns {object} the $http service http config
      */
     function makeHttpConfig(cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      var headers = {'x-cap-cnsi-list': cnsiGuid};
       // Add passthrough header
       angular.extend(headers, {
-        'x-cnap-passthrough': 'true'
+        'x-cap-passthrough': 'true'
       });
       return {
         headers: headers

@@ -160,8 +160,8 @@ func fwdCNSIStandardHeaders(cnsiRequest *CNSIRequest, req *http.Request) {
 		switch {
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
-		//  - "Connection", "X-Cnap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
+		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
+		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
 
 		// Forwarding everything else
 		default:
@@ -172,8 +172,8 @@ func fwdCNSIStandardHeaders(cnsiRequest *CNSIRequest, req *http.Request) {
 
 func (p *portalProxy) proxy(c echo.Context) error {
 	log.Debug("proxy")
-	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
-	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
+	cnsiList := strings.Split(c.Request().Header().Get("x-cap-cnsi-list"), ",")
+	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -218,7 +218,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
 		// Allow the host part of the API URL to be overridden
-		apiHost := c.Request().Header().Get("x-cnap-api-host")
+		apiHost := c.Request().Header().Get("x-cap-api-host")
 		// Don't allow any '.' chars in the api name
 		if apiHost != "" && !strings.ContainsAny(apiHost, ".") {
 			// Add trailing . for when we replace
