@@ -25,6 +25,8 @@
    */
   function Route(apiManager, modelUtils) {
 
+    var routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
+
     var model = {
       route: {},
       checkRouteExists: checkRouteExists,
@@ -52,7 +54,7 @@
      * @public
      */
     function checkRouteExists(cnsiGuid, domainGuid, host, path, port) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .CheckRouteExists(domainGuid, host, path || '', port || '', {}, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
@@ -70,7 +72,7 @@
      * @public
      */
     function associateAppWithRoute(cnsiGuid, guid, appGuid) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .AssociateAppWithRoute(guid, appGuid, {}, modelUtils.makeHttpConfig(cnsiGuid));
     }
 
@@ -85,13 +87,13 @@
      * @public
      */
     function removeAppFromRoute(cnsiGuid, guid, appGuid) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .RemoveAppFromRoute(guid, appGuid, {}, modelUtils.makeHttpConfig(cnsiGuid));
     }
 
     function createRoute(cnsiGuid, routeSpec, params) {
       var routeParams = params || {};
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .CreateRoute(routeSpec, routeParams, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
@@ -109,7 +111,7 @@
      * @public
      */
     function deleteRoute(cnsiGuid, guid, recursive) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .DeleteRoute(guid, recursive, {}, modelUtils.makeHttpConfig(cnsiGuid));
     }
 
@@ -126,7 +128,7 @@
      * @public
      */
     function listAllAppsForRoute(cnsiGuid, guid, params, paginate) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .ListAllAppsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (paginate) {
@@ -163,7 +165,7 @@
      * @public
      */
     function listAllAppsForRouteWithoutStore(cnsiGuid, guid, params, paginate) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .ListAllAppsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (paginate) {
@@ -195,7 +197,7 @@
      * @public
      */
     function listAllRouteMappingsForRoute(cnsiGuid, guid, params, paginate) {
-      return apiManager.retrieve('cloud-foundry.api.Routes')
+      return routesApi
         .ListAllRouteMappingsForRoute(guid, params, modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
@@ -204,7 +206,5 @@
           return response.data.resources;
         });
     }
-
   }
-
 })();

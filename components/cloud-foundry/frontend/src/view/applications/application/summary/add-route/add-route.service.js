@@ -9,11 +9,13 @@
    * @name AddRouteServiceFactory
    * @description Factory for getting the Add Route Dialog
    * @memberof cloud-foundry.view.applications.application.summary
+   * @param {object} $q - promise library
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} frameworkAsyncTaskDialog - async dialog service
+   * @param {object} appClusterRoutesService - App cluster router service
    * @constructor
    */
-  function AddRouteServiceFactory(modelManager, frameworkAsyncTaskDialog) {
+  function AddRouteServiceFactory($q, modelManager, frameworkAsyncTaskDialog, appClusterRoutesService) {
     var that = this;
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     return {
@@ -29,6 +31,7 @@
         // Create a map of domain names -> domain guids
         var model = modelManager.retrieve('cloud-foundry.model.application');
         this.domainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
+        this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
         var domains = [];
         var routeExists = false;
@@ -41,6 +44,7 @@
             type: undefined
           });
         });
+
         var spaceGuid = model.application.summary.space_guid;
         var data = {
           host: null,
@@ -48,7 +52,24 @@
           path: null,
           space_guid: spaceGuid,
           domain_guid: domains[0].value,
-          useRandomPort: true
+          useRandomPort: true,
+          existingRoutes: null
+        };
+
+        // Either returns a function that creates a new route
+        // or a function that returns an already existing route.
+        var getAssignableRouteFunction = function (contextData) {
+          if (contextData.activeTab === 0) {
+            return that.routeModel.createRoute;
+          } else {
+            return function () {
+              var route = _.find(contextData.existingRoutes, function (route) {
+                return contextData.selectedExistingRoute.entity.id === route.entity.id;
+              });
+
+              return $q.when(route);
+            };
+          }
         };
 
         var addRoute = function (contextData, dialog) {
@@ -82,7 +103,9 @@
             }
           }
 
-          return that.routeModel.createRoute(cnsiGuid, data, params)
+          var getRoute = getAssignableRouteFunction(contextData);
+
+          return getRoute(cnsiGuid, data, params)
             .then(function (response) {
               if (!(response.metadata && response.metadata.guid)) {
                 throw response;
@@ -112,8 +135,47 @@
 
         var options = {
           domains: domains,
-          domainMap: _.mapKeys(domains, function (domain) { return domain.value; })
+          domainMap: _.mapKeys(domains, function (domain) { return domain.value; }),
+          existingRoutes: [],
+          userInput: {
+            selectedExistingRoute: null
+          },
+          tableLimit: 4
         };
+
+        var getAllRoutes = function (getRoutesFn, getRouteIdFn, applicationGuid) {
+          // 1) Get all routes in current space.
+          // 2) Filter out the one that the current application is already bound to.
+          // 3) Get the route id and add it to the route object
+          // 4) Return array of routes
+          return getRoutesFn()
+          .then(function (routes) {
+            return _.chain(routes)
+              .filter(function (route) {
+                return !_.find(route.entity.apps, function (app) {
+                  return app.metadata.guid === applicationGuid;
+                });
+              })
+              .map(function (route) {
+                route.entity.id = getRouteIdFn(route);
+                return route;
+              })
+              .value();
+          });
+        };
+
+        var getAllRoutesForThisSpace = _.partial(
+          this.spaceModel.listAllRoutesForSpace,
+          cnsiGuid,
+          spaceGuid
+        );
+
+        var getReleventRoutes = _.partial(
+          getAllRoutes,
+          getAllRoutesForThisSpace,
+          appClusterRoutesService.getRouteId,
+          model.application.summary.guid
+        );
 
         return frameworkAsyncTaskDialog(
           {
@@ -123,7 +185,7 @@
             buttonTitles: {
               submit: 'app.app-info.app-tabs.summary.routes-panel.add-route-dialog.button.submit'
             },
-            class: 'dialog-form',
+            class: 'dialog-form-large',
             dialog: true
           },
           {
@@ -144,12 +206,27 @@
             }
           },
           addRoute,
-          undefined,
-          this.domainModel.listAllSharedDomains(cnsiGuid).then(function (domainInfo) {
-            _.each(domainInfo, function (domain) {
-              options.domainMap[domain.metadata.guid].type = options.domainMap[domain.metadata.guid] ? domain.entity.router_group_type || 'http' : 'http';
-            });
-          })
+          function (contextData) {
+            if (contextData.activeTab === 0) {
+              return !(
+                contextData.addRouteForm &&
+                contextData.addRouteForm.$valid
+              );
+            } else {
+              return !contextData.selectedExistingRoute;
+            }
+          },
+          $q.all(
+            this.domainModel.listAllSharedDomains(cnsiGuid).then(function (domainInfo) {
+              return _.each(domainInfo, function (domain) {
+                options.domainMap[domain.metadata.guid].type = options.domainMap[domain.metadata.guid] ? domain.entity.router_group_type || 'http' : 'http';
+              });
+            }),
+            getReleventRoutes()
+            .then(function (routes) {
+              data.existingRoutes = routes;
+            })
+          )
         );
       }
     };

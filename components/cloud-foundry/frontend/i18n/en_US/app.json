@@ -76,6 +76,16 @@
         }
       },
       "app-tabs": {
+        "routes": {
+          "add": {
+            "create": {
+              "title": "Create New Route"
+            },
+            "reuse": {
+              "title": "Use Existing Route"
+            }
+          }
+        },
         "summary": {
           "label": "Summary",
           "instructions": {
@@ -140,7 +150,7 @@
             "add-route-dialog": {
               "title": "Add a Route",
               "host-label": "Host",
-              "host-error-exists": "A route with this name already exists. Choose a new one",
+              "host-error-exists": "A route with this name already exists.",
               "host-error-required": "Host is required",
               "host-placeholder": "a unique identifier for this route",
               "domain-label": "Domain",
@@ -152,8 +162,10 @@
               "port-label": "Port",
               "port-placeholder": "port for this route",
               "button": {
-                "submit": "Create route"
-              }
+                "submit": "Add route"
+              },
+              "search-placeholder": "Search by name",
+              "no-routes-found": "No routes found"
             }
           },
           "service-instances-panel": {
