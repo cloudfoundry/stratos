@@ -11,6 +11,7 @@ import { Actions, Effect } from '@ngrx/effects';
 
 import 'rxjs/add/observable/from';
 import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/switchMap';
 
 
 @Injectable()
@@ -24,38 +25,59 @@ export class APIEffect {
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
     .mergeMap(apiAction => {
-      console.log(apiAction);
-      const startAction = Object.assign({}, apiAction, {
-        type: ApiActionTypes.API_REQUEST_START
+      const startAction = this.newAPIAction({
+        oldAPIAction: apiAction,
+        apiRequestType: apiAction.actions[0],
+        actionType: ApiActionTypes.API_REQUEST_START,
+        loading: true
       });
-      return [startAction, {type: apiAction.actions[0]}];
+      return [
+        startAction,
+        { type: apiAction.actions[0] }
+      ];
     });
 
   @Effect() apiRequest$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST_START)
-    .map(apiAction => {
-      const { requestType, url, payload } = apiAction;
-      const { proxyAPIVersion, cfAPIVersion, baseURL } = environment;
-      const fullURL = `${baseURL}/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${url}`;
-      return this.http[requestType](fullURL, payload)
-        .map(data => {
-          const successAction = Object.assign({}, apiAction, {
-            type: ApiActionTypes.API_REQUEST_SUCCESS
-          });
-          console.log(successAction);
-          return [
-            successAction, {
-            type: apiAction.actions[1]
-          }];
+    .switchMap(apiAction => {
+      const { httpMethod, apiRequestType, url, payload } = apiAction;
+      const { proxyAPIVersion, cfAPIVersion } = environment;
+      const fullURL = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${url}`;
+      return this.http[httpMethod](fullURL, payload)
+        .mergeMap(data => {
+          apiAction.type = apiAction.actions[1];
+          apiAction.apiRequestType = ApiActionTypes.API_REQUEST_SUCCESS;
+          apiAction.payload = data;
+          apiAction.loading = false;
+          return apiAction;
         })
         .catch(() => {
-          const failedAction = Object.assign({}, apiAction, {
-            type: ApiActionTypes.API_REQUEST_FAILED
+          const failedAction = this.newAPIAction({
+            oldAPIAction: apiAction,
+            apiRequestType: ApiActionTypes.API_REQUEST_FAILED,
+            actionType: apiAction.actions[2],
+            loading: false
           });
-          console.log(failedAction);
-          return [
-            failedAction, {
-            type: apiAction.actions[2]
-          }];
+          return [failedAction];
         });
+    }).catch((err, caught) => {
+      return caught;
     });
+
+    newAPIAction({
+      oldAPIAction,
+      apiRequestType,
+      actionType,
+      loading
+    }) {
+      class NewAPIAction implements APIAction {
+        actions = oldAPIAction.actions;
+        url = oldAPIAction.url;
+        apiRequestType = apiRequestType;
+        httpMethod = oldAPIAction.httpMethod;
+        payload = oldAPIAction.payload;
+        type = actionType;
+        loading = loading;
+      }
+      return new NewAPIAction;
+    }
 }

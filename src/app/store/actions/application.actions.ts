@@ -7,12 +7,15 @@ export const GET_ALL_SUCCESS = '[Application] Get all success';
 export const GET_ALL_FAILED = '[Application] Get all failed';
 
 export class GetAll implements APIAction {
-        actions = [
-            GET_ALL,
-            GET_ALL_SUCCESS,
-            GET_ALL_FAILED
-        ];
-        url = 'application';
-        requestType = 'get';
-        type = ApiActionTypes.API_REQUEST;
+    actions = [
+        GET_ALL,
+        GET_ALL_SUCCESS,
+        GET_ALL_FAILED
+    ];
+    url = 'application';
+    httpMethod = 'get';
+    requestType = null;
+    type = ApiActionTypes.API_REQUEST;
+    apiRequestType = ApiActionTypes.API_REQUEST;
+    loading = false;
 }

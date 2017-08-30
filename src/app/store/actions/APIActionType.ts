@@ -17,7 +17,9 @@ export const ApiActionTypes = {
 export class APIAction implements Action {
     actions: string[];
     url: string;
-    requestType: string;
+    apiRequestType: string = ApiActionTypes.API_REQUEST;
+    httpMethod: string;
     payload?: object;
     type: string = ApiActionTypes.API_REQUEST;
+    loading: boolean;
 }

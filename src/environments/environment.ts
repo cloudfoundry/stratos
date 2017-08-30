@@ -7,5 +7,5 @@ export const environment = {
   production: false,
   proxyAPIVersion: 'v1',
   cfAPIVersion: 'v2',
-  baseURL: 'https://localhost:3100'
+  baseURL: 'https://localhost:4443'
 };
