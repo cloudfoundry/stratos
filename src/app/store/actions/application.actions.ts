@@ -1,6 +1,4 @@
-import * as url from 'url';
 import { ApiActionTypes, APIAction } from './APIActionType';
-import { Injectable } from '@angular/core';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';

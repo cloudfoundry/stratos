@@ -1,3 +1,5 @@
+import { LoginEffect } from './store/effects/login.effects';
+import { authReducer } from './store/reducers/auth.reducer';
 import { HttpModule } from '@angular/http';
 import { APIEffect } from './store/effects/api.effects';
 import { EffectsModule } from '@ngrx/effects';
@@ -17,12 +19,16 @@ import { AppComponent } from './app.component';
   imports: [
     HttpModule,
     BrowserModule,
-    StoreModule.forRoot({ api: apiReducer }),
+    StoreModule.forRoot({
+      api: apiReducer,
+      auth: authReducer
+    }),
     StoreDevtoolsModule.instrument({
       maxAge: 25
     }),
     EffectsModule.forRoot([
-      APIEffect
+      APIEffect,
+      LoginEffect
     ])
   ],
   providers: [],

@@ -1,3 +1,4 @@
+import { Login } from './store/actions/auth.actions';
 import { GetAll } from './store/actions/application.actions';
 import { AppState } from './store/app-state';
 import { Store } from '@ngrx/store';
@@ -14,6 +15,7 @@ export class AppComponent implements AfterContentInit {
   title = 'app';
 
   ngAfterContentInit() {
+    this.store.dispatch(new Login('admin', 'hscadmin'));
     this.store.dispatch(new GetAll);
   }
 
