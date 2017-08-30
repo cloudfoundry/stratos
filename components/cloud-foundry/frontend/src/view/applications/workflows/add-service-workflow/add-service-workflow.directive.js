@@ -301,10 +301,11 @@
      * @returns {object} A promise object
      */
     function startWorkflow() {
+
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: 'app.app-info.app-tabs.services.add.title',
-        titleTranslateValues: { appName: vm.data.app.summary.name },
+        title: 'app.app-info.app-tabs.services.bind.title',
+        titleTranslateValues: { appName: vm.data.app.summary.name, svcName: vm.options.service.entity.label},
         dialog: true,
         class: 'dialog-form-larger'
       };

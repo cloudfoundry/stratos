@@ -230,8 +230,11 @@
           "view-envs": {
             "title": "{{instanceName}}: Variables"
           },
+          "bind": {
+            "title": "Bind Service \"{{ svcName }}\" to Application \"{{ appName }}\""
+          },
           "add": {
-            "title": "Add Service to {{ appName }}",
+            "title": "Add Service '{{ svcName }}' to Application '{{ appName }}'",
             "back-to-services": "Back to Services",
             "add": "Add Service Instance",
             "create": {
