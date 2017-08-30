@@ -415,7 +415,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
-		tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken)
+		tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken, false)
 
 		log.Printf("tr is: %T %+v", tr, tr)
 		log.Printf("emptyTokenRecord is: %T %+v", emptyTokenRecord, emptyTokenRecord)

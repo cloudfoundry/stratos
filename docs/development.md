@@ -189,6 +189,18 @@ $ npm run e2e
 
 The portal-proxy is the back-end for the Console UI. It is written in Go.
 
+### Automatically register and connect to an existing endpoint
+To automatically register a Cloud Foundry add the environment variable below
+
+> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using 
+           the username/password provided.
+
+```
+AUTO_REG_CF_URL=<api url of cf>
+```
+
+This env var can be set in `outputs/config.properties` if running the backend locally in the host machine, `./deploy/proxy.env` if running in docker-compose or `./manifest` if in cf push.
+
 #### Set a GOPATH
 
 #### Clone the project
