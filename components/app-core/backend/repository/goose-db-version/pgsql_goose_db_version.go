@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	getCurrentVersion = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
+	getCurrentVersion = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
 // PostgresGooseDBVersionRepository is a PostgreSQL-backed Goose DB Version repository
