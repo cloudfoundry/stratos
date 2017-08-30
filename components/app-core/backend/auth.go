@@ -272,17 +272,11 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Info("Setting token record as disconnected")
 
-		cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
-		if !ok {
-			return fmt.Errorf("Unable to retrieve CNSI token record: %s", err)
-		}
-
 		userTokenInfo := userTokenInfo{
 			UserGUID: userGUID,
-			TokenExpiry: cfTokenRecord.TokenExpiry,
 		}
 
-		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, cfTokenRecord.AuthToken, cfTokenRecord.RefreshToken, true); err != nil {
+		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, "cleared_token", "cleared_token", true); err != nil {
 			return fmt.Errorf("Unable to clear token: %s", err)
 		}
 	} else {
@@ -612,7 +606,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	// get the scope out of the JWT token data
 	userTokenInfo, err := getUserTokenInfo(cfTokenRecord.AuthToken)
 	if err != nil {
-		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 		log.Errorf(msg, err)
 		return nil, false
 	}

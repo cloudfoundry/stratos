@@ -17,7 +17,7 @@ var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, toke
 
 var listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation, t.disconnected
 										FROM cnsis c, tokens t
-										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2 AND t.disconnected = 'f'`
+										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2 AND t.disconnected = '0'`
 
 var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
 						FROM cnsis

@@ -349,7 +349,7 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 		return interfaces.TokenRecord{}, false
 	}
 
-	tr, err := tokenRepo.FindCNSIToken(cnsiGUID, userGUID, p.Config.EncryptionKeyInBytes)
+	tr, err := tokenRepo.FindCNSITokenIncludeDisconnected(cnsiGUID, userGUID, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return interfaces.TokenRecord{}, false
 	}

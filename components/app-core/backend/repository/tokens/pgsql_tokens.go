@@ -32,18 +32,18 @@ var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnecte
 
 var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected
 										FROM tokens
-										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = 'f'`
+										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = '0'`
 
 var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, disconnected
 														FROM tokens
-														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = 'f'`
+														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = '0'`
 
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
 											WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-										VALUES ($1, $2, $3, $4, $5, $6)`
+var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry, disconnected)
+										VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 var updateCNSIToken = `UPDATE tokens
 										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4
@@ -73,7 +73,7 @@ func InitRepositoryProvider(databaseProvider string) {
 	insertUAAToken = datastore.ModifySQLStatement(insertUAAToken, databaseProvider)
 	updateUAAToken = datastore.ModifySQLStatement(updateUAAToken, databaseProvider)
 	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
-	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
+	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSITokenConnected, databaseProvider)
 	listCNSITokensForUser = datastore.ModifySQLStatement(listCNSITokensForUser, databaseProvider)
 	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
@@ -246,7 +246,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	case 0:
 
 		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
+			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected); insertErr != nil {
 
 			msg := "Unable to INSERT CNSI token: %v"
 			log.Printf(msg, insertErr)
@@ -285,10 +285,12 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 }
 
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+	log.Println("FindCNSIToken")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, false)
 }
 
 func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+	log.Println("FindCNSITokenIncludeDisconnected")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, true)
 }
 
@@ -316,9 +318,9 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	var err error
 	if (includeDisconnected) {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
-	} else {
 		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
+	} else {
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
 	}
 
 	if err != nil {

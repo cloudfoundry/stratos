@@ -227,13 +227,7 @@ func Ping(db *sql.DB) error {
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == "sqlite" {
 		sqlParamReplace := regexp.MustCompile("\\$[0-9]")
-		sql = sqlParamReplace.ReplaceAllString(sql, "?")
-
-		// Work around sqlite int representation of true/false and psql's smorgasbord.
-		sql = strings.Replace(sql, "disconnected = 'f'", "disconnected = 0", -1)
-		sql = strings.Replace(sql, "disconnected = 't'", "disconnected = 1", -1)
-
-		return sql;
+		return sqlParamReplace.ReplaceAllString(sql, "?")
 	}
 
 	// Default is to return the SQL provided directly
