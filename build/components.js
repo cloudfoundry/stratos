@@ -140,7 +140,7 @@
       });
     });
     // Exclude backend/vendor folder from bower_component plugins
-    globs.bowerFull.push('!' + path.relative(baseFolder,path.join(wildBowerFolder, '**/backend/vendor/**')))
+    globs.bowerFull.push('!' + path.relative(baseFolder,path.join(wildBowerFolder, '**/backend/vendor/**')));
     return globs;
   }
 
