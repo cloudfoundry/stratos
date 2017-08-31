@@ -60,7 +60,7 @@
         <tbody>
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
-            inline-message-colspan="5"
+            inline-message-colspan="6"
             table-inline-status="{{ endpoint.error.status }}">
 
           <!--Endpoint Name-->
