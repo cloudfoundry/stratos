@@ -22,7 +22,7 @@ func Up_20170818162837(txn *sql.Tx) {
 
 	_, err := txn.Exec(consoleConfigTable)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 	// TODO find a way to ensure this in Mysql
