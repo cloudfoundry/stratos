@@ -7,6 +7,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 import { apiReducer } from './store/reducers/api.reducer';
 
@@ -19,6 +21,7 @@ import { AppComponent } from './app.component';
   imports: [
     HttpModule,
     BrowserModule,
+    BrowserAnimationsModule,
     StoreModule.forRoot({
       api: apiReducer,
       auth: authReducer
