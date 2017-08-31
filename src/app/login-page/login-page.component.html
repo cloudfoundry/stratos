@@ -1,0 +1,14 @@
+<md-card class="login-card">
+  <h2>Login</h2>
+  <form class="example-form" (ngSubmit)="login()" #loginForm="ngForm">
+    <md-form-field>
+      <input mdInput required [(ngModel)]="username" name="username" placeholder="username">
+    </md-form-field>
+    <md-form-field>
+      <input mdInput required type="password" [(ngModel)]="password" name="password" placeholder="password">
+    </md-form-field>
+    <button *ngIf="!loggedIn" type="submit" md-button md-raised-button [disabled]="!loginForm.valid">Login</button>
+    <span *ngIf="!loggingIn && loggedIn">Logged in!</span>
+    <span *ngIf="!loggingIn && !loggedIn && error">Couldn't log in</span>
+  </form>
+</md-card>

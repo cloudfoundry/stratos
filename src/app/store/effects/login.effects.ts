@@ -32,8 +32,8 @@ export class LoginEffect {
       const headers = new Headers();
       const params = new URLSearchParams();
 
-      params.set('username', 'admin');
-      params.set('password', 'hscadmin');
+      params.set('username', username);
+      params.set('password', password);
 
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
       return this.http.post('/pp/v1/auth/login/uaa', params, {

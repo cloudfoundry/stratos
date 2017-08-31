@@ -17,7 +17,6 @@ export function apiReducer(state: APIState = {
     ) {
         const apiAction = action as APIAction;
         const { payload, loading } = apiAction;
-        console.log(state);
         return { ...state, payload, loading };
     } else {
         return state;
