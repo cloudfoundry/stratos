@@ -16,8 +16,6 @@
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
   var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -157,7 +155,7 @@
 
       expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
       element(by.id('new-app-add-services')).click();
-      expect(application.getActiveTab().getText()).toBe('Services');
+      expect(application.getActiveTab().getText()).toBe('Service Instances');
 
       browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
 
@@ -245,8 +243,6 @@
 
     describe('check application on the cf endpoints dashboard -', function () {
 
-      var serviceName = appSetupHelper.getServiceName(testTime, true);
-
       beforeAll(function () {
         // Load the app again - keep the cookies so we don't have to login
         // This is a workaround for a Bug
@@ -262,56 +258,6 @@
           _.each(tabs, function (tab) {
             tab.click();
           });
-        });
-      });
-
-      it('should contain the service that was created', function () {
-        // Go to Services tab
-        application.getTabs().get(1).click();
-        // Check that we have at least one service
-        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
-        serviceInstances.getRows().then(function (rows) {
-          expect(rows.length).toBeGreaterThan(0);
-        });
-        // Table should contain our service
-        var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
-          return elem.getText().then(function (text) {
-            return text === serviceName;
-          });
-        }).first();
-        expect(column).toBeDefined();
-      });
-
-      it('should allow the service to be detached and then deleted', function () {
-        // Go to Services tab
-        application.getTabs().get(1).click();
-        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
-        serviceInstances.getData().then(function (rows) {
-          var index = _.findIndex(rows, function (row) {
-            return row[0] === serviceName;
-          });
-
-          // Detach Service
-          var columnMenu = actionMenu.wrap(serviceInstances.getItem(index, 4));
-          columnMenu.click();
-          columnMenu.clickItem(1);
-          expect(confirmModal.getTitle()).toBe('Detach Service');
-          confirmModal.commit();
-          helpers.checkAndCloseToast(/Service instance successfully detached/);
-
-          // Delete Service
-          columnMenu.click();
-          columnMenu.clickItem(0);
-          expect(confirmModal.getTitle()).toBe('Delete Service');
-          confirmModal.commit();
-          helpers.checkAndCloseToast(/Service instance successfully deleted/);
-          if (rows.length === 1) {
-            expect(element(by.css('.space-services-table .panel-body')).getText()).toBe('You have no service instances');
-          } else {
-            serviceInstances.getData().then(function (newRows) {
-              expect(newRows.length).toBe(rows.length - 1);
-            });
-          }
         });
       });
     });

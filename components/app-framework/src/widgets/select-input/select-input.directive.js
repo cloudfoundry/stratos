@@ -131,7 +131,7 @@
      */
     function init() {
       $scope.$watch(function () {
-        return vm.inputOptions.length;
+        return vm.inputOptions ? vm.inputOptions.length : 0;
       }, function (length) {
         if (length === 1) {
           vm.setValue(vm.inputOptions[0]);
