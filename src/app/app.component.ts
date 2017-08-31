@@ -16,7 +16,9 @@ export class AppComponent implements AfterContentInit {
 
   ngAfterContentInit() {
     this.store.dispatch(new Login('admin', 'hscadmin'));
-    this.store.dispatch(new GetAll);
+    setTimeout(() => {
+      this.store.dispatch(new GetAll);
+    }, 2000);
   }
 
 }

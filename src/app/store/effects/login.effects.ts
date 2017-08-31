@@ -39,7 +39,7 @@ export class LoginEffect {
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers
       })
-      .map(data => new LoginSuccess(data))
+      .map(data => new LoginSuccess(data.json()))
       .catch((err, caught) => [new LoginFailed(err)]);
     });
 }
