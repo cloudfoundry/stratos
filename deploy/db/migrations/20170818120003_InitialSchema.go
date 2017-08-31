@@ -30,7 +30,7 @@ func Up_20170818120003(txn *sql.Tx) {
 
 	_, err := txn.Exec(createTokens)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 	createCnsisTable := "CREATE TABLE IF NOT EXISTS cnsis ("
@@ -47,33 +47,33 @@ func Up_20170818120003(txn *sql.Tx) {
 
 	_, err = txn.Exec(createCnsisTable)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 	createIndex := "CREATE INDEX tokens_user_guid ON tokens (user_guid);"
 	_, err = txn.Exec(createIndex)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	createIndex = "CREATE INDEX tokens_cnsi_guid ON tokens (cnsi_guid);"
 	_, err = txn.Exec(createIndex)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	createIndex = "CREATE INDEX tokens_token_type ON tokens (token_type);"
 	_, err = txn.Exec(createIndex)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	createIndex = "CREATE INDEX cnsis_name ON cnsis (name);"
 	_, err = txn.Exec(createIndex)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	createIndex = "CREATE INDEX cnsis_cnsi_type ON cnsis (cnsi_type);"
 	_, err = txn.Exec(createIndex)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 }
@@ -84,37 +84,37 @@ func Down_20170818120003(txn *sql.Tx) {
 	dropTables := "DROP  INDEX IF EXISTS tokens_token_type;"
 	_, err := txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  INDEX IF EXISTS tokens_cnsi_guid;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  INDEX IF EXISTS tokens_user_guid;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  TABLE IF EXISTS tokens;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  INDEX IF EXISTS cnsis_cnsi_type;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  INDEX IF EXISTS cnsis_name;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 	dropTables = "DROP  TABLE IF EXISTS cnsis;"
 	_, err = txn.Exec(dropTables)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 }

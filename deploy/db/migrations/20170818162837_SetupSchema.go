@@ -31,7 +31,7 @@ func Up_20170818162837(txn *sql.Tx) {
 		createIndex += "  ON console_config((uaa_endpoint IS NOT NULL));"
 		_, err = txn.Exec(createIndex)
 		if err != nil {
-			fmt.Printf("Failed ot migrate due to: %v", err)
+			fmt.Printf("Failed to migrate due to: %v", err)
 		}
 
 	}
