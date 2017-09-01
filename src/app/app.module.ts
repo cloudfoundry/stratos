@@ -1,13 +1,16 @@
+import { AppState } from './store/app-state';
+import { environment } from './../environments/environment';
+import { AuthGuardService } from './auth-guard.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MDAppModule } from './md/md.module';
-import { LoginEffect } from './store/effects/login.effects';
+import { AuthEffect } from './store/effects/auth.effects';
 import { authReducer } from './store/reducers/auth.reducer';
 import { HttpModule } from '@angular/http';
 import { APIEffect } from './store/effects/api.effects';
 import { EffectsModule } from '@ngrx/effects';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
+import { ActionReducer, State, StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
@@ -16,16 +19,43 @@ import { apiReducer } from './store/reducers/api.reducer';
 
 import { AppComponent } from './app.component';
 import { LoginPageComponent } from './login-page/login-page.component';
+import { HomePageComponent } from './home-page/home-page.component';
+import { DashboardBaseComponent } from './dashboard-base/dashboard-base.component';
+
+import { storeLogger } from 'ngrx-store-logger';
+
+export function logger(reducer): any {
+  // default, no options
+  return storeLogger()(reducer);
+}
+
+export const metaReducers = environment.production ? [] : [logger];
 
 const appRoutes: Routes = [
-  { path: 'login', component: LoginPageComponent }
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'login', component: LoginPageComponent },
+  {
+    path: 'dashboard',
+    component: DashboardBaseComponent,
+    canActivate: [AuthGuardService],
+    children: [
+      {
+        path: '',
+        children: [
+          { path: '', component: HomePageComponent }
+        ],
+      }
+    ]
+  }
 ];
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginPageComponent
+    LoginPageComponent,
+    HomePageComponent,
+    DashboardBaseComponent
   ],
   imports: [
     HttpModule,
@@ -33,23 +63,26 @@ const appRoutes: Routes = [
     FormsModule,
     MDAppModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(
-      appRoutes,
-      { enableTracing: true }
-    ),
     StoreModule.forRoot({
       api: apiReducer,
       auth: authReducer
+    }, {
+      metaReducers
     }),
+    RouterModule.forRoot(
+      appRoutes
+    ),
     StoreDevtoolsModule.instrument({
       maxAge: 25
     }),
     EffectsModule.forRoot([
       APIEffect,
-      LoginEffect
+      AuthEffect
     ])
   ],
-  providers: [],
+  providers: [
+    AuthGuardService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

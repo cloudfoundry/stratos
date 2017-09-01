@@ -1,8 +1,9 @@
-import { Login } from './store/actions/auth.actions';
+import { Router } from '@angular/router';
+import { Login, VerifySession } from './store/actions/auth.actions';
 import { GetAll } from './store/actions/application.actions';
 import { AppState } from './store/app-state';
 import { Store } from '@ngrx/store';
-import { AfterContentInit, Component } from '@angular/core';
+import { AfterContentInit, Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -10,11 +11,14 @@ import { AfterContentInit, Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent implements AfterContentInit {
-  constructor(private store: Store<AppState>) {}
+export class AppComponent implements OnInit, AfterContentInit {
+  constructor(
+    private store: Store<AppState>,
+    private router: Router
+  ) {}
   title = 'app';
 
-  ngAfterContentInit() {
-  }
+  ngOnInit() {}
 
+  ngAfterContentInit() {}
 }

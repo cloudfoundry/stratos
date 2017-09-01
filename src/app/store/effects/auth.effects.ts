@@ -1,5 +1,16 @@
 import { AppState } from './../app-state';
-import { Login, LOGIN, LoginSuccess, LoginFailed } from './../actions/auth.actions';
+import {
+    InvalidSession,
+    Login,
+    LOGIN,
+    LoginFailed,
+    LoginSuccess,
+    SESSION_INVALID,
+    SessionData,
+    VerifiedSession,
+    VERIFY_SESSION,
+    VerifySession,
+} from './../actions/auth.actions';
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
@@ -14,7 +25,7 @@ import 'rxjs/add/operator/switchMap';
 
 
 @Injectable()
-export class LoginEffect {
+export class AuthEffect {
 
   constructor(
     private http: Http,
@@ -22,7 +33,7 @@ export class LoginEffect {
     private store: Store<AppState>
   ) {}
 
-  @Effect() apiRequest$ = this.actions$.ofType<Login>(LOGIN)
+  @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN)
     .switchMap(({ username, password }) => {
       const config = {
         headers: {
@@ -39,7 +50,22 @@ export class LoginEffect {
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers
       })
-      .map(data => new LoginSuccess(data.json()))
+      .map(data => new VerifySession())
       .catch((err, caught) => [new LoginFailed(err)]);
     });
+
+    @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
+    .switchMap(() => {
+      return this.http.get('/pp/v1/auth/session/verify')
+      .mergeMap(data => {
+        return [new VerifiedSession(data.json()), new LoginSuccess()];
+      })
+      .catch((err, caught) => [new InvalidSession()]);
+    });
+
+    @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID)
+    .map(() => {
+      return new LoginFailed('Invalid session');
+    });
+
 }
