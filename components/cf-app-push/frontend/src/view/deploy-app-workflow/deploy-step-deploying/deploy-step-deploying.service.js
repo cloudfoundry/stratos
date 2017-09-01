@@ -195,7 +195,8 @@
       function sendGitHubSourceMetadata() {
         var github = {
           project: sourceUserInput.githubProject,
-          branch: sourceUserInput.githubBranch.name
+          branch: sourceUserInput.githubBranch.name,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -211,7 +212,8 @@
       function sendGitUrlSourceMetadata() {
         var giturl = {
           url: sourceUserInput.gitUrl,
-          branch: sourceUserInput.gitUrlBranch
+          branch: sourceUserInput.gitUrlBranch,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -234,6 +236,7 @@
 
         sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
+        metadata.type = metadata.files === 1 ? 'archive' : 'filefolder';
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,
