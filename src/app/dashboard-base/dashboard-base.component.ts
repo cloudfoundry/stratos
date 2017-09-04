@@ -1,3 +1,4 @@
+import { SideNavItem } from './../side-nav/side-nav.component';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -5,12 +6,26 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './dashboard-base.component.html',
   styleUrls: ['./dashboard-base.component.scss']
 })
+
 export class DashboardBaseComponent implements OnInit {
 
   constructor() { }
 
+  sideNavTabs: SideNavItem[];
+
   ngOnInit() {
-    console.log('dashboard-base');
+    this.sideNavTabs = [
+      {
+        text: 'Dashboard',
+        mdIcon: 'assessment',
+        link: '/dashboard'
+      },
+      {
+        text: 'Applications',
+        mdIcon: 'apps',
+        link: '/applications'
+      }
+    ];
   }
 
 }

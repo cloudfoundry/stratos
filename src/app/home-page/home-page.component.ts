@@ -1,16 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { GetAll } from '../store/actions/application.actions';
+import { AppState } from './../store/app-state';
+import { Store } from '@ngrx/store';
+import { Component, OnInit, AfterContentInit } from '@angular/core';
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss']
 })
-export class HomePageComponent implements OnInit {
+export class HomePageComponent implements OnInit, AfterContentInit {
 
-  constructor() { }
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     console.log('dashboard-home');
+  }
+
+  ngAfterContentInit() {
+    this.store.dispatch(new GetAll());
   }
 
 }

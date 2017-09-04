@@ -28,7 +28,6 @@ export class AuthGuardService implements CanActivate {
         })
         .map(state => {
           if (state.sessionData.valid) {
-            console.log('valid');
             return true;
           } else {
               this.router.navigateByUrl('/login');

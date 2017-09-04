@@ -1,2 +1,6 @@
 // $green: 61/0/87/0;
-$middle-grey: rgba(0, 0, 0, .78);
+@import './theme';
+$dark-grey: rgb(95, 95, 95);
+$middle-grey: rgb(167, 169, 172);
+$light-grey: rgb(220, 221, 222);
+$blue: map-get($suse-blue, 500);

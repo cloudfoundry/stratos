@@ -10,7 +10,7 @@ export class GetAll implements APIAction {
         GET_ALL_SUCCESS,
         GET_ALL_FAILED
     ];
-    url = 'application';
+    url = 'apps';
     httpMethod = 'get';
     requestType = null;
     type = ApiActionTypes.API_REQUEST;

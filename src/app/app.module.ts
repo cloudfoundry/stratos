@@ -23,6 +23,7 @@ import { HomePageComponent } from './home-page/home-page.component';
 import { DashboardBaseComponent } from './dashboard-base/dashboard-base.component';
 
 import { storeLogger } from 'ngrx-store-logger';
+import { SideNavComponent } from './side-nav/side-nav.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -55,7 +56,8 @@ const appRoutes: Routes = [
     AppComponent,
     LoginPageComponent,
     HomePageComponent,
-    DashboardBaseComponent
+    DashboardBaseComponent,
+    SideNavComponent
   ],
   imports: [
     HttpModule,

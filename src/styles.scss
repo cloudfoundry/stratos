@@ -2,8 +2,10 @@
 @import "./sass/colors";
 @import "./sass/theme";
 body {
-    margin: 0;
+  margin: 0;
+  font-family: Lato, sans-serif;
 }
+
 html {
-    background-color: $middle-grey;
+  background-color: $dark-grey;
 }
