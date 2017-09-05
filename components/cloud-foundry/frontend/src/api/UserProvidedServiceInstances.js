@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(UserProvidedServiceInstancesApi.prototype, {
 
-   /*
+    /*
     * Associate Route with the User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/creating_a_user_provided_service_instance.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Routes for the User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Bindings for the User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
     */
@@ -104,7 +104,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all User Provided Service Instances
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_user_provided_service_instances.html
     */
@@ -121,7 +121,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Route from the User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
     */
@@ -138,7 +138,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
     */
@@ -155,7 +155,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a User Provided Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/updating_a_user_provided_service_instance.html
     */

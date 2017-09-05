@@ -19,7 +19,7 @@
   }
 
   function ClusterController($stateParams, $log, appUtilsService, $state, $q, appClusterRolesService,
-                             modelManager, appUserSelection, cfOrganizationModel, cfUtilsService) {
+    modelManager, appUserSelection, cfOrganizationModel, cfUtilsService) {
     var that = this;
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

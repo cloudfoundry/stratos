@@ -40,7 +40,7 @@
    * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfUtilsService, $scope, $q,
-                                    $translate) {
+    $translate) {
 
     var vm = this;
 

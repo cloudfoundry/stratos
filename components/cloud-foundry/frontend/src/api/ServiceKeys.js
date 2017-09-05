@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServiceKeysApi.prototype, {
 
-   /*
+    /*
     * Create a Service Key
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/create_a_service_key.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Service Key
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/delete_a_particular_service_key.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Keys
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/list_all_service_keys.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Key
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/retrieve_a_particular_service_key.html
     */

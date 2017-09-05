@@ -78,7 +78,7 @@
               loop();
             }
           },
-            loop);
+          loop);
         }, interval);
       }
     }

@@ -49,9 +49,9 @@
 
     function init() {
       return initialized.promise
-      .then(function () {
-        return authService.initialize();
-      });
+        .then(function () {
+          return authService.initialize();
+        });
     }
 
     appUtilsService.chainStateResolve('cf.applications', $state, init);

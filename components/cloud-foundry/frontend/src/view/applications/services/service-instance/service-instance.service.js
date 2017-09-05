@@ -19,7 +19,7 @@
    * @returns {object} A service instance factory
    */
   function serviceInstanceFactory($log, $translate, $q, modelManager, appNotificationsService, frameworkDetailView,
-                                  frameworkDialogConfirm) {
+    frameworkDialogConfirm) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
