@@ -101,20 +101,20 @@
         }
       });
 
-      if (config.dialog && openDetailViewCount > 1) {
-        $timeout(function () {
-          var dialog = angular.element('.detail-view-dialog .modal-dialog');
-          // Latest dialog will be the first element
-          var thisDialog = angular.element(dialog.get(0));
-          var parentDialog = angular.element(dialog.get(1));
-
-          var overlap = STACKED_HORIZONTAL_MARGIN * 2;
-          thisDialog.width(parentDialog.width() + overlap);
-          thisDialog.height(parentDialog.height());
-        });
-      }
-
       modal.rendered.then(function () {
+        if (config.dialog && openDetailViewCount > 1) {
+          $timeout(function () {
+            var dialog = angular.element('.detail-view-dialog .modal-dialog');
+            // Latest dialog will be the first element
+            var thisDialog = angular.element(dialog.get(0));
+            var parentDialog = angular.element(dialog.get(1));
+
+            var overlap = STACKED_HORIZONTAL_MARGIN * 2;
+            thisDialog.width(parentDialog.width() + overlap);
+            thisDialog.height(parentDialog.height());
+          });
+        }
+
         $timeout(function () {
           // If dialog mode then we need to fix the width after rendering, so that
           // if content is shown/hidden (e.g. error box) then the dialog width will not change

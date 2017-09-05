@@ -1,30 +1,13 @@
 <div class="select-instance">
-
-  <!--
-  <div class="service-description col-sm-12">
-    <div class="service-icon">
-      <img ng-src="{{ wizardCtrl.options.service.entity.extra.ImageURL }}"
-        default-image default-image-src="/images/services/App_services_72.png"/>
-    </div>
-    <div>
-      <h4 class="font-semi-bold">{{ wizardCtrl.options.service.entity.label }}</h4>
-      <p>{{ wizardCtrl.options.service.entity.extra.LongDescription || wizardCtrl.options.service.entity.description }}</p>
-    </div>
-  </div>
-  -->
-
   <div class="alert alert-info alert-no-bg alert-bordered" ng-if="wizardCtrl.options.service.entity.unique_id==='app-autoscaler-id'">
-    <p>
-      You can bind the Auto-scaler to this application here. Please note that you will need to use the CLI
-      to configure the auto-scaling policy for this application in order for it to be enabled.
-    </p>
+    <p translate>app.app-info.app-tabs.services.bind.warning.auto-sclaer</p>
   </div>
 
   <div class="loading-services-spinner" ng-if="wizardCtrl.options.spinners.loadingServiceInstances">
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
 
-  <p>Select service instance:</p>
+  <p translate>app.app-info.app-tabs.services.bind.select</p>
 
   <div class="select-instance-tabs col-sm-12" ng-if="!wizardCtrl.options.spinners.loadingServiceInstances">
     <form>
@@ -39,7 +22,7 @@
         </thead>
         <tbody>
           <tr class="row-vertical-middle" ng-repeat="instance in wizardCtrl.options.instances">
-            <td>
+            <td class="td-row-selector">
               <radio-input ng-model="wizardCtrl.options.userInput.existingServiceInstance"
                 input-value="instance" required>
               </radio-input>
@@ -48,9 +31,21 @@
             <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
             <td>{{ instance.entity.service_bindings.length || '-' }}</td>
           </tr>
+          <tr class="no-bindable-instances" ng-if="wizardCtrl.options.instances.length === 0">
+            <td colspan="4" translate-namespace="app.app-info.app-tabs.services.bind.no-instances">
+              <p translate>.title</p>
+              <p translate>.prompt</p>
+            </td>
+          </tr>
         </tbody>
         <tfoot>
-          <td colspan="4"><a href="#">Create new Service Instance</a></td>
+          <td></td>
+          <td colspan="3" class="td-create-service">
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.createServiceBinding()">
+            <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
+            <span translate>app.app-info.app-tabs.services.bind.create</span>
+          </button>
+        </td>
       </table>
     </form>
   </div>

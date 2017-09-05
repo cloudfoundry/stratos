@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('service-card directive', function () {
+  describe('service-card directive', function () {
     var $compile, $httpBackend, $scope, mockBindingsApi, cfServiceInstanceService;
     var APP_GUID = '6e23689c-2844-4ebf-ab69-e52ab3439f6b';
     var cnsiGuid = 'cnsiGuid';
