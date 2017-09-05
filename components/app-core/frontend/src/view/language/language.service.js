@@ -97,7 +97,6 @@
    */
   function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, modelManager, appLocalStorage) {
 
-    var userPreference = appLocalStorage.getItem(localeStorageId);
     var initialised = $translate.onReady().then(init);
 
     var service = {
@@ -155,6 +154,8 @@
     return service;
 
     function init() {
+      var userPreference = appLocalStorage.getItem(localeStorageId);
+
       // Determine if there is only one locale which the user should always use
       var locales = _getLocales();
       if (locales.length === 1) {
@@ -183,13 +184,21 @@
 
     function setLocale(locale) {
       if (locale) {
-        // Only store the locale if it's explicitly been set...
+        // Check locale is valid
+        if (_.indexOf(_getLocales(), locale) < 0) {
+          // If not leave it up to the defaults for the current session
+          locale = '';
+        }
+        // Only store the locale if it's explicitly been set or is invalid...
         appLocalStorage.setItem(localeStorageId, locale);
-      } else {
+      }
+
+      if (!locale) {
         // .. otherwise use a best guess from the browser
         locale = browserLocale || $translate.resolveClientLocale();
         locale = locale.replace('-', '_');
       }
+
       // Take into account moment naming conventions. For a list of supported moment locales see
       // https://github.com/moment/moment/tree/2.10.6/locale
       var momentLocale = locale.replace('_', '-');
