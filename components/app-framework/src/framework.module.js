@@ -10,6 +10,7 @@
       'app.framework.widgets',
       'angular-websocket',
       'ngAnimate',
-      'toastr'
+      'toastr',
+      'ngTagsInput'
     ]);
 })();

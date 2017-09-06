@@ -257,7 +257,8 @@
               "title": "Choose Existing Instance",
               "name-label": "Name",
               "plan-label": "Plan",
-              "apps-label": "Apps Attached"
+              "apps-label": "Apps Attached",
+              "tags-label": "Tags"
             },
             "notifications": {
               "success": "The '{{ service }}' service has been successfully attached to application '{{ appName }}'",
