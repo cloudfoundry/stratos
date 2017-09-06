@@ -1,3 +1,8 @@
+resource_types:
+  - name: email
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
 resources:
 - name: stratos-ui
   type: git
@@ -5,10 +10,28 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:SUSE/stratos-ui.git
+- name: after-midnight
+  type: time
+  source:
+    start: 12:00 AM
+    stop: 2:00 AM
+    location: UTC
+- name: send-email
+  type: email
+  source:
+    smtp:
+      host: smtp.novell.com
+      port: "25"
+      username: {{email-username}}
+      password: {{email-password}}
+    from: concourse@capbristol.com
+    to: [ "irfan.habib@suse.com" ]
 jobs:
 - name: console-bosh-deploy
   plan:
   - get: stratos-ui
+  - get: after-midnight
+    trigger: true
   - do:
     - task: deploy
       privileged: true
@@ -18,3 +41,14 @@ jobs:
        BOSH_DIRECTOR_IP: {{bosh-director-ip}}
        BOSH_CA_CERT: {{bosh-ca-cert}}
        BOSH_ADMIN_PASSWORD: {{bosh-admin-password}}
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "BOSH Deploy failed!"
+          body_text: "BOSH Deploy build was successful: ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME}"
+      on_success:
+        put: send-email
+        params:
+          subject_text: "BOSH Deploy successful"
+          body_text: "BOSH Deploy build was successful: ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME}"
+ 
