@@ -63,12 +63,14 @@
       config.params = params;
       config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid;
 
-      function append(urlParams, name, value) {
+      var urlParams = '';
+
+      function append(name, value) {
         if (!value) {
           return;
         }
 
-        if (urlParams.length > 0) {
+        if (urlParams.length === 0) {
           urlParams += '&';
         }
 
@@ -76,10 +78,9 @@
         return urlParams;
       }
 
-      var urlParams = '';
-      append(urlParams, 'host', host);
-      append(urlParams, 'path', path);
-      append(urlParams, 'port', port);
+      append('host', host);
+      append('path', path);
+      append('port', port);
 
       if (urlParams) {
         config.url += '?' + urlParams;
