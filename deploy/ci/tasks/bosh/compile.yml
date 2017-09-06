@@ -1,0 +1,28 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source:
+   repository:  ci-registry.ngrok.io:80/concourse-dcind
+   tag: "latest"
+   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Register BOSH Director
+      bosh2 alias-env vbox -e $BOSH_DIRECTOR_IP --ca-cert $BOSH_CA_CERT
+      export BOSH_CLIENT=admin
+      export BOSH_CLIENT_SECRET=$BOSH_ADMIN_PASSWORD
+      # BOSH create release
+      bosh2 create-release
+      # Upload built release
+      bosh2 -e vbox upload-release -d stratos-ui
+      # Deploy
+      bosh2 -e vbox -d stratos-ui deploy deployment.yml
+      # List Deployment
+      bosh2 -e vbox -d stratos-ui instances

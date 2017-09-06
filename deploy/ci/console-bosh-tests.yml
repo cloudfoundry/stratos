@@ -1,0 +1,20 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    branch: {{stratos-ui-branch}}
+    private_key: {{github-private-key}}
+    uri: git@github.com:SUSE/stratos-ui.git
+jobs:
+- name: console-bosh-deploy
+  plan:
+  - get: stratos-ui
+  - do:
+    - task: deploy
+      privileged: true
+      timeout: 20m
+      file:  stratos-ui/deploy/ci/tasks/bosh/compile.yml
+      params:
+       BOSH_DIRECTOR_IP: {{bosh-director-ip}}
+       BOSH_CA_CERT: {{bosh-ca-cert}}
+       BOSH_ADMIN_PASSWORD: {{bosh-admin-password}}
