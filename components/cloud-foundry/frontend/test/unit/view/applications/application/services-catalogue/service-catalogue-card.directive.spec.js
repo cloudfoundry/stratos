@@ -51,8 +51,8 @@
         }
       };
       $scope.service = {
-        entity: {label: 'Service'},
-        metadata: {guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334'}
+        entity: { label: 'Service' },
+        metadata: { guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334' }
       };
 
       mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
@@ -95,15 +95,13 @@
           expect(serviceCardCtrl).toBeDefined();
 
           expect(serviceCardCtrl.serviceBindings).not.toEqual([]);
-          expect(serviceCardCtrl.numAttached).toBe(1);
-          expect(serviceCardCtrl.actions.length).toBe(3);
+          expect(serviceCardCtrl.numAttached).toBe(0);
         });
 
         describe('init', function () {
           beforeEach(function () {
             spyOn(serviceCardCtrl, 'getServiceInstanceGuids').and.callThrough();
             spyOn(serviceCardCtrl, 'getServiceBindings').and.callThrough();
-            spyOn(serviceCardCtrl, 'updateActions').and.callThrough();
           });
 
           afterAll(function () {
@@ -122,9 +120,6 @@
           it('should set serviceBindings', function () {
             serviceCardCtrl.init().then(function () {
               expect(serviceCardCtrl.serviceBindings.length).toBe(1);
-              expect(serviceCardCtrl.numAttached).toBe(1);
-              expect(serviceCardCtrl.actions[1].hidden).toBeFalsy();
-              expect(serviceCardCtrl.actions[2].hidden).toBeFalsy();
             });
 
             $httpBackend.flush();
@@ -139,11 +134,8 @@
 
             expect(serviceCardCtrl.serviceBindings.length).toBe(0);
             expect(serviceCardCtrl.numAttached).toBe(0);
-            expect(serviceCardCtrl.actions[1].hidden).toBeTruthy();
-            expect(serviceCardCtrl.actions[2].hidden).toBeTruthy();
             expect(serviceCardCtrl.getServiceInstanceGuids).toHaveBeenCalled();
             expect(serviceCardCtrl.getServiceBindings).not.toHaveBeenCalled();
-            expect(serviceCardCtrl.updateActions).toHaveBeenCalled();
           });
         });
 
@@ -157,73 +149,6 @@
             expect(args[0]).toBe('cf.events.START_ADD_SERVICE_WORKFLOW');
           });
         });
-      });
-    });
-    describe('with authModel for admin', function () {
-      beforeEach(inject(function ($injector) {
-        initController($injector, false, 'admin');
-      }));
-
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
-      describe('with defaults', function () {
-        var serviceCardCtrl, element;
-
-        beforeEach(function () {
-          var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
-            '</service-card>';
-          element = angular.element(markup);
-          $compile(element)($scope);
-
-          $scope.$apply();
-          $httpBackend.flush();
-
-          serviceCardCtrl = element.controller('serviceCard');
-        });
-
-        it('should display service actions', function () {
-          expect(element).toBeDefined();
-          expect(serviceCardCtrl).toBeDefined();
-          expect(serviceCardCtrl.hideServiceActions()).toBe(false);
-        });
-
-      });
-    });
-
-    describe('with authModel for non admin user', function () {
-      beforeEach(inject(function ($injector) {
-        initController($injector, false, 'space_manager');
-      }));
-
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
-      describe('with defaults', function () {
-        var serviceCardCtrl, element;
-
-        beforeEach(function () {
-          var markup = '<service-card app="app" cnsi-guid="cnsiGuid" service="service">' +
-            '</service-card>';
-          element = angular.element(markup);
-          $compile(element)($scope);
-
-          $scope.$apply();
-          $httpBackend.flush();
-
-          serviceCardCtrl = element.controller('serviceCard');
-        });
-
-        it('should disable service actions', function () {
-          expect(element).toBeDefined();
-          expect(serviceCardCtrl).toBeDefined();
-          expect(serviceCardCtrl.hideServiceActions()).toBe(true);
-        });
-
       });
     });
   });
