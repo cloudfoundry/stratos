@@ -155,25 +155,36 @@
 
       expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
       element(by.id('new-app-add-services')).click();
-      expect(application.getActiveTab().getText()).toBe('Service Instances');
+      expect(application.getActiveTab().getText()).toBe('Service Catalog');
 
-      browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
+      browser.wait(until.presenceOf(element(by.css('service-catalogue-card'))), 10000);
 
       addAppService.addService(SERVICE_NAME);
+
+      browser.driver.sleep(5000);
 
       var serviceWizard = addAppService.getServiceWizard();
       expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-      expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+      // Click the "create new instance" button
+      addAppService.showCreateInstanceDialog();
+      var createDialog = serviceWizard.getDialog();
+
+      expect(createDialog.getTitleText()).toBe('Create Service Instance');
+
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      expect(createDialog.isCommitEnabled()).toBe(false);
 
       serviceName = appSetupHelper.getServiceName(testTime, true);
       serviceWizard.getCreateNewName().clear();
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+      expect(createDialog.isCommitEnabled()).toBe(true);
 
+      createDialog.commit();
+
+      // Dialog should close
+      expect(serviceWizard.getWizard().getNext().getText()).toBe('BIND TO APP');
       serviceWizard.getWizard().next();
       expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
       serviceWizard.getWizard().next().then(function () {
@@ -188,19 +199,9 @@
 
       application.showSummary();
 
-      // Test that the service is shown in the summary page
-      // Check that we have at least one service
-      var serviceInstances = table.wrap(element(by.css('.summary-service-instances table')));
-      serviceInstances.getRows().then(function (rows) {
-        expect(rows.length).toBeGreaterThan(0);
-      });
-      // Table should contain our service
-      var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
-        return elem.getText().then(function (text) {
-          return text === SERVICE_NAME;
-        });
-      }).first();
-      expect(column).toBeDefined();
+      // Check that we now have a bound service instance
+      var servicesCount = element(by.css('.app-summary-bound-services-count'));
+      expect(servicesCount.getText()).toBe('1');
 
       // Test CLI Info
       application.invokeAction('CLI Info');

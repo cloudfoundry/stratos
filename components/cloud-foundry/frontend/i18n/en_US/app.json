@@ -271,7 +271,7 @@
           }
         },
         "service-catalogue": {
-          "label": "Service Catalogue",
+          "label": "Service Catalog",
           "categories": {
             "show": "Show",
             "attached": "Attached Service Instances",
