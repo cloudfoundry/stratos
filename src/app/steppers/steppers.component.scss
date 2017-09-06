@@ -1,0 +1,48 @@
+.steppers {
+  width: 100%;
+  &__headers {
+    display: flex;
+  }
+  &__header {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    &-inner {
+      flex: none;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+    &:after {
+      content: '';
+      height: 1px;
+      background-color: grey;
+    }
+    &:after {
+      width: 100%;
+    }
+    &:first-child {
+      &:before {
+        content: none;
+      }
+    }
+    &:last-child {
+      flex: none;
+      &:after {
+        content: none;
+      }
+    }
+    &-icon {
+      border-radius: 50%;
+      height: 15px;
+      width: 15px;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &-text {
+      padding-left: 10px;
+    }
+  }
+}

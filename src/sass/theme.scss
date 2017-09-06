@@ -1,127 +1,25 @@
 @import '~@angular/material/theming';
+@import './suse-theme';
 // Plus imports for other components in your app.
-
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
 @include mat-core();
-
 // FYI: Generated using http://mcg.mbitson.com/
-
-$suse-green: (
-    50 : #e1faec,
-    100 : #b3f2cf,
-    200 : #81e9af,
-    300 : #4ee08f,
-    400 : #28da77,
-    500 : #02d35f,
-    600 : #02ce57,
-    700 : #01c84d,
-    800 : #01c243,
-    900 : #01b732,
-    A100 : #e0ffe7,
-    A200 : #adffbe,
-    A400 : #7aff95,
-    A700 : #61ff81,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #000000,
-        500 : #000000,
-        600 : #000000,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-    )
-);
-
-$suse-blue: (
-    50 : #e2e6e8,
-    100 : #b6c0c6,
-    200 : #8696a0,
-    300 : #566b79,
-    400 : #314c5d,
-    500 : #0d2c40,
-    600 : #0b273a,
-    700 : #092132,
-    800 : #071b2a,
-    900 : #03101c,
-    A100 : #5aa2ff,
-    A200 : #2786ff,
-    A400 : #006af3,
-    A700 : #005fda,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #ffffff,
-        400 : #ffffff,
-        500 : #ffffff,
-        600 : #ffffff,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #ffffff,
-        A400 : #ffffff,
-        A700 : #ffffff,
-    )
-);
-
-$suse-purple: (
-    50 : #fbe0f0,
-    100 : #f5b3d9,
-    200 : #ef80c0,
-    300 : #e84da6,
-    400 : #e32693,
-    500 : #de0080,
-    600 : #da0078,
-    700 : #d5006d,
-    800 : #d10063,
-    900 : #c80050,
-    A100 : #fff1f5,
-    A200 : #ffbed3,
-    A400 : #ff8bb1,
-    A700 : #ff71a0,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #ffffff,
-        500 : #ffffff,
-        600 : #ffffff,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-    )
-);
-
-
-
+$suse-green: ( 50: #e1faec, 100: #b3f2cf, 200: #81e9af, 300: #4ee08f, 400: #28da77, 500: #02d35f, 600: #02ce57, 700: #01c84d, 800: #01c243, 900: #01b732, A100: #e0ffe7, A200: #adffbe, A400: #7aff95, A700: #61ff81, contrast: ( 50: #000000, 100: #000000, 200: #000000, 300: #000000, 400: #000000, 500: #000000, 600: #000000, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #000000, A200: #000000, A400: #000000, A700: #000000, ));
+$suse-blue: ( 50: #e2e6e8, 100: #b6c0c6, 200: #8696a0, 300: #566b79, 400: #314c5d, 500: #0d2c40, 600: #0b273a, 700: #092132, 800: #071b2a, 900: #03101c, A100: #5aa2ff, A200: #2786ff, A400: #006af3, A700: #005fda, contrast: ( 50: #000000, 100: #000000, 200: #000000, 300: #ffffff, 400: #ffffff, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #000000, A200: #ffffff, A400: #ffffff, A700: #ffffff, ));
+$suse-purple: ( 50: #fbe0f0, 100: #f5b3d9, 200: #ef80c0, 300: #e84da6, 400: #e32693, 500: #de0080, 600: #da0078, 700: #d5006d, 800: #d10063, 900: #c80050, A100: #fff1f5, A200: #ffbed3, A400: #ff8bb1, A700: #ff71a0, contrast: ( 50: #000000, 100: #000000, 200: #000000, 300: #000000, 400: #ffffff, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #000000, A200: #000000, A400: #000000, A700: #000000, ));
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue.
 $suse-app-primary: mat-palette($suse-green);
 $suse-app-accent: mat-palette($suse-blue);
-
 // The warn palette is optional (defaults to red).
 $suse-app-warn: mat-palette($suse-purple);
-
 // Create the theme object (a Sass map containing all of the palettes).
 $suse-app-theme: mat-light-theme($suse-app-primary, $suse-app-accent, $suse-app-warn);
-
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include angular-material-theme($suse-app-theme);
+@include suse-theme($suse-app-theme);

@@ -24,6 +24,10 @@ import { DashboardBaseComponent } from './dashboard-base/dashboard-base.componen
 
 import { storeLogger } from 'ngrx-store-logger';
 import { SideNavComponent } from './side-nav/side-nav.component';
+import { ConsoleUaaWizardComponent } from './console-uaa-wizard/console-uaa-wizard.component';
+import { SteppersComponent } from './steppers/steppers.component';
+import { StepComponent } from './step/step.component';
+import { StepTitleComponent } from './step-title/step-title.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -34,6 +38,7 @@ export const metaReducers = environment.production ? [] : [logger];
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'login', component: LoginPageComponent },
   {
     path: 'dashboard',
@@ -50,14 +55,17 @@ const appRoutes: Routes = [
   }
 ];
 
-
 @NgModule({
   declarations: [
     AppComponent,
     LoginPageComponent,
     HomePageComponent,
     DashboardBaseComponent,
-    SideNavComponent
+    SideNavComponent,
+    ConsoleUaaWizardComponent,
+    SteppersComponent,
+    StepComponent,
+    StepTitleComponent
   ],
   imports: [
     HttpModule,
@@ -69,8 +77,8 @@ const appRoutes: Routes = [
       api: apiReducer,
       auth: authReducer
     }, {
-      metaReducers
-    }),
+        metaReducers
+      }),
     RouterModule.forRoot(
       appRoutes
     ),

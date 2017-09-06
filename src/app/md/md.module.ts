@@ -7,7 +7,7 @@ import {
     MdProgressSpinnerModule,
     MdSidenavModule,
     MdTabsModule,
-    MdIconModule
+    MdIconModule,
 } from '@angular/material';
 
 const importExport = [
