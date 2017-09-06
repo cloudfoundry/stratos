@@ -9,3 +9,8 @@ body {
 html {
   background-color: $dark-grey;
 }
+
+body,
+html {
+  height: 100%;
+}

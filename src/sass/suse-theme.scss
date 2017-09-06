@@ -5,7 +5,14 @@
   // Extract whichever individual palettes you need from the theme.
   $primary: map-get($theme, primary);
   $accent: map-get($theme, accent); // Use mat-color to extract individual colors from a palette as necessary.
-  .steppers__header-icon {
-    background-color: mat-color($primary);
+  .steppers__header {
+    .steppers__header-icon {
+      background-color: mat-color($accent, 100);
+    }
+    &--active {
+      .steppers__header-icon {
+        background-color: mat-color($primary);
+      }
+    }
   }
 }

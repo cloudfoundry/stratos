@@ -1,3 +1,5 @@
+import { UAASetupEffect } from './store/effects/uaa-setup.effects';
+import { uaaSetupReducer } from './store/reducers/uaa-setup.reducers';
 import { AppState } from './store/app-state';
 import { environment } from './../environments/environment';
 import { AuthGuardService } from './auth-guard.service';
@@ -27,7 +29,6 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard/console-uaa-wizard.component';
 import { SteppersComponent } from './steppers/steppers.component';
 import { StepComponent } from './step/step.component';
-import { StepTitleComponent } from './step-title/step-title.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -64,18 +65,19 @@ const appRoutes: Routes = [
     SideNavComponent,
     ConsoleUaaWizardComponent,
     SteppersComponent,
-    StepComponent,
-    StepTitleComponent
+    StepComponent
   ],
   imports: [
     HttpModule,
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     MDAppModule,
     BrowserAnimationsModule,
     StoreModule.forRoot({
       api: apiReducer,
-      auth: authReducer
+      auth: authReducer,
+      uaaSetup: uaaSetupReducer
     }, {
         metaReducers
       }),
@@ -87,7 +89,8 @@ const appRoutes: Routes = [
     }),
     EffectsModule.forRoot([
       APIEffect,
-      AuthEffect
+      AuthEffect,
+      UAASetupEffect
     ])
   ],
   providers: [

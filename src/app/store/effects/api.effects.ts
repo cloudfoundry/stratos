@@ -21,7 +21,7 @@ export class APIEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {}
+  ) { }
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
     .mergeMap(apiAction => {
@@ -63,21 +63,21 @@ export class APIEffect {
       return caught;
     });
 
-    newAPIAction({
+  newAPIAction({
       oldAPIAction,
-      apiRequestType,
-      actionType,
-      loading
+    apiRequestType,
+    actionType,
+    loading
     }) {
-      class NewAPIAction implements APIAction {
-        actions = oldAPIAction.actions;
-        url = oldAPIAction.url;
-        apiRequestType = apiRequestType;
-        httpMethod = oldAPIAction.httpMethod;
-        payload = oldAPIAction.payload;
-        type = actionType;
-        loading = loading;
-      }
-      return new NewAPIAction;
+    class NewAPIAction implements APIAction {
+      actions = oldAPIAction.actions;
+      url = oldAPIAction.url;
+      apiRequestType = apiRequestType;
+      httpMethod = oldAPIAction.httpMethod;
+      payload = oldAPIAction.payload;
+      type = actionType;
+      loading = loading;
     }
+    return new NewAPIAction;
+  }
 }

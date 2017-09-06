@@ -3,7 +3,12 @@ import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 
 import 'rxjs/add/observable/of';
 
-export type ValidatorFunction = () => Observable<boolean>;
+
+
+export type StepOnNextFunction = () => Observable<{
+  success: boolean,
+  message?: string
+}>;
 
 @Component({
   selector: 'app-step',
@@ -15,21 +20,20 @@ export class StepComponent implements OnInit {
 
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
-
   active = false;
-
   valid = false;
-
   complete = false;
+  error = false;
+  busy = false;
 
   @Input()
   title: string;
 
   @Input()
-  validate: ValidatorFunction = () => Observable.of(true)
+  validate: Observable<boolean> = Observable.of(true);
 
   @Input()
-  onNext: ValidatorFunction = () => Observable.of(true)
+  onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
   constructor() { }
 

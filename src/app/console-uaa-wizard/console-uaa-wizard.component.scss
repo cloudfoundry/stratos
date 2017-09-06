@@ -1,3 +1,9 @@
 .uaa-wizard {
+  height: 100%;
   margin: 0 100px;
+  color: white;
+  &__form {
+    display: flex;
+    flex-direction: column;
+  }
 }

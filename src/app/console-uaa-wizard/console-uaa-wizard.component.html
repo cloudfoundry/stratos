@@ -1,6 +1,6 @@
 <div class="uaa-wizard">
   <app-steppers>
-    <app-step title="Step {{ steps[0] }}">
+    <app-step title="Introduction">
       <div>
         <p>Welcome to SUSE Cloud Foundry Console.</p>
         <p>
@@ -11,14 +11,29 @@
           get started.</p>
       </div>
     </app-step>
-    <app-step title="Step 2">
-      <div>step {{ steps[1] }}</div>
+    <app-step title="UAA Endpoint" [validate]="validateUAAForm" [onNext]="uaaFormNext">
+      <form class="uaa-wizard__form" [formGroup]="uaaForm">
+        UAA Endpoint
+        <md-form-field>
+          <input mdInput formControlName="apiUrl" placeholder="API Url">
+        </md-form-field>
+        Console credentials for UAA
+        <md-form-field>
+          <input mdInput formControlName="clientId" placeholder="Client ID">
+        </md-form-field>
+        <md-form-field>
+          <input mdInput formControlName="clientSecret" placeholder="Client Secret">
+        </md-form-field>
+        <md-form-field>
+          <input mdInput formControlName="adminUsername" placeholder="Admin Username">
+        </md-form-field>
+        <md-form-field>
+          <input mdInput type="password" formControlName="adminPassword" placeholder="Admin Password">
+        </md-form-field>
+      </form>
     </app-step>
-    <app-step title="Step 3">
-      <div>step {{ steps[2] }}</div>
-    </app-step>
-    <app-step title="Step 4">
-      <div>step {{ steps[3] }}</div>
+    <app-step title="Console Admin Scope">
+      <div>step cas</div>
     </app-step>
   </app-steppers>
 </div>

@@ -1,5 +1,5 @@
 import { Observable, Observer, Subscription } from 'rxjs/Rx';
-import { StepComponent, ValidatorFunction } from './../step/step.component';
+import { StepComponent } from './../step/step.component';
 import { Component, ContentChildren, forwardRef, OnInit, QueryList, AfterContentInit } from '@angular/core';
 
 @Component({
@@ -39,22 +39,45 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     if (this.stepValidateSub) {
       this.stepValidateSub.unsubscribe();
     }
-    const validationFunctions: Observable<boolean>[] = steps.map(step => {
-      return step.validate();
+    const validatorObs: Observable<boolean>[] = steps.map(step => {
+      return step.validate;
     });
-    this.stepValidateSub = Observable.forkJoin(
-      validationFunctions
+    this.stepValidateSub = Observable.combineLatest(
+      validatorObs
     ).subscribe(results => {
       console.log(results);
       results.forEach((res, i) => {
-        this.steps[i].valid = res;
+        const step = this.steps[i];
+        step.valid = res;
+        step.error = false;
       });
     });
+  }
+
+  goNext(index: number) {
+    const step = this.steps[index];
+    step.busy = true;
+
+    step.onNext()
+      .first()
+      .catch(() => Observable.of({ success: false, message: 'Failed' }))
+      .subscribe(({ success, message }) => {
+        step.error = !success;
+        step.busy = false;
+        if (success) {
+          this.setActive(index + 1);
+        }
+      });
   }
 
   setActive(index: number) {
     if (this.canGoto(index)) {
       this.steps.forEach((_step, i) => {
+        if (i < index) {
+          _step.complete = true;
+        } else {
+          _step.complete = false;
+        }
         _step.active = i === index ? true : false;
       });
       this.currentIndex = index;
@@ -62,17 +85,27 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   canGoto(index: number) {
+    // TODO: tidy this up
+    const step = this.steps[this.currentIndex];
+    if (step.busy) {
+      return false;
+    }
+    if (index === this.currentIndex) {
+      return true;
+    }
     if (index < 0 || index > this.steps.length) {
       return false;
     }
-    if (index <= this.currentIndex) {
+    if (index < this.currentIndex) {
       return true;
+    } else if (step.error) {
+      return false;
     }
-    const step = this.steps[this.currentIndex];
     if (step.valid) {
       return true;
+    } else {
+      return false;
     }
-    return false;
   }
 
   getIconLigature(step: StepComponent, index: number): 'done' {
