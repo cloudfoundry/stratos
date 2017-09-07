@@ -20,7 +20,7 @@
     </div>
     <div class="steppers__navigation">
       <button color="accent" md-button md-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
-      <button color="primary" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoto(currentIndex + 1)">Next</button>
+      <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
+import { Router } from '@angular/router';
 import { UAASetupState } from './../store/reducers/uaa-setup.reducers';
-import { SetupUAA } from './../store/actions/setup.actions';
+import { SetupUAA, SetUAAScope } from './../store/actions/setup.actions';
 import { AppState } from './../store/app-state';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -16,10 +17,12 @@ import { Component, OnInit, AfterContentInit } from '@angular/core';
 })
 export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
 
-  constructor(public store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, private router: Router) { }
 
   uaaForm: FormGroup;
   validateUAAForm: Observable<boolean>;
+  uaaScopes = [];
+  selectedScope = '';
 
   uaaFormNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetupUAA({
@@ -34,10 +37,32 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       .skipWhile((state: UAASetupState) => {
         return state.settingUp;
       })
-      .map((state: UAASetupState) => ({
-        success: !state.error,
-        message: state.message
-      }));
+      .map((state: UAASetupState) => {
+        this.uaaScopes = state.payload.scope;
+        this.selectedScope = 'stratos.admin';
+        return {
+          success: !state.error,
+          message: state.message
+        };
+      });
+  }
+
+  uaaScopeNext: StepOnNextFunction = () => {
+    this.store.dispatch(new SetUAAScope(this.selectedScope));
+
+    return this.store.select('uaaSetup')
+      .skipWhile((state: UAASetupState) => {
+        return state.settingUp;
+      })
+      .map((state: UAASetupState) => {
+        if (!state.error) {
+          this.router.navigateByUrl('');
+        }
+        return {
+          success: !state.error,
+          message: state.message
+        };
+      });
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({
@@ -57,6 +82,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
     this.uaaForm.valueChanges.subscribe(() => {
       observer.next(this.uaaForm.valid);
     });
+
   }
 
   ngAfterContentInit() {

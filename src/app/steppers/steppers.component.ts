@@ -1,4 +1,4 @@
-import { Observable, Observer, Subscription } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs/Rx';
 import { StepComponent } from './../step/step.component';
 import { Component, ContentChildren, forwardRef, OnInit, QueryList, AfterContentInit } from '@angular/core';
 
@@ -19,6 +19,10 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   stepValidateSub: Subscription = null;
 
   currentIndex = 0;
+
+  nextButtonText = 'Next';
+
+  finishButtonText = 'Finish';
 
   ngOnInit() { }
 
@@ -44,14 +48,14 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     });
     this.stepValidateSub = Observable.combineLatest(
       validatorObs
-    ).subscribe(results => {
-      console.log(results);
-      results.forEach((res, i) => {
-        const step = this.steps[i];
-        step.valid = res;
-        step.error = false;
+    )
+      .subscribe(results => {
+        results.forEach((res, i) => {
+          const step = this.steps[i];
+          step.valid = res;
+          step.error = false;
+        });
       });
-    });
   }
 
   goNext(index: number) {
@@ -72,6 +76,10 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   setActive(index: number) {
     if (this.canGoto(index)) {
+      // We do allow next beyond the last step to
+      // allow the last step to finish up
+      // This shouldn't effect the state of the stepper though.
+      index = Math.min(index, this.steps.length - 1);
       this.steps.forEach((_step, i) => {
         if (i < index) {
           _step.complete = true;
@@ -108,8 +116,23 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     }
   }
 
+  canGoNext(index) {
+    const nextIndex = index + 1;
+    if (nextIndex > this.steps.length) {
+      return true;
+    } else {
+      return this.canGoto(nextIndex);
+    }
+  }
+
   getIconLigature(step: StepComponent, index: number): 'done' {
     return 'done';
+  }
+
+  getNextButtonText(nextIndex: number): string {
+    return nextIndex < this.steps.length ?
+      this.nextButtonText :
+      this.finishButtonText;
   }
 
 }

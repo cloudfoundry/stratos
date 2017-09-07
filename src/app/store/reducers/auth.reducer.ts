@@ -36,14 +36,14 @@ export function authReducer(state: AuthState = {
             return { ...state, loggingIn: true, loggedIn: false, error: false };
         case LOGIN_SUCCESS:
             const loginSuccess = action as LoginSuccess;
-            return { ...state, loggingIn: false, loggedIn: true };
+            return { ...state, loggingIn: false, loggedIn: true, error: false, errorMessage: '' };
         case LOGIN_FAILED:
             const loginFailed = action as LoginFailed;
             return { ...state, error: true, errorMessage: loginFailed.message, loggingIn: false, loggedIn: false };
         case VERIFY_SESSION:
             return { ...state, verifying: true };
         case SESSION_VERIFIED:
-            return { ...state, sessionData: { ...action.sessionData, valid: true }, verifying: false };
+            return { ...state, error: false, errorMessage: '', sessionData: { ...action.sessionData, valid: true }, verifying: false };
         case SESSION_INVALID:
             return { ...state, sessionData: { valid: false }, verifying: false };
         default:

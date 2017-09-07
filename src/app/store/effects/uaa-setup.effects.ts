@@ -1,4 +1,12 @@
-import { SETUP_UAA, SetupUAA, UaaSetupData, SetupUAASuccess, SetupUAAFailed } from './../actions/setup.actions';
+import {
+    SETUP_UAA,
+    SETUP_UAA_SCOPE,
+    SetupUAA,
+    UaaSetupData,
+    SetupUAASuccess,
+    SetupUAAFailed,
+    SetUAAScope
+} from './../actions/setup.actions';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
@@ -14,13 +22,11 @@ export class UAASetupEffect {
         private store: Store<AppState>
     ) { }
 
+    baseUrl = '/pp/v1/setup';
+
     @Effect() uaaSetupRequest$ = this.actions$.ofType<SetupUAA>(SETUP_UAA)
         .switchMap(({ setupData }) => {
-            const config = {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            };
+
             const headers = new Headers();
             const params = new URLSearchParams();
 
@@ -35,10 +41,25 @@ export class UAASetupEffect {
             }
 
             headers.append('Content-Type', 'application/x-www-form-urlencoded');
-            return this.http.post('/pp/v1/setup', params, {
+            return this.http.post(this.baseUrl, params, {
                 headers
             })
                 .map(data => new SetupUAASuccess(data.json()))
                 .catch((err, caught) => [new SetupUAAFailed(err)]);
         });
+
+    @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE)
+        .switchMap(({ scope }) => {
+            const headers = new Headers();
+            const params = new URLSearchParams();
+
+            params.set('console_admin_scope', scope);
+            headers.append('Content-Type', 'application/x-www-form-urlencoded');
+            return this.http.post(`${this.baseUrl}/update`, params, {
+                headers
+            })
+                .map(data => new SetupUAASuccess({}))
+                .catch((err, caught) => [new SetupUAAFailed(err)]);
+        });
+
 }

@@ -32,8 +32,14 @@
         </md-form-field>
       </form>
     </app-step>
-    <app-step title="Console Admin Scope">
-      <div>step cas</div>
+    <app-step title="Console Admin Scope" [onNext]="uaaScopeNext">
+      <form>
+        <md-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">
+          <md-option *ngFor="let scope of uaaScopes" [value]="scope">
+            {{ scope }}
+          </md-option>
+        </md-select>
+      </form>
     </app-step>
   </app-steppers>
 </div>

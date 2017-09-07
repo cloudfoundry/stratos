@@ -1,6 +1,7 @@
 import { Action } from '@ngrx/store';
 
 export const SETUP_UAA = '[Setup] Setup UAA';
+export const SETUP_UAA_SCOPE = '[Setup] Setup UAA scope';
 export const SETUP_UAA_SUCCESS = '[Setup] Setup UAA success';
 export const SETUP_UAA_FAILED = '[Setup] Setup UAA failed';
 
@@ -19,6 +20,14 @@ export class SetupUAA implements Action {
     ) { }
     type = SETUP_UAA;
 }
+
+export class SetUAAScope implements Action {
+    constructor(
+        public scope: string
+    ) { }
+    type = SETUP_UAA_SCOPE;
+}
+
 
 export class SetupUAASuccess implements Action {
     constructor(public payload: {}) { }

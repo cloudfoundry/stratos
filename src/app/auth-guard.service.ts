@@ -16,23 +16,23 @@ export class AuthGuardService implements CanActivate {
   ) { }
 
   canActivate(): Observable<boolean> {
-      return this.store.select('auth')
-        .map((state: AuthState) => {
-          if (!state.verifying) {
-            this.store.dispatch(new VerifySession());
-          }
-          return state;
-        })
-        .skipWhile((state: AuthState) => {
-          return !state.sessionData;
-        })
-        .map(state => {
-          if (state.sessionData.valid) {
-            return true;
-          } else {
-              this.router.navigateByUrl('/login');
-              return false;
-          }
+    return this.store.select('auth')
+      .map((state: AuthState) => {
+        if (!state.verifying && !state.sessionData) {
+          this.store.dispatch(new VerifySession());
+        }
+        return state;
+      })
+      .skipWhile((state: AuthState) => {
+        return !state.sessionData;
+      })
+      .map(state => {
+        if (state.sessionData.valid) {
+          return true;
+        } else {
+          this.router.navigateByUrl('/login');
+          return false;
+        }
       });
   }
 

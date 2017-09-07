@@ -8,6 +8,7 @@ import {
     MdSidenavModule,
     MdTabsModule,
     MdIconModule,
+    MdSelectModule,
 } from '@angular/material';
 
 const importExport = [
@@ -18,7 +19,8 @@ const importExport = [
     MdProgressSpinnerModule,
     MdSidenavModule,
     MdTabsModule,
-    MdIconModule
+    MdIconModule,
+    MdSelectModule
 ];
 
 @NgModule({
