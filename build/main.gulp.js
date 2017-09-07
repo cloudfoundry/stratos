@@ -22,7 +22,6 @@
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
   var sass = require('gulp-sass');
-  var sourcemaps = require('gulp-sourcemaps');
   var sort = require('gulp-sort');
   var templateCache = require('gulp-angular-templatecache');
   var uglify = require('gulp-uglify');
@@ -31,11 +30,11 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
+  var devDeps = require('./dev-dependencies');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
 
   var paths = config.paths;
-  var createSassSourceMaps = true;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
     templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components, browserSync;
   var packageJson = require('../package.json');
@@ -134,6 +133,7 @@
 
   // Compile SCSS to CSS
   gulp.task('css:generate', function () {
+    var sourcemaps = devDeps.get('gulp-sourcemaps');
     var scssFile = './bower_components/index.scss';
     utils.generateScssFile('./bower_components/index.scss', components.findMainFile('**/*.scss'), components.getBowerFolder());
     return gulp
@@ -144,24 +144,23 @@
           this.emit('end');
         }
       })))
-      .pipe(sourcemaps.init())
+      .pipe(gutil.env.devMode ? sourcemaps.init() : gutil.noop())
       .pipe(sass().on('error', sass.logError))
-      .pipe(gulpif(createSassSourceMaps, sourcemaps.write({
-        includeContent: false})
-      ))
+      .pipe(gutil.env.devMode ? sourcemaps.write({ includeContent: false}) : gutil.noop())
       .pipe(autoprefixer({ browsers: ['last 2 version'], cascade: false }))
-      .pipe(gulpif(createSassSourceMaps, sourcemaps.write()))
+      .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
 
   gulp.task('css', ['css:generate'], function () {
+    var sourcemaps = devDeps.get('gulp-sourcemaps');
     var cssFiles = bowerFiles.css;
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
       .pipe(concat('index.css'))
-      .pipe(gulpif(createSassSourceMaps, sourcemaps.init({loadMaps: true})))
+      .pipe(gutil.env.devMode ? sourcemaps.init({loadMaps: true}) : gutil.noop())
       .pipe(cleanCSS())
-      .pipe(gulpif(createSassSourceMaps, sourcemaps.write()))
+      .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -434,7 +433,6 @@
   // Production build
   gulp.task('build', function (next) {
     usePlumber = false;
-    createSassSourceMaps = false;
     runSequence(
       'clean',
       'prepare-frontend',
