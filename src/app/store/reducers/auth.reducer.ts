@@ -7,6 +7,7 @@ import {
     SESSION_VERIFIED,
     SessionData,
     VERIFY_SESSION,
+    RESET_AUTH
 } from './../actions/auth.actions';
 import { Login, LOGIN } from '../actions/auth.actions';
 import { APIAction, ApiActionTypes } from './../actions/APIActionType';
@@ -22,7 +23,7 @@ export interface AuthState {
     verifying: boolean;
 }
 
-export function authReducer(state: AuthState = {
+const defaultState = {
     loggedIn: false,
     loggingIn: false,
     user: null,
@@ -30,22 +31,36 @@ export function authReducer(state: AuthState = {
     errorMessage: '',
     sessionData: null,
     verifying: false
-}, action) {
+};
+
+export function authReducer(state: AuthState = defaultState, action) {
     switch (action.type) {
         case LOGIN:
             return { ...state, loggingIn: true, loggedIn: false, error: false };
         case LOGIN_SUCCESS:
             const loginSuccess = action as LoginSuccess;
-            return { ...state, loggingIn: false, loggedIn: true, error: false, errorMessage: '' };
+            return { ...state, loggingIn: false, loggedIn: true, error: false, uaaError: false, errorMessage: '' };
         case LOGIN_FAILED:
             const loginFailed = action as LoginFailed;
             return { ...state, error: true, errorMessage: loginFailed.message, loggingIn: false, loggedIn: false };
         case VERIFY_SESSION:
             return { ...state, verifying: true };
         case SESSION_VERIFIED:
-            return { ...state, error: false, errorMessage: '', sessionData: { ...action.sessionData, valid: true }, verifying: false };
+            return {
+                ...state,
+                error: false,
+                errorMessage: '',
+                sessionData: {
+                    ...action.sessionData,
+                    valid: true,
+                    uaaError: false
+                },
+                verifying: false
+            };
         case SESSION_INVALID:
-            return { ...state, sessionData: { valid: false }, verifying: false };
+            return { ...state, sessionData: { valid: false, uaaError: action.uaaError }, verifying: false };
+        case RESET_AUTH:
+            return defaultState;
         default:
             return state;
     }

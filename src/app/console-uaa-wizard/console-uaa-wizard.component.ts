@@ -1,3 +1,6 @@
+import { environment } from './../../environments/environment';
+import { AuthState } from '../store/reducers/auth.reducer';
+import { VerifySession } from './../store/actions/auth.actions';
 import { Router } from '@angular/router';
 import { UAASetupState } from './../store/reducers/uaa-setup.reducers';
 import { SetupUAA, SetUAAScope } from './../store/actions/setup.actions';
@@ -49,18 +52,27 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
 
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
-
-    return this.store.select('uaaSetup')
-      .skipWhile((state: UAASetupState) => {
-        return state.settingUp;
+    // return Observable.interval(5000).switchMap(() => {
+    return this.store.select(s => [s.uaaSetup, s.auth])
+      .filter((state: [UAASetupState, AuthState]) => {
+        return !(state[0].settingUp || state[1].verifying);
       })
-      .map((state: UAASetupState) => {
-        if (!state.error) {
+      .delay(1000)
+      .take(30)
+      .filter((state: [UAASetupState, AuthState]) => {
+        const hasSessionData = !!state[1].sessionData;
+        if (!hasSessionData) {
+          this.store.dispatch(new VerifySession());
+        }
+        return hasSessionData;
+      })
+      .map((state: [UAASetupState, AuthState]) => {
+        if (!state[0].error) {
           this.router.navigateByUrl('');
         }
         return {
-          success: !state.error,
-          message: state.message
+          success: !state[0].error,
+          message: state[0].message
         };
       });
   }
@@ -72,6 +84,13 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       adminUsername: new FormControl('', [<any>Validators.required]),
       adminPassword: new FormControl('', [<any>Validators.required]),
     });
+
+    if (environment.uaaSetup) {
+      this.uaaForm.get('apiUrl').setValue(environment.uaaSetup.apiUrl || '');
+      this.uaaForm.get('clientId').setValue(environment.uaaSetup.clientId || '');
+      this.uaaForm.get('adminPassword').setValue(environment.uaaSetup.adminPassword || '');
+      this.uaaForm.get('adminUsername').setValue(environment.uaaSetup.adminUsername || '');
+    }
 
     let observer;
     this.validateUAAForm = Observable.create((_observer) => {

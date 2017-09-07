@@ -14,13 +14,15 @@ export interface UAASetupState {
     settingUp: boolean;
 }
 
-export function uaaSetupReducer(state: UAASetupState = {
+const defaultState = {
     payload: null,
     setup: false,
     error: false,
     message: '',
     settingUp: false
-}, action) {
+};
+
+export function uaaSetupReducer(state: UAASetupState = defaultState, action) {
     switch (action.type) {
         case SETUP_UAA_SCOPE:
         case SETUP_UAA:

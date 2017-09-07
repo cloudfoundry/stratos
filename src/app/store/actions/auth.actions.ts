@@ -9,6 +9,8 @@ export const VERIFY_SESSION = '[Auth] Verify session';
 export const SESSION_VERIFIED = '[Auth] Session verified';
 export const SESSION_INVALID = '[Auth] Session invalid';
 
+export const RESET_AUTH = '[Auth] Reset auth data';
+
 export interface SessionData {
     endpoints?: {};
     user?: {
@@ -21,10 +23,11 @@ export interface SessionData {
         database_version: number;
     };
     valid: boolean;
+    uaaError?: boolean;
 }
 
 export class Login implements Action {
-    constructor(public username: string, public password: string) {}
+    constructor(public username: string, public password: string) { }
     type = LOGIN;
 }
 
@@ -33,7 +36,7 @@ export class LoginSuccess implements Action {
 }
 
 export class LoginFailed implements Action {
-    constructor(public message: string) {}
+    constructor(public message: string) { }
     type = LOGIN_FAILED;
 }
 
@@ -42,12 +45,17 @@ export class VerifySession implements Action {
 }
 
 export class VerifiedSession implements Action {
-    constructor(private sessionData: SessionData) {}
+    constructor(private sessionData: SessionData) { }
     type = SESSION_VERIFIED;
 }
 
 export class InvalidSession implements Action {
+    constructor(public uaaError: boolean = false) { }
     type = SESSION_INVALID;
+}
+
+export class ResetAuth implements Action {
+    type = RESET_AUTH;
 }
 
 

@@ -7,5 +7,11 @@ export const environment = {
   production: false,
   proxyAPIVersion: 'v1',
   cfAPIVersion: 'v2',
-  baseURL: 'https://localhost:4443'
+  baseURL: 'https://localhost:4443',
+  uaaSetup: {
+    apiUrl: 'http://uaa:8080',
+    clientId: 'console',
+    adminUsername: 'admin',
+    adminPassword: 'hscadmin'
+  }
 };

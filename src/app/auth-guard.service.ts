@@ -30,7 +30,9 @@ export class AuthGuardService implements CanActivate {
         if (state.sessionData.valid) {
           return true;
         } else {
-          this.router.navigateByUrl('/login');
+          state.sessionData.uaaError ?
+            this.router.navigateByUrl('/uaa') :
+            this.router.navigateByUrl('/login');
           return false;
         }
       });
