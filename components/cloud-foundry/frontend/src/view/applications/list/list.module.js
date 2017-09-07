@@ -276,6 +276,9 @@
             }
           });
       } else {
+        // Cluster is set to all, so should org
+        vm.model.filterParams.orgGuid = 'all';
+        vm.filter.orgGuid = 'all';
         return $q.resolve();
       }
     }
@@ -313,6 +316,9 @@
             }
           });
       } else {
+        // Cluster & org are set to all, so should space
+        vm.model.filterParams.spaceGuid = 'all';
+        vm.filter.spaceGuid = 'all';
         return $q.resolve();
       }
     }
@@ -407,8 +413,8 @@
     }
 
     /**
-     * @function getClusterOrganizations
-     * @description Get organizations for selected cluster
+     * @function setCluster
+     * @description
      * @returns {void}
      * @public
      */
