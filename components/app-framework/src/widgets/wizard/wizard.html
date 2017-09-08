@@ -69,36 +69,37 @@
   </div>
 
   <div class="wizard-foot" ng-if="!wizardCtrl.workflow.hideFooter">
+    <div class="wizard-foot-buttons" ng-class="{'wizard-footer-hidden' : wizardCtrl.options.hideFooterButtons}">
+      <button type="button"
+              translate
+              class="btn btn-default cancel"
+              ng-click="wizardCtrl.cancel()"
+              ng-disabled="wizardCtrl.cancelBtnDisabled"
+              ng-if="wizardCtrl.allowCancel()">
+        {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'buttons.cancel' }}
+      </button>
 
-    <button type="button"
-            translate
-            class="btn btn-default cancel"
-            ng-click="wizardCtrl.cancel()"
-            ng-disabled="wizardCtrl.cancelBtnDisabled"
-            ng-if="wizardCtrl.allowCancel()">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'buttons.cancel' }}
-    </button>
+      <button type="button"
+        translate
+        class="btn btn-default back"
+        ng-click="wizardCtrl.back()"
+        ng-disabled="wizardCtrl.backBtnDisabled"
+        ng-if="wizardCtrl.workflow.allowBack()">
+        {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'buttons.back' }}
+      </button>
 
-    <button type="button"
-      translate
-      class="btn btn-default back"
-      ng-click="wizardCtrl.back()"
-      ng-disabled="wizardCtrl.backBtnDisabled"
-      ng-if="wizardCtrl.workflow.allowBack()">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'buttons.back' }}
-    </button>
-
-    <button type="button"
-      translate
-      class="btn next"
-      ng-class="{
-                  'btn-primary': !wizardCtrl.stepCommit,
-                  'btn-commit': wizardCtrl.stepCommit
-                }"
-      ng-click="wizardCtrl.next()"
-      ng-if="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
-      ng-disabled="wizardCtrl.disableNext()">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'buttons.next' }}
-    </button>
+      <button type="button"
+        translate
+        class="btn next"
+        ng-class="{
+                    'btn-primary': !wizardCtrl.stepCommit,
+                    'btn-commit': wizardCtrl.stepCommit
+                  }"
+        ng-click="wizardCtrl.next()"
+        ng-if="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
+        ng-disabled="wizardCtrl.disableNext()">
+        {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'buttons.next' }}
+      </button>
+    </div>
   </div>
 </div>

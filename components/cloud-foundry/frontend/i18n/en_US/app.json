@@ -226,6 +226,12 @@
             "name-error-pattern": "Name contains invalid pattern",
             "plan-label": "Plan",
             "plan-placeholder": "Select a Plan",
+            "params-label": "Parameters",
+            "service-params": "Service Parameters",
+            "params-placeholder": "Enter Service Parameter JSON",
+            "tags-label": "Tags",
+            "edit-params": "Edit",
+            "done": "Done",
             "button": {
               "yes": "Create",
               "no": "@:buttons.cancel"

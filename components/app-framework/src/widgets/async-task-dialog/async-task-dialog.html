@@ -23,24 +23,26 @@
     </div>
   </div>
   <div class="form-actions modal-footer" ng-class="{ 'disable-margin': asyncTaskDialogCtrl.disableMargin() } ">
-    <button ng-if="!asyncTaskDialogCtrl.context.noCancel"
-            translate
-            ng-disabled="asyncTaskDialogCtrl.disableButtons || asyncTaskDialogCtrl.showSpinner"
-            type="button" class="btn btn-default"
-            ng-click="$dismiss()">{{ asyncTaskDialogCtrl.context.buttonTitles.cancel }}
-    </button>
-    <button ng-if="!asyncTaskDialogCtrl.context.noSubmit"
-            class="btn"
-            translate
-            ng-class="{
-                        'btn-primary': !asyncTaskDialogCtrl.context.submitCommit(),
-                        'btn-commit': asyncTaskDialogCtrl.context.submitCommit()
-                      }"
-            ng-click="asyncTaskDialogCtrl.invokeAction()"
-            ng-disabled="asyncTaskDialogCtrl.disableSubmit()"
-            type="submit">
-      {{ asyncTaskDialogCtrl.context.buttonTitles.submit }}
-    </button>
+    <div class="async-footer-buttons" ng-class="{'async-footer-hidden' : asyncTaskDialogCtrl.hideFooter}">
+      <button ng-if="!asyncTaskDialogCtrl.context.noCancel"
+              translate
+              ng-disabled="asyncTaskDialogCtrl.disableButtons || asyncTaskDialogCtrl.showSpinner"
+              type="button" class="btn btn-default"
+              ng-click="$dismiss()">{{ asyncTaskDialogCtrl.context.buttonTitles.cancel }}
+      </button>
+      <button ng-if="!asyncTaskDialogCtrl.context.noSubmit"
+              class="btn"
+              translate
+              ng-class="{
+                          'btn-primary': !asyncTaskDialogCtrl.context.submitCommit(),
+                          'btn-commit': asyncTaskDialogCtrl.context.submitCommit()
+                        }"
+              ng-click="asyncTaskDialogCtrl.invokeAction()"
+              ng-disabled="asyncTaskDialogCtrl.disableSubmit()"
+              type="submit">
+        {{ asyncTaskDialogCtrl.context.buttonTitles.submit }}
+      </button>
+    </div>
   </div>
 </div>
 
