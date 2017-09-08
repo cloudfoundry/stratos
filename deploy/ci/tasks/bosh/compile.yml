@@ -12,7 +12,7 @@ image_resource:
 run:
   path: sh
   args:
-    - -exc
+    - -xc
     - |
       # Register BOSH Director
       apt-get update
