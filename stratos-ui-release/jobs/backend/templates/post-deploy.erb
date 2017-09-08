@@ -1,4 +1,5 @@
 #!/bin/bash
+<% if p('stratos_ui.backend.use_mysql') == true %>
 set -e
 
 # TODO check if installation is required
@@ -74,3 +75,4 @@ rm <%= p('stratos_ui.backend.upgrade_volume_path') %>/<%= p('stratos_ui.backend.
 echo "Removed the upgrade lock file."
 
 exit 0
+<% end %>
