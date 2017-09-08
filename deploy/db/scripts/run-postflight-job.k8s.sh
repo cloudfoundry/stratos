@@ -22,9 +22,8 @@ if [ "$DATABASE_PROVIDER" = "pgsql" ]; then
     chmod 0600 /tmp/pgpass
     stratosDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$DB_DATABASE_NAME';")
     # Get db user password from secrets file
-    PWD=$(cat $DB_PASSWORDFILE)
+    DB_PASSWORD=$(cat $DB_PASSWORDFILE)
     DBCONF_KEY=k8s
-    DB_PASSWORD=$PWD 
 fi
 
 if [  "$DATABASE_PROVIDER" = "mysql" ]; then
@@ -39,7 +38,7 @@ if [ -z "$stratosDbExists" ] ; then
     execStatement "CREATE DATABASE \"$DB_DATABASE_NAME\";"
     echo "Creating user $DB_USER"
     if [ "$DATABASE_PROVIDER" = "pgsql" ]; then
-        execStatement "CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$PWD';"
+        execStatement "CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASSWORD';"
     fi
     if [ "$DATABASE_PROVIDER" = "mysql" ]; then
         execStatement "CREATE USER $DB_USER IDENTIFIED BY '$DB_PASSWORD';"
@@ -47,7 +46,6 @@ if [ -z "$stratosDbExists" ] ; then
     
     echo "Granting privs for $DB_DATABASE_NAME to $DB_USER"
     execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$DB_DATABASE_NAME\" TO $DB_USER;"
-    DBCONF_KEY=mariadb-k8s
 else
     echo "$DB_DATABASE_NAME already exists"
 fi
