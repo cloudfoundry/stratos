@@ -52,7 +52,6 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
 
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
-    // return Observable.interval(5000).switchMap(() => {
     return this.store.select(s => [s.uaaSetup, s.auth])
       .filter((state: [UAASetupState, AuthState]) => {
         return !(state[0].settingUp || state[1].verifying);

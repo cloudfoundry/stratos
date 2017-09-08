@@ -1,3 +1,10 @@
+import {
+  GET_CNSIS_FAILED,
+  GET_CNSIS_SUCCESS,
+  GetAllCNSIS,
+  GetAllCNSISFailed,
+  GetAllCNSISSuccess,
+} from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import {
   InvalidSession,
@@ -13,15 +20,8 @@ import {
 } from './../actions/auth.actions';
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/observable/from';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/switchMap';
 
 
 @Injectable()
@@ -58,11 +58,25 @@ export class AuthEffect {
     .switchMap(() => {
       return this.http.get('/pp/v1/auth/session/verify')
         .mergeMap(data => {
-          return [new VerifiedSession(data.json()), new LoginSuccess()];
+          return [new VerifiedSession(data.json()), new GetAllCNSIS(true)];
         })
         .catch((err, caught) => {
           return [new InvalidSession(err.status === 503)];
         });
+    });
+
+  @Effect() CnsisSuccess$ = this.actions$.ofType<GetAllCNSISSuccess>(GET_CNSIS_SUCCESS)
+    .map(action => {
+      if (action.login) {
+        return new LoginSuccess();
+      }
+    });
+
+  @Effect() CnsisFailed$ = this.actions$.ofType<GetAllCNSISFailed>(GET_CNSIS_FAILED)
+    .map(action => {
+      if (action.login) {
+        return new LoginFailed(`Couldn't fetch cnsis.`);
+      }
     });
 
   @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID)

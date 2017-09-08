@@ -24,15 +24,15 @@ export class AuthGuardService implements CanActivate {
         return state;
       })
       .skipWhile((state: AuthState) => {
-        return !state.sessionData;
+        return !state.loggedIn;
       })
       .map(state => {
         if (state.sessionData.valid) {
           return true;
         } else {
           state.sessionData.uaaError ?
-            this.router.navigateByUrl('/uaa') :
-            this.router.navigateByUrl('/login');
+          this.router.navigateByUrl('/uaa') :
+          this.router.navigateByUrl('/login');
           return false;
         }
       });

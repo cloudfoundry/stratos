@@ -1,24 +1,21 @@
-import { APIAction, ApiActionTypes } from './../actions/APIActionType';
+import { EntitiesState } from './api.reducer';
+import { ApiActionTypes } from './../actions/api.actions';
 import { Action } from '@ngrx/store';
 
-export interface APIState {
-    payload: object;
-    loading: boolean;
+export interface EntitiesState {
+    applications: {};
 }
 
-export function apiReducer(state: APIState = {
-    payload: {},
-    loading: false
-}, action: APIAction) {
-    if (
-        action.type === ApiActionTypes.API_REQUEST_START ||
-        action.apiRequestType === ApiActionTypes.API_REQUEST_SUCCESS ||
-        action.apiRequestType === ApiActionTypes.API_REQUEST_FAILED
-    ) {
-        const apiAction = action as APIAction;
-        const { payload, loading } = apiAction;
-        return { ...state, payload, loading };
-    } else {
-        return state;
+const defaultState = {
+     applications: {}
+};
+
+export function entitiesReducer(state: EntitiesState = defaultState, action) {
+    switch (action.apiType) {
+        case ApiActionTypes.API_REQUEST_SUCCESS:
+            return { ...state, ...action.response.entities };
+        default:
+            return state;
     }
 }
+

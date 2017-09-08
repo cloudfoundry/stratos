@@ -1,19 +1,17 @@
+import { normalize } from 'normalizr';
+import { CNSISModel } from './../reducers/cnsis.reducer';
 import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
-import { APIAction, ApiActionTypes } from './../actions/APIActionType';
+import { APIAction, ApiActionTypes, StartAPIAction, WrapperAPIActionSuccess, WrapperAPIActionFailed } from './../actions/api.actions';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Headers, Http, RequestOptions, RequestOptionsArgs, Request, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 
-import 'rxjs/add/observable/from';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/switchMap';
-
-
+const { proxyAPIVersion, cfAPIVersion } = environment;
 @Injectable()
 export class APIEffect {
 
@@ -24,60 +22,63 @@ export class APIEffect {
   ) { }
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
-    .mergeMap(apiAction => {
-      const startAction = this.newAPIAction({
-        oldAPIAction: apiAction,
-        apiRequestType: apiAction.actions[0],
-        actionType: ApiActionTypes.API_REQUEST_START,
-        loading: true
-      });
-      return [
-        startAction,
-        { type: apiAction.actions[0] }
-      ];
-    });
+  .map(apiAction => {
+    return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity);
+  });
 
-  @Effect() apiRequest$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST_START)
-    .switchMap(apiAction => {
-      const { httpMethod, apiRequestType, url, payload } = apiAction;
-      const { proxyAPIVersion, cfAPIVersion } = environment;
-      const fullURL = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${url}`;
-      return this.http[httpMethod](fullURL, payload)
-        .mergeMap(data => {
-          apiAction.type = apiAction.actions[1];
-          apiAction.apiRequestType = ApiActionTypes.API_REQUEST_SUCCESS;
-          apiAction.payload = data;
-          apiAction.loading = false;
-          return apiAction;
+  @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
+    .withLatestFrom(this.store)
+    .switchMap(([apiAction, state]) => {
+      this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+      apiAction.options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${apiAction.options.url}`;
+      apiAction.options.headers = this.addBaseHeaders(state.cnsis.entities, apiAction.options.headers);
+      return this.http.request(new Request(apiAction.options))
+        .mergeMap(response => {
+          const entities = this.getEntities(apiAction, response);
+          console.log(entities);
+          return [new WrapperAPIActionSuccess(apiAction.actions[1], entities)];
         })
-        .catch(() => {
-          const failedAction = this.newAPIAction({
-            oldAPIAction: apiAction,
-            apiRequestType: ApiActionTypes.API_REQUEST_FAILED,
-            actionType: apiAction.actions[2],
-            loading: false
-          });
-          return [failedAction];
+        .catch(err => {
+          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entity)];
         });
-    }).catch((err, caught) => {
-      return caught;
     });
 
-  newAPIAction({
-      oldAPIAction,
-    apiRequestType,
-    actionType,
-    loading
-    }) {
-    class NewAPIAction implements APIAction {
-      actions = oldAPIAction.actions;
-      url = oldAPIAction.url;
-      apiRequestType = apiRequestType;
-      httpMethod = oldAPIAction.httpMethod;
-      payload = oldAPIAction.payload;
-      type = actionType;
-      loading = loading;
+    getEntities(apiAction: StartAPIAction, response: Response) {
+      const data = response.json();
+      const allEntities = Object.keys(data).map(cfGuid => {
+        const cfData = data[cfGuid];
+        if (cfData.resources) {
+          if (!cfData.resources.length) {
+            return null;
+          }
+          return cfData.resources.map(({ entity, metadata }) => {
+            return this.mergeData(entity, metadata, cfGuid);
+          });
+        } else {
+          return this.mergeData(cfData.entity, cfData.metadata, cfGuid);
+        }
+      });
+      const flatEntities = [].concat(...allEntities).filter(e => !!e);
+      console.log(flatEntities);
+      return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
     }
-    return new NewAPIAction;
-  }
+
+    mergeData(entity, metadata, cfGuid) {
+      return {...entity, ...metadata, cfGuid};
+    }
+
+    getDataFromResponse(response: Response) {
+      response.json();
+    }
+
+    addBaseHeaders(cnsiss: CNSISModel[], header: Headers): Headers {
+      const headers = new Headers();
+      headers.set('x-cnap-cnsi-list', cnsiss.map(c => c.guid));
+      return headers;
+    }
+
+    getActionFromString(type: string) {
+      return { type };
+    }
+
 }

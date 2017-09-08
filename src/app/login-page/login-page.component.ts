@@ -33,15 +33,15 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription =
       this.store.select('auth')
-        .subscribe((state: AuthState) => {
-          if (state.loggedIn && state.sessionData && state.sessionData.valid) {
-            this.router.navigateByUrl('');
-          } else {
-            this.loggedIn = state.loggedIn;
-            this.loggingIn = state.loggingIn;
-            this.error = state.error;
-          }
-        });
+      .subscribe((state: AuthState) => {
+        if (state.loggedIn && state.sessionData && state.sessionData.valid) {
+          this.router.navigateByUrl('');
+        } else {
+          this.loggedIn = state.loggedIn;
+          this.loggingIn = state.loggingIn;
+          this.error = state.error;
+        }
+      });
   }
 
   ngOnDestroy() {

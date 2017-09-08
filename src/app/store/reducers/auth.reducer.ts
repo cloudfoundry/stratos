@@ -10,7 +10,7 @@ import {
     RESET_AUTH
 } from './../actions/auth.actions';
 import { Login, LOGIN } from '../actions/auth.actions';
-import { APIAction, ApiActionTypes } from './../actions/APIActionType';
+import { APIAction, ApiActionTypes } from './../actions/api.actions';
 import { Action } from '@ngrx/store';
 
 export interface AuthState {

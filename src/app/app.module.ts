@@ -1,3 +1,5 @@
+import { CNSISEffect } from './store/effects/cnsis.effects';
+import { cnsisReducer } from './store/reducers/cnsis.reducer';
 import { UAASetupEffect } from './store/effects/uaa-setup.effects';
 import { uaaSetupReducer } from './store/reducers/uaa-setup.reducers';
 import { AppState } from './store/app-state';
@@ -17,7 +19,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 
-import { apiReducer } from './store/reducers/api.reducer';
+import { entitiesReducer } from './store/reducers/api.reducer';
 
 import { AppComponent } from './app.component';
 import { LoginPageComponent } from './login-page/login-page.component';
@@ -29,6 +31,10 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard/console-uaa-wizard.component';
 import { SteppersComponent } from './steppers/steppers.component';
 import { StepComponent } from './step/step.component';
+
+import 'rxjs/add/observable/from';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/switchMap';
 
 export function logger(reducer): any {
   // default, no options
@@ -75,9 +81,10 @@ const appRoutes: Routes = [
     MDAppModule,
     BrowserAnimationsModule,
     StoreModule.forRoot({
-      api: apiReducer,
+      entities: entitiesReducer,
       auth: authReducer,
-      uaaSetup: uaaSetupReducer
+      uaaSetup: uaaSetupReducer,
+      cnsis: cnsisReducer
     }, {
         metaReducers
       }),
@@ -90,7 +97,8 @@ const appRoutes: Routes = [
     EffectsModule.forRoot([
       APIEffect,
       AuthEffect,
-      UAASetupEffect
+      UAASetupEffect,
+      CNSISEffect
     ])
   ],
   providers: [
