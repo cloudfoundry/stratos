@@ -28,8 +28,8 @@
   }
 
   function ClusterDetailController($stateParams, $scope, $state, $q,
-                                   modelManager, apiManager, appUtilsService, appClusterCliCommands,
-                                   modelUtils, cfOrganizationModel, cfUtilsService, cfTabs) {
+    modelManager, apiManager, appUtilsService, appClusterCliCommands,
+    modelUtils, cfOrganizationModel, cfUtilsService, cfTabs) {
     var that = this;
     this.guid = $stateParams.guid;
     this.appClusterCliCommands = appClusterCliCommands;

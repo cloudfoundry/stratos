@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(DomainsDeprecatedApi.prototype, {
 
-   /*
+    /*
     * Create a Domain owned by the given Organization (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/create_a_domain_owned_by_the_given_organization_(deprecated).html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Create a Shared Domain (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/create_a_shared_domain_(deprecated).html
     */
@@ -54,7 +54,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Domain (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/delete_a_particular_domain_(deprecated).html
     */
@@ -71,7 +71,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Domains (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/list_all_domains_(deprecated).html
     */
@@ -88,7 +88,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces for the Domain (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/list_all_spaces_for_the_domain_(deprecated).html
     */
@@ -105,7 +105,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Domain (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/domains__deprecated_/retrieve_a_particular_domain_(deprecated).html
     */

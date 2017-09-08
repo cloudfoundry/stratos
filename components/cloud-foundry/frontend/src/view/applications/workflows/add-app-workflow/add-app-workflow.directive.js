@@ -40,7 +40,7 @@
    * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfUtilsService, $scope, $q,
-                                    $translate) {
+    $translate) {
 
     var vm = this;
 
@@ -125,10 +125,7 @@
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-application.html',
             formName: 'application-name-form',
-            btnText: {
-              next: 'buttons.add',
-              cancel: 'buttons.cancel'
-            },
+            nextBtnText: 'buttons.add',
             showBusyOnNext: true,
             isLastStep: true,
             onEnter: function () {

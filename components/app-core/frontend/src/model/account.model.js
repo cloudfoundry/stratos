@@ -128,7 +128,7 @@
      * @private
      */
     function onLoggedIn(response) {
-      var sessionExpiresOnEpoch = response.headers()['x-cnap-session-expires-on'];
+      var sessionExpiresOnEpoch = response.headers()['x-cap-session-expires-on'];
 
       var loginData = response.data || {};
       var loginRes = loginData.user ? loginData.user : loginData;

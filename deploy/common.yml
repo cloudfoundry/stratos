@@ -59,10 +59,6 @@ services:
       - "3003:3003"
     env_file:
       ./proxy.env
-    volumes:
-      - ./hsc-upgrade-volume:/hsc-upgrade-volume
-
-
   nginx:
     extends: buildCommon
     build:
@@ -92,4 +88,4 @@ services:
     # NOTE: This is required so that the tests run against
     # a UAA instance that has all the correct roles
     image: splatform/stratos-uaa
-
+    

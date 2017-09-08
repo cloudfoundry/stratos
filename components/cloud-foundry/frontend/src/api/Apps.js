@@ -20,7 +20,7 @@
   /* eslint-disable camelcase */
   angular.extend(AppsApi.prototype, {
 
-   /*
+    /*
     * Associate Route with the App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/associate_route_with_the_app.html
     */
@@ -37,7 +37,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Copy the app bits for an App
     * This endpoint will copy the package bits in the blobstore from the source app to the destination app.
     * It will always return a job which you can query for success or failure.
@@ -58,7 +58,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Docker App (experimental)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/creating_a_docker_app_(experimental).html
     */
@@ -76,7 +76,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating an App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/creating_an_app.html
     */
@@ -94,7 +94,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/delete_a_particular_app.html
     */
@@ -111,7 +111,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Downloads the staged droplet for an App
     * When using a remote blobstore, such as AWS, the response is a redirect to the actual location of the bits.
     * If the client is automatically following redirects, then the OAuth token that was used to communicate with Cloud Controller will be replayed on the new redirect request.
@@ -131,7 +131,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get App summary
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_app_summary.html
     */
@@ -148,7 +148,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get detailed stats for a STARTED App
     * Get status for each instance of an App using the app guid.
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_detailed_stats_for_a_started_app.html
@@ -166,7 +166,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get the env for an App
     * Get the environment variables for an App using the app guid. Restricted to SpaceDeveloper role.
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_the_env_for_an_app.html
@@ -184,7 +184,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get the instance information for a STARTED App
     * Get status for each instance of an App using the app guid. Note: Provided example response is for apps running on Diego.
     * For apps running on DEAs, instance information will appear as follows:
@@ -213,7 +213,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Apps
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_apps.html
     */
@@ -230,7 +230,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Routes for the App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_routes_for_the_app.html
     */
@@ -247,7 +247,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Bindings for the App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_service_bindings_for_the_app.html
     */
@@ -264,7 +264,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Route from the App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/remove_route_from_the_app.html
     */
@@ -281,7 +281,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Service Binding from the App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/remove_service_binding_from_the_app.html
     */
@@ -298,7 +298,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Restage an App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/restage_an_app.html
     */
@@ -315,7 +315,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/retrieve_a_particular_app.html
     */
@@ -332,7 +332,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Terminate the running App Instance at the given index
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/terminate_the_running_app_instance_at_the_given_index.html
     */
@@ -349,7 +349,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating an App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/updating_an_app.html
     */
