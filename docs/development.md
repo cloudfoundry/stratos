@@ -195,29 +195,52 @@ $ npm run e2e
 
 The portal-proxy is the back-end for the Console UI. It is written in Go.
 
-#### Set a GOPATH
+> **NOTE** WIP Instructions
 
-#### Clone the project
+#### Introduction
+* Golang
+* Dependency Management (Glide)
 
-#### Dependency Management (Glide)
+#### Dependencies
+* go
+  * GOPATH, GOBIN env vars set
+* glide
+* UAA instance
 
-#### Set environment variables
+#### Running portal-proxy in a container
+* Follow instructions in the deploy/docker-compose docs
+* To apply changes (build and update docker image) simply run `deploy/tools/restart_proxy.sh`  
 
-#### Set up developer certs
+#### Running "like a dev"
+
+1. Set up developer certs
+    - Execute `deploy/ci/scripts/generate_cert.sh`
+    - Copy `deploy/ci/scripts/portal-proxy-output/dev-certs` to `./`   
+1. cd ./outputs
+1. Run `gulp build-backend`
+1. Update `./outputs/config.propeties`
+
+docker-compose
+dev certs - deploy/ci/scripts/generate_cert.sh
+copy deploy/ci/scripts/portal-proxy-output/dev-certs to ./
+
+portal run 
+go and glide installed
+dev_config localDevBuild true
+
+
+
+copy deploy/cloud-foundry/config.properties
+uaa running locally
+gulp build-backend
+chown /usr/local/go/
+gcc? https://randomgeekery.org/post/2014/what-is-build-essentials-for-opensuse
+chmod 755 portal-proxy 
 
 #### Tests
 
 ##### Unit Testing
 
-#### Running portal-proxy in a container
-
-#### Running "like a dev"
-
-#### Running "like production"
-
-##### Run the build
-
-##### Run the server
 
 ## Testing
 
