@@ -18,7 +18,7 @@ func Up_20170818162837(txn *sql.Tx) {
 	consoleConfigTable += "  console_client_secret     VARCHAR(255)              NOT NULL, "
 	consoleConfigTable += "  skip_ssl_validation       BOOLEAN                   NOT NULL DEFAULT FALSE,"
 	consoleConfigTable += "  is_setup_complete         BOOLEAN                   NOT NULL DEFAULT FALSE,"
-	consoleConfigTable += "  last_updated              TIMESTAMP                 NOT NULL DEFAULT (NOW()));"
+	consoleConfigTable += "  last_updated              TIMESTAMP                 NOT NULL DEFAULT CURRENT_TIMESTAMP);"
 
 	_, err := txn.Exec(consoleConfigTable)
 	if err != nil {
