@@ -60,44 +60,44 @@
      */
     exports.parse = function (content) {
       return content.split('\n')
-      .map(function (line) {
-        line = line.trim();
-        return line;
-      })
-      .filter(function (line) {
-        return line && line[0] !== '#';
-      })
-      .reduce(function (lists, line) {
-        var isNegative = line[0] === '!';
-        if (isNegative) {
-          line = line.slice(1);
-        }
-        if (line[0] === '/') {
-          line = line.slice(1);
-        }
-        if (isNegative) {
-          lists[1].push(line);
-        } else {
-          lists[0].push(line);
-        }
-        return lists;
-      }, [[], []])
-      .map(function (list) {
-        return list
-        .sort()
-        .map(prepareRegexes)
-        .reduce(function (list, prepared) {
-          list[0].push(prepared[0]);
-          list[1].push(prepared[1]);
-          return list;
-        }, [[], [], []]);
-      })
-      .map(function (item) {
-        return [
-          item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
-          item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
-        ];
-      });
+        .map(function (line) {
+          line = line.trim();
+          return line;
+        })
+        .filter(function (line) {
+          return line && line[0] !== '#';
+        })
+        .reduce(function (lists, line) {
+          var isNegative = line[0] === '!';
+          if (isNegative) {
+            line = line.slice(1);
+          }
+          if (line[0] === '/') {
+            line = line.slice(1);
+          }
+          if (isNegative) {
+            lists[1].push(line);
+          } else {
+            lists[0].push(line);
+          }
+          return lists;
+        }, [[], []])
+        .map(function (list) {
+          return list
+            .sort()
+            .map(prepareRegexes)
+            .reduce(function (list, prepared) {
+              list[0].push(prepared[0]);
+              list[1].push(prepared[1]);
+              return list;
+            }, [[], [], []]);
+        })
+        .map(function (item) {
+          return [
+            item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
+            item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
+          ];
+        });
     };
 
     function prepareRegexes(pattern) {
@@ -115,15 +115,15 @@
 
     function preparePartialRegex(pattern) {
       return pattern
-      .split('/')
-      .map(function (item, index) {
-        if (index) {
-          return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
-        } else {
-          return '(' + prepareRegexPattern(item) + '\\b)';
-        }
-      })
-      .join('');
+        .split('/')
+        .map(function (item, index) {
+          if (index) {
+            return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
+          } else {
+            return '(' + prepareRegexPattern(item) + '\\b)';
+          }
+        })
+        .join('');
     }
 
     function escapeRegex(pattern) {
