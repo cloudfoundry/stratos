@@ -183,13 +183,13 @@ instance_groups:
           session_store_secret: foo
           use_mysql: false
           use_sqlite: true
-          #mysql_user: 
-          #mysql_admin_user: 
-          #mysql_admin_password: 
-          #mysql_user_password: 
-          #mysql_db: 
-          #mysql_host: 
-          #mysql_port:
+          # mysql_user: 
+          # mysql_admin_user: 
+          # mysql_admin_password: 
+          # mysql_user_password: 
+          # mysql_db: 
+          # mysql_host: 
+          # mysql_port:
   networks:
   - name: stratos-net
     static_ips: [10.0.16.103]
