@@ -201,8 +201,6 @@
         dialog.options.userInput = addServiceWorkflowCtrl.userInput;
         dialog.submit().then(function () {
           fail('should not succeed');
-        }).catch(function () {
-          console.log('OK');
         });
 
         $httpBackend.flush();

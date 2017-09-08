@@ -15,7 +15,7 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
+  //var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
