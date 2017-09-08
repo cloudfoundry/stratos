@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(BlobstoresApi.prototype, {
 
-   /*
+    /*
     * Delete all blobs in the Buildpack cache blobstore
     * This endpoint will delete all of the existing buildpack caches in
     * the blobstore. The buildpack cache is used during staging by buildpacks

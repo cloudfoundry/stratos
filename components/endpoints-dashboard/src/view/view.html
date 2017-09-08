@@ -16,13 +16,17 @@
          class="endpoint-notification panel panel-default alert"
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
       <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
-      <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
-        <span translate>endpoints-dashboard.intro.start</span>
-        <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.intro.link</span>
-        <span translate>endpoints-dashboard.intro.end</span>
+      <div ng-if="endpointsDashboardCtrl.endpointsRegistered && !endpointsDashboardCtrl.endpointsConnected">
+        <div ng-show="endpointsDashboardCtrl.isUserAdmin()" translate>endpoints-dashboard.intro.admin</div>
+        <div ng-show="!endpointsDashboardCtrl.isUserAdmin()" translate>endpoints-dashboard.intro.non-admin</div>
       </div>
-      <div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
-          <span translate>endpoints-dashboard.intro.non-admin</span>
+      <div ng-if="!endpointsDashboardCtrl.endpointsRegistered">
+        <!-- If the user is not an admin and there are no connected endpoints they should never reach here-->
+        <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
+          <span translate>endpoints-dashboard.intro.start</span>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>endpoints-dashboard.intro.link</span>
+          <span translate>endpoints-dashboard.intro.end</span>
+        </div>
       </div>
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints.length === 0"
@@ -49,14 +53,14 @@
           <th translate st-sort="name" st-skip-natural="true" translate>endpoints-dashboard.table.name</th>
           <th translate st-sort="connected" st-skip-natural="true" translate>endpoints-dashboard.table.connection</th>
           <th translate st-sort="type" st-sort-default="true" st-skip-natural="true" translate>endpoints-dashboard.table.type</th>
-          <th translate st-sort="url" st-skip-natural="true" translate>endpoints-dashboard.table.address</th>
+          <th translate st-sort="url" st-skip-natural="true" translate colspan="2">endpoints-dashboard.table.address</th>
           <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
-            inline-message-colspan="5"
+            inline-message-colspan="6"
             table-inline-status="{{ endpoint.error.status }}">
 
           <!--Endpoint Name-->
@@ -86,6 +90,8 @@
 
           <td translate>{{ endpoint.type }}</td>
           <td>{{ endpoint.url }}</td>
+          <!-- Add an empty to row to work around chrome issue when copying after triple click on endpoint url -->
+          <td></td>
           <td>
             <actions-menu actions="endpoint.actions"
                           action-target="endpoint.actionsTarget"

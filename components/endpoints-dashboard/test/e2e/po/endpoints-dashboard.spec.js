@@ -1,20 +1,23 @@
 (function () {
   'use strict';
 
-  var helpers = require('../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var resetTo = require('../../../../app-core/frontend/test/e2e/po/resets.po');
-  var loginPage = require('../../../../app-core/frontend/test/e2e/po/login-page.po');
+  var appCore = '../../../../app-core/frontend/';
+  var cloudFoundry = '../../../../cloud-foundry/frontend/';
+
+  var helpers = require(appCore + 'test/e2e/po/helpers.po');
+  var resetTo = require(appCore + 'test/e2e/po/resets.po');
+  var loginPage = require(appCore + 'test/e2e/po/login-page.po');
   var endpointsPage = require('./endpoints/endpoints-dashboard.po.js');
   var registerEndpoint = require('./endpoints/register-endpoint.po.js');
-  var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var navbar = require(appCore + 'test/e2e/po/navbar.po');
+  var actionMenu = require(appCore + 'test/e2e/po/widgets/actions-menu.po');
+  var confModal = require(appCore + 'test/e2e/po/widgets/confirmation-modal.po');
   var _ = require('lodash');
 
   // These are pretty tied into the tests. The dashboard will need to know about specific endpoints to determine
   // behaviour on log in, out, etc. These could, if a problem, be split out into the cf app if this becomes a problem
-  var cfHelpers = require('../../../../cloud-foundry/frontend/test/e2e/po/helpers.po');
-  var applications = require('../../../../cloud-foundry/frontend/test/e2e/po/applications/applications.po');
+  var cfHelpers = require(cloudFoundry + 'test/e2e/po/helpers.po');
+  var applications = require(cloudFoundry + 'test/e2e/po/applications/applications.po');
 
   describe('Endpoints Dashboard -', function () {
 
@@ -54,11 +57,16 @@
             resetToLoggedIn(resetTo.resetAllCnsi, true);
           });
 
-          it('Should reach application wall with \'no clusters\' message after log in', function () {
+          it('Should reach endpoint dashboard after log in', function () {
+            expect(endpointsPage.isEndpoints()).toBeTruthy();
+          });
+
+          it('Should show application wall with \'no clusters\' message', function () {
+            applications.showApplications();
             expect(applications.isApplicationWallNoClusters()).toBeTruthy();
           });
 
-          it('Click on link to reach endpoints', function () {
+          it('Click on application wall link to reach endpoints', function () {
             applications.clickEndpointsDashboard()
               .then(function () {
                 return endpointsPage.isEndpoints();
@@ -68,8 +76,8 @@
               });
           });
 
-          it('Welcome message should not be displayed', function () {
-            expect(endpointsPage.welcomeMessage().isPresent()).toBeFalsy();
+          it('Welcome message should be displayed', function () {
+            expect(endpointsPage.welcomeMessage().isPresent()).toBeTruthy();
           });
 
         });
@@ -530,19 +538,19 @@
             endpointsPage.credentialsFormEndpointConnect().then(function () {
               helpers.checkAndCloseToast(/Successfully connected to '(?:cf)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
-              expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('DISCONNECT');
+              expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('DISCONNECT');
               expect(endpointsPage.endpointIsConnected(cfRowIndex)).toBeTruthy();
             });
           });
 
-          it('should go directly to applications view on logout and login (as admin)', function () {
+          it('should go directly to endpoint view on logout and login (as admin)', function () {
             // This would be better in the 'non admin' section, however it's easier to test here with a service registered
             // This removes the need to go through/test the endpoint dashboard registration process alongside this test
             navbar.logout();
             loginPage.waitForLogin();
             loginPage.login(helpers.getAdminUser(), helpers.getAdminPassword());
 
-            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
+            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/endpoint');
           });
 
           it('should go directly to applications view on logout and login', function () {
@@ -566,7 +574,7 @@
               .then(function () {
                 helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
-                expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('CONNECT');
+                expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('CONNECT');
               });
           });
 

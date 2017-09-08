@@ -73,17 +73,17 @@
       function () {
         return that.apps;
       }, function () {
-      updateStTableState();
-    });
+        updateStTableState();
+      });
 
     $scope.$watch(
       function () {
         return that.table;
       }, function () {
-      if (that.table) {
-        that.table.sortBy(model.currentSortOption, !model.sortAscending);
-      }
-    });
+        if (that.table) {
+          that.table.sortBy(model.currentSortOption, !model.sortAscending);
+        }
+      });
 
     this.getAppSummaryLink = getAppSummaryLink;
     this.stMiddleware = stMiddleware;

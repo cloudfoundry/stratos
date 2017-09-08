@@ -24,8 +24,8 @@
    * @returns {object} the service instance service
    */
   function cnsiServiceFactory($q, $interpolate, $translate, modelManager, appEndpointsDashboardService,
-                              appUtilsService, appErrorService, appNotificationsService,
-                              appCredentialsDialog, frameworkDialogConfirm, appEventService) {
+    appUtilsService, appErrorService, appNotificationsService,
+    appCredentialsDialog, frameworkDialogConfirm, appEventService) {
     var that = this;
     var endpointPrefix = 'cnsi_';
     var cnsiEndpointProviders = {};

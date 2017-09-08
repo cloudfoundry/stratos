@@ -52,7 +52,7 @@
       },
       user: {
         guid: '63ddbbe1-a185-465d-ba10-63d5c01f1a99',
-        name: 'admin@cnap.local',
+        name: 'admin@cap.local',
         admin: true
       },
       endpoints: {

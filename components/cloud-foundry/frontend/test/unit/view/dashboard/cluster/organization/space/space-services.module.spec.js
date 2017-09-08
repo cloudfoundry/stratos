@@ -17,6 +17,7 @@
         guid: 'serviceGuid'
       },
       entity: {
+        name: 'serviceName'
       }
     };
     var space = {

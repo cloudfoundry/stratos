@@ -97,23 +97,7 @@
    */
   function languageServiceFactory($q, $log, $translate, frameworkAsyncTaskDialog, modelManager, appLocalStorage) {
 
-    var userPreference = appLocalStorage.getItem(localeStorageId);
-    var setPromise = $q.resolve();
-
-    // Determine if there is only one locale which the user should always use
-    var locales = _getLocales();
-    if (locales.length === 1) {
-      $log.debug('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
-      // Attempt to set the fallback + preferred
-      $translate.preferredLanguage(locales[0]);
-      $translate.useFallbackLanguage(locales[0]);
-      // Ensure that the user pref is this one. This avoids instances where older, unsupported locales have not been
-      // cleared out of the source tree
-      userPreference = locales[0];
-    }
-
-    // Ensure that the locale is set to the user's pref (or forced to the only locale)
-    setLocale(userPreference);
+    var initialised = $translate.onReady().then(init);
 
     var service = {
       /**
@@ -158,28 +142,63 @@
        * fetching, false to fetch immediately
        * @returns {string|object} If waitForSet is true returns promise containing locale, else locale
        */
-      getLocale: getLocale
-    };
+      getLocale: getLocale,
 
-    if (enableLanguageSelection()) {
-      var userNavModel = modelManager.retrieve('app.model.navigation').user;
-      var item = userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', 2);
-      item.setTextValues(function () {
-        return { current: service.getLocaleLocalised() };
-      });
-    }
+      /**
+       * @name initialised
+       * @description Promise resolving when language service has been initialised
+       */
+      initialised: initialised
+    };
 
     return service;
 
+    function init() {
+      var userPreference = appLocalStorage.getItem(localeStorageId);
+
+      // Determine if there is only one locale which the user should always use
+      var locales = _getLocales();
+      if (locales.length === 1) {
+        $log.debug('Only 1 locale found, setting to preferred + fallback: ', locales[0]);
+        // Attempt to set the fallback + preferred
+        $translate.preferredLanguage(locales[0]);
+        $translate.useFallbackLanguage(locales[0]);
+        // Ensure that the user pref is this one. This avoids instances where older, unsupported locales have not been
+        // cleared out of the source tree
+        userPreference = locales[0];
+      }
+
+      // Ensure that the locale is set to the user's pref (or forced to the only locale)
+      var setPromise = setLocale(userPreference);
+
+      if (enableLanguageSelection()) {
+        var userNavModel = modelManager.retrieve('app.model.navigation').user;
+        var item = userNavModel.addMenuItemFunction('select-language', service.showLanguageSelection, 'menu.language', 2);
+        item.setTextValues(function () {
+          return { current: service.getLocaleLocalised() };
+        });
+      }
+
+      return setPromise;
+    }
+
     function setLocale(locale) {
       if (locale) {
-        // Only store the locale if it's explicitly been set...
+        // Check locale is valid
+        if (_.indexOf(_getLocales(), locale) < 0) {
+          // If not leave it up to the defaults for the current session
+          locale = '';
+        }
+        // Only store the locale if it's explicitly been set or is invalid...
         appLocalStorage.setItem(localeStorageId, locale);
-      } else {
+      }
+
+      if (!locale) {
         // .. otherwise use a best guess from the browser
         locale = browserLocale || $translate.resolveClientLocale();
         locale = locale.replace('-', '_');
       }
+
       // Take into account moment naming conventions. For a list of supported moment locales see
       // https://github.com/moment/moment/tree/2.10.6/locale
       var momentLocale = locale.replace('_', '-');
@@ -190,7 +209,7 @@
         return $q.resolve();
       }
 
-      setPromise = $translate.use(locale).then(function () {
+      return $translate.use(locale).then(function () {
         $log.debug("Changed locale to '" + $translate.use() + "'");
         momentLocale = momentLocale.toLowerCase();
         var newMomentLocale = moment.locale(momentLocale);
@@ -203,15 +222,10 @@
         $log.warn("Failed to load language for locale '" + locale + "', falling back to '" + $translate.use() + "'");
         return $q.reject(reason);
       });
-      return setPromise;
     }
 
-    function getLocale(waitForSet) {
-      if (waitForSet && setPromise) {
-        return setPromise.then($translate.use);
-      } else {
-        return $translate.use();
-      }
+    function getLocale() {
+      return $translate.use();
     }
 
     function getAll() {

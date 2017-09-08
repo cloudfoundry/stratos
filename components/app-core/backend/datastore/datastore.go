@@ -242,7 +242,7 @@ func buildConnectionStringForMysql(dc DatabaseConfig) string {
 		dc.Port,
 		escapeStr(dc.Database))
 
-	log.Printf("DB Connection string: %s:*********tcp(%s:%d)/%s?parseTime=true",
+	log.Printf("DB Connection string: %s:*********@tcp(%s:%d)/%s?parseTime=true",
 		escapeStr(dc.Username),
 		dc.Host,
 		dc.Port,
@@ -267,7 +267,7 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 
-	if databaseProvider == "sqlite" || databaseProvider == "mysql" {
+	if databaseProvider == SQLITE || databaseProvider == MYSQL {
 		sqlParamReplace := regexp.MustCompile("\\$[0-9]")
 		return sqlParamReplace.ReplaceAllString(sql, "?")
 	}

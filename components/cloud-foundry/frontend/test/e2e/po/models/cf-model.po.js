@@ -20,8 +20,8 @@
 
   function createHeader(cnsiGuid) {
     return {
-      'x-cnap-cnsi-list': cnsiGuid,
-      'x-cnap-passthrough': 'true'
+      'x-cap-cnsi-list': cnsiGuid,
+      'x-cap-passthrough': 'true'
     };
   }
 
