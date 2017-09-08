@@ -32,6 +32,18 @@ Note:
 
 ## Troubleshooting
 
+### Creating logs for recent deployments
+To create a log file of the push
+```
+cf push | tee cfpush.log
+```
+
+To create a log file of recent console output
+```
+cf logs console --recent | tee cfconsole.log
+```
+>**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement 
+
 ### Application Security Groups
 
 If you have problems when deploying Stratos UI as a CLoud Foundry application, check that the Application Security Group you have will allow the Stratos UI to communicate with the Cloud Foundry API.
