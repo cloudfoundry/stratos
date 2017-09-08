@@ -312,7 +312,7 @@
         var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
         vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
         vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
-        vm.addBinding().then(function () {
+        return vm.addBinding().then(function () {
           // show notification for successful binding
           var successMsg = $translate.instant('app.app-info.app-tabs.services.add.notifications.success', {
             service: vm.options.serviceInstance.entity.name,

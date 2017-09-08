@@ -190,7 +190,7 @@
         var mockInstancesApi = mock.cloudFoundryAPI.ServiceInstances;
         var CreateServiceInstance = mockInstancesApi.CreateServiceInstance({});
         $httpBackend.whenPOST(CreateServiceInstance.url)
-          .respond(200, CreateServiceInstance.response['400'].body);
+          .respond(400, CreateServiceInstance.response['400'].body);
 
         addServiceWorkflowCtrl.userInput.name = 'New Instance';
         addServiceWorkflowCtrl.userInput.plan = {
@@ -207,18 +207,24 @@
       });
 
       it('should set existing service instance', function () {
-        addServiceWorkflowCtrl.options.activeTab = 1;
 
         $httpBackend.flush();
+
+        var mockInstancesApi = mock.cloudFoundryAPI.ServiceBindings;
+        var CreateServiceBinding = mockInstancesApi.CreateServiceBinding({});
+        $httpBackend.whenPOST(CreateServiceBinding.url)
+          .respond(200, CreateServiceBinding.response['200'].body);
 
         var firstInstance = addServiceWorkflowCtrl.options.instances[0];
         addServiceWorkflowCtrl.userInput.existingServiceInstance = firstInstance;
 
-        addServiceWorkflowCtrl.addService().then(function () {
+        addServiceWorkflowCtrl.finishWorkflow().then(function () {
           expect(addServiceWorkflowCtrl.options.servicePlan).not.toBe(null);
           expect(addServiceWorkflowCtrl.options.serviceInstance).not.toBe(null);
           expect(addServiceWorkflowCtrl.options.serviceInstance).toEqual(firstInstance);
         });
+
+        $httpBackend.flush();
       });
     });
 
