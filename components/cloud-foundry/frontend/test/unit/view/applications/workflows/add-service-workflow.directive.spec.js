@@ -328,7 +328,6 @@
           close: angular.noop
         };
 
-        //spyOn(addServiceWorkflowCtrl, 'addService').and.callThrough();
         spyOn(addServiceWorkflowCtrl, 'addBinding').and.callThrough();
         spyOn(addServiceWorkflowCtrl.modal, 'close').and.callThrough();
 
@@ -341,7 +340,6 @@
 
         $httpBackend.flush();
 
-        //expect(addServiceWorkflowCtrl.addService).toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.addBinding).toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.modal.close).toHaveBeenCalled();
       });
@@ -352,13 +350,11 @@
           close: angular.noop
         };
 
-        //spyOn(addServiceWorkflowCtrl, 'addService').and.callThrough();
         spyOn(addServiceWorkflowCtrl, 'addBinding').and.callThrough();
         spyOn(addServiceWorkflowCtrl.modal, 'close').and.callThrough();
 
         addServiceWorkflowCtrl.finishWorkflow();
 
-        //expect(addServiceWorkflowCtrl.addService).not.toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.addBinding).not.toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.modal.close).toHaveBeenCalled();
       });
