@@ -2,11 +2,10 @@
 set -e
 
 # Step 1 - Set the lock file on the shared volume
-<% if p('stratos_ui.backend.use_mysql') == true %>
 mkdir -p <%= p('stratos_ui.backend.upgrade_volume_path') %>
+<% if p('stratos_ui.backend.use_mysql') == true %>
 touch <%= p('stratos_ui.backend.upgrade_volume_path') %>/<%= p('stratos_ui.backend.upgrade_volume_file') %>
 chmod 440 <%= p('stratos_ui.backend.upgrade_volume_path') %>/<%= p('stratos_ui.backend.upgrade_volume_file') %>
-
 echo "Created the upgrade lock file."
 <% end %>
 
