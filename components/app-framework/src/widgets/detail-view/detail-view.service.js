@@ -82,7 +82,8 @@
               templateUrl: config.templateUrl,
               template: config.template,
               title: config.title,
-              titleTranslateValues: config.titleTranslateValues
+              titleTranslateValues: config.titleTranslateValues,
+              hideClose: config.hideClose
             };
           }
         },
