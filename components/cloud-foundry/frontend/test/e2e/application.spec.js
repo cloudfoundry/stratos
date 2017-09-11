@@ -143,9 +143,12 @@
 
         describe('Application route should show up on CF Endpoints view', function () {
 
-          var appRouteName = hostName + '.' + domain;
-          var appViewUrl;
+          var appRouteName, appViewUrl;
+
           beforeAll(function () {
+            // NOTE - Requires route with name <newHostName> create from test above
+            appRouteName = newHostName + '.' + domain;
+
             browser.getCurrentUrl().then(function (url) {
               appViewUrl = url;
             });
@@ -168,13 +171,13 @@
             routes.getRows().then(function (rows) {
               expect(rows.length).toBeGreaterThan(0);
             });
-            // Table should contain our service
-            var column = routes.getElement().all(by.css('td')).filter(function (elem) {
-              return elem.getText().then(function (text) {
-                return text === appRouteName;
+            // Table should contain our route
+            routes.getData().then(function (rows) {
+              var index = _.findIndex(rows, function (row) {
+                return row[0] === appRouteName;
               });
-            }).first();
-            expect(column).toBeDefined();
+              expect(index).not.toBeLessThan(0);
+            });
           });
 
           it('should allow the route to be un-mapped and then deleted', function () {
@@ -193,6 +196,16 @@
               var index = _.findIndex(rows, function (row) {
                 return row[0] === appRouteName;
               });
+
+              // Confirm route exists in table
+              expect(index).not.toBeLessThan(0);
+              expect(rows[index]).toBeDefined();
+
+              // Confirm route is attached to an application
+              var appRouteAttachedTo = rows[index][1];
+              expect(appRouteAttachedTo).toBeDefined();
+              expect(appRouteAttachedTo.length).toBeGreaterThan(0);
+              expect(appRouteAttachedTo, testAppName);
 
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
               columnMenu.waitForElement();
