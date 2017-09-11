@@ -10,6 +10,12 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:SUSE/stratos-ui.git
+- name: after-midnight
+  type: time
+  source:
+    start: 12:00 AM
+    stop: 2:00 AM
+    location: UTC
 - name: send-email
   type: email
   source:
@@ -24,6 +30,8 @@ jobs:
 - name: console-bosh-deploy
   plan:
   - get: stratos-ui
+  - get: after-midnight
+    trigger: true
   - do:
     - task: deploy
       privileged: true
