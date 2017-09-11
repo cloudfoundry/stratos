@@ -19,7 +19,7 @@ resources:
       username: {{email-username}}
       password: {{email-password}}
     from: {{email-from}}
-    to: {{email-recipient-list}}
+    to: [ ]
 jobs:
 - name: console-bosh-deploy
   plan:
@@ -36,11 +36,11 @@ jobs:
       on_failure:
         put: send-email
         params:
-          subject_text: "BOSH Deploy failed!"
-          body_text: "BOSH Deploy build was successful: ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME}"
+          subject_text: "BOSH Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} failed!"
+          body_text: "BOSH Deploy build was failed: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
       on_success:
         put: send-email
         params:
-          subject_text: "BOSH Deploy successful"
-          body_text: "BOSH Deploy build was successful: ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME}"
+          subject_text: "BOSH Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
+          body_text: "BOSH Deploy build was successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
  
