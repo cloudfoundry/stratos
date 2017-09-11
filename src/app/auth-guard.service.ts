@@ -24,7 +24,7 @@ export class AuthGuardService implements CanActivate {
         return state;
       })
       .skipWhile((state: AuthState) => {
-        return !state.loggedIn;
+        return !state.loggedIn && !state.error;
       })
       .map(state => {
         if (state.sessionData.valid) {

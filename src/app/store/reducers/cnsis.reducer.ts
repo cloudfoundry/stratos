@@ -21,6 +21,8 @@ export interface CNSISModel {
     name: string;
     skip_ssl_validation: boolean;
     token_endpoint: string;
+    // This is generated client side when we login
+    registered?: boolean;
 }
 
 export interface CNSISState {

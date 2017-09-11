@@ -1,5 +1,5 @@
 import { normalize, schema } from 'normalizr';
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 import { ApiActionTypes, APIAction } from './api.actions';
 
 export const GET_ALL = '[Application] Get all';
@@ -15,6 +15,10 @@ export class GetAllApplications implements APIAction {
         this.options = new RequestOptions();
         this.options.url = 'apps';
         this.options.method = 'get';
+        this.options.params = new URLSearchParams();
+        this.options.params.set('page', '1');
+        this.options.params.set('results-per-page', '100');
+
     }
     actions = [
         GET_ALL,
@@ -22,6 +26,7 @@ export class GetAllApplications implements APIAction {
         GET_ALL_FAILED
     ];
     type = ApiActionTypes.API_REQUEST;
-    entity = applicationSchema;
+    entity = [applicationSchema];
+    entityKey = applicationSchema.key;
     options: RequestOptions;
 }

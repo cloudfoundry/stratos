@@ -9,7 +9,7 @@
         <input mdInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
       </md-form-field>
       <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" md-button md-raised-button [disabled]="!loginForm.valid">Login</button>
-      <!-- <span *ngIf="!loggingIn && !loggedIn && error">Couldn't log in</span> -->
     </form>
   </md-card>
+  <div class="login-message" [ngClass]="{'login-message--show': !!message}">{{ message }}</div>
 </div>

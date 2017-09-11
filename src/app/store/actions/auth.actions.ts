@@ -9,6 +9,8 @@ export const VERIFY_SESSION = '[Auth] Verify session';
 export const SESSION_VERIFIED = '[Auth] Session verified';
 export const SESSION_INVALID = '[Auth] Session invalid';
 
+export const GET_INFO = '[Auth] Get session info';
+
 export const RESET_AUTH = '[Auth] Reset auth data';
 
 export interface SessionData {
@@ -56,6 +58,10 @@ export class InvalidSession implements Action {
 
 export class ResetAuth implements Action {
     type = RESET_AUTH;
+}
+
+export class GetInfo implements Action {
+    type = GET_INFO;
 }
 
 

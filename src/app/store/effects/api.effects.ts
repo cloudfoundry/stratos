@@ -22,9 +22,9 @@ export class APIEffect {
   ) { }
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
-  .map(apiAction => {
-    return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity);
-  });
+    .map(apiAction => {
+      return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity, apiAction.entityKey);
+    });
 
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
@@ -43,42 +43,42 @@ export class APIEffect {
         });
     });
 
-    getEntities(apiAction: StartAPIAction, response: Response) {
-      const data = response.json();
-      const allEntities = Object.keys(data).map(cfGuid => {
-        const cfData = data[cfGuid];
-        if (cfData.resources) {
-          if (!cfData.resources.length) {
-            return null;
-          }
-          return cfData.resources.map(({ entity, metadata }) => {
-            return this.mergeData(entity, metadata, cfGuid);
-          });
-        } else {
-          return this.mergeData(cfData.entity, cfData.metadata, cfGuid);
+  getEntities(apiAction: StartAPIAction, response: Response) {
+    const data = response.json();
+    const allEntities = Object.keys(data).map(cfGuid => {
+      const cfData = data[cfGuid];
+      if (cfData.resources) {
+        if (!cfData.resources.length) {
+          return null;
         }
-      });
-      const flatEntities = [].concat(...allEntities).filter(e => !!e);
-      console.log(flatEntities);
-      return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
-    }
+        return cfData.resources.map(({ entity, metadata }) => {
+          return this.mergeData(entity, metadata, cfGuid);
+        });
+      } else {
+        return this.mergeData(cfData.entity, cfData.metadata, cfGuid);
+      }
+    });
+    const flatEntities = [].concat(...allEntities).filter(e => !!e);
+    console.log(flatEntities);
+    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
+  }
 
-    mergeData(entity, metadata, cfGuid) {
-      return {...entity, ...metadata, cfGuid};
-    }
+  mergeData(entity, metadata, cfGuid) {
+    return { ...entity, ...metadata, cfGuid };
+  }
 
-    getDataFromResponse(response: Response) {
-      response.json();
-    }
+  getDataFromResponse(response: Response) {
+    response.json();
+  }
 
-    addBaseHeaders(cnsiss: CNSISModel[], header: Headers): Headers {
-      const headers = new Headers();
-      headers.set('x-cnap-cnsi-list', cnsiss.map(c => c.guid));
-      return headers;
-    }
+  addBaseHeaders(cnsis: CNSISModel[], header: Headers): Headers {
+    const headers = new Headers();
+    headers.set('x-cap-cnsi-list', cnsis.filter(c => c.registered).map(c => c.guid));
+    return headers;
+  }
 
-    getActionFromString(type: string) {
-      return { type };
-    }
+  getActionFromString(type: string) {
+    return { type };
+  }
 
 }

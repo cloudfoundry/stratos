@@ -1,6 +1,5 @@
 import { Router } from '@angular/router';
 import { Login, VerifySession } from './store/actions/auth.actions';
-import { GetAll } from './store/actions/application.actions';
 import { AppState } from './store/app-state';
 import { Store } from '@ngrx/store';
 import { AfterContentInit, Component, OnInit } from '@angular/core';

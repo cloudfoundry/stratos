@@ -1,4 +1,4 @@
-import { schema } from 'normalizr';
+import { Schema } from 'normalizr';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
@@ -13,7 +13,8 @@ export class APIAction implements Action {
   actions: string[];
   type = ApiActionTypes.API_REQUEST;
   options: RequestOptions;
-  entity: schema.Entity;
+  entity: Schema;
+  entityKey: string;
   paginationKey?: string;
 }
 
@@ -21,13 +22,14 @@ export class StartAPIAction implements Action {
   constructor(
     public options: RequestOptions,
     public actions: string[],
-    public entity: schema.Entity
+    public entity: Schema,
+    public entityKey: string
   ) { }
   type = ApiActionTypes.API_REQUEST_START;
 }
 
 export class WrapperAPIActionSuccess implements Action {
-  constructor (
+  constructor(
     public type: string,
     public response: {}
   ) { }
@@ -35,10 +37,10 @@ export class WrapperAPIActionSuccess implements Action {
 }
 
 export class WrapperAPIActionFailed implements Action {
-  constructor (
+  constructor(
     public type: string,
     public message: string,
-    public entity: schema.Entity
+    public entity: Schema
   ) { }
   apiType = ApiActionTypes.API_REQUEST_FAILED;
 }

@@ -53,17 +53,17 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
     return this.store.select(s => [s.uaaSetup, s.auth])
-      .filter((state: [UAASetupState, AuthState]) => {
-        return !(state[0].settingUp || state[1].verifying);
+      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+        return !(uaa.settingUp || auth.verifying);
       })
       .delay(1000)
-      .take(30)
-      .filter((state: [UAASetupState, AuthState]) => {
-        const hasSessionData = !!state[1].sessionData;
-        if (!hasSessionData) {
+      .take(5)
+      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+        const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
+        if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
         }
-        return hasSessionData;
+        return validUAASessionData;
       })
       .map((state: [UAASetupState, AuthState]) => {
         if (!state[0].error) {

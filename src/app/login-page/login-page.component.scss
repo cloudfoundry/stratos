@@ -1,21 +1,27 @@
 .login {
-    height: 100vh;
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    &__header {
-        color: white;
-        margin-bottom: 20px;
-        text-align: center;
+  height: 100vh;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  &__header {
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  &__card {
+    width: 200px;
+    md-form-field {
+      width: 100%;
     }
-    &__card {
-        width: 200px;
-        md-form-field {
-            width: 100%;
-        }
-    }
-    &__submit {
-        width: 100%;
-        color: white;
-    }
+  }
+  &__submit {
+    width: 100%;
+    color: white;
+  }
+  &-message {
+    height: 20px;
+    color: white;
+    padding-top: 20px;
+  }
 }

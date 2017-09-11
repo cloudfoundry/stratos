@@ -1,3 +1,4 @@
+import { paginationReducer } from './store/reducers/pagination.reducer';
 import { CNSISEffect } from './store/effects/cnsis.effects';
 import { cnsisReducer } from './store/reducers/cnsis.reducer';
 import { UAASetupEffect } from './store/effects/uaa-setup.effects';
@@ -84,7 +85,8 @@ const appRoutes: Routes = [
       entities: entitiesReducer,
       auth: authReducer,
       uaaSetup: uaaSetupReducer,
-      cnsis: cnsisReducer
+      cnsis: cnsisReducer,
+      pagination: paginationReducer
     }, {
         metaReducers
       }),

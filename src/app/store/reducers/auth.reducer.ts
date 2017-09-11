@@ -44,7 +44,7 @@ export function authReducer(state: AuthState = defaultState, action) {
             const loginFailed = action as LoginFailed;
             return { ...state, error: true, errorMessage: loginFailed.message, loggingIn: false, loggedIn: false };
         case VERIFY_SESSION:
-            return { ...state, verifying: true };
+            return { ...state, error: false, errorMessage: '', verifying: true };
         case SESSION_VERIFIED:
             return {
                 ...state,

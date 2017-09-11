@@ -1,8 +1,10 @@
+import { CNSISModel } from './../reducers/cnsis.reducer';
+import { register } from 'ts-node/dist';
+import { Observable } from 'rxjs/Rx';
 import { GET_CNSIS, GetAllCNSIS, GetAllCNSISFailed, GetAllCNSISSuccess } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 
@@ -17,10 +19,22 @@ export class CNSISEffect {
     ) { }
 
     @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
-        .switchMap(action => {
-            return this.http.get('/pp/v1/cnsis')
-                .map(data => new GetAllCNSISSuccess(data.json(), action.login))
-                .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
-        });
+        .flatMap(action => {
+            return Observable.zip(
+                this.http.get('/pp/v1/cnsis'),
+                this.http.get('/pp/v1/cnsis/registered'),
+                (all, registered) => {
+                    const allCnsis: CNSISModel[] = all.json();
+                    const registeredCnsis: CNSISModel[] = registered.json();
 
+                    return allCnsis.map(c => {
+                        c.registered = !!registeredCnsis.find(r => r.guid === c.guid);
+                        return c;
+                    });
+                }
+            )
+                .map(data => new GetAllCNSISSuccess(data, action.login))
+                .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
+
+        });
 }

@@ -73,11 +73,12 @@ const paginate = ({ types, mapActionToKey }) => {
   };
 };
 
-export default paginate({
-    types: [
-        ApiActionTypes.API_REQUEST_START,
-        ApiActionTypes.API_REQUEST_SUCCESS,
-        ApiActionTypes.API_REQUEST_FAILED
-    ],
-    mapActionToKey: (action: APIAction) => action.entity.key
+export const paginationReducer = paginate({
+  types: [
+      ApiActionTypes.API_REQUEST_START,
+      ApiActionTypes.API_REQUEST_SUCCESS,
+      ApiActionTypes.API_REQUEST_FAILED
+  ],
+  mapActionToKey: (action: APIAction) => action.entityKey
 });
+
