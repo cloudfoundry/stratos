@@ -47,7 +47,7 @@
         "ssh-restart-warning": "Note: Enabling or disabling SSH Access will restart all application instances.",
         "ssh-no-edit": "Note: SSH Access for this application can not be modified as the Space is set to disallow all SSH access."
       },
-      "app-instances-actions" :{
+      "app-instances-actions": {
         "terminate": "Terminate"
       },
       "terminate-instance": {
@@ -185,6 +185,21 @@
         },
         "services": {
           "label": "Service Instances",
+          "labels": {
+            "type": "Type",
+            "description": "Description",
+            "created-date": "Date created",
+            "env-variables": "Show environment variables"
+          },
+          "messages": {
+            "no-services": "This application has no bound service instances.",
+            "view-catalogue": "To view the available services for this application, please visit the",
+            "view-catalogue-link": "service catalogue",
+            "no-services-search": "No services instances found matching your search.",
+            "currently-viewing-1": "You are currently viewing {{ type }} instances.",
+            "click-here": "Click here",
+            "currently-viewing-2": "to view all types."
+          },
           "types": {
             "show": "Show",
             "all": "All Types"
@@ -253,6 +268,9 @@
         },
         "service-catalogue": {
           "label": "Service Catalogue",
+          "messages": {
+            "no-services": "There are no services available for this endpoint. Please contact your Administrator to add services so you can bind them to your applications."
+          },
           "categories": {
             "show": "Show",
             "attached": "Attached Service Instances",
@@ -372,7 +390,7 @@
           "empty": "No events available",
           "error": "An error occurred retrieving events",
           "detail": "Event Detail",
-          "labels":{
+          "labels": {
             "timestamp": "Timestamp",
             "type": "Type",
             "actor-name": "Actor Name",

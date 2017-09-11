@@ -17,11 +17,50 @@
   &__meta-split {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    @media (max-width: 900px) {
+      flex-direction: column;
+    }
   }
   &__meta-left {
     text-transform: uppercase;
+    font-weight: bold;
   }
   &__meta-right {
+    @media (min-width: 901px) {
+      text-align: right;
+      margin-left: 10px;
+      margin-top: 0;
+    }
+    margin-top: 5px;
+  }
+  &__outer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    padding-bottom: 5px;
+  }
+  &__env {
+    padding-top: 10px;
+  }
+}
+.services-gallery-card {
+  height: 100%;
+  display: block;
+  position: relative;
+  padding-bottom: 20px;
+  .panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-bottom: 0;
+    &-body {
+      flex: 1;
+    }
+  }
+  &__container.cluster-gallery-card-container {
+    width: auto;
+    margin: 0 -10px;
   }
 }
