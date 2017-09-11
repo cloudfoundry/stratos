@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-  .module('app.framework.utils')
-  .directive('autoPopulateInput', autoPopulateInput);
+    .module('app.framework.utils')
+    .directive('autoPopulateInput', autoPopulateInput);
 
   /**
    * @name autoPopulateInput

@@ -82,7 +82,7 @@
    * @param {object} appDeployStepDeployingService - Service to provide the deploying step
    */
   function DeployAppController($scope, $uibModalInstance, $state, appDeployStepDestinationService,
-                               appDeployStepSourceService, appDeployStepDeployingService) {
+    appDeployStepSourceService, appDeployStepDeployingService) {
 
     var vm = this;
 
@@ -95,7 +95,7 @@
       },
       wizard: {
         allowBack: true,
-        sourceType: 'github'
+        sourceType: 'git'
       }
     };
 

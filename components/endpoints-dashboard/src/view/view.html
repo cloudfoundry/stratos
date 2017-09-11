@@ -53,14 +53,14 @@
           <th translate st-sort="name" st-skip-natural="true" translate>endpoints-dashboard.table.name</th>
           <th translate st-sort="connected" st-skip-natural="true" translate>endpoints-dashboard.table.connection</th>
           <th translate st-sort="type" st-sort-default="true" st-skip-natural="true" translate>endpoints-dashboard.table.type</th>
-          <th translate st-sort="url" st-skip-natural="true" translate>endpoints-dashboard.table.address</th>
+          <th translate st-sort="url" st-skip-natural="true" translate colspan="2">endpoints-dashboard.table.address</th>
           <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
-            inline-message-colspan="5"
+            inline-message-colspan="6"
             table-inline-status="{{ endpoint.error.status }}">
 
           <!--Endpoint Name-->
@@ -90,6 +90,8 @@
 
           <td translate>{{ endpoint.type }}</td>
           <td>{{ endpoint.url }}</td>
+          <!-- Add an empty to row to work around chrome issue when copying after triple click on endpoint url -->
+          <td></td>
           <td>
             <actions-menu actions="endpoint.actions"
                           action-target="endpoint.actionsTarget"
