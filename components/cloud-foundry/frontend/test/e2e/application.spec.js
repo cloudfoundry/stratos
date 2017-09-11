@@ -179,6 +179,7 @@
 
           it('should allow the route to be un-mapped and then deleted', function () {
             var routes = table.wrap(element(by.css('.space-services-table table')));
+            routes.waitForElement();
 
             // Click the "Show More" button in case there are many routes
             var showMoreButtonLink = element(by.css('.space-services-table tfoot > tr > td > a'));
@@ -193,8 +194,10 @@
                 return row[0] === appRouteName;
               });
 
-              // Unmap Route
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
+              columnMenu.waitForElement();
+
+              // Unmap Route
               columnMenu.click();
               columnMenu.clickItem(1);
               confirmModal.waitForModal();
