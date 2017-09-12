@@ -25,7 +25,7 @@
 
       for (var y = 0; y < serviceInstance.tags.length; y++) {
         var tag = serviceInstance.tags[y];
-        if (tag === 'postgresql') {
+        if (tag === 'stratos_postgresql') {
           var instance = vcapServices.postgresql[0];
 
           DB_TYPE = 'postgresql';

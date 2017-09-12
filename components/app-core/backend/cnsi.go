@@ -285,10 +285,8 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 	log.Debug("cnsiRecordExists")
 
-	if _, err := p.GetCNSIRecordByEndpoint(endpoint); err == nil {
-		return true
-	}
-	return false
+	_, err := p.GetCNSIRecordByEndpoint(endpoint);
+	return err == nil
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error {

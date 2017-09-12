@@ -23,7 +23,12 @@ case $DB_TYPE in
     echo "Migrating postgresql instance on $DB_HOST"
     $GOBIN/goose -env cf_postgres up
     if [ $? -eq 0 ]; then
-        while sleep 60; do echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'"; done
+        while
+            echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'";
+            sleep 60
+        do
+            :
+        done
     else
         echo Database migration failed
     fi

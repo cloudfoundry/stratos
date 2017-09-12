@@ -48,7 +48,7 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 		service := services[0]
 
 		for _, tag := range service.Tags {
-			if strings.HasPrefix(tag, "postgresql") {
+			if strings.HasPrefix(tag, "stratos_postgresql") {
 				dbCredentials := service.Credentials
 				// At the moment we only handle Postgres
 				db.DatabaseProvider = "pgsql"
