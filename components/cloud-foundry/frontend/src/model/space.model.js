@@ -200,7 +200,7 @@
       var combinedParams = _.assign(params, inlineParams);
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServiceInstancesForSpace(guid, modelUtils.makeListParams(combinedParams),
-          modelUtils.makeHttpConfig(cnsiGuid))
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -261,7 +261,7 @@
       var combinedParams = _.assign(params, inlineParams);
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllRoutesForSpace(guid, modelUtils.makeListParams(combinedParams),
-          modelUtils.makeHttpConfig(cnsiGuid))
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -321,7 +321,7 @@
     function listRolesOfAllUsersInSpace(cnsiGuid, guid, params, paginate) {
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .RetrievingRolesOfAllUsersInSpace(guid, modelUtils.makeListParams(params),
-          modelUtils.makeHttpConfig(cnsiGuid))
+        modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -438,10 +438,10 @@
      * @public
      */
     function updateRoutesCount(cnsiGuid, guid, count) {
-      var promise = $q.resolve({data: {total_results: count}});
+      var promise = $q.resolve({ data: { total_results: count } });
       if (!count) {
         promise = apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllRoutesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
+          .ListAllRoutesForSpace(guid, { 'results-per-page': 1 }, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
         _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', response.data.total_results);
@@ -461,10 +461,10 @@
      * @public
      */
     function updateServiceInstanceCount(cnsiGuid, guid, count) {
-      var promise = $q.resolve({data: {total_results: count}});
+      var promise = $q.resolve({ data: { total_results: count } });
       if (!count) {
         promise = apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServiceInstancesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
+          .ListAllServiceInstancesForSpace(guid, { 'results-per-page': 1 }, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
         _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', response.data.total_results);
@@ -484,10 +484,10 @@
      * @public
      */
     function updateServiceCount(cnsiGuid, guid, count) {
-      var promise = $q.resolve({data: {total_results: count}});
+      var promise = $q.resolve({ data: { total_results: count } });
       if (!count) {
         promise = apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServicesForSpace(guid, {'results-per-page': 1}, modelUtils.makeHttpConfig(cnsiGuid));
+          .ListAllServicesForSpace(guid, { 'results-per-page': 1 }, modelUtils.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
         _.set(model, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServices', response.data.total_results);
@@ -734,9 +734,9 @@
       };
       return spaceApi.UpdateSpace(spaceGuid, updateData, null,
         modelUtils.makeHttpConfig(cnsiGuid)).then(function (response) {
-        // Refresh the space itself
-        return getSpaceDetails(cnsiGuid, response.data);
-      });
+          // Refresh the space itself
+          return getSpaceDetails(cnsiGuid, response.data);
+        });
     }
   }
 

@@ -3,10 +3,10 @@
 
   angular
     .module('cloud-foundry.view.applications.application.log-stream',
-      [
-        'cloud-foundry.view.applications.application.log-stream.cfLogViewer',
-        'cloud-foundry.view.applications.application.log-stream.cfLogViewerReize'
-      ])
+    [
+      'cloud-foundry.view.applications.application.log-stream.cfLogViewer',
+      'cloud-foundry.view.applications.application.log-stream.cfLogViewerReize'
+    ])
     .config(registerRoute)
     .run(registerAppTab);
 
@@ -25,7 +25,7 @@
       hide: false,
       uiSref: 'cf.applications.application.log-stream',
       uiSrefParam: function () {
-        return {guid: $stateParams.guid};
+        return { guid: $stateParams.guid };
       },
       label: 'app.app-info.app-tabs.log-stream.label'
     });
