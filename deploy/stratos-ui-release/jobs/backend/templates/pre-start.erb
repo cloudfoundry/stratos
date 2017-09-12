@@ -3,10 +3,11 @@ set -e
 
 # Step 1 - Set the lock file on the shared volume
 mkdir -p <%= p('stratos_ui.backend.upgrade_volume_path') %>
+<% if p('stratos_ui.backend.use_mysql') == true %>
 touch <%= p('stratos_ui.backend.upgrade_volume_path') %>/<%= p('stratos_ui.backend.upgrade_volume_file') %>
 chmod 440 <%= p('stratos_ui.backend.upgrade_volume_path') %>/<%= p('stratos_ui.backend.upgrade_volume_file') %>
-
 echo "Created the upgrade lock file."
+<% end %>
 
 # Step 2 - Create an AES-256 compliant encryption key
 # in a file on a shared volume.
