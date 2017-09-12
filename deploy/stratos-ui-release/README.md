@@ -34,39 +34,40 @@ $ bosh -e vbox upload-release -d stratos-ui
 5. Deploy the release
 A sample bosh-lite deployment manifest has been provided in `bosh-lite/deployment.yaml`. The following will use that command to deploy the Console.
 
-  a. Provide UAA settings in the deployment manifest if known. In the following some sample values have been provided.
+5.1. Provide UAA settings in the deployment manifest if known. In the following some sample values have been provided.
 ```
-          uaa_address: https://my-uaa:8080
-          console_admin_scope: cloud_controller.admin
-          console_uaa_client: cf
-```
-
-  b. Select the database you want to use. The Stratos UI Console can be deployed using a MySQL/MariaDB store or SQLite. The followign are sample values for a mysql configuration. This assumes a MySQL server has been deployed locally on the host.
-```
-          use_mysql: true
-          use_sqlite: false
-          mysql_user: stratos
-          mysql_admin_user: root
-          mysql_admin_password: changeme
-          mysql_user_password: strat0s
-          mysql_db: stratos-db
-          mysql_host: 127.0.0.1
-          mysql_port: 3306
-
+uaa_address: https://my-uaa:8080
+console_admin_scope: cloud_controller.admin
+console_uaa_client: cf
 ```
 
- To use SQLite, use the following and comment out the mysql parameters.
+5.2. Select the database you want to use. The Stratos UI Console can be deployed using a MySQL/MariaDB store or SQLite. The followign are sample values for a mysql configuration. This assumes a MySQL server has been deployed locally on the host.
+
 ```
-          # use_mysql: true
-          use_sqlite: true
-          # mysql_user: stratos
-          # mysql_admin_user: root
-          # mysql_admin_password: changeme
-          # mysql_user_password: strat0s
-          # mysql_db: stratos-db
-          # mysql_host: 127.0.0.1
-          # mysql_port: 3306
-  ```
+use_mysql: true
+use_sqlite: false
+mysql_user: stratos
+mysql_admin_user: root
+mysql_admin_password: changeme
+mysql_user_password: strat0s
+mysql_db: stratos-db
+mysql_host: 127.0.0.1
+mysql_port: 3306
+
+```
+
+To use SQLite, use the following and comment out the mysql parameters.
+```
+# use_mysql: true
+use_sqlite: true
+# mysql_user: stratos
+# mysql_admin_user: root
+# mysql_admin_password: changeme
+# mysql_user_password: strat0s
+# mysql_db: stratos-db
+# mysql_host: 127.0.0.1
+# mysql_port: 3306
+```
 
 To deploy you deployment manifest execute the following.
 
