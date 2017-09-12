@@ -29,9 +29,6 @@ case $1 in
     cp -f $CONFIG_DIR/dbconf.yml /var/vcap/packages/backend/deploy/db/dbconf.yml
     <% end %>
 
-    <% if p('stratos_ui.backend.use_sqlite') == true %>
-    touch deploy/db/sqlite_schema.sql
-    <% end %>
     cd /var/vcap/packages/backend/
     
     chmod +x portal-proxy
