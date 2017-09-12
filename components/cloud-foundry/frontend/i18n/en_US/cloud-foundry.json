@@ -46,7 +46,8 @@
           "address": "instance address",
           "cli": "cf interactions",
           "username": "account username",
-          "status": "account status"
+          "status": "account status",
+          "api-version": "cf api version"
         },
         "cli-dialog-cluster": {
           "title": "@:cf.cli-common.title",
