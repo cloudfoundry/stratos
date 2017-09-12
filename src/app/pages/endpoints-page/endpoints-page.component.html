@@ -1,0 +1,25 @@
+<h1>Endpoints</h1>
+<md-table #table [dataSource]="dataSource">
+  <ng-container mdColumnDef="name">
+    <md-header-cell *mdHeaderCellDef> Name </md-header-cell>
+    <md-cell *mdCellDef="let endpoint"> {{ endpoint.name }} </md-cell>
+  </ng-container>
+
+  <ng-container mdColumnDef="connection">
+    <md-header-cell *mdHeaderCellDef> Connection </md-header-cell>
+    <md-cell *mdCellDef="let endpoint"> {{ endpoint.connection }}</md-cell>
+  </ng-container>
+
+  <ng-container mdColumnDef="type">
+    <md-header-cell *mdHeaderCellDef> Type </md-header-cell>
+    <md-cell *mdCellDef="let endpoint"> {{ endpoint.type }} </md-cell>
+  </ng-container>
+
+  <ng-container mdColumnDef="address">
+    <md-header-cell *mdHeaderCellDef> Address </md-header-cell>
+    <md-cell *mdCellDef="let endpoint"> {{endpoint.address}} </md-cell>
+  </ng-container>
+
+  <md-header-row *mdHeaderRowDef="displayedColumns"></md-header-row>
+  <md-row *mdRowDef="let row; columns: displayedColumns;"></md-row>
+</md-table>

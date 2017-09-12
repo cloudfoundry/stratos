@@ -24,6 +24,11 @@ export class DashboardBaseComponent implements OnInit {
         text: 'Applications',
         mdIcon: 'apps',
         link: '/application-wall'
+      },
+      {
+        text: 'Endpoints',
+        mdIcon: 'settings_input_component',
+        link: '/endpoints'
       }
     ];
   }
