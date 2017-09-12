@@ -1,11 +1,11 @@
-import { CNSISState } from '../store/reducers/cnsis.reducer';
-import { AuthState } from './../store/reducers/auth.reducer';
+import { AppState } from '../../store/app-state';
+import { AuthState } from '../../store/reducers/auth.reducer';
+import { CNSISState } from '../../store/reducers/cnsis.reducer';
+import { Login } from '../../store/actions/auth.actions';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Rx';
 import { NgForm } from '@angular/forms/src/directives';
-import { AppState } from './../store/app-state';
 import { Store } from '@ngrx/store';
-import { Login } from '../store/actions/auth.actions';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
 @Component({

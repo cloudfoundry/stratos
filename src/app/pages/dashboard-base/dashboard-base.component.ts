@@ -1,4 +1,4 @@
-import { SideNavItem } from './../side-nav/side-nav.component';
+import { SideNavItem } from '../../components/side-nav/side-nav.component';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -23,7 +23,7 @@ export class DashboardBaseComponent implements OnInit {
       {
         text: 'Applications',
         mdIcon: 'apps',
-        link: '/applications'
+        link: '/application-wall'
       }
     ];
   }

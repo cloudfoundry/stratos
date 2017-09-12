@@ -1,13 +1,13 @@
-import { environment } from './../../environments/environment';
-import { AuthState } from '../store/reducers/auth.reducer';
-import { VerifySession } from './../store/actions/auth.actions';
+import { environment } from '../../../environments/environment';
+import { AuthState } from '../../store/reducers/auth.reducer';
+import { VerifySession } from '../../store/actions/auth.actions';
 import { Router } from '@angular/router';
-import { UAASetupState } from './../store/reducers/uaa-setup.reducers';
-import { SetupUAA, SetUAAScope } from './../store/actions/setup.actions';
-import { AppState } from './../store/app-state';
+import { UAASetupState } from '../../store/reducers/uaa-setup.reducers';
+import { SetupUAA, SetUAAScope } from '../../store/actions/setup.actions';
+import { AppState } from '../../store/app-state';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
-import { StepOnNextFunction } from '../step/step.component';
+import { StepOnNextFunction } from '../stepper/step/step.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgForm } from '@angular/forms/src/directives';

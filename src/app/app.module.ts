@@ -5,7 +5,7 @@ import { UAASetupEffect } from './store/effects/uaa-setup.effects';
 import { uaaSetupReducer } from './store/reducers/uaa-setup.reducers';
 import { AppState } from './store/app-state';
 import { environment } from './../environments/environment';
-import { AuthGuardService } from './auth-guard.service';
+import { AuthGuardService } from './guards//auth-guard.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MDAppModule } from './md/md.module';
 import { AuthEffect } from './store/effects/auth.effects';
@@ -23,19 +23,20 @@ import { RouterModule, Routes } from '@angular/router';
 import { entitiesReducer } from './store/reducers/api.reducer';
 
 import { AppComponent } from './app.component';
-import { LoginPageComponent } from './login-page/login-page.component';
-import { HomePageComponent } from './home-page/home-page.component';
-import { DashboardBaseComponent } from './dashboard-base/dashboard-base.component';
+import { LoginPageComponent } from './pages/login-page/login-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
+import { DashboardBaseComponent } from './pages/dashboard-base/dashboard-base.component';
 
 import { storeLogger } from 'ngrx-store-logger';
-import { SideNavComponent } from './side-nav/side-nav.component';
-import { ConsoleUaaWizardComponent } from './console-uaa-wizard/console-uaa-wizard.component';
-import { SteppersComponent } from './steppers/steppers.component';
-import { StepComponent } from './step/step.component';
+import { SideNavComponent } from './components/side-nav/side-nav.component';
+import { ConsoleUaaWizardComponent } from './components/console-uaa-wizard/console-uaa-wizard.component';
+import { SteppersComponent } from './components/stepper/steppers/steppers.component';
+import { StepComponent } from './components/stepper/step/step.component';
 
 import 'rxjs/add/observable/from';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/switchMap';
+import { ApplicationWallComponent } from './pages/application-wall/application-wall.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -49,16 +50,17 @@ const appRoutes: Routes = [
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'login', component: LoginPageComponent },
   {
-    path: 'dashboard',
+    path: '',
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService],
     children: [
       {
-        path: '',
+        path: 'dashboard',
         children: [
           { path: '', component: HomePageComponent }
         ],
-      }
+      },
+      { path: 'application-wall', component: ApplicationWallComponent },
     ]
   }
 ];
@@ -72,7 +74,8 @@ const appRoutes: Routes = [
     SideNavComponent,
     ConsoleUaaWizardComponent,
     SteppersComponent,
-    StepComponent
+    StepComponent,
+    ApplicationWallComponent
   ],
   imports: [
     HttpModule,

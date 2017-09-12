@@ -1,0 +1,12 @@
+@import '../../../sass/colors';
+.dashboard {
+  height: 100vh;
+  &__side-nav {
+    background-color: $blue;
+  }
+  &__inner {
+    min-height: 100%;
+    background-color: $light-grey;
+    padding: 20px;
+  }
+}

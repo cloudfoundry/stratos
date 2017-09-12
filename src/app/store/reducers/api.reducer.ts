@@ -3,11 +3,11 @@ import { ApiActionTypes } from './../actions/api.actions';
 import { Action } from '@ngrx/store';
 
 export interface EntitiesState {
-    applications: {};
+    application: {};
 }
 
 const defaultState = {
-     applications: {}
+     application: {}
 };
 
 export function entitiesReducer(state: EntitiesState = defaultState, action) {

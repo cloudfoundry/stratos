@@ -18,12 +18,13 @@ export class APIAction implements Action {
   paginationKey?: string;
 }
 
-export class StartAPIAction implements Action {
+export class StartAPIAction implements APIAction {
   constructor(
     public options: RequestOptions,
     public actions: string[],
     public entity: Schema,
-    public entityKey: string
+    public entityKey: string,
+    public paginationKey?: string
   ) { }
   type = ApiActionTypes.API_REQUEST_START;
 }
@@ -31,7 +32,9 @@ export class StartAPIAction implements Action {
 export class WrapperAPIActionSuccess implements Action {
   constructor(
     public type: string,
-    public response: {}
+    public response: {},
+    public entityKey: string,
+    public paginationKey?: string
   ) { }
   apiType = ApiActionTypes.API_REQUEST_SUCCESS;
 }
@@ -40,7 +43,9 @@ export class WrapperAPIActionFailed implements Action {
   constructor(
     public type: string,
     public message: string,
-    public entity: Schema
+    public entity: Schema,
+    public entityKey: string,
+    public paginationKey?: string
   ) { }
   apiType = ApiActionTypes.API_REQUEST_FAILED;
 }

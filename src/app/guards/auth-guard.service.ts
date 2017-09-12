@@ -1,8 +1,8 @@
-import { AuthState } from './store/reducers/auth.reducer';
+import { AuthState } from '../store/reducers/auth.reducer';
 import { Observable } from 'rxjs/Rx';
-import { VerifySession } from './store/actions/auth.actions';
+import { VerifySession } from '../store/actions/auth.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from './store/app-state';
+import { AppState } from '../store/app-state';
 import { CanActivate, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/skipWhile';

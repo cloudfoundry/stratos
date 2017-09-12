@@ -23,7 +23,7 @@ export class APIEffect {
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
     .map(apiAction => {
-      return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity, apiAction.entityKey);
+      return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity, apiAction.entityKey, apiAction.paginationKey);
     });
 
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
@@ -35,11 +35,10 @@ export class APIEffect {
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
           const entities = this.getEntities(apiAction, response);
-          console.log(entities);
-          return [new WrapperAPIActionSuccess(apiAction.actions[1], entities)];
+          return [new WrapperAPIActionSuccess(apiAction.actions[1], entities, apiAction.entityKey, apiAction.paginationKey)];
         })
         .catch(err => {
-          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entity)];
+          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entity, apiAction.entityKey, apiAction.paginationKey)];
         });
     });
 
@@ -59,7 +58,6 @@ export class APIEffect {
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
-    console.log(flatEntities);
     return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
   }
 

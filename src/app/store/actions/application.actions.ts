@@ -11,7 +11,7 @@ export const applicationSchema = new schema.Entity('application', {}, {
 });
 
 export class GetAllApplications implements APIAction {
-    constructor() {
+    constructor(public paginationKey?: string) {
         this.options = new RequestOptions();
         this.options.url = 'apps';
         this.options.method = 'get';

@@ -1,5 +1,5 @@
-import { GetAllApplications } from '../store/actions/application.actions';
-import { AppState } from './../store/app-state';
+import { GetAllApplications } from '../../store/actions/application.actions';
+import { AppState } from '../../store/app-state';
 import { Store } from '@ngrx/store';
 import { Component, OnInit, AfterContentInit } from '@angular/core';
 
@@ -17,7 +17,6 @@ export class HomePageComponent implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.store.dispatch(new GetAllApplications());
   }
 
 }
