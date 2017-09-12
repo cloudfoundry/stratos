@@ -52,6 +52,8 @@
     output += exportString('DB_USERNAME', DB_USERNAME);
     output += exportString('DB_PASSWORD', DB_PASSWORD);
     output += exportString('DB_NAME', DB_NAME);
+  } else {
+    console.error('No database configuration found in VCAP_SERVICES: ', JSON.stringify(vcapServices));
   }
 
   fs.writeFile(envFile, output, function (err) {

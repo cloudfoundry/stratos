@@ -34,6 +34,6 @@ case $DB_TYPE in
     fi
     ;;
 *)
-    echo Unknown DB type '$DB_TYPE'
+    echo Unknown DB type \'$DB_TYPE\'?
     ;;
 esac
