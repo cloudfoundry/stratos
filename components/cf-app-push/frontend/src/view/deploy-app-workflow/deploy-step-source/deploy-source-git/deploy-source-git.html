@@ -1,22 +1,27 @@
 <div class="deploy-app-github">
   <div class="deploy-app-github-form">
+    <div focusable-input>
+      <radio-input ng-model="dplyGitCtrl.userInput.gitType" input-value="'github'" input-label="deploy-app-dialog.step-source.git.github"></radio-input>
+    </div>
     <div class="form-group form-group-large" focusable-input
-         ng-class="{'has-error': dplyGitCtrl.userInput.githubProjectValid === false}">
-      <label class="control-label" translate>deploy-app-dialog.step-source.github.project-label</label>
+         ng-class="{'has-error': dplyGitCtrl.isGithub() && dplyGitCtrl.userInput.githubProjectValid === false, 'form-group-disabled': !dplyGitCtrl.isGithub()}">
+      <label class="control-label" translate>deploy-app-dialog.step-source.git.github.project-label</label>
       <span class="control-message" translate ng-if="dplyGitCtrl.userInput.githubProjectValid === false">
-                deploy-app-dialog.step-source.github.project-not-found
-            </span>
+        deploy-app-dialog.step-source.git.github.project-not-found
+      </span>
       <input
         type="text" class="form-control" name="githubProject" ng-model="dplyGitCtrl.userInput.githubProject"
-        placeholder="{{'deploy-app-dialog.step-source.github.project-placeholder' | translate}}"/>
+        placeholder="{{'deploy-app-dialog.step-source.git.github.project-placeholder' | translate}}"
+      />
     </div>
 
-    <div class="form-group form-group-large deploy-app-github-branch" focusable-input>
-      <label class="control-label" translate>deploy-app-dialog.step-source.github.branch-label</label>
+    <div class="form-group form-group-large deploy-app-github-branch" ng-class="{'form-group-disabled': !dplyGitCtrl.isGithub()}"
+         focusable-input>
+      <label class="control-label" translate>deploy-app-dialog.step-source.git.github.branch-label</label>
       <search-box
         ng-model="dplyGitCtrl.userInput.githubBranch"
         input-options="dplyGitCtrl.data.githubBranches"
-        placeholder="{{ 'deploy-app-dialog.step-source.github.branch-placeholder' | translate}}"
+        placeholder="{{ 'deploy-app-dialog.step-source.git.github.branch-placeholder' | translate}}"
         disabled="!dplyGitCtrl.userInput.githubProjectValid">
       </search-box>
     </div>
@@ -43,22 +48,55 @@
           </div>
           <div class="lastCommit-info">
             <div class="lastCommit-info-commit-message">
-              <span translate>deploy-app-dialog.step-source.github.branch-last-commit</span>
+              <span translate>deploy-app-dialog.step-source.git.github.branch-last-commit</span>
               <a href="https://www.github.com/{{dplyGitCtrl.userInput.githubProject}}/commit/{{dplyGitCtrl.data.githubCommit.sha}}"
                  rel="noopener noreferrer" target="_blank">{{ dplyGitCtrl.data.githubCommit.sha | limitTo:6}} {{ dplyGitCtrl.data.githubCommit.commit.message | limitTo:50}}<span ng-if="dplyGitCtrl.data.githubCommit.commit.message.length > 50">...</span>
               </a>
             </div>
             <div class="lastCommit-date-committer">
               <div class="lastCommitter">
-                <span translate>deploy-app-dialog.step-source.github.branch-last-commit-committer</span>{{ dplyGitCtrl.data.githubCommit.author.login || dplyGitCtrl.data.githubCommit.commit.author.name}}
+                <span translate>deploy-app-dialog.step-source.git.github.branch-last-commit-committer</span>{{ dplyGitCtrl.data.githubCommit.author.login || dplyGitCtrl.data.githubCommit.commit.author.name}}
               </div>
               <div>
-                <span translate>deploy-app-dialog.step-source.github.branch-last-commit-date</span> {{ dplyGitCtrl.data.githubCommit.commit.author.date | momentDateFormat }}
+                <span translate>deploy-app-dialog.step-source.git.github.branch-last-commit-date</span> {{ dplyGitCtrl.data.githubCommit.commit.author.date | momentDateFormat }}
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="deploy-app-git-url-form" ng-form="formGitUrl">
+    <div focusable-input>
+      <radio-input ng-model="dplyGitCtrl.userInput.gitType" input-value="'giturl'" input-label="deploy-app-dialog.step-source.git.gitUrl"></radio-input>
+    </div>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': dplyGitCtrl.isGitUrl() && formGitUrl.gitUrl.$invalid && formGitUrl.gitUrl.$dirty, 'form-group-disabled': !dplyGitCtrl.isGitUrl()}">
+      <label class="control-label" translate>deploy-app-dialog.step-source.git.gitUrl.url</label>
+      <div class="control-message" ng-if="formGitUrl.gitUrl.$dirty">
+        <span translate ng-if="formGitUrl.gitUrl.$error.required">deploy-app-dialog.step-source.git.gitUrl.url.error-required</span>
+        <span translate ng-if="formGitUrl.gitUrl.$error.pattern">deploy-app-dialog.step-source.git.gitUrl.url.error-pattern</span>
+      </div>
+      <input type="text" class="form-control"
+             name="gitUrl"
+             ng-model="dplyGitCtrl.userInput.gitUrl"
+             required
+             ng-pattern="dplyGitCtrl.gitUrlRegEx"
+             placeholder="{{'deploy-app-dialog.step-source.git.gitUrl.url.placeholder' | translate}}"
+      />
+    </div>
+    <div class="form-group form-group-large" focusable-input
+         ng-class="{'has-error': dplyGitCtrl.isGitUrl() && formGitUrl.gitUrlBranch.$invalid && formGitUrl.gitUrlBranch.$dirty, 'form-group-disabled': !dplyGitCtrl.isGitUrl()}">
+      <label class="control-label" translate>deploy-app-dialog.step-source.git.gitUrl.branch</label>
+      <div class="control-message" ng-if="formGitUrl.gitUrl.$dirty">
+        <span translate ng-if="formGitUrl.gitUrlBranch.$error.required">deploy-app-dialog.step-source.git.gitUrl.branch.error-required</span>
+      </div>
+      <input type="text" class="form-control"
+             name="gitUrlBranch"
+             ng-model="dplyGitCtrl.userInput.gitUrlBranch"
+             required
+             placeholder="{{'deploy-app-dialog.step-source.git.gitUrl.branch.placeholder' | translate}}"
+      />
     </div>
   </div>
 </div>

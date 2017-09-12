@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(SpacesApi.prototype, {
 
-   /*
+    /*
     * Associate Auditor with the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_auditor_with_the_space.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Auditor with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_auditor_with_the_space_by_username.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Developer with the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_developer_with_the_space.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Developer with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_developer_with_the_space_by_username.html
     */
@@ -88,7 +88,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Manager with the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_manager_with_the_space.html
     */
@@ -105,7 +105,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Manager with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_manager_with_the_space_by_username.html
     */
@@ -123,7 +123,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Security Group with the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/associate_security_group_with_the_space.html
     */
@@ -140,7 +140,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/creating_a_space.html
     */
@@ -158,7 +158,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/delete_a_particular_space.html
     */
@@ -175,7 +175,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get Space summary
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/get_space_summary.html
     */
@@ -192,7 +192,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Apps for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_apps_for_the_space.html
     */
@@ -209,7 +209,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Auditors for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_auditors_for_the_space.html
     */
@@ -226,7 +226,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Developers for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_developers_for_the_space.html
     */
@@ -243,7 +243,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Domains for the Space (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_domains_for_the_space_(deprecated).html
     */
@@ -260,7 +260,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Events for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_events_for_the_space.html
     */
@@ -277,7 +277,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Managers for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_managers_for_the_space.html
     */
@@ -294,7 +294,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Routes for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_routes_for_the_space.html
     */
@@ -311,7 +311,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Security Groups for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_security_groups_for_the_space.html
     */
@@ -328,7 +328,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Instances for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_service_instances_for_the_space.html
     */
@@ -345,7 +345,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Services for the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_services_for_the_space.html
     */
@@ -362,7 +362,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/list_all_spaces.html
     */
@@ -379,7 +379,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Auditor from the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_auditor_from_the_space.html
     */
@@ -396,7 +396,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Auditor with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_auditor_with_the_space_by_username.html
     */
@@ -414,7 +414,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Developer from the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_developer_from_the_space.html
     */
@@ -431,7 +431,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Developer with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_developer_with_the_space_by_username.html
     */
@@ -449,7 +449,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Manager from the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_manager_from_the_space.html
     */
@@ -466,7 +466,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Manager with the Space by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_manager_with_the_space_by_username.html
     */
@@ -484,7 +484,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Security Group from the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/remove_security_group_from_the_space.html
     */
@@ -501,7 +501,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/retrieve_a_particular_space.html
     */
@@ -518,7 +518,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieving the roles of all Users in the Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/retrieving_the_roles_of_all_users_in_the_space.html
     */
@@ -535,7 +535,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Update a Space
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/spaces/update_a_space.html
     */

@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(EventsApi.prototype, {
 
-   /*
+    /*
     * List all Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_all_events.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_create_events.html
     */
@@ -52,7 +52,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_delete_events.html
     */
@@ -69,7 +69,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Exited Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_exited_events.html
     */
@@ -86,7 +86,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App SSH Authorized Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_ssh_authorized_events.html
     */
@@ -103,7 +103,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App SSH Unauthorized Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_ssh_unauthorized_events.html
     */
@@ -120,7 +120,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Start Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_start_events.html
     */
@@ -137,7 +137,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Stop Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_stop_events.html
     */
@@ -154,7 +154,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List App Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_update_events.html
     */
@@ -171,7 +171,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List events associated with an App since January 1, 2014
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_events_associated_with_an_app_since_january_1,_2014.html
     */
@@ -188,7 +188,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Route Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_create_events.html
     */
@@ -205,7 +205,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Route Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_delete_events.html
     */
@@ -222,7 +222,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Route Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_update_events.html
     */
@@ -239,7 +239,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Binding Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_binding_create_events.html
     */
@@ -256,7 +256,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Binding Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_binding_delete_events.html
     */
@@ -273,7 +273,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Broker Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_create_events.html
     */
@@ -290,7 +290,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Broker Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_delete_events.html
     */
@@ -307,7 +307,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Broker Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_update_events.html
     */
@@ -324,7 +324,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_create_events.html
     */
@@ -341,7 +341,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Dashboard Client Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_dashboard_client_create_events.html
     */
@@ -358,7 +358,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Dashboard Client Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_dashboard_client_delete_events.html
     */
@@ -375,7 +375,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_delete_events.html
     */
@@ -392,7 +392,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Instance Bind Route Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_bind_route_events.html
     */
@@ -409,7 +409,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Instance Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_create_events.html
     */
@@ -426,7 +426,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Instance Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_delete_events.html
     */
@@ -443,7 +443,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Instance Unbind Route Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_unbind_route_events.html
     */
@@ -460,7 +460,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Instance Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_update_events.html
     */
@@ -477,7 +477,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Key Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_key_create_events.html
     */
@@ -494,7 +494,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Key Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_key_delete_events.html
     */
@@ -511,7 +511,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_create_events.html
     */
@@ -528,7 +528,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_delete_events.html
     */
@@ -545,7 +545,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_update_events.html
     */
@@ -562,7 +562,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Visibility Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_create_events.html
     */
@@ -579,7 +579,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Visibility Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_delete_events.html
     */
@@ -596,7 +596,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Plan Visibility Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_update_events.html
     */
@@ -613,7 +613,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Service Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_update_events.html
     */
@@ -630,7 +630,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Space Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_create_events.html
     */
@@ -647,7 +647,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Space Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_delete_events.html
     */
@@ -664,7 +664,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List Space Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_update_events.html
     */
@@ -681,7 +681,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List User Provided Service Instance Create Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_create_events.html
     */
@@ -698,7 +698,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List User Provided Service Instance Delete Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_delete_events.html
     */
@@ -715,7 +715,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List User Provided Service Instance Update Events
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_update_events.html
     */
@@ -732,7 +732,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Event
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/retrieve_a_particular_event.html
     */

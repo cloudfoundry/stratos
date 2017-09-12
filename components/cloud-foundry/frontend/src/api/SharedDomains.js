@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(SharedDomainsApi.prototype, {
 
-   /*
+    /*
     * Create a Shared Domain
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/create_a_shared_domain.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Shared Domain
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/delete_a_particular_shared_domain.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Filtering Shared Domains by name
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/filtering_shared_domains_by_name.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Shared Domains
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/list_all_shared_domains.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Shared Domain
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/retrieve_a_particular_shared_domain.html
     */

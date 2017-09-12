@@ -34,7 +34,7 @@
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
       $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,appUtilsService,
-      appClusterCliCommands, modelUtils, cfOrganizationModel, cfUtilsService);
+        appClusterCliCommands, modelUtils, cfOrganizationModel, cfUtilsService);
 
     }));
 

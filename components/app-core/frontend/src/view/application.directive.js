@@ -48,9 +48,21 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController($q, appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope,
-                                 appLoggedInService) {
+  function ApplicationController(
+    $q,
+    appEventService,
+    modelManager,
+    loginManager,
+    appUpgradeCheck,
+    appLocalStorage,
+    consoleSetupCheck,
+    $timeout,
+    $stateParams,
+    $window,
+    $rootScope,
+    $scope,
+    appLoggedInService
+  ) {
 
     var vm = this;
 
@@ -82,7 +94,7 @@
     }
 
     // Navigation options
-    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) { // eslint-disable-line angular/on-watch
       vm.hideNavigation = toParams.hideNavigation;
       vm.hideAccount = toParams.hideAccount;
     });

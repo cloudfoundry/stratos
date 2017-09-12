@@ -238,8 +238,8 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-#buildProxy
-#buildGoose
+buildProxy
+buildGoose
 buildUI
 
 # Done

@@ -23,8 +23,8 @@
         data.dropItemHandler = _.partial(dropHandler, _, data);
         data.sourceTypeOptions = [
           {
-            value: 'github',
-            label: 'deploy-app-dialog.step-source.github.label'
+            value: 'git',
+            label: 'deploy-app-dialog.step-source.git'
           },
           {
             value: 'local',
@@ -54,7 +54,7 @@
             nextBtnText: 'deploy-app-dialog.button-deploy',
             stepCommit: true,
             allowNext: function () {
-              return wizardData.sourceType === 'github' && _.get(data, 'git.valid') ||
+              return wizardData.sourceType === 'git' && _.get(data, 'git.valid') ||
                 wizardData.sourceType === 'local' && _.get(data, 'source.valid');
             }
           },

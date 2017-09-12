@@ -1,5 +1,5 @@
 <div class="space-services-table">
-  <div ng-if="!spaceSrvsCtrl.serviceInstances || spaceSrvsCtrl.serviceInstances.length < 1"
+  <div ng-if="spaceSrvsCtrl.serviceInstances && spaceSrvsCtrl.serviceInstances.length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>cf.space-info.tabs.services.none</div>
   </div>

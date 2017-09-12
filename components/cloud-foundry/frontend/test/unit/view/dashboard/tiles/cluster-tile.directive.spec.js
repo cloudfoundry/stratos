@@ -125,7 +125,7 @@
 
       it('Call succeeds', function () {
         spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 2 }});
         });
         _.set(consoleInfo, 'info.endpoints.cf.' + initialService.guid + '.user.admin', true);
@@ -142,7 +142,7 @@
 
       it('Call succeeds - empty list', function () {
         spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 0 }});
         });
         _.set(consoleInfo, 'info.endpoints.cf.' + initialService.guid + '.user.admin', true);
@@ -159,7 +159,7 @@
 
       it('Call fails', function () {
         spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
         _.set(consoleInfo, 'info.endpoints.cf.' + initialService.guid + '.user.admin', true);
@@ -226,7 +226,7 @@
 
       it('Call succeeds', function () {
         spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 2 }});
         });
         createCtrl();
@@ -242,7 +242,7 @@
 
       it('Call succeeds - empty list', function () {
         spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 0 }});
         });
         createCtrl();
@@ -258,7 +258,7 @@
 
       it('Call fails', function () {
         spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
-          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          expect(httpConfig.headers['x-cap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
         createCtrl();

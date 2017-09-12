@@ -22,6 +22,7 @@
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
   var sass = require('gulp-sass');
+  var sourcemaps = require('gulp-sourcemaps');
   var sort = require('gulp-sort');
   var templateCache = require('gulp-angular-templatecache');
   var uglify = require('gulp-uglify');
@@ -34,6 +35,7 @@
   require('./e2e.gulp');
 
   var paths = config.paths;
+  var createSassSourceMaps = true;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,
     templateFiles, scssFiles, server, usePlumber, mainBowerFile, bowerFiles, components, browserSync;
   var packageJson = require('../package.json');
@@ -142,8 +144,13 @@
           this.emit('end');
         }
       })))
-      .pipe(sass())
-      .pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
+      .pipe(sourcemaps.init())
+      .pipe(sass().on('error', sass.logError))
+      .pipe(gulpif(createSassSourceMaps, sourcemaps.write({
+        includeContent: false})
+      ))
+      .pipe(autoprefixer({ browsers: ['last 2 version'], cascade: false }))
+      .pipe(gulpif(createSassSourceMaps, sourcemaps.write()))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -152,7 +159,9 @@
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
       .pipe(concat('index.css'))
-      .pipe(cleanCSS({}))
+      .pipe(gulpif(createSassSourceMaps, sourcemaps.init({loadMaps: true})))
+      .pipe(cleanCSS())
+      .pipe(gulpif(createSassSourceMaps, sourcemaps.write()))
       .pipe(gulp.dest(paths.dist));
   });
 
@@ -425,6 +434,7 @@
   // Production build
   gulp.task('build', function (next) {
     usePlumber = false;
+    createSassSourceMaps = false;
     runSequence(
       'clean',
       'prepare-frontend',

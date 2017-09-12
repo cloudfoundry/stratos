@@ -16,7 +16,7 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
   function ManageUsersFactory($translate, modelManager, frameworkAsyncTaskDialog, appClusterRolesService,
-                              cfOrganizationModel) {
+    cfOrganizationModel) {
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
@@ -60,9 +60,9 @@
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
         disableClearAll = disableClearAll || !authModel.isAllowed(clusterGuid,
-            authModel.resources.organization,
-            authModel.actions.update,
-            organization.details.org.metadata.guid);
+          authModel.resources.organization,
+          authModel.actions.update,
+          organization.details.org.metadata.guid);
       });
 
       // Async refresh roles
