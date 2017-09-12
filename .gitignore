@@ -41,6 +41,6 @@ deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
 outputs/
 
-stratos-ui-release/.dev_builds
-stratos-ui-release/blobs
-stratos-ui-release/dev_releases/
+deploy/stratos-ui-release/.dev_builds
+deploy/stratos-ui-release/blobs
+deploy/stratos-ui-release/dev_releases/
