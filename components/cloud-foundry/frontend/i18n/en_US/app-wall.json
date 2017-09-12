@@ -84,10 +84,15 @@
         "failure-part-1-alt": "The following exception occurred when creating your application: {{ error }}. ",
         "failure-part-2": "Please try again or contact your administrator if the problem persists."
       },
-      "route": {
+      "route-validate": {
         "exists": "This route already exists. Choose a new one.",
         "failure-part-1": "There was a problem validating your route. ",
         "failure-part-1-alt": "The following exception occurred when validating your route: {{ error }}. ",
+        "failure-part-2": "Please try again or contact your administrator if the problem persists."
+      },
+      "route-create-bind": {
+        "failure-part-1": "There was a problem creating and binding the route to your new application. ",
+        "failure-part-1-alt": "The following exception occurred when creating and binding the route to your new application: {{ error }}. ",
         "failure-part-2": "Please try again or contact your administrator if the problem persists."
       }
     }

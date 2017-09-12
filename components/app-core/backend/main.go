@@ -277,7 +277,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	sessionsTable := "sessions"
 
 	// Store depends on the DB Type
-	if databaseProvider == "pgsql" {
+	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options
@@ -287,7 +287,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		return sessionStore, err
 	}
 	// Store depends on the DB Type
-	if databaseProvider == "mysql" {
+	if databaseProvider == datastore.MYSQL {
 		log.Info("Creating MySQL session store")
 		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options
@@ -631,6 +631,9 @@ func isConsoleUpgrading() bool {
 	}
 
 	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+	if string(upgradeVolume[0]) == "/" {
+		upgradeLockPath = fmt.Sprintf("%s/%s", upgradeVolume, upgradeLockFile)
+	}
 
 	if _, err := os.Stat(upgradeLockPath); err == nil {
 		return true

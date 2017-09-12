@@ -25,7 +25,7 @@
 
       for (var y = 0; y < serviceInstance.tags.length; y++) {
         var tag = serviceInstance.tags[y];
-        if (tag === 'postgresql') {
+        if (tag === 'stratos_postgresql') {
           DB_TYPE = 'postgresql';
           DB_HOST = serviceInstance.credentials.hostname;
           DB_PORT = serviceInstance.credentials.port;
@@ -60,6 +60,8 @@
     output += exportString('DB_USER', DB_USER);
     output += exportString('DB_PASSWORD', DB_PASSWORD);
     output += exportString('DB_DATABASE_NAME', DB_DATABASE_NAME);
+  } else {
+    console.error('No database configuration found in VCAP_SERVICES: ', JSON.stringify(vcapServices));
   }
 
   fs.writeFile(envFile, output, function (err) {

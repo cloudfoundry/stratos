@@ -50,6 +50,10 @@
             <dd>
               <a ng-click="clusterDetailController.showCliCommands()" class="btn btn-link" translate>cf.cli-common.button-text</a>
             </dd>
+            <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.api-version</dt>
+            <dd ng-if="clusterDetailController.initialized" translate>
+              {{ clusterDetailController.userService.info.api_version }}
+            </dd>
             <dt ng-if="clusterDetailController.initialized" translate>cf.summary.panel.label.username</dt>
             <dd ng-if="clusterDetailController.initialized">
               {{ clusterDetailController.userName }}

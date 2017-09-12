@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(UsersApi.prototype, {
 
-   /*
+    /*
     * Associate Audited Organization with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_audited_organization_with_the_user.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Audited Space with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_audited_space_with_the_user.html
     */
@@ -52,7 +52,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Billing Managed Organization with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_billing_managed_organization_with_the_user.html
     */
@@ -69,7 +69,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Managed Organization with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_managed_organization_with_the_user.html
     */
@@ -86,7 +86,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Managed Space with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_managed_space_with_the_user.html
     */
@@ -103,7 +103,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Organization with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_organization_with_the_user.html
     */
@@ -120,7 +120,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Space with the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_space_with_the_user.html
     */
@@ -137,7 +137,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/creating_a_user.html
     */
@@ -155,7 +155,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/delete_a_particular_user.html
     */
@@ -172,7 +172,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get User summary
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/get_user_summary.html
     */
@@ -189,7 +189,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Audited Organizations for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_audited_organizations_for_the_user.html
     */
@@ -206,7 +206,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Audited Spaces for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_audited_spaces_for_the_user.html
     */
@@ -223,7 +223,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Billing Managed Organizations for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_billing_managed_organizations_for_the_user.html
     */
@@ -240,7 +240,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Managed Organizations for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_managed_organizations_for_the_user.html
     */
@@ -257,7 +257,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Managed Spaces for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_managed_spaces_for_the_user.html
     */
@@ -274,7 +274,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Organizations for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_organizations_for_the_user.html
     */
@@ -291,7 +291,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces for the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_spaces_for_the_user.html
     */
@@ -308,7 +308,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Users
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_users.html
     */
@@ -325,7 +325,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Audited Organization from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_audited_organization_from_the_user.html
     */
@@ -342,7 +342,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Audited Space from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_audited_space_from_the_user.html
     */
@@ -359,7 +359,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Billing Managed Organization from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_billing_managed_organization_from_the_user.html
     */
@@ -376,7 +376,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Managed Organization from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_managed_organization_from_the_user.html
     */
@@ -393,7 +393,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Managed Space from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_managed_space_from_the_user.html
     */
@@ -410,7 +410,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Organization from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_organization_from_the_user.html
     */
@@ -427,7 +427,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Space from the User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_space_from_the_user.html
     */
@@ -444,7 +444,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/retrieve_a_particular_user.html
     */
@@ -461,7 +461,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a User
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/updating_a_user.html
     */

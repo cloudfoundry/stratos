@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServiceUsageEventsApi.prototype, {
 
-   /*
+    /*
     * List Service Usage Events
     * Events are sorted by internal database IDs. This order may differ from created_at.
     * Events close to the current time should not be processed because other events may still have open
@@ -38,7 +38,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Purge and reseed Service Usage Events
     * Destroys all existing events. Populates new usage events, one for each existing service instance.
     * All populated events will have a created_at value of current time.
@@ -59,7 +59,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Usage Event
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_usage_events/retrieve_a_particular_service_usage_event.html
     */

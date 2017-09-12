@@ -59,8 +59,12 @@
 
     afterAll(function () {
       if (testGuid) {
-        browser.driver.wait(Q.all(cfModel.deleteOrgIfExisting(testGuid, testOrgName),
-          cfModel.deleteSpaceIfExisting(testGuid, testSpaceName)));
+        browser.driver.wait(
+          Q.all([
+            cfModel.deleteOrgIfExisting(testGuid, testOrgName),
+            cfModel.deleteSpaceIfExisting(testGuid, testSpaceName)
+          ])
+        );
       }
     });
 

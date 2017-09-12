@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServiceBrokersApi.prototype, {
 
-   /*
+    /*
     * Create a Service Broker
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/create_a_service_broker.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Service Broker
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/delete_a_particular_service_broker.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Brokers
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/list_all_service_brokers.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Broker
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/retrieve_a_particular_service_broker.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Update a Service Broker
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/update_a_service_broker.html
     */

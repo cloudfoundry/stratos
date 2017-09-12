@@ -152,15 +152,14 @@ func (ch *CFHosting) Init() error {
 		// Save to Console DB
 		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
 		if err != nil {
+			log.Fatalf("Failed to save console configuration due to %s", err)
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
 		var cfCnsi interfaces.CNSIRecord
 
 		cfCnsi, err = ch.portalProxy.GetCNSIRecordByEndpoint(appData.API)
-		if err != nil {
-			return fmt.Errorf("Failed to discover if an endpoint for hosting cf exists due to %s", err)
-		} else if cfCnsi.CNSIType != "" {
+		if cfCnsi.CNSIType != "" {
 			log.Info("Found existing endpoint matching Cloud Foundry API. Will not auto-register or auto-connect")
 		} else {
 			log.Info("Auto-registering endpoint for Cloud Foundry API")

@@ -9,8 +9,8 @@
    * @namespace cf-app-push.accountActions
    * @memberof cf-app-push
    * @name DeploySourceGit
-   * @description ????????
-   * @returns {object} The ???????? directive definition object
+   * @description Directive to aid user in selecting a git source for their application
+   * @returns {object} The DeploySourceGit directive definition object
    */
   function DeploySourceGit() {
     return {
@@ -41,6 +41,15 @@
     vm.data = {
       githubBranches: []
     };
+
+    vm.userInput.gitType = vm.userInput.gitType || 'github';
+    vm.userInput.gitUrlBranch = vm.userInput.gitUrlBranch || 'master';
+
+    vm.isGithub = isGithub;
+    vm.isGitUrl = isGitUrl;
+    // For now mandate https (pp container does not support ssh)
+    vm.gitUrlRegEx = /https:(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
+    // vm.gitUrlRegEx = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
 
     var gitHubUrlBase = 'https://github.com/';
 
@@ -90,25 +99,21 @@
     }, 1000);
 
     $scope.$watch(function () {
-      return vm.userInput.githubProjectValid &&
-        vm.userInput.githubProject &&
+      var gitType = vm.userInput.gitType;
+      var gitHub = vm.userInput.githubProject &&
         vm.userInput.githubBranch &&
-        vm.userInput.githubBranch.name;
-    }, function (newVal) {
-      vm.valid = newVal;
-    });
+        vm.userInput.githubBranch.name || false;
+      var gitUrl = vm.userInput.gitUrl && vm.userInput.gitUrlBranch || false;
+      return gitType.toString() + gitHub.toString() + gitUrl.toString();
+    }, updateValid);
 
-    $scope.$watch(function () {
-      return vm.userInput.githubProject;
-    }, function (newVal, oldVal) {
+    $scope.$watch('dplyGitCtrl.userInput.githubProject', function (newVal, oldVal) {
       if (oldVal !== newVal) {
         debounceGithubProjectFetch();
       }
     });
 
-    $scope.$watch(function () {
-      return vm.userInput.githubBranch;
-    }, function (newVal, oldVal) {
+    $scope.$watch('dplyGitCtrl.userInput.githubBranch', function (newVal, oldVal) {
       if (newVal && oldVal !== newVal) {
         $http.get('https://api.github.com/repos/' + vm.userInput.githubProject + '/commits/' + newVal.commit.sha)
           .then(function (response) {
@@ -120,14 +125,21 @@
       }
     });
 
-    $scope.$watch(function () {
-      return vm.dropInfo;
-    }, function (newVal, oldVal) {
+    $scope.$watch('dplyGitCtrl.dropInfo', function (newVal, oldVal) {
       if (oldVal !== newVal) {
         var info = newVal;
-        // Check if this is a GitHub link
-        if (angular.isString(info.value) && info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
-          vm.sourceType = 'github';
+        if (!info.isWebLink || !angular.isString(info.value)) {
+          return;
+        }
+
+        if (vm.gitUrlRegEx.test(info.value)) {
+          vm.sourceType = 'git';
+          vm.userInput.gitType = 'giturl';
+          vm.userInput.gitUrl = info.value;
+        } else if (info.value.toLowerCase().indexOf(gitHubUrlBase) === 0) {
+          // Check if this is a GitHub link
+          vm.sourceType = 'git';
+          vm.userInput.gitType = 'github';
           var urlParts = info.value.substring(gitHubUrlBase.length).split('/');
           if (urlParts.length > 1) {
             var branch;
@@ -147,11 +159,44 @@
       }
     });
 
+    function isGithub() {
+      return vm.userInput.gitType === 'github';
+    }
+
+    function isGitUrl() {
+      return vm.userInput.gitType === 'giturl';
+    }
+
     function selectBranch(branch) {
       var foundBranch = _.find(vm.data.githubBranches, function (o) {
         return o.value && o.value.name === branch;
       });
       vm.userInput.githubBranch = foundBranch ? foundBranch.value : undefined;
+    }
+
+    function isGitUrlValid() {
+      return $scope.formGitUrl.$valid;
+    }
+
+    function isGithubValid() {
+      return vm.userInput.githubProjectValid &&
+        vm.userInput.githubProject &&
+        vm.userInput.githubBranch &&
+        vm.userInput.githubBranch.name;
+    }
+
+    function updateValid() {
+      switch (vm.userInput.gitType) {
+        case 'giturl':
+          vm.valid = !!isGitUrlValid();
+          break;
+        case 'github':
+          vm.valid = !!isGithubValid();
+          break;
+        default:
+          vm.valid = false;
+          break;
+      }
     }
 
   }

@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(OrganizationsApi.prototype, {
 
-   /*
+    /*
     * Associate Auditor with the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_auditor_with_the_organization.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Auditor with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_auditor_with_the_organization_by_username.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Billing Manager with the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_billing_manager_with_the_organization.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Billing Manager with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_billing_manager_with_the_organization_by_username.html
     */
@@ -88,7 +88,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Manager with the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_manager_with_the_organization.html
     */
@@ -105,7 +105,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Manager with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_manager_with_the_organization_by_username.html
     */
@@ -123,7 +123,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate Private Domain with the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_private_domain_with_the_organization.html
     */
@@ -140,7 +140,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate User with the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_user_with_the_organization.html
     */
@@ -157,7 +157,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Associate User with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/associate_user_with_the_organization_by_username.html
     */
@@ -175,7 +175,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating an Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/creating_an_organization.html
     */
@@ -193,7 +193,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/delete_a_particular_organization.html
     */
@@ -210,7 +210,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Get Organization summary
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/get_organization_summary.html
     */
@@ -227,7 +227,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Auditors for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_auditors_for_the_organization.html
     */
@@ -244,7 +244,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Billing Managers for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_billing_managers_for_the_organization.html
     */
@@ -261,7 +261,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Domains for the Organization (deprecated)
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_domains_for_the_organization_(deprecated).html
     */
@@ -278,7 +278,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Managers for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_managers_for_the_organization.html
     */
@@ -295,7 +295,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Organizations
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_organizations.html
     */
@@ -312,7 +312,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Private Domains for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_private_domains_for_the_organization.html
     */
@@ -329,7 +329,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Services for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_services_for_the_organization.html
     */
@@ -346,7 +346,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Space Quota Definitions for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_space_quota_definitions_for_the_organization.html
     */
@@ -363,7 +363,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_spaces_for_the_organization.html
     */
@@ -380,7 +380,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Users for the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/list_all_users_for_the_organization.html
     */
@@ -397,7 +397,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Auditor from the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_auditor_from_the_organization.html
     */
@@ -414,7 +414,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Auditor with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_auditor_with_the_organization_by_username.html
     */
@@ -432,7 +432,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Billing Manager from the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_billing_manager_from_the_organization.html
     */
@@ -449,7 +449,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Billing Manager with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_billing_manager_with_the_organization_by_username.html
     */
@@ -467,7 +467,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Manager from the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_manager_from_the_organization.html
     */
@@ -484,7 +484,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Manager with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_manager_with_the_organization_by_username.html
     */
@@ -502,7 +502,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Private Domain from the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_private_domain_from_the_organization.html
     */
@@ -519,7 +519,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove User from the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_user_from_the_organization.html
     */
@@ -536,7 +536,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove User with the Organization by Username
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/remove_user_with_the_organization_by_username.html
     */
@@ -554,7 +554,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/retrieve_a_particular_organization.html
     */
@@ -571,7 +571,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieving organization instance usage
     * This endpoint returns a count of started app instances under an organization.
     * Note that crashing apps are included in this count.
@@ -590,7 +590,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieving organization memory usage
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/retrieving_organization_memory_usage.html
     */
@@ -607,7 +607,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieving the roles of all Users in the Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/retrieving_the_roles_of_all_users_in_the_organization.html
     */
@@ -624,7 +624,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Update an Organization
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organizations/update_an_organization.html
     */

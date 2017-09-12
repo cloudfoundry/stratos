@@ -3,6 +3,7 @@ node_modules/
 bower_components/
 dist/
 components/*/backend/vendor
-tmp/
+dev-certs/
 out/
 outputs/
+tmp/

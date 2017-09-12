@@ -12,25 +12,25 @@
         response: {
           200: {
             body: {
-              "metadata": {
-                "guid": "8ed4029b-251a-41d3-95ee-55cf3a1817d4",
-                "url": "/v2/service_bindings/8ed4029b-251a-41d3-95ee-55cf3a1817d4",
-                "created_at": "2016-05-12T00:45:16Z",
-                "updated_at": null
+              'metadata': {
+                'guid': '8ed4029b-251a-41d3-95ee-55cf3a1817d4',
+                'url': '/v2/service_bindings/8ed4029b-251a-41d3-95ee-55cf3a1817d4',
+                'created_at': '2016-05-12T00:45:16Z',
+                'updated_at': null
               },
-              "entity": {
-                "app_guid": newBindingSpec.app_guid,
-                "service_instance_guid": newBindingSpec.service_instance_guid,
-                "credentials": {
-                  "creds-key-32": "creds-val-32"
+              'entity': {
+                'app_guid': newBindingSpec.app_guid,
+                'service_instance_guid': newBindingSpec.service_instance_guid,
+                'credentials': {
+                  'creds-key-32': 'creds-val-32'
                 },
-                "binding_options": {},
-                "gateway_data": null,
-                "gateway_name": "",
-                "syslog_drain_url": null,
-                "volume_mounts": [],
-                "app_url": "/v2/apps/" + newBindingSpec.app_guid,
-                "service_instance_url": "/v2/user_provided_service_instances/" + newBindingSpec.service_instance_guid
+                'binding_options': {},
+                'gateway_data': null,
+                'gateway_name': '',
+                'syslog_drain_url': null,
+                'volume_mounts': [],
+                'app_url': '/v2/apps/' + newBindingSpec.app_guid,
+                'service_instance_url': '/v2/user_provided_service_instances/' + newBindingSpec.service_instance_guid
               }
             }
           },
@@ -70,33 +70,33 @@
           200: {
 
             body: {
-              "total_results": 1,
-              "total_pages": 1,
-              "prev_url": null,
-              "next_url": null,
-              "resources": [
+              'total_results': 1,
+              'total_pages': 1,
+              'prev_url': null,
+              'next_url': null,
+              'resources': [
                 {
-                  "metadata": {
-                    "guid": "571b283b-97f9-41e3-abc7-81792ee34e40",
-                    "url": "/v2/service_bindings/571b283b-97f9-41e3-abc7-81792ee34e40",
-                    "created_at": "2016-02-19T02:04:08Z",
-                    "updated_at": null
+                  'metadata': {
+                    'guid': '571b283b-97f9-41e3-abc7-81792ee34e40',
+                    'url': '/v2/service_bindings/571b283b-97f9-41e3-abc7-81792ee34e40',
+                    'created_at': '2016-02-19T02:04:08Z',
+                    'updated_at': null
                   },
-                  "entity": {
-                    "app_guid": "6e23689c-2844-4ebf-ab69-e52ab3439f6b",
-                    "service_instance_guid": "01430cca-2592-4396-ac79-b1405a488b3e",
-                    "credentials": {
-                      "creds-key-64": "creds-val-64"
+                  'entity': {
+                    'app_guid': '6e23689c-2844-4ebf-ab69-e52ab3439f6b',
+                    'service_instance_guid': '01430cca-2592-4396-ac79-b1405a488b3e',
+                    'credentials': {
+                      'creds-key-64': 'creds-val-64'
                     },
-                    "binding_options": {},
-                    "gateway_data": null,
-                    "gateway_name": "",
-                    "syslog_drain_url": null,
-                    "app_url": "/v2/apps/6e23689c-2844-4ebf-ab69-e52ab3439f6b",
-                    "service_instance_url": "/v2/service_instances/01430cca-2592-4396-ac79-b1405a488b3e",
-                    "service_instance": {
-                      "entity": {
-                        "name": "instance_123"
+                    'binding_options': {},
+                    'gateway_data': null,
+                    'gateway_name': '',
+                    'syslog_drain_url': null,
+                    'app_url': '/v2/apps/6e23689c-2844-4ebf-ab69-e52ab3439f6b',
+                    'service_instance_url': '/v2/service_instances/01430cca-2592-4396-ac79-b1405a488b3e',
+                    'service_instance': {
+                      'entity': {
+                        'name': 'instance_123'
                       }
                     }
                   }

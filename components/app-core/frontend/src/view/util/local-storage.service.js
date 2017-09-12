@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-  .module('app.view')
-  .factory('appLocalStorage', localStorageFactory);
+    .module('app.view')
+    .factory('appLocalStorage', localStorageFactory);
 
   /**
   * @namespace app.view.localStorageFactory
