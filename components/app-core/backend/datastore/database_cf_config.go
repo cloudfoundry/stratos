@@ -60,7 +60,7 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 				db.SSLMode = "disable"
 				log.Info("Discovered Cloud Foundry postgres service and applied config")
 				return true
-			} else if strings.HasPrefix(tag, "mysql") {
+			} else if strings.HasPrefix(tag, "stratos_mysql") {
 				dbCredentials := service.Credentials
 				db.DatabaseProvider = "mysql"
 				db.Username = dbCredentials.Username

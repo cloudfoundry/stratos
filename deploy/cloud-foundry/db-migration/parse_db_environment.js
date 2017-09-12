@@ -7,7 +7,7 @@
   var envFile = args[0];
   var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
 
-  var DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE_NAME;
+  var DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE_NAME, DATABASE_PROVIDER;
   var output = '';
 
   // Discover the db by finding the first service instance with a supported type
@@ -27,13 +27,15 @@
         var tag = serviceInstance.tags[y];
         if (tag === 'stratos_postgresql') {
           DB_TYPE = 'postgresql';
+          DATABASE_PROVIDER = 'pgsql';
           DB_HOST = serviceInstance.credentials.hostname;
           DB_PORT = serviceInstance.credentials.port;
           DB_USER = serviceInstance.credentials.username;
           DB_PASSWORD = serviceInstance.credentials.password;
           DB_DATABASE_NAME = serviceInstance.credentials.dbname;
-        } else if (tag === 'mysql') {
+        } else if (tag === 'stratos_mysql') {
           DB_TYPE = 'mysql';
+          DATABASE_PROVIDER = 'mysql';
           DB_HOST = serviceInstance.credentials.hostname;
           DB_PORT = serviceInstance.credentials.port;
           DB_USER = serviceInstance.credentials.username;
@@ -54,6 +56,7 @@
   }
 
   if (DB_TYPE) {
+    output += exportString('DATABASE_PROVIDER', DATABASE_PROVIDER);
     output += exportString('DB_TYPE', DB_TYPE);
     output += exportString('DB_HOST', DB_HOST);
     output += exportString('DB_PORT', DB_PORT);
