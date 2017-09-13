@@ -14,7 +14,11 @@ As described in the standard `cf push` instructions [here]("../README.md") the c
     ```
     cf create-service postgresql v9.4 console_db -t stratos_postgresql
     ```
-    * In this example, `postgresql` is the service name for the Postgres DB service, `v9.4` is the service plan and `console_db` is the name for the service instance that will be created.
+    * In this example, `postgresql` is the service name for the Postgres DB service, `v9.4` is the service plan and `console_db` is the name for the service instance that will be created. 
+    * To view services and service plans:
+      ```
+      cf marketplace
+      ```
 
 1. Update the Console's Manifest
 
@@ -36,9 +40,16 @@ As described in the standard `cf push` instructions [here]("../README.md") the c
     It's therefore very important to execute the next step in order for the console to start
 
     Wait for the database setup to complete, by viewing the application log and waiting for the message indicating setup is complete:
-    ```
-    cf logs console
-    ```
+
+    * To stream the logs
+      ```
+      cf logs console
+      ```
+
+    * Database setup complete log message
+      ```
+      Database successfully migrated. Please restart the application via 'cf push -c "null"'
+      ```
    
 1. Restart the app via cf push
     ```
