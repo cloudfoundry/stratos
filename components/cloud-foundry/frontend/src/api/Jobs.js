@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(JobsApi.prototype, {
 
-   /*
+    /*
     * Retrieve Job that is queued
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_that_is_queued.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve Job that was successful
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_that_was_successful.html
     */
@@ -52,7 +52,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve Job with known failure
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_with_known_failure.html
     */
@@ -69,7 +69,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve Job with unknown failure
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_with_unknown_failure.html
     */

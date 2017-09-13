@@ -28,13 +28,13 @@ export GITHUB_OAUTH_STATE=thisshouldberando
 # All the things  #
 ###################
 
-export PGSQL_USER='console'
-export PGSQL_PASSWORD='console'
-export PGSQL_DATABASE='console-db'
-export PGSQL_HOST='localhost'
-export PGSQL_PORT=5432
-export PGSQL_CONNECT_TIMEOUT_IN_SECS=100
-export PGSQL_SSL_MODE='disable'
+export DB_USER='console'
+export DB_PASSWORD='console'
+export DB_DATABASE_NAME='console-db'
+export DB_HOST='localhost'
+export DB_PORT=5432
+export DB_CONNECT_TIMEOUT_IN_SECS=100
+export DB_SSL_MODE='disable'
 
 export HTTP_CLIENT_TIMEOUT_IN_SECS=100
 export SKIP_SSL_VALIDATION='true'

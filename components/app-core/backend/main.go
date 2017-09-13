@@ -18,6 +18,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -273,8 +274,10 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
+	sessionsTable := "sessions"
+
 	// Store depends on the DB Type
-	if databaseProvider == "pgsql" {
+	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options
@@ -283,9 +286,19 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.Secure = true
 		return sessionStore, err
 	}
+	// Store depends on the DB Type
+	if databaseProvider == datastore.MYSQL {
+		log.Info("Creating MySQL session store")
+		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		// Setup cookie-store options
+		sessionStore.Options.MaxAge = sessionExpiry
+		sessionStore.Options.HttpOnly = true
+		sessionStore.Options.Secure = true
+		return sessionStore, err
+	}
 
 	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
@@ -319,13 +332,6 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
-	}
-
-	// Determine database provider
-	if len(dc.Host) > 0 {
-		dc.DatabaseProvider = "pgsql"
-	} else {
-		dc.DatabaseProvider = "sqlite"
 	}
 
 	return dc, nil
@@ -622,6 +628,9 @@ func isConsoleUpgrading() bool {
 	}
 
 	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+	if string(upgradeVolume[0]) == "/" {
+		upgradeLockPath = fmt.Sprintf("%s/%s", upgradeVolume, upgradeLockFile)
+	}
 
 	if _, err := os.Stat(upgradeLockPath); err == nil {
 		return true

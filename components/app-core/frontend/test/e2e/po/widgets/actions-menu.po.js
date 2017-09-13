@@ -2,6 +2,7 @@
   'use strict';
 
   var wrapper = require('../wrapper.po');
+  var helpers = require('../helpers.po');
 
   module.exports = {
     isSingleButton: isSingleButton,
@@ -40,11 +41,11 @@
   }
 
   function click(actionMenu) {
-    return actionMenu.element(by.css('.actions-menu-icon')).click();
+    return helpers.waitForElementAndClick(actionMenu.element(by.css('.actions-menu-icon')));
   }
 
   function clickItem(actionMenu, row) {
-    return _getRow(actionMenu, row).click();
+    return helpers.waitForElementAndClick(_getRow(actionMenu, row));
   }
 
   function _getRow(actionMenu, row) {

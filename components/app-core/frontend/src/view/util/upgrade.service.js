@@ -2,9 +2,9 @@
   'use strict';
 
   angular
-  .module('app.view')
-  .factory('appUpgradeCheck', upgradeCheckFactory)
-  .config(upgradeCheckInterceptor);
+    .module('app.view')
+    .factory('appUpgradeCheck', upgradeCheckFactory)
+    .config(upgradeCheckInterceptor);
 
   /**
   * @namespace appUpgradeCheck
@@ -53,7 +53,7 @@
         // rejection is a response object
         // Must be a 503 with the Retry-After header and mst be do a Portal Proxy URL
         if (isUpgrading(rejection)) {
-            // This indicates upgrade in progress, so change state to an upgrade error page
+          // This indicates upgrade in progress, so change state to an upgrade error page
           appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'upgrading', hideAccount: true});
         }
         // Always return the rejection as it was

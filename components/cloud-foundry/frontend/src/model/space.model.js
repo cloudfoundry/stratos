@@ -734,9 +734,9 @@
       };
       return spaceApi.UpdateSpace(spaceGuid, updateData, null,
         modelUtils.makeHttpConfig(cnsiGuid)).then(function (response) {
-          // Refresh the space itself
-          return getSpaceDetails(cnsiGuid, response.data);
-        });
+        // Refresh the space itself
+        return getSpaceDetails(cnsiGuid, response.data);
+      });
     }
   }
 

@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(RoutesApi.prototype, {
 
-   /*
+    /*
     * Associate App with the Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/associate_app_with_the_route.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Check a HTTP Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/check_a_http_route_exists.html
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Check a Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/check_a_route_exists.html
@@ -61,7 +61,30 @@
     CheckRouteExists: function (domain_guid, host, path, port, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
+      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid;
+
+      var urlParams = '';
+
+      function append(name, value) {
+        if (!value) {
+          return;
+        }
+
+        if (urlParams.length === 0) {
+          urlParams += '&';
+        }
+
+        urlParams += name + '=' + value;
+        return urlParams;
+      }
+
+      append('host', host);
+      append('path', path);
+      append('port', port);
+
+      if (urlParams) {
+        config.url += '?' + urlParams;
+      }
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -71,7 +94,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/creating_a_route.html
     */
@@ -89,7 +112,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/delete_a_particular_route.html
     */
@@ -106,7 +129,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Apps for the Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_apps_for_the_route.html
     */
@@ -123,7 +146,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Route Mappings for the Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_route_mappings_for_the_route.html
     */
@@ -140,7 +163,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Routes
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_routes.html
     */
@@ -157,7 +180,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove App from the Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/remove_app_from_the_route.html
     */
@@ -174,7 +197,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/retrieve_a_particular_route.html
     */
@@ -191,7 +214,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Update a Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/update_a_route.html
     */

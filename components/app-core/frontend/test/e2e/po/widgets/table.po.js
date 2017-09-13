@@ -1,23 +1,15 @@
 (function () {
   'use strict';
 
-  var _ = require('lodash');
+  var wrapper = require('../wrapper.po');
 
   module.exports = {
-    wrap: wrap
+    getRows: getRows,
+    getData: getData,
+    getItem: getItem
   };
 
-  function wrap(element) {
-    return {
-      getElement: function () {
-        return element;
-      },
-      getRows: _.partial(getRows, element),
-      //getItem: _.partial(getItem, element),
-      getData: _.partial(getData, element),
-      getItem: _.partial(getItem, element)
-    };
-  }
+  wrapper(module);
 
   function getRows(ele) {
     //return ele.element(by.css('.wizard-head h4')).getText();
