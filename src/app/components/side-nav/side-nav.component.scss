@@ -1,6 +1,7 @@
 @import '../../../sass/colors';
 @import '../../../sass/theme';
 .side-nav {
+  $border-color: map-get($suse-blue, 900);
   width: 200px;
   &__wrapper {
     background-color: $blue;
@@ -17,6 +18,9 @@
     font-size: 16px;
     padding: 20px;
     cursor: pointer;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: transparent;
     md-icon {
       padding-right: 15px;
     }
@@ -25,8 +29,7 @@
     }
     &--active {
       background-color: map-get($suse-blue, 400);
-      border-top: 1px solid map-get($suse-blue, 900);
-      border-bottom: 1px solid map-get($suse-blue, 900);
+      border-color: $border-color;
     }
   }
   &__logo {
