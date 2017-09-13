@@ -1,31 +1,9 @@
 @import '../../../sass/mixins';
-md-grid-tile {
+@import '../../../sass/theme';
+.mat-card {
   background: white;
-}
-
-.application-wall-tiles {
-  display: flex;
-  flex-flow: wrap;
-  justify-content: space-between;
-}
-
-.application-wall-tile {
-  $space: 15px;
-  $space-row: $space + 40px;
-  flex: 0 1 100%;
-  margin-bottom: $space;
-  @include breakpoint(desktop) {
-    flex: 0 1 calc(25% - #{$space-row});
-  }
-  @include breakpoint(tablet) {
-    flex: 0 1 calc(33% - #{$space-row});
-  }
-  &__body {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-  }
-  &__meta {
-    padding: 10px 0;
+  &-title {
+    border-bottom: 3px solid map-get($suse-green, 400);
+    padding-bottom: 10px;
   }
 }

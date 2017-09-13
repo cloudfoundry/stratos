@@ -2,15 +2,15 @@
 <p>
   {{ isFetching ? 'Fetching applications...' : '' }}
 </p>
-<div class="application-wall-tiles">
-  <md-card class="application-wall-tile" *ngFor="let application of applications">
+<div class="card-wall">
+  <md-card *ngFor="let application of applications">
     <md-card-header>
       <md-card-title>{{ application.name }}</md-card-title>
     </md-card-header>
-    <md-card-content class="application-wall-tile__body">
-      <div class="application-wall-tile__meta"><b>Instances: </b> {{ application.instances }}</div>
-      <div class="application-wall-tile__meta"><b>State: </b> {{ application.state }}</div>
-      <div class="application-wall-tile__meta"><b>Created at: </b>{{ application.created_at }}</div>
+    <md-card-content>
+      <div class="card-wall__meta"><b>Instances: </b> {{ application.instances }}</div>
+      <div class="card-wall__meta"><b>State: </b> {{ application.state }}</div>
+      <div class="card-wall__meta"><b>Created at: </b>{{ application.created_at }}</div>
     </md-card-content>
   </md-card>
 </div>

@@ -14,7 +14,13 @@ export const GET_INFO = '[Auth] Get session info';
 export const RESET_AUTH = '[Auth] Reset auth data';
 
 export interface SessionData {
-    endpoints?: {};
+    endpoints?: {
+        [type: string]: {
+            [guid: string]: {
+                [key: string]: any
+            }
+        }
+    };
     user?: {
         admin: boolean,
         guid: string,

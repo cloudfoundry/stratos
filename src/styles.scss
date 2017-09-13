@@ -1,6 +1,8 @@
 // @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import "./sass/colors";
 @import "./sass/theme";
+@import "./sass/mixins";
+@import "./sass/components/card-wall";
 body {
   margin: 0;
   font-family: Lato, sans-serif;

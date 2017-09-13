@@ -37,6 +37,7 @@ import 'rxjs/add/observable/from';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/switchMap';
 import { ApplicationWallComponent } from './pages/application-wall/application-wall.component';
+import { EndpointsPageComponent } from './pages/endpoints-page/endpoints-page.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -54,13 +55,9 @@ const appRoutes: Routes = [
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService],
     children: [
-      {
-        path: 'dashboard',
-        children: [
-          { path: '', component: HomePageComponent }
-        ],
-      },
+      { path: 'dashboard', component: HomePageComponent },
       { path: 'application-wall', component: ApplicationWallComponent },
+      { path: 'endpoints', component: EndpointsPageComponent }
     ]
   }
 ];
@@ -75,7 +72,8 @@ const appRoutes: Routes = [
     ConsoleUaaWizardComponent,
     SteppersComponent,
     StepComponent,
-    ApplicationWallComponent
+    ApplicationWallComponent,
+    EndpointsPageComponent
   ],
   imports: [
     HttpModule,
