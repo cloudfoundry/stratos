@@ -3,7 +3,8 @@
   {{ isFetching ? 'Fetching applications...' : '' }}
 </p>
 <div class="card-wall">
-  <md-card *ngFor="let application of applications">
+  <md-card [routerLink]="['/applications', application.cfGuid , application.guid]" *ngFor="let application of applications"
+    [ngClass]="'card-wall__card-' + application.state.toLowerCase()">
     <md-card-header>
       <md-card-title>{{ application.name }}</md-card-title>
     </md-card-header>

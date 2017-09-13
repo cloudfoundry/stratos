@@ -1,3 +1,4 @@
+import { CNSISState } from '../../store/reducers/cnsis.reducer';
 import { AuthState } from './../../store/reducers/auth.reducer';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
@@ -35,13 +36,12 @@ class EndpointDataSource extends DataSource<any> {
   }
 
   connect(): Observable<{}[]> {
-    return this.store.select('auth')
-    .map((auth: AuthState) => {
-      const { endpoints } = auth.sessionData;
-      const { cf } = endpoints;
-      return Object.keys(cf).map(guid => {
-        cf[guid].type = 'Cloud Foundry';
-        return cf[guid];
+    return this.store.select('cnsis')
+    .map((cnsis: CNSISState) => {
+      const { entities } = cnsis;
+      return entities.map(cf => {
+        cf.cnsi_type = 'Cloud Foundry';
+        return cf;
       });
     });
   }

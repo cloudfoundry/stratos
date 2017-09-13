@@ -2,7 +2,7 @@ import { denormalize } from 'normalizr';
 import { EntitiesState } from '../../store/reducers/api.reducer';
 import { getCurrentPage, PaginationState, PaginationEntityState } from './../../store/reducers/pagination.reducer';
 import { skipWhile } from 'rxjs/operator/skipWhile';
-import { GetAllApplications, applicationSchema } from '../../store/actions/application.actions';
+import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { Component, OnInit } from '@angular/core';
@@ -22,11 +22,11 @@ export class ApplicationWallComponent implements OnInit {
   ngOnInit() {
     const paginationKey = 'applicationWall';
     getCurrentPage({
-      entityType: applicationSchema.key,
+      entityType: ApplicationSchema.key,
       paginationKey: paginationKey,
       store: this.store,
       action: new GetAllApplications(paginationKey),
-      schema: [applicationSchema]
+      schema: [ApplicationSchema]
     })
     .subscribe(({ paginationEntity, data }) => {
       this.isFetching = paginationEntity.fetching;

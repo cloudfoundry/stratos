@@ -1,9 +1,21 @@
 @import '../../../sass/mixins';
 @import '../../../sass/theme';
+.card-wall__card-started {
+  .mat-card-title {
+    border-bottom: 3px solid map-get($suse-green, 400);
+  }
+}
+
+.card-wall__card-stopped {
+  .mat-card-title {
+    border-bottom: 3px solid map-get($suse-purple, 900);
+  }
+}
+
 .mat-card {
   background: white;
   &-title {
-    border-bottom: 3px solid map-get($suse-green, 400);
+    border-bottom: 3px solid map-get($suse-blue, A100);
     padding-bottom: 10px;
   }
 }
