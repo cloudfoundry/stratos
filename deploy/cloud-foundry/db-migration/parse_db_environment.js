@@ -26,6 +26,7 @@
       for (var y = 0; y < serviceInstance.tags.length; y++) {
         var tag = serviceInstance.tags[y];
         if (tag === 'stratos_postgresql') {
+          DATABASE_PROVIDER = 'pgsql';
           DB_TYPE = 'postgresql';
           DATABASE_PROVIDER = 'pgsql';
           DB_HOST = serviceInstance.credentials.hostname;

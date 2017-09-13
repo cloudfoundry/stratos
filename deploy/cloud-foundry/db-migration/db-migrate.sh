@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Attempting to migrating database"
+echo "Attempting to migrate database"
 
 DB_MIGRATE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DEPLOY_DIR=${DB_MIGRATE_DIR}/../../
@@ -19,11 +19,9 @@ source $STRATOS_DB_ENV
 
 function handleGooseResult {
     if [ $? -eq 0 ]; then
-        while
+        while true; do
             echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'";
             sleep 60
-        do
-            :
         done
     else
         echo Database migration failed
