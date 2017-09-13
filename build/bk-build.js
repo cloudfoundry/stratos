@@ -253,6 +253,18 @@
     );
   });
 
+  gulp.task('bosh-build-backend', function () {
+    // Doesn't perform a `go build -i` buiild
+    prepareBuild.setNoGoInstall(true);
+    return runSequence(
+      'init-build',
+      'dedup-vendor',
+      'write-plugins-yaml',
+      'delete-temp',
+      'local-dev-build'
+    );
+  });
+
   gulp.task('cf-build-backend', function () {
 
     return runSequence(

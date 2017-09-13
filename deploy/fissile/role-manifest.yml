@@ -1,0 +1,80 @@
+roles:
+- name: frontend                    
+  jobs:                           
+  - name: frontend
+    release_name: stratos-ui            
+  run:                      
+    scaling:  
+      min: 1
+      max: 1
+    memory: 1024
+    virtual-cpus: 2
+    exposed-ports:
+    - name: frontend-nginx
+      protocol: TCP                
+      external: 4443              
+      internal: 443              
+      public: false           
+
+  configuration:
+    templates:
+      properties.stratos_ui.frontend.ssl_cert_key: '"((STRATOS_UI_FRONTEND_SSL_CERT_KEY))"'
+      properties.stratos_ui.frontend.ssl_cert: '"((STRATOS_UI_FRONTEND_SSL_CERT))"'
+      properties.stratos_ui.backend.host: 'IP'
+      properties.stratos_ui.backend.port: 443
+  
+    variables:
+    - name: STRATOS_UI_FRONTEND_SSL_CERT
+      description: SSL Cert key for Stratos UI frontend
+      secret: true
+      required: true
+    - name: STRATOS_UI_FRONTEND_SSL_CERT_KEY
+      description: SSL Cert for Stratos UI frontend
+      secret: true
+      required: true
+
+- name: backend                    
+  jobs:                           
+  - name: backend
+    release_name: stratos-ui            
+  run:                      
+    scaling:  
+      min: 1
+      max: 1
+    memory: 1024
+    virtual-cpus: 2
+    exposed-ports:
+    - name: backend
+      protocol: TCP                
+      external: 443              
+      internal: 443              
+      public: false           
+
+  configuration:
+    templates:
+      properties.stratos_ui.backend.port: 443
+      properties.stratos_ui.backend.address: '"((IP_ADDRESS)"'
+      properties.stratos_ui.backend.frontend_origin_address: ''
+      properties.stratos_ui.backend.ssl_cert_key: '"((STRATOS_UI_BACKEND_SSL_CERT_KEY))"'
+      properties.stratos_ui.backend.ssl_cert: '"((STRATOS_UI_BACKEND_SSL_CERT))"'
+      properties.stratos-ui.backend.upgrade_volume_path: '/var/vcap/store/backend'
+      properties.stratos-ui.backend.upgrade_volume_file: 'upgrade.lock'
+      properties.stratos-ui.backend.encryption_key_volume: '/var/vcap/store/backend'
+      properties.stratos-ui.backend.encryption_key_filename: 'key'
+      properties.stratos_ui.backend.session_store_secret: '"((STRATOS_UI_BACKEND_SESSION_STORE_SECRET))"'
+      properties.stratos-ui.backend.use_mysql: false
+      properties.stratos-ui.backend.use_sqlite: true
+
+    variables:
+    - name: STRATOS_UI_BACKEND_SSL_CERT
+      description: SSL Cert key for Stratos UI backend
+      secret: true
+      required: true
+    - name: STRATOS_UI_BACKEND_SSL_CERT_KEY
+      description: SSL Cert for Stratos UI backend
+      secret: true
+      required: true
+    - name: STRATOS_UI_BACKEND_SESSION_STORE_SECRET
+      description: Session store secret
+      secret: true
+      required: true

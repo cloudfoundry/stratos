@@ -30,9 +30,6 @@ properties:
     stratos_ui.backend.console_admin_scope:
         description: "UAA scope identifying Stratos UI Console admin"
         default: ''
-    stratos_ui.backend.console_admin_scope:
-        description: "UAA scope identifying Stratos UI Console admin"
-        default: ''
     stratos_ui.backend.console_uaa_client:
         description: "UAA client for Stratos UI Console"
         default: ''

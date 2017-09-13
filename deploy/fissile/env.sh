@@ -1,0 +1,6 @@
+export FISSILE_RELEASE="deploy/stratos-ui-release"
+export FISSILE_ROLE_MANIFEST="deploy/fissile/role-manifest.yml"
+export FISSILE_LIGHT_OPINIONS="deploy/fissile/opinions.yml"
+export FISSILE_DARK_OPINIONS="deploy/fissile/dark-opinions.yml"
+export FISSILE_WORK_DIR="output/fissile"
+export FISSILE_STEMCELL="splatform/fissile-stemcell-opensuse:42.2-6.ga651b2d-28.33" 

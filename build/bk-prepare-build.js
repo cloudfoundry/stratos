@@ -11,7 +11,7 @@
   var conf = require('./bk-conf');
   var glob = require('glob');
 
-  var tempPath, tempSrcPath, buildTest;
+  var tempPath, tempSrcPath, buildTest, noGoInstall;
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsRemoveQ = Q.denodeify(fs.remove);
   var fsCopyQ = Q.denodeify(fs.copy);
@@ -26,6 +26,14 @@
 
   module.exports.setBuildTest = function (build) {
     buildTest = build;
+  };
+
+  module.exports.getNoGoInstall = function () {
+    return noGoInstall;
+  };
+
+  module.exports.setNoGoInstall = function (goInstall) {
+    noGoInstall = goInstall;
   };
 
   module.exports.getSourcePath = function () {
