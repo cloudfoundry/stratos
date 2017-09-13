@@ -252,8 +252,10 @@
         // This is a workaround for a Bug
         helpers.loadApp(true);
         navbar.goToView('endpoint.clusters');
-        orgsAndSpaces.goToOrg('e2e');
-        orgsAndSpaces.goToSpace('e2e');
+
+        var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
+        orgsAndSpaces.goToOrg(cfFromConfig.org || 'e2e');
+        orgsAndSpaces.goToSpace(cfFromConfig.space || 'e2e');
       });
 
       it('should show the org/space view and its tabs', function () {
