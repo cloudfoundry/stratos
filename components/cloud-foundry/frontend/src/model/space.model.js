@@ -200,7 +200,7 @@
       var combinedParams = _.assign(params, inlineParams);
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServiceInstancesForSpace(guid, modelUtils.makeListParams(combinedParams),
-        modelUtils.makeHttpConfig(cnsiGuid))
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -261,7 +261,7 @@
       var combinedParams = _.assign(params, inlineParams);
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllRoutesForSpace(guid, modelUtils.makeListParams(combinedParams),
-        modelUtils.makeHttpConfig(cnsiGuid))
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -321,7 +321,7 @@
     function listRolesOfAllUsersInSpace(cnsiGuid, guid, params, paginate) {
       return apiManager.retrieve('cloud-foundry.api.Spaces')
         .RetrievingRolesOfAllUsersInSpace(guid, modelUtils.makeListParams(params),
-        modelUtils.makeHttpConfig(cnsiGuid))
+          modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!paginate) {
             return modelUtils.dePaginate(response.data, modelUtils.makeHttpConfig(cnsiGuid));
@@ -732,11 +732,10 @@
       var updateData = {
         allow_ssh: enabled
       };
-      return spaceApi.UpdateSpace(spaceGuid, updateData, null,
-        modelUtils.makeHttpConfig(cnsiGuid)).then(function (response) {
-          // Refresh the space itself
-          return getSpaceDetails(cnsiGuid, response.data);
-        });
+      return spaceApi.UpdateSpace(spaceGuid, updateData, null, modelUtils.makeHttpConfig(cnsiGuid)).then(function (response) {
+        // Refresh the space itself
+        return getSpaceDetails(cnsiGuid, response.data);
+      });
     }
   }
 

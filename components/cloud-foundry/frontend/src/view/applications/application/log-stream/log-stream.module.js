@@ -2,11 +2,9 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.log-stream',
-    [
+    .module('cloud-foundry.view.applications.application.log-stream', [
       'cloud-foundry.view.applications.application.log-stream.cfLogViewer',
-      'cloud-foundry.view.applications.application.log-stream.cfLogViewerReize'
-    ])
+      'cloud-foundry.view.applications.application.log-stream.cfLogViewerReize'])
     .config(registerRoute)
     .run(registerAppTab);
 
