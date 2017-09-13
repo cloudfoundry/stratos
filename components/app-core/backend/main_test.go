@@ -59,8 +59,8 @@ func (e *echoContextMock) Reset(engine.Request, engine.Response)               {
 */
 
 func TestLoadPortalConfig(t *testing.T) {
-	t.Parallel()
 
+	os.Unsetenv("DATABASE_PROVIDER")
 	os.Setenv("HTTP_CLIENT_TIMEOUT_IN_SECS", "10")
 	os.Setenv("SKIP_SSL_VALIDATION", "true")
 	os.Setenv("CONSOLE_PROXY_TLS_ADDRESS", ":8080")
@@ -87,7 +87,6 @@ func TestLoadPortalConfig(t *testing.T) {
 	if result.TLSAddress != ":8080" {
 		t.Error("Unable to get TLSAddress from config")
 	}
-
 
 	if result.CFClient != "portal-proxy" {
 		t.Error("Unable to get CFClient from config")
@@ -117,8 +116,8 @@ func TestLoadPortalConfig(t *testing.T) {
 }
 
 func TestLoadDatabaseConfig(t *testing.T) {
-	t.Parallel()
 
+	os.Unsetenv("DATABASE_PROVIDER")
 	os.Setenv("DB_USER", "console")
 	os.Setenv("DB_PASSWORD", "console")
 	os.Setenv("DB_DATABASE_NAME", "console-db")
@@ -137,8 +136,13 @@ func TestLoadDatabaseConfig(t *testing.T) {
 }
 
 func TestLoadDatabaseConfigWithInvalidSSLMode(t *testing.T) {
-	t.Parallel()
 
+	os.Setenv("DB_USER", "console")
+	os.Setenv("DB_PASSWORD", "console")
+	os.Setenv("DB_DATABASE_NAME", "console-db")
+	os.Setenv("DB_HOST", "localhost")
+	os.Setenv("DB_PORT", "5432")
+	os.Setenv("DATABASE_PROVIDER", "pgsql")
 	os.Setenv("DB_SSL_MODE", "invalid.ssl.mode")
 
 	var dc datastore.DatabaseConfig
