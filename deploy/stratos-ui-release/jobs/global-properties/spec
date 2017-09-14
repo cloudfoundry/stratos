@@ -1,6 +1,6 @@
 ---
 name: global-properties
-description: Dummy BOSH job used to host global parameters that are required to configure SCF / fissile
+description: Dummy BOSH job used to host global parameters that are required to configure fissile
 
 templates:
   run.erb: bin/run
