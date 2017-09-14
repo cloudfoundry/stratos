@@ -156,8 +156,8 @@
             navbar.goToView('endpoint.clusters');
 
             var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
-            orgsAndSpaces.goToOrg(cfFromConfig.org || 'e2e');
-            orgsAndSpaces.goToSpace(cfFromConfig.space || 'e2e');
+            orgsAndSpaces.goToOrg(cfFromConfig.testOrgName || 'e2e');
+            orgsAndSpaces.goToSpace(cfFromConfig.testSpaceName || 'e2e');
             // Go to Routes tab
             application.getTabs().get(2).click();
           });

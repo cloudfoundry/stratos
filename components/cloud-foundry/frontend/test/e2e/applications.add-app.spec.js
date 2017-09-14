@@ -18,7 +18,8 @@
   var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
   var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
   var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
-
+  var cfHelpers = require('./po/helpers.po');
+  
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
 
@@ -254,8 +255,8 @@
         navbar.goToView('endpoint.clusters');
 
         var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
-        orgsAndSpaces.goToOrg(cfFromConfig.org || 'e2e');
-        orgsAndSpaces.goToSpace(cfFromConfig.space || 'e2e');
+        orgsAndSpaces.goToOrg(cfFromConfig.testOrgName || 'e2e');
+        orgsAndSpaces.goToSpace(cfFromConfig.testSpaceName || 'e2e');
       });
 
       it('should show the org/space view and its tabs', function () {
