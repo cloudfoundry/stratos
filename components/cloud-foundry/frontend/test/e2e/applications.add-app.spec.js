@@ -19,7 +19,7 @@
   var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
   var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
   var cfHelpers = require('./po/helpers.po');
-  
+
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
 
