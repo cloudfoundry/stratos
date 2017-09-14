@@ -16,10 +16,14 @@
     @include breakpoint(tablet) {
       flex: 0 1 calc(33% - #{$space-row});
     }
-    &-content {
-      width: 100%;
-      height: 100%;
-      padding: 10px;
+    &-content {}
+  }
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    &-left {
+      padding-right: 10px;
     }
+    &-right {}
   }
 }

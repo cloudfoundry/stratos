@@ -45,12 +45,16 @@ const updatePagination = function (state: PaginationEntityState, action, actionT
     case requestType:
       return {
         ...state,
-        fetching: true
+        fetching: true,
+        error: false,
+        message: '',
       };
     case successType:
       return {
         ...state,
         fetching: false,
+        error: false,
+        message: '',
         ids: {
           [state.currentPage]: action.response.result
         },
@@ -59,7 +63,9 @@ const updatePagination = function (state: PaginationEntityState, action, actionT
     case failureType:
       return {
         ...state,
-        fetching: false
+        fetching: false,
+        error: true,
+        message: action.message
       };
     default:
       return state;
@@ -76,6 +82,23 @@ function getActionType(action) {
   return null;
 }
 
+function getAction(action): APIAction {
+  if (!action) {
+    return null;
+  }
+  return action.apiAction ? action.apiAction : action;
+}
+
+function getActionKey(action) {
+  const apiAction = getAction(action);
+  return apiAction.entityKey || null;
+}
+
+function getPaginationKey(action) {
+  const apiAction = getAction(action);
+  return apiAction.paginationKey || 'all';
+}
+
 export function getCurrentPage (
   { entityType, paginationKey, store, action, schema }:
   { entityType: string, paginationKey: string, store: Store<AppState>, action: Action, schema: Schema}
@@ -83,7 +106,7 @@ export function getCurrentPage (
   return store.select('pagination')
   .skipWhile((pagination: PaginationState) =>  {
     const paginationEntity = pagination[entityType];
-    if (paginationEntity) {
+    if (paginationEntity && paginationEntity[paginationKey]) {
       const paginationState = paginationEntity[paginationKey];
       return !paginationState;
     } else {
@@ -106,12 +129,10 @@ export function getCurrentPage (
 
 export function paginationReducer (state = {}, action) {
   const actionType = getActionType(action);
-  if (actionType) {
-      const key = action.entityKey;
-      if (typeof key !== 'string') {
-        throw new Error('Expected key to be a string.');
-      }
-      const paginationKey = action.paginationKey || 'all';
+  const key = getActionKey(action);
+  if (actionType && key) {
+
+      const paginationKey = getPaginationKey(action);
 
       if (!state[key]) {
         state[key] = {};

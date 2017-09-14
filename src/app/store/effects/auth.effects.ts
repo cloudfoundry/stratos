@@ -54,17 +54,6 @@ export class AuthEffect {
         .catch((err, caught) => [new LoginFailed(err)]);
     });
 
-  // @Effect() getInfo$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
-  //   .switchMap(() => {
-  //     return this.http.get('/pp/v1/auth/session/info')
-  //       .mergeMap(data => {
-  //         return [new VerifiedSession(data.json()), new GetAllCNSIS(true)];
-  //       })
-  //       .catch((err, caught) => {
-  //         return [new InvalidSession(err.status === 503)];
-  //       });
-  //   });
-
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
     .switchMap(() => {
       return this.http.get('/pp/v1/auth/session/verify', { withCredentials: true })

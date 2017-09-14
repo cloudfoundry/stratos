@@ -95,7 +95,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   canGoto(index: number) {
     // TODO: tidy this up
     const step = this.steps[this.currentIndex];
-    if (step.busy) {
+    if (!step || step.busy) {
       return false;
     }
     if (index === this.currentIndex) {

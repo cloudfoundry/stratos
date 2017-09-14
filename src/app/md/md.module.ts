@@ -1,3 +1,4 @@
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import {
     MdButtonModule,
@@ -14,6 +15,7 @@ import {
 } from '@angular/material';
 
 const importExport = [
+    BrowserAnimationsModule,
     MdButtonModule,
     MdCheckboxModule,
     MdInputModule,
@@ -24,7 +26,7 @@ const importExport = [
     MdIconModule,
     MdSelectModule,
     MdGridListModule,
-    MdTableModule
+    MdTableModule,
 ];
 
 @NgModule({

@@ -38,6 +38,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/switchMap';
 import { ApplicationWallComponent } from './pages/application-wall/application-wall.component';
 import { EndpointsPageComponent } from './pages/endpoints-page/endpoints-page.component';
+import { ApplicationPageComponent } from './pages/application-page/application-page.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -56,7 +57,8 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService],
     children: [
       { path: 'dashboard', component: HomePageComponent },
-      { path: 'application-wall', component: ApplicationWallComponent },
+      { path: 'applications', component: ApplicationWallComponent },
+      { path: 'applications/:cfId/:id', component: ApplicationPageComponent },
       { path: 'endpoints', component: EndpointsPageComponent }
     ]
   }
@@ -73,7 +75,8 @@ const appRoutes: Routes = [
     SteppersComponent,
     StepComponent,
     ApplicationWallComponent,
-    EndpointsPageComponent
+    EndpointsPageComponent,
+    ApplicationPageComponent
   ],
   imports: [
     HttpModule,

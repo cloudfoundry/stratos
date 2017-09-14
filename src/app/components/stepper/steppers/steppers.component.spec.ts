@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MDAppModule } from './../../../md/md.module';
 
 import { SteppersComponent } from './steppers.component';
 
@@ -8,7 +9,8 @@ describe('SteppersComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [SteppersComponent]
+      declarations: [SteppersComponent],
+      imports: [ MDAppModule ]
     })
       .compileComponents();
   }));

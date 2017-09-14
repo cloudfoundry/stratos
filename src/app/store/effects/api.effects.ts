@@ -23,27 +23,35 @@ export class APIEffect {
 
   @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
     .map(apiAction => {
-      return new StartAPIAction(apiAction.options, apiAction.actions, apiAction.entity, apiAction.entityKey, apiAction.paginationKey);
+      return new StartAPIAction(apiAction);
     });
 
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
-    .switchMap(([apiAction, state]) => {
+    .switchMap(([action, state]) => {
+      const { apiAction } = action;
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+
       apiAction.options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${apiAction.options.url}`;
-      apiAction.options.headers = this.addBaseHeaders(state.cnsis.entities, apiAction.options.headers);
+      apiAction.options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, apiAction.options.headers);
+
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
           const entities = this.getEntities(apiAction, response);
           return [new WrapperAPIActionSuccess(apiAction.actions[1], entities, apiAction.entityKey, apiAction.paginationKey)];
         })
         .catch(err => {
-          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entity, apiAction.entityKey, apiAction.paginationKey)];
+          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entityKey, apiAction.paginationKey)];
         });
     });
 
-  getEntities(apiAction: StartAPIAction, response: Response) {
+  getEntities(apiAction: APIAction, response: Response) {
     const data = response.json();
+    // Only one entity
+    if (apiAction.cnis) {
+      return normalize(Object.keys(data).map(key => data[key]), apiAction.entity);
+    }
+
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
       if (cfData.resources) {
@@ -69,9 +77,14 @@ export class APIEffect {
     response.json();
   }
 
-  addBaseHeaders(cnsis: CNSISModel[], header: Headers): Headers {
+  addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
+    const cnsiHeader = 'x-cap-cnsi-list';
     const headers = new Headers();
-    headers.set('x-cap-cnsi-list', cnsis.filter(c => c.registered).map(c => c.guid));
+    if (typeof cnsis === 'string') {
+      headers.set(cnsiHeader, cnsis);
+    } else {
+      headers.set(cnsiHeader, cnsis.filter(c => c.registered).map(c => c.guid));
+    }
     return headers;
   }
 
