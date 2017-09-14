@@ -68,7 +68,7 @@
       });
     });
 
-    fdescribe('Summary Tab', function () {
+    describe('Summary Tab', function () {
       beforeAll(function () {
         // Summary tab
         application.showSummary();
