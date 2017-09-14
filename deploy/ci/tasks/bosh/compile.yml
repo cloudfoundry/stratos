@@ -26,7 +26,7 @@ run:
       export BOSH_NON_INTERACTIVE=true
 
       # BOSH create release
-      cd stratos-ui/stratos-ui-release
+      cd stratos-ui/deploy/stratos-ui-release
 
       bosh2 create-release
       # Delete any release
