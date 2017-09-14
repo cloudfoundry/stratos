@@ -210,7 +210,7 @@
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
               columnMenu.waitForElement();
               helpers.scrollIntoView(columnMenu);
-              
+
               // Unmap Route
               columnMenu.click();
 
