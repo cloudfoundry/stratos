@@ -68,7 +68,7 @@
       });
     });
 
-    describe('Summary Tab', function () {
+    fdescribe('Summary Tab', function () {
       beforeAll(function () {
         // Summary tab
         application.showSummary();
@@ -205,13 +205,15 @@
               var appRouteAttachedTo = rows[index][1];
               expect(appRouteAttachedTo).toBeDefined();
               expect(appRouteAttachedTo.length).toBeGreaterThan(0);
-              expect(appRouteAttachedTo, testAppName);
+              expect(appRouteAttachedTo).toContain(testAppName);
 
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
               columnMenu.waitForElement();
-
+              helpers.scrollIntoView(columnMenu);
+              
               // Unmap Route
               columnMenu.click();
+
               columnMenu.clickItem(1);
               confirmModal.waitForModal();
               expect(confirmModal.getTitle()).toBe('Unmap Route from Application');
