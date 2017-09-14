@@ -152,9 +152,9 @@ applications:
 
 ### Enable Endpoints Dashboard to register additional Cloud Foundry endpoints
 
->**NOTE** This method is meant to demonstrate the capabilities of the console with multiple endpoints and is not meant for production environments
+>**NOTE** This feature, on it's own, is meant to demonstrate the capabilities of the console with multiple endpoints and is not meant for production environments.
 
-This method comes with two caveats.
+This method comes with two caveats. To remove these caveats see [here](#Associate-Cloud-Foundry-database-service).
 
 1. The console will lose stored data when a cf app instance is restarted
 2. Multiple instances of the app will contain multiple separate stored data instances. This will mean the user may connect to a different one with a different storage when revisiting the console.
@@ -174,3 +174,6 @@ applications:
   env:
     FORCE_ENDPOINT_DASHBOARD: true
 ```
+
+### Associate Cloud Foundry database service
+Follow instructions [here](db-migration/README.md).

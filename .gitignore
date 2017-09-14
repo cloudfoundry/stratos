@@ -39,6 +39,7 @@ deploy/hsc-upgrade-volume/
 deploy/development.rc
 deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
+deploy/cloud-foundry/db-migration/goose
 outputs/
 
 deploy/stratos-ui-release/.dev_builds
