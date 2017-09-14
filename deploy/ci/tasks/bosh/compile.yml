@@ -41,5 +41,6 @@ run:
 
       # Tear down deployment
       bosh2 -e vbox -d stratos-ui delete-deployment
+      
       # Delete the release
       bosh2 delete-release stratos-ui -e vbox
