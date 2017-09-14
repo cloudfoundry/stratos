@@ -19,7 +19,7 @@ export class ApplicationPageComponent implements OnInit, OnDestroy {
 
   sub: Subscription;
   isFetching: boolean;
-  application = {};
+  application;
 
   ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
