@@ -35,6 +35,7 @@ properties:
         default: ''
     stratos_ui.backend.frontend_origin_address:
         description: "Frontend origin address"
+        default: ''
     stratos_ui.backend.ssl_cert_key:
         description: "SSL Certificate key body"
     stratos_ui.backend.ssl_cert:
@@ -43,6 +44,7 @@ properties:
         description: "Secret used to encrypt the backend session store"
     stratos_ui.backend.use_mysql:
         description: "Use mysql, need to specify relevant mysql settings"
+        default: false
     stratos_ui.backend.mysql_user:
         description: "mysql User"
     stratos_ui.backend.mysql_user_password:
