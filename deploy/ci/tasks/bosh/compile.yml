@@ -6,7 +6,7 @@ image_resource:
   type: docker-image
   source:
    # Image based on bosh/cli2 with git and go added
-   repository:  irfanhabib/bosh-cli
+   repository:  irfanhabib/concourse-bosh
    tag: "latest"
 
 run:
