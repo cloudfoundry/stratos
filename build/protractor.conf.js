@@ -76,7 +76,7 @@
             admin: secrets.cloudFoundry.admin,
             user: secrets.cloudFoundry.user,
             testOrgName: secrets.cloudFoundry.org || 'e2e',
-            testSpaceName: secrets.cloudFoundry.org || 'e2e',
+            testSpaceName: secrets.cloudFoundry.space || 'e2e',
             supportsVersions: false
           }
         }
