@@ -61,7 +61,30 @@
     CheckRouteExists: function (domain_guid, host, path, port, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
+      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid;
+
+      var urlParams = '';
+
+      function append(name, value) {
+        if (!value) {
+          return;
+        }
+
+        if (urlParams.length === 0) {
+          urlParams += '&';
+        }
+
+        urlParams += name + '=' + value;
+        return urlParams;
+      }
+
+      append('host', host);
+      append('path', path);
+      append('port', port);
+
+      if (urlParams) {
+        config.url += '?' + urlParams;
+      }
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
