@@ -1,0 +1,70 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    branch: {{stratos-ui-branch}}
+    private_key: {{github-private-key}}
+    uri: git@github.com:suse/stratos-ui.git
+    tag_filter: "[0-9]*"
+- name: helm-chart-values
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/values.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+- name: helm-chart-Chart
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+
+groups:
+- name: tests
+  jobs:
+  - build-helm-images
+  - deploy-helm
+
+jobs:
+- name: build-helm-images
+  plan:
+  - get: stratos-ui
+  - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/helm/build-helm.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
+    - put: helm-chart-values
+      params:
+        file: helm-build/values.yaml-*
+        acl: public-read
+    - put: helm-chart-Chart
+      params:
+        file: helm-build/Chart.yaml-*
+        acl: public-read
+- name: deploy-helm
+  plan:
+  - get: stratos-ui
+    passed: [build-helm-images]
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/helm/create-chart.yml
+      params:
+        CAASP_SERVER: {{caasp-server}}
+        CAASP_CLUSTER_AUTHORITY_DATA: {{caasp-cluster-authority-data}}
+        CAASP_CLIENT_CERTIFICATE_DATA: {{caasp-client-certificate-data}}
+        CAASP_CLIENT_CLIENT_KEY_DATA: {{caasp-client-client-key-data}}
