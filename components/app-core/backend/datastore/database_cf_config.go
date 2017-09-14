@@ -44,11 +44,11 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 			if strings.HasPrefix(tag, "stratos_postgresql") {
 				dbCredentials := service.Credentials
 				db.DatabaseProvider = "pgsql"
-				db.Username = fmt.Sprintf("%v", dbCredentials["Username"])
-				db.Password = fmt.Sprintf("%v", dbCredentials["Password"])
-				db.Database = fmt.Sprintf("%v", dbCredentials["Dbname"])
-				db.Host = fmt.Sprintf("%v", dbCredentials["Hostname"])
-				db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["Port"]))
+				db.Username = fmt.Sprintf("%v", dbCredentials["username"])
+				db.Password = fmt.Sprintf("%v", dbCredentials["password"])
+				db.Database = fmt.Sprintf("%v", dbCredentials["dbname"])
+				db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
+				db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["port"]))
 				db.SSLMode = "disable"
 				log.Info("Discovered Cloud Foundry postgres service and applied config")
 				return true
