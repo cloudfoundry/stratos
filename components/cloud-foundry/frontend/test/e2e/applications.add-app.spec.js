@@ -154,7 +154,7 @@
 
       expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
       element(by.id('new-app-add-services')).click();
-      expect(application.getActiveTab().getText()).toBe('Service Catalogue');
+      expect(application.getActiveTab().getText()).toBe('Service Catalog');
 
       browser.wait(until.presenceOf(element(by.css('service-catalogue-card'))), 10000);
 

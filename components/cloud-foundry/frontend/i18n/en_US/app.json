@@ -194,7 +194,7 @@
           "messages": {
             "no-services": "This application has no bound service instances.",
             "view-catalogue": "To view the available services for this application, please visit the",
-            "view-catalogue-link": "service catalogue",
+            "view-catalogue-link": "service catalog",
             "no-services-search": "No services instances found matching your search.",
             "currently-viewing-1": "You are currently viewing {{ type }} instances.",
             "click-here": "Click here",
@@ -267,7 +267,7 @@
           }
         },
         "service-catalogue": {
-          "label": "Service Catalogue",
+          "label": "Service Catalog",
           "messages": {
             "no-services": "There are no services available for this endpoint. Please contact your Administrator to add services so you can bind them to your applications."
           },
