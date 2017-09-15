@@ -15,7 +15,6 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -155,9 +154,9 @@
 
       expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
       element(by.id('new-app-add-services')).click();
-      expect(application.getActiveTab().getText()).toBe('Service Instances');
+      expect(application.getActiveTab().getText()).toBe('Service Catalogue');
 
-      browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
+      browser.wait(until.presenceOf(element(by.css('service-catalogue-card'))), 10000);
 
       addAppService.addService(SERVICE_NAME);
 
@@ -187,20 +186,12 @@
       });
 
       application.showSummary();
+      // Check that we now have a bound service instance
+      var servicesCount = element(by.css('.app-summary-bound-services-count'));
+      expect(servicesCount.getText()).toBe('1');
 
-      // Test that the service is shown in the summary page
-      // Check that we have at least one service
-      var serviceInstances = table.wrap(element(by.css('.summary-service-instances table')));
-      serviceInstances.getRows().then(function (rows) {
-        expect(rows.length).toBeGreaterThan(0);
-      });
-      // Table should contain our service
-      var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
-        return elem.getText().then(function (text) {
-          return text === SERVICE_NAME;
-        });
-      }).first();
-      expect(column).toBeDefined();
+      // Test that the service is shown on the Service Instance tab
+      expect(application.findServiceInstanceCard(serviceName)).toBeDefined();
 
       // Test CLI Info
       application.invokeAction('CLI Info');
