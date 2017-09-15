@@ -57,6 +57,7 @@ login-form {
     .spinner-notification {
       text-transform: none;
       font-size: $font-size-large;
+      padding-right: $console-unit-space / 2;
     }
 
     .bounce-spinner > div {
