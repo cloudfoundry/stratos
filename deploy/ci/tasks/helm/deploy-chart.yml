@@ -23,7 +23,7 @@ run:
 
       kubectl cluster-info
       helm init || true
-      
+      EXIT_CODE=0
       ROOT_DIR=$PWD
       STRATOS_UI=${ROOT_DIR}/stratos-ui
       cd ${STRATOS_UI}/deploy/kubernetes/
@@ -32,10 +32,23 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-helm-nightly console/Chart.yaml
       helm dep build console
 
-      helm install console --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console
+      helm install console --set noShared=true --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
       sleep 120
 
       helm list
-      kubectl get po --all-namespaces
 
+      # Check all pods are in Ready state
+      deployed_pots=$(kubectl get po --template '{{range .items}}{{.metadata.name}}{{" "}}{{end}}' --namespace=nightly-test -o go-template)
+      for pod in $deployed_pods; do
+        pod_ready=$(kubectl describe po $pod --namespace nightly-test | grep -a3 Conditions | grep Ready | cut -d$'\t' -f1)
+        if [ "${pod_ready}" != "Ready" ]; then
+          echo "Pod ${pod} is ${pod_ready}" 
+          kubectl get po --all-namespaces 
+          EXIT_CODE=1
+        fi
+      done;
+      
+      # Purge deployment
       helm delete console-nightly --purge
+
+      exit $EXIT_CODE

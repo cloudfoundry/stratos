@@ -1,3 +1,8 @@
+resource_types:
+  - name: email
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
 resources:
 - name: stratos-ui
   type: git
@@ -5,6 +10,12 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:suse/stratos-ui.git
+- name: after-midnight
+  type: time
+  source:
+    start: 01:00 AM
+    stop: 2:00 AM
+    location: UTC
 - name: helm-chart-values
   type: s3
   source:
@@ -23,7 +34,16 @@ resources:
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
-
+- name: send-email
+  type: email
+  source:
+    smtp:
+      host: {{email-server}}
+      port: {{email-port}}
+      username: {{email-username}}
+      password: {{email-password}}
+    from: {{email-from}}
+    to: [ ]
 groups:
 - name: tests
   jobs:
@@ -34,6 +54,8 @@ jobs:
 - name: build-helm-images
   plan:
   - get: stratos-ui
+  - get: after-midnight
+    trigger: true
   - do:
     - task: generete-certs
       timeout: 2m
@@ -45,6 +67,11 @@ jobs:
       params:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "Helm Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} failed!"
+          body_text: "Helm Deploy build has failed: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
     - put: helm-chart-values
       params:
         file: helm-build/values.yaml-*
@@ -53,6 +80,7 @@ jobs:
       params:
         file: helm-build/Chart.yaml-*
         acl: public-read
+  
 - name: deploy-helm
   plan:
   - get: stratos-ui
@@ -69,3 +97,13 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/helm/deploy-chart.yml
       params:
         CAASP_KUBE_CONFIG_URL: {{caasp-kube-config-url}}
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "Helm Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} failed!"
+          body_text: "Helm Deploy build has failed: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      on_success:
+        put: send-email
+        params:
+          subject_text: "Helm Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
+          body_text: "Helm Deploy build has successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
