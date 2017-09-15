@@ -20,7 +20,7 @@
    * @returns {object} Object containing 'show' function
    */
   function ServiceRegistrationFactory($q, $translate, modelManager, appUtilsService, appNotificationsService,
-                                      frameworkDetailView, appEndpointsCnsiService) {
+    frameworkDetailView, appEndpointsCnsiService) {
 
     function createInstanceUrls(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});

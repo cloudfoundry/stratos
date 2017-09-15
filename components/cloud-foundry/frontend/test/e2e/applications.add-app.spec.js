@@ -15,7 +15,6 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  //var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -161,8 +160,6 @@
 
       addAppService.addService(SERVICE_NAME);
 
-      browser.driver.sleep(5000);
-
       var serviceWizard = addAppService.getServiceWizard();
       expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
@@ -198,10 +195,12 @@
       });
 
       application.showSummary();
-
       // Check that we now have a bound service instance
       var servicesCount = element(by.css('.app-summary-bound-services-count'));
       expect(servicesCount.getText()).toBe('1');
+
+      // Test that the service is shown on the Service Instance tab
+      expect(application.findServiceInstanceCard(serviceName)).toBeDefined();
 
       // Test CLI Info
       application.invokeAction('CLI Info');

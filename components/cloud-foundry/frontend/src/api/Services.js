@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServicesApi.prototype, {
 
-   /*
+    /*
     * Delete a Particular Service
     * Deleting with async not set to true will return a 204 status code and an empty response body.
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/services/delete_a_particular_service.html
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Plans for the Service
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/services/list_all_service_plans_for_the_service.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Services
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/services/list_all_services.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/services/retrieve_a_particular_service.html
     */

@@ -51,8 +51,12 @@
 
   function skipGlideInstall() {
     if (isLocalDevBuild()) {
-      // Check if we can find the golang folder - indicates glide has run before
-      var folder = path.join(env.GOPATH, 'src', 'golang.org');
+      // Skip glide install if ...
+      // .. we're in test mode and we've found a common test dependency
+      // .. we're building the backend and we've found a common dependency
+      var folder = prepareBuild.getBuildTest()
+        ? path.join(env.GOPATH, 'src', 'github.com', 'smartystreets', 'goconvey', 'convey')
+        : path.join(env.GOPATH, 'src', 'github.com', 'labstack', 'echo');
       return fs.existsSync(folder);
     }
     return false;

@@ -3,10 +3,7 @@
     <form class="form-horizontal">
       <div class="form-group">
         <label class="control-label" translate>app.app-info.app-tabs.services.types.show</label>
-        <select-input
-          ng-model="applicationServicesCtrl.filterType"
-          input-options="applicationServicesCtrl.filterTypes"
-          tabindex="0"
+        <select-input ng-model="applicationServicesCtrl.filterType" input-options="applicationServicesCtrl.filterTypes" tabindex="0"
           translate-option-labels="true">
         </select-input>
       </div>
@@ -15,28 +12,27 @@
           <span class="input-group-addon">
             <app-icon icon="svg:Filter.svg"></app-icon>
           </span>
-          <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
+          <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$" />
         </div>
       </div>
     </form>
   </div>
 </div>
-<div class="service-manage-message" ng-if="applicationServicesCtrl.managingType">You are currently viewing <b>{{::applicationServicesCtrl.managingType}}</b> instances. <a ng-click="applicationServicesCtrl.filterType = applicationServicesCtrl.ALL_FILTER">Click here</a> to view all types.</div>
-<div ng-if="applicationServicesCtrl.ready && boundServices.length === 0"
-  class="message-box message-box-no-bg">
+<div class="service-manage-message" ng-if="applicationServicesCtrl.managingType"><span translate translate-value-type="{{ applicationServicesCtrl.managingType }}">app.app-info.app-tabs.services.messages.currently-viewing-1</span>  <a ng-click="applicationServicesCtrl.filterType = applicationServicesCtrl.ALL_FILTER" translate>app.app-info.app-tabs.services.messages.click-here</a>  <span translate>app.app-info.app-tabs.services.messages.currently-viewing-2</span></div>
+<div ng-if="applicationServicesCtrl.ready && boundServices.length === 0" class="message-box message-box-no-bg">
   <p>
     <img src="/images/services/App_services_72.png" />
     <div ng-if="!applicationServicesCtrl.search.$ && !applicationServicesCtrl.isFiltered()">
-      <h3>
-        This application has no bound service instances.
+      <h3 translate>
+        app.app-info.app-tabs.services.messages.no-services
       </h3>
-      <h3>
-        To view the avaliable services for this application, please visit the <a ui-sref="cf.applications.application.service-catalogue">service catalogue</a>.
+      <h3 translate>
+        app.app-info.app-tabs.services.messages.view-catalogue <a ui-sref="cf.applications.application.service-catalogue">app.app-info.app-tabs.services.messages.view-catalogue-link</a>.
       </h3>
     </div>
     <div ng-if="applicationServicesCtrl.isFiltered()">
       <h3 translate>
-        No services instances found matching your search.
+        app.app-info.app-tabs.services.messages.no-services-search
       </h3>
     </div>
   </p>
@@ -44,9 +40,8 @@
 <div ng-if="!applicationServicesCtrl.ready" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
-<div class="cluster-gallery-card-container">
+<div class="services-gallery-card__container cluster-gallery-card-container">
   <service-card class="cluster-gallery-card-parent" ng-repeat="service in boundServices = (applicationServicesCtrl.services | filter:applicationServicesCtrl.showInstance | filter:applicationServicesCtrl.search) track by service.metadata.guid"
-    service="service" app="applicationServicesCtrl.appModel.application"
-    cnsi-guid="applicationServicesCtrl.cnsiGuid">
+    service="service" app="applicationServicesCtrl.appModel.application" cnsi-guid="applicationServicesCtrl.cnsiGuid">
   </service-card>
 </div>

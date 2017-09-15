@@ -86,9 +86,9 @@
    * @property {appNotificationsService} appNotificationsService - the toast notification service
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $translate,
-                                        modelManager, cfAddRoutes, cfEditApp, appUtilsService,
-                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
-                                        cfApplicationTabs, cfUtilsService) {
+    modelManager, cfAddRoutes, cfEditApp, appUtilsService,
+    appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
+    cfApplicationTabs, cfUtilsService) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

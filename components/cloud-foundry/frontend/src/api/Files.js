@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(FilesApi.prototype, {
 
-   /*
+    /*
     * Retrieve File
     * The endpoint does not function with Diego apps.
     * Please use CF CLI command `cf ssh` for Diego apps.

@@ -56,9 +56,9 @@
       $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, data);
 
       userServiceInstanceApi.connect('TESTGUID', 'user', 'password')
-      .then(function (response) {
-        expect(response.data).toEqual('test');
-      });
+        .then(function (response) {
+          expect(response.data).toEqual('test');
+        });
 
       $httpBackend.flush();
     });

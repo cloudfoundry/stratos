@@ -32,12 +32,22 @@ services:
     ports:
       - "5432:5432"
 
+  mariadb:
+    extends: imageCommon
+    image: mariadb:latest
+    env_file:
+      ./mariadb.env
+    ports:
+      - "3306:3306"
+
 
   goose:
     extends: buildCommon
     build:
       context: ../deploy
       dockerfile: db/Dockerfile.goose.dev
+    environment:
+      - DATABASE_PROVIDER=mysql
 
 
   proxy:
@@ -49,10 +59,6 @@ services:
       - "3003:3003"
     env_file:
       ./proxy.env
-    volumes:
-      - ./hsc-upgrade-volume:/hsc-upgrade-volume
-
-
   nginx:
     extends: buildCommon
     build:
@@ -82,4 +88,4 @@ services:
     # NOTE: This is required so that the tests run against
     # a UAA instance that has all the correct roles
     image: splatform/stratos-uaa
-
+    

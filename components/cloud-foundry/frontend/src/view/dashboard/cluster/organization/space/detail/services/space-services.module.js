@@ -32,7 +32,7 @@
   }
 
   function SpaceServicesController($scope, $state, $stateParams, $q, modelManager, cfServiceInstanceService,
-                                   appUtilsService) {
+    appUtilsService) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;

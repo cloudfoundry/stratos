@@ -265,7 +265,7 @@
               'results-per-page': 1
             }, {
               headers: {
-                'x-cnap-cnsi-list': _getCurrentCnsis().join(',')
+                'x-cap-cnsi-list': _getCurrentCnsis().join(',')
               }
             }).then(function (response) {
               model.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
@@ -359,7 +359,7 @@
       }, _buildFilter());
       var config = {
         headers: {
-          'x-cnap-cnsi-list': cnsis.join(',')
+          'x-cap-cnsi-list': cnsis.join(',')
         }
       };
       return applicationApi.ListAllApps(options, config).then(function (response) {

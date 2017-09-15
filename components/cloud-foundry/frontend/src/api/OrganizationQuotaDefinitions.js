@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(OrganizationQuotaDefinitionsApi.prototype, {
 
-   /*
+    /*
     * Creating a Organization Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/creating_a_organization_quota_definition.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Organization Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Organization Quota Definitions
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/list_all_organization_quota_definitions.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Organization Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a Organization Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/updating_a_organization_quota_definition.html
     */
