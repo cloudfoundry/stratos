@@ -22,6 +22,9 @@
     addRoute: addRoute,
     editApplication: editApplication,
 
+    // Service Instance Tab
+    findServiceInstanceCard: findServiceInstanceCard,
+
     invokeAction: invokeAction
 
     // applicationServiceFlyout: applicationServiceFlyout,
@@ -95,6 +98,17 @@
 
   function editApplication() {
     return element(by.css('.summary .action-header a.btn.btn-link')).click();
+  }
+
+  function findServiceInstanceCard(name) {
+    var cards = element.all(by.css('.services-gallery-card__container'));
+    var matchingService = cards.filter(function (elem) {
+      return elem.element(by.css('.gallery-card-title')).getText().then(function (text) {
+        return text === name;
+      });
+    }).first();
+
+    return matchingService;
   }
 
   function invokeAction(actionName) {
