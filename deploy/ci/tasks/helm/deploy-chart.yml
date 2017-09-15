@@ -19,24 +19,7 @@ run:
     - -exc
     - |
       mkdir ~/.kube
-      cat << EOF >> ~/.kube/config
-      apiVersion: v1
-      kind: Config
-      clusters:
-      - name: local
-        cluster:
-          server: ${CAASP_SERVER}
-          certificate-authority-data: ${CAASP_CLUSTER_AUTHORITY_DATA}
-      users:
-      - name: kubelet
-        user:
-          client-certificate-data: ${CAASP_CLIENT_CERTIFICATE_DATA}
-          client-key-data: ${CAASP_CLIENT_CLIENT_KEY_DATA}
-      contexts:
-      - context:
-          cluster: local
-          user: kubelet
-      EOF
+      wget ${CAASP_KUBE_CONFIG_URL} -O ~/.kube/config
 
       kubectl cluster-info
       helm init || true
@@ -47,11 +30,12 @@ run:
 
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml-helm-nightly console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-helm-nightly console/Chart.yaml
+      helm dep build console
 
-      helm install console --namespace nightly-test --name console
+      helm install console --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console
       sleep 120
 
       helm list
       kubectl get po --all-namespaces
 
-      helm delete console --purge
+      helm delete console-nightly --purge

@@ -195,15 +195,6 @@ function buildProxy {
   buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
 }
 
-function buildPostgres {
-  # Build and publish the container image for postgres
-  echo
-  echo "-- Build & publish the runtime container image for postgres"
-  # Pull base image locally and retag
-  preloadImage postgres:9.4.9
-  buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
-}
-
 function buildPreflightJob {
   # Build the preflight container
   echo
@@ -272,7 +263,6 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPostgres
 buildPreflightJob
 buildPostflightJob
 buildUI

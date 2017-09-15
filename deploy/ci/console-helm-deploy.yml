@@ -18,8 +18,8 @@ resources:
   type: s3
   source:
     bucket: concourse-stratos-ui
-    endpoint: {{minio-server-endpoint}}
     regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
+    endpoint: {{minio-server-endpoint}}
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
@@ -56,6 +56,7 @@ jobs:
 - name: deploy-helm
   plan:
   - get: stratos-ui
+    trigger: true
     passed: [build-helm-images]
   - get: helm-chart-Chart
     passed: [build-helm-images]
@@ -65,9 +66,6 @@ jobs:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos-ui/deploy/ci/tasks/helm/create-chart.yml
+      file: stratos-ui/deploy/ci/tasks/helm/deploy-chart.yml
       params:
-        CAASP_SERVER: {{caasp-server}}
-        CAASP_CLUSTER_AUTHORITY_DATA: {{caasp-cluster-authority-data}}
-        CAASP_CLIENT_CERTIFICATE_DATA: {{caasp-client-certificate-data}}
-        CAASP_CLIENT_CLIENT_KEY_DATA: {{caasp-client-client-key-data}}
+        CAASP_KUBE_CONFIG_URL: {{caasp-kube-config-url}}

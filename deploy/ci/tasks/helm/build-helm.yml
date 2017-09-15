@@ -17,17 +17,55 @@ run:
   args:
     - -exc
     - |
-      source /docker-lib.sh
-      start_docker
       ROOT_DIR=${PWD}
-      # Move dev-certs
-      mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
-      cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
+      cat << EOF >> ${ROOT_DIR}/helm-build/values.yaml-helm-nightly
+      # Tag for images
+      consoleVersion: helm-nightly-gb4819a3
+      # Docker Org
+      dockerOrg: splatform
+      # Docker Registry where images are available
+      dockerRegistry: docker.io
+      # Specify default DB password
+      dbPassword: changeme
+      dbProvider: mysql
+      # Provide Proxy settings if required
+      #httpProxy: proxy.corp.net
+      #httpsProxy: proxy.corp.net
+      #noProxy: localhost
+      #ftpProxy: proxy.corp.net
+      #socksProxy: sock-proxy.corp.net
+      noShared: false
+      images:
+        console: stratos-console
+        proxy: stratos-proxy
+        proxyNoShared: stratos-proxy-noshared
+        postgres: stratos-postgres
+        preflight: stratos-preflight-job
+        postflight: stratos-postflight-job
+      # Specify which storage class should be used for PVCs
+      #storageClass: default
+      # MariaDB chart configuration
+      mariadb:
+        # Only required for creating the databases
+        mariadbRootPassword: changeme
+        adminUser: root
+        # Credentials for user
+        mariadbUser: console
+        mariadbPassword: changeme
+        mariadbDatabase: console
+        persistence:
+          accessMode: ReadWriteMany
+          size: 1Gi
+      #    storageClass: default
+        metrics:
+          enabled: false
+      EOF
 
-      # Login to Docker to push images
-      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-      # Build images
-      ./build.sh -t helm-nightly -c
-      cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-helm-nightly
-      cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml-helm-nightly
+      cat << EOF >> ${ROOT_DIR}/helm-build/Chart.yaml-helm-nightly
+      apiVersion: v1
+      description: A Helm chart for deploying Console
+      name: console
+      version: helm-nightly-gb4819a3
+      EOF
+      exit 0
