@@ -41,7 +41,7 @@ deploy/ci/secrets.yml
 deploy/kubernetes/values.yaml
 deploy/cloud-foundry/db-migration/goose
 outputs/
-
+deploy/kubernetes/console/charts/
 deploy/stratos-ui-release/.dev_builds
 deploy/stratos-ui-release/blobs
 deploy/stratos-ui-release/.blobs
