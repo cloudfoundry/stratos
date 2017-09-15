@@ -1,4 +1,4 @@
-@import "./service-card/service-card";
+@import "./service-catalogue-card/service-catalogue-card";
 
 .service-filter-panel {
   .filter-form-group {
@@ -9,8 +9,4 @@
 .service-panel {
   display: flex;
   align-items: stretch;
-}
-
-.service-manage-message {
-  margin-bottom: $console-unit-space;
 }

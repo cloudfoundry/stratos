@@ -5,6 +5,7 @@
     <span ng-if="galleryCardCtrl.cardData.titleTranslate" class="gallery-card-title" translate>{{ galleryCardCtrl.cardData.titleTranslate }}</span>
     <actions-menu class="gallery-card-actions" ng-if="galleryCardCtrl.cardActions"
       actions="galleryCardCtrl.cardActions" action-target="galleryCardCtrl.cardData"
+      enable-button-mode="true"
       menu-position="{{galleryCardCtrl.actionsPosition}}">
     </actions-menu>
   </div>
