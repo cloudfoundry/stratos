@@ -9,7 +9,7 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.ngrok.io:80/linkyard/helm
+   repository:  ci-registry.ngrok.io:80/helm-deploy
    tag: "latest"
    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 

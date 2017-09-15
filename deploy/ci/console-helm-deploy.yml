@@ -5,7 +5,6 @@ resources:
     branch: {{stratos-ui-branch}}
     private_key: {{github-private-key}}
     uri: git@github.com:suse/stratos-ui.git
-    tag_filter: "[0-9]*"
 - name: helm-chart-values
   type: s3
   source:
@@ -41,7 +40,7 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
-      timeout: 30m
+      timeout: 45m
       file: stratos-ui/deploy/ci/tasks/helm/build-helm.yml
       params:
         DOCKER_USERNAME: {{docker-username}}
@@ -57,6 +56,10 @@ jobs:
 - name: deploy-helm
   plan:
   - get: stratos-ui
+    passed: [build-helm-images]
+  - get: helm-chart-Chart
+    passed: [build-helm-images]
+  - get: helm-chart-values
     passed: [build-helm-images]
   - do:
     - task: build
