@@ -121,7 +121,7 @@
 
     // Works out if the current list is being filtered or searched.
     that.isFiltered = function () {
-      return !that.search.$ && that.filterType !== that.ALL_FILTER;
+      return that.search.$ || that.filterType !== that.ALL_FILTER;
     };
 
     that.showInstance = function (serviceInstance) {
