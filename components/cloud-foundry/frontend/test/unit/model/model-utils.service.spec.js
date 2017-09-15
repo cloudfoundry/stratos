@@ -20,8 +20,8 @@
       var cnsiGuid = '12345';
       expect(modelUtils.makeHttpConfig(cnsiGuid)).toEqual({
         headers: {
-          'x-cnap-cnsi-list': cnsiGuid,
-          'x-cnap-passthrough': 'true'
+          'x-cap-cnsi-list': cnsiGuid,
+          'x-cap-passthrough': 'true'
         }
       });
     });

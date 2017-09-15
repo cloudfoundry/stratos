@@ -56,11 +56,11 @@ CREATE TABLE IF NOT EXISTS vcs_tokens (
 -- Database version
 CREATE TABLE IF NOT EXISTS goose_db_version (
   version_id    INT                      NOT NULL,
-  is_applied    VARCHAR(1)               NOT NULL DEFAULT "t",
+  is_applied    VARCHAR(1)               NOT NULL DEFAULT "1",
   id            VARCHAR(255)             NOT NULL
 );
 
-INSERT INTO goose_db_version (version_id, is_applied, id) VALUES(1, "t", "SQLite 1.0");
+INSERT INTO goose_db_version (version_id, is_applied, id) VALUES(1, "1", "SQLite 1.0");
 
 -- console_config
 CREATE TABLE IF NOT EXISTS console_config (

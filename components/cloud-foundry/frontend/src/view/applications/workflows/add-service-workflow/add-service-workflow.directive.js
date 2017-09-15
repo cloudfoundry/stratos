@@ -312,7 +312,7 @@
         var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
         vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
         vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
-        vm.addBinding().then(function () {
+        return vm.addBinding().then(function () {
           // show notification for successful binding
           var successMsg = $translate.instant('app.app-info.app-tabs.services.add.notifications.success', {
             service: vm.options.serviceInstance.entity.name,
@@ -341,7 +341,7 @@
           vm.options.activeTab = 1;
           var guid = vm.options.serviceInstance.metadata.guid;
           vm.userInput.existingServiceInstance = _.find(vm.options.instances,
-                                                          function (o) { return o.metadata.guid === guid; });
+            function (o) { return o.metadata.guid === guid; });
         });
       }
       return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-bind');

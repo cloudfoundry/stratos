@@ -75,10 +75,9 @@
      */
     function detach(serviceInstance) {
       var serviceBinding = serviceInstance.entity.service_bindings
-      ? _.find(serviceInstance.entity.service_bindings, function (binding) {
-        return vm.app.summary.guid === binding.entity.app_guid;
-
-      }) : null;
+        ? _.find(serviceInstance.entity.service_bindings, function (binding) {
+          return vm.app.summary.guid === binding.entity.app_guid;
+        }) : null;
       if (serviceBinding) {
         var deferred = $q.defer();
         cfServiceInstanceService.unbindServiceFromApp(

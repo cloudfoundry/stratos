@@ -94,8 +94,8 @@ func (c *ConsoleConfigRepository) SaveConsoleConfig(config *interfaces.ConsoleCo
 	if err != nil {
 		return fmt.Errorf("Unable to truncate Console Config table: %v", err)
 	}
-
 	isComplete := config.ConsoleAdminScope != ""
+
 	if _, err := c.db.Exec(saveConsoleConfig, fmt.Sprintf("%s", config.UAAEndpoint),
 		config.ConsoleAdminScope, config.ConsoleClient, config.ConsoleClientSecret, config.SkipSSLValidation, isComplete); err != nil {
 		return fmt.Errorf("Unable to Save Console Config record: %v", err)
@@ -125,7 +125,7 @@ func (c *ConsoleConfigRepository) IsInitialised() (bool, error) {
 
 	rowCount, err := c.getTableCount()
 	if err != nil {
-		for strings.Contains(err.Error(), "does not exist") {
+		for strings.Contains(err.Error(), "does not exist") || strings.Contains(err.Error(), "doesn't exist") {
 			// Schema isn't initialised yet. Wait a few secs and retry
 			log.Warnf("It appears schema isn't initialised yet, sleeping and trying again %s", err)
 			time.Sleep(1 * time.Second)
@@ -173,8 +173,8 @@ func (c *ConsoleConfigRepository) isSetupComplete() (bool, error) {
 	return isSetupComplete, nil
 }
 
-func (c *ConsoleConfigRepository) getTableCount() (int, error) {
-	rows, err := c.db.Query(getTableCount)
+func (c *ConsoleConfigRepository) getCount(sqlStatement string) (int, error) {
+	rows, err := c.db.Query(sqlStatement)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "does not exist") {
@@ -197,4 +197,8 @@ func (c *ConsoleConfigRepository) getTableCount() (int, error) {
 	}
 
 	return count, nil
+}
+
+func (c *ConsoleConfigRepository) getTableCount() (int, error) {
+	return c.getCount(getTableCount)
 }

@@ -68,7 +68,7 @@
       }
 
       function handleKeypress(event) {
-        var enterSpaceKeyCodes = [13, 32];    // enter or space
+        var enterSpaceKeyCodes = [13, 32]; // enter or space
         var keyCode = event.which || event.keyCode;
         var charStr = String.fromCharCode(keyCode);
 
