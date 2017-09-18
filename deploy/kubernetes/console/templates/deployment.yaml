@@ -8,7 +8,7 @@ metadata:
     app: "{{ .Release.Name }}"
 data:
   stolon: {{ .Values.dbPassword | b64enc }}
-  pgsql-password: {{ .Values.dbPassword | b64enc }}
+  db-password: {{  .Values.mariadb.mariadbPassword | b64enc }}
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
@@ -47,24 +47,22 @@ spec:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "{{ .Release.Name }}-postflight"
         env:
-        - name: PGSQL_HOST
-          value: "{{ .Release.Name }}-postgres-int"
-        - name: PGSQL_PORT
-          value: "5432"
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD_FILE
-          value: /etc/secrets/stolon
-        - name: PGSQL_DATABASE
-          value: console-db
-        - name: PGSQL_USER
-          value: console
-        - name: PGSQL_PASSWORDFILE
-          value: /etc/secrets/pgsql-password
-        - name: PGSQL_SSL_MODE
-          value: disable
-        - name: PGCONNECT_TIMEOUT
-          value: "10"
+        - name: DB_HOST
+          value: "{{ .Release.Name }}-mariadb"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_ADMIN_USER
+          value:  "{{ .Values.mariadb.adminUser }}"
+        - name: DB_ADMIN_PASSWORD
+          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
+        - name: DATABASE_PROVIDER
+          value: "{{ .Values.dbProvider }}"
+        - name: DB_PASSWORD
+          value: "{{ .Values.mariadb.mariadbPassword }}"
+        - name: DB_USER
+          value: "{{ .Values.mariadb.mariadbUser }}"
+        - name: DB_DATABASE_NAME
+          value: "{{ .Values.mariadb.mariadbDatabase }}"
         - name: DO_NOT_QUIT
           value: "true"
         - name: UPGRADE_VOLUME
@@ -105,23 +103,22 @@ spec:
         name: proxy
      {{- end }}
         env:
-        - name: PGSQL_USER
-          value: console
-        - name: PGSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Release.Name }}-secret"
-              key: pgsql-password
-        - name: PGSQL_DATABASE
-          value: console-db
-        - name: PGSQL_HOST
-          value: "{{ .Release.Name }}-postgres-int"
-        - name: PGSQL_PORT
-          value: "5432"
-        - name: PGSQL_CONNECT_TIMEOUT_IN_SECS
-          value: "5"
-        - name: PGSQL_SSL_MODE
-          value: disable
+        - name: DB_USER
+          value: "{{ .Values.mariadb.mariadbUser }}"
+        - name: DB_PASSWORD
+          value: "{{ .Values.mariadb.mariadbPassword }}"
+        - name: DB_DATABASE_NAME
+          value: "{{ .Values.mariadb.mariadbDatabase }}"
+        - name: DB_HOST
+          value: "{{ .Release.Name }}-mariadb"
+        - name: DB_PORT
+          value: "3306"
+        - name: DATABASE_PROVIDER
+          value: "{{ .Values.dbProvider }}"
+        - name: DB_ADMIN_USER
+          value:  "{{ .Values.mariadb.adminUser }}"
+        - name: DB_ADMIN_PASSWORD
+          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
