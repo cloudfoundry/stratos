@@ -33,3 +33,9 @@ RUN apk update && \
     /root/.npm /root/.node-gyp /root/.gnupg /usr/lib/node_modules/npm/man \
     /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html /usr/lib/node_modules/npm/scripts
 
+COPY package.json /
+RUN npm install
+RUN echo 'Europe/London' > /etc/timezone
+RUN dpkg-reconfigure --frontend noninteractive tzdata
+# Due to a conflict in Gulp 3, we need to run this again
+RUN npm install

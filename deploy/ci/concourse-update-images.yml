@@ -25,6 +25,13 @@ resources:
     from: {{email-from}}
     # to: [ "irfan.habib@suse.com", "neil.macdougall@suse.com", "richard.cox@suse.com", "njones@suse.com" ]
     to: [ "irfan.habib@suse.com" ]
+
+groups:
+- name: tests
+  jobs:
+  - update-concourse-image
+  - update-bk-concourse-image
+
 jobs:
 - name: update-concourse-image
   plan:
@@ -38,6 +45,29 @@ jobs:
       params:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
+        DOCKER_ORG: {{docker-build-org}}
+        TAG: {{docker-build-tag}}
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "Concourse Image update ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} failed!"
+          body_text: "Concourse Image update has failed: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+ 
+- name: update-bk-concourse-image
+  plan:
+  - get: stratos-ui
+    trigger: true
+    passed: [update-concourse-image]
+  - do:
+    - task: update-bk-concourse-build-image
+      privileged: true
+      timeout: 20m
+      file: stratos-ui/deploy/ci/tasks/update-images/update-bk-concourse-image.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
+        DOCKER_ORG: {{docker-build-org}}
+        TAG: {{docker-build-tag}}
       on_failure:
         put: send-email
         params:

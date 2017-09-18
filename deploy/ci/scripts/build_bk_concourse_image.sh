@@ -10,5 +10,5 @@ source ${DIRPATH}/build_common.sh
 cd ${DIRPATH}/../../
 cp ../package.json .
 
-docker build  -f ci/Dockerfile.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-concourse:${TAG} \
+docker build  -f ci/Dockerfile.bk.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/portal-proxy-test:${TAG} \
     ${BUILD_ARGS}
