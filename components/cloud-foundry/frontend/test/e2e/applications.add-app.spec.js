@@ -15,9 +15,6 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
   var cfHelpers = require('./po/helpers.po');
 
   // Service to use when adding a service to the app
