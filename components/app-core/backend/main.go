@@ -325,7 +325,10 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
-	if err := config.Load(&dc); err != nil {
+
+	if datastore.ParseCFEnvs(&dc) == true {
+		log.Info("Using Cloud Foundry DB service")
+	} else if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
@@ -628,6 +631,9 @@ func isConsoleUpgrading() bool {
 	}
 
 	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+	if string(upgradeVolume[0]) == "/" {
+		upgradeLockPath = fmt.Sprintf("%s/%s", upgradeVolume, upgradeLockFile)
+	}
 
 	if _, err := os.Stat(upgradeLockPath); err == nil {
 		return true

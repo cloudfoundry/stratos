@@ -56,8 +56,8 @@
 
     params: {
       protocol: 'https://',
-      host: 'localhost',
-      port: '3100',
+      host: secrets.console.host || 'localhost',
+      port: secrets.console.port || '3100',
       credentials: {
         admin: secrets.console.admin,
         user: secrets.console.user
@@ -165,6 +165,7 @@
     },
 
     jasmineNodeOpts: {
+      defaultTimeoutInterval: 45000,
       // disable default jasmine report (using jasmine-spec-reporter)
       print: function () {
       }

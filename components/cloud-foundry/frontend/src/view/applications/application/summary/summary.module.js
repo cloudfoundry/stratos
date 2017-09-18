@@ -53,7 +53,7 @@
             authModel.actions.create, model.application.summary.space_guid);
         },
         go: function (appActions, appGuid) {
-          $state.go('cf.applications.application.services', {guid: appGuid});
+          $state.go('cf.applications.application.service-catalogue', {guid: appGuid});
         }
       }]
     });

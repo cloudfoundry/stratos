@@ -53,7 +53,7 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Events', 'SSH'];
+      var names = ['Summary', 'Log Stream', 'Service Instances', 'Variables', 'Events', 'SSH', 'Service Catalog'];
       var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : undefined;
       if (cfFromConfig && cfFromConfig.supportsVersions) {
         names.push('Versions');
@@ -205,13 +205,15 @@
               var appRouteAttachedTo = rows[index][1];
               expect(appRouteAttachedTo).toBeDefined();
               expect(appRouteAttachedTo.length).toBeGreaterThan(0);
-              expect(appRouteAttachedTo, testAppName);
+              expect(appRouteAttachedTo).toContain(testAppName);
 
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
               columnMenu.waitForElement();
+              helpers.scrollIntoView(columnMenu);
 
               // Unmap Route
               columnMenu.click();
+
               columnMenu.clickItem(1);
               confirmModal.waitForModal();
               expect(confirmModal.getTitle()).toBe('Unmap Route from Application');

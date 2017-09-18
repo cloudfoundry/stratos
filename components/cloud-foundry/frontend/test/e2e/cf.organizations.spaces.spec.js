@@ -97,8 +97,16 @@
       var testAdminUser, testUser;
       var init = cfModel.fetchUsers(testGuid)
         .then(function (users) {
-          testUser = _.find(users, {entity: {username: cfFromConfig.user.username}});
-          testAdminUser = _.find(users, {entity: {username: cfFromConfig.admin.username}});
+          testUser = _.find(users, {
+            entity: {
+              username: cfFromConfig.user.username
+            }
+          });
+          testAdminUser = _.find(users, {
+            entity: {
+              username: cfFromConfig.admin.username
+            }
+          });
           expect(testUser).toBeDefined();
           expect(testAdminUser).toBeDefined();
         })
