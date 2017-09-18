@@ -14,7 +14,7 @@ login-form {
 
     > h1 {
       margin-bottom: $console-unit-space * 1.5;
-      margin-top: $console-unit-space / 2;
+      margin-top: $console-unit-space / 4;
       color: $brand-primary;
       font-weight: $console-font-weight-light;
     }
@@ -57,6 +57,7 @@ login-form {
     .spinner-notification {
       text-transform: none;
       font-size: $font-size-large;
+      padding-right: $console-unit-space / 2;
     }
 
     .bounce-spinner > div {

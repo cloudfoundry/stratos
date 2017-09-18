@@ -93,7 +93,7 @@
           }
         }
       };
-
+      data.activeTab = 0;
       modalObj.actionTask(data, dialog);
       expect(modalObj.context.routeExists()).toBe(false);
       $httpBackend.flush();
@@ -151,6 +151,7 @@
           router_group_tupe: 'http'
         }
       }];
+
       var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
 
       $httpBackend.expectPOST('/pp/v1/proxy/v2/routes?generate_port=true').respond(200, expectedPostReq);
@@ -172,8 +173,151 @@
       };
 
       data.useRandomPort = true;
+      data.activeTab = 0;
       modalObj.actionTask(data, dialog);
       $httpBackend.flush();
+    });
+
+    it('should successfully add an existing route', function () {
+
+      var routesRequestUrl = '/pp/v1/proxy/v2/spaces/' +
+          spaceGuid +
+          '/routes?include-relations=domain,apps&inline-relations-depth=1&results-per-page=100';
+
+      var expectedRoutesRes = {
+        total_results: 17,
+        total_pages: 1,
+        prev_url: null,
+        next_url: null,
+        resources: [
+          {
+            metadata: {
+              guid: 'ec16268e-2372-4b91-a704-8c49bdf5f052',
+              url: '/v2/routes/ec16268e-2372-4b91-a704-8c49bdf5f052',
+              created_at: '2017-06-02T09:03:22Z',
+              updated_at: '2017-06-02T09:03:22Z'
+            },
+            entity: {
+              host: 'console',
+              path: '',
+              domain_guid: '9cacc81a-8a58-4404-835c-43baf41b9833',
+              space_guid: 'ccd7f508-5aab-4811-b555-a954f8205bba',
+              service_instance_guid: null,
+              port: null,
+              domain_url: '/v2/shared_domains/9cacc81a-8a58-4404-835c-43baf41b9833',
+              domain: {
+                metadata: {
+                  guid: '9cacc81a-8a58-4404-835c-43baf41b9833',
+                  url: '/v2/shared_domains/9cacc81a-8a58-4404-835c-43baf41b9833',
+                  created_at: '2017-06-01T10:15:44Z',
+                  updated_at: '2017-06-01T10:15:44Z'
+                },
+                entity: {
+                  name: 'cf-dev.io',
+                  router_group_guid: null,
+                  router_group_type: null
+                }
+              },
+              space_url: '/v2/spaces/ccd7f508-5aab-4811-b555-a954f8205bba',
+              apps_url: '/v2/routes/ec16268e-2372-4b91-a704-8c49bdf5f052/apps',
+              apps: [
+                {
+                  metadata: {
+                    guid: '25906311-e793-4661-8507-280461bce9c7',
+                    url: '/v2/apps/25906311-e793-4661-8507-280461bce9c7',
+                    created_at: '2017-06-26T08:31:03Z',
+                    updated_at: '2017-08-16T14:19:34Z'
+                  },
+                  entity: {
+                    name: 'node-env',
+                    production: false,
+                    space_guid: 'ccd7f508-5aab-4811-b555-a954f8205bba',
+                    stack_guid: 'fe6a3b2c-6e5a-4f16-91f8-60d6c6fcde8d',
+                    buildpack: 'binary_buildpack',
+                    detected_buildpack: '',
+                    detected_buildpack_guid: '7d7836d9-aad7-46d4-b19e-9f60542438d8',
+                    environment_json: {},
+                    memory: 16,
+                    instances: 1,
+                    disk_quota: 16,
+                    state: 'STARTED',
+                    version: '628ddb0d-6e59-4ce4-998a-26ad412b4727',
+                    command: null,
+                    console: false,
+                    debug: null,
+                    staging_task_id: 'f6c8a623-47ae-40c6-99a0-2571954963d3',
+                    package_state: 'STAGED',
+                    health_check_type: 'process',
+                    health_check_timeout: null,
+                    health_check_http_endpoint: null,
+                    staging_failed_reason: null,
+                    staging_failed_description: null,
+                    diego: true,
+                    docker_image: null,
+                    package_updated_at: '2017-06-26T08:38:22Z',
+                    detected_start_command: './go-env',
+                    enable_ssh: true,
+                    docker_credentials_json: {
+                      redacted_message: '[PRIVATE DATA HIDDEN]'
+                    },
+                    ports: [
+                      8080
+                    ],
+                    space_url: '/v2/spaces/ccd7f508-5aab-4811-b555-a954f8205bba',
+                    stack_url: '/v2/stacks/fe6a3b2c-6e5a-4f16-91f8-60d6c6fcde8d',
+                    routes_url: '/v2/apps/25906311-e793-4661-8507-280461bce9c7/routes',
+                    events_url: '/v2/apps/25906311-e793-4661-8507-280461bce9c7/events',
+                    service_bindings_url: '/v2/apps/25906311-e793-4661-8507-280461bce9c7/service_bindings',
+                    route_mappings_url: '/v2/apps/25906311-e793-4661-8507-280461bce9c7/route_mappings'
+                  }
+                }
+              ],
+              route_mappings_url: '/v2/routes/ec16268e-2372-4b91-a704-8c49bdf5f052/route_mappings'
+            }
+          }
+        ]
+      };
+
+      var domains = [{
+        metadata: {
+          guid: 'testDomain',
+          type: 'tcp'
+        },
+        entity: {
+          router_group_tupe: 'http'
+        }
+      }];
+
+      var forbiddenCallTriggered = false;
+      var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
+
+      $httpBackend.expectGET(routesRequestUrl).respond(200, expectedRoutesRes);
+      $httpBackend.when('/pp/v1/proxy/v2/routes?generate_port=true').respond(function () {
+        forbiddenCallTriggered = true;
+        return [400, ''];
+      });
+
+      $httpBackend.whenGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: domains});
+      $httpBackend.whenPUT('/pp/v1/proxy/v2/routes/guid/apps/testApplicationId').respond(200, {});
+      $httpBackend.whenGET('/pp/v1/proxy/v2/apps/' + applicationId + '/summary').respond(200, {});
+
+      var dialog = {
+        context: {
+          options: {
+            domainMap: {
+              testDomain: {
+                type: 'tcp'
+              }
+            }
+          }
+        }
+      };
+
+      data.useRandomPort = true;
+      data.activeTab = 0;
+      modalObj.actionTask(data, dialog);
+      $httpBackend.flush();
+      expect(forbiddenCallTriggered).toBe(false);
     });
 
   });

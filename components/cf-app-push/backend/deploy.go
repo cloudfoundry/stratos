@@ -81,6 +81,7 @@ const (
 	SOURCE_FILE
 	SOURCE_FILE_DATA
 	SOURCE_FILE_ACK
+	SOURCE_GITURL
 )
 
 const (
@@ -131,6 +132,12 @@ type GitHubSourceInfo struct {
 	Branch  string `json:"branch"`
 }
 
+// Structure used to provide metadata about the Git Url source
+type GitUrlSourceInfo struct {
+	Url        string `json:"url"`
+	Branch     string `json:"branch"`
+}
+
 type FolderSourceInfo struct {
 	Files   int      `json:"files"`
 	Folders []string `json:"folders"`
@@ -157,7 +164,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	defer pingTicker.Stop()
 
 	// We use a simple protocol to get the source to use for cf push
-	// This can either be a github project or one or more files
 
 	// Send a message to the client to say that we are awaiting source details
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
@@ -185,6 +191,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		sourceEnvVarMetadata, appDir, err = getGitHubSource(clientWebSocket, tempDir, msg)
 	case SOURCE_FOLDER:
 		sourceEnvVarMetadata, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
+	case SOURCE_GITURL:
+		sourceEnvVarMetadata, appDir, err = getGitUrlSource(clientWebSocket, tempDir, msg)
 	default:
 		err = errors.New("Unsupported source type; don't know how to get the source for the application")
 	}
@@ -389,6 +397,36 @@ func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	return string(marshalledJson), tempDir, nil
 }
 
+func getGitUrlSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, string, error) {
+
+	// The msg data is JSON for the GitHub info
+	info := GitUrlSourceInfo{}
+	if err := json.Unmarshal([]byte(msg.Message), &info); err != nil {
+		return "", tempDir, err
+	}
+
+	log.Infof("Git Url Source: %s, branch %s", info.Url, info.Branch)
+
+	commitHash, err := cloneRepository(info.Url, info.Branch, clientWebSocket, tempDir)
+	if err != nil {
+		return "", tempDir, err
+	}
+
+	sendEvent(clientWebSocket, EVENT_CLONED)
+
+	// Return a string that can be added to the manifest as an application env var to trace where the source originated
+	stratosProject := StratosProject{
+		Url:        info.Url,
+		CommitHash: commitHash,
+		Branch:     info.Branch,
+		Timestamp:  time.Now().Unix(),
+	}
+
+	marshalledJson, _ := json.Marshal(stratosProject)
+	return string(marshalledJson), tempDir, nil
+}
+
+
 func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, error) {
 
 	messageStruct := SocketMessage{
@@ -532,19 +570,19 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 
 func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-	vcsGit := GetVCS()
-
-	err := vcsGit.Create(tempDir, repoUrl)
-	if err != nil {
-		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
-		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
+	if len(branch) == 0 {
+		err := errors.New("No branch supplied")
+		log.Infof("Failed to checkout repo %s due to %+v", branch, repoUrl, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 		return "", err
 	}
 
-	err = vcsGit.Checkout(tempDir, branch)
+	vcsGit := GetVCS()
+
+	err := vcsGit.Create(tempDir, repoUrl, branch)
 	if err != nil {
-		log.Infof("Failed to checkout %s branch in repo %s due to %+v", branch, repoUrl, err)
-		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
+		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", err
 	}
 

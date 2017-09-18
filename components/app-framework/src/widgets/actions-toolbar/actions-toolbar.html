@@ -3,7 +3,7 @@
   <button
     ng-repeat="action in actionsToolbarCtrl.items"
     id="{{action.id}}"
-    class="no-focus btn btn-link btn-border-less actions-toolbar-btn"
+    class="no-focus btn btn-link actions-toolbar-btn"
     ng-disabled="executeOrReturn(action, 'disabled')"
     ng-hide="executeOrReturn(action, 'hidden')"
     ng-click="action.execute()">

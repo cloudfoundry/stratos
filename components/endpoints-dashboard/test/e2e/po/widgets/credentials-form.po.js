@@ -1,9 +1,11 @@
 (function () {
   'use strict';
 
+  var appCore = '../../../../../app-core/frontend/';
+
   // Service instances registration helpers
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var asyncDialog = require('../../../../../app-core/frontend/test/e2e/po/widgets/async-dialog.po');
+  var helpers = require(appCore + 'test/e2e/po/helpers.po');
+  var asyncDialog = require(appCore + 'test/e2e/po/widgets/async-dialog.po');
   var credentialsFormName = 'form.registerCnsi';
 
   module.exports = {

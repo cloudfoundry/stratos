@@ -6,6 +6,7 @@ dockerOrg: splatform
 dockerRegistry: docker.io
 # Specify default DB password
 dbPassword: changeme
+dbProvider: mysql
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
@@ -32,3 +33,18 @@ images:
 #    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDV9+ySh0xZzM41
 #    ...
 #    -----END PRIVATE KEYE-----
+# MariaDB chart configuration
+mariadb:
+  # Only required for creating the databases
+  mariadbRootPassword: changeme
+  adminUser: root
+  # Credentials for user
+  mariadbUser: console
+  mariadbPassword: changeme
+  mariadbDatabase: console
+  persistence:
+    accessMode: ReadWriteMany
+    size: 1Gi
+#    storageClass: default
+  metrics:
+    enabled: false

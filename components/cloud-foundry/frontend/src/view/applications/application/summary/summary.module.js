@@ -53,7 +53,7 @@
             authModel.actions.create, model.application.summary.space_guid);
         },
         go: function (appActions, appGuid) {
-          $state.go('cf.applications.application.services', {guid: appGuid});
+          $state.go('cf.applications.application.service-catalogue', {guid: appGuid});
         }
       }]
     });
@@ -86,9 +86,9 @@
    * @property {appNotificationsService} appNotificationsService - the toast notification service
    */
   function ApplicationSummaryController($state, $stateParams, $log, $q, $translate,
-                                        modelManager, cfAddRoutes, cfEditApp, appUtilsService,
-                                        appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
-                                        cfApplicationTabs, cfUtilsService) {
+    modelManager, cfAddRoutes, cfEditApp, appUtilsService,
+    appClusterRoutesService, frameworkDialogConfirm, appNotificationsService,
+    cfApplicationTabs, cfUtilsService) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -157,7 +157,7 @@
               return vm.model.terminateRunningAppInstanceAtGivenIndex(vm.cnsiGuid, vm.id, instanceIndex)
                 .then(function () {
                   appNotificationsService.notify('success',
-                    $translate.instant('app.app-info.terminate-instance.terminate.success', { index: instanceIndex }));
+                    $translate.instant('app.app-info.terminate-instance.success', { index: instanceIndex }));
                   update();
                 });
             }

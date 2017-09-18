@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -63,6 +64,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"CNSI Name or Endpoint were not provided when trying to register an CF Cluster")
 	}
 
+	apiEndpoint = strings.TrimRight(apiEndpoint, "/")
+
+	// Remove trailing slash, if there is one
 	apiEndpointURL, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -252,22 +256,37 @@ func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) 
 		return interfaces.CNSIRecord{}, err
 	}
 
+	// Ensure that trailing slash is removed from the API Endpoint
+	rec.APIEndpoint.Path = strings.TrimRight(rec.APIEndpoint.Path, "/")
+
+	return rec, nil
+}
+
+func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIRecord, error) {
+	log.Debug("GetCNSIRecordByEndpoint")
+	var rec interfaces.CNSIRecord
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return rec, err
+	}
+
+	rec, err = cnsiRepo.FindByAPIEndpoint(endpoint)
+	if err != nil {
+		return rec, err
+	}
+
+	// Ensure that trailing slash is removed from the API Endpoint
+	rec.APIEndpoint.Path = strings.TrimRight(rec.APIEndpoint.Path, "/")
+
 	return rec, nil
 }
 
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 	log.Debug("cnsiRecordExists")
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
-	if err != nil {
-		return false
-	}
 
-	_, err = cnsiRepo.FindByAPIEndpoint(endpoint)
-	if err != nil {
-		return false
-	}
-
-	return true
+	_, err := p.GetCNSIRecordByEndpoint(endpoint);
+	return err == nil
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c interfaces.CNSIRecord) error {

@@ -47,7 +47,7 @@
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
   function AssignUsersWorkflowController($scope, $translate, modelManager, context, appClusterRolesService,
-                                         cfOrganizationModel,$stateParams, $q, $timeout, $uibModalInstance) {
+    cfOrganizationModel,$stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;

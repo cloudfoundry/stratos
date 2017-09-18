@@ -53,7 +53,7 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Events', 'SSH'];
+      var names = ['Summary', 'Log Stream', 'Service Instances', 'Variables', 'Events', 'SSH', 'Service Catalog'];
       var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : undefined;
       if (cfFromConfig && cfFromConfig.supportsVersions) {
         names.push('Versions');
@@ -143,9 +143,12 @@
 
         describe('Application route should show up on CF Endpoints view', function () {
 
-          var appRouteName = hostName + '.' + domain;
-          var appViewUrl;
+          var appRouteName, appViewUrl;
+
           beforeAll(function () {
+            // NOTE - Requires route with name <newHostName> create from test above
+            appRouteName = newHostName + '.' + domain;
+
             browser.getCurrentUrl().then(function (url) {
               appViewUrl = url;
             });
@@ -168,17 +171,18 @@
             routes.getRows().then(function (rows) {
               expect(rows.length).toBeGreaterThan(0);
             });
-            // Table should contain our service
-            var column = routes.getElement().all(by.css('td')).filter(function (elem) {
-              return elem.getText().then(function (text) {
-                return text === appRouteName;
+            // Table should contain our route
+            routes.getData().then(function (rows) {
+              var index = _.findIndex(rows, function (row) {
+                return row[0] === appRouteName;
               });
-            }).first();
-            expect(column).toBeDefined();
+              expect(index).not.toBeLessThan(0);
+            });
           });
 
           it('should allow the route to be un-mapped and then deleted', function () {
             var routes = table.wrap(element(by.css('.space-services-table table')));
+            routes.waitForElement();
 
             // Click the "Show More" button in case there are many routes
             var showMoreButtonLink = element(by.css('.space-services-table tfoot > tr > td > a'));
@@ -193,9 +197,23 @@
                 return row[0] === appRouteName;
               });
 
-              // Unmap Route
+              // Confirm route exists in table
+              expect(index).not.toBeLessThan(0);
+              expect(rows[index]).toBeDefined();
+
+              // Confirm route is attached to an application
+              var appRouteAttachedTo = rows[index][1];
+              expect(appRouteAttachedTo).toBeDefined();
+              expect(appRouteAttachedTo.length).toBeGreaterThan(0);
+              expect(appRouteAttachedTo).toContain(testAppName);
+
               var columnMenu = actionMenu.wrap(routes.getItem(index, 2));
+              columnMenu.waitForElement();
+              helpers.scrollIntoView(columnMenu);
+
+              // Unmap Route
               columnMenu.click();
+
               columnMenu.clickItem(1);
               confirmModal.waitForModal();
               expect(confirmModal.getTitle()).toBe('Unmap Route from Application');

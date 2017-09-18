@@ -5,9 +5,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository: registry.paas-ui:5000/portal-proxy-test
+   repository: ci-registry.ngrok.io:80/portal-proxy-test
    tag: "latest"
-   insecure_registries: [ "registry.paas-ui:5000" ]
+   insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
 run:
   path: sh

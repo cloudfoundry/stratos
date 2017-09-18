@@ -1,0 +1,114 @@
+$github-avatar-height: 51px;
+$github-avatar-width: 51px;
+$github-info-commit-spacer: 3px;
+
+// Select option height is text size + margin
+$select-option-height: 39px;
+
+.deploy-app {
+  .deploy-app-github {
+    display: flex;
+
+    .deploy-app-github-form {
+      .deploy-app-github-branch {
+        .dropdown-menu {
+          max-height: $select-option-height * 3;
+        }
+      }
+
+      .deploy-app-source-details {
+
+        &.deploy-app-invisible {
+          visibility: hidden;
+        }
+
+        &.deploy-app-github-details {
+          margin-top: $console-unit-space / 2;
+
+          .deploy-app-github-info {
+            border: 1px solid $rule;
+            padding: $console-unit-space / 4 $console-unit-space / 2;
+            max-width: $console-input-width * 1.25;
+
+            &.deploy-app-file-details {
+              height: $console-input-height;
+              display: flex;
+              align-items: center;
+              padding-left: 18px;
+
+              > p {
+                margin: 0;
+              }
+
+              > i {
+                margin-right: 6px;
+              }
+            }
+
+            img {
+              height: $github-avatar-height;
+              width: $github-avatar-width;
+            }
+
+            .project {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+
+              .project-info {
+                padding-left: $console-unit-space / 2;
+              }
+            }
+
+            .lastCommit {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              overflow-x: hidden;
+
+              padding-top: $github-info-commit-spacer;
+
+              .lastCommit-info {
+                padding-left: $console-unit-space / 2;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+
+                > .lastCommit-info-commit-message {
+                  display: flex;
+
+                  > a {
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow-x: hidden;
+                  }
+                }
+
+                .lastCommit-date-committer {
+                  display: flex;
+
+                  > .lastCommitter {
+                    flex: 1;
+                  }
+                }
+              }
+            }
+          }
+
+        }
+
+      }
+    }
+
+    .deploy-app-git-url-form {
+      padding-left: $console-unit-space;
+    }
+
+    .deploy-app-github-form, .deploy-app-git-url-form {
+      radio-input {
+        padding-bottom: $console-unit-space / 2;
+      }
+    }
+  }
+}

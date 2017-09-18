@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository:  10.4.21.241:5000/susetest/console-proxy-builder
+    repository:  ci-registry.ngrok.io:80/susetest/console-proxy-builder
     tag: "latest"
-    insecure_registries: [ "10.4.21.241:5000" ]
+    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
 inputs:
 - name: stratos-ui

@@ -106,6 +106,10 @@
             off-class="console-status-normal" on-class="console-status-normal">
           </status-indicator>
         </dd>
+        <dt translate>app.app-info.app-tabs.summary.summary-panel.service-count</dt>
+        <dd class="pull-right app-summary-bound-services-count">
+          {{ ::appCtrl.model.application.summary.services.length }}
+        </dd>
       </dl>
     </div>
     <div class="col-md-6">
@@ -263,43 +267,6 @@
                         enable-button-mode="true"></actions-menu>
         </td>
       </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="summary-service-instances">
-  <div class="action-header">
-    <span translate>app.app-info.app-tabs.summary.service-instances-panel.title</span>
-    <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})"
-       ng-hide="applicationSummaryCtrl.hideManageServices">
-      <i class="material-icons">arrow_forward</i>
-      <span translate>app.app-info.app-tabs.summary.service-instances-panel.manage-button</span>
-    </a>
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-body"
-      ng-if="!applicationSummaryCtrl.serviceInstances.length" translate>
-      app.app-info.app-tabs.summary.service-instances-panel.none
-    </div>
-    <table class="table table-actionable"
-      ng-if="applicationSummaryCtrl.serviceInstances.length">
-      <thead>
-        <tr>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.name-label</th>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.service-label</th>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.plan-label</th>
-          <!--
-          <th translate>ENV.VARIABLES</th>
-          -->
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="service in applicationSummaryCtrl.serviceInstances">
-          <td>{{ service.name }}</td>
-          <td>{{ service.service_plan.service.label }}</td>
-          <td>{{ service.service_plan.name }}</td>
-        </tr>
       </tbody>
     </table>
   </div>

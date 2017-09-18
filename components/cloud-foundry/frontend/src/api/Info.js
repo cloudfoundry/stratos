@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(InfoApi.prototype, {
 
-   /*
+    /*
     * Get Info
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/info/get_info.html
     */

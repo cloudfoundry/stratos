@@ -1,0 +1,47 @@
+@import "deploy-source-git/deploy-source-git";
+@import "deploy-source-local/deploy-source-local";
+
+$deploy-app-choose-source-height: 36px;
+
+.deploy-app {
+
+  .deploy-app-choose-source {
+    height: $deploy-app-choose-source-height;
+    margin: 0;
+  }
+
+  .deploy-app-source-area {
+    display: flex;
+    flex-direction: column;
+    min-height: $deploy-app-step-height - $deploy-app-choose-source-height - $deploy-app-step-padding-bottom;
+
+    .deploy-app-source-area-select {
+
+      select-input {
+        position: initial;
+        .select-input-field {
+          margin: 0;
+        }
+      }
+    }
+
+    .deploy-app-source-area-settings {
+      padding-top: $console-unit-space;
+    }
+
+    &.file-drop-active {
+      outline: 3px dashed $brand-primary;
+      outline-offset: 4px;
+
+      > * {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .folder-drop-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

@@ -23,6 +23,7 @@ type Info struct {
 	User         *interfaces.ConnectedUser       `json:"user"`
 	Endpoints    map[string]map[string]*Endpoint `json:"endpoints"`
 	CloudFoundry *interfaces.CFInfo              `json:"cloud-foundry,omitempty"`
+	PluginConfig map[string]string               `json:"plugin-config,omitempty"`
 }
 
 func (p *portalProxy) info(c echo.Context) error {
@@ -59,6 +60,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 		User:         uaaUser,
 		Endpoints:    make(map[string]map[string]*Endpoint),
 		CloudFoundry: p.Config.CloudFoundryInfo,
+		PluginConfig: p.Config.PluginConfig,
 	}
 	// initialize the Endpoints maps
 	for _, plugin := range p.Plugins {

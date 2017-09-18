@@ -25,18 +25,22 @@
     };
   }
 
-  function landingPageController($scope, $translate, languageService) {
+  function landingPageController($scope, languageService) {
     var vm = this;
     vm.languageService = languageService;
-    vm.languageOptions = vm.languageService.getAll();
-    vm.currentLanguage = $translate.use();
-    $scope.$watch(function () {
-      return vm.currentLanguage;
-    }, function (newValue, oldValue) {
-      if (newValue !== oldValue) {
-        languageService.setLocale(newValue);
-      }
+    vm.languageOptions = [];
+    languageService.initialised.then(function () {
+      vm.languageOptions = languageService.getAll();
+      vm.currentLanguage = languageService.getLocale();
 
+      $scope.$watch(function () {
+        return vm.currentLanguage;
+      }, function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+          languageService.setLocale(newValue);
+        }
+      });
     });
+
   }
 })();

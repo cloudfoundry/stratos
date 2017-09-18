@@ -32,17 +32,25 @@ jobs:
     params:
       path: stratos-ui
       status: pending
+      context: console-unit-tests
 
   - do:
     - task: run-unit-tests
       privileged: true
-      timeout: 5m
+      timeout: 15m
       file: stratos-ui/deploy/ci/tasks/stratos-ui/run-unit-tests.yml
       on_failure:
         put: stratos-ui
         params:
           path: stratos-ui
           status: failure
+          context: console-unit-tests
+      on_success:
+        put: stratos-ui
+        params:
+          path: stratos-ui
+          status: success
+          context: console-unit-tests
 
 - name: proxy-unit-tests
   plan:
@@ -54,21 +62,25 @@ jobs:
     params:
       path: stratos-ui
       status: pending
+      context: backend-unit-tests
+
   - do:
     - task: run-proxy-unit-tests
       privileged: true
-      timeout: 10m
+      timeout: 15m
       file: stratos-ui/deploy/ci/tasks/portal-proxy/run-unit-tests.yml
       on_success:
         put: stratos-ui
         params:
           path: stratos-ui
           status: success
+          context: backend-unit-tests
       on_failure:
         put: stratos-ui
         params:
           path: stratos-ui
           status: failure
+          context: backend-unit-tests
 
 - name: console-e2e-tests
   plan:
@@ -81,7 +93,7 @@ jobs:
     params:
       path: stratos-ui
       status: pending
-
+      context: e2e-tests
   - do:
     - task: build-proxy-image
       file: stratos-ui/deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
@@ -90,10 +102,10 @@ jobs:
         params:
           path: stratos-ui
           status: failure
-
+          context: e2e-tests
     - task: run-e2e-tests
       privileged: true
-      timeout: 15m
+      timeout: 25m
       file:  stratos-ui/deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
        REGISTRY_NAME: {{insecure-registry}}
@@ -115,9 +127,11 @@ jobs:
         params:
           path: stratos-ui
           status: success
+          context: e2e-tests
       on_failure:
         put: stratos-ui
         params:
           path: stratos-ui
           status: failure
+          context: e2e-tests
 

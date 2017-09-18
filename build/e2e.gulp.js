@@ -18,6 +18,7 @@
   var path = require('path');
   var runSequence = require('run-sequence');
   var ngAnnotate = require('gulp-ng-annotate');
+  var e2eConfigFile = './build/coverage.conf.js';
 
   var components;
   gulp.task('prepare:e2e', function () {
@@ -42,6 +43,13 @@
     combine(opts, cb);
   });
 
+  gulp.task('e2e:nocov', function () {
+    e2eConfigFile = './build/protractor.conf.js';
+    runSequence(
+      'e2e:tests'
+    );
+  });
+
   gulp.task('e2e:tests', function (cb) {
     // Use the protractor in our node_modules folder
     var cmd = './node_modules/protractor/bin/protractor';
@@ -50,7 +58,7 @@
     options.env.NODE_ENV = 'development';
     options.env.env = 'development';
 
-    var args = ['./build/coverage.conf.js'];
+    var args = [e2eConfigFile];
     if (process.env.STRATOS_E2E_SUITE) {
       args.push('--suite');
       args.push(process.env.STRATOS_E2E_SUITE);
