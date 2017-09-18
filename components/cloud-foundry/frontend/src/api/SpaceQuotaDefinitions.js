@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(SpaceQuotaDefinitionsApi.prototype, {
 
-   /*
+    /*
     * Associate Space with the Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/associate_space_with_the_space_quota_definition.html
     */
@@ -35,7 +35,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/creating_a_space_quota_definition.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/delete_a_particular_space_quota_definition.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Space Quota Definitions
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/list_all_space_quota_definitions.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Spaces for the Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/list_all_spaces_for_the_space_quota_definition.html
     */
@@ -104,7 +104,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Remove Space from the Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/remove_space_from_the_space_quota_definition.html
     */
@@ -121,7 +121,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/retrieve_a_particular_space_quota_definition.html
     */
@@ -138,7 +138,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a Space Quota Definition
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/space_quota_definitions/updating_a_space_quota_definition.html
     */

@@ -40,8 +40,8 @@
    * @property {Array} actions - collection of relevant actions vm can be executed against cluster
    */
   function ClusterActionsController($scope, modelManager, $state, $q, $stateParams, $translate, appUtilsService,
-                                    frameworkAsyncTaskDialog, appClusterAssignUsers, appUserSelection,
-                                    appNotificationsService, cfOrganizationModel) {
+    frameworkAsyncTaskDialog, appClusterAssignUsers, appUserSelection,
+    appNotificationsService, cfOrganizationModel) {
     var vm = this;
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

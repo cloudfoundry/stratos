@@ -32,7 +32,7 @@
   }
 
   function SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, appUtilsService, appClusterManageUsers, appClusterRolesService,
-                                appEventService, appUserSelection, cfOrganizationModel) {
+    appEventService, appUserSelection, cfOrganizationModel) {
     var that = this;
 
     this.guid = $stateParams.guid;

@@ -35,8 +35,8 @@
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationTileController(modelManager, $state, $q, $scope, $translate, appUtilsService,
-                                      appClusterAssignUsers, appNotificationsService, frameworkDialogConfirm,
-                                      frameworkAsyncTaskDialog, cfOrganizationModel) {
+    appClusterAssignUsers, appNotificationsService, frameworkDialogConfirm,
+    frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
     this.$state = $state;
 
@@ -175,11 +175,11 @@
       for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
         var space = that.organization.org.entity.spaces[i];
         if (authModel.isAllowed(that.organization.cnsiGuid,
-            authModel.resources.space,
-            authModel.actions.update,
-            space.metadata.guid,
-            space.entity.organization_guid,
-            true)) {
+          authModel.resources.space,
+          authModel.actions.update,
+          space.metadata.guid,
+          space.entity.organization_guid,
+          true)) {
 
           isSpaceManager = true;
           break;
@@ -190,9 +190,9 @@
       // 1. Not allowed to update the organization (not an admin or an org-manager)
       // 2. and not a manager of any space within the organization in question
       var canAssignUsers = authModel.isAllowed(that.organization.cnsiGuid,
-          authModel.resources.organization,
-          authModel.actions.update,
-          that.organization.guid) || isSpaceManager;
+        authModel.resources.organization,
+        authModel.actions.update,
+        that.organization.guid) || isSpaceManager;
 
       editOrgAction.hidden = !canEditOrg && !that.user.admin;
       deleteOrgAction.hidden = !canDeleteOrg && !that.user.admin;

@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ResourceMatchApi.prototype, {
 
-   /*
+    /*
     * List all matching resources
     * This endpoint matches given resource SHA / file size pairs against the Cloud Controller cache,
     * and reports the subset which describes already existing files.

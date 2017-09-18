@@ -41,7 +41,7 @@
    * @property {object} userInput - user's input about new application
    */
   function DeleteAppWorkflowController(modelManager, appEventService, $q, $translate, appUtilsService,
-                                       cfApplicationTabs, cfServiceDeleteAppWorkflow) {
+    cfApplicationTabs, cfServiceDeleteAppWorkflow) {
 
     var vm = this;
 
@@ -321,13 +321,13 @@
         appEventService.$emit(appEventService.events.REDIRECT, 'cf.applications.list.gallery-view');
         vm.dismissDialog();
       })
-      .catch(function () {
-        vm.options.hasError = true;
-        return $q.reject();
-      })
-      .finally(function () {
-        vm.options.isDeleting = false;
-      });
+        .catch(function () {
+          vm.options.hasError = true;
+          return $q.reject();
+        })
+        .finally(function () {
+          vm.options.isDeleting = false;
+        });
     }
   }
 

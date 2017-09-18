@@ -36,8 +36,8 @@
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, $translate, modelManager, appUtilsService,
-                                      appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
-                                      frameworkAsyncTaskDialog, cfOrganizationModel, cfUtilsService) {
+    appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
+    frameworkAsyncTaskDialog, cfOrganizationModel, cfUtilsService) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;

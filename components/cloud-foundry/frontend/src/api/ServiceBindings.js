@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServiceBindingsApi.prototype, {
 
-   /*
+    /*
     * Create a Service Binding
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/create_a_service_binding.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Service Binding
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/delete_a_particular_service_binding.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Bindings
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/list_all_service_bindings.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Binding
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/retrieve_a_particular_service_binding.html
     */

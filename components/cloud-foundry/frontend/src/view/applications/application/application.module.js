@@ -6,6 +6,7 @@
       'cloud-foundry.view.applications.application.summary',
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
+      'cloud-foundry.view.applications.application.service-catalogue',
       'cloud-foundry.view.applications.application.variables',
       'cloud-foundry.view.applications.application.events'
     ])
@@ -48,8 +49,8 @@
    * @property {object} frameworkDialogConfirm - the confirm dialog service
    */
   function ApplicationController(modelManager, appEventService, frameworkDialogConfirm, appUtilsService,
-                                 cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
-                                 $translate, $state, cfApplicationTabs) {
+    cfAppCliCommands, frameworkDetailView, $stateParams, $scope, $window, $q, $interval,
+    $translate, $state, cfApplicationTabs) {
     var vm = this;
 
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');

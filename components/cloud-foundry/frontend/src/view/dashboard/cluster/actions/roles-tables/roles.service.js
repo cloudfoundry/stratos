@@ -36,7 +36,7 @@
    * selected
    */
   function appClusterRolesService($log, $q, $interpolate, $translate, modelManager, appEventService,
-                                  appNotificationsService, frameworkDialogConfirm, cfOrganizationModel) {
+    appNotificationsService, frameworkDialogConfirm, cfOrganizationModel) {
     var that = this;
 
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
