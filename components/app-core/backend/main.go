@@ -260,7 +260,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -340,8 +340,8 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 	return dc, nil
 }
 
-func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
-	log.Debug("createTempCertFiles")
+func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
+	log.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -353,6 +353,17 @@ func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
 	_, errDevkey := os.Stat(devCertsDir + certKeyFilename)
 	if errDevcert == nil && errDevkey == nil {
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
+	}
+
+	// Check if certificate have been provided as files (as is the case in kubernetes)
+	if pc.TLSCertPath != "" && pc.TLSCertKeyPath != "" {
+		log.Infof("Using TLS cert: %s, %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		_, errCertMissing := os.Stat(pc.TLSCertPath)
+		_, errCertKeyMissing := os.Stat(pc.TLSCertKeyPath)
+		if errCertMissing != nil || errCertKeyMissing != nil {
+			return "", "", fmt.Errorf("unable to find certificate %s or certificate key %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		}
+		return pc.TLSCertPath, pc.TLSCertKeyPath, nil
 	}
 
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
@@ -436,7 +447,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	}
 
 	if config.HTTPS {
-		certFile, certKeyFile, err := createTempCertFiles(config)
+		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
