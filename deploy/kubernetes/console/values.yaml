@@ -30,7 +30,7 @@ images:
 #    -----END CERTIFICATE-----
 #consoleCertKey: |
 #    -----BEGIN PRIVATE KEY-----
-#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDV9+ySh0xZzM41
+#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
 #    ...
 #    -----END PRIVATE KEYE-----
 # MariaDB chart configuration
