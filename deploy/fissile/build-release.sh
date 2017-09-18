@@ -63,7 +63,7 @@ popd
 
 pushd fissile-console
 KUBE_EXTERNAL_IP=${KUBE_EXTERNAL_IP:-"127.0.0.1"}
-sed -i 's@192.168.77.77@'${MINIKUBE_IP}'@g' values.yaml
+sed -i 's@192.168.77.77@'${KUBE_EXTERNAL_IP}'@g' values.yaml
 sed -i 's@persistent: persistent@persistent: standard@g' values.yaml
 sed -i 's@FISSILE_MONIT_PASSWORD: ~@FISSILE_MONIT_PASSWORD: monit@g' values.yaml
 sed -i 's@FISSILE_MONIT_PORT: ~@FISSILE_MONIT_PORT: 2812@g' values.yaml
