@@ -106,4 +106,4 @@ jobs:
         put: send-email
         params:
           subject_text: "Helm Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
-          body_text: "Helm Deploy build has successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+          body_text: "Helm Deploy build was successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
