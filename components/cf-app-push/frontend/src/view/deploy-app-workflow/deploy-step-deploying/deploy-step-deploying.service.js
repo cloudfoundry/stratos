@@ -236,7 +236,7 @@
 
         sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
-        metadata.type = metadata.files === 1 ? 'archive' : 'filefolder';
+        metadata.type = 'filefolder';
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,

@@ -335,6 +335,9 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		archiver := getArchiverFor(lastFilePath)
 
 		if archiver != nil {
+			// Overwrite generic 'filefolder' type
+			info.DeploySource.SourceType = "archive"
+
 			log.Debug("Unpacking archive ......")
 			unpackPath := filepath.Join(tempDir, "application")
 			err := os.Mkdir(unpackPath, 0700)
