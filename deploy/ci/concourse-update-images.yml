@@ -8,6 +8,7 @@ resources:
   type: git
   source:
     access_token: {{github-access-token}}
+    branch: {{stratos-ui-branch}}
     repo: SUSE/stratos-ui
     uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
@@ -30,10 +31,13 @@ jobs:
   - get: stratos-ui
     trigger: true
   - do:
-    - task: run-unit-tests
+    - task: update-concourse-build-image
       privileged: true
       timeout: 20m
       file: stratos-ui/deploy/ci/tasks/update-images/update-concourse-image.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
       on_failure:
         put: send-email
         params:

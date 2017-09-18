@@ -2,9 +2,6 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: portal-proxy-output
-# Parameterised task files are currently not supported in Concourse
-# Once that is implemented we can refactor the following into a variable
 image_resource:
   type: docker-image
   source:
