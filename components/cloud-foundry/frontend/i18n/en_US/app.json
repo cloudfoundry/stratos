@@ -191,7 +191,8 @@
             "type": "Type",
             "description": "Description",
             "created-date": "Date created",
-            "env-variables": "Show environment variables"
+            "env-variables": "Show environment variables",
+            "tags": "Tags"
           },
           "messages": {
             "no-services": "This application has no bound service instances.",

@@ -7,6 +7,7 @@
     .host {
       margin: 0;
       min-height: 32px;
+      outline: 0;
     }
 
     .tags {
@@ -31,7 +32,7 @@
         background: none;
         font-family: $font-family-base;
         font-size: $font-size-base;
-        margin: 0 6px 0 0;
+        margin: 2px 6px 2px 0;
 
         &.selected {
           background: $suse-primary;

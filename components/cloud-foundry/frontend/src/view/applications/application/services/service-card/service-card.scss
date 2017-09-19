@@ -44,6 +44,13 @@
   &__env {
     padding-top: 10px;
   }
+  &__tag {
+    border: 1px solid $default-border;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    display: inline-block;
+  }
 }
 .services-gallery-card {
   height: 100%;
