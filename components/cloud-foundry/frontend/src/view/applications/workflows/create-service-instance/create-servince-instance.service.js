@@ -30,7 +30,8 @@
       var newInstance = {
         name: userInput.name,
         service_plan_guid: userInput.plan.metadata.guid,
-        space_guid: spaceGuid
+        space_guid: spaceGuid,
+        tags: _.map(userInput.tags, function (tag) { return tag.text; })
       };
 
       return instanceModel.createServiceInstance(cnsiGuid, newInstance)

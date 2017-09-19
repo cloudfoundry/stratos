@@ -27,6 +27,17 @@
             {{ ::serviceCardCtrl.service.metadata.created_at | momentDateFormat }}
           </div>
         </div>
+        <div class="service-catalogue-card__meta-split">
+          <div translate class="service-catalogue-card__meta-left">
+            app.app-info.app-tabs.services.labels.tags
+          </div>
+          <div class="service-catalogue-card__meta-right">
+            <div ng-repeat="tag in serviceCardCtrl.service.entity.tags">
+              <div class="service-catalogue-card__tag">{{ tag }}</div>
+            </div>
+            <span ng-if="serviceCardCtrl.service.entity.tags.length === 0">-</span>
+          </div>
+        </div>
       </div>
       <div class="service-catalogue-card__icon">
         <img ng-src="{{ serviceCardCtrl.service.entity.extra.ImageURL }}" default-image default-image-src="/images/services/App_services_72.png"

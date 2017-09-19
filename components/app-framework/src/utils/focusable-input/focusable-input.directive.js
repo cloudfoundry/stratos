@@ -27,8 +27,10 @@
 
         element.find('input').on('focus', handleOnFocus);
         element.find('select-input').on('focus', handleOnFocus);
+        element.find('tags-input').on('focus', handleOnFocus);
         element.find('input').on('blur', handleOnBlur);
         element.find('select-input').on('blur', handleOnBlur);
+        element.find('tags-input').on('blur', handleOnBlur);
 
         function handleOnFocus() {
           element.addClass(focusedClass);

@@ -24,4 +24,13 @@
       tabindex="0" required>
     </select-input>
   </div>
+
+  <div class="form-group tags-input-field" focusable-input>
+    <label class="control-label" translate>Service Instance Tags</label>
+    <tags-input
+      min-length="1"
+      ng-model="asyncTaskDialogCtrl.context.options.userInput.tags"
+    ></tags-input>
+  </div>
+      
 </form>

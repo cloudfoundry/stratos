@@ -17,6 +17,7 @@
             <th class="select-col"></th>
             <th translate>.name-label</th>
             <th translate>.plan-label</th>
+            <th translate>.tags-label</th>
             <th translate>.apps-label</th>
           </tr>
         </thead>
@@ -29,10 +30,15 @@
             </td>
             <td>{{ instance.entity.name }}</td>
             <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
+            <td>
+              <div ng-repeat="tag in instance.entity.tags">
+                <div>{{ tag }}</div>
+              </div>
+            </td>
             <td>{{ instance.entity.service_bindings.length || '-' }}</td>
           </tr>
           <tr class="no-bindable-instances" ng-if="wizardCtrl.options.instances.length === 0">
-            <td colspan="4" translate-namespace="app.app-info.app-tabs.services.bind.no-instances">
+            <td colspan="5" translate-namespace="app.app-info.app-tabs.services.bind.no-instances">
               <p translate>.title</p>
               <p translate>.prompt</p>
               <input type="hidden" required ng-model="wizardCtrl.options.userInput.ignored"></input>
@@ -41,7 +47,7 @@
         </tbody>
         <tfoot>
           <td></td>
-          <td colspan="3" class="td-create-service">
+          <td colspan="4" class="td-create-service">
             <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.createServiceBinding()">
             <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
             <span translate>app.app-info.app-tabs.services.bind.create</span>

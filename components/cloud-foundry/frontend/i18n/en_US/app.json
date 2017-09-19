@@ -191,7 +191,8 @@
             "type": "Type",
             "description": "Description",
             "created-date": "Date created",
-            "env-variables": "Show environment variables"
+            "env-variables": "Show environment variables",
+            "tags": "Tags"
           },
           "messages": {
             "no-services": "This application has no bound service instances.",
@@ -274,7 +275,8 @@
               "title": "Choose Existing Instance",
               "name-label": "Name",
               "plan-label": "Plan",
-              "apps-label": "Apps Attached"
+              "apps-label": "Apps Attached",
+              "tags-label": "Tags"
             },
             "notifications": {
               "success": "The '{{ service }}' service has been successfully attached to application '{{ appName }}'",
