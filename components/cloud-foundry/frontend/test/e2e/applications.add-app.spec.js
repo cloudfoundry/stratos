@@ -164,15 +164,24 @@
       expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-      expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+      // Click the "create new instance" button
+      addAppService.showCreateInstanceDialog();
+      var createDialog = serviceWizard.getDialog();
+
+      expect(createDialog.getTitleText()).toBe('Create Service Instance');
+
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      expect(createDialog.isCommitEnabled()).toBe(false);
 
       serviceName = appSetupHelper.getServiceName(testTime, true);
       serviceWizard.getCreateNewName().clear();
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+      expect(createDialog.isCommitEnabled()).toBe(true);
 
+      createDialog.commit();
+
+      // Dialog should close
+      expect(serviceWizard.getWizard().getNext().getText()).toBe('BIND TO APP');
       serviceWizard.getWizard().next();
       expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
       serviceWizard.getWizard().next().then(function () {
