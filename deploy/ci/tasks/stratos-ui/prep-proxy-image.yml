@@ -21,4 +21,4 @@ run:
     npm run build-backend
     cd -
     cp -r ./stratos-ui/outputs ./portal-proxy-output
-    sh ./stratos-ui/deploy/ci/scripts/generate_cert.sh
+    sh ./stratos-ui/deploy/tools/generate_cert.sh

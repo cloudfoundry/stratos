@@ -102,6 +102,8 @@
             "modified-label": "modified",
             "deployed-label": "console deploy",
             "deployed-source-label": "console deploy source",
+            "deployed-source-filefolder": "Folder Upload",
+            "deployed-source-archive": "Archive File Upload",
             "ssh-enabled-label": "ssh enabled",
             "memory-label": "memory",
             "disk-quota-label": "disk quota",

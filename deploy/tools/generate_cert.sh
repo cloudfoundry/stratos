@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # Settings
-devcerts_path=${DEV_CERTS_PATH:-portal-proxy-output/dev-certs}
-domain=pproxy
-commonname=192.168.99.100
-country=US
-state=Washington
-locality=Seattle
+devcerts_path=${CERTS_PATH:-portal-proxy-output/dev-certs}
+domain=${DEV_CERTS_DOMAIN:-pproxy}
+commonname=127.0.0.1
+country=UK
+state=Bristol
+locality=Bristol
 organization=SUSE
-organizationalunit=HDP
+organizationalunit=CAP
 email=SUSE
 
 # Generate a key and cert

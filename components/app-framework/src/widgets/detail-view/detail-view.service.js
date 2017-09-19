@@ -102,7 +102,7 @@
         }
       });
 
-      modal.rendered.then(function () {
+      modal.opened.then(function () {
         if (config.dialog && openDetailViewCount > 1) {
           $timeout(function () {
             var dialog = angular.element('.detail-view-dialog .modal-dialog');
@@ -115,7 +115,9 @@
             thisDialog.height(parentDialog.height());
           });
         }
+      });
 
+      modal.rendered.then(function () {
         $timeout(function () {
           // If dialog mode then we need to fix the width after rendering, so that
           // if content is shown/hidden (e.g. error box) then the dialog width will not change

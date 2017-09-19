@@ -31,6 +31,6 @@
 
 <div class="panel panel-default" ng-repeat="service in applicationServiceCatalogueCtrl.services | filter:applicationServiceCatalogueCtrl.category:true | filter:applicationServiceCatalogueCtrl.search track by service.metadata.guid">
   <div class="panel-body service-panel">
-    <service-catalogue-card service="service" app="applicationServiceCatalogueCtrl.appModel.application" cnsi-guid="applicationServiceCatalogueCtrl.cnsiGuid"></service-card>
+    <service-catalogue-card service="service" app="applicationServiceCatalogueCtrl.appModel.application" cnsi-guid="applicationServiceCatalogueCtrl.cnsiGuid"></service-catalogue-card>
   </div>
 </div>

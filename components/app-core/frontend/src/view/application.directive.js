@@ -159,6 +159,10 @@
      * @public
      */
     function login(username, password) {
+      vm.failedLogin = false;
+      vm.serverErrorOnLogin = false;
+      vm.serverFailedToRespond = false;
+
       modelManager.retrieve('app.model.account')
         .login(username, password)
         .then(
