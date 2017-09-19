@@ -1,4 +1,3 @@
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import {
     MdButtonModule,
@@ -11,11 +10,14 @@ import {
     MdIconModule,
     MdSelectModule,
     MdGridListModule,
-    MdTableModule
+    MdTableModule,
+    MdToolbarModule,
+    MdFormFieldModule,
 } from '@angular/material';
+import { CommonModule } from '@angular/common';
 
 const importExport = [
-    BrowserAnimationsModule,
+    CommonModule,
     MdButtonModule,
     MdCheckboxModule,
     MdInputModule,
@@ -27,6 +29,8 @@ const importExport = [
     MdSelectModule,
     MdGridListModule,
     MdTableModule,
+    MdToolbarModule,
+    MdFormFieldModule,
 ];
 
 @NgModule({

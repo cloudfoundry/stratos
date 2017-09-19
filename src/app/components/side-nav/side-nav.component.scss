@@ -1,13 +1,13 @@
 @import '../../../sass/colors';
 @import '../../../sass/theme';
 .side-nav {
-  $border-color: map-get($suse-blue, 900);
+  $border-color: map-color($suse-blue, 900);
   width: 200px;
   &__wrapper {
-    background-color: $blue;
+    background-color: mat-color($suse-blue, 500);
   }
   &__items {
-    color: white;
+    color: map-get($suse-blue, 50);
     list-style-type: none;
     padding: 0;
     margin: 0;

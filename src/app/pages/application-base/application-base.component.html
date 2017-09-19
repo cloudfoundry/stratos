@@ -1,0 +1,22 @@
+<div class="application-base">
+  <!-- <h1>{{ application ? application.name : 'Loading...' }}</h1> -->
+  <h1>{{ application?.name }}</h1>
+
+  <nav md-tab-nav-bar>
+    <a md-tab-link
+    *ngFor="let tabLink of tabLinks" 
+    [routerLink]="[tabLink.link]"
+    routerLinkActive="active-link"
+    #rla="routerLinkActive"
+    [active]="rla.isActive">
+      {{tabLink.label}}
+    </a>
+  </nav>
+  <div *ngIf="application">
+    <router-outlet></router-outlet>
+  </div>
+  <div *ngIf="!application">
+    Loading...
+  </div>
+
+</div>

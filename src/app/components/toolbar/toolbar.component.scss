@@ -1,0 +1,11 @@
+.toolbar {
+    height: 48px;
+    background-color: white;
+    display: flex;
+    //TODO: RC REMOVE see dashboard__toolbar
+    padding: 0 20px;
+
+    span {
+        align-self: center;
+    }
+}

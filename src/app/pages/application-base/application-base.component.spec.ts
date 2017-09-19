@@ -4,15 +4,15 @@ import { StoreModule } from '@ngrx/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { ApplicationPageComponent } from './application-page.component';
+import { ApplicationBaseComponent } from './application-base.component';
 
 describe('ApplicationPageComponent', () => {
-  let component: ApplicationPageComponent;
-  let fixture: ComponentFixture<ApplicationPageComponent>;
+  let component: ApplicationBaseComponent;
+  let fixture: ComponentFixture<ApplicationBaseComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApplicationPageComponent ],
+      declarations: [ ApplicationBaseComponent ],
       imports: [
         RouterTestingModule,
         StoreModule.forRoot({
@@ -25,7 +25,7 @@ describe('ApplicationPageComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ApplicationPageComponent);
+    fixture = TestBed.createComponent(ApplicationBaseComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

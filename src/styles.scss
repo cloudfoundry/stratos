@@ -6,10 +6,12 @@
 body {
   margin: 0;
   font-family: Lato, sans-serif;
+  color: mat-color($suse-blue, 100);
+  // font-size: 13px;
 }
 
 html {
-  background-color: $dark-grey;
+  background-color: mat-color($suse-blue, 500);
 }
 
 body,
