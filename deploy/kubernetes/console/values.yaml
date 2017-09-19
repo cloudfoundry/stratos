@@ -6,6 +6,7 @@ dockerOrg: splatform
 dockerRegistry: docker.io
 # Specify default DB password
 dbPassword: changeme
+dbProvider: mysql
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
@@ -22,3 +23,28 @@ images:
   postflight: stratos-postflight-job
 # Specify which storage class should be used for PVCs
 #storageClass: default
+#consoleCert: |
+#    -----BEGIN CERTIFICATE-----
+#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+#   ...
+#    -----END CERTIFICATE-----
+#consoleCertKey: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
+#    ...
+#    -----END PRIVATE KEYE-----
+# MariaDB chart configuration
+mariadb:
+  # Only required for creating the databases
+  mariadbRootPassword: changeme
+  adminUser: root
+  # Credentials for user
+  mariadbUser: console
+  mariadbPassword: changeme
+  mariadbDatabase: console
+  persistence:
+    accessMode: ReadWriteMany
+    size: 1Gi
+#    storageClass: default
+  metrics:
+    enabled: false

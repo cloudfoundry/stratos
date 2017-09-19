@@ -42,7 +42,8 @@
       SOURCE_FOLDER: 30002,
       SOURCE_FILE: 30003,
       SOURCE_FILE_DATA: 30004,
-      SOURCE_FILE_ACK: 30005
+      SOURCE_FILE_ACK: 30005,
+      SOURCE_GITURL: 30006
     };
 
     // How often to check for the app being created
@@ -176,23 +177,49 @@
       }
 
       function sendSourceMetadata() {
-        if (wizardData.sourceType === 'github') {
-          sendGitHubSourceMetadata();
+        if (wizardData.sourceType === 'git') {
+          sendGitMetadata();
         } else if (wizardData.sourceType === 'local') {
           sendLocalSourceMetadata();
+        }
+      }
+
+      function sendGitMetadata() {
+        if (sourceUserInput.gitType === 'github') {
+          sendGitHubSourceMetadata();
+        } else if (sourceUserInput.gitType === 'giturl') {
+          sendGitUrlSourceMetadata();
         }
       }
 
       function sendGitHubSourceMetadata() {
         var github = {
           project: sourceUserInput.githubProject,
-          branch: sourceUserInput.githubBranch.name
+          branch: sourceUserInput.githubBranch.name,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
           message: angular.toJson(github),
           timestamp: Math.round((new Date()).getTime() / 1000),
           type: socketEventTypes.SOURCE_GITHUB
+        };
+
+        // Send the source metadata
+        data.webSocket.send(angular.toJson(msg));
+      }
+
+      function sendGitUrlSourceMetadata() {
+        var giturl = {
+          url: sourceUserInput.gitUrl,
+          branch: sourceUserInput.gitUrlBranch,
+          type: sourceUserInput.gitType
+        };
+
+        var msg = {
+          message: angular.toJson(giturl),
+          timestamp: Math.round((new Date()).getTime() / 1000),
+          type: socketEventTypes.SOURCE_GITURL
         };
 
         // Send the source metadata
@@ -209,6 +236,7 @@
 
         sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
+        metadata.type = 'filefolder';
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,

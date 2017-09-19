@@ -7,7 +7,7 @@ RUN apk update && \
 WORKDIR /srv
 COPY outputs/* /srv/
 COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
-COPY dev-certs dev-certs
+COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 RUN chmod +x portal-proxy
 EXPOSE 443
 CMD ["sh", "-c", "/run-preflight-job.sh; /srv/portal-proxy"]

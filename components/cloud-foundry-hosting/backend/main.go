@@ -61,6 +61,15 @@ func (ch *CFHosting) Init() error {
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 
+		// Allow Console Application manifest to override the Admin Scope if really desired
+		if config.IsSet("STRATOS_ADMIN_SCOPE") {
+			stratosAdminScope, err := config.GetValue("STRATOS_ADMIN_SCOPE")
+			if err == nil {
+				ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
+				log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
+			}
+		}
+
 		// Need to run as HTTP on the port we were told to use
 		ch.portalProxy.GetConfig().HTTPS = false
 
@@ -90,7 +99,7 @@ func (ch *CFHosting) Init() error {
 		if config.IsSet(CFApiURLOverride) {
 			apiUrl, _ := config.GetValue(CFApiURLOverride)
 			appData.API = apiUrl
-			log.Infof("Overrriden CF API URL from environment variable %s", apiUrl)
+			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
 		}
 
 		if config.IsSet(CFApiForceSecure) {
@@ -152,18 +161,30 @@ func (ch *CFHosting) Init() error {
 		// Save to Console DB
 		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
 		if err != nil {
+			log.Fatalf("Failed to save console configuration due to %s", err)
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
-		// Auto-register the Cloud Foundry
-		cfCnsi, regErr := ch.portalProxy.DoRegisterEndpoint("Cloud Foundry", appData.API, true, cfEndpointSpec.Info)
-		if regErr != nil {
-			log.Fatal("Could not auto-register the Cloud Foundry endpoint", err)
-			ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-				SpaceGUID: appData.SpaceID,
-				AppGUID:   appData.ApplicationID,
+		var cfCnsi interfaces.CNSIRecord
+
+		cfCnsi, err = ch.portalProxy.GetCNSIRecordByEndpoint(appData.API)
+		if cfCnsi.CNSIType != "" {
+			log.Info("Found existing endpoint matching Cloud Foundry API. Will not auto-register or auto-connect")
+		} else {
+			log.Info("Auto-registering endpoint for Cloud Foundry API")
+			var regErr error
+			// Auto-register the Cloud Foundry
+			cfCnsi, regErr = ch.portalProxy.DoRegisterEndpoint("Cloud Foundry", appData.API, true, cfEndpointSpec.Info)
+			if regErr != nil {
+				log.Fatal("Could not auto-register the Cloud Foundry endpoint", err)
+				ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
+					SpaceGUID: appData.SpaceID,
+					AppGUID:   appData.ApplicationID,
+				}
+				return nil
 			}
-			return nil
+			// Add login hook to automatically connect to the Cloud Foundry when the user logs in
+			ch.portalProxy.GetConfig().LoginHook = ch.cfLoginHook
 		}
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
@@ -172,9 +193,6 @@ func (ch *CFHosting) Init() error {
 			AppGUID:      appData.ApplicationID,
 			EndpointGUID: cfCnsi.GUID,
 		}
-
-		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
-		ch.portalProxy.GetConfig().LoginHook = ch.cfLoginHook
 
 		log.Info("All done for Cloud Foundry deployment")
 	}

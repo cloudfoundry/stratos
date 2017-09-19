@@ -37,22 +37,24 @@
       $scope.app = {
         summary: {
           guid: APP_GUID,
-          services: [
-            {
-              guid: '01430cca-2592-4396-ac79-b1405a488b3e',
-              service_plan: {
-                guid: 'd22b3754-d093-42a2-a294-5fda6c6db44c',
-                service: {
-                  guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334'
-                }
+          services: [{
+            guid: '01430cca-2592-4396-ac79-b1405a488b3e',
+            service_plan: {
+              guid: 'd22b3754-d093-42a2-a294-5fda6c6db44c',
+              service: {
+                guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334'
               }
             }
-          ]
+          }]
         }
       };
       $scope.service = {
-        entity: {label: 'Service'},
-        metadata: {guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334'}
+        entity: {
+          label: 'Service'
+        },
+        metadata: {
+          guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334'
+        }
       };
 
       mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;

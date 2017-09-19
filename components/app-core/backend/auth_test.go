@@ -49,7 +49,7 @@ func TestLoginToUAA(t *testing.T) {
 			WillReturnRows(expectNoRows())
 
 		mock.ExpectExec(insertIntoTokens).
-		// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
+			// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		Convey("Should not fail to login", func() {
@@ -87,7 +87,6 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		uaaUrl, _ := url.Parse(mockUAA.URL)
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
-
 
 		err := pp.loginToUAA(ctx)
 		Convey("Login to UAA should fail", func() {
@@ -129,9 +128,8 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		pp.Config.ConsoleConfig.UAAEndpoint = uaaUrl
 		pp.Config.ConsoleConfig.SkipSSLValidation = true
 
-
 		mock.ExpectQuery(selectAnyFromTokens).
-		// WithArgs(mockUserGUID).
+			// WithArgs(mockUserGUID).
 			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 		// --- set up the database expectation for pp.saveUAAToken
@@ -207,7 +205,7 @@ func TestLoginToCNSI(t *testing.T) {
 		// Setup expectation that the CNSI token will get saved
 		//encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 		mock.ExpectExec(insertIntoTokens).
-		//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
+			//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		// do the call
@@ -660,7 +658,7 @@ func TestVerifySessionExpired(t *testing.T) {
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-			AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
+				AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
 		err := pp.verifySession(ctx)
 
 		Convey("Should fail to verify session", func() {

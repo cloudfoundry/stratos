@@ -439,7 +439,7 @@
           appModel.filterParams.spaceGuid = 'junk3';
 
           setUp();
-          $httpBackend.flush();
+          $scope.$digest();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
@@ -465,6 +465,16 @@
           check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);
         });
 
+        it('avoids bad value - org only', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.orgGuid = 'junk2';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
         it('avoids bad value - space', function () {
           var appModel = modelManager.retrieve('cloud-foundry.model.application');
           appModel.filterParams.cnsiGuid = cnsiGuid;
@@ -475,6 +485,16 @@
           $httpBackend.flush();
 
           check(cnsiGuid, 3, orgGuid, 3, allFilterValue, 3);
+        });
+
+        it('avoids bad value - space only', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
 
       });

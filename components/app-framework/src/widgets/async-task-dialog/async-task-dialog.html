@@ -1,7 +1,7 @@
 <div class="async-dialog">
   <div class="detail-view-content no-margin" ng-keydown="$event.keyCode === 13 && asyncTaskDialogCtrl.canUseEnter($event) && !asyncTaskDialogCtrl.disableSubmit() && asyncTaskDialogCtrl.invokeAction()">
     <div ng-if="asyncTaskDialogCtrl.content.title" class="detail-view-header">
-      <h4 translate>{{asyncTaskDialogCtrl.content.title}}</h4>
+      <h4 translate translate-values="{{asyncTaskDialogCtrl.content.titleTranslateValues}}">{{asyncTaskDialogCtrl.content.title}}</h4>
     </div>
     <ng-include src="asyncTaskDialogCtrl.content.templateUrl"></ng-include>
     <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>

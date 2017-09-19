@@ -15,7 +15,7 @@
   var Q = require('q');
   var _ = require('lodash');
 
-  fdescribe('CF - Manage Organizations and Spaces', function () {
+  describe('CF - Manage Organizations and Spaces', function () {
 
     var cfFromConfig = cfHelpers.getCfs().cf1;
     var testOrgName = cfHelpers.getCustomerOrgSpaceLabel(null, 'org');
@@ -59,8 +59,12 @@
 
     afterAll(function () {
       if (testGuid) {
-        browser.driver.wait(Q.all(cfModel.deleteOrgIfExisting(testGuid, testOrgName),
-          cfModel.deleteSpaceIfExisting(testGuid, testSpaceName)));
+        browser.driver.wait(
+          Q.all([
+            cfModel.deleteOrgIfExisting(testGuid, testOrgName),
+            cfModel.deleteSpaceIfExisting(testGuid, testSpaceName)
+          ])
+        );
       }
     });
 
@@ -93,8 +97,16 @@
       var testAdminUser, testUser;
       var init = cfModel.fetchUsers(testGuid)
         .then(function (users) {
-          testUser = _.find(users, {entity: {username: cfFromConfig.user.username}});
-          testAdminUser = _.find(users, {entity: {username: cfFromConfig.admin.username}});
+          testUser = _.find(users, {
+            entity: {
+              username: cfFromConfig.user.username
+            }
+          });
+          testAdminUser = _.find(users, {
+            entity: {
+              username: cfFromConfig.admin.username
+            }
+          });
           expect(testUser).toBeDefined();
           expect(testAdminUser).toBeDefined();
         })

@@ -1,44 +1,54 @@
-<gallery-card
-  class="cluster-gallery-card"
-  card-actions="serviceCardCtrl.actions"
-  card-data=serviceCardCtrl.cardData
->
-  <div class="service-catalogue-card">
-    <div class="service-catalogue-card__meta">
-      <div class="service-catalogue-card__meta-split">
-        <div class="service-catalogue-card__meta-left">
-          Type
+<gallery-card class="services-gallery-card" card-actions="serviceCardCtrl.actions" card-data=serviceCardCtrl.cardData>
+  <div class="service-catalogue-card__outer">
+    <div class="service-catalogue-card">
+      <div class="service-catalogue-card__meta">
+        <div class="service-catalogue-card__meta-split">
+          <div translate class="service-catalogue-card__meta-left">
+            app.app-info.app-tabs.services.labels.type
+          </div>
+          <div class="service-catalogue-card__meta-right">
+            {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.label }}
+          </div>
         </div>
-        <div class="service-catalogue-card__meta-right">
-          {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.label }}
-        </div>
-      </div>
 
-      <div class="service-catalogue-card__meta-split">
-        <div class="service-catalogue-card__meta-left">
-          Description
+        <div class="service-catalogue-card__meta-split">
+          <div translate class="service-catalogue-card__meta-left">
+            app.app-info.app-tabs.services.labels.description
+          </div>
+          <div class="service-catalogue-card__meta-right">
+            {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.description }}
+          </div>
         </div>
-        <div class="service-catalogue-card__meta-right">
-          {{ ::serviceCardCtrl.service.entity.service_plan.entity.service.entity.description }}
+        <div class="service-catalogue-card__meta-split">
+          <div translate class="service-catalogue-card__meta-left">
+            app.app-info.app-tabs.services.labels.created-date
+          </div>
+          <div class="service-catalogue-card__meta-right">
+            {{ ::serviceCardCtrl.service.metadata.created_at | momentDateFormat }}
+          </div>
+        </div>
+        <div class="service-catalogue-card__meta-split">
+          <div translate class="service-catalogue-card__meta-left">
+            app.app-info.app-tabs.services.labels.tags
+          </div>
+          <div class="service-catalogue-card__meta-right">
+            <div ng-repeat="tag in serviceCardCtrl.service.entity.tags">
+              <div class="service-catalogue-card__tag">{{ tag }}</div>
+            </div>
+            <span ng-if="serviceCardCtrl.service.entity.tags.length === 0">-</span>
+          </div>
         </div>
       </div>
-      <div class="service-catalogue-card__meta-split">
-        <div class="service-catalogue-card__meta-left">
-          Date created
-        </div>
-        <div class="service-catalogue-card__meta-right">
-          {{ ::serviceCardCtrl.service.metadata.created_at | amDateFormat:'MMM Do YYYY HH:mm:ss' }}
-        </div>
-      </div>
-      <div class="service-catalogue-card__meta-split">
-        <a ng-click="serviceCardCtrl.viewEnvVariables(serviceCardCtrl.service)">
-          Show environment variables
-        </a>
+      <div class="service-catalogue-card__icon">
+        <img ng-src="{{ serviceCardCtrl.service.entity.extra.ImageURL }}" default-image default-image-src="/images/services/App_services_72.png"
+        />
       </div>
     </div>
-    <div class="service-catalogue-card__icon">
-      <img ng-src="{{ serviceCardCtrl.service.entity.extra.ImageURL }}"
-        default-image default-image-src="/images/services/App_services_72.png"/>
+    <div class="service-catalogue-card__env">
+      <a translate ng-click="serviceCardCtrl.viewEnvVariables(serviceCardCtrl.service)">
+        app.app-info.app-tabs.services.labels.env-variables
+      </a>
     </div>
   </div>
+
 </gallery-card>

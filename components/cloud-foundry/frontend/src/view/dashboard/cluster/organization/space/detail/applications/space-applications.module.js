@@ -32,7 +32,7 @@
   }
 
   function SpaceApplicationsController($state, $stateParams, $q, $scope, $filter,
-                                       modelManager, appUtilsService, cfAppStateService) {
+    modelManager, appUtilsService, cfAppStateService) {
     var that = this;
 
     var clusterGuid = $stateParams.guid;

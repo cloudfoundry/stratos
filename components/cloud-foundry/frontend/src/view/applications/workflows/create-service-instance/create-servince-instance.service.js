@@ -42,13 +42,13 @@
       newServiceInstance.name = undefined;
 
       return instanceModel.createServiceInstance(cnsiGuid, newInstance)
-      .then(function (newServiceInstance) {
-        if (angular.isDefined(newServiceInstance.metadata)) {
-          return newServiceInstance;
-        } else {
-          throw new Error('Failed to create instance');
-        }
-      });
+        .then(function (newServiceInstance) {
+          if (angular.isDefined(newServiceInstance.metadata)) {
+            return newServiceInstance;
+          } else {
+            throw new Error('Failed to create instance');
+          }
+        });
     }
 
     return {

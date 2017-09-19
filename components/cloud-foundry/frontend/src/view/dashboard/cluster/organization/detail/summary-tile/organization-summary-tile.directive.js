@@ -36,8 +36,8 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, $translate, modelManager, appUtilsService,
-                                             appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
-                                             frameworkAsyncTaskDialog, cfOrganizationModel) {
+    appNotificationsService, appClusterCliCommands, frameworkDialogConfirm,
+    frameworkAsyncTaskDialog, cfOrganizationModel) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;

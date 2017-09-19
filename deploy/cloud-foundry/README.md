@@ -32,6 +32,18 @@ Note:
 
 ## Troubleshooting
 
+### Creating logs for recent deployments
+To create a log file of the push
+```
+cf push | tee cfpush.log
+```
+
+To create a log file of recent console output
+```
+cf logs console --recent | tee cfconsole.log
+```
+>**NOTE** If the name of the application has been changed from `console` in the manifest file please also change the name in the logs statement 
+
 ### Application Security Groups
 
 If you have problems when deploying Stratos UI as a CLoud Foundry application, check that the Application Security Group you have will allow the Stratos UI to communicate with the Cloud Foundry API.
@@ -140,9 +152,9 @@ applications:
 
 ### Enable Endpoints Dashboard to register additional Cloud Foundry endpoints
 
->**NOTE** This method is meant to demonstrate the capabilities of the console with multiple endpoints and is not meant for production environments
+>**NOTE** This feature, on it's own, is meant to demonstrate the capabilities of the console with multiple endpoints and is not meant for production environments.
 
-This method comes with two caveats.
+This method comes with two caveats. To remove these caveats see [here](#Associate-Cloud-Foundry-database-service).
 
 1. The console will lose stored data when a cf app instance is restarted
 2. Multiple instances of the app will contain multiple separate stored data instances. This will mean the user may connect to a different one with a different storage when revisiting the console.
@@ -162,3 +174,6 @@ applications:
   env:
     FORCE_ENDPOINT_DASHBOARD: true
 ```
+
+### Associate Cloud Foundry database service
+Follow instructions [here](db-migration/README.md).

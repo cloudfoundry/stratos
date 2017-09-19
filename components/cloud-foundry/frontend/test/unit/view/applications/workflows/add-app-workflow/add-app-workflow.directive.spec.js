@@ -131,8 +131,7 @@
           });
 
           it('should have right title and button labels', function () {
-            expect($translate.instant(step.btnText.next)).toBe('Add');
-            expect($translate.instant(step.btnText.cancel)).toBe('Cancel');
+            expect($translate.instant(step.nextBtnText)).toBe('Add');
             expect(step.showBusyOnNext).toBe(true);
           });
 

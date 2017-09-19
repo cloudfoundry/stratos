@@ -73,8 +73,12 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 // ReadEncryptionKey - Read the encryption key from the shared volume
 func ReadEncryptionKey(v, f string) ([]byte, error) {
 	log.Println("ReadEncryptionKey")
-	fname := fmt.Sprintf("/%s/%s", v, f)
-	key64chars, err := ioutil.ReadFile(fname)
+
+	encryptionKey := fmt.Sprintf("/%s/%s", v, f)
+	if string(f[0]) == "/" {
+		encryptionKey = fmt.Sprintf("%s/%s", v, f)
+	}
+	key64chars, err := ioutil.ReadFile(encryptionKey)
 	if err != nil {
 		log.Errorf("Unable to read encryption key file: %+v\n", err)
 		return nil, err

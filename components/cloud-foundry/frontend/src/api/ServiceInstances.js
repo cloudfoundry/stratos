@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServiceInstancesApi.prototype, {
 
-   /*
+    /*
     * Binding a Service Instance to a Route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/binding_a_service_instance_to_a_route.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Creating a Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/creating_a_service_instance.html
     */
@@ -54,7 +54,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/delete_a_service_instance.html
     */
@@ -71,7 +71,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Routes for the Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/list_all_routes_for_the_service_instance.html
     */
@@ -88,7 +88,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Bindings for the Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/list_all_service_bindings_for_the_service_instance.html
     */
@@ -105,7 +105,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Instances
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/list_all_service_instances.html
     */
@@ -122,7 +122,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Keys for the Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/list_all_service_keys_for_the_service_instance.html
     */
@@ -139,7 +139,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/retrieve_a_particular_service_instance.html
     */
@@ -156,7 +156,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieving permissions on a Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/retrieving_permissions_on_a_service_instance.html
     */
@@ -173,7 +173,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Unbinding a service instance from a route
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/unbinding_a_service_instance_from_a_route.html
     */
@@ -190,7 +190,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Update a Service Instance
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_instances/update_a_service_instance.html
     */

@@ -15,24 +15,24 @@
           200: {
 
             body: {
-              "guid": {
-                "total_results": 1,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
+              'guid': {
+                'total_results': 1,
+                'total_pages': 1,
+                'prev_url': null,
+                'next_url': null,
+                'resources': [
                   {
-                    "metadata": {
-                      "guid": "97b5b602-0d2a-46f4-98e0-408f6463cbbd",
-                      "url": "/v2/shared_domains/97b5b602-0d2a-46f4-98e0-408f6463cbbd",
-                      "created_at": "2016-02-19T02:04:07Z",
-                      "updated_at": null
+                    'metadata': {
+                      'guid': '97b5b602-0d2a-46f4-98e0-408f6463cbbd',
+                      'url': '/v2/shared_domains/97b5b602-0d2a-46f4-98e0-408f6463cbbd',
+                      'created_at': '2016-02-19T02:04:07Z',
+                      'updated_at': null
                     },
-                    "entity": {
-                      "name": "shared-domain.com",
-                      "router_group_guid": "my-random-guid",
-                      "router_group_types": [
-                        "tcp"
+                    'entity': {
+                      'name': 'shared-domain.com',
+                      'router_group_guid': 'my-random-guid',
+                      'router_group_types': [
+                        'tcp'
                       ]
                     }
                   }
@@ -58,31 +58,31 @@
           200: {
 
             body: {
-              "total_results": 2,
-              "total_pages": 1,
-              "prev_url": null,
-              "next_url": null,
-              "resources": [
+              'total_results': 2,
+              'total_pages': 1,
+              'prev_url': null,
+              'next_url': null,
+              'resources': [
                 {
-                  "metadata": {
-                    "guid": "e05c91d8-e0d1-439a-911f-2216e62dafa6",
-                    "url": "/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6",
-                    "created_at": "2016-04-12T22:02:34Z",
-                    "updated_at": "2016-04-18T19:55:58Z"
+                  'metadata': {
+                    'guid': 'e05c91d8-e0d1-439a-911f-2216e62dafa6',
+                    'url': '/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6',
+                    'created_at': '2016-04-12T22:02:34Z',
+                    'updated_at': '2016-04-18T19:55:58Z'
                   },
-                  "entity": {
-                    "name": "console-8hhk.local"
+                  'entity': {
+                    'name': 'console-8hhk.local'
                   }
                 },
                 {
-                  "metadata": {
-                    "guid": "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
-                    "url": "/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
-                    "created_at": "2016-04-20T20:33:26Z",
-                    "updated_at": null
+                  'metadata': {
+                    'guid': '98dcbe2a-f14f-4dc8-bb33-ccec7ca736df',
+                    'url': '/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df',
+                    'created_at': '2016-04-20T20:33:26Z',
+                    'updated_at': null
                   },
-                  "entity": {
-                    "name": "example.org"
+                  'entity': {
+                    'name': 'example.org'
                   }
                 }
               ]

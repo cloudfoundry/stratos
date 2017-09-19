@@ -21,7 +21,7 @@
       hide: false,
       uiSref: 'cf.applications.application.services',
       uiSrefParam: function () {
-        return {guid: $stateParams.guid};
+        return { guid: $stateParams.guid };
       },
       label: 'app.app-info.app-tabs.services.label'
     });
@@ -72,7 +72,7 @@
           stopFilterWatch();
           $stateParams.serviceType = null;
           that.managingType = null;
-          $state.go('.', $stateParams, {notify: false});
+          $state.go('.', $stateParams, { notify: false });
         }
       });
     }
@@ -121,7 +121,7 @@
 
     // Works out if the current list is being filtered or searched.
     that.isFiltered = function () {
-      return !that.search.$ && that.filterType !== that.ALL_FILTER;
+      return that.search.$ || that.filterType !== that.ALL_FILTER;
     };
 
     that.showInstance = function (serviceInstance) {
