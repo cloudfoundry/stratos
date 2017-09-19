@@ -18,8 +18,10 @@ run:
       start_docker
       cd stratos-ui/deploy/ci/scripts
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-      ./buikd_bk_concourse_image.sh
-      docker tag docker.io/splatform/concourse:test ci-registry.ngrok.io:80/splatform/stratos-concourse:latest
-      docker push ci-registry.ngrok.io:80/splatform/stratos-concourse:latest
+      
+      ./build_bk_concourse_image.sh
+
+      docker tag docker.io/splatform/stratos-bk-concourse:${TAG} ci-registry.ngrok.io:80/splatform/stratos-bk-concourse:latest
+      docker push ci-registry.ngrok.io:80/splatform/stratos-bk-concourse:latest
 
 

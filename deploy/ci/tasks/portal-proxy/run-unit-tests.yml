@@ -5,7 +5,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository: ci-registry.ngrok.io:80/portal-proxy-test
+   repository: ci-registry.ngrok.io:80/stratos-bk-concourse
    tag: "latest"
    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
@@ -15,5 +15,10 @@ run:
     - -exc
     - |
       cd stratos-ui
-      npm install
+      if [ "$(md5sum /package.json | cut -d' ' -f1)" != "$(md5sum package.json| cut -d' ' -f1)" ]; then
+        echo -e "\033[31mpackage.json was updated, please update the image. Running npm install\033[0m"
+        npm install
+      else
+        echo -e "\033[32mpackage.json has not changed. Skipping npm install\033[0m"
+      fi
       npm run test-backend

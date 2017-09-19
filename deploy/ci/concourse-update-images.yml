@@ -40,7 +40,7 @@ jobs:
   - do:
     - task: update-concourse-build-image
       privileged: true
-      timeout: 20m
+      timeout: 30m
       file: stratos-ui/deploy/ci/tasks/update-images/update-concourse-image.yml
       params:
         DOCKER_USERNAME: {{docker-username}}
@@ -61,7 +61,7 @@ jobs:
   - do:
     - task: update-bk-concourse-build-image
       privileged: true
-      timeout: 20m
+      timeout: 30m
       file: stratos-ui/deploy/ci/tasks/update-images/update-bk-concourse-image.yml
       params:
         DOCKER_USERNAME: {{docker-username}}

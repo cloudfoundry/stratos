@@ -7,8 +7,24 @@ TAG=${TAG:-test}
 
 source ${DIRPATH}/build_common.sh
 
-cd ${DIRPATH}/../../
-cp ../package.json .
+# Initialise Glide cache
 
-docker build  -f ci/Dockerfile.bk.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/portal-proxy-test:${TAG} \
+cd ${DIRPATH}/../../../
+cat << EOF >> init-glide.sh
+#!/bin/bash
+cd /root
+glide_yamls=$(find ./components -name glide.yaml)
+for yaml in ${glide_yamls}; do 
+ls -l ${yaml}
+glide --yaml ${yaml} install;
+done
+EOF
+chmod +x init-glide.sh
+# ci-registry.ngrok.io:80/concourse-go-glide is fabiorphp/golang-glide:latest
+mkdir cache
+ls  -l $PWD
+whoami
+docker run -v ${PWD}/:/root -v ${PWD}/cache:/.glide/cache -e GLIDE_HOME=/.glide ci-registry.ngrok.io:80/concourse-go-glide  /root/init-glide.sh
+
+docker build  -f deploy/ci/Dockerfile.bk.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-bk-concourse:${TAG} \
     ${BUILD_ARGS}
