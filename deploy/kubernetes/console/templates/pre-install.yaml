@@ -67,8 +67,20 @@ spec:
              value: upgrade.lock
            - name: ENCRYPTION_KEY_VOLUME
              value: "{{ .Release.Name }}-encryption-key-volume"
+           - name: CERTS_PATH
+             value: "{{ .Release.Name }}-encryption-key-volume"
            - name: ENCRYPTION_KEY_FILENAME
              value: key
+           {{- if .Values.consoleCert }}
+           - name: CONSOLE_CERT
+             value: | 
+{{ .Values.consoleCert | indent 12 }}
+           {{- end }}
+           {{- if .Values.consoleCertKey }}
+           - name: CONSOLE_CERT_KEY
+             value: |
+{{ .Values.consoleCertKey | indent 12 }}
+           {{- end }}
            image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.preflight}}:{{.Values.consoleVersion}}
            name: "{{ .Release.Name }}-preflight-job"
            volumeMounts:

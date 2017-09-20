@@ -65,7 +65,7 @@
           contents: new Buffer(res)
         });
 
-       // console.log(res);
+        // console.log(res);
         that.push(file);
       });
 
@@ -98,7 +98,7 @@
                 dest[k] = v;
               }
             } else {
-             // Merge again
+              // Merge again
               merge(dest[k], v);
             }
           }

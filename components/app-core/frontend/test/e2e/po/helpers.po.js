@@ -66,7 +66,9 @@
     hasClass: hasClass,
     isButtonEnabled: isButtonEnabled,
 
-    scrollIntoView: scrollIntoView
+    scrollIntoView: scrollIntoView,
+
+    waitForElementAndClick: waitForElementAndClick
   };
 
   function getHost() {
@@ -420,6 +422,12 @@
     return browser.controlFlow().execute(function () {
       browser.executeScript('arguments[0].scrollIntoView(true)', element.getWebElement());
     });
+  }
+
+  function waitForElementAndClick(element) {
+    var until = protractor.ExpectedConditions;
+    browser.wait(until.presenceOf(element), 10000);
+    return element.click();
   }
 
 })();

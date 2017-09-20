@@ -1,4 +1,5 @@
 FROM debian:jessie
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y openssl
 COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
+COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 CMD ["/run-preflight-job.sh"]

@@ -18,6 +18,7 @@
             <th st-sort="entity.name" st-sort-default="true" st-skip-natural="true" translate>cf.space-info.tabs.services.columns.services</th>
             <th st-sort="entity.type" st-skip-natural="true" translate>cf.space-info.tabs.services.columns.type</th>
             <th translate>cf.space-info.tabs.services.columns.plan</th>
+            <th translate>cf.space-info.tabs.services.columns.tags</th>
             <th translate>cf.space-info.tabs.services.columns.attached</th>
             <th translate ng-if="spaceSrvsCtrl.canDeleteOrUnbind">cf.space-info.tabs.services.columns.action</th>
           </tr>
@@ -28,6 +29,12 @@
             <td>{{ instance.entity.name }}</td>
             <td>{{ instance.entity.service_plan.entity.service.entity.label }}</td>
             <td>{{ instance.entity.service_plan.entity.name }}</td>
+            <td>
+              <div ng-repeat="tag in instance.entity.tags">
+                <div class="service-catalogue-card__tag">{{ tag }}</div>
+              </div>
+              <span ng-if="instance.entity.tags.length === 0">-</span>
+            </td>
             <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
             <td ng-if="spaceSrvsCtrl.canDeleteOrUnbind">
               <actions-menu actions="spaceSrvsCtrl.actionsPerSI[instance.metadata.guid]"

@@ -1,0 +1,36 @@
+<div ng-if="applicationServiceCatalogueCtrl.ready && applicationServiceCatalogueCtrl.services.length === 0" class="message-box message-box-no-bg">
+  <p>
+    <img src="/images/services/App_services_72.png" />
+    <h3 translate>app.app-info.app-tabs.service-catalogue.messages.no-services</h3>
+  </p>
+</div>
+<div ng-if="!applicationServiceCatalogueCtrl.ready" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+
+<div class="panel panel-default" ng-if="applicationServiceCatalogueCtrl.services.length">
+  <div class="panel-body service-filter-panel">
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label class="control-label" translate>app.app-info.app-tabs.service-catalogue.categories.show</label>
+        <select-input ng-model="applicationServiceCatalogueCtrl.searchCategory" input-options="applicationServiceCatalogueCtrl.serviceCategories"
+          tabindex="0" translate-option-labels="true">
+        </select-input>
+      </div>
+      <div class="form-group addon-form-group filter-form-group">
+        <div class="input-group">
+          <span class="input-group-addon">
+            <app-icon icon="svg:Filter.svg"></app-icon>
+          </span>
+          <input type="text" class="form-control" ng-model="applicationServiceCatalogueCtrl.search.$" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-default" ng-repeat="service in applicationServiceCatalogueCtrl.services | filter:applicationServiceCatalogueCtrl.category:true | filter:applicationServiceCatalogueCtrl.search track by service.metadata.guid">
+  <div class="panel-body service-panel">
+    <service-catalogue-card service="service" app="applicationServiceCatalogueCtrl.appModel.application" cnsi-guid="applicationServiceCatalogueCtrl.cnsiGuid"></service-catalogue-card>
+  </div>
+</div>

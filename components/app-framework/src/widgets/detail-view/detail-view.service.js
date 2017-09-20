@@ -82,7 +82,8 @@
               templateUrl: config.templateUrl,
               template: config.template,
               title: config.title,
-              titleTranslateValues: config.titleTranslateValues
+              titleTranslateValues: config.titleTranslateValues,
+              hideClose: config.hideClose
             };
           }
         },
@@ -101,18 +102,20 @@
         }
       });
 
-      if (config.dialog && openDetailViewCount > 1) {
-        $timeout(function () {
-          var dialog = angular.element('.detail-view-dialog .modal-dialog');
-          // Latest dialog will be the first element
-          var thisDialog = angular.element(dialog.get(0));
-          var parentDialog = angular.element(dialog.get(1));
+      modal.opened.then(function () {
+        if (config.dialog && openDetailViewCount > 1) {
+          $timeout(function () {
+            var dialog = angular.element('.detail-view-dialog .modal-dialog');
+            // Latest dialog will be the first element
+            var thisDialog = angular.element(dialog.get(0));
+            var parentDialog = angular.element(dialog.get(1));
 
-          var overlap = STACKED_HORIZONTAL_MARGIN * 2;
-          thisDialog.width(parentDialog.width() + overlap);
-          thisDialog.height(parentDialog.height());
-        });
-      }
+            var overlap = STACKED_HORIZONTAL_MARGIN * 2;
+            thisDialog.width(parentDialog.width() + overlap);
+            thisDialog.height(parentDialog.height());
+          });
+        }
+      });
 
       modal.rendered.then(function () {
         $timeout(function () {

@@ -192,3 +192,24 @@ kubectl create -f storageclass.yaml
 ```
 
 See [Storage Class documentation] ( https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more insformation.
+
+## Deploying Stratos UI with your own TLS certificates
+
+By default the console will generate self-signed certificates for demo purposes. To configure Stratos UI to use your provided TLS certificates set the `consoleCert` and `consoleCertKey` overrides.
+
+```
+consoleCert: |
+    -----BEGIN CERTIFICATE-----
+    MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+    ...
+    -----END CERTIFICATE-----
+consoleCertKey: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDV9+ySh0xZzM41
+    ....
+    -----END PRIVATE KEY-----
+``` 
+Assuming the above is stored in a file called `override-ssl.yaml`, install the chart with the override specified.
+```
+helm install -f override-ssl.yaml stratos-ui/console --namespace console
+```

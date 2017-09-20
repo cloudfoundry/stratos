@@ -1,0 +1,12 @@
+@import "./service-catalogue-card/service-catalogue-card";
+
+.service-filter-panel {
+  .filter-form-group {
+    flex-grow: 1;
+  }
+}
+
+.service-panel {
+  display: flex;
+  align-items: stretch;
+}

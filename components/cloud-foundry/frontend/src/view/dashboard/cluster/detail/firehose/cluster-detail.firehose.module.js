@@ -34,7 +34,7 @@
   }
 
   function ClusterFirehoseController(base64, appUtilsService, appLocalStorage,
-                                     $scope, $rootScope, $stateParams, $location, $log, $document, $animate) {
+    $scope, $rootScope, $stateParams, $location, $log, $document, $animate) {
     var vm = this;
 
     /* eslint-disable no-control-regex */

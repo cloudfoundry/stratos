@@ -214,7 +214,8 @@
       function sendGitHubSourceMetadata(githubProject, githubBranchName) {
         var github = {
           project: githubProject,
-          branch: githubBranchName
+          branch: githubBranchName,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -231,6 +232,7 @@
         var giturl = {
           url: gitUrl,
           branch: githubBranchName
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -253,6 +255,7 @@
 
         sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
+        metadata.type = 'filefolder';
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,

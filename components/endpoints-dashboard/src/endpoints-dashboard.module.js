@@ -7,13 +7,13 @@
     .run(register);
 
   function register($q, $state, modelManager, appEventService, appUtilsService,
-                    endpointsDashboardDisabledKey, appLoggedInService) {
+    endpointsDashboardDisabledKey, appLoggedInService) {
     return new EndpointsDashboard($q, $state, modelManager, appEventService, appUtilsService,
       endpointsDashboardDisabledKey, appLoggedInService);
   }
 
   function EndpointsDashboard($q, $state, modelManager, appEventService, appUtilsService, endpointsDashboardDisabledKey,
-                              appLoggedInService) {
+    appLoggedInService) {
     var initialized = $q.defer();
 
     appLoggedInService.setDashboardRouteFunc(getDashboardRoute);

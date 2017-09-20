@@ -149,19 +149,19 @@
           // 3) Get the route id and add it to the route object
           // 4) Return array of routes
           return getRoutesFn()
-          .then(function (routes) {
-            return _.chain(routes)
-              .filter(function (route) {
-                return !_.find(route.entity.apps, function (app) {
-                  return app.metadata.guid === applicationGuid;
-                });
-              })
-              .map(function (route) {
-                route.entity.id = getRouteIdFn(route);
-                return route;
-              })
-              .value();
-          });
+            .then(function (routes) {
+              return _.chain(routes)
+                .filter(function (route) {
+                  return !_.find(route.entity.apps, function (app) {
+                    return app.metadata.guid === applicationGuid;
+                  });
+                })
+                .map(function (route) {
+                  route.entity.id = getRouteIdFn(route);
+                  return route;
+                })
+                .value();
+            });
         };
 
         var getAllRoutesForThisSpace = _.partial(
@@ -223,9 +223,9 @@
               });
             }),
             getReleventRoutes()
-            .then(function (routes) {
-              data.existingRoutes = routes;
-            })
+              .then(function (routes) {
+                data.existingRoutes = routes;
+              })
           )
         );
       }
