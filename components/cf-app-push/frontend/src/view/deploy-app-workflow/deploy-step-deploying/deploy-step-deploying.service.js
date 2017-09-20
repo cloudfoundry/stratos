@@ -191,7 +191,7 @@
             userInput = {
               gitType: 'giturl',
               gitUrl: userInput.example.userInput.gitUrl,
-              githubBranchName: userInput.example.userInput.gitUrlBranch
+              gitUrlBranch: userInput.example.userInput.gitUrlBranch
             };
           }
         }
@@ -207,7 +207,7 @@
         if (userInput.gitType === 'github') {
           sendGitHubSourceMetadata(userInput.githubProject, userInput.githubBranch.name);
         } else if (userInput.gitType === 'giturl') {
-          sendGitUrlSourceMetadata(userInput.gitUrl, userInput.githubBranchName);
+          sendGitUrlSourceMetadata(userInput.gitUrl, userInput.gitUrlBranch);
         }
       }
 
@@ -215,7 +215,7 @@
         var github = {
           project: githubProject,
           branch: githubBranchName,
-          type: sourceUserInput.gitType
+          type: 'github'
         };
 
         var msg = {
@@ -231,8 +231,8 @@
       function sendGitUrlSourceMetadata(gitUrl, githubBranchName) {
         var giturl = {
           url: gitUrl,
-          branch: githubBranchName
-          type: sourceUserInput.gitType
+          branch: githubBranchName,
+          type: 'giturl'
         };
 
         var msg = {
