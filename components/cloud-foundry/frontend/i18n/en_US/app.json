@@ -253,7 +253,8 @@
             "button": {
               "yes": "Create",
               "no": "@:buttons.cancel"
-            }
+            },
+            "json-error-invalid": "Must be valid JSON"
           },
           "view-envs": {
             "title": "{{instanceName}}: Variables"

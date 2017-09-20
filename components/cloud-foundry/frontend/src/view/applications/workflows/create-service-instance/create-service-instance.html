@@ -45,11 +45,16 @@
 
 <!-- Parameter editor -->
 <div class="async-dialog-param-editor" ng-class="{'param-editor-open' : asyncTaskDialogCtrl.editParams}">
-  <div class="param-editor-container">
-    <p translate>app.app-info.app-tabs.services.create.service-params</p>
-    <textarea placeholder="{{ 'app.app-info.app-tabs.services.create.params-placeholder' | translate}}" json-text-input ng-model="asyncTaskDialogCtrl.context.options.userInput.params"></textarea>
-    <div class="param-editor-buttons">
-      <a translate class="done-button btn btn-commit" ng-click="asyncTaskDialogCtrl.editParams = false; asyncTaskDialogCtrl.hideFooter = false">app.app-info.app-tabs.services.create.done</a>
-    </div>
-  </div>
+  <form name="form.paramEditor" class="async-dialog-param-editor param-editor-container">
+      <div class="form-group json-input-field" focusable-input ng-model-options="{ debounce: 200 }" ng-class="{'has-error': form.paramEditor.$invalid && form.paramEditor.$dirty}">
+        <label class="control-label" translate>app.app-info.app-tabs.services.create.service-params</label>
+        <span class="control-message">
+            <span translate ng-if="form.paramEditor.$invalid">app.app-info.app-tabs.services.create.json-error-invalid</span>
+          </span>
+        <textarea name="json" focus-when="asyncTaskDialogCtrl.editParams" placeholder="{{ 'app.app-info.app-tabs.services.create.params-placeholder' | translate}}" json-text-input ng-model="asyncTaskDialogCtrl.context.options.userInput.params"></textarea>
+      </div>
+      <div class="param-editor-buttons">
+        <a translate class="done-button btn btn-commit" ng-click="asyncTaskDialogCtrl.editParams = false; asyncTaskDialogCtrl.hideFooter = false">app.app-info.app-tabs.services.create.done</a>
+      </div>
+  </form>
 </div>
