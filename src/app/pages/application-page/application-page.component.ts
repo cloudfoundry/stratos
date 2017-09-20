@@ -1,3 +1,4 @@
+import { EntityRequestState } from '../../store/reducers/api-request-reducer';
 import { createEntitySelector, selectEntities, getEntityObservable } from './../../store/actions/api.actions';
 import { AppState } from './../../store/app-state';
 import { GetApplication } from './../../store/actions/application.actions';
@@ -20,6 +21,9 @@ export class ApplicationPageComponent implements OnInit, OnDestroy {
   sub: Subscription;
   isFetching: boolean;
   application;
+  request: {
+    [key: string]: any
+  } = {};
 
   ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
@@ -30,8 +34,9 @@ export class ApplicationPageComponent implements OnInit, OnDestroy {
         ApplicationSchema,
         id,
         new GetApplication(id, cfId)
-      ).subscribe(application => {
-        this.application = application;
+      ).subscribe(app => {
+        this.application = app.entity;
+        this.request = app.entityRequestInfo;
       });
     });
 

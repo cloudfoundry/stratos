@@ -1,6 +1,6 @@
 import { getAPIResourceEntity } from '../../store/actions/api.actions';
 import { denormalize } from 'normalizr';
-import { EntitiesState } from '../../store/reducers/api.reducer';
+import { EntitiesState } from '../../store/reducers/entity.reducer';
 import { getCurrentPage, PaginationState, PaginationEntityState } from './../../store/reducers/pagination.reducer';
 import { skipWhile } from 'rxjs/operator/skipWhile';
 import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';

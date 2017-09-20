@@ -1,4 +1,4 @@
-import { entitiesReducer } from '../../store/reducers/api.reducer';
+import { entitiesReducer } from '../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../store/reducers/pagination.reducer';
 import { StoreModule } from '@ngrx/store';
 import { RouterTestingModule } from '@angular/router/testing';

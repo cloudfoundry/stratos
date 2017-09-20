@@ -43,7 +43,6 @@ export class GetAllApplications implements APIAction {
         this.options.params.set('page', '1');
         this.options.params.set('results-per-page', '100');
         this.options.params.set('inline-relations-depth', '1');
-
     }
     actions = [
         GET_ALL,
@@ -57,9 +56,9 @@ export class GetAllApplications implements APIAction {
 }
 
 export class GetApplication implements APIAction {
-    constructor(public id: string, public cnis: string) {
+    constructor(public guid: string, public cnis: string) {
         this.options = new RequestOptions();
-        this.options.url = `apps/${id}/summary`;
+        this.options.url = `apps/${guid}/summary`;
         this.options.method = 'get';
     }
     actions = [
