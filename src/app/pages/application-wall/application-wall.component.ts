@@ -21,9 +21,6 @@ export class ApplicationWallComponent implements OnInit {
   isFetching = false;
 
   ngOnInit() {
-    const a = {null: 1};
-    const b = {b: 2};
-    console.log({...a, ...b});
     const paginationKey = 'applicationWall';
     getCurrentPage({
       entityType: ApplicationSchema.key,
