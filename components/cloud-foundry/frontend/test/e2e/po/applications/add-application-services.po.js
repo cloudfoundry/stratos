@@ -6,7 +6,8 @@
   module.exports = {
     getServices: getServices,
     addService: addService,
-    getServiceWizard: getServiceWizard
+    getServiceWizard: getServiceWizard,
+    showCreateInstanceDialog: showCreateInstanceDialog
   };
 
   function getServices() {
@@ -20,7 +21,7 @@
       });
     }).first();
 
-    var btn = getButton(matchingService, 'Add Service');
+    var btn = getButton(matchingService, 'Bind Service');
     btn.click();
   }
 
@@ -35,6 +36,11 @@
 
   function getServiceWizard() {
     return serviceWizard;
+  }
+
+  function showCreateInstanceDialog() {
+    var btn = getServiceWizard().getElement().element(by.css('.td-create-service > button'));
+    return btn.click();
   }
 
 })();

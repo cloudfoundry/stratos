@@ -1,0 +1,22 @@
+.modal.detail-view.detail-view-dialog.create-service-instance-dialog {
+  >.modal-dialog {
+    .async-dialog {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      .detail-view-content {
+        flex: 1;
+        width: 100%;
+
+        >ng-include {
+          flex: 1 1 0;
+        }
+      }
+
+      .form-actions.modal-footer {
+        flex: 0;
+      }
+    }
+ }
+}

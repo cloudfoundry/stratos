@@ -102,6 +102,8 @@
             "modified-label": "modified",
             "deployed-label": "console deploy",
             "deployed-source-label": "console deploy source",
+            "deployed-source-filefolder": "Folder Upload",
+            "deployed-source-archive": "Archive File Upload",
             "ssh-enabled-label": "ssh enabled",
             "memory-label": "memory",
             "disk-quota-label": "disk quota",
@@ -189,7 +191,8 @@
             "type": "Type",
             "description": "Description",
             "created-date": "Date created",
-            "env-variables": "Show environment variables"
+            "env-variables": "Show environment variables",
+            "tags": "Tags"
           },
           "messages": {
             "no-services": "This application has no bound service instances.",
@@ -233,27 +236,47 @@
             },
             "success": "Service instance successfully deleted"
           },
+          "create": {
+            "title": "Create Service Instance",
+            "name-label": "Name",
+            "name-error-required": "Name is required",
+            "name-error-unique": "Name must be unique",
+            "name-error-pattern": "Name contains invalid pattern",
+            "plan-label": "Plan",
+            "plan-placeholder": "Select a Plan",
+            "button": {
+              "yes": "Create",
+              "no": "@:buttons.cancel"
+            }
+          },
           "view-envs": {
             "title": "{{instanceName}}: Variables"
+          },
+          "bind": {
+            "bind-to-app": "Bind to App",
+            "select": "Select Service Instance",
+            "warnings": {
+              "auto-scaler": "You can bind the Auto-scaler to this application here. Please note that you will need to use the CLI to configure the auto-scaling policy for this application in order for it to be enabled."
+            },
+            "no-instances": {
+              "title": "There are no service instances not already bound to this application",
+              "prompt": "Create a new Service Instance in order to continue"
+            },
+            "create": "Create new Service Instance"
           },
           "add": {
             "title": "Add Service to {{ appName }}",
             "back-to-services": "Back to Services",
             "add": "Add Service Instance",
             "create": {
-              "title": "Create New Instance",
-              "name-label": "Name",
-              "name-error-required": "Name is required",
-              "name-error-unique": "Name must be unique",
-              "name-error-pattern": "Name contains invalid pattern",
-              "plan-label": "Plan",
-              "plan-placeholder": "Select a Plan"
+              "title": "Create New Instance"
             },
             "existing": {
               "title": "Choose Existing Instance",
               "name-label": "Name",
               "plan-label": "Plan",
-              "apps-label": "Apps Attached"
+              "apps-label": "Apps Attached",
+              "tags-label": "Tags"
             },
             "notifications": {
               "success": "The '{{ service }}' service has been successfully attached to application '{{ appName }}'",
@@ -288,7 +311,7 @@
             "attached": "Attached",
             "cannot-bind": "This service cannot be bound to an Application",
             "actions": {
-              "add": "Add Service",
+              "bind": "Bind Service",
               "detach": "Detach",
               "manage": "Manage Instances"
             }
@@ -317,8 +340,11 @@
           "view-envs": {
             "title": "{{instanceName}}: Variables"
           },
+          "bind": {
+            "title": "Bind Service \"{{ svcName }}\" to Application \"{{ appName }}\""
+          },
           "add": {
-            "title": "Add Service to {{ appName }}",
+            "title": "Add Service '{{ svcName }}' to Application '{{ appName }}'",
             "back-to-services": "Back to Services",
             "add": "Add Service Instance",
             "create": {
