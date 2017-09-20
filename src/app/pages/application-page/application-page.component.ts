@@ -1,4 +1,4 @@
-import { createEntitySelector, selectEntities, getEntity } from './../../store/actions/api.actions';
+import { createEntitySelector, selectEntities, getEntityObservable } from './../../store/actions/api.actions';
 import { AppState } from './../../store/app-state';
 import { GetApplication } from './../../store/actions/application.actions';
 import { Store } from '@ngrx/store';
@@ -24,7 +24,7 @@ export class ApplicationPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
       const { id, cfId } = params;
-      getEntity(
+      getEntityObservable(
         this.store,
         ApplicationSchema.key,
         ApplicationSchema,

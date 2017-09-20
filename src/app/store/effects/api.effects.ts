@@ -2,7 +2,14 @@ import { normalize } from 'normalizr';
 import { CNSISModel } from './../reducers/cnsis.reducer';
 import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
-import { APIAction, ApiActionTypes, StartAPIAction, WrapperAPIActionSuccess, WrapperAPIActionFailed } from './../actions/api.actions';
+import {
+    APIAction,
+    ApiActionTypes,
+    APIResource,
+    StartAPIAction,
+    WrapperAPIActionFailed,
+    WrapperAPIActionSuccess,
+} from './../actions/api.actions';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 import { Injectable } from '@angular/core';
@@ -45,24 +52,33 @@ export class APIEffect {
         });
     });
 
+  private completeResourceEntity(resource: APIResource | any, cfGuid: string): APIResource {
+    if (!resource) {
+      return resource;
+    }
+    return resource.metadata ? {
+      entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
+      metadata: resource.metadata
+    } : {
+      entity: { ...resource, cfGuid },
+      metadata: { guid: resource.guid }
+    };
+  }
+
   getEntities(apiAction: APIAction, response: Response) {
     const data = response.json();
-    // Only one entity
-    if (apiAction.cnis) {
-      return normalize(Object.keys(data).map(key => data[key]), apiAction.entity);
-    }
-
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
       if (cfData.resources) {
         if (!cfData.resources.length) {
           return null;
         }
-        return cfData.resources.map(({ entity, metadata }) => {
-          return this.mergeData(entity, metadata, cfGuid);
+
+        return cfData.resources.map(resource => {
+          return this.completeResourceEntity(resource, cfGuid);
         });
       } else {
-        return this.mergeData(cfData.entity, cfData.metadata, cfGuid);
+        return this.completeResourceEntity(cfData, cfGuid);
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);

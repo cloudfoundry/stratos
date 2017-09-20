@@ -1,3 +1,7 @@
+import { getAPIResourceGuid } from './api.actions';
+
+import { AppState } from '../app-state';
+import { State, Store } from '@ngrx/store';
 import { normalize, schema } from 'normalizr';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { ApiActionTypes, APIAction } from './api.actions';
@@ -10,8 +14,24 @@ export const GET = '[Application] Get one';
 export const GET_SUCCESS = '[Application] Get one success';
 export const GET_FAILED  = '[Application] Get one failed';
 
-export const ApplicationSchema = new schema.Entity('application', {}, {
-    idAttribute: 'guid'
+// ###### Move these schemas
+export const StackSchema = new schema.Entity('stack', {}, {
+    idAttribute: getAPIResourceGuid
+});
+
+export const SpaceSchema = new schema.Entity('space', {}, {
+    idAttribute: getAPIResourceGuid
+});
+// ######
+
+
+export const ApplicationSchema = new schema.Entity('application', {
+    entity: {
+        stack: StackSchema,
+        space: SpaceSchema
+    }
+}, {
+    idAttribute: getAPIResourceGuid
 });
 
 export class GetAllApplications implements APIAction {
@@ -22,6 +42,7 @@ export class GetAllApplications implements APIAction {
         this.options.params = new URLSearchParams();
         this.options.params.set('page', '1');
         this.options.params.set('results-per-page', '100');
+        this.options.params.set('inline-relations-depth', '1');
 
     }
     actions = [

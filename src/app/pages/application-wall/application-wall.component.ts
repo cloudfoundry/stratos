@@ -1,3 +1,4 @@
+import { getAPIResourceEntity } from '../../store/actions/api.actions';
 import { denormalize } from 'normalizr';
 import { EntitiesState } from '../../store/reducers/api.reducer';
 import { getCurrentPage, PaginationState, PaginationEntityState } from './../../store/reducers/pagination.reducer';
@@ -20,6 +21,9 @@ export class ApplicationWallComponent implements OnInit {
   isFetching = false;
 
   ngOnInit() {
+    const a = {null: 1};
+    const b = {b: 2};
+    console.log({...a, ...b});
     const paginationKey = 'applicationWall';
     getCurrentPage({
       entityType: ApplicationSchema.key,
@@ -31,7 +35,7 @@ export class ApplicationWallComponent implements OnInit {
     .subscribe(({ paginationEntity, data }) => {
       this.isFetching = paginationEntity.fetching;
       if (!this.isFetching ) {
-        this.applications = data;
+        this.applications = data.map(getAPIResourceEntity);
       }
     });
   }
