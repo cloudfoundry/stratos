@@ -257,7 +257,7 @@
         app_guid: vm.data.app.summary.guid
       };
 
-      if (vm.options.userInput.params) {
+      if (vm.options.userInput && vm.options.userInput.params) {
         bindingSpec.parameters = vm.options.userInput.params;
       }
 
