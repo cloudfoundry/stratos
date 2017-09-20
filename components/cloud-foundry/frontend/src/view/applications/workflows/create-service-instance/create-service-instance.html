@@ -44,7 +44,7 @@
 </form>
 
 <!-- Parameter editor -->
-<div class="async-dialog-param-editor" ng-class="{'param-editor-open' : asyncTaskDialogCtrl.editParams}">
+<div ng-if="asyncTaskDialogCtrl.editParams" class="async-dialog-param-editor" ng-class="{'param-editor-open' : asyncTaskDialogCtrl.editParams}">
   <form name="form.paramEditor" class="async-dialog-param-editor param-editor-container">
       <div class="form-group json-input-field" focusable-input ng-model-options="{ debounce: 200 }" ng-class="{'has-error': form.paramEditor.$invalid && form.paramEditor.$dirty}">
         <label class="control-label" translate>app.app-info.app-tabs.services.create.service-params</label>
