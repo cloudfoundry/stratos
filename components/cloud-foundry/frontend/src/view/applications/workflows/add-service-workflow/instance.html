@@ -58,7 +58,7 @@
       <div class="form-group form-json-editor-input"
         ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
         <label class="control-label" required translate>
-          app.app-info.app-tabs.services.create.params-label
+          app.app-info.app-tabs.services.create.binding-params-label
         </label>
         <a href="#" class="input-box-edit" ng-click="wizardCtrl.options.editParams = true; wizardCtrl.options.hideFooterButtons = true" translate>app.app-info.app-tabs.services.create.edit-params</a>
         <div class="json-edit-box">{{ wizardCtrl.options.userInput.params | jsonString }}</div>
@@ -72,7 +72,7 @@
 <div ng-if="wizardCtrl.options.editParams" class="async-dialog-param-editor" ng-class="{'param-editor-open' : wizardCtrl.options.editParams}">
   <form name="form.paramEditor" class="async-dialog-param-editor param-editor-container">
       <div class="form-group json-input-field" focusable-input ng-model-options="{ debounce: 200 }" ng-class="{'has-error': form.paramEditor.$invalid && form.paramEditor.$dirty}">
-        <label class="control-label" translate>app.app-info.app-tabs.services.create.service-params</label>
+        <label class="control-label" translate>app.app-info.app-tabs.services.create.binding-params</label>
         <span class="control-message">
             <span translate ng-if="form.paramEditor.$invalid">app.app-info.app-tabs.services.create.json-error-invalid</span>
           </span>
