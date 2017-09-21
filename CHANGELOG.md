@@ -4,10 +4,8 @@
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.2...0.9.5)
 
-**Merged pull requests:**
+This is the first beta release of the Stratos UI Console. It contains the following bug fixes and improvements:
 
-- Add release notes to releases [\#1270](https://github.com/SUSE/stratos-ui/pull/1270)
-- Initial changelog file [\#1269](https://github.com/SUSE/stratos-ui/pull/1269)
 - Fix filter by text/endpoint bug [\#1268](https://github.com/SUSE/stratos-ui/pull/1268)
 - Fix for missing icon for the busy state [\#1267](https://github.com/SUSE/stratos-ui/pull/1267)
 - Pin MariaDB helm chart version [\#1264](https://github.com/SUSE/stratos-ui/pull/1264)
