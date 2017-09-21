@@ -1,5 +1,35 @@
 # Change Log
 
+## 0.9.5 Beta-1 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.2...0.9.5)
+
+This is the first beta release of the Stratos UI Console. It contains the following bug fixes and improvements:
+
+**Improvements:**
+
+- Added support for parameters when creating/binding services [\#1253](https://github.com/SUSE/stratos-ui/pull/1253)
+- Added support for tags when creating service instances [\#1252](https://github.com/SUSE/stratos-ui/pull/1252)
+- Moved service instances to a new Application tab [\#1237](https://github.com/SUSE/stratos-ui/pull/1237)
+- Show deployment information in Application summary for console deployed apps [\#1243](https://github.com/SUSE/stratos-ui/pull/1243)
+- Minor UI tweaks following UX review [\#1249](https://github.com/SUSE/stratos-ui/pull/1249)
+- Pre-sort service instances in cloud foundry space instances table [\#1233](https://github.com/SUSE/stratos-ui/pull/1233)
+- Enable binding of postgres CF db service to CF hosted console [\#1231](https://github.com/SUSE/stratos-ui/pull/1231)
+- Migrate Helm chart to use MariaDB instead of Postgres [\#1230](https://github.com/SUSE/stratos-ui/pull/1230)
+- Added initial BOSH Release [\#1222](https://github.com/SUSE/stratos-ui/pull/1222)
+- Improve SSL certificate handling when deploying through Helm [\#1210](https://github.com/SUSE/stratos-ui/pull/1210)
+- Added ability to deploy application from a git url [\#1208](https://github.com/SUSE/stratos-ui/pull/1208)
+
+**Fixes:**
+
+- Fixed a couple of minor translation issues [\#1247](https://github.com/SUSE/stratos-ui/pull/1247)
+- Fix for broken cf push [\#1244](https://github.com/SUSE/stratos-ui/pull/1244)
+- Fix for translation issue on the landing page language options [\#1234](https://github.com/SUSE/stratos-ui/pull/1234)
+- Fixed filtering by text/endpoint bug [\#1268](https://github.com/SUSE/stratos-ui/pull/1268)
+- Fix for missing icon for the busy state [\#1267](https://github.com/SUSE/stratos-ui/pull/1267)
+- Fixed incorrect caching and reset behaviour of app wall filters [\#1248](https://github.com/SUSE/stratos-ui/pull/1248)
+- Fixed create app issues related to route visibility/permissions [\#1246](https://github.com/SUSE/stratos-ui/pull/1246)
+
 ## 0.9.2 Alpha-3 Release
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.1...0.9.2)
 
