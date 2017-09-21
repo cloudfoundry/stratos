@@ -22,5 +22,3 @@ run:
       ./build_concourse_image.sh
       docker tag docker.io/splatform/stratos-concourse:${TAG} ci-registry.ngrok.io:80/splatform/stratos-concourse:latest
       docker push ci-registry.ngrok.io:80/splatform/stratos-concourse:latest
-
-
