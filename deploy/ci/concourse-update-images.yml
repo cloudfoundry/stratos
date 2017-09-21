@@ -23,8 +23,7 @@ resources:
       username: {{email-username}}
       password: {{email-password}}
     from: {{email-from}}
-    # to: [ "irfan.habib@suse.com", "neil.macdougall@suse.com", "richard.cox@suse.com", "njones@suse.com" ]
-    to: [ "irfan.habib@suse.com" ]
+    to: [  ]
 
 groups:
 - name: tests
