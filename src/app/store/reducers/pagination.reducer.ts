@@ -1,7 +1,8 @@
+import { mergeState } from './../helpers/reducer.helper';
 import { PaginationState } from './pagination.reducer';
 import { Observable } from 'rxjs/Rx';
 import { denormalize, Schema } from 'normalizr';
-import { EntitiesState } from './api.reducer';
+import { EntitiesState } from './entity.reducer';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { APIAction } from './../actions/api.actions';
@@ -40,7 +41,7 @@ const defaultPaginationEntityState = {
 };
 
 const updatePagination = function (state: PaginationEntityState, action, actionType): PaginationEntityState {
-  state = {...defaultPaginationEntityState, ...state};
+  state = { ...defaultPaginationEntityState, ...state };
   switch (actionType) {
     case requestType:
       return {
@@ -133,17 +134,19 @@ export function paginationReducer (state = {}, action) {
   if (actionType && key) {
 
       const paginationKey = getPaginationKey(action);
+      const newState = { ...state };
 
-      if (!state[key]) {
-        state[key] = {};
+      if (!newState[key]) {
+        newState[key] = {};
       }
 
-      return {
-        ...state,
-        [key]: {
-          [paginationKey]: updatePagination(state[key][paginationKey], action, actionType)
-        }
-      };
+      const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
+
+      newState[key] = mergeState(newState[key] || {}, {
+          [paginationKey]: updatedPaginationState
+      });
+
+      return newState;
   } else {
     return state;
   }

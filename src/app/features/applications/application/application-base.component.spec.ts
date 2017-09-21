@@ -1,5 +1,5 @@
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
-import { entitiesReducer } from '../../../store/reducers/api.reducer';
+import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { StoreModule } from '@ngrx/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';

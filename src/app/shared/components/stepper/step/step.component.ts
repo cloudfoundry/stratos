@@ -3,8 +3,6 @@ import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 
 import 'rxjs/add/observable/of';
 
-
-
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
   message?: string
@@ -14,7 +12,6 @@ export type StepOnNextFunction = () => Observable<{
   selector: 'app-step',
   templateUrl: './step.component.html',
   styleUrls: ['./step.component.scss'],
-
 })
 
 export class StepComponent implements OnInit {

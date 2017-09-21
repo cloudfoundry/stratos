@@ -1,6 +1,9 @@
 <nav class="side-nav">
-  <div class="side-nav__logo"> </div>
-  <div class="side-nav__logo-text">Cloud foundary</div>
+  <div class="side-nav__top">
+    <div class="side-nav__top-inner">
+      <div class="side-nav__logo"> </div>
+    </div>
+  </div>
   <ul class="side-nav__items">
     <li *ngFor="let tab of tabs" class="side-nav__item" [routerLink]="[tab.link]" [routerLinkActive]="['side-nav__item--active']">
       <md-icon>{{ tab.mdIcon }}</md-icon> {{ tab.text }}

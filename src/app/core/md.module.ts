@@ -13,6 +13,7 @@ import {
     MdTableModule,
     MdToolbarModule,
     MdFormFieldModule,
+    MdProgressBarModule
 } from '@angular/material';
 import { CommonModule } from '@angular/common';
 
@@ -31,6 +32,7 @@ const importExport = [
     MdTableModule,
     MdToolbarModule,
     MdFormFieldModule,
+    MdProgressBarModule
 ];
 
 @NgModule({
