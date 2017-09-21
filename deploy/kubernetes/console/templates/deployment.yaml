@@ -197,9 +197,3 @@ spec:
       - name: "{{ .Release.Name }}-secret"
         secret:
           secretName: "{{ .Release.Name }}-secret"
-      - name: "{{ .Release.Name }}-encryption-key-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-encryption-key-volume"
-      - name: "{{ .Release.Name }}-secret"
-        secret:
-          secretName: "{{ .Release.Name }}-secret"
