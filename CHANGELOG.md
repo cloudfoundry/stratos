@@ -28,7 +28,7 @@ This is the first beta release of the Stratos UI Console. It contains the follow
 - Fixed filtering by text/endpoint bug [\#1268](https://github.com/SUSE/stratos-ui/pull/1268)
 - Fix for missing icon for the busy state [\#1267](https://github.com/SUSE/stratos-ui/pull/1267)
 - Fixed incorrect caching and reset behaviour of app wall filters [\#1248](https://github.com/SUSE/stratos-ui/pull/1248)
-- Fixed create app issues related to route visiblility/permissions [\#1246](https://github.com/SUSE/stratos-ui/pull/1246)
+- Fixed create app issues related to route visibility/permissions [\#1246](https://github.com/SUSE/stratos-ui/pull/1246)
 
 ## 0.9.2 Alpha-3 Release
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.1...0.9.2)
