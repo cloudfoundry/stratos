@@ -15,3 +15,25 @@
 .wizard-nav-step-number, .wizard-nav-step-number-complete, .wizard-nav-item-sep {
   display: none;
 }
+
+
+.wizard-foot {
+  overflow: hidden;
+  .wizard-foot-buttons {
+
+    button {
+      transition: margin-left 0.5s, margin-right 0.5s;
+    }
+
+    &.wizard-footer-hidden {
+
+      button:first-child {
+        margin-left: -200px
+      }
+
+      button:last-child {
+        margin-right: -200px
+      }
+    }
+  }
+}

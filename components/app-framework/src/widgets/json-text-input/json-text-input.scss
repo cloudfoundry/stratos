@@ -1,0 +1,16 @@
+.json-input-field {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;  
+
+  &.form-group {
+    width: 100%;
+  }
+
+  textarea {
+    outline: 0;
+    border: 0;
+    font-family: monospace;
+    font-size: $font-size-monospace;
+  }
+}
