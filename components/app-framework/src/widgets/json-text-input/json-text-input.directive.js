@@ -25,6 +25,9 @@
             return undefined;
           }
         });
+        ngModelCtrl.$formatters.push(function (value) {
+          return angular.toJson(value, 2);
+        });
       }
     };
   }
