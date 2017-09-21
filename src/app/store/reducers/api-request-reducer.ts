@@ -17,16 +17,16 @@ const defaultEntityRequest = {
     message: ''
 };
 
-function getEntityRequestState(state: EntitiesState, apiAction: APIAction) {
-    const requestState = state[apiAction.entityKey][apiAction.guid];
+function getEntityRequestState(state: EntitiesState, { entityKey, guid }) {
+    const requestState = state[entityKey][guid];
     if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
         return { ...requestState };
     }
     return { ...defaultEntityRequest };
 }
 
-function setEntityRequestState(state: EntitiesState, requestState, apiAction: APIAction) {
-    state[apiAction.entityKey][apiAction.guid] = requestState;
+function setEntityRequestState(state: EntitiesState, requestState, { entityKey, guid }) {
+    state[entityKey][guid] = requestState;
     return { ...state };
 }
 
@@ -37,20 +37,30 @@ export function apiRequestReducer(state: EntitiesState = defaultEntitiesState, a
             if (!action.apiAction.guid) {
                 return state;
             }
-            console.log(`loading api`);
             const requestState = getEntityRequestState(state, action.apiAction);
             requestState.fetching = true;
             return setEntityRequestState(state, requestState, action.apiAction);
         case ApiActionTypes.API_REQUEST_SUCCESS:
-            console.log(`success api`);
             if (action.apiAction.guid) {
                 const requestSuccessState = getEntityRequestState(state, action.apiAction);
                 requestSuccessState.fetching = false;
+                requestSuccessState.error = false;
                 return setEntityRequestState(state, requestSuccessState, action.apiAction);
+            } else if (action.response && action.response.entities) {
+                const entities = action.response.entities;
+                // Make this more functional programming
+                Object.keys(entities).forEach(entityKey => {
+                    Object.keys(entities[entityKey]).forEach(guid => {
+                        const entState = getEntityRequestState(state, { entityKey, guid });
+                        entState.fetching = false;
+                        entState.error = false;
+                        setEntityRequestState(state, entState, { entityKey, guid });
+                    });
+                });
+                return state;
             }
             return state;
         case ApiActionTypes.API_REQUEST_FAILED:
-            console.log(`failed api`);
             if (action.apiAction.guid) {
                 const requestSuccessState = getEntityRequestState(state, action.apiAction);
                 requestSuccessState.fetching = false;
