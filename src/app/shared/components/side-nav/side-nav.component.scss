@@ -1,0 +1,60 @@
+@import '../../../../sass/colors';
+@import '../../../../sass/theme';
+.side-nav {
+  $border-color: map-color($suse-blue, 900);
+  width: 200px;
+  &__wrapper {
+    background-color: mat-color($suse-blue, 500);
+  }
+  &__top {
+    height: 64px;
+    border-bottom: 1px solid;
+    display: flex;
+    flex-direction: column;
+    &-inner {
+      display: flex;
+      flex: 1;
+      padding: 10px;
+    }
+  }
+  &__items {
+    color: map-get($suse-blue, 50);
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  &__item {
+    align-items: center;
+    display: flex;
+    font-size: 16px;
+    padding: 20px;
+    cursor: pointer;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: transparent;
+    md-icon {
+      padding-right: 15px;
+    }
+    &:hover {
+      background-color: map-get($suse-green, 400);
+    }
+    &--active {
+      background-color: map-get($suse-blue, 400);
+      border-color: $border-color;
+    }
+  }
+  &__logo {
+    background-image: url('/assets/suse-logo-white.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    flex: 1;
+    &-text {
+      text-transform: uppercase;
+      color: white;
+      text-align: center;
+      font-size: 16px;
+      padding: 10px 0;
+    }
+  }
+}

@@ -1,122 +1,29 @@
-import { SideNavService } from './services/side-nav/side-nav.service';
-import { apiRequestReducer } from './store/reducers/api-request-reducer';
-import { paginationReducer } from './store/reducers/pagination.reducer';
-import { CNSISEffect } from './store/effects/cnsis.effects';
-import { cnsisReducer } from './store/reducers/cnsis.reducer';
-import { UAASetupEffect } from './store/effects/uaa-setup.effects';
-import { uaaSetupReducer } from './store/reducers/uaa-setup.reducers';
-import { AppState } from './store/app-state';
-import { environment } from './../environments/environment';
-import { AuthGuardService } from './guards//auth-guard.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MDAppModule } from './md/md.module';
-import { AuthEffect } from './store/effects/auth.effects';
-import { authReducer } from './store/reducers/auth.reducer';
-import { HttpModule } from '@angular/http';
-import { APIEffect } from './store/effects/api.effects';
-import { EffectsModule } from '@ngrx/effects';
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ActionReducer, State, StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterModule, Routes } from '@angular/router';
 
-import { entitiesReducer } from './store/reducers/entity.reducer';
-
+// import { environment } from './../environments/environment';
 import { AppComponent } from './app.component';
-import { LoginPageComponent } from './pages/login-page/login-page.component';
-import { HomePageComponent } from './pages/home-page/home-page.component';
-import { DashboardBaseComponent } from './pages/dashboard-base/dashboard-base.component';
+import { HttpModule } from '@angular/http';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { storeLogger } from 'ngrx-store-logger';
-import { SideNavComponent } from './components/side-nav/side-nav.component';
-import { ConsoleUaaWizardComponent } from './components/console-uaa-wizard/console-uaa-wizard.component';
-import { SteppersComponent } from './components/stepper/steppers/steppers.component';
-import { StepComponent } from './components/stepper/step/step.component';
-
-import 'rxjs/add/observable/from';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/switchMap';
-import { ApplicationWallComponent } from './pages/application-wall/application-wall.component';
-import { EndpointsPageComponent } from './pages/endpoints-page/endpoints-page.component';
-import { ApplicationPageComponent } from './pages/application-page/application-page.component';
-import { PageHeaderComponent } from './components/page-header/page-header.component';
-import { LoadingPageComponent } from './components/loading-page/loading-page.component';
-
-export function logger(reducer): any {
-  // default, no options
-  return storeLogger()(reducer);
-}
-
-export const metaReducers = environment.production ? [] : [logger];
-
-const appRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'uaa', component: ConsoleUaaWizardComponent },
-  { path: 'login', component: LoginPageComponent },
-  {
-    path: '',
-    component: DashboardBaseComponent,
-    canActivate: [AuthGuardService],
-    children: [
-      { path: 'dashboard', component: HomePageComponent },
-      { path: 'applications', component: ApplicationWallComponent },
-      { path: 'applications/:cfId/:id', component: ApplicationPageComponent },
-      { path: 'endpoints', component: EndpointsPageComponent }
-    ]
-  }
-];
+import { CoreModule } from './core/core.module';
+import { SharedModule } from './shared/shared.module';
+import { AppStoreModule } from './store/store.module';
+import { RouteModule } from './app.routing';
+import { ApplicationsModule } from './features/applications/applications.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginPageComponent,
-    HomePageComponent,
-    DashboardBaseComponent,
-    SideNavComponent,
-    ConsoleUaaWizardComponent,
-    SteppersComponent,
-    StepComponent,
-    ApplicationWallComponent,
-    EndpointsPageComponent,
-    ApplicationPageComponent,
-    PageHeaderComponent,
-    LoadingPageComponent
   ],
   imports: [
-    HttpModule,
     BrowserModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MDAppModule,
     BrowserAnimationsModule,
-    StoreModule.forRoot({
-      entities: entitiesReducer,
-      auth: authReducer,
-      uaaSetup: uaaSetupReducer,
-      cnsis: cnsisReducer,
-      pagination: paginationReducer,
-      apiRequest: apiRequestReducer
-    }, {
-        metaReducers
-      }),
-    RouterModule.forRoot(
-      appRoutes
-    ),
-    StoreDevtoolsModule.instrument({
-      maxAge: 25
-    }),
-    EffectsModule.forRoot([
-      APIEffect,
-      AuthEffect,
-      UAASetupEffect,
-      CNSISEffect
-    ])
-  ],
-  providers: [
-    AuthGuardService,
-    SideNavService
+    CoreModule,
+    AppStoreModule,
+    SharedModule,
+    RouteModule,
+    ApplicationsModule
   ],
   bootstrap: [AppComponent]
 })
