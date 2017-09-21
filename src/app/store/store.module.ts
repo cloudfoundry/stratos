@@ -6,11 +6,12 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from "@ngrx/effects";
 import { storeLogger } from 'ngrx-store-logger';
 
-import { entitiesReducer } from "./reducers/api.reducer";
+import { entitiesReducer } from "./reducers/entity.reducer";
 import { authReducer } from "./reducers/auth.reducer";
 import { uaaSetupReducer } from "./reducers/uaa-setup.reducers";
 import { cnsisReducer } from "./reducers/cnsis.reducer";
 import { paginationReducer } from "./reducers/pagination.reducer";
+import { apiRequestReducer } from "./reducers/api-request-reducer";
 
 import { APIEffect } from "./effects/api.effects";
 import { AuthEffect } from "./effects/auth.effects";
@@ -19,7 +20,6 @@ import { CNSISEffect } from "./effects/cnsis.effects";
 
 import { environment } from '../../environments/environment';
 
-// import { logger } from "../app.module";
 
 export function logger(reducer): any {
     // default, no options
@@ -35,7 +35,8 @@ export const metaReducers = environment.production ? [] : [logger];
         auth: authReducer,
         uaaSetup: uaaSetupReducer,
         cnsis: cnsisReducer,
-        pagination: paginationReducer
+        pagination: paginationReducer,
+        apiRequest: apiRequestReducer
       }, {
           metaReducers
         }),
@@ -49,17 +50,6 @@ export const metaReducers = environment.production ? [] : [logger];
         UAASetupEffect,
         CNSISEffect
     ]),
-  ],
-  declarations: [
-  ],
-  providers: [
   ]
 })
-export class AppStoreModule { 
-    // static forRoot(): ModuleWithProviders {
-    //     return {
-    //       ngModule: GuardsModule,
-    //       providers: [AuthGuardService]
-    //     }
-    //   }
-}
+export class AppStoreModule { }

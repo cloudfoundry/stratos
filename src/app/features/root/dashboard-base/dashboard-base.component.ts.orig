@@ -1,7 +1,12 @@
+<<<<<<< HEAD:src/app/features/root/dashboard-base/dashboard-base.component.ts
+import { SideNavItem } from '../../../shared/components/side-nav/side-nav.component';
+import { Component, OnInit } from '@angular/core';
+=======
 import { ngContentDef } from '@angular/core/src/view/ng_content';
-import { SideNavService } from './../../../core/side-nav/side-nav.service';
-import { SideNavItem } from './../../../shared/components/side-nav/side-nav.component';
+import { SideNavService } from './../../services/side-nav/side-nav.service';
+import { SideNavItem } from '../../components/side-nav/side-nav.component';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+>>>>>>> master:src/app/pages/dashboard-base/dashboard-base.component.ts
 
 @Component({
   selector: 'app-dashboard-base',

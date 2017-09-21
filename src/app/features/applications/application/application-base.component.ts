@@ -2,14 +2,8 @@ import { Subscription } from 'rxjs/Rx';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Store } from '@ngrx/store';
-import { createEntitySelector, selectEntities, getEntity } from './../../../store/actions/api.actions';
-import { AppState } from './../../../store/app-state';
-import { GetApplication } from './../../../store/actions/application.actions';
-import { getCurrentPage } from '../../../store/reducers/pagination.reducer';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
-
 import { ApplicationService } from '../application.service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-application-base',
@@ -22,6 +16,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
   sub: Subscription[] = [];
+  isFetching$: Observable<boolean>;
   application;
   
   tabLinks = [
@@ -37,9 +32,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id)
-      this.sub.push(this.applicationService.GetApplication().subscribe(application => {
-        this.application = application;
+      this.sub.push(this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
+        this.application = entity;
       }));
+      this.isFetching$ = this.applicationService.isFetching$;
     }));
   }
 

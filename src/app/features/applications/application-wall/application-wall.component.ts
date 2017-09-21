@@ -5,11 +5,11 @@ import { Observable } from 'rxjs/Rx';
 import { skipWhile } from 'rxjs/operator/skipWhile';
 
 import { Store } from '@ngrx/store';
-import { getAPIResourceEntity } from '../../store/actions/api.actions';
-import { EntitiesState } from '../../store/reducers/entity.reducer';
-import { getCurrentPage, PaginationState, PaginationEntityState } from './../../store/reducers/pagination.reducer';
-import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
-import { AppState } from '../../store/app-state';
+import { getAPIResourceEntity } from '../../../store/actions/api.actions';
+import { EntitiesState } from '../../../store/reducers/entity.reducer';
+import { getCurrentPage, PaginationState, PaginationEntityState } from './../../../store/reducers/pagination.reducer';
+import { GetAllApplications, ApplicationSchema } from '../../../store/actions/application.actions';
+import { AppState } from '../../../store/app-state';
 
 
 @Component({

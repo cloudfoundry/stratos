@@ -3,6 +3,7 @@ import { NgModule, ModuleWithProviders } from "@angular/core";
 import { AuthGuardService } from "./auth-guard.service";
 import { MDAppModule } from "./md.module";
 import { RouterModule } from "@angular/router";
+import { SideNavService } from "./side-nav/side-nav.service";
 
 @NgModule({
   imports: [
@@ -13,7 +14,8 @@ import { RouterModule } from "@angular/router";
     RouterModule
   ],
   providers: [
-    AuthGuardService
+    AuthGuardService,
+    SideNavService
   ]
 })
 export class CoreModule { }

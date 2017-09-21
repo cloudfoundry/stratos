@@ -4,10 +4,11 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CoreModule } from '../core/core.module';
 
-import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { SideNavComponent } from './components/side-nav/side-nav.component';
 import { SteppersComponent } from './components/stepper/steppers/steppers.component';
 import { StepComponent } from './components/stepper/step/step.component';
+import { LoadingPageComponent } from './components/loading-page/loading-page.component';
+import { PageHeaderComponent } from './components/page-header/page-header.component';
 
 
 @NgModule({
@@ -19,18 +20,20 @@ import { StepComponent } from './components/stepper/step/step.component';
     ReactiveFormsModule
   ],
   declarations: [
-    ToolbarComponent,
     SideNavComponent,
     SteppersComponent,
     StepComponent,
+    LoadingPageComponent,
+    PageHeaderComponent
   ],
   exports: [
-    ToolbarComponent,
     SideNavComponent,
     SteppersComponent,
     StepComponent,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LoadingPageComponent,
+    PageHeaderComponent
   ]
 })
 export class SharedModule { }

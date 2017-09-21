@@ -2,12 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot, ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { getEntity } from '../../../store/actions/api.actions';
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
 import { ApplicationService } from '../application.service';
-// import { Todo } from './todo';
-// import { TodoDataService } from './todo-data.service';
 
 @Injectable()
 export class ApplicationResolver implements Resolve<boolean> {
@@ -29,18 +24,5 @@ export class ApplicationResolver implements Resolve<boolean> {
         console.log('Resolver: cfId', cfId);
         
         return true;
-
-        //TODO: RC? What to do for application not found or other core api error??
-        // return getEntity(
-        //     this.store,
-        //     ApplicationSchema.key,
-        //     ApplicationSchema,
-        //     id,
-        //     new GetApplication(id, cfId)
-        // ).first();
-        // return Observable.of({});
-        // a.subscribe(() => {})
-        // console.log('Resolver: a', a);
-        // return a;
     }
 }
