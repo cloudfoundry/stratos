@@ -1,12 +1,14 @@
-import { createEntitySelector, selectEntities, getEntity } from './../../../store/actions/api.actions';
-import { AppState } from './../../../store/app-state';
-import { GetApplication } from './../../../store/actions/application.actions';
-import { Store } from '@ngrx/store';
-import { getCurrentPage } from '../../../store/reducers/pagination.reducer';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { Subscription } from 'rxjs/Rx';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
+
+import { Store } from '@ngrx/store';
+import { createEntitySelector, selectEntities, getEntity } from './../../../store/actions/api.actions';
+import { AppState } from './../../../store/app-state';
+import { GetApplication } from './../../../store/actions/application.actions';
+import { getCurrentPage } from '../../../store/reducers/pagination.reducer';
+import { ApplicationSchema } from '../../../store/actions/application.actions';
+
 import { ApplicationService } from '../application.service';
 
 @Component({
@@ -20,7 +22,6 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
   sub: Subscription[] = [];
-  // isFetching: boolean;
   application;
   
   tabLinks = [
@@ -33,13 +34,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
-    console.log('application-base: on init');
-
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id)
       this.sub.push(this.applicationService.GetApplication().subscribe(application => {
-        console.log('application-base: have app');
         this.application = application;
       }));
     }));

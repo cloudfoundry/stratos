@@ -8,9 +8,6 @@ import { RouterModule } from "@angular/router";
   imports: [
     MDAppModule
   ],
-  declarations: [
-
-  ],
   exports: [
     MDAppModule,
     RouterModule
@@ -19,11 +16,4 @@ import { RouterModule } from "@angular/router";
     AuthGuardService
   ]
 })
-export class CoreModule { 
-    // static forRoot(): ModuleWithProviders {
-    //     return {
-    //       ngModule: GuardsModule,
-    //       providers: [AuthGuardService]
-    //     }
-    //   }
-}
+export class CoreModule { }

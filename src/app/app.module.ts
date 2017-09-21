@@ -25,8 +25,6 @@ import { ApplicationsModule } from './features/applications/applications.module'
     RouteModule,
     ApplicationsModule
   ],
-  providers: [
-  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

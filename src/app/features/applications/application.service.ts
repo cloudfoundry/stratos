@@ -10,26 +10,9 @@ export class ApplicationService {
 
   constructor(private store: Store<AppState>) { }
 
-  // applications: Map<string, Map<string, Observable<any>>> = new Map<string, Map<string, Observable<any>>>();
   application: Observable<any>;
 
   SetApplication(cfId, id) {
-
-    console.log('ApplicationService SetApplication')
-    // if (!this.applications.has(this.cfId)) {
-    //   this.applications.set(this.cfId, new Map<string, Observable<any>>())
-    // }
-    // let cf = this.applications.get(this.cfId);
-
-    // if (!cf.has(this.id)) {
-    //   cf.set(this.id, getEntity(
-    //     this.store,
-    //     ApplicationSchema.key,
-    //     ApplicationSchema,
-    //     id,
-    //     new GetApplication(this.id, cfId)
-    //   ))
-    // }
     if (!this.application) {
       this.application = getEntity(
         this.store,

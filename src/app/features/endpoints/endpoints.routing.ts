@@ -14,12 +14,6 @@ const endpointsRoutes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forChild(endpointsRoutes),
-  ],
-  declarations: [
-  ],
-  exports: [
-  ],
-  providers: [
   ]
 })
 export class EndointsRoutingModule { }

@@ -1,11 +1,14 @@
+import { Component, OnInit } from '@angular/core';
+
+import { skipWhile } from 'rxjs/operator/skipWhile';
 import { denormalize } from 'normalizr';
+
+import { Store } from '@ngrx/store';
+
 import { EntitiesState } from '../../../store/reducers/api.reducer';
 import { getCurrentPage, PaginationState, PaginationEntityState } from './../../../store/reducers/pagination.reducer';
-import { skipWhile } from 'rxjs/operator/skipWhile';
 import { GetAllApplications, ApplicationSchema } from '../../../store/actions/application.actions';
-import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
-import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-application-wall',

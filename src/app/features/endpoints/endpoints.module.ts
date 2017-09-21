@@ -17,10 +17,6 @@ import { EndpointsPageComponent } from './endpoints-page/endpoints-page.componen
   ],
   declarations: [
     EndpointsPageComponent
-  ],
-  exports: [
-  ],
-  providers: [
   ]
 })
 export class EndpointsModule { }

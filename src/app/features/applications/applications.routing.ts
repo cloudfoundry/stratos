@@ -12,23 +12,6 @@ import { VariablesTabComponent } from './application/variables-tab/variables-tab
 import { EventsTabComponent } from './application/events-tab/events-tab.component';
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 
-
-//TODO: RC split pages into sectional folders with own modules, use loadChildren: 'app/pages/pages.module#PagesModule' & RouterModule.forChild(appRoutes),
-// { path: 'applications', component: ApplicationWallComponent },
-// {
-//   path: 'applications/:cfId/:id',
-//   component: ApplicationBaseComponent,
-//   children: [
-//     { path: '', redirectTo: 'summary', pathMatch: 'full' },
-//     { path: 'summary', component: SummaryTabComponent },
-//     { path: 'log-stream', component: LogStreamTabComponent },
-//     { path: 'services', component: ServicesTabComponent },
-//     { path: 'variables', component: VariablesTabComponent },
-//     { path: 'events', component: EventsTabComponent },
-//     { path: 'ssh', component: SshTabComponent }
-//   ]
-// },
-
 const appplicationsRoutes: Routes = [
   {
     path: '',
@@ -58,12 +41,6 @@ const appplicationsRoutes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forChild(appplicationsRoutes),
-  ],
-  declarations: [
-  ],
-  exports: [
-  ],
-  providers: [
   ]
 })
 export class ApplicationsRoutingModule { }

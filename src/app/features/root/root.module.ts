@@ -27,8 +27,6 @@ import { HomePageComponent } from './home-page/home-page.component';
     DashboardBaseComponent,
     LoginPageComponent,
     HomePageComponent
-  ],
-  providers: [
   ]
 })
 export class RootModule { }

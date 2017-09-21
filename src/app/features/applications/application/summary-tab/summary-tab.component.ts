@@ -23,10 +23,7 @@ export class SummaryTabComponent implements OnInit, OnDestroy {
     sub: Subscription;
 
     ngOnInit() {
-      console.log('SummaryTabComponent ngoninit');
       this.sub = this.applicationService.GetApplication().subscribe(application => {
-        console.log('SummaryTabComponent has application');
-        console.log(application);
         this.application = application;
       });
     }

@@ -14,10 +14,6 @@ import { DashboardBaseComponent } from './features/root/dashboard-base/dashboard
 import { HomePageComponent } from './features/root/home-page/home-page.component';
 import { SharedModule } from './shared/shared.module';
 
-
-
-//TODO: RC split pages into sectional folders with own modules, use loadChildren: 'app/pages/pages.module#PagesModule' & RouterModule.forChild(appRoutes),
-
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
@@ -41,28 +37,6 @@ const appRoutes: Routes = [
     SharedModule,
     RouterModule.forRoot(appRoutes),
     RootModule
-  ],
-  declarations: [
-  ],
-  exports: [
-  ],
-  providers: [
   ]
 })
 export class RouteModule { }
-
-      // { path: 'applications', component: ApplicationWallComponent },
-      // {
-      //   path: 'applications/:cfId/:id',
-      //   component: ApplicationBaseComponent,
-      //   children: [
-      //     { path: '', redirectTo: 'summary', pathMatch: 'full' },
-      //     { path: 'summary', component: SummaryTabComponent },
-      //     { path: 'log-stream', component: LogStreamTabComponent },
-      //     { path: 'services', component: ServicesTabComponent },
-      //     { path: 'variables', component: VariablesTabComponent },
-      //     { path: 'events', component: EventsTabComponent },
-      //     { path: 'ssh', component: SshTabComponent }
-      //   ]
-      // },
-
