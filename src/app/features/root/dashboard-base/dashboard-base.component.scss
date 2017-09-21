@@ -1,0 +1,18 @@
+@import '../../../../sass/colors';
+.dashboard {
+  height: 100vh;
+  &__side-nav {
+    background-color: mat-color($suse-blue, 500);
+  }
+  &__toolbar {
+    //TODO: RC? Does this not work due to the _ngcontent thang? Trying to keep this '20' value within this sass file
+    .toolbar {
+      padding: 0 20px;
+    }
+  }
+  &__inner {
+    min-height: 100%;
+    background-color: mat-color($suse-blue, 50);
+    padding: 20px;
+  }
+}
