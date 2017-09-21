@@ -1,9 +1,9 @@
-<div *ngIf="!request.fetching">
-  <h1>{{ application.name }}</h1>
-
-  <div>Running instances: {{ application.running_instances }}</div>
-  <div>Memory: {{ application.memory }}</div>
-</div>
-<div *ngIf="request.fetching">
-  Fetching app...
-</div>
+<app-loading-page [isLoading]="isFetching" [text]="'Getting your application'">
+  <app-page-header>
+    <h1>{{ application.name }} </h1>
+  </app-page-header>
+  <div>
+    <div>Running instances: {{ application.running_instances }}</div>
+    <div>Memory: {{ application.memory }}</div>
+  </div>
+</app-loading-page>

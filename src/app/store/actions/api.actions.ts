@@ -1,11 +1,11 @@
-import { EntityRequestState } from './../reducers/api-request-reducer';
+import { RequestOptions } from '@angular/http';
+import { Action, compose, createFeatureSelector, createSelector, Store } from '@ngrx/store';
+import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
-import { skipWhile } from 'rxjs/operator/skipWhile';
+
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { denormalize, Schema } from 'normalizr';
-import { RequestOptions } from '@angular/http';
-import { Action, createFeatureSelector, createSelector, Store, compose, State } from '@ngrx/store';
+import { EntityRequestState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -89,27 +89,27 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-  .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, any, EntityRequestState]) => {
-    if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
-      store.dispatch(action);
-    }
-    const returnData = {
-      entityRequestInfo,
-      entity
-    };
-    return Observable.of({
-      entityRequestInfo,
-      entity,
-      entities
+    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, any, EntityRequestState]) => {
+      if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
+        store.dispatch(action);
+      }
+      const returnData = {
+        entityRequestInfo,
+        entity
+      };
+      return Observable.of({
+        entityRequestInfo,
+        entity,
+        entities
+      });
+    }).filter(({ entityRequestInfo, entity }) => {
+      return !!entityRequestInfo;
+    }).mergeMap(({ entities, entity, entityRequestInfo }) => {
+      return Observable.of({
+        entityRequestInfo,
+        entity: entity ? denormalize(entity, schema, entities) : {}
+      });
     });
-  }).filter(({ entityRequestInfo }) => {
-    return !!entityRequestInfo;
-  }).mergeMap(({ entities, entity, entityRequestInfo }) => {
-    return Observable.of({
-      entityRequestInfo,
-      entity: entity ? denormalize(entity, schema, entities) : null
-    });
-  });
 };
 
 export function selectEntity(type: string, guid: string) {
@@ -151,13 +151,13 @@ export const getEntityById = (guid: string) => (entities) => {
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
 export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');
 export const getAPIResourceEntity = (resource: APIResource): any => getValueOrNull(resource, 'entity');
-export const getMetadataGuid = (metadata: APIResourceMetadata): string =>  getValueOrNull(metadata, 'guid');
+export const getMetadataGuid = (metadata: APIResourceMetadata): string => getValueOrNull(metadata, 'guid');
 export const getAPIResourceGuid = compose(
-    getMetadataGuid,
-    getAPIResourceMetadata
+  getMetadataGuid,
+  getAPIResourceMetadata
 );
 
-export function getAPIRequestInfoState (state: AppState) {
+export function getAPIRequestInfoState(state: AppState) {
   return state.apiRequest || {};
 }
 

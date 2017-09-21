@@ -1,5 +1,7 @@
+import { ngContentDef } from '@angular/core/src/view/ng_content';
+import { SideNavService } from './../../services/side-nav/side-nav.service';
 import { SideNavItem } from '../../components/side-nav/side-nav.component';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -7,10 +9,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit {
+export class DashboardBaseComponent implements OnInit, AfterViewInit {
 
-  constructor() { }
+  constructor(private sideNaveService: SideNavService) {
 
+  }
+
+  @ViewChild('sidenav') public sidenav;
   sideNavTabs: SideNavItem[];
 
   ngOnInit() {
@@ -33,4 +38,7 @@ export class DashboardBaseComponent implements OnInit {
     ];
   }
 
+  ngAfterViewInit() {
+    this.sideNaveService.sideNav = this.sidenav;
+  }
 }

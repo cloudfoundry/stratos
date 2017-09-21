@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Rx';
 import { getAPIResourceEntity } from '../../store/actions/api.actions';
 import { denormalize } from 'normalizr';
 import { EntitiesState } from '../../store/reducers/entity.reducer';
@@ -18,20 +19,24 @@ export class ApplicationWallComponent implements OnInit {
   constructor(private store: Store<AppState>) { }
 
   applications = [];
-  isFetching = false;
+  isFetching: Observable<boolean>;
 
   ngOnInit() {
     const paginationKey = 'applicationWall';
-    getCurrentPage({
+    const getObs$ = getCurrentPage({
       entityType: ApplicationSchema.key,
       paginationKey: paginationKey,
       store: this.store,
       action: new GetAllApplications(paginationKey),
       schema: [ApplicationSchema]
-    })
+    });
+    this.isFetching = getObs$.mergeMap(({paginationEntity}) => {
+      return Observable.of(paginationEntity.fetching);
+    });
+
+    getObs$
     .subscribe(({ paginationEntity, data }) => {
-      this.isFetching = paginationEntity.fetching;
-      if (!this.isFetching ) {
+      if (!paginationEntity.fetching) {
         this.applications = data.map(getAPIResourceEntity);
       }
     });

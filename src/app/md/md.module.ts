@@ -11,7 +11,9 @@ import {
     MdIconModule,
     MdSelectModule,
     MdGridListModule,
-    MdTableModule
+    MdTableModule,
+    MdToolbarModule,
+    MdProgressBarModule
 } from '@angular/material';
 
 const importExport = [
@@ -27,6 +29,8 @@ const importExport = [
     MdSelectModule,
     MdGridListModule,
     MdTableModule,
+    MdToolbarModule,
+    MdProgressBarModule
 ];
 
 @NgModule({

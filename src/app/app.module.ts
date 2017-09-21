@@ -1,3 +1,4 @@
+import { SideNavService } from './services/side-nav/side-nav.service';
 import { apiRequestReducer } from './store/reducers/api-request-reducer';
 import { paginationReducer } from './store/reducers/pagination.reducer';
 import { CNSISEffect } from './store/effects/cnsis.effects';
@@ -40,6 +41,8 @@ import 'rxjs/add/operator/switchMap';
 import { ApplicationWallComponent } from './pages/application-wall/application-wall.component';
 import { EndpointsPageComponent } from './pages/endpoints-page/endpoints-page.component';
 import { ApplicationPageComponent } from './pages/application-page/application-page.component';
+import { PageHeaderComponent } from './components/page-header/page-header.component';
+import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 
 export function logger(reducer): any {
   // default, no options
@@ -77,7 +80,9 @@ const appRoutes: Routes = [
     StepComponent,
     ApplicationWallComponent,
     EndpointsPageComponent,
-    ApplicationPageComponent
+    ApplicationPageComponent,
+    PageHeaderComponent,
+    LoadingPageComponent
   ],
   imports: [
     HttpModule,
@@ -110,7 +115,8 @@ const appRoutes: Routes = [
     ])
   ],
   providers: [
-    AuthGuardService
+    AuthGuardService,
+    SideNavService
   ],
   bootstrap: [AppComponent]
 })
