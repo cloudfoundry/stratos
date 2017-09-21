@@ -1,0 +1,6 @@
+@import '../app/components/side-nav/side-nav.component.theme.scss';
+@import '../app/pages/dashboard-base/dashboard-base.component.theme.scss';
+@mixin app-theme($theme) {
+  @include stepper-theme($theme);
+  @include dahboard-page-theme($theme);
+}

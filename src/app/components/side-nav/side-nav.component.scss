@@ -1,14 +1,8 @@
-@import '../../../sass/colors';
-@import '../../../sass/theme';
 .side-nav {
-  $border-color: map-get($suse-blue, 900);
+  height: 100%;
   width: 200px;
-  &__wrapper {
-    background-color: $blue;
-  }
   &__top {
     height: 64px;
-    border-bottom: 1px solid;
     display: flex;
     flex-direction: column;
     &-inner {
@@ -26,7 +20,7 @@
   &__item {
     align-items: center;
     display: flex;
-    font-size: 16px;
+    font-size: 15px;
     padding: 20px;
     cursor: pointer;
     border-top: 1px solid;
@@ -34,13 +28,6 @@
     border-color: transparent;
     md-icon {
       padding-right: 15px;
-    }
-    &:hover {
-      background-color: map-get($suse-green, 400);
-    }
-    &--active {
-      background-color: map-get($suse-blue, 400);
-      border-color: $border-color;
     }
   }
   &__logo {
