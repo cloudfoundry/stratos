@@ -45,11 +45,11 @@
     vm.getOrganizations = getOrganizations;
     vm.getSpacesForOrganization = getSpacesForOrganization;
 
-    init();
-
     var initialServiceInstance = _.get(vm.serviceInstance, 'metadata.guid') || appModel.filterParams.cnsiGuid;
     var initialOrganization = _.get(vm.organization, 'metadata.guid') || appModel.filterParams.orgGuid;
     var initialSpace = _.get(vm.space, 'metadata.guid') || appModel.filterParams.spaceGuid;
+
+    init();
 
     function init() {
       vm.organizations = [];
