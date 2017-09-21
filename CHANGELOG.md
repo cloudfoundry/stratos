@@ -3,6 +3,8 @@
 ## 0.9.2 Alpha-3 Release
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.1...0.9.2)
 
+Third alpha release containing the following bug fixes and minor improvements:
+
 - Fix a few service instance bugs [\#1226](https://github.com/SUSE/stratos-ui/pull/1226)
 - Fixes issues where trailing slash in CF endpoint causes problems [\#1224](https://github.com/SUSE/stratos-ui/pull/1224)
 - Reuse unbound routes [\#1223](https://github.com/SUSE/stratos-ui/pull/1223)
@@ -28,7 +30,7 @@
 Second alpha release contains the following fixes:
 
 - Improved documentation when deploying using Helm  [\#1201](https://github.com/SUSE/stratos-ui/pull/1201)
-- Added the ability to deploy the Console helm chart without using shared volumes, to make it easier to deploy in multi-node clusters with basic storage provisioner such as `hostpath` [\#1204] (https://github.com/SUSE/stratos-ui/pull/1204)
+- Added the ability to deploy the Console helm chart without using shared volumes, to make it easier to deploy in multi-node clusters with basic storage provisioner such as `hostpath` [\#1204](https://github.com/SUSE/stratos-ui/pull/1204)
 - Specified the `cflinuxfs2` stack to the CF manifest.yaml, since default CAASP stack `opensuse42` is unable to deploy the app  [\#1205](https://github.com/SUSE/stratos-ui/pull/1205)
 - Changed root of the volume mount for Postgres in kubernetes to address permission issue in certain environments  [\#1203](https://github.com/SUSE/stratos-ui/pull/1203)
 
