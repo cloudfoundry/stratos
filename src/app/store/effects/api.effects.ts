@@ -45,10 +45,16 @@ export class APIEffect {
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
           const entities = this.getEntities(apiAction, response);
-          return [new WrapperAPIActionSuccess(apiAction.actions[1], entities, apiAction.entityKey, apiAction.paginationKey)];
+          return Observable.of(
+            new WrapperAPIActionSuccess(
+              apiAction.actions[1],
+              entities,
+              apiAction
+            )
+          );
         })
         .catch(err => {
-          return [new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction.entityKey, apiAction.paginationKey)];
+          return  Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
         });
     });
 

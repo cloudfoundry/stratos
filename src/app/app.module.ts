@@ -1,3 +1,4 @@
+import { apiRequestReducer } from './store/reducers/api-request-reducer';
 import { paginationReducer } from './store/reducers/pagination.reducer';
 import { CNSISEffect } from './store/effects/cnsis.effects';
 import { cnsisReducer } from './store/reducers/cnsis.reducer';
@@ -20,7 +21,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 
-import { entitiesReducer } from './store/reducers/api.reducer';
+import { entitiesReducer } from './store/reducers/entity.reducer';
 
 import { AppComponent } from './app.component';
 import { LoginPageComponent } from './pages/login-page/login-page.component';
@@ -90,7 +91,8 @@ const appRoutes: Routes = [
       auth: authReducer,
       uaaSetup: uaaSetupReducer,
       cnsis: cnsisReducer,
-      pagination: paginationReducer
+      pagination: paginationReducer,
+      apiRequest: apiRequestReducer
     }, {
         metaReducers
       }),
