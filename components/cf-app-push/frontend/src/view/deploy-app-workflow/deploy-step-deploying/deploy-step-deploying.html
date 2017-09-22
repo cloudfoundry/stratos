@@ -1,6 +1,6 @@
 <cf-log-viewer ng-if="!step.data.uploadingFiles" web-socket="step.data.webSocket"
   filter="step.data.logFilter" disable-status="true"
-  title="step.data.getState().title" status="step.data.getState().status">
+  log-title="step.data.getState().title" status="step.data.getState().status">
 </cf-log-viewer>
 <div ng-if="step.data.uploadingFiles" class="deploy-app-file-upload-status">
   <div class="deploy-app-file-upload-title" translate>deploy-app-dialog.step-deploying.uploading</div>

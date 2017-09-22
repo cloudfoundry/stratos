@@ -1,7 +1,7 @@
 <div class="panel panel-default summary log-viewer-panel">
   <div class="panel-heading action-header">
-    <span ng-if="!cfLogViewer.title" class="log-stream-title" translate>app.app-info.app-tabs.log-stream.title</span>
-    <span ng-if="cfLogViewer.title" class="log-stream-title" translate>{{ cfLogViewer.title }}</span>
+    <span ng-if="!cfLogViewer.logTitle" class="log-stream-title" translate>app.app-info.app-tabs.log-stream.title</span>
+    <span ng-if="cfLogViewer.logTitle" class="log-stream-title" translate>{{ cfLogViewer.logTitle }}</span>
     <span ng-if="cfLogViewer.streamingStatus !== 2 && !cfLogViewer.disableStatus" class="app-log-stream-indicator material-icons"
     ng-class="{
                 'log-stream-ok text-primary': cfLogViewer.streamingStatus === 1,

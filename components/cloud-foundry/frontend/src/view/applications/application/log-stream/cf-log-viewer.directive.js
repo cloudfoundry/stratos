@@ -15,7 +15,7 @@
         filter: '=?',
         disableStatus: '=?',
         fitHeight: '=?',
-        title: '=?',
+        logTitle: '=?',
         status: '=?'
       },
       controller: CfLogViewerController,
