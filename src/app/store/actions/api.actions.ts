@@ -146,7 +146,7 @@ export function getEntityType(type: string) {
 }
 
 export const getEntityById = (guid: string) => (entities) => {
-  return entities[guid]
+  return entities[guid];
 };
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
 export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');

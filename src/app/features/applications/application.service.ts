@@ -9,7 +9,7 @@ import { getEntityObservable } from '../../store/actions/api.actions';
 @Injectable()
 export class ApplicationService {
 
-  //TODO: RC OnDestroy sub.unsubscribe();
+  // TODO: RC OnDestroy sub.unsubscribe();?
 
   constructor(private store: Store<AppState>) { }
 
@@ -31,7 +31,7 @@ export class ApplicationService {
   }
 
   UpdateApplication() {
-    //TODO: RC Force an update to catch remote changes
+    // TODO: RC Force an update to catch remote changes
     console.log('NOT IMPLEMENTED');
   }
 

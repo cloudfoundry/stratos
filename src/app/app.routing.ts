@@ -1,6 +1,6 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 import { CoreModule } from './core/core.module';
 import { AuthGuardService } from './core/auth-guard.service';
@@ -24,7 +24,7 @@ const appRoutes: Routes = [
     canActivate: [AuthGuardService],
     children: [
       { path: 'dashboard', component: HomePageComponent },
-      { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule'},
+      { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
       { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' }
     ]
   }
@@ -35,7 +35,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes),
+    RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules }),
     RootModule
   ]
 })

@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
-  providers: [ ApplicationService ]
+  providers: [ApplicationService]
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
@@ -18,7 +18,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
-  
+
   tabLinks = [
     { link: 'summary', label: 'Summary' },
     { link: 'log-stream', label: 'Log Stream' },
@@ -31,7 +31,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
-      this.applicationService.SetApplication(cfId, id)
+      this.applicationService.SetApplication(cfId, id);
       this.sub.push(this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
         this.application = entity;
       }));
