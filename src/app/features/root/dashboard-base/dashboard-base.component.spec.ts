@@ -1,10 +1,9 @@
-import { SideNavComponent } from './../../components/side-nav/side-nav.component';
-import { RouterTestingModule } from '@angular/router/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
-import { DashboardBaseComponent } from './dashboard-base.component';
-
+import { SideNavComponent } from './../../components/side-nav/side-nav.component';
 import { MDAppModule } from './../../md/md.module';
+import { DashboardBaseComponent } from './dashboard-base.component';
 
 describe('DashboardBaseComponent', () => {
   let component: DashboardBaseComponent;
@@ -12,13 +11,13 @@ describe('DashboardBaseComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardBaseComponent, SideNavComponent ],
+      declarations: [DashboardBaseComponent, SideNavComponent],
       imports: [
         RouterTestingModule,
         MDAppModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

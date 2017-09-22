@@ -1,0 +1,18 @@
+@import '../app/shared/components/side-nav/side-nav.component.theme';
+@import '../app/features/root/dashboard-base/dashboard-base.component.theme';
+@mixin app-theme($theme) {
+  $background-colors: map-get($theme, background);
+  $is-dark: map-get($theme, is-dark);
+  $app-background-color: white;
+  @if $is-dark==true {
+    $app-background-color: lighten(mat-color($background-colors, background), 10%);
+  }
+  @else {
+    $app-background-color: darken(mat-color($background-colors, background), 10%);
+  }
+  html {
+    background-color: $app-background-color;
+  }
+  @include side-nav-theme($theme);
+  @include dahboard-page-theme($theme);
+}

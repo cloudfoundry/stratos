@@ -1,0 +1,24 @@
+@import '~@angular/material/theming';
+@mixin side-nav-theme($theme) {
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
+  .side-nav {
+    background-color: mat-color($background-colors, background);
+    $border-color: mat-color($primary, 700);
+    &__top {
+      background-color: mat-color($primary, 500);
+    }
+    &__item {
+      border-bottom: 1px solid $border-color;
+      &--active {
+        color: mat-color($primary);
+      }
+    }
+    &__items,
+    &__logo-text {
+      color: rgba(mat-color($foreground-colors, base), .65);
+    }
+  }
+}
