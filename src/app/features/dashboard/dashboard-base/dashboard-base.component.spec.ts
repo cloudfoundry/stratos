@@ -13,8 +13,8 @@ describe('DashboardBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DashboardBaseComponent, SideNavComponent],
       imports: [
-        RouterTestingModule,
-        MDAppModule
+	RouterTestingModule,
+	MDAppModule
       ]
     })
       .compileComponents();

@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { AuthGuardService } from './auth-guard.service';
 import { MDAppModule } from './md.module';
+import { PageHeaderService } from './page-header-service/page-header.service';
 import { SideNavService } from './side-nav-service/side-nav.service';
 
 @NgModule({
@@ -15,7 +16,8 @@ import { SideNavService } from './side-nav-service/side-nav.service';
   ],
   providers: [
     AuthGuardService,
-    SideNavService
+    SideNavService,
+    PageHeaderService
   ]
 })
 export class CoreModule { }

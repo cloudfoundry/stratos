@@ -1,9 +1,12 @@
-@import '../app/shared/components/side-nav/side-nav.component.theme';
-@import '../app/features/root/dashboard-base/dashboard-base.component.theme';
+@import '../app/features/dashboard/side-nav/side-nav.component.theme';
+@import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
+@import '../app/features/login/login-page/login-page.component.theme';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
   $is-dark: map-get($theme, is-dark);
   $app-background-color: white;
+  $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
   @if $is-dark==true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
   }
@@ -13,6 +16,8 @@
   html {
     background-color: $app-background-color;
   }
-  @include side-nav-theme($theme);
-  @include dahboard-page-theme($theme);
+  $app-theme: ( app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65));
+  @include login-page-theme($theme, $app-theme);
+  @include side-nav-theme($theme, $app-theme);
+  @include dashboard-page-theme($theme, $app-theme);
 }

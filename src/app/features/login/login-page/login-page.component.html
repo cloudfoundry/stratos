@@ -1,0 +1,20 @@
+<div class="login">
+
+  <md-card class="login__card">
+    <md-progress-bar class="login-loading-bar" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
+    </md-progress-bar>
+    <h1 class="mat-h1">Login</h1>
+    <form class="example-form" (ngSubmit)="login()" #loginForm="ngForm">
+      <md-form-field>
+	<input mdInput required [(ngModel)]="username" name="username" placeholder="Username">
+      </md-form-field>
+      <md-form-field>
+	<input mdInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+      </md-form-field>
+      <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" md-button md-raised-button [disabled]="!loginForm.valid">Login</button>
+    </form>
+  </md-card>
+  <div class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+    {{ message }}
+  </div>
+</div>

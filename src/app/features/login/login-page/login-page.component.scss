@@ -5,7 +5,6 @@
   justify-content: center;
   flex-direction: column;
   &__header {
-    color: white;
     margin-bottom: 20px;
     text-align: center;
   }
@@ -17,11 +16,15 @@
   }
   &__submit {
     width: 100%;
-    color: white;
   }
   &-message {
     height: 20px;
-    color: white;
     padding-top: 20px;
+  }
+  &-loading-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
   }
 }

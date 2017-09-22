@@ -17,12 +17,12 @@ describe('ConsoleUaaWizardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ConsoleUaaWizardComponent, StepComponent, SteppersComponent ],
       imports: [
-        RouterTestingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MDAppModule,
-        StoreModule.forRoot({}),
-        BrowserAnimationsModule
+	RouterTestingModule,
+	FormsModule,
+	ReactiveFormsModule,
+	MDAppModule,
+	StoreModule.forRoot({}),
+	BrowserAnimationsModule
       ]
     })
     .compileComponents();

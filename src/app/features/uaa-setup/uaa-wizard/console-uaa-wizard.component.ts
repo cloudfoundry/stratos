@@ -38,15 +38,15 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
     }));
     return this.store.select('uaaSetup')
       .skipWhile((state: UAASetupState) => {
-        return state.settingUp;
+	return state.settingUp;
       })
       .map((state: UAASetupState) => {
-        this.uaaScopes = state.payload.scope;
-        this.selectedScope = 'stratos.admin';
-        return {
-          success: !state.error,
-          message: state.message
-        };
+	this.uaaScopes = state.payload.scope;
+	this.selectedScope = 'stratos.admin';
+	return {
+	  success: !state.error,
+	  message: state.message
+	};
       });
   }
 
@@ -54,25 +54,25 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
     return this.store.select(s => [s.uaaSetup, s.auth])
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-        return !(uaa.settingUp || auth.verifying);
+	return !(uaa.settingUp || auth.verifying);
       })
       .delay(1000)
       .take(5)
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-        const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
-        if (!validUAASessionData) {
-          this.store.dispatch(new VerifySession());
-        }
-        return validUAASessionData;
+	const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
+	if (!validUAASessionData) {
+	  this.store.dispatch(new VerifySession());
+	}
+	return validUAASessionData;
       })
       .map((state: [UAASetupState, AuthState]) => {
-        if (!state[0].error) {
-          this.router.navigateByUrl('');
-        }
-        return {
-          success: !state[0].error,
-          message: state[0].message
-        };
+	if (!state[0].error) {
+	  this.router.navigateByUrl('');
+	}
+	return {
+	  success: !state[0].error,
+	  message: state[0].message
+	};
       });
   }
   ngOnInit() {

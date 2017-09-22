@@ -1,23 +1,18 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
-import { CoreModule } from './core/core.module';
 import { AuthGuardService } from './core/auth-guard.service';
-
-import { EndpointsPageComponent } from './features/endpoints/endpoints-page/endpoints-page.component';
-
-import { RootModule } from './features/root/root.module';
-import { ConsoleUaaWizardComponent } from './features/root/console-uaa-wizard/console-uaa-wizard.component';
-import { LoginPageComponent } from './features/root/login/login-page.component';
-import { DashboardBaseComponent } from './features/root/dashboard-base/dashboard-base.component';
-import { HomePageComponent } from './features/root/home-page/home-page.component';
+import { CoreModule } from './core/core.module';
+import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
+import { HomePageComponent } from './features/home/home/home-page.component';
+import { ConsoleUaaWizardComponent } from './features/uaa-setup/uaa-wizard/console-uaa-wizard.component';
 import { SharedModule } from './shared/shared.module';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
-  { path: 'login', component: LoginPageComponent },
+  { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
   {
     path: '',
     component: DashboardBaseComponent,
@@ -35,8 +30,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules }),
-    RootModule
+    RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules })
   ]
 })
 export class RouteModule { }
