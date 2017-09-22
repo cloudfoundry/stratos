@@ -15,6 +15,7 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
+  var cfHelpers = require('./po/helpers.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -248,8 +249,10 @@
         // This is a workaround for a Bug
         helpers.loadApp(true);
         navbar.goToView('endpoint.clusters');
-        orgsAndSpaces.goToOrg('e2e');
-        orgsAndSpaces.goToSpace('e2e');
+
+        var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
+        orgsAndSpaces.goToOrg(cfFromConfig.testOrgName || 'e2e');
+        orgsAndSpaces.goToSpace(cfFromConfig.testSpaceName || 'e2e');
       });
 
       it('should show the org/space view and its tabs', function () {
