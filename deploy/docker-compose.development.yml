@@ -9,20 +9,17 @@ services:
       file: common.yml
       service: ui
 
-
-  postgres:
+  mariadb:
     extends:
       file: common.yml
-      service: postgres
-
+      service: mariadb
 
   goose:
     extends:
       file: common.yml
       service: goose
     links:
-      - postgres:postgres
-
+      - mariadb:mariadb
 
   proxy:
     extends:
