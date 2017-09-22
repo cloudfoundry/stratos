@@ -1,23 +1,26 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
-import { SideNavService } from '../../../core/side-nav-service/side-nav.service';
+import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
+import { AppState } from './../../../store/app-state';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent implements OnInit, OnDestroy {
+export class PageHeaderComponent implements OnInit {
 
-  constructor(public sideNavService: SideNavService, public pageHeaderService: PageHeaderService) { }
+  constructor(private store: Store<AppState>) { }
+
+
   // Assumes there will only ever be one header per page
   ngOnInit() {
-    this.pageHeaderService.headerActive = true;
+
   }
 
-  ngOnDestroy() {
-    this.pageHeaderService.headerActive = false;
+  toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
   }
 
 }

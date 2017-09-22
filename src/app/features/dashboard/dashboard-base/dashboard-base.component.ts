@@ -1,8 +1,11 @@
-import { AfterContentInit, Component, ContentChildren, forwardRef, OnInit, QueryList, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { MdDrawer } from '@angular/material';
+import { Store } from '@ngrx/store';
 
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { AppState } from '../../../store/app-state';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavService } from './../../../core/side-nav-service/side-nav.service';
+import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
 @Component({
@@ -12,14 +15,17 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 })
 
 export class DashboardBaseComponent implements OnInit, AfterContentInit {
+  sidenavOpen = true;
 
-  @ContentChildren(forwardRef(() => PageHeaderComponent), { descendants: true })
-  header: QueryList<PageHeaderComponent>;
-
-  constructor(private sideNaveService: SideNavService, public pageHeaderService: PageHeaderService) {
+  constructor(
+    private sideNaveService: SideNavService,
+    public pageHeaderService: PageHeaderService,
+    private store: Store<AppState>
+  ) {
   }
 
-  @ViewChild('sidenav') public sidenav;
+  @ViewChild('sidenav') public sidenav: MdDrawer;
+
   sideNavTabs: SideNavItem[];
 
   ngOnInit() {
@@ -42,9 +48,9 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
     ];
   }
   ngAfterContentInit() {
-    this.sideNaveService.sideNav = this.sidenav;
-    this.header.changes.subscribe(headers => {
-      console.log(headers.length);
-    });
+    this.store.select('dashboard')
+      .subscribe((dashboard: DashboardState) => {
+        dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
+      });
   }
 }
