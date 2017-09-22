@@ -1,0 +1,45 @@
+.side-nav {
+  height: 100%;
+  width: 200px;
+  &__top {
+    height: 64px;
+    display: flex;
+    flex-direction: column;
+    &-inner {
+      display: flex;
+      flex: 1;
+      padding: 10px;
+    }
+  }
+  &__items {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  &__item {
+    align-items: center;
+    display: flex;
+    font-size: 15px;
+    padding: 20px;
+    cursor: pointer;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: transparent;
+    md-icon {
+      padding-right: 15px;
+    }
+  }
+  &__logo {
+    background-image: url('/assets/suse-logo-white.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    flex: 1;
+    &-text {
+      text-transform: uppercase;
+      text-align: center;
+      font-size: 16px;
+      padding: 10px 0;
+    }
+  }
+}
