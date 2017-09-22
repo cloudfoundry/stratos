@@ -242,6 +242,7 @@
             "name-error-required": "Name is required",
             "name-error-unique": "Name must be unique",
             "name-error-pattern": "Name contains invalid pattern",
+            "name-error-maxlength": "Name must be 50 characters or less",
             "plan-label": "Plan",
             "plan-placeholder": "Select a Plan",
             "params-label": "Instance Parameters",

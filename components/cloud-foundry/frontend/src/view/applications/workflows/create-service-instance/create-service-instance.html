@@ -8,10 +8,12 @@
       <span translate ng-if="form.createNewForm.name.$error.required">.name-error-required</span>
       <span translate ng-if="form.createNewForm.name.$error.stratosUnique">.name-error-unique</span>
       <span translate ng-if="form.createNewForm.name.$error.pattern">.name-error-pattern</span>
+      <span translate ng-if="form.createNewForm.name.$error.maxlength">.name-error-maxlength</span>
     </span>
     <input type="text" name="name" class="form-control" tabindex="0"
       ng-model="asyncTaskDialogCtrl.context.options.userInput.name" ng-trim="false"
       stratos-unique items="asyncTaskDialogCtrl.context.options.instanceNames"
+      ng-maxlength="50"
       ng-pattern="/^[a-zA-Z\d\-\_]+$/" required autofocus>
   </div>
 
