@@ -1,25 +1,24 @@
 @import '~@angular/material/theming';
-@mixin stepper-theme($theme) {
+@mixin side-nav-theme($theme) {
   $primary: map-get($theme, primary);
   $accent: map-get($theme, accent);
+  $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
   .side-nav {
-    background-color: mat-color($primary, 500);
+    background-color: mat-color($background-colors, background);
     $border-color: mat-color($primary, 700);
     &__top {
-      border-bottom: 1px solid $border-color;
+      background-color: mat-color($primary, 500);
     }
     &__item {
       border-bottom: 1px solid $border-color;
-      &:hover {
-        background-color: mat-color($primary, 600);
-      }
       &--active {
-        background-color: mat-color($primary, 400);
+        color: mat-color($primary);
       }
     }
     &__items,
     &__logo-text {
-      color: mat-contrast($primary, 500);
+      color: rgba(mat-color($foreground-colors, base), .65);
     }
   }
 }

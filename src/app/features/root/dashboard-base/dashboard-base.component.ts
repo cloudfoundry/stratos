@@ -1,7 +1,7 @@
-import { ngContentDef } from '@angular/core/src/view/ng_content';
-import { SideNavService } from './../../../core/side-nav/side-nav.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
+
+import { SideNavService } from './../../../core/side-nav-service/side-nav.service';
 import { SideNavItem } from './../../../shared/components/side-nav/side-nav.component';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -9,7 +9,7 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, AfterViewInit {
+export class DashboardBaseComponent implements OnInit {
 
   constructor(private sideNaveService: SideNavService) {
 
@@ -19,6 +19,7 @@ export class DashboardBaseComponent implements OnInit, AfterViewInit {
   sideNavTabs: SideNavItem[];
 
   ngOnInit() {
+    this.sideNaveService.sideNav = this.sidenav;
     this.sideNavTabs = [
       {
         text: 'Dashboard',
@@ -36,9 +37,5 @@ export class DashboardBaseComponent implements OnInit, AfterViewInit {
         link: '/endpoints'
       }
     ];
-  }
-
-  ngAfterViewInit() {
-    this.sideNaveService.sideNav = this.sidenav;
   }
 }

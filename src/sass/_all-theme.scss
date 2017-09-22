@@ -1,6 +1,6 @@
 @import '../app/shared/components/side-nav/side-nav.component.theme';
 @import '../app/features/root/dashboard-base/dashboard-base.component.theme';
 @mixin app-theme($theme) {
-  @include stepper-theme($theme);
+  @include side-nav-theme($theme);
   @include dahboard-page-theme($theme);
 }
