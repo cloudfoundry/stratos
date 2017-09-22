@@ -1,7 +1,6 @@
-@import '~@angular/material/theming';
 @mixin dahboard-page-theme($theme) {
   $background-colors: map-get($theme, background);
   .dashboard {
-    background-color: darken(mat-color($background-colors, background), 10%);
+    // background-color: darken(mat-color($background-colors, background), 10%);
   }
 }
