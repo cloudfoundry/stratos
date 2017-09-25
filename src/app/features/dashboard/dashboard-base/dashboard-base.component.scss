@@ -3,6 +3,12 @@
   height: 100vh;
   background-color: transparent;
   &__inner {
+    min-height: 100%;
+    display: flex;
+  }
+  &__content {
+    margin-top: 64px;
     padding: 20px;
+    width: 100%;
   }
 }

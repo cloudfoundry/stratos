@@ -1,6 +1,7 @@
+import { AfterContentInit, Component, ContentChildren, forwardRef, Input, OnInit, QueryList } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
+
 import { StepComponent } from './../step/step.component';
-import { Component, ContentChildren, forwardRef, OnInit, QueryList, AfterContentInit } from '@angular/core';
 
 @Component({
   selector: 'app-steppers',
@@ -10,6 +11,9 @@ import { Component, ContentChildren, forwardRef, OnInit, QueryList, AfterContent
 export class SteppersComponent implements OnInit, AfterContentInit {
 
   constructor() { }
+
+  @Input()
+  cancel = null;
 
   @ContentChildren(forwardRef(() => StepComponent), { descendants: true })
   _steps: QueryList<StepComponent>;

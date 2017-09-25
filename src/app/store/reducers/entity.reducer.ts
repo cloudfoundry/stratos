@@ -1,18 +1,18 @@
-import { mergeState } from './../helpers/reducer.helper';
-import { EntitiesState } from './entity.reducer';
 import { ApiActionTypes } from './../actions/api.actions';
-import { Action } from '@ngrx/store';
+import { mergeState } from './../helpers/reducer.helper';
 
 export interface EntitiesState {
     application: any;
     stack: any;
     space: any;
+    organization: any;
 }
 
 export const defaultEntitiesState = {
-     application: {},
-     stack: {},
-     space: {}
+    application: {},
+    stack: {},
+    space: {},
+    organization: {}
 };
 
 export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action) {

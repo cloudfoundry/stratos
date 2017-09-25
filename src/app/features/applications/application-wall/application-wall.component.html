@@ -1,7 +1,7 @@
 <app-page-header>
   <h1>Applications</h1>
   <div class="page-header-right">
-    <button md-icon-button><md-icon>add</md-icon></button>
+    <button md-icon-button [routerLink]="'/applications/new/'"><md-icon>add</md-icon></button>
   </div>
 </app-page-header>
 <app-loading-page [isLoading]="isFetching" [text]="'Getting your applications'">

@@ -1,20 +1,40 @@
-<div class="uaa-wizard">
-  <app-steppers>
-    <app-step title="Introduction">
-      <div>
-        <p>Welcome to SUSE Cloud Foundry Console.</p>
-        <p>
-          SUSE Cloud Foundry Console is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators
-          to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
-        </p>
-        <p>Before accessing the console for the first time some configuration information is required. Press <b>NEXT</b> to
-          get started.</p>
-      </div>
-    </app-step>
-    <app-step title="UAA Endpoint">
-    </app-step>
-    <app-step title="Console Admin Scope">
-
-    </app-step>
-  </app-steppers>
-</div>
+<app-page-header>
+  Create
+</app-page-header>
+<app-steppers cancel="/applications">
+  <app-step title="Cloud Foundary">
+    <b>Select a Cloud Foundry instance, organization and space for the app.</b>
+    <app-stepper-form>
+      <md-select placeholder="Cloud Foundary" name="cf">
+        <md-option *ngFor="let cf of cfList" [value]="cf.guid">
+          <span>{{ cf.name }}</span>
+        </md-option>
+      </md-select>
+      <md-form-field>
+        <input mdInput placeholder="Organization">
+      </md-form-field>
+      <md-form-field>
+        <input mdInput placeholder="Space">
+      </md-form-field>
+    </app-stepper-form>
+  </app-step>
+  <app-step title="Name">
+    <b>Please select a unique name for your application</b>
+    <app-stepper-form>
+      <md-form-field>
+        <input mdInput placeholder="Application Name">
+      </md-form-field>
+    </app-stepper-form>
+  </app-step>
+  <app-step title="Create Route">
+    <b>Create a route</b>
+    <app-stepper-form>
+      <md-form-field>
+        <input mdInput placeholder="Domain">
+      </md-form-field>
+      <md-form-field>
+        <input mdInput placeholder="Host">
+      </md-form-field>
+    </app-stepper-form>
+  </app-step>
+</app-steppers>

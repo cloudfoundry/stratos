@@ -1,19 +1,12 @@
-import { AppState } from '../app-state';
 import { Action, createSelector } from '@ngrx/store';
+
+import { AppState } from '../app-state';
+import { CNSISState } from '../reducers/cnsis.reducer';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';
 export const GET_CNSIS_SUCCESS = '[CNSIS] Get all success';
 export const GET_CNSIS_FAILED = '[CNSIS] Get all failed';
-
-export interface UaaSetupData {
-    console_client: string;
-    password: string;
-    skip_ssl_validation: boolean;
-    uaa_endpoint: string;
-    username: string;
-    console_client_secret?: string;
-}
 
 export class GetAllCNSIS implements Action {
     constructor(public login = false) { }
@@ -30,9 +23,9 @@ export class GetAllCNSISFailed implements Action {
     type = GET_CNSIS_FAILED;
 }
 
-export const cnsisSelector = (state: AppState) => state.cnsis;
+export const cnsisSelector = (state: AppState): CNSISState => state.cnsis;
 
-export const cnsisEntitySelector = createSelector(
+export const cnsisEntitySelector = createSelector<AppState, CNSISState, CNSISState['entities']>(
     cnsisSelector,
     state => state.entities
 );

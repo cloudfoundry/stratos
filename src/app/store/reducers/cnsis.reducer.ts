@@ -1,5 +1,4 @@
-import { GET_CNSIS, GET_CNSIS_SUCCESS, GET_CNSIS_FAILED } from './../actions/cnsis.actions';
-import { Action } from '@ngrx/store';
+import { GET_CNSIS, GET_CNSIS_FAILED, GET_CNSIS_SUCCESS } from './../actions/cnsis.actions';
 
 
 export interface CNSISModel {
