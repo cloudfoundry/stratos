@@ -13,8 +13,6 @@ export class PageHeaderComponent implements OnInit {
 
   constructor(private store: Store<AppState>) { }
 
-
-  // Assumes there will only ever be one header per page
   ngOnInit() {
 
   }
