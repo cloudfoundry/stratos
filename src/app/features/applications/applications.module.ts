@@ -1,9 +1,8 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
 
-import { ApplicationsRoutingModule } from './applications.routing';
-
+import { CoreModule } from '../../core/core.module';
+import { SharedModule } from '../../shared/shared.module';
+import { ApplicationWallComponent } from './application-wall/application-wall.component';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { EventsTabComponent } from './application/events-tab/events-tab.component';
 import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
@@ -11,10 +10,8 @@ import { ServicesTabComponent } from './application/services-tab/services-tab.co
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { SummaryTabComponent } from './application/summary-tab/summary-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
-import { ApplicationWallComponent } from './application-wall/application-wall.component';
-
-import { CoreModule } from '../../core/core.module';
-import { SharedModule } from '../../shared/shared.module';
+import { ApplicationsRoutingModule } from './applications.routing';
+import { CreateApplicationComponent } from './create-application/create-application.component';
 
 
 @NgModule({
@@ -31,7 +28,8 @@ import { SharedModule } from '../../shared/shared.module';
     ServicesTabComponent,
     SshTabComponent,
     SummaryTabComponent,
-    VariablesTabComponent
+    VariablesTabComponent,
+    CreateApplicationComponent
   ]
 })
 export class ApplicationsModule { }
