@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { CoreModule } from '../core/core.module';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
-import { PageHeaderComponent } from './components/page-header/page-header.component';
+import { PageHeaderModule } from './components/page-header/page-header.module';
 import { StepComponent } from './components/stepper/step/step.component';
 import { SteppersComponent } from './components/stepper/steppers/steppers.component';
 
@@ -14,6 +14,7 @@ import { SteppersComponent } from './components/stepper/steppers/steppers.compon
   imports: [
     CommonModule,
     CoreModule,
+    PageHeaderModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule
@@ -21,8 +22,7 @@ import { SteppersComponent } from './components/stepper/steppers/steppers.compon
   declarations: [
     SteppersComponent,
     StepComponent,
-    LoadingPageComponent,
-    PageHeaderComponent
+    LoadingPageComponent
   ],
   exports: [
     SteppersComponent,
@@ -30,7 +30,7 @@ import { SteppersComponent } from './components/stepper/steppers/steppers.compon
     FormsModule,
     ReactiveFormsModule,
     LoadingPageComponent,
-    PageHeaderComponent
+    PageHeaderModule
   ]
 })
 export class SharedModule { }
