@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GetAllOrganizations } from '../../../store/actions/organization.actions';
-import { GetAllSpaces } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 
 @Component({
@@ -20,7 +19,7 @@ export class CreateApplicationComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(new GetAllOrganizations(this.paginationKey));
-    this.store.dispatch(new GetAllSpaces(this.paginationKey));
+    // this.store.dispatch(new GetAllSpaces(this.paginationKey));
     // this.store.select(cnsisEntitySelector)
     //   .take(1)
     //   .mergeMap(cfList => Observable.of(cfList.filter(cf => cf.registered)))

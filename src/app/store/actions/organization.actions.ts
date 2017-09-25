@@ -2,14 +2,19 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { APIAction, ApiActionTypes, getAPIResourceGuid } from './api.actions';
+import { SpaceSchema } from './space.actions';
 
 export const GET_ALL = '[Organization] Get all';
 export const GET_ALL_SUCCESS = '[Organization] Get all success';
 export const GET_ALL_FAILED = '[Organization] Get all failed';
 
-export const OrganizationSchema = new schema.Entity('organization', {}, {
-    idAttribute: getAPIResourceGuid
-});
+export const OrganizationSchema = new schema.Entity('organization', {
+    entity: {
+        spaces: [SpaceSchema]
+    }
+}, {
+        idAttribute: getAPIResourceGuid
+    });
 
 export class GetAllOrganizations implements APIAction {
     constructor(public paginationKey?: string) {

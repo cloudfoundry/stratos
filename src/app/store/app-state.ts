@@ -5,6 +5,7 @@ import { EntitiesState } from './reducers/entity.reducer';
 import { PaginationState } from './reducers/pagination.reducer';
 import { UAASetupState } from './reducers/uaa-setup.reducers';
 
+
 export interface AppState {
   entities: EntitiesState;
   auth: AuthState;

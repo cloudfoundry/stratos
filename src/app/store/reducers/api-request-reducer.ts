@@ -1,8 +1,7 @@
-import { mergeState } from './../helpers/reducer.helper';
-import { defaultEntitiesState, EntitiesState } from './entity.reducer';
-import { APIAction, ApiActionTypes } from './../actions/api.actions';
-import { Action } from '@ngrx/store';
+import { ApiActionTypes } from './../actions/api.actions';
+import { defaultEntitiesState } from './entity.reducer';
 
+const defaultState = { ...defaultEntitiesState };
 export interface EntityRequestState {
     fetching: boolean;
     updating: boolean;
@@ -14,23 +13,24 @@ const defaultEntityRequest = {
     fetching: false,
     updating: false,
     error: false,
-    message: ''
+    message: 'HELLLLOOOOOO'
 };
 
-function getEntityRequestState(state: EntitiesState, { entityKey, guid }) {
-    const requestState = state[entityKey][guid];
+function getEntityRequestState(state, { entityKey, guid }) {
+    const requestState = { ...state[entityKey][guid] };
     if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
-        return { ...requestState };
+        return requestState;
     }
     return { ...defaultEntityRequest };
 }
 
-function setEntityRequestState(state: EntitiesState, requestState, { entityKey, guid }) {
-    state[entityKey][guid] = requestState;
-    return { ...state };
+function setEntityRequestState(state, requestState, { entityKey, guid }) {
+    const newState = { ...state };
+    newState[entityKey][guid] = requestState;
+    return newState;
 }
 
-export function apiRequestReducer(state: EntitiesState = defaultEntitiesState, action) {
+export function apiRequestReducer(state = defaultState, action) {
     const actionType = action.apiType || action.type;
     switch (actionType) {
         case ApiActionTypes.API_REQUEST_START:
@@ -47,17 +47,18 @@ export function apiRequestReducer(state: EntitiesState = defaultEntitiesState, a
                 requestSuccessState.error = false;
                 return setEntityRequestState(state, requestSuccessState, action.apiAction);
             } else if (action.response && action.response.entities) {
-                const entities = action.response.entities;
-                // Make this more functional programming
+                const entities = { ...action.response.entities };
+                // Make this more functional programming-y
                 Object.keys(entities).forEach(entityKey => {
                     Object.keys(entities[entityKey]).forEach(guid => {
                         const entState = getEntityRequestState(state, { entityKey, guid });
                         entState.fetching = false;
                         entState.error = false;
+                        entState.message = 'WF';
                         setEntityRequestState(state, entState, { entityKey, guid });
                     });
                 });
-                return state;
+                return { ...state };
             }
             return state;
         case ApiActionTypes.API_REQUEST_FAILED:
