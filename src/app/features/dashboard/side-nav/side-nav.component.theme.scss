@@ -13,12 +13,12 @@
     &__item {
       border-bottom: 1px solid $border-color;
       &--active {
-	color: mat-color($primary);
+        color: mat-color($primary);
       }
     }
     &__items,
     &__logo-text {
-      color: ma-get($app-theme, app-background-text-color);
+      color: map-get($app-theme, app-background-text-color);
     }
   }
 }

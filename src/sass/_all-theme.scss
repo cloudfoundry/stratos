@@ -1,6 +1,7 @@
 @import '../app/features/dashboard/side-nav/side-nav.component.theme';
 @import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
 @import '../app/features/login/login-page/login-page.component.theme';
+@import '../app//shared/components/stepper/steppers/steppers.component.theme';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
@@ -20,4 +21,5 @@
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
   @include dashboard-page-theme($theme, $app-theme);
+  @include steppers-theme($theme, $app-theme)
 }
