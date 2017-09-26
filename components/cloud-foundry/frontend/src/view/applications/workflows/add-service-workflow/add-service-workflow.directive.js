@@ -29,15 +29,15 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.appEventService} appEventService - the event management service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view widget
+   * @param {object} cfServiceCreateServiceInstanceWorkflow - service to support creating a new service instance
    * @property {object} modal - the detail view modal instance
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, $translate, modelManager, appEventService, frameworkDetailView) {
+  function AddServiceWorkflowController($q, $scope, $translate, modelManager, appEventService, frameworkDetailView, cfServiceCreateServiceInstanceWorkflow) {
     var vm = this;
 
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     var serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
@@ -55,7 +55,6 @@
     };
 
     vm.reset = reset;
-    vm.addService = addService;
     vm.addBinding = addBinding;
     vm.startWorkflow = startWorkflow;
     vm.stopWorkflow = stopWorkflow;
@@ -110,18 +109,17 @@
           {
             templateUrl: path + 'instance.html',
             formName: 'addInstanceForm',
-            nextBtnText: 'app.app-info.app-tabs.services.add.add',
+            nextBtnText: 'app.app-info.app-tabs.services.bind.bind-to-app',
             showBusyOnNext: true,
             stepCommit: true,
             onNext: function () {
-              return vm.addService().then(function () {
-                return vm.addBinding().then(function () {
-                  return $q.resolve();
-                }, function () {
-                  return _onServiceBindingError();
-                });
+              var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
+              vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
+              vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
+              return vm.addBinding().then(function () {
+                return $q.resolve();
               }, function () {
-                return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-create');
+                return _onServiceBindingError();
               });
             }
           }
@@ -158,6 +156,18 @@
         serviceInstance: null,
         servicePlan: null
       };
+
+      vm.options.createServiceBinding = createServiceBinding;
+    }
+
+    function createServiceBinding() {
+      cfServiceCreateServiceInstanceWorkflow.show(vm.data.cnsiGuid, vm.data.spaceGuid, vm.options.instanceNames, vm.options.servicePlans)
+        .then(function (newServiceInstance) {
+          _loadServiceInstances().then(function () {
+            // AUto-select the instance that was just created
+            vm.userInput.existingServiceInstance = _.find(vm.options.instances, function (o) { return o.metadata.guid === newServiceInstance.metadata.guid; });
+          });
+        });
     }
 
     /**
@@ -236,43 +246,6 @@
     }
 
     /**
-     * @function addService
-     * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
-     * @description Add a new service instance to the space
-     * @returns {object} A promise object
-     */
-    function addService() {
-      var deferred = $q.defer();
-
-      if (vm.options.activeTab === 0) {
-        var newInstance = {
-          name: vm.options.userInput.name,
-          service_plan_guid: vm.options.userInput.plan.metadata.guid,
-          space_guid: vm.data.spaceGuid
-        };
-        instanceModel.createServiceInstance(vm.data.cnsiGuid, newInstance)
-          .then(function (newServiceInstance) {
-            if (angular.isDefined(newServiceInstance.metadata)) {
-              vm.options.serviceInstance = newServiceInstance;
-              deferred.resolve();
-            } else {
-              deferred.reject();
-            }
-          }, function () {
-            deferred.reject();
-          });
-        vm.options.servicePlan = vm.options.userInput.plan;
-      } else {
-        var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
-        vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
-        vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
-        deferred.resolve();
-      }
-
-      return deferred.promise;
-    }
-
-    /**
      * @function addBinding
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Add a new service binding to the application
@@ -301,16 +274,18 @@
      * @returns {object} A promise object
      */
     function startWorkflow() {
+
       var config = {
         templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
-        title: 'app.app-info.app-tabs.services.add.title',
-        titleTranslateValues: { appName: vm.data.app.summary.name },
+        title: 'app.app-info.app-tabs.service-catalogue.bind.title',
+        titleTranslateValues: { appName: vm.data.app.summary.name, svcName: vm.options.service.entity.label},
         dialog: true,
-        class: 'dialog-form-larger'
+        class: 'dialog-form-larger add-service-workflow-dialog'
       };
       var context = {
         addServiceActions: vm.addServiceActions,
-        options: vm.options
+        options: vm.options,
+        createServiceBinding: vm.createServiceBinding
       };
 
       return frameworkDetailView(config, context);
@@ -334,20 +309,19 @@
      */
     function finishWorkflow() {
       if (!vm.data.confirm) {
-        vm.addService().then(function () {
-          vm.addBinding().then(function () {
-            // show notification for successful binding
-            var successMsg = $translate.instant('app.app-info.app-tabs.services.add.notifications.success', {
-              service: vm.options.serviceInstance.entity.name,
-              appName: vm.data.app.summary.name
-            });
-            appEventService.$emit('events.NOTIFY_SUCCESS', {message: successMsg});
-            vm.modal.close();
-          }, function () {
-            return _onServiceBindingError();
+        var planGuid = vm.options.userInput.existingServiceInstance.entity.service_plan_guid;
+        vm.options.servicePlan = vm.options.servicePlanMap[planGuid];
+        vm.options.serviceInstance = vm.options.userInput.existingServiceInstance;
+        return vm.addBinding().then(function () {
+          // show notification for successful binding
+          var successMsg = $translate.instant('app.app-info.app-tabs.services.add.notifications.success', {
+            service: vm.options.serviceInstance.entity.name,
+            appName: vm.data.app.summary.name
           });
+          appEventService.$emit('events.NOTIFY_SUCCESS', {message: successMsg});
+          vm.modal.close();
         }, function () {
-          return $q.reject('app.app-info.app-tabs.services.add.notifications.failure-create');
+          return _onServiceBindingError();
         });
       } else {
         vm.modal.close();

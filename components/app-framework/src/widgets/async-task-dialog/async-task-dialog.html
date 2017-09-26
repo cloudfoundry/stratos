@@ -1,5 +1,5 @@
 <div class="async-dialog">
-  <div class="detail-view-content no-margin" ng-keydown="$event.keyCode === 13 && !asyncTaskDialogCtrl.disableSubmit() && asyncTaskDialogCtrl.invokeAction()">
+  <div class="detail-view-content no-margin" ng-keydown="$event.keyCode === 13 && asyncTaskDialogCtrl.canUseEnter($event) && !asyncTaskDialogCtrl.disableSubmit() && asyncTaskDialogCtrl.invokeAction()">
     <div ng-if="asyncTaskDialogCtrl.content.title" class="detail-view-header">
       <h4 translate translate-values="{{asyncTaskDialogCtrl.content.titleTranslateValues}}">{{asyncTaskDialogCtrl.content.title}}</h4>
     </div>

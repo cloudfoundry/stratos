@@ -25,6 +25,7 @@
     "jquery": "~1.11.3",
     "lodash": "~4.0.1",
     "ngSmoothScroll": "~2.0.0",
+    "ng-tags-input": "~3.2.0",
     "angular-cookies": "1.4",
     "angular-utf8-base64": "~0.0.5",
     "SpinKit": "spinkit#~1.2.5"

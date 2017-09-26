@@ -2,10 +2,23 @@
   'use strict';
 
   describe('add-service-workflow directive', function () {
-    var $httpBackend, $scope, appEventService, mockApp, mockService, addServiceWorkflowCtrl, appModel;
+    var $httpBackend, $scope, appEventService, mockApp, mockService, addServiceWorkflowCtrl, appModel, createServiceDialog;
 
     beforeEach(module('templates'));
     beforeEach(module('console-app'));
+
+    beforeEach(module(function ($provide) {
+      $provide.value('frameworkAsyncTaskDialog', function (config, context, submit) {
+        return {
+          result: {
+            config: config,
+            context: context,
+            options: context ? context.options : {},
+            submit: submit
+          }
+        };
+      });
+    }));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
@@ -24,6 +37,10 @@
       addServiceWorkflowCtrl = element.controller('addServiceWorkflow');
       spyOn(addServiceWorkflowCtrl, 'reset').and.callThrough();
       spyOn(addServiceWorkflowCtrl, 'startWorkflow').and.callThrough();
+
+      //frameworkAsyncTaskDialog
+
+      createServiceDialog = $injector.get('cfServiceCreateServiceInstanceWorkflow');
 
       mockService = {
         entity: { extra: '{"displayName":"Service","longDescription":"Service description"}' },
@@ -117,6 +134,17 @@
       });
     });
 
+    describe('createServiceInstanceWorkflow', function () {
+      it('dialog creation', function () {
+        var dialog = createServiceDialog.show('guid', 'space', [], []);
+        expect(dialog).toBeDefined();
+        expect(dialog.config).toBeDefined();
+        expect(dialog.context).toBeDefined();
+        expect(dialog.options).toBeDefined();
+        expect(dialog.submit).toBeDefined();
+      });
+    });
+
     describe('addService', function () {
       beforeEach(function () {
         var config = {
@@ -146,9 +174,12 @@
         addServiceWorkflowCtrl.userInput.plan = {
           metadata: { guid: 'a5ac915f-b746-42c5-8506-6d318bf21107' }
         };
-        addServiceWorkflowCtrl.addService().then(function () {
-          expect(addServiceWorkflowCtrl.options.servicePlan).not.toBe(null);
-          expect(addServiceWorkflowCtrl.options.serviceInstance).not.toBe(null);
+
+        var dialog = createServiceDialog.show('guid', mockApp.space_guid, [], []);
+        dialog.options.userInput = addServiceWorkflowCtrl.userInput;
+        dialog.submit().then(function (newInstance) {
+          expect(newInstance.entity.name).toEqual(newInstanceSpec.name);
+          expect(newInstance.entity.service_plan_guid).toEqual(newInstanceSpec.service_plan_guid);
         });
 
         $httpBackend.flush();
@@ -159,31 +190,41 @@
         var mockInstancesApi = mock.cloudFoundryAPI.ServiceInstances;
         var CreateServiceInstance = mockInstancesApi.CreateServiceInstance({});
         $httpBackend.whenPOST(CreateServiceInstance.url)
-          .respond(200, CreateServiceInstance.response['400'].body);
+          .respond(400, CreateServiceInstance.response['400'].body);
 
+        addServiceWorkflowCtrl.userInput.name = 'New Instance';
         addServiceWorkflowCtrl.userInput.plan = {
           metadata: { guid: 'a5ac915f-b746-42c5-8506-6d318bf21107' }
         };
-        addServiceWorkflowCtrl.addService().then(angular.noop, function () {
-          expect(addServiceWorkflowCtrl.options.serviceInstance).toBe(null);
+
+        var dialog = createServiceDialog.show('guid', mockApp.space_guid, [], []);
+        dialog.options.userInput = addServiceWorkflowCtrl.userInput;
+        dialog.submit().then(function () {
+          fail('should not succeed');
         });
 
         $httpBackend.flush();
       });
 
       it('should set existing service instance', function () {
-        addServiceWorkflowCtrl.options.activeTab = 1;
 
         $httpBackend.flush();
+
+        var mockInstancesApi = mock.cloudFoundryAPI.ServiceBindings;
+        var CreateServiceBinding = mockInstancesApi.CreateServiceBinding({});
+        $httpBackend.whenPOST(CreateServiceBinding.url)
+          .respond(200, CreateServiceBinding.response['200'].body);
 
         var firstInstance = addServiceWorkflowCtrl.options.instances[0];
         addServiceWorkflowCtrl.userInput.existingServiceInstance = firstInstance;
 
-        addServiceWorkflowCtrl.addService().then(function () {
+        addServiceWorkflowCtrl.finishWorkflow().then(function () {
           expect(addServiceWorkflowCtrl.options.servicePlan).not.toBe(null);
           expect(addServiceWorkflowCtrl.options.serviceInstance).not.toBe(null);
           expect(addServiceWorkflowCtrl.options.serviceInstance).toEqual(firstInstance);
         });
+
+        $httpBackend.flush();
       });
     });
 
@@ -287,7 +328,6 @@
           close: angular.noop
         };
 
-        spyOn(addServiceWorkflowCtrl, 'addService').and.callThrough();
         spyOn(addServiceWorkflowCtrl, 'addBinding').and.callThrough();
         spyOn(addServiceWorkflowCtrl.modal, 'close').and.callThrough();
 
@@ -300,7 +340,6 @@
 
         $httpBackend.flush();
 
-        expect(addServiceWorkflowCtrl.addService).toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.addBinding).toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.modal.close).toHaveBeenCalled();
       });
@@ -311,13 +350,11 @@
           close: angular.noop
         };
 
-        spyOn(addServiceWorkflowCtrl, 'addService').and.callThrough();
         spyOn(addServiceWorkflowCtrl, 'addBinding').and.callThrough();
         spyOn(addServiceWorkflowCtrl.modal, 'close').and.callThrough();
 
         addServiceWorkflowCtrl.finishWorkflow();
 
-        expect(addServiceWorkflowCtrl.addService).not.toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.addBinding).not.toHaveBeenCalled();
         expect(addServiceWorkflowCtrl.modal.close).toHaveBeenCalled();
       });
