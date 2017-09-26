@@ -84,7 +84,6 @@ jobs:
 - name: deploy-helm
   plan:
   - get: stratos-ui
-    trigger: true
     passed: [build-helm-images]
   - get: helm-chart-Chart
     passed: [build-helm-images]
