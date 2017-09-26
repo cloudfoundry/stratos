@@ -257,6 +257,10 @@
         app_guid: vm.data.app.summary.guid
       };
 
+      if (vm.options.userInput && vm.options.userInput.params) {
+        bindingSpec.parameters = vm.options.userInput.params;
+      }
+
       return bindingModel.createServiceBinding(vm.data.cnsiGuid, bindingSpec)
         .then(function (newBinding) {
           if (angular.isDefined(newBinding.metadata)) {

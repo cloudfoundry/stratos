@@ -63,9 +63,35 @@
       getStep: function (session) {
         var data = {
           deployState: deployState,
-          logFilter: logFilter
+          logFilter: logFilter,
+          getState: getState
         };
         var wizardData = session.wizard;
+
+        function getState() {
+          switch (data.deployStatus) {
+            case data.deployState.PUSHING:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploying',
+                status: 2
+              };
+            case data.deployState.DEPLOYED:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploy-success',
+                status: 1
+              };
+            case data.deployState.FAILED:
+              return {
+                title: data.deployFailure,
+                status: 3
+              };
+            default:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploying',
+                status: 2
+              };
+          }
+        }
 
         var step = {
           title: 'deploy-app-dialog.step-deploying.title',

@@ -433,18 +433,7 @@
           // changed the org and space filter
           needToReload = needToReload || !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
-          if (needToReload) {
-            _reload();
-          } else {
-            if (vm.filter.cnsiGuid === 'all') {
-              vm.model.resetFilter();
-            } else {
-              vm.model.filterByCluster(vm.filter.cnsiGuid);
-            }
-            vm.paginationProperties.pageNumber = 1;
-            vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
-            _loadPage(1);
-          }
+          _reload(false, !needToReload);
         });
     }
 

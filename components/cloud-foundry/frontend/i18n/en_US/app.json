@@ -242,12 +242,22 @@
             "name-error-required": "Name is required",
             "name-error-unique": "Name must be unique",
             "name-error-pattern": "Name contains invalid pattern",
+            "name-error-maxlength": "Name must be 50 characters or less",
             "plan-label": "Plan",
             "plan-placeholder": "Select a Plan",
+            "params-label": "Instance Parameters",
+            "binding-params-label": "Binding Parameters",
+            "service-params": "Service Instance Parameters",
+            "binding-params": "Service Binding Parameters",
+            "params-placeholder": "Enter Service Parameter JSON",
+            "tags-label": "Tags",
+            "edit-params": "Edit",
+            "done": "Done",
             "button": {
               "yes": "Create",
               "no": "@:buttons.cancel"
-            }
+            },
+            "json-error-invalid": "Must be valid JSON"
           },
           "view-envs": {
             "title": "{{instanceName}}: Variables"

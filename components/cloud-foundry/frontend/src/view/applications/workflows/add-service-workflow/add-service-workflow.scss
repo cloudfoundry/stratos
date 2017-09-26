@@ -36,7 +36,7 @@
 
   .select-instance-tabs {
 
-    min-height: 264px;
+    min-height: 300px;
 
     .nav.nav-tabs {
       .uib-tab > a {
@@ -62,7 +62,7 @@
     .no-bindable-instances > td {
       text-align: center;
       p {
-        margin: $console-unit-space / 2;
+        margin: $console-half-space;
       }
     }
 
