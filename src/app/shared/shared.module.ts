@@ -8,6 +8,8 @@ import { LoadingPageComponent } from './components/loading-page/loading-page.com
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { StepComponent } from './components/stepper/step/step.component';
 import { SteppersComponent } from './components/stepper/steppers/steppers.component';
+import { DisplayValueComponent } from './components/display-value/display-value.component';
+import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 
 
 @NgModule({
@@ -22,7 +24,9 @@ import { SteppersComponent } from './components/stepper/steppers/steppers.compon
   declarations: [
     SteppersComponent,
     StepComponent,
-    LoadingPageComponent
+    LoadingPageComponent,
+    DisplayValueComponent,
+    EditableDisplayValueComponent
   ],
   exports: [
     SteppersComponent,
@@ -30,7 +34,9 @@ import { SteppersComponent } from './components/stepper/steppers/steppers.compon
     FormsModule,
     ReactiveFormsModule,
     LoadingPageComponent,
-    PageHeaderModule
+    PageHeaderModule,
+    DisplayValueComponent,
+    EditableDisplayValueComponent
   ]
 })
 export class SharedModule { }

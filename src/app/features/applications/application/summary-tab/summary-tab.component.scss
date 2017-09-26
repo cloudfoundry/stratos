@@ -1,0 +1,54 @@
+.summary__cards {
+  max-width: 1000px;
+  display: flex;
+  flex-wrap: wrap;
+  $summary-card-spacing: 20px; // @media (min-width: 50em)
+  md-card {
+    margin-top: $summary-card-spacing;
+    margin-right: $summary-card-spacing;
+    md-card-header md-card-title {
+      // please tell me why .mat-card-header-text does not work??
+      margin-left: -8px; // h2 {
+      //   margin: 0;
+      // }
+    }
+    md-card-content {
+      margin-bottom: 0;
+    }
+    md-card-actions {
+      .mat-slide-toggle {
+        align-self: center;
+        height: 20px;
+        line-height: 20px;
+      }
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+  }
+  md-card:first-of-type {
+    md-card-content form {
+      display: flex;
+      flex-direction: row;
+      md-list {
+        flex: 1
+      }
+    }
+    flex: 1 1 500px;
+    min-width: 500px;
+  }
+  md-card:not(:first-of-type) {
+    flex: 1 1 300px;
+    min-width: 250px;
+  }
+  @media (min-width: 1190px) {
+    md-card:first-of-type {
+      flex: 1 1 800px;
+    }
+  }
+  @media (max-width: 825px) {
+    md-card:first-of-type {
+      min-width: 300px;
+    }
+  }
+}
