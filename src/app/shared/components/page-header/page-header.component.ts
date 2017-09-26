@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-import { SideNavService } from '../../../core/side-nav-service/side-nav.service';
+import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
+import { AppState } from './../../../store/app-state';
 
 @Component({
   selector: 'app-page-header',
@@ -9,9 +11,14 @@ import { SideNavService } from '../../../core/side-nav-service/side-nav.service'
 })
 export class PageHeaderComponent implements OnInit {
 
-  constructor(public sideNavService: SideNavService) { }
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
+
+  }
+
+  toggleSidenav() {
+    this.store.dispatch(new ToggleSideNav());
   }
 
 }

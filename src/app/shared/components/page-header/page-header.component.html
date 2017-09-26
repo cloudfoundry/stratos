@@ -1,6 +1,8 @@
 <div class="page-header">
   <md-toolbar color="primary">
-    <md-icon class="page-header__nav-toggle" (click)="sideNavService?.sideNav.toggle()">menu</md-icon>
+    <md-icon class="page-header__nav-toggle" (click)="toggleSidenav()">menu</md-icon>
     <ng-content></ng-content>
+    <div class="page-header__filler"></div>
+    <ng-content select=".page-header-right"></ng-content>
   </md-toolbar>
 </div>

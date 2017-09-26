@@ -16,14 +16,14 @@ describe('LoginPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ LoginPageComponent ],
       imports: [
-        RouterTestingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MDAppModule,
-        StoreModule.forRoot({
-          auth: authReducer,
-          cnsis: cnsisReducer
-        })
+	RouterTestingModule,
+	FormsModule,
+	ReactiveFormsModule,
+	MDAppModule,
+	StoreModule.forRoot({
+	  auth: authReducer,
+	  cnsis: cnsisReducer
+	})
       ]
     })
     .compileComponents();

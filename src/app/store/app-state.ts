@@ -1,8 +1,10 @@
-import { PaginationState } from './reducers/pagination.reducer';
-import { CNSISState } from './reducers/cnsis.reducer';
-import { UAASetupState } from './reducers/uaa-setup.reducers';
-import { EntitiesState } from './reducers/entity.reducer';
 import { AuthState } from './reducers/auth.reducer';
+import { CNSISState } from './reducers/cnsis.reducer';
+import { DashboardState } from './reducers/dashboard-reducer';
+import { EntitiesState } from './reducers/entity.reducer';
+import { PaginationState } from './reducers/pagination.reducer';
+import { UAASetupState } from './reducers/uaa-setup.reducers';
+
 export interface AppState {
   entities: EntitiesState;
   auth: AuthState;
@@ -10,4 +12,5 @@ export interface AppState {
   cnsis: CNSISState;
   pagination: PaginationState;
   apiRequest: EntitiesState;
+  dashboard: DashboardState;
 }

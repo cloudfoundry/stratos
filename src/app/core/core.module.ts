@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { AuthGuardService } from './auth-guard.service';
+import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { MDAppModule } from './md.module';
-import { SideNavService } from './side-nav-service/side-nav.service';
+import { PageHeaderService } from './page-header-service/page-header.service';
+import { WindowRef } from './window-ref/window-ref.service';
 
 @NgModule({
   imports: [
@@ -15,7 +17,9 @@ import { SideNavService } from './side-nav-service/side-nav.service';
   ],
   providers: [
     AuthGuardService,
-    SideNavService
+    PageHeaderService,
+    EventWatcherService,
+    WindowRef
   ]
 })
 export class CoreModule { }

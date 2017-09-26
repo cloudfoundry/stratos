@@ -11,9 +11,9 @@ describe('HomePageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ HomePageComponent ],
       imports: [
-        StoreModule.forRoot({
+	StoreModule.forRoot({
 
-        }),
+	}),
       ]
     })
     .compileComponents();
