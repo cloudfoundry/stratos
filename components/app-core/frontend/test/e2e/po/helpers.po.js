@@ -68,7 +68,9 @@
 
     scrollIntoView: scrollIntoView,
 
-    waitForElementAndClick: waitForElementAndClick
+    waitForElementAndClick: waitForElementAndClick,
+
+    isSetupMode: isSetupMode
   };
 
   function getHost() {
@@ -339,6 +341,23 @@
           } else {
             console.log('Failed to create session. ' + JSON.stringify(response));
             reject('Failed to create session');
+          }
+        });
+    });
+  }
+
+  /**
+   * @function isSetupMode
+   * @description Check if console is in setup mode
+   * @returns {Promise} A promise
+   */
+  function isSetupMode() {
+    return new Promise(function (resolve, reject) {
+      req.post(getHost() + '/pp/v1/auth/login/uaa', options)
+        .on('error', reject)
+        .on('response', function (response) {
+          if (response.statusCode === 503) {
+            resolve();
           }
         });
     });
