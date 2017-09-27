@@ -15,6 +15,7 @@ import { ApplicationWallComponent } from './application-wall/application-wall.co
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
+import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { SharedModule } from '../../shared/shared.module';
     ServicesTabComponent,
     SshTabComponent,
     SummaryTabComponent,
-    VariablesTabComponent
+    VariablesTabComponent,
+    ViewBuildpackComponent
   ]
 })
 export class ApplicationsModule { }

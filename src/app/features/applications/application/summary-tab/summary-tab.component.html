@@ -3,8 +3,11 @@
     <md-card>
       <md-card-header>
         <md-card-title>
-          <h3>Details</h3>
+          <h3>Overview</h3>
         </md-card-title>
+        <div class="spacer"></div>
+        <button *ngIf="isEditSummary" md-button>Save</button>
+        <md-slide-toggle name="edit" [(ngModel)]="isEditSummary">Edit</md-slide-toggle>
       </md-card-header>
       <md-card-content>
         <form #summaryForm="ngForm">
@@ -25,10 +28,10 @@
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-display-value [label]="'App State'" [value]="application.state"></app-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-display-value [label]="'Package State'" [value]=application.package_state></app-display-value>
+              <app-display-value [label]="'Composite States'">
+                <div>App State: {{application.state}}</div>
+                <div>Package State: {{application.package_state}}</div>
+              </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'Instances'">
@@ -39,10 +42,10 @@
           </md-list>
           <md-list role='list' class='summary__cards__summary__right'>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="application.services?.length || 0"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="application.services?.length || '-'"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="application.memory">
+              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="application.memory | mbToHumanSize">
                 <div class="display-input__input">
                   <md-form-field>
                     <input mdInput name="appMemory" placeholder="Memory" [(ngModel)]="application.memory" />
@@ -51,7 +54,7 @@
               </app-editable-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-display-value [label]="'disk quota'" [value]="application.disk_quota"></app-display-value>
+              <app-display-value [label]="'disk quota'" [value]="application.disk_quota | mbToHumanSize"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'SSH Enabled'">
@@ -61,43 +64,32 @@
           </md-list>
         </form>
       </md-card-content>
-      <md-card-actions>
-        <md-slide-toggle name="edit" [(ngModel)]="isEditSummary">Edit</md-slide-toggle>
-        <button [disabled]="!isEditSummary" md-button>Save</button>
-
-
-        <!-- <div > -->
-
-        <!-- </div> -->
-
-      </md-card-actions>
-      <md-card-actions>
-
-      </md-card-actions>
     </md-card>
 
     <md-card>
       <md-card-header>
         <md-card-title>
-          <h3>Build &amp; Deploy</h3>
+          <h3>Build, Deploy &amp; Host</h3>
         </md-card-title>
       </md-card-header>
       <md-card-content>
         <md-list dense>
           <md-list-item>
-            <app-display-value [label]="'Created'" [value]="application.created_at"></app-display-value>
+            <app-display-value [label]="'Changed'">
+              <div>Created: {{application.last_operation?.created_at | date:'medium'}}</div>
+              <div>Modifed: {{application.package_updated_at | date:'medium' || '-'}}</div>
+            </app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Modified'" [value]="application.package_updated_at | date:'medium'"></app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Buildpack'" [value]="'todo'"></app-display-value>
+            <app-display-value [label]="'Buildpack'">
+              <app-view-buildpack [buildPack]="application.buildpack || application.detected_buildpack"></app-view-buildpack>
+            </app-display-value>
           </md-list-item>
           <md-list-item>
             <app-display-value [label]="'Production'" [value]="application.production"></app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Stack'" [value]="'todo'"></app-display-value>
+            <app-display-value [label]="'Stack'" [value]="stack?.name"></app-display-value>
           </md-list-item>
           <md-list-item>
             <app-display-value [label]="'Console Deploy'" [value]="'todo'"></app-display-value>
@@ -106,16 +98,6 @@
             <app-display-value [label]="'Console Deploy Source'" [value]="'todo'"></app-display-value>
           </md-list-item>
         </md-list>
-      </md-card-content>
-    </md-card>
-
-    <md-card>
-      <md-card-header>
-        <md-card-title>
-          <h3>Cloud Foundry</h3>
-        </md-card-title>
-      </md-card-header>
-      <md-card-content>
         <md-list>
           <md-list-item>
             <app-display-value [label]="'Host'" [value]="'todo'"></app-display-value>
@@ -132,6 +114,7 @@
         </md-list>
       </md-card-content>
     </md-card>
+
   </div>
 
   <br><br> {{application | json }}

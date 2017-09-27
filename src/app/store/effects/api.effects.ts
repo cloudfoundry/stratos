@@ -3,12 +3,12 @@ import { CNSISModel } from './../reducers/cnsis.reducer';
 import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
 import {
-    APIAction,
-    ApiActionTypes,
-    APIResource,
-    StartAPIAction,
-    WrapperAPIActionFailed,
-    WrapperAPIActionSuccess,
+  APIAction,
+  ApiActionTypes,
+  APIResource,
+  StartAPIAction,
+  WrapperAPIActionFailed,
+  WrapperAPIActionSuccess,
 } from './../actions/api.actions';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
@@ -54,7 +54,7 @@ export class APIEffect {
           );
         })
         .catch(err => {
-          return  Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
+          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
         });
     });
 
@@ -66,9 +66,9 @@ export class APIEffect {
       entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
       metadata: resource.metadata
     } : {
-      entity: { ...resource, cfGuid },
-      metadata: { guid: resource.guid }
-    };
+        entity: { ...resource, cfGuid },
+        metadata: { guid: resource.guid }
+      };
   }
 
   getEntities(apiAction: APIAction, response: Response) {

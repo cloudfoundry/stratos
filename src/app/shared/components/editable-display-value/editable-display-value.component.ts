@@ -25,7 +25,7 @@ export class EditableDisplayValueComponent implements OnInit, AfterViewInit {
   // }
 
   ngAfterViewInit() {
-    this.displayDefault = this.displayCustom.nativeElement.children.length === 0;
+    setTimeout(_ => this.displayDefault = this.displayCustom.nativeElement.children.length === 0);
   }
 }
 

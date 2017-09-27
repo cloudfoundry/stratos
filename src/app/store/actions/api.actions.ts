@@ -107,14 +107,25 @@ export const getEntityObservable = (
     }).mergeMap(({ entities, entity, entityRequestInfo }) => {
       return Observable.of({
         entityRequestInfo,
-        entity: entity ? denormalize(entity, schema, entities) : {}
+        entity: entity ? {
+          entity: denormalize(entity.entity, schema, entities),
+          metadata: entity.metadata
+        } : {}
       });
     });
 };
 
-export function selectEntity(type: string, guid: string) {
+export function selectApiResourceEntity(type: string, guid: string) {
   return compose(
     getAPIResourceEntity,
+    getEntityById(guid),
+    getEntityType(type),
+    getEntityState
+  );
+}
+
+export function selectEntity(type: string, guid: string) {
+  return compose(
     getEntityById(guid),
     getEntityType(type),
     getEntityState

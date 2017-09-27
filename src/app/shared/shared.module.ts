@@ -10,6 +10,7 @@ import { StepComponent } from './components/stepper/step/step.component';
 import { SteppersComponent } from './components/stepper/steppers/steppers.component';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
+import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
     StepComponent,
     LoadingPageComponent,
     DisplayValueComponent,
-    EditableDisplayValueComponent
+    EditableDisplayValueComponent,
+    MbToHumanSizePipe
   ],
   exports: [
     SteppersComponent,
@@ -36,7 +38,8 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
     LoadingPageComponent,
     PageHeaderModule,
     DisplayValueComponent,
-    EditableDisplayValueComponent
+    EditableDisplayValueComponent,
+    MbToHumanSizePipe
   ]
 })
 export class SharedModule { }

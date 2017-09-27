@@ -1,7 +1,7 @@
-<app-page-header>
-  <h1>{{ application.name }} </h1>
-</app-page-header>
 <app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
+  <app-page-header>
+    <h1>{{ application.name }} </h1>
+  </app-page-header>
   <nav md-tab-nav-bar>
     <a md-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
       [active]="rla.isActive">
