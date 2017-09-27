@@ -13,7 +13,7 @@ const defaultEntityRequest = {
     fetching: false,
     updating: false,
     error: false,
-    message: 'HELLLLOOOOOO'
+    message: ''
 };
 
 function getEntityRequestState(state, { entityKey, guid }) {
@@ -54,7 +54,6 @@ export function apiRequestReducer(state = defaultState, action) {
                         const entState = getEntityRequestState(state, { entityKey, guid });
                         entState.fetching = false;
                         entState.error = false;
-                        entState.message = 'WF';
                         setEntityRequestState(state, entState, { entityKey, guid });
                     });
                 });

@@ -1,5 +1,6 @@
 import { AuthState } from './reducers/auth.reducer';
 import { CNSISState } from './reducers/cnsis.reducer';
+import { CreateNewApplicationState } from './reducers/create-application.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { EntitiesState } from './reducers/entity.reducer';
 import { PaginationState } from './reducers/pagination.reducer';
@@ -14,4 +15,5 @@ export interface AppState {
   pagination: PaginationState;
   apiRequest: EntitiesState;
   dashboard: DashboardState;
+  createApplication: CreateNewApplicationState;
 }

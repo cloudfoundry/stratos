@@ -50,7 +50,7 @@ export class GetAllApplications implements APIAction {
     options: RequestOptions;
 }
 
-export class GetApplication implements APIAction {
+export class GetApplicationSummary implements APIAction {
     constructor(public guid: string, public cnis: string) {
         this.options = new RequestOptions();
         this.options.url = `apps/${guid}/summary`;

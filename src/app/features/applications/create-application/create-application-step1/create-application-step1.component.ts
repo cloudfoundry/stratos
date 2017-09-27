@@ -1,10 +1,11 @@
-import { AfterContentInit, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, NgModel, Validators } from '@angular/forms';
 import { MdSelect } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
 import { registeredCnsisEntitySelector } from '../../../../store/actions/cnsis.actions';
+import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { GetAllOrganizations, OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { AppState } from '../../../../store/app-state';
 import { getCurrentPage } from '../../../../store/reducers/pagination.reducer';
@@ -19,9 +20,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   constructor(private store: Store<AppState>, private fb: FormBuilder) {
   }
 
-  @ViewChild(TemplateRef)
-  content: TemplateRef<any>;
-
   paginationKey = 'createApplication';
 
   data$: Observable<any>;
@@ -33,13 +31,17 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @ViewChild('cfSelect')
   cfSelect: MdSelect;
 
+  @ViewChild('spaceSelect')
+  spaceSelect: MdSelect;
+
   cfForm: FormGroup;
 
   @ViewChild('appName')
   appName: NgModel;
 
-  title: string;
   validate: Observable<boolean>;
+
+  currentOrg: any;
 
   ngOnInit() {
 
@@ -55,6 +57,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     this.validate = this.cfForm.valueChanges.mergeMap(() => {
       return Observable.of(this.cfForm.valid);
     }).startWith(this.cfForm.valid);
+
     this.data$ = this.getCFData();
   }
 
@@ -73,23 +76,36 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       }),
       this.store.select(registeredCnsisEntitySelector),
       this.cfSelect.valueChange.startWith(null),
-      this.orgSelect.valueChange.startWith(null)
+      this.orgSelect.valueChange.startWith(null),
+      this.spaceSelect.valueChange.startWith(null)
     )
-      .filter(([orgList, cfList, selectedCF, selectedOrg]) => {
+      .filter(([orgList, cfList]) => {
         return !!cfList;
       })
-      .mergeMap(([orgList, cfList, selectedCF, selectedOrg]) => {
+      .mergeMap(([orgList, cfList, selectedCF, selectedOrg, selectedSpace]) => {
         const data = {
           cfList,
           orgList: null,
           spaceList: null
         };
-        if (orgList.data && selectedCF) {
-          data.orgList = orgList.data
-            .map(org => org.entity)
-            .filter(org => org.cfGuid === selectedCF.guid);
+        if (selectedCF) {
+          if (orgList.data) {
+            data.orgList = orgList.data
+              .map(org => org.entity)
+              .filter(org => org.cfGuid === selectedCF.guid);
+          }
         }
-        data.spaceList = selectedOrg ? selectedOrg.spaces.map(space => space.entity) : [];
+        data.spaceList = selectedOrg ? selectedOrg.spaces.map(space => {
+          space.entity.guid = space.metadata.guid;
+          return space.entity;
+        }) : [];
+        if (selectedCF && selectedOrg && selectedSpace) {
+          this.store.dispatch(new SetCFDetails({
+            cloudFoundry: selectedCF,
+            org: selectedOrg,
+            space: selectedSpace
+          }));
+        }
         return Observable.of(data);
       });
   }

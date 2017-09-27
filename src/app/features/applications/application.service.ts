@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { ApplicationSchema, GetApplication } from '../../store/actions/application.actions';
 import { getEntityObservable } from '../../store/actions/api.actions';
+import { ApplicationSchema, GetApplicationSummary } from '../../store/actions/application.actions';
+import { AppState } from '../../store/app-state';
 
 @Injectable()
 export class ApplicationService {
@@ -22,7 +22,7 @@ export class ApplicationService {
       ApplicationSchema.key,
       ApplicationSchema,
       id,
-      new GetApplication(id, cfId)
+      new GetApplicationSummary(id, cfId)
     );
 
     this.isFetching$ = this.application$.mergeMap(({ entityRequestInfo }) => {

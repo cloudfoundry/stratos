@@ -1,4 +1,4 @@
-<app-step [title]="'Cloud Foundry'">
+<app-step [title]="'Cloud Foundry'" [validate]="validate">
   <b>Select a Cloud Foundry instance, organization and space for the app.</b>
   <form [formGroup]="cfForm">
     <md-select #cfSelect placeholder="Cloud Foundary" formControlName="cf">
@@ -11,7 +11,7 @@
         <span>{{ org.name }}</span>
       </md-option>
     </md-select>
-    <md-select placeholder="Space" formControlName="space">
+    <md-select #spaceSelect placeholder="Space" formControlName="space">
       <md-option *ngFor="let space of (data$ | async)?.spaceList" [value]="space">
         <span>{{ space.name }}</span>
       </md-option>

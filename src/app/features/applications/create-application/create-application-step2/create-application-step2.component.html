@@ -1,0 +1,10 @@
+<!-- <app-step title="Name" [validate]="nameValid$"> -->
+<app-step title="Name">
+  <b>Please select a unique name for your application</b>
+  <app-stepper-form>
+    <md-form-field>
+      <input ngModel #appName="ngModel" required mdInput placeholder="Application Name">
+    </md-form-field>
+  </app-stepper-form>
+  {{ isFetching }}
+</app-step>
