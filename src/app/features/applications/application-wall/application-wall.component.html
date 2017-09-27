@@ -5,6 +5,7 @@
   </div>
 </app-page-header>
 <app-loading-page [isLoading]="isFetching" [text]="'Getting your applications'">
+  <p *ngIf="error">We're sorry, we couldn't get you applications. Please try again later.</p>
   <div [@cardEnter]="applications.length" class="card-wall">
     <md-card [routerLink]="['/applications', application.cfGuid , application.guid]" *ngFor="let application of applications"
       [ngClass]="'card-wall__card-' + application.state.toLowerCase()">

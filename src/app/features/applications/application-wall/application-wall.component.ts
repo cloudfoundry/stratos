@@ -32,6 +32,7 @@ export class ApplicationWallComponent implements OnInit {
 
   applications = [];
   isFetching: Observable<boolean>;
+  error: boolean;
 
   ngOnInit() {
     const paginationKey = 'applicationWall';
@@ -49,8 +50,11 @@ export class ApplicationWallComponent implements OnInit {
     getObs$
       .delay(100)
       .subscribe(({ paginationEntity, data }) => {
+        this.error = paginationEntity.error;
         if (!paginationEntity.fetching) {
-          this.applications = data.map(getAPIResourceEntity);
+          if (!paginationEntity.error) {
+            this.applications = data.map(getAPIResourceEntity);
+          }
         }
       });
   }

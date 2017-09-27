@@ -1,22 +1,21 @@
-import { AfterContentInit, Component, ContentChildren, forwardRef, Input, OnInit, QueryList } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 
+import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
 
 @Component({
   selector: 'app-steppers',
   templateUrl: './steppers.component.html',
-  styleUrls: ['./steppers.component.scss']
+  styleUrls: ['./steppers.component.scss'],
+  providers: [SteppersService]
 })
-export class SteppersComponent implements OnInit, AfterContentInit {
+export class SteppersComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+  constructor(private steppersService: SteppersService) { }
 
   @Input()
   cancel = null;
-
-  @ContentChildren(forwardRef(() => StepComponent), { descendants: true })
-  _steps: QueryList<StepComponent>;
 
   steps: StepComponent[] = [];
 
@@ -28,19 +27,19 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   finishButtonText = 'Finish';
 
-  ngOnInit() { }
-
-  ngAfterContentInit() {
-    this.initSteps(this._steps);
-    this._steps.changes.subscribe((steps: QueryList<StepComponent>) => {
-      this.initSteps(steps);
-    });
-    this.setActive(this.currentIndex);
+  ngOnInit() {
+    this.steppersService.steps
+      .subscribe(step => {
+        if (this.steps.length === 1) {
+          this.setActive(0);
+        }
+        this.steps.push(step);
+        this.initSteps(this.steps);
+      });
   }
 
-  initSteps(steps: QueryList<StepComponent>) {
-    this.steps = steps.toArray();
-    this.observeStepsValidation(this.steps);
+  initSteps(steps: StepComponent[]) {
+    this.observeStepsValidation(steps);
   }
 
   observeStepsValidation(steps: StepComponent[]) {
@@ -137,6 +136,10 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     return nextIndex < this.steps.length ?
       this.nextButtonText :
       this.finishButtonText;
+  }
+
+  ngOnDestroy() {
+    this.stepValidateSub.unsubscribe();
   }
 
 }

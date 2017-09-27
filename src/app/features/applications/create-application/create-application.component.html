@@ -2,31 +2,16 @@
   Create
 </app-page-header>
 <app-steppers cancel="/applications">
-  <app-step title="Cloud Foundary">
-    <b>Select a Cloud Foundry instance, organization and space for the app.</b>
-    <app-stepper-form>
-      <md-select placeholder="Cloud Foundary" name="cf">
-        <md-option *ngFor="let cf of cfList" [value]="cf.guid">
-          <span>{{ cf.name }}</span>
-        </md-option>
-      </md-select>
-      <md-form-field>
-        <input mdInput placeholder="Organization">
-      </md-form-field>
-      <md-form-field>
-        <input mdInput placeholder="Space">
-      </md-form-field>
-    </app-stepper-form>
-  </app-step>
-  <app-step title="Name">
+  <app-create-application-step1></app-create-application-step1>
+  <app-step title="Name" [validate]="nameValid$">
     <b>Please select a unique name for your application</b>
     <app-stepper-form>
       <md-form-field>
-        <input mdInput placeholder="Application Name">
+        <input ngModel #appName="ngModel" required mdInput placeholder="Application Name">
       </md-form-field>
     </app-stepper-form>
   </app-step>
-  <app-step title="Create Route">
+  <app-step [title]="'Create Route'">
     <b>Create a route</b>
     <app-stepper-form>
       <md-form-field>

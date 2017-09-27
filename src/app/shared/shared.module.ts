@@ -15,8 +15,6 @@ import { SteppersModule } from './components/stepper/steppers.module';
     CoreModule,
     PageHeaderModule,
     RouterModule,
-    FormsModule,
-    ReactiveFormsModule,
     SteppersModule
   ],
   declarations: [

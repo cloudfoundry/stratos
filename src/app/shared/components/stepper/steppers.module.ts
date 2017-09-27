@@ -10,7 +10,7 @@ import { SteppersComponent } from './steppers/steppers.component';
 @NgModule({
     imports: [
         CommonModule,
-        CoreModule,
+        CoreModule
     ],
     declarations: [
         SteppersComponent,

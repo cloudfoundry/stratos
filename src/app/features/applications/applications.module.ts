@@ -11,14 +11,15 @@ import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { SummaryTabComponent } from './application/summary-tab/summary-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
-import { CreateApplicationComponent } from './create-application/create-application.component';
+import { CreateApplicationModule } from './create-application/create-application.module';
 
 
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
-    ApplicationsRoutingModule
+    ApplicationsRoutingModule,
+    CreateApplicationModule
   ],
   declarations: [
     ApplicationWallComponent,
@@ -28,8 +29,7 @@ import { CreateApplicationComponent } from './create-application/create-applicat
     ServicesTabComponent,
     SshTabComponent,
     SummaryTabComponent,
-    VariablesTabComponent,
-    CreateApplicationComponent
+    VariablesTabComponent
   ]
 })
 export class ApplicationsModule { }

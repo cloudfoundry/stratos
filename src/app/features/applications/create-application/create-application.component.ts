@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Rx';
 
-import { GetAllOrganizations } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 
 @Component({
@@ -15,16 +16,15 @@ export class CreateApplicationComponent implements OnInit {
 
   paginationKey = 'createApplication';
 
-  cfList;
+  nameValid$: Observable<boolean>;
+
+  @ViewChild('appName')
+  appName: NgModel;
 
   ngOnInit() {
-    this.store.dispatch(new GetAllOrganizations(this.paginationKey));
-    // this.store.dispatch(new GetAllSpaces(this.paginationKey));
-    // this.store.select(cnsisEntitySelector)
-    //   .take(1)
-    //   .mergeMap(cfList => Observable.of(cfList.filter(cf => cf.registered)))
-    //   .subscribe(cf => this.cfList = cf);
 
+    this.nameValid$ = this.appName.valueChanges
+      .mergeMap(() => Observable.of(this.appName.valid))
+      .startWith(this.appName.valid);
   }
-
 }
