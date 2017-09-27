@@ -36,4 +36,3 @@ export const cnsisEntitySelector = createSelector(
     cnsisSelector,
     state => state.entities
 );
-

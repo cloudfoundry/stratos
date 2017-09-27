@@ -32,8 +32,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
-      this.sub.push(this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
-        this.application = entity;
+      this.sub.push(this.applicationService.application$.subscribe(({ app }) => {
+        this.application = app.entity.entity;
       }));
       this.isFetching$ = this.applicationService.isFetching$;
     }));

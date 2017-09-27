@@ -5,14 +5,18 @@ import { Action } from '@ngrx/store';
 
 export interface EntitiesState {
     application: any;
+    applicationSummary: any;
     stack: any;
     space: any;
+    organization: any;
 }
 
 export const defaultEntitiesState = {
-     application: {},
-     stack: {},
-     space: {}
+    application: {},
+    applicationSummary: {},
+    stack: {},
+    space: {},
+    organization: {}
 };
 
 export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action) {

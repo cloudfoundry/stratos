@@ -35,7 +35,7 @@ export class APIEffect {
 
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
-    .switchMap(([action, state]) => {
+    .mergeMap(([action, state]) => {
       const { apiAction } = action;
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 

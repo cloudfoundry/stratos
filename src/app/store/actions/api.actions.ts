@@ -71,7 +71,7 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-interface EntityInfo {
+export interface EntityInfo {
   entityRequestInfo: EntityRequestState;
   entity: any;
 }
@@ -103,7 +103,7 @@ export const getEntityObservable = (
         entities
       });
     }).filter(({ entityRequestInfo, entity }) => {
-      return !!entityRequestInfo;
+      return (entity && entity.entity) || !!entityRequestInfo;// TODO: RC/NJ Make sure nested entities get entityRequestInfo
     }).mergeMap(({ entities, entity, entityRequestInfo }) => {
       return Observable.of({
         entityRequestInfo,
