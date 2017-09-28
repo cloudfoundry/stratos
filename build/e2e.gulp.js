@@ -129,6 +129,12 @@
     );
   });
 
+  gulp.task('e2e:run-on-target', function () {
+    runSequence(
+      'e2e:tests'
+    );
+  });
+
   gulp.task('e2e:runq', function () {
     paths.browserSyncDist = paths.instrumented;
     config.browserSyncPort = 4000;
