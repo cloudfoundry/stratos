@@ -1,10 +1,13 @@
-<!-- <app-step title="Name" [validate]="nameValid$"> -->
-<app-step title="Name">
+<app-step title="Name" [validate]="validate">
   <b>Please select a unique name for your application</b>
-  <app-stepper-form>
-    <md-form-field>
-      <input ngModel #appName="ngModel" required mdInput placeholder="Application Name">
-    </md-form-field>
-  </app-stepper-form>
-  {{ isFetching }}
+  <form novalidate #form="ngForm">
+    <div>
+      <md-form-field class="md-form-field__spinner">
+        <input ngModel required mdInput placeholder="Application Name" name="app" appApplicationNameUnique>
+        <md-spinner class="inline-spinner small-spinner md-form-spinner" *ngIf="checkingName$ | async"></md-spinner>
+      </md-form-field>
+
+    </div>
+
+  </form>
 </app-step>

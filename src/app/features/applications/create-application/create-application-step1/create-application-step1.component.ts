@@ -75,9 +75,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
         schema: [OrganizationSchema]
       }),
       this.store.select(registeredCnsisEntitySelector),
-      this.cfSelect.valueChange.startWith(null),
-      this.orgSelect.valueChange.startWith(null),
-      this.spaceSelect.valueChange.startWith(null)
+      this.cfSelect.valueChange.startWith(''),
+      this.orgSelect.valueChange.startWith(''),
+      this.spaceSelect.valueChange.startWith('')
     )
       .filter(([orgList, cfList]) => {
         return !!cfList;

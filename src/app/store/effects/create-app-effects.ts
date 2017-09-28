@@ -13,6 +13,7 @@ import {
     NewAppCFDetails,
     selectNewAppCFDetails,
 } from '../actions/create-applications-page.actions';
+import { CreateNewApplicationState } from '../reducers/create-application.reducer';
 import { AppState } from './../app-state';
 
 
@@ -55,3 +56,5 @@ export class CreateAppPageEffects {
                 });
         });
 }
+
+export const selectNewAppState = (state: AppState): CreateNewApplicationState => state.createApplication;

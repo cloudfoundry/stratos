@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 
 import { SteppersService } from '../steppers.service';
@@ -8,7 +8,8 @@ import { StepComponent } from './../step/step.component';
   selector: 'app-steppers',
   templateUrl: './steppers.component.html',
   styleUrls: ['./steppers.component.scss'],
-  providers: [SteppersService]
+  providers: [SteppersService],
+  encapsulation: ViewEncapsulation.None
 })
 export class SteppersComponent implements OnInit, OnDestroy {
 
