@@ -1,10 +1,10 @@
 (function () {
   'use strict';
 
-  var wizard = require('../../../../../../app-core/frontend/test/e2e/po/widgets/wizard.po');
-  var inputText = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
-  var searchBox = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-search-box.po');
-  
+  var wizard = require('./widgets/wizard.po');
+  var inputText = require('./widgets/input-text.po');
+  var searchBox = require('./widgets/input-search-box.po');
+ 
   module.exports = {
     getWizard: getWizard,
     getStepTitle: getStepTitle,

@@ -21,7 +21,8 @@
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
-
+  var uaa = browser.params.uaa;
+  var runSetupModeTests = browser.params.runSetupModeTests;
   module.exports = {
 
     getHost: getHost,
@@ -30,6 +31,7 @@
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
+    getUaaConfig: getUaaConfig,
 
     newBrowser: newBrowser,
     loadApp: loadApp,
@@ -70,7 +72,9 @@
 
     waitForElementAndClick: waitForElementAndClick,
 
-    isSetupMode: isSetupMode
+    isSetupMode: isSetupMode,
+    getRunSetupModeTests : getRunSetupModeTests
+
   };
 
   function getHost() {
@@ -95,6 +99,10 @@
 
   function getPassword() {
     return password;
+  }
+
+  function getUaaConfig() {
+    return uaa;
   }
 
   function newBrowser() {
@@ -361,6 +369,10 @@
           }
         });
     });
+  }
+
+  function getRunSetupModeTests() {
+    return runSetupModeTests;
   }
 
   /**
