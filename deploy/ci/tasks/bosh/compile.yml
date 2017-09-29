@@ -32,7 +32,7 @@ run:
       ln -s ../../../ stratos-ui
       cd -
 
-      bosh2 create-release
+      bosh2 create-release --force
       # Delete any release
       bosh2 -e vbox upload-release -d stratos-ui
 
