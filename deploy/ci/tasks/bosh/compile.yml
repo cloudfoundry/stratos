@@ -24,11 +24,13 @@ run:
       export BOSH_NON_INTERACTIVE=true
 
       # BOSH create release
-      pushd stratos-ui/deploy/stratos-ui-release
+      ROOT_DIR=${PWD}
+      cd stratos-ui/deploy/stratos-ui-release
+      BOSH_RELEASE_DIR=${PWD}
 
-      pushd src
+      cd src
       ln -s ../../../ stratos-ui
-      popd
+      cd -
 
       bosh2 create-release
       # Delete any release
@@ -40,10 +42,11 @@ run:
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
       FRONTEND_IP=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
-      popd
+      
+      cd ${ROOT_DIR}
       # Run E2E tests
 
-      pushd stratos-ui
+      cd stratos-ui
       npm install
   
       cat << EOF > ../build/secrets.json
@@ -85,6 +88,7 @@ run:
       npm run e2e-on-target
       E2E_EXIT_CODE=$?
 
+      cd ${BOSH_RELEASE_DIR}
       # Tear down deployment
       bosh2 -e vbox -d stratos-ui delete-deployment
       
