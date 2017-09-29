@@ -19,26 +19,26 @@ export class AppNameUniqueDirective implements Validator {
 
   constructor(private store: Store<AppState>) { }
 
-  public validate(c: AbstractControl): Observable<boolean | null> {
-    console.log('here');
+  public validate(c: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
     if (c.value) {
       return this.store.select(selectNewAppState)
         .debounceTime(250)
-        .mergeMap(createAppState => {
+        .do(createAppState => {
           if (createAppState.nameCheck.name !== c.value) {
             this.store.dispatch(new IsNewAppNameFree(c.value));
           }
-          return Observable.of(createAppState);
         })
         .filter(createAppState => {
           return !createAppState.nameCheck.checking &&
             createAppState.nameCheck.name === c.value;
         })
-        .mergeMap(createAppState => {
-          return Observable.of(createAppState.nameCheck.available);
+        .map(createAppState => {
+          return createAppState.nameCheck.available ? null : {
+            appNameTaken: !createAppState.nameCheck.available
+          };
         }).first();
     } else {
-      return Observable.of(false);
+      return Observable.of(null).first();
     }
   }
 }

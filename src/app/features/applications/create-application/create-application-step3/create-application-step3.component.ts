@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { CreateNewApplication } from '../../../../store/actions/application.actions';
+import { selectEntityRequestInfo } from '../../../../store/actions/api.actions';
+import { ApplicationSchema, CreateNewApplication } from '../../../../store/actions/application.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { EntityRequestState } from '../../../../store/reducers/api-request-reducer';
 import { CreateNewApplicationState } from '../../../../store/reducers/create-application.reducer';
 
 @Component({
@@ -15,7 +17,7 @@ import { CreateNewApplicationState } from '../../../../store/reducers/create-app
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, private router: Router) { }
 
   newAppData: CreateNewApplicationState;
   onNext: StepOnNextFunction;
@@ -26,23 +28,26 @@ export class CreateApplicationStep3Component implements OnInit {
     this.onNext = () => {
       const { cloudFoundryDetails, name } = this.newAppData;
 
-      const {
-        cloudFoundry,
-        org,
-        space
-      } = cloudFoundryDetails;
+      const { cloudFoundry, org, space } = cloudFoundryDetails;
       const reqGuid = name + space.guid;
+
       this.store.dispatch(new CreateNewApplication(
         reqGuid,
-        cloudFoundry.guid,
-        {
+        cloudFoundry.guid, {
           name,
           space_guid: space.guid
         }
       ));
-      return Observable.of({
-        success: false
-      });
+
+      return this.store.select(selectEntityRequestInfo<EntityRequestState>(ApplicationSchema.key, reqGuid))
+        .filter(state => {
+          return !state.creating;
+        }).map(state => {
+          if (!state.error) {
+            this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${state.response.result[0]}/summary`);
+          }
+          return { success: !state.error };
+        });
     };
   }
 

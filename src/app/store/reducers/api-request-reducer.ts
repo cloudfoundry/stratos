@@ -1,6 +1,8 @@
 import { RequestMethod } from '@angular/http';
+import { error } from 'util';
 
-import { APIAction, ApiActionTypes, WrapperAPIActionSuccess } from './../actions/api.actions';
+import { APIAction, ApiActionTypes, WrapperAPIActionSuccess } from '../actions/api.actions';
+import { mergeState } from '../helpers/reducer.helper';
 import { defaultEntitiesState } from './entity.reducer';
 
 const defaultState = { ...defaultEntitiesState };
@@ -9,7 +11,7 @@ export interface EntityRequestState {
     updating: boolean;
     creating: boolean;
     error: boolean;
-    entity: any;
+    response: any;
     message: string;
 }
 
@@ -18,23 +20,9 @@ const defaultEntityRequest = {
     updating: false,
     creating: false,
     error: false,
-    entity: null,
+    response: null,
     message: ''
 };
-
-function getEntityRequestState(state, { entityKey, guid }): EntityRequestState {
-    const requestState = { ...state[entityKey][guid] };
-    if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
-        return requestState;
-    }
-    return { ...defaultEntityRequest };
-}
-
-function setEntityRequestState(state, requestState, { entityKey, guid }): EntityRequestState {
-    const newState = { ...state };
-    newState[entityKey][guid] = requestState;
-    return newState;
-}
 
 export function apiRequestReducer(state = defaultState, action) {
     const actionType = action.apiType || action.type;
@@ -45,7 +33,8 @@ export function apiRequestReducer(state = defaultState, action) {
             }
             const apiAction = action.apiAction as APIAction;
             const requestState = getEntityRequestState(state, action.apiAction);
-            apiAction.options.method === RequestMethod.Post ?
+            apiAction.options.method === RequestMethod.Post ||
+                apiAction.options.method.toString().toLocaleLowerCase() === 'post' ?
                 requestState.creating = true :
                 requestState.fetching = true;
 
@@ -58,8 +47,18 @@ export function apiRequestReducer(state = defaultState, action) {
                 requestSuccessState.fetching = false;
                 requestSuccessState.creating = false;
                 requestSuccessState.error = false;
-                requestSuccessState.entity = successAction.response;
-                return setEntityRequestState(state, requestSuccessState, action.apiAction);
+                requestSuccessState.response = successAction.response;
+                const newState = setEntityRequestState(state, requestSuccessState, action.apiAction);
+
+                if (action.apiAction.guid !== successAction.response.result[0]) {
+                    // If we have a temp guid (i.e. from a creation) then make sure we populate the actual
+                    // entity request.
+                    // const actualAction = { ...action.apiAction };
+                    action.apiAction.guid = successAction.response.result[0];
+                    return setEntityRequestState(newState, requestSuccessState, action.apiAction);
+                }
+
+                return newState;
             } else if (action.response && action.response.entities) {
                 const entities = { ...action.response.entities };
                 // Make this more functional programming-y
@@ -88,3 +87,22 @@ export function apiRequestReducer(state = defaultState, action) {
     }
 }
 
+
+function getEntityRequestState(state, { entityKey, guid }): EntityRequestState {
+    const requestState = { ...state[entityKey][guid] };
+    if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
+        return requestState;
+    }
+    return { ...defaultEntityRequest };
+}
+
+function setEntityRequestState(state, requestState, { entityKey, guid }): EntityRequestState {
+    const newState = {
+        [entityKey]: {
+            [guid]: requestState
+        }
+    };
+
+    newState[entityKey][guid] = requestState;
+    return mergeState(state, newState);
+}

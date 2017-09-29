@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { NgForm } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
@@ -35,9 +35,10 @@ export class CreateApplicationStep2Component implements OnInit {
   name: string;
 
   ngOnInit() {
-    this.validate = this.form.statusChanges.mergeMap(() => {
-      return Observable.of(this.form.valid);
+    this.validate = this.form.statusChanges.map(() => {
+      return this.form.valid;
     }).startWith(this.form.valid);
+
     this.checkingName$ = this.store.select(selectNewAppState).map(state => state.nameCheck.checking);
     this.onNext = () => {
       this.store.dispatch(new SetNewAppName(this.name));

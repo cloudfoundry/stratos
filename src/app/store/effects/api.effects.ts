@@ -13,6 +13,7 @@ import {
     APIAction,
     ApiActionTypes,
     APIResource,
+    NormalizedResponse,
     StartAPIAction,
     WrapperAPIActionFailed,
     WrapperAPIActionSuccess,
@@ -73,7 +74,7 @@ export class APIEffect {
       };
   }
 
-  getEntities(apiAction: APIAction, response: Response) {
+  getEntities(apiAction: APIAction, response: Response): NormalizedResponse {
     const data = response.json();
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
@@ -90,7 +91,7 @@ export class APIEffect {
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
-    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
+    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : null;
   }
 
   mergeData(entity, metadata, cfGuid) {

@@ -1,4 +1,4 @@
-<app-step [title]="'Cloud Foundry'" [validate]="validate">
+<app-step [title]="'Cloud Foundry'" [validate]="validate" [onNext]="onNext">
   <b>Select a Cloud Foundry instance, organization and space for the app.</b>
   <form [formGroup]="cfForm">
     <md-select #cfSelect placeholder="Cloud Foundary" formControlName="cf">

@@ -43,6 +43,17 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   currentOrg: any;
 
+  cfDetails: {
+    cloudFoundry: '',
+    org: '',
+    space: ''
+  };
+
+  onNext = () => {
+    this.store.dispatch(new SetCFDetails(this.cfDetails));
+    return Observable.of({ success: true });
+  }
+
   ngOnInit() {
 
   }
@@ -102,11 +113,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
           return space.entity;
         }) : [];
         if (selectedCF && selectedOrg && selectedSpace) {
-          this.store.dispatch(new SetCFDetails({
+          this.cfDetails = {
             cloudFoundry: selectedCF,
             org: selectedOrg,
             space: selectedSpace
-          }));
+          };
         }
         return Observable.of(data);
       });
