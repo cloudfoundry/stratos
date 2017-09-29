@@ -77,7 +77,7 @@ run:
           }
         },
         "uaa": {
-          "url": ${UAA_URL}",
+          "url": "${UAA_URL}",
           "clientId": "${UAA_CLIENT_ID}",
           "adminUsername": "${UAA_ADMIN_USERNAME}",
           "adminPassword": "${UAA_ADMIN_PASSWORD}"
@@ -87,6 +87,7 @@ run:
       }
       EOF
 
+      cat build/secrets.json
       npm run e2e-on-target
       E2E_EXIT_CODE=$?
 
