@@ -3,13 +3,14 @@ import { Observable } from 'rxjs/Observable';
 
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
-import { GetApplication, GetApplicationSummary } from '../../store/actions/application.actions';
+import { ApplicationSchema, ApplicationSummarySchema, ApplicationStatsSchema } from '../../store/actions/application.actions';
+import { GetApplication, GetApplicationSummary, GetApplicationStats } from '../../store/actions/application.actions';
 import { getEntityObservable, EntityInfo } from '../../store/actions/api.actions';
 import { StackSchema, GetStack } from '../../store/actions/stack.action';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { OrganisationSchema, GetOrganisation } from '../../store/actions/organisation.action';
 import { SpaceSchema, GetSpace } from '../../store/actions/space.action';
+import { ApplicationStateService } from './application-state.service';
 
 export interface AppData {
   fetching: boolean;
@@ -24,13 +25,14 @@ export interface AppData {
 @Injectable()
 export class ApplicationService {
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, private appStateService: ApplicationStateService) {
     // TODO: RC OnDestroy sub.unsubscribe();?
     console.log('INIT SERVICE, MORE THAN ONE OF THESE? TROUBLE!');
   }
 
   public isFetching$: Observable<boolean>;
   public application$: Observable<AppData>;
+  private appStats$;
 
   SetApplication(cfId, id) {
     const application$ = getEntityObservable(
@@ -39,9 +41,27 @@ export class ApplicationService {
       ApplicationSchema,
       id,
       new GetApplication(id, cfId)
-    ).filter(({ entity, entityRequestInfo }) => {
-      return entity && entity.entity;
-    });
+    )
+      .filter(({ entity, entityRequestInfo }) => {
+        return entity && entity.entity && !entityRequestInfo.fetching;
+      })
+      .flatMap(app => {
+        if (app.entity.entity.state === 'STARTED' && !this.appStats$) {
+          this.appStats$ = getEntityObservable(
+            this.store,
+            ApplicationStatsSchema.key,
+            ApplicationStatsSchema,
+            id,
+            new GetApplicationStats(id, cfId)
+          ).filter(({ entity, entityRequestInfo }) => {
+            return entity && entity.entity && !entityRequestInfo.fetching;
+          });
+          // this.appStats$ = this.appStats$ || ;
+        }
+
+        // Observable.of({ entity: { entity: [] } })
+        return Observable.combineLatest(Observable.of(app), this.appStats$ || Observable.of({ entity: { entity: [] } }));
+      });
 
     const applicationSummary$ = getEntityObservable(
       this.store,
@@ -57,9 +77,13 @@ export class ApplicationService {
       .combineLatest(
       applicationSummary$,
       this.store.select(cnsisEntitySelector),
-    ).map(([app, appSummary, cnsis]) => {
+    ).map(([appDetails, appSummary, cnsis]) => {
+      // [app, appStats]
+      const app = appDetails[0];
+      const appStats = appDetails[1];
       return {
         fetching: app.entityRequestInfo.fetching && appSummary.entityRequestInfo.fetching,
+        appState: this.appStateService.Get(app.entity.entity, []),
         app: app,
         space: app.entity.entity.space,
         stack: app.entity.entity.stack,

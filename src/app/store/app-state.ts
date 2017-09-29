@@ -4,6 +4,7 @@ import { DashboardState } from './reducers/dashboard-reducer';
 import { EntitiesState } from './reducers/entity.reducer';
 import { PaginationState } from './reducers/pagination.reducer';
 import { UAASetupState } from './reducers/uaa-setup.reducers';
+import { AppMetadata } from './reducers/app-metadata.reducer';
 
 export interface AppState {
   entities: EntitiesState;
@@ -13,4 +14,5 @@ export interface AppState {
   pagination: PaginationState;
   apiRequest: EntitiesState;
   dashboard: DashboardState;
+  appMetadata: AppMetadata;
 }

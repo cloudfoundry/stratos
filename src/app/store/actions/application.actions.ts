@@ -34,6 +34,10 @@ export const ApplicationSummarySchema = new schema.Entity('applicationSummary', 
         idAttribute: getAPIResourceGuid
     });
 
+export const ApplicationStatsSchema = new schema.Entity('applicationStats', {}, {
+    idAttribute: getAPIResourceGuid
+});
+
 export class GetAllApplications implements APIAction {
     constructor(public paginationKey?: string) {
         this.options = new RequestOptions();
@@ -76,6 +80,7 @@ export class GetApplication implements APIAction {
     options: RequestOptions;
 }
 
+
 export class GetApplicationSummary implements APIAction {
     constructor(public guid: string, public cnis: string) {
         this.options = new RequestOptions();
@@ -90,5 +95,22 @@ export class GetApplicationSummary implements APIAction {
     type = ApiActionTypes.API_REQUEST;
     entity = [ApplicationSummarySchema];
     entityKey = ApplicationSummarySchema.key;
+    options: RequestOptions;
+}
+
+export class GetApplicationStats implements APIAction {
+    constructor(public guid: string, public cnis: string) {
+        this.options = new RequestOptions();
+        this.options.url = `apps/${guid}/stats`;
+        this.options.method = 'get';
+    }
+    actions = [
+        GET,
+        GET_SUCCESS,
+        GET_FAILED
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [ApplicationStatsSchema];
+    entityKey = ApplicationStatsSchema.key;
     options: RequestOptions;
 }

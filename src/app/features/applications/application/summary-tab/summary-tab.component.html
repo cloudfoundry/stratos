@@ -24,7 +24,7 @@
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'State'">
-                TODO
+                !!{{(appData$ | async)?.appState.label}} !!
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">

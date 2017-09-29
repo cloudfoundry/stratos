@@ -17,6 +17,7 @@ import { dashboardReducer } from './reducers/dashboard-reducer';
 import { entitiesReducer } from './reducers/entity.reducer';
 import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { appMetadataReducer } from './reducers/app-metadata.reducer';
 
 
 export function logger(reducer): any {
@@ -35,7 +36,8 @@ export const metaReducers = environment.production ? [] : [logger];
       cnsis: cnsisReducer,
       pagination: paginationReducer,
       apiRequest: apiRequestReducer,
-      dashboard: dashboardReducer
+      dashboard: dashboardReducer,
+      appMetadata: appMetadataReducer
     }, {
         metaReducers
       }),
