@@ -72,8 +72,9 @@
     flex-direction: column;
     max-width: 60%;
     md-select,
-    .md-form-field {
+    md-form-field {
       margin-top: 20px;
+      width: 100%;
     }
   }
 }

@@ -13,6 +13,11 @@ export const GET = '[Application] Get one';
 export const GET_SUCCESS = '[Application] Get one success';
 export const GET_FAILED = '[Application] Get one failed';
 
+export const CREATE = '[Application] Create';
+export const CREATE_SUCCESS = '[Application] Create success';
+export const CREATE_FAILED = '[Application] Create failed';
+
+
 // ###### Move these schemas - NJ
 export const StackSchema = new schema.Entity('stack', {}, {
     idAttribute: getAPIResourceGuid
@@ -60,6 +65,31 @@ export class GetApplicationSummary implements APIAction {
         GET,
         GET_SUCCESS,
         GET_FAILED
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [ApplicationSchema];
+    entityKey = ApplicationSchema.key;
+    options: RequestOptions;
+}
+
+export interface NewApplication {
+    name: string;
+    space_guid: string;
+}
+export class CreateNewApplication implements APIAction {
+    constructor(public guid: string, public cnis: string, application: NewApplication) {
+        this.options = new RequestOptions();
+        this.options.url = `apps`;
+        this.options.method = 'post';
+        this.options.body = {
+            name: application.name,
+            space_guid: application.space_guid
+        };
+    }
+    actions = [
+        CREATE,
+        CREATE_SUCCESS,
+        CREATE_FAILED
     ];
     type = ApiActionTypes.API_REQUEST;
     entity = [ApplicationSchema];

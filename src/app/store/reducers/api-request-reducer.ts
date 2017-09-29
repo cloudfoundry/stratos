@@ -1,22 +1,28 @@
-import { ApiActionTypes } from './../actions/api.actions';
+import { RequestMethod } from '@angular/http';
+
+import { APIAction, ApiActionTypes, WrapperAPIActionSuccess } from './../actions/api.actions';
 import { defaultEntitiesState } from './entity.reducer';
 
 const defaultState = { ...defaultEntitiesState };
 export interface EntityRequestState {
     fetching: boolean;
     updating: boolean;
+    creating: boolean;
     error: boolean;
+    entity: any;
     message: string;
 }
 
 const defaultEntityRequest = {
     fetching: false,
     updating: false,
+    creating: false,
     error: false,
+    entity: null,
     message: ''
 };
 
-function getEntityRequestState(state, { entityKey, guid }) {
+function getEntityRequestState(state, { entityKey, guid }): EntityRequestState {
     const requestState = { ...state[entityKey][guid] };
     if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
         return requestState;
@@ -24,7 +30,7 @@ function getEntityRequestState(state, { entityKey, guid }) {
     return { ...defaultEntityRequest };
 }
 
-function setEntityRequestState(state, requestState, { entityKey, guid }) {
+function setEntityRequestState(state, requestState, { entityKey, guid }): EntityRequestState {
     const newState = { ...state };
     newState[entityKey][guid] = requestState;
     return newState;
@@ -37,14 +43,22 @@ export function apiRequestReducer(state = defaultState, action) {
             if (!action.apiAction.guid) {
                 return state;
             }
+            const apiAction = action.apiAction as APIAction;
             const requestState = getEntityRequestState(state, action.apiAction);
-            requestState.fetching = true;
+            apiAction.options.method === RequestMethod.Post ?
+                requestState.creating = true :
+                requestState.fetching = true;
+
             return setEntityRequestState(state, requestState, action.apiAction);
         case ApiActionTypes.API_REQUEST_SUCCESS:
             if (action.apiAction.guid) {
+                const successAction = action as WrapperAPIActionSuccess;
+
                 const requestSuccessState = getEntityRequestState(state, action.apiAction);
                 requestSuccessState.fetching = false;
+                requestSuccessState.creating = false;
                 requestSuccessState.error = false;
+                requestSuccessState.entity = successAction.response;
                 return setEntityRequestState(state, requestSuccessState, action.apiAction);
             } else if (action.response && action.response.entities) {
                 const entities = { ...action.response.entities };

@@ -4,7 +4,8 @@ import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { NewAppCFDetails } from '../../../../store/actions/create-applications-page.actions';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { NewAppCFDetails, SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 
@@ -29,11 +30,19 @@ export class CreateApplicationStep2Component implements OnInit {
 
   cfDetails: NewAppCFDetails;
 
+  onNext: StepOnNextFunction;
+
+  name: string;
+
   ngOnInit() {
     this.validate = this.form.statusChanges.mergeMap(() => {
       return Observable.of(this.form.valid);
     }).startWith(this.form.valid);
     this.checkingName$ = this.store.select(selectNewAppState).map(state => state.nameCheck.checking);
+    this.onNext = () => {
+      this.store.dispatch(new SetNewAppName(this.name));
+      return Observable.of({ success: true });
+    };
   }
 
 }

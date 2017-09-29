@@ -54,9 +54,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       space: [[], [Validators.required]]
     });
 
-    this.validate = this.cfForm.valueChanges.mergeMap(() => {
-      return Observable.of(this.cfForm.valid);
-    }).startWith(this.cfForm.valid);
+    this.validate = this.cfForm.valueChanges
+      .throttleTime(250)
+      .mergeMap(() => {
+        return Observable.of(this.cfForm.valid);
+      }).startWith(this.cfForm.valid);
 
     this.data$ = this.getCFData();
   }
