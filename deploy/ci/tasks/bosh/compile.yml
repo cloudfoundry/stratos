@@ -48,6 +48,8 @@ run:
 
       cd stratos-ui
       npm install
+      export PATH=${PWD}/node_modules/.bin:$PATH
+      bower install --allow-root --force
   
       cat << EOF > ../build/secrets.json
       {
@@ -95,4 +97,4 @@ run:
       # Delete the release
       bosh2 delete-release stratos-ui -e vbox
 
-      exit E2E_EXIT_CODE
+      exit $E2E_EXIT_CODE
