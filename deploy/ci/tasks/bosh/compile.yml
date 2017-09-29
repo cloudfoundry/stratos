@@ -51,7 +51,7 @@ run:
       export PATH=${PWD}/node_modules/.bin:$PATH
       bower install --allow-root --force
 
-      cat << EOF > ../build/secrets.json
+      cat << EOF > build/secrets.json
       {
         "cloudFoundry": {
           "url": "${CF_LOCATION}",
