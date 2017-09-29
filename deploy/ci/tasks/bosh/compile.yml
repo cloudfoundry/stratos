@@ -41,7 +41,8 @@ run:
       # Deploy
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
-      FRONTEND_IP=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
+      FRONTEND_IP_=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
+      FRONTEND_IP=$(echo FRONTEND_IP_ | sed -e 's/ *$//')
       ping -c5 ${FRONTEND_IP}
       cd ${ROOT_DIR}
       # Run E2E tests
@@ -65,8 +66,8 @@ run:
           }
        },
         "console": {
-          "host": "${FRONTEND_IP}"
-          "port": "443"
+          "host": "${FRONTEND_IP}",
+          "port": "443",
           "admin": {
             "username": "${CONSOLE_ADMIN_USER}",
             "password": "${CONSOLE_ADMIN_PASSWORD}"
