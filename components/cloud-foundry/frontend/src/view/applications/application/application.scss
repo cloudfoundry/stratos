@@ -1,4 +1,5 @@
 @import 'services/services',
+        'service-catalogue/service-catalogue',
         'summary/summary',
         'log-stream/cf-log-viewer',
         'variables/variables';
@@ -47,7 +48,7 @@
       cursor: pointer;
     }
   }
-  
+
 }
 
 .application-header {

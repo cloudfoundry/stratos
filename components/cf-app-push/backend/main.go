@@ -5,8 +5,8 @@ import (
 
 	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/flags"
-	"github.com/labstack/echo"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/labstack/echo"
 )
 
 type CFAppPush struct {

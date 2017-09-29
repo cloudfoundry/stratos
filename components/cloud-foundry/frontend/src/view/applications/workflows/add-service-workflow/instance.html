@@ -1,84 +1,85 @@
 <div class="select-instance">
-  <div class="service-description col-sm-12">
-    <div class="service-icon">
-      <img ng-src="{{ wizardCtrl.options.service.entity.extra.ImageURL }}"
-        default-image default-image-src="/images/services/App_services_72.png"/>
-    </div>
-    <div>
-      <h4 class="font-semi-bold">{{ wizardCtrl.options.service.entity.label }}</h4>
-      <p>{{ wizardCtrl.options.service.entity.extra.LongDescription || wizardCtrl.options.service.entity.description }}</p>
-    </div>
-  </div>
-
-
   <div class="alert alert-info alert-no-bg alert-bordered" ng-if="wizardCtrl.options.service.entity.unique_id==='app-autoscaler-id'">
-    <p>
-      You can bind the Auto-scaler to this application here. Please note that you will need to use the CLI
-      to configure the auto-scaling policy for this application in order for it to be enabled.
-    </p>
+    <p translate>app.app-info.app-tabs.services.bind.warning.auto-sclaer</p>
   </div>
 
   <div class="loading-services-spinner" ng-if="wizardCtrl.options.spinners.loadingServiceInstances">
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
 
-  <uib-tabset class="select-instance-tabs col-sm-12"
-    active="wizardCtrl.options.activeTab" ng-if="!wizardCtrl.options.spinners.loadingServiceInstances">
-    <uib-tab index="0" heading="{{ 'app.app-info.app-tabs.services.add.create.title' | translate }}">
-      <form name="createNewForm" ng-if="wizardCtrl.options.activeTab === 0">
-        <div class="form-group" focusable-input
-          ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
-          <label class="control-label" required translate>
-            app.app-info.app-tabs.services.add.create.name-label
-          </label>
-          <span class="control-message" translate-namespace="app.app-info.app-tabs.services.add.create" >
-            <span translate ng-if="addInstanceForm.createNewForm.name.$error.required">.name-error-required</span>
-            <span translate ng-if="addInstanceForm.createNewForm.name.$error.stratosUnique">.name-error-unique</span>
-            <span translate ng-if="addInstanceForm.createNewForm.name.$error.pattern">.name-error-pattern</span>
-          </span>
-          <input type="text" name="name" class="form-control" tabindex="0"
-            ng-model="wizardCtrl.options.userInput.name" ng-trim="false"
-            stratos-unique items="wizardCtrl.options.instanceNames" ignore-case
-            ng-pattern="/^[a-zA-Z\d\-\_]+$/" required autofocus>
-        </div>
+  <p translate>app.app-info.app-tabs.services.bind.select</p>
 
-        <div class="form-group">
-          <label class="control-label" translate>app.app-info.app-tabs.services.add.create.plan-label</label>
-          <select-input name="plan"
-            ng-model="wizardCtrl.options.userInput.plan"
-            input-options="wizardCtrl.options.servicePlans"
-            placeholder="app.app-info.app-tabs.services.add.create.plan-placeholder"
-            tabindex="0" required>
-          </select-input>
-        </div>
-      </form>
-    </uib-tab>
-    <uib-tab index="1" heading="{{ 'app.app-info.app-tabs.services.add.existing.title' | translate }}"
-      disable="wizardCtrl.options.instances.length === 0">
-      <form ng-if="wizardCtrl.options.activeTab === 1">
-        <table class="table table-outlined existing-instances-table">
-          <thead>
-            <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
-              <th class="select-col"></th>
-              <th translate>.name-label</th>
-              <th translate>.plan-label</th>
-              <th translate>.apps-label</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="row-vertical-middle" ng-repeat="instance in wizardCtrl.options.instances">
-              <td>
-                <radio-input ng-model="wizardCtrl.options.userInput.existingServiceInstance"
-                  input-value="instance" required>
-                </radio-input>
-              </td>
-              <td>{{ instance.entity.name }}</td>
-              <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
-              <td>{{ instance.entity.service_bindings.length || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-    </uib-tab>
-  </uib-tabset>
+  <div class="select-instance-tabs col-sm-12" ng-if="!wizardCtrl.options.spinners.loadingServiceInstances">
+    <form>
+      <table class="table table-outlined existing-instances-table">
+        <thead>
+          <tr translate-namespace="app.app-info.app-tabs.services.add.existing">
+            <th class="select-col"></th>
+            <th translate>.name-label</th>
+            <th translate>.plan-label</th>
+            <th translate>.tags-label</th>
+            <th translate>.apps-label</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-vertical-middle" ng-repeat="instance in wizardCtrl.options.instances">
+            <td class="td-row-selector">
+              <radio-input ng-model="wizardCtrl.options.userInput.existingServiceInstance"
+                input-value="instance" required>
+              </radio-input>
+            </td>
+            <td>{{ instance.entity.name }}</td>
+            <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
+            <td>
+              <div ng-repeat="tag in instance.entity.tags">
+                <div>{{ tag }}</div>
+              </div>
+            </td>
+            <td>{{ instance.entity.service_bindings.length || '-' }}</td>
+          </tr>
+          <tr class="no-bindable-instances" ng-if="wizardCtrl.options.instances.length === 0">
+            <td colspan="5" translate-namespace="app.app-info.app-tabs.services.bind.no-instances">
+              <p translate>.title</p>
+              <p translate>.prompt</p>
+              <input type="hidden" required ng-model="wizardCtrl.options.userInput.ignored"></input>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <td></td>
+          <td colspan="4" class="td-create-service">
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.createServiceBinding()">
+            <i class="material-icons app-icon-sm add-icon">add_circle_outline</i>
+            <span translate>app.app-info.app-tabs.services.bind.create</span>
+          </button>
+        </td>
+      </table>
+
+      <div class="form-group form-json-editor-input"
+        ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
+        <label class="control-label" required translate>
+          app.app-info.app-tabs.services.create.binding-params-label
+        </label>
+        <a href="#" class="input-box-edit" ng-click="wizardCtrl.options.editParams = true; wizardCtrl.options.hideFooterButtons = true" translate>app.app-info.app-tabs.services.create.edit-params</a>
+        <div class="json-edit-box">{{ wizardCtrl.options.userInput.params | jsonString }}</div>
+      </div>
+  
+    </form>
+  </div>
+</div>
+
+<!-- Parameter editor -->
+<div ng-if="wizardCtrl.options.editParams" class="async-dialog-param-editor" ng-class="{'param-editor-open' : wizardCtrl.options.editParams}">
+  <form name="form.paramEditor" class="async-dialog-param-editor param-editor-container">
+      <div class="form-group json-input-field" focusable-input ng-model-options="{ debounce: 200 }" ng-class="{'has-error': form.paramEditor.$invalid && form.paramEditor.$dirty}">
+        <label class="control-label" translate>app.app-info.app-tabs.services.create.binding-params</label>
+        <span class="control-message">
+            <span translate ng-if="form.paramEditor.$invalid">app.app-info.app-tabs.services.create.json-error-invalid</span>
+          </span>
+        <textarea name="json" focus-when="wizardCtrl.options.editParams" placeholder="{{ 'app.app-info.app-tabs.services.create.params-placeholder' | translate}}" json-text-input ng-model="wizardCtrl.options.userInput.params"></textarea>
+      </div>
+      <div class="param-editor-buttons">
+        <a translate class="done-button btn btn-commit" ng-click="wizardCtrl.options.editParams = false; wizardCtrl.options.hideFooterButtons = false">app.app-info.app-tabs.services.create.done</a>
+      </div>
+  </form>
 </div>

@@ -60,6 +60,7 @@
     // - The app wall is showing
     // - The app wall has the required cf, organization and space filters set correctly
 
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 240000;
     // Reset all cnsi that exist in params
     return resetTo.resetAllCnsi()
       .then(function () {

@@ -1,4 +1,5 @@
 package main
+
 // Based on https://github.com/golang/go/blob/master/src/cmd/go/internal/get/vcs.go
 
 import (
@@ -24,8 +25,8 @@ func GetVCS() *vcsCmd {
 }
 
 type vcsCmd struct {
-	name        string
-	cmd         string   // name of binary to invoke command
+	name string
+	cmd  string // name of binary to invoke command
 
 	createCmd   []string // commands to download a fresh copy of a repository
 	checkoutCmd []string // commands to checkout a branch
@@ -72,7 +73,7 @@ func (v *vcsCmd) run1(dir string, cmdline string, keyval []string, verbose bool)
 
 	m := make(map[string]string)
 	for i := 0; i < len(keyval); i += 2 {
-		m[keyval[i]] = keyval[i + 1]
+		m[keyval[i]] = keyval[i+1]
 	}
 	args := strings.Fields(cmdline)
 	for i, arg := range args {
@@ -102,7 +103,7 @@ func (v *vcsCmd) run1(dir string, cmdline string, keyval []string, verbose bool)
 
 func expand(match map[string]string, s string) string {
 	for k, v := range match {
-		s = strings.Replace(s, "{" + k + "}", v, -1)
+		s = strings.Replace(s, "{"+k+"}", v, -1)
 	}
 	return s
 }
@@ -113,7 +114,7 @@ func EnvForDir(dir string, base []string) []string {
 
 func MergeEnvLists(in, out []string) []string {
 	out = append([]string(nil), out...)
-	NextVar:
+NextVar:
 	for _, inkv := range in {
 		k := strings.SplitAfterN(inkv, "=", 2)[0]
 		for i, outkv := range out {

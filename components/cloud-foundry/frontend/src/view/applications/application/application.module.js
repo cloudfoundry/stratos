@@ -6,6 +6,7 @@
       'cloud-foundry.view.applications.application.summary',
       'cloud-foundry.view.applications.application.log-stream',
       'cloud-foundry.view.applications.application.services',
+      'cloud-foundry.view.applications.application.service-catalogue',
       'cloud-foundry.view.applications.application.variables',
       'cloud-foundry.view.applications.application.events'
     ])

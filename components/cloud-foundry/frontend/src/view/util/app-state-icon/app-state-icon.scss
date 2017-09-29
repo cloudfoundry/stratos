@@ -36,3 +36,7 @@ span.material-icons.app-status {
 .app-status-icon-delete:after {
   content: 'delete';
 }
+
+.app-status-icon-busy:after {
+  content: 'hourglass_empty';
+}

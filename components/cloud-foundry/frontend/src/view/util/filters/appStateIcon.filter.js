@@ -42,6 +42,9 @@
         case 'deleted':
           icon = 'app-status-icon-delete text-success';
           break;
+        case 'busy':
+          icon = 'app-status-icon-busy';
+          break;
         default:
           icon = '';
       }

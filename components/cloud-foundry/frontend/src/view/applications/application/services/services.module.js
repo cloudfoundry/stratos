@@ -8,7 +8,7 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.services', {
-      url: '/services',
+      url: '/services?serviceType',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/services/services.html',
       controller: ApplicationServicesController,
       controllerAs: 'applicationServicesCtrl'
@@ -21,7 +21,7 @@
       hide: false,
       uiSref: 'cf.applications.application.services',
       uiSrefParam: function () {
-        return {guid: $stateParams.guid};
+        return { guid: $stateParams.guid };
       },
       label: 'app.app-info.app-tabs.services.label'
     });
@@ -33,6 +33,7 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $state - the UI router $state service
    * @property {cloud-foundry.model.space} model - the Cloud Foundry space model
    * @property {cloud-foundry.model.application} model - the Cloud Foundry application model
    * @property {string} id - the application GUID
@@ -43,93 +44,133 @@
    * @property {object} search - the search object for filtering
    * @property {object} category - the search category object for filtering
    */
-  function ApplicationServicesController($scope, modelManager, $stateParams) {
+  function ApplicationServicesController(
+    $scope,
+    modelManager,
+    $stateParams,
+    $state
+  ) {
     var that = this;
-    this.model = modelManager.retrieve('cloud-foundry.model.space');
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.id = $stateParams.guid;
-    this.cnsiGuid = $stateParams.cnsiGuid;
-    this.services = [];
-    this.serviceCategories = [
-      { label: 'app.app-info.app-tabs.services.categories.attached', value: 'attached' },
-      { label: 'app.app-info.app-tabs.services.categories.all', value: 'all' }
-    ];
-    this.searchCategory = 'all';
-    this.search = {};
-    this.category = {
-      entity: {
-        extra: undefined
-      }
-    };
-    this.ready = false;
+    that.model = modelManager.retrieve('cloud-foundry.model.space');
+    that.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    that.id = $stateParams.guid;
+    that.cnsiGuid = $stateParams.cnsiGuid;
+    that.managingType = $stateParams.serviceType;
+    that.services = [];
+    that.ALL_FILTER = 'all';
+    that.filterType = $stateParams.serviceType || that.ALL_FILTER;
+    that.search = {};
 
-    $scope.$watch(function () {
-      return that.appModel.application.summary.guid;
-    }, function () {
-      var summary = that.appModel.application.summary;
-      var spaceGuid = summary.space_guid;
-      if (angular.isDefined(spaceGuid)) {
-        that.model.listAllServicesForSpace(that.cnsiGuid, spaceGuid)
-          .then(function (services) {
-            // retrieve categories and attachment data for service filtering
-            var categories = [];
-            var attachedServices = _.chain(summary.services)
-              .filter(function (o) { return angular.isDefined(o.service_plan); })
-              .map(function (o) { return o.service_plan.service.guid; })
-              .value();
-            angular.forEach(services, function (service) {
-              if (attachedServices.length > 0) {
-                if (_.includes(attachedServices, service.metadata.guid)) {
-                  service.attached = true;
-                }
-              }
+    that.ready = false;
 
-              // Parse service entity extra data JSON string
-              if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                service.entity.extra = angular.fromJson(service.entity.extra);
-              }
+    if ($stateParams.serviceType) {
+      // Make sure we clear the serviceType url param if the user changes the filter
+      var stopFilterWatch = $scope.$watch(function () {
+        return that.filterType;
+      }, function () {
+        if (that.filterType !== $stateParams.serviceType) {
+          stopFilterWatch();
+          $stateParams.serviceType = null;
+          that.managingType = null;
+          $state.go('.', $stateParams, { notify: false });
+        }
+      });
+    }
 
-              // a service can belong to >1 category, so allow filtering by any of them
-              if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.Categories)) {
-                var _categories = service.entity.extra.Categories;
-                if (angular.isString(_categories)) {
-                  _categories = [_categories];
-                }
-                var serviceCategories = _.map(_categories, function (o) {
-                  return {
-                    label: o,
-                    value: { Categories: o },
-                    lower: o.toLowerCase()
-                  };
-                });
-                categories = _.unionBy(categories, serviceCategories, 'lower');
-              }
+    var stopSummaryWatch = $scope.$watch(function () {
+      return that.appModel.application.summary;
+    }, function (summary) {
+      if (summary.guid) {
+        stopSummaryWatch();
+        var spaceGuid = summary.space_guid;
+        if (spaceGuid) {
+          that.model.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid)
+            .then(function (serviceInstances) {
+              // Get any extra service data
+              // and get the types from services
+              return {
+                filterTypes: that.getServiceFilterTypes(serviceInstances),
+                services: that.getExtraServiceData(serviceInstances)
+              };
+            })
+            .then(function (data) {
+              // Attach data to controller
+              that.filterTypes = data.filterTypes;
+              that.services = data.services;
+              that.ready = true;
             });
-
-            that.services.length = 0;
-            [].push.apply(that.services, services);
-
-            categories = _.sortBy(categories, 'lower');
-            that.serviceCategories.length = 2;
-            [].push.apply(that.serviceCategories, categories);
-          })
-          .finally(function () {
-            that.ready = true;
-          });
+        }
       }
     });
 
-    $scope.$watch(function () {
-      return that.searchCategory;
-    }, function (newSearchCategory) {
-      if (newSearchCategory === 'attached') {
-        that.category.entity.extra = undefined;
-        that.category.attached = true;
-      } else {
-        delete that.category.attached;
-        that.category.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
+    function getCurrentAppBinding(serviceInstance) {
+      if (
+        !serviceInstance.entity.service_bindings ||
+        serviceInstance.entity.service_bindings.length === 0
+      ) {
+        return null;
       }
-    });
+      return _.find(serviceInstance.entity.service_bindings, function (binding) {
+        return binding.entity.app_guid === that.appModel.application.summary.guid;
+      }) || null;
+    }
+
+    function getServiceInstanceType(serviceInstance) {
+      return serviceInstance.entity.service_plan.entity.service.entity.label;
+    }
+
+    // Works out if the current list is being filtered or searched.
+    that.isFiltered = function () {
+      return that.search.$ || that.filterType !== that.ALL_FILTER;
+    };
+
+    that.showInstance = function (serviceInstance) {
+      var isOfType = !that.filterType ||
+        that.filterType === that.ALL_FILTER ||
+        that.filterType === getServiceInstanceType(serviceInstance);
+      var isBoundToThisApp = !!getCurrentAppBinding(serviceInstance);
+
+      return isBoundToThisApp && isOfType;
+    };
+
+    that.getExtraServiceData = function (services) {
+      return _.chain(services)
+        .map(function (service) {
+          if (angular.isString(service.entity.extra)) {
+            service.entity.extra = angular.fromJson(service.entity.extra);
+          }
+          return service;
+        })
+        .sortBy('entity.type')
+        .value();
+    };
+
+    // Gets all of the types in the current list of instances
+    that.getServiceFilterTypes = function (serviceInstances) {
+      var baseFilters = [{
+        label: 'app.app-info.app-tabs.services.types.all',
+        value: that.ALL_FILTER,
+        lower: that.ALL_FILTER.toLowerCase()
+      }];
+
+      var typeFilters = _.chain(serviceInstances)
+        .flatMap(function (serviceInstance) {
+          return getServiceInstanceType(serviceInstance);
+        })
+        .compact()
+        .uniq()
+        .map(function (type) {
+          return {
+            label: type,
+            value: type,
+            lower: type.toLowerCase()
+          };
+        })
+        .sortBy('lower')
+        .value();
+
+      return baseFilters.concat(typeFilters);
+    };
   }
 
 })();

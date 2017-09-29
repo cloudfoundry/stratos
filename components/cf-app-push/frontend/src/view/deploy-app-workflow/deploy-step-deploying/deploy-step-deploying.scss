@@ -19,6 +19,10 @@ $deploy-status-bounce-spacer: 6px;
     .panel-heading.action-header {
       background-color: $console-primary-bg;
     }
+
+    .log-viewer {
+      height: $deploy-app-step-height;
+    }
   }
 
   .deploy-app-file-upload-status {

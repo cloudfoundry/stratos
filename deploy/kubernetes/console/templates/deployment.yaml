@@ -9,9 +9,6 @@ metadata:
 data:
   stolon: {{ .Values.dbPassword | b64enc }}
   db-password: {{  .Values.mariadb.mariadbPassword | b64enc }}
-  console-cert-key: {{ .Files.Get "ssl/console.key" | b64enc }}
-  console-cert: {{ .Files.Get "ssl/console.crt" | b64enc }}
-
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
@@ -29,9 +26,15 @@ spec:
       containers:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
+        env:
+        - name: ENCRYPTION_KEY_VOLUME
+          value: "{{ .Release.Name }}-encryption-key-volume"
         volumeMounts:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
+          readOnly: true
+        - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
+          name: "{{ .Release.Name }}-encryption-key-volume"
           readOnly: true
         ports:
         - containerPort: 80
@@ -136,6 +139,22 @@ spec:
           value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
+        {{- if .Values.noShared }}
+        {{- if .Values.consoleCert }}
+        - name: CONSOLE_CERT
+          value: | 
+{{ .Values.consoleCert | indent 12 }}
+        {{- end }}
+        {{- if .Values.consoleCertKey }}
+        - name: CONSOLE_CERT_KEY
+          value: |
+{{ .Values.consoleCertKey | indent 12 }}
+        {{- end }}
+        {{- end }}
+        - name: CONSOLE_PROXY_CERT_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
+        - name: CONSOLE_PROXY_CERT_KEY_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}

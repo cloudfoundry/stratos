@@ -1,7 +1,7 @@
 .add-service-workflow {
 
   .select-instance {
-    padding: $console-unit-space 0;
+    padding: 0;
 
     .loading-services-spinner {
       text-align: center;
@@ -35,10 +35,18 @@
   }
 
   .select-instance-tabs {
+
+    min-height: 300px;
+
     .nav.nav-tabs {
       .uib-tab > a {
         background: transparent;
       }
+    }
+
+    .td-row-selector {
+      vertical-align: middle;
+      width: $console-unit-space;
     }
 
     .tab-content {
@@ -48,6 +56,33 @@
         margin-bottom: 0;
         tbody > tr td {
           vertical-align: middle;
+        }
+      }
+    }
+    .no-bindable-instances > td {
+      text-align: center;
+      p {
+        margin: $console-half-space;
+      }
+    }
+
+    table > tfoot > tr {
+      .td-create-service {
+        padding: 0;
+        vertical-align: middle;
+
+        button {
+          display: flex;
+          align-items: center;
+          > i {
+            line-height: 1;
+            margin-right: $console-unit-space / 4;
+          }
+
+          &:hover, &:focus {
+            outline: 0;
+            text-decoration: none;
+          }
         }
       }
     }
