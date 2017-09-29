@@ -39,15 +39,13 @@ run:
       # Deploy
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
-      bosh2 -e vbox -d stratos-ui instances
+      FRONTEND_IP=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
       popd
       # Run E2E tests
 
       pushd stratos-ui
-
       npm install
-
-    
+  
       cat << EOF > ../build/secrets.json
       {
         "cloudFoundry": {
@@ -62,6 +60,8 @@ run:
           }
        },
         "console": {
+          "host": "${FRONTEND_IP}"
+          "port": "443"
           "admin": {
             "username": "${CONSOLE_ADMIN_USER}",
             "password": "${CONSOLE_ADMIN_PASSWORD}"
