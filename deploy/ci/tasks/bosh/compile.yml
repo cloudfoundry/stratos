@@ -42,7 +42,7 @@ run:
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
       FRONTEND_IP=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
-      
+      ping -c5 ${FRONTEND_IP}
       cd ${ROOT_DIR}
       # Run E2E tests
 
@@ -50,7 +50,7 @@ run:
       npm install
       export PATH=${PWD}/node_modules/.bin:$PATH
       bower install --allow-root --force
-  
+
       cat << EOF > ../build/secrets.json
       {
         "cloudFoundry": {
