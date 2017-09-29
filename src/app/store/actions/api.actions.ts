@@ -39,6 +39,13 @@ export class APIAction implements Action {
   guid?: string;
 }
 
+export interface NormalizedResponse {
+  entities: {
+    [key: string]: any
+  };
+  result: any[];
+}
+
 export class StartAPIAction implements Action {
   constructor(
     public apiAction: APIAction
@@ -50,7 +57,7 @@ export class StartAPIAction implements Action {
 export class WrapperAPIActionSuccess implements Action {
   constructor(
     public type: string,
-    public response: {},
+    public response: NormalizedResponse,
     public apiAction: APIAction
   ) { }
   apiType = ApiActionTypes.API_REQUEST_SUCCESS;
@@ -121,17 +128,11 @@ export function selectEntity(type: string, guid: string) {
   );
 }
 
-export function selectEntityRequestInfo(type: string, guid: string) {
+export function selectEntityRequestInfo<T>(type: string, guid: string) {
   return compose(
-    getEntityById(guid),
+    getEntityById<T>(guid),
     getEntityType(type),
-    (d) => {
-      return d;
-    },
     getAPIRequestInfoState,
-    (d) => {
-      return d;
-    },
   );
 }
 
@@ -145,9 +146,10 @@ export function getEntityType(type: string) {
   };
 }
 
-export const getEntityById = (guid: string) => (entities) => {
+export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
+
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
 export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');
 export const getAPIResourceEntity = (resource: APIResource): any => getValueOrNull(resource, 'entity');

@@ -1,12 +1,12 @@
 .steppers {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  height: 100%;
   &__inner {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    margin: 50px 0;
+    padding: 50px;
   }
   &__headers {
     display: flex;
@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     &-inner {
-      flex: none;
+      flex: 1;
       display: flex;
       align-items: center;
       padding: 0 10px;
@@ -50,16 +50,31 @@
       justify-content: center;
     }
     &-text {
+      white-space: nowrap;
       padding-left: 10px;
     }
   }
   &__contents {
+    height: 100%;
     flex: 1;
-    margin-top: 10px;
+    margin: 30px 80px;
+  }
+  &__wrapper {
+    height: 100%;
   }
   &__navigation {
     margin-top: 50px;
     display: flex;
     justify-content: space-between
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    max-width: 60%;
+    md-select,
+    md-form-field {
+      margin-top: 20px;
+      width: 100%;
+    }
   }
 }

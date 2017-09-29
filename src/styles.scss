@@ -10,5 +10,20 @@ body {
 
 body,
 html {
-  height: auto;
+  min-height: 100vh;
+}
+
+.mat-progress-spinner {
+  &.small-spinner {
+    height: 20px;
+    width: 20px;
+  }
+  &.inline-spinner {
+    display: inline-block;
+  }
+  &.md-form-spinner {
+    position: absolute;
+    right: -20px;
+    top: 0;
+  }
 }

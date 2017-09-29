@@ -1,0 +1,20 @@
+<app-step [title]="'Cloud Foundry'" [validate]="validate" [onNext]="onNext">
+  <b>Select a Cloud Foundry instance, organization and space for the app.</b>
+  <form [formGroup]="cfForm">
+    <md-select #cfSelect placeholder="Cloud Foundary" formControlName="cf">
+      <md-option *ngFor="let cf of (data$ | async)?.cfList" [value]="cf">
+        <span>{{ cf.name }}</span>
+      </md-option>
+    </md-select>
+    <md-select #orgSelect placeholder="Organization" formControlName="org">
+      <md-option *ngFor="let org of (data$ | async)?.orgList" [value]="org">
+        <span>{{ org.name }}</span>
+      </md-option>
+    </md-select>
+    <md-select #spaceSelect placeholder="Space" formControlName="space">
+      <md-option *ngFor="let space of (data$ | async)?.spaceList" [value]="space">
+        <span>{{ space.name }}</span>
+      </md-option>
+    </md-select>
+  </form>
+</app-step>

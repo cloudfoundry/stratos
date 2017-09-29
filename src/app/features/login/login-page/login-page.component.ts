@@ -37,25 +37,25 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription =
       this.store.select(s => [s.auth, s.cnsis])
-	.subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
-	  if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
-	    this.router.navigateByUrl('');
-	  } else {
-	    this.loggedIn = auth.loggedIn;
-	    this.loggingIn = auth.loggingIn;
-	    this.error = auth.error && !auth.sessionData;
+        .subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
+          if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
+            this.router.navigateByUrl('');
+          } else {
+            this.loggedIn = auth.loggedIn;
+            this.loggingIn = auth.loggingIn;
+            this.error = auth.error && !auth.sessionData;
 
-	    if (this.error) {
-	      this.message = `Couldn't log in, please try again.`;
-	    } else if (auth.verifying) {
-	      this.message = 'Verifying session...';
-	    } else if (cnsis.loading) {
-	      this.message = 'Fetching Cloud Foundry information...';
-	    } else if (auth.loggingIn) {
-	      this.message = 'Logging in...';
-	    }
-	  }
-	});
+            if (this.error) {
+              this.message = `Couldn't log in, please try again.`;
+            } else if (auth.verifying) {
+              this.message = 'Verifying session...';
+            } else if (cnsis.loading) {
+              this.message = 'Fetching Cloud Foundry information...';
+            } else if (auth.loggingIn) {
+              this.message = 'Logging in...';
+            }
+          }
+        });
   }
 
   ngOnDestroy() {

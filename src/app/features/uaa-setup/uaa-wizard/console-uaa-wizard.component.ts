@@ -1,17 +1,17 @@
-import { environment } from '../../../../environments/environment';
-import { AuthState } from '../../../store/reducers/auth.reducer';
-import { VerifySession } from '../../../store/actions/auth.actions';
-import { Router } from '@angular/router';
-import { UAASetupState } from '../../../store/reducers/uaa-setup.reducers';
-import { SetupUAA, SetUAAScope } from '../../../store/actions/setup.actions';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { any } from 'codelyzer/util/function';
+import { Observable } from 'rxjs/Rx';
 
-import { NgForm } from '@angular/forms/src/directives';
-import { Component, OnInit, AfterContentInit } from '@angular/core';
+import { environment } from '../../../../environments/environment';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { VerifySession } from '../../../store/actions/auth.actions';
+import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
+import { AppState } from '../../../store/app-state';
+import { AuthState } from '../../../store/reducers/auth.reducer';
+import { UAASetupState } from '../../../store/reducers/uaa-setup.reducers';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -38,15 +38,15 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
     }));
     return this.store.select('uaaSetup')
       .skipWhile((state: UAASetupState) => {
-	return state.settingUp;
+        return state.settingUp;
       })
       .map((state: UAASetupState) => {
-	this.uaaScopes = state.payload.scope;
-	this.selectedScope = 'stratos.admin';
-	return {
-	  success: !state.error,
-	  message: state.message
-	};
+        this.uaaScopes = state.payload.scope;
+        this.selectedScope = 'stratos.admin';
+        return {
+          success: !state.error,
+          message: state.message
+        };
       });
   }
 
@@ -54,25 +54,25 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
     return this.store.select(s => [s.uaaSetup, s.auth])
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-	return !(uaa.settingUp || auth.verifying);
+        return !(uaa.settingUp || auth.verifying);
       })
       .delay(1000)
       .take(5)
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-	const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
-	if (!validUAASessionData) {
-	  this.store.dispatch(new VerifySession());
-	}
-	return validUAASessionData;
+        const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
+        if (!validUAASessionData) {
+          this.store.dispatch(new VerifySession());
+        }
+        return validUAASessionData;
       })
       .map((state: [UAASetupState, AuthState]) => {
-	if (!state[0].error) {
-	  this.router.navigateByUrl('');
-	}
-	return {
-	  success: !state[0].error,
-	  message: state[0].message
-	};
+        if (!state[0].error) {
+          this.router.navigateByUrl('');
+        }
+        return {
+          success: !state[0].error,
+          message: state[0].message
+        };
       });
   }
   ngOnInit() {

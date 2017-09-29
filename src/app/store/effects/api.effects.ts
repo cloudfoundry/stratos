@@ -1,22 +1,25 @@
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
+
+import { Injectable } from '@angular/core';
+import { Headers, Http, Request, Response } from '@angular/http';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
-import { CNSISModel } from './../reducers/cnsis.reducer';
+import { Observable } from 'rxjs/Observable';
+
 import { environment } from './../../../environments/environment';
-import { AppState } from './../app-state';
 import {
     APIAction,
     ApiActionTypes,
     APIResource,
+    NormalizedResponse,
     StartAPIAction,
     WrapperAPIActionFailed,
     WrapperAPIActionSuccess,
 } from './../actions/api.actions';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
-import { Injectable } from '@angular/core';
-import { Headers, Http, RequestOptions, RequestOptionsArgs, Request, Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import { Action, Store } from '@ngrx/store';
-import { Actions, Effect } from '@ngrx/effects';
+import { AppState } from './../app-state';
+import { CNSISModel } from './../reducers/cnsis.reducer';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Injectable()
@@ -35,7 +38,7 @@ export class APIEffect {
 
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
-    .switchMap(([action, state]) => {
+    .mergeMap(([action, state]) => {
       const { apiAction } = action;
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
@@ -54,7 +57,7 @@ export class APIEffect {
           );
         })
         .catch(err => {
-          return  Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
+          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
         });
     });
 
@@ -66,12 +69,12 @@ export class APIEffect {
       entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
       metadata: resource.metadata
     } : {
-      entity: { ...resource, cfGuid },
-      metadata: { guid: resource.guid }
-    };
+        entity: { ...resource, cfGuid },
+        metadata: { guid: resource.guid }
+      };
   }
 
-  getEntities(apiAction: APIAction, response: Response) {
+  getEntities(apiAction: APIAction, response: Response): NormalizedResponse {
     const data = response.json();
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
@@ -88,7 +91,7 @@ export class APIEffect {
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
-    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : {};
+    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : null;
   }
 
   mergeData(entity, metadata, cfGuid) {

@@ -9,10 +9,12 @@ import { environment } from '../../environments/environment';
 import { APIEffect } from './effects/api.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CNSISEffect } from './effects/cnsis.effects';
+import { CreateAppPageEffects } from './effects/create-app-effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { apiRequestReducer } from './reducers/api-request-reducer';
 import { authReducer } from './reducers/auth.reducer';
 import { cnsisReducer } from './reducers/cnsis.reducer';
+import { createAppReducer } from './reducers/create-application.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { entitiesReducer } from './reducers/entity.reducer';
 import { paginationReducer } from './reducers/pagination.reducer';
@@ -35,7 +37,8 @@ export const metaReducers = environment.production ? [] : [logger];
       cnsis: cnsisReducer,
       pagination: paginationReducer,
       apiRequest: apiRequestReducer,
-      dashboard: dashboardReducer
+      dashboard: dashboardReducer,
+      createApplication: createAppReducer
     }, {
         metaReducers
       }),
@@ -47,7 +50,8 @@ export const metaReducers = environment.production ? [] : [logger];
       APIEffect,
       AuthEffect,
       UAASetupEffect,
-      CNSISEffect
+      CNSISEffect,
+      CreateAppPageEffects
     ]),
   ]
 })
