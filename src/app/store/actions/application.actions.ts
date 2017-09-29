@@ -16,13 +16,6 @@ export const GET = '[Application] Get one';
 export const GET_SUCCESS = '[Application] Get one success';
 export const GET_FAILED = '[Application] Get one failed';
 
-// ###### Move these schemas
-
-
-
-// ######
-
-
 export const ApplicationSchema = new schema.Entity('application', {
     entity: {
         stack: StackSchema,
@@ -49,7 +42,7 @@ export class GetAllApplications implements APIAction {
         this.options.params = new URLSearchParams();
         this.options.params.set('page', '1');
         this.options.params.set('results-per-page', '100');
-        this.options.params.set('inline-relations-depth', '1');
+        this.options.params.set('inline-relations-depth', '2');
     }
     actions = [
         GET_ALL,

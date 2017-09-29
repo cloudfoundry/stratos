@@ -1,31 +1,25 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Subscription } from 'rxjs/Subscription';
 
 import { ApplicationService, AppData } from '../../application.service';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-summary-tab',
   templateUrl: './summary-tab.component.html',
   styleUrls: ['./summary-tab.component.scss']
 })
-export class SummaryTabComponent implements OnInit, OnDestroy {
+export class SummaryTabComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
-  subs: Subscription[] = [];
-  appData: AppData;
+  appData$: Observable<AppData>;
 
   ngOnInit() {
-    this.subs.push(this.applicationService.application$.subscribe(appData => {
-      this.appData = appData;
-    }));
-  }
-
-  ngOnDestroy() {
-    this.subs.forEach(subscription => subscription.unsubscribe);
+    this.appData$ = this.applicationService.application$;
   }
 
 }

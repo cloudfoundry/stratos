@@ -39,42 +39,9 @@ export class ApplicationService {
       ApplicationSchema,
       id,
       new GetApplication(id, cfId)
-    )
-      .filter(({ entity, entityRequestInfo }) => {// TODO: RC replace with skipWhile?
-        // return entityRequestInfo.fetching === false;
-        return entity && entity.entity;
-      })
-      .flatMap(app => {
-        return Observable.combineLatest(
-          Observable.of(app),
-          getEntityObservable(
-            this.store,
-            SpaceSchema.key,
-            SpaceSchema,
-            app.entity.entity.space,
-            new GetSpace(app.entity.entity.space, cfId)
-          )
-        );
-      }).flatMap(([app, space]) => {
-        return Observable.combineLatest(
-          Observable.of(app),
-          Observable.of(space),
-          getEntityObservable(
-            this.store,
-            StackSchema.key,
-            StackSchema,
-            app.entity.entity.stack_guid,
-            new GetStack(app.entity.entity.stack_guid, cfId)
-          ),
-          getEntityObservable(
-            this.store,
-            OrganisationSchema.key,
-            OrganisationSchema,
-            space.entity.entity.organization_guid,
-            new GetSpace(space.entity.entity.organization_guid, cfId)
-          )
-        );
-      });
+    ).filter(({ entity, entityRequestInfo }) => {
+      return entity && entity.entity;
+    });
 
     const applicationSummary$ = getEntityObservable(
       this.store,
@@ -86,33 +53,17 @@ export class ApplicationService {
       return entityRequestInfo.fetching === false;
     });
 
-    // getEntityObservable(
-    //   this.store,
-    //   OrganisationSchema.key,
-    //   OrganisationSchema,
-    //   id,
-    //   new GetOrganisation(id, cfId)
-    // );
-
-
-
-    // this.application$ = application$.withLatestFrom(applicationSummary$)
-    // .flatMap(result => {
-
-    // })
-
-    // , spaces, organisations
     this.application$ = application$
       .combineLatest(
       applicationSummary$,
       this.store.select(cnsisEntitySelector),
-    ).map(([[app, space, stack, organisation], appSummary, cnsis]) => {
+    ).map(([app, appSummary, cnsis]) => {
       return {
         fetching: app.entityRequestInfo.fetching && appSummary.entityRequestInfo.fetching,
         app: app,
-        space: space,
-        stack: stack,
-        organisation: organisation,
+        space: app.entity.entity.space,
+        stack: app.entity.entity.stack,
+        organisation: app.entity.entity.space.entity.organization,
         appSummary: appSummary,
         cf: cnsis.find((CNSIModel) => {
           return CNSIModel.guid === app.entity.entity.cfGuid;

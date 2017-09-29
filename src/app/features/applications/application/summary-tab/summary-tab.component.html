@@ -13,11 +13,11 @@
         <form #summaryForm="ngForm">
           <md-list role='list' class='summary__cards__summary__left'>
             <md-list-item role='listitem'>
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Name'" [value]="appData?.app.entity.entity.name">
+              <app-editable-display-value [edit]="isEditSummary" [label]="'Name'" [value]="(appData$ | async)?.app.entity.entity.name">
                 <!-- <div class="display-input__display"> hello ! </div> -->
                 <div class="display-input__input">
                   <md-form-field>
-                    <input mdInput name="appName" placeholder="Name" [(ngModel)]="appData?.app.entity.entity.name" />
+                    <input mdInput name="appName" placeholder="Name" [ngModel]="(appData$ | async)?.app.entity.entity.name" />
                   </md-form-field>
                 </div>
               </app-editable-display-value>
@@ -29,37 +29,37 @@
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'Composite States'">
-                <div>App State: {{appData?.app.entity.entity.state}}</div>
-                <div>Package State: {{appData?.app.entity.entity.package_state}}</div>
+                <div>App State: {{(appData$ | async)?.app.entity.entity.state}}</div>
+                <div>Package State: {{(appData$ | async)?.app.entity.entity.package_state}}</div>
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'Instances'">
-                <md-slider mdInput [max]="appData?.app.entity.entity.instances" step="1" [disabled]="!isEditSummary" [(ngModel)]="appData?.app.entity.entity.running_instances"
-                  name="appInstances" min="0" thumbLabel tickInterval="1"></md-slider> {{appData?.app.entity.entity.running_instances || 0}} / {{ appData?.app.entity.entity.instances
+                <md-slider mdInput [max]="(appData$ | async)?.app.entity.entity.instances" step="1" [disabled]="!isEditSummary" [ngModel]="(appData$ | async)?.app.entity.entity.running_instances"
+                  name="appInstances" min="0" thumbLabel tickInterval="1"></md-slider> {{(appData$ | async)?.app.entity.entity.running_instances || 0}} / {{ (appData$ | async)?.app.entity.entity.instances
                 }}
               </app-display-value>
             </md-list-item>
           </md-list>
           <md-list role='list' class='summary__cards__summary__right'>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="appData?.appSummary.entity.entity.services?.length || '-'"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="(appData$ | async)?.appSummary.entity.entity.services?.length || '-'"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="appData?.app.entity.entity.memory | mbToHumanSize">
+              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(appData$ | async)?.app.entity.entity.memory | mbToHumanSize">
                 <div class="display-input__input">
                   <md-form-field>
-                    <input mdInput name="appMemory" placeholder="Memory" [(ngModel)]="appData?.app.entity.entity.memory" />
+                    <input mdInput name="appMemory" placeholder="Memory" [ngModel]="(appData$ | async)?.app.entity.entity.memory" />
                   </md-form-field>
                 </div>
               </app-editable-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-display-value [label]="'disk quota'" [value]="appData?.app.entity.entity.disk_quota | mbToHumanSize"></app-display-value>
+              <app-display-value [label]="'disk quota'" [value]="(appData$ | async)?.app.entity.entity.disk_quota | mbToHumanSize"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'SSH Enabled'">
-                <md-slide-toggle name="appSsh" [(ngModel)]="appData?.app.entity.entity.enable_ssh" [disabled]="!isEditSummary"></md-slide-toggle>
+                <md-slide-toggle name="appSsh" [ngModel]="(appData$ | async)?.app.entity.entity.enable_ssh" [disabled]="!isEditSummary"></md-slide-toggle>
               </app-display-value>
             </md-list-item>
           </md-list>
@@ -77,34 +77,34 @@
         <md-list dense>
           <md-list-item>
             <app-display-value [label]="'Changed'">
-              <div>Created: {{appData?.app.entity.metadata.created_at | date:'medium'}}</div>
-              <div>Modifed: {{appData?.app.entity.entity.package_updated_at | date:'medium' || '-'}}</div>
+              <div>Created: {{(appData$ | async)?.app.entity.metadata.created_at | date:'medium'}}</div>
+              <div>Modifed: {{(appData$ | async)?.app.entity.entity.package_updated_at | date:'medium' || '-'}}</div>
             </app-display-value>
           </md-list-item>
           <md-list-item>
             <app-display-value [label]="'Buildpack'">
-              <app-view-buildpack [buildPack]="appData?.app.entity.entity.buildpack || appData?.app.entity.entity.detected_buildpack"></app-view-buildpack>
+              <app-view-buildpack [buildPack]="(appData$ | async)?.app.entity.entity.buildpack || (appData$ | async)?.app.entity.entity.detected_buildpack"></app-view-buildpack>
             </app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Production'" [value]="appData?.app.entity.entity.production"></app-display-value>
+            <app-display-value [label]="'Production'" [value]="(appData$ | async)?.app.entity.entity.production"></app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Stack'" [value]="appData?.stack.entity.entity.name"></app-display-value>
+            <app-display-value [label]="'Stack'" [value]="(appData$ | async)?.stack.entity.name"></app-display-value>
           </md-list-item>
         </md-list>
         <md-list>
           <md-list-item>
-            <app-display-value [label]="'CF'" [value]="appData?.cf.name"></app-display-value>
+            <app-display-value [label]="'CF'" [value]="(appData$ | async)?.cf.name"></app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'CF URL'" [value]="appData?.cf.api_endpoint.Scheme + '://' + appData?.cf.api_endpoint.Host"></app-display-value>
+            <app-display-value [label]="'CF URL'" [value]="(appData$ | async)?.cf.api_endpoint.Scheme + '://' + (appData$ | async)?.cf.api_endpoint.Host"></app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Organisation'" [value]="appData?.organisation.entity.entity.name"></app-display-value>
+            <app-display-value [label]="'Organisation'" [value]="(appData$ | async)?.organisation.entity.name"></app-display-value>
           </md-list-item>
           <md-list-item>
-            <app-display-value [label]="'Space'" [value]="appData?.space.entity.entity.name"></app-display-value>
+            <app-display-value [label]="'Space'" [value]="(appData$ | async)?.space.entity.name"></app-display-value>
           </md-list-item>
           <md-list-item>
             <app-display-value [label]="'Console Deploy'" [value]="'todo'"></app-display-value>
@@ -118,6 +118,6 @@
 
   </div>
 
-  <!-- <br><br>{{appData?.appSummary.entity.entity | json }} -->
-  <!-- <br><br>{{appData?.app.entity.entity | json }} -->
-  <!-- <br><br>{{appData?.stack.entity.entity | json }} -->
+  <!-- <br><br>{{(appData$ | async)?.appSummary.entity.entity | json }} -->
+  <!-- <br><br>{{(appData$ | async)?.app.entity.entity | json }} -->
+  <!-- <br><br>{{(appData$ | async)?.stack.entity | json }} -->

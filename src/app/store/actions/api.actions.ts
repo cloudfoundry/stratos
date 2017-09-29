@@ -108,7 +108,7 @@ export const getEntityObservable = (
       return Observable.of({
         entityRequestInfo,
         entity: entity ? {
-          entity: denormalize(entity.entity, schema, entities),
+          entity: denormalize(entity, schema, entities).entity,
           metadata: entity.metadata
         } : {}
       });
