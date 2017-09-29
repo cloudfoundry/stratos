@@ -15,8 +15,6 @@ run:
     - -xc
     - |
       # Register BOSH Director
-      apt-get update
-      apt-get install -y git
       cat << EOF >> ca_cert
       $BOSH_CA_CERT
       EOF
@@ -26,7 +24,11 @@ run:
       export BOSH_NON_INTERACTIVE=true
 
       # BOSH create release
-      cd stratos-ui/deploy/stratos-ui-release
+      pushd stratos-ui/deploy/stratos-ui-release
+
+      pushd src
+      ln -s ../../../ stratos-ui
+      popd
 
       bosh2 create-release
       # Delete any release
@@ -38,9 +40,46 @@ run:
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
       bosh2 -e vbox -d stratos-ui instances
+      popd
+      # Run E2E tests
 
-      # Tear down deployment
-      bosh2 -e vbox -d stratos-ui delete-deployment
-      
-      # Delete the release
-      bosh2 delete-release stratos-ui -e vbox
+      pushd stratos-ui
+
+      npm install
+
+    
+      cat << EOF > ../build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+       },
+        "console": {
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
+        },
+        "uaa": {
+          "url": ${UAA_URL}",
+          "clientId": "${UAA_CLIENT_ID}",
+          "adminUsername": "${UAA_ADMIN_USERNAME}",
+          "adminPassword": "${UAA_ADMIN_PASSWORD}"
+        },
+        "runSetupModeTests": true,
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      npm run e2e-on-target

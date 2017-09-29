@@ -1,0 +1,32 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source:
+   repository:  irfanhabib/concourse-bosh
+   tag: "latest"
+
+run:
+  path: sh
+  args:
+    - -xc
+    - |
+      # Register BOSH Director
+      cat << EOF >> ca_cert
+      $BOSH_CA_CERT
+      EOF
+      bosh2 alias-env vbox -e $BOSH_DIRECTOR_IP --ca-cert ca_cert
+      export BOSH_CLIENT=admin
+      export BOSH_CLIENT_SECRET=$BOSH_ADMIN_PASSWORD
+      export BOSH_NON_INTERACTIVE=true
+
+      # BOSH create release
+      pushd stratos-ui/deploy/stratos-ui-release
+
+      # Tear down deployment
+      bosh2 -e vbox -d stratos-ui delete-deployment
+      
+      # Delete the release
+      bosh2 delete-release stratos-ui -e vbox
