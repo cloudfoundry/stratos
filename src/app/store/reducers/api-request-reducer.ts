@@ -3,7 +3,7 @@ import { error } from 'util';
 
 import { APIAction, ApiActionTypes, WrapperAPIActionSuccess } from '../actions/api.actions';
 import { mergeState } from '../helpers/reducer.helper';
-import { defaultEntitiesState } from './entity.reducer';
+import { defaultEntitiesState, EntitiesState } from './entity.reducer';
 
 const defaultState = { ...defaultEntitiesState };
 export interface EntityRequestState {
@@ -48,29 +48,23 @@ export function apiRequestReducer(state = defaultState, action) {
                 requestSuccessState.creating = false;
                 requestSuccessState.error = false;
                 requestSuccessState.response = successAction.response;
-                const newState = setEntityRequestState(state, requestSuccessState, action.apiAction);
 
-                if (action.apiAction.guid !== successAction.response.result[0]) {
-                    // If we have a temp guid (i.e. from a creation) then make sure we populate the actual
-                    // entity request.
-                    // const actualAction = { ...action.apiAction };
-                    action.apiAction.guid = successAction.response.result[0];
-                    return setEntityRequestState(newState, requestSuccessState, action.apiAction);
-                }
+                const newState = mergeState(
+                    createRequestStateFromResponse(successAction.response.entities, state),
+                    setEntityRequestState(state, requestSuccessState, action.apiAction)
+                );
+
+                // if (action.apiAction.guid !== successAction.response.result[0]) {
+                //     // If we have a temp guid (i.e. from a creation) then make sure we populate the actual
+                //     // entity request.
+                //     action.apiAction.guid = successAction.response.result[0];
+                //     return setEntityRequestState(newState, requestSuccessState, action.apiAction);
+                // }
 
                 return newState;
             } else if (action.response && action.response.entities) {
-                const entities = { ...action.response.entities };
-                // Make this more functional programming-y
-                Object.keys(entities).forEach(entityKey => {
-                    Object.keys(entities[entityKey]).forEach(guid => {
-                        const entState = getEntityRequestState(state, { entityKey, guid });
-                        entState.fetching = false;
-                        entState.error = false;
-                        setEntityRequestState(state, entState, { entityKey, guid });
-                    });
-                });
-                return { ...state };
+                const { entities } = action.response;
+                return createRequestStateFromResponse(entities, state);
             }
             return state;
         case ApiActionTypes.API_REQUEST_FAILED:
@@ -96,13 +90,25 @@ function getEntityRequestState(state, { entityKey, guid }): EntityRequestState {
     return { ...defaultEntityRequest };
 }
 
-function setEntityRequestState(state, requestState, { entityKey, guid }): EntityRequestState {
+function setEntityRequestState(state, requestState, { entityKey, guid }): EntitiesState {
     const newState = {
         [entityKey]: {
             [guid]: requestState
         }
     };
-
-    newState[entityKey][guid] = requestState;
     return mergeState(state, newState);
+}
+
+
+function createRequestStateFromResponse(entities, state): EntitiesState {
+    let newState = { ...state };
+    Object.keys(entities).forEach(entityKey => {
+        Object.keys(entities[entityKey]).forEach(guid => {
+            const entState = getEntityRequestState(state, { entityKey, guid });
+            entState.fetching = false;
+            entState.error = false;
+            newState = setEntityRequestState(newState, entState, { entityKey, guid });
+        });
+    });
+    return newState;
 }
