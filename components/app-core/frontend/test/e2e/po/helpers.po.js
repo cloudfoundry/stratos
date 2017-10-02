@@ -17,9 +17,9 @@
   }).output.trim();
   var hostPort = browser.params.port || '';
   var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
-  if (hostProtocol === 'http://' && hostPort === '80') {
+  if (hostProtocol === 'http://' && hostPort.toString() === '80') {
     host = hostProtocol + hostIp;
-  } else if (hostProtocol === 'https://' && hostPort === '443') {
+  } else if (hostProtocol === 'https://' && hostPort.toString() === '443') {
     host = hostProtocol + hostIp;
   }
   var cnsis = browser.params.cnsi;
