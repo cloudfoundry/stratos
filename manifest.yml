@@ -2,7 +2,7 @@ applications:
 - name: console
   memory: 1G
   disk_quota: 512M
-  host: suse-console
+  host: console
   timeout: 180
   buildpack: https://github.com/nwmac/stratos-buildpack
   health-check-type: port
