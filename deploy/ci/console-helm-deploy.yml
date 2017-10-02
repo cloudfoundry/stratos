@@ -85,6 +85,7 @@ jobs:
   plan:
   - get: stratos-ui
     passed: [build-helm-images]
+    trigger: true
   - get: helm-chart-Chart
     passed: [build-helm-images]
   - get: helm-chart-values

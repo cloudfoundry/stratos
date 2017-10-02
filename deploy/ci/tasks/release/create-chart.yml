@@ -32,6 +32,7 @@ run:
 
       # Generate Helm package
       helm dep build console
+      helm dep update
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
