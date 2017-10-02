@@ -89,7 +89,7 @@ run:
       EOF
 
       cat build/secrets.json
-      npm run e2e-on-target
+      npm run headless-e2e -- --params.host=${FRONTEND_IP} --params.port=443
       E2E_EXIT_CODE=$?
 
       cd ${BOSH_RELEASE_DIR}
