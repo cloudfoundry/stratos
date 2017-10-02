@@ -1,6 +1,6 @@
 import 'rxjs/add/observable/of';
 
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { SteppersService } from '../steppers.service';
@@ -18,8 +18,6 @@ export type StepOnNextFunction = () => Observable<{
 
 export class StepComponent implements OnInit {
 
-  @ViewChild(TemplateRef)
-  content: TemplateRef<any>;
   active = false;
   valid = false;
   complete = false;
