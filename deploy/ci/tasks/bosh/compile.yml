@@ -42,7 +42,7 @@ run:
       bosh2 -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
       # List Deployment
       FRONTEND_IP_=$(bosh2 -e vbox -d stratos-ui instances | sed -n 's/.*frontend.*\(10\.*\)/\1/p')
-      FRONTEND_IP=$(echo FRONTEND_IP_ | sed -e 's/ *$//')
+      FRONTEND_IP=$(echo ${FRONTEND_IP_} | sed -e 's/ *$//')
       ping -c5 ${FRONTEND_IP}
       cd ${ROOT_DIR}
       # Run E2E tests
@@ -90,7 +90,8 @@ run:
 
       cat build/secrets.json
       export DBUS_SESSION_BUS_ADDRESS=/dev/null
-      npm run headless-e2e -- --params.host=${FRONTEND_IP} --params.port=443
+      npm run update-webdriver
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${FRONTEND_IP} --params.port=443
       E2E_EXIT_CODE=$?
 
       cd ${BOSH_RELEASE_DIR}
