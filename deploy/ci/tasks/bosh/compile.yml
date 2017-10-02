@@ -89,6 +89,7 @@ run:
       EOF
 
       cat build/secrets.json
+      export DBUS_SESSION_BUS_ADDRESS=/dev/null
       npm run headless-e2e -- --params.host=${FRONTEND_IP} --params.port=443
       E2E_EXIT_CODE=$?
 
