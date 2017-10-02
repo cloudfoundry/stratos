@@ -1,9 +1,9 @@
 applications:
 - name: console
   memory: 1G
-  disk_quota: 2G
-  host: console
+  disk_quota: 512M
+  host: suse-console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  buildpack: https://github.com/nwmac/stratos-buildpack
   health-check-type: port
   stack: cflinuxfs2
