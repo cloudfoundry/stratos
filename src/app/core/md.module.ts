@@ -1,25 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
-    MdAutocompleteModule,
-    MdButtonModule,
-    MdCardModule,
-    MdCheckboxModule,
-    MdFormFieldModule,
-    MdGridListModule,
-    MdIconModule,
-    MdInputModule,
-    MdProgressBarModule,
-    MdProgressSpinnerModule,
-    MdSelectModule,
-    MdSidenavModule,
-    MdTableModule,
-    MdTabsModule,
-    MdToolbarModule,
-    MdFormFieldModule,
-    MdProgressBarModule,
-    MdSlideToggleModule,
-    MdSliderModule
+  MdAutocompleteModule,
+  MdButtonModule,
+  MdCardModule,
+  MdCheckboxModule,
+  MdFormFieldModule,
+  MdGridListModule,
+  MdIconModule,
+  MdInputModule,
+  MdProgressBarModule,
+  MdProgressSpinnerModule,
+  MdSelectModule,
+  MdSidenavModule,
+  MdSliderModule,
+  MdSlideToggleModule,
+  MdTableModule,
+  MdTabsModule,
+  MdToolbarModule,
 } from '@angular/material';
 
 const importExport = [

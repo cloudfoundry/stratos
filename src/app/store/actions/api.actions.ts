@@ -96,21 +96,17 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, any, EntityRequestState]) => {
+    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-      const returnData = {
-        entityRequestInfo,
-        entity
-      };
       return Observable.of({
         entityRequestInfo,
         entity,
         entities
       });
     }).filter(({ entityRequestInfo, entity }) => {
-      return (entity && entity.entity) || !!entityRequestInfo;// TODO: RC/NJ Make sure nested entities get entityRequestInfo
+      return (entity && entity.entity) || !!entityRequestInfo; // TODO: RC/NJ Make sure nested entities get entityRequestInfo
     }).mergeMap(({ entities, entity, entityRequestInfo }) => {
       return Observable.of({
         entityRequestInfo,
@@ -133,7 +129,7 @@ export function selectApiResourceEntity(type: string, guid: string) {
 
 export function selectEntity(type: string, guid: string) {
   return compose(
-    getEntityById<EntitiesState>(guid),
+    getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
   );

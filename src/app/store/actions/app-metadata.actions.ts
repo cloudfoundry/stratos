@@ -1,59 +1,150 @@
-import { RequestOptions } from '@angular/http';
-import { Action, compose, createFeatureSelector, createSelector, Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
+import { AppMetadataRequestState } from '../reducers/app-metadata-request.reducer';
+import { AppMetadata } from '../reducers/app-metadata.reducer';
 import { Observable } from 'rxjs/Rx';
-
-import { EntitiesState } from '../reducers/entity.reducer';
-import { AppState } from './../app-state';
-import { EntityRequestState } from './../reducers/api-request-reducer';
+import { RequestOptions } from '@angular/http';
+import { Action, compose, Store } from '@ngrx/store';
+import { AppState } from '../app-state';
 
 export const AppMetadataTypes = {
   APP_METADATA: '[App Metadata] App Metadata',
+  APP_METADATA_START: '[App Metadata] App Metadata start',
   APP_METADATA_SUCCESS: '[App Metadata] App Metadata success',
   APP_METADATA_FAILED: '[App Metadata] App Metadata failed'
 };
 
-//FIXME: 
-export type AppMetadataType = 'summary' | 'instances' | 'environmentVars';
+export const AppMetadataProperties = {
+  INSTANCES: 'instances',
+  ENV_VARS: 'environmentVars'
+};
+export type AppMetadataType = 'instances' | 'environmentVars';
 
-export class GetMetadataAction implements Action {
+export class GetAppMetadataAction implements Action {
+  options: RequestOptions;
+
   constructor(
     public guid: string,
     public cnis: string,
     public metadataType: AppMetadataType
   ) {
-    this.options = this.getRequestOptions(cnis, guid, metadataType);
+    this.options = this.getRequestOptions(guid, cnis, metadataType);
   }
 
   type = AppMetadataTypes.APP_METADATA;
 
   private getRequestOptions(guid: string, cnis: string, type: AppMetadataType) {
-    let requestObject;
+    let requestObject: RequestOptions;
     switch (type) {
-      case 'summary':
+      case AppMetadataProperties.INSTANCES:
         requestObject = new RequestOptions({
-          url: `apps/${guid}/summary`,
+          url: `apps/${guid}/stats`,
           method: 'get'
         });
         break;
+      default:
+        requestObject = new RequestOptions();
+        break;
     }
+    return requestObject;
   }
-
-
-  // url?: string | null;
-  // method?: string | RequestMethod | null;
-  // /** @deprecated from 4.0.0. Use params instead. */
-  // search?: string | URLSearchParams | {
-  //     [key: string]: any | any[];
-  // } | null;
-  // params?: string | URLSearchParams | {
-  //     [key: string]: any | any[];
-  // } | null;
-  // headers?: Headers | null;
-  // body?: any;
-  // withCredentials?: boolean | null;
-  // responseType?: ResponseContentType | null;
-
-
 }
 
+export class WrapperAppMetadataStart implements Action {
+  constructor(
+    public appMetadataAction: GetAppMetadataAction
+  ) { }
+  type = AppMetadataTypes.APP_METADATA_START;
+}
+
+export class WrapperAppMetadataSuccess implements Action {
+  constructor(
+    public metadata: any,
+    public appMetadataAction: GetAppMetadataAction,
+  ) { }
+  type = AppMetadataTypes.APP_METADATA_SUCCESS;
+}
+
+export class WrapperAppMetadataFailed implements Action {
+  message: string;
+  appMetedataError: AppMetedataError;
+
+  constructor(
+    public response: any,
+    public appMetadataAction: GetAppMetadataAction
+  ) {
+    // TODO: Make this standard over all CF responses
+    this.appMetedataError = JSON.parse(response._body);
+    this.message = this.appMetedataError.description;
+  }
+  type = AppMetadataTypes.APP_METADATA_FAILED;
+}
+
+interface AppMetedataError {
+  description: string;
+  error_code?: string;
+  code?: number;
+}
+
+function getAppMetadata(state) {
+  return state.appMetadata.values || {};
+}
+
+function getAppRequestMetadata(state) {
+  return state.appMetadata.requests || {};
+}
+
+function getMetadataType<T>(metadataType) {
+  return (appMetadata): T => {
+    return appMetadata[metadataType];
+  };
+}
+
+function getMetadataById(appId: string) {
+  return (entities) => {
+    return entities[appId] || {};
+  };
+}
+
+export const getAppMetadataObservable = (
+  store: Store<AppState>,
+  appId: string,
+  action: GetAppMetadataAction
+): Observable<any> => {
+  return Observable.combineLatest(
+    store.select(getAppMetadata),
+    store.select(selectMetadata(action.metadataType, appId)),
+    store.select(selectMetadataRequest(action.metadataType, appId))
+  )
+    // FIXME: This is firing off a LOT before we have a chance to update metadataRequestState.fetching
+    .mergeMap(([appMetadata, metadata, metadataRequestState]: [AppMetadata, any, AppMetadataRequestState]) => {
+      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) {
+        console.log('DISPATCHING: metadata: ', metadata);
+        console.log('DISPATCHING: metadataRequestState: ', metadataRequestState);
+        store.dispatch(action);
+      }
+      return Observable.of({
+        metadata,
+        metadataRequestState
+      });
+    })
+    .filter(({ metadata, metadataRequestState }) => {
+      return metadata || metadataRequestState;
+    });
+};
+
+// TODO: RC Add type dependent on metadatatype
+const selectMetadata = (metadataType, appId): any => {
+  return compose(
+    getMetadataType<any>(metadataType),
+    getMetadataById(appId),
+    getAppMetadata
+  );
+};
+
+const selectMetadataRequest = (metadataType, appId): any => {
+  // TODO: RC fix type getAppAppMetadataRequestState
+  return compose(
+    getMetadataType<AppMetadataRequestState>(metadataType),
+    getMetadataById(appId),
+    getAppRequestMetadata
+  );
+};

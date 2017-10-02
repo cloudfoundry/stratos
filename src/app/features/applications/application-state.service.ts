@@ -278,17 +278,17 @@ export class ApplicationStateService {
   /**
 * @description Get a count either from a value if supplied or by filterine app instance metadata
 * @param {number} value - the value to use directly or undefined if not available
-* @param {object[]} appInstances - the application instances metadata (from the app stats API call)
+* @param {object} appInstances - the application instances metadata (from the app stats API call)
 * @param {string} instanceState - the instance state to use when filtering the app instance metadata
 * @returns {number} Count of instances in the desired state
 */
-  private getCount(value: number, appInstances: any[], instanceState: string) {
+  private getCount(value: number, appInstances: any, instanceState: string) {
     // Use a value if one available
     if (value) {
       return value;
     } else if (appInstances) {
       // Calculate form app instance metadata if available
-      return appInstances.filter(s => s.state === instanceState).length;
+      return (Object.keys(appInstances).find(k => appInstances[k].state === instanceState) || []).length;
     } else {
       // No value given and no instance data available, so return -1 to represent unknown
       return -1;

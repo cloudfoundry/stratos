@@ -98,10 +98,6 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  getDataFromResponse(response: Response) {
-    response.json();
-  }
-
   addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
     const cnsiHeader = 'x-cap-cnsi-list';
     const headers = new Headers();

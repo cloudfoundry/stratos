@@ -3,12 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
 import { EntityInfo, getEntityObservable } from '../../store/actions/api.actions';
-import {
-  ApplicationSchema,
-  ApplicationStatsSchema,
-  ApplicationSummarySchema,
-} from '../../store/actions/application.actions';
-import { GetApplication, GetApplicationStats, GetApplicationSummary } from '../../store/actions/application.actions';
+import { GetAppMetadataAction, getAppMetadataObservable } from '../../store/actions/app-metadata.actions';
+import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
+import { GetApplication, GetApplicationSummary } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
 import { ApplicationStateService } from './application-state.service';
@@ -48,20 +45,20 @@ export class ApplicationService {
       })
       .flatMap(app => {
         if (app.entity.entity.state === 'STARTED' && !this.appStats$) {
-          this.appStats$ = getEntityObservable(
+          this.appStats$ = getAppMetadataObservable(
             this.store,
-            ApplicationStatsSchema.key,
-            ApplicationStatsSchema,
             id,
-            new GetApplicationStats(id, cfId)
-          ).filter(({ entity, entityRequestInfo }) => {
-            return entity && entity.entity && !entityRequestInfo.fetching;
-          });
-          // this.appStats$ = this.appStats$ || ;
+            // TODO: RC 'instances' ok but AppMetadataProperties.INSTANCES not
+            new GetAppMetadataAction(id, cfId, 'instances')
+          ).filter(({ metadata, metadataRequestState }) => {
+            return metadata && !metadataRequestState.fetching;
+          })
+            .flatMap(({ metadata, metadataRequestState }) => {
+              return Observable.of(metadata);
+            });
         }
 
-        // Observable.of({ entity: { entity: [] } })
-        return Observable.combineLatest(Observable.of(app), this.appStats$ || Observable.of({ entity: { entity: [] } }));
+        return Observable.combineLatest(Observable.of(app), this.appStats$ || Observable.of({}));
       });
 
     const applicationSummary$ = getEntityObservable(
@@ -71,20 +68,20 @@ export class ApplicationService {
       id,
       new GetApplicationSummary(id, cfId)
     ).filter(({ entity, entityRequestInfo }) => {
-      return entityRequestInfo.fetching === false;
+      return entity && entity.entity && !entityRequestInfo.fetching;
     });
 
     this.application$ = application$
       .combineLatest(
       applicationSummary$,
       this.store.select(cnsisEntitySelector),
-    ).map(([appDetails, appSummary, cnsis]) => {
+    ).map(([appDetails, appSummary, cnsis]: [any, any, any]) => {
       // [app, appStats]
       const app = appDetails[0];
       const appStats = appDetails[1];
       return {
         fetching: app.entityRequestInfo.fetching && appSummary.entityRequestInfo.fetching,
-        appState: this.appStateService.Get(app.entity.entity, []),
+        appState: this.appStateService.Get(app.entity.entity, appStats),
         app: app,
         space: app.entity.entity.space,
         stack: app.entity.entity.stack,

@@ -1,64 +1,67 @@
+import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { mergeState } from './../helpers/reducer.helper';
-import { EntitiesState } from './entity.reducer';
-import { ApiActionTypes } from './../actions/api.actions';
-import { Action } from '@ngrx/store';
-import { APP_METADATA, APP_METADATA_SUCCESS, APP_METADATA_FAILED } from '../actions/app-metadata.actions';
 
 export interface AppMetadata {
   [key: string]: {
-    summary: any;
-    instances: any;
+    instances: AppInstancesState;
     environmentVars: any;
   };
 }
 
-// export interface AppInstancesState {
-//   [key: string]: AppInstanceState;
-// }
+export interface AppInstancesState {
+  [key: string]: AppInstanceState;
+}
 
-// export interface AppInstanceState {
-//   state: string;
-//   stats: AppInstanceStats[];
-// }
+export interface AppInstanceState {
+  state: string;
+  stats: AppInstanceStats[];
+}
 
-// export interface AppInstanceStats {
-//   disk_quota: number;
-//   fds_quota: number;
-//   host: string;
-//   mem_quota: number;
-//   name: string;
-//   port: number;
-//   uptime: number;
-//   uris: string[];
-//   usage: AppInstanceUsage;
-// }
+export interface AppInstanceStats {
+  disk_quota: number;
+  fds_quota: number;
+  host: string;
+  mem_quota: number;
+  name: string;
+  port: number;
+  uptime: number;
+  uris: string[];
+  usage: AppInstanceUsage;
+}
 
-// export interface AppInstanceUsage {
-//   cpu: number;
-//   disk: number;
-//   mem: number;
-//   time: string;
-// }
+export interface AppInstanceUsage {
+  cpu: number;
+  disk: number;
+  mem: number;
+  time: string;
+}
 
 export const defaultMetadataState = {
-};
 
-export const defaultMetadata = {
-  summary: {},
-  instances: {},
-  environmentVars: {}
 };
 
 export function appMetadataReducer(state: AppMetadata = defaultMetadataState, action) {
   switch (action.type) {
-    case APP_METADATA:
+    case AppMetadataTypes.APP_METADATA:
+      console.log('app metadata recuder: APP_METADATA');
       return state;
-    case APP_METADATA_SUCCESS:
-      return mergeState(state, action.response.entities);
-    case APP_METADATA_FAILED:
+    case AppMetadataTypes.APP_METADATA_SUCCESS:
+      console.log('app metadata recuder: APP_METADATA_SUCCESS');
+      return setAppMetadataState(state, action.metadata, action.appMetadataAction);
+    case AppMetadataTypes.APP_METADATA_FAILED:
+      console.log('app metadata recuder: APP_METADATA_FAILED');
       return state;
     default:
       return state;
   }
+}
+
+function setAppMetadataState(state, metadata, { metadataType, guid }): AppMetadata {
+  const newState = {
+    [guid]: {
+      [metadataType]: metadata
+    }
+  };
+  return mergeState(state, newState);
 }
 

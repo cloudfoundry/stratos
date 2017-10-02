@@ -7,7 +7,6 @@ import { selectEntityRequestInfo } from '../../../../store/actions/api.actions';
 import { ApplicationSchema, CreateNewApplication } from '../../../../store/actions/application.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { EntityRequestState } from '../../../../store/reducers/api-request-reducer';
 import { CreateNewApplicationState } from '../../../../store/reducers/create-application.reducer';
 
 @Component({
@@ -39,7 +38,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
 
-      return this.store.select(selectEntityRequestInfo<EntityRequestState>(ApplicationSchema.key, reqGuid))
+      return this.store.select(selectEntityRequestInfo(ApplicationSchema.key, reqGuid))
         .filter(state => {
           return !state.creating;
         }).map(state => {

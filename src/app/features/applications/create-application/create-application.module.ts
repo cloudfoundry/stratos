@@ -21,6 +21,9 @@ import { CreateApplicationComponent } from './create-application.component';
     CreateApplicationStep2Component,
     CreateApplicationStep3Component,
     AppNameUniqueDirective
+  ],
+  exports: [
+    CreateApplicationComponent
   ]
 })
 export class CreateApplicationModule { }

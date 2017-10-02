@@ -13,15 +13,13 @@ import { SummaryTabComponent } from './application/summary-tab/summary-tab.compo
 import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
-import { CreateApplicationModule } from './create-application/create-application.module';
 
 
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
-    ApplicationsRoutingModule,
-    CreateApplicationModule
+    ApplicationsRoutingModule
   ],
   declarations: [
     ApplicationWallComponent,
