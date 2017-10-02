@@ -18,6 +18,7 @@
     var testTime = (new Date()).toISOString();
     var testAppName = appSetupHelper.getName(testTime) + '-delete';
     var hostName = appSetupHelper.getHostName(testAppName);
+    console.log('Hostname: ' + hostName)
     var testCluster, domain;
 
     beforeEach(function () {
