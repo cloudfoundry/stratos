@@ -4,7 +4,7 @@
   var wizard = require('./widgets/wizard.po');
   var inputText = require('./widgets/input-text.po');
   var searchBox = require('./widgets/input-search-box.po');
- 
+
   module.exports = {
     getWizard: getWizard,
     getStepTitle: getStepTitle,
