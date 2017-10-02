@@ -96,6 +96,21 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/helm/deploy-chart.yml
       params:
         CAASP_KUBE_CONFIG_URL: {{caasp-kube-config-url}}
+        CAASP_NODE_IPS: {{caasp-node-ips}}
+        UAA_ADMIN_PASSWORD: {{uaa-admin-password}}
+        UAA_ADMIN_USERNAME: {{uaa-admin-username}}
+        UAA_CLIENT_ID: {{uaa-client-id}}
+        UAA_URL: {{uaa-url}}
+        CF_LOCATION: {{cf-location}}
+        CF_ADMIN_USER: {{cf-admin-user}}
+        CF_ADMIN_PASSWORD: {{cf-admin-password}}
+        CF_E2E_USER: {{cf-e2e-user}}
+        CF_E2E_USER_PASSWORD: {{cf-e2e-user-password}}
+        CONSOLE_ADMIN_USER: {{console-admin-user}}
+        CONSOLE_ADMIN_PASSWORD: {{console-admin-password}}
+        CONSOLE_USER_USER: {{console-user-user}}
+        CONSOLE_USER_PASSWORD: {{console-user-password}}
+        GITHUB_TOKEN: {{github-access-token}}
       on_failure:
         put: send-email
         params:

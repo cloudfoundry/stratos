@@ -9,7 +9,7 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.ngrok.io:80/helm-deploy
+   repository:  ci-registry.ngrok.io:80/stratos-concourse
    tag: "latest"
    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
@@ -47,7 +47,66 @@ run:
           EXIT_CODE=1
         fi
       done;
-      
+
+      UI_EXT_PORT=$(kubectl describe service console-nightly-ui-ext --namespace nightly-test  | grep NodePort | grep https | sed -e 's/.*\(32.*\)\/TCP/\1/p' |head -1)
+      UI_EXT_IP=""
+      for NODE_IP in $CAASP_NODE_IPS; do
+        nc -z ${NODE_IP} ${UI_EXT_PORT}
+        if [ $? = 0 ]; then
+          UI_EXT_IP=${NODE_IP}
+        fi;
+      done
+      echo "Console IP: ${UI_EXT_IP} and port is ${UI_EXT_PORT}"
+
+      # Run E2E tests
+      cd stratos-ui
+      npm install
+      export PATH=${PWD}/node_modules/.bin:$PATH
+      bower install --allow-root --force
+
+      cat << EOF > build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+       },
+        "console": {
+          "host": "${FRONTEND_IP}",
+          "port": "443",
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
+        },
+        "uaa": {
+          "url": "${UAA_URL}",
+          "clientId": "${UAA_CLIENT_ID}",
+          "adminUsername": "${UAA_ADMIN_USERNAME}",
+          "adminPassword": "${UAA_ADMIN_PASSWORD}"
+        },
+        "runSetupModeTests": true,
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      cat build/secrets.json
+      export DBUS_SESSION_BUS_ADDRESS=/dev/null
+      npm run update-webdriver
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${FRONTEND_IP} --params.port=443
+      E2E_EXIT_CODE=$?
+
+
       # Purge deployment
       helm delete console-nightly --purge
 
