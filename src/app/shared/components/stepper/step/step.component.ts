@@ -1,9 +1,8 @@
 import 'rxjs/add/observable/of';
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-
-import { SteppersService } from '../steppers.service';
 
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
@@ -14,12 +13,12 @@ export type StepOnNextFunction = () => Observable<{
   selector: 'app-step',
   templateUrl: './step.component.html',
   styleUrls: ['./step.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class StepComponent implements OnInit {
 
   active = false;
-  valid = false;
   complete = false;
   error = false;
   busy = false;
@@ -27,16 +26,19 @@ export class StepComponent implements OnInit {
   @Input()
   title: string;
 
-  @Input()
-  validate: Observable<boolean> = Observable.of(true);
+  @Input('valid')
+  valid = true;
+
+  @ViewChild(TemplateRef)
+  content: TemplateRef<any>;
 
   @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
-  constructor(private steppersService: SteppersService) { }
+  constructor() {
+  }
 
   ngOnInit() {
-    this.steppersService.steps.next(this);
   }
 
 }

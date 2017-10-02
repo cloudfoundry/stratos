@@ -55,7 +55,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
-
+    this.data$ = this.getCFData();
   }
 
   ngAfterContentInit() {
@@ -65,13 +65,12 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       space: [[], [Validators.required]]
     });
 
-    this.validate = this.cfForm.valueChanges
-      .throttleTime(250)
-      .mergeMap(() => {
-        return Observable.of(this.cfForm.valid);
-      }).startWith(this.cfForm.valid);
+    this.validate = this.cfForm.statusChanges
+      .map(() => {
+        return this.cfForm.valid;
+      });
 
-    this.data$ = this.getCFData();
+
   }
 
   getCFData(): Observable<{
@@ -95,7 +94,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       .filter(([orgList, cfList]) => {
         return !!cfList;
       })
-      .mergeMap(([orgList, cfList, selectedCF, selectedOrg, selectedSpace]) => {
+      .map(([orgList, cfList, selectedCF, selectedOrg, selectedSpace]) => {
         const data = {
           cfList,
           orgList: null,
@@ -119,7 +118,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
             space: selectedSpace
           };
         }
-        return Observable.of(data);
+        return data;
       });
   }
 

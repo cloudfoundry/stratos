@@ -1,13 +1,13 @@
-<app-step [title]="'Create Route'" [onNext]="onNext">
-  <b>Create a route</b>
-  <form novalidate>
-    <md-select #domainName placeholder="Domain" name="domain">
-      <md-option *ngFor="let domain of newAppData?.cloudFoundryDetails?.org.domains" [value]="domain">
-        <span>{{ domain.entity.name }}</span>
-      </md-option>
-    </md-select>
-    <md-form-field>
-      <input mdInput placeholder="Host">
-    </md-form-field>
-  </form>
-</app-step>
+<!-- <app-step [title]="'Create Route'" [onNext]="onNext"> -->
+<b>Create a route</b>
+<form novalidate>
+  <md-select #domainName placeholder="Domain" name="domain">
+    <md-option *ngFor="let domain of newAppData?.cloudFoundryDetails?.org.domains" [value]="domain">
+      <span>{{ domain.entity.name }}</span>
+    </md-option>
+  </md-select>
+  <md-form-field>
+    <input mdInput placeholder="Host" value="{{ newAppData.name }}">
+  </md-form-field>
+</form>
+<!-- </app-step> -->

@@ -20,35 +20,36 @@ export class CreateApplicationStep3Component implements OnInit {
   constructor(private store: Store<AppState>, private router: Router) { }
 
   newAppData: CreateNewApplicationState;
-  onNext: StepOnNextFunction;
+  onNext: StepOnNextFunction = () => {
+    const { cloudFoundryDetails, name } = this.newAppData;
+
+    const { cloudFoundry, org, space } = cloudFoundryDetails;
+    const reqGuid = name + space.guid;
+
+    this.store.dispatch(new CreateNewApplication(
+      reqGuid,
+      cloudFoundry.guid, {
+        name,
+        space_guid: space.guid
+      }
+    ));
+
+    return this.store.select(selectEntityRequestInfo<EntityRequestState>(ApplicationSchema.key, reqGuid))
+      .filter(state => {
+        return !state.creating;
+      }).map(state => {
+        if (!state.error) {
+          this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${state.response.result[0]}/summary`);
+        }
+        return { success: !state.error };
+      });
+  }
+
   ngOnInit() {
     this.store.select(selectNewAppState).subscribe(state => {
       this.newAppData = state;
     });
-    this.onNext = () => {
-      const { cloudFoundryDetails, name } = this.newAppData;
 
-      const { cloudFoundry, org, space } = cloudFoundryDetails;
-      const reqGuid = name + space.guid;
-
-      this.store.dispatch(new CreateNewApplication(
-        reqGuid,
-        cloudFoundry.guid, {
-          name,
-          space_guid: space.guid
-        }
-      ));
-
-      return this.store.select(selectEntityRequestInfo<EntityRequestState>(ApplicationSchema.key, reqGuid))
-        .filter(state => {
-          return !state.creating;
-        }).map(state => {
-          if (!state.error) {
-            this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${state.response.result[0]}/summary`);
-          }
-          return { success: !state.error };
-        });
-    };
   }
 
 }

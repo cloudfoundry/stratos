@@ -35,7 +35,6 @@ export class StatefulIconComponent implements OnInit, OnChanges {
   selectedState: StatefulIconDefinition;
 
   isTemplate(icon: StatefulIconDefinition): icon is IconTemplateDefinition {
-    console.log(icon);
     return !!(<IconTemplateDefinition>icon).template;
   }
 
