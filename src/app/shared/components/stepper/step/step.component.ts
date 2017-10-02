@@ -1,7 +1,9 @@
-import { Observable } from 'rxjs/Observable';
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-
 import 'rxjs/add/observable/of';
+
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+
+import { SteppersService } from '../steppers.service';
 
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
@@ -33,9 +35,10 @@ export class StepComponent implements OnInit {
   @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
-  constructor() { }
+  constructor(private steppersService: SteppersService) { }
 
   ngOnInit() {
+    this.steppersService.steps.next(this);
   }
 
 }

@@ -1,26 +1,28 @@
-<div class="steppers">
-  <div class="steppers__inner">
-    <div class="steppers__headers">
-      <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}"
-        class="steppers__header">
-        <div class="steppers__header-inner">
-          <div class="steppers__header-icon">
-            <md-icon *ngIf="step.complete">{{ this.getIconLigature() }}</md-icon>
-            <div *ngIf="!step.complete">{{ i + 1 }}</div>
+<div class="steppers__wrapper">
+  <div class="steppers">
+    <div class="steppers__inner">
+      <div class="steppers__headers">
+        <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}"
+          class="steppers__header">
+          <div class="steppers__header-inner">
+            <div class="steppers__header-icon">
+              <md-icon *ngIf="step.complete">{{ this.getIconLigature() }}</md-icon>
+              <div *ngIf="!step.complete">{{ i + 1 }}</div>
+            </div>
+            <span class="steppers__header-text">{{ step.title }}</span>
           </div>
-          <span class="steppers__header-text">{{ step.title }}</span>
         </div>
       </div>
-    </div>
-    <div class="steppers__contents">
-      <div *ngFor="let step of steps">
-        <div *ngIf="step.active" class="steppers__content" [ngTemplateOutlet]="step.content">
+      <div class="steppers__contents">
+        <ng-content></ng-content>
+      </div>
+      <div class="steppers__navigation">
+        <button color="accent" md-button md-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
+        <div>
+          <button color="warn" md-button [routerLink]="cancel" *ngIf="cancel">Cancel</button>
+          <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
         </div>
       </div>
-    </div>
-    <div class="steppers__navigation">
-      <button color="accent" md-button md-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
-      <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
     </div>
   </div>
 </div>

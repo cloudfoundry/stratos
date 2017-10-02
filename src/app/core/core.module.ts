@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { AuthGuardService } from './auth-guard.service';
@@ -14,7 +15,9 @@ import { UtilsService } from './utils.service';
   ],
   exports: [
     MDAppModule,
-    RouterModule
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [
     AuthGuardService,

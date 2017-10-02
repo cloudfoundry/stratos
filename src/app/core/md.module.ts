@@ -1,23 +1,26 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
+    MdAutocompleteModule,
     MdButtonModule,
-    MdCheckboxModule,
-    MdInputModule,
     MdCardModule,
-    MdProgressSpinnerModule,
-    MdSidenavModule,
-    MdTabsModule,
-    MdIconModule,
-    MdSelectModule,
+    MdCheckboxModule,
+    MdFormFieldModule,
     MdGridListModule,
+    MdIconModule,
+    MdInputModule,
+    MdProgressBarModule,
+    MdProgressSpinnerModule,
+    MdSelectModule,
+    MdSidenavModule,
     MdTableModule,
+    MdTabsModule,
     MdToolbarModule,
     MdFormFieldModule,
     MdProgressBarModule,
     MdSlideToggleModule,
     MdSliderModule
 } from '@angular/material';
-import { CommonModule } from '@angular/common';
 
 const importExport = [
     CommonModule,
@@ -36,7 +39,8 @@ const importExport = [
     MdFormFieldModule,
     MdProgressBarModule,
     MdSlideToggleModule,
-    MdSliderModule
+    MdSliderModule,
+    MdAutocompleteModule
 ];
 
 @NgModule({

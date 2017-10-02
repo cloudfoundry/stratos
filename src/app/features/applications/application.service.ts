@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { ApplicationSchema, ApplicationSummarySchema, ApplicationStatsSchema } from '../../store/actions/application.actions';
-import { GetApplication, GetApplicationSummary, GetApplicationStats } from '../../store/actions/application.actions';
-import { getEntityObservable, EntityInfo } from '../../store/actions/api.actions';
-import { StackSchema, GetStack } from '../../store/actions/stack.action';
+import { EntityInfo, getEntityObservable } from '../../store/actions/api.actions';
+import {
+  ApplicationSchema,
+  ApplicationStatsSchema,
+  ApplicationSummarySchema,
+} from '../../store/actions/application.actions';
+import { GetApplication, GetApplicationStats, GetApplicationSummary } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
-import { OrganisationSchema, GetOrganisation } from '../../store/actions/organisation.action';
-import { SpaceSchema, GetSpace } from '../../store/actions/space.action';
+import { AppState } from '../../store/app-state';
 import { ApplicationStateService } from './application-state.service';
 
 export interface AppData {

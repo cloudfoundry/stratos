@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
+import { ChangeSideNavMode, CloseSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 
@@ -51,12 +51,11 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   }
   ngAfterContentInit() {
     this.eventWatcherService.resizeEvent$.subscribe(({ innerWidth }) => {
-      if (innerWidth && innerWidth < 500) {
+      if (innerWidth && innerWidth < 980) {
         this.store.dispatch(new ChangeSideNavMode('over'));
         this.store.dispatch(new CloseSideNav());
       } else {
         this.store.dispatch(new ChangeSideNavMode('side'));
-        this.store.dispatch(new OpenSideNav());
       }
     });
 

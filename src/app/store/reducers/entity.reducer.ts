@@ -1,7 +1,5 @@
-import { mergeState } from './../helpers/reducer.helper';
-import { EntitiesState } from './entity.reducer';
 import { ApiActionTypes } from './../actions/api.actions';
-import { Action } from '@ngrx/store';
+import { mergeState } from './../helpers/reducer.helper';
 
 export interface EntitiesState {
     application: any;

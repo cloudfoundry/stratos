@@ -1,10 +1,12 @@
+import { AppMetadata } from './reducers/app-metadata.reducer';
 import { AuthState } from './reducers/auth.reducer';
 import { CNSISState } from './reducers/cnsis.reducer';
+import { CreateNewApplicationState } from './reducers/create-application.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { EntitiesState } from './reducers/entity.reducer';
 import { PaginationState } from './reducers/pagination.reducer';
 import { UAASetupState } from './reducers/uaa-setup.reducers';
-import { AppMetadata } from './reducers/app-metadata.reducer';
+
 
 export interface AppState {
   entities: EntitiesState;
@@ -15,4 +17,5 @@ export interface AppState {
   apiRequest: EntitiesState;
   dashboard: DashboardState;
   appMetadata: AppMetadata;
+  createApplication: CreateNewApplicationState;
 }
