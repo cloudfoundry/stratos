@@ -13,7 +13,6 @@ DEPLOY_DIR=$CF_DIR/..
 
 # Try and parse the VCAP_SERVICES env var for DB Config
 $DB_MIGRATE_DIR/parseVcapServices > $STRATOS_DB_ENV
-cat $STRATOS_DB_ENV
 source $STRATOS_DB_ENV
 rm $STRATOS_DB_ENV
 
