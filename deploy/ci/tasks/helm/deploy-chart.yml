@@ -47,7 +47,7 @@ run:
         fi
       done;
 
-      UI_EXT_PORT=$(kubectl describe service console-nightly-ui-ext --namespace nightly-test  | grep NodePort | grep https | sed -e 's/.*\(32.*\)\/TCP/\1/p' |head -1)
+      UI_EXT_PORT=$(kubectl describe service console-nightly-ui-ext --namespace nightly-test  | grep NodePort | grep https | sed -e 's/.*\(3[0-9][0-9].*\)\/TCP/\1/p' |head -1)
       UI_EXT_IP=""
       for NODE_IP in $CAASP_NODE_IPS; do
         nc -z ${NODE_IP} ${UI_EXT_PORT}
