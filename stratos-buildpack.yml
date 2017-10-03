@@ -1,1 +1,3 @@
-# Marker file for the Stratos Buildpack
+---
+default_process_types:
+  web: ./portal-proxy

@@ -46,11 +46,12 @@ chmod +x portal-proxy
 export DB_MIGRATE_DIR="$CF_DIR/db-migration"
 
 export GOPATH=${DB_MIGRATE_DIR}/goose
-export GOBIN=$GOPATH/bin
+export GOBIN=${DB_MIGRATE_DIR}/bin
 
 go get bitbucket.org/liamstask/goose/cmd/goose
 
-ls -alR ${DB_MIGRATE_DIR}
+ls -al ${DB_MIGRATE_DIR}
+ls -al ${DB_MIGRATE_DIR}/bin
 
 # Build the migration helper
 pushd ${DB_MIGRATE_DIR}
