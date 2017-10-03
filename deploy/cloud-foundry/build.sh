@@ -50,3 +50,7 @@ go get bitbucket.org/liamstask/goose/cmd/goose
 pushd ${DB_MIGRATE_DIR}
 go build -o parseVcapServices
 popd
+
+# Clean up build folders
+rm -rf ${TOP_LEVEL}/dist
+rm -rf ${TOP_LEVEL}/outputs

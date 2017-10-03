@@ -1,7 +1,7 @@
 applications:
 - name: console
   memory: 1G
-  disk_quota: 512M
+  disk_quota: 256M
   host: console
   timeout: 180
   buildpack: https://github.com/nwmac/stratos-buildpack

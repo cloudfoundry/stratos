@@ -22,11 +22,13 @@ const (
 	DB_TYPE              = "DB_TYPE"
 	DB_HOST              = "DB_HOST"
 	DB_PORT              = "DB_PORT"
-	DB_USERNAME          = "DB_USERNAME"
+	DB_USER              = "DB_USER"
 	DB_PASSWORD          = "DB_PASSWORD"
-	DB_NAME              = "DB_NAME"
+	DB_NAME              = "DB_DATABASE_NAME"
 	PROVIDER_POSTGRES    = "pgsql"
 	TYPE_POSTGRES        = "postgresql"
+	PROVIDER_MYSQL       = "mysql"
+	TYPE_MYSQL           = "mysql"
 )
 
 type VCAPService struct {
@@ -52,6 +54,8 @@ func main() {
 			fmt.Println("#", err)
 		}
 	}
+
+	fmt.Println("")
 }
 
 func findDatabaseConfig(vcapServices map[string][]VCAPService) {
@@ -64,9 +68,19 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 				exportString(DB_TYPE, TYPE_POSTGRES)
 				exportString(DB_HOST, service.Credentials[HOSTNAME])
 				exportString(DB_PORT, service.Credentials[PORT])
-				exportString(DB_USERNAME, service.Credentials[USERNAME])
+				exportString(DB_USER, service.Credentials[USERNAME])
 				exportString(DB_PASSWORD, service.Credentials[PASSWORD])
 				exportString(DB_NAME, service.Credentials[DBNAME])
+			} else if stringInSlice(STRATOS_MYSQL_TAG, service.Tags) {
+				fmt.Println("# MySQL db config")
+
+				exportString(DATABASE_PROVIDER, PROVIDER_MYSQL)
+				exportString(DB_TYPE, TYPE_MYSQL)
+				exportString(DB_HOST, service.Credentials[HOSTNAME])
+				exportString(DB_PORT, service.Credentials[PORT])
+				exportString(DB_USER, service.Credentials[USERNAME])
+				exportString(DB_PASSWORD, service.Credentials[PASSWORD])
+				exportString(DB_NAME, service.Credentials[NAME])
 			}
 		}
 	}
