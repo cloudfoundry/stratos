@@ -122,15 +122,15 @@ export const getEntityObservable = (
 export function selectEntity(type: string, guid: string) {
   return compose(
     getAPIResourceEntity,
-    getEntityById(guid),
+    getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
   );
 }
 
-export function selectEntityRequestInfo<T>(type: string, guid: string) {
+export function selectEntityRequestInfo(type: string, guid: string) {
   return compose(
-    getEntityById<T>(guid),
+    getEntityById<EntityRequestState>(guid),
     getEntityType(type),
     getAPIRequestInfoState,
   );
@@ -147,6 +147,8 @@ export function getEntityType(type: string) {
 }
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
+  console.log(entities[guid]);
+  console.log(entities, guid);
   return entities[guid];
 };
 

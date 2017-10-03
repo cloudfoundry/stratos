@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, NgModel, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MdSelect } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -35,9 +35,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   spaceSelect: MdSelect;
 
   cfForm: FormGroup;
-
-  @ViewChild('appName')
-  appName: NgModel;
 
   validate: Observable<boolean>;
 

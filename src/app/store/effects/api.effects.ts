@@ -47,6 +47,12 @@ export class APIEffect {
 
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
+          const resData = response.json();
+          const cnsisErrors = this.getErrors(resData);
+          if (cnsisErrors.length) {
+            // We should consider not completely failing the whole if some cnsis return.
+            throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+          }
           const entities = this.getEntities(apiAction, response);
           return Observable.of(
             new WrapperAPIActionSuccess(
@@ -57,7 +63,7 @@ export class APIEffect {
           );
         })
         .catch(err => {
-          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
+          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.error, apiAction));
         });
     });
 
@@ -72,6 +78,18 @@ export class APIEffect {
         entity: { ...resource, cfGuid },
         metadata: { guid: resource.guid }
       };
+  }
+
+  getErrors(resData) {
+    return Object.keys(resData)
+      .map(guid => {
+        const cnsis = resData[guid];
+        cnsis.guid = guid;
+        return cnsis;
+      })
+      .filter(cnsis => {
+        return cnsis.error;
+      });
   }
 
   getEntities(apiAction: APIAction, response: Response): NormalizedResponse {
@@ -96,10 +114,6 @@ export class APIEffect {
 
   mergeData(entity, metadata, cfGuid) {
     return { ...entity, ...metadata, cfGuid };
-  }
-
-  getDataFromResponse(response: Response) {
-    response.json();
   }
 
   addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
