@@ -82,7 +82,7 @@
         browser.driver.sleep(500);
         // Should be scrolling
         var initialScroll = getLogViewerScrollTop();
-        browser.driver.sleep(1000);
+        browser.driver.sleep(2000);
         var nextScroll = getLogViewerScrollTop();
         expect(initialScroll).toBeLessThan(nextScroll);
       });
