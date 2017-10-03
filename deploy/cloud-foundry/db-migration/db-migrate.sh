@@ -19,10 +19,9 @@ source $STRATOS_DB_ENV
 
 function handleGooseResult {
     if [ $? -eq 0 ]; then
-        while true; do
-            echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'";
-            sleep 60
-        done
+        # Run simple not program to listen on port to indicate that the app is ready
+        echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'";
+        node ${DB_MIGRATE_DIR}/migration_done.js $PORT
     else
         echo Database migration failed
     fi
