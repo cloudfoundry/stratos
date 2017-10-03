@@ -21,7 +21,7 @@ type CloudFoundrySpecification struct {
 }
 
 const (
-	EndpointType  = "cf"
+	EndpointType = "cf"
 	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
@@ -29,15 +29,15 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return &CloudFoundrySpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
-func (c *CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error){
+func (c *CloudFoundrySpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return c, nil
 }
 
-func (c *CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error){
+func (c *CloudFoundrySpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return c, nil
 }
 
-func (c *CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error){
+func (c *CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -59,16 +59,23 @@ func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 }
 
 func (c *CloudFoundrySpecification) Init() error {
+	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
+	c.portalProxy.GetConfig().LoginHook = c.cfLoginHook
+
+	return nil
+}
+
+func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
 
+	// CF auto reg url missing, continue as normal
 	if (cfAPI == "") {
 		return nil
 	}
 
-	if cfCnsi.CNSIType != "" {
-		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
-	} else {
+	// CF auto reg cnsi entry missing, attempt to register
+	if cfCnsi.CNSIType == "" {
 		log.Infof("Auto-registering cloud foundry endpoint %s", cfAPI)
 
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
@@ -83,34 +90,25 @@ func (c *CloudFoundrySpecification) Init() error {
 		if c.portalProxy.GetConfig().CloudFoundryInfo != nil {
 			c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
 		}
-
+	} else {
+		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
 	}
 
-	// Add login hook to automatically connect to the Cloud Foundry when the user logs in
-	c.portalProxy.GetConfig().LoginHook = c.cfLoginHook
+	log.Infof("Determining if user should auto-connect to %s.", cfAPI)
 
-	return nil
-}
+	userGUID, err := c.portalProxy.GetSessionStringValue(context, "user_id")
+	if err != nil {
+		return fmt.Errorf("Could not determine user_id from session: %s", err)
+	}
 
-func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
-
-	cfAPI, cfCnsi, _ := c.fetchAutoRegisterEndpoint()
-	if cfCnsi.CNSIType != "" {
-		log.Infof("Found existing cloud foundry endpoint matching %s. Will attempt to auto-connect", cfAPI)
-
-		userGUID, err := c.portalProxy.GetSessionStringValue(context, "user_id")
-		if err != nil {
-			return fmt.Errorf("Could not determine user_id from session: %s", err)
-		}
-
-		cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
-		if ok && cfTokenRecord.Disconnected {
-			// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
-			log.Infof("User previsouly disconnected, cancelling auto-connect to auto-reg cloud foundry %s. ", cfAPI)
-		} else {
-			_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
-			return err;
-		}
+	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
+	if ok && cfTokenRecord.Disconnected {
+		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
+		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previsouly disoconnected). ", cfAPI)
+	} else {
+		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
+		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
+		return err;
 	}
 
 	return nil
