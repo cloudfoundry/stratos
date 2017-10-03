@@ -32,7 +32,9 @@
 
       cancel: _.partial(cancel, element),
       primary: _.partial(primary, element),
-      commit: _.partial(commit, element)
+      commit: _.partial(commit, element),
+
+      getTitleText: _.partial(getTitleText, element)
     };
   }
 

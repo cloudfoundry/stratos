@@ -30,6 +30,7 @@
   var i18n = require('./i18n.gulp');
   var cleanCSS = require('gulp-clean-css');
   var config = require('./gulp.config');
+  var devDeps = require('./dev-dependencies');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
 
@@ -132,6 +133,7 @@
 
   // Compile SCSS to CSS
   gulp.task('css:generate', function () {
+    var sourcemaps = devDeps.get('gulp-sourcemaps');
     var scssFile = './bower_components/index.scss';
     utils.generateScssFile('./bower_components/index.scss', components.findMainFile('**/*.scss'), components.getBowerFolder());
     return gulp
@@ -142,17 +144,23 @@
           this.emit('end');
         }
       })))
-      .pipe(sass())
-      .pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
+      .pipe(gutil.env.devMode ? sourcemaps.init() : gutil.noop())
+      .pipe(sass().on('error', sass.logError))
+      .pipe(gutil.env.devMode ? sourcemaps.write({ includeContent: false}) : gutil.noop())
+      .pipe(autoprefixer({ browsers: ['last 2 version'], cascade: false }))
+      .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
 
   gulp.task('css', ['css:generate'], function () {
+    var sourcemaps = devDeps.get('gulp-sourcemaps');
     var cssFiles = bowerFiles.css;
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
       .pipe(concat('index.css'))
-      .pipe(cleanCSS({}))
+      .pipe(gutil.env.devMode ? sourcemaps.init({loadMaps: true}) : gutil.noop())
+      .pipe(cleanCSS())
+      .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
 

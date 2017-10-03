@@ -16,10 +16,10 @@ services:
       - nginx
 
 
-  postgres:
+  mariadb:
     extends:
       file: common.yml
-      service: postgres
+      service: mariadb
 
 
   goose:
@@ -27,7 +27,7 @@ services:
       file: common.yml
       service: goose
     links:
-      - postgres
+      - mariadb
 
 
   proxy:

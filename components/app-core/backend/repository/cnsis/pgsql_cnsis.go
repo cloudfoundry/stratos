@@ -8,8 +8,8 @@ import (
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	log "github.com/Sirupsen/logrus"
 )
 
 var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation

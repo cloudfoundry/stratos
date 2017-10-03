@@ -40,7 +40,7 @@ const UAAAdminIdentifier = "stratos.admin"
 const CFAdminIdentifier = "cloud_controller.admin"
 
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
-const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
+const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
@@ -184,7 +184,6 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 }
 
 func (p *portalProxy) verifyLoginToCNSI(c echo.Context) error {
-
 	log.Debug("verifyLoginToCNSI")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
@@ -348,6 +347,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 
 func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	log.Debug("getUAATokenWithCreds")
+
 	body := url.Values{}
 	body.Set("grant_type", "password")
 	body.Set("username", username)
@@ -359,6 +359,7 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 
 func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	log.Debug("getUAATokenWithRefreshToken")
+
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
@@ -407,6 +408,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
 	log.Debug("saveUAAToken")
+
 	key := u.UserGUID
 	tokenRecord := interfaces.TokenRecord{
 		AuthToken:    authTok,
@@ -424,6 +426,7 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 
 func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
 	log.Debug("saveCNSIToken")
+
 	tokenRecord := interfaces.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
@@ -442,6 +445,7 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 
 func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	log.Debug("deleteCNSIToken")
+
 	err := p.unsetCNSITokenRecord(cnsiID, userGUID)
 	if err != nil {
 		log.Errorf("%v", err)
@@ -453,6 +457,7 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 
 func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
 	log.Debug("GetUAATokenRecord")
+
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for UAA token: %v", err)
@@ -470,6 +475,7 @@ func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord
 
 func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
 	log.Debug("setUAATokenRecord")
+
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
@@ -485,6 +491,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
+
 	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 	if err != nil {
 		msg := "Could not find session date"
@@ -564,6 +571,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	log.Debug("getUAAUser")
+
 	// get the uaa token record
 	uaaTokenRecord, err := p.GetUAATokenRecord(userGUID)
 	if err != nil {
@@ -595,6 +603,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
 	log.Debug("GetCNSIUser")
+
 	// get the uaa token record
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {

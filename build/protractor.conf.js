@@ -51,10 +51,13 @@
       }
     },
 
+    // Default is 11000
+    allScriptsTimeout: 20000,
+
     params: {
       protocol: 'https://',
-      host: 'localhost',
-      port: '3100',
+      host: secrets.console.host || 'localhost',
+      port: secrets.console.port || '4000',
       credentials: {
         admin: secrets.console.admin,
         user: secrets.console.user
@@ -72,8 +75,8 @@
             },
             admin: secrets.cloudFoundry.admin,
             user: secrets.cloudFoundry.user,
-            testOrgName: 'e2e',
-            testSpaceName: 'e2e',
+            testOrgName: secrets.cloudFoundry.org || 'e2e',
+            testSpaceName: secrets.cloudFoundry.space || 'e2e',
             supportsVersions: false
           }
         }
@@ -133,8 +136,19 @@
 
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
+      var setLocale = function () {
+        angular.module('setLocale', []).config(['$injector', function ($injector) {
+          // Override whatever language the running browser is in, this removes unexpected http request to
+          // locale_<browser locale>.json
+          var languageServiceProvider = $injector.get('languageServiceProvider');
+          languageServiceProvider.setBrowserLocale('en_US');
+        }]);
+      };
+
+      browser.addMockModule('setLocale', setLocale);
+
       // Optional. Really nice to see the progress of the tests while executing
-      var SpecReporter = require('jasmine-spec-reporter');
+      var SpecReporter = require('jasmine-spec-reporter').SpecReporter;
       jasmine.getEnv().addReporter(new SpecReporter({
         displayPendingSpec: false,
         displayPendingSummary: false,
@@ -151,6 +165,7 @@
     },
 
     jasmineNodeOpts: {
+      defaultTimeoutInterval: 45000,
       // disable default jasmine report (using jasmine-spec-reporter)
       print: function () {
       }

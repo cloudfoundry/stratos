@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(ServicePlanVisibilitiesApi.prototype, {
 
-   /*
+    /*
     * Creating a Service Plan Visibility
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/creating_a_service_plan_visibility.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Service Plan Visibilities
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Service Plan Visibilities
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/list_all_service_plan_visibilities.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Service Plan Visibility
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
     */
@@ -87,7 +87,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Updating a Service Plan Visibility
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/updating_a_service_plan_visibility.html
     */

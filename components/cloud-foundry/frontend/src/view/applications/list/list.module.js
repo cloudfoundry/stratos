@@ -34,7 +34,7 @@
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
+    appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
 
     var vm = this;
 
@@ -276,6 +276,9 @@
             }
           });
       } else {
+        // Cluster is set to all, so should org
+        vm.model.filterParams.orgGuid = 'all';
+        vm.filter.orgGuid = 'all';
         return $q.resolve();
       }
     }
@@ -313,6 +316,9 @@
             }
           });
       } else {
+        // Cluster & org are set to all, so should space
+        vm.model.filterParams.spaceGuid = 'all';
+        vm.filter.spaceGuid = 'all';
         return $q.resolve();
       }
     }
@@ -407,8 +413,8 @@
     }
 
     /**
-     * @function getClusterOrganizations
-     * @description Get organizations for selected cluster
+     * @function setCluster
+     * @description
      * @returns {void}
      * @public
      */
@@ -427,18 +433,7 @@
           // changed the org and space filter
           needToReload = needToReload || !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
-          if (needToReload) {
-            _reload();
-          } else {
-            if (vm.filter.cnsiGuid === 'all') {
-              vm.model.resetFilter();
-            } else {
-              vm.model.filterByCluster(vm.filter.cnsiGuid);
-            }
-            vm.paginationProperties.pageNumber = 1;
-            vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
-            _loadPage(1);
-          }
+          _reload(false, !needToReload);
         });
     }
 

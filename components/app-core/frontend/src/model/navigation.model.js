@@ -207,7 +207,7 @@
         position: pos,
         // baseState is used to work out which menu entry is active based on any child state
         baseState: baseState || name, // defaults to name
-        items: new Menu()   // sub-menu
+        items: new Menu() // sub-menu
       };
 
       return this._addMenuItem(item);
@@ -232,7 +232,7 @@
         position: pos,
         onClick: fn,
         baseState: name,
-        items: new Menu()   // sub-menu
+        items: new Menu() // sub-menu
       };
 
       return this._addMenuItem(item);

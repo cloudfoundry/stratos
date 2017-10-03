@@ -265,7 +265,7 @@
               'results-per-page': 1
             }, {
               headers: {
-                'x-cnap-cnsi-list': _getCurrentCnsis().join(',')
+                'x-cap-cnsi-list': _getCurrentCnsis().join(',')
               }
             }).then(function (response) {
               model.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
@@ -273,17 +273,15 @@
           }
         })
         .then(function () {
-          var didFilter = false;
+          // Always start from a fresh filtered state
+          resetFilter();
+
           if (model.filterParams.cnsiGuid !== 'all') {
             filterByCluster(model.filterParams.cnsiGuid);
-            didFilter = true;
           }
+
           if (model.filterParams.text) {
             filterByText(model.filterParams.text);
-            didFilter = true;
-          }
-          if (!didFilter) {
-            resetFilter();
           }
         })
         .catch(_.bind(_onListAllAppsFailure, this));
@@ -359,7 +357,7 @@
       }, _buildFilter());
       var config = {
         headers: {
-          'x-cnap-cnsi-list': cnsis.join(',')
+          'x-cap-cnsi-list': cnsis.join(',')
         }
       };
       return applicationApi.ListAllApps(options, config).then(function (response) {
@@ -487,14 +485,14 @@
      * @public
      */
     function filterByCluster(clusterId) {
-      model.filteredApplications = _.filter(model.cachedApplications, ['clusterId', clusterId]);
+      model.filteredApplications = _.filter(model.filteredApplications, ['clusterId', clusterId]);
       _sortFilteredApplications();
       model.hasApps = model.filteredApplications.length > 0;
     }
 
     function filterByText(text) {
       text = text.toLowerCase();
-      model.filteredApplications = _.filter(model.cachedApplications, function (app) {
+      model.filteredApplications = _.filter(model.filteredApplications, function (app) {
         if (app.entity.name.toLowerCase().indexOf(text) > -1) {
           return app;
         }

@@ -35,8 +35,8 @@
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, $scope, $q, $translate, modelManager,
-                                           appClusterAssignUsers, appNotificationsService, appUtilsService,
-                                           frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
+    appClusterAssignUsers, appNotificationsService, appUtilsService,
+    frameworkDialogConfirm, frameworkAsyncTaskDialog, cfOrganizationModel) {
     var vm = this;
 
     vm.clusterGuid = $stateParams.guid;

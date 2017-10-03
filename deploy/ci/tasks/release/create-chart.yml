@@ -9,7 +9,8 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.ngrok.io:80/linkyard/helm
+  # Generated using Dockerfile.stratos-helm
+   repository:  ci-registry.ngrok.io:80/stratos-helm
    tag: "latest"
    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
@@ -31,6 +32,7 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
 
       # Generate Helm package
+      helm dep build console
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/

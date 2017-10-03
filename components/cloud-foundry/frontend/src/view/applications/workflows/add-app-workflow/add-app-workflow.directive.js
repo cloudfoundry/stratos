@@ -40,7 +40,7 @@
    * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, appEventService, appUtilsService, cfUtilsService, $scope, $q,
-                                    $translate) {
+    $translate) {
 
     var vm = this;
 
@@ -125,10 +125,7 @@
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-application.html',
             formName: 'application-name-form',
-            btnText: {
-              next: 'buttons.add',
-              cancel: 'buttons.cancel'
-            },
+            nextBtnText: 'buttons.add',
             showBusyOnNext: true,
             isLastStep: true,
             onEnter: function () {
@@ -154,14 +151,24 @@
                       {appName: vm.userInput.name})
                   });
                 }, function (error) {
-                  var msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1');
-                  var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
-                  if (cloudFoundryException || _.isString(error)) {
-                    msg = $translate.instant('add-app-dialog.step1.notifications.failure-part-1-alt',
-                      { error: cloudFoundryException || error});
+                  var failurePart1, failurePart1Alt, failurePart2;
+                  if (vm.userInput.routeCreateBindError) {
+                    failurePart1 = 'add-app-dialog.step1.route-create-bind.failure-part-1';
+                    failurePart1Alt = 'add-app-dialog.step1.route-create-bind.failure-part-1-alt';
+                    failurePart2 = 'add-app-dialog.step1.route-create-bind.failure-part-2';
+                  } else {
+                    failurePart1 = 'add-app-dialog.step1.notifications.failure-part-1';
+                    failurePart1Alt = 'add-app-dialog.step1.notifications.failure-part-1-alt';
+                    failurePart2 = 'add-app-dialog.step1.notifications.failure-part-2';
                   }
 
-                  msg = msg + $translate.instant('add-app-dialog.step1.notifications.failure-part-2');
+                  var msg = $translate.instant(failurePart1);
+                  var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
+                  if (cloudFoundryException || _.isString(error)) {
+                    msg = $translate.instant(failurePart1Alt, { error: cloudFoundryException || error});
+                  }
+
+                  msg = msg + $translate.instant(failurePart2);
                   return $q.reject(msg);
                 });
               });
@@ -224,6 +231,13 @@
         var routePromise = routeModel.createRoute(cnsiGuid, routeSpec)
           .then(function (route) {
             return routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
+          })
+          .then(function () {
+            vm.userInput.routeCreateBindError = false;
+          })
+          .catch(function (err) {
+            vm.userInput.routeCreateBindError = true;
+            return $q.reject(err);
           });
 
         appEventService.$emit('cf.events.NEW_APP_CREATED');
@@ -260,17 +274,17 @@
           }
 
           if (error.exist) {
-            return $q.reject($translate.instant('add-app-dialog.step1.route.exists'));
+            return $q.reject($translate.instant('add-app-dialog.step1.route-validate.exists'));
           }
 
-          var msg = $translate.instant('add-app-dialog.step1.route.failure-part-1');
+          var msg = $translate.instant('add-app-dialog.step1.route-validate.failure-part-1');
           var cloudFoundryException = appUtilsService.extractCloudFoundryError(error);
           if (cloudFoundryException || _.isString(error)) {
-            msg = $translate.instant('add-app-dialog.step1.route.failure-part-1-alt',
+            msg = $translate.instant('add-app-dialog.step1.route-validate.failure-part-1-alt',
               {error: cloudFoundryException || error});
           }
 
-          msg = msg + $translate.instant('add-app-dialog.step1.route.failure-part-2');
+          msg = msg + $translate.instant('add-app-dialog.step1.route-validate.failure-part-2');
 
           return $q.reject(msg);
         });
@@ -360,13 +374,13 @@
     function stopWorkflow() {
       vm.notify();
       vm.addingApplication = false;
-      vm.closeDialog();
+      vm.closeDialog({ reload: vm.userInput.routeCreateBindError });
     }
 
     function finishWorkflow() {
       vm.notify();
       vm.addingApplication = false;
-      vm.dismissDialog();
+      vm.dismissDialog({ reload: vm.userInput.routeCreateBindError });
     }
 
   }

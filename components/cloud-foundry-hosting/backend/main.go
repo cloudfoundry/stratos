@@ -61,6 +61,15 @@ func (ch *CFHosting) Init() error {
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 
+		// Allow Console Application manifest to override the Admin Scope if really desired
+		if config.IsSet("STRATOS_ADMIN_SCOPE") {
+			stratosAdminScope, err := config.GetValue("STRATOS_ADMIN_SCOPE")
+			if err == nil {
+				ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
+				log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
+			}
+		}
+
 		// Need to run as HTTP on the port we were told to use
 		ch.portalProxy.GetConfig().HTTPS = false
 
@@ -90,7 +99,7 @@ func (ch *CFHosting) Init() error {
 		if config.IsSet(CFApiURLOverride) {
 			apiUrl, _ := config.GetValue(CFApiURLOverride)
 			appData.API = apiUrl
-			log.Infof("Overrriden CF API URL from environment variable %s", apiUrl)
+			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
 		}
 
 		if config.IsSet(CFApiForceSecure) {
@@ -152,6 +161,7 @@ func (ch *CFHosting) Init() error {
 		// Save to Console DB
 		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
 		if err != nil {
+			log.Fatalf("Failed to save console configuration due to %s", err)
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 

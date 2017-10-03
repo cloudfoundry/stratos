@@ -129,8 +129,8 @@ func fwdHeaders(uaaReq engine.Request, req *http.Request) {
 		switch {
 		// Skip these
 		//  - "Referer" causes CF to fail with a 403
-		//  - "Connection", "X-Cnap-*" and "Cookie" are consumed by us
-		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
+		//  - "Connection", "x-cap-*" and "Cookie" are consumed by us
+		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cap-"):
 
 		// Forwarding everything else
 		default:

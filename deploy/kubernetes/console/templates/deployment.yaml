@@ -1,24 +1,5 @@
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
- name: "{{ .Release.Name }}-postgres-volume"
- labels:
-   app: "{{ .Release.Name }}"
- annotations:
-  {{- if .Values.storageClass }}
-    volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
-  {{- else }}
-    volume.alpha.kubernetes.io/storage-class: default
-  {{- end }}
-spec:
- accessModes:
-   - ReadWriteMany
- resources:
-   requests:
-     storage: 2Gi
----
-apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -27,10 +8,7 @@ metadata:
     app: "{{ .Release.Name }}"
 data:
   stolon: {{ .Values.dbPassword | b64enc }}
-  pgsql-password: {{ .Values.dbPassword | b64enc }}
-  console-cert-key: {{ .Files.Get "ssl/console.key" | b64enc }}
-  console-cert: {{ .Files.Get "ssl/console.crt" | b64enc }}
-
+  db-password: {{  .Values.mariadb.mariadbPassword | b64enc }}
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
@@ -48,9 +26,15 @@ spec:
       containers:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
+        env:
+        - name: ENCRYPTION_KEY_VOLUME
+          value: "{{ .Release.Name }}-encryption-key-volume"
         volumeMounts:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
+          readOnly: true
+        - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
+          name: "{{ .Release.Name }}-encryption-key-volume"
           readOnly: true
         ports:
         - containerPort: 80
@@ -63,24 +47,22 @@ spec:
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "{{ .Release.Name }}-postflight"
         env:
-        - name: PGSQL_HOST
-          value: "{{ .Release.Name }}-postgres-int"
-        - name: PGSQL_PORT
-          value: "5432"
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD_FILE
-          value: /etc/secrets/stolon
-        - name: PGSQL_DATABASE
-          value: console-db
-        - name: PGSQL_USER
-          value: console
-        - name: PGSQL_PASSWORDFILE
-          value: /etc/secrets/pgsql-password
-        - name: PGSQL_SSL_MODE
-          value: disable
-        - name: PGCONNECT_TIMEOUT
-          value: "10"
+        - name: DB_HOST
+          value: "{{ .Release.Name }}-mariadb"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_ADMIN_USER
+          value:  "{{ .Values.mariadb.adminUser }}"
+        - name: DB_ADMIN_PASSWORD
+          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
+        - name: DATABASE_PROVIDER
+          value: "{{ .Values.dbProvider }}"
+        - name: DB_PASSWORD
+          value: "{{ .Values.mariadb.mariadbPassword }}"
+        - name: DB_USER
+          value: "{{ .Values.mariadb.mariadbUser }}"
+        - name: DB_DATABASE_NAME
+          value: "{{ .Values.mariadb.mariadbDatabase }}"
         - name: DO_NOT_QUIT
           value: "true"
         - name: UPGRADE_VOLUME
@@ -121,23 +103,22 @@ spec:
         name: proxy
      {{- end }}
         env:
-        - name: PGSQL_USER
-          value: console
-        - name: PGSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Release.Name }}-secret"
-              key: pgsql-password
-        - name: PGSQL_DATABASE
-          value: console-db
-        - name: PGSQL_HOST
-          value: "{{ .Release.Name }}-postgres-int"
-        - name: PGSQL_PORT
-          value: "5432"
-        - name: PGSQL_CONNECT_TIMEOUT_IN_SECS
-          value: "5"
-        - name: PGSQL_SSL_MODE
-          value: disable
+        - name: DB_USER
+          value: "{{ .Values.mariadb.mariadbUser }}"
+        - name: DB_PASSWORD
+          value: "{{ .Values.mariadb.mariadbPassword }}"
+        - name: DB_DATABASE_NAME
+          value: "{{ .Values.mariadb.mariadbDatabase }}"
+        - name: DB_HOST
+          value: "{{ .Release.Name }}-mariadb"
+        - name: DB_PORT
+          value: "3306"
+        - name: DATABASE_PROVIDER
+          value: "{{ .Values.dbProvider }}"
+        - name: DB_ADMIN_USER
+          value:  "{{ .Values.mariadb.adminUser }}"
+        - name: DB_ADMIN_PASSWORD
+          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
@@ -158,6 +139,22 @@ spec:
           value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
+        {{- if .Values.noShared }}
+        {{- if .Values.consoleCert }}
+        - name: CONSOLE_CERT
+          value: | 
+{{ .Values.consoleCert | indent 12 }}
+        {{- end }}
+        {{- if .Values.consoleCertKey }}
+        - name: CONSOLE_CERT_KEY
+          value: |
+{{ .Values.consoleCertKey | indent 12 }}
+        {{- end }}
+        {{- end }}
+        - name: CONSOLE_PROXY_CERT_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
+        - name: CONSOLE_PROXY_CERT_KEY_PATH
+          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
@@ -191,76 +188,9 @@ spec:
           name: "{{ .Release.Name }}-secret"
           readOnly: true
       volumes:
-      - name: "{{ .Release.Name }}-postgres-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-postgres-volume"
       - name: "{{ .Release.Name }}-upgrade-volume"
         persistentVolumeClaim:
           claimName: "{{ .Release.Name }}-upgrade-volume"
-      - name: "{{ .Release.Name }}-encryption-key-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-encryption-key-volume"
-      - name: "{{ .Release.Name }}-secret"
-        secret:
-          secretName: "{{ .Release.Name }}-secret"
----
-apiVersion: apps/v1beta1
-kind: StatefulSet
-metadata:
-  name: postgres
-spec:
-  serviceName: "postgres"
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: "{{ .Release.Name }}"
-        component: postgres
-    spec:
-      containers:
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postgres}}:{{.Values.consoleVersion}}
-        name: postgres
-        env:
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD_FILE
-          value: /etc/secrets/stolon
-        - name: PGDATA
-          value: /stolon-data
-        - name: HTTP_PROXY
-        {{- if .Values.httpProxy }}
-          value: {{.Values.httpProxy}}
-        {{- end }}
-        - name: HTTPS_PROXY
-        {{- if .Values.httpsProxy }}
-          value: {{.Values.httpsProxy}}
-        {{- end }}
-        - name: NO_PROXY
-        {{- if .Values.noProxy }}
-          value: {{.Values.noProxy}}
-        {{- end }}
-        - name: FTP_PROXY
-        {{- if .Values.ftpProxy }}
-          value: {{.Values.ftpProxy}}
-        {{- end }}
-        - name: SOCKS_PROXY
-        {{- if .Values.socksProxy }}
-          value: {{.Values.socksProxy}}
-        {{- end }}
-        volumeMounts:
-        - mountPath: /stolon-data
-          name: "{{ .Release.Name }}-postgres-volume"
-        - mountPath: /etc/secrets/
-          name: "{{ .Release.Name }}-secret"
-          readOnly: true
-        ports:
-        - containerPort: 5432
-          name: postgres
-          protocol: TCP
-      volumes:
-      - name: "{{ .Release.Name }}-postgres-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-postgres-volume"
       - name: "{{ .Release.Name }}-encryption-key-volume"
         persistentVolumeClaim:
           claimName: "{{ .Release.Name }}-encryption-key-volume"

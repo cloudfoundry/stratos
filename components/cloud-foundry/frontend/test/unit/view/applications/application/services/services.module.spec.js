@@ -37,35 +37,6 @@
       expect(appServicesCtrl.services).toEqual([]);
     });
 
-    it('should set services on app summary change', function () {
-      var spaceGuid = 'space_123';
-
-      var mockSpacesApi = mock.cloudFoundryAPI.Spaces;
-      var ListAllServicesForSpace = mockSpacesApi.ListAllServicesForSpaceWithSSO(spaceGuid);
-      $httpBackend.whenGET(ListAllServicesForSpace.url)
-        .respond(200, ListAllServicesForSpace.response['200'].body);
-
-      appServicesCtrl.appModel.application.summary = {
-        space_guid: spaceGuid,
-        services: [ {
-          service_plan: {
-            service: {
-              guid: ListAllServicesForSpace.response['200'].body.resources[0].metadata.guid
-            }
-          }
-        }]
-      };
-
-      $scope.$apply();
-      $httpBackend.flush();
-
-      expect(appServicesCtrl.services.length).toBeGreaterThan(0);
-      expect(appServicesCtrl.services.length).toEqual(3);
-      expect(appServicesCtrl.services[0].attached).toBeTruthy();
-      expect(appServicesCtrl.services[1].attached).toBeFalsy();
-      expect(appServicesCtrl.services[2].attached).toBeFalsy();
-    });
-
     it('should keep services empty on app summary change with no space GUID', function () {
       appServicesCtrl.appModel.application.summary = {
         guid: 'app_123'

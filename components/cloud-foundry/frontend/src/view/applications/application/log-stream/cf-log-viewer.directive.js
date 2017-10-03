@@ -14,7 +14,9 @@
         webSocket: '=?',
         filter: '=?',
         disableStatus: '=?',
-        fitHeight: '=?'
+        fitHeight: '=?',
+        logTitle: '=?',
+        status: '=?'
       },
       controller: CfLogViewerController,
       controllerAs: 'cfLogViewer',

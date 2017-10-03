@@ -4,7 +4,7 @@ COPY *.json ./
 COPY gulpfile.js ./
 COPY components ./components
 COPY build ./build/
-COPY deploy/ci/scripts/generate_cert.sh generate_cert.sh
+COPY deploy/tools/generate_cert.sh generate_cert.sh
 COPY deploy/db deploy/db
 COPY deploy/all-in-one/config.all-in-one.properties config.properties
 
@@ -16,7 +16,7 @@ RUN npm install -g gulp bower \
     && npm run build-cf
 
 # Generate dev-certs
-RUN DEV_CERTS_PATH=/go/dev-certs ./generate_cert.sh \
+RUN CERTS_PATH=/go/dev-certs ./generate_cert.sh \
     && chmod +x portal-proxy
 
 EXPOSE 443

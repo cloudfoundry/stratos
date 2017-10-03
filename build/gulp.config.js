@@ -49,7 +49,7 @@
         },
         'bootstrap-sass': {
           main: [
-//            'assets/stylesheets/_bootstrap.scss'
+            // 'assets/stylesheets/_bootstrap.scss'
           ]
         }
       }

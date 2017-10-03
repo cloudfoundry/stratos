@@ -18,6 +18,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -259,7 +260,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -273,8 +274,10 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
+	sessionsTable := "sessions"
+
 	// Store depends on the DB Type
-	if databaseProvider == "pgsql" {
+	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options
@@ -283,9 +286,19 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.Secure = true
 		return sessionStore, err
 	}
+	// Store depends on the DB Type
+	if databaseProvider == datastore.MYSQL {
+		log.Info("Creating MySQL session store")
+		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		// Setup cookie-store options
+		sessionStore.Options.MaxAge = sessionExpiry
+		sessionStore.Options.HttpOnly = true
+		sessionStore.Options.Secure = true
+		return sessionStore, err
+	}
 
 	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
@@ -324,18 +337,11 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	// Determine database provider
-	if len(dc.Host) > 0 {
-		dc.DatabaseProvider = "pgsql"
-	} else {
-		dc.DatabaseProvider = "sqlite"
-	}
-
 	return dc, nil
 }
 
-func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
-	log.Debug("createTempCertFiles")
+func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
+	log.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -347,6 +353,17 @@ func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
 	_, errDevkey := os.Stat(devCertsDir + certKeyFilename)
 	if errDevcert == nil && errDevkey == nil {
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
+	}
+
+	// Check if certificate have been provided as files (as is the case in kubernetes)
+	if pc.TLSCertPath != "" && pc.TLSCertKeyPath != "" {
+		log.Infof("Using TLS cert: %s, %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		_, errCertMissing := os.Stat(pc.TLSCertPath)
+		_, errCertKeyMissing := os.Stat(pc.TLSCertKeyPath)
+		if errCertMissing != nil || errCertKeyMissing != nil {
+			return "", "", fmt.Errorf("unable to find certificate %s or certificate key %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		}
+		return pc.TLSCertPath, pc.TLSCertKeyPath, nil
 	}
 
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
@@ -430,7 +447,7 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	}
 
 	if config.HTTPS {
-		certFile, certKeyFile, err := createTempCertFiles(config)
+		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
@@ -625,6 +642,9 @@ func isConsoleUpgrading() bool {
 	}
 
 	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+	if string(upgradeVolume[0]) == "/" {
+		upgradeLockPath = fmt.Sprintf("%s/%s", upgradeVolume, upgradeLockFile)
+	}
 
 	if _, err := os.Stat(upgradeLockPath); err == nil {
 		return true

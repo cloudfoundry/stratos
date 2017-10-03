@@ -538,7 +538,7 @@
             endpointsPage.credentialsFormEndpointConnect().then(function () {
               helpers.checkAndCloseToast(/Successfully connected to '(?:cf)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
-              expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('DISCONNECT');
+              expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('DISCONNECT');
               expect(endpointsPage.endpointIsConnected(cfRowIndex)).toBeTruthy();
             });
           });
@@ -574,7 +574,7 @@
               .then(function () {
                 helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
-                expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 4).getText()).toBe('CONNECT');
+                expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('CONNECT');
               });
           });
 
