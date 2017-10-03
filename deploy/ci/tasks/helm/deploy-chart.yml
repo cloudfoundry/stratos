@@ -119,4 +119,4 @@ run:
       # Due to a Helm bug, it currently does not remove statefulsets
       kubectl delete namespace nightly-test
 
-      exit $EXIT_CODE
+      exit $E2E_EXIT_CODE
