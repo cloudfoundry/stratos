@@ -109,7 +109,7 @@ run:
       cat build/secrets.json
       export DBUS_SESSION_BUS_ADDRESS=/dev/null
       npm run update-webdriver
-      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${FRONTEND_IP} --params.port=443
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${UI_EXT_IP} --params.port=443
       E2E_EXIT_CODE=$?
 
 
