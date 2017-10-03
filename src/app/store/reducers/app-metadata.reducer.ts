@@ -42,15 +42,9 @@ export const defaultMetadataState = {
 
 export function appMetadataReducer(state: AppMetadata = defaultMetadataState, action) {
   switch (action.type) {
-    case AppMetadataTypes.APP_METADATA:
-      console.log('app metadata recuder: APP_METADATA');
-      return state;
     case AppMetadataTypes.APP_METADATA_SUCCESS:
-      console.log('app metadata recuder: APP_METADATA_SUCCESS');
+      // console.log('app metadata recuder: APP_METADATA_SUCCESS');
       return setAppMetadataState(state, action.metadata, action.appMetadataAction);
-    case AppMetadataTypes.APP_METADATA_FAILED:
-      console.log('app metadata recuder: APP_METADATA_FAILED');
-      return state;
     default:
       return state;
   }

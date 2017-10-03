@@ -1,9 +1,9 @@
-import { AppMetadataRequestState } from '../reducers/app-metadata-request.reducer';
-import { AppMetadata } from '../reducers/app-metadata.reducer';
-import { Observable } from 'rxjs/Rx';
 import { RequestOptions } from '@angular/http';
 import { Action, compose, Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Rx';
+
 import { AppState } from '../app-state';
+import { AppMetadataRequestState } from '../reducers/app-metadata-request.reducer';
 
 export const AppMetadataTypes = {
   APP_METADATA: '[App Metadata] App Metadata',
@@ -37,6 +37,12 @@ export class GetAppMetadataAction implements Action {
       case AppMetadataProperties.INSTANCES:
         requestObject = new RequestOptions({
           url: `apps/${guid}/stats`,
+          method: 'get'
+        });
+        break;
+      case AppMetadataProperties.ENV_VARS:
+        requestObject = new RequestOptions({
+          url: `apps/${guid}/env`,
           method: 'get'
         });
         break;
@@ -109,17 +115,19 @@ export const getAppMetadataObservable = (
   appId: string,
   action: GetAppMetadataAction
 ): Observable<any> => {
+  let dispatched = false;
   return Observable.combineLatest(
-    store.select(getAppMetadata),
     store.select(selectMetadata(action.metadataType, appId)),
     store.select(selectMetadataRequest(action.metadataType, appId))
   )
     // FIXME: This is firing off a LOT before we have a chance to update metadataRequestState.fetching
-    .mergeMap(([appMetadata, metadata, metadataRequestState]: [AppMetadata, any, AppMetadataRequestState]) => {
-      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) {
-        console.log('DISPATCHING: metadata: ', metadata);
-        console.log('DISPATCHING: metadataRequestState: ', metadataRequestState);
+    .mergeMap(([metadata, metadataRequestState]: [any, AppMetadataRequestState]) => {
+      // console.log('getAppMetadataObservable: mergemap: start');
+      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
         store.dispatch(action);
+        dispatched = true;
+        // console.log('getAppMetadataObservable: DISPATCHING: metadata: ', metadata);
+        // console.log('getAppMetadataObservable: DISPATCHING: metadataRequestState: ', metadataRequestState);
       }
       return Observable.of({
         metadata,

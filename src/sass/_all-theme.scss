@@ -9,6 +9,9 @@
   $is-dark: map-get($theme, is-dark);
   $app-background-color: white;
   $app-background-text-color: rgba(mat-color($foreground-colors, base), .65);
+  $primary: map-get($theme, primary);
+  $accent: map-get($theme, accent);
+  $warn: map-get($theme, warn);
   @if $is-dark==true {
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
   }
@@ -23,5 +26,21 @@
   @include side-nav-theme($theme, $app-theme);
   @include dashboard-page-theme($theme, $app-theme);
   @include display-value-theme($theme, $app-theme);
-  @include steppers-theme($theme, $app-theme)
+  @include steppers-theme($theme, $app-theme);
+  $status-success: mat-color($primary);
+  $status-warning: mat-color($warn);
+  $status-danger: mat-color($accent);
+  $status-tentative: mat-color($primary, 100);
+  .text-success {
+    color: $status-success;
+  }
+  .text-warning {
+    color: $status-warning;
+  }
+  .text-danger {
+    color: $status-danger;
+  }
+  .text-tentative {
+    color: $status-tentative;
+  }
 }

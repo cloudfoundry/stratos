@@ -1,15 +1,5 @@
 import { Injectable } from '@angular/core';
 
-// export interface AppData {
-//   fetching: boolean;
-//   app: EntityInfo;
-//   space: EntityInfo;
-//   organisation: EntityInfo;
-//   appSummary: any;
-//   stack: EntityInfo;
-//   cf: any;
-// }
-
 export interface AppState {
   label: string;
   indicator: string;
@@ -35,103 +25,103 @@ export class ApplicationStateService {
   private stateMetadata = {
     '?': {
       FAILED: {
-        label: 'app.state.failed',
+        label: 'Staging Failed',
         indicator: 'error',
         actions: 'delete'
       }
     },
     PENDING: {
       '?': {
-        label: 'app.state.pending',
+        label: 'Pending',
         indicator: 'busy',
         actions: 'delete'
       }
     },
     LOADING: {
       '?': {
-        label: 'app.state.loading',
+        label: 'Loading',
         indicator: 'busy'
       }
     },
     STOPPED: {
       PENDING: {
-        label: 'app.state.updating',
+        label: 'Offline while Updating',
         indicator: 'warning',
         actions: 'delete'
       },
       STAGED: {
-        label: 'app.state.offline',
+        label: 'Offline',
         indicator: 'warning',
         actions: 'start,delete,cli'
       },
       '*NONE*': {
-        label: 'app.state.incomplete',
+        label: 'Incompleter',
         indicator: 'warning',
         actions: 'delete, cli'
       }
     },
     STARTED: {
       NO_INSTANCES: {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.no-instances',
+        label: 'Deployed',
+        subLabel: 'No Instances',
         indicator: 'ok',
         actions: 'stop,restart,cli'
       },
       PENDING: {
-        label: 'app.state.staging',
+        label: 'Staging App',
         indicator: 'busy',
         actions: 'delete'
       },
       'STAGED(?,?,?)': {
-        label: 'app.state.deployed',
+        label: 'Deployed',
         indicator: 'tentative',
         actions: 'stop,restart,cli'
       },
       'STAGED(0,0,0)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.starting',
+        label: 'Deployed',
+        subLabel: 'Starting App',
         indicator: 'busy',
         actions: 'stop,restart,cli'
       },
       'STAGED(N,0,0,N)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.starting',
+        label: 'Deployed',
+        subLabel: 'Starting App',
         indicator: 'busy',
         actions: 'stop,restart,cli'
       },
       'STAGED(N,0,0)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.online',
+        label: 'Deployed',
+        subLabel: 'Online',
         indicator: 'ok',
         actions: 'stop,restart,launch,cli'
       },
       'STAGED(0,N,0)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.crashed',
+        label: 'Deployed',
+        subLabel: 'Crashed',
         indicator: 'error',
         actions: 'stop,restart,cli'
       },
       'STAGED(0,0,N)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.starting',
+        label: 'Deployed',
+        subLabel: 'Starting App',
         indicator: 'warning',
         actions: 'stop,restart,cli'
       },
       'STAGED(0,N,N)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.crashing',
+        label: 'Deployed',
+        subLabel: 'Crashing',
         indicator: 'error',
         actions: 'stop,restart,cli'
       },
       'STAGED(N,N,0)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.partial',
+        label: 'Deployed',
+        subLabel: 'Partially Online',
         indicator: 'warning',
         actions: 'stop,restart,launch,cli'
       },
       'STAGED(N,0,N)': {
-        label: 'app.state.deployed',
-        subLabel: 'app.state.partial',
+        label: 'Deployed',
+        subLabel: 'Partially Online',
         indicator: 'warning',
         actions: 'stop,restart,launch,cli'
       }
@@ -221,7 +211,7 @@ export class ApplicationStateService {
 
     // No match against the state table, so return unknown
     return {
-      label: 'app.state.unknown',
+      label: 'Unknown',
       indicator: 'error',
       actions: ''
     };

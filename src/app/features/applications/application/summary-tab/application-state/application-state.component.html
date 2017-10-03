@@ -1,0 +1,6 @@
+<div class="app-state">
+  <span>{{state?.label }}</span>
+  <span *ngIf="state?.subLabel"> - </span>
+  <span *ngIf="state?.subLabel">{{ state?.subLabel }}</span>
+  <app-application-state-icon [state]="state"></app-application-state-icon>
+</div>

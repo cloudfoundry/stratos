@@ -33,7 +33,7 @@ export function appMetadataRequestReducer(state = {}, action) {
     const appMetadataAction: GetAppMetadataAction = action.appMetadataAction;
     switch (action.type) {
         case AppMetadataTypes.APP_METADATA_START:
-            console.log('app metadata request recuder: APP_METADATA_START');
+            // console.log('app metadata request recuder: APP_METADATA_START');
             if (!appMetadataAction) {
                 return state;
             }
@@ -48,14 +48,14 @@ export function appMetadataRequestReducer(state = {}, action) {
             requestState.message = '';
             return setAppMetadataRequestState(state, requestState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_SUCCESS:
-            console.log('app metadata request recuder: setAppMetadataRequestState');
+            // console.log('app metadata request recuder: setAppMetadataRequestState');
             const requestSuccessState = getAppMetadataRequestState(state, appMetadataAction);
             requestSuccessState.fetching = false;
             requestSuccessState.creating = false;
             requestSuccessState.error = false;
             return setAppMetadataRequestState(state, requestSuccessState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_FAILED:
-            console.log('app metadata request recuder: APP_METADATA_FAILED');
+            // console.log('app metadata request recuder: APP_METADATA_FAILED');
             const requestFailedState = getAppMetadataRequestState(state, appMetadataAction);
             requestFailedState.fetching = false;
             requestFailedState.error = true;
