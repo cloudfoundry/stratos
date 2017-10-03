@@ -6,11 +6,12 @@
   module.exports = {
     getServices: getServices,
     addService: addService,
-    getServiceWizard: getServiceWizard
+    getServiceWizard: getServiceWizard,
+    showCreateInstanceDialog: showCreateInstanceDialog
   };
 
   function getServices() {
-    return element.all(by.css('service-card'));
+    return element.all(by.css('service-catalogue-card'));
   }
 
   function addService(serviceName) {
@@ -19,11 +20,27 @@
         return text === serviceName;
       });
     }).first();
-    return matchingService.element(by.css('.btn.btn-sm.btn-link')).click();
+
+    var btn = getButton(matchingService, 'Bind Service');
+    btn.click();
+  }
+
+  function getButton(serviceCatalogCard, buttonText) {
+    var buttons = serviceCatalogCard.all(by.css('.service-actions > button'));
+    return buttons.filter(function (elem) {
+      return elem.getText().then(function (text) {
+        return text.toLowerCase().indexOf(buttonText.toLowerCase()) === 0;
+      });
+    }).first();
   }
 
   function getServiceWizard() {
     return serviceWizard;
+  }
+
+  function showCreateInstanceDialog() {
+    var btn = getServiceWizard().getElement().element(by.css('.td-create-service > button'));
+    return btn.click();
   }
 
 })();

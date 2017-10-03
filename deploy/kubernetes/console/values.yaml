@@ -23,6 +23,16 @@ images:
   postflight: stratos-postflight-job
 # Specify which storage class should be used for PVCs
 #storageClass: default
+#consoleCert: |
+#    -----BEGIN CERTIFICATE-----
+#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+#   ...
+#    -----END CERTIFICATE-----
+#consoleCertKey: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
+#    ...
+#    -----END PRIVATE KEYE-----
 # MariaDB chart configuration
 mariadb:
   # Only required for creating the databases

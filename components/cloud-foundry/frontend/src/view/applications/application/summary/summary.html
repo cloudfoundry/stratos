@@ -78,17 +78,30 @@
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
-        <dt translate ng-if="applicationSummaryCtrl.stratosProject">app.app-info.app-tabs.summary.summary-panel.deployed-label</dt>
-        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject">
-          {{ applicationSummaryCtrl.stratosProject.timestamp * 1000 | momentDateFormat }}
+        <dt translate ng-if="applicationSummaryCtrl.stratosProject.deploySource">app.app-info.app-tabs.summary.summary-panel.deployed-label</dt>
+        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject.deploySource">
+          {{ applicationSummaryCtrl.stratosProject.deploySource.timestamp * 1000 | momentDateFormat }}
         </dd>
 
-        <dt translate ng-if="applicationSummaryCtrl.stratosProject">app.app-info.app-tabs.summary.summary-panel.deployed-source-label</dt>
-        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject">
-          <a href="{{applicationSummaryCtrl.stratosProject.url}}/commit/{{applicationSummaryCtrl.stratosProject.commit}}"
-             rel="noopener noreferrer" target="_blank">
-            {{applicationSummaryCtrl.stratosProject.commit | limitTo:8}}
+        <dt translate ng-if="applicationSummaryCtrl.stratosProject.deploySource">app.app-info.app-tabs.summary.summary-panel.deployed-source-label</dt>
+        <dd class="pull-right" ng-if="applicationSummaryCtrl.stratosProject.deploySource"
+          ng-switch="applicationSummaryCtrl.stratosProject.deploySource.type">
+          <a ng-switch-when="github"
+            href="{{applicationSummaryCtrl.stratosProject.deploySource.url}}/commit/{{applicationSummaryCtrl.stratosProject.deploySource.commit}}"
+            rel="noopener noreferrer" target="_blank">
+            {{applicationSummaryCtrl.stratosProject.deploySource.commit | limitTo:8}}
           </a>
+          <span ng-switch-when="giturl"
+            uib-popover="{{ applicationSummaryCtrl.stratosProject.deploySource.branch }} {{applicationSummaryCtrl.stratosProject.deploySource.commit | limitTo:8 }}"
+            popover-trigger="'mouseenter'"
+            popover-placement="top"
+            popover-popup-delay="200"
+            popover-popup-close-delay="1500"
+          >
+            {{applicationSummaryCtrl.stratosProject.deploySource.url}}
+          </span>
+          <span ng-switch-when="filefolder" translate>app.app-info.app-tabs.summary.summary-panel.deployed-source-filefolder</span>
+          <span ng-switch-when="archive" translate>app.app-info.app-tabs.summary.summary-panel.deployed-source-archive</span>
         </dd>
 
         <dt translate>cf.ssh.access</dt>
@@ -105,6 +118,10 @@
             on-label="cf.ssh.enabled" off-label="cf.ssh.disabled"
             off-class="console-status-normal" on-class="console-status-normal">
           </status-indicator>
+        </dd>
+        <dt translate>app.app-info.app-tabs.summary.summary-panel.service-count</dt>
+        <dd class="pull-right app-summary-bound-services-count">
+          {{ ::appCtrl.model.application.summary.services.length }}
         </dd>
       </dl>
     </div>
@@ -263,43 +280,6 @@
                         enable-button-mode="true"></actions-menu>
         </td>
       </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="summary-service-instances">
-  <div class="action-header">
-    <span translate>app.app-info.app-tabs.summary.service-instances-panel.title</span>
-    <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})"
-       ng-hide="applicationSummaryCtrl.hideManageServices">
-      <i class="material-icons">arrow_forward</i>
-      <span translate>app.app-info.app-tabs.summary.service-instances-panel.manage-button</span>
-    </a>
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-body"
-      ng-if="!appCtrl.model.application.summary.services.length" translate>
-      app.app-info.app-tabs.summary.service-instances-panel.none
-    </div>
-    <table class="table table-actionable"
-      ng-if="appCtrl.model.application.summary.services.length">
-      <thead>
-        <tr>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.name-label</th>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.service-label</th>
-          <th translate>app.app-info.app-tabs.summary.service-instances-panel.plan-label</th>
-          <!--
-          <th translate>ENV.VARIABLES</th>
-          -->
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="service in appCtrl.model.application.summary.services">
-          <td>{{ service.name }}</td>
-          <td>{{ service.service_plan.service.label }}</td>
-          <td>{{ service.service_plan.name }}</td>
-        </tr>
       </tbody>
     </table>
   </div>

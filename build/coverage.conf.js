@@ -20,8 +20,6 @@
   exports.config = protractorConfig.config;
   var onPrepare = exports.config.onPrepare;
   exports.config.plugins = [{path: path.join(__dirname, 'waitPlugin.js')}];
-  exports.config.params.port = 4000;
-
   exports.config.onPrepare = function () {
     onPrepare();
 

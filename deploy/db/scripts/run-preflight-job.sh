@@ -19,4 +19,18 @@ if [ ! -e /$ENCRYPTION_KEY_VOLUME/$ENCRYPTION_KEY_FILENAME ]; then
   echo "-- Done."
 fi
 
+# Step 3 - Write out or generate SSL certificate data
+if [ "${CONSOLE_CERT:-not-set}" = "not-set" -a "${CONSOLE_CERT_KEY:-not-set}" = "not-set" ]; then
+  echo "CONSOLE_CERT and CONSOLE_CERT_KEY not set, generating..."
+  export CERTS_PATH=/$ENCRYPTION_KEY_VOLUME
+  export DEV_CERTS_DOMAIN=console
+  /generate_cert.sh
+  echo "Certificates generated."
+else
+  echo "CONSOLE_CERT and CONSOLE_CERT_KEY have been provided, writing them to the Encryption volume"
+  echo "$CONSOLE_CERT" > /$ENCRYPTION_KEY_VOLUME/console.crt 
+  echo "$CONSOLE_CERT_KEY" > /$ENCRYPTION_KEY_VOLUME/console.key 
+  echo "Wrote out certificates."
+fi
+
 exit 0

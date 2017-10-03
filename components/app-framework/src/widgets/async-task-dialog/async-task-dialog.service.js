@@ -141,6 +141,11 @@
     vm.hasErrorMessage = hasErrorMessage;
     vm.isFormInvalid = isFormInvalid;
 
+    // Ignore enter if event has been marked with preventDefault()
+    vm.canUseEnter = function (ev) {
+      return !ev.isDefaultPrevented();
+    };
+
     /**
      * @name invokeAction
      * @description invokes the asyn task

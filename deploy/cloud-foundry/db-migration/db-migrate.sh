@@ -17,11 +17,7 @@ export STRATOS_DB_ENV="$STRATOS_TEMP/db.env"
 node ${DB_MIGRATE_DIR}/parse_db_environment.js $STRATOS_DB_ENV
 source $STRATOS_DB_ENV
 
-cd $DEPLOY_DIR
-case $DB_TYPE in
-"postgresql")
-    echo "Migrating postgresql instance on $DB_HOST"
-    $GOBIN/goose -env cf_postgres up
+function handleGooseResult {
     if [ $? -eq 0 ]; then
         while true; do
             echo "Database successfully migrated. Please restart the application via 'cf push -c \"null\"'";
@@ -30,6 +26,19 @@ case $DB_TYPE in
     else
         echo Database migration failed
     fi
+}
+
+cd $DEPLOY_DIR
+case $DB_TYPE in
+"postgresql")
+    echo "Migrating postgresql instance on $DB_HOST"
+    $GOBIN/goose -env cf_postgres up
+    handleGooseResult
+    ;;
+"mysql")
+    echo "Migrating mysql instance on $DB_HOST"
+    $GOBIN/goose -env cf_mysql up
+    handleGooseResult
     ;;
 *)
     echo Unknown DB type \'$DB_TYPE\'?

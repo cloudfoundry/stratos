@@ -19,19 +19,26 @@ The rest of the instruction assume that a BOSH lite environment is being used to
       --sha1 1396d7877204e630b9e77ae680f492d26607461d
     ```
 
-3. Build the Stratos UI BOSH release
+3. Create a symlink to the root of the repository in `deploy/stratos-ui-release/src/`
+
+    ```
+    $ cd deploy/stratos-ui-release/src
+    $ ln -s ../../../ stratos-ui
+    ```
+
+4. Build the Stratos UI BOSH release from `deploy/stratos-ui/release`
     ```
     $ bosh create-release
     ```
 
     If you have outstanding changes locally add the `--force` flag.
 
-4. After a successful build, upload the release to your director.
+5. After a successful build, upload the release to your director.
     ```
     $ bosh -e vbox upload-release -d stratos-ui
     ```
 
-5. Deploy the release
+6. Deploy the release
 
     A sample bosh-lite deployment manifest has been provided in `bosh-lite/deployment.yaml`. The following will use that command to deploy the Console.
 
@@ -76,7 +83,7 @@ The rest of the instruction assume that a BOSH lite environment is being used to
     $ bosh -e vbox -d stratos-ui deploy bosh-lite/deployment.yml
     ```
 
-6. List deployment
+7. List deployment
 
     List deployment to get the IP address of the frontend to access the Console. In the following example to access the Console the address is `https://10.0.16.4`.
 

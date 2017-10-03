@@ -53,7 +53,7 @@
     });
 
     it('Should Walk through the tabs', function () {
-      var names = ['Summary', 'Log Stream', 'Services', 'Variables', 'Events', 'SSH'];
+      var names = ['Summary', 'Log Stream', 'Service Instances', 'Variables', 'Events', 'SSH', 'Service Catalog'];
       var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : undefined;
       if (cfFromConfig && cfFromConfig.supportsVersions) {
         names.push('Versions');
@@ -154,8 +154,10 @@
             });
             helpers.loadApp(true);
             navbar.goToView('endpoint.clusters');
-            orgsAndSpaces.goToOrg('e2e');
-            orgsAndSpaces.goToSpace('e2e');
+
+            var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
+            orgsAndSpaces.goToOrg(cfFromConfig.testOrgName || 'e2e');
+            orgsAndSpaces.goToSpace(cfFromConfig.testSpaceName || 'e2e');
             // Go to Routes tab
             application.getTabs().get(2).click();
           });

@@ -57,7 +57,7 @@
     params: {
       protocol: 'https://',
       host: secrets.console.host || 'localhost',
-      port: secrets.console.port || '3100',
+      port: secrets.console.port || '4000',
       credentials: {
         admin: secrets.console.admin,
         user: secrets.console.user
@@ -75,8 +75,8 @@
             },
             admin: secrets.cloudFoundry.admin,
             user: secrets.cloudFoundry.user,
-            testOrgName: 'e2e',
-            testSpaceName: 'e2e',
+            testOrgName: secrets.cloudFoundry.org || 'e2e',
+            testSpaceName: secrets.cloudFoundry.space || 'e2e',
             supportsVersions: false
           }
         }
