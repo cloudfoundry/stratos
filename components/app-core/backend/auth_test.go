@@ -648,7 +648,7 @@ func TestVerifySessionExpired(t *testing.T) {
 		sessionValues["exp"] = time.Now().Add(-time.Hour).Unix()
 
 		mock.ExpectQuery(selectAnyFromTokens).
-			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}))
+			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}))
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Session has expired"))
 
@@ -657,8 +657,8 @@ func TestVerifySessionExpired(t *testing.T) {
 		}
 
 		mock.ExpectQuery(selectAnyFromTokens).
-			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
+			WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"], false))
 		err := pp.verifySession(ctx)
 
 		Convey("Should fail to verify session", func() {
