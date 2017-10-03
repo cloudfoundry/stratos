@@ -16,7 +16,7 @@ image_resource:
 run:
   path: sh
   args:
-    - -exc
+    - -xc
     - |
       mkdir ~/.kube
       wget ${CAASP_KUBE_CONFIG_URL} -O ~/.kube/config
@@ -31,6 +31,13 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml-helm-nightly console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-helm-nightly console/Chart.yaml
       helm dep build console
+
+      helm status console-nightly
+      CONSOLE_NIGHTLY_DEPLOYED=$?
+      if [ "$CONSOLE_NIGHTLY_DEPLOYED" = "1" ]; then
+        helm delete console-nightly --purge
+      fi
+      
       helm install console --set noShared=true --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
       sleep 120
 
@@ -58,7 +65,7 @@ run:
       echo "Console IP: ${UI_EXT_IP} and port is ${UI_EXT_PORT}"
 
       # Run E2E tests
-      cd stratos-ui
+      cd ${STRATOS_UI}
       npm install
       export PATH=${PWD}/node_modules/.bin:$PATH
       bower install --allow-root --force
