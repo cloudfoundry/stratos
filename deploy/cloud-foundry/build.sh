@@ -58,3 +58,6 @@ popd
 # Clean up build folders
 rm -rf ./dist
 rm -rf ./outputs
+
+# Don't need the source code after build
+rm -rf ./components
