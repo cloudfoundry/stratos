@@ -7,7 +7,7 @@ As described in the standard `cf push` instructions [here]("../README.md") the c
 
 1. Create a Service Instance for the Console Database
 
-    > **NOTE** The console supports postgresql and mysql DBs. Your service instance must be tagged with either `stratos_postgresql` for postrgresql or `stratos_mysql` for mysql.
+    > **NOTE** The console supports postgresql and mysql DBs. Your service instance must be tagged with either `stratos_postgresql` for postgresql or `stratos_mysql` for mysql.
 
     Use `cf create-service` to create a service instance for the DB - for example for postgresql:
     ```
