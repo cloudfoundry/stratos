@@ -84,7 +84,7 @@ run:
           }
        },
         "console": {
-          "host": "${FRONTEND_IP}",
+          "host": "${UI_EXT_IP}",
           "port": "443",
           "admin": {
             "username": "${CONSOLE_ADMIN_USER}",
