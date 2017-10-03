@@ -31,8 +31,6 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml-helm-nightly console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-helm-nightly console/Chart.yaml
       helm dep build console
-      helm dep update
-
       helm install console --set noShared=true --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
       sleep 120
 
