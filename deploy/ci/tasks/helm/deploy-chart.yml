@@ -34,7 +34,7 @@ run:
 
       helm status console-nightly
       CONSOLE_NIGHTLY_DEPLOYED=$?
-      if [ "$CONSOLE_NIGHTLY_DEPLOYED" = "1" ]; then
+      if [ "$CONSOLE_NIGHTLY_DEPLOYED" = "0" ]; then
         helm delete console-nightly --purge
       fi
       
@@ -85,7 +85,7 @@ run:
        },
         "console": {
           "host": "${UI_EXT_IP}",
-          "port": "443",
+          "port": "${UI_EXT_PORT}",
           "admin": {
             "username": "${CONSOLE_ADMIN_USER}",
             "password": "${CONSOLE_ADMIN_PASSWORD}"
@@ -109,7 +109,7 @@ run:
       cat build/secrets.json
       export DBUS_SESSION_BUS_ADDRESS=/dev/null
       npm run update-webdriver
-      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${UI_EXT_IP} --params.port=443
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${UI_EXT_IP} --params.port=${UI_EXT_PORT}
       E2E_EXIT_CODE=$?
 
 
