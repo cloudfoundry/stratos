@@ -21,7 +21,8 @@
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
-
+  var uaa = browser.params.uaa;
+  var runSetupModeTests = browser.params.runSetupModeTests;
   module.exports = {
 
     getHost: getHost,
@@ -30,6 +31,7 @@
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
+    getUaaConfig: getUaaConfig,
 
     newBrowser: newBrowser,
     loadApp: loadApp,
@@ -68,7 +70,11 @@
 
     scrollIntoView: scrollIntoView,
 
-    waitForElementAndClick: waitForElementAndClick
+    waitForElementAndClick: waitForElementAndClick,
+
+    isSetupMode: isSetupMode,
+    getRunSetupModeTests : getRunSetupModeTests
+
   };
 
   function getHost() {
@@ -93,6 +99,10 @@
 
   function getPassword() {
     return password;
+  }
+
+  function getUaaConfig() {
+    return uaa;
   }
 
   function newBrowser() {
@@ -342,6 +352,27 @@
           }
         });
     });
+  }
+
+  /**
+   * @function isSetupMode
+   * @description Check if console is in setup mode
+   * @returns {Promise} A promise
+   */
+  function isSetupMode() {
+    return new Promise(function (resolve, reject) {
+      req.post(getHost() + '/pp/v1/auth/login/uaa', options)
+        .on('error', reject)
+        .on('response', function (response) {
+          if (response.statusCode === 503) {
+            resolve();
+          }
+        });
+    });
+  }
+
+  function getRunSetupModeTests() {
+    return runSetupModeTests;
   }
 
   /**
