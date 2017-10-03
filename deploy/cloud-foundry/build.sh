@@ -2,6 +2,9 @@
 
 set -e
 
+BUILD_DIR=$1
+CACHE_DIR=$2
+
 echo "Preparing application folder for Cloud Foundry deployment"
 
 CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -42,7 +45,8 @@ chmod +x portal-proxy
 
 # Get the goose db migration tool
 export DB_MIGRATE_DIR="$CF_DIR/db-migration"
-export GOPATH=${DB_MIGRATE_DIR}/goose
+export GOPATH=${CACHE_DIR}/goose
+mkdir -p $GOPATH
 export GOBIN=${DB_MIGRATE_DIR}/bin
 go get bitbucket.org/liamstask/goose/cmd/goose
 
@@ -52,5 +56,5 @@ go build -o parseVcapServices
 popd
 
 # Clean up build folders
-rm -rf ${TOP_LEVEL}/dist
-rm -rf ${TOP_LEVEL}/outputs
+rm -rf ./dist
+rm -rf ./outputs
