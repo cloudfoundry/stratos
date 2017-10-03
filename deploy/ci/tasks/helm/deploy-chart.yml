@@ -116,4 +116,7 @@ run:
       # Purge deployment
       helm delete console-nightly --purge
 
+      # Due to a Helm bug, it currently does not remove statefulsets
+      kubectl delete namespace nightly-test
+
       exit $EXIT_CODE
