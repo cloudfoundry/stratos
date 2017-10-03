@@ -28,8 +28,7 @@ cd ${TOP_LEVEL}
 npm install --only=prod
 ${BOWER_PATH}/bower install
 
-# Fetch Glide dependencies, since this is I/O intensive
-# it won't interfere with UI build
+# Fetch Glide dependencies
 npm run cf-get-backend-deps
 
 npm run build
@@ -42,18 +41,12 @@ npm run build-cf
 chmod +x portal-proxy
 
 # Get the goose db migration tool
-
 export DB_MIGRATE_DIR="$CF_DIR/db-migration"
-
 export GOPATH=${DB_MIGRATE_DIR}/goose
 export GOBIN=${DB_MIGRATE_DIR}/bin
-
 go get bitbucket.org/liamstask/goose/cmd/goose
-
-ls -al ${DB_MIGRATE_DIR}
-ls -al ${DB_MIGRATE_DIR}/bin
 
 # Build the migration helper
 pushd ${DB_MIGRATE_DIR}
-go build -o ParseVcapServices
+go build -o parseVcapServices
 popd
