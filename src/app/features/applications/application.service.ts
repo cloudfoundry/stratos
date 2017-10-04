@@ -13,36 +13,16 @@ import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions
 import { GetApplication, GetApplicationSummary } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
-import {
-  ApplicationEnvVars,
-  ApplicationEnvVarsService,
-  EnvVarStratosProject,
-} from './application/summary-tab/application-env-vars.service';
+import { ApplicationEnvVarsService } from './application/summary-tab/application-env-vars.service';
 import { ApplicationStateService } from './application/summary-tab/application-state/application-state.service';
 
 export interface AppData {
-  fetching: boolean;
   app: EntityInfo;
   space: EntityInfo;
   organisation: EntityInfo;
-  appSummary: any;
   stack: EntityInfo;
   cf: any;
-  appState: any;
-  appEnvVars: ApplicationEnvVars;
-  appEnvVarsStratosProject?: EnvVarStratosProject;
 }
-
-// export interface AppMetadataRequestState {
-//   fetching: boolean;
-//   updating: boolean;
-//   creating: boolean;
-//   error: boolean;
-//   response: any;
-//   message: string;
-// }
-
-
 
 @Injectable()
 export class ApplicationService {
@@ -53,106 +33,103 @@ export class ApplicationService {
     console.log('INIT SERVICE, MORE THAN ONE OF THESE? TROUBLE!');
   }
 
-  public isFetching$: Observable<boolean>;
+  public isFetchingApp$: Observable<boolean>;
+  public isFetchingAll$: Observable<boolean>;
+
   public application$: Observable<AppData>;
-  private appStats$;
+  public applicationEnvVars$: Observable<any>;
+  public applicationStats$: Observable<any>;
+  public applicationSummary$: Observable<any>;
+
+  private completeRequest(value, requestInfo: { fetching: boolean }) {
+    return requestInfo && !requestInfo.fetching && value;
+  }
 
   SetApplication(cfId, id) {
 
-    //FIXME: THIS DOES NOT SPAM
-    const applicationStats$ = getAppMetadataObservable(
-      this.store,
-      id,
-      new GetAppMetadataAction(id, cfId, AppMetadataProperties.INSTANCES as AppMetadataType)
-    ).filter(({ metadata, metadataRequestState }) => {
-      return metadata && !metadataRequestState.fetching;
-    }).flatMap(({ metadata, metadataRequestState }) => {
-      return Observable.of(metadata);
-    });
-    // .subscribe(something => {
-    //   console.log(something);
-    // });
-
-    const applicationEnvVars$ = getAppMetadataObservable(
-      this.store,
-      id,
-      new GetAppMetadataAction(id, cfId, AppMetadataProperties.ENV_VARS as AppMetadataType)
-    ).filter(({ metadata, metadataRequestState }) => {
-      return metadata && !metadataRequestState.fetching;
-    }).flatMap(({ metadata, metadataRequestState }) => {
-      return Observable.of(metadata);
-    });
-
-
-    const application$ = getEntityObservable(
+    // First set up all the base observables
+    const app$ = getEntityObservable(
       this.store,
       ApplicationSchema.key,
       ApplicationSchema,
       id,
       new GetApplication(id, cfId)
-    )
-      .filter(({ entity, entityRequestInfo }) => {
-        return entity && entity.entity && !entityRequestInfo.fetching;
-      })
-      .flatMap(app => {
-        if (app.entity.entity.state === 'STARTED' && !this.appStats$) {
-          //FIXME: THIS SPAMS
-          // this.appStats$ = getAppMetadataObservable(
-          //   this.store,
-          //   id,
-          //   // TODO: RC 'instances' ok but AppMetadataProperties.INSTANCES not
-          //   new GetAppMetadataAction(id, cfId, 'instances')
-          // ).filter(({ metadata, metadataRequestState }) => {
-          //   return metadata && !metadataRequestState.fetching;
-          // })
-          //   .flatMap(({ metadata, metadataRequestState }) => {
-          //     return Observable.of(metadata);
-          //   });
-        }
+    );
 
-        return Observable.combineLatest(Observable.of(app), this.appStats$ || Observable.of({}));
-      });
-
-    const applicationSummary$ = getEntityObservable(
+    const appSummary$ = getEntityObservable(
       this.store,
       ApplicationSummarySchema.key,
       ApplicationSummarySchema,
       id,
       new GetApplicationSummary(id, cfId)
-    ).filter(({ entity, entityRequestInfo }) => {
-      return entity && entity.entity && !entityRequestInfo.fetching;
-    });
+    );
 
-    this.application$ = application$
+    const appStats$ = getAppMetadataObservable(
+      this.store,
+      id,
+      new GetAppMetadataAction(id, cfId, AppMetadataProperties.INSTANCES as AppMetadataType)
+    );
+
+    const appEnvVars$ = getAppMetadataObservable(
+      this.store,
+      id,
+      new GetAppMetadataAction(id, cfId, AppMetadataProperties.ENV_VARS as AppMetadataType)
+    );
+
+    const appStatsGated$ = app$
+      .first(app => {
+        return app && app.entity && app.entity.entity && app.entity.entity.state === 'STARTED';
+      })
+      // See: https://github.com/ReactiveX/rxjs/issues/1759 for why we have this delay
+      .delay(1)
+      .mergeMap(app => {
+        return appStats$;
+      });
+
+    // Assign/Amalgamate them to public properties (with mangling if required)
+
+    this.application$ = app$
       .combineLatest(
-      applicationSummary$,
-      applicationStats$,
-      applicationEnvVars$,
       this.store.select(cnsisEntitySelector),
-    ).map(([appDetails, appSummary, applicationStats, applicationEnvVars, cnsis]: [any, any, any, any, any]) => {
-      // AppInstanceStats
-      // [app, appStats]
-      const app = appDetails[0];
-      const appStats = applicationStats || appDetails[1];
+    ).filter(([{ entity, entityRequestInfo }, cnsis]: [any, any]) => {
+      return this.completeRequest(entity, entityRequestInfo) && cnsis;
+    }).map(([{ entity, entityRequestInfo }, cnsis]: [any, any]) => {
       return {
-        fetching: app.entityRequestInfo.fetching && appSummary.entityRequestInfo.fetching,
-        app: app,
-        space: app.entity.entity.space,
-        organisation: app.entity.entity.space.entity.organization,
-        appSummary: appSummary,
-        stack: app.entity.entity.stack,
+        app: entity,
+        space: entity.entity.space,
+        organisation: entity.entity.space.entity.organization,
+        stack: entity.entity.stack,
         cf: cnsis.find((CNSIModel) => {
-          return CNSIModel.guid === app.entity.entity.cfGuid;
+          return CNSIModel.guid === entity.entity.cfGuid;
         }),
-        appState: this.appStateService.Get(app.entity.entity, appStats),
-        appEnvVars: applicationEnvVars,
-        appEnvVarsStratosProject: this.appEnvVarsService.FetchStratosProject(applicationEnvVars),
       };
     });
 
-    this.isFetching$ = this.application$.mergeMap(({ fetching }) => {
-      return Observable.of(fetching);
+    this.applicationStats$ = app$.combineLatest(appStatsGated$)
+      .filter(([{ entity, entityRequestInfo }, { metadata, metadataRequestState }]) => {
+        return this.completeRequest(entity, entityRequestInfo) &&
+          this.completeRequest(metadata, metadataRequestState);
+      })
+      .map(([{ entity, entityRequestInfo }, { metadata, metadataRequestState }]) => {
+        return this.appStateService.Get(entity.entity, metadata);
+      });
+
+    this.applicationEnvVars$ = appEnvVars$.map(applicationEnvVars => {
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
+
+    this.applicationSummary$ = appSummary$
+      .filter(appSummary => {
+        return this.completeRequest(appSummary.entity, appSummary.entityRequestInfo);
+      })
+      .map(appSummary => appSummary.entity);
+
+    this.isFetchingApp$ = app$.map(({ entity, entityRequestInfo }) => {
+      return !this.completeRequest(entity, entityRequestInfo);
+    });
+    // this.isFetchingAll$ = app$.combineLatest(app$, appSummary$, appEnvVars$)  => {
+    //   return !entityRequestInfo || entityRequestInfo.fetching;
+    // });
 
   }
 

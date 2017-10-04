@@ -110,6 +110,8 @@ function getMetadataById(appId: string) {
   };
 }
 
+
+
 export const getAppMetadataObservable = (
   store: Store<AppState>,
   appId: string,
@@ -120,14 +122,10 @@ export const getAppMetadataObservable = (
     store.select(selectMetadata(action.metadataType, appId)),
     store.select(selectMetadataRequest(action.metadataType, appId))
   )
-    // FIXME: This is firing off a LOT before we have a chance to update metadataRequestState.fetching
     .mergeMap(([metadata, metadataRequestState]: [any, AppMetadataRequestState]) => {
-      // console.log('getAppMetadataObservable: mergemap: start');
       if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
         store.dispatch(action);
         dispatched = true;
-        // console.log('getAppMetadataObservable: DISPATCHING: metadata: ', metadata);
-        // console.log('getAppMetadataObservable: DISPATCHING: metadataRequestState: ', metadataRequestState);
       }
       return Observable.of({
         metadata,

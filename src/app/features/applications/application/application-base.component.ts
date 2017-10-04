@@ -1,9 +1,9 @@
-import { Subscription } from 'rxjs/Rx';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Rx';
 
 import { ApplicationService } from '../application.service';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-application-base',
@@ -33,9 +33,9 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
       this.sub.push(this.applicationService.application$.subscribe(({ app }) => {
-        this.application = app.entity.entity;
+        this.application = app.entity;
       }));
-      this.isFetching$ = this.applicationService.isFetching$;
+      this.isFetching$ = this.applicationService.isFetchingApp$;
     }));
   }
 

@@ -1,11 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Subscription } from 'rxjs/Subscription';
-
-import { ApplicationService, AppData } from '../../application.service';
-import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-import { Observable } from 'rxjs/Observable';
+import { ApplicationService } from '../../application.service';
 
 @Component({
   selector: 'app-summary-tab',
@@ -16,10 +12,9 @@ export class SummaryTabComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
-  appData$: Observable<AppData>;
+  appService = this.applicationService;
 
   ngOnInit() {
-    this.appData$ = this.applicationService.application$;
   }
 
 }
