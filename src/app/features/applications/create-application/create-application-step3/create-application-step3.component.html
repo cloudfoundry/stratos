@@ -6,6 +6,6 @@
     </md-option>
   </md-select>
   <md-form-field>
-    <input [(ngModel)]="hostName" mdInput placeholder="Host" name="hostName">
+    <input [disabled]="!form.controls['domain']?.value" [(ngModel)]="hostName" mdInput placeholder="Host" name="hostName">
   </md-form-field>
 </form>

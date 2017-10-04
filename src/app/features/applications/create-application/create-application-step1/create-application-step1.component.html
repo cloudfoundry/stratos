@@ -1,6 +1,6 @@
 <b>Select a Cloud Foundry instance, organization and space for the app.</b>
 <form #cfForm="ngForm">
-  <md-select #cfSelect="ngModel" [ngModel]="selectedCF" required placeholder="Cloud Foundary" name="cf">
+  <md-select #cfSelect="ngModel" [ngModel]="selectedCF" required placeholder="Cloud Foundry" name="cf">
     <md-option *ngFor="let cf of cfList$ | async" [value]="cf">
       <span>{{ cf.name }}</span>
     </md-option>

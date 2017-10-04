@@ -38,3 +38,24 @@ export class CreateRoute implements APIAction {
     options: RequestOptions;
 }
 
+
+export class CheckRouteExists implements APIAction {
+    constructor(public guid: string, public cnis: string, route: NewRoute) {
+        this.options = new RequestOptions();
+        this.options.url = 'routes';
+        this.options.method = 'post';
+        this.options.body = {
+            generate_port: true,
+            ...route
+        };
+    }
+    actions = [
+        CREATE_ROUTE,
+        CREATE_ROUTE_SUCCESS,
+        CREATE_ROUTE_ERROR
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [RouteSchema];
+    entityKey = RouteSchema.key;
+    options: RequestOptions;
+}
