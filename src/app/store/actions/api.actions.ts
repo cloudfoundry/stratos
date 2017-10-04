@@ -96,26 +96,21 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, any, EntityRequestState]) => {
+    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-      const returnData = {
+    }).filter(([entities, entity, entityRequestInfo]) => {
+      return (entity && entity.entity) || !!entityRequestInfo;
+    })
+    .map(([entities, entity, entityRequestInfo]) => {
+      return {
         entityRequestInfo,
-        entity
+        entity: entity ? {
+          entity: denormalize(entity, schema, entities).entity,
+          metadata: entity.metadata
+        } : {}
       };
-      return Observable.of({
-        entityRequestInfo,
-        entity,
-        entities
-      });
-    }).filter(({ entityRequestInfo, entity }) => {
-      return !!entityRequestInfo;
-    }).mergeMap(({ entities, entity, entityRequestInfo }) => {
-      return Observable.of({
-        entityRequestInfo,
-        entity: entity ? denormalize(entity, schema, entities) : {}
-      });
     });
 };
 
