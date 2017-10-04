@@ -147,8 +147,6 @@ export function getEntityType(type: string) {
 }
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
-  console.log(entities[guid]);
-  console.log(entities, guid);
   return entities[guid];
 };
 

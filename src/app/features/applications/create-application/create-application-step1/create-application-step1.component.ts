@@ -1,6 +1,5 @@
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MdSelect } from '@angular/material';
+import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
@@ -17,7 +16,7 @@ import { getCurrentPage } from '../../../../store/reducers/pagination.reducer';
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  constructor(private store: Store<AppState>, private fb: FormBuilder) {
+  constructor(private store: Store<AppState>) {
   }
 
   paginationKey = 'createApplication';
@@ -26,97 +25,97 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   cfValid$: Observable<boolean>;
 
   @ViewChild('orgSelect')
-  orgSelect: MdSelect;
+  orgSelect: NgModel;
 
   @ViewChild('cfSelect')
-  cfSelect: MdSelect;
+  cfSelect: NgModel;
 
   @ViewChild('spaceSelect')
-  spaceSelect: MdSelect;
+  spaceSelect: NgModel;
 
-  cfForm: FormGroup;
+  @ViewChild('cfForm')
+  cfForm: NgForm;
 
   validate: Observable<boolean>;
 
   currentOrg: any;
 
-  cfDetails: {
-    cloudFoundry: '',
-    org: '',
-    space: ''
-  };
+  cfList$ = this.store.select(registeredCnsisEntitySelector).first();
+
+  private getData$ = Observable.combineLatest(
+    getCurrentPage({
+      entityType: OrganizationSchema.key,
+      paginationKey: this.paginationKey,
+      store: this.store,
+      action: new GetAllOrganizations(this.paginationKey),
+      schema: [OrganizationSchema]
+    }).filter(orgList => {
+      return !orgList.paginationEntity.fetching;
+    }).first(),
+    this.cfList$
+  );
+
+  orgList$: Observable<any>;
+
+  spaceList$: Observable<any>;
+
+  selectedCF: any;
+
+  selectedOrg: any;
+
+  selectedSpace: any;
 
   onNext = () => {
-    this.store.dispatch(new SetCFDetails(this.cfDetails));
+    this.store.dispatch(new SetCFDetails({
+      cloudFoundry: this.cfSelect.value,
+      org: this.orgSelect.value,
+      space: this.spaceSelect.value
+    }));
     return Observable.of({ success: true });
   }
 
   ngOnInit() {
-    this.data$ = this.getCFData();
+    this.orgList$ = Observable.combineLatest(
+      this.cfSelect.valueChanges.startWith(''),
+      this.getData$
+    )
+      .do(() => this.selectedOrg = null)
+      .map(([selectedCF, data]) => {
+        this.orgSelect.viewModel = '';
+        const [orgList, cfList] = data;
+        if (selectedCF) {
+          if (orgList.data) {
+            return orgList.data
+              .map(org => org.entity)
+              .filter(org => org.cfGuid === selectedCF.guid);
+          }
+        }
+        return [];
+      });
+
+    this.spaceList$ = Observable.combineLatest(
+      this.orgSelect.valueChanges.startWith(''),
+      this.getData$
+    )
+      .do(() => this.selectedSpace = null)
+      .map(([selectedOrg, data]) => {
+        const [orgList, cfList] = data;
+        if (selectedOrg) {
+          return selectedOrg.spaces.map(space => {
+            space.entity.guid = space.metadata.guid;
+            return space.entity;
+          });
+        }
+        return [];
+      });
   }
 
   ngAfterContentInit() {
-    this.cfForm = this.fb.group({
-      cf: [[], [Validators.required]],
-      org: [[], [Validators.required]],
-      space: [[], [Validators.required]]
-    });
 
     this.validate = this.cfForm.statusChanges
       .map(() => {
         return this.cfForm.valid;
       });
 
-
   }
-
-  getCFData(): Observable<{
-    cfList: any,
-    orgList: any,
-    spaceList: any
-  }> {
-    return Observable.combineLatest(
-      getCurrentPage({
-        entityType: OrganizationSchema.key,
-        paginationKey: this.paginationKey,
-        store: this.store,
-        action: new GetAllOrganizations(this.paginationKey),
-        schema: [OrganizationSchema]
-      }),
-      this.store.select(registeredCnsisEntitySelector),
-      this.cfSelect.valueChange.startWith(''),
-      this.orgSelect.valueChange.startWith(''),
-      this.spaceSelect.valueChange.startWith('')
-    )
-      .filter(([orgList, cfList]) => {
-        return !!cfList;
-      })
-      .map(([orgList, cfList, selectedCF, selectedOrg, selectedSpace]) => {
-        const data = {
-          cfList,
-          orgList: null,
-          spaceList: null
-        };
-        if (selectedCF) {
-          if (orgList.data) {
-            data.orgList = orgList.data
-              .map(org => org.entity)
-              .filter(org => org.cfGuid === selectedCF.guid);
-          }
-        }
-        data.spaceList = selectedOrg ? selectedOrg.spaces.map(space => {
-          space.entity.guid = space.metadata.guid;
-          return space.entity;
-        }) : [];
-        if (selectedCF && selectedOrg && selectedSpace) {
-          this.cfDetails = {
-            cloudFoundry: selectedCF,
-            org: selectedOrg,
-            space: selectedSpace
-          };
-        }
-        return data;
-      });
-  }
-
 }

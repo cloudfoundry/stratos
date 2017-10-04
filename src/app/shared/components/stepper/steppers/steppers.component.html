@@ -20,7 +20,7 @@
         <button color="accent" md-button md-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
         <div>
           <button color="warn" md-button [routerLink]="cancel" *ngIf="cancel">Cancel</button>
-          <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!this.steps[currentIndex]?.valid">{{ this.getNextButtonText(currentIndex + 1) }}</button>
+          <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
         </div>
       </div>
     </div>

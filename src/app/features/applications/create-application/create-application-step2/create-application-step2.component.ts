@@ -4,7 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { NewAppCFDetails, SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
+import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 
@@ -18,16 +18,12 @@ export class CreateApplicationStep2Component implements OnInit {
   constructor(private store: Store<AppState>, private fb: FormBuilder) {
   }
 
-  nameValid$: Observable<boolean>;
-
   @ViewChild('form')
   form: NgForm;
 
   validate: Observable<boolean>;
 
   checkingNameState$: Observable<string>;
-
-  cfDetails: NewAppCFDetails;
 
   name: string;
 
@@ -48,10 +44,6 @@ export class CreateApplicationStep2Component implements OnInit {
       }
       return state.nameCheck.available ? 'done' : 'error';
     });
-    this.onNext = () => {
-      this.store.dispatch(new SetNewAppName(this.name));
-      return Observable.of({ success: true });
-    };
   }
 
 }

@@ -42,6 +42,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   goNext() {
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
+      step.busy = true;
       step.onNext()
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed' }))
@@ -98,7 +99,11 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   canGoNext(index) {
-    if (!this.steps[index] || !this.steps[index].valid) {
+    if (
+      !this.steps[index] ||
+      !this.steps[index].valid ||
+      this.steps[index].busy
+    ) {
       return false;
     }
     return true;
