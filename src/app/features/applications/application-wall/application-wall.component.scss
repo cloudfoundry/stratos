@@ -17,3 +17,10 @@
     padding-bottom: 10px;
   }
 }
+
+.row-filler {
+  opacity: 0;
+  height: 1px; // flex: 1;
+  padding: 0;
+  margin: 0;
+}
