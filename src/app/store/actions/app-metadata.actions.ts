@@ -18,6 +18,11 @@ export const AppMetadataProperties = {
 };
 export type AppMetadataType = 'instances' | 'environmentVars';
 
+export interface AppMetadataInfo {
+  metadata: any;
+  metadataRequestState: AppMetadataRequestState;
+}
+
 export class GetAppMetadataAction implements Action {
   options: RequestOptions;
 
@@ -110,8 +115,6 @@ function getMetadataById(appId: string) {
   };
 }
 
-
-
 export const getAppMetadataObservable = (
   store: Store<AppState>,
   appId: string,
@@ -137,7 +140,6 @@ export const getAppMetadataObservable = (
     });
 };
 
-// TODO: RC Add type dependent on metadatatype
 const selectMetadata = (metadataType, appId): any => {
   return compose(
     getMetadataType<any>(metadataType),
@@ -147,7 +149,6 @@ const selectMetadata = (metadataType, appId): any => {
 };
 
 const selectMetadataRequest = (metadataType, appId): any => {
-  // TODO: RC fix type getAppAppMetadataRequestState
   return compose(
     getMetadataType<AppMetadataRequestState>(metadataType),
     getMetadataById(appId),

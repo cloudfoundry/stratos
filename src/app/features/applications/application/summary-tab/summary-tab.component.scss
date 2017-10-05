@@ -4,6 +4,8 @@
   $summary-card-spacing: 20px;
   flex-wrap: wrap;
   md-card {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-width: 300px;
     margin-top: $summary-card-spacing;
@@ -31,6 +33,9 @@
         height: 20px;
         line-height: 20px;
       }
+    }
+    md-card-content {
+      flex: 1;
     }
     md-card-content,
     md-card-content form {

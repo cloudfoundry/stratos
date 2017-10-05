@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-export interface AppState {
+export interface ApplicationStateData {
   label: string;
   indicator: string;
   actions: string;
@@ -160,7 +160,7 @@ export class ApplicationStateService {
 * @param {object} appInstances - the application instances metadata (from the app stats API call)
 * @returns {object} Object representing the state metadata for the application
 */
-  Get(summary: any, appInstances: any): AppState {
+  Get(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
     const wildcard = this.stateMetadata['?'];

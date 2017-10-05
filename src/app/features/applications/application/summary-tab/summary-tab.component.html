@@ -7,7 +7,7 @@
         </md-card-title>
         <div class="spacer"></div>
         <button *ngIf="isEditSummary" md-button>Save</button>
-        <md-slide-toggle name="edit" [(ngModel)]="isEditSummary">Edit</md-slide-toggle>
+        <md-slide-toggle name="edit" [disabled]="(cardOneFetching$ | async)" [(ngModel)]="isEditSummary">Edit</md-slide-toggle>
       </md-card-header>
       <md-card-content>
         <form #summaryForm="ngForm">
@@ -23,7 +23,7 @@
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'Composite State'">
-                <app-application-state [state]="(appService.applicationStats$ | async)"></app-application-state>
+                <app-application-state [state]="(appService.applicationState$ | async)"></app-application-state>
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
@@ -34,17 +34,17 @@
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'Instances'">
-                <md-slider mdInput [max]="(appService.applicationSummary$ | async)?.entity.instances" step="1" [disabled]="!isEditSummary"
-                  [ngModel]="(appService.applicationSummary$ | async)?.entity.running_instances" name="appInstances" min="0"
+                <md-slider mdInput [max]="(appService.appSummary$ | async)?.entity.entity?.instances" step="1" [disabled]="!isEditSummary"
+                  [ngModel]="(appService.appSummary$ | async)?.entity.entity?.running_instances" name="appInstances" min="0"
                   thumbLabel tickInterval="1"></md-slider>
-                {{(appService.applicationSummary$| async)?.entity.running_instances || 0}} / {{ (appService.applicationSummary$ | async)?.entity.instances
+                {{(appService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (appService.appSummary$ | async)?.entity.entity?.instances
                 }}
               </app-display-value>
             </md-list-item>
           </md-list>
           <md-list role='list' class='summary__cards__summary__right'>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(appService.applicationSummary$| async)?.entity.services?.length || '-'"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="(appService.appSummary$| async)?.entity.services?.length || '-'"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(appService.application$| async)?.app.entity.memory | mbToHumanSize">
@@ -66,6 +66,10 @@
           </md-list>
         </form>
       </md-card-content>
+      <md-card-footer>
+        <md-progress-bar *ngIf="(cardOneFetching$ | async)" [mode]="'indeterminate'" [color]="'primary'">
+        </md-progress-bar>
+      </md-card-footer>
     </md-card>
 
     <md-card>
@@ -107,21 +111,21 @@
           <md-list-item>
             <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
           </md-list-item>
-          <md-list-item *ngIf="(appService.applicationEnvVars$| async)?.deploySource">
-            <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationEnvVars$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
+          <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+            <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
           </md-list-item>
-          <md-list-item *ngIf="(appService.applicationEnvVars$| async)?.deploySource">
-            <span [ngSwitch]="(appService.applicationEnvVars$| async)?.deploySource.type">
+          <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+            <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
                 <app-display-value *ngSwitchCase="'giturl'" [label]="'Console Deploy Source'">
-                  <div mdTooltip="{{(appService.applicationEnvVars$| async)?.deploySource.branch + ' ' + ((appService.applicationEnvVars$| async)?.deploySource.commit | slice:0:8)}}"
+                  <div mdTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
                   [mdTooltipHideDelay]="1500">
-                    {{(appService.applicationEnvVars$| async)?.deploySource.url}}
+                    {{(appService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
                 </app-display-value>
                 <app-display-value *ngSwitchCase="'github'" [label]="'Console Deploy Source'">
-                    <a href="{{(appService.applicationEnvVars$| async)?.deploySource.url}}/commit/{{(appService.applicationEnvVars$| async)?.deploySource.commit}}"
+                    <a href="{{(appService.applicationStratProject$| async)?.deploySource.url}}/commit/{{(appService.applicationStratProject$| async)?.deploySource.commit}}"
                     rel="noopener noreferrer" target="_blank">
-                    {{(appService.applicationEnvVars$| async)?.deploySource.commit | slice:0:8}}
+                    {{(appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8}}
                   </a>
                 </app-display-value>
                 <app-display-value *ngSwitchCase="'filefolder'" [label]="'Console Deploy Source'" [value]="'Folder Upload'"></app-display-value>
@@ -130,8 +134,12 @@
           </md-list-item>
         </md-list>
       </md-card-content>
+      <md-card-footer>
+        <md-progress-bar *ngIf="(cardTwoFetching$ | async)" [mode]="'indeterminate'">
+        </md-progress-bar>
+      </md-card-footer>
     </md-card>
   </div>
-  <!-- <br><br>{{(appService.applicationSummary$ | async)?.entity | json}}
-  <br><br>{{(appService.applicationSummary$ | async)?.entity.instances | json}}
-  <br><br>{{(appService.applicationSummary$ | async)?.entity.running_instances | json}} -->
+  <!--<br><br>{{(appService.appSummary$ | async)?.entity.entity.instances | json}}
+  <br><br>{{(appService.appSummary$ | async)?.entity.entity.running_instances | json}} -->
+  <!-- <br><br>{{(appService.appSummary$ | async)? | json}} -->

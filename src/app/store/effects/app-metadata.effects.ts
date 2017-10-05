@@ -30,14 +30,12 @@ export class AppMetadataEffect {
 
   @Effect() appMetadataRequest$ = this.actions$.ofType<GetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
     .map(appMetadataAction => {
-      // console.log('effects: AppMetadataTypes.APP_METADATA');
       return new WrapperAppMetadataStart(appMetadataAction);
     });
 
   @Effect() appMetadataRequestStart$ = this.actions$.ofType<WrapperAppMetadataStart>(AppMetadataTypes.APP_METADATA_START)
     .withLatestFrom(this.store)
     .mergeMap(([{ appMetadataAction, type }, appState]) => {
-      // console.log('effects: AppMetadataTypes.APP_METADATA_START');
 
       const options = { ...appMetadataAction.options };
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${appMetadataAction.options.url}`;
@@ -46,17 +44,10 @@ export class AppMetadataEffect {
 
       return this.http.request(new Request(options))
         .mergeMap(response => {
-          const metadata = response.json();
-
-          // const newState = {
-          //     [appMetadataAction.guid]: {
-          //       [appMetadataAction.metadataType]: metadata
-          //     }
-          // };
 
           return Observable.of(
             new WrapperAppMetadataSuccess(
-              metadata,
+              response.json(),
               appMetadataAction
             )
           );

@@ -39,6 +39,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     }));
   }
 
+
   ngOnDestroy() {
     this.sub.forEach(subscription => subscription.unsubscribe);
   }

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { EntityInfo, getEntityObservable } from '../../store/actions/api.actions';
 import {
+  AppMetadataInfo,
   AppMetadataProperties,
   AppMetadataType,
   GetAppMetadataAction,
@@ -13,10 +14,14 @@ import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions
 import { GetApplication, GetApplicationSummary } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
-import { ApplicationEnvVarsService } from './application/summary-tab/application-env-vars.service';
-import { ApplicationStateService } from './application/summary-tab/application-state/application-state.service';
+import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+} from './application/summary-tab/application-state/application-state.service';
 
-export interface AppData {
+export interface ApplicationData {
+  fetching: boolean;
   app: EntityInfo;
   space: EntityInfo;
   organisation: EntityInfo;
@@ -29,17 +34,18 @@ export class ApplicationService {
 
   constructor(private store: Store<AppState>, private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsService) {
-    // TODO: RC OnDestroy sub.unsubscribe();?
-    console.log('INIT SERVICE, MORE THAN ONE OF THESE? TROUBLE!');
   }
 
-  public isFetchingApp$: Observable<boolean>;
-  public isFetchingAll$: Observable<boolean>;
+  isFetchingApp$: Observable<boolean>;
 
-  public application$: Observable<AppData>;
-  public applicationEnvVars$: Observable<any>;
-  public applicationStats$: Observable<any>;
-  public applicationSummary$: Observable<any>;
+  app$: Observable<EntityInfo>;
+  appSummary$: Observable<EntityInfo>;
+  appStatsGated$: Observable<AppMetadataInfo>;
+  appEnvVars$: Observable<AppMetadataInfo>;
+
+  application$: Observable<ApplicationData>;
+  applicationStratProject$: Observable<EnvVarStratosProject>;
+  applicationState$: Observable<ApplicationStateData>;
 
   private completeRequest(value, requestInfo: { fetching: boolean }) {
     return requestInfo && !requestInfo.fetching && value;
@@ -48,7 +54,7 @@ export class ApplicationService {
   SetApplication(cfId, id) {
 
     // First set up all the base observables
-    const app$ = getEntityObservable(
+    this.app$ = getEntityObservable(
       this.store,
       ApplicationSchema.key,
       ApplicationSchema,
@@ -56,7 +62,7 @@ export class ApplicationService {
       new GetApplication(id, cfId)
     );
 
-    const appSummary$ = getEntityObservable(
+    this.appSummary$ = getEntityObservable(
       this.store,
       ApplicationSummarySchema.key,
       ApplicationSummarySchema,
@@ -64,19 +70,20 @@ export class ApplicationService {
       new GetApplicationSummary(id, cfId)
     );
 
+    // Subscribing to this will make the stats call. It's better to subscrbibe to appStatsGated$
     const appStats$ = getAppMetadataObservable(
       this.store,
       id,
       new GetAppMetadataAction(id, cfId, AppMetadataProperties.INSTANCES as AppMetadataType)
     );
 
-    const appEnvVars$ = getAppMetadataObservable(
+    this.appEnvVars$ = getAppMetadataObservable(
       this.store,
       id,
       new GetAppMetadataAction(id, cfId, AppMetadataProperties.ENV_VARS as AppMetadataType)
     );
 
-    const appStatsGated$ = app$
+    this.appStatsGated$ = this.app$
       .first(app => {
         return app && app.entity && app.entity.entity && app.entity.entity.state === 'STARTED';
       })
@@ -88,13 +95,14 @@ export class ApplicationService {
 
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    this.application$ = app$
+    this.application$ = this.app$
       .combineLatest(
       this.store.select(cnsisEntitySelector),
     ).filter(([{ entity, entityRequestInfo }, cnsis]: [any, any]) => {
       return this.completeRequest(entity, entityRequestInfo) && cnsis;
-    }).map(([{ entity, entityRequestInfo }, cnsis]: [any, any]) => {
+    }).map(([{ entity, entityRequestInfo }, cnsis]: [any, any]): ApplicationData => {
       return {
+        fetching: entityRequestInfo.fetching,
         app: entity,
         space: entity.entity.space,
         organisation: entity.entity.space.entity.organization,
@@ -105,7 +113,7 @@ export class ApplicationService {
       };
     });
 
-    this.applicationStats$ = app$.combineLatest(appStatsGated$)
+    this.applicationState$ = this.app$.combineLatest(this.appStatsGated$)
       .filter(([{ entity, entityRequestInfo }, { metadata, metadataRequestState }]) => {
         return this.completeRequest(entity, entityRequestInfo) &&
           this.completeRequest(metadata, metadataRequestState);
@@ -114,27 +122,19 @@ export class ApplicationService {
         return this.appStateService.Get(entity.entity, metadata);
       });
 
-    this.applicationEnvVars$ = appEnvVars$.map(applicationEnvVars => {
+    this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
 
-    this.applicationSummary$ = appSummary$
-      .filter(appSummary => {
-        return this.completeRequest(appSummary.entity, appSummary.entityRequestInfo);
-      })
-      .map(appSummary => appSummary.entity);
 
-    this.isFetchingApp$ = app$.map(({ entity, entityRequestInfo }) => {
+    this.isFetchingApp$ = this.app$.map(({ entity, entityRequestInfo }) => {
       return !this.completeRequest(entity, entityRequestInfo);
     });
-    // this.isFetchingAll$ = app$.combineLatest(app$, appSummary$, appEnvVars$)  => {
-    //   return !entityRequestInfo || entityRequestInfo.fetching;
-    // });
 
   }
 
   UpdateApplication() {
-    // TODO: RC Force an update to catch remote changes
+    // TODO: RC Force an update to catch remote changes?
     console.log('NOT IMPLEMENTED');
   }
 

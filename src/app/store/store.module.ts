@@ -49,6 +49,7 @@ export const metaReducers = environment.production ? [] : [logger];
     StoreDevtoolsModule.instrument({
       maxAge: 25
     }),
+
     HttpModule,
     EffectsModule.forRoot([
       APIEffect,

@@ -4,7 +4,7 @@ import { mergeState } from './../helpers/reducer.helper';
 export interface AppMetadata {
   [key: string]: {
     instances: AppInstancesState;
-    environmentVars: any;
+    environmentVars: AppEnvVarsState;
   };
 }
 
@@ -36,6 +36,16 @@ export interface AppInstanceUsage {
   time: string;
 }
 
+export interface AppEnvVarsState {
+  application_env_json?: any;
+  environment_json?: {
+    STRATOS_PROJECT?: any;
+  };
+  running_env_json?: any;
+  staging_env_json?: any;
+  system_env_json?: any;
+}
+
 export const defaultMetadataState = {
 
 };
@@ -43,7 +53,6 @@ export const defaultMetadataState = {
 export function appMetadataReducer(state: AppMetadata = defaultMetadataState, action) {
   switch (action.type) {
     case AppMetadataTypes.APP_METADATA_SUCCESS:
-      // console.log('app metadata recuder: APP_METADATA_SUCCESS');
       return setAppMetadataState(state, action.metadata, action.appMetadataAction);
     default:
       return state;
