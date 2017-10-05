@@ -70,6 +70,14 @@ search-box {
       }
     }
   }
+
+  .search-box-busy {
+    padding: 0;
+    margin-bottom: $padding-base-vertical;
+    height: $line-height-computed;
+    line-height: $line-height-computed;
+    margin-top: $console-form-margin-top;    
+  }
 }
 
 .form-group-large {
