@@ -1,9 +1,9 @@
-import { paginationReducer } from '../../../store/reducers/pagination.reducer';
-import { entitiesReducer } from '../../../store/reducers/entity.reducer';
-import { StoreModule } from '@ngrx/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
+import { entitiesReducer } from '../../../store/reducers/entity.reducer';
+import { paginationReducer } from '../../../store/reducers/pagination.reducer';
 import { ApplicationBaseComponent } from './application-base.component';
 
 describe('ApplicationPageComponent', () => {
@@ -12,7 +12,7 @@ describe('ApplicationPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApplicationBaseComponent ],
+      declarations: [ApplicationBaseComponent],
       imports: [
         RouterTestingModule,
         StoreModule.forRoot({
@@ -21,7 +21,7 @@ describe('ApplicationPageComponent', () => {
         })
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

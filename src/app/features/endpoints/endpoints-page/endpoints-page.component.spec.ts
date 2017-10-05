@@ -1,9 +1,9 @@
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
-import { cnsisReducer } from '../../../store/reducers/cnsis.reducer';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MDAppModule } from './../../md/md.module';
 
+import { MDAppModule } from '../../../core/md.module';
+import { cnsisReducer } from '../../../store/reducers/cnsis.reducer';
 import { EndpointsPageComponent } from './endpoints-page.component';
 
 describe('EndpointsPageComponent', () => {
@@ -12,7 +12,7 @@ describe('EndpointsPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EndpointsPageComponent ],
+      declarations: [EndpointsPageComponent],
       imports: [
         RouterTestingModule,
         StoreModule.forRoot({
@@ -21,7 +21,7 @@ describe('EndpointsPageComponent', () => {
         MDAppModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

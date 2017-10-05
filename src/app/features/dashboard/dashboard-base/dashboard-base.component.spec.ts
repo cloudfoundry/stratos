@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { SideNavComponent } from './../../components/side-nav/side-nav.component';
-import { MDAppModule } from './../../md/md.module';
+import { MDAppModule } from '../../../core/md.module';
+import { SideNavComponent } from '../side-nav/side-nav.component';
 import { DashboardBaseComponent } from './dashboard-base.component';
 
 describe('DashboardBaseComponent', () => {

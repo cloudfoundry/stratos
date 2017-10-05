@@ -8,9 +8,9 @@ describe('StepperFormComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StepperFormComponent ]
+      declarations: [StepperFormComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

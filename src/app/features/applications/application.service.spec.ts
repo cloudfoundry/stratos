@@ -1,10 +1,12 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
+import { AppStoreModule } from '../../store/store.module';
 import { ApplicationService } from './application.service';
 
 describe('ApplicationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [AppStoreModule],
       providers: [ApplicationService]
     });
   });
