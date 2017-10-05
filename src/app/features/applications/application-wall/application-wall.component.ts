@@ -1,7 +1,7 @@
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs/Rx';
 
 import { getAPIResourceEntity } from '../../../store/actions/api.actions';
 import { ApplicationSchema, GetAllApplications } from '../../../store/actions/application.actions';
@@ -26,13 +26,15 @@ import { getCurrentPage } from './../../../store/reducers/pagination.reducer';
     )
   ]
 })
-export class ApplicationWallComponent implements OnInit {
+export class ApplicationWallComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>) { }
 
   applications = [];
   isFetching: Observable<boolean>;
   error: boolean;
+
+  wallSub: Subscription;
 
   ngOnInit() {
     const paginationKey = 'applicationWall';
@@ -47,7 +49,7 @@ export class ApplicationWallComponent implements OnInit {
       return Observable.of(paginationEntity.fetching);
     });
 
-    getObs$
+    this.wallSub = getObs$
       .delay(100)
       .subscribe(({ paginationEntity, data }) => {
         this.error = paginationEntity.error;
@@ -57,6 +59,10 @@ export class ApplicationWallComponent implements OnInit {
           }
         }
       });
+  }
+
+  ngOnDestroy() {
+    this.wallSub.unsubscribe();
   }
 
 }

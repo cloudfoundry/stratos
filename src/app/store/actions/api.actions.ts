@@ -37,6 +37,7 @@ export class APIAction implements Action {
   cnis?: string;
   // For single entity requests
   guid?: string;
+  updatingKey?: string;
 }
 
 export interface NormalizedResponse {
@@ -96,41 +97,36 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, any, EntityRequestState]) => {
+    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-      const returnData = {
+    }).filter(([entities, entity, entityRequestInfo]) => {
+      return (entity && entity.entity) || !!entityRequestInfo;
+    })
+    .map(([entities, entity, entityRequestInfo]) => {
+      return {
         entityRequestInfo,
-        entity
+        entity: entity ? {
+          entity: denormalize(entity, schema, entities).entity,
+          metadata: entity.metadata
+        } : {}
       };
-      return Observable.of({
-        entityRequestInfo,
-        entity,
-        entities
-      });
-    }).filter(({ entityRequestInfo, entity }) => {
-      return !!entityRequestInfo;
-    }).mergeMap(({ entities, entity, entityRequestInfo }) => {
-      return Observable.of({
-        entityRequestInfo,
-        entity: entity ? denormalize(entity, schema, entities) : {}
-      });
     });
 };
 
 export function selectEntity(type: string, guid: string) {
   return compose(
     getAPIResourceEntity,
-    getEntityById(guid),
+    getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
   );
 }
 
-export function selectEntityRequestInfo<T>(type: string, guid: string) {
+export function selectEntityRequestInfo(type: string, guid: string) {
   return compose(
-    getEntityById<T>(guid),
+    getEntityById<EntityRequestState>(guid),
     getEntityType(type),
     getAPIRequestInfoState,
   );

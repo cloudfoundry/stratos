@@ -2,12 +2,13 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, Response } from '@angular/http';
+import { Headers, Http, Request, RequestMethod, Response } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
+import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
     APIAction,
@@ -47,17 +48,27 @@ export class APIEffect {
 
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
+          const resData = response.json();
+          const cnsisErrors = this.getErrors(resData);
+          if (cnsisErrors.length) {
+            // We should consider not completely failing the whole if some cnsis return.
+            throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+          }
           const entities = this.getEntities(apiAction, response);
-          return Observable.of(
-            new WrapperAPIActionSuccess(
-              apiAction.actions[1],
-              entities,
-              apiAction
-            )
-          );
+          const actions = [];
+          actions.push(new WrapperAPIActionSuccess(
+            apiAction.actions[1],
+            entities,
+            apiAction
+          ));
+
+          if (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post) {
+            actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+          }
+          return actions;
         })
         .catch(err => {
-          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err, apiAction));
+          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.error, apiAction));
         });
     });
 
@@ -72,6 +83,18 @@ export class APIEffect {
         entity: { ...resource, cfGuid },
         metadata: { guid: resource.guid }
       };
+  }
+
+  getErrors(resData) {
+    return Object.keys(resData)
+      .map(guid => {
+        const cnsis = resData[guid];
+        cnsis.guid = guid;
+        return cnsis;
+      })
+      .filter(cnsis => {
+        return cnsis.error;
+      });
   }
 
   getEntities(apiAction: APIAction, response: Response): NormalizedResponse {
@@ -96,10 +119,6 @@ export class APIEffect {
 
   mergeData(entity, metadata, cfGuid) {
     return { ...entity, ...metadata, cfGuid };
-  }
-
-  getDataFromResponse(response: Response) {
-    response.json();
   }
 
   addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {

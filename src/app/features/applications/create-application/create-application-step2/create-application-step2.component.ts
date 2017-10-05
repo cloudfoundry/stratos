@@ -4,8 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { NewAppCFDetails, SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
+import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 
@@ -19,31 +18,32 @@ export class CreateApplicationStep2Component implements OnInit {
   constructor(private store: Store<AppState>, private fb: FormBuilder) {
   }
 
-  nameValid$: Observable<boolean>;
-
   @ViewChild('form')
   form: NgForm;
 
   validate: Observable<boolean>;
 
-  checkingName$: Observable<boolean>;
-
-  cfDetails: NewAppCFDetails;
-
-  onNext: StepOnNextFunction;
+  checkingNameState$: Observable<string>;
 
   name: string;
 
-  ngOnInit() {
-    this.validate = this.form.statusChanges.map(() => {
-      return this.form.valid;
-    }).startWith(this.form.valid);
+  onNext = () => {
+    this.store.dispatch(new SetNewAppName(this.name));
+    return Observable.of({ success: true });
+  }
 
-    this.checkingName$ = this.store.select(selectNewAppState).map(state => state.nameCheck.checking);
-    this.onNext = () => {
-      this.store.dispatch(new SetNewAppName(this.name));
-      return Observable.of({ success: true });
-    };
+  ngOnInit() {
+    this.validate = this.form.statusChanges
+      .map(() => {
+        return this.form.valid;
+      });
+
+    this.checkingNameState$ = this.store.select(selectNewAppState).map(state => {
+      if (state.nameCheck.checking) {
+        return 'busy';
+      }
+      return state.nameCheck.available ? 'done' : 'error';
+    });
   }
 
 }

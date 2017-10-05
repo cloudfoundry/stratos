@@ -1,20 +1,20 @@
-<app-step [title]="'Cloud Foundry'" [validate]="validate" [onNext]="onNext">
-  <b>Select a Cloud Foundry instance, organization and space for the app.</b>
-  <form [formGroup]="cfForm">
-    <md-select #cfSelect placeholder="Cloud Foundary" formControlName="cf">
-      <md-option *ngFor="let cf of (data$ | async)?.cfList" [value]="cf">
-        <span>{{ cf.name }}</span>
-      </md-option>
-    </md-select>
-    <md-select #orgSelect placeholder="Organization" formControlName="org">
-      <md-option *ngFor="let org of (data$ | async)?.orgList" [value]="org">
-        <span>{{ org.name }}</span>
-      </md-option>
-    </md-select>
-    <md-select #spaceSelect placeholder="Space" formControlName="space">
-      <md-option *ngFor="let space of (data$ | async)?.spaceList" [value]="space">
-        <span>{{ space.name }}</span>
-      </md-option>
-    </md-select>
-  </form>
-</app-step>
+<b>Select a Cloud Foundry instance, organization and space for the app.</b>
+<form #cfForm="ngForm">
+  <md-select #cfSelect="ngModel" [ngModel]="selectedCF" required placeholder="Cloud Foundry" name="cf">
+    <md-option *ngFor="let cf of cfList$ | async" [value]="cf">
+      <span>{{ cf.name }}</span>
+    </md-option>
+  </md-select>
+  <md-select [disabled]="!cfSelect.value" #orgSelect="ngModel" [ngModel]="selectedOrg" required placeholder="Organization"
+    name="org">
+    <md-option *ngFor="let org of orgList$ | async" [value]="org">
+      <span>{{ org.name }}</span>
+    </md-option>
+    <app-stateful-icon *ngIf="(cfList$ | async) && !(orgList$ | async)" [state]="'busy'"></app-stateful-icon>
+  </md-select>
+  <md-select [disabled]="!orgSelect.value" #spaceSelect="ngModel" [ngModel]="selectedSpace" required placeholder="Space" name="space">
+    <md-option *ngFor="let space of spaceList$ | async" [value]="space">
+      <span>{{ space.name }}</span>
+    </md-option>
+  </md-select>
+</form>
