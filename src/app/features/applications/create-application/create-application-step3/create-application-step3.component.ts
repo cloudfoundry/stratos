@@ -6,7 +6,11 @@ import { Observable } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { selectEntityRequestInfo } from '../../../../store/actions/api.actions';
-import { ApplicationSchema, CreateNewApplication } from '../../../../store/actions/application.actions';
+import {
+    ApplicationSchema,
+    AssociateRouteWithAppApplication,
+    CreateNewApplication,
+} from '../../../../store/actions/application.actions';
 import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
@@ -67,8 +71,15 @@ export class CreateApplicationStep3Component implements OnInit {
     )
       .filter(([app, route]) => {
         return !app.creating && !route.creating;
-      }).map(([app, route]) => {
+      })
+      .map(([app, route]) => {
+        debugger;
         if (!app.error && !route.error) {
+          this.store.dispatch(new AssociateRouteWithAppApplication(
+            app.response.result[0],
+            route.response.result[0],
+            cloudFoundry.guid
+          ));
           this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${app.response.result[0]}/summary`);
         }
         return { success: !app.error && !route.error };

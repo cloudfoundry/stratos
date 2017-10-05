@@ -2,12 +2,13 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, Response } from '@angular/http';
+import { Headers, Http, Request, RequestMethod, Response } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
+import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
     APIAction,
@@ -54,13 +55,17 @@ export class APIEffect {
             throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
           }
           const entities = this.getEntities(apiAction, response);
-          return Observable.of(
-            new WrapperAPIActionSuccess(
-              apiAction.actions[1],
-              entities,
-              apiAction
-            )
-          );
+          const actions = [];
+          actions.push(new WrapperAPIActionSuccess(
+            apiAction.actions[1],
+            entities,
+            apiAction
+          ));
+
+          if (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post) {
+            actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+          }
+          return actions;
         })
         .catch(err => {
           return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.error, apiAction));

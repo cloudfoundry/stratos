@@ -37,6 +37,7 @@ export class APIAction implements Action {
   cnis?: string;
   // For single entity requests
   guid?: string;
+  updatingKey?: string;
 }
 
 export interface NormalizedResponse {
