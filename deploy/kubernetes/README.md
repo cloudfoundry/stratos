@@ -34,10 +34,12 @@ helm search console
 NAME                    VERSION DESCRIPTION                       
 stratos-ui/console      0.9.0 A Helm chart for deploying Console
 ```
-To install the Console
+To install the Console.
+
 ```
 helm install stratos-ui/console --namespace=console --name my-console
 ```
+> **Note**: The previous assumes that a storage class exists in the kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*. 
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
@@ -146,13 +148,12 @@ uaa   1        1        1           1          4m
 
 ```
 
-## Persistent Volumes stuck in `Pending` state when deploying through Helm
+## Specifying a custom Storage Class 
 
-The issue may be that your Kubernetes does not have a `default` storage class. You can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+If no default storage class has been defined in the Kuberentes cluster. The Stratos UI helm chart will fail to deploy successfully. To check if a `default` storage class exists, you can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
 
 #### Provide Storage Class override
 ```
-kubectl get storageclas
 $ kubectl get storageclass
 NAME                TYPE
 ssd                 kubernetes.io/host-path   
@@ -164,6 +165,11 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 ```
 ---
 storageClass: persistent
+mariadb:
+  persistence:
+    storageClass: persistent
+# Set the following only if the cluster is not using a clustered filesystem
+noShared: true
 ```
 
 Run Helm with the override:
