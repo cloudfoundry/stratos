@@ -28,8 +28,10 @@
             </md-list-item>
             <md-list-item role="listitem">
               <app-display-value [label]="'States'">
-                <div>App State: {{(appService.application$| async)?.app.entity.state}}</div>
-                <div>Package State: {{(appService.application$| async)?.app.entity.package_state}}</div>
+                <md-chip-list aria-orientation="vertical">
+                  <md-chip>App: {{(appService.application$| async)?.app.entity.state}}</md-chip>
+                  <md-chip>Package: {{(appService.application$| async)?.app.entity.package_state}}</md-chip>
+                </md-chip-list>
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
@@ -44,7 +46,7 @@
           </md-list>
           <md-list role='list' class='summary__cards__summary__right'>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(appService.appSummary$| async)?.entity.services?.length || '-'"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="(appService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
               <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(appService.application$| async)?.app.entity.memory | mbToHumanSize">

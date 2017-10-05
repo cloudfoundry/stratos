@@ -55,7 +55,7 @@ export class ApplicationStateService {
         actions: 'start,delete,cli'
       },
       '*NONE*': {
-        label: 'Incompleter',
+        label: 'Incomplete',
         indicator: 'warning',
         actions: 'delete, cli'
       }

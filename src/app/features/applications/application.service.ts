@@ -113,13 +113,20 @@ export class ApplicationService {
       };
     });
 
-    this.applicationState$ = this.app$.combineLatest(this.appStatsGated$)
-      .filter(([{ entity, entityRequestInfo }, { metadata, metadataRequestState }]) => {
-        return this.completeRequest(entity, entityRequestInfo) &&
-          this.completeRequest(metadata, metadataRequestState);
+    this.applicationState$ = this.app$
+      .filter((appInfo: EntityInfo) => {
+        return this.completeRequest(appInfo.entity, appInfo.entityRequestInfo);
       })
-      .map(([{ entity, entityRequestInfo }, { metadata, metadataRequestState }]) => {
-        return this.appStateService.Get(entity.entity, metadata);
+      .mergeMap((appInfo: EntityInfo) => {
+        if (appInfo && appInfo.entity && appInfo.entity.entity && appInfo.entity.entity.state === 'STARTED') {
+          return appStats$.filter((appStates: AppMetadataInfo) => {
+            return this.completeRequest(appStates.metadata, appStates.metadataRequestState);
+          })
+            .map((appStates: AppMetadataInfo) => {
+              return this.appStateService.Get(appInfo.entity.entity, appStates.metadata);
+            });
+        }
+        return Observable.of(this.appStateService.Get(appInfo.entity.entity, {}));
       });
 
     this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
