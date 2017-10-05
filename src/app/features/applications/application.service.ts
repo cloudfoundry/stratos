@@ -145,4 +145,8 @@ export class ApplicationService {
     console.log('NOT IMPLEMENTED');
   }
 
+  SaveApplication(application) {
+    console.log('SAVING: ', application);
+  }
+
 }

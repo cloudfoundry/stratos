@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-editable-display-value',
@@ -19,10 +19,6 @@ export class EditableDisplayValueComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
   }
-
-  // ngAfterContentInit() {
-  //   // this.showDisplayDefault = this.displayDefault.nativeElement.children.length > 0;
-  // }
 
   ngAfterViewInit() {
     setTimeout(_ => this.displayDefault = this.displayCustom.nativeElement.children.length === 0);
