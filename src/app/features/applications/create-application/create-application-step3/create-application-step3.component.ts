@@ -45,7 +45,7 @@ export class CreateApplicationStep3Component implements OnInit {
       }
     ));
 
-    const routeDomainMetaData = this.form.controls.domain.value.metadata;
+    const routeDomainMetaData = this.form.controls.domain.value.metadata || {};
     const hostName = this.hostName;
     const shouldCreateRoute = routeDomainMetaData && hostName && this.form.valid;
     const newRouteGuid = hostName + routeDomainMetaData.guid;
@@ -73,7 +73,6 @@ export class CreateApplicationStep3Component implements OnInit {
         return !app.creating && !route.creating;
       })
       .map(([app, route]) => {
-        debugger;
         if (!app.error && !route.error) {
           this.store.dispatch(new AssociateRouteWithAppApplication(
             app.response.result[0],

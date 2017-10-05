@@ -1,7 +1,7 @@
 .steppers {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
   &__inner {
     display: flex;
     flex: 1;
@@ -60,7 +60,8 @@
     margin: 30px 80px;
   }
   &__wrapper {
-    height: 100%;
+    min-height: 100%;
+    display: flex;
   }
   &__navigation {
     margin-top: 50px;
