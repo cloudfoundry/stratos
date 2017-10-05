@@ -39,6 +39,7 @@
    * @param {$rootScope} $rootScope - Angular $rootScope service
    * @param {$scope} $scope - Angular $scope service
    * @param {appLoggedInService} appLoggedInService - Logged In Service
+   * @param {appBusyService} appBusyService - Application Busy Service
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
@@ -61,7 +62,8 @@
     $window,
     $rootScope,
     $scope,
-    appLoggedInService
+    appLoggedInService,
+    appBusyService
   ) {
 
     var vm = this;
@@ -81,6 +83,9 @@
     vm.login = login;
     vm.logout = logout;
     vm.reload = reload;
+
+    // Global spinner state
+    vm.spinner = appBusyService.busyState;
 
     if (loginManager.isEnabled()) {
       $timeout(function () {
@@ -187,9 +192,11 @@
       vm.failedLogin = false;
       vm.serverErrorOnLogin = false;
       vm.serverFailedToRespond = false;
-      vm.showGlobalSpinner = true;
-      vm.globalSpinnerLabel = 'preparing.console';
+      //vm.showGlobalSpinner = true;
+      //vm.globalSpinnerLabel = 'preparing.console';
       vm.redirectState = false;
+
+      vm.appBusyId = appBusyService.set('preparing.console');
 
       // If we have a setup error, then we don't want to continue login to some other page
       // We will redirect to our error page instead
@@ -240,8 +247,7 @@
           }
         })
         .finally(function () {
-          vm.showGlobalSpinner = false;
-          vm.globalSpinnerLabel = '';
+          vm.appBusyId = appBusyService.clear(vm.appBusyId);
 
           if (continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them

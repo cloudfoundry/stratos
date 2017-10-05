@@ -32,36 +32,29 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {object} $state - the UI router $state service
-   * @param {object} $parse - the angular $parse service
    * @param {object} appUtilsService - the appUtilsService service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} appLoggedInService - Logged In Service
+   * @param {object} appBusyService - the appBusyService service
    * @constructor
    */
-  function ApplicationsController($scope, $q, $state, $parse, appUtilsService, modelManager, appEventService, appLoggedInService) {
+  function ApplicationsController($scope, $q, $state,appUtilsService, modelManager, appEventService, appLoggedInService, appBusyService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
     var initialized = $q.defer();
     var vm = this;
-    var appController = $parse('applicationCtrl');
-    if (appController) {
-      vm.appController = appController($scope);
-      vm.appController.showGlobalSpinner = true;
-      vm.appController.globalSpinnerLabel = 'Collecting Cloud Foundry Metadata';
-    } else {
-      vm.appController = {};
-    }
 
     if (appLoggedInService.isLoggedIn()) {
       initialized.resolve();
     }
 
     function init() {
+      vm.appBusyId = appBusyService.set('cf.busy');
       return initialized.promise
         .then(function () {
           return authService.initialize().finally(function () {
-            vm.appController.showGlobalSpinner = false;
+            appBusyService.clear(vm.appBusyId);
           });
         });
     }

@@ -1,5 +1,6 @@
 {
   "cloud-foundry": "Cloud Foundry",
+  "cf.busy": "Collecting Cloud Foundry Metadata",
   "org": "Org",
   "space": "Space",
   "menu": {
