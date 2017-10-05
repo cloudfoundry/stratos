@@ -188,6 +188,7 @@
       vm.serverErrorOnLogin = false;
       vm.serverFailedToRespond = false;
       vm.showGlobalSpinner = true;
+      vm.globalSpinnerLabel = 'preparing.console';
       vm.redirectState = false;
 
       // If we have a setup error, then we don't want to continue login to some other page
@@ -240,6 +241,8 @@
         })
         .finally(function () {
           vm.showGlobalSpinner = false;
+          vm.globalSpinnerLabel = '';
+
           if (continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them
             // to redirect to their page - we might want to control that they go to the endpoints dashboard (for example).

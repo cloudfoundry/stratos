@@ -4,6 +4,14 @@
   <actions-toolbar ready="applicationsListCtrl.ready" items="applicationsListCtrl.appWallActions"></actions-toolbar>
 </div>
 
+<global-spinner
+  class="application-global-spinner"
+  spinner-active="applicationsListCtrl.loading && !applicationsListCtrl.model.hasApps"
+  spinner-label="'app-wall.retrieving'"
+  spinner-local="true"
+  spinner-type="bounce-spinner">
+</global-spinner>
+
 <div ng-if="applicationsListCtrl.ready">
   <div class="application-control-bar" ng-if="applicationsListCtrl.model.clusterCount > 0">
     <div class="panel panel-default">
