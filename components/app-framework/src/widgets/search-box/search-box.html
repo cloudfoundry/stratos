@@ -1,10 +1,13 @@
-<div ng-click="searchBoxCtrl.openIt()" class="search-box" ng-class="{ open: searchBoxCtrl.open, disabled: searchBoxCtrl.disabled}">
+<div ng-click="!searchBoxCtrl.busy && searchBoxCtrl.openIt()" class="search-box" ng-class="{ open: searchBoxCtrl.open, disabled: searchBoxCtrl.disabled || searchBoxCtrl.busy}">
+  <div class="search-box-busy" ng-if="searchBoxCtrl.busy" translate>search-box.busy</div>
   <input type="text"
          ng-change="searchBoxCtrl.onChange()"
          ng-model="searchBoxCtrl.searchText"
          ng-keydown="searchBoxCtrl.onKeyDown($event)"
+         ng-show="!searchBoxCtrl.busy"
          placeholder="{{ searchBoxCtrl.placeholder }}" ng-disabled="searchBoxCtrl.disabled"/>
   <i class="search-icon material-icons"
+     ng-show="!searchBoxCtrl.busy"
      ng-class="searchBoxCtrl.searchIcon || 'search-icon-icon'"></i>
 
   <ul ng-show="searchBoxCtrl.open" class="dropdown-menu">
