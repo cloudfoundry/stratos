@@ -10,6 +10,7 @@ import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { SummaryTabComponent } from './application/summary-tab/summary-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
+import { CreateApplicationModule } from './create-application/create-application.module';
 
 const appplicationsRoutes: Routes = [
   {
@@ -43,7 +44,9 @@ const appplicationsRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forChild(appplicationsRoutes),
+    CreateApplicationModule,
+    RouterModule.forChild(appplicationsRoutes)
+
   ]
 })
 export class ApplicationsRoutingModule { }

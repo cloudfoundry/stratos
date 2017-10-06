@@ -65,6 +65,7 @@ export class APIEffect {
           if (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post) {
             actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
           }
+
           return actions;
         })
         .catch(err => {

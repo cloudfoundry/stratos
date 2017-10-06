@@ -1,9 +1,11 @@
-import { Subscription } from 'rxjs/Rx';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-
-import { ApplicationService } from '../application.service';
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Rx';
+
+import { EntityInfo } from '../../../store/actions/api.actions';
+import { AppMetadataInfo } from '../../../store/actions/app-metadata.actions';
+import { ApplicationData, ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-application-base',
@@ -12,6 +14,7 @@ import { Observable } from 'rxjs/Observable';
   providers: [ApplicationService]
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
+  [x: string]: any;
 
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
@@ -19,8 +22,14 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   isFetching$: Observable<boolean>;
   application;
 
+  isEditSummary = false;
+
+  summaryExpanded = true;
+
+  cardOneFetching: Observable<boolean>;
+
   tabLinks = [
-    { link: 'summary', label: 'Summary' },
+    { link: 'summary', label: 'Build Info' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -28,18 +37,64 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     { link: 'ssh', label: 'SSH' }
   ];
 
+  startEdit() {
+    this.isEditSummary = true;
+    this.setAppDefaults();
+  }
+
+  endEdit() {
+    this.isEditSummary = false;
+  }
+
+  setAppDefaults() {
+    this.appEdits = { ... this.appDefaultEdits };
+  }
+
   ngOnInit() {
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
-      this.sub.push(this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
-        this.application = entity;
+      this.sub.push(this.applicationService.application$.subscribe(({ app }) => {
+        this.application = app.entity;
       }));
-      this.isFetching$ = this.applicationService.isFetching$;
+      this.isFetching$ = this.applicationService.isFetchingApp$;
     }));
+
+    this.appEdits = {
+      name: '',
+      instances: 0,
+      memory: 0,
+      enable_ssh: false
+    };
+
+    this.cardOneFetching$ = this.applicationService.app$
+      .combineLatest(
+      this.applicationService.appEnvVars$,
+      this.applicationService.appStatsGated$
+      ).mergeMap(([app, appEnvVars, appStatsGated]: [EntityInfo, AppMetadataInfo, AppMetadataInfo]) => {
+	return Observable.of(app.entityRequestInfo.fetching || appEnvVars.metadataRequestState.fetching ||
+	  appStatsGated.metadataRequestState.fetching);
+      });
+
+    this.sub.push(this.cardOneFetching$
+      .filter((isFetching) => {
+	return !isFetching;
+      })
+      .mergeMap(_ => {
+	return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
+      })
+      .subscribe(([application, appSummary]: [ApplicationData, EntityInfo]) => {
+	this.appDefaultEdits = {
+	  name: application.app.entity.name,
+	  instances: appSummary.entity.entity.instances,
+	  memory: application.app.entity.memory,
+	  enable_ssh: application.app.entity.enable_ssh
+	};
+      }));
   }
 
+
   ngOnDestroy() {
-    this.sub.forEach(subscription => subscription.unsubscribe);
+    this.sub.forEach(subscription => subscription.unsubscribe());
   }
 }

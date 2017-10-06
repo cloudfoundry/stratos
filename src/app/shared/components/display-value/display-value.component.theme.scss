@@ -1,0 +1,19 @@
+@import '~@angular/material/theming';
+@mixin display-value-theme($theme, $app-theme) {
+  // $primary: map-get($theme, primary);
+  // $accent: map-get($theme, accent);
+  // $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
+  .display-value {
+    $foreground-colors: map-get($theme, foreground);
+    &__label {
+      color: mat-color($foreground-colors, secondary-text);
+      font-size: 14px;
+      padding-bottom: 10px;
+    }
+    &__value {
+      color: mat-color($foreground-colors, text);
+      font-size: 16px;
+    }
+  }
+}

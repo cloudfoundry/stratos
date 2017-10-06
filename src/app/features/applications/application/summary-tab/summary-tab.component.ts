@@ -1,31 +1,66 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, Subscription } from 'rxjs/Rx';
 
-import { Subscription } from 'rxjs/Subscription';
+import { EntityInfo } from '../../../../store/actions/api.actions';
+import { ApplicationData, ApplicationService } from '../../application.service';
+import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 
-import { ApplicationService } from '../../application.service';
+interface ApplicationEdits {
+  name: string;
+  instances: number;
+  memory: number;
+  enable_ssh: boolean;
+}
 
 @Component({
   selector: 'app-summary-tab',
   templateUrl: './summary-tab.component.html',
   styleUrls: ['./summary-tab.component.scss']
 })
-export class SummaryTabComponent implements OnInit, OnDestroy {
-
+export class SummaryTabComponent implements OnInit {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
-  sub: Subscription;
-  application;
+  isEditSummary: boolean;
 
-  ngOnInit() {
-    this.sub = this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
-      this.application = entity;
-    });
+  appService = this.applicationService;
+
+  cardTwoFetching$: Observable<boolean>;
+  appEdits: ApplicationEdits;
+  appDefaultEdits: ApplicationEdits;
+
+  sub: Subscription;
+
+  setAppDefaults() {
+    this.appEdits = { ... this.appDefaultEdits };
+  }
+
+  SaveApplication(application) {
+    // console.log('SAVING: ', application);
+    // // setTimeout(_ = > {
+    // //   this.isEditSummary = false;
+    // // }, 1);
+    // setTimeout(_ => this.isEditSummary = false, 5000);
+    // this.isEditSummary = false;
 
   }
 
-  ngOnDestroy() {
-    this.sub.unsubscribe();
+  ngOnInit() {
+
+    this.appEdits = {
+      name: '',
+      instances: 0,
+      memory: 0,
+      enable_ssh: false
+    };
+
+    this.cardTwoFetching$ = this.appService.application$
+      .combineLatest(
+      this.appService.appSummary$
+      )
+      .mergeMap(([app, { entity, entityRequestInfo }]: [ApplicationData, EntityInfo]) => {
+        return Observable.of(app.fetching || entityRequestInfo.fetching);
+      });
   }
 
 }

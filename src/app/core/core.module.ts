@@ -6,6 +6,7 @@ import { AuthGuardService } from './auth-guard.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { MDAppModule } from './md.module';
 import { PageHeaderService } from './page-header-service/page-header.service';
+import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 
 @NgModule({
@@ -22,7 +23,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     AuthGuardService,
     PageHeaderService,
     EventWatcherService,
-    WindowRef
+    WindowRef,
+    UtilsService
   ]
 })
 export class CoreModule { }

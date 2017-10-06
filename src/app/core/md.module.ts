@@ -5,6 +5,8 @@ import {
     MdButtonModule,
     MdCardModule,
     MdCheckboxModule,
+    MdChipsModule,
+    MdExpansionModule,
     MdFormFieldModule,
     MdGridListModule,
     MdIconModule,
@@ -13,9 +15,12 @@ import {
     MdProgressSpinnerModule,
     MdSelectModule,
     MdSidenavModule,
+    MdSliderModule,
+    MdSlideToggleModule,
     MdTableModule,
     MdTabsModule,
     MdToolbarModule,
+    MdTooltipModule,
 } from '@angular/material';
 
 const importExport = [
@@ -34,7 +39,12 @@ const importExport = [
     MdToolbarModule,
     MdFormFieldModule,
     MdProgressBarModule,
-    MdAutocompleteModule
+    MdSlideToggleModule,
+    MdSliderModule,
+    MdAutocompleteModule,
+    MdTooltipModule,
+    MdChipsModule,
+    MdExpansionModule
 ];
 
 @NgModule({

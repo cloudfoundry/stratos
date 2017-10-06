@@ -1,8 +1,163 @@
 <app-page-header>
-  <h1>{{ application.name }} </h1>
+  <h1>{{ application?.name }} </h1>
+  <div class="page-header-right">
+    <button md-icon-button *ngIf="isEditSummary" md-button (click)="endEdit()" [disabled]="!summaryForm.valid"><md-icon>done</md-icon></button>
+    <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()"><md-icon>clear</md-icon></button>
+    <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="cardOneFetching$ | async" (click)="startEdit()"><md-icon>edit</md-icon></button>
+  </div>
 </app-page-header>
+
 <app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
-  <nav md-tab-nav-bar>
+  <div class="summary">
+    <app-details-card class="summary__form" title="Summary" [busy]="cardOneFetching$ | async">
+      <form class="summary__form" #summaryForm="ngForm">
+	<md-list dense role='list'>
+	  <md-list-item role="listitem">
+	    <app-display-value [label]="'Composite State'">
+	      <app-application-state [state]="(applicationService.applicationState$ | async)"></app-application-state>
+	    </app-display-value>
+	  </md-list-item>
+	  <md-list-item role="listitem">
+	    <app-display-value [label]="'States'">
+	      <md-chip-list aria-orientation="vertical">
+		<md-chip>App: {{(applicationService.application$| async)?.app.entity.state}}</md-chip>
+		<md-chip>Package: {{(applicationService.application$| async)?.app.entity.package_state}}</md-chip>
+	      </md-chip-list>
+	    </app-display-value>
+	  </md-list-item>
+	  <md-list-item role="listitem">
+	    <app-editable-display-value [edit]="isEditSummary">
+	      <div class="display-input__display">
+		<app-display-value [label]="'Running Instances'">
+		  <md-slider mdInput [max]="(applicationService.appSummary$ | async)?.entity.entity?.instances" step="1" [disabled]="!isEditSummary"
+		    [ngModel]="(applicationService.appSummary$ | async)?.entity.entity?.running_instances" name="appInstances"
+		    min="0" thumbLabel tickInterval="1"></md-slider>
+		  {{(applicationService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (applicationService.appSummary$ |
+		  async)?.entity.entity?.instances }}
+		</app-display-value>
+	      </div>
+	      <div class="display-input__input">
+		<md-form-field>
+		  <input mdInput name="instances" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required pattern="[0-9]+"
+		  />
+		</md-form-field>
+	      </div>
+	    </app-editable-display-value>
+	  </md-list-item>
+	</md-list>
+	<md-list>
+	  <md-list-item role="listitem">
+	    <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
+	  </md-list-item>
+	  <md-list-item role="listitem">
+	    <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
+	      <div class="display-input__input">
+		<md-form-field>
+		  <input mdInput name="appMemory" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+" />
+		</md-form-field>
+	      </div>
+	    </app-editable-display-value>
+	  </md-list-item>
+	  <md-list-item role="listitem">
+	    <app-display-value [label]="'disk quota'" [value]="(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize"></app-display-value>
+	  </md-list-item>
+	  <md-list-item role="listitem">
+	    <app-editable-display-value [edit]="isEditSummary" [label]="'SSH Enabled'">
+	      <div class="display-input__display">
+		<app-display-value [label]="'SSH Enabled'">
+		  <md-slide-toggle name="appSsh" [ngModel]="(applicationService.application$| async)?.app.entity.enable_ssh" [disabled]="true"></md-slide-toggle>
+		</app-display-value>
+	      </div>
+	      <div class="display-input__input">
+
+		<app-display-value [label]="'SSH Enabled'">
+		  <md-slide-toggle name="appSsh" [ngModel]="appEdits.enable_ssh"></md-slide-toggle>
+		</app-display-value>
+	      </div>
+	    </app-editable-display-value>
+	  </md-list-item>
+	</md-list>
+      </form>
+    </app-details-card>
+    <!-- <md-expansion-panel-header>
+	<md-panel-title>
+	  <h2>Summary</h2>
+	</md-panel-title>
+      </md-expansion-panel-header>
+
+      <md-card-content>
+	<form #summaryForm="ngForm">
+	  <md-list dense role='list'>
+	    <md-list-item role="listitem">
+	      <app-display-value [label]="'Composite State'">
+		<app-application-state [state]="(applicationService.applicationState$ | async)"></app-application-state>
+	      </app-display-value>
+	    </md-list-item>
+	    <md-list-item role="listitem">
+	      <app-display-value [label]="'States'">
+		<md-chip-list aria-orientation="vertical">
+		  <md-chip>App: {{(applicationService.application$| async)?.app.entity.state}}</md-chip>
+		  <md-chip>Package: {{(applicationService.application$| async)?.app.entity.package_state}}</md-chip>
+		</md-chip-list>
+	      </app-display-value>
+	    </md-list-item>
+	    <md-list-item role="listitem">
+	      <app-editable-display-value [edit]="isEditSummary">
+		<div class="display-input__display">
+		  <app-display-value [label]="'Running Instances'">
+		    <md-slider mdInput [max]="(applicationService.appSummary$ | async)?.entity.entity?.instances" step="1" [disabled]="!isEditSummary"
+		      [ngModel]="(applicationService.appSummary$ | async)?.entity.entity?.running_instances" name="appInstances"
+		      min="0" thumbLabel tickInterval="1"></md-slider>
+		    {{(applicationService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (applicationService.appSummary$ |
+		    async)?.entity.entity?.instances }}
+		  </app-display-value>
+		</div>
+		<div class="display-input__input">
+		  <md-form-field>
+		    <input mdInput name="instances" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required pattern="[0-9]+"
+		    />
+		  </md-form-field>
+		</div>
+	      </app-editable-display-value>
+	    </md-list-item>
+	  </md-list>
+	  <md-list>
+	    <md-list-item role="listitem">
+	      <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
+	    </md-list-item>
+	    <md-list-item role="listitem">
+	      <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
+		<div class="display-input__input">
+		  <md-form-field>
+		    <input mdInput name="appMemory" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+" />
+		  </md-form-field>
+		</div>
+	      </app-editable-display-value>
+	    </md-list-item>
+	    <md-list-item role="listitem">
+	      <app-display-value [label]="'disk quota'" [value]="(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize"></app-display-value>
+	    </md-list-item>
+	    <md-list-item role="listitem">
+	      <app-editable-display-value [edit]="isEditSummary" [label]="'SSH Enabled'">
+		<div class="display-input__display">
+		  <app-display-value [label]="'SSH Enabled'">
+		    <md-slide-toggle name="appSsh" [ngModel]="(applicationService.application$| async)?.app.entity.enable_ssh" [disabled]="true"></md-slide-toggle>
+		  </app-display-value>
+		</div>
+		<div class="display-input__input">
+
+		  <app-display-value [label]="'SSH Enabled'">
+		    <md-slide-toggle name="appSsh" [ngModel]="appEdits.enable_ssh"></md-slide-toggle>
+		  </app-display-value>
+		</div>
+	      </app-editable-display-value>
+	    </md-list-item>
+	  </md-list>
+	</form>
+      </md-card-content>
+    </md-expansion-panel> -->
+  </div>
+  <nav md-tab-nav-bar class="summary__nav">
     <a md-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
       [active]="rla.isActive">
             {{tabLink.label}}
