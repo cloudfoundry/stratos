@@ -6,6 +6,8 @@
   "terms": "Terms of Use",
   "endpoint": "Endpoint",
 
+  "preparing.console": "Preparing Console ...",
+
   "buttons": {
     "ok": "OK",
     "cancel": "Cancel",
