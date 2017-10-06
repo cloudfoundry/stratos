@@ -37,6 +37,7 @@ export class APIAction implements Action {
   cnis?: string;
   // For single entity requests
   guid?: string;
+  updatingKey?: string;
 }
 
 export interface NormalizedResponse {
@@ -78,7 +79,7 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-export interface EntityInfo {
+interface EntityInfo {
   entityRequestInfo: EntityRequestState;
   entity: any;
 }
@@ -96,39 +97,27 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-    .mergeMap(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
+    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-      return Observable.of({
-        entityRequestInfo,
-        entity,
-        entities
-      });
-    }).filter(({ entityRequestInfo, entity }) => {
-      return (entity && entity.entity) || !!entityRequestInfo; // TODO: RC/NJ Make sure nested entities get entityRequestInfo
-    }).mergeMap(({ entities, entity, entityRequestInfo }) => {
-      return Observable.of({
+    }).filter(([entities, entity, entityRequestInfo]) => {
+      return (entity && entity.entity) || !!entityRequestInfo;
+    })
+    .map(([entities, entity, entityRequestInfo]) => {
+      return {
         entityRequestInfo,
         entity: entity ? {
           entity: denormalize(entity, schema, entities).entity,
           metadata: entity.metadata
         } : {}
-      });
+      };
     });
 };
 
-export function selectApiResourceEntity(type: string, guid: string) {
-  return compose(
-    getAPIResourceEntity,
-    getEntityById(guid),
-    getEntityType(type),
-    getEntityState
-  );
-}
-
 export function selectEntity(type: string, guid: string) {
   return compose(
+    getAPIResourceEntity,
     getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState

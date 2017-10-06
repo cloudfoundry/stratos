@@ -18,6 +18,10 @@ export const CREATE = '[Application] Create';
 export const CREATE_SUCCESS = '[Application] Create success';
 export const CREATE_FAILED = '[Application] Create failed';
 
+export const ASSIGN_ROUTE = '[Application] Assign route';
+export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
+export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
+
 
 export const ApplicationSchema = new schema.Entity('application', {
     entity: {
@@ -121,4 +125,22 @@ export class CreateNewApplication implements APIAction {
     entity = [ApplicationSchema];
     entityKey = ApplicationSchema.key;
     options: RequestOptions;
+}
+
+export class AssociateRouteWithAppApplication implements APIAction {
+    constructor(public guid: string, public routeGuid: string, public cnis: string) {
+        this.options = new RequestOptions();
+        this.options.url = `apps/${guid}/routes/${routeGuid}`;
+        this.options.method = 'put';
+    }
+    actions = [
+        ASSIGN_ROUTE,
+        ASSIGN_ROUTE_SUCCESS,
+        ASSIGN_ROUTE_FAILED
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [ApplicationSchema];
+    entityKey = ApplicationSchema.key;
+    options: RequestOptions;
+    updatingKey = 'Assigning-Route';
 }

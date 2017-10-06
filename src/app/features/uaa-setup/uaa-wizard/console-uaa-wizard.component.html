@@ -11,7 +11,7 @@
           get started.</p>
       </div>
     </app-step>
-    <app-step title="UAA Endpoint" [validate]="validateUAAForm" [onNext]="uaaFormNext">
+    <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
       <form class="uaa-wizard__form" [formGroup]="uaaForm">
         UAA Endpoint
         <md-form-field>

@@ -1,0 +1,10 @@
+<div class="stateful-icon" *ngIf="selectedState">
+  <span *ngIf="isTemplate(selectedState)">
+    <ng-container *ngTemplateOutlet="selectedState.template"></ng-container>
+  </span>
+  <md-icon *ngIf="!isTemplate(selectedState)" [color]="selectedState.color">{{ selectedState.icon }}</md-icon>
+</div>
+
+<ng-template #spinner>
+  <md-spinner></md-spinner>
+</ng-template>

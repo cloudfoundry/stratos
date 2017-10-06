@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 
 import { SteppersService } from '../steppers.service';
@@ -11,9 +11,12 @@ import { StepComponent } from './../step/step.component';
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None
 })
-export class SteppersComponent implements OnInit, OnDestroy {
+export class SteppersComponent implements OnInit, AfterContentInit {
 
-  constructor(private steppersService: SteppersService) { }
+  constructor(
+    private steppersService: SteppersService) { }
+
+  @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
   @Input()
   cancel = null;
@@ -29,53 +32,28 @@ export class SteppersComponent implements OnInit, OnDestroy {
   finishButtonText = 'Finish';
 
   ngOnInit() {
-    this.steppersService.steps
-      .subscribe(step => {
-        if (this.steps.length === 1) {
-          this.setActive(0);
-        }
-        this.steps.push(step);
-        this.initSteps(this.steps);
-      });
   }
 
-  initSteps(steps: StepComponent[]) {
-    this.observeStepsValidation(steps);
+  ngAfterContentInit() {
+    this.steps = this._steps.toArray();
+    this.setActive(0);
   }
 
-  observeStepsValidation(steps: StepComponent[]) {
-    if (this.stepValidateSub) {
-      this.stepValidateSub.unsubscribe();
-    }
-    const validatorObs: Observable<boolean>[] = steps.map(step => {
-      return step.validate;
-    });
-    this.stepValidateSub = Observable.combineLatest(
-      validatorObs
-    )
-      .subscribe(results => {
-        results.forEach((res, i) => {
-          const step = this.steps[i];
-          step.valid = res;
-          step.error = false;
+  goNext() {
+    if (this.currentIndex < this.steps.length) {
+      const step = this.steps[this.currentIndex];
+      step.busy = true;
+      step.onNext()
+        .first()
+        .catch(() => Observable.of({ success: false, message: 'Failed' }))
+        .subscribe(({ success, message }) => {
+          step.error = !success;
+          step.busy = false;
+          if (success) {
+            this.setActive(this.currentIndex + 1);
+          }
         });
-      });
-  }
-
-  goNext(index: number) {
-    const step = this.steps[index];
-    step.busy = true;
-
-    step.onNext()
-      .first()
-      .catch(() => Observable.of({ success: false, message: 'Failed' }))
-      .subscribe(({ success, message }) => {
-        step.error = !success;
-        step.busy = false;
-        if (success) {
-          this.setActive(index + 1);
-        }
-      });
+    }
   }
 
   setActive(index: number) {
@@ -121,12 +99,14 @@ export class SteppersComponent implements OnInit, OnDestroy {
   }
 
   canGoNext(index) {
-    const nextIndex = index + 1;
-    if (nextIndex > this.steps.length) {
-      return true;
-    } else {
-      return this.canGoto(nextIndex);
+    if (
+      !this.steps[index] ||
+      !this.steps[index].valid ||
+      this.steps[index].busy
+    ) {
+      return false;
     }
+    return true;
   }
 
   getIconLigature(step: StepComponent, index: number): 'done' {
@@ -137,10 +117,6 @@ export class SteppersComponent implements OnInit, OnDestroy {
     return nextIndex < this.steps.length ?
       this.nextButtonText :
       this.finishButtonText;
-  }
-
-  ngOnDestroy() {
-    this.stepValidateSub.unsubscribe();
   }
 
 }

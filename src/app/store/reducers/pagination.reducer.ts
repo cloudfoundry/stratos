@@ -1,20 +1,19 @@
-import { mergeState } from './../helpers/reducer.helper';
-import { PaginationState } from './pagination.reducer';
-import { Observable } from 'rxjs/Rx';
+import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
-import { EntitiesState } from './entity.reducer';
-import { Store, Action } from '@ngrx/store';
+
+import { ApiActionTypes } from '../actions/api.actions';
+import { CLEAR_PAGINATION } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
 import { APIAction } from './../actions/api.actions';
-import { ApiActionTypes } from '../actions/api.actions';
+import { mergeState } from './../helpers/reducer.helper';
 
 export class PaginationEntityState {
-    currentPage = 0;
-    pageCount = 0;
-    ids = {};
-    fetching: boolean;
-    error: boolean;
-    message: '';
+  currentPage = 0;
+  pageCount = 0;
+  ids = {};
+  fetching: boolean;
+  error: boolean;
+  message: '';
 }
 
 export interface PaginationState {
@@ -29,7 +28,7 @@ const types = [
   ApiActionTypes.API_REQUEST_FAILED
 ];
 
-const [ requestType, successType, failureType ] = types;
+const [requestType, successType, failureType] = types;
 
 const defaultPaginationEntityState = {
   fetching: false,
@@ -97,56 +96,62 @@ function getActionKey(action) {
 
 function getPaginationKey(action) {
   const apiAction = getAction(action);
-  return apiAction.paginationKey || 'all';
+  return apiAction.paginationKey;
 }
 
-export function getCurrentPage (
+export function getCurrentPage(
   { entityType, paginationKey, store, action, schema }:
-  { entityType: string, paginationKey: string, store: Store<AppState>, action: Action, schema: Schema}
+    { entityType: string, paginationKey: string, store: Store<AppState>, action: Action, schema: Schema }
 ) {
   return store.select('pagination')
-  .skipWhile((pagination: PaginationState) =>  {
-    const paginationEntity = pagination[entityType];
-    if (paginationEntity && paginationEntity[paginationKey]) {
-      const paginationState = paginationEntity[paginationKey];
-      return !paginationState;
-    } else {
-      store.dispatch(action);
-      return true;
-    }
-  })
-  .flatMap((pagination: PaginationState) => [pagination[entityType][paginationKey]])
-  .withLatestFrom(store.select('entities'))
-  .flatMap(
-    ([paginationEntity, entities]) => {
+    .filter((pagination: PaginationState) => {
+      const paginationEntity = pagination[entityType];
+      if (paginationEntity && paginationEntity[paginationKey]) {
+        const paginationState = paginationEntity[paginationKey];
+        return !!paginationState;
+      } else {
+        store.dispatch(action);
+        return false;
+      }
+    })
+    .map((pagination: PaginationState) => pagination[entityType][paginationKey])
+    .withLatestFrom(store.select('entities'))
+    .map(([paginationEntity, entities]) => {
       const page = paginationEntity.ids[paginationEntity.currentPage];
-      return Observable.of({
+      return {
         paginationEntity,
         data: page ? denormalize(paginationEntity.ids[paginationEntity.currentPage], schema, entities) : null
-      });
-    }
-  );
+      };
+    });
 }
 
-export function paginationReducer (state = {}, action) {
+export function paginationReducer(state = {}, action) {
+
+  if (action.type === CLEAR_PAGINATION) {
+    if (state[action.entityKey]) {
+      const clearState = { ...state };
+      clearState[action.entityKey] = {};
+      return clearState;
+    }
+    return state;
+  }
+
   const actionType = getActionType(action);
   const key = getActionKey(action);
-  if (actionType && key) {
+  const paginationKey = getPaginationKey(action);
+  if (actionType && key && paginationKey) {
+    const newState = { ...state };
 
-      const paginationKey = getPaginationKey(action);
-      const newState = { ...state };
-
-      if (!newState[key]) {
-        newState[key] = {};
-      }
-
+    if (!newState[key] || actionType === CLEAR_PAGINATION) {
+      newState[key] = {};
+    }
+    if (actionType !== CLEAR_PAGINATION) {
       const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
-
-      newState[key] = mergeState(newState[key] || {}, {
-          [paginationKey]: updatedPaginationState
+      newState[key] = mergeState(newState[key], {
+        [paginationKey]: updatedPaginationState
       });
-
-      return newState;
+    }
+    return newState;
   } else {
     return state;
   }

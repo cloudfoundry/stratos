@@ -7,6 +7,7 @@ export interface EntitiesState {
     stack: any;
     space: any;
     organization: any;
+    route: any;
 }
 
 export const defaultEntitiesState = {
@@ -14,7 +15,8 @@ export const defaultEntitiesState = {
     applicationSummary: {},
     stack: {},
     space: {},
-    organization: {}
+    organization: {},
+    route: {}
 };
 
 export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action) {

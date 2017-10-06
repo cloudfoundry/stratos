@@ -10,6 +10,7 @@ import { LoadingPageComponent } from './components/loading-page/loading-page.com
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
+import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 
 
 @NgModule({
@@ -23,6 +24,7 @@ import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
     declarations: [
         LoadingPageComponent,
         DisplayValueComponent,
+    StatefulIconComponent,
         EditableDisplayValueComponent,
         MbToHumanSizePipe,
         LoadingPageComponent,
@@ -34,6 +36,8 @@ import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
         PageHeaderModule,
         DisplayValueComponent,
         EditableDisplayValueComponent,
+    SteppersModule,
+    StatefulIconComponent
         MbToHumanSizePipe,
         SteppersModule
     ]
