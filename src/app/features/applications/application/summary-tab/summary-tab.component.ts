@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../../store/actions/api.actions';
 import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
@@ -18,8 +18,7 @@ interface ApplicationEdits {
   templateUrl: './summary-tab.component.html',
   styleUrls: ['./summary-tab.component.scss']
 })
-export class SummaryTabComponent implements OnInit {
-
+export class SummaryTabComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
   isEditSummary: boolean;
@@ -31,8 +30,20 @@ export class SummaryTabComponent implements OnInit {
   appEdits: ApplicationEdits;
   appDefaultEdits: ApplicationEdits;
 
+  sub: Subscription;
+
   setAppDefaults() {
     this.appEdits = { ... this.appDefaultEdits };
+  }
+
+  SaveApplication(application) {
+    // console.log('SAVING: ', application);
+    // // setTimeout(_ = > {
+    // //   this.isEditSummary = false;
+    // // }, 1);
+    // setTimeout(_ => this.isEditSummary = false, 5000);
+    // this.isEditSummary = false;
+
   }
 
   ngOnInit() {
@@ -48,9 +59,9 @@ export class SummaryTabComponent implements OnInit {
       .combineLatest(
       this.appService.appEnvVars$,
       this.appService.appStatsGated$
-      ).mergeMap(([app, appEnvVars, appStatsGated]: [EntityInfo, AppMetadataInfo, AppMetadataInfo]) => {
+      ).mergeMap(([app, appEnvVars, appStatsGated]: [EntityInfo, AppMetadataInfo, any]) => {
         return Observable.of(app.entityRequestInfo.fetching || appEnvVars.metadataRequestState.fetching ||
-          appStatsGated.metadataRequestState.fetching);
+          appStatsGated ? appStatsGated.metadataRequestState.fetching : false);
       });
 
     this.cardTwoFetching$ = this.appService.application$
@@ -61,7 +72,7 @@ export class SummaryTabComponent implements OnInit {
         return Observable.of(app.fetching || entityRequestInfo.fetching);
       });
 
-    this.cardOneFetching$
+    this.sub = this.cardOneFetching$
       .filter((isFetching) => {
         return !isFetching;
       })
@@ -79,13 +90,8 @@ export class SummaryTabComponent implements OnInit {
     //
   }
 
-  SaveApplication(application) {
-    // console.log('SAVING: ', application);
-    // // setTimeout(_ = > {
-    // //   this.isEditSummary = false;
-    // // }, 1);
-    // setTimeout(_ => this.isEditSummary = false, 5000);
-    // this.isEditSummary = false;
-
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
+
 }
