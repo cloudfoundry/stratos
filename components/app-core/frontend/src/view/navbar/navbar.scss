@@ -411,3 +411,11 @@ nav.secondary-nav {
     }
   }
 }
+
+.nav-logout-only {
+  text-align: right;
+
+  .actions-toolbar {
+    margin-right: $console-unit-space;
+  }
+}
