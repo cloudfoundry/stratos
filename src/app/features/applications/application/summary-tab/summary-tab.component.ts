@@ -26,7 +26,12 @@ export class SummaryTabComponent implements OnInit {
   appService = this.applicationService;
 
   cardTwoFetching$: Observable<boolean>;
-  appEdits: ApplicationEdits;
+  appEdits = {
+    name: '',
+    instances: 0,
+    memory: 0,
+    enable_ssh: false
+  };
   appDefaultEdits: ApplicationEdits;
 
   sub: Subscription;
@@ -46,13 +51,6 @@ export class SummaryTabComponent implements OnInit {
   }
 
   ngOnInit() {
-
-    this.appEdits = {
-      name: '',
-      instances: 0,
-      memory: 0,
-      enable_ssh: false
-    };
 
     this.cardTwoFetching$ = this.appService.application$
       .combineLatest(

@@ -37,6 +37,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     { link: 'ssh', label: 'SSH' }
   ];
 
+  appEdits = {
+    name: '',
+    instances: 0,
+    memory: 0,
+    enable_ssh: false
+  };
+
   startEdit() {
     this.isEditSummary = true;
     this.setAppDefaults();
@@ -60,36 +67,32 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       this.isFetching$ = this.applicationService.isFetchingApp$;
     }));
 
-    this.appEdits = {
-      name: '',
-      instances: 0,
-      memory: 0,
-      enable_ssh: false
-    };
-
     this.cardOneFetching$ = this.applicationService.app$
       .combineLatest(
       this.applicationService.appEnvVars$,
       this.applicationService.appStatsGated$
-      ).mergeMap(([app, appEnvVars, appStatsGated]: [EntityInfo, AppMetadataInfo, AppMetadataInfo]) => {
-	return Observable.of(app.entityRequestInfo.fetching || appEnvVars.metadataRequestState.fetching ||
-	  appStatsGated.metadataRequestState.fetching);
+      )
+      .map(([app, appEnvVars, appStatsGated]: [EntityInfo, AppMetadataInfo, AppMetadataInfo]) => {
+        const fetching = app.entityRequestInfo.fetching || appEnvVars.metadataRequestState.fetching ||
+          appStatsGated ? appStatsGated.metadataRequestState.fetching : false;
+        return Observable.of(app.entityRequestInfo.fetching || appEnvVars.metadataRequestState.fetching ||
+          appStatsGated.metadataRequestState.fetching);
       });
 
     this.sub.push(this.cardOneFetching$
       .filter((isFetching) => {
-	return !isFetching;
+        return !isFetching;
       })
       .mergeMap(_ => {
-	return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
+        return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
       })
       .subscribe(([application, appSummary]: [ApplicationData, EntityInfo]) => {
-	this.appDefaultEdits = {
-	  name: application.app.entity.name,
-	  instances: appSummary.entity.entity.instances,
-	  memory: application.app.entity.memory,
-	  enable_ssh: application.app.entity.enable_ssh
-	};
+        this.appDefaultEdits = {
+          name: application.app.entity.name,
+          instances: appSummary.entity.entity.instances,
+          memory: application.app.entity.memory,
+          enable_ssh: application.app.entity.enable_ssh
+        };
       }));
   }
 
