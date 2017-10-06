@@ -18,6 +18,10 @@ export const CREATE = '[Application] Create';
 export const CREATE_SUCCESS = '[Application] Create success';
 export const CREATE_FAILED = '[Application] Create failed';
 
+export const UPDATE = '[Application] Update';
+export const UPDATE_SUCCESS = '[Application] Update success';
+export const UPDATE_FAILED = '[Application] Update failed';
+
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
 export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
@@ -143,4 +147,30 @@ export class AssociateRouteWithAppApplication implements APIAction {
     entityKey = ApplicationSchema.key;
     options: RequestOptions;
     updatingKey = 'Assigning-Route';
+}
+
+export interface UpdateApplication {
+    name: string;
+    instances: number;
+    memory: number;
+    enable_ssh: boolean;
+}
+
+export class UpdateExistingApplication implements APIAction {
+    constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+        this.options = new RequestOptions();
+        this.options.url = `apps/${guid}`;
+        this.options.method = 'PUT';
+        this.options.body = application;
+    }
+    actions = [
+        UPDATE,
+        UPDATE_SUCCESS,
+        UPDATE_FAILED
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [ApplicationSchema];
+    entityKey = ApplicationSchema.key;
+    options: RequestOptions;
+    updatingKey = 'Updating-Existing-Application';
 }
