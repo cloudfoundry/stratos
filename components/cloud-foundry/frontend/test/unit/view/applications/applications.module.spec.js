@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
- describe('space detail (users) module', function () {
+  describe('space detail (users) module', function () {
 
     var $controller, $httpBackend, $scope, authService, appEventService;
 
