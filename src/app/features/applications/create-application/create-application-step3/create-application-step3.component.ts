@@ -118,8 +118,8 @@ export class CreateApplicationStep3Component implements OnInit {
             app.response.result[0],
             cloudFoundry.guid
           ));
+          this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${app.response.result[0]}/summary`);
         }
-        this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${app.response.result[0]}/summary`);
         return { success: !update };
       });
   }
