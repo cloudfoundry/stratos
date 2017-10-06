@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
+import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { EventsTabComponent } from './application/events-tab/events-tab.component';
 import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
@@ -20,6 +21,9 @@ import { CreateApplicationModule } from './create-application/create-application
     SharedModule,
     ApplicationsRoutingModule,
     CreateApplicationModule
+  ],
+  providers: [
+    ApplicationService
   ],
   declarations: [
     ApplicationWallComponent,

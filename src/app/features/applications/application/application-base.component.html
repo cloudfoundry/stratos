@@ -1,5 +1,5 @@
 <app-page-header>
-  <h1>{{ application.name }} </h1>
+  <h1>{{ (this.application$ | async)?.name }} </h1>
 </app-page-header>
 <app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
   <nav md-tab-nav-bar>

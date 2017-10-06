@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
+import { CoreModule } from '../../../../core/core.module';
+import { SharedModule } from '../../../../shared/shared.module';
 import { SummaryTabComponent } from './summary-tab.component';
 
 describe('SummaryTabComponent', () => {
@@ -8,9 +11,14 @@ describe('SummaryTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SummaryTabComponent ]
+      declarations: [SummaryTabComponent],
+      imports: [
+        CoreModule,
+        SharedModule,
+        RouterTestingModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

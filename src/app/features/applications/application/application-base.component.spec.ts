@@ -2,11 +2,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
 import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
 import { ApplicationBaseComponent } from './application-base.component';
 
-describe('ApplicationPageComponent', () => {
+describe('ApplicationBaseComponent', () => {
   let component: ApplicationBaseComponent;
   let fixture: ComponentFixture<ApplicationBaseComponent>;
 
@@ -14,6 +16,9 @@ describe('ApplicationPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ApplicationBaseComponent],
       imports: [
+        CoreModule,
+        SharedModule,
+        StoreModule,
         RouterTestingModule,
         StoreModule.forRoot({
           entities: entitiesReducer,

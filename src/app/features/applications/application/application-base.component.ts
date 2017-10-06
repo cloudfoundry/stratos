@@ -1,23 +1,20 @@
-import { Subscription } from 'rxjs/Rx';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 import { ApplicationService } from '../application.service';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
-  styleUrls: ['./application-base.component.scss'],
-  providers: [ApplicationService]
+  styleUrls: ['./application-base.component.scss']
 })
-export class ApplicationBaseComponent implements OnInit, OnDestroy {
+export class ApplicationBaseComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
-  sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
-  application;
+  application$;
 
   tabLinks = [
     { link: 'summary', label: 'Summary' },
@@ -29,17 +26,16 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
-    this.sub.push(this.route.params.subscribe(params => {
-      const { id, cfId } = params;
-      this.applicationService.SetApplication(cfId, id);
-      this.sub.push(this.applicationService.application$.subscribe(({ entity, entityRequestInfo }) => {
-        this.application = entity;
-      }));
-      this.isFetching$ = this.applicationService.isFetching$;
-    }));
-  }
-
-  ngOnDestroy() {
-    this.sub.forEach(subscription => subscription.unsubscribe);
+    this.route.params
+      .first()
+      .subscribe(params => {
+        const { id, cfId } = params;
+        this.applicationService.SetApplication(cfId, id);
+        this.application$ = this.applicationService.application$
+          .map(({ entity, entityRequestInfo }) => {
+            return entity;
+          });
+        this.isFetching$ = this.applicationService.isFetching$;
+      });
   }
 }
