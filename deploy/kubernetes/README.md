@@ -76,6 +76,11 @@ Open a terminal and cd to the `deploy/kubernetes` directory:
 $ cd deploy/kubernetes
 ```
 
+Fetch dependant helm charts
+```
+$ helm dep build
+```
+
 Run helm install:
 
 ```
