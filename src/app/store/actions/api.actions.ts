@@ -79,7 +79,7 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-interface EntityInfo {
+export interface EntityInfo {
   entityRequestInfo: EntityRequestState;
   entity: any;
 }
@@ -101,7 +101,8 @@ export const getEntityObservable = (
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-    }).filter(([entities, entity, entityRequestInfo]) => {
+    })
+    .filter(([entities, entity, entityRequestInfo]) => {
       return (entity && entity.entity) || !!entityRequestInfo;
     })
     .map(([entities, entity, entityRequestInfo]) => {
@@ -117,7 +118,6 @@ export const getEntityObservable = (
 
 export function selectEntity(type: string, guid: string) {
   return compose(
-    getAPIResourceEntity,
     getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState

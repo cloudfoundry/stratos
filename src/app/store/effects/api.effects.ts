@@ -11,13 +11,13 @@ import { Observable } from 'rxjs/Observable';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
-  APIAction,
-  ApiActionTypes,
-  APIResource,
-  NormalizedResponse,
-  StartAPIAction,
-  WrapperAPIActionFailed,
-  WrapperAPIActionSuccess,
+    APIAction,
+    ApiActionTypes,
+    APIResource,
+    NormalizedResponse,
+    StartAPIAction,
+    WrapperAPIActionFailed,
+    WrapperAPIActionSuccess,
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
@@ -65,6 +65,7 @@ export class APIEffect {
           if (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post) {
             actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
           }
+
           return actions;
         })
         .catch(err => {

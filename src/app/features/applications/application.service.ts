@@ -4,11 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { EntityInfo, getEntityObservable } from '../../store/actions/api.actions';
 import {
-  AppMetadataInfo,
-  AppMetadataProperties,
-  AppMetadataType,
-  GetAppMetadataAction,
-  getAppMetadataObservable,
+    AppMetadataInfo,
+    AppMetadataProperties,
+    AppMetadataType,
+    GetAppMetadataAction,
+    getAppMetadataObservable,
 } from '../../store/actions/app-metadata.actions';
 import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
 import { GetApplication, GetApplicationSummary } from '../../store/actions/application.actions';
@@ -16,8 +16,8 @@ import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
 import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
 import {
-  ApplicationStateData,
-  ApplicationStateService,
+    ApplicationStateData,
+    ApplicationStateService,
 } from './application/summary-tab/application-state/application-state.service';
 
 export interface ApplicationData {
