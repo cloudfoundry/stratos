@@ -1,143 +1,47 @@
 <div>
   <div class="summary__cards">
-    <md-card>
-      <md-card-header>
-        <md-card-title>
-          <h3>Overview</h3>
-        </md-card-title>
-        <div class="spacer"></div>
-        <button *ngIf="isEditSummary" md-button (click)="appService.SaveApplication(appEdits)" [disabled]="!summaryForm.valid">Save</button>
-        <md-slide-toggle name="edit" [disabled]="(cardOneFetching$ | async)" [(ngModel)]="isEditSummary" (change)="setAppDefaults()">Edit</md-slide-toggle>
-      </md-card-header>
-      <md-card-content>
-        <form #summaryForm="ngForm">
-          <md-list role='list' class='summary__cards__summary__left'>
-            <md-list-item role='listitem'>
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Name'" [value]="(appService.application$ | async)?.app.entity.name">
-                <div class="display-input__input">
-                  <md-form-field>
-                    <input mdInput name="appName" placeholder="Name" [(ngModel)]="appEdits.name" required />
-                  </md-form-field>
-                </div>
-              </app-editable-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-display-value [label]="'Composite State'">
-                <app-application-state [state]="(appService.applicationState$ | async)"></app-application-state>
-              </app-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-display-value [label]="'States'">
-                <md-chip-list aria-orientation="vertical">
-                  <md-chip>App: {{(appService.application$| async)?.app.entity.state}}</md-chip>
-                  <md-chip>Package: {{(appService.application$| async)?.app.entity.package_state}}</md-chip>
-                </md-chip-list>
-              </app-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary">
-                <div class="display-input__display">
-                  <app-display-value [label]="'Running Instances'">
-                    <md-slider mdInput [max]="(appService.appSummary$ | async)?.entity.entity?.instances" step="1" [disabled]="!isEditSummary"
-                      [ngModel]="(appService.appSummary$ | async)?.entity.entity?.running_instances" name="appInstances" min="0"
-                      thumbLabel tickInterval="1"></md-slider>
-                    {{(appService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (appService.appSummary$ | async)?.entity.entity?.instances
-                    }}
-                  </app-display-value>
-                </div>
-                <div class="display-input__input">
-                  <md-form-field>
-                    <input mdInput name="instances" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required pattern="[0-9]+"
-                    />
-                  </md-form-field>
-                </div>
-              </app-editable-display-value>
-            </md-list-item>
-          </md-list>
-          <md-list role='list' class='summary__cards__summary__right'>
-            <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(appService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(appService.application$| async)?.app.entity.memory | mbToHumanSize">
-                <div class="display-input__input">
-                  <md-form-field>
-                    <input mdInput name="appMemory" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+" />
-                  </md-form-field>
-                </div>
-              </app-editable-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-display-value [label]="'disk quota'" [value]="(appService.application$| async)?.app.entity.disk_quota | mbToHumanSize"></app-display-value>
-            </md-list-item>
-            <md-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'SSH Enabled'">
-                <div class="display-input__display">
-                  <app-display-value [label]="'SSH Enabled'">
-                    <md-slide-toggle name="appSsh" [ngModel]="(appService.application$| async)?.app.entity.enable_ssh" [disabled]="true"></md-slide-toggle>
-                  </app-display-value>
-                </div>
-                <div class="display-input__input">
-
-                  <app-display-value [label]="'SSH Enabled'">
-                    <md-slide-toggle name="appSsh" [ngModel]="appEdits.enable_ssh"></md-slide-toggle>
-                  </app-display-value>
-                </div>
-              </app-editable-display-value>
-            </md-list-item>
-          </md-list>
-        </form>
-      </md-card-content>
-      <md-card-footer>
-        <md-progress-bar *ngIf="(cardOneFetching$ | async)" [mode]="'indeterminate'" [color]="'primary'">
-        </md-progress-bar>
-      </md-card-footer>
-    </md-card>
-
-    <md-card>
-      <md-card-header>
-        <md-card-title>
-          <h3>Build, Deploy &amp; Host</h3>
-        </md-card-title>
-      </md-card-header>
-      <md-card-content>
-        <md-list dense>
-          <md-list-item>
-            <app-display-value [label]="'Changed'">
-              <div>Created: {{(appService.application$| async)?.app.metadata.created_at | date:'medium'}}</div>
-              <div>Modifed: {{(appService.application$| async)?.app.entity.package_updated_at | date:'medium' || '-'}}</div>
-            </app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Buildpack'">
-              <app-view-buildpack [buildPack]="(appService.application$| async)?.app.entity.buildpack || (appService.application$| async)?.app.entity.detected_buildpack"></app-view-buildpack>
-            </app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Production'" [value]="(appService.application$| async)?.app.entity.production"></app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Stack'" [value]="(appService.application$| async)?.stack.entity.name"></app-display-value>
-          </md-list-item>
-        </md-list>
-        <md-list>
-          <md-list-item>
-            <app-display-value [label]="'CF'" [value]="(appService.application$| async)?.cf.name"></app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'CF URL'" [value]="(appService.application$| async)?.cf.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf.api_endpoint.Host"></app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Organisation'" [value]="(appService.application$| async)?.organisation.entity.name"></app-display-value>
-          </md-list-item>
-          <md-list-item>
-            <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
-          </md-list-item>
-          <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-            <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
-          </md-list-item>
-          <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-            <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
+    <app-details-card class="summary__card" title="Build, Deploy &amp; Host" [busy]="cardTwoFetching$ | async">
+      <md-list>
+	<md-list-item>
+	  <app-display-value [label]="'Created'">
+	    {{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }}
+	  </app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Modifed'">
+	    {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }}
+	  </app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Buildpack'">
+	    <app-view-buildpack [buildPack]="(appService.application$| async)?.app.entity.buildpack || (appService.application$| async)?.app.entity.detected_buildpack"></app-view-buildpack>
+	  </app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Production'" [value]="(appService.application$| async)?.app.entity.production"></app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Stack'" [value]="(appService.application$| async)?.stack.entity.name"></app-display-value>
+	</md-list-item>
+      </md-list>
+      <md-list>
+	<md-list-item>
+	  <app-display-value [label]="'CF'" [value]="(appService.application$| async)?.cf.name"></app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'CF URL'" [value]="(appService.application$| async)?.cf.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf.api_endpoint.Host"></app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Organisation'" [value]="(appService.application$| async)?.organisation.entity.name"></app-display-value>
+	</md-list-item>
+	<md-list-item>
+	  <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
+	</md-list-item>
+	<md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+	  <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
+	</md-list-item>
+	<md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+	  <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
                 <app-display-value *ngSwitchCase="'giturl'" [label]="'Console Deploy Source'">
                   <div mdTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
                   [mdTooltipHideDelay]="1500">
@@ -153,14 +57,13 @@
                 <app-display-value *ngSwitchCase="'filefolder'" [label]="'Console Deploy Source'" [value]="'Folder Upload'"></app-display-value>
                 <app-display-value *ngSwitchCase="'archive'" [label]="'Console Deploy Source'" [value]="'Archive File Upload'"></app-display-value>
             </span>
-          </md-list-item>
-        </md-list>
-      </md-card-content>
-      <md-card-footer>
-        <md-progress-bar *ngIf="(cardTwoFetching$ | async)" [mode]="'indeterminate'">
-        </md-progress-bar>
-      </md-card-footer>
-    </md-card>
+	</md-list-item>
+      </md-list>
+    </app-details-card>
+    <md-card-footer>
+      <md-progress-bar *ngIf="(cardTwoFetching$ | async)" [mode]="'indeterminate'">
+      </md-progress-bar>
+    </md-card-footer>
   </div>
   <!--<br><br>{{(appService.appSummary$ | async)?.entity.entity.instances | json}}
   <br><br>{{(appService.appSummary$ | async)?.entity.entity.running_instances | json}} -->

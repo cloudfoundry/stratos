@@ -1,25 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
-  MdAutocompleteModule,
-  MdButtonModule,
-  MdCardModule,
-  MdCheckboxModule,
-  MdChipsModule,
-  MdFormFieldModule,
-  MdGridListModule,
-  MdIconModule,
-  MdInputModule,
-  MdProgressBarModule,
-  MdProgressSpinnerModule,
-  MdSelectModule,
-  MdSidenavModule,
-  MdSliderModule,
-  MdSlideToggleModule,
-  MdTableModule,
-  MdTabsModule,
-  MdToolbarModule,
-  MdTooltipModule,
+    MdAutocompleteModule,
+    MdButtonModule,
+    MdCardModule,
+    MdCheckboxModule,
+    MdChipsModule,
+    MdExpansionModule,
+    MdFormFieldModule,
+    MdGridListModule,
+    MdIconModule,
+    MdInputModule,
+    MdProgressBarModule,
+    MdProgressSpinnerModule,
+    MdSelectModule,
+    MdSidenavModule,
+    MdSliderModule,
+    MdSlideToggleModule,
+    MdTableModule,
+    MdTabsModule,
+    MdToolbarModule,
+    MdTooltipModule,
 } from '@angular/material';
 
 const importExport = [
@@ -42,7 +43,8 @@ const importExport = [
     MdSliderModule,
     MdAutocompleteModule,
     MdTooltipModule,
-    MdChipsModule
+    MdChipsModule,
+    MdExpansionModule
 ];
 
 @NgModule({

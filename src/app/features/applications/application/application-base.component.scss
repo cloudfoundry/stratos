@@ -1,3 +1,12 @@
-.application-base {
-
+.summary {
+  &__nav {
+    margin: 20px 0;
+  }
+  &__form {
+    flex: 1;
+    display: flex;
+  }
+  &__card {
+    flex: 1;
+  }
 }

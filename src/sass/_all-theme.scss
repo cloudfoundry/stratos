@@ -16,7 +16,7 @@
     $app-background-color: lighten(mat-color($background-colors, background), 10%);
   }
   @else {
-    $app-background-color: darken(mat-color($background-colors, background), 10%);
+    $app-background-color: darken(mat-color($background-colors, background), 2%);
   }
   html {
     background-color: $app-background-color;

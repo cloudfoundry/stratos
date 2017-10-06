@@ -4,7 +4,7 @@
     <button md-icon-button [routerLink]="'/applications/new/'"><md-icon>add</md-icon></button>
   </div>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching" [text]="'Fetching your applications'">
+<app-loading-page [isLoading]="isFetching" [text]="'Getting your applications'">
   <p *ngIf="error">We're sorry, we couldn't fetch you applications. Please try again later.</p>
   <div [@cardEnter]="applications?.length" class="card-wall">
     <md-card [routerLink]="['/applications', application?.cfGuid , application?.guid]" *ngFor="let application of applications"

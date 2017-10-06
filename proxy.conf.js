@@ -1,7 +1,7 @@
 const PROXY_CONFIG = {
   "/pp": {
     "target": {
-      "host": "localhost",
+      "host": "stratos-ui.ngrok.io",
       "protocol": "https:",
       "port": 443
     },
@@ -9,6 +9,5 @@ const PROXY_CONFIG = {
     "changeOrigin": true
   }
 }
-//stratos-ui.ngrok.io
 
 module.exports = PROXY_CONFIG;

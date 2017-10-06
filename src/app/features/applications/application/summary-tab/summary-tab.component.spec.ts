@@ -8,9 +8,9 @@ describe('SummaryTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SummaryTabComponent ]
+      declarations: [SummaryTabComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

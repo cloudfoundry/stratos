@@ -11,6 +11,7 @@ import { PageHeaderModule } from './components/page-header/page-header.module';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
+import { DetailsCardComponent } from './components/details-card/details-card.component';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
         EditableDisplayValueComponent,
         MbToHumanSizePipe,
         LoadingPageComponent,
+	DetailsCardComponent,
     ],
     exports: [
         FormsModule,
@@ -36,6 +38,7 @@ import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
         PageHeaderModule,
         DisplayValueComponent,
         EditableDisplayValueComponent,
+	DetailsCardComponent,
         SteppersModule,
         StatefulIconComponent,
         MbToHumanSizePipe,
