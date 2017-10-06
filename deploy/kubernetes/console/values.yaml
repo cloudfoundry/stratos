@@ -13,6 +13,7 @@ dbProvider: mysql
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+useLb: false
 console:
   port: 443
 # externalIP: 127.0.0.1
