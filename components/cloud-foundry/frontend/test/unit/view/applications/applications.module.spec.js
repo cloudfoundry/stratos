@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('space detail (users) module', function () {
+ describe('space detail (users) module', function () {
 
     var $controller, $httpBackend, $scope, authService, appEventService;
 
@@ -20,7 +20,7 @@
       var appBusyService = $injector.get('appBusyService');
 
       authService = modelManager.retrieve('cloud-foundry.model.auth');
-      spyOn(authService, 'initialize');
+      spyOn(authService, 'initialize').and.callThrough();
 
       $scope = $injector.get('$rootScope').$new();
 
