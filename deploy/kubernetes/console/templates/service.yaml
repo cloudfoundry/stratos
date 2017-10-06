@@ -13,25 +13,12 @@ spec:
   - name: https
     port: 443
     protocol: TCP
-    targetPort: 443
+    targetPort: {{ .Values.console.port }}
   selector:
     app: "{{ .Release.Name }}"
     component: console
   type: NodePort
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: console-postgres
-  name: "{{ .Release.Name }}-postgres-int"
-spec:
-  ports:
-  - name: postgres
-    port: 5432
-    protocol: TCP
-    targetPort: 5432
-  selector:
-    app: "{{ .Release.Name }}"
-    component: postgres
-  type: ClusterIP
+{{- if .Values.console.externalIP }}
+  externalIPs:
+  -  {{ .Values.console.externalIP }}
+{{- end }}

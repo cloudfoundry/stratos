@@ -13,6 +13,9 @@ dbProvider: mysql
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+console:
+  port: 443
+# externalIP: 127.0.0.1
 noShared: false
 images:
   console: stratos-console
@@ -43,7 +46,7 @@ mariadb:
   mariadbPassword: changeme
   mariadbDatabase: console
   persistence:
-    accessMode: ReadWriteMany
+    accessMode: ReadWriteOnce
     size: 1Gi
 #    storageClass: default
   metrics:
