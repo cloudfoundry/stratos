@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { EntityRequestState } from './../reducers/api-request-reducer';
+import { EntityRequestState, UpdateState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -124,6 +124,16 @@ export function selectEntity(type: string, guid: string) {
   );
 }
 
+export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
+  return compose(
+    getUpdateSectionById(updatingGuid),
+    getEntityUpdateSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
+  );
+}
+
 export function selectEntityRequestInfo(type: string, guid: string) {
   return compose(
     getEntityById<EntityRequestState>(guid),
@@ -144,6 +154,14 @@ export function getEntityType(type: string) {
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
+};
+
+export const getEntityUpdateSections = (request: EntityRequestState) => {
+  return request.updating;
+};
+
+export const getUpdateSectionById = (guid: string) => (updating): UpdateState => {
+  return updating[guid];
 };
 
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;

@@ -43,3 +43,6 @@ Thumbs.db
 
 # Git
 *.orig
+
+# Angular CLI
+proxy.conf.js
