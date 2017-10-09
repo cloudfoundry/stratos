@@ -57,7 +57,7 @@ export class ApplicationService {
   appGuid: string;
   cfGuid: string;
 
-  IsEntityComplete(value, requestInfo: { fetching: boolean }) {
+  IsEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {
@@ -76,7 +76,7 @@ export class ApplicationService {
       ApplicationSchema,
       appGuid,
       new GetApplication(appGuid, cfGuid)
-    );
+    ).debounceTime(250);
 
     this.appSummary$ = getEntityObservable(
       this.store,
@@ -99,6 +99,8 @@ export class ApplicationService {
       new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
     );
 
+    // Assign/Amalgamate them to public properties (with mangling if required)
+
     this.appStatsGated$ = this.app$
       .filter((appInfo: EntityInfo) => {
         // console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
@@ -117,8 +119,6 @@ export class ApplicationService {
         });
       });
 
-    // Assign/Amalgamate them to public properties (with mangling if required)
-
     this.application$ = this.app$
       .combineLatest(
       this.store.select(cnsisEntitySelector),
@@ -131,9 +131,6 @@ export class ApplicationService {
         const hasOrg = hasSpace ? entity.entity.space.entity.organization : false;
         const hasCfGuid = entity.entity.cfGuid;
         return hasSpace && hasOrg && hasCfGuid;
-      })
-      .do(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
-
       })
       .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
         return {
@@ -173,7 +170,6 @@ export class ApplicationService {
     this.isUpdatingApp$ =
       this.store.select(selectEntityUpdateInfo(ApplicationSchema.key, appGuid, UpdateExistingApplication.updateKey))
         .map((updateState: UpdateState) => {
-          console.log('isUpdatingApp: obs:', updateState);
           return updateState ? updateState.busy : false;
         });
   }

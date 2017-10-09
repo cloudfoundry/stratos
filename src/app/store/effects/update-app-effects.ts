@@ -29,16 +29,16 @@ export class UpdateAppEffects {
     ) {
     }
 
-    @Effect({ dispatch: false }) UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
-        .do((action: WrapperAPIActionSuccess) => {
-            this.store.dispatch(new GetApplication(
+    @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
+        .mergeMap((action: WrapperAPIActionSuccess) => {
+            return [new GetApplication(
                 action.apiAction.guid,
                 action.apiAction.cnis,
-            ));
-            this.store.dispatch(new GetApplicationSummary(
+            ),
+            new GetApplicationSummary(
                 action.apiAction.guid,
                 action.apiAction.cnis,
-            ));
+            )];
         });
 
 }
