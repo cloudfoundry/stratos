@@ -15,12 +15,10 @@ import { WindowRef } from './window-ref/window-ref.service';
     MDAppModule
   ],
   exports: [
-    BrowserModule,
     MDAppModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule,
-    BrowserAnimationsModule,
+    ReactiveFormsModule
   ],
   providers: [
     AuthGuardService,
