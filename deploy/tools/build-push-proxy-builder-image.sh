@@ -38,7 +38,7 @@ docker run \
        splatform/stratos-bk-build-base:dev \
        sh /stratos-ui/run-glide.sh
 
-# # Generate NPM cache
+# Generate NPM cache
 docker run \
        -ti \
        --rm \
