@@ -16,7 +16,6 @@ export interface AppMetadataRequestState {
     updating: boolean;
     creating: boolean;
     error: boolean;
-    response: any;
     message: string;
 }
 
@@ -25,7 +24,6 @@ const defaultAppMetadataRequest = {
     updating: false,
     creating: false,
     error: false,
-    response: null,
     message: ''
 };
 
@@ -37,12 +35,8 @@ export function appMetadataRequestReducer(state = {}, action) {
                 return state;
             }
             const requestState = getAppMetadataRequestState(state, appMetadataAction);
-            appMetadataAction.options.method === RequestMethod.Post ||
-                appMetadataAction.options.method.toString().toLocaleLowerCase() === 'post' ?
-                requestState.creating = true :
-                requestState.fetching = true;
+            requestState.fetching = true;
             requestState.error = false;
-            requestState.response = {};
             requestState.message = '';
             return setAppMetadataRequestState(state, requestState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_SUCCESS:
@@ -56,7 +50,6 @@ export function appMetadataRequestReducer(state = {}, action) {
             requestFailedState.fetching = false;
             requestFailedState.error = true;
             requestFailedState.message = action.message;
-            requestFailedState.response = action.response;
             return setAppMetadataRequestState(state, requestFailedState, appMetadataAction);
         default:
             return state;
@@ -67,7 +60,7 @@ function getAppMetadataRequestState(state, { metadataType, guid }): AppMetadataR
     let requestState = state[guid] || {};
     requestState = requestState[metadataType] || {};
     if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
-        return requestState;
+        return { ...requestState };
     }
     return { ...defaultAppMetadataRequest };
 }
