@@ -1,4 +1,5 @@
-FROM node:6.9.1
+FROM splatform/stratos-ui-base:dev
+
 
 ARG USER_ID
 ARG GROUP_ID
@@ -13,7 +14,7 @@ RUN user_exists=$(getent passwd ${USER_ID} | cut -d: -f1); \
       echo "Group with gid ${GROUP_ID} already exists."; \
     fi ;\
     if [ -z "${user_exists}" ]; then \
-      useradd -m -r -g ${USER_NAME} -u ${USER_ID} ${USER_NAME}; \
+      useradd -m -r -g ${GROUP_ID} -u ${USER_ID} ${USER_NAME}; \
       else \
         echo "User with uid ${USER_ID} already exists."; \
       fi

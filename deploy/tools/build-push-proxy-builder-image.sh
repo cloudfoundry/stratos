@@ -35,17 +35,17 @@ docker run \
        -e HOME=/stratos-ui \
        --volume ${PWD}/glide-cache:/.glide \
        --volume $PWD/../:/stratos-ui \
-       splatform/stratos-bk-build-base:latest \
+       splatform/stratos-bk-build-base:dev \
        sh /stratos-ui/run-glide.sh
 
-# Generate NPM cache
+# # Generate NPM cache
 docker run \
        -ti \
        --rm \
        --volume ${PWD}/npm-cache:/root/.npm \
        --volume $PWD/..:/stratos-ui \
-       splatform/stratos-bk-build-base:latest \
-       sh  -c "cd /stratos-ui && npm install"
+       splatform/stratos-bk-build-base:dev \
+       bash  -c "cd /stratos-ui && npm install"
 
 docker build --tag ${NAME} \
              --file Dockerfile.bk.build .
@@ -57,6 +57,6 @@ rm -rf ../vendor/
 
 popd
 
-echo "Tag and push the shared image"
+echo "Tag ${SHARED_IMAGE_URL} and push the shared image"
 docker tag ${NAME} ${SHARED_IMAGE_URL}
 docker push ${SHARED_IMAGE_URL}

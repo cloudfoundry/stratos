@@ -24,14 +24,6 @@ services:
   ##############################################################################
 
 
-  postgres:
-    extends: imageCommon
-    image: postgres:latest
-    env_file:
-      ./postgres.env
-    ports:
-      - "5432:5432"
-
   mariadb:
     extends: imageCommon
     image: mariadb:latest

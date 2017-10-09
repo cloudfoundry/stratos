@@ -1,12 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
+env
+ls /
 rm -rf node_modules
 npm install
 npm run build-backend
 
 if [ "${USER_NAME}" != "root" ]; then
-  adduser -D -G users -u ${USER_ID} ${USER_NAME}
+  useradd -G users -u ${USER_ID} ${USER_NAME}
   chown -R ${USER_NAME}:${GROUP_ID} outputs/
 fi
 

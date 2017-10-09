@@ -1,4 +1,4 @@
-FROM splatform/stratos-goose
+FROM splatform/stratos-goose-base:dev
 
 WORKDIR /src
 

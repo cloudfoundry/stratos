@@ -14,7 +14,7 @@ docker run -it \
            -e GROUP_ID=$(id -g) \
            --name console-proxy-builder \
            --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-           splatform/stratos-proxy-builder:test $*
+           splatform/stratos-proxy-builder:dev $*
 
 ret=$?
 popd
