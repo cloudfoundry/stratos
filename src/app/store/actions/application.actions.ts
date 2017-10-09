@@ -1,4 +1,4 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
+import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from './api.actions';
@@ -157,11 +157,16 @@ export interface UpdateApplication {
 }
 
 export class UpdateExistingApplication implements APIAction {
+    static updateKey = 'Updating-Existing-Application';
+
     constructor(public guid: string, public cnis: string, application: UpdateApplication) {
         this.options = new RequestOptions();
         this.options.url = `apps/${guid}`;
         this.options.method = 'PUT';
         this.options.body = application;
+        this.options.headers = new Headers();
+        const cnsiPassthroughHeader = 'x-cap-passthrough';
+        this.options.headers.set(cnsiPassthroughHeader, 'true');
     }
     actions = [
         UPDATE,
@@ -172,5 +177,5 @@ export class UpdateExistingApplication implements APIAction {
     entity = [ApplicationSchema];
     entityKey = ApplicationSchema.key;
     options: RequestOptions;
-    updatingKey = 'Updating-Existing-Application';
+    updatingKey = UpdateExistingApplication.updateKey;
 }

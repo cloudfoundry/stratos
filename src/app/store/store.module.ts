@@ -22,6 +22,7 @@ import { dashboardReducer } from './reducers/dashboard-reducer';
 import { entitiesReducer } from './reducers/entity.reducer';
 import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { UpdateAppEffects } from './effects/update-app-effects';
 
 
 export function logger(reducer): any {
@@ -58,6 +59,7 @@ export const metaReducers = environment.production ? [] : [logger];
       CNSISEffect,
       CreateAppPageEffects,
       AppMetadataEffect,
+      UpdateAppEffects,
     ]),
   ]
 })

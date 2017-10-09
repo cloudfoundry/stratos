@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { EntityInfo, getEntityObservable, selectEntityRequestInfo } from '../../store/actions/api.actions';
+import { EntityInfo, getEntityObservable, selectEntityUpdateInfo } from '../../store/actions/api.actions';
 import {
   AppMetadataInfo,
   AppMetadataProperties,
@@ -19,6 +19,7 @@ import {
 } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
+import { UpdateState } from '../../store/reducers/api-request-reducer';
 import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
 import {
   ApplicationStateData,
@@ -100,17 +101,17 @@ export class ApplicationService {
 
     this.appStatsGated$ = this.app$
       .filter((appInfo: EntityInfo) => {
-        console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
+        // console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
         return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo);
       })
       .delay(1)
       .mergeMap((appInfo: EntityInfo) => {
-        console.log('appStatsGated$: mergeMap: ', appInfo);
+        // console.log('appStatsGated$: mergeMap: ', appInfo);
         if (appInfo && appInfo.entity && appInfo.entity.entity && appInfo.entity.entity.state === 'STARTED') {
-          console.log('appStatsGated$: mergeMap: appStats');
+          // console.log('appStatsGated$: mergeMap: appStats');
           return appStats$;
         }
-        console.log('appStatsGated$: mergeMap: app');
+        // console.log('appStatsGated$: mergeMap: app');
         return this.app$.map((app: EntityInfo) => {
           return null;
         });
@@ -118,21 +119,18 @@ export class ApplicationService {
 
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    // const logEntries = new Subject();
-
-    // this.isUpdatingApp$ = logEntries.asObservable();
-    this.isUpdatingApp$ = this.store.select(selectEntityRequestInfo(ApplicationSchema.key, appGuid))
-      .mergeMap(({ updating }) => {
-        console.log('!!!!!! ', updating);
-        return Observable.of(true);
-      });
-
     this.application$ = this.app$
       .combineLatest(
       this.store.select(cnsisEntitySelector),
     )
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
         return this.IsEntityComplete(entity, entityRequestInfo) && cnsis;
+      })
+      .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
+        const hasSpace = entity.entity.space;
+        const hasOrg = hasSpace ? entity.entity.space.entity.organization : false;
+        const hasCfGuid = entity.entity.cfGuid;
+        return hasSpace && hasOrg && hasCfGuid;
       })
       .do(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
 
@@ -165,24 +163,22 @@ export class ApplicationService {
     });
 
 
+    /**
+     * An observable based on the core application entity
+    */
     this.isFetchingApp$ = this.app$.map(({ entity, entityRequestInfo }) => {
       return !this.IsEntityComplete(entity, entityRequestInfo);
     });
 
-    //TODO: RC How to unsub?
-    this.application$.subscribe((appData: ApplicationData) => {
-      this.appGuid = appData.app.entity.guid;
-      this.cfGuid = appData.app.entity.cfGuid;
-    });
-  }
-
-  RefreshApplication() {
-    // TODO: RC Force an update to catch remote changes?
-    console.log('NOT IMPLEMENTED');
+    this.isUpdatingApp$ =
+      this.store.select(selectEntityUpdateInfo(ApplicationSchema.key, appGuid, UpdateExistingApplication.updateKey))
+        .map((updateState: UpdateState) => {
+          console.log('isUpdatingApp: obs:', updateState);
+          return updateState ? updateState.busy : false;
+        });
   }
 
   UpdateApplication(updatedApplication: UpdateApplication) {
-    console.log('SAVING: ', updatedApplication);
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
