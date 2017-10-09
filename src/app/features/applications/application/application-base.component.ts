@@ -36,7 +36,12 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   summaryDataChanging: Observable<boolean>;
 
   appEdits: ApplicationEdits;
-  appDefaultEdits: ApplicationEdits;
+  appDefaultEdits: ApplicationEdits = {
+    enable_ssh: false,
+    instances: 0,
+    memory: 0,
+    name: ''
+  };
 
   tabLinks = [
     { link: 'summary', label: 'Build Info' },
@@ -46,13 +51,6 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     { link: 'events', label: 'Events' },
     { link: 'ssh', label: 'SSH' }
   ];
-
-  appEdits = {
-    name: '',
-    instances: 0,
-    memory: 0,
-    enable_ssh: false
-  };
 
   startEdit() {
     this.isEditSummary = true;
@@ -73,6 +71,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.setAppDefaults();
+
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
