@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { EntityRequestState, UpdateState } from './../reducers/api-request-reducer';
+import { UpdateState, EntityRequestState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -157,7 +157,7 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
 };
 
 export const getEntityUpdateSections = (request: EntityRequestState) => {
-  return request.updating;
+  return request ? request.updating : false;
 };
 
 export const getUpdateSectionById = (guid: string) => (updating): UpdateState => {

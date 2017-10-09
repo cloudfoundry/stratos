@@ -13,6 +13,7 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { AppReducersModule } from './reducers.module';
 import { appMetadataReducer } from './reducers/app-metadata.reducer';
 import { appMetadataRequestReducer } from './reducers/app-metadata-request.reducer';
+import { UpdateAppEffects } from './effects/update-app-effects';
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import { appMetadataRequestReducer } from './reducers/app-metadata-request.reduc
       CNSISEffect,
       CreateAppPageEffects,
       AppMetadataEffect,
+      UpdateAppEffects,
     ]),
   ]
 })

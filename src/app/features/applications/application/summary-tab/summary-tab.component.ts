@@ -1,18 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../../store/actions/api.actions';
 import { ApplicationData, ApplicationService } from '../../application.service';
-import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 
-interface ApplicationEdits {
-  name: string;
-  instances: number;
-  memory: number;
-  enable_ssh: boolean;
-}
-
+//TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
   selector: 'app-summary-tab',
   templateUrl: './summary-tab.component.html',
@@ -21,34 +14,9 @@ interface ApplicationEdits {
 export class SummaryTabComponent implements OnInit {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
-  isEditSummary: boolean;
-
   appService = this.applicationService;
 
   cardTwoFetching$: Observable<boolean>;
-  appEdits = {
-    name: '',
-    instances: 0,
-    memory: 0,
-    enable_ssh: false
-  };
-  appDefaultEdits: ApplicationEdits;
-
-  sub: Subscription;
-
-  setAppDefaults() {
-    this.appEdits = { ... this.appDefaultEdits };
-  }
-
-  SaveApplication(application) {
-    // console.log('SAVING: ', application);
-    // // setTimeout(_ = > {
-    // //   this.isEditSummary = false;
-    // // }, 1);
-    // setTimeout(_ => this.isEditSummary = false, 5000);
-    // this.isEditSummary = false;
-
-  }
 
   ngOnInit() {
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-details-card',
@@ -15,6 +15,8 @@ export class DetailsCardComponent implements OnInit {
 
   @Input('busy')
   busy: boolean;
+
+
 
   ngOnInit() {
   }

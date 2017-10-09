@@ -11,13 +11,13 @@ import { Observable } from 'rxjs/Observable';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
-    APIAction,
-    ApiActionTypes,
-    APIResource,
-    NormalizedResponse,
-    StartAPIAction,
-    WrapperAPIActionFailed,
-    WrapperAPIActionSuccess,
+  APIAction,
+  ApiActionTypes,
+  APIResource,
+  NormalizedResponse,
+  StartAPIAction,
+  WrapperAPIActionFailed,
+  WrapperAPIActionSuccess,
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
@@ -124,7 +124,7 @@ export class APIEffect {
 
   addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
     const cnsiHeader = 'x-cap-cnsi-list';
-    const headers = new Headers();
+    const headers = header || new Headers();
     if (typeof cnsis === 'string') {
       headers.set(cnsiHeader, cnsis);
     } else {

@@ -2,46 +2,46 @@
   <div class="summary__cards">
     <app-details-card class="summary__card" title="Build, Deploy &amp; Host" [busy]="cardTwoFetching$ | async">
       <md-list>
-	<md-list-item>
-	  <app-display-value [label]="'Created'">
-	    {{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }}
-	  </app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Modifed'">
-	    {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }}
-	  </app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Buildpack'">
-	    <app-view-buildpack [buildPack]="(appService.application$| async)?.app.entity.buildpack || (appService.application$| async)?.app.entity.detected_buildpack"></app-view-buildpack>
-	  </app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Production'" [value]="(appService.application$| async)?.app.entity.production"></app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Stack'" [value]="(appService.application$| async)?.stack.entity.name"></app-display-value>
-	</md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Created'">
+            {{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }}
+          </app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Modifed'">
+            {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }}
+          </app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Buildpack'">
+            <app-view-buildpack [buildPack]="(appService.application$| async)?.app.entity.buildpack || (appService.application$| async)?.app.entity.detected_buildpack"></app-view-buildpack>
+          </app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Production'" [value]="(appService.application$| async)?.app.entity.production"></app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Stack'" [value]="(appService.application$| async)?.stack?.entity.name"></app-display-value>
+        </md-list-item>
       </md-list>
       <md-list>
-	<md-list-item>
-	  <app-display-value [label]="'CF'" [value]="(appService.application$| async)?.cf.name"></app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'CF URL'" [value]="(appService.application$| async)?.cf.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf.api_endpoint.Host"></app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Organisation'" [value]="(appService.application$| async)?.organisation.entity.name"></app-display-value>
-	</md-list-item>
-	<md-list-item>
-	  <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
-	</md-list-item>
-	<md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-	  <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
-	</md-list-item>
-	<md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-	  <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
+        <md-list-item>
+          <app-display-value [label]="'CF'" [value]="(appService.application$| async)?.cf?.name"></app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'CF URL'" [value]="(appService.application$| async)?.cf?.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf?.api_endpoint.Host"></app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Organisation'" [value]="(appService.application$| async)?.organisation.entity.name"></app-display-value>
+        </md-list-item>
+        <md-list-item>
+          <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
+        </md-list-item>
+        <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+          <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
+        </md-list-item>
+        <md-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
+          <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
                 <app-display-value *ngSwitchCase="'giturl'" [label]="'Console Deploy Source'">
                   <div mdTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
                   [mdTooltipHideDelay]="1500">
@@ -57,7 +57,7 @@
                 <app-display-value *ngSwitchCase="'filefolder'" [label]="'Console Deploy Source'" [value]="'Folder Upload'"></app-display-value>
                 <app-display-value *ngSwitchCase="'archive'" [label]="'Console Deploy Source'" [value]="'Archive File Upload'"></app-display-value>
             </span>
-	</md-list-item>
+        </md-list-item>
       </md-list>
     </app-details-card>
     <md-card-footer>
