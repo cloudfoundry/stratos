@@ -10,11 +10,16 @@ DB_MIGRATE_DIR=$CF_DIR/db-migration
 STRATOS_DB_ENV=$CF_DIR/.env_vars
 GOOSE_BIN_DIR=$DB_MIGRATE_DIR/bin
 DEPLOY_DIR=$CF_DIR/..
+DBMIGRATE_BIN_DIR="$CF_DIR/../db/migrations"
 
 # Try and parse the VCAP_SERVICES env var for DB Config
 $DB_MIGRATE_DIR/parseVcapServices > $STRATOS_DB_ENV
 source $STRATOS_DB_ENV
 rm $STRATOS_DB_ENV
+
+# Ensure go is on the path in order for the DB Migrations to run
+export PATH=${DB_MIGRATE_DIR}/golang/go/bin:$PATH
+export GOPATH=${DB_MIGRATE_DIR}/gopath
 
 function handleGooseResult {
   if [ $? -eq 0 ]; then
@@ -34,12 +39,12 @@ if [ "$CF_INSTANCE_INDEX" -eq "0" ]; then
     case $DB_TYPE in
     "postgresql")
         echo "Migrating postgresql instance on $DB_HOST"
-        $GOOSE_BIN_DIR/goose -env cf_postgres up
+        $DBMIGRATE_BIN_DIR/migrateStratosDb -env cf_postgres up
         handleGooseResult
         ;;
     "mysql")
         echo "Migrating mysql instance on $DB_HOST"
-        $GOOSE_BIN_DIR/goose -env cf_mysql up
+        $DBMIGRATE_BIN_DIR/migrateStratosDb -env cf_mysql up
         handleGooseResult
         ;;
     *)

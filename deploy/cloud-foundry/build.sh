@@ -45,10 +45,20 @@ chmod +x portal-proxy
 
 # Get the goose db migration tool
 export DB_MIGRATE_DIR="$CF_DIR/db-migration"
-export GOPATH=${CACHE_DIR}/goose
+export DB_DIR="$CF_DIR/../db/migrations"
+export GOPATH=${CACHE_DIR}/migration
 mkdir -p $GOPATH
-export GOBIN=${DB_MIGRATE_DIR}/bin
-go get bitbucket.org/liamstask/goose/cmd/goose
+
+go get bitbucket.org/liamstask/goose/lib/goose
+go get github.com/lib/pq
+go get github.com/mattn/go-sqlite3
+
+# Build the migration tool
+pushd ${DB_DIR}
+go build -o migrateStratosDb
+echo "Built DB migrator"
+popd
+
 
 # Build the migration helper
 pushd ${DB_MIGRATE_DIR}
@@ -61,3 +71,5 @@ rm -rf ./outputs
 
 # Don't need the source code after build
 rm -rf ./components
+
+echo "All done"
