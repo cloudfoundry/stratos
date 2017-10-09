@@ -1,3 +1,32 @@
-<p>
-  variables-tab works!
-</p>
+<div class="">
+  <!-- TODO: RC Empty table/no env vars message-->
+  <!-- TODO: RC Arrive from app wall error-->
+
+  <div class="">
+    <md-form-field floatPlaceholder="never">
+      <input mdInput #filter placeholder="Filter Environment Variables">
+    </md-form-field>
+  </div>
+
+  <md-table #table [dataSource]="envVarsEnvironment" mdSort>
+
+    <ng-container mdColumnDef="name">
+      <md-header-cell *mdHeaderCellDef md-sort-header> Name </md-header-cell>
+      <md-cell *mdCellDef="let row"> {{row.name}} </md-cell>
+    </ng-container>
+
+    <ng-container mdColumnDef="value">
+      <md-header-cell *mdHeaderCellDef md-sort-header> Value </md-header-cell>
+      <md-cell *mdCellDef="let row"> {{row.value}} </md-cell>
+    </ng-container>
+
+
+    <md-header-row *mdHeaderRowDef="['name', 'value']">
+      test
+    </md-header-row>
+    <md-row *mdRowDef="let row; columns: ['name', 'value'];"></md-row>
+  </md-table>
+
+  <md-paginator #paginator [length]="(envVarsEnvironment.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
+  </md-paginator>
+</div>
