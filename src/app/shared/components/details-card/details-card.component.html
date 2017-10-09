@@ -1,0 +1,13 @@
+<div class="details-card">
+  <div [class.show]="busy" class="details-card__loading">
+    <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+  </div>
+  <md-expansion-panel [expanded]="true">
+    <md-expansion-panel-header>
+      <md-panel-title>
+	<h2>{{ title }}</h2>
+      </md-panel-title>
+    </md-expansion-panel-header>
+    <ng-content></ng-content>
+  </md-expansion-panel>
+</div>

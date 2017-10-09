@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { EntityRequestState } from './../reducers/api-request-reducer';
+import { UpdateState, EntityRequestState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -79,7 +79,7 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-interface EntityInfo {
+export interface EntityInfo {
   entityRequestInfo: EntityRequestState;
   entity: any;
 }
@@ -101,7 +101,8 @@ export const getEntityObservable = (
       if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
         store.dispatch(action);
       }
-    }).filter(([entities, entity, entityRequestInfo]) => {
+    })
+    .filter(([entities, entity, entityRequestInfo]) => {
       return (entity && entity.entity) || !!entityRequestInfo;
     })
     .map(([entities, entity, entityRequestInfo]) => {
@@ -117,10 +118,19 @@ export const getEntityObservable = (
 
 export function selectEntity(type: string, guid: string) {
   return compose(
-    getAPIResourceEntity,
     getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
+  );
+}
+
+export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
+  return compose(
+    getUpdateSectionById(updatingGuid),
+    getEntityUpdateSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
@@ -144,6 +154,14 @@ export function getEntityType(type: string) {
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
+};
+
+export const getEntityUpdateSections = (request: EntityRequestState) => {
+  return request ? request.updating : false;
+};
+
+export const getUpdateSectionById = (guid: string) => (updating): UpdateState => {
+  return updating[guid];
 };
 
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;

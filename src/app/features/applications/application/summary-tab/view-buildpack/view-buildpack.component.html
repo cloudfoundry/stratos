@@ -1,0 +1,2 @@
+<span *ngIf="!isWebLink">{{ buildPack || '-' }}</span>
+<a *ngIf="isWebLink" target="buildPack" href="{{ buildPack }}" rel="noopener noreferrer">{{ buildPack }}</a>

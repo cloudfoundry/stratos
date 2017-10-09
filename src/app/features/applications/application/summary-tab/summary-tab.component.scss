@@ -1,0 +1,11 @@
+  .summary {
+    &__cards {
+      display: flex;
+      $summary-card-spacing: 20px;
+      flex-wrap: wrap;
+      margin: auto;
+    }
+    &__card {
+      width: 100%;
+    }
+  }

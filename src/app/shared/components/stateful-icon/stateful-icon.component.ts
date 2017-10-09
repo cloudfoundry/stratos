@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, TemplateRef, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, TemplateRef, ViewChild, SimpleChanges } from '@angular/core';
 
 interface IconDefinition {
   icon: string;

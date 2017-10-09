@@ -6,7 +6,7 @@ import { defaultEntitiesState, EntitiesState } from './entity.reducer';
 
 const defaultState = { ...defaultEntitiesState };
 
-interface UpdateState {
+export interface UpdateState {
     busy: boolean;
     error: boolean;
     message: string;

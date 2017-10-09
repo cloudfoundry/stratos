@@ -1,0 +1,10 @@
+<div class="display-value">
+  <div class="display-value__label">{{label}}</div>
+  <div class="display-value__value">
+    <span *ngIf="displayDefault">{{value}}</span>
+    <div #displayCustom>
+      <ng-content></ng-content>
+    </div>
+  </div>
+
+</div>

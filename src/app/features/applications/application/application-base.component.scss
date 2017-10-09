@@ -1,3 +1,27 @@
-.application-base {
-
+.summary {
+  display: flex;
+  &__nav {
+    margin: 20px 0;
+  }
+  &__form {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    div {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+    }
+  }
+  &__card {
+    flex: 1;
+  }
+  md-chip-list {
+    md-chip {
+      margin-right: 7px;
+      margin-bottom: 5px;
+      margin-left: 0;
+    }
+  }
 }

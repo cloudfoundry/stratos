@@ -9,21 +9,26 @@ import { EventsTabComponent } from './application/events-tab/events-tab.componen
 import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
 import { ServicesTabComponent } from './application/services-tab/services-tab.component';
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
+import { ApplicationEnvVarsService } from './application/summary-tab/application-env-vars.service';
+import {
+  ApplicationStateIconComponent,
+} from './application/summary-tab/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe,
+} from './application/summary-tab/application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateComponent } from './application/summary-tab/application-state/application-state.component';
+import { ApplicationStateService } from './application/summary-tab/application-state/application-state.service';
 import { SummaryTabComponent } from './application/summary-tab/summary-tab.component';
+import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
-import { CreateApplicationModule } from './create-application/create-application.module';
 
 
 @NgModule({
   imports: [
     CoreModule,
     SharedModule,
-    ApplicationsRoutingModule,
-    CreateApplicationModule
-  ],
-  providers: [
-    ApplicationService
+    ApplicationsRoutingModule
   ],
   declarations: [
     ApplicationWallComponent,
@@ -33,7 +38,16 @@ import { CreateApplicationModule } from './create-application/create-application
     ServicesTabComponent,
     SshTabComponent,
     SummaryTabComponent,
-    VariablesTabComponent
+    VariablesTabComponent,
+    ViewBuildpackComponent,
+    ApplicationStateIconPipe,
+    ApplicationStateIconComponent,
+    ApplicationStateComponent
+  ],
+  providers: [
+    ApplicationService,
+    ApplicationStateService,
+    ApplicationEnvVarsService
   ]
 })
 export class ApplicationsModule { }

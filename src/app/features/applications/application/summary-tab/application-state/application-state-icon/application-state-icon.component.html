@@ -1,0 +1,4 @@
+<div class="app-state-icon">
+  <md-icon [ngClass]="state?.indicator | applicationStateIcon:'class'">{{state?.indicator | applicationStateIcon:'icon'}}</md-icon>
+  <!-- <md-progress-spinner *ngIf="state?.indicator === 'busy'" mode="indeterminate" color="primary"></md-progress-spinner> -->
+</div>

@@ -3,6 +3,7 @@ import { mergeState } from './../helpers/reducer.helper';
 
 export interface EntitiesState {
     application: any;
+    applicationSummary: any;
     stack: any;
     space: any;
     organization: any;
@@ -11,6 +12,7 @@ export interface EntitiesState {
 
 export const defaultEntitiesState = {
     application: {},
+    applicationSummary: {},
     stack: {},
     space: {},
     organization: {},
