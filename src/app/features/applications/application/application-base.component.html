@@ -1,9 +1,15 @@
 <app-page-header>
   <h1>{{ application?.name }} </h1>
   <div class="page-header-right">
-    <button md-icon-button *ngIf="isEditSummary" md-button (click)="saveEdits()" [disabled]="!summaryForm.valid"><md-icon>done</md-icon></button>
-    <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()"><md-icon>clear</md-icon></button>
-    <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="startEdit()"><md-icon>edit</md-icon></button>
+    <button md-icon-button *ngIf="isEditSummary" md-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
+      <md-icon>done</md-icon>
+    </button>
+    <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()">
+      <md-icon>clear</md-icon>
+    </button>
+    <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
+      <md-icon>edit</md-icon>
+    </button>
   </div>
 </app-page-header>
 
@@ -16,7 +22,7 @@
           <md-list dense role='list'>
             <md-list-item role="listitem">
               <app-display-value [label]="'Composite State'">
-                <app-application-state [state]="(applicationService.applicationState$ | async)"></app-application-state>
+                <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
               </app-display-value>
             </md-list-item>
             <md-list-item role="listitem">
@@ -91,8 +97,8 @@
   <nav md-tab-nav-bar class="summary__nav">
     <a md-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
       [active]="rla.isActive">
-            {{tabLink.label}}
-          </a>
+      {{tabLink.label}}
+    </a>
   </nav>
   <router-outlet></router-outlet>
 </app-loading-page>

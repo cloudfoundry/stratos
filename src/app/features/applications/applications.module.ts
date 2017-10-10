@@ -11,10 +11,10 @@ import { ServicesTabComponent } from './application/services-tab/services-tab.co
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { ApplicationEnvVarsService } from './application/summary-tab/application-env-vars.service';
 import {
-  ApplicationStateIconComponent,
+    ApplicationStateIconComponent,
 } from './application/summary-tab/application-state/application-state-icon/application-state-icon.component';
 import {
-  ApplicationStateIconPipe,
+    ApplicationStateIconPipe,
 } from './application/summary-tab/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './application/summary-tab/application-state/application-state.component';
 import { ApplicationStateService } from './application/summary-tab/application-state/application-state.service';

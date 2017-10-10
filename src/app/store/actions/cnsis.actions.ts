@@ -32,7 +32,7 @@ export const cnsisEntitySelector = createSelector<AppState, CNSISState, CNSISSta
 
 export const registeredCnsisEntitySelector = createSelector<AppState, CNSISState['entities'], CNSISState['entities']>(
     cnsisEntitySelector,
-    entities => entities.filter(cnis => cnis.registered)
+    entities => entities ? entities.filter(cnis => cnis.registered) : []
 );
 
 
