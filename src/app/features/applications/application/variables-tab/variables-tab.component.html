@@ -1,32 +1,60 @@
-<div class="">
-  <!-- TODO: RC Empty table/no env vars message-->
+<div class="variables-tab">
   <!-- TODO: RC Arrive from app wall error-->
 
-  <div class="">
-    <md-form-field floatPlaceholder="never">
-      <input mdInput #filter placeholder="Filter Environment Variables">
-    </md-form-field>
+  <div class="variables-tab__env-table">
+    <div [hidden]="!(envVarsDataSource.count$ | async)">
+      <md-card>
+        <md-card-header [ngClass]="{'selected': (envVarsDataSource.hasSelected$ | async) }">
+          <div [hidden]="(envVarsDataSource.hasSelected$ | async)">
+            <div class="md-card-header-text mat-card-header-text">Environment Variables</div>
+            <md-form-field floatPlaceholder="never">
+              <input mdInput #filter placeholder="Filter Environment Variables">
+            </md-form-field>
+            <button md-button><md-icon>add</md-icon></button>
+          </div>
+          <div [hidden]="!(envVarsDataSource.hasSelected$ | async)">
+            <div class="md-card-header-text mat-card-header-text">{{envVarsDataSource.selectedRows.size}} Selected</div>
+            <button md-button><md-icon>delete</md-icon></button>
+          </div>
+        </md-card-header>
+        <md-card-content>
+          <md-table #table [dataSource]="envVarsDataSource" mdSort>
+            <ng-container mdColumnDef="select">
+              <md-header-cell *mdHeaderCellDef>
+                <md-checkbox [value]="envVarsDataSource.selectAllChecked" (click)="envVarsDataSource.selectAllFilteredRows()"></md-checkbox>
+              </md-header-cell>
+              <md-cell *mdCellDef="let row">
+                <md-checkbox [checked]="envVarsDataSource.selectedRows.has(row.name)"></md-checkbox>
+              </md-cell>
+            </ng-container>
+            <ng-container mdColumnDef="name">
+              <md-header-cell *mdHeaderCellDef md-sort-header start="desc"> Name </md-header-cell>
+              <md-cell *mdCellDef="let row"> {{row.name}} </md-cell>
+            </ng-container>
+            <ng-container mdColumnDef="value">
+              <md-header-cell *mdHeaderCellDef md-sort-header> Value </md-header-cell>
+              <md-cell *mdCellDef="let row"> {{row.value}} </md-cell>
+            </ng-container>
+            <md-header-row *mdHeaderRowDef="['select', 'name', 'value']">
+            </md-header-row>
+            <md-row *mdRowDef="let row; columns: ['select', 'name', 'value'];" (click)="envVarsDataSource.selectedRowToggle(row)"></md-row>
+          </md-table>
+        </md-card-content>
+        <md-card-footer>
+          <md-paginator #paginator [length]="(envVarsDataSource.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
+          </md-paginator>
+        </md-card-footer>
+      </md-card>
+    </div>
+    <div [hidden]="(envVarsDataSource.count$ | async)">
+      <md-card>
+        <md-card-content>You have no variables.</md-card-content>
+      </md-card>
+    </div>
+
   </div>
 
-  <md-table #table [dataSource]="envVarsEnvironment" mdSort>
-
-    <ng-container mdColumnDef="name">
-      <md-header-cell *mdHeaderCellDef md-sort-header> Name </md-header-cell>
-      <md-cell *mdCellDef="let row"> {{row.name}} </md-cell>
-    </ng-container>
-
-    <ng-container mdColumnDef="value">
-      <md-header-cell *mdHeaderCellDef md-sort-header> Value </md-header-cell>
-      <md-cell *mdCellDef="let row"> {{row.value}} </md-cell>
-    </ng-container>
 
 
-    <md-header-row *mdHeaderRowDef="['name', 'value']">
-      test
-    </md-header-row>
-    <md-row *mdRowDef="let row; columns: ['name', 'value'];"></md-row>
-  </md-table>
 
-  <md-paginator #paginator [length]="(envVarsEnvironment.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
-  </md-paginator>
 </div>

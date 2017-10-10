@@ -1,0 +1,33 @@
+.variables-tab {
+  &__env-table {
+    md-card-header {
+      div:not([hidden]) {
+        height: 66px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex: 1;
+        .md-card-header-text {
+          flex-grow: 1;
+        }
+        button {
+          margin-left: 10px;
+        }
+      }
+    }
+    md-card-content {
+      md-row:hover {
+        background-color: rgba(0, 0, 0, 0.09);
+        cursor: pointer;
+      }
+      md-header-cell:first-of-type,
+      md-cell:first-of-type {
+        flex-grow: 0;
+        min-width: 50px;
+      }
+      md-cell md-checkbox {
+        pointer-events: none;
+      }
+    }
+  }
+}
