@@ -17,14 +17,15 @@
       var modelManager = $injector.get('modelManager');
       appEventService = $injector.get('appEventService');
       var appLoggedInService = $injector.get('appLoggedInService');
+      var appBusyService = $injector.get('appBusyService');
 
       authService = modelManager.retrieve('cloud-foundry.model.auth');
-      spyOn(authService, 'initialize');
+      spyOn(authService, 'initialize').and.callThrough();
 
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsController = $state.get('cf.applications').controller;
-      $controller = new ApplicationsController($scope, $q, $state, appUtilsService, modelManager, appEventService, appLoggedInService);
+      $controller = new ApplicationsController($scope, $q, $state, appUtilsService, modelManager, appEventService, appLoggedInService, appBusyService);
 
       expect($controller).toBeDefined();
     }));

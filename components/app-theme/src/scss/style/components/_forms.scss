@@ -35,6 +35,10 @@ form, [ng-form] {
       width: $console-input-width * 1.25;
     }
 
+    &.form-group-busy {
+      background-color: $gray-lighter;
+    }
+
     label {
       color: $console-input-label-fg;
       font-weight: normal;

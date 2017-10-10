@@ -30,6 +30,28 @@ Note:
 3. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos UI can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
 4. The Stratos UI Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
+## Enable Endpoints Dashboard to register additional Cloud Foundry endpoints
+
+To enable the dashboard add the environment variable 'FORCE_ENDPOINT_DASHBOARD' to the manifest before the call to 'cf push' is made. For example
+
+ ```
+ applications:
+ - name: console
+   memory: 768M
+   disk_quota: 1G
+   host: console
+   timeout: 180
+   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+   health-check-type: port
+   env:
+     FORCE_ENDPOINT_DASHBOARD: true
+ ```
+
+>**NOTE** This step, on it's own, is meant for demonstration purposes only. Registered endpoints will be lost if the app is restarted and each app instance will have it's own lists. To remove these caveats see the section 'Associate Cloud Foundry database service' below.
+
+## Associate Cloud Foundry database service
+Follow instructions [here](db-migration/README.md).
+
 ## Troubleshooting
 
 ### Creating logs for recent deployments
@@ -149,31 +171,3 @@ applications:
   env:
     CF_API_FORCE_SECURE: true
 ```
-
-### Enable Endpoints Dashboard to register additional Cloud Foundry endpoints
-
->**NOTE** This feature, on it's own, is meant to demonstrate the capabilities of the console with multiple endpoints and is not meant for production environments.
-
-This method comes with two caveats. To remove these caveats see [here](#Associate-Cloud-Foundry-database-service).
-
-1. The console will lose stored data when a cf app instance is restarted
-2. Multiple instances of the app will contain multiple separate stored data instances. This will mean the user may connect to a different one with a different storage when revisiting the console.
-
-
-To enable the dashboard add the environment variable 'FORCE_ENDPOINT_DASHBOARD' to the manifest before the call to 'cf push' is made. For example
-
-```
-applications:
-- name: console
-  memory: 768M
-  disk_quota: 1G
-  host: console
-  timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
-  health-check-type: port
-  env:
-    FORCE_ENDPOINT_DASHBOARD: true
-```
-
-### Associate Cloud Foundry database service
-Follow instructions [here](db-migration/README.md).

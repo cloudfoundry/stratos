@@ -1,4 +1,14 @@
 <!-- Top navigation -->
+<div class="nav-logout-only app-actions-bar" ng-if="applicationCtrl.hideNavigation && !applicationCtrl.hideAccount">
+  <div class="actions-toolbar">
+    <button
+      class="no-focus btn btn-link actions-toolbar-btn"
+      id="navbar-item-logout"
+      ng-click="applicationCtrl.logout()" tabindex="0">
+      <span translate>menu.logout</span>
+    </button>
+  </div>
+</div>
 <nav class="secondary-nav"
   ng-class="{'navbar-icons-only' : applicationCtrl.navbarIconsOnly, 'navbar-hidden': applicationCtrl.hideNavigation}">
     <div ng-if="!applicationCtrl.hideNavigation" type="button"
