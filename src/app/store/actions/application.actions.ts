@@ -150,10 +150,11 @@ export class AssociateRouteWithAppApplication implements APIAction {
 }
 
 export interface UpdateApplication {
-    name: string;
-    instances: number;
-    memory: number;
-    enable_ssh: boolean;
+    name?: string;
+    instances?: number;
+    memory?: number;
+    enable_ssh?: boolean;
+    environment_json?: Object;
 }
 
 export class UpdateExistingApplication implements APIAction {

@@ -2,59 +2,91 @@
   <!-- TODO: RC Arrive from app wall error-->
 
   <div class="variables-tab__env-table">
-    <div [hidden]="!(envVarsDataSource.count$ | async)">
+    <div>
+      <div [class.show]="(envVarsDataSource.fetching$ | async)" class="variables-tab__env-table__loading">
+        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+      </div>
       <md-card>
         <md-card-header [ngClass]="{'selected': (envVarsDataSource.hasSelected$ | async) }">
-          <div [hidden]="(envVarsDataSource.hasSelected$ | async)">
-            <div class="md-card-header-text mat-card-header-text">Environment Variables</div>
-            <md-form-field floatPlaceholder="never">
-              <input mdInput #filter placeholder="Filter Environment Variables">
-            </md-form-field>
-            <button md-button><md-icon>add</md-icon></button>
+          <!-- <md-card-title></md-card-title> -->
+          <div [hidden]="envVarsDataSource.hasSelected$ | async">
+
+            <div class="grow-title mat-card-header-text-wa">Environment Variables</div>
+            <div [hidden]="(envVarsDataSource.count$ | async) === 0">
+              <md-form-field floatPlaceholder="never">
+                <input mdInput #filter placeholder="Filter Environment Variables">
+              </md-form-field>
+            </div>
+
+            <button md-icon-button><md-icon>add</md-icon></button>
           </div>
           <div [hidden]="!(envVarsDataSource.hasSelected$ | async)">
-            <div class="md-card-header-text mat-card-header-text">{{envVarsDataSource.selectedRows.size}} Selected</div>
-            <button md-button><md-icon>delete</md-icon></button>
+            <div class="grow-title mat-card-header-text-wa">{{envVarsDataSource.selectedRows.size}} Selected</div>
+            <button md-icon-button (click)="envVarsDataSource.selectedDelete()"><md-icon>delete</md-icon></button>
           </div>
         </md-card-header>
         <md-card-content>
-          <md-table #table [dataSource]="envVarsDataSource" mdSort>
+          <md-table #table [hidden]="(envVarsDataSource.count$ | async) === 0" [dataSource]="envVarsDataSource" mdSort>
             <ng-container mdColumnDef="select">
               <md-header-cell *mdHeaderCellDef>
                 <md-checkbox [value]="envVarsDataSource.selectAllChecked" (click)="envVarsDataSource.selectAllFilteredRows()"></md-checkbox>
               </md-header-cell>
               <md-cell *mdCellDef="let row">
-                <md-checkbox [checked]="envVarsDataSource.selectedRows.has(row.name)"></md-checkbox>
+                <md-checkbox [checked]="envVarsDataSource.selectedRows.has(row.name)" (change)="envVarsDataSource.selectedRowToggle(row)"></md-checkbox>
               </md-cell>
             </ng-container>
             <ng-container mdColumnDef="name">
               <md-header-cell *mdHeaderCellDef md-sort-header start="desc"> Name </md-header-cell>
-              <md-cell *mdCellDef="let row"> {{row.name}} </md-cell>
+              <md-cell *mdCellDef="let row">{{row.name}}</md-cell>
             </ng-container>
             <ng-container mdColumnDef="value">
               <md-header-cell *mdHeaderCellDef md-sort-header> Value </md-header-cell>
-              <md-cell *mdCellDef="let row"> {{row.value}} </md-cell>
+              <md-cell *mdCellDef="let row">
+                <md-form-field *ngIf="row.edit">
+                  <input mdInput name="envVarValue" [value]="row.edit?.value" (input)="row.edit.value = $event.target.value" required/>
+                </md-form-field>
+                <span *ngIf="!row.edit">{{row.value}}</span>
+              </md-cell>
             </ng-container>
-            <md-header-row *mdHeaderRowDef="['select', 'name', 'value']">
+            <ng-container mdColumnDef="edit">
+              <md-header-cell *mdHeaderCellDef>
+              </md-header-cell>
+              <md-cell *mdCellDef="let row">
+                <button md-icon-button *ngIf="!row.edit" (click)="envVarsDataSource.startEdit(row)" [disabled]="envVarsDataSource.hasSelected$ | async"><md-icon>edit</md-icon></button>
+                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.saveEdit(row)"><md-icon>done</md-icon></button>
+                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.cancelEdit(row)"><md-icon>clear</md-icon></button>
+              </md-cell>
+            </ng-container>
+            <md-header-row *mdHeaderRowDef="['select', 'name', 'value', 'edit']" [hidden]="(envVarsDataSource.count$ | async) === 0">
             </md-header-row>
-            <md-row *mdRowDef="let row; columns: ['select', 'name', 'value'];" (click)="envVarsDataSource.selectedRowToggle(row)"></md-row>
+            <md-row *mdRowDef="let row; columns: ['select', 'name', 'value', 'edit'];">
+            </md-row>
+            <!-- <md-row class="mat-row" *mdRowDef="let row; columns: []">
+              <md-cell class="mat-cell">
+                sfdsdf
+              </md-cell>
+              <md-cell class="mat-cell">
+                sfdsdf
+              </md-cell>
+              <md-cell class="mat-cell">
+                sfdsdf
+              </md-cell>
+            </md-row> -->
           </md-table>
+          <div [hidden]="(envVarsDataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
+            <div class="mat-card-header-text">
+              <div class="mat-card-header-text-wa">You have no variables.</div>
+            </div>
+
+          </div>
         </md-card-content>
         <md-card-footer>
-          <md-paginator #paginator [length]="(envVarsDataSource.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
-          </md-paginator>
+          <div [hidden]="(envVarsDataSource.count$ | async) === 0">
+            <md-paginator #paginator [length]="(envVarsDataSource.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
+            </md-paginator>
+          </div>
         </md-card-footer>
       </md-card>
     </div>
-    <div [hidden]="(envVarsDataSource.count$ | async)">
-      <md-card>
-        <md-card-content>You have no variables.</md-card-content>
-      </md-card>
-    </div>
-
   </div>
-
-
-
-
 </div>

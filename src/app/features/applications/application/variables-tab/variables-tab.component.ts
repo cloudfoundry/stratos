@@ -5,10 +5,12 @@ import { DataSource } from '@angular/cdk/table';
 import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { UpdateApplication } from '../../../../store/actions/application.actions';
 
 interface AppEnvVar {
   name: string;
   value: string;
+  edit?: AppEnvVar;
 }
 
 @Component({
@@ -51,6 +53,13 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   constructor(private _appService: ApplicationService, private _paginator: MdPaginator, private _sort: MdSort) {
     super();
+    this.fetching$ = this._appService.appEnvVars$
+      .map((envVars: AppMetadataInfo) => {
+        if (envVars.metadataRequestState) {
+          return envVars.metadataRequestState.fetching;
+        }
+        return !envVars.metadata;
+      });
   }
 
   _defaultSort: Sort = { active: 'name', direction: 'asc' };
@@ -62,14 +71,18 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   count$ = new BehaviorSubject(0);
   filteredCount$ = new BehaviorSubject(0);
+
+  items: AppEnvVar[] = new Array<AppEnvVar>();
   filteredItems: AppEnvVar[] = new Array<AppEnvVar>();
 
   selectedRows = new Map<string, AppEnvVar>();
   hasSelected$ = new BehaviorSubject(false);
   selectAllChecked = false;
 
+  fetching$: Observable<boolean>;
 
-  selectedRowToggle(row) {
+
+  selectedRowToggle(row: AppEnvVar) {
     const exists = this.selectedRows.has(row.name);
     if (exists) {
       this.selectedRows.delete(row.name);
@@ -89,6 +102,40 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
       }
     }
     this.hasSelected$.next(this.selectedRows.size > 0);
+  }
+
+  selectedDelete() {
+    const updateApp: UpdateApplication = {
+      environment_json: {}
+    };
+    for (const row of this.items) {
+      if (!this.selectedRows.has(row.name)) {
+        updateApp.environment_json[row.name] = row.value;
+      }
+    }
+    this._appService.UpdateApplication(updateApp);
+  }
+
+  startEdit(row: AppEnvVar) {
+    row.edit = { ...row };
+  }
+
+  saveEdit(editedRow: AppEnvVar) {
+    const updateApp: UpdateApplication = {
+      environment_json: {}
+    };
+    for (const row of this.items) {
+      updateApp.environment_json[row.name] = row.value;
+    }
+    updateApp.environment_json[editedRow.name] = editedRow.edit.value;
+
+    // TODO: items --> rows
+    this._appService.UpdateApplication(updateApp);
+    editedRow.edit = null;
+  }
+
+  cancelEdit(row: AppEnvVar) {
+    row.edit = null;
   }
 
   connect(): Observable<AppEnvVar[]> {
@@ -121,11 +168,14 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   _filterEnvVars(envVars, filter: string): AppEnvVar[] {
     this.filteredItems.length = 0;
-    let count = 0;
+    this.items.length = 0;
+
     for (const envVar in envVars.metadata.environment_json) {
       if (!envVars.metadata.environment_json.hasOwnProperty(envVar)) { continue; }
+
       const [name, value] = [envVar, envVars.metadata.environment_json[envVar]];
-      count++;
+      this.items.push({ name, value });
+
       if (filter && filter.length > 0) {
         if (name.indexOf(filter) >= 0 || value.indexOf(filter) >= 0) {
           this.filteredItems.push({ name, value });
@@ -134,8 +184,10 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
         this.filteredItems.push({ name, value });
       }
     }
-    this.count$.next(count);
+
+    this.count$.next(this.items.length);
     this.filteredCount$.next(this.filteredItems.length);
+
     return this.filteredItems;
   }
 
