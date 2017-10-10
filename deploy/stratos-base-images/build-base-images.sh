@@ -17,15 +17,22 @@ curl -sSO https://raw.githubusercontent.com/tests-always-included/mo/master/mo
 chmod +x mo
 
 for i in ${DOCKERFILES}; do
-   ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
+  BASE_IMAGE=${BASE_IMAGE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
 
+
+pwd
 build_and_push_image() {
     image_name=$1
     docker_file=$2
     docker build . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
 }
+# Base image with node installed
+build_go_base(){
+   build_and_push_image stratos-go-base Dockerfile.stratos-go-base
+}
+
 # Base image with node installed
 build_ui_base(){
    build_and_push_image stratos-ui-base Dockerfile.stratos-ui-base
@@ -48,12 +55,23 @@ build_goose_base(){
 }
 
 build_portal_proxy_builder(){
-    export TAG=dev
     pushd  ${DEPLOY_PATH}/
-    tools/build-push-proxy-builder-image.sh
+    TAG=dev tools/build-push-proxy-builder-image.sh
     popd
 }
 
+build_postflight_job_base(){
+    pushd ${DEPLOY_PATH}/
+    TAG=dev tools/build-postflight-image-builder.sh
+    popd
+}
+
+build_preflight_job_base(){
+    build_and_push_image stratos-preflight-base Dockerfile.stratos-preflight-base
+}
+
+# Base with go
+# build_go_base
 # Used building the UI
 build_ui_base;
 # Used for running the backend
@@ -66,4 +84,8 @@ build_nginx_base;
 build_bk_build_base;
 # Used for building the backend
 build_portal_proxy_builder;
+# Used for building the postflight job image
+build_postflight_job_base;
+# Used for building the preflight job image
+build_preflight_job_base;
 rm -f mo;

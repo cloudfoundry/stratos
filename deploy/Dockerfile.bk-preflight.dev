@@ -1,13 +1,10 @@
-FROM alpine:latest
+FROM splatform/stratos-preflight-base:dev
 
-RUN apk update && \
-    apk add ca-certificates openssl git &&\
-    mkdir -p /srv
-
+RUN mkdir -p /srv
 WORKDIR /srv
 COPY outputs/* /srv/
 COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
 COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 RUN chmod +x portal-proxy
 EXPOSE 443
-CMD ["sh", "-c", "/run-preflight-job.sh; /srv/portal-proxy"]
+CMD ["bash", "-c", "/run-preflight-job.sh; /srv/portal-proxy"]

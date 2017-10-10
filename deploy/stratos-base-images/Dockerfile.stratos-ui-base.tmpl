@@ -3,6 +3,6 @@ FROM {{BASE_IMAGE}}
 RUN zypper -n ref && \
 zypper -n up && \
 zypper in -y wget tar git
-RUN wget https://nodejs.org/dist/v8.6.0/node-v8.6.0-linux-x64.tar.xz && \
-tar -xf node-v8.6.0-linux-x64.tar.xz
-ENV PATH $PATH:/node-v8.6.0-linux-x64/bin
+RUN cd / && wget https://nodejs.org/dist/v6.11.4/node-v6.11.4-linux-x64.tar.xz && \
+tar -xf node-v6.11.4-linux-x64.tar.xz
+ENV PATH $PATH:/node-v6.11.4-linux-x64/bin

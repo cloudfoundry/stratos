@@ -1,8 +1,2 @@
-FROM {{BASE_IMAGE}}
-RUN zypper -n ref && \
-    zypper -n up && \
-    zypper in -y go git
-RUN mkdir /go
-ENV GOPATH /go
-WORKDIR /go
+FROM splatform/stratos-go-base:dev
 RUN go get bitbucket.org/liamstask/goose/cmd/goose

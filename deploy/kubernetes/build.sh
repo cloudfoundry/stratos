@@ -183,7 +183,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:test
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:dev
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -201,7 +201,6 @@ function buildPostgres {
   echo
   echo "-- Build & publish the runtime container image for postgres"
   # Pull base image locally and retag
-  preloadImage postgres:9.4.9
   buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
 }
 
@@ -209,7 +208,6 @@ function buildPreflightJob {
   # Build the preflight container
   echo
   echo "-- Build & publish the runtime container image for the preflight job"
-  preloadImage debian:jessie
   buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
@@ -224,7 +222,7 @@ function buildPostflightJob {
              --rm \
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:latest
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:dev
   mv goose  ${STRATOS_UI_PATH}/
   buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
@@ -235,7 +233,6 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
-  preloadImage node:6.9.1
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -244,7 +241,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    node:6.9.1 \
+    splatform/stratos-ui-base:dev \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
@@ -256,7 +253,6 @@ function buildUI {
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
   # Download and retag image to save bandwidth
-  preloadImage nginx:1.11
   buildAndPublishImage stratos-console Dockerfile.k8s ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 

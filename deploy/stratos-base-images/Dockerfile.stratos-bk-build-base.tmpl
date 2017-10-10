@@ -1,16 +1,5 @@
-FROM {{BASE_IMAGE}}
+FROM splatform/stratos-go-base:dev
 
-RUN zypper -n ref && \
-zypper -n up && \
-zypper in -y wget which tar git gcc
-RUN wget https://nodejs.org/dist/v6.11.4/node-v6.11.4-linux-x64.tar.xz && \
+RUN cd / && wget https://nodejs.org/dist/v6.11.4/node-v6.11.4-linux-x64.tar.xz && \
 tar -xf node-v6.11.4-linux-x64.tar.xz
-RUN wget https://storage.googleapis.com/golang/go1.8.4.linux-amd64.tar.gz && \
-    tar -xzf go1.8.4.linux-amd64.tar.gz -C /usr/local/ && \
-    mkdir -p /go/bin && \
-    mkdir -p /go/src
-ENV PATH $PATH:/node-v6.11.4-linux-x64/bin:/usr/local/go/bin:/go/bin
-ENV GOPATH /go
-RUN wget https://glide.sh/get && \
-    chmod +x get && \
-    ./get
+ENV PATH $PATH:/node-v6.11.4-linux-x64/bin

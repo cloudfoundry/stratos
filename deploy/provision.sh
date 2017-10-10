@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 WORK_DIR=$(pwd)
 

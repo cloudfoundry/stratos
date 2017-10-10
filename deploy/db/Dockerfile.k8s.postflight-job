@@ -1,8 +1,6 @@
-FROM golang:1.8-alpine
+FROM splatform/stratos-goose-base:dev
 
-RUN apk update && \
-    apk add postgresql-client mariadb-client git gcc musl-dev
-RUN go get bitbucket.org/liamstask/goose/lib/goose
+RUN zypper -n in postgresql mariadb-client
 RUN go get github.com/go-sql-driver/mysql
 COPY goose /usr/local/bin/
 COPY deploy/db/dbconf.yml db/dbconf.yml

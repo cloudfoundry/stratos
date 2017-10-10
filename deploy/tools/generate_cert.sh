@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Settings
 devcerts_path=${CERTS_PATH:-portal-proxy-output/dev-certs}
