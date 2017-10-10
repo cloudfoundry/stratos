@@ -54,7 +54,8 @@
         placeholder: '@?',
         searchIcon: '@?',
         disabled: '=?',
-        translateOptionLabels: '=?'
+        translateOptionLabels: '=?',
+        busy: '=?'
       },
       controller: SearchBoxController,
       controllerAs: 'searchBoxCtrl',

@@ -1,16 +1,15 @@
 # Associate a Cloud Foundry database service
 
-As described in the standard `cf push` instructions [here]("../README.md") the console when deployed via `cf push`
+As described in the standard `cf push` instructions [here](../README.md) the console when deployed via `cf push`
  does not contain any way to persist date over application restarts and db entries such as registered endpoints
  and user tokens are lost. To resolve this a Cloud Foundry db service can be bound to the console. Run through 
  the steps below to implement.
 
-> **NOTE** The console supports postgresql. Your Cloud Foundry deployment should contain a service for
- the desired db tagged with 'stratos_postgresql'.
-
 1. Create a Service Instance for the Console Database
 
-    Use `cf create-service` to create a service instance for the Postges DB - for example:
+    > **NOTE** The console supports postgresql and mysql DBs. Your service instance must be tagged with either `stratos_postgresql` for postgresql or `stratos_mysql` for mysql.
+
+    Use `cf create-service` to create a service instance for the DB - for example for postgresql:
     ```
     cf create-service postgresql v9.4 console_db -t stratos_postgresql
     ```

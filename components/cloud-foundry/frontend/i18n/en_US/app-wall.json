@@ -3,6 +3,7 @@
     "app-wall": "@:applications",
     "search-placeholder": "Search by name",
     "add-application": "Add Application",
+    "retrieving": "Retrieving Applications",
     "reset": "Reset",
     "options": {
       "show": "Show Options",
