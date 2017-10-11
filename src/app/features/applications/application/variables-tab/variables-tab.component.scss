@@ -17,8 +17,10 @@
         .grow-title {
           flex-grow: 1;
         }
-        button {
-          margin-left: 13px;
+        form {
+          padding-right: 13px;
+        }
+        button:last-of-type {
           margin-right: 26px;
         }
       }
@@ -41,7 +43,7 @@
       md-row {
         height: 57px;
         &:hover {
-          background-color: rgba(0, 0, 0, 0.09); // cursor: pointer;
+          background-color: rgba(0, 0, 0, 0.05);
         }
         md-cell {
           &.mat-column-edit {
@@ -63,6 +65,9 @@
       .no-variables {
         padding: 20px 0;
       }
+    }
+    md-card-footer {
+      margin: 0;
     }
   } // mat-card-header-text is very, very weird.
   div.mat-card-header-text-wa {

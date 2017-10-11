@@ -164,7 +164,8 @@ export class ApplicationService {
      * An observable based on the core application entity
     */
     this.isFetchingApp$ = this.app$.map(({ entity, entityRequestInfo }) => {
-      return !this.IsEntityComplete(entity, entityRequestInfo);
+      return entityRequestInfo ? entityRequestInfo.fetching : false;
+      // return !this.IsEntityComplete(entity, entityRequestInfo);
     });
 
     this.isUpdatingApp$ =

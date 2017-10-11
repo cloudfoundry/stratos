@@ -157,9 +157,7 @@ export interface UpdateApplication {
     environment_json?: Object;
 }
 
-export class UpdateExistingApplication implements APIAction {
-    static updateKey = 'Updating-Existing-Application';
-
+abstract class UpdateExistingApplicationBase implements APIAction {
     constructor(public guid: string, public cnis: string, application: UpdateApplication) {
         this.options = new RequestOptions();
         this.options.url = `apps/${guid}`;
@@ -178,5 +176,24 @@ export class UpdateExistingApplication implements APIAction {
     entity = [ApplicationSchema];
     entityKey = ApplicationSchema.key;
     options: RequestOptions;
+}
+export class UpdateExistingApplication extends UpdateExistingApplicationBase {
+    static updateKey = 'Updating-Existing-Application';
+
+    constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+        super(guid, cnis, application);
+    }
     updatingKey = UpdateExistingApplication.updateKey;
 }
+
+// TODO: RC Factor into own process outside of entity update
+export class UpdateExistingApplicationEnvVar extends UpdateExistingApplicationBase {
+    static updateKey = 'Updating-Existing-Application-Env-Var';
+
+    constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+        super(guid, cnis, application);
+    }
+    updatingKey = UpdateExistingApplicationEnvVar.updateKey;
+}
+
+

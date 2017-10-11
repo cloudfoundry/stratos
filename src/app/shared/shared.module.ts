@@ -12,6 +12,8 @@ import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.
 import { SteppersModule } from './components/stepper/steppers.module';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
+import { FocusDirective } from './components/focus.directive';
+import { UniqueDirective } from './components/unique.directive';
 
 
 @NgModule({
@@ -29,7 +31,9 @@ import { DetailsCardComponent } from './components/details-card/details-card.com
         EditableDisplayValueComponent,
         MbToHumanSizePipe,
         LoadingPageComponent,
-	DetailsCardComponent,
+        DetailsCardComponent,
+        FocusDirective,
+        UniqueDirective,
     ],
     exports: [
         FormsModule,
@@ -38,11 +42,13 @@ import { DetailsCardComponent } from './components/details-card/details-card.com
         PageHeaderModule,
         DisplayValueComponent,
         EditableDisplayValueComponent,
-	DetailsCardComponent,
+        DetailsCardComponent,
         SteppersModule,
         StatefulIconComponent,
         MbToHumanSizePipe,
-        SteppersModule
+        SteppersModule,
+        FocusDirective,
+        UniqueDirective,
     ]
 })
 export class SharedModule { }

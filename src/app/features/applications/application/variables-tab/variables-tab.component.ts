@@ -1,16 +1,24 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, EventEmitter } from '@angular/core';
 import { ApplicationService } from '../../application.service';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { UpdateApplication } from '../../../../store/actions/application.actions';
+import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
+import { selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
+import { UpdateState } from '../../../../store/reducers/api-request-reducer';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
 
 interface AppEnvVar {
   name: string;
   value: string;
   edit?: AppEnvVar;
+}
+
+interface AddAppEnvVar extends AppEnvVar {
+  select: boolean;
 }
 
 @Component({
@@ -20,7 +28,7 @@ interface AppEnvVar {
 })
 export class VariablesTabComponent implements OnInit, OnDestroy {
 
-  constructor(private appService: ApplicationService) { }
+  constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
   envVarsDataSource: AppEnvironemtEvnVarsDataSource;
 
@@ -32,7 +40,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   hasEnvVars$: Observable<boolean>;
 
   ngOnInit() {
-    this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.appService, this.paginator, this.sort);
+    this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.store, this.appService, this.paginator, this.sort);
     this.filterSub = Observable.fromEvent(this.filter.nativeElement, 'keyup')
       .debounceTime(150)
       .distinctUntilChanged()
@@ -51,15 +59,18 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
 
 export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
-  constructor(private _appService: ApplicationService, private _paginator: MdPaginator, private _sort: MdSort) {
+  constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
+    private _sort: MdSort) {
     super();
-    this.fetching$ = this._appService.appEnvVars$
+    this.isFetchingAppEnvVars$ = this._appService.appEnvVars$
       .map((envVars: AppMetadataInfo) => {
         if (envVars.metadataRequestState) {
           return envVars.metadataRequestState.fetching;
         }
         return !envVars.metadata;
       });
+    this.isUpdatingAppEnvVars$ = Observable.of(false);
+    _sort.sort({ id: this._defaultSort.active, start: this._defaultSort.direction as 'asc' || 'desc', disableClear: true });
   }
 
   _defaultSort: Sort = { active: 'name', direction: 'asc' };
@@ -72,15 +83,48 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   count$ = new BehaviorSubject(0);
   filteredCount$ = new BehaviorSubject(0);
 
-  items: AppEnvVar[] = new Array<AppEnvVar>();
-  filteredItems: AppEnvVar[] = new Array<AppEnvVar>();
+  rows = new Array<AppEnvVar>();
+  rowNames = new Array<string>();
+  filteredRows = new Array<AppEnvVar>();
 
   selectedRows = new Map<string, AppEnvVar>();
-  hasSelected$ = new BehaviorSubject(false);
+  isSelecting$ = new BehaviorSubject(false);
   selectAllChecked = false;
 
-  fetching$: Observable<boolean>;
+  isAdding$ = new BehaviorSubject(false);
 
+  addRow: AddAppEnvVar = {
+    name: '',
+    value: '',
+    select: false
+  };
+
+  isFetchingAppEnvVars$: Observable<boolean>;
+  isUpdatingAppEnvVars$: Observable<boolean>;
+
+  addAppFocusEventEmitter = new EventEmitter<boolean>();
+
+  startAdd() {
+    this.addRow = {
+      name: '',
+      value: '',
+      select: false
+    };
+    this.isAdding$.next(true);
+    // this.addAppFocusEventEmitter.emit(true);
+  }
+
+  saveAdd() {
+    const updateApp = this._createUpdateApplication(false);
+    updateApp.environment_json[this.addRow.name] = this.addRow.value;
+    this._appService.UpdateApplication(updateApp);
+    this.isAdding$.next(false);
+    this.addRow.select = true;
+  }
+
+  cancelAdd() {
+    this.isAdding$.next(false);
+  }
 
   selectedRowToggle(row: AppEnvVar) {
     const exists = this.selectedRows.has(row.name);
@@ -89,31 +133,27 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
     } else {
       this.selectedRows.set(row.name, row);
     }
-    this.hasSelected$.next(this.selectedRows.size > 0);
+    this.isSelecting$.next(this.selectedRows.size > 0);
   }
 
   selectAllFilteredRows(selectAll) {
     this.selectAllChecked = !this.selectAllChecked;
-    for (const row of this.filteredItems) {
+    for (const row of this.filteredRows) {
       if (this.selectAllChecked) {
         this.selectedRows.set(row.name, row);
       } else {
         this.selectedRows.delete(row.name);
       }
     }
-    this.hasSelected$.next(this.selectedRows.size > 0);
+    this.isSelecting$.next(this.selectedRows.size > 0);
   }
 
   selectedDelete() {
-    const updateApp: UpdateApplication = {
-      environment_json: {}
-    };
-    for (const row of this.items) {
-      if (!this.selectedRows.has(row.name)) {
-        updateApp.environment_json[row.name] = row.value;
-      }
-    }
+    const updateApp = this._createUpdateApplication(true);
     this._appService.UpdateApplication(updateApp);
+
+    this.selectedRows.clear();
+    this.isSelecting$.next(false);
   }
 
   startEdit(row: AppEnvVar) {
@@ -121,17 +161,11 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   }
 
   saveEdit(editedRow: AppEnvVar) {
-    const updateApp: UpdateApplication = {
-      environment_json: {}
-    };
-    for (const row of this.items) {
-      updateApp.environment_json[row.name] = row.value;
-    }
+    const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[editedRow.name] = editedRow.edit.value;
 
-    // TODO: items --> rows
     this._appService.UpdateApplication(updateApp);
-    editedRow.edit = null;
+    delete editedRow.edit;
   }
 
   cancelEdit(row: AppEnvVar) {
@@ -167,28 +201,29 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   }
 
   _filterEnvVars(envVars, filter: string): AppEnvVar[] {
-    this.filteredItems.length = 0;
-    this.items.length = 0;
+    this.filteredRows.length = 0;
+    this.rows.length = 0;
 
     for (const envVar in envVars.metadata.environment_json) {
       if (!envVars.metadata.environment_json.hasOwnProperty(envVar)) { continue; }
 
       const [name, value] = [envVar, envVars.metadata.environment_json[envVar]];
-      this.items.push({ name, value });
+      this.rows.push({ name, value });
+      this.rowNames.push(name);
 
       if (filter && filter.length > 0) {
         if (name.indexOf(filter) >= 0 || value.indexOf(filter) >= 0) {
-          this.filteredItems.push({ name, value });
+          this.filteredRows.push({ name, value });
         }
       } else {
-        this.filteredItems.push({ name, value });
+        this.filteredRows.push({ name, value });
       }
     }
 
-    this.count$.next(this.items.length);
-    this.filteredCount$.next(this.filteredItems.length);
+    this.count$.next(this.rows.length);
+    this.filteredCount$.next(this.filteredRows.length);
 
-    return this.filteredItems;
+    return this.filteredRows;
   }
 
   _sortEnvVars(envVars: AppEnvVar[], sort: Sort): AppEnvVar[] {
@@ -203,7 +238,33 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   }
 
   _pageEnvVars(envVars: AppEnvVar[], paginator: MdPaginator): AppEnvVar[] {
-    const startIndex = paginator.pageIndex * paginator.pageSize;
+    // Is the paginators pageIndex valid?
+    if (paginator.pageIndex * paginator.pageSize > envVars.length) {
+      paginator.pageIndex = Math.floor(envVars.length / paginator.pageSize);
+    }
+    // Should the paginator select a freshly added row?
+    if (this.addRow.select) {
+      for (let i = 0; i < envVars.length; i++) {
+        if (envVars[i].name === this.addRow.name) {
+          paginator.pageIndex = Math.floor(i / paginator.pageSize);
+          this.addRow.select = false;
+          break;
+        }
+      }
+    }
+    const startIndex: number = paginator.pageIndex * paginator.pageSize;
     return envVars.splice(startIndex, this._paginator.pageSize);
+  }
+
+  _createUpdateApplication(removeSelected: boolean): UpdateApplication {
+    const updateApp: UpdateApplication = {
+      environment_json: {}
+    };
+    for (const row of this.rows) {
+      if (!removeSelected || !this.selectedRows.has(row.name)) {
+        updateApp.environment_json[row.name] = row.value;
+      }
+    }
+    return updateApp;
   }
 }
