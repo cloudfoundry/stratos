@@ -13,7 +13,7 @@ spec:
   - name: https
     port: 443
     protocol: TCP
-    targetPort: "{{ .Values.console.port }}"
+    targetPort: {{ .Values.console.port }}
   selector:
     app: "{{ .Release.Name }}"
     component: console
