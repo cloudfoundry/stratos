@@ -82,19 +82,22 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       enable_ssh: false
     };
 
-    this.summaryDataChanging$ = this.applicationService.app$
+    this.summaryDataChanging$ = this.applicationService.isFetchingApp$
       .combineLatest(
-      this.applicationService.isFetchingApp$,
       this.applicationService.isUpdatingApp$,
-      this.applicationService.appEnvVars$,
-      this.applicationService.appStatsGated$
-      ).map(([app, isFetchingApp, isUpdatingApp, appEnvVars, appStatsGated]: [any, boolean, boolean, AppMetadataInfo, any]) => {
-        const isFetching = isFetchingApp
-          || (appEnvVars ? appEnvVars.metadataRequestState.fetching : false)
-          || (appStatsGated ? appStatsGated.metadataRequestState.fetching : false);
-
+      this.applicationService.isFetchingEnvVars$,
+      this.applicationService.isFetchingStats$
+      ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]: [boolean, boolean, boolean, boolean]) => {
+        const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
         const isUpdating = isUpdatingApp;
 
+        console.log('isFetchingApp ', isFetchingApp);
+        console.log('isFetchingEnvVars ', isFetchingEnvVars);
+        console.log('isFetchingStats ', isFetchingStats);
+
+        console.log('isFetching ', isFetching);
+        console.log('isUpdating ', isUpdating);
+        console.log(isFetching || isUpdating);
         return isFetching || isUpdating;
       });
 

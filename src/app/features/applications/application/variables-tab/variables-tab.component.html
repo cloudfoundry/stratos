@@ -3,7 +3,7 @@
 
   <div class="variables-tab__env-table">
     <div>
-      <div [class.show]="(envVarsDataSource.isFetchingAppEnvVars$ | async) || (envVarsDataSource.isUpdatingAppEnvVars$ | async)"
+      <div [class.show]="(appService.isFetchingApp$ | async) || (appService.isFetchingEnvVars$ | async) || (appService.isUpdatingEnvVars$ | async)"
         class="variables-tab__env-table__loading">
         <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
       </div>

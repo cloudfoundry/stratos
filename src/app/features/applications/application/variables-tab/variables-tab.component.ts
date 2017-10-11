@@ -62,14 +62,14 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
     private _sort: MdSort) {
     super();
-    this.isFetchingAppEnvVars$ = this._appService.appEnvVars$
-      .map((envVars: AppMetadataInfo) => {
-        if (envVars.metadataRequestState) {
-          return envVars.metadataRequestState.fetching;
-        }
-        return !envVars.metadata;
-      });
-    this.isUpdatingAppEnvVars$ = Observable.of(false);
+    // this.isFetchingAppEnvVars$ = this._appService.appEnvVars$
+    //   .map((envVars: AppMetadataInfo) => {
+    //     if (envVars.metadataRequestState) {
+    //       return envVars.metadataRequestState.fetching;
+    //     }
+    //     return !envVars.metadata;
+    //   });
+    // this.isUpdatingAppEnvVars$ = Observable.of(false);
     _sort.sort({ id: this._defaultSort.active, start: this._defaultSort.direction as 'asc' || 'desc', disableClear: true });
   }
 
@@ -173,12 +173,13 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   }
 
   connect(): Observable<AppEnvVar[]> {
-    return this._appService.appEnvVars$
-      .filter((envVars: AppMetadataInfo) => {
-        if (envVars.metadataRequestState) {
-          return !envVars.metadataRequestState.fetching;
-        }
-        return !!envVars.metadata;
+    return this._appService.isFetchingEnvVars$
+      .combineLatest(this._appService.appEnvVars$)
+      .filter(([isFetching, envVars]: [boolean, AppMetadataInfo]) => {
+        return !isFetching && !!envVars.metadata;
+      })
+      .map(([isFetching, envVars]: [boolean, AppMetadataInfo]) => {
+        return envVars;
       })
       .combineLatest(
       this._paginator.page.startWith(this._defaultPaginator),
