@@ -28,7 +28,6 @@
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
   var uaa = browser.params.uaa;
-  var runSetupModeTests = browser.params.runSetupModeTests;
   module.exports = {
 
     getHost: getHost,
@@ -78,8 +77,7 @@
 
     waitForElementAndClick: waitForElementAndClick,
 
-    isSetupMode: isSetupMode,
-    getRunSetupModeTests : getRunSetupModeTests
+    isSetupMode: isSetupMode
 
   };
 
@@ -366,19 +364,18 @@
    * @returns {Promise} A promise
    */
   function isSetupMode() {
+    var req = newRequest();
     return new Promise(function (resolve, reject) {
-      req.post(getHost() + '/pp/v1/auth/login/uaa', options)
+      return req.post(getHost() + '/pp/v1/auth/login/uaa', {})
         .on('error', reject)
         .on('response', function (response) {
           if (response.statusCode === 503) {
             resolve();
+          } else {
+            reject();
           }
         });
     });
-  }
-
-  function getRunSetupModeTests() {
-    return runSetupModeTests;
   }
 
   /**
