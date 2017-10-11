@@ -38,7 +38,7 @@ run:
         helm delete console-nightly --purge
       fi
       
-      helm install console --set noShared=true --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
+      helm install console --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
       sleep 120
 
       helm list
