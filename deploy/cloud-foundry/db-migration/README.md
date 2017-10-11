@@ -31,28 +31,9 @@ As described in the standard `cf push` instructions [here](../README.md) the con
 
     * This enables the endpoints dashboard UI and specifies that the Console should bind to the service instance named `console_db`
 
-1. Set up the database schema for the Console. Run the following from the root of the console:
+1. Push the app via cf push
     ```
-    cf push -c "deploy/cloud-foundry/db-migration/db-migrate.sh" -u "process"
-    ```
-    > **NOTE** All subsequent pushes, restarts, restaging will use this migration command.
-    It's therefore very important to execute the next step in order for the console to start
-
-    Wait for the database setup to complete, by viewing the application log and waiting for the message indicating setup is complete:
-
-    * To stream the logs
-      ```
-      cf logs console
-      ```
-
-    * Database setup complete log message
-      ```
-      Database successfully migrated. Please restart the application via 'cf push -c "null"'
-      ```
-   
-1. Restart the app via cf push
-    ```
-    cf push -c "null"
+    cf push
     ```
 
     
