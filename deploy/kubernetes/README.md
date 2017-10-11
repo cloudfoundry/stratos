@@ -47,6 +47,21 @@ This will create a Console instance named `my-console` in a namespace called `co
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
+#### Using a Load Balancer
+If your Kubernetes deployment supports automatic configuration of a load balancer (i.e Google Container Engine), specify the parameters `useLb=true` when installing.
+
+```
+helm install stratos-ui/console --namespace=console --name my-console --set useLb=true
+```
+
+#### Specifying an External IP
+
+If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
+
+```
+helm install stratos-ui/console --namespace=console --name my-console --set console.externalIP=192.168.100.100 console.port=5000
+```
+
 #### Upgrading your deployment
 
 To upgrade your instance when using the Helm repository, fetch any updates to the repository:
