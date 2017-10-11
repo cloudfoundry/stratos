@@ -43,11 +43,7 @@ helm install stratos-ui/console --namespace=console --name my-console
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
-This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster. If you are deploying into a cluster that is not configured with a dynamic storage provisioner like `glusterfs` or `ceph`. You should specify the `noShared` override when installing the chart. 
-
-```
-helm install --set noShared=true stratos-ui/console --namespace=console --name my-console
-```
+This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
@@ -173,8 +169,6 @@ storageClass: persistent
 mariadb:
   persistence:
     storageClass: persistent
-# Set the following only if the cluster is not using a clustered filesystem
-noShared: true
 ```
 
 Run Helm with the override:
