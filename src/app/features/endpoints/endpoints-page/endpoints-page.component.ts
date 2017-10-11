@@ -1,4 +1,4 @@
-import { CNSISState } from '../../../store/reducers/cnsis.reducer';
+import { CNSISState, CNSISModel } from '../../../store/reducers/cnsis.reducer';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
@@ -13,7 +13,7 @@ import { DataSource } from '@angular/cdk/collections';
 })
 export class EndpointsPageComponent implements OnInit {
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>) { }
 
   dataSource: DataSource<any>;
 
@@ -28,6 +28,11 @@ export class EndpointsPageComponent implements OnInit {
     this.dataSource = new EndpointDataSource(this.store);
   }
 
+
+  getEndpointTypeString(endpoint) {
+    return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
+  }
+
 }
 
 class EndpointDataSource extends DataSource<any> {
@@ -35,16 +40,10 @@ class EndpointDataSource extends DataSource<any> {
     super();
   }
 
-  connect(): Observable<{}[]> {
+  connect(): Observable<CNSISModel[]> {
     return this.store.select('cnsis')
-    .map((cnsis: CNSISState) => {
-      const { entities } = cnsis;
-      return entities.map(cf => {
-        cf.cnsi_type = 'Cloud Foundry';
-        return cf;
-      });
-    });
+      .map((cnsis: CNSISState) => cnsis.entities);
   }
 
-  disconnect() {}
+  disconnect() { }
 }

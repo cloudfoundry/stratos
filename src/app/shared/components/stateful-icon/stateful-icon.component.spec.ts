@@ -1,5 +1,7 @@
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { MDAppModule } from '../../../core/md.module';
 import { StatefulIconComponent } from './stateful-icon.component';
 
 describe('StatefulIconComponent', () => {
@@ -8,9 +10,12 @@ describe('StatefulIconComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StatefulIconComponent ]
+      declarations: [StatefulIconComponent],
+      imports: [
+        MDAppModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

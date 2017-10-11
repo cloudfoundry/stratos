@@ -1,5 +1,9 @@
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { StoreModule } from '@ngrx/store';
 
+import { MDAppModule } from '../../../core/md.module';
+import { appReducers } from '../../../store/reducers.module';
 import { PageHeaderComponent } from './page-header.component';
 
 describe('PageHeaderComponent', () => {
@@ -8,7 +12,13 @@ describe('PageHeaderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PageHeaderComponent]
+      declarations: [PageHeaderComponent],
+      imports: [
+        MDAppModule,
+        StoreModule.forRoot(
+          appReducers
+        )
+      ]
     })
       .compileComponents();
   }));

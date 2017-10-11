@@ -13,11 +13,11 @@ export class PaginationEntityState {
   ids = {};
   fetching: boolean;
   error: boolean;
-  message: '';
+  message: string;
 }
 
 export interface PaginationState {
-  [entity: string]: {
+  [entityType: string]: {
     [paginationKey: string]: PaginationEntityState
   };
 }

@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { StoreModule } from '@ngrx/store';
 
+import { CoreModule } from '../../../../core/core.module';
 import { LogStreamTabComponent } from './log-stream-tab.component';
 
 describe('LogStreamTabComponent', () => {
@@ -8,9 +10,13 @@ describe('LogStreamTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LogStreamTabComponent ]
+      imports: [
+        StoreModule,
+        CoreModule
+      ],
+      declarations: [LogStreamTabComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

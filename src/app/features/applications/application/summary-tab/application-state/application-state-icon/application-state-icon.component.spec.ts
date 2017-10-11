@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { MDAppModule } from '../../../../../../core/md.module';
 import { ApplicationStateIconComponent } from './application-state-icon.component';
+import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 
 describe('ApplicationStateIconComponent', () => {
   let component: ApplicationStateIconComponent;
@@ -8,9 +10,14 @@ describe('ApplicationStateIconComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApplicationStateIconComponent ]
+      declarations: [
+        ApplicationStateIconComponent, ApplicationStateIconPipe
+      ],
+      imports: [
+        MDAppModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
