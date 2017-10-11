@@ -169,15 +169,19 @@ function createRequestStateFromResponse(entities, state): EntitiesState {
     return newState;
 }
 
-export type ApiRequestTypes = 'fetch' | 'update' | 'create';
+export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 function getRequestTypeFromMethod(method): ApiRequestTypes {
     if (typeof method === 'string') {
         method = method.toString().toLowerCase();
         if (method === 'post') {
             return 'create';
-        } else if (method === 'put') {
+        }
+        if (method === 'put') {
             return 'update';
+        }
+        if (method === 'delete') {
+            return 'delete';
         }
     } else if (typeof method === 'number') {
         if (method === RequestMethod.Post) {
@@ -185,6 +189,9 @@ function getRequestTypeFromMethod(method): ApiRequestTypes {
         }
         if (method === RequestMethod.Put) {
             return 'update';
+        }
+        if (method === RequestMethod.Delete) {
+            return 'delete';
         }
     }
     return 'fetch';

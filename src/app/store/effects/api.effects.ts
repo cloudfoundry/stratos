@@ -54,7 +54,10 @@ export class APIEffect {
             // We should consider not completely failing the whole if some cnsis return.
             throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
           }
-          const entities = this.getEntities(apiAction, response);
+          const entities = response.status === 204 ? {
+            entities: {},
+            result: []
+          } : this.getEntities(apiAction, response);
           const actions = [];
           actions.push(new WrapperAPIActionSuccess(
             apiAction.actions[1],
@@ -62,7 +65,10 @@ export class APIEffect {
             apiAction
           ));
 
-          if (apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post) {
+          if (
+            apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
+            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
+          ) {
             actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
           }
 
