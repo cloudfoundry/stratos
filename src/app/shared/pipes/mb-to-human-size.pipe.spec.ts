@@ -1,11 +1,27 @@
-import { inject } from '@angular/core/testing';
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+import { inject, TestBed } from '@angular/core/testing';
 
 import { UtilsService } from '../../core/utils.service';
 import { MbToHumanSizePipe } from './mb-to-human-size.pipe';
 
+
+
 describe('MbToHumanSizePipe', () => {
-  it('create an instance', inject([UtilsService], (service: UtilsService) => {
-    const pipe = new MbToHumanSizePipe(service);
-    expect(pipe).toBeTruthy();
+
+  let pipe;
+
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [
+      MbToHumanSizePipe,
+      UtilsService
+    ]
   }));
+
+  beforeEach(inject([MbToHumanSizePipe], p => {
+    pipe = p;
+  }));
+
+  it('create an instance', () => {
+    expect(pipe).toBeTruthy();
+  });
 });
