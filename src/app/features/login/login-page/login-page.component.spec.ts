@@ -1,11 +1,13 @@
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { MDAppModule } from '../../../core/md.module';
-import { authReducer } from '../../../store/reducers/auth.reducer';
-import { cnsisReducer } from '../../../store/reducers/cnsis.reducer';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { appReducers } from '../../../store/reducers.module';
 import { LoginPageComponent } from './login-page.component';
 
 describe('LoginPageComponent', () => {
@@ -16,14 +18,14 @@ describe('LoginPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [LoginPageComponent],
       imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
         RouterTestingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MDAppModule,
-        StoreModule.forRoot({
-          auth: authReducer,
-          cnsis: cnsisReducer
-        })
+        BrowserAnimationsModule,
+        StoreModule.forRoot(
+          appReducers
+        )
       ]
     })
       .compileComponents();

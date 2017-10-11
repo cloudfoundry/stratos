@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { MDAppModule } from '../../../core/md.module';
 import { LoadingPageComponent } from './loading-page.component';
 
 describe('LoadingPageComponent', () => {
@@ -8,9 +9,12 @@ describe('LoadingPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LoadingPageComponent ]
+      declarations: [LoadingPageComponent],
+      imports: [
+        MDAppModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

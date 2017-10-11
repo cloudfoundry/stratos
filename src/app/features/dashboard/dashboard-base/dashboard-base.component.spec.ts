@@ -1,7 +1,14 @@
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
-import { MDAppModule } from '../../../core/md.module';
+import { CoreModule } from '../../../core/core.module';
+import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { appReducers } from '../../../store/reducers.module';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { DashboardBaseComponent } from './dashboard-base.component';
 
@@ -13,8 +20,17 @@ describe('DashboardBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DashboardBaseComponent, SideNavComponent],
       imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
         RouterTestingModule,
-        MDAppModule
+        BrowserAnimationsModule,
+        StoreModule.forRoot(
+          appReducers
+        )
+      ],
+      providers: [
+        PageHeaderService
       ]
     })
       .compileComponents();

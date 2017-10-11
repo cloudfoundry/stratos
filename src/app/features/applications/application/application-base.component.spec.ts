@@ -1,5 +1,6 @@
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
@@ -8,6 +9,7 @@ import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
+import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { ApplicationBaseComponent } from './application-base.component';
 import { ApplicationEnvVarsService } from './summary-tab/application-env-vars.service';
 import {
@@ -35,12 +37,15 @@ describe('ApplicationBaseComponent', () => {
         StoreModule,
         CoreModule,
         SharedModule,
+        BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
         StoreModule.forRoot({
           entities: entitiesReducer,
           pagination: paginationReducer
-        })
+        }, {
+            initialState: getInitialTestStoreState()
+          })
       ],
       providers: [
         ApplicationStateService,
