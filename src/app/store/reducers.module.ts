@@ -56,7 +56,7 @@ export const metaReducers = environment.production ? [storeFreeze, logger] : [];
             }
         ),
         StoreDevtoolsModule.instrument({
-            maxAge: 25
+            maxAge: 100
         })
     ]
 })

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
@@ -28,6 +28,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private applicationService: ApplicationService,
     private store: Store<AppState>
   ) { }
@@ -123,6 +124,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
           memory: application.app.entity.memory,
           enable_ssh: application.app.entity.enable_ssh
         };
+      }, e => {
+        if (e.error === this.applicationService.fatalErrorMessage) {
+          this.router.navigateByUrl('applications');
+        }
       }));
   }
 

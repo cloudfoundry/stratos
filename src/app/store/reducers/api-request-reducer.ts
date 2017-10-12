@@ -68,8 +68,8 @@ function startRequest(state, action) {
     if (!action.apiAction.guid) {
         return state;
     }
-    const apiAction = action.apiaction as APIAction;
-    const requestTypeStart = getRequestTypeFromMethod(action.options.method);
+    const apiAction = action.apiAction as APIAction;
+    const requestTypeStart = getRequestTypeFromMethod(apiAction.options.method);
     let requestState = getEntityRequestState(state, apiAction);
 
     if (requestTypeStart === 'update') {

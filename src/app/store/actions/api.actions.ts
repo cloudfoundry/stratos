@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { EntityRequestState, ActionState, defaultEntityRequest } from './../reducers/api-request-reducer';
+import { EntityRequestState, ActionState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -100,17 +100,18 @@ export const getEntityObservable = (
     store.select(selectEntity(entityKey, id)),
     store.select(selectEntityRequestInfo(entityKey, id))
   )
-    .do(([entities, entity, entityRequestInfo = defaultEntityRequest]: [EntitiesState, APIResource, EntityRequestState]) => {
+    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
       if (
+        !entityRequestInfo ||
         !entity &&
         !entityRequestInfo.fetching &&
-        !!entityRequestInfo.error
+        !entityRequestInfo.error
       ) {
         store.dispatch(action);
       }
     })
     .filter(([entities, entity, entityRequestInfo]) => {
-      return (entity && entity.entity) && !entityRequestInfo;
+      return !!entityRequestInfo;
     })
     .map(([entities, entity, entityRequestInfo]) => {
       return {

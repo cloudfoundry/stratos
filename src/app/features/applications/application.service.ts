@@ -57,6 +57,8 @@ export class ApplicationService {
   appGuid: string;
   cfGuid: string;
 
+  fatalErrorMessage = '__FATAL_REDIRECT__';
+
   IsEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
@@ -76,7 +78,12 @@ export class ApplicationService {
       ApplicationSchema,
       appGuid,
       new GetApplication(appGuid, cfGuid)
-    ).debounceTime(250);
+    ).debounceTime(250)
+      .do(appInfo => {
+        if (appInfo.entityRequestInfo.error) {
+          throw Observable.throw(this.fatalErrorMessage);
+        }
+      }).takeWhile(appInfo => !appInfo.entityRequestInfo.error);
 
     this.appSummary$ = getEntityObservable(
       this.store,
@@ -102,7 +109,7 @@ export class ApplicationService {
     // Assign/Amalgamate them to public properties (with mangling if required)
 
     this.appStatsGated$ = this.app$
-      .filter((appInfo: EntityInfo) => {
+      .filter(appInfo => {
         // console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
         return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo);
       })
