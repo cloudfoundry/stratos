@@ -1,40 +1,45 @@
 import { RequestMethod } from '@angular/http';
 
-import { APIAction, ApiActionTypes, WrapperAPIActionSuccess } from '../actions/api.actions';
+import { APIAction, ApiActionTypes, WrapperAPIActionSuccess, SingleEntityAction } from '../actions/api.actions';
 import { mergeState } from '../helpers/reducer.helper';
 import { defaultEntitiesState, EntitiesState } from './entity.reducer';
 
 const defaultState = { ...defaultEntitiesState };
 
-export interface UpdateState {
+export interface ActionState {
     busy: boolean;
     error: boolean;
     message: string;
 }
+
+export const defaultActionState = {
+    busy: false,
+    error: false,
+    message: ''
+};
+
 const rootUpdatingKey = '_root_';
 export interface EntityRequestState {
     fetching: boolean;
     updating: {
-        _root_: UpdateState,
-        [key: string]: UpdateState
+        _root_: ActionState,
+        [key: string]: ActionState
     };
     creating: boolean;
+    deleting: ActionState;
     error: boolean;
     response: any;
     message: string;
 }
 
-const defaultEntityRequest = {
+export const defaultEntityRequest = {
     fetching: false,
     updating: {
-        _root_: {
-            busy: false,
-            error: false,
-            message: ''
-        }
+        _root_: { ...defaultActionState }
     },
     creating: false,
     error: false,
+    deleting: { ...defaultActionState },
     response: null,
     message: ''
 };
@@ -48,97 +53,110 @@ export function apiRequestReducer(state = defaultState, action) {
     const actionType = action.apiType || action.type;
     switch (actionType) {
         case ApiActionTypes.API_REQUEST_START:
-            if (!action.apiAction.guid) {
-                return state;
-            }
-            const apiAction = action.apiAction as APIAction;
-
-            const requestTypeStart = getRequestTypeFromMethod(apiAction.options.method);
-            let requestState = getEntityRequestState(state, action.apiAction);
-
-            if (requestTypeStart === 'update') {
-                requestState.updating = mergeUpdatingState(
-                    action.apiAction,
-                    requestState.updating,
-                    {
-                        busy: true,
-                        error: false,
-                        message: '',
-                    }
-                );
-            } else {
-                requestState = modifyRequestWithRequestType(
-                    requestState,
-                    requestTypeStart
-                );
-            }
-
-            return setEntityRequestState(state, requestState, action.apiAction);
+            return startRequest(state, action);
         case ApiActionTypes.API_REQUEST_SUCCESS:
-            if (action.apiAction.guid) {
-                const requestTypeSuccess = getRequestTypeFromMethod(action.apiAction.options.method);
-                const successAction = action as WrapperAPIActionSuccess;
-
-                const requestSuccessState = getEntityRequestState(state, action.apiAction);
-                if (requestTypeSuccess === 'update') {
-                    requestSuccessState.updating = mergeUpdatingState(
-                        action.apiAction,
-                        requestSuccessState.updating,
-                        {
-                            busy: false,
-                            error: false,
-                            message: '',
-                        }
-                    );
-                } else {
-                    requestSuccessState.fetching = false;
-                    requestSuccessState.error = false;
-                    requestSuccessState.creating = false;
-                    requestSuccessState.response = successAction.response;
-                }
-
-                const newState = mergeState(
-                    createRequestStateFromResponse(successAction.response.entities, state),
-                    setEntityRequestState(state, requestSuccessState, action.apiAction)
-                );
-
-                return newState;
-            } else if (action.response && action.response.entities) {
-                const { entities } = action.response;
-                return createRequestStateFromResponse(entities, state);
-            }
-            return state;
+            return succeedRequest(state, action);
         case ApiActionTypes.API_REQUEST_FAILED:
-            if (action.apiAction.guid) {
-                const requestTypeSuccess = getRequestTypeFromMethod(action.apiAction.options.method);
-
-                const requestFailedState = getEntityRequestState(state, action.apiAction);
-                if (requestTypeStart === 'update') {
-                    requestFailedState.updating = mergeUpdatingState(
-                        action.apiAction,
-                        requestFailedState.updating,
-                        {
-                            busy: false,
-                            error: true,
-                            message: action.message
-                        }
-                    );
-                } else {
-                    requestFailedState.fetching = false;
-                    requestFailedState.error = true;
-                    requestFailedState.creating = false;
-                    requestFailedState.message = action.message;
-                }
-                return setEntityRequestState(state, requestFailedState, action.apiAction);
-            }
-            return state;
+            return failRequest(state, action);
         default:
             return state;
     }
 }
 
 
-function getEntityRequestState(state, { entityKey, guid }): EntityRequestState {
+function startRequest(state, action) {
+    if (!action.apiAction.guid) {
+        return state;
+    }
+    const apiAction = action.apiaction as APIAction;
+    const requestTypeStart = getRequestTypeFromMethod(action.options.method);
+    let requestState = getEntityRequestState(state, apiAction);
+
+    if (requestTypeStart === 'update') {
+        requestState.updating = mergeUpdatingState(
+            apiAction,
+            requestState.updating,
+            {
+                busy: true,
+                error: false,
+                message: '',
+            }
+        );
+    } else {
+        requestState = modifyRequestWithRequestType(
+            requestState,
+            requestTypeStart
+        );
+    }
+    return setEntityRequestState(state, requestState, action.apiAction);
+}
+
+function succeedRequest(state, action) {
+    if (action.apiAction.guid) {
+        const requestTypeSuccess = getRequestTypeFromMethod(action.apiAction.options.method);
+        const successAction = action as WrapperAPIActionSuccess;
+
+        const requestSuccessState = getEntityRequestState(state, action.apiAction);
+
+        if (requestTypeSuccess === 'update') {
+            requestSuccessState.updating = mergeUpdatingState(
+                action.apiAction,
+                requestSuccessState.updating,
+                {
+                    busy: false,
+                    error: false,
+                    message: '',
+                }
+            );
+        } else {
+            requestSuccessState.fetching = false;
+            requestSuccessState.error = false;
+            requestSuccessState.creating = false;
+            requestSuccessState.response = successAction.response;
+        }
+
+        const newState = mergeState(
+            createRequestStateFromResponse(successAction.response.entities, state),
+            setEntityRequestState(state, requestSuccessState, action.apiAction)
+        );
+
+        return newState;
+    } else if (action.response && action.response.entities) {
+        const { entities } = action.response;
+        return createRequestStateFromResponse(entities, state);
+    }
+    return state;
+}
+
+function failRequest(state, action) {
+    if (action.apiAction.guid) {
+        const requestTypeFailed = getRequestTypeFromMethod(action.apiAction.options.method);
+
+        const requestFailedState = getEntityRequestState(state, action.apiAction);
+        if (requestTypeFailed === 'update') {
+            requestFailedState.updating = mergeUpdatingState(
+                action.apiAction,
+                requestFailedState.updating,
+                {
+                    busy: false,
+                    error: true,
+                    message: action.message
+                }
+            );
+        } else {
+            requestFailedState.fetching = false;
+            requestFailedState.error = true;
+            requestFailedState.creating = false;
+            requestFailedState.message = action.message;
+        }
+        return setEntityRequestState(state, requestFailedState, action.apiAction);
+    }
+    return state;
+}
+
+
+function getEntityRequestState(state, action: SingleEntityAction): EntityRequestState {
+    const { entityKey, guid } = action;
     const requestState = { ...state[entityKey][guid] };
     if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
         return requestState;
@@ -163,6 +181,7 @@ function createRequestStateFromResponse(entities, state): EntitiesState {
             const entState = getEntityRequestState(state, { entityKey, guid });
             entState.fetching = false;
             entState.error = false;
+            entState.deleting = { ...defaultActionState };
             newState = setEntityRequestState(newState, entState, { entityKey, guid });
         });
     });
@@ -202,6 +221,8 @@ function modifyRequestWithRequestType(requestState: EntityRequestState, type: Ap
         requestState.fetching = true;
     } else if (type === 'create') {
         requestState.creating = true;
+    } else if (type === 'delete') {
+        requestState.deleting = { ...defaultActionState, busy: true };
     }
 
     return requestState;

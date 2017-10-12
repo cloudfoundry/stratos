@@ -7,6 +7,9 @@
     <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()">
       <md-icon>clear</md-icon>
     </button>
+    <button md-icon-button name="delete" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+      <md-icon>delete</md-icon>
+    </button>
     <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
       <md-icon>edit</md-icon>
     </button>

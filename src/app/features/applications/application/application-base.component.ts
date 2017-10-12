@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../store/actions/api.actions';
 import { AppMetadataInfo } from '../../../store/actions/app-metadata.actions';
+import { DeleteApplication } from '../../../store/actions/application.actions';
+import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
 
 interface ApplicationEdits {
@@ -23,7 +26,11 @@ interface ApplicationEdits {
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
   [x: string]: any;
 
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private applicationService: ApplicationService,
+    private store: Store<AppState>
+  ) { }
 
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
@@ -68,6 +75,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   setAppDefaults() {
     this.appEdits = { ... this.appDefaultEdits };
+  }
+
+  deleteApplication() {
+    this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
   }
 
   ngOnInit() {

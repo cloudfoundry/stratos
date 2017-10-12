@@ -26,6 +26,10 @@ export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
 export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
 
+export const DELETE = '[Application] Delete';
+export const DELETE_SUCCESS = '[Application] Delete success';
+export const DELETE_FAILED = '[Application] Delete failed';
+
 
 export const ApplicationSchema = new schema.Entity('application', {
     entity: {
@@ -162,7 +166,7 @@ export class UpdateExistingApplication implements APIAction {
     constructor(public guid: string, public cnis: string, application: UpdateApplication) {
         this.options = new RequestOptions();
         this.options.url = `apps/${guid}`;
-        this.options.method = 'PUT';
+        this.options.method = 'put';
         this.options.body = application;
         this.options.headers = new Headers();
         const cnsiPassthroughHeader = 'x-cap-passthrough';
@@ -179,3 +183,26 @@ export class UpdateExistingApplication implements APIAction {
     options: RequestOptions;
     updatingKey = UpdateExistingApplication.updateKey;
 }
+
+export class DeleteApplication implements APIAction {
+    static updateKey = 'Updating-Existing-Application';
+
+    constructor(public guid: string, public cnis: string) {
+        this.options = new RequestOptions();
+        this.options.url = `apps/${guid}`;
+        this.options.method = 'delete';
+        this.options.headers = new Headers();
+        const cnsiPassthroughHeader = 'x-cap-passthrough';
+        this.options.headers.set(cnsiPassthroughHeader, 'true');
+    }
+    actions = [
+        UPDATE,
+        UPDATE_SUCCESS,
+        UPDATE_FAILED
+    ];
+    type = ApiActionTypes.API_REQUEST;
+    entity = [ApplicationSchema];
+    entityKey = ApplicationSchema.key;
+    options: RequestOptions;
+}
+

@@ -19,7 +19,7 @@ import {
 } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
-import { UpdateState } from '../../store/reducers/api-request-reducer';
+import { ActionState } from '../../store/reducers/api-request-reducer';
 import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
 import {
   ApplicationStateData,
@@ -169,8 +169,8 @@ export class ApplicationService {
 
     this.isUpdatingApp$ =
       this.store.select(selectEntityUpdateInfo(ApplicationSchema.key, appGuid, UpdateExistingApplication.updateKey))
-        .map((updateState: UpdateState) => {
-          return updateState ? updateState.busy : false;
+        .map((state: ActionState) => {
+          return state ? state.busy : false;
         });
   }
 
