@@ -58,6 +58,12 @@
       protocol: 'https://',
       host: secrets.console.host || 'localhost',
       port: secrets.console.port || '4000',
+      uaa: {
+        apiUrl: secrets.uaa.url,
+        clientId: secrets.uaa.clientId,
+        adminUsername: secrets.uaa.adminUsername,
+        adminPassword: secrets.uaa.adminPassword
+      },
       credentials: {
         admin: secrets.console.admin,
         user: secrets.console.user

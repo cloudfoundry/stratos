@@ -32,6 +32,7 @@
       getSteps: _.partial(getSteps, element),
       getStepNames: _.partial(getStepNames, element),
       getCurrentStep: _.partial(getCurrentStep, element),
+      getCurrentStepName: _.partial(getCurrentStepName, element),
 
       getCancel: _.partial(getCancel, element),
       getBack: _.partial(getBack, element),
@@ -40,6 +41,7 @@
       isCancelEnabled: _.partial(isCancelEnabled, element),
       isNextEnabled: _.partial(isNextEnabled, element),
       isErrored: _.partial(isErrored, element),
+      isBackEnabled: _.partial(isBackEnabled, element),
 
       cancel: _.partial(cancel, element),
       next: _.partial(next, element)
@@ -65,7 +67,11 @@
   }
 
   function getCurrentStep(ele) {
-    return ele.element(by.css('.wizard-nav-item.nav-item.active'));
+    return ele.element(by.css('.wizard-nav-item.active'));
+  }
+
+  function getCurrentStepName(ele) {
+    return ele.element(by.css('.wizard-nav-item.active .wizard-nav-step-title'));
   }
 
   function getCancel(ele) {
@@ -82,6 +88,10 @@
 
   function isCancelEnabled(element) {
     return _buttonEnabled(getCancel(element));
+  }
+
+  function isBackEnabled(element) {
+    return _buttonEnabled(getBack(element));
   }
 
   function isNextEnabled(element) {
