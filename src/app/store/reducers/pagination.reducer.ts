@@ -9,6 +9,7 @@ import { mergeState } from './../helpers/reducer.helper';
 
 export class PaginationEntityState {
   currentPage = 0;
+  totalResults = 0; // TODO: Populate
   pageCount = 0;
   ids = {};
   fetching: boolean;
@@ -34,6 +35,7 @@ const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
   currentPage: 1,
+  totalResults: 0,
   ids: {},
   error: false,
   message: ''
@@ -58,7 +60,7 @@ const updatePagination = function (state: PaginationEntityState, action, actionT
         ids: {
           [state.currentPage]: action.response.result
         },
-        pageCount: state.pageCount + 1
+        pageCount: state.pageCount + 1,
       };
     case failureType:
       return {

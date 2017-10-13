@@ -44,16 +44,6 @@ export const ApplicationSchema = new schema.Entity('application', {
         idAttribute: getAPIResourceGuid
     });
 
-export const ApplicationSummarySchema = new schema.Entity('applicationSummary', {
-    entity: {
-        stack: StackSchema,
-        space: SpaceSchema
-    }
-}, {
-        idAttribute: getAPIResourceGuid
-    });
-
-
 export class GetAllApplications implements APIAction {
     constructor(public paginationKey?: string) {
         this.options = new RequestOptions();

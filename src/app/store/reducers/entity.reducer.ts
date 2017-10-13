@@ -9,6 +9,7 @@ export interface EntitiesState {
     space: any;
     organization: any;
     route: any;
+    event: any;
 }
 
 export const defaultEntitiesState = {
@@ -16,7 +17,8 @@ export const defaultEntitiesState = {
     stack: {},
     space: {},
     organization: {},
-    route: {}
+    route: {},
+    event: {}
 };
 
 export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action: WrapperAPIActionSuccess) {

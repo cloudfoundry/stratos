@@ -57,6 +57,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   }
 }
 
+//TODO: RC Move to own file
 export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
