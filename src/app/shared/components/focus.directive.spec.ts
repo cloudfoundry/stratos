@@ -1,13 +1,19 @@
 import { FocusDirective } from './focus.directive';
 import { inject, TestBed, ComponentFixture } from '@angular/core/testing';
-import { Component, DebugElement } from '@angular/core';
-import { By } from '@angular/platform-browser';
+import { Component, DebugElement, ElementRef, Renderer } from '@angular/core';
+import { By, BrowserModule } from '@angular/platform-browser';
+import { CoreModule } from '../../core/core.module';
+import { SharedModule } from '../shared.module';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  template: `<input type="text" autoFocus>`
+  template: `<input type="text" autoFocus/>`
 })
 class TestAutoFocusComponent {
 }
+
+export class MockElementRef { }
+export class MockRenderer { }
 
 describe('FocusDirective', () => {
 
@@ -17,24 +23,31 @@ describe('FocusDirective', () => {
   let focusDirective: FocusDirective;
 
   beforeEach(() => {
-    // { provide: ElementRef, useClass: MockElementRef }
     TestBed.configureTestingModule({
       providers: [
+        FocusDirective,
+        { provide: ElementRef, useClass: MockElementRef },
+        { provide: Renderer, useClass: MockRenderer }
       ],
       declarations: [
         TestAutoFocusComponent,
-        FocusDirective,
+      ],
+      imports: [
+        CoreModule,
+        BrowserModule,
+        CommonModule,
+        SharedModule,
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(TestAutoFocusComponent);
     component = fixture.componentInstance;
-    inputEl = fixture.debugElement.query(By.css('input'));
-    focusDirective = inputEl.injector.get<FocusDirective>(FocusDirective);
-  });
 
-  // beforeEach(inject([FocusDirective], fd => {
-  //   focusDirective = fd;
-  // }));
+    inputEl = fixture.debugElement.query(By.css('input'));
+
+    focusDirective = inputEl.injector.get<FocusDirective>(FocusDirective);
+
+    fixture.detectChanges();
+  });
 
   it('should create an instance', () => {
     expect(focusDirective).toBeTruthy();
