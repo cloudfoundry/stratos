@@ -1,17 +1,15 @@
+import { LOGIN } from '../actions/auth.actions';
 import {
     LOGIN_FAILED,
     LOGIN_SUCCESS,
     LoginFailed,
     LoginSuccess,
+    RESET_AUTH,
     SESSION_INVALID,
     SESSION_VERIFIED,
     SessionData,
     VERIFY_SESSION,
-    RESET_AUTH
 } from './../actions/auth.actions';
-import { Login, LOGIN } from '../actions/auth.actions';
-import { APIAction, ApiActionTypes } from './../actions/api.actions';
-import { Action } from '@ngrx/store';
 
 export interface AuthState {
     loggedIn: boolean;
@@ -39,7 +37,7 @@ export function authReducer(state: AuthState = defaultState, action) {
             return { ...state, loggingIn: true, loggedIn: false, error: false };
         case LOGIN_SUCCESS:
             const loginSuccess = action as LoginSuccess;
-            return { ...state, loggingIn: false, loggedIn: true, error: false, uaaError: false, errorMessage: '' };
+            return { ...state, loggingIn: false, loggedIn: true, error: false, errorMessage: '' };
         case LOGIN_FAILED:
             const loginFailed = action as LoginFailed;
             return { ...state, error: true, errorMessage: loginFailed.message, loggingIn: false, loggedIn: false };

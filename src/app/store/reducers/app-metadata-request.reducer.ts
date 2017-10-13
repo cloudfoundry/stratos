@@ -28,7 +28,6 @@ export interface AppMetadataRequestState {
     updating: MetadataUpdateState;
     creating: MetadataUpdateState;
     error: boolean;
-    response: any;
     message: string;
 }
 
@@ -37,7 +36,6 @@ const defaultAppMetadataRequest: AppMetadataRequestState = {
     updating: { ...defaultRequestProgress },
     creating: { ...defaultRequestProgress },
     error: false,
-    response: null,
     message: ''
 };
 
@@ -73,7 +71,6 @@ export function appMetadataRequestReducer(state = {}, action) {
             }
             const requestState = getAppMetadataRequestState(state, appMetadataAction);
             requestState.error = false;
-            requestState.response = {};
             requestState.message = '';
             requestState[getRequestTypeFromMethod(appMetadataAction.options.method)] = {
                 busy: true,
@@ -97,7 +94,6 @@ export function appMetadataRequestReducer(state = {}, action) {
             };
             requestFailedState.error = true;
             requestFailedState.message = action.message;
-            requestFailedState.response = action.response;
             return setAppMetadataRequestState(state, requestFailedState, appMetadataAction);
         default:
             return state;

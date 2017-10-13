@@ -5,11 +5,12 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { selectEntityRequestInfo } from '../../../../store/actions/api.actions';
+import { selectEntityRequestInfo, selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
 import {
-    ApplicationSchema,
-    AssociateRouteWithAppApplication,
-    CreateNewApplication,
+  ApplicationSchema,
+  AssociateRouteWithAppApplication,
+  CreateNewApplication,
+  GetApplication,
 } from '../../../../store/actions/application.actions';
 import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
@@ -29,6 +30,8 @@ export class CreateApplicationStep3Component implements OnInit {
   form: NgForm;
 
   hostName: string;
+
+  message = null;
 
   newAppData: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
@@ -62,6 +65,8 @@ export class CreateApplicationStep3Component implements OnInit {
       ));
     }
 
+    this.message = `Creating application${shouldCreateRoute ? ' and route' : ''}`;
+
     return Observable.combineLatest(
       this.store.select(selectEntityRequestInfo(ApplicationSchema.key, newAppGuid)),
       // If we don't create a route, just fake it till we make it!
@@ -73,15 +78,49 @@ export class CreateApplicationStep3Component implements OnInit {
         return !app.creating && !route.creating;
       })
       .map(([app, route]) => {
-        if (!app.error && !route.error) {
-          this.store.dispatch(new AssociateRouteWithAppApplication(
+        if (app.error || route.error) {
+          throw new Error('Nope!');
+        }
+        this.message = `Finished creating application${shouldCreateRoute ? ' and route' : ''}`;
+        let routeAssignAction;
+        if (shouldCreateRoute) {
+          routeAssignAction = new AssociateRouteWithAppApplication(
             app.response.result[0],
             route.response.result[0],
+            cloudFoundry.guid
+          );
+          this.store.dispatch(routeAssignAction);
+        }
+        return { app, route, updatingKey: routeAssignAction ? routeAssignAction.updatingKey : null };
+      })
+      .delay(1)
+      .mergeMap(({ app, route, updatingKey }) => {
+        this.message = `Assigning creating application${shouldCreateRoute ? ' and route' : ''}`;
+        return (
+          shouldCreateRoute ?
+            this.store.select(selectEntityUpdateInfo(
+              ApplicationSchema.key,
+              app.response.result[0],
+              updatingKey
+            ))
+              .filter((update) => {
+                return update.busy;
+              }) :
+            Observable.of({
+              error: false
+            })
+        ).withLatestFrom(Observable.of({ app, route, updatingKey }));
+      })
+      .map(([update, { app, route, updatingKey }]) => {
+        // We need to re-fetch the whole application to ensure we get all of the data.
+        if (!update.error) {
+          this.store.dispatch(new GetApplication(
+            app.response.result[0],
             cloudFoundry.guid
           ));
           this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${app.response.result[0]}/summary`);
         }
-        return { success: !app.error && !route.error };
+        return { success: !update };
       });
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-application-state',
@@ -7,7 +7,8 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class ApplicationStateComponent implements OnInit {
 
-  @Input() public state: any;
+  @Input('state')
+  public state: any;
 
   constructor() { }
 

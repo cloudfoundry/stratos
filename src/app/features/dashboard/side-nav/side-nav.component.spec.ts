@@ -1,7 +1,7 @@
-import { RouterTestingModule } from '@angular/router/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MDAppModule } from './../../md/md.module';
+import { RouterTestingModule } from '@angular/router/testing';
 
+import { MDAppModule } from '../../../core/md.module';
 import { SideNavComponent } from './side-nav.component';
 
 describe('SideNavComponent', () => {
@@ -10,10 +10,10 @@ describe('SideNavComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SideNavComponent ],
-      imports: [ RouterTestingModule, MDAppModule ]
+      declarations: [SideNavComponent],
+      imports: [RouterTestingModule, MDAppModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { AppMetadata } from './reducers/app-metadata.reducer';
+import { MetadataState } from './reducers/app-metadata.reducer';
 import { AuthState } from './reducers/auth.reducer';
 import { CNSISState } from './reducers/cnsis.reducer';
 import { CreateNewApplicationState } from './reducers/create-application.reducer';
@@ -16,6 +16,6 @@ export interface AppState {
   pagination: PaginationState;
   apiRequest: EntitiesState;
   dashboard: DashboardState;
-  appMetadata: AppMetadata;
+  appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
 }

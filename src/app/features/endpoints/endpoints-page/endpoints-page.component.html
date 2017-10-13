@@ -15,12 +15,12 @@
 
   <ng-container mdColumnDef="type">
     <md-header-cell *mdHeaderCellDef> Type </md-header-cell>
-    <md-cell *mdCellDef="let endpoint"> {{ endpoint.cnsi_type }} </md-cell>
+    <md-cell *mdCellDef="let endpoint"> {{ getEndpointTypeString(endpoint) }} </md-cell>
   </ng-container>
 
   <ng-container mdColumnDef="address">
     <md-header-cell *mdHeaderCellDef> Address </md-header-cell>
-    <md-cell *mdCellDef="let endpoint"> {{endpoint.api_endpoint.Host}} </md-cell>
+    <md-cell *mdCellDef="let endpoint"> {{ endpoint.api_endpoint.Host }} </md-cell>
   </ng-container>
 
   <md-header-row *mdHeaderRowDef="displayedColumns"></md-header-row>

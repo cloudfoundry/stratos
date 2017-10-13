@@ -1,6 +1,11 @@
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { mergeState } from './../helpers/reducer.helper';
 
+export interface MetadataState {
+  values: AppMetadata;
+  requests: {};
+}
+
 export interface AppMetadata {
   [key: string]: {
     instances: AppInstancesState;
@@ -14,7 +19,7 @@ export interface AppInstancesState {
 
 export interface AppInstanceState {
   state: string;
-  stats: AppInstanceStats[];
+  stats: AppInstanceStats;
 }
 
 export interface AppInstanceStats {

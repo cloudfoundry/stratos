@@ -1,11 +1,14 @@
-import { entitiesReducer } from '../../store/reducers/entity.reducer';
-import { paginationReducer } from '../../../store/reducers/pagination.reducer';
-import { StoreModule } from '@ngrx/store';
-import { RouterTestingModule } from '@angular/router/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationWallComponent } from './application-wall.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
-import { MDAppModule } from './../../../md/md.module';
+import { CoreModule } from '../../../core/core.module';
+import { MDAppModule } from '../../../core/md.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { entitiesReducer } from '../../../store/reducers/entity.reducer';
+import { paginationReducer } from '../../../store/reducers/pagination.reducer';
+import { ApplicationWallComponent } from './application-wall.component';
 
 describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
@@ -13,17 +16,20 @@ describe('ApplicationWallComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApplicationWallComponent ],
+      declarations: [ApplicationWallComponent],
       imports: [
         RouterTestingModule,
+        BrowserAnimationsModule,
         StoreModule.forRoot({
           entities: entitiesReducer,
           pagination: paginationReducer
         }),
-        MDAppModule
+        MDAppModule,
+        SharedModule,
+        CoreModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

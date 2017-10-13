@@ -1,5 +1,9 @@
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { CoreModule } from '../../../core/core.module';
+import { DisplayValueComponent } from '../display-value/display-value.component';
 import { EditableDisplayValueComponent } from './editable-display-value.component';
 
 describe('EditableDisplayValueComponent', () => {
@@ -8,9 +12,16 @@ describe('EditableDisplayValueComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditableDisplayValueComponent ]
+      declarations: [
+        EditableDisplayValueComponent,
+        DisplayValueComponent
+      ],
+      imports: [
+        CommonModule,
+        CoreModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
