@@ -172,7 +172,7 @@
     },
 
     jasmineNodeOpts: {
-      defaultTimeoutInterval: 45000,
+      defaultTimeoutInterval: 90000,
       // disable default jasmine report (using jasmine-spec-reporter)
       print: function () {
       }
