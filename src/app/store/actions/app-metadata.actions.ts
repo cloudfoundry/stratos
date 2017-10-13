@@ -140,7 +140,7 @@ export const getAppMetadataObservable = (
     });
 };
 
-const selectMetadata = (metadataType, appId): any => {
+export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
   return compose(
     getMetadataType<any>(metadataType),
     getMetadataById(appId),
@@ -148,7 +148,7 @@ const selectMetadata = (metadataType, appId): any => {
   );
 };
 
-const selectMetadataRequest = (metadataType, appId): any => {
+export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
   return compose(
     getMetadataType<AppMetadataRequestState>(metadataType),
     getMetadataById(appId),

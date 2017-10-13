@@ -13,10 +13,10 @@ import { getInitialTestStoreState } from '../../../test-framework/store-test-hel
 import { ApplicationBaseComponent } from './application-base.component';
 import { ApplicationEnvVarsService } from './summary-tab/application-env-vars.service';
 import {
-    ApplicationStateIconComponent,
+  ApplicationStateIconComponent,
 } from './summary-tab/application-state/application-state-icon/application-state-icon.component';
 import {
-    ApplicationStateIconPipe,
+  ApplicationStateIconPipe,
 } from './summary-tab/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './summary-tab/application-state/application-state.component';
 import { ApplicationStateService } from './summary-tab/application-state/application-state.service';
@@ -42,7 +42,7 @@ describe('ApplicationBaseComponent', () => {
         MDAppModule,
         StoreModule.forRoot({
           entities: entitiesReducer,
-          pagination: paginationReducer
+          pagination: paginationReducer,
         }, {
             initialState: getInitialTestStoreState()
           })

@@ -17,6 +17,7 @@ import { CreateNewApplicationState } from '../reducers/create-application.reduce
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, GetApplicationSummary, UPDATE } from '../actions/application.actions';
 import { WrapperAPIActionSuccess, ApiActionTypes } from '../actions/api.actions';
+import { GetAppMetadataAction, AppMetadataProperties, AppMetadataType } from '../actions/app-metadata.actions';
 
 
 @Injectable()
@@ -38,7 +39,9 @@ export class UpdateAppEffects {
             new GetApplicationSummary(
                 action.apiAction.guid,
                 action.apiAction.cnis,
-            )];
+            ),
+            // TODO: RC REMOVE
+            new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
         });
 
 }

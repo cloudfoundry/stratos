@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+@mixin variables-tab-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary); // $accent: map-get($theme, accent);
+  // $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
+  .variables-tab__env-table md-card-header.selected {
+    background-color: mat-color($primary, 50);
+  }
+}
