@@ -70,6 +70,12 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
     //     return !envVars.metadata;
     //   });
     // this.isUpdatingAppEnvVars$ = Observable.of(false);
+    this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
+      _appService.isFetchingEnvVars$,
+      _appService.isUpdatingEnvVars$
+    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
+      return isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
+    });
     _sort.sort({ id: this._defaultSort.active, start: this._defaultSort.direction as 'asc' || 'desc', disableClear: true });
   }
 
@@ -99,8 +105,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
     select: false
   };
 
-  isFetchingAppEnvVars$: Observable<boolean>;
-  isUpdatingAppEnvVars$: Observable<boolean>;
+  showProgressIndicator: Observable<boolean>;
 
   addAppFocusEventEmitter = new EventEmitter<boolean>();
 
@@ -117,7 +122,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   saveAdd() {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[this.addRow.name] = this.addRow.value;
-    this._appService.UpdateApplication(updateApp);
+    this._appService.UpdateApplicationEvVars(updateApp);
     this.isAdding$.next(false);
     this.addRow.select = true;
   }
@@ -150,7 +155,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   selectedDelete() {
     const updateApp = this._createUpdateApplication(true);
-    this._appService.UpdateApplication(updateApp);
+    this._appService.UpdateApplicationEvVars(updateApp);
 
     this.selectedRows.clear();
     this.isSelecting$.next(false);
@@ -164,7 +169,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[editedRow.name] = editedRow.edit.value;
 
-    this._appService.UpdateApplication(updateApp);
+    this._appService.UpdateApplicationEvVars(updateApp);
     delete editedRow.edit;
   }
 
