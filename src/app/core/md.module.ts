@@ -21,6 +21,8 @@ import {
     MdTabsModule,
     MdToolbarModule,
     MdTooltipModule,
+    MdPaginatorModule,
+    MdSortModule
 } from '@angular/material';
 
 const importExport = [
@@ -44,7 +46,9 @@ const importExport = [
     MdAutocompleteModule,
     MdTooltipModule,
     MdChipsModule,
-    MdExpansionModule
+    MdExpansionModule,
+    MdPaginatorModule,
+    MdSortModule
 ];
 
 @NgModule({

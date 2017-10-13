@@ -11,21 +11,56 @@ export interface AppMetadataRequestStates {
     };
 }
 
-export interface AppMetadataRequestState {
-    fetching: boolean;
-    updating: boolean;
-    creating: boolean;
+export interface MetadataUpdateState {
+    busy: boolean;
     error: boolean;
     message: string;
 }
 
-const defaultAppMetadataRequest = {
-    fetching: false,
-    updating: false,
-    creating: false,
+const defaultRequestProgress: MetadataUpdateState = {
+    busy: false,
+    error: false,
+    message: '',
+};
+
+export interface AppMetadataRequestState {
+    fetching: MetadataUpdateState;
+    updating: MetadataUpdateState;
+    creating: MetadataUpdateState;
+    error: boolean;
+    message: string;
+}
+
+const defaultAppMetadataRequest: AppMetadataRequestState = {
+    fetching: { ...defaultRequestProgress },
+    updating: { ...defaultRequestProgress },
+    creating: { ...defaultRequestProgress },
     error: false,
     message: ''
 };
+
+export type MetadataRequestTypes = 'fetching' | 'updating' | 'creating';
+function getRequestTypeFromMethod(method): MetadataRequestTypes {
+    if (typeof method === 'string') {
+        method = method.toString().toLowerCase();
+        if (method === 'post') {
+            return 'creating';
+        } else if (method === 'put') {
+            return 'updating';
+        }
+    } else if (typeof method === 'number') {
+        if (method === RequestMethod.Get) {
+            return 'fetching';
+        }
+        if (method === RequestMethod.Post) {
+            return 'creating';
+        }
+        if (method === RequestMethod.Put) {
+            return 'updating';
+        }
+    }
+    return 'fetching';
+}
 
 export function appMetadataRequestReducer(state = {}, action) {
     const appMetadataAction: GetAppMetadataAction = action.appMetadataAction;
@@ -35,19 +70,27 @@ export function appMetadataRequestReducer(state = {}, action) {
                 return state;
             }
             const requestState = getAppMetadataRequestState(state, appMetadataAction);
-            requestState.fetching = true;
             requestState.error = false;
             requestState.message = '';
+            requestState[getRequestTypeFromMethod(appMetadataAction.options.method)] = {
+                busy: true,
+                error: false,
+                message: '',
+            };
             return setAppMetadataRequestState(state, requestState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_SUCCESS:
             const requestSuccessState = getAppMetadataRequestState(state, appMetadataAction);
-            requestSuccessState.fetching = false;
-            requestSuccessState.creating = false;
+            requestSuccessState[getRequestTypeFromMethod(appMetadataAction.options.method)] = { ...defaultRequestProgress };
             requestSuccessState.error = false;
+            requestSuccessState.message = '';
             return setAppMetadataRequestState(state, requestSuccessState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_FAILED:
             const requestFailedState = getAppMetadataRequestState(state, appMetadataAction);
-            requestFailedState.fetching = false;
+            requestFailedState[getRequestTypeFromMethod(appMetadataAction.options.method)] = {
+                busy: false,
+                error: true,
+                message: action.message,
+            };
             requestFailedState.error = true;
             requestFailedState.message = action.message;
             return setAppMetadataRequestState(state, requestFailedState, appMetadataAction);
