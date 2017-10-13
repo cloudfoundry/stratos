@@ -11,13 +11,13 @@ import { Observable } from 'rxjs/Observable';
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
-    APIAction,
-    ApiActionTypes,
-    APIResource,
-    NormalizedResponse,
-    StartAPIAction,
-    WrapperAPIActionFailed,
-    WrapperAPIActionSuccess,
+  APIAction,
+  ApiActionTypes,
+  APIResource,
+  NormalizedResponse,
+  StartAPIAction,
+  WrapperAPIActionFailed,
+  WrapperAPIActionSuccess,
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
@@ -48,16 +48,24 @@ export class APIEffect {
 
       return this.http.request(new Request(apiAction.options))
         .mergeMap(response => {
-          const resData = response.json();
-          const cnsisErrors = this.getErrors(resData);
-          if (cnsisErrors.length) {
-            // We should consider not completely failing the whole if some cnsis return.
-            throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+          let resData;
+          try {
+            resData = response.json();
+          } catch (e) {
+            resData = null;
           }
-          const entities = response.status === 204 ? {
-            entities: {},
-            result: []
-          } : this.getEntities(apiAction, response);
+          if (resData) {
+            const cnsisErrors = this.getErrors(resData);
+            if (cnsisErrors.length) {
+              // We should consider not completely failing the whole if some cnsis return.
+              throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+            }
+          }
+          const entities = resData ?
+            this.getEntities(apiAction, resData) : {
+              entities: {},
+              result: []
+            };
           const actions = [];
           actions.push(new WrapperAPIActionSuccess(
             apiAction.actions[1],
@@ -75,7 +83,7 @@ export class APIEffect {
           return actions;
         })
         .catch(err => {
-          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.error, apiAction));
+          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.message, apiAction));
         });
     });
 
@@ -104,8 +112,7 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: APIAction, response: Response): NormalizedResponse {
-    const data = response.json();
+  getEntities(apiAction: APIAction, data): NormalizedResponse {
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
       if (cfData.resources) {

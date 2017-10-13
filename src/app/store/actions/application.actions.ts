@@ -14,6 +14,10 @@ export const GET = '[Application] Get one';
 export const GET_SUCCESS = '[Application] Get one success';
 export const GET_FAILED = '[Application] Get one failed';
 
+export const GET_SUMMARY = '[Application] Get summary';
+export const GET_SUMMARY_SUCCESS = '[Application] Get summary success';
+export const GET_SUMMARY_FAILED = '[Application] Get summary failed';
+
 export const CREATE = '[Application] Create';
 export const CREATE_SUCCESS = '[Application] Create success';
 export const CREATE_FAILED = '[Application] Create failed';
@@ -100,9 +104,9 @@ export class GetApplicationSummary implements APIAction {
     this.options.method = 'get';
   }
   actions = [
-    GET,
-    GET_SUCCESS,
-    GET_FAILED
+    GET_SUMMARY,
+    GET_SUMMARY_SUCCESS,
+    GET_SUMMARY_FAILED
   ];
   type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSummarySchema];
@@ -154,14 +158,16 @@ export class AssociateRouteWithAppApplication implements APIAction {
 }
 
 export interface UpdateApplication {
-  name?: string;
-  instances?: number;
-  memory?: number;
-  enable_ssh?: boolean;
-  environment_json?: Object;
+  name: string;
+  instances: number;
+  memory: number;
+  enable_ssh: boolean;
+  environment_json: any;
 }
 
-abstract class UpdateExistingApplicationBase implements APIAction {
+export class UpdateExistingApplicationBase implements APIAction {
+  static updateKey = 'Updating-Existing-Application';
+
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
@@ -187,6 +193,7 @@ export class UpdateExistingApplication extends UpdateExistingApplicationBase {
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
     super(guid, cnis, application);
   }
+
   updatingKey = UpdateExistingApplication.updateKey;
 }
 
@@ -202,9 +209,9 @@ export class DeleteApplication implements APIAction {
     this.options.headers.set(cnsiPassthroughHeader, 'true');
   }
   actions = [
-    UPDATE,
-    UPDATE_SUCCESS,
-    UPDATE_FAILED
+    DELETE,
+    DELETE_SUCCESS,
+    DELETE_FAILED
   ];
   type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
@@ -219,5 +226,6 @@ export class UpdateExistingApplicationEnvVar extends UpdateExistingApplicationBa
     super(guid, cnis, application);
   }
   updatingKey = UpdateExistingApplicationEnvVar.updateKey;
+
 }
 

@@ -9,7 +9,8 @@
     "test-debug": "ng test",
     "test": "ng test --code-coverage --sourcemaps=false",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "remotedev": "remotedev --hostname=localhost --port=8000"
   },
   "private": true,
   "dependencies": {
@@ -52,6 +53,8 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "ngrx-store-freeze": "^0.2.0",
     "protractor": "~5.1.2",
+    "remote-redux-devtools": "^0.5.12",
+    "remotedev-server": "^0.2.4",
     "ts-node": "~3.2.0",
     "tslint": "~5.3.2",
     "typescript": "~2.3.3"

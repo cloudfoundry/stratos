@@ -6,16 +6,9 @@ import { Subscription } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../store/actions/api.actions';
 import { AppMetadataInfo } from '../../../store/actions/app-metadata.actions';
-import { DeleteApplication } from '../../../store/actions/application.actions';
+import { DeleteApplication, UpdateApplication } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
-
-interface ApplicationEdits {
-  name: string;
-  instances: number;
-  memory: number;
-  enable_ssh: boolean;
-}
 
 @Component({
   selector: 'app-application-base',
@@ -43,12 +36,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   summaryDataChanging: Observable<boolean>;
 
-  appEdits: ApplicationEdits;
-  appDefaultEdits: ApplicationEdits = {
+  appEdits: UpdateApplication;
+  appDefaultEdits: UpdateApplication = {
     enable_ssh: false,
     instances: 0,
     memory: 0,
-    name: ''
+    name: '',
+    environment_json: {}
   };
 
   tabLinks = [
@@ -125,7 +119,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
           name: application.app.entity.name,
           instances: appSummary.entity.entity.instances,
           memory: application.app.entity.memory,
-          enable_ssh: application.app.entity.enable_ssh
+          enable_ssh: application.app.entity.enable_ssh,
+          environment_json: application.app.entity.environment_json
         };
       }, e => {
         if (e.error === this.applicationService.fatalErrorMessage) {

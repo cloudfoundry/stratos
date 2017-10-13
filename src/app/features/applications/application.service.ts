@@ -53,6 +53,7 @@ export class ApplicationService {
   isFetchingStats$: Observable<boolean> = Observable.of(false);
 
   app$: Observable<EntityInfo>;
+  waitForAppEntity$: Observable<EntityInfo>;
   appSummary$: Observable<EntityInfo>;
   appStatsGated$: Observable<null | AppMetadataInfo>;
   appEnvVars$: Observable<AppMetadataInfo>;
@@ -100,13 +101,17 @@ export class ApplicationService {
         }
       }).takeWhile(appInfo => !appInfo.entityRequestInfo.error);
 
+    this.waitForAppEntity$ = this.app$.filter(appInfo => {
+      return !!appInfo.entity;
+    });
+
     this.appSummary$ = getEntityObservable(
       this.store,
       ApplicationSummarySchema.key,
       ApplicationSummarySchema,
       appGuid,
       new GetApplicationSummary(appGuid, cfGuid)
-    );
+    ).skipUntil(this.waitForAppEntity$);
 
     // Subscribing to this will make the stats call. It's better to subscrbibe to appStatsGated$
     const appStats$ = getAppMetadataObservable(
@@ -121,33 +126,30 @@ export class ApplicationService {
       new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
     );
 
+    this.waitForAppEntity$.mergeMap(() => {
+      return Observable.combineLatest(
+        appStats$,
+        this.appEnvVars$,
+        this.appSummary$
+      );
+    });
+
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    this.appStatsGated$ = this.app$
-      .filter(appInfo => {
-        // console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
-        return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo);
-      })
-      .delay(1)
+    this.appStatsGated$ = this.waitForAppEntity$
       .mergeMap((appInfo: EntityInfo) => {
-        // console.log('appStatsGated$: mergeMap: ', appInfo);
         if (appInfo && appInfo.entity && appInfo.entity.entity && appInfo.entity.entity.state === 'STARTED') {
-          // console.log('appStatsGated$: mergeMap: appStats');
           return appStats$;
         }
-        // console.log('appStatsGated$: mergeMap: app');
         return this.app$.map((app: EntityInfo) => {
           return null;
         });
       });
 
-    this.application$ = this.app$
+    this.application$ = this.waitForAppEntity$
       .combineLatest(
       this.store.select(cnsisEntitySelector),
     )
-      .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
-        return this.IsEntityComplete(entity, entityRequestInfo) && cnsis;
-      })
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
         const hasSpace = entity.entity.space;
         const hasOrg = hasSpace ? entity.entity.space.entity.organization : false;
@@ -167,12 +169,8 @@ export class ApplicationService {
         };
       });
 
-    this.applicationState$ = this.app$
+    this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStatsGated$)
-      .filter(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        const appStatsFetched = appStats ? this.IsMetadataComplete(appStats.metadata, appStats.metadataRequestState) : true;
-        return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo) && appStatsFetched;
-      })
       .mergeMap(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
         return Observable.of(this.appStateService.Get(appInfo.entity.entity, appStats ? appStats.metadata : null));
       });
@@ -181,13 +179,12 @@ export class ApplicationService {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
 
-    /**
+
+
+    /**§
      * An observable based on the core application entity
     */
-    this.isFetchingApp$ = this.store.select(selectEntityRequestInfo(ApplicationSchema.key, appGuid))
-      .map((entityRequestInfo: EntityRequestState) => {
-        return entityRequestInfo ? entityRequestInfo.fetching : false;
-      });
+    this.isFetchingApp$ = this.waitForAppEntity$.map(() => false).startWith(true);
 
     this.isUpdatingApp$ =
       this.store.select(selectEntityUpdateInfo(ApplicationSchema.key, appGuid, UpdateExistingApplication.updateKey))
