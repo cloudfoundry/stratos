@@ -42,6 +42,9 @@ const CFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
+// SessionExpiresAfterHeader Custom header for communicating the session expiry time to clients
+const ClientRequestDateHeader = "X-Cap-Request-Date"
+
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
@@ -92,6 +95,11 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	req := c.Request().(*standard.Request).Request
 	req.Header.Set("Cookie", "")
 	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
+	}
+
+	err := p.handleSessionExpiryHeader(c)
+	if err != nil {
 		return err
 	}
 
@@ -524,15 +532,10 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		}
 	}
 
-	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
-	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, err := p.GetSessionValue(c, "expires_on")
+	err := p.handleSessionExpiryHeader(c)
 	if err != nil {
-		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+		return err
 	}
-	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	info, err := p.getInfo(c)
 	if err != nil {
@@ -545,6 +548,32 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
+
+	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
+	// the Set-Cookie header and session cookie expires_on from client side javascript
+	expOn, err := p.GetSessionValue(c, "expires_on")
+	if err != nil {
+		msg := "Could not get session expiry"
+		log.Error(msg+" - ", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+	}
+	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
+
+	expiry := expOn.(time.Time).Unix()
+	expiryDuration := time.Now().Sub(expiry)
+
+	// Subtract time now to get the duration add this to the time provided by the client
+	if c.Request().Header().Contains(ClientRequestDateHeader) {
+		clientDate := c.Request().Header().Get(ClientRequestDateHeader)
+		clientDateInt, err := strconf.ParseInt(clientDate, 10, 64)
+		if err == nil {
+			clientDateInt += expiryDuration
+			c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(clientDateInt, 10))
+		}
+	}
 }
 
 func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
