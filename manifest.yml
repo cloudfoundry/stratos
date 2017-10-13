@@ -5,5 +5,7 @@ applications:
   host: console
   timeout: 180
   buildpack: https://github.com/SUSE/stratos-buildpack
+  buildpacks:
+  - https://github.com/SUSE/stratos-buildpack
   health-check-type: port
   stack: cflinuxfs2
