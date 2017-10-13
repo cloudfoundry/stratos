@@ -44,12 +44,12 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsService) {
   }
 
-  isFetchingApp$: Observable<boolean>;
-  isUpdatingApp$: Observable<boolean>;
+  isFetchingApp$: Observable<boolean> = Observable.of(false);
+  isUpdatingApp$: Observable<boolean> = Observable.of(false);
 
-  isFetchingEnvVars$: Observable<boolean>;
-  isUpdatingEnvVars$: Observable<boolean>;
-  isFetchingStats$: Observable<boolean>;
+  isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
+  isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
+  isFetchingStats$: Observable<boolean> = Observable.of(false);
 
   app$: Observable<EntityInfo>;
   appSummary$: Observable<EntityInfo>;
@@ -173,15 +173,9 @@ export class ApplicationService {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
 
-
     /**
      * An observable based on the core application entity
     */
-    // this.isFetchingApp$ = this.app$.map(({ entity, entityRequestInfo }) => {
-    //   return entityRequestInfo ? entityRequestInfo.fetching : false;
-    //   // return !this.IsEntityComplete(entity, entityRequestInfo);
-    // });
-
     this.isFetchingApp$ = this.store.select(selectEntityRequestInfo(ApplicationSchema.key, appGuid))
       .map((entityRequestInfo: EntityRequestState) => {
         return entityRequestInfo ? entityRequestInfo.fetching : false;
