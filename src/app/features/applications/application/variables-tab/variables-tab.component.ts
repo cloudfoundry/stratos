@@ -264,7 +264,11 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   _createUpdateApplication(removeSelected: boolean): UpdateApplication {
     const updateApp: UpdateApplication = {
-      environment_json: {}
+      environment_json: {},
+      name: '',
+      instances: 0,
+      memory: 0,
+      enable_ssh: false,
     };
     for (const row of this.rows) {
       if (!removeSelected || !this.selectedRows.has(row.name)) {
