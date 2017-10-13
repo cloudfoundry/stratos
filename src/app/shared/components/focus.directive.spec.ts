@@ -1,8 +1,14 @@
 import { FocusDirective } from './focus.directive';
+import { inject } from '@angular/core/testing';
 
 describe('FocusDirective', () => {
+  let focusDirective: FocusDirective;
+
+  beforeEach(inject([FocusDirective], fd => {
+    focusDirective = fd;
+  }));
+
   it('should create an instance', () => {
-    const directive = new FocusDirective();
-    expect(directive).toBeTruthy();
+    expect(focusDirective).toBeTruthy();
   });
 });

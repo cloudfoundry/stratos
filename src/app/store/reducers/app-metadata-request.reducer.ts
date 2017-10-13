@@ -83,7 +83,6 @@ export function appMetadataRequestReducer(state = {}, action) {
             requestSuccessState[getRequestTypeFromMethod(appMetadataAction.options.method)] = { ...defaultRequestProgress };
             requestSuccessState.error = false;
             requestSuccessState.message = '';
-            requestSuccessState.response = '';
             return setAppMetadataRequestState(state, requestSuccessState, appMetadataAction);
         case AppMetadataTypes.APP_METADATA_FAILED:
             const requestFailedState = getAppMetadataRequestState(state, appMetadataAction);
