@@ -14,7 +14,6 @@ import {
 import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
 import {
   GetApplication,
-  GetApplicationSummary,
   UpdateApplication,
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
@@ -54,7 +53,7 @@ export class ApplicationService {
 
   app$: Observable<EntityInfo>;
   waitForAppEntity$: Observable<EntityInfo>;
-  appSummary$: Observable<EntityInfo>;
+  appSummary$: Observable<AppMetadataInfo>;
   appStatsGated$: Observable<null | AppMetadataInfo>;
   appEnvVars$: Observable<AppMetadataInfo>;
 
@@ -105,15 +104,13 @@ export class ApplicationService {
       return !!appInfo.entity;
     });
 
-    this.appSummary$ = getEntityObservable(
+    this.appSummary$ = getAppMetadataObservable(
       this.store,
-      ApplicationSummarySchema.key,
-      ApplicationSummarySchema,
       appGuid,
-      new GetApplicationSummary(appGuid, cfGuid)
-    ).skipUntil(this.waitForAppEntity$);
+      new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
+    );
 
-    // Subscribing to this will make the stats call. It's better to subscrbibe to appStatsGated$
+    // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
     const appStats$ = getAppMetadataObservable(
       this.store,
       appGuid,
@@ -128,7 +125,6 @@ export class ApplicationService {
 
     this.waitForAppEntity$.mergeMap(() => {
       return Observable.combineLatest(
-        appStats$,
         this.appEnvVars$,
         this.appSummary$
       );
@@ -195,7 +191,7 @@ export class ApplicationService {
     this.isFetchingEnvVars$ =
       this.store.select(selectMetadataRequest(AppMetadataProperties.ENV_VARS as AppMetadataType, appGuid))
         .map((appMetadataRequestState: AppMetadataRequestState) => {
-          console.log('sadsdsda: ', appMetadataRequestState ? appMetadataRequestState.fetching.busy : 'nup');
+          // console.log('sadsdsda: ', appMetadataRequestState ? appMetadataRequestState.fetching.busy : 'nup');
           return appMetadataRequestState ? appMetadataRequestState.fetching.busy : false;
         });
 

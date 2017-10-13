@@ -12,7 +12,7 @@ export class FocusDirective implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log('subscribing!!');
+    // console.log('subscribing!!');
     this.sub = this.appFocus.subscribe(event => {
       // this.renderer.invokeElementMethod(this.element.nativeElement, 'focus', []);
       // this.element.nativeElement.focus();

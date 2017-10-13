@@ -97,13 +97,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
         const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
         const isUpdating = isUpdatingApp;
 
-        console.log('isFetchingApp ', isFetchingApp);
-        console.log('isFetchingEnvVars ', isFetchingEnvVars);
-        console.log('isFetchingStats ', isFetchingStats);
+        // console.log('isFetchingApp ', isFetchingApp);
+        // console.log('isFetchingEnvVars ', isFetchingEnvVars);
+        // console.log('isFetchingStats ', isFetchingStats);
 
-        console.log('isFetching ', isFetching);
-        console.log('isUpdating ', isUpdating);
-        console.log(isFetching || isUpdating);
+        // console.log('isFetching ', isFetching);
+        // console.log('isUpdating ', isUpdating);
+        // console.log(isFetching || isUpdating);
         return isFetching || isUpdating;
       });
 
@@ -114,10 +114,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       .mergeMap(_ => {
         return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
       })
-      .subscribe(([application, appSummary]: [ApplicationData, EntityInfo]) => {
+      .subscribe(([application, appSummary]: [ApplicationData, any]) => {
         this.appDefaultEdits = {
           name: application.app.entity.name,
-          instances: appSummary.entity.entity.instances,
+          instances: appSummary.metadata.instances,
           memory: application.app.entity.memory,
           enable_ssh: application.app.entity.enable_ssh,
           environment_json: application.app.entity.environment_json

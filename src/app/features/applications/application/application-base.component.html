@@ -42,8 +42,8 @@
               <app-editable-display-value [edit]="isEditSummary">
                 <div class="display-input__display">
                   <app-display-value [label]="'Running Instances'">
-                    {{(applicationService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (applicationService.appSummary$ |
-                    async)?.entity.entity?.instances }}
+                    {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.appSummary$ | async)?.metadata?.instances
+                    }}
                   </app-display-value>
                 </div>
                 <div class="display-input__input">
@@ -55,7 +55,7 @@
               </app-editable-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.metadata?.services?.length || '-'"></app-display-value>
             </md-list-item>
           </md-list>
         </div>

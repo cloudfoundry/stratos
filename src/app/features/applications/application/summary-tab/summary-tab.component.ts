@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../../store/actions/api.actions';
 import { ApplicationData, ApplicationService } from '../../application.service';
+import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 
 //TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
@@ -24,8 +25,8 @@ export class SummaryTabComponent implements OnInit {
       .combineLatest(
       this.appService.appSummary$
       )
-      .mergeMap(([app, { entity, entityRequestInfo }]: [ApplicationData, EntityInfo]) => {
-        return Observable.of(app.fetching || entityRequestInfo.fetching);
+      .map(([app, appSummary]: [ApplicationData, AppMetadataInfo]) => {
+        return app.fetching || appSummary.metadataRequestState.fetching.busy;
       });
   }
 
