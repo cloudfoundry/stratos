@@ -41,12 +41,17 @@ export class APIAction implements Action, SingleEntityAction {
   // For single entity requests
   guid?: string;
   updatingKey?: string;
+  entityMerge?: ActionMergeFunction;
+}
+
+export type ActionMergeFunction = (oldEntities: EntitiesState, newEntities: NormalizedResponseEntities)
+  => NormalizedResponseEntities;
+export interface NormalizedResponseEntities {
+  [key: string]: string;
 }
 
 export interface NormalizedResponse {
-  entities: {
-    [key: string]: any
-  };
+  entities: NormalizedResponseEntities;
   result: any[];
 }
 

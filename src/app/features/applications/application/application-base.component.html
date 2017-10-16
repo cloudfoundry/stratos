@@ -43,7 +43,7 @@
               <app-editable-display-value [edit]="isEditSummary">
                 <div class="display-input__display">
                   <app-display-value [label]="'Running Instances'">
-                    {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.appSummary$ | async)?.metadata?.instances
+                    {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances
                     }}
                   </app-display-value>
                 </div>

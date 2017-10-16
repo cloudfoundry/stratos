@@ -6,12 +6,12 @@ import { Observable } from 'rxjs/Rx';
 
 import { environment } from '../../../environments/environment';
 import {
-    AppNameFree,
-    AppNameTaken,
-    CHECK_NAME,
-    IsNewAppNameFree,
-    NewAppCFDetails,
-    selectNewAppCFDetails,
+  AppNameFree,
+  AppNameTaken,
+  CHECK_NAME,
+  IsNewAppNameFree,
+  NewAppCFDetails,
+  selectNewAppCFDetails,
 } from '../actions/create-applications-page.actions';
 import { CreateNewApplicationState } from '../reducers/create-application.reducer';
 import { AppState } from './../app-state';
@@ -23,31 +23,21 @@ import { GetAppMetadataAction, AppMetadataProperties, AppMetadataType } from '..
 @Injectable()
 export class UpdateAppEffects {
 
-    constructor(
-        private http: Http,
-        private actions$: Actions,
-        private store: Store<AppState>
-    ) {
-    }
+  constructor(
+    private http: Http,
+    private actions$: Actions,
+    private store: Store<AppState>
+  ) {
+  }
 
-    @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
-        .mergeMap((action: WrapperAPIActionSuccess) => {
+  @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
+    .mergeMap((action: WrapperAPIActionSuccess) => {
 
+      const actions = [
+        // TODO: RC REMOVE. At the moment this is done so the app metadata env vars environment_json matches that of the app
+        new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
 
-            const actions = [new GetApplication(
-                action.apiAction.guid,
-                action.apiAction.cnis,
-            ),
-            // TODO: RC REMOVE
-            new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
-
-            const app = action.response.entities.application;
-            if (app && app.entity && app.entity.entity && app.entity.entity.state === 'STARTED') {
-                actions.push(
-                    new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis,
-                        AppMetadataProperties.INSTANCES as AppMetadataType));
-            }
-            return actions;
-        });
+      return actions;
+    });
 
 }
