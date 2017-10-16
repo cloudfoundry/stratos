@@ -37,11 +37,11 @@ To enable the dashboard add the environment variable 'FORCE_ENDPOINT_DASHBOARD' 
  ```
  applications:
  - name: console
-   memory: 768M
-   disk_quota: 1G
+   memory: 256M
+   disk_quota: 256M
    host: console
    timeout: 180
-   buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+   buildpack: https://github.com/SUSE/stratos-buildpack
    health-check-type: port
    env:
      FORCE_ENDPOINT_DASHBOARD: true
@@ -145,11 +145,11 @@ To specify the Cloud Foundry API endpoint, add the `CF_API_URL` variable to the 
 ```
 applications:
 - name: console
-  memory: 768M
-  disk_quota: 1G
+  memory: 256M
+  disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
   env:
     CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
@@ -162,11 +162,11 @@ To force the console to use secured communication with the Cloud Foundry API end
 ```
 applications:
 - name: console
-  memory: 768M
-  disk_quota: 1G
+  memory: 256M
+  disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/multi-buildpack
+  buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
   env:
     CF_API_FORCE_SECURE: true
