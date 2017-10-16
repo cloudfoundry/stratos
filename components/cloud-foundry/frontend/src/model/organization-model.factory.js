@@ -486,7 +486,6 @@
         });
       }
 
-
       function getServiceInstancesCount(spaces) {
         var serviceInstancesCountPromises = [];
         var missingSpaces = [];
