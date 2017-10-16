@@ -103,16 +103,6 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
-	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, err := p.GetSessionValue(c, "expires_on")
-	if err != nil {
-		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, msg)
-	}
-	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
-
 	_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return err
