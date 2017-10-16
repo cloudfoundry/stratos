@@ -30,7 +30,7 @@ export class GetAllAppEvents implements APIAction {
         this.options.params.set('results-per-page', resultsPerPage.toString());
         this.options.params.set('order-direction', 'asc');
         // TODO: RC returns emtpy, then null in inner workings
-        // this.options.params.set('q', 'actee:' + appGuid);
+        this.options.params.set('q', 'actee:' + appGuid);
 
         // order-direction:desc
         // page:1

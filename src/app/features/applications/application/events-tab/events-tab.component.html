@@ -27,19 +27,24 @@
             </ng-container>
             <ng-container mdColumnDef="type">
               <md-header-cell *mdHeaderCellDef> Type </md-header-cell>
-              <md-cell *mdCellDef="let row">{{row.entity.type}}</md-cell>
+              <md-cell *mdCellDef="let row">
+                <div *ngFor="let item of row.entity.type.split('.')">
+                  {{item}}
+                </div>
+              </md-cell>
             </ng-container>
             <ng-container mdColumnDef="actor_name">
               <md-header-cell *mdHeaderCellDef> Actor Name </md-header-cell>
-              <md-cell *mdCellDef="let row">{{row.entity.actor_name}}</md-cell>
+              <md-cell *mdCellDef="let row">
+                <md-icon>{{row.entity.actor_type | eventTabActorIcon}}</md-icon> {{row.entity.actor_name}}</md-cell>
             </ng-container>
             <ng-container mdColumnDef="detail">
               <md-header-cell *mdHeaderCellDef> Detail </md-header-cell>
               <md-cell *mdCellDef="let row">
                 <table>
-                  <tr *ngFor="let metadata of (row.entity.metadata.request || row.entity.metadata) | values">
+                  <tr *ngFor="let metadata of (row.entity.metadata) | values">
                     <td>{{metadata.key}}</td>
-                    <td>{{metadata.value}}</td>
+                    <td>{{metadata.value | json}}</td>
                   </tr>
                 </table>
               </md-cell>
@@ -58,7 +63,8 @@
         <md-card-footer>
           <div [hidden]="(dataSource.count$ | async) === 0">
             <!-- [pageIndex]="0" -->
-            <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
+            <!-- [pageSize]="5"  -->
+            <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSizeOptions]="[5, 10, 25, 100]">
             </md-paginator>
           </div>
         </md-card-footer>
