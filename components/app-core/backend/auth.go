@@ -98,7 +98,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	err := p.handleSessionExpiryHeader(c)
+	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
 		return err
 	}
@@ -532,7 +532,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		}
 	}
 
-	err := p.handleSessionExpiryHeader(c)
+	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
 		return err
 	}
@@ -562,18 +562,20 @@ func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	expiry := expOn.(time.Time).Unix()
-	expiryDuration := time.Now().Sub(expiry)
+	expiry := expOn.(time.Time)
+	expiryDuration := expiry.Sub(time.Now())
 
 	// Subtract time now to get the duration add this to the time provided by the client
 	if c.Request().Header().Contains(ClientRequestDateHeader) {
 		clientDate := c.Request().Header().Get(ClientRequestDateHeader)
-		clientDateInt, err := strconf.ParseInt(clientDate, 10, 64)
+		clientDateInt, err := strconv.ParseInt(clientDate, 10, 64)
 		if err == nil {
-			clientDateInt += expiryDuration
+			clientDateInt += int64(expiryDuration.Seconds())
 			c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(clientDateInt, 10))
 		}
 	}
+
+	return nil
 }
 
 func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, error) {
