@@ -15,7 +15,7 @@ import {
 } from '../actions/create-applications-page.actions';
 import { CreateNewApplicationState } from '../reducers/create-application.reducer';
 import { AppState } from './../app-state';
-import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, GetApplicationSummary, UPDATE } from '../actions/application.actions';
+import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
 import { WrapperAPIActionSuccess, ApiActionTypes } from '../actions/api.actions';
 import { GetAppMetadataAction, AppMetadataProperties, AppMetadataType } from '../actions/app-metadata.actions';
 
@@ -32,16 +32,22 @@ export class UpdateAppEffects {
 
     @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
         .mergeMap((action: WrapperAPIActionSuccess) => {
-            return [new GetApplication(
-                action.apiAction.guid,
-                action.apiAction.cnis,
-            ),
-            new GetApplicationSummary(
+
+
+            const actions = [new GetApplication(
                 action.apiAction.guid,
                 action.apiAction.cnis,
             ),
             // TODO: RC REMOVE
             new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
+
+            const app = action.response.entities.application;
+            if (app && app.entity && app.entity.entity && app.entity.entity.state === 'STARTED') {
+                actions.push(
+                    new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis,
+                        AppMetadataProperties.INSTANCES as AppMetadataType));
+            }
+            return actions;
         });
 
 }

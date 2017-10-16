@@ -19,45 +19,45 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 
 export function logger(reducer): any {
-    // default, no options
-    return storeLogger()(reducer);
+  // default, no options
+  return storeLogger()(reducer);
 }
 
 const appMetadataReducers: ActionReducerMap<any> = {
-    values: appMetadataReducer,
-    requests: appMetadataRequestReducer
+  values: appMetadataReducer,
+  requests: appMetadataRequestReducer
 };
 
 export function appMetaDataReducer(state, action): MetadataState {
-    // https://github.com/ngrx/platform/issues/116#issuecomment-317297642
-    return combineReducers<MetadataState>(appMetadataReducers)(state, action);
+  // https://github.com/ngrx/platform/issues/116#issuecomment-317297642
+  return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
 export const appReducers = {
-    entities: entitiesReducer,
-    auth: authReducer,
-    uaaSetup: uaaSetupReducer,
-    cnsis: cnsisReducer,
-    pagination: paginationReducer,
-    apiRequest: apiRequestReducer,
-    dashboard: dashboardReducer,
-    createApplication: createAppReducer,
-    appMetadata: appMetaDataReducer
+  entities: entitiesReducer,
+  auth: authReducer,
+  uaaSetup: uaaSetupReducer,
+  cnsis: cnsisReducer,
+  pagination: paginationReducer,
+  apiRequest: apiRequestReducer,
+  dashboard: dashboardReducer,
+  createApplication: createAppReducer,
+  appMetadata: appMetaDataReducer
 };
 
 export const metaReducers = environment.production ? [storeFreeze, logger] : [];
 
 @NgModule({
-    imports: [
-        StoreModule.forRoot(
-            appReducers,
-            {
-                metaReducers
-            }
-        ),
-        StoreDevtoolsModule.instrument({
-            maxAge: 25
-        })
-    ]
+  imports: [
+    StoreModule.forRoot(
+      appReducers,
+      {
+        // metaReducers
+      }
+    ),
+    StoreDevtoolsModule.instrument({
+      maxAge: 100
+    })
+  ]
 })
 export class AppReducersModule { }

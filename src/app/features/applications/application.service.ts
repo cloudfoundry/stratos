@@ -11,16 +11,16 @@ import {
   getAppMetadataObservable,
   selectMetadataRequest,
 } from '../../store/actions/app-metadata.actions';
-import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
+import { ApplicationSchema } from '../../store/actions/application.actions';
 import {
   GetApplication,
-  GetApplicationSummary,
   UpdateApplication,
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
-import { UpdateState, EntityRequestState } from '../../store/reducers/api-request-reducer';
+import { ActionState, EntityRequestState } from '../../store/reducers/api-request-reducer';
+
 import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
 import {
   ApplicationStateData,
@@ -44,15 +44,19 @@ export class ApplicationService {
     private appEnvVarsService: ApplicationEnvVarsService) {
   }
 
-  isFetchingApp$: Observable<boolean> = Observable.of(false);
-  isUpdatingApp$: Observable<boolean> = Observable.of(false);
+  // NJ: This needs to be cleaned up. So much going on!
+  isFetchingApp$: Observable<boolean>;
+  isUpdatingApp$: Observable<boolean>;
 
-  isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
-  isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
-  isFetchingStats$: Observable<boolean> = Observable.of(false);
+  isDeletingApp$: Observable<boolean>;
+
+  isFetchingEnvVars$: Observable<boolean>;
+  isUpdatingEnvVars$: Observable<boolean>;
+  isFetchingStats$: Observable<boolean>;
 
   app$: Observable<EntityInfo>;
-  appSummary$: Observable<EntityInfo>;
+  waitForAppEntity$: Observable<EntityInfo>;
+  appSummary$: Observable<AppMetadataInfo>;
   appStatsGated$: Observable<null | AppMetadataInfo>;
   appEnvVars$: Observable<AppMetadataInfo>;
 
@@ -73,7 +77,7 @@ export class ApplicationService {
 
   IsMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
     if (requestInfo) {
-      return !requestInfo.fetching.busy;
+      return !requestInfo.fetching;
     } else {
       return !!value;
     }
@@ -90,61 +94,62 @@ export class ApplicationService {
       ApplicationSchema,
       appGuid,
       new GetApplication(appGuid, cfGuid)
-    ).debounceTime(250);
-
-    this.appSummary$ = getEntityObservable(
-      this.store,
-      ApplicationSummarySchema.key,
-      ApplicationSummarySchema,
-      appGuid,
-      new GetApplicationSummary(appGuid, cfGuid)
     );
 
-    // Subscribing to this will make the stats call. It's better to subscrbibe to appStatsGated$
-    const appStats$ = getAppMetadataObservable(
-      this.store,
-      appGuid,
-      new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType)
-    );
+    this.isDeletingApp$ = this.app$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
 
-    this.appEnvVars$ = getAppMetadataObservable(
-      this.store,
-      appGuid,
-      new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
-    );
+    this.waitForAppEntity$ = this.app$
+      .filter((appInfo) => {
+        return (
+          !!appInfo.entity &&
+          !appInfo.entityRequestInfo.deleting.busy &&
+          !appInfo.entityRequestInfo.deleting.deleted &&
+          !appInfo.entityRequestInfo.error
+        );
+      })
+      .delay(1);
+
+    this.appSummary$ =
+      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
+        this.store,
+        appGuid,
+        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
+      ));
+
+    // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
+    const appStats$ =
+      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
+        this.store,
+        appGuid,
+        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType)
+      ));
+
+    this.appEnvVars$ =
+      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
+        this.store,
+        appGuid,
+        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
+      ));
 
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    this.appStatsGated$ = this.app$
-      .filter((appInfo: EntityInfo) => {
-        // console.log('appStatsGated$: filter: ', this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo));
-        return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo);
-      })
-      .delay(1)
-      .mergeMap((appInfo: EntityInfo) => {
-        // console.log('appStatsGated$: mergeMap: ', appInfo);
-        if (appInfo && appInfo.entity && appInfo.entity.entity && appInfo.entity.entity.state === 'STARTED') {
-          // console.log('appStatsGated$: mergeMap: appStats');
+    this.appStatsGated$ = this.waitForAppEntity$
+      .filter(ai => ai && ai.entity && ai.entity.entity)
+      .take(1)
+      .mergeMap(ai => {
+        if (ai.entity.entity.state === 'STARTED') {
           return appStats$;
+        } else {
+          return Observable.of(null);
         }
-        // console.log('appStatsGated$: mergeMap: app');
-        return this.app$.map((app: EntityInfo) => {
-          return null;
-        });
       });
 
-    this.application$ = this.app$
+    this.application$ = this.waitForAppEntity$
       .combineLatest(
       this.store.select(cnsisEntitySelector),
     )
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
-        return this.IsEntityComplete(entity, entityRequestInfo) && cnsis;
-      })
-      .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
-        const hasSpace = entity.entity.space;
-        const hasOrg = hasSpace ? entity.entity.space.entity.organization : false;
-        const hasCfGuid = entity.entity.cfGuid;
-        return hasSpace && hasOrg && hasCfGuid;
+        return entity && entity.entity && entity.entity.cfGuid && entity.entity.space && entity.entity.space.entity.organization;
       })
       .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
         return {
@@ -159,52 +164,40 @@ export class ApplicationService {
         };
       });
 
-    this.applicationState$ = this.app$
+    this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStatsGated$)
-      .filter(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        const appStatsFetched = appStats ? this.IsMetadataComplete(appStats.metadata, appStats.metadataRequestState) : true;
-        return this.IsEntityComplete(appInfo.entity, appInfo.entityRequestInfo) && appStatsFetched;
-      })
-      .mergeMap(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        return Observable.of(this.appStateService.Get(appInfo.entity.entity, appStats ? appStats.metadata : null));
+      .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
+        return this.appStateService.Get(appInfo.entity.entity, appStats ? appStats.metadata : null);
       });
 
     this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
 
+
     /**
      * An observable based on the core application entity
     */
-    this.isFetchingApp$ = this.store.select(selectEntityRequestInfo(ApplicationSchema.key, appGuid))
-      .map((entityRequestInfo: EntityRequestState) => {
-        return entityRequestInfo ? entityRequestInfo.fetching : false;
-      });
+    this.isFetchingApp$ = Observable.combineLatest(
+      this.app$.map(ei => ei.entityRequestInfo.fetching),
+      this.appSummary$.map(as => as.metadataRequestState.fetching.busy)
+    )
+      .map((fetching) => fetching[0] || fetching[1]);
 
     this.isUpdatingApp$ =
-      this.store.select(selectEntityUpdateInfo(ApplicationSchema.key, appGuid, UpdateExistingApplication.updateKey))
-        .map((updateState: UpdateState) => {
-          return updateState ? updateState.busy : false;
-        });
+      this.app$.map(a => {
+        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || {
+          busy: false
+        };
+        return updatingSection.busy || false;
+      });
 
-    this.isFetchingEnvVars$ =
-      this.store.select(selectMetadataRequest(AppMetadataProperties.ENV_VARS as AppMetadataType, appGuid))
-        .map((appMetadataRequestState: AppMetadataRequestState) => {
-          console.log('sadsdsda: ', appMetadataRequestState ? appMetadataRequestState.fetching.busy : 'nup');
-          return appMetadataRequestState ? appMetadataRequestState.fetching.busy : false;
-        });
+    this.isFetchingEnvVars$ = this.appEnvVars$.map(ev => ev.metadataRequestState.fetching.busy).startWith(false);
 
-    this.isUpdatingEnvVars$ =
-      this.store.select(selectMetadataRequest(AppMetadataProperties.ENV_VARS as AppMetadataType, appGuid))
-        .map((appMetadataRequestState: AppMetadataRequestState) => {
-          return appMetadataRequestState ? (appMetadataRequestState.creating.busy || appMetadataRequestState.updating.busy) : false;
-        });
+    this.isUpdatingEnvVars$ = this.appEnvVars$.map(ev => ev.metadataRequestState.updating.busy).startWith(false);
 
     this.isFetchingStats$ =
-      this.store.select(selectMetadataRequest(AppMetadataProperties.INSTANCES as AppMetadataType, appGuid))
-        .map((appMetadataRequestState: AppMetadataRequestState) => {
-          return appMetadataRequestState ? appMetadataRequestState.fetching.busy : false;
-        });
+      this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);
 
   }
 

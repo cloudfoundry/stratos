@@ -7,7 +7,7 @@ import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
 import { selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
-import { UpdateState } from '../../../../store/reducers/api-request-reducer';
+import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 
@@ -57,6 +57,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   }
 }
 
+//TODO: RC Move to own file
 export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
@@ -257,7 +258,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   _createUpdateApplication(removeSelected: boolean): UpdateApplication {
     const updateApp: UpdateApplication = {
-      environment_json: {}
+      environment_json: {},
     };
     for (const row of this.rows) {
       if (!removeSelected || !this.selectedRows.has(row.name)) {

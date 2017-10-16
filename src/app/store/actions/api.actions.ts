@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
-import { UpdateState, EntityRequestState } from './../reducers/api-request-reducer';
+import { EntityRequestState, ActionState } from './../reducers/api-request-reducer';
 
 
 export const ApiActionTypes = {
@@ -26,8 +26,11 @@ export interface APIResourceMetadata {
   update_at: string;
   url: string;
 }
-
-export class APIAction implements Action {
+export interface SingleEntityAction {
+  entityKey: string;
+  guid?: string;
+}
+export class APIAction implements Action, SingleEntityAction {
   actions: string[];
   type = ApiActionTypes.API_REQUEST;
   options: RequestOptions;
@@ -98,12 +101,19 @@ export const getEntityObservable = (
     store.select(selectEntityRequestInfo(entityKey, id))
   )
     .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
-      if (!entity && (!entityRequestInfo || !entityRequestInfo.fetching)) {
+      if (
+        !entityRequestInfo ||
+        !entity &&
+        !entityRequestInfo.fetching &&
+        !entityRequestInfo.error &&
+        !entityRequestInfo.deleting.busy &&
+        !entityRequestInfo.deleting.deleted
+      ) {
         store.dispatch(action);
       }
     })
     .filter(([entities, entity, entityRequestInfo]) => {
-      return (entity && entity.entity) || !!entityRequestInfo;
+      return !!entityRequestInfo;
     })
     .map(([entities, entity, entityRequestInfo]) => {
       return {
@@ -111,16 +121,26 @@ export const getEntityObservable = (
         entity: entity ? {
           entity: denormalize(entity, schema, entities).entity,
           metadata: entity.metadata
-        } : {}
+        } : null
       };
     });
 };
+
 
 export function selectEntity(type: string, guid: string) {
   return compose(
     getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
+  );
+}
+
+export function selectEntityDeletionInfo(type: string, entityGuid: string) {
+  return compose(
+    getEntityDeleteSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
@@ -160,7 +180,11 @@ export const getEntityUpdateSections = (request: EntityRequestState) => {
   return request ? request.updating : false;
 };
 
-export const getUpdateSectionById = (guid: string) => (updating): UpdateState => {
+export const getEntityDeleteSections = (request: EntityRequestState) => {
+  return request.deleting;
+};
+
+export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
   return updating[guid];
 };
 

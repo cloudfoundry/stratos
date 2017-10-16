@@ -10,6 +10,7 @@ export interface AppMetadata {
   [key: string]: {
     instances: AppInstancesState;
     environmentVars: AppEnvVarsState;
+    summary: any;
   };
 }
 

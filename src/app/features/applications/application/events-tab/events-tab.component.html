@@ -1,3 +1,74 @@
-<p>
-  events-tab works!
-</p>
+<div class="events-tab">
+  <!-- TODO: RC Arrive from app wall error-->
+
+  <div class="app-table">
+    <div>
+      <div [class.show]="(dataSource.showProgressIndicator$ | async)" class="app-table__loading">
+        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+      </div>
+      <md-card>
+        <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.count$ | async) === 0">
+          <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+            <div class="grow-title mat-card-header-text-wa"></div>
+            <div [hidden]="(dataSource.count$ | async) === 0">
+              TODO: Filter
+            </div>
+          </div>
+          <div [hidden]="!(dataSource.isSelecting$ | async)">
+          </div>
+          <div [hidden]="!(dataSource.isAdding$ | async)">
+          </div>
+        </md-card-header>
+        <md-card-content>
+          <md-table #table [hidden]="(dataSource.count$ | async) === 0" [dataSource]="dataSource" mdSort>
+            <ng-container mdColumnDef="timestamp">
+              <md-header-cell *mdHeaderCellDef> Timestamp </md-header-cell>
+              <md-cell *mdCellDef="let row">{{row.entity.timestamp | date:'medium'}}</md-cell>
+            </ng-container>
+            <ng-container mdColumnDef="type">
+              <md-header-cell *mdHeaderCellDef> Type </md-header-cell>
+              <md-cell *mdCellDef="let row">
+                <div *ngFor="let item of row.entity.type.split('.')">
+                  {{item}}
+                </div>
+              </md-cell>
+            </ng-container>
+            <ng-container mdColumnDef="actor_name">
+              <md-header-cell *mdHeaderCellDef> Actor Name </md-header-cell>
+              <md-cell *mdCellDef="let row">
+                <md-icon>{{row.entity.actor_type | eventTabActorIcon}}</md-icon> {{row.entity.actor_name}}</md-cell>
+            </ng-container>
+            <ng-container mdColumnDef="detail">
+              <md-header-cell *mdHeaderCellDef> Detail </md-header-cell>
+              <md-cell *mdCellDef="let row">
+                <table>
+                  <tr *ngFor="let metadata of (row.entity.metadata) | values">
+                    <td>{{metadata.key}}</td>
+                    <td>{{metadata.value | json}}</td>
+                  </tr>
+                </table>
+              </md-cell>
+            </ng-container>
+            <md-header-row *mdHeaderRowDef="['timestamp', 'type', 'actor_name', 'detail']" [hidden]="(dataSource.count$ | async) === 0">
+            </md-header-row>
+            <md-row *mdRowDef="let row; columns: ['timestamp', 'type', 'actor_name', 'detail'];">
+            </md-row>
+          </md-table>
+          <div [hidden]="(dataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
+            <div class="mat-card-header-text">
+              <div class="mat-card-header-text-wa">There are no events.</div>
+            </div>
+          </div>
+        </md-card-content>
+        <md-card-footer>
+          <div [hidden]="(dataSource.count$ | async) === 0">
+            <!-- [pageIndex]="0" -->
+            <!-- [pageSize]="5"  -->
+            <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSizeOptions]="[5, 10, 25, 100]">
+            </md-paginator>
+          </div>
+        </md-card-footer>
+      </md-card>
+    </div>
+  </div>
+</div>

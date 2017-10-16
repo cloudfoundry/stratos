@@ -1,18 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityInfo } from '../../../store/actions/api.actions';
 import { AppMetadataInfo } from '../../../store/actions/app-metadata.actions';
+import { DeleteApplication, UpdateApplication } from '../../../store/actions/application.actions';
+import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
-
-interface ApplicationEdits {
-  name: string;
-  instances: number;
-  memory: number;
-  enable_ssh: boolean;
-}
 
 @Component({
   selector: 'app-application-base',
@@ -23,7 +19,12 @@ interface ApplicationEdits {
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
   [x: string]: any;
 
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private applicationService: ApplicationService,
+    private store: Store<AppState>
+  ) { }
 
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
@@ -35,12 +36,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   summaryDataChanging: Observable<boolean>;
 
-  appEdits: ApplicationEdits;
-  appDefaultEdits: ApplicationEdits = {
+  appEdits: UpdateApplication;
+  appDefaultEdits: UpdateApplication = {
     enable_ssh: false,
     instances: 0,
     memory: 0,
-    name: ''
+    name: '',
+    environment_json: {}
   };
 
   tabLinks = [
@@ -70,36 +72,29 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.appEdits = { ... this.appDefaultEdits };
   }
 
+  deleteApplication() {
+    this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
+  }
+
   ngOnInit() {
     this.setAppDefaults();
 
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
-      this.sub.push(this.applicationService.application$.subscribe(({ app }) => {
-        this.application = app.entity;
-      }));
       this.isFetching$ = this.applicationService.isFetchingApp$;
     }));
 
-    this.summaryDataChanging$ = this.applicationService.isFetchingApp$
-      .combineLatest(
+    this.summaryDataChanging$ = Observable.combineLatest(
+      this.applicationService.isFetchingApp$,
       this.applicationService.isUpdatingApp$,
       this.applicationService.isFetchingEnvVars$,
       this.applicationService.isFetchingStats$
-      ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]: [boolean, boolean, boolean, boolean]) => {
-        const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
-        const isUpdating = isUpdatingApp;
-
-        console.log('isFetchingApp ', isFetchingApp);
-        console.log('isFetchingEnvVars ', isFetchingEnvVars);
-        console.log('isFetchingStats ', isFetchingStats);
-
-        console.log('isFetching ', isFetching);
-        console.log('isUpdating ', isUpdating);
-        console.log(isFetching || isUpdating);
-        return isFetching || isUpdating;
-      });
+    ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]) => {
+      const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
+      const isUpdating = isUpdatingApp;
+      return isFetching || isUpdating;
+    });
 
     this.sub.push(this.summaryDataChanging$
       .filter((isChanging) => {
@@ -108,14 +103,26 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       .mergeMap(_ => {
         return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
       })
-      .subscribe(([application, appSummary]: [ApplicationData, EntityInfo]) => {
+      .subscribe(([application, appSummary]: [ApplicationData, any]) => {
         this.appDefaultEdits = {
           name: application.app.entity.name,
-          instances: appSummary.entity.entity.instances,
+          instances: appSummary.metadata.instances,
           memory: application.app.entity.memory,
-          enable_ssh: application.app.entity.enable_ssh
+          enable_ssh: application.app.entity.enable_ssh,
+          environment_json: application.app.entity.environment_json
         };
       }));
+
+    const appSub = this.applicationService.app$.subscribe(app => {
+      if (
+        app.entityRequestInfo.deleting.deleted ||
+        app.entityRequestInfo.error
+      ) {
+        this.router.navigateByUrl('applications');
+      }
+    });
+
+    this.sub.push(appSub);
   }
 
 

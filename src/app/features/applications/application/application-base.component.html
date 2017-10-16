@@ -1,11 +1,14 @@
 <app-page-header>
-  <h1>{{ application?.name }} </h1>
+  <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
     <button md-icon-button *ngIf="isEditSummary" md-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
       <md-icon>done</md-icon>
     </button>
     <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()">
       <md-icon>clear</md-icon>
+    </button>
+    <button md-icon-button name="delete" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+      <md-icon>delete</md-icon>
     </button>
     <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
       <md-icon>edit</md-icon>
@@ -22,6 +25,7 @@
           <md-list dense role='list'>
             <md-list-item role="listitem">
               <app-display-value [label]="'Composite State'">
+
                 <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
               </app-display-value>
             </md-list-item>
@@ -39,8 +43,8 @@
               <app-editable-display-value [edit]="isEditSummary">
                 <div class="display-input__display">
                   <app-display-value [label]="'Running Instances'">
-                    {{(applicationService.appSummary$| async)?.entity.entity?.running_instances || 0}} / {{ (applicationService.appSummary$ |
-                    async)?.entity.entity?.instances }}
+                    {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.appSummary$ | async)?.metadata?.instances
+                    }}
                   </app-display-value>
                 </div>
                 <div class="display-input__input">
@@ -52,7 +56,7 @@
               </app-editable-display-value>
             </md-list-item>
             <md-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.entity.entity?.services?.length || '-'"></app-display-value>
+              <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.metadata?.services?.length || '-'"></app-display-value>
             </md-list-item>
           </md-list>
         </div>

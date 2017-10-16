@@ -14,9 +14,10 @@ export const AppMetadataTypes = {
 
 export const AppMetadataProperties = {
   INSTANCES: 'instances',
-  ENV_VARS: 'environmentVars'
+  ENV_VARS: 'environmentVars',
+  SUMMARY: 'summary'
 };
-export type AppMetadataType = 'instances' | 'environmentVars';
+export type AppMetadataType = 'instances' | 'environmentVars' | 'summary';
 
 export interface AppMetadataInfo {
   metadata: any;
@@ -51,9 +52,14 @@ export class GetAppMetadataAction implements Action {
           method: 'get'
         });
         break;
-      default:
-        requestObject = new RequestOptions();
+      case AppMetadataProperties.SUMMARY:
+        requestObject = new RequestOptions({
+          url: `apps/${guid}/summary`,
+          method: 'get'
+        });
         break;
+      default:
+        throw new Error(`Unexpected AppMetadataProperties type of ${type}`);
     }
     return requestObject;
   }
@@ -83,14 +89,15 @@ export class WrapperAppMetadataFailed implements Action {
     public appMetadataAction: GetAppMetadataAction
   ) {
     // TODO: Make this standard over all CF responses
-    this.appMetedataError = JSON.parse(response._body);
-    this.message = this.appMetedataError.description;
+    this.appMetedataError = response._body ? JSON.parse(response._body) : response;
+    this.message = this.appMetedataError.description || this.appMetedataError.message;
   }
   type = AppMetadataTypes.APP_METADATA_FAILED;
 }
 
 interface AppMetedataError {
-  description: string;
+  description?: string;
+  message?: string;
   error_code?: string;
   code?: number;
 }
