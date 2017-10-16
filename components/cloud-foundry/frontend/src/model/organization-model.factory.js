@@ -22,6 +22,7 @@
     var orgsQuotaApi = apiManager.retrieve('cloud-foundry.api.OrganizationQuotaDefinitions');
     var appsApi = apiManager.retrieve('cloud-foundry.api.Apps');
     var routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
+    var serviceInstancesApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
 
     var ORG_ROLE_TO_KEY = {
       org_user: 'users',
@@ -485,6 +486,52 @@
         });
       }
 
+
+      function getServiceInstancesCount(spaces) {
+        var serviceInstancesCountPromises = [];
+        var missingSpaces = [];
+
+        _.forEach(spaces, function (space) {
+          // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs
+          // requests.
+          // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
+          // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
+          // new request. The new request will be made once per org with this issue. This number may become troublesome
+          // if there are 50+ such orgs.
+          if (space.entity.service_instances) {
+            // If we have the space's apps, great, use that
+            serviceInstancesCountPromises.push($q.resolve(space.entity.service_instances.length));
+          } else {
+            // If we don't have the space's apps (most probably due to the number of apps exceeding 'results-per-page')
+            // then create a single request for the end. This avoids making a request per space.
+            missingSpaces.push(space.metadata.guid);
+          }
+        });
+
+        // Instead of making one request per space (this could be 50+ spaces) only make one and use total_results
+        if (missingSpaces.length > 0) {
+          // We shouldn't have to worry about the length of the query string, this only affects browsers.
+          var q = 'space_guid IN ' + missingSpaces.join(',');
+          var missingServicesParams = {
+            q: q,
+            'results-per-page': 1
+          };
+          missingServicesParams = _.defaults(missingServicesParams, params);
+          var promise = serviceInstancesApi.ListAllServiceInstances(missingServicesParams, httpConfig).then(function (response) {
+            return response.data.total_results;
+          });
+          serviceInstancesCountPromises.push(promise);
+        }
+
+        return $q.all(serviceInstancesCountPromises).then(function (serviceInstanceCounts) {
+          var total = 0;
+          _.forEach(serviceInstanceCounts, function (count) {
+            total += count;
+          });
+          return total;
+        });
+      }
+
       var rolesP = getRoles(org); // Roles can be returned inline
       var quotaP = getQuota(org); // The quota can be returned inline
 
@@ -522,6 +569,8 @@
 
       var instancesP = allSpacesP.then(getInstances);
 
+      var serviceInstancesCountP = allSpacesP.then(getServiceInstancesCount);
+
       return $q.all({
         memory: usedMemP,
         quota: quotaP,
@@ -529,7 +578,8 @@
         appCounts: appCountsP,
         routesCountP: routesCountP,
         roles: orgRolesP,
-        spaces: allSpacesP
+        spaces: allSpacesP,
+        serviceInstancesCount: serviceInstancesCountP
       }).then(function (vals) {
         var details = {};
 
@@ -552,6 +602,9 @@
         details.totalApps = vals.appCounts;
         details.totalRoutes = vals.routesCountP;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
+
+        // Service Instances Count
+        details.serviceInstancesCount = vals.serviceInstancesCount;
 
         // Services Quotas
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
