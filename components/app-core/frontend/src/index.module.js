@@ -43,6 +43,8 @@
     $compileProvider.debugInfoEnabled(false);
 
     $logProvider.debugEnabled(false);
+    
+    $compileProvider.preAssignBindingsEnabled(true);
 
   }
 
