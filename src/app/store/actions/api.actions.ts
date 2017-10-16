@@ -105,7 +105,9 @@ export const getEntityObservable = (
         !entityRequestInfo ||
         !entity &&
         !entityRequestInfo.fetching &&
-        !entityRequestInfo.error
+        !entityRequestInfo.error &&
+        !entityRequestInfo.deleting.busy &&
+        !entityRequestInfo.deleting.deleted
       ) {
         store.dispatch(action);
       }
@@ -119,16 +121,26 @@ export const getEntityObservable = (
         entity: entity ? {
           entity: denormalize(entity, schema, entities).entity,
           metadata: entity.metadata
-        } : {}
+        } : null
       };
     });
 };
+
 
 export function selectEntity(type: string, guid: string) {
   return compose(
     getEntityById<APIResource>(guid),
     getEntityType(type),
     getEntityState
+  );
+}
+
+export function selectEntityDeletionInfo(type: string, entityGuid: string) {
+  return compose(
+    getEntityDeleteSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
@@ -166,6 +178,10 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
 
 export const getEntityUpdateSections = (request: EntityRequestState) => {
   return request ? request.updating : false;
+};
+
+export const getEntityDeleteSections = (request: EntityRequestState) => {
+  return request.deleting;
 };
 
 export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
