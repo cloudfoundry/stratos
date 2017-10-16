@@ -11,7 +11,7 @@ import {
   getAppMetadataObservable,
   selectMetadataRequest,
 } from '../../store/actions/app-metadata.actions';
-import { ApplicationSchema, ApplicationSummarySchema } from '../../store/actions/application.actions';
+import { ApplicationSchema } from '../../store/actions/application.actions';
 import {
   GetApplication,
   UpdateApplication,

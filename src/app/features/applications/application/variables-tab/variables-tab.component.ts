@@ -57,6 +57,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   }
 }
 
+//TODO: RC Move to own file
 export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
@@ -265,10 +266,6 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   _createUpdateApplication(removeSelected: boolean): UpdateApplication {
     const updateApp: UpdateApplication = {
       environment_json: {},
-      name: '',
-      instances: 0,
-      memory: 0,
-      enable_ssh: false,
     };
     for (const row of this.rows) {
       if (!removeSelected || !this.selectedRows.has(row.name)) {

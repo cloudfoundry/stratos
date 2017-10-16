@@ -22,6 +22,7 @@ import { SummaryTabComponent } from './application/summary-tab/summary-tab.compo
 import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
+import { EventTabActorIconPipe } from './application/events-tab/event-tab-actor-icon.pipe';
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import { ApplicationsRoutingModule } from './applications.routing';
     ViewBuildpackComponent,
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
-    ApplicationStateComponent
+    ApplicationStateComponent,
+    EventTabActorIconPipe
   ],
   providers: [
     ApplicationService,

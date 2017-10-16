@@ -14,6 +14,7 @@ import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
 import { FocusDirective } from './components/focus.directive';
 import { UniqueDirective } from './components/unique.directive';
+import { ValuesPipe } from './pipes/values.pipe';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { UniqueDirective } from './components/unique.directive';
         StatefulIconComponent,
         EditableDisplayValueComponent,
         MbToHumanSizePipe,
+        ValuesPipe,
         LoadingPageComponent,
         DetailsCardComponent,
         FocusDirective,
@@ -46,6 +48,7 @@ import { UniqueDirective } from './components/unique.directive';
         SteppersModule,
         StatefulIconComponent,
         MbToHumanSizePipe,
+        ValuesPipe,
         SteppersModule,
         FocusDirective,
         UniqueDirective,

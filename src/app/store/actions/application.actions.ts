@@ -44,16 +44,6 @@ export const ApplicationSchema = new schema.Entity('application', {
     idAttribute: getAPIResourceGuid
   });
 
-export const ApplicationSummarySchema = new schema.Entity('applicationSummary', {
-  entity: {
-    stack: StackSchema,
-    space: SpaceSchema
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
-
-
 export class GetAllApplications implements APIAction {
   constructor(public paginationKey?: string) {
     this.options = new RequestOptions();
@@ -141,11 +131,11 @@ export class AssociateRouteWithAppApplication implements APIAction {
 }
 
 export interface UpdateApplication {
-  name: string;
-  instances: number;
-  memory: number;
-  enable_ssh: boolean;
-  environment_json: any;
+  name?: string;
+  instances?: number;
+  memory?: number;
+  enable_ssh?: boolean;
+  environment_json?: any;
 }
 
 export class UpdateExistingApplicationBase implements APIAction {
