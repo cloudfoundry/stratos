@@ -17414,7 +17414,8 @@ const testInitialStoreState: AppState = {
         }
       },
       organization: {},
-      route: {}
+      route: {},
+      event: {},
     },
     auth: {
       loggedIn: true,
@@ -17621,6 +17622,7 @@ const testInitialStoreState: AppState = {
           fetching: false,
           pageCount: 1,
           currentPage: 1,
+          totalResults: 0,
           ids: {
             '1': [
               '4e4858c4-24ab-4caf-87a8-7703d1da58a0',
@@ -20046,7 +20048,8 @@ const testInitialStoreState: AppState = {
         }
       },
       organization: {},
-      route: {}
+      route: {},
+      event: {},
     },
     dashboard: {
       sidenavOpen: true,
