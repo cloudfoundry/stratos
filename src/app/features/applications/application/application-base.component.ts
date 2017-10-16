@@ -82,30 +82,19 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.sub.push(this.route.params.subscribe(params => {
       const { id, cfId } = params;
       this.applicationService.SetApplication(cfId, id);
-      this.sub.push(this.applicationService.application$.subscribe(({ app }) => {
-        this.application = app.entity;
-      }));
       this.isFetching$ = this.applicationService.isFetchingApp$;
     }));
 
-    this.summaryDataChanging$ = this.applicationService.isFetchingApp$
-      .combineLatest(
+    this.summaryDataChanging$ = Observable.combineLatest(
+      this.applicationService.isFetchingApp$,
       this.applicationService.isUpdatingApp$,
       this.applicationService.isFetchingEnvVars$,
       this.applicationService.isFetchingStats$
-      ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]: [boolean, boolean, boolean, boolean]) => {
-        const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
-        const isUpdating = isUpdatingApp;
-
-        // console.log('isFetchingApp ', isFetchingApp);
-        // console.log('isFetchingEnvVars ', isFetchingEnvVars);
-        // console.log('isFetchingStats ', isFetchingStats);
-
-        // console.log('isFetching ', isFetching);
-        // console.log('isUpdating ', isUpdating);
-        // console.log(isFetching || isUpdating);
-        return isFetching || isUpdating;
-      });
+    ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]) => {
+      const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
+      const isUpdating = isUpdatingApp;
+      return isFetching || isUpdating;
+    });
 
     this.sub.push(this.summaryDataChanging$
       .filter((isChanging) => {
@@ -122,11 +111,18 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
           enable_ssh: application.app.entity.enable_ssh,
           environment_json: application.app.entity.environment_json
         };
-      }, e => {
-        if (e.error === this.applicationService.fatalErrorMessage) {
-          this.router.navigateByUrl('applications');
-        }
       }));
+
+    const appSub = this.applicationService.app$.subscribe(app => {
+      if (
+        app.entityRequestInfo.deleting.deleted ||
+        app.entityRequestInfo.error
+      ) {
+        this.router.navigateByUrl('applications');
+      }
+    });
+
+    this.sub.push(appSub);
   }
 
 

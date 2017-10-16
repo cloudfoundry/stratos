@@ -11,34 +11,34 @@ export const NAME_FREE = '[Create App Page] Application name free';
 
 
 export interface NewAppCFDetails {
-    cloudFoundry: any;
-    org: any;
-    space: any;
+  cloudFoundry: any;
+  org: any;
+  space: any;
 }
 
 export class SetCFDetails implements Action {
-    constructor(public cloudFoundryDetails: NewAppCFDetails) { }
-    type = SET_CF_DETAILS;
+  constructor(public cloudFoundryDetails: NewAppCFDetails) { }
+  type = SET_CF_DETAILS;
 }
 
 export class SetNewAppName implements Action {
-    constructor(public name: string) { }
-    type = SET_NAME;
+  constructor(public name: string) { }
+  type = SET_NAME;
 }
 
 export class IsNewAppNameFree implements Action {
-    constructor(public name: string) { }
-    type = CHECK_NAME;
+  constructor(public name: string) { }
+  type = CHECK_NAME;
 }
 
 export class AppNameTaken implements Action {
-    constructor(private name: string) { }
-    type = NAME_TAKEN;
+  constructor(private name: string) { }
+  type = NAME_TAKEN;
 }
 
 export class AppNameFree implements Action {
-    constructor(private name: string) { }
-    type = NAME_FREE;
+  constructor(private name: string) { }
+  type = NAME_FREE;
 }
 
 export const selectNewAppDetails = (state: AppState) => state.createApplication;
@@ -48,13 +48,13 @@ export const getNewAppCFDetails = (state: CreateNewApplicationState) => state.cl
 export const getNewAppCFName = (state: CreateNewApplicationState) => state.name;
 
 export const selectNewAppCFDetails = compose(
-    getNewAppCFDetails,
-    selectNewAppDetails
+  getNewAppCFDetails,
+  selectNewAppDetails
 );
 
 export const selectNewAppCFName = compose(
-    getNewAppCFName,
-    selectNewAppDetails
+  getNewAppCFName,
+  selectNewAppDetails
 );
 
 
