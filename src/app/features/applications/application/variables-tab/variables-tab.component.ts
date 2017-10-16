@@ -63,14 +63,6 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,
     private _sort: MdSort) {
     super();
-    // this.isFetchingAppEnvVars$ = this._appService.appEnvVars$
-    //   .map((envVars: AppMetadataInfo) => {
-    //     if (envVars.metadataRequestState) {
-    //       return envVars.metadataRequestState.fetching;
-    //     }
-    //     return !envVars.metadata;
-    //   });
-    // this.isUpdatingAppEnvVars$ = Observable.of(false);
     this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
       _appService.isFetchingEnvVars$,
       _appService.isUpdatingEnvVars$
@@ -249,6 +241,7 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
     if (paginator.pageIndex * paginator.pageSize > envVars.length) {
       paginator.pageIndex = Math.floor(envVars.length / paginator.pageSize);
     }
+
     // Should the paginator select a freshly added row?
     if (this.addRow.select) {
       for (let i = 0; i < envVars.length; i++) {

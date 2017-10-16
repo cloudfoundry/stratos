@@ -12,10 +12,12 @@ import { getInitialTestStoreState } from '../../../../test-framework/store-test-
 import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../summary-tab/application-env-vars.service';
 import { appMetaDataReducer } from '../../../../store/reducers.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;
   let fixture: ComponentFixture<VariablesTabComponent>;
+  let appService: ApplicationService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -25,12 +27,13 @@ describe('VariablesTabComponent', () => {
         CoreModule,
         SharedModule,
         MDAppModule,
+        BrowserAnimationsModule,
         StoreModule.forRoot({
           entities: entitiesReducer,
           pagination: paginationReducer,
           appMetadata: appMetaDataReducer,
         }, {
-            initialState: {}
+            initialState: getInitialTestStoreState()
           })
       ],
       providers: [
@@ -45,6 +48,10 @@ describe('VariablesTabComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(VariablesTabComponent);
     component = fixture.componentInstance;
+
+    appService = fixture.debugElement.injector.get(ApplicationService);
+    appService.SetApplication('01ccda9d-8f40-4dd0-bc39-08eea68e364f', '4e4858c4-24ab-4caf-87a8-7703d1da58a0');
+
     fixture.detectChanges();
   });
 
