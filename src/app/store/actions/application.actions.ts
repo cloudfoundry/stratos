@@ -131,11 +131,11 @@ export class AssociateRouteWithAppApplication implements APIAction {
 }
 
 export interface UpdateApplication {
-    name: string;
-    instances: number;
-    memory: number;
-    enable_ssh: boolean;
-    environment_json: any;
+    name?: string;
+    instances?: number;
+    memory?: number;
+    enable_ssh?: boolean;
+    environment_json?: any;
 }
 
 export class UpdateExistingApplicationBase implements APIAction {
