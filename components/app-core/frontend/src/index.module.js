@@ -26,7 +26,7 @@
   angular
     .module('console-app', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
-  function config($compileProvider, $logProvider) {
+  function config($compileProvider, $logProvider, $qProvider) {
 
     /**
      * Disabling Debug Data
@@ -44,6 +44,8 @@
 
     $logProvider.debugEnabled(false);
     $compileProvider.preAssignBindingsEnabled(true);
+    // Skip errors on unhandled rejections (promise chains that don't deal with errors)
+    $qProvider.errorOnUnhandledRejections(false);
 
   }
 
