@@ -6,6 +6,19 @@ import { AppState } from '../../../store/app-state';
 import { Component, OnInit } from '@angular/core';
 import { DataSource } from '@angular/cdk/collections';
 
+class EndpointDataSource extends DataSource<any> {
+  constructor(private store: Store<AppState>) {
+    super();
+  }
+
+  connect(): Observable<CNSISModel[]> {
+    return this.store.select('cnsis')
+      .map((cnsis: CNSISState) => cnsis.entities);
+  }
+
+  disconnect() { }
+}
+
 @Component({
   selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
@@ -33,17 +46,4 @@ export class EndpointsPageComponent implements OnInit {
     return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
   }
 
-}
-
-class EndpointDataSource extends DataSource<any> {
-  constructor(private store: Store<AppState>) {
-    super();
-  }
-
-  connect(): Observable<CNSISModel[]> {
-    return this.store.select('cnsis')
-      .map((cnsis: CNSISState) => cnsis.entities);
-  }
-
-  disconnect() { }
 }

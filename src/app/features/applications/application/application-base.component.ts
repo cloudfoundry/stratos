@@ -26,6 +26,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>
   ) { }
 
+  public async: any;
+
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
@@ -34,7 +36,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   summaryExpanded = true;
 
-  summaryDataChanging: Observable<boolean>;
+  summaryDataChanging$: Observable<boolean>;
 
   appEdits: UpdateApplication;
   appDefaultEdits: UpdateApplication = {

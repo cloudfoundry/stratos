@@ -6,7 +6,7 @@ import { EntityInfo } from '../../../../store/actions/api.actions';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 
-//TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
+// TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
   selector: 'app-summary-tab',
   templateUrl: './summary-tab.component.html',
@@ -18,6 +18,8 @@ export class SummaryTabComponent implements OnInit {
   appService = this.applicationService;
 
   cardTwoFetching$: Observable<boolean>;
+
+  public async: any;
 
   ngOnInit() {
 

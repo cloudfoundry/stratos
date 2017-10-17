@@ -1,5 +1,6 @@
 import { AppState } from '../store/app-state';
 
+// tslint:disable:max-line-length
 const testInitialStoreState: AppState = {
     entities: {
       application: {

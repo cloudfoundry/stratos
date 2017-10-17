@@ -7,13 +7,13 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 
 
 @NgModule({
-    imports: [
-	CoreModule,
-	SharedModule
-    ],
-    declarations: [
-	SideNavComponent,
-	DashboardBaseComponent
-    ]
+  imports: [
+    CoreModule,
+    SharedModule
+  ],
+  declarations: [
+    SideNavComponent,
+    DashboardBaseComponent
+  ]
 })
 export class DashboardModule { }
