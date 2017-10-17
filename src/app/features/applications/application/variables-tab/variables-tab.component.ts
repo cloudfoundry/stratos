@@ -37,7 +37,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   @ViewChild(MdSort) sort: MdSort;
 
   filterSub: Subscription;
-  hasEnvVars$: Observable<boolean>;
+  envVars$: Observable<any>;
 
   ngOnInit() {
     this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.store, this.appService, this.paginator, this.sort);
@@ -48,6 +48,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
         if (!this.envVarsDataSource) { return; }
         this.envVarsDataSource.filter = this.filter.nativeElement.value;
       });
+    this.envVars$ = this.appService.appEnvVars$;
   }
 
   ngOnDestroy(): void {

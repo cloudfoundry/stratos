@@ -15,43 +15,46 @@ import { DetailsCardComponent } from './components/details-card/details-card.com
 import { FocusDirective } from './components/focus.directive';
 import { UniqueDirective } from './components/unique.directive';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CodeBlockComponent } from './components/code-block/code-block.component';
 
 
 @NgModule({
-    imports: [
-        CommonModule,
-        CoreModule,
-        PageHeaderModule,
-        RouterModule,
-        SteppersModule
-    ],
-    declarations: [
-        LoadingPageComponent,
-        DisplayValueComponent,
-        StatefulIconComponent,
-        EditableDisplayValueComponent,
-        MbToHumanSizePipe,
-        ValuesPipe,
-        LoadingPageComponent,
-        DetailsCardComponent,
-        FocusDirective,
-        UniqueDirective,
-    ],
-    exports: [
-        FormsModule,
-        ReactiveFormsModule,
-        LoadingPageComponent,
-        PageHeaderModule,
-        DisplayValueComponent,
-        EditableDisplayValueComponent,
-        DetailsCardComponent,
-        SteppersModule,
-        StatefulIconComponent,
-        MbToHumanSizePipe,
-        ValuesPipe,
-        SteppersModule,
-        FocusDirective,
-        UniqueDirective,
-    ]
+  imports: [
+    CommonModule,
+    CoreModule,
+    PageHeaderModule,
+    RouterModule,
+    SteppersModule
+  ],
+  declarations: [
+    LoadingPageComponent,
+    DisplayValueComponent,
+    StatefulIconComponent,
+    EditableDisplayValueComponent,
+    MbToHumanSizePipe,
+    ValuesPipe,
+    LoadingPageComponent,
+    DetailsCardComponent,
+    FocusDirective,
+    UniqueDirective,
+    CodeBlockComponent,
+  ],
+  exports: [
+    FormsModule,
+    ReactiveFormsModule,
+    LoadingPageComponent,
+    PageHeaderModule,
+    DisplayValueComponent,
+    EditableDisplayValueComponent,
+    DetailsCardComponent,
+    SteppersModule,
+    StatefulIconComponent,
+    MbToHumanSizePipe,
+    ValuesPipe,
+    SteppersModule,
+    FocusDirective,
+    UniqueDirective,
+    CodeBlockComponent,
+  ]
 })
 export class SharedModule { }
