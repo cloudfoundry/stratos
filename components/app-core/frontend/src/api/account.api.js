@@ -46,7 +46,8 @@
     function login(username, password) {
       var config = {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-cap-request-date': moment().unix()
         }
       };
       var data = $httpParamSerializer({ username: username, password: password });
@@ -72,7 +73,12 @@
      * @public
      */
     function verifySession() {
-      return $http.get('/pp/v1/auth/session/verify');
+      var config = {
+        headers: {
+          'x-cap-request-date': moment().unix()
+        }
+      };
+      return $http.get('/pp/v1/auth/session/verify', config);
     }
 
     function userInfo() {
