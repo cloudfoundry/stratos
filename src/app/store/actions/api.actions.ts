@@ -163,7 +163,7 @@ export function selectEntityRequestInfo(type: string, guid: string) {
 }
 
 export function getEntityState(state: AppState) {
-  return state.entities || {};
+  return state.entities;
 }
 
 export function getEntityType(type: string) {

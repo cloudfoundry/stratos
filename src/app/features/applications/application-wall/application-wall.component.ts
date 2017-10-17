@@ -6,7 +6,7 @@ import { Observable, Subscription } from 'rxjs/Rx';
 import { getAPIResourceEntity } from '../../../store/actions/api.actions';
 import { ApplicationSchema, GetAllApplications } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
-import { getCurrentPage } from './../../../store/reducers/pagination.reducer';
+import { getPaginationObservables } from './../../../store/reducers/pagination.reducer';
 
 
 @Component({
@@ -38,26 +38,20 @@ export class ApplicationWallComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const paginationKey = 'applicationWall';
-    const getObs$ = getCurrentPage({
-      entityType: ApplicationSchema.key,
-      paginationKey: paginationKey,
-      store: this.store,
-      action: new GetAllApplications(paginationKey),
-      schema: [ApplicationSchema]
-    });
-    this.isFetching = getObs$.mergeMap(({ paginationEntity }) => {
-      return Observable.of(paginationEntity.fetching);
-    });
+    const {
+      pagination$,
+      entities$
+    } = getPaginationObservables({
+        store: this.store,
+        action: new GetAllApplications(paginationKey),
+        schema: [ApplicationSchema]
+      });
 
-    this.wallSub = getObs$
-      .delay(100)
-      .subscribe(({ paginationEntity, data }) => {
-        this.error = paginationEntity.error;
-        if (!paginationEntity.fetching) {
-          if (!paginationEntity.error) {
-            this.applications = data.map(getAPIResourceEntity);
-          }
-        }
+    this.isFetching = pagination$.map((paginationEntity) => paginationEntity.fetching);
+
+    this.wallSub = entities$
+      .subscribe(entities => {
+        this.applications = entities.map(getAPIResourceEntity);
       });
   }
 

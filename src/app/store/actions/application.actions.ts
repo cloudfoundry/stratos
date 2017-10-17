@@ -5,6 +5,7 @@ import { getAPIResourceGuid } from './api.actions';
 import { APIAction, ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
+import { PaginationAction } from '../reducers/pagination.reducer';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -44,8 +45,8 @@ export const ApplicationSchema = new schema.Entity('application', {
     idAttribute: getAPIResourceGuid
   });
 
-export class GetAllApplications implements APIAction {
-  constructor(public paginationKey?: string) {
+export class GetAllApplications implements APIAction, PaginationAction {
+  constructor(public paginationKey: string) {
     this.options = new RequestOptions();
     this.options.url = 'apps';
     this.options.method = 'get';

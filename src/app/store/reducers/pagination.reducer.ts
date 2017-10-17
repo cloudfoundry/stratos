@@ -2,25 +2,36 @@ import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 
 import { ApiActionTypes } from '../actions/api.actions';
-import { CLEAR_PAGINATION } from '../actions/pagination.actions';
+import { CLEAR_PAGINATION, SET_PAGE, SetPage, selectPaginationState, SET_PARAMS, SetParams } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
-import { APIAction } from './../actions/api.actions';
+import { APIAction, getEntityState } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
+import { Observable } from 'rxjs';
 
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0; // TODO: Populate
   pageCount = 0;
   ids = {};
+  params: {
+    [entityKey: string]: string | number
+  };
   fetching: boolean;
   error: boolean;
   message: string;
 }
 
+export interface PaginationAction extends Action {
+  entityKey: string;
+  paginationKey: string;
+}
+
+export interface PaginationEntityTypeState {
+  [paginationKey: string]: PaginationEntityState;
+}
+
 export interface PaginationState {
-  [entityType: string]: {
-    [paginationKey: string]: PaginationEntityState
-  };
+  [entityKey: string]: PaginationEntityTypeState;
 }
 
 const types = [
@@ -37,6 +48,7 @@ const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
+  params: {},
   error: false,
   message: ''
 };
@@ -69,19 +81,23 @@ const updatePagination = function (state: PaginationEntityState, action, actionT
         error: true,
         message: action.message
       };
+    case SET_PAGE:
+      return {
+        ...state,
+        currentPage: (action as SetPage).pageNumber
+      };
+    case SET_PARAMS:
+      return {
+        ...state,
+        params: (action as SetParams).params
+      };
     default:
       return state;
   }
 };
 
 function getActionType(action) {
-  if (action.type === requestType) {
-    return action.type;
-  }
-  if (action.apiType === successType || action.apiType === failureType) {
-    return action.apiType;
-  }
-  return null;
+  return action.apiType || action.type;
 }
 
 function getAction(action): APIAction {
@@ -101,30 +117,43 @@ function getPaginationKey(action) {
   return apiAction.paginationKey;
 }
 
-export function getCurrentPage(
-  { entityType, paginationKey, store, action, schema }:
-    { entityType: string, paginationKey: string, store: Store<AppState>, action: Action, schema: Schema }
+export function getPaginationObservables(
+  { store, action, schema }:
+    { store: Store<AppState>, action: PaginationAction, schema: Schema }
 ) {
-  return store.select('pagination')
-    .filter((pagination: PaginationState) => {
-      const paginationEntity = pagination[entityType];
-      if (paginationEntity && paginationEntity[paginationKey]) {
-        const paginationState = paginationEntity[paginationKey];
-        return !!paginationState;
-      } else {
+  const { entityKey, paginationKey } = action;
+
+  const pagination$ = store.select(selectPaginationState(entityKey, paginationKey))
+    .do(pagination => {
+      if (!pagination) {
         store.dispatch(action);
-        return false;
       }
     })
-    .map((pagination: PaginationState) => pagination[entityType][paginationKey])
-    .withLatestFrom(store.select('entities'))
+    .filter(pagination => !!pagination);
+
+  const entities$ = pagination$
+    .filter(pagination => {
+      return !!pagination && !pagination.fetching && !!pagination.ids[pagination.currentPage];
+    })
+    .distinctUntilChanged((oldPag, newPag) => {
+      const oldPage = oldPag.ids[oldPag.currentPage];
+      const newPage = newPag.ids[newPag.currentPage];
+      return oldPage.join('') !== newPage.join('');
+    })
+    .withLatestFrom(store.select(getEntityState))
     .map(([paginationEntity, entities]) => {
       const page = paginationEntity.ids[paginationEntity.currentPage];
-      return {
-        paginationEntity,
-        data: page ? denormalize(paginationEntity.ids[paginationEntity.currentPage], schema, entities) : null
-      };
+      return page ? denormalize(page, schema, entities) : null;
     });
+
+  return {
+    pagination$,
+    entities$
+  };
+}
+
+function shouldFetchCurrentPage(pagination: PaginationEntityState) {
+  return !pagination || (!pagination.fetching && !pagination.error && (!pagination.ids || !pagination.ids[pagination.currentPage]));
 }
 
 export function paginationReducer(state = {}, action) {

@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
-import { ClearPaginationOfType } from '../actions/pagination.actions';
+import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
   APIAction,
@@ -42,6 +42,16 @@ export class APIEffect {
     .mergeMap(([action, state]) => {
       const { apiAction } = action;
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+
+      // Push the params to the store
+      if (apiAction.paginationKey && apiAction.options && apiAction.options.params) {
+        const params = {};
+        apiAction.options.params.paramsMap.forEach((value, key) => {
+          const paramValue = value.length === 1 ? value[0] : value;
+          params[key] = paramValue;
+        });
+        this.store.dispatch(new SetParams(apiAction.entityKey, apiAction.paginationKey, params));
+      }
 
       apiAction.options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${apiAction.options.url}`;
       apiAction.options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, apiAction.options.headers);
