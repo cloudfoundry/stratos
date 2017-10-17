@@ -8,6 +8,7 @@
           "apps": "applications",
           "instances": "application instances",
           "services": "services",
+          "service-instances": "services instances",
           "routes": "routes",
           "memory": "memory usage",
           "ssh": "ssh enabled",
