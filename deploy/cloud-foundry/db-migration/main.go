@@ -24,7 +24,7 @@ const (
 	DB_PORT              = "DB_PORT"
 	DB_USER              = "DB_USER"
 	DB_PASSWORD          = "DB_PASSWORD"
-	DB_NAME              = "DB_DATABASE_NAME"
+	DB_DATABASE_NAME     = "DB_DATABASE_NAME"
 	PROVIDER_POSTGRES    = "pgsql"
 	TYPE_POSTGRES        = "postgresql"
 	PROVIDER_MYSQL       = "mysql"
@@ -70,7 +70,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 				exportString(DB_PORT, service.Credentials[PORT])
 				exportString(DB_USER, service.Credentials[USERNAME])
 				exportString(DB_PASSWORD, service.Credentials[PASSWORD])
-				exportString(DB_NAME, service.Credentials[DBNAME])
+				exportString(DB_DATABASE_NAME, service.Credentials[DBNAME])
 			} else if stringInSlice(STRATOS_MYSQL_TAG, service.Tags) {
 				fmt.Println("# MySQL db config")
 
@@ -80,7 +80,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 				exportString(DB_PORT, service.Credentials[PORT])
 				exportString(DB_USER, service.Credentials[USERNAME])
 				exportString(DB_PASSWORD, service.Credentials[PASSWORD])
-				exportString(DB_NAME, service.Credentials[NAME])
+				exportString(DB_DATABASE_NAME, service.Credentials[NAME])
 			}
 		}
 	}
@@ -96,5 +96,5 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func exportString(name string, value interface{}) {
-	fmt.Printf("\nexport %s=\"%s\"", name, value)
+	fmt.Printf("\nexport %s=\"%v\"", name, value)
 }

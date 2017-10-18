@@ -73,3 +73,10 @@ rm -rf ./outputs
 rm -rf ./components
 
 echo "All done"
+
+du -h ${CACHE_DIR}
+
+echo "Disk usage for cache and app folders:"
+
+du -h -c --summarize ${CACHE_DIR}
+du -h -c --summarize ${BUILD_DIR}

@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		fmt.Println("ERROR")
 		fmt.Printf("%v\n", err)
+		log.Fatal("Failed to perform database migration")
 	}
 }
 
@@ -107,6 +108,7 @@ func upRun(args []string) error {
 
 	db, err := goose.OpenDBFromDBConf(conf)
 	if err != nil {
+		fmt.Println("Failed to open database connection")
 		return err
 	}
 	defer db.Close()
