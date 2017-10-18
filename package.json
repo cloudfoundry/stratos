@@ -31,7 +31,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "bower": "^1.7.1",
+    "bower": "^1.8.0",
     "delete": "^0.3.2",
     "fs-extra": "^3.0.1",
     "glob": "^7.1.1",
