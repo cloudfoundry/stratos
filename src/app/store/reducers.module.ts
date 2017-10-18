@@ -52,7 +52,7 @@ export const metaReducers = environment.production ? [storeFreeze, logger] : [];
     StoreModule.forRoot(
       appReducers,
       {
-        // metaReducers
+        metaReducers
       }
     ),
     StoreDevtoolsModule.instrument({

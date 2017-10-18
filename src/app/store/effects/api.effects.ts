@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
-import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions';
+import { ClearPaginationOfType, SetParams, selectPaginationState } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
   APIAction,
@@ -21,6 +21,7 @@ import {
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
+import { PaginationEntityState } from '../reducers/pagination.reducer';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Injectable()
@@ -40,23 +41,25 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-      const { apiAction } = action;
+      const paramsObject = {};
+      const apiAction = { ...action.apiAction };
+      const options = apiAction.options ? { ...apiAction.options } : null;
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
-      // Push the params to the store
-      if (apiAction.paginationKey && apiAction.options && apiAction.options.params) {
-        const params = {};
-        apiAction.options.params.paramsMap.forEach((value, key) => {
-          const paramValue = value.length === 1 ? value[0] : value;
-          params[key] = paramValue;
-        });
-        this.store.dispatch(new SetParams(apiAction.entityKey, apiAction.paginationKey, params));
+      if (apiAction.paginationKey && options && options.params) {
+        const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, apiAction.paginationKey)(state));
+        // options.params = Object.assign(options.params, paginationParams);
+        for (const key in paginationParams) {
+          if (paginationParams.hasOwnProperty(key)) {
+            options.params.set(key, paginationParams[key]);
+          }
+        }
       }
 
-      apiAction.options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${apiAction.options.url}`;
-      apiAction.options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, apiAction.options.headers);
+      options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
+      options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, options.headers);
 
-      return this.http.request(new Request(apiAction.options))
+      return this.http.request(new Request(options))
         .mergeMap(response => {
           let resData;
           try {
@@ -71,16 +74,24 @@ export class APIEffect {
               throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
             }
           }
-          const entities = resData ?
-            this.getEntities(apiAction, resData) : {
-              entities: {},
-              result: []
-            };
+          let entities = {
+            entities: {},
+            result: []
+          };
+          let totalResults = 0;
+
+          if (resData) {
+            const entityData = this.getEntities(apiAction, resData);
+            entities = entityData.entities;
+            totalResults = entityData.totalResults;
+          }
+
           const actions = [];
           actions.push(new WrapperAPIActionSuccess(
             apiAction.actions[1],
             entities,
-            apiAction
+            apiAction,
+            totalResults
           ));
 
           if (
@@ -122,23 +133,31 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: APIAction, data): NormalizedResponse {
+  getEntities(apiAction: APIAction, data): {
+    entities: NormalizedResponse
+    totalResults: number
+  } {
+    let totalResults = 0;
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
+      totalResults += cfData['total_results'];
       if (cfData.resources) {
         if (!cfData.resources.length) {
           return null;
         }
-
         return cfData.resources.map(resource => {
           return this.completeResourceEntity(resource, cfGuid);
         });
       } else {
+
         return this.completeResourceEntity(cfData, cfGuid);
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
-    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : null;
+    return {
+      entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
+      totalResults
+    };
   }
 
   mergeData(entity, metadata, cfGuid) {
@@ -160,4 +179,10 @@ export class APIEffect {
     return { type };
   }
 
+  getPaginationParams(paginationState: PaginationEntityState) {
+    return {
+      ...paginationState.params,
+      page: paginationState.currentPage,
+    } as Object;
+  }
 }

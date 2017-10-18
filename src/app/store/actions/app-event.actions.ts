@@ -22,17 +22,12 @@ export const EventSchema = new schema.Entity('event', {
 
 
 export class GetAllAppEvents implements APIAction, PaginationAction {
-  constructor(public paginationKey: string, appGuid: string, page?: string, resultsPerPage?: string) {
+  constructor(public paginationKey: string, appGuid: string, public cnis) {
     this.options = new RequestOptions();
     this.options.url = 'events';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    if (page) {
-      this.options.params.set('page', page.toString());
-    }
-    if (resultsPerPage) {
-      this.options.params.set('results-per-page', resultsPerPage.toString());
-    }
+
     this.options.params.set('order-direction', 'asc');
     // TODO: RC returns emtpy, then null in inner workings
     this.options.params.set('q', 'actee:' + appGuid);
@@ -47,6 +42,7 @@ export class GetAllAppEvents implements APIAction, PaginationAction {
     AppGetAllEvents.GET_ALL_SUCCESS,
     AppGetAllEvents.GET_ALL_FAILED
   ];
+
   type = ApiActionTypes.API_REQUEST;
   entity = [EventSchema];
   entityKey = EventSchema.key;

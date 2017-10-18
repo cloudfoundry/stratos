@@ -42,14 +42,14 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   cfList$ = this.store.select(registeredCnsisEntitySelector).first();
 
-  org$ = getPaginationObservables({
+  org = getPaginationObservables({
     store: this.store,
     action: new GetAllOrganizations(this.paginationKey),
     schema: [OrganizationSchema]
   });
 
   private getData$ = Observable.combineLatest(
-    this.org$.pagination$.filter(paginationEntity => {
+    this.org.pagination$.filter(paginationEntity => {
       return !paginationEntity.fetching;
     }).first(),
     this.cfList$
@@ -78,7 +78,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     this.orgList$ = Observable.combineLatest(
       this.cfSelect.valueChanges.startWith(''),
       this.getData$,
-      this.org$.entities$
+      this.org.entities$
     )
       .do(() => this.selectedOrg = null)
       .map(([selectedCF, data, entities]) => {
@@ -112,7 +112,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-
     this.validate = this.cfForm.statusChanges
       .map(() => {
         return this.cfForm.valid;

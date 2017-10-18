@@ -13,16 +13,20 @@
             <div [hidden]="(envVarsDataSource.count$ | async) === 0">
               <form novalidate>
                 <md-form-field floatPlaceholder="never">
-                  <input mdInput #filter placeholder="Filter Environment Variables">
+                  <input mdInput ngModel #filter="ngModel" name="filter" placeholder="Filter Environment Variables">
                 </md-form-field>
               </form>
             </div>
             <!-- addRowName.focus() -->
-            <button md-icon-button (click)="addRowForm.reset(); envVarsDataSource.startAdd();"><md-icon>add</md-icon></button>
+            <button md-icon-button (click)="addRowForm.reset(); envVarsDataSource.startAdd();">
+              <md-icon>add</md-icon>
+            </button>
           </div>
           <div [hidden]="!(envVarsDataSource.isSelecting$ | async)">
             <div class="grow-title mat-card-header-text-wa">{{envVarsDataSource.selectedRows.size}} Selected</div>
-            <button md-icon-button (click)="envVarsDataSource.selectedDelete()"><md-icon>delete</md-icon></button>
+            <button md-icon-button (click)="envVarsDataSource.selectedDelete()">
+              <md-icon>delete</md-icon>
+            </button>
           </div>
           <div [hidden]="!(envVarsDataSource.isAdding$ | async)">
             <div class="grow-title mat-card-header-text-wa"></div>
@@ -38,8 +42,12 @@
                 <input mdInput #addRowName id="envVarValue" name="envVarValue" placeholder="Value" [(ngModel)]="envVarsDataSource.addRow.value">
               </md-form-field>
             </form>
-            <button md-icon-button (click)="envVarsDataSource.saveAdd()" [disabled]="!addRowForm.valid"><md-icon>done</md-icon></button>
-            <button md-icon-button (click)="envVarsDataSource.cancelAdd()"><md-icon>clear</md-icon></button>
+            <button md-icon-button (click)="envVarsDataSource.saveAdd()" [disabled]="!addRowForm.valid">
+              <md-icon>done</md-icon>
+            </button>
+            <button md-icon-button (click)="envVarsDataSource.cancelAdd()">
+              <md-icon>clear</md-icon>
+            </button>
           </div>
         </md-card-header>
         <md-card-content>
@@ -71,9 +79,15 @@
               <md-header-cell *mdHeaderCellDef>
               </md-header-cell>
               <md-cell *mdCellDef="let row">
-                <button md-icon-button *ngIf="!row.edit" (click)="envVarsDataSource.startEdit(row)" [disabled]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)"><md-icon>edit</md-icon></button>
-                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.saveEdit(row)"><md-icon>done</md-icon></button>
-                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.cancelEdit(row)"><md-icon>clear</md-icon></button>
+                <button md-icon-button *ngIf="!row.edit" (click)="envVarsDataSource.startEdit(row)" [disabled]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)">
+                  <md-icon>edit</md-icon>
+                </button>
+                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.saveEdit(row)">
+                  <md-icon>done</md-icon>
+                </button>
+                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.cancelEdit(row)">
+                  <md-icon>clear</md-icon>
+                </button>
               </md-cell>
             </ng-container>
             <md-header-row *mdHeaderRowDef="['select', 'name', 'value', 'edit']" [hidden]="(envVarsDataSource.count$ | async) === 0">

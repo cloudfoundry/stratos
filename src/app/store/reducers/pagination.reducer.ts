@@ -6,7 +6,8 @@ import { CLEAR_PAGINATION, SET_PAGE, SetPage, selectPaginationState, SET_PARAMS,
 import { AppState } from '../app-state';
 import { APIAction, getEntityState } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
+import { defaultEntitiesState } from './entity.reducer';
 
 export class PaginationEntityState {
   currentPage = 0;
@@ -48,53 +49,67 @@ const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
-  params: {},
+  params: {
+    'results-per-page': 5
+  },
   error: false,
   message: ''
 };
 
-const updatePagination = function (state: PaginationEntityState, action, actionType): PaginationEntityState {
-  state = { ...defaultPaginationEntityState, ...state };
-  switch (actionType) {
-    case requestType:
-      return {
-        ...state,
-        fetching: true,
-        error: false,
-        message: '',
-      };
-    case successType:
-      return {
-        ...state,
-        fetching: false,
-        error: false,
-        message: '',
-        ids: {
-          [state.currentPage]: action.response.result
-        },
-        pageCount: state.pageCount + 1,
-      };
-    case failureType:
-      return {
-        ...state,
-        fetching: false,
-        error: true,
-        message: action.message
-      };
-    case SET_PAGE:
-      return {
-        ...state,
-        currentPage: (action as SetPage).pageNumber
-      };
-    case SET_PARAMS:
-      return {
-        ...state,
-        params: (action as SetParams).params
-      };
-    default:
-      return state;
-  }
-};
+const updatePagination =
+  function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
+    switch (actionType) {
+      case requestType:
+        return {
+          ...state,
+          fetching: true,
+          error: false,
+          message: '',
+        };
+      case successType:
+        const params = {};
+        const { apiAction } = action;
+        if (apiAction.options.params) {
+          apiAction.options.params.paramsMap.forEach((value, key) => {
+            const paramValue = value.length === 1 ? value[0] : value;
+            params[key] = paramValue;
+          });
+        }
+        return {
+          ...state,
+          fetching: false,
+          error: false,
+          message: '',
+          ids: {
+            [state.currentPage]: action.response.result
+          },
+          pageCount: state.pageCount + 1,
+          params: params,
+          totalResults: action.totalResults || action.response.result.length
+        };
+      case failureType:
+        return {
+          ...state,
+          fetching: false,
+          error: true,
+          message: action.message
+        };
+      case SET_PAGE:
+        return {
+          ...state,
+          error: false,
+          currentPage: (action as SetPage).pageNumber
+        };
+      case SET_PARAMS:
+        return {
+          ...state,
+          error: false,
+          params: (action as SetParams).params
+        };
+      default:
+        return state;
+    }
+  };
 
 function getActionType(action) {
   return action.apiType || action.type;
@@ -123,23 +138,33 @@ export function getPaginationObservables(
 ) {
   const { entityKey, paginationKey } = action;
 
-  const pagination$ = store.select(selectPaginationState(entityKey, paginationKey))
+  const select$ = store.select(selectPaginationState(entityKey, paginationKey));
+
+  select$.subscribe(() => {
+    console.log('Really?');
+  });
+
+  const pagination$ = select$
+    .debounceTime(250)
     .do(pagination => {
-      if (!pagination) {
+      console.log('Shanged!')
+      if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
         store.dispatch(action);
       }
     })
+    .delay(1)
     .filter(pagination => !!pagination);
 
   const entities$ = pagination$
     .filter(pagination => {
-      return !!pagination && !pagination.fetching && !!pagination.ids[pagination.currentPage];
+      console.log('ready?')
+      return pageReady(pagination);
     })
-    .distinctUntilChanged((oldPag, newPag) => {
-      const oldPage = oldPag.ids[oldPag.currentPage];
-      const newPage = newPag.ids[newPag.currentPage];
-      return oldPage.join('') !== newPage.join('');
-    })
+    // .distinctUntilChanged((oldPag, newPag) => {
+    //   const oldPage = oldPag.ids[oldPag.currentPage];
+    //   const newPage = newPag.ids[newPag.currentPage];
+    //   return oldPage.join('') !== newPage.join('');
+    // })
     .withLatestFrom(store.select(getEntityState))
     .map(([paginationEntity, entities]) => {
       const page = paginationEntity.ids[paginationEntity.currentPage];
@@ -152,11 +177,28 @@ export function getPaginationObservables(
   };
 }
 
-function shouldFetchCurrentPage(pagination: PaginationEntityState) {
-  return !pagination || (!pagination.fetching && !pagination.error && (!pagination.ids || !pagination.ids[pagination.currentPage]));
+function pageReady(pagination: PaginationEntityState) {
+  return pagination && pagination.ids[pagination.currentPage];
 }
 
-export function paginationReducer(state = {}, action) {
+function hasValidOrGettingPage(pagination: PaginationEntityState) {
+  if (pagination && Object.keys(pagination).length) {
+    const hasPage = !!pagination.ids[pagination.currentPage];
+
+    return pagination.fetching || hasPage;
+  } else {
+    return false;
+  }
+}
+
+function hasError(pagination: PaginationEntityState) {
+  return pagination && pagination.error;
+}
+
+export function paginationReducer(state = defaultEntitiesState, action) {
+  if (action.type === ApiActionTypes.API_REQUEST) {
+    return state;
+  }
 
   if (action.type === CLEAR_PAGINATION) {
     if (state[action.entityKey]) {
@@ -173,9 +215,6 @@ export function paginationReducer(state = {}, action) {
   if (actionType && key && paginationKey) {
     const newState = { ...state };
 
-    if (!newState[key] || actionType === CLEAR_PAGINATION) {
-      newState[key] = {};
-    }
     if (actionType !== CLEAR_PAGINATION) {
       const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
       newState[key] = mergeState(newState[key], {

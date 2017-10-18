@@ -3,13 +3,14 @@ import { ApplicationService } from '../../application.service';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
-import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
+import { MdPaginator, PageEvent, MdSort, Sort, MdInput } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
 import { selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
 import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
+import { NgModel } from '@angular/forms';
 
 interface AppEnvVar {
   name: string;
@@ -33,7 +34,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   envVarsDataSource: AppEnvironemtEvnVarsDataSource;
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
-  @ViewChild('filter') filter: ElementRef;
+  @ViewChild('filter') filter: NgModel;
   @ViewChild(MdSort) sort: MdSort;
 
   filterSub: Subscription;
@@ -41,12 +42,12 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.store, this.appService, this.paginator, this.sort);
-    this.filterSub = Observable.fromEvent(this.filter.nativeElement, 'keyup')
+    this.filterSub = this.filter.valueChanges
       .debounceTime(150)
       .distinctUntilChanged()
-      .subscribe(() => {
+      .subscribe((value) => {
         if (!this.envVarsDataSource) { return; }
-        this.envVarsDataSource.filter = this.filter.nativeElement.value;
+        this.envVarsDataSource.filter = value;
       });
   }
 

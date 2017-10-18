@@ -62,7 +62,8 @@ export class WrapperAPIActionSuccess implements Action {
   constructor(
     public type: string,
     public response: NormalizedResponse,
-    public apiAction: APIAction
+    public apiAction: APIAction,
+    public totalResults?: number
   ) { }
   apiType = ApiActionTypes.API_REQUEST_SUCCESS;
 }

@@ -6,7 +6,7 @@ import { MdPaginator, PageEvent } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
-import { getPaginationObservables } from '../../../../store/reducers/pagination.reducer';
+import { getPaginationObservables, PaginationEntityState } from '../../../../store/reducers/pagination.reducer';
 import { SetPage } from '../../../../store/actions/pagination.actions';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
 
@@ -26,6 +26,7 @@ interface AppEvent {
 
 export class AppEventsDataSource extends DataSource<AppEvent> {
   private static paginationKey = 'application-events';
+  private action = new GetAllAppEvents(AppEventsDataSource.paginationKey, this._appService.appGuid, this._appService.cfGuid);
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator) {
     super();
@@ -36,14 +37,23 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
     )
       .map(([isFetchingApp, isLoadingPage]) => isFetchingApp || isLoadingPage);
 
-    this._paginator.page.startWith(this._defaultPaginator)
+    this._paginator.page
       .subscribe(pageEvent => {
-        this.store.dispatch(new SetPage(ApplicationSchema.key, AppEventsDataSource.paginationKey, pageEvent.pageIndex));
+        this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, pageEvent.pageIndex + 1));
       });
+
+    const { pagination$, entities$ } = getPaginationObservables({
+      store: this.store,
+      action: this.action,
+      schema: [EventSchema]
+    });
+
+    this.pagination$ = pagination$;
+    this.entities$ = entities$;
   }
 
   _defaultPaginator = {
-    pageIndex: 1,
+    pageIndex: 0,
     pageSize: 5,
   };
 
@@ -52,23 +62,17 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
 
   showProgressIndicator: Observable<boolean>;
 
-
+  pagination$: Observable<PaginationEntityState>;
+  entities$: Observable<any>;
 
   connect(): Observable<AppEvent[]> {
 
-    const {
-    pagination$,
-      entities$
-  } = getPaginationObservables({
-        store: this.store,
-        action: new GetAllAppEvents(AppEventsDataSource.paginationKey, this._appService.appGuid),
-        schema: [EventSchema]
-      });
-    this.isLoadingPage$ = pagination$.map(pag => pag.fetching);
+    this.isLoadingPage$ = this.pagination$.map(pag => pag.fetching);
+
 
     return Observable.combineLatest(
-      pagination$
-      , entities$
+      this.pagination$,
+      this.entities$
     )
       .map(([paginationEntity, data]) => {
         this._paginator.length = paginationEntity.totalResults || data.length; // TODO: RC FIXME
