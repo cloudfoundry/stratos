@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy, Optional } from '@angular/core';
 import { MdDialogRef, MD_DIALOG_DATA } from '@angular/material';
 import { Logout } from '../../store/actions/auth.actions';
 import { Store } from '@ngrx/store';
@@ -13,11 +13,11 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialogRef: MdDialogRef<LogOutDialogComponent>,
-    @Inject(MD_DIALOG_DATA) public data: any,
+    @Optional() @Inject(MD_DIALOG_DATA) public data: any,
     private store: Store<AppState>) { }
 
   private _autoLogout: any;
-  private countDown: number;
+  public countDown: number;
 
   ngOnInit() {
     const updateInterval = 1000;
