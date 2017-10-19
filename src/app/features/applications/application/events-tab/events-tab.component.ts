@@ -1,4 +1,5 @@
-import { resultPerPageParam } from '../../../../store/effects/api.effects';
+import { resultPerPageParam } from '../../../../store/reducers/pagination.reducer';
+
 import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';

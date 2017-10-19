@@ -21,6 +21,10 @@ import { mergeState } from './../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
 import { defaultEntitiesState } from './entity.reducer';
 
+
+export const resultPerPageParam = 'results-per-page';
+export const resultPerPageParamDefault = 5;
+
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0; // TODO: Populate
@@ -67,7 +71,9 @@ const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
-  params: {},
+  params: {
+    [resultPerPageParam]: resultPerPageParamDefault
+  },
   error: false,
   message: ''
 };
@@ -119,7 +125,10 @@ const updatePagination =
       case SET_PARAMS:
         return {
           ...state,
-          params: (action as SetParams).params
+          params: {
+            [resultPerPageParam]: resultPerPageParamDefault,
+            ...(action as SetParams).params
+          }
         };
       case ADD_PARAMS:
         return {
@@ -228,7 +237,13 @@ export function paginationReducer(state = defaultEntitiesState, action) {
         ...newState[action.entityKey],
         [action.paginationKey]: {
           ...newState[action.entityKey][action.paginationKey],
-          ids: {}
+          ids: {},
+          fetching: false,
+          pageCount: 0,
+          currentPage: 1,
+          totalResults: 0,
+          error: false,
+          message: ''
         }
       };
       return {

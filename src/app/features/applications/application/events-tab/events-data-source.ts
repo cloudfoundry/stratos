@@ -1,4 +1,3 @@
-import { resultPerPageParam } from '../../../../store/effects/api.effects';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -7,8 +6,12 @@ import { MdPaginator, PageEvent } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
-import { getPaginationObservables, PaginationEntityState } from '../../../../store/reducers/pagination.reducer';
-import { SetPage } from '../../../../store/actions/pagination.actions';
+import {
+  getPaginationObservables,
+  PaginationEntityState,
+  resultPerPageParam,
+} from '../../../../store/reducers/pagination.reducer';
+import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
 
 interface AppEvent {
@@ -32,12 +35,7 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator) {
     super();
     this._paginator.pageIndex = 0;
-
-
-    this._paginator.page
-      .subscribe(pageEvent => {
-        this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, pageEvent.pageIndex + 1));
-      });
+    this._paginator.pageSizeOptions = [5, 10, 20];
 
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
@@ -45,9 +43,32 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
       schema: [EventSchema]
     });
 
+    const pageSize$ = this._paginator.page.map(pageEvent => pageEvent.pageSize)
+      .distinctUntilChanged()
+      .withLatestFrom(pagination$)
+      .do(([pageSize, pag]) => {
+        if (pag.params[resultPerPageParam] !== pageSize) {
+          this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+            [resultPerPageParam]: pageSize
+          }));
+        }
+      });
+
+    const pageIndex$ = this._paginator.page.map(pageEvent => pageEvent.pageIndex)
+      .distinctUntilChanged()
+      .do(pageIndex => this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, pageIndex + 1)));
+
+    Observable.combineLatest(
+      pageSize$,
+      pageIndex$
+    ).subscribe();
+
     this.pagination$ = pagination$;
     this.entities$ = entities$;
   }
+
+  currentPageSize = 0;
+  currentPage = 0;
 
   _defaultPaginator = {
     pageIndex: 0,
@@ -68,13 +89,16 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
 
     return Observable.combineLatest(
       this.pagination$.do(pag => {
-        this._paginator.pageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
+        this.currentPage = pag.currentPage;
+        this.currentPageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
+        this._paginator.pageIndex = this.currentPage - 1;
+        this._paginator.pageSize = this.currentPageSize;
+        this._paginator.length = pag.totalResults; // TODO: RC FIXME
+        // this.count$.next(this._paginator.length);
       }),
       this.entities$
     )
       .map(([paginationEntity, data]) => {
-        this._paginator.length = paginationEntity.totalResults || data.length; // TODO: RC FIXME
-        this.count$.next(this._paginator.length);
         return data;
       });
   }

@@ -21,12 +21,10 @@ import {
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
-import { PaginatedAction, PaginationEntityState } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationEntityState, resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination.reducer';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
-export const resultPerPageParam = 'results-per-page';
-const resultPerPageParamDefault = 5;
 @Injectable()
 export class APIEffect {
 
