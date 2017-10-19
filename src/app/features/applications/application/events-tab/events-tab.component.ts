@@ -1,3 +1,4 @@
+import { resultPerPageParam } from '../../../../store/effects/api.effects';
 import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -5,7 +6,7 @@ import { ApplicationService } from '../../application.service';
 import { MdPaginator } from '@angular/material';
 import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
-import { SetPage, selectPaginationState } from '../../../../store/actions/pagination.actions';
+import { AddParams, selectPaginationState, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema } from '../../../../store/actions/app-event.actions';
 
 @Component({
@@ -23,7 +24,9 @@ export class EventsTabComponent implements OnInit {
   @ViewChild(MdPaginator) paginator: MdPaginator;
 
   gotToPage() {
-    this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, 2));
+    this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+      [resultPerPageParam]: 10
+    }));
   }
 
   ngOnInit() {

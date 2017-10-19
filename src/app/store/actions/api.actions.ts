@@ -36,7 +36,6 @@ export class APIAction implements Action, SingleEntityAction {
   options: RequestOptions;
   entity: Schema;
   entityKey: string;
-  paginationKey?: string;
   cnis?: string;
   // For single entity requests
   guid?: string;

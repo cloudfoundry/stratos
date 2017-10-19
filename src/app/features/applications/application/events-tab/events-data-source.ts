@@ -1,3 +1,4 @@
+import { resultPerPageParam } from '../../../../store/effects/api.effects';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -32,10 +33,6 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
     super();
     this._paginator.pageIndex = 0;
 
-    // this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
-    //   this.isLoadingPage$,
-    // )
-    //   .map(([isFetchingApp, isLoadingPage]) => isFetchingApp || isLoadingPage);
 
     this._paginator.page
       .subscribe(pageEvent => {
@@ -70,7 +67,9 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
     this.isLoadingPage$ = this.pagination$.map(pag => pag.fetching);
 
     return Observable.combineLatest(
-      this.pagination$,
+      this.pagination$.do(pag => {
+        this._paginator.pageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
+      }),
       this.entities$
     )
       .map(([paginationEntity, data]) => {

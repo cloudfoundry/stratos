@@ -1,3 +1,4 @@
+import { PaginationEffects } from './effects/pagination.effects';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
@@ -28,6 +29,7 @@ import { UpdateAppEffects } from './effects/update-app-effects';
       CreateAppPageEffects,
       AppMetadataEffect,
       UpdateAppEffects,
+      PaginationEffects
     ]),
   ]
 })

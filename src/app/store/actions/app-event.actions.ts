@@ -5,7 +5,7 @@ import { getAPIResourceGuid } from './api.actions';
 import { APIAction, ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
-import { PaginationAction } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationAction } from '../reducers/pagination.reducer';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
@@ -21,16 +21,12 @@ export const EventSchema = new schema.Entity('event', {
   });
 
 
-export class GetAllAppEvents implements APIAction, PaginationAction {
-  constructor(public paginationKey: string, appGuid: string, public cnis) {
+export class GetAllAppEvents implements PaginatedAction {
+  constructor(public paginationKey: string, public appGuid: string, public cnis) {
     this.options = new RequestOptions();
     this.options.url = 'events';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-
-    this.options.params.set('order-direction', 'asc');
-    // TODO: RC returns emtpy, then null in inner workings
-    this.options.params.set('q', 'actee:' + appGuid);
 
     // order-direction:desc
     // page:1
@@ -47,4 +43,8 @@ export class GetAllAppEvents implements APIAction, PaginationAction {
   entity = [EventSchema];
   entityKey = EventSchema.key;
   options: RequestOptions;
+  initialParams = {
+    'order-direction': 'asc',
+    'q': 'actee:' + this.appGuid
+  };
 }

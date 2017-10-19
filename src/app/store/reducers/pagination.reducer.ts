@@ -2,7 +2,19 @@ import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 
 import { ApiActionTypes } from '../actions/api.actions';
-import { CLEAR_PAGINATION, SET_PAGE, SetPage, selectPaginationState, SET_PARAMS, SetParams } from '../actions/pagination.actions';
+import {
+  ADD_PARAMS,
+  AddParams,
+  CLEAR_PAGES,
+  CLEAR_PAGINATION_OF_TYPE,
+  REMOVE_PARAMS,
+  RemoveParams,
+  selectPaginationState,
+  SET_PAGE,
+  SET_PARAMS,
+  SetPage,
+  SetParams,
+} from '../actions/pagination.actions';
 import { AppState } from '../app-state';
 import { APIAction, getEntityState } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
@@ -22,6 +34,12 @@ export class PaginationEntityState {
   message: string;
 }
 
+// An action that is intended to begin a
+export interface PaginatedAction extends PaginationAction, APIAction {
+  initialParams?: {
+    [key: string]: string | number
+  };
+}
 export interface PaginationAction extends Action {
   entityKey: string;
   paginationKey: string;
@@ -49,9 +67,7 @@ const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
-  params: {
-    'results-per-page': 5
-  },
+  params: {},
   error: false,
   message: ''
 };
@@ -85,7 +101,6 @@ const updatePagination =
             [state.currentPage]: action.response.result
           },
           pageCount: state.pageCount + 1,
-          params: params,
           totalResults: action.totalResults || action.response.result.length
         };
       case failureType:
@@ -104,9 +119,24 @@ const updatePagination =
       case SET_PARAMS:
         return {
           ...state,
-          error: false,
           params: (action as SetParams).params
         };
+      case ADD_PARAMS:
+        return {
+          ...state,
+          params: {
+            ...state.params,
+            ...(action as AddParams).params
+          }
+        };
+      case REMOVE_PARAMS:
+        const removeParamsState = { ...state };
+        (action as RemoveParams).params.forEach((key) => {
+          if (removeParamsState.params.hasOwnProperty(key)) {
+            delete removeParamsState.params[key];
+          }
+        });
+        return removeParamsState;
       default:
         return state;
     }
@@ -116,7 +146,7 @@ function getActionType(action) {
   return action.apiType || action.type;
 }
 
-function getAction(action): APIAction {
+function getAction(action): PaginatedAction {
   if (!action) {
     return null;
   }
@@ -134,10 +164,13 @@ function getPaginationKey(action) {
 }
 
 export function getPaginationObservables(
-  { store, action, schema }:
-    { store: Store<AppState>, action: PaginationAction, schema: Schema }
+  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema }
 ) {
   const { entityKey, paginationKey } = action;
+
+  if (action.initialParams) {
+    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
+  }
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
 
@@ -188,7 +221,24 @@ export function paginationReducer(state = defaultEntitiesState, action) {
     return state;
   }
 
-  if (action.type === CLEAR_PAGINATION) {
+  if (action.type === CLEAR_PAGES) {
+    if (state[action.entityKey] && state[action.entityKey][action.paginationKey]) {
+      const newState = { ...state };
+      const entityState = {
+        ...newState[action.entityKey],
+        [action.paginationKey]: {
+          ...newState[action.entityKey][action.paginationKey],
+          ids: {}
+        }
+      };
+      return {
+        ...newState,
+        [action.entityKey]: entityState
+      };
+    }
+  }
+
+  if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     if (state[action.entityKey]) {
       const clearState = { ...state };
       clearState[action.entityKey] = {};
@@ -203,12 +253,10 @@ export function paginationReducer(state = defaultEntitiesState, action) {
   if (actionType && key && paginationKey) {
     const newState = { ...state };
 
-    if (actionType !== CLEAR_PAGINATION) {
-      const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
-      newState[key] = mergeState(newState[key], {
-        [paginationKey]: updatedPaginationState
-      });
-    }
+    const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
+    newState[key] = mergeState(newState[key], {
+      [paginationKey]: updatedPaginationState
+    });
     return newState;
   } else {
     return state;

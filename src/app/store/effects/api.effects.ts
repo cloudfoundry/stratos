@@ -2,7 +2,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestMethod, Response } from '@angular/http';
+import { Headers, Http, Request, RequestMethod, Response, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
@@ -21,9 +21,12 @@ import {
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
-import { PaginationEntityState } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationEntityState } from '../reducers/pagination.reducer';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
+
+export const resultPerPageParam = 'results-per-page';
+const resultPerPageParamDefault = 5;
 @Injectable()
 export class APIEffect {
 
@@ -41,20 +44,26 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
+
       const paramsObject = {};
       const apiAction = { ...action.apiAction };
-      const options = apiAction.options ? { ...apiAction.options } : null;
+      const options = { ...apiAction.options };
+
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
-      if (apiAction.paginationKey && options && options.params) {
-        const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, apiAction.paginationKey)(state));
-        // options.params = Object.assign(options.params, paginationParams);
+      const paginatedAction = (apiAction as PaginatedAction);
+      if (paginatedAction.paginationKey) {
+        options.params = new URLSearchParams();
+        const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
         for (const key in paginationParams) {
           if (paginationParams.hasOwnProperty(key)) {
             if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
               options.params.set(key, paginationParams[key]);
             }
           }
+        }
+        if (!options.params.has(resultPerPageParam)) {
+          options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
         }
       }
 
@@ -76,10 +85,7 @@ export class APIEffect {
               throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
             }
           }
-          let entities = {
-            entities: {},
-            result: []
-          };
+          let entities;
           let totalResults = 0;
 
           if (resData) {
@@ -87,6 +93,11 @@ export class APIEffect {
             entities = entityData.entities;
             totalResults = entityData.totalResults;
           }
+
+          entities = entities || {
+            entities: {},
+            result: []
+          };
 
           const actions = [];
           actions.push(new WrapperAPIActionSuccess(
@@ -185,6 +196,6 @@ export class APIEffect {
     return {
       ...paginationState.params,
       page: paginationState.currentPage,
-    } as Object;
+    };
   }
 }
