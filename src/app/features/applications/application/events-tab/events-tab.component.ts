@@ -6,6 +6,7 @@ import { MdPaginator } from '@angular/material';
 import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { SetPage, selectPaginationState } from '../../../../store/actions/pagination.actions';
+import { EventSchema } from '../../../../store/actions/app-event.actions';
 
 @Component({
   selector: 'app-events-tab',
@@ -22,14 +23,11 @@ export class EventsTabComponent implements OnInit {
   @ViewChild(MdPaginator) paginator: MdPaginator;
 
   gotToPage() {
-    this.store.dispatch(new SetPage('event', 'application-events', 2));
+    this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, 2));
   }
 
   ngOnInit() {
     this.dataSource = new AppEventsDataSource(this.store, this.appService, this.paginator);
-    this.store.select(selectPaginationState('event', 'application-events')).subscribe(() => {
-      console.log('Shanged?>')
-    });
   }
 }
 

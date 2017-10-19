@@ -51,7 +51,9 @@ export class APIEffect {
         // options.params = Object.assign(options.params, paginationParams);
         for (const key in paginationParams) {
           if (paginationParams.hasOwnProperty(key)) {
-            options.params.set(key, paginationParams[key]);
+            if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
+              options.params.set(key, paginationParams[key]);
+            }
           }
         }
       }

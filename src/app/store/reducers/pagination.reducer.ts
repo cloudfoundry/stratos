@@ -81,6 +81,7 @@ const updatePagination =
           error: false,
           message: '',
           ids: {
+            ...state.ids,
             [state.currentPage]: action.response.result
           },
           pageCount: state.pageCount + 1,
@@ -138,33 +139,20 @@ export function getPaginationObservables(
 ) {
   const { entityKey, paginationKey } = action;
 
-  const select$ = store.select(selectPaginationState(entityKey, paginationKey));
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
 
-  select$.subscribe(() => {
-    console.log('Really?');
-  });
+  const pagination$ = paginationSelect$
+    .filter(pagination => !!pagination);
 
-  const pagination$ = select$
-    .debounceTime(250)
+  const entities$ = paginationSelect$
     .do(pagination => {
-      console.log('Shanged!')
       if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
         store.dispatch(action);
       }
     })
-    .delay(1)
-    .filter(pagination => !!pagination);
-
-  const entities$ = pagination$
     .filter(pagination => {
-      console.log('ready?')
-      return pageReady(pagination);
+      return isPageReady(pagination);
     })
-    // .distinctUntilChanged((oldPag, newPag) => {
-    //   const oldPage = oldPag.ids[oldPag.currentPage];
-    //   const newPage = newPag.ids[newPag.currentPage];
-    //   return oldPage.join('') !== newPage.join('');
-    // })
     .withLatestFrom(store.select(getEntityState))
     .map(([paginationEntity, entities]) => {
       const page = paginationEntity.ids[paginationEntity.currentPage];
@@ -177,8 +165,8 @@ export function getPaginationObservables(
   };
 }
 
-function pageReady(pagination: PaginationEntityState) {
-  return pagination && pagination.ids[pagination.currentPage];
+function isPageReady(pagination: PaginationEntityState) {
+  return !!pagination && !!pagination.ids[pagination.currentPage];
 }
 
 function hasValidOrGettingPage(pagination: PaginationEntityState) {

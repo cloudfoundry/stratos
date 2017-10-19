@@ -25,17 +25,17 @@ interface AppEvent {
 }
 
 export class AppEventsDataSource extends DataSource<AppEvent> {
-  private static paginationKey = 'application-events';
+  public static paginationKey = 'application-events';
   private action = new GetAllAppEvents(AppEventsDataSource.paginationKey, this._appService.appGuid, this._appService.cfGuid);
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator) {
     super();
     this._paginator.pageIndex = 0;
 
-    this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
-      this.isLoadingPage$,
-    )
-      .map(([isFetchingApp, isLoadingPage]) => isFetchingApp || isLoadingPage);
+    // this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
+    //   this.isLoadingPage$,
+    // )
+    //   .map(([isFetchingApp, isLoadingPage]) => isFetchingApp || isLoadingPage);
 
     this._paginator.page
       .subscribe(pageEvent => {
@@ -68,7 +68,6 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
   connect(): Observable<AppEvent[]> {
 
     this.isLoadingPage$ = this.pagination$.map(pag => pag.fetching);
-
 
     return Observable.combineLatest(
       this.pagination$,

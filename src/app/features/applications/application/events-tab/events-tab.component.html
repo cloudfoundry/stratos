@@ -3,7 +3,7 @@
 
   <div class="app-table">
     <div>
-      <div [class.show]="(dataSource.showProgressIndicator$ | async)" class="app-table__loading">
+      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
         <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
       </div>
       <md-card>
