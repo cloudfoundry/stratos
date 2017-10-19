@@ -23,7 +23,8 @@ import {
   MdToolbarModule,
   MdTooltipModule,
   MdPaginatorModule,
-  MdSortModule
+  MdSortModule,
+  MdDialogModule
 } from '@angular/material';
 
 const importExport = [
@@ -49,7 +50,8 @@ const importExport = [
   MdChipsModule,
   MdExpansionModule,
   MdPaginatorModule,
-  MdSortModule
+  MdSortModule,
+  MdDialogModule
 ];
 
 @NgModule({

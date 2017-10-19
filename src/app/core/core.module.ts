@@ -10,6 +10,7 @@ import { MDAppModule } from './md.module';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 
 @NgModule({
   imports: [
@@ -19,7 +20,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     MDAppModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LogOutDialogComponent
   ],
   providers: [
     AuthGuardService,
@@ -27,6 +29,10 @@ import { WindowRef } from './window-ref/window-ref.service';
     EventWatcherService,
     WindowRef,
     UtilsService
-  ]
+  ],
+  declarations: [LogOutDialogComponent],
+  entryComponents: [
+    LogOutDialogComponent
+  ],
 })
 export class CoreModule { }

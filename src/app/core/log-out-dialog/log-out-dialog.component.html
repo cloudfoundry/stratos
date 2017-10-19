@@ -1,0 +1,10 @@
+<h2 md-dialog-title>Are you still there?</h2>
+<md-dialog-content>
+  <div>
+    You have been inactive for a while. For your protection, we will automatically log you out in {{this.countDown | date:'mm:ss'
+    }}
+  </div>
+</md-dialog-content>
+<md-dialog-actions>
+  <button md-button [md-dialog-close]="true">I am still here</button>
+</md-dialog-actions>

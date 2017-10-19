@@ -1,0 +1,7 @@
+md-dialog-actions {
+  justify-content: flex-end;
+  div {
+    // Avoid any dilaog width bobbling given changes to time
+    padding-right: 10px;
+  }
+}

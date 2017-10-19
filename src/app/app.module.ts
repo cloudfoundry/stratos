@@ -12,6 +12,7 @@ import { LoginModule } from './features/login/login.module';
 import { UAASetupModule } from './features/uaa-setup/uaa-setup.module';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
+import { LoggedInService } from './logged-in.service';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,9 @@ import { AppStoreModule } from './store/store.module';
     LoginModule,
     HomeModule,
     DashboardModule
+  ],
+  providers: [
+    LoggedInService,
   ],
   bootstrap: [AppComponent]
 })

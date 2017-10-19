@@ -57,7 +57,9 @@ export class AuthEffect {
     .switchMap(() => {
       return this.http.get('/pp/v1/auth/session/verify', { withCredentials: true })
         .mergeMap(data => {
-          return [new VerifiedSession(data.json()), new GetAllCNSIS(true)];
+          const sessionData: SessionData = data.json();
+          sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
+          return [new VerifiedSession(sessionData), new GetAllCNSIS(true)];
         })
         .catch((err, caught) => {
           return [new InvalidSession(err.status === 503)];

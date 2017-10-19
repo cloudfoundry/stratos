@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { AppState } from './store/app-state';
+import { LoggedInService } from './logged-in.service';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,8 @@ import { AppState } from './store/app-state';
 export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,
-    private router: Router
+    private router: Router,
+    private loggedInService: LoggedInService
   ) { }
   title = 'app';
 
