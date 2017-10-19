@@ -222,7 +222,7 @@
 
     // copy db migrator artefact
     var dbMigratorPath = path.join(prepareBuild.getDbMigratorSourcePath(), conf.dbMigratorName);
-    var outputDbMigratorPath = path.join(outputPath, conf.dbMigatorName);
+    var outputDbMigratorPath = path.join(outputPath, conf.dbMigratorName);
 
     promise
       .then(function () {
