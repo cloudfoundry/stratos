@@ -19,7 +19,7 @@ import { AppState } from '../app-state';
 import { APIAction, getEntityState } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
-import { defaultEntitiesState } from './entity.reducer';
+import { defaultEntitiesState, EntitiesState } from './entity.reducer';
 
 
 export const resultPerPageParam = 'results-per-page';
@@ -199,10 +199,7 @@ function removeEmptyParams(params: PaginationParam) {
     }
   });
   return newObject;
-
 }
-
-
 
 function getActionType(action) {
   return action.apiType || action.type;
@@ -225,40 +222,53 @@ function getPaginationKey(action) {
   return apiAction.paginationKey;
 }
 
-export function getPaginationObservables(
-  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema }
-) {
-  const { entityKey, paginationKey } = action;
+export const getPaginationObservables = (function () {
+  const mem = {};
+  return function ({ store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema }): {
+    entities$: Observable<any[]>,
+    pagination$: Observable<PaginationEntityState>
+  } {
+    const _key = action.entityKey + action.paginationKey;
+    if (mem[_key]) {
+      return mem[_key];
+    }
+    const { entityKey, paginationKey } = action;
 
-  if (action.initialParams) {
-    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
-  }
+    if (action.initialParams) {
+      store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
+    }
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+    const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
 
-  const pagination$ = paginationSelect$
-    .filter(pagination => !!pagination);
+    const pagination$: Observable<PaginationEntityState> = paginationSelect$
+      .filter(pagination => !!pagination);
 
-  const entities$ = paginationSelect$
-    .do(pagination => {
-      if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
-        store.dispatch(action);
-      }
-    })
-    .filter(pagination => {
-      return isPageReady(pagination);
-    })
-    .withLatestFrom(store.select(getEntityState))
-    .map(([paginationEntity, entities]) => {
-      const page = paginationEntity.ids[paginationEntity.currentPage];
-      return page ? denormalize(page, schema, entities) : null;
-    });
+    const entities$: Observable<any[]> = paginationSelect$
+      .do(pagination => {
+        if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+          store.dispatch(action);
+        }
+      })
+      .filter(pagination => {
+        return isPageReady(pagination);
+      })
+      .withLatestFrom(store.select(getEntityState))
+      .map(([paginationEntity, entities]) => {
+        const page = paginationEntity.ids[paginationEntity.currentPage];
+        return page ? denormalize(page, schema, entities) : null;
+      });
 
-  return {
-    pagination$,
-    entities$
+    const obs = {
+      pagination$,
+      entities$
+    };
+
+    mem[_key] = obs;
+    console.log(_key);
+
+    return obs;
   };
-}
+})();
 
 function isPageReady(pagination: PaginationEntityState) {
   return !!pagination && !!pagination.ids[pagination.currentPage];
