@@ -138,12 +138,12 @@
       }
 
       fsCopyQ('./deploy/db/migrations', tempDbMigratorSrcPath)
-      .then(function () {
-        generateMigrationIndex(done);
-      })
-      .catch(function (err) {
-        done(err);
-      });
+        .then(function () {
+          generateMigrationIndex(done);
+        })
+        .catch(function (err) {
+          done(err);
+        });
     });
   });
 

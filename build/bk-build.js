@@ -63,9 +63,9 @@
 
     // DB Migrator dependencies
     promise = promise
-    .then(function () {
-      return buildUtils.runGlideInstall(prepareBuild.getDbMigratorSourcePath());
-    });
+      .then(function () {
+        return buildUtils.runGlideInstall(prepareBuild.getDbMigratorSourcePath());
+      });
 
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
 
