@@ -6,4 +6,4 @@ applications:
   timeout: 180
   buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
-  stack: cflinuxfs2
+
