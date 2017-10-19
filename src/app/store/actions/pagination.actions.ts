@@ -4,6 +4,7 @@ import {
   PaginationAction,
   PaginationEntityState,
   PaginationEntityTypeState,
+  PaginationParam,
   PaginationState,
 } from '../reducers/pagination.reducer';
 
@@ -42,9 +43,7 @@ export class SetParams implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public params: {
-      [key: string]: string | number
-    }
+    public params: PaginationParam
   ) {
   }
   type = SET_PARAMS;
@@ -54,9 +53,7 @@ export class AddParams implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public params: {
-      [key: string]: string | number
-    }
+    public params: PaginationParam
   ) {
   }
   type = ADD_PARAMS;

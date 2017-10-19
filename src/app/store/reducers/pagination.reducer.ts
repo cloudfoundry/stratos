@@ -25,14 +25,34 @@ import { defaultEntitiesState } from './entity.reducer';
 export const resultPerPageParam = 'results-per-page';
 export const resultPerPageParamDefault = 5;
 
+export function qParamsToString(params: QParam[]) {
+  const qStrings = params.map(joinQParam);
+  return qStrings.join('%3A');
+}
+
+function joinQParam(q: QParam) {
+  return `${q.key}${q.joiner}${(q.value as string[]).join ? (q.value as string[]).join(',') : q.value}`;
+}
+
+export class QParam {
+  constructor(
+    public key: string,
+    public value: string | string[],
+    public joiner: '>=' | '<=' | '<' | '>' | '%2BIN%2B' | ':' | '=' = ':'
+  ) { }
+}
+
+export interface PaginationParam {
+  q?: QParam[];
+  [entityKey: string]: any;
+}
+
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0; // TODO: Populate
   pageCount = 0;
   ids = {};
-  params: {
-    [entityKey: string]: string | number
-  };
+  params: PaginationParam;
   fetching: boolean;
   error: boolean;
   message: string;
@@ -40,9 +60,7 @@ export class PaginationEntityState {
 
 // An action that is intended to begin a
 export interface PaginatedAction extends PaginationAction, APIAction {
-  initialParams?: {
-    [key: string]: string | number
-  };
+  initialParams?: PaginationParam;
 }
 export interface PaginationAction extends Action {
   entityKey: string;
@@ -123,19 +141,23 @@ const updatePagination =
           currentPage: (action as SetPage).pageNumber
         };
       case SET_PARAMS:
+
         return {
           ...state,
           params: {
             [resultPerPageParam]: resultPerPageParamDefault,
-            ...(action as SetParams).params
+            ...(action as SetParams).params,
+            q: getUniqueQParams(action as SetParams, state)
           }
         };
       case ADD_PARAMS:
+        const addParamAction = action as AddParams;
         return {
           ...state,
           params: {
             ...state.params,
-            ...(action as AddParams).params
+            ...addParamAction.params,
+            q: getUniqueQParams(addParamAction, state)
           }
         };
       case REMOVE_PARAMS:
@@ -150,6 +172,21 @@ const updatePagination =
         return state;
     }
   };
+
+function getUniqueQParams(action: AddParams | SetParams, state) {
+  let qParmas = [].concat(state.params.q || []);
+  // Ensure q params are unique
+  if (action.params.q) {
+    qParmas = qParmas.concat(action.params.q).filter((thing, index, self) => self.findIndex(
+      (t) => {
+        return t.key === thing.key;
+      }
+    ) === index);
+  }
+  return qParmas;
+}
+
+
 
 function getActionType(action) {
   return action.apiType || action.type;

@@ -21,7 +21,15 @@ import {
 } from './../actions/api.actions';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
-import { PaginatedAction, PaginationEntityState, resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination.reducer';
+import {
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
+  QParam,
+  qParamsToString,
+  resultPerPageParam,
+  resultPerPageParamDefault,
+} from '../reducers/pagination.reducer';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -49,20 +57,29 @@ export class APIEffect {
 
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
+      // Apply the params from the store
       const paginatedAction = (apiAction as PaginatedAction);
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
         const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
+        if (paginationParams.hasOwnProperty('q')) {
+          // Convert q into a cf q string
+          paginationParams.qString = qParamsToString(paginationParams.q);
+          options.params.set('q', paginationParams.qString as string);
+          delete paginationParams.qString;
+          delete paginationParams.q;
+        }
         for (const key in paginationParams) {
           if (paginationParams.hasOwnProperty(key)) {
             if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
-              options.params.set(key, paginationParams[key]);
+              options.params.set(key, paginationParams[key] as string);
             }
           }
         }
         if (!options.params.has(resultPerPageParam)) {
           options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
         }
+
       }
 
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
@@ -190,10 +207,10 @@ export class APIEffect {
     return { type };
   }
 
-  getPaginationParams(paginationState: PaginationEntityState) {
+  getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
     return {
       ...paginationState.params,
-      page: paginationState.currentPage,
+      page: paginationState.currentPage.toString(),
     };
   }
 }

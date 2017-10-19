@@ -5,7 +5,7 @@ import { getAPIResourceGuid } from './api.actions';
 import { APIAction, ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
-import { PaginatedAction, PaginationAction } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationAction, QParam } from '../reducers/pagination.reducer';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',
@@ -45,6 +45,9 @@ export class GetAllAppEvents implements PaginatedAction {
   options: RequestOptions;
   initialParams = {
     'order-direction': 'asc',
-    'q': 'actee:' + this.appGuid
+    q: [
+      new QParam('actee', this.appGuid),
+      new QParam('actee', '1')
+    ]
   };
 }

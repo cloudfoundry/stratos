@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { APIAction, ApiActionTypes, getAPIResourceGuid } from './api.actions';
 import { SpaceSchema } from './space.actions';
-import { PaginationAction } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationAction } from '../reducers/pagination.reducer';
 
 export const GET_ALL = '[Organization] Get all';
 export const GET_ALL_SUCCESS = '[Organization] Get all success';
@@ -17,7 +17,7 @@ export const OrganizationSchema = new schema.Entity('organization', {
     idAttribute: getAPIResourceGuid
   });
 
-export class GetAllOrganizations implements APIAction, PaginationAction {
+export class GetAllOrganizations implements PaginatedAction {
   constructor(public paginationKey: string) {
     this.options = new RequestOptions();
     this.options.url = 'organizations';
@@ -36,4 +36,9 @@ export class GetAllOrganizations implements APIAction, PaginationAction {
   entity = [OrganizationSchema];
   entityKey = OrganizationSchema.key;
   options: RequestOptions;
+  initialParams: {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 1
+  };
 }
