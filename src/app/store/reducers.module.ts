@@ -46,7 +46,13 @@ export const appReducers = {
   appMetadata: appMetaDataReducer
 };
 
-export const metaReducers = environment.production ? [storeFreeze, logger] : [];
+// export const metaReducers = environment.production ? [storeFreeze, logger] : [];
+// function clearStore(reducer) {
+//   return function (state, action) {
+//     return reducer(action.type === LOGOUT_SUCCESS ? undefined : state, action);
+//   };
+// }
+// export const metaReducers = [clearStore];
 
 @NgModule({
   imports: [

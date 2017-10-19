@@ -30,6 +30,7 @@ import { Headers, Http, URLSearchParams, RequestOptionsArgs } from '@angular/htt
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
+import { MdDialog } from '@angular/material';
 
 
 @Injectable()
@@ -39,7 +40,8 @@ export class AuthEffect {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>,
-    private router: Router
+    private router: Router,
+    public dialog: MdDialog
   ) { }
 
   @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN)
@@ -77,7 +79,7 @@ export class AuthEffect {
           return [new VerifiedSession(sessionData, action.updateCNSIs)];
         })
         .catch((err, caught) => {
-          return [new InvalidSession(err.status === 503), new ResetAuth()];
+          return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
         });
     });
 
@@ -113,21 +115,15 @@ export class AuthEffect {
   @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT)
     .switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {})
-        .map(data => new LogoutSuccess())
+        .mergeMap(data => [new LogoutSuccess(), new ResetAuth()])
         .catch((err, caught) => [new LogoutFailed(err)]);
     });
 
-  @Effect() logoutSuccess$ = this.actions$.ofType<LogoutSuccess>(LOGOUT_SUCCESS)
-    .map(() => {
-      return new ResetAuth();
+  @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH)
+    .do(() => {
+      window.location.reload();
+      // this.dialog.closeAll();
+      // this.router.navigateByUrl('/login');
     });
-
-  @Effect() resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH)
-    .mergeMap(() => {
-      // TODO: RC Reset all entities, pagination from store?
-      this.router.navigateByUrl('/login');
-      return [];
-    });
-
 
 }

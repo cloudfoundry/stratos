@@ -74,11 +74,14 @@ export class LoggedInService {
     this._activityPromptShown = true;
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
-      data: { expiryDate }
+      data: { expiryDate },
+      disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((userInitiatedClose: boolean) => {
-      this.store.dispatch(new VerifySession(false, false));
+    dialogRef.afterClosed().subscribe((verrify = false) => {
+      if (verrify) {
+        this.store.dispatch(new VerifySession(false, false));
+      }
       this._activityPromptShown = false;
     });
   }
