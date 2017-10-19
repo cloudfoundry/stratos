@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 )
@@ -16,6 +17,7 @@ import (
 var flagPath = flag.String("path", "db", "folder containing db info")
 var flagEnv = flag.String("env", "development", "which DB environment to use")
 var flagPgSchema = flag.String("pgschema", "", "which postgres-schema to migrate (default = none)")
+var flagCloudFoundry = flag.Bool("cf", false, "detect and parse Cloud Foundry database configuration from VCAP_SERVICES")
 
 // helper to create a DBConf from the given flags
 func dbConfFromFlags() (dbconf *goose.DBConf, err error) {
@@ -33,8 +35,16 @@ func main() {
 		return
 	}
 
-	// TODO: Check command is up
-	fmt.Println(args[0])
+	if strings.ToLower(args[0]) != "up" {
+		log.Fatal("Database migration tool only supports migration upgrades")
+	}
+
+	if *flagCloudFoundry {
+		err := parseCloudFoundryEnv()
+		if err != nil {
+			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
+		}
+	}
 
 	err := upRun(args[1:])
 	if err != nil {
