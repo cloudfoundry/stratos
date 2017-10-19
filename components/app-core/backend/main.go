@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -446,33 +447,30 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
+	var engine *standard.Server
+	address := config.TLSAddress
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
-
-		address := config.TLSAddress
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine := standard.WithTLS(address, certFile, certKeyFile)
-		if isUpgrade {
-			go stopEchoWhenUpgraded(e)
-		}
+		engine = standard.WithTLS(address, certFile, certKeyFile)
 
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTPS server", engineErr)
-		}
 	} else {
-		address := config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine := standard.New(address)
-		if isUpgrade {
-			go stopEchoWhenUpgraded(e)
-		}
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTP server", engineErr)
+		engine = standard.New(address)
+	}
+
+	if isUpgrade {
+		go stopEchoWhenUpgraded(engine)
+	}
+
+	engineErr := e.Run(engine)
+	if engineErr != nil {
+		engineErrStr := fmt.Sprintf("%s", engineErr)
+		if !strings.Contains(engineErrStr, "Server closed") {
+			log.Warnf("Failed to start HTTP/S server", engineErr)
 		}
 	}
 
@@ -652,11 +650,10 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *echo.Echo) {
+func stopEchoWhenUpgraded(e *standard.Server) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
-	e.Stop()
-
+	e.Close()
 }
