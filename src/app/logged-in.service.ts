@@ -82,7 +82,7 @@ export class LoggedInService {
     });
 
     dialogRef.afterClosed().subscribe((userInitiatedClose: boolean) => {
-      this.store.dispatch(new VerifySession()); // TODO: RC expect this to log user out if bad call
+      this.store.dispatch(new VerifySession(false, false)); // TODO: RC expect this to log user out if bad call
       this._activityPromptShown = false;
     });
   }
@@ -104,7 +104,7 @@ export class LoggedInService {
       let userIsActive = idleDelta < this._userIdlePeriod;
       userIsActive = false; // REMOVE
       if (userIsActive) {
-        this.store.dispatch(new VerifySession()); // TODO: RC expect this to log user out if bad call
+        this.store.dispatch(new VerifySession(false, false)); // TODO: RC expect this to log user out if bad call
       } else {
         this._promptInactiveUser(safeExpire);
       }

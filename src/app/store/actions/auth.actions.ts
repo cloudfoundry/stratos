@@ -29,11 +29,12 @@ export class LoginFailed implements Action {
 }
 
 export class VerifySession implements Action {
+  constructor(public login = true, public updateCNSIs = true) { }
   type = VERIFY_SESSION;
 }
 
 export class VerifiedSession implements Action {
-  constructor(private sessionData: SessionData) { }
+  constructor(private sessionData: SessionData, public updateCNSIs = true) { }
   type = SESSION_VERIFIED;
 }
 

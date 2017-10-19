@@ -16,9 +16,10 @@ import {
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
+  SESSION_VERIFIED,
 } from './../actions/auth.actions';
 import { Injectable } from '@angular/core';
-import { Headers, Http, URLSearchParams } from '@angular/http';
+import { Headers, Http, URLSearchParams, RequestOptionsArgs } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 
@@ -36,7 +37,8 @@ export class AuthEffect {
     .switchMap(({ username, password }) => {
       const config = {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-cap-request-date': Math.floor(Date.now() / 1000)
         }
       };
       const headers = new Headers();
@@ -54,23 +56,36 @@ export class AuthEffect {
     });
 
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
-    .switchMap(() => {
-      return this.http.get('/pp/v1/auth/session/verify', { withCredentials: true })
+    .switchMap((action) => {
+      const options: RequestOptionsArgs = {
+        headers: new Headers({ 'x-cap-request-date': Math.floor(Date.now() / 1000) }),
+        withCredentials: true
+      };
+      return this.http.get('/pp/v1/auth/session/verify', options)
         .mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          return [new VerifiedSession(sessionData), new GetAllCNSIS(true)];
+          return [new VerifiedSession(sessionData, action.updateCNSIs)];
         })
         .catch((err, caught) => {
           return [new InvalidSession(err.status === 503)];
         });
     });
 
-  @Effect() CnsisSuccess$ = this.actions$.ofType<GetAllCNSISSuccess>(GET_CNSIS_SUCCESS)
-    .map(action => {
-      if (action.login) {
-        return new LoginSuccess();
+  @Effect() verifiedAuth$ = this.actions$.ofType<VerifiedSession>(SESSION_VERIFIED)
+    .mergeMap(action => {
+      if (action.updateCNSIs) {
+        return [new GetAllCNSIS(true)];
       }
+      return [];
+    });
+
+  @Effect() CnsisSuccess$ = this.actions$.ofType<GetAllCNSISSuccess>(GET_CNSIS_SUCCESS)
+    .mergeMap(action => {
+      if (action.login) {
+        return [new LoginSuccess()];
+      }
+      return [];
     });
 
   @Effect() CnsisFailed$ = this.actions$.ofType<GetAllCNSISFailed>(GET_CNSIS_FAILED)
