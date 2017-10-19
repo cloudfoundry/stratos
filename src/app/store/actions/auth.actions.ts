@@ -6,6 +6,10 @@ export const LOGIN = '[Auth] Login';
 export const LOGIN_SUCCESS = '[Auth] Login success';
 export const LOGIN_FAILED = '[Auth] Login failed';
 
+export const LOGOUT = '[Auth] Logout';
+export const LOGOUT_SUCCESS = '[Auth] Logout success';
+export const LOGOUT_FAILED = '[Auth] Logout failed';
+
 export const VERIFY_SESSION = '[Auth] Verify session';
 export const SESSION_VERIFIED = '[Auth] Session verified';
 export const SESSION_INVALID = '[Auth] Session invalid';
@@ -51,4 +55,15 @@ export class GetInfo implements Action {
   type = GET_INFO;
 }
 
+export class Logout implements Action {
+  type = LOGOUT;
+}
 
+export class LogoutSuccess implements Action {
+  type = LOGOUT_SUCCESS;
+}
+
+export class LogoutFailed implements Action {
+  constructor(public error: any) { }
+  type = LOGOUT_FAILED;
+}

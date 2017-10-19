@@ -17,7 +17,6 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const updateInterval = 1000;
     this.countDown = this.data.expiryDate - Date.now();
-    this.countDown = 5000;//TODO RC REMOVE ME
     this._autoLogout = setInterval(() => {
       this.countDown -= updateInterval;
       if (this.countDown < 0) {

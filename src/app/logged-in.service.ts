@@ -10,13 +10,11 @@ import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.comp
 import { Observable } from 'rxjs/Observable';
 
 @Injectable()
-// A true singleton
 export class LoggedInService {
 
   private _sessionData: SessionData;
   private _userInteractionChecker: Subscription;
 
-  private _loggedIn = false;
   private _lastUserInteraction = Date.now();
   private _sessionChecker;
 
@@ -42,7 +40,6 @@ export class LoggedInService {
     private store: Store<AppState>,
     private dialog: MdDialog,
   ) {
-    console.log('CONSTRUCTED');
 
     const eventStreams = this._userActiveEvents.map((eventName) => {
       return Observable.fromEvent(document, eventName);
@@ -51,7 +48,6 @@ export class LoggedInService {
     this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
-        // TODO: RC understand loggedIn vs sessionData.valid
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
           if (!this._sessionChecker) {
             this._sessionChecker = setInterval(() => { this._checkSession(); }, this._checkSessionInterval);
@@ -82,13 +78,12 @@ export class LoggedInService {
     });
 
     dialogRef.afterClosed().subscribe((userInitiatedClose: boolean) => {
-      this.store.dispatch(new VerifySession(false, false)); // TODO: RC expect this to log user out if bad call
+      this.store.dispatch(new VerifySession(false, false));
       this._activityPromptShown = false;
     });
   }
 
   private _checkSession() {
-    console.log('_checkSession');
     if (this._activityPromptShown) {
       return;
     }
@@ -96,15 +91,15 @@ export class LoggedInService {
     const sessionExpiresOn = this._sessionData.sessionExpiresOn;
     const safeExpire = sessionExpiresOn - this._autoLogoutDelta;
     const delta = safeExpire - now;
-    let aboutToExpire = delta < this._warnBeforeLogout;
-    aboutToExpire = true; // REMOVE
+    const aboutToExpire = delta < this._warnBeforeLogout;
+    // aboutToExpire = true; // REMOVE
 
     if (aboutToExpire) {
       const idleDelta = now - this._lastUserInteraction;
-      let userIsActive = idleDelta < this._userIdlePeriod;
-      userIsActive = false; // REMOVE
+      const userIsActive = idleDelta < this._userIdlePeriod;
+      // userIsActive = false; // REMOVE
       if (userIsActive) {
-        this.store.dispatch(new VerifySession(false, false)); // TODO: RC expect this to log user out if bad call
+        this.store.dispatch(new VerifySession(false, false));
       } else {
         this._promptInactiveUser(safeExpire);
       }
