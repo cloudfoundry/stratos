@@ -22,7 +22,7 @@
         <md-card-content>
           <md-table #table [hidden]="(dataSource.count$ | async) === 0" [dataSource]="dataSource" mdSort>
             <ng-container mdColumnDef="timestamp">
-              <md-header-cell *mdHeaderCellDef> Timestamp </md-header-cell>
+              <md-header-cell *mdHeaderCellDef md-sort-header> Timestamp </md-header-cell>
               <md-cell *mdCellDef="let row">{{row.entity.timestamp | date:'medium'}}</md-cell>
             </ng-container>
             <ng-container mdColumnDef="type">

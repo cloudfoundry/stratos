@@ -1,8 +1,9 @@
+import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
-import { MdPaginator, PageEvent } from '@angular/material';
+import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
@@ -11,7 +12,7 @@ import {
   PaginationEntityState,
   resultPerPageParam,
 } from '../../../../store/reducers/pagination.reducer';
-import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
+import { AddParams, RemoveParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
 
 interface AppEvent {
@@ -32,7 +33,15 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
   public static paginationKey = 'application-events';
   private action = new GetAllAppEvents(AppEventsDataSource.paginationKey, this._appService.appGuid, this._appService.cfGuid);
 
-  constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator) {
+  sortSub: Subscription;
+  paginationSub: Subscription;
+
+  constructor(
+    private store: Store<AppState>,
+    private _appService: ApplicationService,
+    private _paginator: MdPaginator,
+    private _sort: MdSort
+  ) {
     super();
     this._paginator.pageIndex = 0;
     this._paginator.pageSizeOptions = [5, 10, 20];
@@ -54,11 +63,18 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
         }
       });
 
+    this.sortSub = this._sort.mdSortChange.subscribe((sort: Sort) => {
+      this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+        'sort-by': sort.active,
+        'order-direction': sort.direction
+      }));
+    });
+
     const pageIndex$ = this._paginator.page.map(pageEvent => pageEvent.pageIndex)
       .distinctUntilChanged()
       .do(pageIndex => this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, pageIndex + 1)));
 
-    Observable.combineLatest(
+    this.paginationSub = Observable.combineLatest(
       pageSize$,
       pageIndex$
     ).subscribe();
@@ -104,5 +120,7 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
   }
 
   disconnect() {
+    this.sortSub.unsubscribe();
+    this.paginationSub.unsubscribe();
   }
 }

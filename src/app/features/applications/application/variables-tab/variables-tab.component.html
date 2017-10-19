@@ -63,11 +63,11 @@
               </md-cell>
             </ng-container>
             <ng-container mdColumnDef="name">
-              <md-header-cell *mdHeaderCellDef md-sort-header [disableClear]="'true'"> Name </md-header-cell>
+              <md-header-cell *mdHeaderCellDef md-sort-header disableClear="true"> Name </md-header-cell>
               <md-cell *mdCellDef="let row">{{row.name}}</md-cell>
             </ng-container>
             <ng-container mdColumnDef="value">
-              <md-header-cell *mdHeaderCellDef md-sort-header [disableClear]="'true'"> Value </md-header-cell>
+              <md-header-cell *mdHeaderCellDef md-sort-header disableClear="true"> Value </md-header-cell>
               <md-cell *mdCellDef="let row">
                 <md-form-field *ngIf="row.edit">
                   <input mdInput name="envVarValue" [value]="row.edit?.value" (input)="row.edit.value = $event.target.value" />

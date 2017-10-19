@@ -4,7 +4,7 @@ import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
-import { MdPaginator } from '@angular/material';
+import { MdPaginator, MdSort } from '@angular/material';
 import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { AddParams, selectPaginationState, SetPage } from '../../../../store/actions/pagination.actions';
@@ -23,6 +23,7 @@ export class EventsTabComponent implements OnInit {
   dataSource: AppEventsDataSource;
   hasEvents$: Observable<boolean>;
   @ViewChild(MdPaginator) paginator: MdPaginator;
+  @ViewChild(MdSort) sort: MdSort;
 
   gotToPage() {
     this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
@@ -31,7 +32,7 @@ export class EventsTabComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.dataSource = new AppEventsDataSource(this.store, this.appService, this.paginator);
+    this.dataSource = new AppEventsDataSource(this.store, this.appService, this.paginator, this.sort);
   }
 }
 

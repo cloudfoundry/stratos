@@ -144,21 +144,21 @@ const updatePagination =
 
         return {
           ...state,
-          params: {
+          params: removeEmptyParams({
             [resultPerPageParam]: resultPerPageParamDefault,
             ...(action as SetParams).params,
             q: getUniqueQParams(action as SetParams, state)
-          }
+          })
         };
       case ADD_PARAMS:
         const addParamAction = action as AddParams;
         return {
           ...state,
-          params: {
+          params: removeEmptyParams({
             ...state.params,
             ...addParamAction.params,
             q: getUniqueQParams(addParamAction, state)
-          }
+          })
         };
       case REMOVE_PARAMS:
         const removeParamsState = { ...state };
@@ -177,13 +177,29 @@ function getUniqueQParams(action: AddParams | SetParams, state) {
   let qParmas = [].concat(state.params.q || []);
   // Ensure q params are unique
   if (action.params.q) {
-    qParmas = qParmas.concat(action.params.q).filter((thing, index, self) => self.findIndex(
-      (t) => {
-        return t.key === thing.key;
-      }
-    ) === index);
+    qParmas = qParmas.concat(action.params.q)
+      .filter((q, index, self) => self.findIndex(
+        (qs) => {
+          return qs.key === q.key;
+        }
+      ) === index)
+      .filter((q: QParam) => {
+        // Filter out empties
+        return !!q.value;
+      });
   }
   return qParmas;
+}
+
+function removeEmptyParams(params: PaginationParam) {
+  const newObject = {};
+  Object.keys(params).forEach(key => {
+    if (params[key]) {
+      newObject[key] = params[key];
+    }
+  });
+  return newObject;
+
 }
 
 
