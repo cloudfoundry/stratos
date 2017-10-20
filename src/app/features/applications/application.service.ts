@@ -109,7 +109,7 @@ export class ApplicationService {
       .delay(1);
 
     this.appSummary$ =
-      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
+      this.waitForAppEntity$.mergeMap(() => getAppMetadataObservable(
         this.store,
         appGuid,
         new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
@@ -134,14 +134,14 @@ export class ApplicationService {
 
     this.appStatsGated$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
-      .take(1)
       .mergeMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
           return appStats$;
         } else {
           return Observable.of(null);
         }
-      });
+      })
+      .takeWhile(v => !v);
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(

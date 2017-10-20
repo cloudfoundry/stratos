@@ -6,12 +6,12 @@ import { HomePageComponent } from './home/home-page.component';
 
 
 @NgModule({
-    imports: [
-	CoreModule,
-	SharedModule,
-    ],
-    declarations: [
-	HomePageComponent
-    ]
+  imports: [
+    CoreModule,
+    SharedModule,
+  ],
+  declarations: [
+    HomePageComponent
+  ]
 })
 export class HomeModule { }

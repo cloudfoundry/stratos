@@ -32,20 +32,10 @@ export class UpdateAppEffects {
   @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
     .mergeMap((action: WrapperAPIActionSuccess) => {
 
+      const actions = [
+        // TODO: RC REMOVE. At the moment this is done so the app metadata env vars environment_json matches that of the app
+        new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
 
-      const actions = [new GetApplication(
-        action.apiAction.guid,
-        action.apiAction.cnis,
-      ),
-      // TODO: RC REMOVE
-      new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
-
-      const app = action.response.entities.application;
-      if (app && app.entity && app.entity.entity && app.entity.entity.state === 'STARTED') {
-        actions.push(
-          new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis,
-            AppMetadataProperties.INSTANCES as AppMetadataType));
-      }
       return actions;
     });
 

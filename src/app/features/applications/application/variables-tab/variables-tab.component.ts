@@ -4,12 +4,13 @@ import { Observable, Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, PageEvent, MdSort, Sort, MdInput } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
+import { UpdateApplication, ApplicationSchema } from '../../../../store/actions/application.actions';
 import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { NgModel } from '@angular/forms';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
+import { EntityInfo } from '../../../../store/types/api.types';
 
 interface AppEnvVar {
   name: string;
@@ -37,7 +38,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   @ViewChild(MdSort) sort: MdSort;
 
   filterSub: Subscription;
-  hasEnvVars$: Observable<boolean>;
+  envVars$: Observable<any>;
 
   ngOnInit() {
     this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.store, this.appService, this.paginator, this.sort);
@@ -48,6 +49,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
         if (!this.envVarsDataSource) { return; }
         this.envVarsDataSource.filter = value;
       });
+    this.envVars$ = this.appService.appEnvVars$;
   }
 
   ngOnDestroy(): void {
@@ -171,20 +173,13 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   }
 
   connect(): Observable<AppEnvVar[]> {
-    return this._appService.isFetchingEnvVars$
-      .combineLatest(this._appService.appEnvVars$)
-      .filter(([isFetching, envVars]: [boolean, AppMetadataInfo]) => {
-        return !isFetching && !!envVars.metadata;
-      })
-      .map(([isFetching, envVars]: [boolean, AppMetadataInfo]) => {
-        return envVars;
-      })
+    return this._appService.waitForAppEntity$
       .combineLatest(
       this._paginator.page.startWith(this._defaultPaginator),
       this._filterChange.startWith(''),
       this._sort.mdSortChange.startWith(this._defaultSort),
     )
-      .map(([envVars, pageEvent, filter, sort]: [AppMetadataInfo, PageEvent, string, Sort]) => {
+      .map(([envVars, pageEvent, filter, sort]: [EntityInfo, PageEvent, string, Sort]) => {
         // TODO: RC caching?? catch no-ops?
         const filtered = this._filterEnvVars(envVars, filter);
 
@@ -199,14 +194,14 @@ export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
   disconnect() {
   }
 
-  _filterEnvVars(envVars, filter: string): AppEnvVar[] {
+  _filterEnvVars(envVars: EntityInfo, filter: string): AppEnvVar[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
 
-    for (const envVar in envVars.metadata.environment_json) {
-      if (!envVars.metadata.environment_json.hasOwnProperty(envVar)) { continue; }
+    for (const envVar in envVars.entity.entity.environment_json) {
+      if (!envVars.entity.entity.environment_json.hasOwnProperty(envVar)) { continue; }
 
-      const [name, value] = [envVar, envVars.metadata.environment_json[envVar]];
+      const [name, value] = [envVar, envVars.entity.entity.environment_json[envVar]];
       this.rows.push({ name, value });
       this.rowNames.push(name);
 

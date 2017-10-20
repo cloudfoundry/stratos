@@ -110,4 +110,13 @@
       </md-card>
     </div>
   </div>
+
+  <div class="variables-tab__env-code-block">
+    <md-card>
+      <md-card-header>Variables</md-card-header>
+      <md-card-content>
+        <app-code-block>{{ (envVars$ | async)?.metadata | json }}</app-code-block>
+      </md-card-content>
+    </md-card>
+  </div>
 </div>

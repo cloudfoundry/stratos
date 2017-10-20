@@ -73,4 +73,13 @@
   div.mat-card-header-text-wa {
     margin: 0 8px;
   }
+  &__env-code-block {
+    padding-top: 20px;
+    md-card {
+      padding: 20px;
+      md-card-content {
+        padding: 18px;
+      }
+    }
+  }
 }

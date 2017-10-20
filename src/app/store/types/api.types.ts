@@ -4,6 +4,7 @@ import { Action } from '@ngrx/store';
 import { ApiActionTypes } from '../actions/api.actions';
 import { PaginatedAction } from './pagination.types';
 import { EntityRequestState } from '../reducers/api-request-reducer';
+import { EntitiesState } from './entity.types';
 
 export interface EntityInfo {
   entityRequestInfo: EntityRequestState;
@@ -69,4 +70,11 @@ export class WrapperAPIActionFailed implements Action {
     public apiAction: APIAction | PaginatedAction
   ) { }
   apiType = ApiActionTypes.API_REQUEST_FAILED;
+}
+
+
+export type ActionMergeFunction = (oldEntities: EntitiesState, newEntities: NormalizedResponseEntities)
+  => NormalizedResponseEntities;
+export interface NormalizedResponseEntities {
+  [key: string]: string;
 }

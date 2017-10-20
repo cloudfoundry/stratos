@@ -6,12 +6,12 @@ import { ConsoleUaaWizardComponent } from './uaa-wizard/console-uaa-wizard.compo
 
 
 @NgModule({
-    imports: [
-	CoreModule,
-	SharedModule
-    ],
-    declarations: [
-	ConsoleUaaWizardComponent
-    ]
+  imports: [
+    CoreModule,
+    SharedModule
+  ],
+  declarations: [
+    ConsoleUaaWizardComponent
+  ]
 })
 export class UAASetupModule { }

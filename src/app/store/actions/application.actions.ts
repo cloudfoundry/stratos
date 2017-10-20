@@ -5,9 +5,10 @@ import { schema } from 'normalizr';
 import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
-import { APIAction } from '../types/api.types';
+import { ActionMergeFunction, APIAction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
+import { pick } from '../helpers/reducer.helper';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -37,15 +38,16 @@ export const DELETE = '[Application] Delete';
 export const DELETE_SUCCESS = '[Application] Delete success';
 export const DELETE_FAILED = '[Application] Delete failed';
 
-
-export const ApplicationSchema = new schema.Entity('application', {
+const ApplicationEntiySchema = {
   entity: {
     stack: StackSchema,
     space: SpaceSchema
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
+};
+
+export const ApplicationSchema = new schema.Entity('application', ApplicationEntiySchema, {
+  idAttribute: getAPIResourceGuid
+});
 
 export class GetAllApplications implements PaginatedAction {
   constructor(public paginationKey: string) {
@@ -137,7 +139,10 @@ export interface UpdateApplication {
   environment_json?: any;
 }
 
-export class UpdateExistingApplicationBase implements APIAction {
+
+// declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
+
+export class UpdateExistingApplication implements APIAction {
   static updateKey = 'Updating-Existing-Application';
 
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
@@ -145,9 +150,10 @@ export class UpdateExistingApplicationBase implements APIAction {
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
     this.options.body = application;
-    this.options.headers = new Headers();
-    const cnsiPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(cnsiPassthroughHeader, 'true');
+    // TODO: Ensure all failure style information is captured in non-passthrough result
+    // this.options.headers = new Headers();
+    // const cnsiPassthroughHeader = 'x-cap-passthrough';
+    // this.options.headers.set(cnsiPassthroughHeader, 'true');
   }
   actions = [
     UPDATE,
@@ -158,19 +164,16 @@ export class UpdateExistingApplicationBase implements APIAction {
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
-}
-export class UpdateExistingApplication extends UpdateExistingApplicationBase {
-  static updateKey = 'Updating-Existing-Application';
-
-  constructor(public guid: string, public cnis: string, application: UpdateApplication) {
-    super(guid, cnis, application);
-  }
-
   updatingKey = UpdateExistingApplication.updateKey;
+  entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
+    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntiySchema.entity) as [string]);
+    newEntities[ApplicationSchema.key][this.guid].entity = Object.assign(newEntities[ApplicationSchema.key][this.guid].entity, keepFromOld);
+    return newEntities;
+  }
 }
 
 export class DeleteApplication implements APIAction {
-  static updateKey = 'Updating-Existing-Application';
+  static updateKey = 'Deleting-Existing-Application';
 
   constructor(public guid: string, public cnis: string) {
     this.options = new RequestOptions();
@@ -190,14 +193,3 @@ export class DeleteApplication implements APIAction {
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
-// TODO: RC Factor into own process outside of entity update
-export class UpdateExistingApplicationEnvVar extends UpdateExistingApplicationBase {
-  static updateKey = 'Updating-Existing-Application-Env-Var';
-
-  constructor(public guid: string, public cnis: string, application: UpdateApplication) {
-    super(guid, cnis, application);
-  }
-  updatingKey = UpdateExistingApplicationEnvVar.updateKey;
-
-}
-

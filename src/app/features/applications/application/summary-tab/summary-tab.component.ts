@@ -18,6 +18,8 @@ export class SummaryTabComponent implements OnInit {
 
   cardTwoFetching$: Observable<boolean>;
 
+  public async: any;
+
   ngOnInit() {
 
     this.cardTwoFetching$ = this.appService.application$

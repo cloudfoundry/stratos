@@ -1,9 +1,9 @@
+import { EntitiesState } from '../types/entity.types';
 import { RequestMethod } from '@angular/http';
 
 import { ApiActionTypes } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
 import { WrapperAPIActionSuccess } from '../types/api.types';
-import { EntitiesState } from '../types/entity.types';
 
 
 export const defaultEntitiesState = {

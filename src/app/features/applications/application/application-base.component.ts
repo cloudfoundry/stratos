@@ -24,6 +24,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     private store: Store<AppState>
   ) { }
 
+  public async: any;
+
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
@@ -32,7 +34,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   summaryExpanded = true;
 
-  summaryDataChanging: Observable<boolean>;
+  summaryDataChanging$: Observable<boolean>;
 
   appEdits: UpdateApplication;
   appDefaultEdits: UpdateApplication = {
@@ -99,12 +101,12 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
         return !isChanging;
       })
       .mergeMap(_ => {
-        return Observable.combineLatest(this.applicationService.application$, this.applicationService.appSummary$);
+        return this.applicationService.application$;
       })
-      .subscribe(([application, appSummary]: [ApplicationData, any]) => {
+      .subscribe((application: ApplicationData) => {
         this.appDefaultEdits = {
           name: application.app.entity.name,
-          instances: appSummary.metadata.instances,
+          instances: application.app.entity.instances,
           memory: application.app.entity.memory,
           enable_ssh: application.app.entity.enable_ssh,
           environment_json: application.app.entity.environment_json
