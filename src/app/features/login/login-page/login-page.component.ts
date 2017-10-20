@@ -1,3 +1,4 @@
+import { CNSISState } from '../../../store/types/cnsis.types';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
@@ -7,7 +8,6 @@ import { Subscription } from 'rxjs/Rx';
 import { Login } from '../../../store/actions/auth.actions';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
-import { CNSISState } from '../../../store/reducers/cnsis.reducer';
 
 @Component({
   selector: 'app-login-page',

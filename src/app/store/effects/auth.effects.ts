@@ -13,7 +13,6 @@ import {
   LoginFailed,
   LoginSuccess,
   SESSION_INVALID,
-  SessionData,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,

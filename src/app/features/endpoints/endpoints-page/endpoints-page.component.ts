@@ -1,4 +1,4 @@
-import { CNSISState, CNSISModel } from '../../../store/reducers/cnsis.reducer';
+import { CNSISModel, CNSISState } from '../../../store/types/cnsis.types';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';

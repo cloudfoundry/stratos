@@ -1,13 +1,13 @@
+import { registeredCnsisEntitySelector } from '../../../../store/selectors/cnsis.selectors';
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { registeredCnsisEntitySelector } from '../../../../store/actions/cnsis.actions';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { GetAllOrganizations, OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { AppState } from '../../../../store/app-state';
-import { getCurrentPage } from '../../../../store/reducers/pagination.reducer';
+import { getPaginationObservables } from '../../../../store/reducers/pagination.reducer';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -42,15 +42,15 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   cfList$ = this.store.select(registeredCnsisEntitySelector).first();
 
+  org = getPaginationObservables({
+    store: this.store,
+    action: new GetAllOrganizations(this.paginationKey),
+    schema: [OrganizationSchema]
+  });
+
   private getData$ = Observable.combineLatest(
-    getCurrentPage({
-      entityType: OrganizationSchema.key,
-      paginationKey: this.paginationKey,
-      store: this.store,
-      action: new GetAllOrganizations(this.paginationKey),
-      schema: [OrganizationSchema]
-    }).filter(orgList => {
-      return !orgList.paginationEntity.fetching;
+    this.org.pagination$.filter(paginationEntity => {
+      return !paginationEntity.fetching;
     }).first(),
     this.cfList$
   );
@@ -77,15 +77,16 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   ngOnInit() {
     this.orgList$ = Observable.combineLatest(
       this.cfSelect.valueChanges.startWith(''),
-      this.getData$
+      this.getData$,
+      this.org.entities$
     )
       .do(() => this.selectedOrg = null)
-      .map(([selectedCF, data]) => {
+      .map(([selectedCF, data, entities]) => {
         this.orgSelect.viewModel = '';
-        const [orgList, cfList] = data;
+        const [pag, cfList] = data;
         if (selectedCF) {
-          if (orgList.data) {
-            return orgList.data
+          if (entities) {
+            return entities
               .map(org => org.entity)
               .filter(org => org.cfGuid === selectedCF.guid);
           }
@@ -111,7 +112,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-
     this.validate = this.cfForm.statusChanges
       .map(() => {
         return this.cfForm.valid;

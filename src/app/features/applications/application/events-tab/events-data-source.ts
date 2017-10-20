@@ -1,12 +1,19 @@
+import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
-import { MdPaginator, PageEvent } from '@angular/material';
+import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
-import { getCurrentPage } from '../../../../store/reducers/pagination.reducer';
+import {
+  getPaginationObservables,
+  resultPerPageParam,
+} from '../../../../store/reducers/pagination.reducer';
+import { AddParams, RemoveParams, SetPage } from '../../../../store/actions/pagination.actions';
+import { ApplicationSchema } from '../../../../store/actions/application.actions';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 
 interface AppEvent {
   actee_name: string;
@@ -23,75 +30,96 @@ interface AppEvent {
 }
 
 export class AppEventsDataSource extends DataSource<AppEvent> {
-  private static paginationKey = 'application-events';
 
-  constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator) {
+  sortSub: Subscription;
+  paginationSub: Subscription;
+
+  constructor(
+    private store: Store<AppState>,
+    private action: PaginatedAction,
+    private _paginator: MdPaginator,
+    private _sort: MdSort,
+    private uid?: string
+  ) {
     super();
     this._paginator.pageIndex = 0;
+    this._paginator.pageSizeOptions = [5, 10, 20];
 
-    this.showProgressIndicator = _appService.isFetchingApp$.combineLatest(
-      this.isLoadingPage$,
-    ).map(([isFetchingApp, isLoadingPage]: [boolean, boolean]) => {
-      console.log(isFetchingApp);
-      console.log(isLoadingPage);
-      return isFetchingApp || isLoadingPage;
+    const { pagination$, entities$ } = getPaginationObservables({
+      store: this.store,
+      action: this.action,
+      schema: [EventSchema],
     });
+
+    const pageSize$ = this._paginator.page.map(pageEvent => pageEvent.pageSize)
+      .distinctUntilChanged()
+      .withLatestFrom(pagination$)
+      .do(([pageSize, pag]) => {
+        if (pag.params[resultPerPageParam] !== pageSize) {
+          this.store.dispatch(new AddParams(EventSchema.key, action.paginationKey, {
+            [resultPerPageParam]: pageSize
+          }));
+        }
+      });
+
+    this.sortSub = this._sort.mdSortChange.subscribe((sort: Sort) => {
+      this.store.dispatch(new AddParams(EventSchema.key, action.paginationKey, {
+        'sort-by': sort.active,
+        'order-direction': sort.direction
+      }));
+    });
+
+    const pageIndex$ = this._paginator.page.map(pageEvent => pageEvent.pageIndex)
+      .distinctUntilChanged()
+      .do(pageIndex => this.store.dispatch(new SetPage(EventSchema.key, action.paginationKey, pageIndex + 1)));
+
+    this.paginationSub = Observable.combineLatest(
+      pageSize$,
+      pageIndex$
+    ).subscribe();
+
+    this.pagination$ = pagination$;
+    this.entities$ = entities$;
   }
 
+  currentPageSize = 0;
+  currentPage = 0;
+
   _defaultPaginator = {
-    pageIndex: 1,
+    pageIndex: 0,
     pageSize: 5,
   };
 
   count$ = new BehaviorSubject(-1);
-  isLoadingPage$ = new BehaviorSubject(false);
+  isLoadingPage$: Observable<boolean>;
 
   showProgressIndicator: Observable<boolean>;
 
+  pagination$: Observable<PaginationEntityState>;
+  entities$: Observable<any>;
+
   connect(): Observable<AppEvent[]> {
-    return this._paginator.page.startWith(this._defaultPaginator)
-      .mergeMap((pageEvent: PageEvent) => {
-        console.log('PAGE EVENT: ', pageEvent);
 
-        return getCurrentPage({
-          entityType: EventSchema.key,
-          paginationKey: AppEventsDataSource.paginationKey,
-          store: this.store,
-          action: new GetAllAppEvents(AppEventsDataSource.paginationKey, pageEvent.pageIndex, pageEvent.pageSize, this._appService.appGuid),
-          schema: [EventSchema]
-        });
-        // this.isFetching = getObs$.mergeMap(({ paginationEntity }) => {
-        //   return Observable.of(paginationEntity.fetching);
-        // });
+    this.isLoadingPage$ = this.pagination$.map(pag => pag.fetching);
 
-        // this.wallSub = getObs$
-        //   .delay(100)
-        //   .subscribe(({ paginationEntity, data }) => {
-        //     this.error = paginationEntity.error;
-        //     if (!paginationEntity.fetching) {
-        //       if (!paginationEntity.error) {
-        //         this.applications = data.map(getAPIResourceEntity);
-        //       }
-        //     }
-        //   });
-
-        // return [];
-      })
-      .do(({ paginationEntity, data }) => {
-        console.log(paginationEntity);
-        console.log(data);
-        this.isLoadingPage$.next(paginationEntity.fetching);
-      })
-      .filter(({ paginationEntity, data }) => {
-        return !paginationEntity.fetching;
-      })
-      .map(({ paginationEntity, data }) => {
-        this._paginator.length = paginationEntity.totalResults || data.length; // TODO: RC FIXME
-        this.count$.next(this._paginator.length);
+    return Observable.combineLatest(
+      this.pagination$.do(pag => {
+        this.currentPage = pag.currentPage;
+        this.currentPageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
+        this._paginator.pageIndex = this.currentPage - 1;
+        this._paginator.pageSize = this.currentPageSize;
+        this._paginator.length = pag.totalResults; // TODO: RC FIXME
+        // this.count$.next(this._paginator.length);
+      }),
+      this.entities$
+    )
+      .map(([paginationEntity, data]) => {
         return data;
       });
   }
 
   disconnect() {
+    this.sortSub.unsubscribe();
+    this.paginationSub.unsubscribe();
   }
 }

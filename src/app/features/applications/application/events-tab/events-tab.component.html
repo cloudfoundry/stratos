@@ -3,7 +3,7 @@
 
   <div class="app-table">
     <div>
-      <div [class.show]="(dataSource.showProgressIndicator$ | async)" class="app-table__loading">
+      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
         <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
       </div>
       <md-card>
@@ -22,7 +22,7 @@
         <md-card-content>
           <md-table #table [hidden]="(dataSource.count$ | async) === 0" [dataSource]="dataSource" mdSort>
             <ng-container mdColumnDef="timestamp">
-              <md-header-cell *mdHeaderCellDef> Timestamp </md-header-cell>
+              <md-header-cell *mdHeaderCellDef md-sort-header> Timestamp </md-header-cell>
               <md-cell *mdCellDef="let row">{{row.entity.timestamp | date:'medium'}}</md-cell>
             </ng-container>
             <ng-container mdColumnDef="type">
@@ -54,21 +54,16 @@
             <md-row *mdRowDef="let row; columns: ['timestamp', 'type', 'actor_name', 'detail'];">
             </md-row>
           </md-table>
-          <div [hidden]="(dataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
+          <!-- <div [hidden]="(dataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
             <div class="mat-card-header-text">
               <div class="mat-card-header-text-wa">There are no events.</div>
             </div>
-          </div>
+          </div> -->
         </md-card-content>
-        <md-card-footer>
-          <div [hidden]="(dataSource.count$ | async) === 0">
-            <!-- [pageIndex]="0" -->
-            <!-- [pageSize]="5"  -->
-            <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSizeOptions]="[5, 10, 25, 100]">
-            </md-paginator>
-          </div>
-        </md-card-footer>
+        <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSizeOptions]="[5, 10, 25, 100]">
+        </md-paginator>
       </md-card>
     </div>
   </div>
+  <button (click)="gotToPage(2)">2</button>
 </div>

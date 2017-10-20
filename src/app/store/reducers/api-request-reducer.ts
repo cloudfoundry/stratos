@@ -1,8 +1,10 @@
 import { RequestMethod } from '@angular/http';
 
-import { APIAction, ApiActionTypes, WrapperAPIActionSuccess, SingleEntityAction } from '../actions/api.actions';
+import { ApiActionTypes } from '../actions/api.actions';
 import { mergeState } from '../helpers/reducer.helper';
-import { defaultEntitiesState, EntitiesState } from './entity.reducer';
+import { defaultEntitiesState } from './entity.reducer';
+import { WrapperAPIActionSuccess, SingleEntityAction, APIAction } from '../types/api.types';
+import { EntitiesState } from '../types/entity.types';
 
 const defaultState = { ...defaultEntitiesState };
 
@@ -28,8 +30,6 @@ export const defaultDeletingActionState = {
   message: '',
   deleted: false
 };
-
-
 
 const rootUpdatingKey = '_root_';
 export interface EntityRequestState {

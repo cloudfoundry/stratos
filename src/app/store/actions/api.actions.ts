@@ -1,11 +1,14 @@
+
 import { RequestOptions } from '@angular/http';
 import { Action, compose, createFeatureSelector, createSelector, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
-import { EntitiesState } from '../reducers/entity.reducer';
 import { AppState } from './../app-state';
 import { EntityRequestState, ActionState } from './../reducers/api-request-reducer';
+import { APIResource, APIResourceMetadata, EntityInfo } from '../types/api.types';
+import { EntitiesState } from '../types/entity.types';
+import { getEntityState, selectEntity, selectEntityRequestInfo } from '../selectors/api.selectors';
 
 
 export const ApiActionTypes = {
@@ -14,83 +17,6 @@ export const ApiActionTypes = {
   API_REQUEST_SUCCESS: 'API_REQUEST_SUCCESS',
   API_REQUEST_FAILED: 'API_REQUEST_FAILED',
 };
-
-export interface APIResource {
-  metadata: APIResourceMetadata;
-  entity: any;
-}
-
-export interface APIResourceMetadata {
-  created_at: string;
-  guid: string;
-  update_at: string;
-  url: string;
-}
-export interface SingleEntityAction {
-  entityKey: string;
-  guid?: string;
-}
-export class APIAction implements Action, SingleEntityAction {
-  actions: string[];
-  type = ApiActionTypes.API_REQUEST;
-  options: RequestOptions;
-  entity: Schema;
-  entityKey: string;
-  paginationKey?: string;
-  cnis?: string;
-  // For single entity requests
-  guid?: string;
-  updatingKey?: string;
-  entityMerge?: ActionMergeFunction;
-}
-
-export type ActionMergeFunction = (oldEntities: EntitiesState, newEntities: NormalizedResponseEntities)
-  => NormalizedResponseEntities;
-export interface NormalizedResponseEntities {
-  [key: string]: string;
-}
-
-export interface NormalizedResponse {
-  entities: NormalizedResponseEntities;
-  result: any[];
-}
-
-export class StartAPIAction implements Action {
-  constructor(
-    public apiAction: APIAction
-  ) {
-  }
-  type = ApiActionTypes.API_REQUEST_START;
-}
-
-export class WrapperAPIActionSuccess implements Action {
-  constructor(
-    public type: string,
-    public response: NormalizedResponse,
-    public apiAction: APIAction
-  ) { }
-  apiType = ApiActionTypes.API_REQUEST_SUCCESS;
-}
-
-export class WrapperAPIActionFailed implements Action {
-  constructor(
-    public type: string,
-    public message: string,
-    public apiAction: APIAction
-  ) { }
-  apiType = ApiActionTypes.API_REQUEST_FAILED;
-}
-
-export const selectEntities = createFeatureSelector<EntitiesState>('entities');
-
-export const createEntitySelector = (entity: string) => {
-  return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
-};
-
-export interface EntityInfo {
-  entityRequestInfo: EntityRequestState;
-  entity: any;
-}
 
 export const getEntityObservable = (
   store: Store<AppState>,
@@ -130,81 +56,6 @@ export const getEntityObservable = (
       };
     });
 };
-
-
-export function selectEntity(type: string, guid: string) {
-  return compose(
-    getEntityById<APIResource>(guid),
-    getEntityType(type),
-    getEntityState
-  );
-}
-
-export function selectEntityDeletionInfo(type: string, entityGuid: string) {
-  return compose(
-    getEntityDeleteSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
-  return compose(
-    getUpdateSectionById(updatingGuid),
-    getEntityUpdateSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityRequestInfo(type: string, guid: string) {
-  return compose(
-    getEntityById<EntityRequestState>(guid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function getEntityState(state: AppState) {
-  return state.entities || {};
-}
-
-export function getEntityType(type: string) {
-  return (entityState) => {
-    return entityState[type] || {};
-  };
-}
-
-export const getEntityById = <T>(guid: string) => (entities): T => {
-  return entities[guid];
-};
-
-export const getEntityUpdateSections = (request: EntityRequestState) => {
-  return request ? request.updating : false;
-};
-
-export const getEntityDeleteSections = (request: EntityRequestState) => {
-  return request.deleting;
-};
-
-export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
-  return updating[guid];
-};
-
-const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
-export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');
-export const getAPIResourceEntity = (resource: APIResource): any => getValueOrNull(resource, 'entity');
-export const getMetadataGuid = (metadata: APIResourceMetadata): string => getValueOrNull(metadata, 'guid');
-export const getAPIResourceGuid = compose(
-  getMetadataGuid,
-  getAPIResourceMetadata
-);
-
-export function getAPIRequestInfoState(state: AppState) {
-  return state.apiRequest || {};
-}
 
 
 

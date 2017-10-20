@@ -9,15 +9,14 @@ import {
   AppNameFree,
   AppNameTaken,
   CHECK_NAME,
-  IsNewAppNameFree,
-  NewAppCFDetails,
-  selectNewAppCFDetails,
+  IsNewAppNameFree
 } from '../actions/create-applications-page.actions';
-import { CreateNewApplicationState } from '../reducers/create-application.reducer';
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
-import { WrapperAPIActionSuccess, ApiActionTypes } from '../actions/api.actions';
-import { GetAppMetadataAction, AppMetadataProperties, AppMetadataType } from '../actions/app-metadata.actions';
+import { ApiActionTypes } from '../actions/api.actions';
+import { GetAppMetadataAction, AppMetadataProperties } from '../actions/app-metadata.actions';
+import { WrapperAPIActionSuccess } from '../types/api.types';
+import { AppMetadataType } from '../types/app-metadata.types';
 
 
 @Injectable()

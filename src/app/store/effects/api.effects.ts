@@ -2,27 +2,38 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestMethod, Response } from '@angular/http';
+import { Headers, Http, Request, RequestMethod, Response, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
-import { ClearPaginationOfType } from '../actions/pagination.actions';
+import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
+  ApiActionTypes
+} from './../actions/api.actions';
+import {
   APIAction,
-  ApiActionTypes,
+
   APIResource,
   NormalizedResponse,
   StartAPIAction,
   WrapperAPIActionFailed,
   WrapperAPIActionSuccess,
-} from './../actions/api.actions';
+} from './../types/api.types';
 import { AppState } from './../app-state';
-import { CNSISModel } from './../reducers/cnsis.reducer';
+import {
+  qParamsToString,
+  resultPerPageParam,
+  resultPerPageParamDefault,
+} from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { CNSISModel } from '../types/cnsis.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
+
 @Injectable()
 export class APIEffect {
 
@@ -40,13 +51,42 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-      const { apiAction } = action;
+
+      const paramsObject = {};
+      const apiAction = { ...action.apiAction };
+      const options = { ...apiAction.options };
+
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
-      apiAction.options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${apiAction.options.url}`;
-      apiAction.options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, apiAction.options.headers);
+      // Apply the params from the store
+      const paginatedAction = (apiAction as PaginatedAction);
+      if (paginatedAction.paginationKey) {
+        options.params = new URLSearchParams();
+        const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
+        if (paginationParams.hasOwnProperty('q')) {
+          // Convert q into a cf q string
+          paginationParams.qString = qParamsToString(paginationParams.q);
+          options.params.set('q', paginationParams.qString as string);
+          delete paginationParams.qString;
+          delete paginationParams.q;
+        }
+        for (const key in paginationParams) {
+          if (paginationParams.hasOwnProperty(key)) {
+            if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
+              options.params.set(key, paginationParams[key] as string);
+            }
+          }
+        }
+        if (!options.params.has(resultPerPageParam)) {
+          options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
+        }
 
-      return this.http.request(new Request(apiAction.options))
+      }
+
+      options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
+      options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, options.headers);
+
+      return this.http.request(new Request(options))
         .mergeMap(response => {
           let resData;
           try {
@@ -61,16 +101,26 @@ export class APIEffect {
               throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
             }
           }
-          const entities = resData ?
-            this.getEntities(apiAction, resData) : {
-              entities: {},
-              result: []
-            };
+          let entities;
+          let totalResults = 0;
+
+          if (resData) {
+            const entityData = this.getEntities(apiAction, resData);
+            entities = entityData.entities;
+            totalResults = entityData.totalResults;
+          }
+
+          entities = entities || {
+            entities: {},
+            result: []
+          };
+
           const actions = [];
           actions.push(new WrapperAPIActionSuccess(
             apiAction.actions[1],
             entities,
-            apiAction
+            apiAction,
+            totalResults
           ));
 
           if (
@@ -112,23 +162,31 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: APIAction, data): NormalizedResponse {
+  getEntities(apiAction: APIAction, data): {
+    entities: NormalizedResponse
+    totalResults: number
+  } {
+    let totalResults = 0;
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
+      totalResults += cfData['total_results'];
       if (cfData.resources) {
         if (!cfData.resources.length) {
           return null;
         }
-
         return cfData.resources.map(resource => {
           return this.completeResourceEntity(resource, cfGuid);
         });
       } else {
+
         return this.completeResourceEntity(cfData, cfGuid);
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
-    return flatEntities.length ? normalize(flatEntities, apiAction.entity) : null;
+    return {
+      entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
+      totalResults
+    };
   }
 
   mergeData(entity, metadata, cfGuid) {
@@ -150,4 +208,10 @@ export class APIEffect {
     return { type };
   }
 
+  getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
+    return {
+      ...paginationState.params,
+      page: paginationState.currentPage.toString(),
+    };
+  }
 }

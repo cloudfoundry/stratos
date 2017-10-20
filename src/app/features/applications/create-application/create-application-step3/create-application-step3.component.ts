@@ -1,3 +1,4 @@
+import { selectEntityRequestInfo, selectEntityUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -5,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { selectEntityRequestInfo, selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
 import {
   ApplicationSchema,
   AssociateRouteWithAppApplication,
@@ -15,7 +15,7 @@ import {
 import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../store/reducers/create-application.reducer';
+import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
 @Component({
   selector: 'app-create-application-step3',

@@ -1,10 +1,13 @@
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { getAPIResourceGuid } from './api.actions';
-import { APIAction, ApiActionTypes, ActionMergeFunction, NormalizedResponseEntities } from './api.actions';
+import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
+import { ActionMergeFunction, APIAction } from '../types/api.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
 
 export const GET_ALL = '[Application] Get all';
@@ -46,15 +49,11 @@ export const ApplicationSchema = new schema.Entity('application', ApplicationEnt
   idAttribute: getAPIResourceGuid
 });
 
-export class GetAllApplications implements APIAction {
-  constructor(public paginationKey?: string) {
+export class GetAllApplications implements PaginatedAction {
+  constructor(public paginationKey: string) {
     this.options = new RequestOptions();
     this.options.url = 'apps';
     this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('page', '1');
-    this.options.params.set('results-per-page', '100');
-    this.options.params.set('inline-relations-depth', '2');
   }
   actions = [
     GET_ALL,
@@ -65,6 +64,11 @@ export class GetAllApplications implements APIAction {
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 2
+  };
 }
 
 export class GetApplication implements APIAction {
@@ -88,11 +92,6 @@ export class GetApplication implements APIAction {
   options: RequestOptions;
 }
 
-
-export interface NewApplication {
-  name: string;
-  space_guid: string;
-}
 export class CreateNewApplication implements APIAction {
   constructor(public guid: string, public cnis: string, application: NewApplication) {
     this.options = new RequestOptions();
