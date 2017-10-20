@@ -13,15 +13,20 @@ import { SharedModule } from './shared/shared.module';
 import { appReducers } from './store/reducers.module';
 import { getInitialTestStoreState } from './test-framework/store-test-helper';
 
-fdescribe('AppComponent', () => {
+describe('AppComponent', () => {
   const initialState = getInitialTestStoreState();
+
+  class LoggedInServiceMock {
+  }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppComponent
       ],
-      providers: [LoggedInService],
+      providers: [
+        { provide: LoggedInService, useClass: LoggedInServiceMock }
+      ],
       imports: [
         // CoreModule,
         SharedModule,

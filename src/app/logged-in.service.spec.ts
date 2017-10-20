@@ -6,7 +6,7 @@ import { CoreModule } from './core/core.module';
 import { appReducers } from './store/reducers.module';
 import { getInitialTestStoreState } from './test-framework/store-test-helper';
 
-fdescribe('LoggedInService', () => {
+describe('LoggedInService', () => {
   const initialState = getInitialTestStoreState();
 
   beforeEach(() => {

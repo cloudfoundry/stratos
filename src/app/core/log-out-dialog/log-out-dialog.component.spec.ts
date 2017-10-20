@@ -9,16 +9,16 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../store/reducers.module';
 import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
 
-fdescribe('LogOutDialogComponent', () => {
+describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
 
   class MdDialogRefMock {
   }
 
-  // class MD_DIALOG_DATA {
-  //   data: '';
-  // }
+  class MD_DIALOG_DATA_MOCK {
+    data: '';
+  }
 
   const initialState = getInitialTestStoreState();
 
@@ -26,6 +26,7 @@ fdescribe('LogOutDialogComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: MdDialogRef, useClass: MdDialogRefMock },
+        { provide: MD_DIALOG_DATA, useClass: MD_DIALOG_DATA_MOCK },
       ],
       imports: [
         CoreModule,
