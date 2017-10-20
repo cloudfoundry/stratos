@@ -4,10 +4,11 @@ import { Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
-import { SessionData, VerifySession } from './store/actions/auth.actions';
+import { VerifySession } from './store/actions/auth.actions';
 import { MdDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable } from 'rxjs/Observable';
+import { SessionData } from './store/types/auth.types';
 
 @Injectable()
 export class LoggedInService {

@@ -1,11 +1,4 @@
-import { RequestOptions } from '@angular/http';
-import { Action, compose, createFeatureSelector, createSelector, Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
-import { Observable } from 'rxjs/Rx';
-
-import { EntitiesState } from '../reducers/entity.reducer';
-import { AppState } from './../app-state';
-import { EntityRequestState, ActionState } from './../reducers/api-request-reducer';
+import { Action } from '@ngrx/store';
 
 export enum LogLevel {
   DEBUG,

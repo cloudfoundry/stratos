@@ -31,6 +31,7 @@ import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { MdDialog } from '@angular/material';
+import { SessionData } from '../types/auth.types';
 
 
 @Injectable()

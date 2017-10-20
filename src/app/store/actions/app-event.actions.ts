@@ -5,6 +5,7 @@ import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
 import { PaginatedAction, QParam } from '../types/pagination.types';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',

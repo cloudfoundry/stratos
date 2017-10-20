@@ -17,4 +17,5 @@ export interface SessionData {
   };
   valid: boolean;
   uaaError?: boolean;
+  sessionExpiresOn: number;
 }

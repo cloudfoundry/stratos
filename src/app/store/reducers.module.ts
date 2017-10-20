@@ -19,6 +19,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 // import { StoreRouterConnectingModule, routerReducer, RouterStateSerializer } from '@ngrx/router-store';
 import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
+import { MetadataState } from './types/app-metadata.types';
 
 
 export function logger(reducer): any {
