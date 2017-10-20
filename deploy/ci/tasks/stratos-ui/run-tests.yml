@@ -47,14 +47,14 @@ run:
           "user": {
             "username": "${CONSOLE_USER_USER}",
             "password": "${CONSOLE_USER_PASSWORD}"
-          },
-          "uaa": {
+          }
+        },
+        "uaa": {
             "url": "http://uaa:8080",
             "clientId": "console",
             "adminUsername": "admin",
             "adminPassword": "hscadmin"
           },
-        },
         "githubPat": "${GITHUB_TOKEN}"
       }
       EOF
