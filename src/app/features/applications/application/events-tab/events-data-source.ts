@@ -9,11 +9,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
 import {
   getPaginationObservables,
-  PaginationEntityState,
   resultPerPageParam,
 } from '../../../../store/reducers/pagination.reducer';
 import { AddParams, RemoveParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
+import { PaginationEntityState } from '../../../../store/types/pagination.types';
 
 interface AppEvent {
   actee_name: string;

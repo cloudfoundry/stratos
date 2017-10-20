@@ -22,14 +22,11 @@ import {
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
 import {
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
-  QParam,
   qParamsToString,
   resultPerPageParam,
   resultPerPageParamDefault,
 } from '../reducers/pagination.reducer';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

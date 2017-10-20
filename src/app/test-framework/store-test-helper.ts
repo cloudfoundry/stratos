@@ -17628,7 +17628,9 @@ const testInitialStoreState: AppState = {
           pageCount: 1,
           currentPage: 1,
           totalResults: 0,
-          params: {},
+          params: {
+            key: 'a'
+          },
           ids: {
             '1': [
               '4e4858c4-24ab-4caf-87a8-7703d1da58a0',

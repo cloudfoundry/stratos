@@ -1,3 +1,4 @@
+import { PaginatedAction } from '../reducers/pagination.reducer';
 import { RequestOptions } from '@angular/http';
 import { Action, compose, createFeatureSelector, createSelector, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
@@ -61,7 +62,7 @@ export class WrapperAPIActionSuccess implements Action {
   constructor(
     public type: string,
     public response: NormalizedResponse,
-    public apiAction: APIAction,
+    public apiAction: APIAction | PaginatedAction,
     public totalResults?: number
   ) { }
   apiType = ApiActionTypes.API_REQUEST_SUCCESS;
@@ -71,7 +72,7 @@ export class WrapperAPIActionFailed implements Action {
   constructor(
     public type: string,
     public message: string,
-    public apiAction: APIAction
+    public apiAction: APIAction | PaginatedAction
   ) { }
   apiType = ApiActionTypes.API_REQUEST_FAILED;
 }
