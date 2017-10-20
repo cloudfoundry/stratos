@@ -5,10 +5,11 @@ import { PaginationState } from './types/pagination.types';
 import { MetadataState } from './types/app-metadata.types';
 import { CreateNewApplicationState } from './types/create-application.types';
 import { EntitiesState } from './types/entity.types';
+import { ActionHistoryState } from './reducers/action-history-reducer';
 import { UAASetupState } from './types/uaa-setup.types';
 
-
 export interface AppState {
+  actionHistory: ActionHistoryState;
   entities: EntitiesState;
   auth: AuthState;
   uaaSetup: UAASetupState;

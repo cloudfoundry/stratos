@@ -1,3 +1,7 @@
+import { LogLevel } from '../app/store/actions/log.actions';
+
+
 export const environment = {
-  production: true
+  production: true,
+  logLevel: LogLevel.WARN
 };

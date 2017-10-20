@@ -1,8 +1,8 @@
-import { combineReducers, StoreModule, ActionReducerMap } from '@ngrx/store';
+import { combineReducers, StoreModule, ActionReducerMap, State } from '@ngrx/store';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
 
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 import { AppState } from './app-state';
 import { apiRequestReducer } from './reducers/api-request-reducer';
 import { appMetadataRequestReducer } from './reducers/app-metadata-request.reducer';
@@ -16,7 +16,9 @@ import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { NgModule } from '@angular/core';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { MetadataState } from './types/app-metadata.types';
+// import { StoreRouterConnectingModule, routerReducer, RouterStateSerializer } from '@ngrx/router-store';
+import { RouterStateSnapshot, Params } from '@angular/router';
+import { actionHistoryReducer } from './reducers/action-history-reducer';
 
 
 export function logger(reducer): any {
@@ -34,6 +36,25 @@ export function appMetaDataReducer(state, action): MetadataState {
   return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
+
+// https://stackoverflow.com/questions/46075374/can-ngrx-router-store-4-be-used-with-ngrx-store-2-2
+// export interface RouterStateUrl {
+//   url: string;
+//   queryParams: Params;
+// }
+// export class CustomRouterStateSerializer
+//   implements RouterStateSerializer<RouterStateUrl> {
+//   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
+//     const { url } = routerState;
+//     const queryParams = routerState.root.queryParams;
+
+//     return { url, queryParams };
+//   }
+// }
+// providers: [
+//   { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer },
+// ]
+
 export const appReducers = {
   entities: entitiesReducer,
   auth: authReducer,
@@ -43,16 +64,13 @@ export const appReducers = {
   apiRequest: apiRequestReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
-  appMetadata: appMetaDataReducer
+  appMetadata: appMetaDataReducer,
+  actionHistory: actionHistoryReducer,
 };
+// TODO: Add the below line back in once https://github.com/ngrx/platform/issues/446 is confirmed fixed (bug spams ROUTER_CANCEL on log in)
+// routerReducer: routerReducer,
 
-// export const metaReducers = environment.production ? [storeFreeze, logger] : [];
-// function clearStore(reducer) {
-//   return function (state, action) {
-//     return reducer(action.type === LOGOUT_SUCCESS ? undefined : state, action);
-//   };
-// }
-// export const metaReducers = [clearStore];
+export const metaReducers = environment.production ? [] : [storeFreeze, logger];
 
 @NgModule({
   imports: [
@@ -64,7 +82,9 @@ export const appReducers = {
     ),
     StoreDevtoolsModule.instrument({
       maxAge: 100
-    })
-  ]
+    }),
+    // StoreRouterConnectingModule
+  ],
+
 })
 export class AppReducersModule { }

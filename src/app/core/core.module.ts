@@ -11,6 +11,7 @@ import { PageHeaderService } from './page-header-service/page-header.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
+import { LoggerService } from './logger.service';
 
 @NgModule({
   imports: [
@@ -28,7 +29,8 @@ import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component
     PageHeaderService,
     EventWatcherService,
     WindowRef,
-    UtilsService
+    UtilsService,
+    LoggerService
   ],
   declarations: [LogOutDialogComponent],
   entryComponents: [

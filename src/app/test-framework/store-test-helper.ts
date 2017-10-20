@@ -20167,7 +20167,8 @@ const testInitialStoreState: AppState = {
           }
         }
       }
-    }
+    },
+    actionHistory: []
   };
   /* tslint:enable */
 
