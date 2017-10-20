@@ -53,7 +53,7 @@ run:
             "clientId": "console",
             "adminUsername": "admin",
             "adminPassword": "hscadmin"
-          },
+          }
         },
         "githubPat": "${GITHUB_TOKEN}"
       }
