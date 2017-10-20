@@ -1,7 +1,8 @@
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { ApiActionTypes, getAPIResourceGuid } from './api.actions';
+import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { PaginatedAction } from '../types/pagination.types';
 

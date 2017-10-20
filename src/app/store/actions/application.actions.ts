@@ -1,12 +1,13 @@
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { getAPIResourceGuid } from './api.actions';
 import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
 import { APIAction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
+import { NewApplication } from '../types/application.types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -63,8 +64,8 @@ export class GetAllApplications implements PaginatedAction {
   options: RequestOptions;
   initialParams = {
     page: 1,
-    ['results-per-page']: 100,
-    ['inline-relations-depth']: 2
+    'results-per-page': 100,
+    'inline-relations-depth': 2
   };
 }
 
@@ -89,11 +90,6 @@ export class GetApplication implements APIAction {
   options: RequestOptions;
 }
 
-
-export interface NewApplication {
-  name: string;
-  space_guid: string;
-}
 export class CreateNewApplication implements APIAction {
   constructor(public guid: string, public cnis: string, application: NewApplication) {
     this.options = new RequestOptions();

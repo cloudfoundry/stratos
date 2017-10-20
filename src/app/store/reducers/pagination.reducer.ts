@@ -17,11 +17,11 @@ import {
   SetParams,
 } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
-import { getEntityState } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
-import { defaultEntitiesState, EntitiesState } from './entity.reducer';
+import { defaultEntitiesState } from './entity.reducer';
 import { selectPaginationState } from '../selectors/pagination.selectors';
+import { getEntityState } from '../selectors/api.selectors';
 
 
 export const resultPerPageParam = 'results-per-page';

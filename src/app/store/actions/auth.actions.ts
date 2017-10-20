@@ -1,5 +1,6 @@
 import { Action } from '@ngrx/store';
 import { ApiActionTypes } from './api.actions';
+import { SessionData } from '../types/auth.types';
 
 export const LOGIN = '[Auth] Login';
 export const LOGIN_SUCCESS = '[Auth] Login success';
@@ -12,27 +13,6 @@ export const SESSION_INVALID = '[Auth] Session invalid';
 export const GET_INFO = '[Auth] Get session info';
 
 export const RESET_AUTH = '[Auth] Reset auth data';
-
-export interface SessionData {
-  endpoints?: {
-    [type: string]: {
-      [guid: string]: {
-        [key: string]: any
-      }
-    }
-  };
-  user?: {
-    admin: boolean,
-    guid: string,
-    name: string
-  };
-  version?: {
-    proxy_version: string,
-    database_version: number;
-  };
-  valid: boolean;
-  uaaError?: boolean;
-}
 
 export class Login implements Action {
   constructor(public username: string, public password: string) { }

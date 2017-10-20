@@ -1,4 +1,3 @@
-import { CNSISModel } from './../reducers/cnsis.reducer';
 import { register } from 'ts-node/dist';
 import { Observable } from 'rxjs/Rx';
 import { GET_CNSIS, GetAllCNSIS, GetAllCNSISFailed, GetAllCNSISSuccess } from './../actions/cnsis.actions';

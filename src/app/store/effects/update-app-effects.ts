@@ -9,11 +9,8 @@ import {
   AppNameFree,
   AppNameTaken,
   CHECK_NAME,
-  IsNewAppNameFree,
-  NewAppCFDetails,
-  selectNewAppCFDetails,
+  IsNewAppNameFree
 } from '../actions/create-applications-page.actions';
-import { CreateNewApplicationState } from '../reducers/create-application.reducer';
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
 import { ApiActionTypes } from '../actions/api.actions';

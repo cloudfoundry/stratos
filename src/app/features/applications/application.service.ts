@@ -1,8 +1,9 @@
+import { cnsisEntitySelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { getEntityObservable, selectEntityUpdateInfo, selectEntityRequestInfo } from '../../store/actions/api.actions';
+import { getEntityObservable } from '../../store/actions/api.actions';
 import {
   AppMetadataProperties,
   GetAppMetadataAction,
@@ -15,7 +16,6 @@ import {
   UpdateApplication,
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
-import { cnsisEntitySelector } from '../../store/actions/cnsis.actions';
 import { AppState } from '../../store/app-state';
 import { ActionState, EntityRequestState } from '../../store/reducers/api-request-reducer';
 

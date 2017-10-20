@@ -1,5 +1,6 @@
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
-import { getAPIResourceGuid, ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './api.actions';
 import { RequestOptions } from '@angular/http';
 import { OrganisationSchema } from './organisation.action';
 import { APIAction } from '../types/api.types';

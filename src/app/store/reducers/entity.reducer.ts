@@ -3,15 +3,8 @@ import { RequestMethod } from '@angular/http';
 import { ApiActionTypes } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
 import { WrapperAPIActionSuccess } from '../types/api.types';
+import { EntitiesState } from '../types/entity.types';
 
-export interface EntitiesState {
-  application: any;
-  stack: any;
-  space: any;
-  organization: any;
-  route: any;
-  event: any;
-}
 
 export const defaultEntitiesState = {
   application: {},

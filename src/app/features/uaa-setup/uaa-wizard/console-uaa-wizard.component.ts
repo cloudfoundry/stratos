@@ -11,7 +11,7 @@ import { VerifySession } from '../../../store/actions/auth.actions';
 import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
-import { UAASetupState } from '../../../store/reducers/uaa-setup.reducers';
+import { UAASetupState } from '../../../store/types/uaa-setup.types';
 
 @Component({
   selector: 'app-console-uaa-wizard',

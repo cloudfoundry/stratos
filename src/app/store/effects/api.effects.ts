@@ -23,7 +23,6 @@ import {
   WrapperAPIActionSuccess,
 } from './../types/api.types';
 import { AppState } from './../app-state';
-import { CNSISModel } from './../reducers/cnsis.reducer';
 import {
   qParamsToString,
   resultPerPageParam,
@@ -31,6 +30,7 @@ import {
 } from '../reducers/pagination.reducer';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
+import { CNSISModel } from '../types/cnsis.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

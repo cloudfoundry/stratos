@@ -5,7 +5,6 @@ import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, PageEvent, MdSort, Sort, MdInput } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
-import { selectEntityUpdateInfo } from '../../../../store/actions/api.actions';
 import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -58,7 +57,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   }
 }
 
-//TODO: RC Move to own file
+// TODO: RC Move to own file
 export class AppEnvironemtEvnVarsDataSource extends DataSource<AppEnvVar> {
 
   constructor(private store: Store<AppState>, private _appService: ApplicationService, private _paginator: MdPaginator,

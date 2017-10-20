@@ -3,10 +3,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs/Rx';
 
-import { getAPIResourceEntity } from '../../../store/actions/api.actions';
 import { ApplicationSchema, GetAllApplications } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { getPaginationObservables } from './../../../store/reducers/pagination.reducer';
+import { getAPIResourceEntity } from '../../../store/selectors/api.selectors';
 
 
 @Component({
