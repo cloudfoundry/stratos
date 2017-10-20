@@ -1,9 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { APIAction, ApiActionTypes, getAPIResourceGuid } from './api.actions';
+import { ApiActionTypes, getAPIResourceGuid } from './api.actions';
 import { SpaceSchema } from './space.actions';
-import { PaginatedAction, PaginationAction } from '../reducers/pagination.reducer';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ALL = '[Organization] Get all';
 export const GET_ALL_SUCCESS = '[Organization] Get all success';

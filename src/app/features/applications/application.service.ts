@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { EntityInfo, getEntityObservable, selectEntityUpdateInfo, selectEntityRequestInfo } from '../../store/actions/api.actions';
+import { getEntityObservable, selectEntityUpdateInfo, selectEntityRequestInfo } from '../../store/actions/api.actions';
 import {
-  AppMetadataInfo,
   AppMetadataProperties,
-  AppMetadataType,
   GetAppMetadataAction,
   getAppMetadataObservable,
   selectMetadataRequest,
@@ -26,7 +24,8 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from './application/summary-tab/application-state/application-state.service';
-import { MetadataUpdateState, AppMetadataRequestState } from '../../store/reducers/app-metadata-request.reducer';
+import { EntityInfo } from '../../store/types/api.types';
+import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType } from '../../store/types/app-metadata.types';
 
 export interface ApplicationData {
   fetching: boolean;

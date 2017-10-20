@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
-import { EntityInfo } from '../../../../store/actions/api.actions';
 import { ApplicationData, ApplicationService } from '../../application.service';
-import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
+import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 
-//TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
+// TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
   selector: 'app-summary-tab',
   templateUrl: './summary-tab.component.html',

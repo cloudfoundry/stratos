@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment.prod';
 import { AppState } from './app-state';
 import { apiRequestReducer } from './reducers/api-request-reducer';
 import { appMetadataRequestReducer } from './reducers/app-metadata-request.reducer';
-import { appMetadataReducer, MetadataState } from './reducers/app-metadata.reducer';
+import { appMetadataReducer } from './reducers/app-metadata.reducer';
 import { authReducer } from './reducers/auth.reducer';
 import { cnsisReducer } from './reducers/cnsis.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
@@ -16,6 +16,7 @@ import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { NgModule } from '@angular/core';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { MetadataState } from './types/app-metadata.types';
 
 
 export function logger(reducer): any {

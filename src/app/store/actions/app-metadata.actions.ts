@@ -3,7 +3,7 @@ import { Action, compose, Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
 import { AppState } from '../app-state';
-import { AppMetadataRequestState } from '../reducers/app-metadata-request.reducer';
+import { AppMetadataType, AppMetadataRequestState } from '../types/app-metadata.types';
 
 export const AppMetadataTypes = {
   APP_METADATA: '[App Metadata] App Metadata',
@@ -17,12 +17,6 @@ export const AppMetadataProperties = {
   ENV_VARS: 'environmentVars',
   SUMMARY: 'summary'
 };
-export type AppMetadataType = 'instances' | 'environmentVars' | 'summary';
-
-export interface AppMetadataInfo {
-  metadata: any;
-  metadataRequestState: AppMetadataRequestState;
-}
 
 export class GetAppMetadataAction implements Action {
   options: RequestOptions;

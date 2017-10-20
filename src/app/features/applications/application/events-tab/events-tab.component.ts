@@ -7,7 +7,7 @@ import { ApplicationService } from '../../application.service';
 import { MdPaginator, MdSort } from '@angular/material';
 import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
-import { AddParams, selectPaginationState, SetPage } from '../../../../store/actions/pagination.actions';
+import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema } from '../../../../store/actions/app-event.actions';
 
 @Component({

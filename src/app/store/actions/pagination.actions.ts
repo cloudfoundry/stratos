@@ -6,7 +6,7 @@ import {
   PaginationEntityTypeState,
   PaginationParam,
   PaginationState,
-} from '../reducers/pagination.reducer';
+} from '../types/pagination.types';
 
 
 
@@ -68,28 +68,3 @@ export class RemoveParams implements PaginationAction {
   }
   type = REMOVE_PARAMS;
 }
-
-export function selectPaginationState(entityKey: string, paginationKey: string) {
-  return compose(
-    getPaginationKeyState(paginationKey),
-    getPaginationEntityState(entityKey),
-    getPaginationState
-  );
-}
-
-export function getPaginationKeyState(paginationKey: string) {
-  return (state: PaginationEntityTypeState) => {
-    return state[paginationKey];
-  };
-}
-
-export function getPaginationEntityState(entityKey: string) {
-  return (state: PaginationState) => {
-    return state[entityKey] || {};
-  };
-}
-
-export function getPaginationState(state: AppState) {
-  return state.pagination;
-}
-

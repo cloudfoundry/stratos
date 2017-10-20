@@ -2,7 +2,7 @@ import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from './api.actions';
-import { APIAction, ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
 import { PaginatedAction, QParam } from '../types/pagination.types';

@@ -8,17 +8,20 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
-import { ClearPaginationOfType, SetParams, selectPaginationState } from '../actions/pagination.actions';
+import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
+  ApiActionTypes
+} from './../actions/api.actions';
+import {
   APIAction,
-  ApiActionTypes,
+
   APIResource,
   NormalizedResponse,
   StartAPIAction,
   WrapperAPIActionFailed,
   WrapperAPIActionSuccess,
-} from './../actions/api.actions';
+} from './../types/api.types';
 import { AppState } from './../app-state';
 import { CNSISModel } from './../reducers/cnsis.reducer';
 import {
@@ -27,6 +30,7 @@ import {
   resultPerPageParamDefault,
 } from '../reducers/pagination.reducer';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

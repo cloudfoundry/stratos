@@ -1,5 +1,5 @@
-import { APIAction } from '../actions/api.actions';
 import { Action } from '@ngrx/store';
+import { APIAction } from './api.types';
 
 export class QParam {
   constructor(

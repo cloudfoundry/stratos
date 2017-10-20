@@ -2,10 +2,11 @@ import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from './api.actions';
-import { APIAction, ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './api.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
-import { PaginationAction, PaginatedAction } from '../reducers/pagination.reducer';
+import { APIAction } from '../types/api.types';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';

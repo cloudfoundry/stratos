@@ -4,8 +4,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 
-import { EntityInfo } from '../../../store/actions/api.actions';
-import { AppMetadataInfo } from '../../../store/actions/app-metadata.actions';
 import { DeleteApplication, UpdateApplication } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';

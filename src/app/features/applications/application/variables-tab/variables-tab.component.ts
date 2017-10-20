@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef, OnDestroy, EventEmitter } fro
 import { ApplicationService } from '../../application.service';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
-import { AppMetadataInfo } from '../../../../store/actions/app-metadata.actions';
 import { MdPaginator, PageEvent, MdSort, Sort, MdInput } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { UpdateApplication, UpdateExistingApplicationEnvVar, ApplicationSchema } from '../../../../store/actions/application.actions';
@@ -11,6 +10,7 @@ import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { NgModel } from '@angular/forms';
+import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 
 interface AppEnvVar {
   name: string;

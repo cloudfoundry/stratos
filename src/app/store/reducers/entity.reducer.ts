@@ -1,7 +1,8 @@
 import { RequestMethod } from '@angular/http';
 
-import { ApiActionTypes, WrapperAPIActionSuccess } from './../actions/api.actions';
+import { ApiActionTypes } from './../actions/api.actions';
 import { mergeState } from './../helpers/reducer.helper';
+import { WrapperAPIActionSuccess } from '../types/api.types';
 
 export interface EntitiesState {
   application: any;
