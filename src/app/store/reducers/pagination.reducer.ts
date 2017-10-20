@@ -27,6 +27,21 @@ import { getEntityState } from '../selectors/api.selectors';
 export const resultPerPageParam = 'results-per-page';
 export const resultPerPageParamDefault = 5;
 
+const defaultPaginationEntityState = {
+  fetching: false,
+  pageCount: 0,
+  currentPage: 1,
+  totalResults: 0,
+  ids: {},
+  params: {
+    [resultPerPageParam]: resultPerPageParamDefault
+  },
+  error: false,
+  message: ''
+};
+
+export const defaultPaginationState = { ...defaultEntitiesState };
+
 export function qParamsToString(params: QParam[]) {
   const qStrings = params.map(joinQParam);
   return qStrings.join('%3A');
@@ -43,19 +58,6 @@ const types = [
 ];
 
 const [requestType, successType, failureType] = types;
-
-const defaultPaginationEntityState = {
-  fetching: false,
-  pageCount: 0,
-  currentPage: 1,
-  totalResults: 0,
-  ids: {},
-  params: {
-    [resultPerPageParam]: resultPerPageParamDefault
-  },
-  error: false,
-  message: ''
-};
 
 const updatePagination =
   function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
@@ -249,7 +251,8 @@ function hasError(pagination: PaginationEntityState) {
   return pagination && pagination.error;
 }
 
-export function paginationReducer(state = defaultEntitiesState, action) {
+export function paginationReducer(state, action) {
+  state = state || defaultPaginationState;
   if (action.type === ApiActionTypes.API_REQUEST) {
     return state;
   }

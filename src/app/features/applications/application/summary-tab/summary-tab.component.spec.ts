@@ -6,7 +6,6 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { APIResource } from '../../../../store/actions/api.actions';
 import { appReducers } from '../../../../store/reducers.module';
 import { AppStoreModule } from '../../../../store/store.module';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
@@ -15,6 +14,7 @@ import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { ApplicationStateService } from './application-state/application-state.service';
 import { SummaryTabComponent } from './summary-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
+import { APIResource } from '../../../../store/types/api.types';
 
 describe('SummaryTabComponent', () => {
   let component: SummaryTabComponent;

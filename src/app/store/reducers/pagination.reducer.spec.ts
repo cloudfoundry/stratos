@@ -2,14 +2,11 @@ import { ApplicationSchema } from '../actions/application.actions';
 import { RequestOptions } from '@angular/http';
 
 import {
-  APIAction,
   ApiActionTypes,
-  StartAPIAction,
-  WrapperAPIActionFailed,
-  WrapperAPIActionSuccess,
 } from './../actions/api.actions';
-import { PaginatedAction, paginationReducer, PaginationAction } from './pagination.reducer';
-import { defaultEntitiesState } from './entity.reducer';
+import { defaultPaginationState, paginationReducer } from './pagination.reducer';
+import { PaginatedAction } from '../types/pagination.types';
+import { StartAPIAction, WrapperAPIActionSuccess, WrapperAPIActionFailed } from '../types/api.types';
 
 
 class MockPagAction implements PaginatedAction {
@@ -23,19 +20,20 @@ class MockPagAction implements PaginatedAction {
 
 function checkState({ newState, expectedNewState, entityKey, paginationKey }) {
   expect(newState[entityKey]).toBeTruthy();
-  expect(newState[entityKey][paginationKey]).toBeTruthy();
-  expect(newState[entityKey][paginationKey]).toEqual(expectedNewState);
+  const state = newState[entityKey][paginationKey];
+  const state2 = expectedNewState[entityKey][paginationKey];
+  expect(state).toBeTruthy();
+  expect(state).toEqual(state2);
 }
 
 describe('PaginationReducer', () => {
-
   it('should return empty state', () => {
-    expect(paginationReducer(null, { type: 'FAKE_NEWS' })).toEqual({ ...defaultEntitiesState });
-    expect(paginationReducer(null, { type: ApiActionTypes.API_REQUEST })).toEqual({});
+    expect(paginationReducer(null, { type: 'FAKE_NEWS' })).toEqual(defaultPaginationState);
+    expect(paginationReducer(null, { type: ApiActionTypes.API_REQUEST })).toEqual(defaultPaginationState);
   });
 
   it('should return fetching state', () => {
-    const entityKey = 'EntityKey';
+    const entityKey = ApplicationSchema.key;
     const paginationKey = 'PaginationKey';
     const apiAction = new MockPagAction();
     apiAction.entityKey = entityKey;
@@ -44,25 +42,29 @@ describe('PaginationReducer', () => {
     const startApiAction = new StartAPIAction(apiAction);
     const newState = paginationReducer(
       {
-        ...defaultEntitiesState,
+        ...defaultPaginationState,
         [ApplicationSchema.key]: {
-          fetching: false,
-          pageCount: 0,
-          currentPage: 1,
-          ids: {},
-          error: true,
-          message: 'asdasdasdasasdd'
+          [paginationKey]: {
+            fetching: false,
+            pageCount: 0,
+            currentPage: 1,
+            ids: {},
+            error: true,
+            message: 'aasdasdasd'
+          }
         }
       }, startApiAction);
     const expectedNewState = {
-      ...defaultEntitiesState,
+      ...defaultPaginationState,
       [ApplicationSchema.key]: {
-        fetching: true,
-        pageCount: 0,
-        currentPage: 1,
-        ids: {},
-        error: false,
-        message: ''
+        [paginationKey]: {
+          fetching: true,
+          pageCount: 0,
+          currentPage: 1,
+          ids: {},
+          error: false,
+          message: ''
+        }
       }
     };
     checkState({
@@ -96,11 +98,12 @@ describe('PaginationReducer', () => {
       }
     );
     const newState = paginationReducer({
-      ...defaultEntitiesState,
+      ...defaultPaginationState,
       [entityKey]: {
         [paginationKey]: {
           fetching: true,
           pageCount: 0,
+          totalResults: 0,
           currentPage: 1,
           ids: {},
           error: true,
@@ -109,14 +112,19 @@ describe('PaginationReducer', () => {
       }
     }, successApiAction);
     const expectedNewState = {
-      fetching: false,
-      pageCount: 1,
-      currentPage: 1,
-      ids: {
-        1: [1, 2]
-      },
-      error: false,
-      message: ''
+      [entityKey]: {
+        [paginationKey]: {
+          fetching: false,
+          pageCount: 1,
+          totalResults: 2,
+          currentPage: 1,
+          ids: {
+            1: [1, 2]
+          },
+          error: false,
+          message: ''
+        }
+      }
     };
     checkState({
       newState,
@@ -145,12 +153,13 @@ describe('PaginationReducer', () => {
       }
     );
     const newState = paginationReducer({
-      ...defaultEntitiesState,
+      ...defaultPaginationState,
       [entityKey]: {
         [paginationKey]: {
           fetching: true,
           pageCount: 0,
           currentPage: 1,
+          totalResults: 0,
           ids: {},
           error: false,
           message: 'asdasdasdasd'
@@ -158,12 +167,17 @@ describe('PaginationReducer', () => {
       }
     }, failedApiAction);
     const expectedNewState = {
-      fetching: false,
-      pageCount: 0,
-      currentPage: 1,
-      ids: {},
-      error: true,
-      message: message
+      [entityKey]: {
+        [paginationKey]: {
+          fetching: false,
+          pageCount: 0,
+          currentPage: 1,
+          totalResults: 0,
+          ids: {},
+          error: true,
+          message: message
+        }
+      }
     };
     checkState({
       newState,
