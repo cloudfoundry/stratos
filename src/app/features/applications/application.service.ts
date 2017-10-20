@@ -140,8 +140,7 @@ export class ApplicationService {
         } else {
           return Observable.of(null);
         }
-      })
-      .takeWhile(v => !v);
+      });
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
