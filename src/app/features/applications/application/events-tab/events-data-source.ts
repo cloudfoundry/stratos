@@ -13,7 +13,7 @@ import {
 } from '../../../../store/reducers/pagination.reducer';
 import { AddParams, RemoveParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
-import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 
 interface AppEvent {
   actee_name: string;
@@ -30,17 +30,16 @@ interface AppEvent {
 }
 
 export class AppEventsDataSource extends DataSource<AppEvent> {
-  public static paginationKey = 'application-events';
-  private action = new GetAllAppEvents(AppEventsDataSource.paginationKey, this._appService.appGuid, this._appService.cfGuid);
 
   sortSub: Subscription;
   paginationSub: Subscription;
 
   constructor(
     private store: Store<AppState>,
-    private _appService: ApplicationService,
+    private action: PaginatedAction,
     private _paginator: MdPaginator,
-    private _sort: MdSort
+    private _sort: MdSort,
+    private uid?: string
   ) {
     super();
     this._paginator.pageIndex = 0;
@@ -49,7 +48,7 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,
-      schema: [EventSchema]
+      schema: [EventSchema],
     });
 
     const pageSize$ = this._paginator.page.map(pageEvent => pageEvent.pageSize)
@@ -57,14 +56,14 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
       .withLatestFrom(pagination$)
       .do(([pageSize, pag]) => {
         if (pag.params[resultPerPageParam] !== pageSize) {
-          this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+          this.store.dispatch(new AddParams(EventSchema.key, action.paginationKey, {
             [resultPerPageParam]: pageSize
           }));
         }
       });
 
     this.sortSub = this._sort.mdSortChange.subscribe((sort: Sort) => {
-      this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+      this.store.dispatch(new AddParams(EventSchema.key, action.paginationKey, {
         'sort-by': sort.active,
         'order-direction': sort.direction
       }));
@@ -72,7 +71,7 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
 
     const pageIndex$ = this._paginator.page.map(pageEvent => pageEvent.pageIndex)
       .distinctUntilChanged()
-      .do(pageIndex => this.store.dispatch(new SetPage(EventSchema.key, AppEventsDataSource.paginationKey, pageIndex + 1)));
+      .do(pageIndex => this.store.dispatch(new SetPage(EventSchema.key, action.paginationKey, pageIndex + 1)));
 
     this.paginationSub = Observable.combineLatest(
       pageSize$,

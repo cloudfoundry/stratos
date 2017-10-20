@@ -187,11 +187,14 @@ function getPaginationKey(action) {
 
 export const getPaginationObservables = (function () {
   const mem = {};
-  return function ({ store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema }): {
-    entities$: Observable<any[]>,
-    pagination$: Observable<PaginationEntityState>
-  } {
-    const _key = action.entityKey + action.paginationKey;
+  return function (
+    { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
+    uid?: string
+  ): {
+      entities$: Observable<any[]>,
+      pagination$: Observable<PaginationEntityState>
+    } {
+    const _key = action.entityKey + action.paginationKey + (uid || '');
     if (mem[_key]) {
       return mem[_key];
     }

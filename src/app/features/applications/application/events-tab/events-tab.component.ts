@@ -8,7 +8,7 @@ import { MdPaginator, MdSort } from '@angular/material';
 import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
-import { EventSchema } from '../../../../store/actions/app-event.actions';
+import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
 
 @Component({
   selector: 'app-events-tab',
@@ -18,21 +18,31 @@ import { EventSchema } from '../../../../store/actions/app-event.actions';
 
 export class EventsTabComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) { }
+  constructor(private store: Store<AppState>, private appService: ApplicationService) {
+    this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`
+  }
 
   dataSource: AppEventsDataSource;
   hasEvents$: Observable<boolean>;
+  paginationKey: string;
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
 
   gotToPage() {
-    this.store.dispatch(new AddParams(EventSchema.key, AppEventsDataSource.paginationKey, {
+    this.store.dispatch(new AddParams(EventSchema.key, this.paginationKey, {
       [resultPerPageParam]: 10
     }));
   }
 
+
   ngOnInit() {
-    this.dataSource = new AppEventsDataSource(this.store, this.appService, this.paginator, this.sort);
+    const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
+    this.dataSource = new AppEventsDataSource(
+      this.store,
+      action,
+      this.paginator,
+      this.sort
+    );
   }
 }
 
