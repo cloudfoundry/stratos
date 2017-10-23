@@ -16,7 +16,7 @@ run:
     - |
       cd stratos-ui
       if [ "${SET_PROXIES}" = "true" ]; then
-      export http_proxy= ${PROXY_SERVER}
+      export http_proxy=${PROXY_SERVER}
       export https_proxy=${PROXY_SERVER}
       npm config set proxy  ${PROXY_SERVER}
       npm config set https-proxy  ${PROXY_SERVER}
