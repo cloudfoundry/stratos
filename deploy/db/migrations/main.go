@@ -39,10 +39,11 @@ func main() {
 	}
 
 	if *flagCloudFoundry {
-		err := parseCloudFoundryEnv()
+		dbEnv, err := parseCloudFoundryEnv()
 		if err != nil {
 			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
 		}
+		flag.Set("env", dbEnv)
 	}
 
 	err := upRun(args[1:])
