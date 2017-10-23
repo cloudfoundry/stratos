@@ -18,14 +18,17 @@ run:
     - |
       cd stratos-ui/
       cp -r /node_modules .
-      npm config set proxy http://registry.capbristol.com:3128
-      npm config set https-proxy http://registry.capbristol.com:3128
+      if [ "${SET_PROXIES}" = "true" ]; then
+      npm config set proxy ${PROXY_SERVER}
+      npm config set https-proxy ${PROXY_SERVER}
       cat << EOF >> ~/.bowerrc
         {
-            "proxy":"http://registry.capbristol.com:3128",
-            "https-proxy":"http://registry.capbristol.com:3128"
+            "proxy":"${PROXY_SERVER}",
+            "https-proxy":"${PROXY_SERVER}"
         }
       EOF
+      fi
+
       if [ "$(md5sum /package.json | cut -d' ' -f1)" != "$(md5sum package.json| cut -d' ' -f1)" ]; then
         echo -e "\033[31mpackage.json was updated, please update the image. Running npm install\033[0m"
         npm install
