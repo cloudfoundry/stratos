@@ -18,12 +18,12 @@ run:
     - |
       cd stratos-ui/
       cp -r /node_modules .
-      npm config set proxy http://registry.capbristol.com:8080
-      npm config set https-proxy http://registry.capbristol.com:8080
+      npm config set proxy http://registry.capbristol.com:3128
+      npm config set https-proxy http://registry.capbristol.com:3128
       cat << EOF >> ~/.bowerrc
         {
-            "proxy":"http://registry.capbristol.com:8080",
-            "https-proxy":"http://registry.capbristol.com:8080"
+            "proxy":"http://registry.capbristol.com:3128",
+            "https-proxy":"http://registry.capbristol.com:3128"
         }
       EOF
       if [ "$(md5sum /package.json | cut -d' ' -f1)" != "$(md5sum package.json| cut -d' ' -f1)" ]; then

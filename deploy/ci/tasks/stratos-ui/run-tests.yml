@@ -20,8 +20,8 @@ run:
       source /docker-lib.sh
       start_docker
       export GOPATH=$PWD
-      export http_proxy=http://registry.capbristol.com:8080
-      export https_proxy=http://registry.capbristol.com:8080
+      export http_proxy=http://registry.capbristol.com:3128
+      export https_proxy=http://registry.capbristol.com:3128
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
