@@ -43,16 +43,6 @@ npm run build-cf
 
 chmod +x portal-proxy
 
-# Get the goose db migration tool
-export DB_MIGRATE_DIR="$CF_DIR/db-migration"
-export GOPATH=${CACHE_DIR}/migration
-mkdir -p $GOPATH
-
-# Build the migration helper
-pushd ${DB_MIGRATE_DIR}
-go build -o parseVcapServices
-popd
-
 # Clean up build folders
 rm -rf ./dist
 rm -rf ./outputs

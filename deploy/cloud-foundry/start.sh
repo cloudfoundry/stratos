@@ -36,12 +36,12 @@ if [ "$CF_INSTANCE_INDEX" -eq "0" ]; then
     case $DB_TYPE in
     "postgresql")
         echo "Migrating postgresql instance on $DB_HOST"
-        ./stratos-dbmigrator -env cf_postgres --path deploy/db up
+        ./stratos-dbmigrator -cf -env cf_postgres --path deploy/db up
         handleGooseResult
         ;;
     "mysql")
         echo "Migrating mysql instance on $DB_HOST"
-        ./stratos-dbmigrator -env cf_mysql --path deploy/db up
+        ./stratos-dbmigrator -cf -env cf_mysql --path deploy/db up
         handleGooseResult
         ;;
     *)
