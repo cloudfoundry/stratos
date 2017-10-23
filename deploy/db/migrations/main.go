@@ -52,14 +52,6 @@ type StratosMigrationMehod struct {
 type StratosMigrations struct {
 }
 
-// func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
-// 	Up_20170818162837(txn)
-// }
-
-// func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
-// 	Up_20170818120003(txn)
-// }
-
 // -- Sorting
 
 type By func(p1, p2 *StratosMigrationMehod) bool
