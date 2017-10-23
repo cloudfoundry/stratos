@@ -16,13 +16,6 @@ resources:
     private_key: {{github-private-key}}
     base_url: {{base-url}}
 
-# groups:
-# - name: tests
-#   jobs:
-#   - console-unit-tests
-#   - proxy-unit-tests
-#   - console-e2e-tests
-
 jobs:
 - name: console-unit-tests
   plan:
