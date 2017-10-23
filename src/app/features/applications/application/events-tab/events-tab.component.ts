@@ -5,10 +5,12 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { MdPaginator, MdSort } from '@angular/material';
-import { AppEventsDataSource } from './events-data-source';
+import { AppEventsDataSource, AppEvent } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
+import { CfTableDataSource } from '../../../../core/table-data-source';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-events-tab',
@@ -19,10 +21,10 @@ import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-even
 export class EventsTabComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
-    this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`
+
   }
 
-  dataSource: AppEventsDataSource;
+  dataSource: CfTableDataSource<AppEvent>;
   hasEvents$: Observable<boolean>;
   paginationKey: string;
   @ViewChild(MdPaginator) paginator: MdPaginator;
@@ -36,15 +38,24 @@ export class EventsTabComponent implements OnInit {
 
 
   ngOnInit() {
+    this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`;
     const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
-    this.dataSource = new AppEventsDataSource(
+
+
+    // this.dataSource = new AppEventsDataSource(
+    //   this.store,
+    //   action,
+    //   this.paginator,
+    //   this.sort
+    // );
+    this.dataSource = new CfTableDataSource<AppEvent>(
+      this.paginator,
+      this.sort,
+      Observable.of(''),
       this.store,
       action,
-      this.paginator,
-      this.sort
+      EventSchema,
+      'metadata.guid'// TODO: RC Not sure if this will work.. atm selecting events not possible
     );
   }
 }
-
-// TODO: RC Move
-

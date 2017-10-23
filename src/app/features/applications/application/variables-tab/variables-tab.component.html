@@ -3,14 +3,14 @@
 
   <div class="variables-tab__env-table">
     <div>
-      <div [class.show]="(envVarsDataSource.showProgressIndicator$ | async)" class="variables-tab__env-table__loading">
+      <div [class.show]="(envVarsDataSource.isLoadingPage$ | async)" class="variables-tab__env-table__loading">
         <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
       </div>
       <md-card>
         <md-card-header [ngClass]="{'selected': (envVarsDataSource.isSelecting$ | async) }">
           <div [hidden]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)">
             <div class="grow-title mat-card-header-text-wa">Environment Variables</div>
-            <div [hidden]="(envVarsDataSource.count$ | async) === 0">
+            <div [hidden]="paginator.length === 0">
               <form novalidate>
                 <md-form-field floatPlaceholder="never">
                   <input mdInput ngModel #filter="ngModel" name="filter" placeholder="Filter Environment Variables">
@@ -32,6 +32,8 @@
             <div class="grow-title mat-card-header-text-wa"></div>
             <form #addRowForm="ngForm" novalidate>
               <!-- [appFocus]="envVarsDataSource.addAppFocusEventEmitter"  -->
+              !!{{envVarsDataSource.addRow | json}}!!
+
               <md-form-field floatPlaceholder="never">
                 <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addRow.name"
                   required [appUnique]="envVarsDataSource.rowNames">
@@ -51,7 +53,7 @@
           </div>
         </md-card-header>
         <md-card-content>
-          <md-table #table [hidden]="(envVarsDataSource.count$ | async) === 0" [dataSource]="envVarsDataSource" mdSort>
+          <md-table #table [hidden]="paginator.length === 0" [dataSource]="envVarsDataSource" mdSort>
             <ng-container mdColumnDef="select">
               <md-header-cell *mdHeaderCellDef>
                 <md-checkbox [disabled]="(envVarsDataSource.isAdding$ | async)" [checked]="envVarsDataSource.selectAllChecked" (change)="envVarsDataSource.selectAllFilteredRows()">
@@ -69,41 +71,44 @@
             <ng-container mdColumnDef="value">
               <md-header-cell *mdHeaderCellDef md-sort-header disableClear="true"> Value </md-header-cell>
               <md-cell *mdCellDef="let row">
-                <md-form-field *ngIf="row.edit">
-                  <input mdInput name="envVarValue" [value]="row.edit?.value" (input)="row.edit.value = $event.target.value" />
+                <md-form-field *ngIf="row.name === envVarsDataSource.editRow?.name">
+                  <input mdInput name="envVarValue" [value]="envVarsDataSource.editRow?.value" (input)="envVarsDataSource.editRow.value = $event.target.value"
+                  />
                 </md-form-field>
-                <span *ngIf="!row.edit">{{row.value}}</span>
+                <span *ngIf="row.name !== envVarsDataSource.editRow?.name">{{row.value}}</span>
               </md-cell>
             </ng-container>
             <ng-container mdColumnDef="edit">
               <md-header-cell *mdHeaderCellDef>
               </md-header-cell>
               <md-cell *mdCellDef="let row">
-                <button md-icon-button *ngIf="!row.edit" (click)="envVarsDataSource.startEdit(row)" [disabled]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)">
+                <button md-icon-button *ngIf="row.name !== envVarsDataSource.editRow?.name" (click)="envVarsDataSource.startEdit(row)" [disabled]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)">
                   <md-icon>edit</md-icon>
                 </button>
-                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.saveEdit(row)">
+                <button md-icon-button *ngIf="row.name === envVarsDataSource.editRow?.name" (click)="envVarsDataSource.saveEdit()">
                   <md-icon>done</md-icon>
                 </button>
-                <button md-icon-button *ngIf="row.edit" (click)="envVarsDataSource.cancelEdit(row)">
+                <button md-icon-button *ngIf="row.name === envVarsDataSource.editRow?.name" (click)="envVarsDataSource.cancelEdit()">
                   <md-icon>clear</md-icon>
                 </button>
               </md-cell>
             </ng-container>
-            <md-header-row *mdHeaderRowDef="['select', 'name', 'value', 'edit']" [hidden]="(envVarsDataSource.count$ | async) === 0">
+            <md-header-row [hidden]="paginator.length === 0" *mdHeaderRowDef="['select', 'name', 'value', 'edit']">
             </md-header-row>
             <md-row *mdRowDef="let row; columns: ['select', 'name', 'value', 'edit'];">
             </md-row>
           </md-table>
-          <div [hidden]="(envVarsDataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
+          <div [hidden]="paginator.length > 0" class="mat-card-header-text no-variables">
             <div class="mat-card-header-text">
               <div class="mat-card-header-text-wa">You have no variables.</div>
             </div>
           </div>
         </md-card-content>
         <md-card-footer>
-          <div [hidden]="(envVarsDataSource.count$ | async) === 0">
-            <md-paginator #paginator [length]="(envVarsDataSource.count$ | async)" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
+          !!{{paginator.length }}!!
+          <div [hidden]="paginator.length === 0">
+            <!-- [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]" [length]="( envVarsDataSource.count$ | async)"-->
+            <md-paginator #paginator>
             </md-paginator>
           </div>
         </md-card-footer>

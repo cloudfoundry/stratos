@@ -18,4 +18,5 @@ export const environment = {
   },
   logLevel: LogLevel.DEBUG,
   logToConsole: true,
+  logEnableConsoleActions: true,
 };

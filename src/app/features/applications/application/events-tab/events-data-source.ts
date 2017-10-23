@@ -15,7 +15,8 @@ import { AddParams, RemoveParams, SetPage } from '../../../../store/actions/pagi
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 
-interface AppEvent {
+// TODO: RC KEEP AND MOVE TO TYPES
+export interface AppEvent {
   actee_name: string;
   actee_type: string;
   actor: string;
@@ -39,7 +40,6 @@ export class AppEventsDataSource extends DataSource<AppEvent> {
     private action: PaginatedAction,
     private _paginator: MdPaginator,
     private _sort: MdSort,
-    private uid?: string
   ) {
     super();
     this._paginator.pageIndex = 0;

@@ -47,7 +47,7 @@ export class GetAllAppEvents implements PaginatedAction {
     'order-direction': 'asc',
     q: [
       new QParam('actee', this.appGuid),
-      new QParam('actee', '1')
+      new QParam('actee', '1')// TODO: RC What's this?
     ]
   };
 }
