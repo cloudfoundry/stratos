@@ -33,6 +33,8 @@ const (
 	DB_URI            = "uri"
 	URI_POSTGRES      = "postgres://"
 	URI_MYSQL         = "mysql://"
+	TAG_MYSQL         = "mysql"
+	TAG_POSTGRES      = "postgresql"
 )
 
 type VCAPService struct {
@@ -93,8 +95,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 
 	// If we found a service, then use if
 	if len(service.Name) > 0 {
-		uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
-		if strings.HasPrefix(uri, URI_POSTGRES) {
+		if isPostgresService(service) {
 			fmt.Println("Parsing Postgres db config")
 
 			exportString(DATABASE_PROVIDER, PROVIDER_POSTGRES)
@@ -104,7 +105,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 			exportString(DB_USER, service.Credentials[USERNAME])
 			exportString(DB_PASSWORD, service.Credentials[PASSWORD])
 			exportString(DB_DATABASE_NAME, service.Credentials[DBNAME])
-		} else if strings.HasPrefix(uri, URI_MYSQL) {
+		} else if isMySQLService(service) {
 			fmt.Println("Parsing MySQL db config")
 
 			exportString(DATABASE_PROVIDER, PROVIDER_MYSQL)
@@ -118,16 +119,6 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 	}
 }
 
-// Try and find the first service config that has the DB tag
-func findFirstTaggedConfiguration(configs map[string]VCAPService) (VCAPService, bool) {
-	for _, service := range configs {
-		if stringInSlice(STRATOS_TAG, service.Tags) {
-			return service, true
-		}
-	}
-	return VCAPService{}, false
-}
-
 func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[string]VCAPService {
 	var configs map[string]VCAPService
 	configs = make(map[string]VCAPService)
@@ -135,15 +126,23 @@ func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[strin
 	for _, services := range vcapServices {
 		for _, service := range services {
 			// Need a valid URI
-			uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
-			valid := strings.HasPrefix(uri, URI_POSTGRES) || strings.HasPrefix(uri, URI_MYSQL)
-			if valid {
+			if isPostgresService(service) || isMySQLService(service) {
 				configs[service.Name] = service
 			}
 		}
 	}
 
 	return configs
+}
+
+func isPostgresService(service VCAPService) {
+	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
+	return strings.HasPrefix(uri, URI_POSTGRES) || stringInSlice(TAG_POSTGRES, service.Tags)
+}
+
+func isMySQLService(service VCAPService) {
+	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
+	return strings.HasPrefix(uri, URI_MYSQL) || stringInSlice(TAG_MYSQL, service.Tags)
 }
 
 func stringInSlice(a string, list []string) bool {
