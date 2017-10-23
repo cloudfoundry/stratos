@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -36,7 +37,8 @@ type VCAPService struct {
 	Tags        []string               `json:"tags"`
 }
 
-func parseCloudFoundryEnv() error {
+func parseCloudFoundryEnv() (string, error) {
+	var dbEnv string
 
 	fmt.Println("Attempting to parse VCAP_SERVICES")
 
@@ -49,12 +51,22 @@ func parseCloudFoundryEnv() error {
 		err := json.Unmarshal([]byte(services), &vcapServices)
 		if err == nil {
 			findDatabaseConfig(vcapServices)
+			switch dbType := os.Getenv(DB_TYPE); dbType {
+			case TYPE_POSTGRES:
+				dbEnv = "cf_postgres"
+				fmt.Printf("Migrating postgresql instance on %s\n", os.Getenv(DB_HOST))
+			case TYPE_MYSQL:
+				dbEnv = "cf_mysql"
+				fmt.Printf("Migrating mysql instance on %s\n", os.Getenv(DB_HOST))
+			default:
+				return "", errors.New("Database type not recognized")
+			}
 		} else {
-			return err
+			return "", err
 		}
 	}
 
-	return nil
+	return dbEnv, nil
 }
 
 func findDatabaseConfig(vcapServices map[string][]VCAPService) {

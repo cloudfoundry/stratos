@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -40,10 +39,11 @@ func main() {
 	}
 
 	if *flagCloudFoundry {
-		err := parseCloudFoundryEnv()
+		dbEnv, err := parseCloudFoundryEnv()
 		if err != nil {
 			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
 		}
+		flag.Set("env", dbEnv)
 	}
 
 	err := upRun(args[1:])
@@ -63,13 +63,13 @@ type StratosMigrationMehod struct {
 type StratosMigrations struct {
 }
 
-func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
-	Up_20170818162837(txn)
-}
+// func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
+// 	Up_20170818162837(txn)
+// }
 
-func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
-	Up_20170818120003(txn)
-}
+// func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
+// 	Up_20170818120003(txn)
+// }
 
 // -- Sorting
 
