@@ -16,5 +16,6 @@ export const environment = {
     adminUsername: 'admin',
     adminPassword: 'hscadmin'
   },
-  logLevel: LogLevel.DEBUG
+  logLevel: LogLevel.DEBUG,
+  logToConsole: true,
 };

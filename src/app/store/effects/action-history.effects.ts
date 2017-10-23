@@ -21,8 +21,8 @@ export class ActionHistoryEffect {
           console.log('Action History');
           history.map(item => {
             console.log(item);
-          })
-        })
+          });
+        });
 
     });
 }

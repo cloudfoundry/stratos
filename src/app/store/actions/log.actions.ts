@@ -14,7 +14,7 @@ export const LoggerActionTypes = {
   ERROR: '[LOG] Error',
 };
 
-class LoggerAction implements Action {
+export class LoggerAction implements Action {
   constructor(
     public logLevel: LogLevel = LogLevel.INFO,
     public message: string,
