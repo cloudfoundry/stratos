@@ -135,12 +135,12 @@ func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[strin
 	return configs
 }
 
-func isPostgresService(service VCAPService) {
+func isPostgresService(service VCAPService) bool {
 	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
 	return strings.HasPrefix(uri, URI_POSTGRES) || stringInSlice(TAG_POSTGRES, service.Tags)
 }
 
-func isMySQLService(service VCAPService) {
+func isMySQLService(service VCAPService) bool {
 	uri := fmt.Sprintf("%v", service.Credentials[DB_URI])
 	return strings.HasPrefix(uri, URI_MYSQL) || stringInSlice(TAG_MYSQL, service.Tags)
 }
