@@ -17,6 +17,8 @@ run:
   - -exc
   - |
     cd stratos-ui
+    npm config set proxy http://registry.capbristol.com:8080
+    npm config set https-proxy http:///registry.capbristol.com:8080
     npm install
     npm run build-backend
     cd -
