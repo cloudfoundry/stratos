@@ -33,36 +33,15 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   envVars$: Observable<any>;
 
   ngOnInit() {
-    // private _paginator: MdPaginator,
-    // private _sort: MdSort,
-    // private _filterChange = new BehaviorSubject(''),
-    // private _store: Store<AppState>,
-    // private _appService: ApplicationService,
-
-    // this.store, this.appService, this.paginator, this.sort
-
     const filter$: Observable<string> = this.filter.valueChanges
       .debounceTime(150)
       .distinctUntilChanged()
       .map(value => value as string);
-    // const filter$ = Observable.of('');
-
-
 
     this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.paginator, this.sort, filter$, this.store, this.appService);
-    // this.filterSub = this.filter.valueChanges
-    //   .debounceTime(150)
-    //   .distinctUntilChanged()
-    //   .subscribe((value) => {
-    //     if (!this.envVarsDataSource) { return; }
-    //     this.envVarsDataSource.filter = value;
-    //   });
     this.envVars$ = this.appService.appEnvVars$;
   }
 
   ngOnDestroy(): void {
-    // if (this.filterSub) {
-    //   this.filterSub.unsubscribe();
-    // }
   }
 }

@@ -11,7 +11,7 @@ import { schema } from 'normalizr';
 import { getPaginationObservables, resultPerPageParam } from '../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../store/actions/pagination.actions';
 
-export abstract class TableDataSource<T> extends DataSource<T> {
+export abstract class TableDataSource<T extends object> extends DataSource<T> {
 
   private paginationSub: Subscription;
 
@@ -23,6 +23,15 @@ export abstract class TableDataSource<T> extends DataSource<T> {
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
 
+  public addRow: T;
+  public selectRow: T;
+  public isAdding$ = new BehaviorSubject(false);
+
+  public selectedRows = new Map<string, T>();
+  public isSelecting$ = new BehaviorSubject(false);
+  public selectAllChecked = false;
+
+  public editRow: T;
 
   constructor(
     private _mdPaginator: MdPaginator,
@@ -30,15 +39,16 @@ export abstract class TableDataSource<T> extends DataSource<T> {
     private _filter: Observable<string>,
     private store: Store<AppState>,
     private _typeId: string,
+    private _emptyType: T,
   ) {
     super();
     // this._mdPaginator.pageIndex = 0;
     // this._mdPaginator.pageSizeOptions = [5, 10, 20];
+    this.addRow = { ... (_emptyType as object) } as T;
 
     this.pageSize$ = this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged().subscribe(() => console.log('1_mdPaginator'));
+    this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
     this._mdPaginator.pageSizeOptions = [5, 10, 20];
-    this.pageSize$.subscribe(() => console.log('1pageSize'));
 
     this.sort$ = this._mdSort.mdSortChange;
 
@@ -47,23 +57,19 @@ export abstract class TableDataSource<T> extends DataSource<T> {
     this.paginationSub = Observable.combineLatest(
       this.pageSize$,
       this.pageIndex$
-    ).subscribe(() => console.log('paginationSub'));
+    ).subscribe();
 
     this.filter$ = _filter;
-
   }
 
   abstract connect(): Observable<T[]>;
-
   disconnect() {
     this.paginationSub.unsubscribe();
   }
 
-  public addRow: T;
-  public selectRow: T;
-  public isAdding$ = new BehaviorSubject(false);
-  protected startAdd(defaultObject: T) {
-    this.addRow = defaultObject; // TODO: Ensure clone
+
+  protected startAdd() {
+    this.addRow = { ... (this._emptyType as object) } as T;
     this.isAdding$.next(true);
   }
   protected saveAdd() {
@@ -74,9 +80,6 @@ export abstract class TableDataSource<T> extends DataSource<T> {
     this.isAdding$.next(false);
   }
 
-  public selectedRows = new Map<string, T>();
-  public isSelecting$ = new BehaviorSubject(false);
-  public selectAllChecked = false;
   protected selectedRowToggle(row: T) {
     const exists = this.selectedRows.has(row[this._typeId]);
     if (exists) {
@@ -102,22 +105,19 @@ export abstract class TableDataSource<T> extends DataSource<T> {
     this.isSelecting$.next(false);
   }
 
-  public editRow: T;
   protected startEdit(rowClone: T) {
     this.editRow = rowClone;
   }
-
   protected saveEdit() {
     delete this.editRow;
   }
-
   protected cancelEdit() {
     delete this.editRow;
   }
 
 }
 
-export class CfTableDataSource<T> extends TableDataSource<T> {
+export class CfTableDataSource<T extends object> extends TableDataSource<T> {
 
   private sortSub: Subscription;
   private cfPaginationSub: Subscription;
@@ -129,9 +129,6 @@ export class CfTableDataSource<T> extends TableDataSource<T> {
   public isLoadingPage$: Observable<boolean>;
   public filteredRows: Array<T>;
 
-  /**
-   *
-   */
   constructor(
     private _CfMdPaginator: MdPaginator,
     private _CfMdSort: MdSort,
@@ -140,18 +137,17 @@ export class CfTableDataSource<T> extends TableDataSource<T> {
     private action: PaginatedAction,
     private sourceScheme: schema.Entity,
     private _cfTypeId: string,
+    private _cfEmptyType: T,
   ) {
-    super(_CfMdPaginator, _CfMdSort, _CfFilter, _CfStore, _cfTypeId);
+    super(_CfMdPaginator, _CfMdSort, _CfFilter, _CfStore, _cfTypeId, _cfEmptyType);
     const { pagination$, entities$ } = getPaginationObservables({
       store: this._CfStore,
       action: this.action,
       schema: [sourceScheme],
     });
 
-    //  = this.pageSize$.do(() => console.log('2pageSize'));
     const cfPageSizeWithPagination$ = this.pageSize$.withLatestFrom(pagination$)
       .do(([pageSize, pag]) => {
-        console.log('2dsfdsf');
         if (pag.params[resultPerPageParam] !== pageSize) {
           this._CfStore.dispatch(new AddParams(sourceScheme.key, action.paginationKey, {
             [resultPerPageParam]: pageSize
@@ -173,7 +169,7 @@ export class CfTableDataSource<T> extends TableDataSource<T> {
     this.cfPaginationSub = Observable.combineLatest(
       cfPageSizeWithPagination$,
       cfPageIndex$
-    ).subscribe(() => console.log('2cfPaginationSub'));
+    ).subscribe();
 
     this.pagination$ = pagination$;
     this.entities$ = entities$;
@@ -203,7 +199,7 @@ export class CfTableDataSource<T> extends TableDataSource<T> {
 
 }
 
-export abstract class DefaultTableDataSource<T> extends TableDataSource<T> {
+export abstract class DefaultTableDataSource<T extends object> extends TableDataSource<T> {
 
   abstract filteredRows: Array<T>;
   abstract isLoadingPage$: Observable<boolean>;
@@ -216,12 +212,13 @@ export abstract class DefaultTableDataSource<T> extends TableDataSource<T> {
     private _dFilter: Observable<string>,
     private _dStore: Store<AppState>,
     private _dTypeId: string,
+    private _dEmptyType: T,
   ) {
-    super(_dMdPaginator, _dMdSort, _dFilter, _dStore, _dTypeId);
+    super(_dMdPaginator, _dMdSort, _dFilter, _dStore, _dTypeId, _dEmptyType);
   }
 
   connect(): Observable<T[]> {
-    this.data$.subscribe(() => console.log('connect data$.subscribe'));
+    // this.data$.subscribe(() => console.log('connect data$.subscribe'));
     return this.data$
       .combineLatest(
       this.pageSize$.startWith(5),

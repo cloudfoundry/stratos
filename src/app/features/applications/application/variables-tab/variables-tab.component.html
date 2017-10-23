@@ -32,8 +32,6 @@
             <div class="grow-title mat-card-header-text-wa"></div>
             <form #addRowForm="ngForm" novalidate>
               <!-- [appFocus]="envVarsDataSource.addAppFocusEventEmitter"  -->
-              !!{{envVarsDataSource.addRow | json}}!!
-
               <md-form-field floatPlaceholder="never">
                 <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addRow.name"
                   required [appUnique]="envVarsDataSource.rowNames">
@@ -105,7 +103,6 @@
           </div>
         </md-card-content>
         <md-card-footer>
-          !!{{paginator.length }}!!
           <div [hidden]="paginator.length === 0">
             <!-- [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]" [length]="( envVarsDataSource.count$ | async)"-->
             <md-paginator #paginator>

@@ -55,7 +55,8 @@ export class EventsTabComponent implements OnInit {
       this.store,
       action,
       EventSchema,
-      'metadata.guid'// TODO: RC Not sure if this will work.. atm selecting events not possible
+      'metadata.guid', // TODO: RC Not sure if this will work.. atm selecting events not possible
+      {} as AppEvent
     );
   }
 }
