@@ -1,2 +1,2 @@
-{ "insecure-registries": ["registry.capbristol.com:5000", "ci-registry.ngrok.io:80", "149.44.104.52:5000"]}
+{ "insecure-registries": ["registry.capbristol.com:5000", "ci-registry.ngrok.io:80"]}
 
