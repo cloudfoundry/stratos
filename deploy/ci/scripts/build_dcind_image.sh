@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKER_REGISTRY=registry.irfanhabib.com:5000
+DOCKER_REGISTRY=ci-registry.ngrok.io:80
 TAG=${TAG:-latest}
 REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-ci-registry.ngrok.io}
 REGISTRY_USER=${REGISTRY_USER:-ubuntu}

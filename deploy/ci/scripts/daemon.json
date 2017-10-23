@@ -1,2 +1,2 @@
-{ "insecure-registries": ["registry.irfanhabib.com:5000"]}
+{ "insecure-registries": ["ci-registry.ngrok.io:80"]}
 
