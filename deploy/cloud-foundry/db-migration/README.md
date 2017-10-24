@@ -45,6 +45,6 @@ The Console will look through all service instances that are bound to it and fil
 
 * A MySQL database service if it has a uri field in the credentials object which begins with the string "mysql://" or it has a tag "mysql"
 
-If there is a single database service instance, the Conseol will use that.
+If there is a single database service instance, the Console will use that.
 
 If there are multiple database service instances, the Console will look for one with a tag of "stratos".
