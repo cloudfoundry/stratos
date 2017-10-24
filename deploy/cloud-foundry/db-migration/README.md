@@ -7,11 +7,11 @@ As described in the standard `cf push` instructions [here](../README.md) the con
 
 1. Create a Service Instance for the Console Database
 
-    > **NOTE** The console supports postgresql and mysql DBs. Your service instance must be tagged with either `stratos_postgresql` for postgresql or `stratos_mysql` for mysql.
+    > **NOTE** The console supports postgresql and mysql DBs. The console will enumerate the bound service instances to detect the database type - see  [below](#note-on-service-bindings) for more detail.
 
-    Use `cf create-service` to create a service instance for the DB - for example for postgresql:
+    Use `cf create-service` to create a service instance for the DB - for example:
     ```
-    cf create-service postgresql v9.4 console_db -t stratos_postgresql
+    cf create-service postgresql v9.4 console_db
     ```
     * In this example, `postgresql` is the service name for the Postgres DB service, `v9.4` is the service plan and `console_db` is the name for the service instance that will be created. 
     * To view services and service plans:
@@ -37,3 +37,14 @@ As described in the standard `cf push` instructions [here](../README.md) the con
     ```
 
     
+## Note on Service Bindings
+
+The Console will look through all service instances that are bound to it and filter those to determine which are database services. It determines:
+
+* A Postgres database service if it has a uri field in the credentials object which begins with the string "postgres://" or it has a tag "postgresql"
+
+* A MySQL database service if it has a uri field in the credentials object which begins with the string "mysql://" or it has a tag "mysql"
+
+If there is a single database service instance, the Conseol will use that.
+
+If there are multiple database service instances, the Console will look for one with a tag of "stratos".
