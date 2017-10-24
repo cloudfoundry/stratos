@@ -128,6 +128,12 @@
             if (options.servicePlans.length) {
               options.userInput.plan = options.servicePlans[0].value;
             }
+
+            // Get all of the instances so that we can check for name uniqueness
+            var queryOptions = { q:  'space_guid:' + serviceInstance.entity.space_guid };
+            return instanceModel.all(cnsiGuid, queryOptions).then(function (spaceInstances) {
+              options.instanceNames = _.map(spaceInstances, function (instance) { return instance.entity.name; });
+            });
           });
         };
 
