@@ -47,7 +47,7 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig) bool {
 	var service VCAPService
 	configs := findDatabaseConfigurations(vcapServices)
-	log.Info("Found %d database service instances", len(configs))
+	log.Infof("Found %d database service instances", len(configs))
 	for _, s := range configs {
 		// If only 1 db service, then use it
 		if len(configs) == 1 {
