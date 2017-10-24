@@ -17,13 +17,11 @@ $DB_MIGRATE_DIR/parseVcapServices > $STRATOS_DB_ENV
 source $STRATOS_DB_ENV
 rm $STRATOS_DB_ENV
 
-# Ensure go is on the path in order for the DB Migrations to run
-export PATH=${DB_MIGRATE_DIR}/golang/go/bin:$PATH
-export GOPATH=${DB_MIGRATE_DIR}/gopath
+# DB Migration
 
 function handleGooseResult {
   if [ $? -eq 0 ]; then
-    echo "Database successfully migrated."
+    echo "Database successfully migrated"
   else
     echo "Database migration failed"
     exit 1
@@ -34,24 +32,22 @@ function handleGooseResult {
 if [ "$CF_INSTANCE_INDEX" -eq "0" ]; then
   if [ -n "$DB_TYPE" ]; then
     echo "Attempting to migrate database"
-    pushd $DEPLOY_DIR
 
     case $DB_TYPE in
     "postgresql")
         echo "Migrating postgresql instance on $DB_HOST"
-        $DBMIGRATE_BIN_DIR/migrateStratosDb -env cf_postgres up
+        ./stratos-dbmigrator -env cf_postgres --path deploy/db up
         handleGooseResult
         ;;
     "mysql")
         echo "Migrating mysql instance on $DB_HOST"
-        $DBMIGRATE_BIN_DIR/migrateStratosDb -env cf_mysql up
+        ./stratos-dbmigrator -env cf_mysql --path deploy/db up
         handleGooseResult
         ;;
     *)
         echo Unknown DB type \'$DB_TYPE\'?
         ;;
     esac
-    popd
   fi
 else
   echo "Skipping DB migration => not index 0 ($CF_INSTANCE_INDEX)"  
