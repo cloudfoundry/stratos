@@ -1,3 +1,4 @@
+import { fileExists } from 'ts-node/dist';
 import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
@@ -6,13 +7,13 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { TableDataSource } from './table-data-source';
+import { TableDataSource, ITableDataSource } from './table-data-source';
 import { PaginationEntityState, PaginatedAction } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 
-export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> {
+export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource {
 
   private sortSub: Subscription;
   private cfPaginationSub: Subscription;
@@ -25,49 +26,13 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   public filteredRows: Array<T>;
 
   constructor(
-    private _CfMdPaginator: MdPaginator,
-    private _CfMdSort: MdSort,
-    private _CfFilter: Observable<string>,
     private _CfStore: Store<AppState>,
     private action: PaginatedAction,
     private sourceScheme: schema.Entity,
     private _cfTypeId: string,
     private _cfEmptyType: T,
   ) {
-    super(_CfMdPaginator, _CfMdSort, _CfFilter, _CfStore, _cfTypeId, _cfEmptyType);
-    const { pagination$, entities$ } = getPaginationObservables({
-      store: this._CfStore,
-      action: this.action,
-      schema: [sourceScheme],
-    });
-
-    const cfPageSizeWithPagination$ = this.pageSize$.withLatestFrom(pagination$)
-      .do(([pageSize, pag]) => {
-        if (pag.params[resultPerPageParam] !== pageSize) {
-          this._CfStore.dispatch(new AddParams(sourceScheme.key, action.paginationKey, {
-            [resultPerPageParam]: pageSize
-          }));
-        }
-      });
-
-    this.sortSub = this.sort$.subscribe((sort: Sort) => {
-      this._CfStore.dispatch(new AddParams(sourceScheme.key, action.paginationKey, {
-        'sort-by': sort.active,
-        'order-direction': sort.direction
-      }));
-    });
-
-    const cfPageIndex$ = this.pageIndex$.do(
-      pageIndex => this._CfStore.dispatch(new SetPage(sourceScheme.key, action.paginationKey, pageIndex + 1)));
-
-    this.cfPagination$ = pagination$;
-    this.cfPaginationSub = Observable.combineLatest(
-      cfPageSizeWithPagination$,
-      cfPageIndex$
-    ).subscribe();
-
-    this.pagination$ = pagination$;
-    this.entities$ = entities$;
+    super(_CfStore, _cfTypeId, _cfEmptyType);
   }
 
   connect(): Observable<T[]> {
@@ -75,9 +40,9 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
 
     return Observable.combineLatest(
       this.cfPagination$.do((pag) => {
-        this._CfMdPaginator.pageIndex = pag.currentPage - 1;
-        this._CfMdPaginator.pageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
-        this._CfMdPaginator.length = pag.totalResults;
+        this.mdPaginator.pageIndex = pag.currentPage - 1;
+        this.mdPaginator.pageSize = parseInt(pag.params[resultPerPageParam] as string, 10);
+        this.mdPaginator.length = pag.totalResults;
       }),
       this.entities$
     )
@@ -90,6 +55,45 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     this.sortSub.unsubscribe();
     this.cfPaginationSub.unsubscribe();
     super.disconnect();
+  }
+
+  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+    super.initialise(paginator, sort, filter$);
+
+    const { pagination$, entities$ } = getPaginationObservables({
+      store: this._CfStore,
+      action: this.action,
+      schema: [this.sourceScheme],
+    });
+
+    this.pagination$ = pagination$;
+    this.entities$ = entities$;
+
+
+    const cfPageSizeWithPagination$ = this.pageSize$.withLatestFrom(pagination$)
+      .do(([pageSize, pag]) => {
+        if (pag.params[resultPerPageParam] !== pageSize) {
+          this._CfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+            [resultPerPageParam]: pageSize
+          }));
+        }
+      });
+
+    this.sortSub = this.sort$.subscribe((sortObj: Sort) => {
+      this._CfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+        'sort-by': sortObj.active,
+        'order-direction': sortObj.direction
+      }));
+    });
+
+    const cfPageIndex$ = this.pageIndex$.do(
+      pageIndex => this._CfStore.dispatch(new SetPage(this.sourceScheme.key, this.action.paginationKey, pageIndex + 1)));
+
+    this.cfPagination$ = pagination$;
+    this.cfPaginationSub = Observable.combineLatest(
+      cfPageSizeWithPagination$,
+      cfPageIndex$
+    ).subscribe();
   }
 
 }

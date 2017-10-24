@@ -31,13 +31,10 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   data$: any;
 
   constructor(
-    private _paginator: MdPaginator,
-    private _sort: MdSort,
-    private _filterChange: Observable<string>,
     private _store: Store<AppState>,
     private _appService: ApplicationService,
   ) {
-    super(_paginator, _sort, _filterChange, _store, 'name', {
+    super(_store, 'name', {
       name: '',
       value: '',
     });
@@ -68,6 +65,7 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
 
     super.selectedDelete();
   }
+
 
   startEdit(row: AppEnvVar) {
     super.startEdit({ ...row });
@@ -125,11 +123,11 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   sort(envVars: Array<AppEnvVar>, sort: Sort): AppEnvVar[] {
     return envVars.slice().sort((a, b) => {
       // TODO: RC lower case strings?
-      const [propertyA, propertyB] = [a[this._sort.active], b[this._sort.active]];
+      const [propertyA, propertyB] = [a[sort.active], b[sort.active]];
       const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
       const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
 
-      return (valueA < valueB ? -1 : 1) * (this._sort.direction === 'asc' ? 1 : -1);
+      return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
     });
   }
 

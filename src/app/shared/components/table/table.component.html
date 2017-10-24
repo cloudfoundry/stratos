@@ -1,0 +1,51 @@
+<div class="app-table">
+  <div>
+    <!--  -->
+    <div style="height: 5px;">
+      <md-progress-bar *ngIf="(dataSource.isLoadingPage$ | async)" color="primary" [mode]="'query'"></md-progress-bar>
+    </div>
+    <md-card>
+      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
+        <div class="grow-title mat-card-header-text-wa">TITLE TO DO</div>
+        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+          <div class="grow-title mat-card-header-text-wa"></div>
+          <div [hidden]="paginator.length === 0">
+            <!-- TODO: Optional hide -->
+            <form novalidate>
+              <md-form-field floatPlaceholder="never">
+                <input mdInput ngModel #filter="ngModel" name="filter" placeholder="Filter Environment Variables">
+              </md-form-field>
+            </form>
+          </div>
+          <!-- TODO: Make optional -->
+          <button md-icon-button (click)="addRowForm.reset(); dataSource.startAdd();">
+              <md-icon>add</md-icon>
+            </button>
+        </div>
+        <!-- TODO: Make optional -->
+        <div [hidden]="!(dataSource.isSelecting$ | async)">
+          <div class="grow-title mat-card-header-text-wa">{{dataSource.selectedRows.size}} Selected</div>
+          <button md-icon-button (click)="dataSource.selectedDelete()">
+              <md-icon>delete</md-icon>
+            </button>
+        </div>
+        <div [hidden]="!(dataSource.isAdding$ | async)">
+          <ng-content select=".table-add"></ng-content>
+        </div>
+      </md-card-header>
+      <md-card-content>
+        <!-- Cannot wrap md-table around ng-content, see https://github.com/angular/material2/issues/6980-->
+        <ng-content select=".table-content"></ng-content>
+
+        <div [hidden]="paginator.length > 0" class="mat-card-header-text no-variables">
+          <div class="mat-card-header-text">
+            <div class="mat-card-header-text-wa">There are no rows.</div>
+          </div>
+        </div>
+      </md-card-content>
+      <!-- [length]="paginator.length" [pageSizeOptions]="[5, 10, 25, 100]" -->
+      <md-paginator #paginator>
+      </md-paginator>
+    </md-card>
+  </div>
+</div>

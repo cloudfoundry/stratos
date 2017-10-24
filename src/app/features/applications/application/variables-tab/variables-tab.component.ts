@@ -19,29 +19,18 @@ import { CfAppEvnVarsDataSource } from '../../../../shared/data-sources/cf-app-v
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss']
 })
-export class VariablesTabComponent implements OnInit, OnDestroy {
+export class VariablesTabComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
   envVarsDataSource: CfAppEvnVarsDataSource;
 
-  @ViewChild(MdPaginator) paginator: MdPaginator;
-  @ViewChild('filter') filter: NgModel;
-  @ViewChild(MdSort) sort: MdSort;
-
-  filterSub: Subscription;
   envVars$: Observable<any>;
 
   ngOnInit() {
-    const filter$: Observable<string> = this.filter.valueChanges
-      .debounceTime(150)
-      .distinctUntilChanged()
-      .map(value => value as string);
-
-    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.paginator, this.sort, filter$, this.store, this.appService);
+    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
   }
 
-  ngOnDestroy(): void {
-  }
+
 }

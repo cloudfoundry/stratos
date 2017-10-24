@@ -30,9 +30,6 @@ export class CfAppEventsDataSource extends CfTableDataSource<AppEvent> {
    *
    */
   constructor(
-    _mdPaginator: MdPaginator,
-    _mdSort: MdSort,
-    _filter: Observable<string>,
     _store: Store<AppState>,
     _cfGuid: string,
     _appGuid: string,
@@ -40,6 +37,6 @@ export class CfAppEventsDataSource extends CfTableDataSource<AppEvent> {
     const paginationKey = `app-events:${_cfGuid}${_appGuid}`;
     const action = new GetAllAppEvents(paginationKey, _appGuid, _cfGuid);
     // TODO: RC key will not work
-    super(_mdPaginator, _mdSort, _filter, _store, action, EventSchema, 'metadata.guid', {} as AppEvent);
+    super(_store, action, EventSchema, 'metadata.guid', {} as AppEvent);
   }
 }

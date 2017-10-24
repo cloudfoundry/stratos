@@ -22,16 +22,12 @@ export class EventsTabComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  dataSource: CfTableDataSource<AppEvent>;
+  eventSource: CfTableDataSource<AppEvent>;
   hasEvents$: Observable<boolean>;
-  @ViewChild(MdPaginator) paginator: MdPaginator;
-  @ViewChild(MdSort) sort: MdSort;
+
 
   ngOnInit() {
-    this.dataSource = new CfAppEventsDataSource(
-      this.paginator,
-      this.sort,
-      Observable.of(''),
+    this.eventSource = new CfAppEventsDataSource(
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,

@@ -6,11 +6,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { TableDataSource } from './table-data-source';
+import { TableDataSource, ITableDataSource } from './table-data-source';
 import { AppState } from '../../store/app-state';
 
 
-export abstract class StandardTableDataSource<T extends object> extends TableDataSource<T> {
+export abstract class StandardTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource {
 
   abstract filteredRows: Array<T>;
   abstract isLoadingPage$: Observable<boolean>;
@@ -18,17 +18,15 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   private bsCount: BehaviorSubject<number> = new BehaviorSubject(0);
 
   constructor(
-    private _dMdPaginator: MdPaginator,
-    private _dMdSort: MdSort,
-    private _dFilter: Observable<string>,
     private _dStore: Store<AppState>,
     private _dTypeId: string,
     private _dEmptyType: T,
   ) {
-    super(_dMdPaginator, _dMdSort, _dFilter, _dStore, _dTypeId, _dEmptyType);
+    super(_dStore, _dTypeId, _dEmptyType);
   }
 
   connect(): Observable<T[]> {
+    // return Observable.of(new Array<T>());
     return this.data$
       .combineLatest(
       this.pageSize$.startWith(5),
@@ -38,7 +36,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       )
       .map(([collection, pageSize, pageIndex, sort, filter]: [Array<T>, number, number, Sort, string]) => {
         // TODO: RC caching?? catch no-ops?
-        this._dMdPaginator.length = collection.length;
+        this.mdPaginator.length = collection.length;
 
         const filtered = this.filter(collection, filter);
 
@@ -56,6 +54,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   }
 
   abstract filter(collection: any, filter: string): Array<T>;
+  // TODO:RC change to sort event;
   abstract sort(collection: Array<T>, sort: Sort): Array<T>;
 
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
@@ -76,5 +75,9 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     }
     const startIndex: number = pageIndex * pageSize;
     return collection.splice(startIndex, pageSize);
+  }
+
+  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+    super.initialise(paginator, sort, filter$);
   }
 }

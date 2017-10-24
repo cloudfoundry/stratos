@@ -16,6 +16,7 @@ import { FocusDirective } from './components/focus.directive';
 import { UniqueDirective } from './components/unique.directive';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
+import { TableComponent } from './components/table/table.component';
 
 
 @NgModule({
@@ -38,6 +39,7 @@ import { CodeBlockComponent } from './components/code-block/code-block.component
     FocusDirective,
     UniqueDirective,
     CodeBlockComponent,
+    TableComponent,
   ],
   exports: [
     FormsModule,
@@ -55,6 +57,7 @@ import { CodeBlockComponent } from './components/code-block/code-block.component
     FocusDirective,
     UniqueDirective,
     CodeBlockComponent,
+    TableComponent,
   ]
 })
 export class SharedModule { }

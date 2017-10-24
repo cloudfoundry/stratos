@@ -8,6 +8,14 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 
+export interface ITableDataSource {
+  // selectedRows: Map<string, any>;
+  // mdPaginator
+  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>);
+  connect(): Observable<any>;
+  disconnect();
+}
+
 export abstract class TableDataSource<T extends object> extends DataSource<T> {
 
   private paginationSub: Subscription;
@@ -31,9 +39,6 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
   public editRow: T;
 
   constructor(
-    private _mdPaginator: MdPaginator,
-    private _mdSort: MdSort,
-    private _filter: Observable<string>,
     private store: Store<AppState>,
     private _typeId: string,
     private _emptyType: T,
@@ -42,21 +47,6 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
     // this._mdPaginator.pageIndex = 0;
     // this._mdPaginator.pageSizeOptions = [5, 10, 20];
     this.addRow = { ... (_emptyType as object) } as T;
-
-    this.pageSize$ = this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    this._mdPaginator.pageSizeOptions = [5, 10, 20];
-
-    this.sort$ = this._mdSort.mdSortChange;
-
-    this.pageIndex$ = this._mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
-
-    this.paginationSub = Observable.combineLatest(
-      this.pageSize$,
-      this.pageIndex$
-    ).subscribe();
-
-    this.filter$ = _filter;
   }
 
   abstract connect(): Observable<T[]>;
@@ -112,4 +102,25 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
     delete this.editRow;
   }
 
+  public mdPaginator: MdPaginator;
+  // protected _sort$: Observable<Sort>;
+  protected initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+    this.mdPaginator = paginator;
+    this.sort$ = sort;
+
+    this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    this.mdPaginator.pageSizeOptions = [5, 10, 20];
+
+    // this.sort$ = this._sort$.mdSortChange;
+
+    this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
+
+    this.paginationSub = Observable.combineLatest(
+      this.pageSize$,
+      this.pageIndex$
+    ).subscribe();
+
+    this.filter$ = filter$;
+  }
 }
