@@ -234,22 +234,31 @@ func (p *portalProxy) SetupMiddleware(setupMiddleware *setupMiddleware) echo.Mid
 
 			setupRequestRegex := "/v1/setup$"
 			setupUpdateRequestRegex := "/v1/setup/update$"
+			versionRequestRegex := "/v1/version$"
+			backendRequestRegex := "/v1/"
 
 			if inCFMode {
 				setupRequestRegex = fmt.Sprintf("^/pp%s", setupRequestRegex)
 				setupUpdateRequestRegex = fmt.Sprintf("^/pp%s", setupUpdateRequestRegex)
+				versionRequestRegex = fmt.Sprintf("^/pp%s", versionRequestRegex)
+				backendRequestRegex = fmt.Sprintf("^/pp%s", backendRequestRegex)
 			}
 
 			isSetupRequest, _ = regexp.MatchString(setupRequestRegex, requestURLPath)
 			if !isSetupRequest {
-				isSetupRequest, _ = regexp.MatchString("/v1/setup/update$", requestURLPath)
+				isSetupRequest, _ = regexp.MatchString(setupUpdateRequestRegex, requestURLPath)
 			}
 			if isSetupRequest {
 				return h(c)
 			}
 
+			isVersionRequest, _ := regexp.MatchString(versionRequestRegex, requestURLPath)
+
+			if isVersionRequest {
+				return h(c)
+			}
 			// Request is not a setup request, refuse backend requests and allow all others
-			isBackendRequest, _ := regexp.MatchString("/v1/", requestURLPath)
+			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
 
 			if !isBackendRequest {
 				return h(c)
