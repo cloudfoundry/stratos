@@ -14,6 +14,14 @@
    */
   function appBusyServiceFactory($timeout) {
 
+    // Time to wait before showing the progress indicator - if a close occurs in this time, no progress is shown
+    // This prevents indicators being shown for quick operations
+    var OPEN_TIMEOUT = 250;
+
+    // Time period after the last close, where if a new progress indicator is requested, it will be shown immediately rather than obeying the open timeout
+    // This prevents progress indicators flicking on and off when different ui-view's show and hide progress indicators
+    var CLOSE_TIMEOUT = 500;
+
     var nextBusyId = 0;
 
     // Maintain a list of outstanding busy messages - only show the most recent
@@ -36,7 +44,7 @@
           } else {
             closeTimer = $timeout(function () {
               closeTimer = undefined;
-            }, 500);
+            }, CLOSE_TIMEOUT);
           }
         } else {
           // Get the last item - that is the most recent
@@ -55,7 +63,7 @@
               openTimer = $timeout(function () {
                 openTimer = undefined;
                 that.busyState.active = true;
-              }, 250);
+              }, OPEN_TIMEOUT);
             }
           }
         }
