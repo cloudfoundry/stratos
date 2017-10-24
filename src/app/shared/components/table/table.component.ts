@@ -17,15 +17,15 @@ import { StandardTableDataSource } from '../../data-sources/table-data-source-st
 export class TableComponent<T extends object> implements OnInit {
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
-  // @ViewChild(MdSort) sort: MdSort;
+  @Input('sort') sort = new EventEmitter<any>();
   @ViewChild('filter') filter: NgModel;
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as ITableDataSource;
-  // @Input('sort') sort: MdSort;
-  // @Input('hmmm') hmmm: any;
 
-  @Input('sort') sort = new EventEmitter<any>();
+  @Input('title') title: string;
+  @Input('enableAdd') enableAdd = false;
+  @Input('enableFilter') enableFilter = false;
 
   constructor() { }
 

@@ -23,6 +23,7 @@ export class VariablesTabComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
+
   envVarsDataSource: CfAppEvnVarsDataSource;
 
   envVars$: Observable<any>;
@@ -31,6 +32,4 @@ export class VariablesTabComponent implements OnInit {
     this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
   }
-
-
 }

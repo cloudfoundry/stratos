@@ -2,27 +2,25 @@
   <div>
     <!--  -->
     <div style="height: 5px;">
-      <md-progress-bar *ngIf="(dataSource.isLoadingPage$ | async)" color="primary" [mode]="'query'"></md-progress-bar>
+      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
+        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+      </div>
     </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
-        <div class="grow-title mat-card-header-text-wa">TITLE TO DO</div>
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-          <div class="grow-title mat-card-header-text-wa"></div>
-          <div [hidden]="paginator.length === 0">
-            <!-- TODO: Optional hide -->
+          <div class="grow-title mat-card-header-text-wa">{{ title }}</div>
+          <div [hidden]="!enableFilter || paginator.length === 0">
             <form novalidate>
               <md-form-field floatPlaceholder="never">
-                <input mdInput ngModel #filter="ngModel" name="filter" placeholder="Filter Environment Variables">
+                <input mdInput ngModel #filter="ngModel" name="filter" placeholder="Filter Rows">
               </md-form-field>
             </form>
           </div>
-          <!-- TODO: Make optional -->
-          <button md-icon-button (click)="addRowForm.reset(); dataSource.startAdd();">
+          <button md-icon-button *ngIf="enableAdd" (click)="addRowForm.reset();dataSource.startAdd();">
               <md-icon>add</md-icon>
             </button>
         </div>
-        <!-- TODO: Make optional -->
         <div [hidden]="!(dataSource.isSelecting$ | async)">
           <div class="grow-title mat-card-header-text-wa">{{dataSource.selectedRows.size}} Selected</div>
           <button md-icon-button (click)="dataSource.selectedDelete()">
@@ -30,21 +28,26 @@
             </button>
         </div>
         <div [hidden]="!(dataSource.isAdding$ | async)">
-          <ng-content select=".table-add"></ng-content>
+          <div class="grow-title mat-card-header-text-wa"></div>
+          !!{{addRowForm | json }}!!
+          <form #addRowForm="ngForm" novalidate>
+            <ng-content select="[app-table-add]"></ng-content>
+          </form>
+          <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!addRowForm.valid"><md-icon>done</md-icon></button>
+          <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
         </div>
       </md-card-header>
       <md-card-content>
-        <!-- Cannot wrap md-table around ng-content, see https://github.com/angular/material2/issues/6980-->
-        <ng-content select=".table-content"></ng-content>
+        <!-- Cannot wrap md-table > ng-content > column definitions, see https://github.com/angular/material2/issues/6980-->
+        <ng-content select="[app-table-content]"></ng-content>
 
-        <div [hidden]="paginator.length > 0" class="mat-card-header-text no-variables">
+        <div [hidden]="paginator.length > 0" class="mat-card-header-text no-rows">
           <div class="mat-card-header-text">
-            <div class="mat-card-header-text-wa">There are no rows.</div>
+            <div class="mat-card-header-text-wa">There are no entries.</div>
           </div>
         </div>
       </md-card-content>
-      <!-- [length]="paginator.length" [pageSizeOptions]="[5, 10, 25, 100]" -->
-      <md-paginator #paginator>
+      <md-paginator #paginator [hidden]="paginator.length === 0">
       </md-paginator>
     </md-card>
   </div>

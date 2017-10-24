@@ -1,0 +1,74 @@
+ .app-table {
+   md-card-header {
+     >div:not([hidden]) {
+       height: 66px;
+       display: flex;
+       flex-direction: row;
+       align-items: center;
+       flex: 1;
+       .grow-title {
+         flex-grow: 1;
+       }
+       form {
+         padding-right: 13px;
+       }
+       button:last-of-type {
+         margin-right: 26px;
+       }
+     }
+   }
+   md-card-content {
+     .no-rows {
+       padding: 20px 0;
+     }
+   }
+   md-card-footer {
+     margin: 0;
+   }
+   md-paginator[hidden] {
+     display: none;
+   }
+ } // mat-card-header-text is very, very weird.
+ div.mat-card-header-text-wa {
+   margin: 0 8px;
+ }
+
+ :host /deep/ [app-table-add] {
+   //TODO: RC
+ }
+
+ :host /deep/ [app-table-content] {
+   md-header-row[hidden] {
+     *,
+     &.mat-header-row {
+       display: none;
+     }
+   }
+   md-header-cell,
+   md-cell {
+     flex: 1 1 200px; //  flex-grow: 0; //  min-width: 200px;
+     padding: 10px 5px;
+   }
+   .table-column-select {
+     flex-grow: 0;
+     min-width: 100px;
+   }
+   .table-column-edit {
+     flex-grow: 0;
+     min-width: inherit;
+     display: flex;
+     flex-direction: row;
+     justify-content: flex-end;
+   }
+   md-row {
+     min-height: 57px;
+     &:hover {
+       background-color: rgba(0, 0, 0, 0.05);
+     }
+     md-cell {
+       md-form-field {
+         width: 90%;
+       }
+     }
+   }
+ }

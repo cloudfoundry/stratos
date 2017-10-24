@@ -1,8 +1,7 @@
 <div class="events-tab">
-  <!-- TODO: RC Arrive from app wall error-->
-  <app-table #appTable [dataSource]="eventSource">
-    <div class="table-content">
-      <md-table #table [hidden]="(eventSource.count$ | async) === 0" [dataSource]="eventSource" mdSort (mdSortChange)="appTable.sort.emit($event)">
+  <app-table #appTable [dataSource]="eventSource" [title]="'Events'" [enableFilter]="true">
+    <div app-table-content>
+      <md-table #table [hidden]="eventSource.mdPaginator.length === 0" [dataSource]="eventSource" mdSort (mdSortChange)="appTable.sort.emit($event)">
         <ng-container mdColumnDef="timestamp">
           <md-header-cell *mdHeaderCellDef md-sort-header> Timestamp </md-header-cell>
           <md-cell *mdCellDef="let row">{{row.entity.timestamp | date:'medium'}}</md-cell>
@@ -31,14 +30,11 @@
             </table>
           </md-cell>
         </ng-container>
-        <md-header-row *mdHeaderRowDef="['timestamp', 'type', 'actor_name', 'detail']" [hidden]="(eventSource.count$ | async) === 0">
+        <md-header-row *mdHeaderRowDef="['timestamp', 'type', 'actor_name', 'detail']" [hidden]="eventSource.mdPaginator.length === 0">
         </md-header-row>
         <md-row *mdRowDef="let row; columns: ['timestamp', 'type', 'actor_name', 'detail'];">
         </md-row>
       </md-table>
-
-
-
     </div>
   </app-table>
 </div>
