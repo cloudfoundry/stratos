@@ -20,34 +20,14 @@ import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources
 
 export class EventsTabComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
-
-  }
+  constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
   dataSource: CfTableDataSource<AppEvent>;
   hasEvents$: Observable<boolean>;
-  // paginationKey: string;
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
 
-  // gotToPage() {
-  //   this.store.dispatch(new AddParams(EventSchema.key, this.paginationKey, {
-  //     [resultPerPageParam]: 10
-  //   }));
-  // }
-
-
   ngOnInit() {
-    // this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`;
-    // const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
-
-
-    // this.dataSource = new AppEventsDataSource(
-    //   this.store,
-    //   action,
-    //   this.paginator,
-    //   this.sort
-    // );
     this.dataSource = new CfAppEventsDataSource(
       this.paginator,
       this.sort,

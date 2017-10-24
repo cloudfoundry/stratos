@@ -57,5 +57,24 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
 
   abstract filter(collection: any, filter: string): Array<T>;
   abstract sort(collection: Array<T>, sort: Sort): Array<T>;
-  abstract paginate(collection: Array<T>, pageSize: number, pageIndex: number): Array<T>;
+
+  paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
+    // Is the paginators pageIndex valid?
+    if (pageIndex * pageSize > collection.length) {
+      pageIndex = Math.floor(collection.length / pageSize);
+    }
+
+    // Should the paginator select a freshly added row?
+    if (this.selectRow) {
+      for (let i = 0; i < collection.length; i++) {
+        if (collection[i][this._dTypeId] === this.selectRow[this._dTypeId]) {
+          pageIndex = Math.floor(i / pageSize);
+          delete this.selectRow;
+          break;
+        }
+      }
+    }
+    const startIndex: number = pageIndex * pageSize;
+    return collection.splice(startIndex, pageSize);
+  }
 }

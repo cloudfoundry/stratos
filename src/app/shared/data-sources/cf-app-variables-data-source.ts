@@ -97,6 +97,7 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   }
 
   disconnect() {
+    super.disconnect();
   }
 
   filter(envVars: AppEnvVar[], filter: string): any {
@@ -130,26 +131,6 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
 
       return (valueA < valueB ? -1 : 1) * (this._sort.direction === 'asc' ? 1 : -1);
     });
-  }
-
-  paginate(envVars: Array<AppEnvVar>, pageSize: number, pageIndex: number): AppEnvVar[] {
-    // Is the paginators pageIndex valid?
-    if (pageIndex * pageSize > envVars.length) {
-      pageIndex = Math.floor(envVars.length / pageSize);
-    }
-
-    // Should the paginator select a freshly added row?
-    if (this.selectRow) {
-      for (let i = 0; i < envVars.length; i++) {
-        if (envVars[i].name === this.selectRow.name) {
-          pageIndex = Math.floor(i / pageSize);
-          delete this.selectRow;
-          break;
-        }
-      }
-    }
-    const startIndex: number = pageIndex * pageSize;
-    return envVars.splice(startIndex, this._paginator.pageSize);
   }
 
   _createUpdateApplication(removeSelected: boolean): UpdateApplication {
