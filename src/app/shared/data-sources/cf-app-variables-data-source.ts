@@ -1,14 +1,14 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
+import { AppState } from '../../store/app-state';
 import { MdPaginator, MdSort, Sort, PageEvent } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { EventEmitter } from '@angular/core';
-import { EntityInfo } from '../../../../store/types/api.types';
-import { UpdateApplication } from '../../../../store/actions/application.actions';
-import { DefaultTableDataSource } from '../../../../core/table-data-source';
+import { StandardTableDataSource } from './table-data-source-standard';
+import { ApplicationService } from '../../features/applications/application.service';
+import { EntityInfo } from '../../store/types/api.types';
+import { UpdateApplication } from '../../store/actions/application.actions';
 
 interface AppEnvVar {
   name: string;
@@ -19,7 +19,7 @@ interface AddAppEnvVar extends AppEnvVar {
   select: boolean;
 }
 
-export class AppEnvironemtEvnVarsDataSource extends DefaultTableDataSource<AppEnvVar> {
+export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
 
   // Only needed for unique filter when adding new env vars
   private rowNames: Array<string> = new Array<string>();

@@ -5,12 +5,12 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { MdPaginator, MdSort } from '@angular/material';
-import { AppEventsDataSource, AppEvent } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
-import { CfTableDataSource } from '../../../../core/table-data-source';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
+import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
 
 @Component({
   selector: 'app-events-tab',
@@ -26,20 +26,20 @@ export class EventsTabComponent implements OnInit {
 
   dataSource: CfTableDataSource<AppEvent>;
   hasEvents$: Observable<boolean>;
-  paginationKey: string;
+  // paginationKey: string;
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
 
-  gotToPage() {
-    this.store.dispatch(new AddParams(EventSchema.key, this.paginationKey, {
-      [resultPerPageParam]: 10
-    }));
-  }
+  // gotToPage() {
+  //   this.store.dispatch(new AddParams(EventSchema.key, this.paginationKey, {
+  //     [resultPerPageParam]: 10
+  //   }));
+  // }
 
 
   ngOnInit() {
-    this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`;
-    const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
+    // this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`;
+    // const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
 
 
     // this.dataSource = new AppEventsDataSource(
@@ -48,15 +48,13 @@ export class EventsTabComponent implements OnInit {
     //   this.paginator,
     //   this.sort
     // );
-    this.dataSource = new CfTableDataSource<AppEvent>(
+    this.dataSource = new CfAppEventsDataSource(
       this.paginator,
       this.sort,
       Observable.of(''),
       this.store,
-      action,
-      EventSchema,
-      'metadata.guid', // TODO: RC Not sure if this will work.. atm selecting events not possible
-      {} as AppEvent
+      this.appService.cfGuid,
+      this.appService.appGuid,
     );
   }
 }

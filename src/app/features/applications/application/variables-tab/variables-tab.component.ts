@@ -11,7 +11,7 @@ import { AppState } from '../../../../store/app-state';
 import { NgModel } from '@angular/forms';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 import { EntityInfo } from '../../../../store/types/api.types';
-import { AppEnvironemtEvnVarsDataSource } from './variables-data-source';
+import { CfAppEvnVarsDataSource } from '../../../../shared/data-sources/cf-app-variables-data-source';
 
 
 @Component({
@@ -23,7 +23,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  envVarsDataSource: AppEnvironemtEvnVarsDataSource;
+  envVarsDataSource: CfAppEvnVarsDataSource;
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild('filter') filter: NgModel;
@@ -38,7 +38,7 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
       .distinctUntilChanged()
       .map(value => value as string);
 
-    this.envVarsDataSource = new AppEnvironemtEvnVarsDataSource(this.paginator, this.sort, filter$, this.store, this.appService);
+    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.paginator, this.sort, filter$, this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
   }
 
