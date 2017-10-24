@@ -17,11 +17,22 @@ resources:
     base_url: {{base-url}}
 
 jobs:
+- name: fetch-pr
+  plan:
+  # get PR and set status to pending
+  - get: stratos-ui
+    trigger: true
+  - do: 
+    - task: fethc-pr-task
+      timeout: 15m
+      file: stratos-ui/deploy/ci/tasks/stratos-ui/dummy-task.yml
 - name: console-unit-tests
   plan:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
+    passed: [fetch-pr]
+
   - put: stratos-ui
     params:
       path: stratos-ui
@@ -51,6 +62,7 @@ jobs:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
+    passed: [fetch-pr]
   - put: stratos-ui
     params:
       path: stratos-ui
@@ -81,6 +93,7 @@ jobs:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
+    passed: [fetch-pr]
   - put: stratos-ui
     params:
       path: stratos-ui
