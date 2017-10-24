@@ -12,7 +12,7 @@
    * @param {object} appEventService - the event service
    * @returns {object} the busy service
    */
-  function appBusyServiceFactory() {
+  function appBusyServiceFactory($timeout) {
 
     var nextBusyId = 0;
 
@@ -21,6 +21,8 @@
 
     var busyStates = {};
 
+    var openTimer, closeTimer;
+
     return {
 
       busyState: {},
@@ -28,13 +30,34 @@
       _update: function () {
         if (busyStack.length === 0) {
           this.busyState.active = false;
+          if (openTimer) {
+            $timeout.cancel(openTimer);
+            openTimer = undefined;
+          } else {
+            closeTimer = $timeout(function () {
+              closeTimer = undefined;
+            }, 500);
+          }
         } else {
           // Get the last item - that is the most recent
           var newestId = busyStack[busyStack.length - 1];
           var busyInfo = busyStates[newestId];
           this.busyState.label = busyInfo.label;
           this.busyState.local = busyInfo.local || false;
-          this.busyState.active = true;
+
+          if (!this.busyState.active && !openTimer) {
+            if (closeTimer) {
+              $timeout.cancel(closeTimer);
+              closeTimer = undefined;
+              this.busyState.active = true;
+            } else {
+              var that = this;
+              openTimer = $timeout(function () {
+                openTimer = undefined;
+                that.busyState.active = true;
+              }, 250);
+            }
+          }
         }
       },
 
