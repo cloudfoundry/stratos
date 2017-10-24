@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository:  registry.capbristol.com:5000/susetest/console-proxy-builder
+    repository:  registry.capbristol.com:5000/splatform/stratos-proxy-builder:latest
     tag: "latest"
     insecure_registries: [ "registry.capbristol.com:5000" ]
 
@@ -17,10 +17,6 @@ run:
   - -exc
   - |
     cd stratos-ui
-    if [ "${SET_PROXIES}" = "true" ]; then
-    npm config set proxy ${PROXY_SERVER}
-    npm config set https-proxy ${PROXY_SERVER}
-    fi
     npm install
     npm run build-backend
     cd -
