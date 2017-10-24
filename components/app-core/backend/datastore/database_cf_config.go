@@ -23,6 +23,7 @@ const (
 type VCAPService struct {
 	Credentials map[string]interface{} `json:"credentials"`
 	Tags        []string               `json:"tags"`
+	Name        string                 `json:"name"`
 }
 
 // Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
