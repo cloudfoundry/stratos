@@ -87,6 +87,13 @@
     function getInitialActions() {
       return [
         {
+          name: 'cf.space-info.edit-service-action',
+          disabled: false,
+          execute: function (serviceInstance) {
+            cfServiceInstanceService.editService(vm.clusterGuid, serviceInstance, _.bind(update, vm, serviceInstance));
+          }
+        },
+        {
           name: 'cf.space-info.delete-service-action',
           disabled: false,
           execute: function (serviceInstance) {
@@ -127,8 +134,8 @@
       _.forEach(serviceInstances, function (si) {
         if (vm.canDeleteOrUnbind) {
           vm.actionsPerSI[si.metadata.guid] = vm.actionsPerSI[si.metadata.guid] || getInitialActions();
-          vm.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
-          vm.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
+          vm.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
+          vm.actionsPerSI[si.metadata.guid][2].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
         } else {
           delete vm.actionsPerSI[si.metadata.guid];
         }
