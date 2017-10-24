@@ -9,14 +9,28 @@ import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 
 export interface ITableDataSource {
-  // selectedRows: Map<string, any>;
-  // mdPaginator
+  mdPaginator: MdPaginator;
+  addRow;
+  isAdding$: BehaviorSubject<boolean>;
+  isSelecting$: BehaviorSubject<boolean>;
+
+  editRow: any; // Edit items - remove once ng-content can exist in md-table
+
+  selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
+  selectedRows: Map<string, any>; // Select items - remove once ng-content can exist in md-table
+  selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: any); // Select items - remove once ng-content can exist in md-table
+
+  startEdit(row); // Edit items - remove once ng-content can exist in md-table
+  saveEdit(); // Edit items - remove once ng-content can exist in md-table
+  cancelEdit(); // Edit items - remove once ng-content can exist in md-table
+
   initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>);
   connect(): Observable<any>;
   disconnect();
 }
 
-export abstract class TableDataSource<T extends object> extends DataSource<T> {
+export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource {
 
   private paginationSub: Subscription;
 
@@ -30,13 +44,15 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
 
   public addRow: T;
   protected selectRow: T;
-  public isAdding$ = new BehaviorSubject(false);
+  public isAdding$ = new BehaviorSubject<boolean>(false);
 
   public selectedRows = new Map<string, T>();
   public isSelecting$ = new BehaviorSubject(false);
   public selectAllChecked = false;
 
   public editRow: T;
+
+  public mdPaginator: MdPaginator;
 
   constructor(
     private store: Store<AppState>,
@@ -55,19 +71,19 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
   }
 
 
-  protected startAdd() {
+  startAdd() {
     this.addRow = { ... (this._emptyType as object) } as T;
     this.isAdding$.next(true);
   }
-  protected saveAdd() {
+  saveAdd() {
     this.selectRow = this.addRow;
     this.isAdding$.next(false);
   }
-  protected cancelAdd() {
+  cancelAdd() {
     this.isAdding$.next(false);
   }
 
-  protected selectedRowToggle(row: T) {
+  selectedRowToggle(row: T) {
     const exists = this.selectedRows.has(row[this._typeId]);
     if (exists) {
       this.selectedRows.delete(row[this._typeId]);
@@ -76,7 +92,7 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
-  protected selectAllFilteredRows(selectAll) {
+  selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
     for (const row of this.filteredRows) {
       if (this.selectAllChecked) {
@@ -92,19 +108,17 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> {
     this.isSelecting$.next(false);
   }
 
-  protected startEdit(rowClone: T) {
+  startEdit(rowClone: T) {
     this.editRow = rowClone;
   }
-  protected saveEdit() {
+  saveEdit() {
     delete this.editRow;
   }
-  protected cancelEdit() {
+  cancelEdit() {
     delete this.editRow;
   }
 
-  public mdPaginator: MdPaginator;
-  // protected _sort$: Observable<Sort>;
-  protected initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
     this.mdPaginator = paginator;
     this.sort$ = sort;
 

@@ -1,6 +1,5 @@
 <div class="app-table">
   <div>
-    <!--  -->
     <div style="height: 5px;">
       <div [hidden]="!(dataSource.isLoadingPage$ | async)">
         <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
@@ -29,7 +28,7 @@
         </div>
         <div [hidden]="!(dataSource.isAdding$ | async)">
           <div class="grow-title mat-card-header-text-wa"></div>
-          !!{{addRowForm | json }}!!
+          <!-- !!{{addRowForm.valid }}!! -->
           <form #addRowForm="ngForm" novalidate>
             <ng-content select="[app-table-add]"></ng-content>
           </form>
