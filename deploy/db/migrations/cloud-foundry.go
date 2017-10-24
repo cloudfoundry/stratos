@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -36,33 +37,43 @@ type VCAPService struct {
 	Tags        []string               `json:"tags"`
 }
 
-func main() {
+func parseCloudFoundryEnv() (string, error) {
+	var dbEnv string
 
-	fmt.Println("# VCAP_SERVICES Parsing")
+	fmt.Println("Attempting to parse VCAP_SERVICES")
 
 	// Try and get the services environment variable
 	services, ok := os.LookupEnv(VCAP_SERVICES)
 
 	if ok {
 		var vcapServices map[string][]VCAPService
-
 		// Try and parse it as JSON
 		err := json.Unmarshal([]byte(services), &vcapServices)
 		if err == nil {
 			findDatabaseConfig(vcapServices)
+			switch dbType := os.Getenv(DB_TYPE); dbType {
+			case TYPE_POSTGRES:
+				dbEnv = "cf_postgres"
+				fmt.Printf("Migrating postgresql instance on %s\n", os.Getenv(DB_HOST))
+			case TYPE_MYSQL:
+				dbEnv = "cf_mysql"
+				fmt.Printf("Migrating mysql instance on %s\n", os.Getenv(DB_HOST))
+			default:
+				return "", errors.New("Database type not recognized")
+			}
 		} else {
-			fmt.Println("#", err)
+			return "", err
 		}
 	}
 
-	fmt.Println("")
+	return dbEnv, nil
 }
 
 func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 	for _, services := range vcapServices {
 		for _, service := range services {
 			if stringInSlice(STRATOS_POSTGRES_TAG, service.Tags) {
-				fmt.Println("# Postgres db config")
+				fmt.Println("Pasring Postgres db config")
 
 				exportString(DATABASE_PROVIDER, PROVIDER_POSTGRES)
 				exportString(DB_TYPE, TYPE_POSTGRES)
@@ -72,7 +83,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService) {
 				exportString(DB_PASSWORD, service.Credentials[PASSWORD])
 				exportString(DB_DATABASE_NAME, service.Credentials[DBNAME])
 			} else if stringInSlice(STRATOS_MYSQL_TAG, service.Tags) {
-				fmt.Println("# MySQL db config")
+				fmt.Println("Pasring MySQL db config")
 
 				exportString(DATABASE_PROVIDER, PROVIDER_MYSQL)
 				exportString(DB_TYPE, TYPE_MYSQL)
@@ -96,5 +107,5 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func exportString(name string, value interface{}) {
-	fmt.Printf("\nexport %s=\"%v\"", name, value)
+	os.Setenv(name, fmt.Sprintf("%v", value))
 }
