@@ -32,9 +32,11 @@
    * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
    * deploy, etc)
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
+   * @param {appBusyService} appBusyService - the application busy service
+   * 
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-    appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage) {
+    appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage, appBusyService) {
 
     var vm = this;
 
@@ -46,6 +48,12 @@
 
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.loading = true;
+    if (!vm.model.hasApps) {
+      vm.appBusyId = appBusyService.set('app-wall.retrieving', true);
+    } else {
+      vm.appBusyId = undefined;
+    }
+
     vm.isSpaceDeveloper = false;
     vm.clusters = [{label: 'app-wall.select-endpoint-all', value: 'all', translateLabel: true}];
     vm.organizations = [{label: 'app-wall.select-org-all', value: 'all', translateLabel: true}];
@@ -110,6 +118,11 @@
       appErrorService.clearAppError();
       // Ensure that remove the resize handler on the window
       angular.element($window).off('resize', onResize);
+
+      // Clear the busy indicator if it is shown
+      if (vm.appBusyId) {
+        appBusyService.clear(vm.appBusyId);
+      }
     });
 
     $scope.$watch(function () {
@@ -154,6 +167,10 @@
         .finally(function () {
           // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
           vm.ready = true;
+          if (vm.appBusyId) {
+            appBusyService.clear(vm.appBusyId);
+            vm.appBusyId = undefined;
+          }
         });
     }
 
@@ -433,18 +450,7 @@
           // changed the org and space filter
           needToReload = needToReload || !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
-          if (needToReload) {
-            _reload();
-          } else {
-            if (vm.filter.cnsiGuid === 'all') {
-              vm.model.resetFilter();
-            } else {
-              vm.model.filterByCluster(vm.filter.cnsiGuid);
-            }
-            vm.paginationProperties.pageNumber = 1;
-            vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
-            _loadPage(1);
-          }
+          _reload(false, !needToReload);
         });
     }
 

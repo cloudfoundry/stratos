@@ -28,10 +28,11 @@
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.appRegisterService} appRegisterService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {object} appBusyService - the appBusyService service
    * @constructor
    */
   function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
-    appEndpointsDashboardService) {
+    appEndpointsDashboardService, appBusyService) {
     var vm = this;
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
@@ -116,6 +117,7 @@
     }
 
     function init() {
+      vm.appBusyId = appBusyService.set('endpoints-dashboard.busy');
       vm.initialised = false;
       return appEndpointsDashboardService.update()
         .then(function () {
@@ -139,6 +141,8 @@
           _updateWelcomeMessage();
         }).catch(function () {
           vm.listError = true;
+        }).finally(function () {
+          appBusyService.clear(vm.appBusyId);
         });
     }
 

@@ -1,4 +1,4 @@
-actions-toolbar {
+actions-toolbar, .app-actions-bar {
   width: 100%;
   display: flex;
   align-items: center;
@@ -41,6 +41,7 @@ actions-toolbar {
 
       &:hover {
         background-color: $actions-toolbar-hover-bg;
+        text-decoration: none;
         > app-icon > svg > path {
           stroke: $actions-toolbar-menu-hover-color;
         }
@@ -48,6 +49,8 @@ actions-toolbar {
 
       &:focus {
         outline: 0;
+        text-decoration: none;
+        color: $actions-toolbar-menu-color;
       }
 
       > app-icon {
@@ -58,6 +61,9 @@ actions-toolbar {
         > svg {
           width: $actions-toolbar-icon-svg-size;
           height: $actions-toolbar-icon-svg-size;
+          & > path {
+            stroke: $actions-toolbar-menu-color;
+          }
         }
 
         > i.material-icons {

@@ -36,21 +36,26 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {object} appLoggedInService - Logged In Service
+   * @param {object} appBusyService - the appBusyService service
    * @constructor
    */
-  function ApplicationsController($scope, $q, $state, appUtilsService, modelManager, appEventService, appLoggedInService) {
+  function ApplicationsController($scope, $q, $state,appUtilsService, modelManager, appEventService, appLoggedInService, appBusyService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
     var initialized = $q.defer();
+    var vm = this;
 
     if (appLoggedInService.isLoggedIn()) {
       initialized.resolve();
     }
 
     function init() {
+      vm.appBusyId = appBusyService.set('cf.busy');
       return initialized.promise
         .then(function () {
-          return authService.initialize();
+          return authService.initialize().finally(function () {
+            appBusyService.clear(vm.appBusyId);
+          });
         });
     }
 

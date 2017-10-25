@@ -55,6 +55,14 @@
           "summary-panel": {
             "org-label": "Organisation"
           }
+        },
+        "services": {
+          "messages": {
+            "view-catalogue-link": "service catalogue"
+          }
+        },
+        "service-catalogue": {
+          "label": "Service Catalogue"
         }
       }
     }

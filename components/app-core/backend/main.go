@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -260,7 +261,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -340,8 +341,8 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 	return dc, nil
 }
 
-func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
-	log.Debug("createTempCertFiles")
+func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
+	log.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -353,6 +354,17 @@ func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
 	_, errDevkey := os.Stat(devCertsDir + certKeyFilename)
 	if errDevcert == nil && errDevkey == nil {
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
+	}
+
+	// Check if certificate have been provided as files (as is the case in kubernetes)
+	if pc.TLSCertPath != "" && pc.TLSCertKeyPath != "" {
+		log.Infof("Using TLS cert: %s, %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		_, errCertMissing := os.Stat(pc.TLSCertPath)
+		_, errCertKeyMissing := os.Stat(pc.TLSCertKeyPath)
+		if errCertMissing != nil || errCertKeyMissing != nil {
+			return "", "", fmt.Errorf("unable to find certificate %s or certificate key %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		}
+		return pc.TLSCertPath, pc.TLSCertKeyPath, nil
 	}
 
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
@@ -435,33 +447,30 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 		p.registerRoutes(e, addSetupMiddleware)
 	}
 
+	var engine *standard.Server
+	address := config.TLSAddress
 	if config.HTTPS {
-		certFile, certKeyFile, err := createTempCertFiles(config)
+		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
-
-		address := config.TLSAddress
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine := standard.WithTLS(address, certFile, certKeyFile)
-		if isUpgrade {
-			go stopEchoWhenUpgraded(e)
-		}
+		engine = standard.WithTLS(address, certFile, certKeyFile)
 
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTPS server", engineErr)
-		}
 	} else {
-		address := config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine := standard.New(address)
-		if isUpgrade {
-			go stopEchoWhenUpgraded(e)
-		}
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTP server", engineErr)
+		engine = standard.New(address)
+	}
+
+	if isUpgrade {
+		go stopEchoWhenUpgraded(engine)
+	}
+
+	engineErr := e.Run(engine)
+	if engineErr != nil {
+		engineErrStr := fmt.Sprintf("%s", engineErr)
+		if !strings.Contains(engineErrStr, "Server closed") {
+			log.Warnf("Failed to start HTTP/S server", engineErr)
 		}
 	}
 
@@ -641,11 +650,10 @@ func isConsoleUpgrading() bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *echo.Echo) {
+func stopEchoWhenUpgraded(e *standard.Server) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
-	e.Stop()
-
+	e.Close()
 }

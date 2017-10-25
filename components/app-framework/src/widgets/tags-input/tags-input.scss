@@ -1,0 +1,49 @@
+.tags-input-field.form-group {
+  height: auto;
+
+  // Override default styles for the tags-input directive
+  tags-input {
+
+    .host {
+      margin: 0;
+      min-height: 32px;
+      outline: 0;
+    }
+
+    .tags {
+      box-shadow: none;
+      border: 0;
+      padding: 0;
+
+      &.focused {
+        outline: 0;
+        border: 0;
+        box-shadow: none;
+      }
+
+      input.input {
+        font-family: $font-family-base;
+        font-size: $font-size-base;
+        height: 26px;
+        margin-bottom: 0;
+      }
+
+      .tag-item {
+        background: none;
+        font-family: $font-family-base;
+        font-size: $font-size-base;
+        margin: 2px 6px 2px 0;
+
+        &.selected {
+          background: $suse-primary;
+        }
+
+        ti-tag-item {
+          ng-include {
+            margin: 0 !important;
+          }
+        }
+      }
+    }
+  }
+}

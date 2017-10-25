@@ -17,5 +17,5 @@ run:
   - |
     apk update
     apk add openssl
-    export DEV_CERTS_PATH=dev-certs-output/dev-certs
-    ./stratos-ui/deploy/ci/scripts/generate_cert.sh
+    export CERTS_PATH=dev-certs-output/dev-certs
+    ./stratos-ui/deploy/tools/generate_cert.sh

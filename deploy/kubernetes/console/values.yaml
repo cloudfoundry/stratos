@@ -13,7 +13,11 @@ dbProvider: mysql
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
-noShared: false
+useLb: false
+console:
+  port: 443
+# externalIP: 127.0.0.1
+noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy
@@ -23,18 +27,42 @@ images:
   postflight: stratos-postflight-job
 # Specify which storage class should be used for PVCs
 #storageClass: default
+#consoleCert: |
+#    -----BEGIN CERTIFICATE-----
+#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+#   ...
+#    -----END CERTIFICATE-----
+#consoleCertKey: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
+#    ...
+#    -----END PRIVATE KEYE-----
 # MariaDB chart configuration
 mariadb:
   # Only required for creating the databases
   mariadbRootPassword: changeme
+  image: splatform/stratos-mariadb:10.1.28-r2
   adminUser: root
   # Credentials for user
   mariadbUser: console
   mariadbPassword: changeme
   mariadbDatabase: console
   persistence:
-    accessMode: ReadWriteMany
+    accessMode: ReadWriteOnce
     size: 1Gi
 #    storageClass: default
   metrics:
     enabled: false
+uaa:
+  protocol: https://
+  port: 
+  host: 
+  consoleClient:  
+  consoleClientSecret: 
+  consoleAdminIdentifier: 
+  skipSSLValidation: false
+ # SCF values compatability 
+env:
+  UAA_HOST: 
+  UAA_ADMIN_CLIENT_SECRET: 
+  UAA_PORT:

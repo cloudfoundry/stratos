@@ -63,9 +63,35 @@
       getStep: function (session) {
         var data = {
           deployState: deployState,
-          logFilter: logFilter
+          logFilter: logFilter,
+          getState: getState
         };
         var wizardData = session.wizard;
+
+        function getState() {
+          switch (data.deployStatus) {
+            case data.deployState.PUSHING:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploying',
+                status: 2
+              };
+            case data.deployState.DEPLOYED:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploy-success',
+                status: 1
+              };
+            case data.deployState.FAILED:
+              return {
+                title: data.deployFailure,
+                status: 3
+              };
+            default:
+              return {
+                title: 'deploy-app-dialog.step-deploying.title-deploying',
+                status: 2
+              };
+          }
+        }
 
         var step = {
           title: 'deploy-app-dialog.step-deploying.title',
@@ -195,7 +221,8 @@
       function sendGitHubSourceMetadata() {
         var github = {
           project: sourceUserInput.githubProject,
-          branch: sourceUserInput.githubBranch.name
+          branch: sourceUserInput.githubBranch.name,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -211,7 +238,8 @@
       function sendGitUrlSourceMetadata() {
         var giturl = {
           url: sourceUserInput.gitUrl,
-          branch: sourceUserInput.gitUrlBranch
+          branch: sourceUserInput.gitUrlBranch,
+          type: sourceUserInput.gitType
         };
 
         var msg = {
@@ -234,6 +262,7 @@
 
         sourceUserInput.fileTransfers = metadata.files;
         metadata.files = metadata.files.length;
+        metadata.type = 'filefolder';
         data.uploadingFiles = {
           remaining: metadata.files,
           bytes: 0,

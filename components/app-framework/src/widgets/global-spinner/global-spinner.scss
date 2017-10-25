@@ -1,5 +1,5 @@
-.global-spinner {
-  background-color: $global-spinner-bg-color;
+
+.global-spinner, .global-spinner-local {
   position: fixed;
   top: 0px;
   left: 0px;
@@ -11,14 +11,41 @@
   align-items: center;
   height: 100%;
   width: 100%;
-  z-index: $global-spinner-z-index;
 
   spinner {
     height: $global-spinner-height;
     width: $global-spinner-width;
   }
+
+  .global-spinner-content.global-spinnter-with-label {
+    background-color: $gray-darker;
+    color: $white;
+    padding: $console-half-space $console-unit-space * 2;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: center;
+
+    > div {
+      margin-bottom: $console-half-space;
+    }
+
+    bounce-spinner .bounce-spinner > div {
+      background-color: $white;
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .global-spinner-active {
   overflow-y: hidden;
+}
+
+.global-spinner {
+  background-color: $global-spinner-bg-color;
+  z-index: $global-spinner-z-index;
+}
+
+.global-spinner-local {
+  pointer-events: none;
 }

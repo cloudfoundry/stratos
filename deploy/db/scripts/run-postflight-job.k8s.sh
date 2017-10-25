@@ -78,9 +78,26 @@ goose --env=$DBCONF_KEY dbversion
 echo "Database operation(s) complete."
 
 
+TEMP_SCRIPT=$(mktemp)
+cat << EOF >> $TEMP_SCRIPT
+#!/bin/sh
 # Check if Upgrade Lock file exists
-if [ ! -f "/$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME" ]; then
-  exit 1
+while [ ! -f "/$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME" ];
+do 
+    echo "Upgrade lock file does not exist yet! Sleeping..."
+    sleep 5; 
+done   
+EOF
+chmod +x $TEMP_SCRIPT
+
+
+# Timeout after 5 minutes
+IS_ALPINE=$(cat /etc/os-release | grep Alpine)
+
+if [ -z "${IS_ALPINE}" ]; then
+    timeout 5m ${TEMP_SCRIPT}
+else
+    timeout -t 300 ${TEMP_SCRIPT}
 fi
 # Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
@@ -95,5 +112,5 @@ if [ "${DO_NOT_QUIT:-false}" = "false" ]; then
     exit 0
 else
     echo "Running in 'DO NOT QUIT' mode"
-    while true; do echo ''; sleep 5; done   
+    while true; do sleep 5; done   
 fi

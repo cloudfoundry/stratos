@@ -8,6 +8,7 @@
           "apps": "applications",
           "instances": "application instances",
           "services": "services",
+          "service-instances": "services instances",
           "routes": "routes",
           "memory": "memory usage",
           "ssh": "ssh enabled",
@@ -58,7 +59,8 @@
             "type": "type",
             "plan": "plan",
             "attached": "application attached",
-            "action": "@:cf.space-info.tabs.column.action"
+            "action": "@:cf.space-info.tabs.column.action",
+            "tags": "tags"
           },
           "none": "You have no service instances",
           "show-all-button": "@:cf.space-info.tabs.show-all-button"

@@ -12,16 +12,22 @@
   // Get host IP
   var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
   var hostProtocol = browser.params.protocol || 'https://';
-  var hostIp = browser.params.host || sh.exec(CMD, {silent: true}).output.trim();
+  var hostIp = browser.params.host || sh.exec(CMD, {
+    silent: true
+  }).output.trim();
   var hostPort = browser.params.port || '';
   var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
-
+  if (hostProtocol === 'http://' && hostPort.toString() === '80') {
+    host = hostProtocol + hostIp;
+  } else if (hostProtocol === 'https://' && hostPort.toString() === '443') {
+    host = hostProtocol + hostIp;
+  }
   var cnsis = browser.params.cnsi;
   var adminUser = browser.params.credentials.admin.username;
   var adminPassword = browser.params.credentials.admin.password;
   var user = browser.params.credentials.user.username;
   var password = browser.params.credentials.user.password;
-
+  var uaa = browser.params.uaa;
   module.exports = {
 
     getHost: getHost,
@@ -30,6 +36,7 @@
     getAdminPassword: getAdminPassword,
     getUser: getUser,
     getPassword: getPassword,
+    getUaaConfig: getUaaConfig,
 
     newBrowser: newBrowser,
     loadApp: loadApp,
@@ -68,7 +75,10 @@
 
     scrollIntoView: scrollIntoView,
 
-    waitForElementAndClick: waitForElementAndClick
+    waitForElementAndClick: waitForElementAndClick,
+
+    isSetupMode: isSetupMode
+
   };
 
   function getHost() {
@@ -93,6 +103,10 @@
 
   function getPassword() {
     return password;
+  }
+
+  function getUaaConfig() {
+    return uaa;
   }
 
   function newBrowser() {
@@ -339,6 +353,26 @@
           } else {
             console.log('Failed to create session. ' + JSON.stringify(response));
             reject('Failed to create session');
+          }
+        });
+    });
+  }
+
+  /**
+   * @function isSetupMode
+   * @description Check if console is in setup mode
+   * @returns {Promise} A promise
+   */
+  function isSetupMode() {
+    var req = newRequest();
+    return new Promise(function (resolve, reject) {
+      return req.post(getHost() + '/pp/v1/auth/login/uaa', {})
+        .on('error', reject)
+        .on('response', function (response) {
+          if (response.statusCode === 503) {
+            resolve();
+          } else {
+            reject();
           }
         });
     });
