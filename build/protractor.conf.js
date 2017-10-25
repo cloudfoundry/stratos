@@ -68,7 +68,6 @@
         admin: secrets.console.admin,
         user: secrets.console.user
       },
-      runSetupModeTests: secrets.runSetupModeTests || false,
       skipSSlValidation: true,
       caCert: '',
       appWithLogStream: 'node-env',
