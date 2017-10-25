@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-build-base:dev
+FROM splatform/stratos-bk-build-base:opensuse
 
 RUN mkdir -p /go/src/github.com/SUSE/stratos-ui
 WORKDIR /go/src/github.com/SUSE/stratos-ui

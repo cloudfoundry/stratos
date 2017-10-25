@@ -183,7 +183,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:dev
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -222,7 +222,7 @@ function buildPostflightJob {
              --rm \
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:dev
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:opensuse
   mv goose  ${STRATOS_UI_PATH}/
   buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
@@ -241,7 +241,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    splatform/stratos-ui-base:dev \
+    splatform/stratos-ui-build-base:opensuse \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container

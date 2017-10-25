@@ -1,4 +1,4 @@
-FROM splatform/stratos-ui-base:dev
+FROM splatform/stratos-ui-build-base:opensuse
 
 
 ARG USER_ID

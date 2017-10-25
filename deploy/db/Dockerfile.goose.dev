@@ -1,4 +1,4 @@
-FROM splatform/stratos-goose-base:dev
+FROM splatform/stratos-goose-base:opensuse
 
 WORKDIR /src
 

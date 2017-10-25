@@ -1,4 +1,4 @@
-FROM splatform/stratos-preflight-base:dev
+FROM splatform/stratos-preflight-base:opensuse
 
 RUN mkdir -p /srv
 WORKDIR /srv

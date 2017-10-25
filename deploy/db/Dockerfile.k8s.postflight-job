@@ -1,4 +1,4 @@
-FROM splatform/stratos-goose-base:dev
+FROM splatform/stratos-goose-base:opensuse
 
 RUN zypper -n in postgresql mariadb-client
 RUN go get github.com/go-sql-driver/mysql

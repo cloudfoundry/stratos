@@ -4,8 +4,48 @@ set -ex
 BASE_IMAGE=opensuse:42.3
 REGISTRY=docker.io
 ORGANIZATION=splatform
-TAG=dev
-PUSH_IMAGES=true
+TAG=opensuse
+PROG=$(basename ${BASH_SOURCE[0]})
+
+function usage {
+    echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
+    echo "       -b Value    Base Image"
+    echo "       -r Value   Docker registry"
+    echo "       -o Value   Organization in Docker registry"
+    echo "       -t Value    Tag for images"
+    echo "       -p    Push images to registry"
+    echo "       -h    Help"
+    exit 1
+}
+
+
+while getopts "b:r:o:t:ph" opt ; do
+    case $opt in
+        b)
+            BASE_IMAGE=${OPTARG}
+            ;;
+        r)
+            REGISTRY=${OPTARG}
+            ;;
+        o)
+            ORGANIZATION=${OPTARG}
+            ;;
+        t)
+            TAG=${OPTARG}
+            ;;
+        p)
+            PUSH_IMAGES=true
+            ;;
+        h)
+            usage
+            ;;
+        \?)
+            echo "Invalid option -$OPTARG" >&2
+            usage
+            ;;
+    esac
+done
+
 
 __DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_PATH=${__DIRNAME}/..
@@ -26,16 +66,18 @@ build_and_push_image() {
     image_name=$1
     docker_file=$2
     docker build . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
-    docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
+    if [ ! -z ${PUSH_IMAGES} ]; then
+        docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
+    fi
 }
 # Base image with node installed
 build_go_base(){
-   build_and_push_image stratos-go-base Dockerfile.stratos-go-base
+   build_and_push_image stratos-go-build-base Dockerfile.stratos-go-build-base
 }
 
 # Base image with node installed
 build_ui_base(){
-   build_and_push_image stratos-ui-base Dockerfile.stratos-ui-base
+   build_and_push_image stratos-ui-build-base Dockerfile.stratos-ui-build-base
 }
 
 build_nginx_base(){
@@ -56,13 +98,13 @@ build_goose_base(){
 
 build_portal_proxy_builder(){
     pushd  ${DEPLOY_PATH}/
-    TAG=dev tools/build-push-proxy-builder-image.sh
+    TAG=opensuse tools/build-push-proxy-builder-image.sh
     popd
 }
 
 build_postflight_job_base(){
     pushd ${DEPLOY_PATH}/
-    TAG=dev tools/build-postflight-image-builder.sh
+    TAG=opensuse tools/build-postflight-image-builder.sh
     popd
 }
 
@@ -71,7 +113,7 @@ build_preflight_job_base(){
 }
 
 # Base with go
-# build_go_base
+build_go_base
 # Used building the UI
 build_ui_base;
 # Used for running the backend

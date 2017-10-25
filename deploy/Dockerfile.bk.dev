@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-base:dev
+FROM splatform/stratos-bk-base:opensuse
 
 COPY outputs/* /srv/
 COPY dev-certs dev-certs

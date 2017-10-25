@@ -35,7 +35,7 @@ docker run \
        -e HOME=/stratos-ui \
        --volume ${PWD}/glide-cache:/.glide \
        --volume $PWD/../:/stratos-ui \
-       splatform/stratos-bk-build-base:dev \
+       splatform/stratos-bk-build-base:opensuse \
        sh /stratos-ui/run-glide.sh
 
 # Generate NPM cache
@@ -44,7 +44,7 @@ docker run \
        --rm \
        --volume ${PWD}/npm-cache:/root/.npm \
        --volume $PWD/..:/stratos-ui \
-       splatform/stratos-bk-build-base:dev \
+       splatform/stratos-bk-build-base:opensuse \
        bash  -c "cd /stratos-ui && npm install"
 
 docker build --tag ${NAME} \

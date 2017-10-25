@@ -50,7 +50,7 @@ chmod +x ${DIR_NAME}/build-goose.sh
 # Write out Dockerfile
 DOCKERFILE=${DIR_NAME}/Dockerfile
 cat << EOT >> ${DOCKERFILE}
-FROM splatform/stratos-go-base:dev
+FROM splatform/stratos-go-build-base:opensuse
 
 ADD build-goose.sh /build-goose.sh
 CMD ["/build-goose.sh"]
