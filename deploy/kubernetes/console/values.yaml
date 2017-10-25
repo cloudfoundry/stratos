@@ -53,3 +53,16 @@ mariadb:
 #    storageClass: default
   metrics:
     enabled: false
+uaa:
+  protocol: https://
+  port: 
+  host: 
+  consoleClient:  
+  consoleClientSecret: 
+  consoleAdminIdentifier: 
+  skipSSLValidation: false
+ # SCF values compatability 
+env:
+  UAA_HOST: 
+  UAA_ADMIN_CLIENT_SECRET: 
+  UAA_PORT:
