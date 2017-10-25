@@ -14,7 +14,6 @@ run:
   args:
     - -xc
     - |
-      # Register BOSH Director
       FRONTEND_IP_=${CONSOLE_ADDRESS}
       FRONTEND_IP=$(echo ${FRONTEND_IP_} | sed -e 's/ *$//')
       ping -c5 ${FRONTEND_IP}
