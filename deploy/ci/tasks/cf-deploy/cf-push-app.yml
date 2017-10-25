@@ -1,0 +1,27 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source:
+   repository: governmentpaas/cf-cli 
+   tag: latest
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      cf login ${CF_API_URL} -u ${CF_USER} -p${CF_PASSWORD}
+      cf target -o ${CF_ORG} -s ${CF_SPACE}
+      cd stratos-ui
+      if [ ! -z ${CREATE_DB} ]; then
+        cf create-service mysql-dev v9.4 console_db
+        cat << EOF >> manifest.yml
+        services:
+        - console_db
+        EOF
+        cat manifest.yml
+      fi
+      cf  push --hostname ${APP_NAME}

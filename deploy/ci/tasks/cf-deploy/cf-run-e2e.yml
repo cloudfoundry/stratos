@@ -1,0 +1,66 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source:
+   # Image based on bosh/cli2 with git and go added
+   repository:  irfanhabib/concourse-bosh
+   tag: "latest"
+
+run:
+  path: sh
+  args:
+    - -xc
+    - |
+      # Register BOSH Director
+      FRONTEND_IP_=${CONSOLE_ADDRESS}
+      FRONTEND_IP=$(echo ${FRONTEND_IP_} | sed -e 's/ *$//')
+      ping -c5 ${FRONTEND_IP}
+      cd stratos-ui
+      npm install
+      export PATH=${PWD}/node_modules/.bin:$PATH
+      bower install --allow-root --force
+
+      cat << EOF > build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+       },
+        "console": {
+          "host": "${FRONTEND_IP}",
+          "port": "443",
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
+        },
+        "uaa": {
+          "url": "${UAA_URL}",
+          "clientId": "${UAA_CLIENT_ID}",
+          "adminUsername": "${UAA_ADMIN_USERNAME}",
+          "adminPassword": "${UAA_ADMIN_PASSWORD}"
+        },
+        "runSetupModeTests": true,
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      cat build/secrets.json
+      export DBUS_SESSION_BUS_ADDRESS=/dev/null
+      npm run update-webdriver
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${FRONTEND_IP} --params.port=443
+      exit $?
