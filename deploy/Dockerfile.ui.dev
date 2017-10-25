@@ -1,6 +1,5 @@
 FROM splatform/stratos-ui-build-base:opensuse
 
-
 ARG USER_ID
 ARG GROUP_ID
 ARG USER_NAME
