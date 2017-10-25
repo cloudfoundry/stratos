@@ -9,7 +9,7 @@
    * @memberof app.utils
    * @name appBusyService
    * @description The application busy service
-   * @param {object} appEventService - the event service
+   * @param {object} $timeout - the $timeout service
    * @returns {object} the busy service
    */
   function appBusyServiceFactory($timeout) {

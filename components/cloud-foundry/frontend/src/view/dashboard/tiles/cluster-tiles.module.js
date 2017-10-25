@@ -64,7 +64,7 @@
 
     function init() {
       var appBusyId = appBusyService.set('cf.endpoints.busy');
-      
+
       return refreshClusterModel().then(function () {
         appBusyService.clear(appBusyId);
         if (_.keys(vm.serviceInstances).length === 1 && !vm.isEndpointsDashboardAvailable) {
