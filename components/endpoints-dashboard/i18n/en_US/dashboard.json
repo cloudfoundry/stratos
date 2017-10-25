@@ -2,6 +2,7 @@
   "endpoints-dashboard": {
     "title": "Endpoints",
     "register-button": "Register Endpoint",
+    "busy": "Retrieving Endpoint metadata",
     "table": {
       "name": "name",
       "connection": "connection",
