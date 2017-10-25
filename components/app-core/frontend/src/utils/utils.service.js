@@ -64,6 +64,21 @@
       '$', 'i'
     );
 
+    var localUrlValidationExpression = new RegExp(
+      '^' +
+      // protocol identifier
+      'http(s)?://' +
+      // user:pass authentication
+      '(?:\\S+(?::\\S*)?@)?' +
+      // host name
+      '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
+      // port number
+      '(?::\\d{2,5})?' +
+      // resource path
+      '(?:[/?#]\\S*)?' +
+      '$', 'i'
+    );
+
     var colorCodes = {
       black: 0,
       red: 1,
@@ -88,6 +103,7 @@
       runInSequence: runInSequence,
       sizeUtilization: sizeUtilization,
       urlValidationExpression: urlValidationExpression,
+      localUrlValidationExpression: localUrlValidationExpression,
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
       coloredLog: coloredLog,

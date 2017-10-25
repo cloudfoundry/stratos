@@ -12,12 +12,24 @@
 
     function extendSuite(suite) {
       suite.skipWhen = function (skipFn) {
-        var skipped = false;
 
+        function markDisabled(testSuite) {
+          if (testSuite && testSuite.children) {
+            for (var i = 0; i < testSuite.children.length; i++) {
+              var item = testSuite.children[i];
+              item.disabled = true;
+              markDisabled(item);
+            }
+          }
+        }
+
+        var skipped = false;
         if (typeof skipFn === 'function') {
           skipped = skipFn();
+          if (skipped) {
+            markDisabled(this);
+          }
         }
-        this.disabled = this.disabled || skipped;
       };
       return suite;
     }

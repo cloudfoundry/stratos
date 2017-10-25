@@ -38,9 +38,10 @@
   function DeploySourceGitController($http, $scope) {
     var vm = this;
 
-    vm.data = {
-      githubBranches: []
-    };
+    // Preserve data in case user goes back and forward in the wizard
+    vm.userInput.gitData = vm.userInput.gitData || [];
+    vm.data = vm.userInput.gitData;
+    vm.data.githubBranches = vm.data.githubBranches || [];
 
     vm.userInput.gitType = vm.userInput.gitType || 'github';
     vm.userInput.gitUrlBranch = vm.userInput.gitUrlBranch || 'master';
@@ -66,7 +67,7 @@
           vm.data.githubProject = response.data;
           vm.userInput.githubProjectCached = project;
 
-          $http.get('https://api.github.com/repos/' + project + '/branches')
+          $http.get('https://api.github.com/repos/' + project + '/branches?per_page=100')
             .then(function (response) {
               vm.data.githubBranches.length = 0;
               [].push.apply(vm.data.githubBranches, _.map(response.data, function selectOptionMapping(o) {

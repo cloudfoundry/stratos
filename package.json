@@ -18,6 +18,7 @@
     "pree2e": "npm run update-webdriver",
     "e2e": "gulp e2e:run",
     "e2e-on-target": "gulp e2e:tests",
+    "pree2e-on-target": "npm run update-webdriver",
     "preheadless-e2e": "npm run pree2e",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js",
     "pretest": "gulp unit:prepare",
@@ -30,7 +31,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "bower": "^1.7.1",
+    "bower": "^1.8.0",
     "delete": "^0.3.2",
     "fs-extra": "^3.0.1",
     "glob": "^7.1.1",

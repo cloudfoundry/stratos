@@ -42,6 +42,9 @@ const CFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
+// SessionExpiresAfterHeader Custom header for communicating the session expiry time to clients
+const ClientRequestDateHeader = "X-Cap-Request-Date"
+
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
@@ -95,15 +98,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
-	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, err := p.GetSessionValue(c, "expires_on")
+	err = p.handleSessionExpiryHeader(c)
 	if err != nil {
-		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+		return err
 	}
-	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
@@ -546,6 +544,26 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		}
 	}
 
+	err = p.handleSessionExpiryHeader(c)
+	if err != nil {
+		return err
+	}
+
+	info, err := p.getInfo(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = c.JSON(http.StatusOK, info)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
+
 	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, err := p.GetSessionValue(c, "expires_on")
@@ -556,14 +574,17 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
-	info, err := p.getInfo(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+	expiry := expOn.(time.Time)
+	expiryDuration := expiry.Sub(time.Now())
 
-	err = c.JSON(http.StatusOK, info)
-	if err != nil {
-		return err
+	// Subtract time now to get the duration add this to the time provided by the client
+	if c.Request().Header().Contains(ClientRequestDateHeader) {
+		clientDate := c.Request().Header().Get(ClientRequestDateHeader)
+		clientDateInt, err := strconv.ParseInt(clientDate, 10, 64)
+		if err == nil {
+			clientDateInt += int64(expiryDuration.Seconds())
+			c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(clientDateInt, 10))
+		}
 	}
 
 	return nil

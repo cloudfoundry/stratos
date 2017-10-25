@@ -41,8 +41,9 @@
    * @property  {$stateParams} $stateParams - UI Router state params
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {appUtilsService} appUtilsService - the appUtilsService service
+   * @param {object} appBusyService - the appBusyService service
    */
-  function ClusterTilesController($q, $state, $stateParams, modelManager, appUtilsService) {
+  function ClusterTilesController($q, $state, $stateParams, modelManager, appUtilsService, appBusyService) {
     var vm = this;
 
     vm.currentUserAccount = modelManager.retrieve('app.model.account');
@@ -62,7 +63,10 @@
     appUtilsService.chainStateResolve('endpoint.clusters.tiles', $state, init);
 
     function init() {
+      var appBusyId = appBusyService.set('cf.endpoints.busy');
+
       return refreshClusterModel().then(function () {
+        appBusyService.clear(appBusyId);
         if (_.keys(vm.serviceInstances).length === 1 && !vm.isEndpointsDashboardAvailable) {
           // We are running without the Endpoints Dashboard and there is only one instance available
           // redirecting to Organisations Detail page

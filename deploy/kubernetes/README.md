@@ -34,20 +34,33 @@ helm search console
 NAME                    VERSION DESCRIPTION                       
 stratos-ui/console      0.9.0 A Helm chart for deploying Console
 ```
-To install the Console
+To install the Console.
+
 ```
 helm install stratos-ui/console --namespace=console --name my-console
 ```
+> **Note**: The previous assumes that a storage class exists in the kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*. 
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
-This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster. If you are deploying into a cluster that is not configured with a dynamic storage provisioner like `glusterfs` or `ceph`. You should specify the `noShared` override when installing the chart. 
-
-```
-helm install --set noShared=true stratos-ui/console --namespace=console --name my-console
-```
+This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
+
+#### Using a Load Balancer
+If your Kubernetes deployment supports automatic configuration of a load balancer (i.e Google Container Engine), specify the parameters `useLb=true` when installing.
+
+```
+helm install stratos-ui/console --namespace=console --name my-console --set useLb=true
+```
+
+#### Specifying an External IP
+
+If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
+
+```
+helm install stratos-ui/console --namespace=console --name my-console --set console.externalIP=192.168.100.100 console.port=5000
+```
 
 #### Upgrading your deployment
 
@@ -74,6 +87,11 @@ Open a terminal and cd to the `deploy/kubernetes` directory:
 
 ```
 $ cd deploy/kubernetes
+```
+
+Fetch dependant helm charts
+```
+$ helm dep build
 ```
 
 Run helm install:
@@ -118,6 +136,30 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 > Note: For some environments like Minikube, you are not given an IP Address - it may show as `<nodes>`. In this case, run `kubectl cluster-info` and use the IP address of your node shown in the output of this command.
 
+## Specifying UAA configuration
+
+When deploying with SCF, the `scf-config-values.yaml` (see [SCF Wiki link](https://github.com/SUSE/scf/wiki/How-to-Install-SCF#configuring-the-deployment)) can be supplied when installing Stratos UI.
+```
+$ helm install stratos-ui/console  -f scf-config-values.yaml
+```
+
+Alternatively, you can supply the following configuration. Edit according to your environment and save to a file called `uaa-config.yaml`.
+```
+uaa:
+  protocol: https://
+  port: 2793
+  host: uaa.cf-dev.io
+  consoleClient:  cf
+  consoleClientSecret: 
+  consoleAdminIdentifier: cloud_controller.admin 
+  skipSSLValidation: false
+```
+
+To install stratos-ui with the above specified configuration:
+```
+$ helm install stratos-ui/console -f uaa-config.yaml
+```
+
 ## UAA for Testing
 A UAA Helm chart has been provided to quickly bring up an UAA instance for testing the console.
 
@@ -146,13 +188,12 @@ uaa   1        1        1           1          4m
 
 ```
 
-## Persistent Volumes stuck in `Pending` state when deploying through Helm
+## Specifying a custom Storage Class 
 
-The issue may be that your Kubernetes does not have a `default` storage class. You can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+If no default storage class has been defined in the Kuberentes cluster. The Stratos UI helm chart will fail to deploy successfully. To check if a `default` storage class exists, you can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
 
 #### Provide Storage Class override
 ```
-kubectl get storageclas
 $ kubectl get storageclass
 NAME                TYPE
 ssd                 kubernetes.io/host-path   
@@ -164,6 +205,9 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 ```
 ---
 storageClass: persistent
+mariadb:
+  persistence:
+    storageClass: persistent
 ```
 
 Run Helm with the override:

@@ -1,4 +1,0 @@
-buildpacks:
-  - https://github.com/cloudfoundry/go-buildpack
-  - https://github.com/cloudfoundry/nodejs-buildpack
-  - https://github.com/cloudfoundry/binary-buildpack
