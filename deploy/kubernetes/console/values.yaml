@@ -41,6 +41,7 @@ images:
 mariadb:
   # Only required for creating the databases
   mariadbRootPassword: changeme
+  image: splatform/stratos-mariadb:10.1.28-r2
   adminUser: root
   # Credentials for user
   mariadbUser: console
