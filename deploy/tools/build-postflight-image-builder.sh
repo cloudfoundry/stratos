@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 DIR_NAME=$(mktemp -d)
-DOCKER_ORGANISATION=susetest
-IMAGE_NAME=hsc-postflight-builder
-TAG=latest
+DOCKER_ORGANISATION=${DOCKER_ORG:-splatform}
+IMAGE_NAME=stratos-postflight-builder
+TAG=${TAG:-test}
 
 while getopts ":ho:t:p" opt ; do
     case $opt in
@@ -42,8 +42,6 @@ ENTRYPOINT_SCRIPT=${DIR_NAME}/build-goose.sh
 cat << EOT >> ${ENTRYPOINT_SCRIPT}
 #!/usr/bin/env sh
 
-apk update
-apk add git gcc musl-dev
 go get 'bitbucket.org/liamstask/goose/cmd/goose'
 EOT
 
@@ -52,7 +50,7 @@ chmod +x ${DIR_NAME}/build-goose.sh
 # Write out Dockerfile
 DOCKERFILE=${DIR_NAME}/Dockerfile
 cat << EOT >> ${DOCKERFILE}
-FROM golang:alpine
+FROM splatform/stratos-go-build-base:opensuse
 
 ADD build-goose.sh /build-goose.sh
 CMD ["/build-goose.sh"]
