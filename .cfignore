@@ -16,3 +16,4 @@ deploy/docker-compose/
 deploy/stratos-ui-release/
 deploy/kubernetes/
 docs/
+build/dev_config.json

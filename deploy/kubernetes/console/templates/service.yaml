@@ -6,10 +6,12 @@ metadata:
   name: "{{ .Release.Name }}-ui-ext"
 spec:
   ports:
+{{- if not .Values.useLb }}
   - name: http
     port: 80
     protocol: TCP
     targetPort: 80
+{{- end }}
   - name: https
     port: 443
     protocol: TCP

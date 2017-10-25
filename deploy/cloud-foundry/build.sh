@@ -43,28 +43,6 @@ npm run build-cf
 
 chmod +x portal-proxy
 
-# Get the goose db migration tool
-export DB_MIGRATE_DIR="$CF_DIR/db-migration"
-export DB_DIR="$CF_DIR/../db/migrations"
-export GOPATH=${CACHE_DIR}/migration
-mkdir -p $GOPATH
-
-go get bitbucket.org/liamstask/goose/lib/goose
-go get github.com/lib/pq
-go get github.com/mattn/go-sqlite3
-
-# Build the migration tool
-pushd ${DB_DIR}
-go build -o migrateStratosDb
-echo "Built DB migrator"
-popd
-
-
-# Build the migration helper
-pushd ${DB_MIGRATE_DIR}
-go build -o parseVcapServices
-popd
-
 # Clean up build folders
 rm -rf ./dist
 rm -rf ./outputs
@@ -73,3 +51,8 @@ rm -rf ./outputs
 rm -rf ./components
 
 echo "All done"
+
+echo "Disk usage for cache and app folders:"
+
+du -h -c --summarize ${CACHE_DIR}
+du -h -c --summarize ${BUILD_DIR}
