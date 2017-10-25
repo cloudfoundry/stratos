@@ -5,19 +5,12 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  opensuse
+   repository:  registry.capbristol.com:5000/opensuse
    tag: "latest"
-
+   insecure_registries: ["registry.capbristol.com:5000"]
 run:
   path: sh
   args:
-    - -exc
+    - -ec
     - |
-# TODO add Private key
-      cat << EOF >> privateKey
-      ${SSH_PRIVATE_KEY}
-      EOF 
-      chmod 600 privateKey
-      ssh  -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-      ${CF_DEPLOY_SYSTEM_USER}@${CF_DEPLOY_SYSTEM} \
-      "cd ~/scf/ && vagrant up"
+      echo "Skip"
