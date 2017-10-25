@@ -285,12 +285,12 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 }
 
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
-	log.Println("FindCNSIToken")
+	log.Debug("FindCNSIToken")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, false)
 }
 
 func (p *PgsqlTokenRepository) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
-	log.Println("FindCNSITokenIncludeDisconnected")
+	log.Debug("FindCNSITokenIncludeDisconnected")
 	return p.findCNSIToken(cnsiGUID, userGUID, encryptionKey, true)
 }
 

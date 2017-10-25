@@ -267,7 +267,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 
 	// If cnsi is cf AND cf is auto-register only clear the entry
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
-		log.Info("Setting token record as disconnected")
+		log.Debug("Setting token record as disconnected")
 
 		userTokenInfo := userTokenInfo{
 			UserGUID: userGUID,
@@ -277,7 +277,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 			return fmt.Errorf("Unable to clear token: %s", err)
 		}
 	} else {
-		log.Info("Deleting Token")
+		log.Debug("Deleting Token")
 		if err := p.deleteCNSIToken(cnsiGUID, userGUID); err != nil {
 			return fmt.Errorf("Unable to delete token: %s", err)
 		}
