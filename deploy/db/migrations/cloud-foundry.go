@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -65,7 +64,8 @@ func parseCloudFoundryEnv() (string, error) {
 				dbEnv = "cf_mysql"
 				fmt.Printf("Migrating mysql instance on %s\n", os.Getenv(DB_HOST))
 			default:
-				return "", errors.New("Database service not found or type not recognized")
+				// Database service not found or type not recognized
+				return "", nil
 			}
 		} else {
 			return "", err

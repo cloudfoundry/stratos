@@ -136,6 +136,30 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 > Note: For some environments like Minikube, you are not given an IP Address - it may show as `<nodes>`. In this case, run `kubectl cluster-info` and use the IP address of your node shown in the output of this command.
 
+## Specifying UAA configuration
+
+When deploying with SCF, the `scf-config-values.yaml` (see [SCF Wiki link](https://github.com/SUSE/scf/wiki/How-to-Install-SCF#configuring-the-deployment)) can be supplied when installing Stratos UI.
+```
+$ helm install stratos-ui/console  -f scf-config-values.yaml
+```
+
+Alternatively, you can supply the following configuration. Edit according to your environment and save to a file called `uaa-config.yaml`.
+```
+uaa:
+  protocol: https://
+  port: 2793
+  host: uaa.cf-dev.io
+  consoleClient:  cf
+  consoleClientSecret: 
+  consoleAdminIdentifier: cloud_controller.admin 
+  skipSSLValidation: false
+```
+
+To install stratos-ui with the above specified configuration:
+```
+$ helm install stratos-ui/console -f uaa-config.yaml
+```
+
 ## UAA for Testing
 A UAA Helm chart has been provided to quickly bring up an UAA instance for testing the console.
 

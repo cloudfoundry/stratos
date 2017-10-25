@@ -97,11 +97,10 @@ spec:
      {{- end }}
      {{- if not .Values.noShared }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
-        name: proxy
      {{- else }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxyNoShared}}:{{.Values.consoleVersion}}
-        name: proxy
      {{- end }}
+        name: proxy
         env:
         - name: DB_USER
           value: "{{ .Values.mariadb.mariadbUser }}"
@@ -174,6 +173,29 @@ spec:
         - name: SOCKS_PROXY
         {{- if .Values.socksProxy }}
           value: {{.Values.socksProxy}}
+        {{- end }}
+        {{- if .Values.env.UAA_HOST }}  
+        - name: UAA_ENDPOINT 
+          value: https://scf.{{.Values.env.UAA_HOST}}:{{.Values.env.UAA_PORT}}
+        - name: CONSOLE_CLIENT 
+          value: cf
+        - name: CONSOLE_CLIENT_SECRET 
+          value: {{.Values.env.UAA_ADMIN_CLIENT_SECRET}}
+        - name: CONSOLE_ADMIN_SCOPE 
+          value: cloud_controller.admin
+        - name: SKIP_SSL_VALIDATION 
+          value: "true"
+        {{- else if .Values.uaa.host }}  
+        - name: UAA_ENDPOINT 
+          value: {{default "https://" .Values.uaa.protocol}}{{.Values.uaa.host}}:{{.Values.uaa.port}}
+        - name: CONSOLE_CLIENT 
+          value: {{.Values.uaa.consoleClient}}
+        - name: CONSOLE_CLIENT_SECRET 
+          value: {{.Values.uaa.consoleClientSecret}}
+        - name: CONSOLE_ADMIN_SCOPE 
+          value: {{.Values.uaa.consoleAdminIdentifier}}
+        - name: SKIP_SSL_VALIDATION 
+          value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
         {{- end }}
         ports:
         - containerPort: 3003

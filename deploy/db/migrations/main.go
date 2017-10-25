@@ -44,6 +44,12 @@ func main() {
 			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
 		}
 		flag.Set("env", dbEnv)
+
+		// If there is no dbEnv, then we are using SQLite, so don't run migrations
+		if len(dbEnv) == 0 {
+			log.Println("No DB Environment detected - skipping migrations")
+			return
+		}
 	}
 
 	err := upRun(args[1:])
