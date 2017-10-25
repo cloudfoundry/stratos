@@ -15,6 +15,7 @@
           "apps": "applications",
           "instances": "application instances",
           "services": "services",
+          "service-instances": "service instances",
           "routes": "routes",
           "private-domains": "private domains",
           "memory": "memory usage",

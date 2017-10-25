@@ -7,11 +7,18 @@
   var runSetupModeTests = false;
   describe('Console Setup', function () {
 
-    beforeAll(function () {
+    beforeAll(function (done) {
 
       helpers.setBrowserNormal();
       helpers.loadApp();
-      runSetupModeTests = helpers.getRunSetupModeTests();
+      helpers.isSetupMode()
+        .then(function () {
+          runSetupModeTests = true;
+          done();
+        }, function () {
+          runSetupModeTests = false;
+          done();
+        });
     });
 
     afterAll(function () {});

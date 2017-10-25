@@ -8,8 +8,8 @@
       <dd>{{ orgSummaryTileCtrl.organization.details.totalApps}}</dd>
       <dt translate>cf.org-info.summary.label.instances</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.instances}} / {{ orgSummaryTileCtrl.organization.details.instancesQuota | infinityFilter }}</dd>
-      <dt translate>cf.org-info.summary.label.services</dt>
-      <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota | infinityFilter }}</dd>
+      <dt translate>cf.org-info.summary.label.service-instances</dt>
+      <dd>{{ orgSummaryTileCtrl.organization.details.serviceInstancesCount}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota | infinityFilter }}</dd>
       <dt translate>cf.org-info.summary.label.routes</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}} / {{ orgSummaryTileCtrl.organization.details.routesQuota | infinityFilter }}</dd>
       <dt translate>cf.org-info.summary.label.private-domains</dt>

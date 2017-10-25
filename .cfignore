@@ -7,3 +7,13 @@ dev-certs/
 out/
 outputs/
 tmp/
+CHANGELOG.md
+test/
+deploy/all-in-one/
+deploy/ci/
+deploy/containers/
+deploy/docker-compose/
+deploy/stratos-ui-release/
+deploy/kubernetes/
+docs/
+build/dev_config.json
