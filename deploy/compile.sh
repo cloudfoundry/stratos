@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-env
-ls /
 rm -rf node_modules
 npm install
 npm run build-backend
