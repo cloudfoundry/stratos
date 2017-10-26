@@ -145,7 +145,6 @@
     // Ignore enter if event has been marked with preventDefault()
     vm.canUseEnter = function (ev) {
       if (vm.context.allowEnter) {
-        console.log('Checking if enter is allowed');
         return vm.context.allowEnter(vm, ev);
       } else {
         return !ev.isDefaultPrevented();
