@@ -14,12 +14,13 @@ function usage {
     echo "       -o Value   Organization in Docker registry"
     echo "       -t Value    Tag for images"
     echo "       -p    Push images to registry"
+    echo "       -s Is SLE"
     echo "       -h    Help"
     exit 1
 }
 
 
-while getopts "b:r:o:t:ph" opt ; do
+while getopts "b:r:o:t:psh" opt ; do
     case $opt in
         b)
             BASE_IMAGE=${OPTARG}
@@ -35,6 +36,9 @@ while getopts "b:r:o:t:ph" opt ; do
             ;;
         p)
             PUSH_IMAGES=true
+            ;;
+        s)
+            IS_SLE=true
             ;;
         h)
             usage
@@ -56,8 +60,9 @@ pushd $(mktemp -d)
 curl -sSO https://raw.githubusercontent.com/tests-always-included/mo/master/mo
 chmod +x mo
 
+GO_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-go-build-base:${TAG}
 for i in ${DOCKERFILES}; do
-  BASE_IMAGE=${BASE_IMAGE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
+  BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} IS_SLE=${IS_SLE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
 
 
@@ -98,13 +103,14 @@ build_goose_base(){
 
 build_portal_proxy_builder(){
     pushd  ${DEPLOY_PATH}/
-    TAG=opensuse tools/build-push-proxy-builder-image.sh
+    BK_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-bk-build-base:${TAG}
+    BK_BUILD_BASE=${BK_BUILD_BASE} TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-push-proxy-builder-image.sh
     popd
 }
 
 build_postflight_job_base(){
     pushd ${DEPLOY_PATH}/
-    TAG=opensuse tools/build-postflight-image-builder.sh
+    TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-postflight-image-builder.sh
     popd
 }
 

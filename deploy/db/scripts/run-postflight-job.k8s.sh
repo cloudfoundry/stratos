@@ -90,15 +90,7 @@ done
 EOF
 chmod +x $TEMP_SCRIPT
 
-
-# Timeout after 5 minutes
-IS_ALPINE=$(cat /etc/os-release | grep Alpine)
-
-if [ -z "${IS_ALPINE}" ]; then
-    timeout 5m ${TEMP_SCRIPT}
-else
-    timeout -t 300 ${TEMP_SCRIPT}
-fi
+timeout 5m ${TEMP_SCRIPT};
 # Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
 rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true
