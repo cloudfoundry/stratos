@@ -16,6 +16,9 @@ export interface TableColumn<T> {
   header?: (row: T) => string;
   headerComponent?: any;
   class?: string;
+  sort?: {
+    disableClear: boolean;
+  };
 }
 
 @Component({

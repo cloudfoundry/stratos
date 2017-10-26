@@ -7,8 +7,8 @@
     </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
-        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="grow-title">{{ title }}</div>
-        <div [hidden]="!(dataSource.isSelecting$ | async)" class="grow-title">{{dataSource.selectedRows.size}} Selected</div>
+        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="spacer">{{ title }}</div>
+        <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
         <!-- md-card-title has no ngcontent attribute so cannot select in css -->
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
           <div [hidden]="!enableFilter || paginator.length === 0">
@@ -28,7 +28,7 @@
             </button>
         </div>
         <div [hidden]="!(dataSource.isAdding$ | async)">
-          <div class="grow-title mat-card-header-text-wa"></div>
+          <div class="spacer"></div>
           <!-- !!{{addRowForm.valid }}!! -->
           <form #addRowForm="ngForm" novalidate>
             <ng-content select="[app-table-add]"></ng-content>
@@ -39,14 +39,19 @@
       </md-card-header>
       <md-card-content>
         <md-table #table [hidden]="dataSource.mdPaginator.length === 0" [dataSource]="dataSource" mdSort>
-          <!-- TODO: RC SORT md-sort-header disableClear="true"-->
           <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnDef">
-            <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
-              <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
-            </md-header-cell>
+            <div *ngIf="column.sort">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear">
+                <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
+              </md-header-cell>
+            </div>
+            <div *ngIf="!column.sort">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
+                <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
+              </md-header-cell>
+            </div>
             <md-cell *mdCellDef="let row" [ngClass]="column.class">
               <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
-              <!-- {{ column.cell(row) }} -->
             </md-cell>
           </ng-container>
           <md-header-row [hidden]="dataSource.mdPaginator.length === 0" *mdHeaderRowDef="columnNames"></md-header-row>
