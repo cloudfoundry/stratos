@@ -61,6 +61,7 @@
       }
       context.noCancel = !!config.noCancel;
       context.noSubmit = !!config.noSubmit;
+      context.allowEnter = config.allowEnter;
 
       if (angular.isFunction(invalidityCheck)) {
         context.invalidityCheck = invalidityCheck;
@@ -143,7 +144,12 @@
 
     // Ignore enter if event has been marked with preventDefault()
     vm.canUseEnter = function (ev) {
-      return !ev.isDefaultPrevented();
+      if (vm.context.allowEnter) {
+        console.log('Checking if enter is allowed');
+        return vm.context.allowEnter(vm, ev);
+      } else {
+        return !ev.isDefaultPrevented();
+      }
     };
 
     /**

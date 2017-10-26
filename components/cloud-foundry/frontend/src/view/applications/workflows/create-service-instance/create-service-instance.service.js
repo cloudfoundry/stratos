@@ -146,7 +146,10 @@
               submit: 'app.app-info.app-tabs.services.edit.button.yes'
             },
             class: 'dialog-form-larger create-service-instance-dialog edit-service-instance',
-            dialog: true
+            dialog: true,
+            allowEnter: function (asyncTaskDialogCtrl) {
+              return !asyncTaskDialogCtrl.editParams;
+            }
           },
           {
             options: options
