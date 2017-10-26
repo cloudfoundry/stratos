@@ -1,7 +1,8 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
 
-    <app-table #appTable [dataSource]="envVarsDataSource" [title]="'User Environment Variables'" [enableAdd]="true" [enableFilter]="true">
+    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [title]="'User Environment Variables'" [enableAdd]="true"
+      [enableFilter]="true">
       <div app-table-add>
         <md-form-field floatPlaceholder="never">
           <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addRow.name"
@@ -14,51 +15,6 @@
         </md-form-field>
         <!-- [appFocus]="envVarsDataSource.addAppFocusEventEmitter"  -->
       </div>
-      <md-table app-table-content #table [hidden]="envVarsDataSource.mdPaginator.length === 0" [dataSource]="envVarsDataSource"
-        mdSort (mdSortChange)="appTable.sort.emit($event)">
-        <ng-container mdColumnDef="select">
-          <md-header-cell *mdHeaderCellDef class="table-column-select">
-            <md-checkbox [disabled]="(envVarsDataSource.isAdding$ | async)" [checked]="envVarsDataSource.selectAllChecked" (change)="envVarsDataSource.selectAllFilteredRows()">
-            </md-checkbox>
-          </md-header-cell>
-          <md-cell *mdCellDef="let row" class="table-column-select">
-            <md-checkbox [disabled]="(envVarsDataSource.isAdding$ | async)" [checked]="envVarsDataSource.selectedRows.has(row.name)"
-              (change)="envVarsDataSource.selectedRowToggle(row)"></md-checkbox>
-          </md-cell>
-        </ng-container>
-        <ng-container mdColumnDef="name">
-          <md-header-cell *mdHeaderCellDef md-sort-header disableClear="true"> Name </md-header-cell>
-          <md-cell *mdCellDef="let row">{{row.name}}</md-cell>
-        </ng-container>
-        <ng-container mdColumnDef="value">
-          <md-header-cell *mdHeaderCellDef md-sort-header disableClear="true"> Value </md-header-cell>
-          <md-cell *mdCellDef="let row">
-            <md-form-field *ngIf="row.name === envVarsDataSource.editRow?.name">
-              <input mdInput name="envVarValue" [value]="envVarsDataSource.editRow?.value" (input)="envVarsDataSource.editRow.value = $event.target.value"
-              />
-            </md-form-field>
-            <span *ngIf="row.name !== envVarsDataSource.editRow?.name">{{row.value}}</span>
-          </md-cell>
-        </ng-container>
-        <ng-container mdColumnDef="edit">
-          <md-header-cell *mdHeaderCellDef class="table-column-edit"></md-header-cell>
-          <md-cell *mdCellDef="let row" class="table-column-edit">
-            <button md-icon-button *ngIf="row.name !== envVarsDataSource.editRow?.name" (click)="envVarsDataSource.startEdit(row)" [disabled]="(envVarsDataSource.isSelecting$ | async) || (envVarsDataSource.isAdding$ | async)">
-                    <md-icon>edit</md-icon>
-                  </button>
-            <button md-icon-button *ngIf="row.name === envVarsDataSource.editRow?.name" (click)="envVarsDataSource.saveEdit()">
-                    <md-icon>done</md-icon>
-                  </button>
-            <button md-icon-button *ngIf="row.name === envVarsDataSource.editRow?.name" (click)="envVarsDataSource.cancelEdit()">
-                    <md-icon>clear</md-icon>
-                  </button>
-          </md-cell>
-        </ng-container>
-        <md-header-row [hidden]="envVarsDataSource.mdPaginator.length === 0" *mdHeaderRowDef="['select', 'name', 'value', 'edit']">
-        </md-header-row>
-        <md-row *mdRowDef="let row; columns: ['select', 'name', 'value', 'edit'];">
-        </md-row>
-      </md-table>
     </app-table>
   </div>
 

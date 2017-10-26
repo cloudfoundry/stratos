@@ -10,7 +10,7 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 
-interface AppEnvVar {
+export interface AppEnvVar {
   name: string;
   value: string;
 }

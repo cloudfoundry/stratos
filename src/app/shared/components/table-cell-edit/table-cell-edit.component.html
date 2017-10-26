@@ -1,0 +1,9 @@
+<button md-icon-button *ngIf="row.name !== dataSource.editRow?.name" (click)="dataSource.startEdit(row)" [disabled]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+    <md-icon>edit</md-icon>
+  </button>
+<button md-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.saveEdit()">
+    <md-icon>done</md-icon>
+  </button>
+<button md-icon-button *ngIf="row.name === dataSource.editRow?.name" (click)="dataSource.cancelEdit()">
+    <md-icon>clear</md-icon>
+  </button>

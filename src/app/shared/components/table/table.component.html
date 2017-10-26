@@ -37,9 +37,20 @@
         </div>
       </md-card-header>
       <md-card-content>
-        <!-- Cannot wrap md-table > ng-content > column definitions, see https://github.com/angular/material2/issues/6980-->
-        <ng-content select="[app-table-content]"></ng-content>
-
+        <md-table app-table-content #table [hidden]="dataSource.mdPaginator.length === 0" [dataSource]="dataSource" mdSort (mdSortChange)="appTable.sort.emit($event)">
+          <!-- TODO: RC SORT md-sort-header disableClear="true"-->
+          <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnDef">
+            <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
+              <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
+            </md-header-cell>
+            <md-cell *mdCellDef="let row" [ngClass]="column.class">
+              <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
+              <!-- {{ column.cell(row) }} -->
+            </md-cell>
+          </ng-container>
+          <md-header-row [hidden]="dataSource.mdPaginator.length === 0" *mdHeaderRowDef="columnNames"></md-header-row>
+          <md-row *mdRowDef="let row; columns: columnNames;"></md-row>
+        </md-table>
         <div [hidden]="paginator.length > 0" class="mat-card-header-text no-rows">
           <div class="mat-card-header-text">
             <div class="mat-card-header-text-wa">There are no entries.</div>

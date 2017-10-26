@@ -17,6 +17,12 @@ import { UniqueDirective } from './components/unique.directive';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { TableComponent } from './components/table/table.component';
+// import { TableColumnSelectComponent } from './components/table-column-select/table-column-select.component';
+// import { TableColumnEditComponent } from './components/table-column-edit/table-column-edit.component';
+import { TableCellComponent } from './components/table-cell/table-cell.component';
+import { TableCellSelectComponent } from './components/table-cell-select/table-cell-select.component';
+import { TableHeaderSelectComponent } from './components/table-header-select/table-header-select.component';
+import { TableCellEditComponent } from './components/table-cell-edit/table-cell-edit.component';
 
 
 @NgModule({
@@ -40,6 +46,12 @@ import { TableComponent } from './components/table/table.component';
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
+    // TableColumnSelectComponent,
+    // TableColumnEditComponent,
+    TableCellComponent,
+    TableCellSelectComponent,
+    TableHeaderSelectComponent,
+    TableCellEditComponent,
   ],
   exports: [
     FormsModule,
@@ -58,6 +70,9 @@ import { TableComponent } from './components/table/table.component';
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
-  ]
+    // TableColumnSelectComponent,
+    // TableColumnEditComponent,
+    TableCellSelectComponent,
+  ],
 })
 export class SharedModule { }
