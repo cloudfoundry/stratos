@@ -14,8 +14,7 @@ run:
   args:
     - -xc
     - |
-      FRONTEND_IP_=${CONSOLE_ADDRESS}
-      FRONTEND_IP=$(echo ${FRONTEND_IP_} | sed -e 's/ *$//')
+      FRONTEND_IP=${CONSOLE_ADDRESS}
       ping -c5 ${FRONTEND_IP}
       cd stratos-ui
       npm install

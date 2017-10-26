@@ -33,7 +33,7 @@ jobs:
   # - get: after-midnight
   - do:
     - task: deploy
-      timeout: 2hr
+      timeout: 2h
       file:  stratos-ui/deploy/ci/tasks/cf-deploy/deploy-vagrant.yml
       params:
        SSH_PRIVATE_KEY: {{ssh-private-key}}
@@ -57,14 +57,14 @@ jobs:
     trigger: true
   - do:
     - task: deploy-app
-      timeout: 2hr
-      file:  stratos-ui/deploy/ci/tasks/cf-deploy/deploy-vagrant.yml
+      timeout: 2h
+      file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-push-app.yml
       params:
-       CF_API_URL: {{ssh-private-key}}
+       CF_API_URL: {{cf-api-url}}
        CF_USER: {{cf-admin-user}}
        CF_PASSWORD: {{cf-admin-password}}
        CF_ORG: {{cf-org}}
-       CF_SPACE: {{cf-space}
+       CF_SPACE: {{cf-space}}
        APP_NAME: "console-std"
       # on_failure:
       #   put: send-email
@@ -77,7 +77,6 @@ jobs:
       #     subject_text: "BOSH Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
       #     body_text: "BOSH Deploy build was successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
  
- 
 - name: run-e2e
   plan:
   - get: stratos-ui
@@ -85,7 +84,7 @@ jobs:
     trigger: true
   - do:
     - task: run-e2e
-      timeout: 2hr
+      timeout: 2h
       file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-run-e2e.yml
       params:
        UAA_ADMIN_PASSWORD: {{uaa-admin-password}}
@@ -102,7 +101,7 @@ jobs:
        CONSOLE_USER_USER: {{console-user-user}}
        CONSOLE_USER_PASSWORD: {{console-user-password}}
        GITHUB_TOKEN: {{github-access-token}}
-       APP_NAME: "console-std"
+       CONSOLE_ADDRESS: "console-std.cf-dev.io"
       # on_failure:
       #   put: send-email
       #   params:
@@ -114,8 +113,23 @@ jobs:
       #     subject_text: "BOSH Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
       #     body_text: "BOSH Deploy build was successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
  
- 
- 
+- name: remove-app
+  plan:
+  - get: stratos-ui
+    passed: [run-e2e]
+    trigger: true
+  - do:
+    - task: remove-app
+      timeout: 2h
+      file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-delete-app.yml
+      params:
+       CF_API_URL: {{cf-api-url}}
+       CF_USER: {{cf-admin-user}}
+       CF_PASSWORD: {{cf-admin-password}}
+       CF_ORG: {{cf-org}}
+       CF_SPACE: {{cf-space}}
+       APP_NAME: "console-std"
+
 - name: deploy-app-with-db
   plan:
   - get: stratos-ui
@@ -123,15 +137,15 @@ jobs:
     trigger: true
   - do:
     - task: deploy-app-with-db
-      timeout: 2hr
-      file:  stratos-ui/deploy/ci/tasks/cf-deploy/deploy-vagrant.yml
+      timeout: 2h
+      file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-push-app.yml
       params:
-       CF_API_URL: {{ssh-private-key}}
+       CF_API_URL: {{cf-api-url}}
        CF_USER: {{cf-admin-user}}
        CF_PASSWORD: {{cf-admin-password}}
        CF_ORG: {{cf-org}}
-       CF_SPACE: {{cf-space}
-       APP_NAME: "console-std"
+       CF_SPACE: {{cf-space}}
+       APP_NAME: "console-db"
        CREATE_DB: "true"
       # on_failure:
       #   put: send-email
@@ -152,7 +166,7 @@ jobs:
     trigger: true
   - do:
     - task: run-e2e-on-db
-      timeout: 2hr
+      timeout: 2h
       file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-run-e2e.yml
       params:
        UAA_ADMIN_PASSWORD: {{uaa-admin-password}}
@@ -169,7 +183,7 @@ jobs:
        CONSOLE_USER_USER: {{console-user-user}}
        CONSOLE_USER_PASSWORD: {{console-user-password}}
        GITHUB_TOKEN: {{github-access-token}}
-       APP_NAME: "console-std"
+       CONSOLE_ADDRESS: "console-db.cf-dev.io"
       # on_failure:
       #   put: send-email
       #   params:
@@ -181,4 +195,19 @@ jobs:
       #     subject_text: "BOSH Deploy ${BUILD_PIPELINE_NAME}/${BUILD_JOB_NAME}/${BUILD_NAME} successful"
       #     body_text: "BOSH Deploy build was successful: ${ATC_EXTERNAL_URL}/teams/main/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
  
- 
+- name: remove-app-db
+  plan:
+  - get: stratos-ui
+    passed: [run-e2e-on-db]
+    trigger: true
+  - do:
+    - task: remove-app-db
+      timeout: 2h
+      file:  stratos-ui/deploy/ci/tasks/cf-deploy/cf-delete-app.yml
+      params:
+       CF_API_URL: {{cf-api-url}}
+       CF_USER: {{cf-admin-user}}
+       CF_PASSWORD: {{cf-admin-password}}
+       CF_ORG: {{cf-org}}
+       CF_SPACE: {{cf-space}}
+       APP_NAME: "console-db"
