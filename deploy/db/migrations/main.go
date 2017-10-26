@@ -189,7 +189,6 @@ func upRun(args []string) {
 			err = goose.FinalizeMigration(conf, txn, true, element.Version)
 			if err != nil {
 				log.Fatal("Commit() failed:", err)
-				return err
 			}
 
 			didRun = true
@@ -203,7 +202,7 @@ func upRun(args []string) {
 	}
 }
 
-func dbVersionRun(args []string) {
+func dbVersionRun() {
 	conf, err := dbConfFromFlags()
 	if err != nil {
 		log.Fatal(err)
@@ -217,7 +216,7 @@ func dbVersionRun(args []string) {
 	fmt.Printf("goose: dbversion %v\n", current)
 }
 
-func statusRun(cmd *Command, args ...string) {
+func statusRun() {
 
 	conf, err := dbConfFromFlags()
 	if err != nil {
