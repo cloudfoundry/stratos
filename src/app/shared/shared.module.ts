@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+import { VirtualScrollModule } from 'angular2-virtual-scroll';
 import { CoreModule } from '../core/core.module';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
@@ -16,6 +17,7 @@ import { FocusDirective } from './components/focus.directive';
 import { UniqueDirective } from './components/unique.directive';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
+import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 
 
 @NgModule({
@@ -24,7 +26,8 @@ import { CodeBlockComponent } from './components/code-block/code-block.component
     CoreModule,
     PageHeaderModule,
     RouterModule,
-    SteppersModule
+    SteppersModule,
+    VirtualScrollModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -38,6 +41,7 @@ import { CodeBlockComponent } from './components/code-block/code-block.component
     FocusDirective,
     UniqueDirective,
     CodeBlockComponent,
+    LogViewerComponent
   ],
   exports: [
     FormsModule,
@@ -55,6 +59,7 @@ import { CodeBlockComponent } from './components/code-block/code-block.component
     FocusDirective,
     UniqueDirective,
     CodeBlockComponent,
+    LogViewerComponent
   ]
 })
 export class SharedModule { }

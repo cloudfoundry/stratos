@@ -1,0 +1,10 @@
+<span>High throughput: {{ highThroughput }}</span>
+<br/>
+<span>Paused: {{ isPaused$ | async }}</span>
+<button #pauseButton>Pause</button>
+
+<div class="log-scroller" #container>
+  <div class="last-chance-saloon" #bin></div>
+  <div class="log-scroller__content" (mousewheel)="wheelHandler" (scroll)="scrollHandler" #content>
+  </div>
+</div>
