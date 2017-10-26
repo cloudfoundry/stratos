@@ -4,5 +4,10 @@ applications:
   disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/SUSE/stratos-buildpack
+  buildpacks:
+  - https://github.com/SUSE/stratos-buildpack
   health-check-type: port
+  env:
+    STRATOS_CF_LOCAL: true
+
+

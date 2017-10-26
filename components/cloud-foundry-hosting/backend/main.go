@@ -25,11 +25,13 @@ const (
 	CFApiForceSecure       = "CF_API_FORCE_SECURE"
 	cfSessionCookieName    = "JSESSIONID"
 	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
+	CFLocalHosted          = "STRATOS_CF_LOCAL"
 )
 
 type CFHosting struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
+	isCFLocal    bool
 }
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -49,6 +51,7 @@ func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 }
 
 func (ch *CFHosting) Init() error {
+	ch.isCFLocal = false
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if config.IsSet(VCapApplication) {
 		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
@@ -78,7 +81,6 @@ func (ch *CFHosting) Init() error {
 			if err != nil {
 				log.Warnf("Unable to read Port")
 			} else {
-
 				ch.portalProxy.GetConfig().TLSAddress = ":" + port
 				log.Infof("Updated Console address to: %s", ch.portalProxy.GetConfig().TLSAddress)
 			}
@@ -95,6 +97,13 @@ func (ch *CFHosting) Init() error {
 		}
 
 		log.Infof("CF API URL: %s", appData.API)
+
+		// Check if we are running usign 'cf local'
+		if config.IsSet(CFLocalHosted) {
+			log.Warn("Environment indicates running using 'cf local' - skipping CF auto-configuration")
+			ch.isCFLocal = true
+			return nil
+		}
 
 		// Allow the URL to be overridden by an application environment variable
 		if config.IsSet(CFApiURLOverride) {
@@ -214,6 +223,11 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		if c.Request().Header().Contains("Upgrade") &&
 			c.Request().Header().Contains("Sec-Websocket-Key") {
 			log.Infof("Not redirecting this request")
+			return h(c)
+		}
+
+		// Check CF Local
+		if ch.isCFLocal {
 			return h(c)
 		}
 
