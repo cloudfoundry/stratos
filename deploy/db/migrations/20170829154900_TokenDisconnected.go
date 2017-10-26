@@ -24,7 +24,7 @@ func Down_20170829154900(txn *sql.Tx) {
 	dropColumn := "ALTER TABLE \"table_name\" DROP COLUMN \"column_name\";"
 	_, err := txn.Exec(dropColumn)
 	if err != nil {
-		fmt.Printf("Failed ot migrate due to: %v", err)
+		fmt.Printf("Failed to migrate due to: %v", err)
 	}
 
 }
