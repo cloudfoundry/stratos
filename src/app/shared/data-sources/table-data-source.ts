@@ -25,7 +25,7 @@ export interface ITableDataSource {
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
-  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>);
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>);
   connect(): Observable<any>;
   disconnect();
 }
@@ -118,9 +118,9 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     delete this.editRow;
   }
 
-  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
     this.mdPaginator = paginator;
-    this.sort$ = sort;
+    this.sort$ = sort.mdSortChange;
 
     this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
     // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();

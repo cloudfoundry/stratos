@@ -1,8 +1,8 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
 
-    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [title]="'User Environment Variables'" [enableAdd]="true"
-      [enableFilter]="true">
+    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [title]="'Environment Variables'" [enableAdd]="true"
+      [enableFilter]="true" [fixedRowHeight]="true">
       <div app-table-add>
         <md-form-field floatPlaceholder="never">
           <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addRow.name"
@@ -20,7 +20,10 @@
 
   <div class="variables-tab__env-code-block">
     <md-card>
-      <md-card-header>Variables</md-card-header>
+      <md-card-header>
+        <div>Variables</div>
+      </md-card-header>
+
       <md-card-content>
         <app-code-block>{{ (envVars$ | async)?.metadata | json }}</app-code-block>
       </md-card-content>

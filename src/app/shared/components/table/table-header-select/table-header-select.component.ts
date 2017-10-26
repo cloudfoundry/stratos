@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ITableDataSource } from '../../data-sources/table-data-source';
+import { ITableDataSource } from '../../../data-sources/table-data-source';
 
 @Component({
   selector: 'app-table-header-select',

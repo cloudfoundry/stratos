@@ -1,9 +1,10 @@
-import { ITableDataSource } from '../../data-sources/table-data-source';
+import { ITableDataSource } from '../../../data-sources/table-data-source';
 import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef } from '@angular/core';
-import { TableColumn } from '../table/table.component';
+import { TableColumn } from '../table.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellEditVariableComponent } from '../../../../features/applications/application/variables-tab/table-cell-edit-variable/table-cell-edit-variable.component';
 
 export interface ITableCellComponent<T> {
   dataSource: ITableDataSource;
@@ -18,11 +19,12 @@ export interface ITableCellComponent<T> {
     TableCellSelectComponent,
     TableHeaderSelectComponent,
     TableCellEditComponent,
+    TableCellEditVariableComponent,
   ],
 })
 export class TableCellComponent<T> implements OnInit {
 
-  @Input('dataSource') dataSource: ITableDataSource;
+  @Input('dataSource') dataSource = null as ITableDataSource;
 
   @Input('component') component: Type<{}>;
   @Input('func') func: () => string;

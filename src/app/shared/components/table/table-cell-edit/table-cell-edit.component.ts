@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ITableCellComponent } from '../table-cell/table-cell.component';
-import { ITableDataSource } from '../../data-sources/table-data-source';
+import { ITableDataSource } from '../../../data-sources/table-data-source';
 
 @Component({
   selector: 'app-table-cell-edit',

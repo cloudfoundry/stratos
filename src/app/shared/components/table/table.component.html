@@ -7,8 +7,10 @@
     </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
+        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="grow-title">{{ title }}</div>
+        <div [hidden]="!(dataSource.isSelecting$ | async)" class="grow-title">{{dataSource.selectedRows.size}} Selected</div>
+        <!-- md-card-title has no ngcontent attribute so cannot select in css -->
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-          <div class="grow-title mat-card-header-text-wa">{{ title }}</div>
           <div [hidden]="!enableFilter || paginator.length === 0">
             <form novalidate>
               <md-form-field floatPlaceholder="never">
@@ -21,7 +23,6 @@
             </button>
         </div>
         <div [hidden]="!(dataSource.isSelecting$ | async)">
-          <div class="grow-title mat-card-header-text-wa">{{dataSource.selectedRows.size}} Selected</div>
           <button md-icon-button (click)="dataSource.selectedDelete()">
               <md-icon>delete</md-icon>
             </button>
@@ -37,7 +38,7 @@
         </div>
       </md-card-header>
       <md-card-content>
-        <md-table app-table-content #table [hidden]="dataSource.mdPaginator.length === 0" [dataSource]="dataSource" mdSort (mdSortChange)="appTable.sort.emit($event)">
+        <md-table #table [hidden]="dataSource.mdPaginator.length === 0" [dataSource]="dataSource" mdSort>
           <!-- TODO: RC SORT md-sort-header disableClear="true"-->
           <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnDef">
             <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
@@ -49,7 +50,7 @@
             </md-cell>
           </ng-container>
           <md-header-row [hidden]="dataSource.mdPaginator.length === 0" *mdHeaderRowDef="columnNames"></md-header-row>
-          <md-row *mdRowDef="let row; columns: columnNames;"></md-row>
+          <md-row *mdRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></md-row>
         </md-table>
         <div [hidden]="paginator.length > 0" class="mat-card-header-text no-rows">
           <div class="mat-card-header-text">

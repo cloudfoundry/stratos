@@ -26,19 +26,21 @@ export interface TableColumn<T> {
 export class TableComponent<T extends object> implements OnInit {
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
-  @Input('sort') sort = new EventEmitter<any>(); // TODO: REPLACE WITH MdSort (now that sort and table are together)
+  // @Input('sort') sort = new EventEmitter<any>(); // TODO: REPLACE WITH MdSort (now that sort and table are together)
+  @ViewChild(MdSort) sort: MdSort;
   @ViewChild('filter') filter: NgModel;
 
-  // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('dataSource') dataSource = null as ITableDataSource;
+
+  @Input('dataSource') dataSource = null as ITableDataSource; // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('columns') columns: TableColumn<T>[];
-  columnNames: string[];
+  private columnNames: string[];
 
   @Input('title') title: string;
   @Input('enableAdd') enableAdd = false;
   @Input('enableFilter') enableFilter = false;
+  @Input('fixedRowHeight') fixedRowHeight = false;
 
-  @ContentChild(MdTable) table: MdTable<T>;
+  // @ContentChild(MdTable) table: MdTable<T>;
 
   constructor() { }
 
@@ -47,7 +49,7 @@ export class TableComponent<T extends object> implements OnInit {
       .debounceTime(150)
       .distinctUntilChanged()
       .map(value => value as string);
-    this.dataSource.initialise(this.paginator, this.sort.asObservable(), filter);
+    this.dataSource.initialise(this.paginator, this.sort, filter);
     this.columnNames = this.columns.map(x => x.columnDef);
   }
 }

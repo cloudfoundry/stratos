@@ -57,7 +57,7 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     super.disconnect();
   }
 
-  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
     super.initialise(paginator, sort, filter$);
 
     const { pagination$, entities$ } = getPaginationObservables({

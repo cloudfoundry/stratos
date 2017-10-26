@@ -77,7 +77,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     return collection.splice(startIndex, pageSize);
   }
 
-  initialise(paginator: MdPaginator, sort: Observable<Sort>, filter$: Observable<string>) {
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
     super.initialise(paginator, sort, filter$);
   }
 }

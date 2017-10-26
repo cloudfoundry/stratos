@@ -1,0 +1,5 @@
+<md-form-field *ngIf="row.name === dataSource.editRow?.name">
+  <input mdInput name="envVarValue" [value]="dataSource.editRow?.value" (input)="dataSource.editRow.value = $event.target.value"
+  />
+</md-form-field>
+<span *ngIf="row.name !== dataSource.editRow?.name">{{row.value}}</span>

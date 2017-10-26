@@ -23,6 +23,7 @@ import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { EventTabActorIconPipe } from './application/events-tab/event-tab-actor-icon.pipe';
+import { TableCellEditVariableComponent } from './application/variables-tab/table-cell-edit-variable/table-cell-edit-variable.component';
 
 
 @NgModule({
@@ -44,7 +45,8 @@ import { EventTabActorIconPipe } from './application/events-tab/event-tab-actor-
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    EventTabActorIconPipe
+    EventTabActorIconPipe,
+    TableCellEditVariableComponent
   ],
   providers: [
     ApplicationService,
