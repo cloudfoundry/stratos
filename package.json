@@ -7,6 +7,7 @@
     "clean": "gulp clean",
     "build": "gulp clean:dist && gulp",
     "build-backend": "gulp build-backend",
+    "build-migrator": "gulp build-migrator",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
     "build-cf": "gulp deploy:cf",
