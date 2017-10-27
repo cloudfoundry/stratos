@@ -9,13 +9,13 @@ PROG=$(basename ${BASH_SOURCE[0]})
 
 function usage {
     echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
-    echo "       -b Value    Base Image"
+    echo "       -b Value   Base Image"
     echo "       -r Value   Docker registry"
     echo "       -o Value   Organization in Docker registry"
-    echo "       -t Value    Tag for images"
-    echo "       -p    Push images to registry"
-    echo "       -s Is SLE"
-    echo "       -h    Help"
+    echo "       -t Value   Tag for images"
+    echo "       -p         Push images to registry"
+    echo "       -s         Is SLE"
+    echo "       -h         Help"
     exit 1
 }
 

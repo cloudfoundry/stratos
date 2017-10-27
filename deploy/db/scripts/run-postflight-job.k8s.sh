@@ -90,7 +90,7 @@ done
 EOF
 chmod +x $TEMP_SCRIPT
 
-timeout 5m ${TEMP_SCRIPT};
+timeout 5m ${TEMP_SCRIPT}
 # Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
 rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true
