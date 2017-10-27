@@ -38,12 +38,12 @@ run:
           "host": "${FRONTEND_IP}",
           "port": "443",
           "admin": {
-            "username": "${CONSOLE_ADMIN_USER}",
-            "password": "${CONSOLE_ADMIN_PASSWORD}"
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
           },
           "user": {
-            "username": "${CONSOLE_USER_USER}",
-            "password": "${CONSOLE_USER_PASSWORD}"
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
           }
         },
         "uaa": {
