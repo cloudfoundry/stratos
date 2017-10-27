@@ -5,10 +5,10 @@ set -eu
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-
+BASE_IMAGE_TAG=opensuse
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTcl" opt; do
+while getopts ":ho:r:t:dTcb:l" opt; do
   case $opt in
     h)
       echo
@@ -26,6 +26,9 @@ while getopts ":ho:r:t:dTcl" opt; do
       ;;
     t)
       TAG="${OPTARG}"
+      ;;
+    b)
+      BASE_IMAGE_TAG="${OPTARG}"
       ;;
     T)
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
@@ -56,13 +59,14 @@ echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
 echo "REGISTRY: ${DOCKER_REGISTRY}"
 echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
+echo "BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}"
 
 echo
 echo "Starting build"
 
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
+STRATOS_UI_PATH=${__DIRNAME}/../../
 
 # Proxy support
 BUILD_ARGS=""
@@ -96,6 +100,8 @@ function buildAndPublishImage {
     exit 1
   fi
 
+  # Patch Dockerfile
+  patchDockerfile ${DOCKER_FILE} ${FOLDER}
   IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
   echo Building Docker Image for ${NAME}
 
@@ -108,13 +114,11 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
+  unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
   if [ ! -z ${TAG_LATEST} ]; then
     docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
     docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
   fi
-
-  # Update values.yaml
-
   popd > /dev/null 2>&1
 }
 
@@ -170,6 +174,34 @@ function pushGitTag {
   popd > /dev/null 2>&1
 }
 
+
+function patchDockerfile {
+  DOCKER_FILE=${1}
+  FOLDER=${2}
+
+  # Replace registry/organization
+  pushd ${FOLDER} > /dev/null 2>&1
+  pwd
+  sed -i "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${DOCKER_FILE}
+  sed -i "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${DOCKER_FILE}
+  popd > /dev/null 2>&1
+
+}
+
+function unPatchDockerfile {
+  DOCKER_FILE=${1}
+  FOLDER=${2}
+
+  # Replace registry/organization
+  pushd ${FOLDER} > /dev/null 2>&1
+  pwd
+  sed -i "s@${DOCKER_REGISTRY}/${DOCKER_ORG}@splatform@g" ${FOLDER}/${DOCKER_FILE}
+  sed -i "s/${BASE_IMAGE_TAG}/opensuse/g" ${FOLDER}/${DOCKER_FILE}
+  popd > /dev/null 2>&1
+
+}
+
+
 function buildProxy {
   # Use the existing build container to compile the proxy executable, and leave
   # it on the local filesystem.
@@ -191,7 +223,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -215,16 +247,15 @@ function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-
   docker run \
              ${RUN_ARGS} \
              -it \
              --rm \
              --name postflight-builder \
              --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:${BASE_IMAGE_TAG}
   mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
@@ -241,7 +272,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    splatform/stratos-ui-build-base:opensuse \
+    ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container

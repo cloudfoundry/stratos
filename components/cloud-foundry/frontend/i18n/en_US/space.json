@@ -38,6 +38,7 @@
       "unmap-route-action": "Unmap Route",
       "detach-service-action": "Detach Service",
       "delete-service-action": "Delete Service",
+      "edit-service-action": "Edit Service",
       "tabs": {
         "show-all-button": "Show All",
         "column.action": "action",

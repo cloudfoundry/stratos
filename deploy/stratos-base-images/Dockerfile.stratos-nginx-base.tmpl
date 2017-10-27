@@ -1,5 +1,7 @@
 FROM {{BASE_IMAGE}}
-
+{{#IS_SLE}}
+RUN zypper addrepo -G -t yum -c 'http://nginx.org/packages/sles/12' nginx
+{{/IS_SLE}}
 RUN zypper -n ref && \
     zypper -n up && \
     zypper in -y nginx

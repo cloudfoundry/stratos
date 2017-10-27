@@ -259,6 +259,13 @@
             },
             "json-error-invalid": "Must be valid JSON"
           },
+          "edit": {
+            "title": "Edit Service Instance",
+            "button": {
+              "yes": "Update"
+            },
+            "success": "Service instance successfully updated"
+          },
           "view-envs": {
             "title": "{{instanceName}}: Variables"
           },
