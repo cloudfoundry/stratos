@@ -6,8 +6,9 @@ image_resource:
   type: docker-image
   source:
    # Image based on bosh/cli2 with git and go added
-   repository:  irfanhabib/concourse-bosh
+   repository:  registry.capbristol.com:5000/stratos-concourse
    tag: "latest"
+   insecure_registries: ["registry.capbristol.com:5000"]
 
 run:
   path: sh
