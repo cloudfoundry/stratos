@@ -167,7 +167,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 	u.UserGUID = userID
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
 
 	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
 
@@ -255,12 +255,33 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	userID, err := p.GetSessionStringValue(c, "user_id")
+	userGUID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+		return fmt.Errorf("Could not find correct session value: %s", err)
 	}
 
-	p.deleteCNSIToken(cnsiGUID, userID)
+	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
+	if err != nil {
+		return fmt.Errorf("Unable to load CNSI record: %s", err)
+	}
+
+	// If cnsi is cf AND cf is auto-register only clear the entry
+	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
+		log.Debug("Setting token record as disconnected")
+
+		userTokenInfo := userTokenInfo{
+			UserGUID: userGUID,
+		}
+
+		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, "cleared_token", "cleared_token", true); err != nil {
+			return fmt.Errorf("Unable to clear token: %s", err)
+		}
+	} else {
+		log.Debug("Deleting Token")
+		if err := p.deleteCNSIToken(cnsiGUID, userGUID); err != nil {
+			return fmt.Errorf("Unable to delete token: %s", err)
+		}
+	}
 
 	return nil
 }
@@ -401,13 +422,14 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
 	log.Debug("saveCNSIToken")
 
 	tokenRecord := interfaces.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
+		Disconnected: disconnect,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
@@ -614,7 +636,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	// get the scope out of the JWT token data
 	userTokenInfo, err := getUserTokenInfo(cfTokenRecord.AuthToken)
 	if err != nil {
-		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 		log.Errorf(msg, err)
 		return nil, false
 	}

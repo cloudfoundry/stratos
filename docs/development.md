@@ -195,7 +195,19 @@ $ npm run e2e
 
 The portal-proxy is the back-end for the Console UI. It is written in Go.
 
-> **NOTE** WIP Instructions
+### Automatically register and connect to an existing endpoint
+To automatically register a Cloud Foundry add the environment variable below
+
+> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using 
+           the username/password provided.
+
+```
+AUTO_REG_CF_URL=<api url of cf>
+```
+
+This env var can be set in `outputs/config.properties` if running the backend locally in the host machine, `./deploy/proxy.env` if running in docker-compose or `./manifest` if in cf push.
+
+> **NOTE** WIP Instructions!
 
 #### Introduction
 * Golang
@@ -215,27 +227,15 @@ The portal-proxy is the back-end for the Console UI. It is written in Go.
 
 1. Set up developer certs
     - Execute `deploy/ci/scripts/generate_cert.sh`
-    - Copy `deploy/ci/scripts/portal-proxy-output/dev-certs` to `./`   
+    - Copy `deploy/ci/scripts/portal-proxy-output/dev-certs` to `./`
+1. Update `build/dev_config.json` with `"localDevBuild": true`
 1. cd ./outputs
+1. Run `gulp local-dev-build`
 1. Run `gulp build-backend`
-1. Update `./outputs/config.propeties`
-
-docker-compose
-dev certs - deploy/ci/scripts/generate_cert.sh
-copy deploy/ci/scripts/portal-proxy-output/dev-certs to ./
-
-portal run 
-go and glide installed
-dev_config localDevBuild true
-
-
-
-copy deploy/cloud-foundry/config.properties
-uaa running locally
-gulp build-backend
-chown /usr/local/go/
-gcc? https://randomgeekery.org/post/2014/what-is-build-essentials-for-opensuse
-chmod 755 portal-proxy 
+1. Update `config.propeties` and ensure that..
+    - the UAA points to a valid instance
+    - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance
+1. Run `portal-proxy`
 
 #### Tests
 
