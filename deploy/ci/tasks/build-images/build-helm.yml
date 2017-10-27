@@ -22,4 +22,4 @@ run:
       mv dev-certs-output/dev-certs stratos-ui/dev-certs
       ls stratos-ui
       cd stratos-ui/deploy/kubernetes
-      ./build.sh -t test -r registry.capbristol.com:5000
+      ./build.sh -t test -r registry.capbristol.com:5000 -l

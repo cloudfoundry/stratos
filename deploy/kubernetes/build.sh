@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTc" opt; do
+while getopts ":ho:r:t:dTcl" opt; do
   case $opt in
     h)
       echo
@@ -36,6 +36,9 @@ while getopts ":ho:r:t:dTc" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    l)
+      TAG_LATEST="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -104,6 +107,11 @@ function buildAndPublishImage {
 
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
+
+  if [ ! -z ${TAG_LATEST} ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
 
   # Update values.yaml
 
