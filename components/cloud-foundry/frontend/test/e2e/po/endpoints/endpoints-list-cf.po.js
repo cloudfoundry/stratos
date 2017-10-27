@@ -26,18 +26,18 @@
   }
 
   function goToCfEndpoints() {
-    return browser.get(helpers.getHost() + '/#/endpoint/cf');
+    return browser.get(helpers.getHost() + '/#!/endpoint/cf');
   }
 
   function isEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint');
+      return expect(url).toBe(helpers.getHost() + '/#!/endpoint');
     });
   }
 
   function isCfEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cf/list');
+      return expect(url).toBe(helpers.getHost() + '/#!/endpoint/cf/list');
     });
   }
 
@@ -52,7 +52,7 @@
   function isCfOganizationsDetails() {
     browser.debugger();
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toMatch(helpers.getHost() + '/#/endpoint/.*/organizations');
+      return expect(url).toMatch(helpers.getHost() + '/#!/endpoint/.*/organizations');
     });
   }
 

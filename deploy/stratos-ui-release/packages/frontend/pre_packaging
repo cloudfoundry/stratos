@@ -5,7 +5,7 @@ cd ${BUILD_DIR}/stratos-ui
 
 npm install
 export PATH=$PATH:$PWD/node_modules/.bin
-bower install
+bower install --allow-root
 npm run build
 
 # remove things we don't need

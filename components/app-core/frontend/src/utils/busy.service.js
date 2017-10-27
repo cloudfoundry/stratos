@@ -9,10 +9,18 @@
    * @memberof app.utils
    * @name appBusyService
    * @description The application busy service
-   * @param {object} appEventService - the event service
+   * @param {object} $timeout - the $timeout service
    * @returns {object} the busy service
    */
-  function appBusyServiceFactory() {
+  function appBusyServiceFactory($timeout) {
+
+    // Time to wait before showing the progress indicator - if a close occurs in this time, no progress is shown
+    // This prevents indicators being shown for quick operations
+    var OPEN_TIMEOUT = 250;
+
+    // Time period after the last close, where if a new progress indicator is requested, it will be shown immediately rather than obeying the open timeout
+    // This prevents progress indicators flicking on and off when different ui-view's show and hide progress indicators
+    var CLOSE_TIMEOUT = 500;
 
     var nextBusyId = 0;
 
@@ -21,6 +29,8 @@
 
     var busyStates = {};
 
+    var openTimer, closeTimer;
+
     return {
 
       busyState: {},
@@ -28,13 +38,34 @@
       _update: function () {
         if (busyStack.length === 0) {
           this.busyState.active = false;
+          if (openTimer) {
+            $timeout.cancel(openTimer);
+            openTimer = undefined;
+          } else {
+            closeTimer = $timeout(function () {
+              closeTimer = undefined;
+            }, CLOSE_TIMEOUT);
+          }
         } else {
           // Get the last item - that is the most recent
           var newestId = busyStack[busyStack.length - 1];
           var busyInfo = busyStates[newestId];
           this.busyState.label = busyInfo.label;
           this.busyState.local = busyInfo.local || false;
-          this.busyState.active = true;
+
+          if (!this.busyState.active && !openTimer) {
+            if (closeTimer) {
+              $timeout.cancel(closeTimer);
+              closeTimer = undefined;
+              this.busyState.active = true;
+            } else {
+              var that = this;
+              openTimer = $timeout(function () {
+                openTimer = undefined;
+                that.busyState.active = true;
+              }, OPEN_TIMEOUT);
+            }
+          }
         }
       },
 

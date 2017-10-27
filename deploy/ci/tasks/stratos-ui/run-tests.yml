@@ -20,6 +20,7 @@ run:
       source /docker-lib.sh
       start_docker
       export GOPATH=$PWD
+
       # Move portal-proxy binaries
       cp -r ./portal-proxy-output/* stratos-ui/
 
@@ -60,7 +61,7 @@ run:
 
       cat ../build/secrets.json
 
-      for image in splatform/stratos-goose mariadb:latest nginx:1.11 splatform/stratos-uaa alpine:latest splatform/stratos-concourse; do
+      for image in splatform/stratos-goose-base:opensuse  splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa splatform/stratos-concourse; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done

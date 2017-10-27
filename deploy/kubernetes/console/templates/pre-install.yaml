@@ -15,7 +15,11 @@ metadata:
     "helm.sh/hook-weight": "-1"
 spec:
   accessModes:
+{{- if .Values.noShared }}
     - ReadWriteOnce
+{{- else }}
+    - ReadWriteMany
+{{- end }}
   resources:
     requests:
       storage: 1Mi
@@ -36,7 +40,11 @@ metadata:
     "helm.sh/hook-weight": "-1"
 spec:
   accessModes:
+{{- if .Values.noShared }}
     - ReadWriteOnce
+{{- else }}
+    - ReadWriteMany
+{{- end }}
   resources:
     requests:
       storage: 1Mi

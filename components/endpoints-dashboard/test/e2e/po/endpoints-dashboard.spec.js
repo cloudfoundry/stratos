@@ -550,7 +550,7 @@
             loginPage.waitForLogin();
             loginPage.login(helpers.getAdminUser(), helpers.getAdminPassword());
 
-            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/endpoint');
+            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#!/endpoint');
           });
 
           it('should go directly to applications view on logout and login', function () {
@@ -558,7 +558,7 @@
             loginPage.waitForLogin();
             loginPage.login(helpers.getUser(), helpers.getPassword());
 
-            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
+            expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#!/cf/applications/list/gallery-view');
           });
 
         });

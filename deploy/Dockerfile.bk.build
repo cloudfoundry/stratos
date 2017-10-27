@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-build-base
+FROM splatform/stratos-bk-build-base:opensuse
 
 RUN mkdir -p /go/src/github.com/SUSE/stratos-ui
 COPY package.json /

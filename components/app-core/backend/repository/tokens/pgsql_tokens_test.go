@@ -278,8 +278,8 @@ func TestFindUAATokens(t *testing.T) {
 		})
 
 		Convey("should fail to decrypt with invalid encryptionKey", func() {
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -291,8 +291,8 @@ func TestFindUAATokens(t *testing.T) {
 
 		Convey("Success case", func() {
 
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -342,8 +342,8 @@ func TestFindCNSITokens(t *testing.T) {
 		})
 
 		Convey("should fail to decrypt with invalid encryptionKey", func() {
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -355,8 +355,8 @@ func TestFindCNSITokens(t *testing.T) {
 
 		Convey("Success case", func() {
 
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -400,8 +400,8 @@ func TestListCNSITokensForUser(t *testing.T) {
 		})
 
 		Convey("Test successful path", func() {
-			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+			rs := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+				AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)

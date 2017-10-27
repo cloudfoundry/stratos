@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 )
@@ -16,6 +16,7 @@ import (
 var flagPath = flag.String("path", "db", "folder containing db info")
 var flagEnv = flag.String("env", "development", "which DB environment to use")
 var flagPgSchema = flag.String("pgschema", "", "which postgres-schema to migrate (default = none)")
+var flagCloudFoundry = flag.Bool("cf", false, "detect and parse Cloud Foundry database configuration from VCAP_SERVICES")
 
 // helper to create a DBConf from the given flags
 func dbConfFromFlags() (dbconf *goose.DBConf, err error) {
@@ -33,8 +34,23 @@ func main() {
 		return
 	}
 
-	// TODO: Check command is up
-	fmt.Println(args[0])
+	if strings.ToLower(args[0]) != "up" {
+		log.Fatal("Database migration tool only supports migration upgrades")
+	}
+
+	if *flagCloudFoundry {
+		dbEnv, err := parseCloudFoundryEnv()
+		if err != nil {
+			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
+		}
+		flag.Set("env", dbEnv)
+
+		// If there is no dbEnv, then we are using SQLite, so don't run migrations
+		if len(dbEnv) == 0 {
+			log.Println("No DB Environment detected - skipping migrations")
+			return
+		}
+	}
 
 	err := upRun(args[1:])
 	if err != nil {
@@ -53,13 +69,13 @@ type StratosMigrationMehod struct {
 type StratosMigrations struct {
 }
 
-func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
-	Up_20170818162837(txn)
-}
+// func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
+// 	Up_20170818162837(txn)
+// }
 
-func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
-	Up_20170818120003(txn)
-}
+// func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
+// 	Up_20170818120003(txn)
+// }
 
 // -- Sorting
 

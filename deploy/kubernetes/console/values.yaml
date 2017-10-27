@@ -17,7 +17,7 @@ useLb: false
 console:
   port: 443
 # externalIP: 127.0.0.1
-noShared: false
+noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy
@@ -53,3 +53,16 @@ mariadb:
 #    storageClass: default
   metrics:
     enabled: false
+uaa:
+  protocol: https://
+  port: 
+  host: 
+  consoleClient:  
+  consoleClientSecret: 
+  consoleAdminIdentifier: 
+  skipSSLValidation: false
+ # SCF values compatability 
+env:
+  UAA_HOST: 
+  UAA_ADMIN_CLIENT_SECRET: 
+  UAA_PORT:

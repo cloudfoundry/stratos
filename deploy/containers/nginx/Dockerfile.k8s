@@ -1,4 +1,4 @@
-FROM nginx:1.11
+FROM splatform/stratos-nginx-base:opensuse
 
 RUN mkdir -p /usr/share/doc/suse
 COPY ./LICENSE.txt /usr/share/doc/suse/LICENSE.txt
