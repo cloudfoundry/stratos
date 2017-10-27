@@ -28,6 +28,8 @@ npm install -g gulp bower
 
 cd ${TOP_LEVEL}
 
+rm -rf ${BUILD_DIR}/bower_components
+
 npm install --only=prod
 ${BOWER_PATH}/bower install
 
