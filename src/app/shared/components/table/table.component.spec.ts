@@ -1,21 +1,56 @@
+import { ITableDataSource } from '../../data-sources/table-data-source';
+import { TableCellComponent } from './table-cell/table-cell.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableComponent } from './table.component';
+import { TableComponent, TableColumn } from './table.component';
+import { CoreModule } from '../../../core/core.module';
+import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
+import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { TableCellEditComponent } from './table-cell-edit/table-cell-edit.component';
+import { TableCellEditVariableComponent } from './custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
+import { MdPaginator, MdSort, MdPaginatorIntl } from '@angular/material';
+import { Observable } from 'rxjs/Observable';
+import { ChangeDetectorRef } from '@angular/core';
 
-describe('TableComponent', () => {
-  let component: TableComponent;
-  let fixture: ComponentFixture<TableComponent>;
+class MdPaginatorMock {
+
+}
+
+fdescribe('TableComponent', () => {
+  let component: TableComponent<any>;
+  let fixture: ComponentFixture<TableComponent<any>>;
+
+
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableComponent ]
+      declarations: [
+        TableComponent,
+        TableCellComponent,
+        TableCellSelectComponent,
+        TableHeaderSelectComponent,
+        TableCellEditComponent,
+        TableCellEditVariableComponent,
+        { provide: MdPaginator, useClass: MdPaginatorMock },
+      ],
+      imports: [
+        CoreModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
+    component.dataSource = {
+      connect() { return Observable.of([]); },
+      initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
+      selectedRows: new Map<string, any>(),
+      mdPaginator: new MdPaginator({} as MdPaginatorIntl, {} as ChangeDetectorRef)
+    } as ITableDataSource<any>;
+    // component.dataSource.selectedRows = new Map<string, any>();
+    component.columns = new Array<TableColumn<any>>();
     fixture.detectChanges();
   });
 

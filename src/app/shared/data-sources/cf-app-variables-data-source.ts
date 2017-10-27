@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { MdPaginator, MdSort, Sort, PageEvent } from '@angular/material';
+import { MdPaginator, MdSort, Sort, PageEvent, MdSortable } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
@@ -25,6 +25,8 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
   private rows = new Array<AppEnvVar>();
+  // Default sort shizzle
+  private _defaultSortParmas: MdSortable;
 
   filteredRows = new Array<AppEnvVar>();
   isLoadingPage$: Observable<boolean>;
@@ -37,7 +39,10 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     super(_store, 'name', {
       name: '',
       value: '',
-    });
+    }, { active: 'name', direction: 'asc' });
+    this._defaultSortParmas = {
+      id: 'name', start: 'asc', disableClear: true
+    };
 
     this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
       _appService.isFetchingEnvVars$,
@@ -46,10 +51,6 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
       return isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
     });
   }
-
-  // _defaultSort: Sort = { active: 'name', direction: 'asc' }; // TODO: RC
-  // _defaultPaginator = {};
-
 
   saveAdd() {
     const updateApp = this._createUpdateApplication(false);
@@ -121,7 +122,7 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   }
 
   initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    sort.sort({ id: 'name', start: 'asc', disableClear: true });
+    sort.sort(this._defaultSortParmas);
     super.initialise(paginator, sort, filter$);
   }
 

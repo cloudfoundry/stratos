@@ -10,7 +10,7 @@ import { TableDataSource, ITableDataSource } from './table-data-source';
 import { AppState } from '../../store/app-state';
 
 
-export abstract class StandardTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource {
+export abstract class StandardTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource<T> {
 
   abstract filteredRows: Array<T>;
   abstract isLoadingPage$: Observable<boolean>;
@@ -21,6 +21,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     private _dStore: Store<AppState>,
     private _dTypeId: string,
     private _dEmptyType: T,
+    private _defaultSort: Sort,
   ) {
     super(_dStore, _dTypeId, _dEmptyType);
   }
@@ -30,10 +31,11 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       .combineLatest(
       this.pageSize$.startWith(5),
       this.pageIndex$.startWith(0),
-      this.sort$.startWith({ active: 'name', direction: 'asc' }), // TODO: RC make generic
+      this.sort$.startWith(this._defaultSort),
       this.filter$.startWith('')
       )
       .map(([collection, pageSize, pageIndex, sort, filter]: [Array<T>, number, number, Sort, string]) => {
+        console.log('CHANGED');
         // TODO: RC caching?? catch no-ops?
         this.mdPaginator.length = collection.length;
 
@@ -43,7 +45,6 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
 
         const page = this.paginate(sorted, pageSize, pageIndex);
 
-        // TODO: RC !!!!!! This is being called multiple times at start
         return page;
       });
   }
@@ -53,7 +54,6 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   }
 
   abstract filter(collection: any, filter: string): Array<T>;
-  // TODO:RC change to sort event;
   abstract sort(collection: Array<T>, sort: Sort): Array<T>;
 
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
@@ -76,7 +76,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     return collection.splice(startIndex, pageSize);
   }
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    super.initialise(paginator, sort, filter$);
-  }
+  // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
+  //   super.initialise(paginator, sort, filter$);
+  // }
 }

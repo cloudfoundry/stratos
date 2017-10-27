@@ -1,3 +1,4 @@
+import { EntityInfo } from '../../store/types/api.types';
 import { EventSchema, GetAllAppEvents } from '../../store/actions/app-event.actions';
 import { AppState } from '../../store/app-state';
 import { Subscription } from 'rxjs/Rx';
@@ -24,7 +25,7 @@ export interface AppEvent {
   type: string;
 }
 
-export class CfAppEventsDataSource extends CfTableDataSource<AppEvent> {
+export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
   /**
    *
@@ -37,6 +38,6 @@ export class CfAppEventsDataSource extends CfTableDataSource<AppEvent> {
     const paginationKey = `app-events:${_cfGuid}${_appGuid}`;
     const action = new GetAllAppEvents(paginationKey, _appGuid, _cfGuid);
     // TODO: RC key will not work
-    super(_store, action, EventSchema, 'metadata.guid', {} as AppEvent);
+    super(_store, action, EventSchema, 'metadata.guid', {} as EntityInfo);
   }
 }

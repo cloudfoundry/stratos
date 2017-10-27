@@ -1,3 +1,4 @@
+import { EntityInfo } from '../../../../store/types/api.types';
 import { resultPerPageParam } from '../../../../store/reducers/pagination.reducer';
 
 import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
@@ -11,6 +12,7 @@ import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-even
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
 import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
+import { TableColumn } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'app-events-tab',
@@ -22,8 +24,26 @@ export class EventsTabComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  eventSource: CfTableDataSource<AppEvent>;
+  eventSource: CfTableDataSource<EntityInfo>;
   hasEvents$: Observable<boolean>;
+  columns: Array<TableColumn<EntityInfo>> = [
+    {
+      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cell: (row: EntityInfo) => `${row.entity.timestamp}`,
+      sort: { disableClear: true }
+    },
+    {
+      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cell: (row: EntityInfo) => `${row.entity.type}`,
+      sort: { disableClear: true }
+    },
+    {
+      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cell: (row: EntityInfo) => `${row.entity.actor_name}`,
+      sort: { disableClear: true }
+    },
+    {
+      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cell: (row: EntityInfo) => `${row.entity.metadata}`,
+      sort: { disableClear: true }
+    },
+  ];
 
 
   ngOnInit() {

@@ -1,5 +1,8 @@
 <div class="events-tab">
-  <app-table #appTable [dataSource]="eventSource" [title]="'Events'" [enableFilter]="true">
+  <app-table #appTable [dataSource]="eventSource" [columns]="columns" [title]="'Events'" [enableFilter]="true">
+  </app-table>
+
+  <!-- <app-table #appTable [dataSource]="eventSource" [title]="'Events'" [enableFilter]="true">
     <div app-table-content>
       <md-table #table [hidden]="eventSource.mdPaginator.length === 0" [dataSource]="eventSource" mdSort (mdSortChange)="appTable.sort.emit($event)">
         <ng-container mdColumnDef="timestamp">
@@ -36,5 +39,5 @@
         </md-row>
       </md-table>
     </div>
-  </app-table>
+  </app-table> -->
 </div>

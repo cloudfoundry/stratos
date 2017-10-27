@@ -13,7 +13,7 @@ import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 
-export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource {
+export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource<T> {
 
   private sortSub: Subscription;
   private cfPaginationSub: Subscription;
