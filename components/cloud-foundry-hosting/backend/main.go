@@ -91,8 +91,7 @@ func (ch *CFHosting) Init() error {
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
 		if err != nil {
-			// Could be running using 'cf local', so don't abort, but the user will need to setup the console
-			log.Warn("Could not get the Cloud Foundry API URL", err)
+			log.Fatal("Could not get the Cloud Foundry API URL", err)
 			return nil
 		}
 
