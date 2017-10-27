@@ -13,13 +13,13 @@ image_resource:
 run:
   path: sh
   args:
-    - -exc
+    - -ecx
     - |
       source /docker-lib.sh
       start_docker
       # Move dev-certs
       ls .
       mv dev-certs-output/dev-certs stratos-ui/dev-certs
-      ls stratos-ui
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
       cd stratos-ui/deploy/kubernetes
       ./build.sh -t test -l
