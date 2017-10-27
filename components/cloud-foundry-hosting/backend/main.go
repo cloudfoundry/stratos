@@ -165,33 +165,13 @@ func (ch *CFHosting) Init() error {
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
-		var cfCnsi interfaces.CNSIRecord
-
-		cfCnsi, err = ch.portalProxy.GetCNSIRecordByEndpoint(appData.API)
-		if cfCnsi.CNSIType != "" {
-			log.Info("Found existing endpoint matching Cloud Foundry API. Will not auto-register or auto-connect")
-		} else {
-			log.Info("Auto-registering endpoint for Cloud Foundry API")
-			var regErr error
-			// Auto-register the Cloud Foundry
-			cfCnsi, regErr = ch.portalProxy.DoRegisterEndpoint("Cloud Foundry", appData.API, true, cfEndpointSpec.Info)
-			if regErr != nil {
-				log.Fatal("Could not auto-register the Cloud Foundry endpoint", err)
-				ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-					SpaceGUID: appData.SpaceID,
-					AppGUID:   appData.ApplicationID,
-				}
-				return nil
-			}
-			// Add login hook to automatically connect to the Cloud Foundry when the user logs in
-			ch.portalProxy.GetConfig().LoginHook = ch.cfLoginHook
-		}
+		log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
+		ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
 			SpaceGUID:    appData.SpaceID,
 			AppGUID:      appData.ApplicationID,
-			EndpointGUID: cfCnsi.GUID,
 		}
 
 		log.Info("All done for Cloud Foundry deployment")
@@ -199,12 +179,6 @@ func (ch *CFHosting) Init() error {
 	return nil
 }
 
-func (ch *CFHosting) cfLoginHook(c echo.Context) error {
-	log.Debug("Auto connecting to the Cloud Foundry instance")
-	cfInfo := ch.portalProxy.GetConfig().CloudFoundryInfo
-	_, err := ch.portalProxy.DoLoginToCNSI(c, cfInfo.EndpointGUID)
-	return err
-}
 
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {

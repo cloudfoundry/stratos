@@ -1,10 +1,5 @@
-FROM alpine:latest
+FROM splatform/stratos-bk-base:opensuse
 
-RUN apk update && \
-    apk add ca-certificates git &&\
-    mkdir -p /srv
-
-WORKDIR /srv
 COPY outputs/* /srv/
 RUN chmod +x portal-proxy
 EXPOSE 443
