@@ -18,7 +18,9 @@ import { EntityInfo } from '../../../../store/types/api.types';
 import { CfAppEvnVarsDataSource, AppEnvVar } from '../../../../shared/data-sources/cf-app-variables-data-source';
 import { TableColumn } from '../../../../shared/components/table/table.component';
 import { TableCellEditComponent } from '../../../../shared/components/table/table-cell-edit/table-cell-edit.component';
-import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
+import {
+  TableCellEditVariableComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
 
 
 @Component({
@@ -33,10 +35,22 @@ export class VariablesTabComponent implements OnInit {
   envVarsDataSource: CfAppEvnVarsDataSource;
   envVars$: Observable<any>;
   columns: Array<TableColumn<AppEnvVar>> = [
-    { columnDef: 'select', headerComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent, class: 'table-column-select' },
-    { columnDef: 'name', header: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: { disableClear: true } },
-    { columnDef: 'value', header: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent, sort: { disableClear: true } },
-    { columnDef: 'edit', header: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent, class: 'table-column-edit' },
+    {
+      columnDef: 'select', headerComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
+      class: 'table-column-select'
+    },
+    {
+      columnDef: 'name', header: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
+      sort: { disableClear: true }
+    },
+    {
+      columnDef: 'value', header: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent,
+      sort: { disableClear: true }
+    },
+    {
+      columnDef: 'edit', header: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent,
+      class: 'table-column-edit'
+    },
   ];
 
   ngOnInit() {

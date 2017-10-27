@@ -2,7 +2,7 @@ import { ITableDataSource, TableDataSource } from '../../data-sources/table-data
 import { Component, ContentChild, EventEmitter, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, MdSort, Sort, MdTable } from '@angular/material';
-import { NgModel } from '@angular/forms';
+import { NgModel, NgForm } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { CfTableDataSource } from '../../data-sources/table-data-source-cf';
 import { StandardTableDataSource } from '../../data-sources/table-data-source-standard';
@@ -29,7 +29,6 @@ export interface TableColumn<T> {
 export class TableComponent<T extends object> implements OnInit {
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
-  // @Input('sort') sort = new EventEmitter<any>(); // TODO: REPLACE WITH MdSort (now that sort and table are together)
   @ViewChild(MdSort) sort: MdSort;
   @ViewChild('filter') filter: NgModel;
 
@@ -42,6 +41,12 @@ export class TableComponent<T extends object> implements OnInit {
   @Input('enableAdd') enableAdd = false;
   @Input('enableFilter') enableFilter = false;
   @Input('fixedRowHeight') fixedRowHeight = false;
+  @Input('addForm') addForm: NgForm;
+  private safeAddForm() {
+    // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
+    // When applying the question mark (addForm?) it's value is ignored by [disabled]
+    return this.addForm || {};
+  }
 
   // @ContentChild(MdTable) table: MdTable<T>;
 

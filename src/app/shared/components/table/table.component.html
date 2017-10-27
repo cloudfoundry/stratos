@@ -7,9 +7,9 @@
     </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
+        <!-- Don't use md-card-title, it has no ngcontent attribute so cannot select in css -->
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="spacer">{{ title }}</div>
         <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
-        <!-- md-card-title has no ngcontent attribute so cannot select in css -->
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
           <div [hidden]="!enableFilter || paginator.length === 0">
             <form novalidate>
@@ -18,7 +18,7 @@
               </md-form-field>
             </form>
           </div>
-          <button md-icon-button *ngIf="enableAdd" (click)="addRowForm.reset();dataSource.startAdd();">
+          <button md-icon-button *ngIf="enableAdd" (click)="safeAddForm().reset();dataSource.startAdd();;">
               <md-icon>add</md-icon>
             </button>
         </div>
@@ -29,11 +29,8 @@
         </div>
         <div [hidden]="!(dataSource.isAdding$ | async)">
           <div class="spacer"></div>
-          <!-- !!{{addRowForm.valid }}!! -->
-          <form #addRowForm="ngForm" novalidate>
-            <ng-content select="[app-table-add]"></ng-content>
-          </form>
-          <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!addRowForm.valid"><md-icon>done</md-icon></button>
+          <ng-content select="[app-table-add]"></ng-content>
+          <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
           <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
         </div>
       </md-card-header>

@@ -21,6 +21,9 @@ import { TableCellComponent } from './components/table/table-cell/table-cell.com
 import { TableCellSelectComponent } from './components/table/table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './components/table/table-header-select/table-header-select.component';
 import { TableCellEditComponent } from './components/table/table-cell-edit/table-cell-edit.component';
+import {
+  TableCellEditVariableComponent
+} from './components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
 
 
 @NgModule({
@@ -48,6 +51,7 @@ import { TableCellEditComponent } from './components/table/table-cell-edit/table
     TableCellSelectComponent,
     TableHeaderSelectComponent,
     TableCellEditComponent,
+    TableCellEditVariableComponent,
   ],
   exports: [
     FormsModule,
