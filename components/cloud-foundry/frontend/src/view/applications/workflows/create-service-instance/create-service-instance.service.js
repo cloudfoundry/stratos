@@ -147,8 +147,8 @@
             },
             class: 'dialog-form-larger create-service-instance-dialog edit-service-instance',
             dialog: true,
-            allowEnter: function (asyncTaskDialogCtrl) {
-              return !asyncTaskDialogCtrl.editParams;
+            allowEnter: function () {
+              return false;
             }
           },
           {
