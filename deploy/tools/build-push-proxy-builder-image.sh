@@ -48,7 +48,7 @@ docker run \
        ${BK_BUILD_BASE} \
        bash  -c "cd /stratos-ui && npm install"
 
-# Patch BK Build Base
+# Patch bk-build-base
 sed -i "s@splatform/stratos-bk-build-base:opensuse@${BK_BUILD_BASE}@g" Dockerfile.bk.build
 docker build --tag ${NAME} \
              --file Dockerfile.bk.build .
