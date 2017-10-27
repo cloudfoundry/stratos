@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTcb:" opt; do
+while getopts ":ho:r:t:dTcb:l" opt; do
   case $opt in
     h)
       echo
@@ -39,6 +39,9 @@ while getopts ":ho:r:t:dTcb:" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    l)
+      TAG_LATEST="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -112,7 +115,10 @@ function buildAndPublishImage {
   docker push  ${IMAGE_URL}
 
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
-
+  if [ ! -z ${TAG_LATEST} ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
   popd > /dev/null 2>&1
 }
 

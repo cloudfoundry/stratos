@@ -3,37 +3,73 @@ resources:
   type: git
   source:
     branch: {{stratos-ui-branch}}
+    access_token: {{github-access-token}}
+    repo: SUSE/stratos-ui
+    uri: git@github.com:suse/stratos-ui.git
     private_key: {{github-private-key}}
-    uri: git@github.com:hpcloud/stratos-ui.git
-
-groups:
-- name: tests
-  jobs:
-  - unit-tests
-  - e2e-tests
+    base_url: {{base-url}}
 
 jobs:
-- name: unit-tests
+- name: console-unit-tests
   plan:
+  # get PR and set status to pending
   - get: stratos-ui
+    trigger: true
 
   - do:
     - task: run-unit-tests
       privileged: true
-      timeout: 5m
+      timeout: 15m
       file: stratos-ui/deploy/ci/tasks/stratos-ui/run-unit-tests.yml
-- name: e2e-tests
+      params:
+       SET_PROXIES: {{set-proxies}}
+       PROXY_SERVER: {{proxy-server}}
+- name: proxy-unit-tests
   plan:
+  # get PR and set status to pending
   - get: stratos-ui
-    passed: [unit-tests]
+    trigger: true
+
+  - do:
+    - task: run-proxy-unit-tests
+      privileged: true
+      timeout: 15m
+      file: stratos-ui/deploy/ci/tasks/portal-proxy/run-unit-tests.yml
+      params:
+       SET_PROXIES: {{set-proxies}}
+       PROXY_SERVER: {{proxy-server}}
+
+- name: console-e2e-tests
+  plan:
+
+  # get PR and set status to pending
+  - get: stratos-ui
+    trigger: true
 
   - do:
     - task: build-proxy-image
-      file: stratos-ui/deploy/tasks/stratos-ui/prep-proxy-image.yml
+      file: stratos-ui/deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
+      params:
+       SET_PROXIES: {{set-proxies}}
+       PROXY_SERVER: {{proxy-server}}
     - task: run-e2e-tests
       privileged: true
+      timeout: 25m
+      file:  stratos-ui/deploy/ci/tasks/stratos-ui/run-tests.yml
       params:
+       SET_PROXIES: {{set-proxies}}
+       PROXY_SERVER: {{proxy-server}}
        REGISTRY_NAME: {{insecure-registry}}
        CUSTOM_APP_LABEL: {{custom-app-label}}
-      timeout: 10m
-      file: stratos-ui/deploy/tasks/stratos-ui/run-tests.yml
+       WEB_SERVER_URI: {{web-server-uri}}
+       SCP_LOCATION: {{scp-location}}
+       CF_LOCATION: {{cf-location}}
+       CF_ADMIN_USER: {{cf-admin-user}}
+       CF_ADMIN_PASSWORD: {{cf-admin-password}}
+       CF_E2E_USER: {{cf-e2e-user}}
+       CF_E2E_USER_PASSWORD: {{cf-e2e-user-password}}
+       CONSOLE_ADMIN_USER: {{console-admin-user}}
+       CONSOLE_ADMIN_PASSWORD: {{console-admin-password}}
+       CONSOLE_USER_USER: {{console-user-user}}
+       CONSOLE_USER_PASSWORD: {{console-user-password}}
+       GITHUB_TOKEN: {{github-access-token}}

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKER_REGISTRY=ci-registry.ngrok.io:80
+DOCKER_REGISTRY=registry.capbristol.com:5000
 TAG=${TAG:-latest}
-REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-ci-registry.ngrok.io}
+REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-registry.capbristol.com}
 REGISTRY_USER=${REGISTRY_USER:-ubuntu}
 
 DOWNLOAD_FOLDER=${DIRPATH}/tmp

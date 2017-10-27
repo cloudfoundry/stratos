@@ -4,6 +4,7 @@ resource_types:
   source:
     repository: {{pr-resource-image}}
     tag: latest
+    insecure_registries: [ {{insecure-registry}} ]
 
 resources:
 - name: stratos-ui
@@ -15,19 +16,23 @@ resources:
     private_key: {{github-private-key}}
     base_url: {{base-url}}
 
-groups:
-- name: tests
-  jobs:
-  - console-unit-tests
-  - proxy-unit-tests
-  - console-e2e-tests
-
 jobs:
+- name: fetch-pr
+  plan:
+  # get PR and set status to pending
+  - get: stratos-ui
+    trigger: true
+  - do: 
+    - task: fethc-pr-task
+      timeout: 15m
+      file: stratos-ui/deploy/ci/tasks/stratos-ui/dummy-task.yml
 - name: console-unit-tests
   plan:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
+    passed: [fetch-pr]
+
   - put: stratos-ui
     params:
       path: stratos-ui
@@ -57,7 +62,7 @@ jobs:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
-    passed: [console-unit-tests]
+    passed: [fetch-pr]
   - put: stratos-ui
     params:
       path: stratos-ui
@@ -88,7 +93,7 @@ jobs:
   # get PR and set status to pending
   - get: stratos-ui
     trigger: true
-    passed: [proxy-unit-tests]
+    passed: [fetch-pr]
   - put: stratos-ui
     params:
       path: stratos-ui

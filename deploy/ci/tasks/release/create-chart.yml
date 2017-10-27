@@ -10,9 +10,9 @@ image_resource:
   type: docker-image
   source:
   # Generated using Dockerfile.stratos-helm
-   repository:  ci-registry.ngrok.io:80/stratos-helm
+   repository:  registry.capbristol.com:5000/stratos-helm
    tag: "latest"
-   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+   insecure_registries: [ "registry.capbristol.com:5000" ]
 
 run:
   path: sh
