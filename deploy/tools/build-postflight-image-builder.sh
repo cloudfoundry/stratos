@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 DIR_NAME=$(mktemp -d)
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
 DOCKER_ORGANISATION=${DOCKER_ORG:-splatform}
 IMAGE_NAME=stratos-postflight-builder
 TAG=${TAG:-test}
@@ -58,9 +59,9 @@ EOT
 
 cd ${DIR_NAME}
 echo "Building image  ${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}"
-docker build . -t ${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}
+docker build . -t ${DOCKER_REGISTRY}/${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}
 
 if [ -n "${PUSH_IMAGE}" ]; then
     echo "Pushing image  ${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}"
-    docker push ${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORGANISATION}/${IMAGE_NAME}:${TAG}
 fi
