@@ -36,19 +36,19 @@ export class VariablesTabComponent implements OnInit {
   envVars$: Observable<any>;
   columns: Array<TableColumn<AppEnvVar>> = [
     {
-      columnDef: 'select', headerComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
+      columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
       class: 'table-column-select'
     },
     {
-      columnDef: 'name', header: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
+      columnId: 'name', headerCell: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
       sort: { disableClear: true }
     },
     {
-      columnDef: 'value', header: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent,
+      columnId: 'value', headerCell: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent,
       sort: { disableClear: true }
     },
     {
-      columnDef: 'edit', header: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent,
+      columnId: 'edit', headerCell: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent,
       class: 'table-column-edit'
     },
   ];

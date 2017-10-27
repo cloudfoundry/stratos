@@ -1,7 +1,7 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
-    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [title]="'Environment Variables'" [enableAdd]="true"
-      [enableFilter]="true" [fixedRowHeight]="true" [addForm]="addRowForm">
+    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [title]="'Environment Variables'" [addForm]="addRowForm"
+      [enableFilter]="true" [fixedRowHeight]="true">
       <div app-table-add>
         <form #addRowForm="ngForm" novalidate>
           <md-form-field floatPlaceholder="never">

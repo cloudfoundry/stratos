@@ -4,7 +4,7 @@ import { AppState } from '../../store/app-state';
 import { MdPaginator, MdSort, Sort, PageEvent } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
 import { StandardTableDataSource } from './table-data-source-standard';
 import { ApplicationService } from '../../features/applications/application.service';
 import { EntityInfo } from '../../store/types/api.types';
@@ -118,6 +118,11 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     }
 
     return this.filteredRows;
+  }
+
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
+    sort.sort({ id: 'name', start: 'asc', disableClear: true });
+    super.initialise(paginator, sort, filter$);
   }
 
   sort(envVars: Array<AppEnvVar>, sort: Sort): AppEnvVar[] {

@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 
-export interface ITableDataSource {
+export interface ITableDataSource<T> {
   mdPaginator: MdPaginator;
   addRow;
   isAdding$: BehaviorSubject<boolean>;
@@ -30,7 +30,7 @@ export interface ITableDataSource {
   disconnect();
 }
 
-export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource {
+export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
 
   private paginationSub: Subscription;
 

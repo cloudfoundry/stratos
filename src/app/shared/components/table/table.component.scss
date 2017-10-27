@@ -1,7 +1,7 @@
  .app-table {
    md-card-header {
      display: flex;
-     height: 66px; // Fix height so doesn't ping around after selecting
+     height: 66px; // Fixed height so doesn't ping around after selecting
      div:not([hidden]).spacer {
        flex-grow: 99;
      }

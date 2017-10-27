@@ -5,11 +5,7 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
 import { TableCellEditVariableComponent } from '../custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
-
-export interface ITableCellComponent<T> {
-  dataSource: ITableDataSource;
-  row: T;
-}
+import { TableCellCustom } from './table-cell-custom';
 
 @Component({
   selector: 'app-table-cell',
@@ -26,7 +22,7 @@ export interface ITableCellComponent<T> {
 })
 export class TableCellComponent<T> implements OnInit {
 
-  @Input('dataSource') dataSource = null as ITableDataSource;
+  @Input('dataSource') dataSource = null as ITableDataSource<T>;
 
   @Input('component') component: Type<{}>;
   @Input('func') func: () => string;
@@ -38,7 +34,7 @@ export class TableCellComponent<T> implements OnInit {
     if (this.component) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
       const componentRef = this.viewContainerRef.createComponent(componentFactory);
-      const cellComponent = <ITableCellComponent<T>>componentRef.instance;
+      const cellComponent = <TableCellCustom<T>>componentRef.instance;
       cellComponent.row = this.row;
       cellComponent.dataSource = this.dataSource;
     }

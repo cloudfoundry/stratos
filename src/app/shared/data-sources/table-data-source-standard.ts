@@ -26,7 +26,6 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   }
 
   connect(): Observable<T[]> {
-    // return Observable.of(new Array<T>());
     return this.data$
       .combineLatest(
       this.pageSize$.startWith(5),

@@ -18,7 +18,7 @@
               </md-form-field>
             </form>
           </div>
-          <button md-icon-button *ngIf="enableAdd" (click)="safeAddForm().reset();dataSource.startAdd();;">
+          <button md-icon-button *ngIf="addForm" (click)="safeAddForm().reset();dataSource.startAdd();;">
               <md-icon>add</md-icon>
             </button>
         </div>
@@ -36,15 +36,15 @@
       </md-card-header>
       <md-card-content>
         <md-table #table [hidden]="dataSource.mdPaginator.length === 0" [dataSource]="dataSource" mdSort>
-          <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnDef">
+          <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnId">
             <div *ngIf="column.sort">
               <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear">
-                <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
+                <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [row]="row" [dataSource]="dataSource"></app-table-cell>
               </md-header-cell>
             </div>
             <div *ngIf="!column.sort">
               <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
-                <app-table-cell [component]="column.headerComponent" [func]="column.header" [row]="row" [dataSource]="dataSource"></app-table-cell>
+                <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [row]="row" [dataSource]="dataSource"></app-table-cell>
               </md-header-cell>
             </div>
             <md-cell *mdCellDef="let row" [ngClass]="column.class">

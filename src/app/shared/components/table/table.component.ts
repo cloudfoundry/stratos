@@ -7,14 +7,12 @@ import { Observable } from 'rxjs/Observable';
 import { CfTableDataSource } from '../../data-sources/table-data-source-cf';
 import { StandardTableDataSource } from '../../data-sources/table-data-source-standard';
 
-// type AcceptableTable<T extends object> = CfTableDataSource<T> | StandardTableDataSource<T>;
-
 export interface TableColumn<T> {
-  columnDef: string;
-  cell?: (row: T) => string;
+  columnId: string;
+  cell?: (row: T) => string;// Either cell OR cellComponent should be defined
   cellComponent?: any;
-  header?: (row: T) => string;
-  headerComponent?: any;
+  headerCell?: (row: T) => string;// Either headerCell OR headerCellComponent should be defined
+  headerCellComponent?: any;
   class?: string;
   sort?: {
     disableClear: boolean;
@@ -32,13 +30,12 @@ export class TableComponent<T extends object> implements OnInit {
   @ViewChild(MdSort) sort: MdSort;
   @ViewChild('filter') filter: NgModel;
 
-
-  @Input('dataSource') dataSource = null as ITableDataSource; // See https://github.com/angular/angular-cli/issues/2034 for weird definition
+  // See https://github.com/angular/angular-cli/issues/2034 for weird definition
+  @Input('dataSource') dataSource = null as ITableDataSource<T>;
   @Input('columns') columns: TableColumn<T>[];
   private columnNames: string[];
 
   @Input('title') title: string;
-  @Input('enableAdd') enableAdd = false;
   @Input('enableFilter') enableFilter = false;
   @Input('fixedRowHeight') fixedRowHeight = false;
   @Input('addForm') addForm: NgForm;
@@ -48,8 +45,6 @@ export class TableComponent<T extends object> implements OnInit {
     return this.addForm || {};
   }
 
-  // @ContentChild(MdTable) table: MdTable<T>;
-
   constructor() { }
 
   ngOnInit() {
@@ -58,6 +53,6 @@ export class TableComponent<T extends object> implements OnInit {
       .distinctUntilChanged()
       .map(value => value as string);
     this.dataSource.initialise(this.paginator, this.sort, filter);
-    this.columnNames = this.columns.map(x => x.columnDef);
+    this.columnNames = this.columns.map(x => x.columnId);
   }
 }
