@@ -17,7 +17,7 @@ run:
   - -exc
   - |
     cd stratos-ui
-    npm install
+    npm install --production
     npm run build-backend
     cd -
     cp -r ./stratos-ui/outputs ./portal-proxy-output

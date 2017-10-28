@@ -15,7 +15,7 @@ if [ ! -z "${CREATE_USER}" ]; then
   fi
 fi
 
-npm install
+npm install --production
 export PATH=$PATH:$WORK_DIR/node_modules/.bin
 bower install --allow-root --force
 npm run build
