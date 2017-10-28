@@ -57,23 +57,23 @@ echo "DBCONFIG: $DBCONF_KEY"
 echo "Connection string: $DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-goose --env=$DBCONF_KEY dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-goose --env=$DBCONF_KEY status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-goose --env=$DBCONF_KEY up
+stratos-dbmigrator --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-goose --env=$DBCONF_KEY status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-goose --env=$DBCONF_KEY dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 
