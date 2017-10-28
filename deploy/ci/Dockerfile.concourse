@@ -16,3 +16,12 @@ RUN apt-get update && \
     rm google-chrome-stable_current_amd64.deb && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /usr/src/app
+# Helm and Kubectl are required for the automated Helm tests
+RUN curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+    chmod +x ./kubectl && \
+    mv ./kubectl /usr/local/bin/kubectl
+RUN apt-get update && \
+    apt-get install -y netcat

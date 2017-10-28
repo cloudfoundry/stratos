@@ -1,0 +1,122 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: helm-chart-Chart
+- name: helm-chart-values
+outputs:
+- name: helm-chart
+image_resource:
+  type: docker-image
+  source:
+   repository:  ci-registry.ngrok.io:80/stratos-concourse
+   tag: "latest"
+   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+
+run:
+  path: sh
+  args:
+    - -xc
+    - |
+      mkdir ~/.kube
+      wget ${CAASP_KUBE_CONFIG_URL} -O ~/.kube/config
+
+      kubectl cluster-info
+      helm init || true
+      EXIT_CODE=0
+      ROOT_DIR=$PWD
+      STRATOS_UI=${ROOT_DIR}/stratos-ui
+      cd ${STRATOS_UI}/deploy/kubernetes/
+
+      cp -f ${ROOT_DIR}/helm-chart-values/values.yaml-helm-nightly console/values.yaml
+      cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml-helm-nightly console/Chart.yaml
+      helm dep build console
+
+      helm status console-nightly
+      CONSOLE_NIGHTLY_DEPLOYED=$?
+      if [ "$CONSOLE_NIGHTLY_DEPLOYED" = "0" ]; then
+        helm delete console-nightly --purge
+      fi
+      
+      helm install console --set storageClass=hostpath --set mariadb.persistence.storageClass=hostpath --namespace nightly-test --name console-nightly
+      sleep 120
+
+      helm list
+
+      # Check all pods are in Ready state
+      deployed_pots=$(kubectl get po --template '{{range .items}}{{.metadata.name}}{{" "}}{{end}}' --namespace=nightly-test -o go-template)
+      for pod in $deployed_pods; do
+        pod_ready=$(kubectl describe po $pod --namespace nightly-test | grep -a3 Conditions | grep Ready | cut -d$'\t' -f1)
+        if [ "${pod_ready}" != "Ready" ]; then
+          echo "Pod ${pod} is ${pod_ready}" 
+          kubectl get po --all-namespaces 
+          EXIT_CODE=1
+        fi
+      done;
+
+      UI_EXT_PORT=$(kubectl describe service console-nightly-ui-ext --namespace nightly-test  | grep NodePort | grep https | sed -e 's/.*\(3[0-9][0-9].*\)\/TCP/\1/p' |head -1)
+      UI_EXT_IP=""
+      for NODE_IP in $CAASP_NODE_IPS; do
+        nc -z ${NODE_IP} ${UI_EXT_PORT}
+        if [ $? = 0 ]; then
+          UI_EXT_IP=${NODE_IP}
+        fi;
+      done
+      echo "Console IP: ${UI_EXT_IP} and port is ${UI_EXT_PORT}"
+
+      # Run E2E tests
+      cd ${STRATOS_UI}
+      npm install
+      export PATH=${PWD}/node_modules/.bin:$PATH
+      bower install --allow-root --force
+
+      cat << EOF > build/secrets.json
+      {
+        "cloudFoundry": {
+          "url": "${CF_LOCATION}",
+          "admin": {
+            "username": "${CF_ADMIN_USER}",
+            "password": "${CF_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CF_E2E_USER}",
+            "password": "${CF_E2E_USER_PASSWORD}"
+          }
+       },
+        "console": {
+          "host": "${UI_EXT_IP}",
+          "port": "${UI_EXT_PORT}",
+          "admin": {
+            "username": "${CONSOLE_ADMIN_USER}",
+            "password": "${CONSOLE_ADMIN_PASSWORD}"
+          },
+          "user": {
+            "username": "${CONSOLE_USER_USER}",
+            "password": "${CONSOLE_USER_PASSWORD}"
+          }
+        },
+        "uaa": {
+          "url": "${UAA_URL}",
+          "clientId": "${UAA_CLIENT_ID}",
+          "adminUsername": "${UAA_ADMIN_USERNAME}",
+          "adminPassword": "${UAA_ADMIN_PASSWORD}"
+        },
+        "runSetupModeTests": true,
+        "githubPat": "${GITHUB_TOKEN}"
+      }
+      EOF
+
+      cat build/secrets.json
+      export DBUS_SESSION_BUS_ADDRESS=/dev/null
+      npm run update-webdriver
+      xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js --params.host=${UI_EXT_IP} --params.port=${UI_EXT_PORT}
+      E2E_EXIT_CODE=$?
+
+
+      # Purge deployment
+      helm delete console-nightly --purge
+
+      # Due to a Helm bug, it currently does not remove statefulsets
+      kubectl delete namespace nightly-test
+
+      exit $E2E_EXIT_CODE
