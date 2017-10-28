@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eux
 
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-registry.capbristol.com:5000}
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
 DOCKER_ORG=${DOCKER_ORG:-splatform}
 NAME=stratos-proxy-builder
 TAG=${TAG:-opensuse}
