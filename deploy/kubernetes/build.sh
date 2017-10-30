@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTcb:" opt; do
+while getopts ":ho:r:t:dTclb" opt; do
   case $opt in
     h)
       echo
@@ -39,6 +39,9 @@ while getopts ":ho:r:t:dTcb:" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    l)
+      TAG_LATEST="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -111,6 +114,10 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
+  if [ ! -z ${TAG_LATEST} ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
 
   popd > /dev/null 2>&1
@@ -228,6 +235,7 @@ function buildProxy {
   buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
 }
 
+
 function buildPreflightJob {
   # Build the preflight container
   echo
@@ -240,7 +248,8 @@ function buildPostflightJob {
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
   pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
-  docker run ${RUN_ARGS} \
+  docker run \
+             ${RUN_ARGS} \
              -it \
              --rm \
              -e USER_NAME=$(id -nu) \
