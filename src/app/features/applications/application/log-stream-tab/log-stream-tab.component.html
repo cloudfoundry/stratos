@@ -1,1 +1,6 @@
-<app-log-viewer [logStream]="messages"></app-log-viewer>
+<!-- <input mdInput ngModel [(ngModel)]="searchFilter" placeholder="Filter"> -->
+<md-form-field>
+  <input mdInput ngModel #searchFilter="ngModel" placeholder="Filter">
+</md-form-field>
+
+<app-log-viewer [title]="streamTitle$ | async" [logStream]="messages"></app-log-viewer>

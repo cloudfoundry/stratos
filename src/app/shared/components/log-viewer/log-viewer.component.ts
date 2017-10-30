@@ -3,23 +3,29 @@ import { Element } from '@angular/compiler';
 import { ApplicationService } from '../../../features/applications/application.service';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MdButton } from '@angular/material';
 
-
-interface LogItem {
-  message: string;
-  message_type: number;
-  app_id: string;
-  source_type: string;
-  source_instance: string;
-  timestamp: string;
-}
 
 @Component({
   selector: 'app-log-viewer',
   templateUrl: './log-viewer.component.html',
   styleUrls: ['./log-viewer.component.scss']
 })
+
 export class LogViewerComponent implements OnInit, OnDestroy {
+
+  static colors = {
+    red: '#CC6666',
+    green: '#B5BD68',
+    yellow: '#F0C674',
+    blue: '#81A2BE',
+    purple: '#B294BB',
+    teal: '#8ABEB7',
+    grey: '#C5C8C6'
+  };
+
+  @Input('title')
+  title: string;
 
   @Input('logStream')
   logStream: Observable<any>;
@@ -34,20 +40,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   content: ElementRef;
 
   @ViewChild('pauseButton')
-  pauseButton: ElementRef;
+  pauseButton: MdButton;
 
-  STREAMING_STATUS = {
-    NOT_STREAMING: 0,
-    ONLINE: 1,
-    CONNECTING: 2,
-    CLOSED: 3
-  };
-
-  // colorizer = AnsiColorsService.getInstance();
-
-  smartBrowser = false;
-
-  capacityBytes = 0;
+  @ViewChild('followLogButton')
+  followLogButton: MdButton;
 
   currentLog = '';
 
@@ -58,14 +54,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   stickToBottom = true;
 
   highThroughput = false;
-  highThroughputTimeMS = 500; // If the time interval between log emits is less then we're in high throughput mode
-  highThroughputBufferIntervalMS = 200; // Buffer time for high through mode
-
-  bufferTime = 0;
-
-  reuseElement = null;
-
-  batchCounts = [];
+  highThroughputTimeMS = 100; // If the time interval between log emits is less then we're in high throughput mode
+  highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
 
   countAttribute = 'batchLength';
   estimatedCount = 0;
@@ -73,54 +63,53 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   removalSub: Subscription;
   listeningSub: Subscription;
 
+  stopped$: Observable<boolean>;
+  isLocked$: Observable<boolean>;
+  isHightThroughput$: Observable<boolean>;
+
   ngOnInit() {
 
     const contentElement = this.content.nativeElement;
     const containerElement = this.container.nativeElement;
 
-    const isPaused$ = Observable
-      .fromEvent(this.pauseButton.nativeElement, 'click')
+    this.stopped$ = Observable
+      .fromEvent<boolean>(this.pauseButton._elementRef.nativeElement, 'click')
       .scan((acc, x) => {
         return !acc;
       }, false)
       .startWith(false);
 
-    const isLocked$ = Observable
-      .fromEvent(containerElement, 'scroll')
-      .map(() => {
-        return false;
-      })
-      .distinctUntilChanged()
-      .startWith(true);
+    const stoppableLogStream$ = this.stopped$
+      .switchMap(stopped => stopped ? Observable.never() : this.logStream);
 
-    const isHightThroughput$ = this.logStream
+    this.isLocked$ =
+      Observable.fromEvent<MouseEvent>(this.followLogButton._elementRef.nativeElement, 'click')
+        .scan((acc, event) => !acc, true)
+        .startWith(true);
+
+    this.isHightThroughput$ = stoppableLogStream$
       .timeInterval()
-      .throttleTime(1000)
+      .sampleTime(1000)
       .map(x => {
         const high = x.interval < this.highThroughputTimeMS;
         return high;
-      });
+      })
+      .distinctUntilChanged();
 
     const buffer$ = Observable.interval(100)
-      .combineLatest(isHightThroughput$)
+      .combineLatest(this.isHightThroughput$)
       .throttle(([t, high]) => {
         return Observable.interval(high ? this.highThroughputBufferIntervalMS : 0);
       })
       .debounceTime(this.highThroughputBufferIntervalMS);
 
-    this.removalSub = Observable.interval(5000).do(() => {
-      this.remove();
-    }).subscribe();
-
-    this.listeningSub = isPaused$
-      .switchMap(paused => paused ? Observable.never() : this.logStream)
+    const addedLogs$ = stoppableLogStream$
       .buffer(buffer$)
-      .combineLatest(isLocked$)
-      .do(([logs, isLocked]) => {
+      .filter(log => !!log.length)
+      .do((logs) => {
         this.logLinesCount += logs.length;
         const elementString = logs.map(log => {
-          const timestamp = JSON.parse(log);
-          return `<div class="log-line">${timestamp.timestamp}</div>`;
+          return `<div style="padding: 5px 0; color: #C5C8C6;">${log}</div>`;
         }).join('');
         const ele = document.createElement('div') as HTMLDivElement;
         if (logs.length > 1) {
@@ -128,22 +117,30 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         }
         ele.innerHTML = elementString;
         contentElement.append(ele);
-        console.log(isLocked);
-        if (isLocked) {
-          containerElement.scrollTop = contentElement.clientHeight;
-        }
         if (this.logLinesCount > this.maxLogLines) {
           this.binElement();
         }
-      })
-      .subscribe();
+      });
+
+    this.listeningSub = Observable.combineLatest(
+      this.isLocked$,
+      addedLogs$
+    ).do(([isLocked, logs]) => {
+      if (isLocked) {
+        containerElement.scrollTop = contentElement.clientHeight;
+      }
+    }).subscribe();
+
+    this.removalSub = Observable.interval(5000).do(() => {
+      this.remove();
+    }).subscribe();
   }
 
   binElement() {
     try {
-      const removedEle = this.content.nativeElement.removeChild(this.content.nativeElement.lastChild);
+      const removedEle = this.content.nativeElement.removeChild(this.content.nativeElement.firstChild);
       this.bin.nativeElement.append(removedEle);
-      this.logLinesCount -= (removedEle.getAttribute(this.batchCounts) || 1);
+      this.logLinesCount -= (removedEle.getAttribute(this.countAttribute) || 1);
     } catch (e) { }
   }
 

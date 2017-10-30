@@ -54,11 +54,6 @@
             <md-row *mdRowDef="let row; columns: ['timestamp', 'type', 'actor_name', 'detail'];">
             </md-row>
           </md-table>
-          <!-- <div [hidden]="(dataSource.count$ | async) > 0" class="mat-card-header-text no-variables">
-            <div class="mat-card-header-text">
-              <div class="mat-card-header-text-wa">There are no events.</div>
-            </div>
-          </div> -->
         </md-card-content>
         <md-paginator #paginator [length]="(dataSource.count$ | async)" [pageSizeOptions]="[5, 10, 25, 100]">
         </md-paginator>

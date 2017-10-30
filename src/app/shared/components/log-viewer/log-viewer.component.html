@@ -1,10 +1,20 @@
-<span>High throughput: {{ highThroughput }}</span>
-<br/>
-<span>Paused: {{ isPaused$ | async }}</span>
-<button #pauseButton>Pause</button>
-
-<div class="log-scroller" #container>
-  <div class="last-chance-saloon" #bin></div>
-  <div class="log-scroller__content" (mousewheel)="wheelHandler" (scroll)="scrollHandler" #content>
+<div class="log-viewer">
+  <md-toolbar class="log-viewer__header" color="primary">
+    <span>{{title || 'Log'}}</span>
+    <md-icon class="log-viewer__warn-icon" mdTooltip="High throughput stream" *ngIf="isHightThroughput$ | async">warning</md-icon>
+    <div class="spacer"></div>
+    <div class="log-viewer__actions">
+      <button #pauseButton md-icon-button>
+        <md-icon>{{ ( stopped$ | async ) ? 'play_arrow' : 'stop' }}</md-icon>
+      </button>
+      <button [disabled]="stopped$ | async" md-icon-button #followLogButton>
+        <md-icon color="{{ ( isLocked$ | async ) ? 'accent' : '' }}">vertical_align_bottom</md-icon>
+      </button>
+    </div>
+  </md-toolbar>
+  <div class="log-scroller" #container>
+    <div class="last-chance-saloon" #bin></div>
+    <div class="log-scroller__content" (mousewheel)="wheelHandler" (scroll)="scrollHandler" #content>
+    </div>
   </div>
 </div>
