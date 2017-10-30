@@ -138,8 +138,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 
-  rm -f ${STRATOS_UI_PATH}/goose
-
 }
 
 function preloadImage {
@@ -249,17 +247,21 @@ function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-
+  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   docker run \
              ${RUN_ARGS} \
              -it \
              --rm \
-             --name postflight-builder \
-             --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:${BASE_IMAGE_TAG}
-  mv goose  ${STRATOS_UI_PATH}/
+             -e USER_NAME=$(id -nu) \
+             -e USER_ID=$(id -u)  \
+             -e GROUP_ID=$(id -g) \
+             -e BUILD_DB_MIGRATOR="true" \
+             --name stratos-proxy-builder \
+             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
   buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
-  rm -f ${STRATOS_UI_PATH}/goose
+  popd > /dev/null 2>&1
+
 }
 
 function buildMariaDb {

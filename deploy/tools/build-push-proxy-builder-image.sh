@@ -4,7 +4,7 @@ set -eux
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
 DOCKER_ORG=${DOCKER_ORG:-splatform}
 NAME=stratos-proxy-builder
-TAG=${TAG:-test}
+TAG=${TAG:-opensuse}
 BK_BUILD_BASE=${BK_BUILD_BASE:-splatform/stratos-bk-build-base:opensuse}
 
 STRATOS_UI_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../"
