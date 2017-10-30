@@ -28,7 +28,7 @@ run:
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
       # Build images
-      ./build.sh -T -c
+      ./build.sh -T -c -b ${BASE_IMAGE} -r ${REGISTRY}
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}
       cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml-${GIT_TAG}
