@@ -13,6 +13,18 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
 import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
 import { TableColumn } from '../../../../shared/components/table/table.component';
+import {
+  TableCellEventTypeComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
+import {
+  TableCellEventTimestampComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import {
+  TableCellEventActionComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
+import {
+  TableCellEventDetailComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 
 @Component({
   selector: 'app-events-tab',
@@ -28,20 +40,17 @@ export class EventsTabComponent implements OnInit {
   hasEvents$: Observable<boolean>;
   columns: Array<TableColumn<EntityInfo>> = [
     {
-      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cell: (row: EntityInfo) => `${row.entity.timestamp}`,
+      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
       sort: { disableClear: true }
     },
     {
-      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cell: (row: EntityInfo) => `${row.entity.type}`,
-      sort: { disableClear: true }
+      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cellComponent: TableCellEventTypeComponent
     },
     {
-      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cell: (row: EntityInfo) => `${row.entity.actor_name}`,
-      sort: { disableClear: true }
+      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cellComponent: TableCellEventActionComponent
     },
     {
-      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cell: (row: EntityInfo) => `${row.entity.metadata}`,
-      sort: { disableClear: true }
+      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cellComponent: TableCellEventDetailComponent
     },
   ];
 

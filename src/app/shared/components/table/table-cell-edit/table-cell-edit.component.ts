@@ -1,3 +1,4 @@
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { Component, OnInit } from '@angular/core';
 import { ITableDataSource } from '../../../data-sources/table-data-source';
 import { TableCellCustom } from '../table-cell/table-cell-custom';

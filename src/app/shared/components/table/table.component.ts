@@ -9,14 +9,19 @@ import { StandardTableDataSource } from '../../data-sources/table-data-source-st
 
 export interface TableColumn<T> {
   columnId: string;
-  cell?: (row: T) => string;// Either cell OR cellComponent should be defined
+  cell?: (row: T) => string; // Either cell OR cellComponent should be defined
   cellComponent?: any;
-  headerCell?: (row: T) => string;// Either headerCell OR headerCellComponent should be defined
+  headerCell?: (row: T) => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
   class?: string;
   sort?: {
     disableClear: boolean;
   };
+}
+
+export interface TableText {
+  title: string;
+  filter?: string;
 }
 
 @Component({
@@ -35,11 +40,11 @@ export class TableComponent<T extends object> implements OnInit {
   @Input('columns') columns: TableColumn<T>[];
   private columnNames: string[];
 
-  @Input('title') title: string;
+  @Input('text') text: TableText;
   @Input('enableFilter') enableFilter = false;
   @Input('fixedRowHeight') fixedRowHeight = false;
   @Input('addForm') addForm: NgForm;
-  private safeAddForm() {
+  public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
     return this.addForm || {};

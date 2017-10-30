@@ -1,3 +1,4 @@
+import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,6 +25,12 @@ import { TableCellEditComponent } from './components/table/table-cell-edit/table
 import {
   TableCellEditVariableComponent
 } from './components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
+import {
+  TableCellEventTimestampComponent
+} from './components/table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import { TableCellEventTypeComponent } from './components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
+import { TableCellEventActionComponent } from './components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
+import { TableCellEventDetailComponent } from './components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 
 
 @NgModule({
@@ -52,6 +59,11 @@ import {
     TableHeaderSelectComponent,
     TableCellEditComponent,
     TableCellEditVariableComponent,
+    TableCellEventTimestampComponent,
+    TableCellEventTypeComponent,
+    TableCellEventActionComponent,
+    TableCellEventDetailComponent,
+    EventTabActorIconPipe,
   ],
   exports: [
     FormsModule,

@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { TableDataSource, ITableDataSource } from './table-data-source';
+import { TableDataSource, ITableDataSource, getRowUniqueId } from './table-data-source';
 import { AppState } from '../../store/app-state';
 
 
@@ -19,11 +19,11 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
 
   constructor(
     private _dStore: Store<AppState>,
-    private _dTypeId: string,
+    private _dGetRowUniqueId: getRowUniqueId,
     private _dEmptyType: T,
     private _defaultSort: Sort,
   ) {
-    super(_dStore, _dTypeId, _dEmptyType);
+    super(_dStore, _dGetRowUniqueId, _dEmptyType);
   }
 
   connect(): Observable<T[]> {
@@ -57,22 +57,24 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   abstract sort(collection: Array<T>, sort: Sort): Array<T>;
 
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
+    let actualPageSize = this.mdPaginator.pageIndex || pageIndex;
     // Is the paginators pageIndex valid?
-    if (pageIndex * pageSize > collection.length) {
-      pageIndex = Math.floor(collection.length / pageSize);
+    if (actualPageSize * pageSize > collection.length) {
+      actualPageSize = Math.floor(collection.length / pageSize);
     }
 
     // Should the paginator select a freshly added row?
     if (this.selectRow) {
       for (let i = 0; i < collection.length; i++) {
-        if (collection[i][this._dTypeId] === this.selectRow[this._dTypeId]) {
-          pageIndex = Math.floor(i / pageSize);
+        if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this.selectRow)) {
+          actualPageSize = Math.floor(i / pageSize);
+          this.mdPaginator.pageIndex = Math.floor(i / pageSize);
           delete this.selectRow;
           break;
         }
       }
     }
-    const startIndex: number = pageIndex * pageSize;
+    const startIndex: number = actualPageSize * pageSize;
     return collection.splice(startIndex, pageSize);
   }
 

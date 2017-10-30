@@ -1,5 +1,6 @@
 <div class="events-tab">
-  <app-table #appTable [dataSource]="eventSource" [columns]="columns" [title]="'Events'" [enableFilter]="true">
+  <app-table #appTable [dataSource]="eventSource" [columns]="columns" [text]="{ title: 'Events', filter: 'Filter Details'}"
+    [enableFilter]="true">
   </app-table>
 
   <!-- <app-table #appTable [dataSource]="eventSource" [title]="'Events'" [enableFilter]="true">

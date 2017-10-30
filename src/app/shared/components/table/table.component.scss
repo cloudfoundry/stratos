@@ -20,6 +20,9 @@
    }
    md-card-content {
      md-table {
+       &[hidden] * {
+         display: none;
+       }
        md-header-row[hidden] {
          *,
          &.mat-header-row {

@@ -37,7 +37,8 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
   ) {
     const paginationKey = `app-events:${_cfGuid}${_appGuid}`;
     const action = new GetAllAppEvents(paginationKey, _appGuid, _cfGuid);
-    // TODO: RC key will not work
-    super(_store, action, EventSchema, 'metadata.guid', {} as EntityInfo);
+    super(_store, action, EventSchema, (object: EntityInfo) => {
+      return object.entity.metadata ? object.entity.metadata.guid : null;
+    }, {} as EntityInfo);
   }
 }

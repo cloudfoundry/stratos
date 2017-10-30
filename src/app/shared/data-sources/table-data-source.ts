@@ -30,6 +30,8 @@ export interface ITableDataSource<T> {
   disconnect();
 }
 
+export type getRowUniqueId = (T) => string;
+
 export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
 
   private paginationSub: Subscription;
@@ -56,7 +58,7 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
 
   constructor(
     private store: Store<AppState>,
-    private _typeId: string,
+    private _getRowUniqueId: getRowUniqueId,
     private _emptyType: T,
   ) {
     super();
@@ -84,11 +86,11 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   }
 
   selectedRowToggle(row: T) {
-    const exists = this.selectedRows.has(row[this._typeId]);
+    const exists = this.selectedRows.has(this._getRowUniqueId(row));
     if (exists) {
-      this.selectedRows.delete(row[this._typeId]);
+      this.selectedRows.delete(this._getRowUniqueId(row));
     } else {
-      this.selectedRows.set(row[this._typeId], row);
+      this.selectedRows.set(this._getRowUniqueId(row), row);
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
@@ -96,9 +98,9 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     this.selectAllChecked = !this.selectAllChecked;
     for (const row of this.filteredRows) {
       if (this.selectAllChecked) {
-        this.selectedRows.set(row[this._typeId], row);
+        this.selectedRows.set(this._getRowUniqueId(row), row);
       } else {
-        this.selectedRows.delete(row[this._typeId]);
+        this.selectedRows.delete(this._getRowUniqueId(row));
       }
     }
     this.isSelecting$.next(this.selectedRows.size > 0);

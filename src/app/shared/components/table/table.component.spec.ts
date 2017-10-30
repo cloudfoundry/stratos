@@ -11,12 +11,9 @@ import { TableCellEditVariableComponent } from './custom-cells/table-cell-edit-v
 import { MdPaginator, MdSort, MdPaginatorIntl } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { ChangeDetectorRef } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-class MdPaginatorMock {
-
-}
-
-fdescribe('TableComponent', () => {
+describe('TableComponent', () => {
   let component: TableComponent<any>;
   let fixture: ComponentFixture<TableComponent<any>>;
 
@@ -31,10 +28,10 @@ fdescribe('TableComponent', () => {
         TableHeaderSelectComponent,
         TableCellEditComponent,
         TableCellEditVariableComponent,
-        { provide: MdPaginator, useClass: MdPaginatorMock },
       ],
       imports: [
         CoreModule,
+        NoopAnimationsModule,
       ]
     })
       .compileComponents();
@@ -43,14 +40,18 @@ fdescribe('TableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
+
+    const mdPaginatorIntl: MdPaginatorIntl = new MdPaginatorIntl();
     component.dataSource = {
       connect() { return Observable.of([]); },
       initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
       selectedRows: new Map<string, any>(),
-      mdPaginator: new MdPaginator({} as MdPaginatorIntl, {} as ChangeDetectorRef)
+      mdPaginator: new MdPaginator(mdPaginatorIntl, {} as ChangeDetectorRef)
     } as ITableDataSource<any>;
-    // component.dataSource.selectedRows = new Map<string, any>();
+    component.dataSource.selectedRows = new Map<string, any>();
+
     component.columns = new Array<TableColumn<any>>();
+
     fixture.detectChanges();
   });
 

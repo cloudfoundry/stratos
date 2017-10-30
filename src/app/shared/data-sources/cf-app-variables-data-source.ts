@@ -36,10 +36,12 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     private _store: Store<AppState>,
     private _appService: ApplicationService,
   ) {
-    super(_store, 'name', {
-      name: '',
-      value: '',
-    }, { active: 'name', direction: 'asc' });
+    super(_store, (object: AppEnvVar) => {
+      return object.name;
+    }, {
+        name: '',
+        value: '',
+      }, { active: 'name', direction: 'asc' });
     this._defaultSortParmas = {
       id: 'name', start: 'asc', disableClear: true
     };
