@@ -168,8 +168,10 @@ spec:
           value: https://scf.{{.Values.env.UAA_HOST}}:{{.Values.env.UAA_PORT}}
         - name: CONSOLE_CLIENT 
           value: cf
-        - name: CONSOLE_CLIENT_SECRET 
-          value: {{.Values.env.UAA_ADMIN_CLIENT_SECRET}}
+        - name: CONSOLE_CLIENT_SECRET
+          value:
+        - name: AUTO_REG_CF_URL
+          value: https://api.{{.Values.env.DOMAIN}}
         - name: CONSOLE_ADMIN_SCOPE 
           value: cloud_controller.admin
         - name: SKIP_SSL_VALIDATION 
