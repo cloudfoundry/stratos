@@ -5,7 +5,7 @@ function execStatement {
     stmt=$1
 
     if [ "$DATABASE_PROVIDER" = "mysql" ]; then
-        echo "Executing: mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e $stmt"
+        echo "Executing: mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p****** -e $stmt"
         mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e $stmt
     fi
 
@@ -54,7 +54,7 @@ fi
 echo "Checking database to see if migration is necessary."
 
 echo "DBCONFIG: $DBCONF_KEY"
-echo "Connection string: $DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
+echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
 stratos-dbmigrator --env=$DBCONF_KEY dbversion
