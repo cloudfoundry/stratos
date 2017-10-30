@@ -33,6 +33,33 @@ resources:
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
+- name: helm-chart-values-sle
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/values.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+- name: helm-chart-Chart-sle
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/Chart.yaml-(?P<version>.*)
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+- name: helm-chart-tarball-sle
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/console-(?P<version>.*).tgz
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
 
 groups:
 - name: tests
@@ -85,12 +112,12 @@ jobs:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
         BASE_IMAGE: sle_12
-        REGISTRY: staging.howdoi.website:443
-    - put: helm-chart-values
+        REGISTRY: staging.registry.howdoi.website:443
+    - put: helm-chart-values-sle
       params:
         file: helm-build/values.yaml-*
         acl: public-read
-    - put: helm-chart-Chart
+    - put: helm-chart-Chart-sle
       params:
         file: helm-build/Chart.yaml-*
         acl: public-read
@@ -143,7 +170,7 @@ jobs:
         GIT_PRIVATE_KEY: {{github-private-key}}
         NO_REPO: "true"
         BASE_IMAGE: "sle"
-    - put: helm-chart-tarball
+    - put: helm-chart-tarball-sle
       params:
         file: helm-chart/*.tgz
         acl: public-read

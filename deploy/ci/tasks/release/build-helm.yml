@@ -17,6 +17,13 @@ run:
   args:
     - -exc
     - |
+      if [ ! -z "${REGISTRY}" ]; then
+      cat << EOF >> /etc/docker/demon.json
+      {
+      "insecure-registries":["staging.registry.howdoi.website:443"]
+      }
+      EOF
+      fi
       source /docker-lib.sh
       start_docker
       ROOT_DIR=${PWD}
