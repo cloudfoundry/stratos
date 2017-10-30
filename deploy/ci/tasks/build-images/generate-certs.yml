@@ -5,7 +5,7 @@ image_resource:
   source:
     repository: ci-registry.ngrok.io:80/opensuse
     tag: latest
-    insecure_registries: [ " ci-registry.ngrok.io:80" ]
+    insecure_registries: [ "ci-registry.ngrok.io:80" ]
 
 inputs:
 - name: stratos-ui
