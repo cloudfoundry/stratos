@@ -153,9 +153,9 @@ jobs:
   - get: stratos-ui
     passed: [build-sle-helm-images]
     trigger: true
-  - get: helm-chart-Chart
+  - get: helm-chart-Chart-sle
     passed: [build-sle-helm-images]
-  - get: helm-chart-values
+  - get: helm-chart-values-sle
     passed: [build-sle-helm-images]
   - do:
     - task: build
