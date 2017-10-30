@@ -112,7 +112,7 @@ jobs:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
         BASE_IMAGE: sle_12
-        REGISTRY: staging.registry.howdoi.website:443
+        STAGING_REPOSITORY: {{staging-repository}}
     - put: helm-chart-values-sle
       params:
         file: helm-build/values.yaml-*
