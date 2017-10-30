@@ -119,7 +119,6 @@ function buildAndPublishImage {
     docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
   fi
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
-  # Update values.yaml
 
   popd > /dev/null 2>&1
 }
