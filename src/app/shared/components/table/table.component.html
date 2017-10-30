@@ -11,7 +11,7 @@
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="spacer">{{ text?.title }}</div>
         <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-          <div [hidden]="!enableFilter || paginator.length === 0">
+          <div [hidden]="!enableFilter || (paginator.length === 0 && !filter) ">
             <form novalidate>
               <md-form-field floatPlaceholder="never">
                 <input mdInput ngModel #filter="ngModel" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
@@ -54,7 +54,7 @@
           <md-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && paginator.length === 0" *mdHeaderRowDef="columnNames"></md-header-row>
           <md-row *mdRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></md-row>
         </md-table>
-        <div [hidden]="!(dataSource.isLoadingPage$ | async) && paginator.length > 0" class="mat-card-header-text no-rows">
+        <div [hidden]="(dataSource.isLoadingPage$ | async) || paginator.length > 0" class="mat-card-header-text no-rows">
           <div class="mat-card-header-text">
             <div class="mat-card-header-text-wa">There are no entries.</div>
           </div>

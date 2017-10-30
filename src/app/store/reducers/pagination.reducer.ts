@@ -43,8 +43,7 @@ const defaultPaginationEntityState = {
 export const defaultPaginationState = { ...defaultEntitiesState };
 
 export function qParamsToString(params: QParam[]) {
-  const qStrings = params.map(joinQParam);
-  return qStrings.join('%3A');
+  return params.map(joinQParam);
 }
 
 function joinQParam(q: QParam) {

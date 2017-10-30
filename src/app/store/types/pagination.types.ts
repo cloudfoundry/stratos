@@ -5,7 +5,7 @@ export class QParam {
   constructor(
     public key: string,
     public value: string | string[],
-    public joiner: '>=' | '<=' | '<' | '>' | '%2BIN%2B' | ':' | '=' = ':'
+    public joiner: '>=' | '<=' | '<' | '>' | ' IN ' | ':' | '=' = ':'
   ) { }
 }
 

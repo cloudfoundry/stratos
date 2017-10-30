@@ -62,8 +62,6 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     private _emptyType: T,
   ) {
     super();
-    // this._mdPaginator.pageIndex = 0;
-    // this._mdPaginator.pageSizeOptions = [5, 10, 20];
     this.addRow = { ... (_emptyType as object) } as T;
   }
 
@@ -137,6 +135,6 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
       this.pageIndex$
     ).subscribe();
 
-    this.filter$ = filter$;
+    this.filter$ = filter$.debounceTime(250);
   }
 }
