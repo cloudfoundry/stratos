@@ -253,6 +253,13 @@ function buildPostflightJob {
   rm -f ${STRATOS_UI_PATH}/goose
 }
 
+function buildMariaDb {
+  echo
+  echo "-- Building/publishing MariaDB"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
+}
+
 function buildUI {
   # Prepare the nginx server
   CURRENT_USER=$
@@ -296,6 +303,7 @@ updateTagForRelease
 buildProxy
 buildPreflightJob
 buildPostflightJob
+buildMariaDb
 buildUI
 
 if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then

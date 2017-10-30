@@ -24,6 +24,28 @@ spec:
     requests:
       storage: 1Mi
 ---
+{{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: console-mariadb
+  labels:
+    app:  "{{ .Release.Name }}"
+spec:
+  accessModes:
+    - {{ .Values.mariadb.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.mariadb.persistence.size | quote }}
+{{- if .Values.mariadb.persistence.storageClass }}
+{{- if (eq "-" .Values.mariadb.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.mariadb.persistence.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
