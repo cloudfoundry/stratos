@@ -66,3 +66,4 @@ env:
   UAA_HOST: 
   UAA_ADMIN_CLIENT_SECRET: 
   UAA_PORT:
+dockerRegistrySecret:

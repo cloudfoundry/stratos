@@ -99,7 +99,7 @@ spec:
        restartPolicy: Never
        {{- if .Values.dockerRegistrySecret }}
        imagePullSecrets:
-         {{.Values.dockerRegistrySecret}}
+       - nane:  {{.Values.dockerRegistrySecret}}
        {{- end }}
        volumes:
        - name: "{{ .Release.Name }}-upgrade-volume"

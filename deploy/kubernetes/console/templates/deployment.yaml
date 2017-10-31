@@ -213,7 +213,7 @@ spec:
           readOnly: true
       {{- if .Values.dockerRegistrySecret }}
       imagePullSecrets:
-        {{.Values.dockerRegistrySecret}}
+      - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
       volumes:
       - name: "{{ .Release.Name }}-upgrade-volume"

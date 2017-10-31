@@ -68,7 +68,7 @@ spec:
        restartPolicy: OnFailure
        {{- if .Values.dockerRegistrySecret }}
        imagePullSecrets:
-         {{.Values.dockerRegistrySecret}}
+       - name: {{.Values.dockerRegistrySecret}}
        {{- end }}
        volumes:
        - name: "{{ .Release.Name }}-upgrade-volume"
