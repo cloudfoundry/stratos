@@ -23,7 +23,9 @@ run:
       "insecure-registries":["${STAGING_REPOSITORY}"]
       }
       EOF
+      docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY}
       fi
+
       source /docker-lib.sh
       start_docker
       ROOT_DIR=${PWD}

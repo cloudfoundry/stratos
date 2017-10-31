@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTclb" opt; do
+while getopts ":ho:r:t:dTclb:" opt; do
   case $opt in
     h)
       echo
