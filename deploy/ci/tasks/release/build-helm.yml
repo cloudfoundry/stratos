@@ -42,6 +42,7 @@ run:
       IS_OFFICIAL_BUILD=""
       if [ ! -z "${IS_OFFICIAL}" ]; then
       IS_OFFICIAL_BUILD="-O"
+      ADD_OFFICIAL_TAG="-cap"
       fi
       # Build images
       if [ ! -z "${STAGING_REPOSITORY}" ]; then
@@ -50,5 +51,5 @@ run:
       ./build.sh -T -c -b ${BASE_IMAGE}  ${IS_OFFICIAL_BUILD}
       fi
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
-      cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}
-      cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml-${GIT_TAG}
+      cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml${ADD_OFFICIAL_TAG}-${GIT_TAG}
+      cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml${ADD_OFFICIAL_TAG}-${GIT_TAG}
