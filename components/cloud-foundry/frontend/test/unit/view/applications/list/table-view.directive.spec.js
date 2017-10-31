@@ -34,7 +34,6 @@
     });
 
     describe('Controller tests', function () {
- 
       it('should be defined', function () {
         expect(applicationsTableDirectiveCtrl).toBeDefined();
       });
