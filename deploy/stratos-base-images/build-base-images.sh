@@ -108,6 +108,10 @@ build_preflight_job_base(){
     build_and_push_image stratos-preflight-base Dockerfile.stratos-preflight-base
 }
 
+build_mariadb_base(){
+    build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
+}
+
 # Base with go
 build_go_base
 # Used building the UI
@@ -122,4 +126,6 @@ build_bk_build_base;
 build_portal_proxy_builder;
 # Used for building the postflight job image
 build_preflight_job_base;
+# Used for building the DB image
+build_mariadb_base;
 rm -f mo;
