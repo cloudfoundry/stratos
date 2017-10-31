@@ -57,7 +57,7 @@ mariadb:
     enabled: true
     accessMode: ReadWriteOnce
     size: 1Gi
-#    storageClass: default
+    storageClass:
 uaa:
   protocol: https://
   port: 
