@@ -30,7 +30,7 @@ run:
       cat /etc/docker/daemon.json
       # Login to Docker to push images
       if [ ! -z "${STAGING_REPOSITORY}" ]; then
-      docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY};
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${STAGING_REPOSITORY};
       else
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD};
       fi
