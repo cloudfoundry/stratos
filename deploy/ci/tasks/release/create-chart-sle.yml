@@ -29,8 +29,8 @@ run:
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       SHORT_GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
 
-      cp -f ${ROOT_DIR}/helm-chart-values/values.yaml* console/values.yaml
-      cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
+      cp -f ${ROOT_DIR}/helm-chart-values-sle/values.yaml* console/values.yaml
+      cp -f ${ROOT_DIR}/helm-chart-Chart-sle/Chart.yaml* console/Chart.yaml
 
       # Generate Helm package
       helm package console
