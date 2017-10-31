@@ -39,12 +39,15 @@ run:
       mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
       cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
 
-
+      IS_OFFICIAL_BUILD=""
+      if [ ! -z "${IS_OFFICIAL}" ]; then
+      IS_OFFICIAL_BUILD="-o"
+      fi
       # Build images
       if [ ! -z "${STAGING_REPOSITORY}" ]; then
-      ./build.sh -T -c -b ${BASE_IMAGE} -r ${STAGING_REPOSITORY}
+      ./build.sh -T -c -b ${BASE_IMAGE} -r ${STAGING_REPOSITORY} ${IS_OFFICIAL_BUILD}
       else
-      ./build.sh -T -c -b ${BASE_IMAGE}
+      ./build.sh -T -c -b ${BASE_IMAGE}  ${IS_OFFICIAL_BUILD}
       fi
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}
