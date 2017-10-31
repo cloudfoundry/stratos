@@ -23,18 +23,22 @@ run:
       "insecure-registries":["${STAGING_REPOSITORY}"]
       }
       EOF
-      docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY}
       fi
 
       source /docker-lib.sh
       start_docker
+
+      # Login to Docker to push images
+      if [ ! -z "${STAGING_REPOSITORY}" ]; then
+      docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY};
+      else
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD};
+      fi
       ROOT_DIR=${PWD}
       # Move dev-certs
       mv ${ROOT_DIR}/dev-certs-output/dev-certs stratos-ui/dev-certs
       cd ${ROOT_DIR}/stratos-ui/deploy/kubernetes
 
-      # Login to Docker to push images
-      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
       # Build images
       ./build.sh -T -c -b ${BASE_IMAGE} -r ${STAGING_REPOSITORY}
