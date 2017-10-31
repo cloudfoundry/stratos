@@ -43,16 +43,8 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-      {{- if .Values.dockerRegistrySecret }}
-      imagePullSecrets:
-        {{.Values.dockerRegistrySecret}}
-      {{- end }}
      {{- if .Values.noShared }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
-      {{- if .Values.dockerRegistrySecret }}
-      imagePullSecrets:
-        {{.Values.dockerRegistrySecret}}
-      {{- end }}
         name: "{{ .Release.Name }}-postflight"
         env:
         - name: DB_HOST
@@ -108,10 +100,6 @@ spec:
      {{- else }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxyNoShared}}:{{.Values.consoleVersion}}
      {{- end }}
-      {{- if .Values.dockerRegistrySecret }}
-      imagePullSecrets:
-        {{.Values.dockerRegistrySecret}}
-      {{- end }}
         name: proxy
         env:
         - name: DB_USER
@@ -223,6 +211,10 @@ spec:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
           readOnly: true
+      {{- if .Values.dockerRegistrySecret }}
+      imagePullSecrets:
+        {{.Values.dockerRegistrySecret}}
+      {{- end }}
       volumes:
       - name: "{{ .Release.Name }}-upgrade-volume"
         persistentVolumeClaim:

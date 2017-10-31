@@ -97,6 +97,10 @@ spec:
            - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
              name: "{{ .Release.Name }}-encryption-key-volume"
        restartPolicy: Never
+       {{- if .Values.dockerRegistrySecret }}
+       imagePullSecrets:
+         {{.Values.dockerRegistrySecret}}
+       {{- end }}
        volumes:
        - name: "{{ .Release.Name }}-upgrade-volume"
          persistentVolumeClaim:
