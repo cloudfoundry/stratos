@@ -17,10 +17,10 @@ run:
   args:
     - -exc
     - |
-      if [ ! -z "${REGISTRY}" ]; then
+      if [ ! -z "${STAGING_REPOSITORY}" ]; then
       cat << EOF >> /etc/docker/demon.json
       {
-      "insecure-registries":["staging.registry.howdoi.website:443"]
+      "insecure-registries":["${STAGING_REPOSITORY}"]
       }
       EOF
       fi
@@ -35,7 +35,7 @@ run:
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
       # Build images
-      ./build.sh -T -c -b ${BASE_IMAGE} -r ${REGISTRY}
+      ./build.sh -T -c -b ${BASE_IMAGE} -r ${STAGING_REPOSITORY}
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
       cp console/values.yaml ${ROOT_DIR}/helm-build/values.yaml-${GIT_TAG}
       cp console/Chart.yaml ${ROOT_DIR}/helm-build/Chart.yaml-${GIT_TAG}
