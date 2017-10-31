@@ -2,8 +2,8 @@
 platform: linux
 inputs:
 - name: stratos-ui
-- name: helm-chart-Chart
-- name: helm-chart-values
+- name: helm-chart-Chart-sle
+- name: helm-chart-values-sle
 outputs:
 - name: helm-chart
 image_resource:
@@ -35,26 +35,3 @@ run:
       # Generate Helm package
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${BASE_IMAGE}-${SHORT_GIT_TAG}.tgz
-      cd ${ROOT_DIR}/helm-chart/
-      if [ -f ${STRATOS_UI}/index.yaml ]; then
-        cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
-        MERGE_INDEX="--merge index.yaml"
-      fi
-
-      # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${SHORT_GIT_TAG}/
-      cp index.yaml ${STRATOS_UI}/
-      cd ${STRATOS_UI}
-      git config --global user.name ${GIT_USER}
-      git config --global user.email ${GIT_EMAIL}
-
-      mkdir -p /root/.ssh/
-      echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
-      chmod 600 /root/.ssh/id_rsa
-
-      # Update Helm repo
-      git add index.yaml
-      git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
-      git config --global push.default simple
-      git push origin HEAD:master;
-
