@@ -35,7 +35,6 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       this.filter$.startWith('')
       )
       .map(([collection, pageSize, pageIndex, sort, filter]: [Array<T>, number, number, Sort, string]) => {
-        console.log('CHANGED');
         // TODO: RC caching?? catch no-ops?
         this.mdPaginator.length = collection.length;
 
@@ -78,7 +77,4 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     return collection.splice(startIndex, pageSize);
   }
 
-  // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-  //   super.initialise(paginator, sort, filter$);
-  // }
 }

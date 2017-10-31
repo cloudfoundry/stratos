@@ -12,7 +12,7 @@ import { TableDataSource, ITableDataSource, getRowUniqueId } from './table-data-
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
-import { AddParams, RemoveParams, SetPage, SetParams } from '../../store/actions/pagination.actions';
+import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 
 export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource<T> {
 
@@ -20,18 +20,18 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   private cfPaginationSub: Subscription;
 
   private cfPagination$: Observable<any>;
-  private pagination$: Observable<PaginationEntityState>;
+  protected pagination$: Observable<PaginationEntityState>;
   private entities$: Observable<any>;
 
   public isLoadingPage$: Observable<boolean>;
   public filteredRows: Array<T>;
 
   constructor(
-    private _cfStore: Store<AppState>,
-    private action: PaginatedAction,
-    private sourceScheme: schema.Entity,
-    private _cfGetRowUniqueId: getRowUniqueId,
-    private _cfEmptyType: T,
+    protected _cfStore: Store<AppState>,
+    protected action: PaginatedAction,
+    protected sourceScheme: schema.Entity,
+    protected _cfGetRowUniqueId: getRowUniqueId,
+    protected _cfEmptyType: T,
   ) {
     super(_cfStore, _cfGetRowUniqueId, _cfEmptyType);
   }
@@ -79,22 +79,6 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
         }
       });
 
-    const cfFilter$ = this.filter$.withLatestFrom(pagination$)
-      .do(([filter, pag]: [string, PaginationEntityState]) => {
-        // if (!filter) {
-        //   this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, {
-        //     q: [
-        //       new QParam('actee', filter, '%2BIN%2B'),
-        //     ]
-        //   }));
-        // }
-        this._cfStore.dispatch(new SetParams(this.sourceScheme.key, this.action.paginationKey, {
-          q: [
-            new QParam('actee', filter, '%2BIN%2B'),
-          ]
-        }));
-      });
-
     // Ensure the widget is up to date
     sort.active = this.action.initialParams['order-direction-field'];
     sort.direction = this.action.initialParams['order-direction'];
@@ -112,7 +96,6 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     this.cfPaginationSub = Observable.combineLatest(
       cfPageSizeWithPagination$,
       cfPageIndex$,
-      cfFilter$,
     ).subscribe();
   }
 

@@ -9,6 +9,8 @@ import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
 import { CfTableDataSource } from './table-data-source-cf';
+import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
+import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
 
 // TODO: RC KEEP AND MOVE TO TYPES
 export interface AppEvent {
@@ -27,6 +29,7 @@ export interface AppEvent {
 
 export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
+  private cfFilterSub: Subscription;
   /**
    *
    */
@@ -40,5 +43,29 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
     super(_store, action, EventSchema, (object: EntityInfo) => {
       return object.entity.metadata ? object.entity.metadata.guid : null;
     }, {} as EntityInfo);
+
+  }
+
+  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
+    super.initialise(paginator, sort, filter$);
+    const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
+      .do(([filter, pag]: [string, PaginationEntityState]) => {
+        if (filter) {
+          const q = pag.params.q;
+          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+            q: [
+              new QParam('type', filter, ' IN '),
+            ]
+          }));
+        } else {
+          this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
+        }
+      });
+    this.cfFilterSub = cfFilter$.subscribe();
+  }
+
+  disconnect() {
+    this.cfFilterSub.unsubscribe();
+    super.disconnect();
   }
 }
