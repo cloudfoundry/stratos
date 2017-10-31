@@ -12,8 +12,10 @@ Configuration information can be found in two places (tech debt?)
 
 ## Development server
 1. (First time only) Copy `./proxy.conf.templage.js` to `./proxy.conf.js` and update with required portal-proxy url
-2. Run `npm start` for a dev server.
-3. Navigate to `http://localhost:4200/`.
+2. Run `npm install`
+3. Run `npm start` for a dev server.
+4. Navigate to `https://localhost:4200/`.
+   - The credentials to log in will be dependent on the portal-proxy the console points at. Please refer to the guides used when setting up the portal-proxy for more information
 
 The app will automatically reload if you change any of the source files.
 
