@@ -9,7 +9,7 @@ BASE_IMAGE_TAG=opensuse
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTclb:o" opt; do
+while getopts ":ho:r:t:dTclb:O" opt; do
   case $opt in
     h)
       echo
@@ -41,7 +41,7 @@ while getopts ":ho:r:t:dTclb:o" opt; do
     c)
       CONCOURSE_BUILD="true"
       ;;
-    o)
+    O)
       ADD_OFFICIAL_TAG="true"
       ;;
     l)

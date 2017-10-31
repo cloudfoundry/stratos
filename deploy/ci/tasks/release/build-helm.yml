@@ -41,7 +41,7 @@ run:
 
       IS_OFFICIAL_BUILD=""
       if [ ! -z "${IS_OFFICIAL}" ]; then
-      IS_OFFICIAL_BUILD="-o"
+      IS_OFFICIAL_BUILD="-O"
       fi
       # Build images
       if [ ! -z "${STAGING_REPOSITORY}" ]; then
