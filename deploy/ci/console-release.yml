@@ -111,8 +111,10 @@ jobs:
       params:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
-        BASE_IMAGE: sle_12
+        BASE_IMAGE: {{staging-repo-base-image-tag}}
         STAGING_REPOSITORY: {{staging-repository}}
+        STAGING_REPOSITORY_USERNAME: {{staging-repository-username}}
+        STAGING_REPOSITORY_PASSWORD: {{staging-repository-password}}
     - put: helm-chart-values-sle
       params:
         file: helm-build/values.yaml-*
