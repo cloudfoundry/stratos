@@ -81,13 +81,12 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
-      timeout: 30m
+      timeout: 50m
       file: stratos-ui/deploy/ci/tasks/release/build-helm.yml
       params:
         DOCKER_USERNAME: {{docker-username}}
         DOCKER_PASSWORD: {{docker-password}}
         BASE_IMAGE: opensuse
-        REGISTRY: docker.io
     - put: helm-chart-values
       params:
         file: helm-build/values.yaml-*
@@ -106,15 +105,14 @@ jobs:
       file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
     - task: build
       privileged: true
-      timeout: 30m
+      timeout: 50m
       file: stratos-ui/deploy/ci/tasks/release/build-helm.yml
       params:
-        DOCKER_USERNAME: {{docker-username}}
-        DOCKER_PASSWORD: {{docker-password}}
+        DOCKER_USERNAME: {{staging-repository-username}}
+        DOCKER_PASSWORD: {{staging-repository-password}}
         BASE_IMAGE: {{staging-repo-base-image-tag}}
         STAGING_REPOSITORY: {{staging-repository}}
-        STAGING_REPOSITORY_USERNAME: {{staging-repository-username}}
-        STAGING_REPOSITORY_PASSWORD: {{staging-repository-password}}
+        IS_OFFICIAL: "true"
     - put: helm-chart-values-sle
       params:
         file: helm-build/values.yaml-*
@@ -163,14 +161,13 @@ jobs:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos-ui/deploy/ci/tasks/release/create-chart.yml
+      file: stratos-ui/deploy/ci/tasks/release/create-chart-sle.yml
       params:
         GIT_USER: {{concourse-user}}
         GIT_EMAIL: {{concourse-email}}
         GITHUB_ORG: {{github-organization}}
         GITHUB_REPO: {{github-repository}}
         GIT_PRIVATE_KEY: {{github-private-key}}
-        NO_REPO: "true"
         BASE_IMAGE: "sle"
     - put: helm-chart-tarball-sle
       params:
