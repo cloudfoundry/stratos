@@ -9,7 +9,7 @@ metadata:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
   {{- else if .Values.kube.storage_class.persistent }}
-      volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
   {{- else }}
     volume.alpha.kubernetes.io/storage-class: default
   {{- end }}
@@ -37,7 +37,7 @@ metadata:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
   {{- else if .Values.kube.storage_class.persistent }}
-      volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
   {{- else }}
     volume.alpha.kubernetes.io/storage-class: default
   {{- end }}
@@ -59,7 +59,7 @@ metadata:
   {{- if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
   {{- else if .Values.kube.storage_class.persistent }}
-      volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
   {{- else }}
     volume.alpha.kubernetes.io/storage-class: default
   {{- end }}
