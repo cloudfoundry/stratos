@@ -1,0 +1,17 @@
+FROM opensuse:latest
+
+# Default password for root of mariadb
+ENV MYSQL_ROOT_PASSWORD mysecretpassword
+
+# Add repo for the latest mariadb
+RUN zypper in -y mariadb net-tools \
+  && zypper clean --all
+
+# Config for mariadb
+RUN rm -rf /var/lib/mysql \
+  && mkdir -p /var/lib/mysql \
+  && mkdir -p /var/log/mysql \
+  && touch /var/log/mysql/mysqld.log \
+  && chown -R mysql:mysql /var/log/mysql
+
+VOLUME ["/var/lib/mysql"]

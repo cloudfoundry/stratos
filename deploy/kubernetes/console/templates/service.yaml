@@ -28,3 +28,18 @@ spec:
   externalIPs:
   -  {{ .Values.console.externalIP }}
 {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-mariadb"
+  labels:
+    app: "{{ .Release.Name }}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: mysql
+  selector:
+    app: "{{ .Release.Name }}"
