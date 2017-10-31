@@ -8,7 +8,11 @@ spec:
   ports:
 {{- if and (not .Values.useLb) (or (not .Values.kube.external_ip) (and .Values.kube.external_ip .Values.kube.external_console_http_port)) }}
   - name: http
-    port: {{ default 80 .Values.kube.external_console_http_port }}
+    {{- if and .Values.kube.external_ip .Values.kube.external_console_http_port }}
+    port: {{ .Values.kube.external_console_http_port }}
+    {{- else }}
+    port: 80
+    {{- end }}
     protocol: TCP
     targetPort: 80
 {{- end }}
