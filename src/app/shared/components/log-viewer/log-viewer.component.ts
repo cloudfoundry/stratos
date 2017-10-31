@@ -2,14 +2,24 @@ import { throttle } from 'rxjs/operator/throttle';
 import { Element } from '@angular/compiler';
 import { ApplicationService } from '../../../features/applications/application.service';
 import { Observable, Subscription } from 'rxjs/Rx';
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MdButton } from '@angular/material';
 
 
 @Component({
   selector: 'app-log-viewer',
   templateUrl: './log-viewer.component.html',
-  styleUrls: ['./log-viewer.component.scss']
+  styleUrls: ['./log-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class LogViewerComponent implements OnInit, OnDestroy {
@@ -33,9 +43,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   @ViewChild('container')
   container: ElementRef;
 
-  @ViewChild('bin')
-  bin: ElementRef;
-
   @ViewChild('content')
   content: ElementRef;
 
@@ -53,19 +60,17 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   stickToBottom = true;
 
-  highThroughput = false;
-  highThroughputTimeMS = 100; // If the time interval between log emits is less then we're in high throughput mode
+  highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
   highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
 
   countAttribute = 'batchLength';
   estimatedCount = 0;
 
-  removalSub: Subscription;
   listeningSub: Subscription;
 
   stopped$: Observable<boolean>;
   isLocked$: Observable<boolean>;
-  isHightThroughput$: Observable<boolean>;
+  isHighThroughput$: Observable<boolean>;
 
   ngOnInit() {
 
@@ -80,28 +85,29 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       .startWith(false);
 
     const stoppableLogStream$ = this.stopped$
-      .switchMap(stopped => stopped ? Observable.never() : this.logStream);
+      .mergeMap(stopped => stopped ? Observable.never() : this.logStream);
 
     this.isLocked$ =
       Observable.fromEvent<MouseEvent>(this.followLogButton._elementRef.nativeElement, 'click')
         .scan((acc, event) => !acc, true)
         .startWith(true);
 
-    this.isHightThroughput$ = stoppableLogStream$
+    this.isHighThroughput$ = stoppableLogStream$
       .timeInterval()
-      .sampleTime(1000)
+      .sampleTime(5000)
       .map(x => {
         const high = x.interval < this.highThroughputTimeMS;
         return high;
       })
-      .distinctUntilChanged();
+      .distinctUntilChanged()
+      .startWith(false);
 
-    const buffer$ = Observable.interval(100)
-      .combineLatest(this.isHightThroughput$)
+    const buffer$ = Observable
+      .interval()
+      .combineLatest(this.isHighThroughput$)
       .throttle(([t, high]) => {
         return Observable.interval(high ? this.highThroughputBufferIntervalMS : 0);
-      })
-      .debounceTime(this.highThroughputBufferIntervalMS);
+      });
 
     const addedLogs$ = stoppableLogStream$
       .buffer(buffer$)
@@ -111,15 +117,16 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         const elementString = logs.map(log => {
           return `<div style="padding: 5px 0; color: #C5C8C6;">${log}</div>`;
         }).join('');
-        const ele = document.createElement('div') as HTMLDivElement;
+        let removedElement;
+        if (this.logLinesCount > this.maxLogLines) {
+          removedElement = this.binElement();
+        }
+        const ele = removedElement || document.createElement('div') as HTMLDivElement;
         if (logs.length > 1) {
           ele.setAttribute(this.countAttribute, '' + logs.length);
         }
         ele.innerHTML = elementString;
         contentElement.append(ele);
-        if (this.logLinesCount > this.maxLogLines) {
-          this.binElement();
-        }
       });
 
     this.listeningSub = Observable.combineLatest(
@@ -130,27 +137,15 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         containerElement.scrollTop = contentElement.clientHeight;
       }
     }).subscribe();
-
-    this.removalSub = Observable.interval(5000).do(() => {
-      this.remove();
-    }).subscribe();
   }
 
   binElement() {
-    try {
-      const removedEle = this.content.nativeElement.removeChild(this.content.nativeElement.firstChild);
-      this.bin.nativeElement.append(removedEle);
-      this.logLinesCount -= (removedEle.getAttribute(this.countAttribute) || 1);
-    } catch (e) { }
-  }
-
-  remove() {
-    const binHeight = this.bin.nativeElement.clientHeight;
-    this.bin.nativeElement.innerHTML = '';
+    const removedEle = this.content.nativeElement.removeChild(this.content.nativeElement.firstChild);
+    this.logLinesCount -= (removedEle.getAttribute(this.countAttribute) || 1);
+    return removedEle;
   }
 
   ngOnDestroy(): void {
-    this.removalSub.unsubscribe();
     this.listeningSub.unsubscribe();
   }
 

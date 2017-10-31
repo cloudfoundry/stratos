@@ -1,7 +1,7 @@
 <div class="log-viewer">
   <md-toolbar class="log-viewer__header" color="primary">
     <span>{{title || 'Log'}}</span>
-    <md-icon class="log-viewer__warn-icon" mdTooltip="High throughput stream" *ngIf="isHightThroughput$ | async">warning</md-icon>
+    <md-icon class="log-viewer__warn-icon" mdTooltip="High throughput stream" *ngIf="isHighThroughput$ | async">warning</md-icon>
     <div class="spacer"></div>
     <div class="log-viewer__actions">
       <button #pauseButton md-icon-button>
@@ -13,8 +13,6 @@
     </div>
   </md-toolbar>
   <div class="log-scroller" #container>
-    <div class="last-chance-saloon" #bin></div>
-    <div class="log-scroller__content" (mousewheel)="wheelHandler" (scroll)="scrollHandler" #content>
-    </div>
+    <div class="log-scroller__content" (mousewheel)="wheelHandler" (scroll)="scrollHandler" #content></div>
   </div>
 </div>
