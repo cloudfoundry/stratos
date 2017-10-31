@@ -29,7 +29,7 @@ export interface AppEvent {
 
 export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
-  private cfFilterSub: Subscription;
+  // private cfFilterSub: Subscription;
   /**
    *
    */
@@ -46,26 +46,26 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
   }
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    super.initialise(paginator, sort, filter$);
-    const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
-      .do(([filter, pag]: [string, PaginationEntityState]) => {
-        if (filter) {
-          const q = pag.params.q;
-          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-            q: [
-              new QParam('type', filter, ' IN '),
-            ]
-          }));
-        } else {
-          this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
-        }
-      });
-    this.cfFilterSub = cfFilter$.subscribe();
-  }
+  // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
+  //   super.initialise(paginator, sort, filter$);
+  //   const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
+  //     .do(([filter, pag]: [string, PaginationEntityState]) => {
+  //       if (filter) {
+  //         const q = pag.params.q;
+  //         this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+  //           q: [
+  //             new QParam('type', filter, ' IN '),
+  //           ]
+  //         }));
+  //       } else {
+  //         this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
+  //       }
+  //     });
+  //   this.cfFilterSub = cfFilter$.subscribe();
+  // }
 
-  disconnect() {
-    this.cfFilterSub.unsubscribe();
-    super.disconnect();
-  }
+  // disconnect() {
+  //   this.cfFilterSub.unsubscribe();
+  //   super.disconnect();
+  // }
 }
