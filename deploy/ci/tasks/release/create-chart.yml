@@ -50,10 +50,11 @@ run:
       mkdir -p /root/.ssh/
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
-
+      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Update Helm repo
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
       git config --global push.default simple
+      git pull --rebase
       git push origin HEAD:master;
 
