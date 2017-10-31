@@ -89,7 +89,6 @@
 
     this.stMiddleware = stMiddleware;
 
-
     function stMiddleware(tableState) {
       var stSort = tableState.sort.predicate + '_' + !tableState.sort.reverse;
       var sort = model.currentSortOption + '_' + model.sortAscending;
