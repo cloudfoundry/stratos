@@ -12,6 +12,12 @@ import { MdPaginator, MdSort, MdPaginatorIntl } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { ChangeDetectorRef } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TableCellEventTimestampComponent } from './custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import { TableCellEventTypeComponent } from './custom-cells/table-cell-event-type/table-cell-event-type.component';
+import { TableCellEventActionComponent } from './custom-cells/table-cell-event-action/table-cell-event-action.component';
+import { TableCellEventDetailComponent } from './custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
+import { ValuesPipe } from '../../pipes/values.pipe';
 
 describe('TableComponent', () => {
   let component: TableComponent<any>;
@@ -28,6 +34,12 @@ describe('TableComponent', () => {
         TableHeaderSelectComponent,
         TableCellEditComponent,
         TableCellEditVariableComponent,
+        TableCellEventTimestampComponent,
+        TableCellEventTypeComponent,
+        TableCellEventActionComponent,
+        TableCellEventDetailComponent,
+        EventTabActorIconPipe,
+        ValuesPipe,
       ],
       imports: [
         CoreModule,

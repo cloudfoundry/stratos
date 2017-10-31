@@ -14,7 +14,7 @@
         </md-list-item>
         <md-list-item>
           <app-display-value [label]="'Buildpack'">
-            <app-view-buildpack [buildPack]="(appService.application$| async)?.app.entity.buildpack || (appService.application$| async)?.app.entity.detected_buildpack"></app-view-buildpack>
+            <app-view-buildpack [buildPack]="(appService.application$ | async)?.app.entity.buildpack || (appService.application$ | async)?.app.entity.detected_buildpack"></app-view-buildpack>
           </app-display-value>
         </md-list-item>
         <md-list-item>

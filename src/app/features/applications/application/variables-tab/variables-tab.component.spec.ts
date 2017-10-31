@@ -13,6 +13,7 @@ import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../summary-tab/application-env-vars.service';
 import { appMetaDataReducer } from '../../../../store/reducers.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 
 describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;
@@ -37,7 +38,7 @@ describe('VariablesTabComponent', () => {
           })
       ],
       providers: [
-        ApplicationService,
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         ApplicationEnvVarsService,
       ]
