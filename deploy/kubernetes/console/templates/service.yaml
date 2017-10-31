@@ -20,10 +20,10 @@ spec:
 {{- if and .Values.kube.external_ip .Values.kube.external_console_https_port }}
     port: {{ .Values.kube.external_console_https_port }}
 {{- else }}
-    port: 443
+    port: {{ .Values.console.port }}
 {{- end }}
     protocol: TCP
-    targetPort: {{ .Values.console.port }}
+    targetPort: 443
   selector:
     app: "{{ .Release.Name }}"
     component: console
