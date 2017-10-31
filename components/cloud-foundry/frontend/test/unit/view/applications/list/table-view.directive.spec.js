@@ -38,11 +38,6 @@
         expect(applicationsTableDirectiveCtrl).toBeDefined();
       });
 
-      it('should return correct URL', function () {
-        var urlString = applicationsTableDirectiveCtrl.getAppSummaryLink(apps[0]);
-        expect(urlString).toEqual('#/cf/applications/testGuid/app/appGuid/summary');
-      });
-
     });
 
   });
