@@ -97,10 +97,6 @@ build_bk_build_base(){
     build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 }
 
-build_goose_base(){
-    build_and_push_image stratos-goose-base Dockerfile.stratos-goose-base
-}
-
 build_portal_proxy_builder(){
     pushd  ${DEPLOY_PATH}/
     BK_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-bk-build-base:${TAG}
@@ -108,14 +104,12 @@ build_portal_proxy_builder(){
     popd
 }
 
-build_postflight_job_base(){
-    pushd ${DEPLOY_PATH}/
-    TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-postflight-image-builder.sh
-    popd
-}
-
 build_preflight_job_base(){
     build_and_push_image stratos-preflight-base Dockerfile.stratos-preflight-base
+}
+
+build_mariadb_base(){
+    build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
 }
 
 # Base with go
@@ -124,8 +118,6 @@ build_go_base
 build_ui_base;
 # Used for running the backend
 build_bk_base;
-# Used for goose
-build_goose_base;
 # Used for hosting nginx
 build_nginx_base;
 # Used for stratos-proxy-builder base
@@ -133,7 +125,7 @@ build_bk_build_base;
 # Used for building the backend
 build_portal_proxy_builder;
 # Used for building the postflight job image
-build_postflight_job_base;
-# Used for building the preflight job image
 build_preflight_job_base;
+# Used for building the DB image
+build_mariadb_base;
 rm -f mo;

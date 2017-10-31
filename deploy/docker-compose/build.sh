@@ -123,8 +123,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 
-  rm -f ${STRATOS_UI_PATH}/goose
-
 }
 
 function updateTagForRelease {
@@ -192,7 +190,6 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-    preloadImage splatform/stratos-goose-base:opensuse
     buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
   rm -f ${STRATOS_UI_PATH}/goose
 }

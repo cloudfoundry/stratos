@@ -19,7 +19,6 @@ run:
   args:
     - -exc
     - |
-
       # Expect this command to fail since k8s isn't available but it will initialise helm locally
       helm init || true
       ROOT_DIR=$PWD
