@@ -1,3 +1,4 @@
+import { EntityInfo } from '../../../../store/types/api.types';
 import { resultPerPageParam } from '../../../../store/reducers/pagination.reducer';
 
 import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
@@ -5,10 +6,25 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { MdPaginator, MdSort } from '@angular/material';
-import { AppEventsDataSource } from './events-data-source';
 import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
+import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
+import { TableColumn } from '../../../../shared/components/table/table.component';
+import {
+  TableCellEventTypeComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
+import {
+  TableCellEventTimestampComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
+import {
+  TableCellEventActionComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
+import {
+  TableCellEventDetailComponent
+} from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 
 @Component({
   selector: 'app-events-tab',
@@ -18,33 +34,32 @@ import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-even
 
 export class EventsTabComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
-    this.paginationKey = `app-events:${this.appService.cfGuid}${this.appService.appGuid}`
-  }
+  constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  dataSource: AppEventsDataSource;
+  eventSource: CfTableDataSource<EntityInfo>;
   hasEvents$: Observable<boolean>;
-  paginationKey: string;
-  @ViewChild(MdPaginator) paginator: MdPaginator;
-  @ViewChild(MdSort) sort: MdSort;
-
-  gotToPage() {
-    this.store.dispatch(new AddParams(EventSchema.key, this.paginationKey, {
-      [resultPerPageParam]: 10
-    }));
-  }
+  columns: Array<TableColumn<EntityInfo>> = [
+    {
+      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
+      sort: { disableClear: true }
+    },
+    {
+      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cellComponent: TableCellEventTypeComponent
+    },
+    {
+      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cellComponent: TableCellEventActionComponent
+    },
+    {
+      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cellComponent: TableCellEventDetailComponent
+    },
+  ];
 
 
   ngOnInit() {
-    const action = new GetAllAppEvents(this.paginationKey, this.appService.appGuid, this.appService.cfGuid);
-    this.dataSource = new AppEventsDataSource(
+    this.eventSource = new CfAppEventsDataSource(
       this.store,
-      action,
-      this.paginator,
-      this.sort
+      this.appService.cfGuid,
+      this.appService.appGuid,
     );
   }
 }
-
-// TODO: RC Move
-

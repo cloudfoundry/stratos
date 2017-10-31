@@ -43,8 +43,7 @@ const defaultPaginationEntityState = {
 export const defaultPaginationState = { ...defaultEntitiesState };
 
 export function qParamsToString(params: QParam[]) {
-  const qStrings = params.map(joinQParam);
-  return qStrings.join('%3A');
+  return params.map(joinQParam);
 }
 
 function joinQParam(q: QParam) {
@@ -104,13 +103,14 @@ const updatePagination =
           currentPage: (action as SetPage).pageNumber
         };
       case SET_PARAMS:
-
+        const setParamAction = action as SetParams;
         return {
           ...state,
           params: removeEmptyParams({
+            // TODO: Every time we call SET_PARAMS this will reset to default. Should this change to 'INIT_PARAMS'?
             [resultPerPageParam]: resultPerPageParamDefault,
-            ...(action as SetParams).params,
-            q: getUniqueQParams(action as SetParams, state)
+            ...setParamAction.params,
+            q: getUniqueQParams(setParamAction, state)
           })
         };
       case ADD_PARAMS:
@@ -124,8 +124,17 @@ const updatePagination =
           })
         };
       case REMOVE_PARAMS:
-        const removeParamsState = { ...state };
-        (action as RemoveParams).params.forEach((key) => {
+        const removeParamAction = action as RemoveParams;
+        const removeParamsState = {
+          ...state,
+          params: {
+            ...state.params,
+            q: state.params.q.filter((qs: QParam) => {
+              return !removeParamAction.qs.find((removeParamKey: string) => qs.key === removeParamKey);
+            })
+          }
+        };
+        removeParamAction.params.forEach((key) => {
           if (removeParamsState.params.hasOwnProperty(key)) {
             delete removeParamsState.params[key];
           }
@@ -137,10 +146,22 @@ const updatePagination =
   };
 
 function getUniqueQParams(action: AddParams | SetParams, state) {
-  let qParmas = [].concat(state.params.q || []);
-  // Ensure q params are unique
+  let qStatePrams: QParam[] = [].concat(state.params.q || []);
+  const qActionPrams: QParam[] = [].concat(action.params.q || []);
+
+  // Update existing q params
+  for (const actionParam of qActionPrams) {
+    const existingParam = qStatePrams.findIndex((stateParam: QParam) => stateParam.key === actionParam.key);
+    if (existingParam >= 0) {
+      qStatePrams[existingParam] = { ...actionParam };
+    } else {
+      qStatePrams.push(actionParam);
+    }
+  }
+
+  //  Ensure q params are unique
   if (action.params.q) {
-    qParmas = qParmas.concat(action.params.q)
+    qStatePrams = qStatePrams.concat(qActionPrams)
       .filter((q, index, self) => self.findIndex(
         (qs) => {
           return qs.key === q.key;
@@ -151,7 +172,7 @@ function getUniqueQParams(action: AddParams | SetParams, state) {
         return !!q.value;
       });
   }
-  return qParmas;
+  return qStatePrams;
 }
 
 function removeEmptyParams(params: PaginationParam) {

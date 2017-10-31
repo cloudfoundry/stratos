@@ -11,10 +11,10 @@ import { ServicesTabComponent } from './application/services-tab/services-tab.co
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { ApplicationEnvVarsService } from './application/summary-tab/application-env-vars.service';
 import {
-    ApplicationStateIconComponent,
+  ApplicationStateIconComponent,
 } from './application/summary-tab/application-state/application-state-icon/application-state-icon.component';
 import {
-    ApplicationStateIconPipe,
+  ApplicationStateIconPipe,
 } from './application/summary-tab/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './application/summary-tab/application-state/application-state.component';
 import { ApplicationStateService } from './application/summary-tab/application-state/application-state.service';
@@ -22,7 +22,6 @@ import { SummaryTabComponent } from './application/summary-tab/summary-tab.compo
 import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
-import { EventTabActorIconPipe } from './application/events-tab/event-tab-actor-icon.pipe';
 
 
 @NgModule({
@@ -44,7 +43,6 @@ import { EventTabActorIconPipe } from './application/events-tab/event-tab-actor-
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    EventTabActorIconPipe
   ],
   providers: [
     ApplicationService,

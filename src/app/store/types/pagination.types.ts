@@ -5,7 +5,7 @@ export class QParam {
   constructor(
     public key: string,
     public value: string | string[],
-    public joiner: '>=' | '<=' | '<' | '>' | '%2BIN%2B' | ':' | '=' = ':'
+    public joiner: '>=' | '<=' | '<' | '>' | ' IN ' | ':' | '=' = ':'
   ) { }
 }
 
@@ -16,7 +16,7 @@ export interface PaginationParam {
 
 export class PaginationEntityState {
   currentPage = 0;
-  totalResults = 0; // TODO: Populate
+  totalResults = 0;
   pageCount = 0;
   ids = {};
   params: PaginationParam;

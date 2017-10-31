@@ -71,7 +71,14 @@ export const appReducers = {
 // TODO: Add the below line back in once https://github.com/ngrx/platform/issues/446 is confirmed fixed (bug spams ROUTER_CANCEL on log in)
 // routerReducer: routerReducer,
 
-export const metaReducers = environment.production ? [] : [storeFreeze, logger];
+
+let metaReducers = [];
+if (!environment.production) {
+  metaReducers = [storeFreeze];
+  if (environment.logEnableConsoleActions) {
+    metaReducers.push(logger);
+  }
+}
 
 @NgModule({
   imports: [

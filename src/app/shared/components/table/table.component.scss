@@ -1,0 +1,73 @@
+ .app-table {
+   md-card-header {
+     display: flex;
+     height: 66px; // Fixed height so doesn't ping around after selecting
+     div:not([hidden]).spacer {
+       flex-grow: 99;
+     }
+     >div:not([hidden]) {
+       display: flex;
+       flex-direction: row;
+       align-items: center;
+       flex: 1;
+       form {
+         padding-right: 13px;
+       }
+       button:last-of-type {
+         margin-right: 26px;
+       }
+     }
+   }
+   md-card-content {
+     md-table {
+       &[hidden] * {
+         display: none;
+       }
+       md-header-row[hidden] {
+         *,
+         &.mat-header-row {
+           display: none;
+         }
+       }
+       md-header-cell,
+       md-cell {
+         flex: 1 1 200px;
+         padding: 10px 5px;
+       }
+       .table-column-select {
+         flex-grow: 0;
+         min-width: 100px;
+       }
+       .table-column-edit {
+         flex-grow: 0;
+         min-width: inherit;
+         display: flex;
+         flex-direction: row;
+         justify-content: flex-end;
+       }
+       md-row {
+         min-height: 57px;
+         &:hover {
+           background-color: rgba(0, 0, 0, 0.05);
+         }
+         md-cell {
+           md-form-field {
+             width: 90%;
+           }
+         }
+       }
+       md-row.fixedRowHeight {
+         height: 57px;
+       }
+     }
+     .no-rows {
+       padding: 20px 0;
+     }
+   }
+   md-card-footer {
+     margin: 0;
+   }
+   md-paginator[hidden] {
+     display: none;
+   }
+ }

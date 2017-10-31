@@ -1,0 +1,67 @@
+<div class="app-table">
+  <div>
+    <div style="height: 5px;">
+      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
+        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+      </div>
+    </div>
+    <md-card>
+      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
+        <!-- Don't use md-card-title, it has no ngcontent attribute so cannot select in css -->
+        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="spacer">{{ text?.title }}</div>
+        <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
+        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+          <div [hidden]="!enableFilter || (paginator.length === 0 && !filter) ">
+            <form novalidate>
+              <md-form-field floatPlaceholder="never">
+                <input mdInput ngModel #filter="ngModel" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
+              </md-form-field>
+            </form>
+          </div>
+          <button md-icon-button *ngIf="addForm" (click)="safeAddForm().reset();dataSource.startAdd();;">
+              <md-icon>add</md-icon>
+            </button>
+        </div>
+        <div [hidden]="!(dataSource.isSelecting$ | async)">
+          <button md-icon-button (click)="dataSource.selectedDelete()">
+              <md-icon>delete</md-icon>
+            </button>
+        </div>
+        <div [hidden]="!(dataSource.isAdding$ | async)">
+          <div class="spacer"></div>
+          <ng-content select="[app-table-add]"></ng-content>
+          <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
+          <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
+        </div>
+      </md-card-header>
+      <md-card-content>
+        <md-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && paginator.length === 0" [dataSource]="dataSource" mdSort>
+          <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnId">
+            <div *ngIf="column.sort">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear">
+                <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
+              </md-header-cell>
+            </div>
+            <div *ngIf="!column.sort">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
+                <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
+              </md-header-cell>
+            </div>
+            <md-cell *mdCellDef="let row" [ngClass]="column.class">
+              <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
+            </md-cell>
+          </ng-container>
+          <md-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && paginator.length === 0" *mdHeaderRowDef="columnNames"></md-header-row>
+          <md-row *mdRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></md-row>
+        </md-table>
+        <div [hidden]="(dataSource.isLoadingPage$ | async) || paginator.length > 0" class="mat-card-header-text no-rows">
+          <div class="mat-card-header-text">
+            <div class="mat-card-header-text-wa">There are no entries.</div>
+          </div>
+        </div>
+      </md-card-content>
+      <md-paginator #paginator [hidden]="paginator.length === 0">
+      </md-paginator>
+    </md-card>
+  </div>
+</div>

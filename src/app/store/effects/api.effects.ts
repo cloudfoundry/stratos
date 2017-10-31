@@ -62,11 +62,14 @@ export class APIEffect {
       const paginatedAction = (apiAction as PaginatedAction);
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
+        // TODO: q params may also come from a standard api request
         const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
         if (paginationParams.hasOwnProperty('q')) {
           // Convert q into a cf q string
           paginationParams.qString = qParamsToString(paginationParams.q);
-          options.params.set('q', paginationParams.qString as string);
+          for (const q of paginationParams.qString) {
+            options.params.append('q', q);
+          }
           delete paginationParams.qString;
           delete paginationParams.q;
         }

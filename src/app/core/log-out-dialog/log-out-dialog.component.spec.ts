@@ -16,7 +16,7 @@ describe('LogOutDialogComponent', () => {
   class MdDialogRefMock {
   }
 
-  class MD_DIALOG_DATA_MOCK {
+  class MdDialogDataMock {
     data: '';
   }
 
@@ -26,7 +26,7 @@ describe('LogOutDialogComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: MdDialogRef, useClass: MdDialogRefMock },
-        { provide: MD_DIALOG_DATA, useClass: MD_DIALOG_DATA_MOCK },
+        { provide: MD_DIALOG_DATA, useClass: MdDialogDataMock },
       ],
       imports: [
         CoreModule,
