@@ -9,17 +9,18 @@ PROG=$(basename ${BASH_SOURCE[0]})
 
 function usage {
     echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
-    echo "       -b Value    Base Image"
+    echo "       -b Value   Base Image"
     echo "       -r Value   Docker registry"
     echo "       -o Value   Organization in Docker registry"
-    echo "       -t Value    Tag for images"
-    echo "       -p    Push images to registry"
-    echo "       -h    Help"
+    echo "       -t Value   Tag for images"
+    echo "       -p         Push images to registry"
+    echo "       -s         Is SLE"
+    echo "       -h         Help"
     exit 1
 }
 
 
-while getopts "b:r:o:t:ph" opt ; do
+while getopts "b:r:o:t:psh" opt ; do
     case $opt in
         b)
             BASE_IMAGE=${OPTARG}
@@ -35,6 +36,9 @@ while getopts "b:r:o:t:ph" opt ; do
             ;;
         p)
             PUSH_IMAGES=true
+            ;;
+        s)
+            IS_SLE=true
             ;;
         h)
             usage
@@ -56,8 +60,9 @@ pushd $(mktemp -d)
 curl -sSO https://raw.githubusercontent.com/tests-always-included/mo/master/mo
 chmod +x mo
 
+GO_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-go-build-base:${TAG}
 for i in ${DOCKERFILES}; do
-  BASE_IMAGE=${BASE_IMAGE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
+  BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} IS_SLE=${IS_SLE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
 
 
@@ -92,24 +97,19 @@ build_bk_build_base(){
     build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 }
 
-build_goose_base(){
-    build_and_push_image stratos-goose-base Dockerfile.stratos-goose-base
-}
-
 build_portal_proxy_builder(){
     pushd  ${DEPLOY_PATH}/
-    TAG=opensuse tools/build-push-proxy-builder-image.sh
-    popd
-}
-
-build_postflight_job_base(){
-    pushd ${DEPLOY_PATH}/
-    TAG=opensuse tools/build-postflight-image-builder.sh
+    BK_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-bk-build-base:${TAG}
+    BK_BUILD_BASE=${BK_BUILD_BASE} TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-push-proxy-builder-image.sh
     popd
 }
 
 build_preflight_job_base(){
     build_and_push_image stratos-preflight-base Dockerfile.stratos-preflight-base
+}
+
+build_mariadb_base(){
+    build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
 }
 
 # Base with go
@@ -118,8 +118,6 @@ build_go_base
 build_ui_base;
 # Used for running the backend
 build_bk_base;
-# Used for goose
-build_goose_base;
 # Used for hosting nginx
 build_nginx_base;
 # Used for stratos-proxy-builder base
@@ -127,7 +125,7 @@ build_bk_build_base;
 # Used for building the backend
 build_portal_proxy_builder;
 # Used for building the postflight job image
-build_postflight_job_base;
-# Used for building the preflight job image
 build_preflight_job_base;
+# Used for building the DB image
+build_mariadb_base;
 rm -f mo;

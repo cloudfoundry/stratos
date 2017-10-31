@@ -19,7 +19,6 @@ run:
   args:
     - -exc
     - |
-
       # Expect this command to fail since k8s isn't available but it will initialise helm locally
       helm init || true
       ROOT_DIR=$PWD
@@ -32,7 +31,6 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
 
       # Generate Helm package
-      helm dep build console
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/

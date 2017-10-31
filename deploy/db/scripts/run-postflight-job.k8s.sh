@@ -5,7 +5,7 @@ function execStatement {
     stmt=$1
 
     if [ "$DATABASE_PROVIDER" = "mysql" ]; then
-        echo "Executing: mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e $stmt"
+        echo "Executing: mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p****** -e $stmt"
         mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e $stmt
     fi
 
@@ -54,26 +54,26 @@ fi
 echo "Checking database to see if migration is necessary."
 
 echo "DBCONFIG: $DBCONF_KEY"
-echo "Connection string: $DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
+echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-goose --env=$DBCONF_KEY dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-goose --env=$DBCONF_KEY status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-goose --env=$DBCONF_KEY up
+stratos-dbmigrator --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-goose --env=$DBCONF_KEY status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-goose --env=$DBCONF_KEY dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 
@@ -90,15 +90,7 @@ done
 EOF
 chmod +x $TEMP_SCRIPT
 
-
-# Timeout after 5 minutes
-IS_ALPINE=$(cat /etc/os-release | grep Alpine)
-
-if [ -z "${IS_ALPINE}" ]; then
-    timeout 5m ${TEMP_SCRIPT}
-else
-    timeout -t 300 ${TEMP_SCRIPT}
-fi
+timeout 5m ${TEMP_SCRIPT}
 # Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
 rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true

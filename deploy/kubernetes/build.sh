@@ -5,10 +5,10 @@ set -eu
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-
+BASE_IMAGE_TAG=opensuse
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dTc" opt; do
+while getopts ":ho:r:t:dTclb" opt; do
   case $opt in
     h)
       echo
@@ -27,6 +27,9 @@ while getopts ":ho:r:t:dTc" opt; do
     t)
       TAG="${OPTARG}"
       ;;
+    b)
+      BASE_IMAGE_TAG="${OPTARG}"
+      ;;
     T)
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
       RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
@@ -36,6 +39,9 @@ while getopts ":ho:r:t:dTc" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    l)
+      TAG_LATEST="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -53,13 +59,14 @@ echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
 echo "REGISTRY: ${DOCKER_REGISTRY}"
 echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
+echo "BASE_IMAGE_TAG: ${BASE_IMAGE_TAG}"
 
 echo
 echo "Starting build"
 
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
+STRATOS_UI_PATH=${__DIRNAME}/../../
 
 # Proxy support
 BUILD_ARGS=""
@@ -93,6 +100,8 @@ function buildAndPublishImage {
     exit 1
   fi
 
+  # Patch Dockerfile
+  patchDockerfile ${DOCKER_FILE} ${FOLDER}
   IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
   echo Building Docker Image for ${NAME}
 
@@ -105,7 +114,11 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
-  # Update values.yaml
+  if [ ! -z ${TAG_LATEST} ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
+  unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
 
   popd > /dev/null 2>&1
 }
@@ -124,8 +137,6 @@ function cleanup {
   echo
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
-
-  rm -f ${STRATOS_UI_PATH}/goose
 
 }
 
@@ -162,6 +173,34 @@ function pushGitTag {
   popd > /dev/null 2>&1
 }
 
+
+function patchDockerfile {
+  DOCKER_FILE=${1}
+  FOLDER=${2}
+
+  # Replace registry/organization
+  pushd ${FOLDER} > /dev/null 2>&1
+  pwd
+  sed -i "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" ${FOLDER}/${DOCKER_FILE}
+  sed -i "s/opensuse/${BASE_IMAGE_TAG}/g" ${FOLDER}/${DOCKER_FILE}
+  popd > /dev/null 2>&1
+
+}
+
+function unPatchDockerfile {
+  DOCKER_FILE=${1}
+  FOLDER=${2}
+
+  # Replace registry/organization
+  pushd ${FOLDER} > /dev/null 2>&1
+  pwd
+  sed -i "s@${DOCKER_REGISTRY}/${DOCKER_ORG}@splatform@g" ${FOLDER}/${DOCKER_FILE}
+  sed -i "s/${BASE_IMAGE_TAG}/opensuse/g" ${FOLDER}/${DOCKER_FILE}
+  popd > /dev/null 2>&1
+
+}
+
+
 function buildProxy {
   # Use the existing build container to compile the proxy executable, and leave
   # it on the local filesystem.
@@ -183,7 +222,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -196,13 +235,6 @@ function buildProxy {
   buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
 }
 
-function buildPostgres {
-  # Build and publish the container image for postgres
-  echo
-  echo "-- Build & publish the runtime container image for postgres"
-  # Pull base image locally and retag
-  buildAndPublishImage stratos-postgres Dockerfile ${STRATOS_UI_PATH}/deploy/containers/postgres
-}
 
 function buildPreflightJob {
   # Build the preflight container
@@ -215,17 +247,28 @@ function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-
+  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   docker run \
              ${RUN_ARGS} \
              -it \
              --rm \
-             --name postflight-builder \
-             --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:opensuse
-  mv goose  ${STRATOS_UI_PATH}/
-  buildAndPublishImage stratos-postflight-job ./deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
-  rm -f ${STRATOS_UI_PATH}/goose
+             -e USER_NAME=$(id -nu) \
+             -e USER_ID=$(id -u)  \
+             -e GROUP_ID=$(id -g) \
+             -e BUILD_DB_MIGRATOR="true" \
+             --name stratos-proxy-builder \
+             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
+  buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
+  popd > /dev/null 2>&1
+
+}
+
+function buildMariaDb {
+  echo
+  echo "-- Building/publishing MariaDB"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
 }
 
 function buildUI {
@@ -241,7 +284,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    splatform/stratos-ui-build-base:opensuse \
+    ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
@@ -269,9 +312,9 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPostgres
 buildPreflightJob
 buildPostflightJob
+buildMariaDb
 buildUI
 
 if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then

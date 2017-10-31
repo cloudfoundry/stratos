@@ -33,6 +33,7 @@
       all: all,
       createServiceInstance: createServiceInstance,
       deleteServiceInstance: deleteServiceInstance,
+      updateServiceInstance: updateServiceInstance,
       listAllServiceBindingsForServiceInstance: listAllServiceBindingsForServiceInstance,
       onAll: onAll
     };
@@ -95,6 +96,25 @@
      */
     function deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params) {
       return serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params,
+        modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data;
+        });
+    }
+
+    /**
+     * @function updateServiceInstance
+     * @memberof cloud-foundry.model.service-instance.ServiceInstance
+     * @description Update a service instance.
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {object} serviceInstanceGuid - the service instance guid of the service instance to delete
+     * @param {object} bindingData - the service instance data
+     * @param {object} params - additional params to pass to request
+     * @returns {promise} A promise object
+     * @public
+     */
+    function updateServiceInstance(cnsiGuid, serviceInstanceGuid, bindingData, params) {
+      return serviceInstanceApi.UpdateServiceInstance(serviceInstanceGuid, bindingData, params,
         modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;

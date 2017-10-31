@@ -34,6 +34,6 @@ RUN apk update && \
     /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html /usr/lib/node_modules/npm/scripts
 
 COPY package.json /go/
-RUN npm install
+RUN npm install --production
 ENV GLIDE_HOME /.glide
 COPY cache /.glide/cache

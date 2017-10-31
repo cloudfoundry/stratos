@@ -90,3 +90,12 @@ form .form-group {
 
   }
 }
+
+.edit-service-instance .async-dialog {
+  min-height: 400px;
+  width: 600px;
+}
+
+.modal.detail-view.detail-view-dialog.create-service-instance-dialog.edit-service-instance>.modal-dialog .async-dialog .detail-view-content>ng-include {
+  flex: 0;
+}
