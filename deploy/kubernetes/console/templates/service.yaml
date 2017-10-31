@@ -6,16 +6,24 @@ metadata:
   name: "{{ .Release.Name }}-ui-ext"
 spec:
   ports:
-{{- if not .Values.useLb }}
+{{- if and (not .Values.useLb) (or (not .Values.kube.external_ip) (and .Values.kube.external_ip .Values.kube.external_console_http_port)) }}
   - name: http
+    {{- if and .Values.kube.external_ip .Values.kube.external_console_http_port }}
+    port: {{ .Values.kube.external_console_http_port }}
+    {{- else }}
     port: 80
+    {{- end }}
     protocol: TCP
     targetPort: 80
 {{- end }}
   - name: https
-    port: 443
+{{- if and .Values.kube.external_ip .Values.kube.external_console_https_port }}
+    port: {{ .Values.kube.external_console_https_port }}
+{{- else }}
+    port: {{ .Values.console.port }}
+{{- end }}
     protocol: TCP
-    targetPort: {{ .Values.console.port }}
+    targetPort: 443
   selector:
     app: "{{ .Release.Name }}"
     component: console
@@ -24,9 +32,14 @@ spec:
 {{- else }}
   type: NodePort
 {{- end }}
-{{- if .Values.console.externalIP }}
+{{- if .Values.kube.external_ip }}
+  externalIPs:
+  -  {{ .Values.kube.external_ip }}
+{{- else }}
+  {{- if .Values.console.externalIP }}
   externalIPs:
   -  {{ .Values.console.externalIP }}
+  {{- end }}
 {{- end }}
 ---
 apiVersion: v1
