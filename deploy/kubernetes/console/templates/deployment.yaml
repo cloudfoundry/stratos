@@ -274,6 +274,10 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
+      {{- if .Values.dockerRegistrySecret }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
       volumes:
       - name: data
       {{- if .Values.mariadb.persistence.enabled }}
