@@ -73,3 +73,6 @@ env:
   UAA_PORT:
 kube:
   external_console_https_port: 8443
+  storage_class:
+    persistent:
+dockerRegistrySecret:

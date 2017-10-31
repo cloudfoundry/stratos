@@ -66,6 +66,10 @@ spec:
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
        restartPolicy: OnFailure
+       {{- if .Values.dockerRegistrySecret }}
+       imagePullSecrets:
+       - name: {{.Values.dockerRegistrySecret}}
+       {{- end }}
        volumes:
        - name: "{{ .Release.Name }}-upgrade-volume"
          persistentVolumeClaim:
