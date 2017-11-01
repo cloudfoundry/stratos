@@ -107,7 +107,7 @@ helm install console --namespace=console --name my-console
 
 ### Deploying using the GitHub repository
 
-> Note: Deploying using the GitHub repository uses the latest Stratos UI images that are built nightly (tagged `latest`). While these contain the very latest upadtes, they may contain bugs or instabilties.
+> Note: Deploying using the GitHub repository uses the latest Stratos UI images that are built nightly (tagged `latest`). While these contain the very latest updates, they may contain bugs or instabilities.
 
 Clone the Stratos UI GitHub repository:
 
