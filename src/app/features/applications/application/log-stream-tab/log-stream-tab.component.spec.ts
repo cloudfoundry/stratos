@@ -1,3 +1,7 @@
+import { CommonModule } from '@angular/common';
+import { RouterTestingModule } from '@angular/router/testing';
+import { MDAppModule } from '../../../../core/md.module';
+import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
@@ -11,10 +15,15 @@ describe('LogStreamTabComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        StoreModule,
+        MDAppModule,
+        RouterTestingModule,
+        CommonModule,
         CoreModule
       ],
-      declarations: [LogStreamTabComponent]
+      declarations: [
+        LogViewerComponent,
+        LogStreamTabComponent
+      ]
     })
       .compileComponents();
   }));

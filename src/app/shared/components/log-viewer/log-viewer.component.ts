@@ -94,7 +94,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     this.isHighThroughput$ = stoppableLogStream$
       .timeInterval()
-      .sampleTime(5000)
+      .sampleTime(500)
       .map(x => {
         const high = x.interval < this.highThroughputTimeMS;
         return high;
@@ -140,7 +140,11 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   binElement() {
-    const removedEle = this.content.nativeElement.removeChild(this.content.nativeElement.firstChild);
+    const toRemove = this.content.nativeElement.firstChild;
+    if (!toRemove) {
+      return null;
+    }
+    const removedEle = this.content.nativeElement.removeChild(toRemove);
     this.logLinesCount -= (removedEle.getAttribute(this.countAttribute) || 1);
     return removedEle;
   }

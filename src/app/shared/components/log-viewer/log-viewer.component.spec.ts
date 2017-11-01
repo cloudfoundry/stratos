@@ -8,7 +8,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { LogViewerComponent } from './log-viewer.component';
 import { Component, ViewChild } from '@angular/core';
 
-fdescribe('LogViewerComponent', () => {
+describe('LogViewerComponent', () => {
   let component: TestHostComponent;
   let fixture: ComponentFixture<TestHostComponent>;
   let stream: Subject<String>;
@@ -16,7 +16,8 @@ fdescribe('LogViewerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [LogViewerComponent,
+      declarations: [
+        LogViewerComponent,
         TestHostComponent
       ],
       imports: [
@@ -55,31 +56,6 @@ fdescribe('LogViewerComponent', () => {
     });
   });
 
-  it('should be in high throughput mode', (done) => {
-    expect(contentEl.children.length).toEqual(0);
-    let log = true;
-
-    component.logViewer.isHighThroughput$.take(1).subscribe(high => {
-      expect(high).toEqual(false);
-    });
-
-    while (log) {
-      setTimeout(() => {
-        stream.next('Log');
-      }, 100);
-    }
-
-    setTimeout(() => {
-      fixture.detectChanges();
-      log = false;
-      component.logViewer.isHighThroughput$.take(1).subscribe(high => {
-        expect(high).toEqual(true);
-      });
-      done();
-    }, 5500);
-
-  });
-
   it('should only allow max rows', (done) => {
     expect(contentEl.children.length).toEqual(0);
 
@@ -87,21 +63,46 @@ fdescribe('LogViewerComponent', () => {
       expect(high).toEqual(false);
     });
 
-    const maxLines = component.logViewer.maxLogLines + 100;
+    component.logViewer.maxLogLines = 5;
+
+    const maxLines = component.logViewer.maxLogLines + 1;
     let i = 0;
 
     while (i < maxLines) {
-      stream.next('Log');
       ++i;
+      setTimeout(() => {
+        stream.next('Log');
+      }, 300 * i);
     }
 
     setTimeout(() => {
       fixture.detectChanges();
       expect(contentEl.children.length).toEqual(component.logViewer.maxLogLines);
       done();
+    }, (maxLines * 300) + 10);
+  });
+
+  it('should be in high throughput mode', (done) => {
+    expect(contentEl.children.length).toEqual(0);
+
+    component.logViewer.isHighThroughput$.take(1).subscribe(high => {
+      expect(high).toEqual(false);
     });
 
+    let i = 1;
+    while (i < 200) {
+      ++i;
+      setTimeout(() => {
+        stream.next('Log');
+      }, 50 * i);
+    }
+
+    component.logViewer.isHighThroughput$.filter(high => high).subscribe(high => {
+      expect(high).toEqual(true);
+      done();
+    });
   });
+
   @Component({
     selector: `app-host-component`,
     template: `<app-log-viewer></app-log-viewer>`
