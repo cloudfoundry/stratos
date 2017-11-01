@@ -55,4 +55,4 @@ run:
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
       git config --global push.default simple
-      git push origin HEAD:master;
+      git push origin HEAD:master
