@@ -3,6 +3,24 @@
 The following guide details how to deploy the Stratos UI Console in Kubernetes.
 
 <!-- TOC -->
+- [Requirements](#requirements)
+  * [Kubernetes](#kubernetes)
+  * [Helm](#helm)
+  * [Storage Class](#storage-class)
+- [Deploying Stratos UI](#deploying-stratos-ui)
+- [Deploy using the Helm repository](#deploy-using-the-helm-repository)
+- [Deploy using an archive of the Helm Chart](#deploy-using-an-archive-of-the-helm-chart)
+- [Deploying using the GitHub repository](#deploying-using-the-github-repository)
+- [Accessing the Console](#accessing-the-console)
+- [Advanced Topics](#advanced-topics)
+  * [Using a Load Balancer](#using-a-load-balancer)
+  * [Specifying an External IP](#specifying-an-external-ip)
+  * [Upgrading your deployment](#upgrading-your-deployment)
+  * [Specifying UAA configuration](#specifying-uaa-configuration)
+  * [Specifying a custom Storage Class](#specifying-a-custom-storage-class)
+    + [Providing Storage Class override](#providing-storage-class-override)
+    + [Create a default Storage Class](#create-a-default-storage-class)
+  * [Deploying Stratos UI with your own TLS certificates](#deploying-stratos-ui-with-your-own-tls-certificates)
 <!-- /TOC -->
 
 ## Requirements
