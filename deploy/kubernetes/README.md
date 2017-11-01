@@ -8,9 +8,9 @@ The following guide details how to deploy the Stratos UI Console in Kubernetes.
   * [Helm](#helm)
   * [Storage Class](#storage-class)
 - [Deploying Stratos UI](#deploying-stratos-ui)
-- [Deploy using the Helm repository](#deploy-using-the-helm-repository)
-- [Deploy using an archive of the Helm Chart](#deploy-using-an-archive-of-the-helm-chart)
-- [Deploying using the GitHub repository](#deploying-using-the-github-repository)
+  * [Deploy using the Helm repository](#deploy-using-the-helm-repository)
+  * [Deploy using an archive of the Helm Chart](#deploy-using-an-archive-of-the-helm-chart)
+  * [Deploying using the GitHub repository](#deploying-using-the-github-repository)
 - [Accessing the Console](#accessing-the-console)
 - [Advanced Topics](#advanced-topics)
   * [Using a Load Balancer](#using-a-load-balancer)
@@ -68,9 +68,7 @@ You can deploy Stratos UI from one of three different sources:
 1. Using an archive file containing a given release of our Helm chart
 1. Using the latest Helm chart directly from out GitHub repository
 
-
-
-## Deploy using the Helm repository
+### Deploy using the Helm repository
 
 Add the Helm repository to your helm installation
 ```
@@ -95,7 +93,7 @@ This will create a Console instance named `my-console` in a namespace called `co
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
-## Deploy using an archive of the Helm Chart
+### Deploy using an archive of the Helm Chart
 
 Helm chart archives are available for Stratos UI releases from our GitHub repository, under releases - see https://github.com/SUSE/stratos-ui/releases.
 
@@ -105,12 +103,15 @@ Deploy Stratos UI with:
 
 ```
 helm install console --namespace=console --name my-console
-
 ```
 
-## Deploying using the GitHub repository
+### Deploying using the GitHub repository
 
-To deploy the Stratos UI Console:
+Clone the Stratos UI GitHub repository:
+
+```
+git clone https://github.com/SUSE/stratos-ui.git
+```
 
 Open a terminal and cd to the `deploy/kubernetes` directory:
 
