@@ -85,7 +85,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       .startWith(false);
 
     const stoppableLogStream$ = this.stopped$
-      .mergeMap(stopped => stopped ? Observable.never() : this.logStream);
+      .switchMap(stopped => stopped ? Observable.never() : this.logStream);
 
     this.isLocked$ =
       Observable.fromEvent<MouseEvent>(this.followLogButton._elementRef.nativeElement, 'click')
