@@ -17,14 +17,6 @@ run:
   args:
     - -exc
     - |
-      if [ ! -z "${STAGING_REPOSITORY}" ]; then
-      cat << EOF >> /etc/docker/daemon.json
-      {
-      "insecure-registries":["${STAGING_REPOSITORY}"]
-      }
-      EOF
-      fi
-
       source /docker-lib.sh
       start_docker
       cat /etc/docker/daemon.json
