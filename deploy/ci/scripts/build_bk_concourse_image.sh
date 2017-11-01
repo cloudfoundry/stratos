@@ -20,11 +20,10 @@ glide --yaml ${yaml} install;
 done
 EOF
 chmod +x init-glide.sh
-# ci-registry.ngrok.io:80/concourse-go-glide is fabiorphp/golang-glide:latest
 mkdir cache
 ls  -l $PWD
 whoami
-docker run -v ${PWD}/:/root -v ${PWD}/cache:/.glide/cache -e GLIDE_HOME=/.glide ci-registry.ngrok.io:80/concourse-go-glide  /root/init-glide.sh
+docker run -v ${PWD}/:/root -v ${PWD}/cache:/.glide/cache -e GLIDE_HOME=/.glide ci-registry.capbristol.com:5000/concourse-go-glide  /root/init-glide.sh
 
 docker build  -f deploy/ci/Dockerfile.bk.concourse ./ -t ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-bk-concourse:${TAG} \
     ${BUILD_ARGS}
