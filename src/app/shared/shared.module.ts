@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+import { VirtualScrollModule } from 'angular2-virtual-scroll';
 import { CoreModule } from '../core/core.module';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
@@ -31,6 +32,7 @@ import {
 import { TableCellEventTypeComponent } from './components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
 import { TableCellEventActionComponent } from './components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from './components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 
 
 @NgModule({
@@ -39,7 +41,8 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
     CoreModule,
     PageHeaderModule,
     RouterModule,
-    SteppersModule
+    SteppersModule,
+    VirtualScrollModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -64,6 +67,7 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     EventTabActorIconPipe,
+    LogViewerComponent
   ],
   exports: [
     FormsModule,
@@ -82,6 +86,7 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
-  ],
+    LogViewerComponent
+  ]
 })
 export class SharedModule { }
