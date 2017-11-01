@@ -6,9 +6,11 @@ PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
+OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
-
-while getopts ":ho:r:t:dTclb" opt; do
+ADD_OFFICIAL_TAG="false"
+TAG_LATEST="false"
+while getopts ":ho:r:t:dTclb:O" opt; do
   case $opt in
     h)
       echo
@@ -39,6 +41,9 @@ while getopts ":ho:r:t:dTclb" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    O)
+      ADD_OFFICIAL_TAG="true"
       ;;
     l)
       TAG_LATEST="true"
@@ -114,7 +119,7 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
-  if [ ! -z ${TAG_LATEST} ]; then
+  if [ "${TAG_LATEST}" = "true" ]; then
     docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
     docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
   fi
@@ -158,6 +163,9 @@ function updateTagForRelease {
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-g${GIT_HASH}"
+  if [ "${ADD_OFFICIAL_TAG}" = "true" ]; then
+  TAG=${OFFICIAL_TAG}-${TAG}
+  fi
   echo "New TAG: ${TAG}"
   popd > /dev/null 2>&1
 }

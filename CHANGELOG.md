@@ -1,5 +1,44 @@
 # Change Log
 
+## 0.9.6 Beta-2 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.5...0.9.6)
+
+This is the second beta release of the Stratos UI Console. It contains the following bug fixes and improvements:
+
+**Improvements:**
+
+- Add ability to edit a service instance [\#1324](https://github.com/SUSE/stratos-ui/pull/1324)
+- Improve URL validation on setup flow [\#1320](https://github.com/SUSE/stratos-ui/pull/1320)
+- Make search boxes not usable and visually show this while fetching orgs and spaces [\#1287](https://github.com/SUSE/stratos-ui/pull/1287)
+- Make sure the expiry date time is relative to the time as the client sees it [\#1299](https://github.com/SUSE/stratos-ui/pull/1299)
+- Add loading indicators to endpoints and Cloud Foundry dashboards [\#1325](https://github.com/SUSE/stratos-ui/pull/1325)
+- Improve the loading indicators on initial console load [\#1286](https://github.com/SUSE/stratos-ui/pull/1286)
+- Move deploy status and title into the log viewer title bar. [\#1277](https://github.com/SUSE/stratos-ui/pull/1277)
+- Upgrade to Angular 1.6 [\#1307](https://github.com/SUSE/stratos-ui/pull/1307)
+- Enable binding of mysql db service to CF hosted console [\#1260](https://github.com/SUSE/stratos-ui/pull/1260)
+- Add support for a backend healthcheck [\#1321](https://github.com/SUSE/stratos-ui/pull/1321)
+- Allow helm scf-values to be used to deploy the console [\#1344](https://github.com/SUSE/stratos-ui/pull/1344)
+- Add ability to configure UAA settings when deploying UI through helm chart [\#1315](https://github.com/SUSE/stratos-ui/pull/1315)
+- Use custom buildpack to build Stratos UI [\#1283](https://github.com/SUSE/stratos-ui/pull/1283)
+- Migrate container images to opensuse:42.3 base [\#1293](https://github.com/SUSE/stratos-ui/pull/1293)
+- Replace goose with custom database migrator [\#1334](https://github.com/SUSE/stratos-ui/pull/1334)
+
+**Fixes:**
+
+- Fix for app wall cf/org/space context not carrying over to deploy-location selector [\#1273](https://github.com/SUSE/stratos-ui/pull/1273)
+- Add a logout button when only the error page is shown [\#1289](https://github.com/SUSE/stratos-ui/pull/1289)
+- Address minor bugs in the deploy application for github [\#1285](https://github.com/SUSE/stratos-ui/pull/1285)
+- Fix incorrect service summary info shown [\#1306](https://github.com/SUSE/stratos-ui/pull/1306)
+- Fix i10n for empty/no app events [\#1303](https://github.com/SUSE/stratos-ui/pull/1303)
+- Staging fails when pushed from Windows [\#1322](https://github.com/SUSE/stratos-ui/issues/1322)
+- Properly kill upgrade echo instance [\#1311](https://github.com/SUSE/stratos-ui/pull/1311)
+- Helm chart: Switch to `noShared` mode by default to support more setups [\#1295](https://github.com/SUSE/stratos-ui/pull/1295)
+- Kubernetes/GCE: Skip HTTP endpoint when a load balancer is being setup [\#1305](https://github.com/SUSE/stratos-ui/pull/1305)
+- Fix typo in error message of sshHostKeyChecker [\#1294](https://github.com/SUSE/stratos-ui/pull/1294)
+- Fix line endings [\#1332](https://github.com/SUSE/stratos-ui/pull/1332)
+
+
 ## 0.9.5 Beta-1 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.2...0.9.5)
