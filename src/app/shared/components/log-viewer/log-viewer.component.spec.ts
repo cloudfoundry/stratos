@@ -17,8 +17,8 @@ describe('LogViewerComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        LogViewerComponent,
-        TestHostComponent
+        TestHostComponent,
+        LogViewerComponent
       ],
       imports: [
         MDAppModule,

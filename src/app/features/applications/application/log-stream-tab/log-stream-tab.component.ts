@@ -62,62 +62,66 @@ export class LogStreamTabComponent implements OnInit {
   }
 
   ngOnInit() {
-    const host = window.location.host;
-    const streamUrl = (
-      `wss://${host}/pp/v1/${this.applicationService.cfGuid}/apps/${this.applicationService.appGuid}/stream`
-    );
-    this.messages = websocketConnect(
-      streamUrl,
-      new QueueingSubject<string>()
-    )
-      .messages
-      .share()
-      .map(message => {
-        const json = JSON.parse(message);
-        return json;
-      })
-      .filter(l => !!l)
-      .combineLatest(this.searchFilter.valueChanges.debounceTime(250).startWith(null))
-      .map(([log, value]) => {
-        const message = atob(log.message);
-        let searchIndex = null;
-        if (value) {
-          const foundIndex = message.toLowerCase().indexOf(value.toLowerCase());
-          if (foundIndex >= 0) {
-            searchIndex = [foundIndex, foundIndex + value.length];
-          } else {
-            searchIndex = -1;
+    if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
+      this.messages = Observable.never();
+    } else {
+      const host = window.location.host;
+      const streamUrl = (
+        `wss://${host}/pp/v1/${this.applicationService.cfGuid}/apps/${this.applicationService.appGuid}/stream`
+      );
+      this.messages = websocketConnect(
+        streamUrl,
+        new QueueingSubject<string>()
+      )
+        .messages
+        .share()
+        .map(message => {
+          const json = JSON.parse(message);
+          return json;
+        })
+        .filter(l => !!l)
+        .combineLatest(this.searchFilter.valueChanges.debounceTime(250).startWith(null))
+        .map(([log, value]) => {
+          const message = atob(log.message);
+          let searchIndex = null;
+          if (value) {
+            const foundIndex = message.toLowerCase().indexOf(value.toLowerCase());
+            if (foundIndex >= 0) {
+              searchIndex = [foundIndex, foundIndex + value.length];
+            } else {
+              searchIndex = -1;
+            }
           }
-        }
-        return {
-          ...log,
-          message,
-          searchIndex
-        };
-      })
-      .filter(log => {
-        return log.searchIndex !== -1;
-      })
-      .map(log => {
-        let { message } = log;
-        const { searchIndex } = log;
-        if (searchIndex) {
-          const colorStyles = 'color: black; background-color: yellow;';
-          const highlight = `<span style="${colorStyles}">${message.slice(searchIndex[0], searchIndex[1])}</span>`;
-          message = message.substring(0, searchIndex[0]) + highlight + message.substring(searchIndex[1]);
-        }
-        return {
-          message,
-          log
-        };
-      })
-      .map(({ log, message }) => {
-        const styles = this.getLogTypeStyles(log);
-        const timesString = moment(Math.round(log.timestamp / 1000000)).format('HH:mm:ss.SSS');
-        return (
-          `[${timesString}]: <span style="${styles}">[${log.source_type}.${log.source_instance}]</span> ${message}`
-        );
-      });
+          return {
+            ...log,
+            message,
+            searchIndex
+          };
+        })
+        .filter(log => {
+          return log.searchIndex !== -1;
+        })
+        .map(log => {
+          let { message } = log;
+          const { searchIndex } = log;
+          if (searchIndex) {
+            const colorStyles = 'color: black; background-color: yellow;';
+            const highlight = `<span style="${colorStyles}">${message.slice(searchIndex[0], searchIndex[1])}</span>`;
+            message = message.substring(0, searchIndex[0]) + highlight + message.substring(searchIndex[1]);
+          }
+          return {
+            message,
+            log
+          };
+        })
+        .map(({ log, message }) => {
+          const styles = this.getLogTypeStyles(log);
+          const timesString = moment(Math.round(log.timestamp / 1000000)).format('HH:mm:ss.SSS');
+          return (
+            `[${timesString}]: <span style="${styles}">[${log.source_type}.${log.source_instance}]</span> ${message}`
+          );
+        });
+    }
   }
 
 }
