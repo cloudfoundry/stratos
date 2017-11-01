@@ -75,6 +75,7 @@ jobs:
   plan:
   - get: stratos-ui
     trigger: true
+    passed: [create-sle-chart]
   - do:
     - task: generete-certs
       timeout: 2m
