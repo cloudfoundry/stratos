@@ -130,7 +130,7 @@ described in the [deploy](../deploy/README.md) instructions.
 
 #### Configuration
 The Console frontend must know the address of the backend. This can be
-set by creating the file ./build/dev_config.js
+set by creating the file ./build/dev_config.json
 with contents such as
 ```
 {
