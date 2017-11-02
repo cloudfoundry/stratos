@@ -26,7 +26,7 @@
     <tbody>
     <tr ng-repeat="app in tableViewCtrl.stApps">
       <td class="table-view-app-name">
-        <a ng-href="{{ tableViewCtrl.getAppSummaryLink(app) }}">{{ app.entity.name }}</a>
+        <a ui-sref="cf.applications.application.summary({ cnsiGuid: app.clusterId, guid: app.metadata.guid })">{{ app.entity.name }}</a>
       </td>
       <td>
         <div class="app-state-column">

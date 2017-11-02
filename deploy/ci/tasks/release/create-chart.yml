@@ -19,10 +19,10 @@ run:
   args:
     - -exc
     - |
-
       # Expect this command to fail since k8s isn't available but it will initialise helm locally
       helm init || true
       ROOT_DIR=$PWD
+      BASE_IMAGE=${BASE_IMAGE:-opensuse}
       STRATOS_UI=${ROOT_DIR}/stratos-ui
       cd ${STRATOS_UI}/deploy/kubernetes/
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
@@ -32,9 +32,8 @@ run:
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
 
       # Generate Helm package
-      helm dep build console
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${BASE_IMAGE}-${SHORT_GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
       if [ -f ${STRATOS_UI}/index.yaml ]; then
         cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
@@ -51,7 +50,7 @@ run:
       mkdir -p /root/.ssh/
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
-
+      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Update Helm repo
       git add index.yaml
       git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
