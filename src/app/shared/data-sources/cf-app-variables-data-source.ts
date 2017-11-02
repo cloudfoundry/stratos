@@ -41,8 +41,6 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   constructor(
     private _store: Store<AppState>,
     private _appService: ApplicationService,
-    private _cnsiGuid: string,
-    private _appGuid: string,
   ) {
     super(
       _store,
@@ -54,14 +52,11 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
         value: '',
       },
       { active: 'name', direction: 'asc' },
-      'app-variables'
+      `app-variables:${_appService.cfGuid}:${_appService.appGuid}`
     );
-    // this._defaultSortParmas = {
-    //   id: 'name', start: 'asc', disableClear: true
-    // };TODO: RC Set via action
 
     _store.dispatch(new SetListStateAction(
-      'app-variables',
+      `app-variables:${_appService.cfGuid}:${_appService.appGuid}`,
       'table',
       {
         pageIndex: 0,
@@ -100,7 +95,6 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
 
     super.selectedDelete();
   }
-
 
   startEdit(row: AppEnvVar) {
     super.startEdit({ ...row });
@@ -154,11 +148,6 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
 
     return this.filteredRows;
   }
-
-  // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-  //   // sort.sort(this._defaultSortParmas);
-  //   // super.initialise(paginator, sort, filter$);
-  // }
 
   listSort(envVars: Array<AppEnvVar>, sort: ListSort): AppEnvVar[] {
     return envVars.slice().sort((a, b) => {

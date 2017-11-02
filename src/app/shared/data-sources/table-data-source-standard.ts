@@ -60,29 +60,25 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   abstract listSort(collection: Array<T>, sort: ListSort): Array<T>;
 
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
-    let actualPageSize = pageIndex; // this.mdPaginator.pageIndex || pageIndex; //TODO: RC
-
     // Is the paginators pageIndex valid?
-    if (actualPageSize * pageSize > collection.length) {
-      actualPageSize = Math.floor(collection.length / pageSize);
+    if (pageIndex * pageSize > collection.length) {
+      pageIndex = Math.floor(collection.length / pageSize);
     }
 
     // Should the paginator select a freshly added row?
     if (this.selectRow) {
       for (let i = 0; i < collection.length; i++) {
         if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this.selectRow)) {
-          actualPageSize = Math.floor(i / pageSize);
+          pageIndex = Math.floor(i / pageSize);
           this._dStore.dispatch(new SetListPaginationAction(this._dlistStateKey, {
-            pageIndex: actualPageSize
+            pageIndex: pageIndex
           }));
-          // TODO: RC raise aciton
-          // this.mdPaginator.pageIndex = Math.floor(i / pageSize);
           delete this.selectRow;
           break;
         }
       }
     }
-    const startIndex: number = actualPageSize * pageSize;
+    const startIndex: number = pageIndex * pageSize;
     return collection.splice(startIndex, pageSize);
   }
 

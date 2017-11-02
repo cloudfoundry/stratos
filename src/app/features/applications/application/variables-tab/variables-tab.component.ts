@@ -54,7 +54,7 @@ export class VariablesTabComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService, 'dsfdsf', 'sdfdsf');//TODO: RC
+    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
   }
 

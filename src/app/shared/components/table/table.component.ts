@@ -8,7 +8,7 @@ import {
   SetListStateAction,
 } from '../../../store/actions/list.actions';
 import { ITableDataSource, TableDataSource } from '../../data-sources/table-data-source';
-import { Component, ContentChild, EventEmitter, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, MdSort, Sort, MdTable, PageEvent } from '@angular/material';
 import { NgModel, NgForm } from '@angular/forms';
@@ -17,6 +17,7 @@ import { CfTableDataSource } from '../../data-sources/table-data-source-cf';
 import { StandardTableDataSource } from '../../data-sources/table-data-source-standard';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
+import { Subscription } from 'rxjs/Subscription';
 
 export interface TableColumn<T> {
   columnId: string;
@@ -40,7 +41,9 @@ export interface TableText {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })
-export class TableComponent<T extends object> implements OnInit {
+export class TableComponent<T extends object> implements OnInit, OnDestroy {
+
+  private uberSub: Subscription;
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
@@ -66,23 +69,16 @@ export class TableComponent<T extends object> implements OnInit {
   ) { }
 
   ngOnInit() {
-    const filter: Observable<string> = this.filter.valueChanges
-      .debounceTime(150)
-      .distinctUntilChanged()
-      .map(value => value as string);
-    // this.dataSource.initialise(this.paginator, this.sort, filter);
     this.columnNames = this.columns.map(x => x.columnId);
 
-    // TODO: RC unsub
-    this.dataSource.listPagination$.subscribe((pagination: ListPagination) => {
+    const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex;
       this.paginator.pageSize = pagination.pageSize;
       this.paginator.pageSizeOptions = pagination.pageSizeOptions;
     });
 
-    // TODO: RC unsub
-    this.paginator.page.subscribe((page: PageEvent) => {
+    const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
       this._store.dispatch(new SetListPaginationAction(
         this.dataSource.listStateKey,
         {
@@ -92,15 +88,13 @@ export class TableComponent<T extends object> implements OnInit {
       ));
     });
 
-    // TODO: RC unsub
-    this.dataSource.listSort$.subscribe((sort: ListSort) => {
+    const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
       this.sort.active = sort.field;
       this.sort.direction = sort.direction;
       this.sort.disableClear = sort.disableClear;
     });
 
-    // TODO: RC unsub
-    this.sort.mdSortChange.subscribe((sort: Sort) => {
+    const sortWidgetToStore = this.sort.mdSortChange.do((sort: Sort) => {
       this._store.dispatch(new SetListSortAction(
         this.dataSource.listStateKey,
         {
@@ -110,16 +104,15 @@ export class TableComponent<T extends object> implements OnInit {
       ));
     });
 
-    // TODO: RC unsub
-    this.dataSource.listFilter$.subscribe((filter: ListFilter) => {
+    const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
       this.filter.model = filter.filter;
     });
 
-    this.filter.valueChanges
+    const filterWidgeToStore = this.filter.valueChanges
       .debounceTime(150)
       .distinctUntilChanged()
       .map(value => value as string)
-      .subscribe((stFilter: string) => {
+      .do((stFilter: string) => {
         this._store.dispatch(new SetListFilterAction(
           this.dataSource.listStateKey,
           {
@@ -128,5 +121,17 @@ export class TableComponent<T extends object> implements OnInit {
         ));
       });
 
+    this.uberSub = Observable.combineLatest(
+      paginationStoreToWidget,
+      paginationWidgetToStore,
+      sortStoreToWidget,
+      sortWidgetToStore,
+      filterStoreToWidget,
+      filterWidgeToStore
+    ).subscribe();
+  }
+
+  ngOnDestroy() {
+    this.uberSub.unsubscribe();
   }
 }

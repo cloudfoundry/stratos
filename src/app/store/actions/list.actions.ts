@@ -27,8 +27,6 @@ export const ListStateActionTypes = {
 
 export type ListView = 'table' | 'cards';
 
-// export class SetListAction implements Action { }
-
 export class SetListStateAction implements Action {
   constructor(
     public key: string,
@@ -76,5 +74,3 @@ export class SetListFilterAction implements Action {
   }
   type = ListStateActionTypes.SET_FILTER;
 }
-
-
