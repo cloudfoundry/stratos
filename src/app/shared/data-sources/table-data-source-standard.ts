@@ -1,3 +1,4 @@
+import { ListFilter, ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
 import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
@@ -22,27 +23,32 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     private _dGetRowUniqueId: getRowUniqueId,
     private _dEmptyType: T,
     private _defaultSort: Sort,
+    private _dlistStateKey: string,
   ) {
-    super(_dStore, _dGetRowUniqueId, _dEmptyType);
+    super(_dStore, _dGetRowUniqueId, _dEmptyType, _dlistStateKey);
   }
 
   connect(): Observable<T[]> {
     return this.data$
       .combineLatest(
-      this.pageSize$.startWith(5),
-      this.pageIndex$.startWith(0),
-      this.sort$.startWith(this._defaultSort),
-      this.filter$.startWith('')
-      )
-      .map(([collection, pageSize, pageIndex, sort, filter]: [Array<T>, number, number, Sort, string]) => {
+      this.listPagination$,
+      this.listSort$,
+      this.listFilter$,
+    )
+      .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
         // TODO: RC caching?? catch no-ops?
-        this.mdPaginator.length = collection.length;
+        if (pagination.totalResults !== collection.length) {
+          this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
+            ...pagination,
+            totalResults: collection.length
+          }));
+        }
 
-        const filtered = this.filter(collection, filter);
+        const filtered = this.listFilter(collection, filter);
 
-        const sorted = this.sort(filtered, sort);
+        const sorted = this.listSort(filtered, sort);
 
-        const page = this.paginate(sorted, pageSize, pageIndex);
+        const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
 
         return page;
       });
@@ -52,11 +58,12 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
     super.disconnect();
   }
 
-  abstract filter(collection: any, filter: string): Array<T>;
-  abstract sort(collection: Array<T>, sort: Sort): Array<T>;
+  abstract listFilter(collection: any, filter: ListFilter): Array<T>;
+  abstract listSort(collection: Array<T>, sort: ListSort): Array<T>;
 
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
-    let actualPageSize = this.mdPaginator.pageIndex || pageIndex;
+    let actualPageSize = pageIndex; // this.mdPaginator.pageIndex || pageIndex; //TODO: RC
+
     // Is the paginators pageIndex valid?
     if (actualPageSize * pageSize > collection.length) {
       actualPageSize = Math.floor(collection.length / pageSize);
@@ -67,7 +74,8 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       for (let i = 0; i < collection.length; i++) {
         if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this.selectRow)) {
           actualPageSize = Math.floor(i / pageSize);
-          this.mdPaginator.pageIndex = Math.floor(i / pageSize);
+          // TODO: RC raise aciton
+          // this.mdPaginator.pageIndex = Math.floor(i / pageSize);
           delete this.selectRow;
           break;
         }

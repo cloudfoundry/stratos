@@ -11,6 +11,7 @@ import { schema } from 'normalizr';
 import { CfTableDataSource } from './table-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
+import { SetListStateAction } from '../../store/actions/list.actions';
 
 // TODO: RC KEEP AND MOVE TO TYPES
 export interface AppEvent {
@@ -40,9 +41,52 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
   ) {
     const paginationKey = `app-events:${_cfGuid}${_appGuid}`;
     const action = new GetAllAppEvents(paginationKey, _appGuid, _cfGuid);
-    super(_store, action, EventSchema, (object: EntityInfo) => {
-      return object.entity.metadata ? object.entity.metadata.guid : null;
-    }, {} as EntityInfo);
+
+    super(
+      _store,
+      action,
+      EventSchema,
+      (object: EntityInfo) => {
+        return object.entity.metadata ? object.entity.metadata.guid : null;
+      },
+      {} as EntityInfo,
+      paginationKey
+    );
+
+    _store.dispatch(new SetListStateAction(
+      paginationKey,
+      'table',
+      {
+        pageIndex: 0,
+        pageSize: 5,
+        pageSizeOptions: [5, 10, 15],
+        totalResults: 0,
+      },
+      {
+        direction: action.initialParams['order-direction'] as 'asc' | 'desc',
+        field: action.initialParams['order-direction-field']
+      },
+      {
+        filter: ''
+      }));
+
+    // sort.active = this.action.initialParams['order-direction-field'];
+    // sort.direction = this.action.initialParams['order-direction'];
+
+    // const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
+    //   .do(([filter, pag]: [string, PaginationEntityState]) => {
+    //     if (filter) {
+    //       const q = pag.params.q;
+    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+    //         q: [
+    //           new QParam('type', filter, ' IN '),
+    //         ]
+    //       }));
+    //     } else {
+    //       this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
+    //     }
+    //   });
+    // this.cfFilterSub = cfFilter$.subscribe();
 
   }
 

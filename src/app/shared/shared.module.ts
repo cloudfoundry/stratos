@@ -31,6 +31,7 @@ import {
 import { TableCellEventTypeComponent } from './components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
 import { TableCellEventActionComponent } from './components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from './components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { ListComponent } from './components/list/list.component';
 
 
 @NgModule({
@@ -64,6 +65,7 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     EventTabActorIconPipe,
+    ListComponent,
   ],
   exports: [
     FormsModule,

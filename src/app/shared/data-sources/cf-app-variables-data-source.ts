@@ -9,6 +9,7 @@ import { StandardTableDataSource } from './table-data-source-standard';
 import { ApplicationService } from '../../features/applications/application.service';
 import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
+import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 
 export interface AppEnvVar {
   name: string;
@@ -17,6 +18,10 @@ export interface AppEnvVar {
 
 interface AddAppEnvVar extends AppEnvVar {
   select: boolean;
+}
+
+function key(_cnsiGuid: string, _appGuid: string) {
+  return `app-variables:${_cnsiGuid}:${_appGuid}`;
 }
 
 export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
@@ -32,19 +37,46 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   isLoadingPage$: Observable<boolean>;
   data$: any;
 
+
   constructor(
     private _store: Store<AppState>,
     private _appService: ApplicationService,
+    private _cnsiGuid: string,
+    private _appGuid: string,
   ) {
-    super(_store, (object: AppEnvVar) => {
-      return object.name;
-    }, {
+    super(
+      _store,
+      (object: AppEnvVar) => {
+        return object.name;
+      },
+      {
         name: '',
         value: '',
-      }, { active: 'name', direction: 'asc' });
-    this._defaultSortParmas = {
-      id: 'name', start: 'asc', disableClear: true
-    };
+      },
+      { active: 'name', direction: 'asc' },
+      'app-variables'
+    );
+    // this._defaultSortParmas = {
+    //   id: 'name', start: 'asc', disableClear: true
+    // };TODO: RC Set via action
+
+    _store.dispatch(new SetListStateAction(
+      'app-variables',
+      'table',
+      {
+        pageIndex: 0,
+        pageSize: 5,
+        pageSizeOptions: [5, 10, 15],
+        totalResults: 0,
+      },
+      {
+        direction: 'asc',
+        field: 'name'
+      },
+      {
+        filter: ''
+      }));
+
 
     this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
       _appService.isFetchingEnvVars$,
@@ -101,7 +133,7 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     super.disconnect();
   }
 
-  filter(envVars: AppEnvVar[], filter: string): any {
+  listFilter(envVars: AppEnvVar[], filter: ListFilter): any {
     this.filteredRows.length = 0;
     this.rows.length = 0;
     this.rowNames.length = 0;
@@ -111,8 +143,8 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
       this.rows.push(envVar);
       this.rowNames.push(name);
 
-      if (filter && filter.length > 0) {
-        if (name.indexOf(filter) >= 0 || value.indexOf(filter) >= 0) {
+      if (filter && filter.filter && filter.filter.length > 0) {
+        if (name.indexOf(filter.filter) >= 0 || value.indexOf(filter.filter) >= 0) {
           this.filteredRows.push({ name, value });
         }
       } else {
@@ -123,15 +155,15 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     return this.filteredRows;
   }
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    sort.sort(this._defaultSortParmas);
-    super.initialise(paginator, sort, filter$);
-  }
+  // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
+  //   // sort.sort(this._defaultSortParmas);
+  //   // super.initialise(paginator, sort, filter$);
+  // }
 
-  sort(envVars: Array<AppEnvVar>, sort: Sort): AppEnvVar[] {
+  listSort(envVars: Array<AppEnvVar>, sort: ListSort): AppEnvVar[] {
     return envVars.slice().sort((a, b) => {
       // TODO: RC lower case strings?
-      const [propertyA, propertyB] = [a[sort.active], b[sort.active]];
+      const [propertyA, propertyB] = [a[sort.field], b[sort.field]];
       const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
       const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
 

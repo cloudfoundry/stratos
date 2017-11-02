@@ -1,11 +1,22 @@
+import {
+  ListFilter,
+  ListPagination,
+  ListSort,
+  SetListFilterAction,
+  SetListPaginationAction,
+  SetListSortAction,
+  SetListStateAction,
+} from '../../../store/actions/list.actions';
 import { ITableDataSource, TableDataSource } from '../../data-sources/table-data-source';
 import { Component, ContentChild, EventEmitter, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
-import { MdPaginator, MdSort, Sort, MdTable } from '@angular/material';
+import { MdPaginator, MdSort, Sort, MdTable, PageEvent } from '@angular/material';
 import { NgModel, NgForm } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { CfTableDataSource } from '../../data-sources/table-data-source-cf';
 import { StandardTableDataSource } from '../../data-sources/table-data-source-standard';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../store/app-state';
 
 export interface TableColumn<T> {
   columnId: string;
@@ -50,14 +61,72 @@ export class TableComponent<T extends object> implements OnInit {
     return this.addForm || {};
   }
 
-  constructor() { }
+  constructor(
+    private _store: Store<AppState>,
+  ) { }
 
   ngOnInit() {
     const filter: Observable<string> = this.filter.valueChanges
       .debounceTime(150)
       .distinctUntilChanged()
       .map(value => value as string);
-    this.dataSource.initialise(this.paginator, this.sort, filter);
+    // this.dataSource.initialise(this.paginator, this.sort, filter);
     this.columnNames = this.columns.map(x => x.columnId);
+
+    // TODO: RC unsub
+    this.dataSource.listPagination$.subscribe((pagination: ListPagination) => {
+      this.paginator.length = pagination.totalResults;
+      this.paginator.pageIndex = pagination.pageIndex;
+      this.paginator.pageSize = pagination.pageSize;
+      this.paginator.pageSizeOptions = pagination.pageSizeOptions;
+    });
+
+    // TODO: RC unsub
+    this.paginator.page.subscribe((page: PageEvent) => {
+      this._store.dispatch(new SetListPaginationAction(
+        this.dataSource.listStateKey,
+        {
+          pageSize: page.pageSize,
+          pageIndex: page.pageIndex,
+        }
+      ));
+    });
+
+    // TODO: RC unsub
+    this.dataSource.listSort$.subscribe((sort: ListSort) => {
+      this.sort.active = sort.field;
+      this.sort.direction = sort.direction;
+      this.sort.disableClear = sort.disableClear;
+    });
+
+    // TODO: RC unsub
+    this.sort.mdSortChange.subscribe((sort: Sort) => {
+      this._store.dispatch(new SetListSortAction(
+        this.dataSource.listStateKey,
+        {
+          field: sort.active,
+          direction: sort.direction as 'asc' | 'desc',
+        }
+      ));
+    });
+
+    // TODO: RC unsub
+    this.dataSource.listFilter$.subscribe((filter: ListFilter) => {
+      this.filter.model = filter.filter;
+    });
+
+    this.filter.valueChanges
+      .debounceTime(150)
+      .distinctUntilChanged()
+      .map(value => value as string)
+      .subscribe((stFilter: string) => {
+        this._store.dispatch(new SetListFilterAction(
+          this.dataSource.listStateKey,
+          {
+            filter: stFilter
+          }
+        ));
+      });
+
   }
 }

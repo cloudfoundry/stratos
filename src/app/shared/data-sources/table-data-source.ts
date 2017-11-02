@@ -7,9 +7,17 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
+import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
+import { ListFilter, ListPagination, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 
 export interface ITableDataSource<T> {
-  mdPaginator: MdPaginator;
+  // mdPaginator: MdPaginator;
+  listStateKey: string;
+  listState$: Observable<ListState>;
+  listPagination$: Observable<ListPagination>;
+  listSort$: Observable<ListSort>;
+  listFilter$: Observable<ListFilter>;
+
   addRow;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
@@ -34,12 +42,22 @@ export type getRowUniqueId = (T) => string;
 
 export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
 
-  private paginationSub: Subscription;
+  // private paginationSub: Subscription;
 
-  protected pageSize$: Observable<number>;
-  protected sort$: Observable<Sort>;
-  protected pageIndex$: Observable<number>;
-  protected filter$: Observable<string>;
+  // protected pageSize$: Observable<number>;
+  // protected sort$: Observable<Sort>;
+  // protected pageIndex$: Observable<number>;
+  // protected filter$: Observable<string>;
+  public listState$: Observable<ListState>;
+  public listPagination$: Observable<ListPagination>;
+  public listSort$: Observable<ListSort>;
+  public listFilter$: Observable<ListFilter>;
+  // protected listStateSections$: {
+  //   pagination: Observable<ListPagination>,
+  //   sort: Observable<ListSort>,
+  //   filter: Observable<ListFilter>,
+  // };
+  // private listStateSub: Subscription;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -54,20 +72,52 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
 
   public editRow: T;
 
-  public mdPaginator: MdPaginator;
+  // public mdPaginator: MdPaginator;
 
   constructor(
     private store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
     private _emptyType: T,
+    public listStateKey: string,
   ) {
     super();
     this.addRow = { ... (_emptyType as object) } as T;
+
+    this.listState$ = getListStateObservable(this.store, listStateKey);
+    const { pagination, sort, filter } = getListStateObservables(this.store, listStateKey);
+    this.listPagination$ = pagination.filter(x => !!x);
+    this.listSort$ = sort.filter(x => !!x);
+    this.listFilter$ = filter.filter(x => !!x);
+
+
+
+    // this.listStateSub = this.listState$.debounceTime(250).subscribe();
+
+
+    // this.mdPaginator = paginator;
+    // this.sort$ = sort.mdSortChange;
+
+    // this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    // this.mdPaginator.pageSizeOptions = [5, 10, 20];
+
+    // this.sort$ = this._sort$.mdSortChange;
+
+    // this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
+
+    // this.paginationSub = Observable.combineLatest(
+    //   this.pageSize$,
+    //   this.pageIndex$
+    // ).subscribe();
+
+    // this.filter$ = filter$.debounceTime(250);
+
   }
 
   abstract connect(): Observable<T[]>;
   disconnect() {
-    this.paginationSub.unsubscribe();
+    // this.paginationSub.unsubscribe();
+    // this.listStateSub.unsubscribe();
   }
 
 
@@ -119,22 +169,22 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   }
 
   initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    this.mdPaginator = paginator;
-    this.sort$ = sort.mdSortChange;
+    // this.mdPaginator = paginator;
+    // this.sort$ = sort.mdSortChange;
 
-    this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    this.mdPaginator.pageSizeOptions = [5, 10, 20];
+    // this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    // // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
+    // this.mdPaginator.pageSizeOptions = [5, 10, 20];
 
-    // this.sort$ = this._sort$.mdSortChange;
+    // // this.sort$ = this._sort$.mdSortChange;
 
-    this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
+    // this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
 
-    this.paginationSub = Observable.combineLatest(
-      this.pageSize$,
-      this.pageIndex$
-    ).subscribe();
+    // this.paginationSub = Observable.combineLatest(
+    //   this.pageSize$,
+    //   this.pageIndex$
+    // ).subscribe();
 
-    this.filter$ = filter$.debounceTime(250);
+    // this.filter$ = filter$.debounceTime(250);
   }
 }

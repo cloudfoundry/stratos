@@ -7,6 +7,7 @@ import { CreateNewApplicationState } from './types/create-application.types';
 import { EntitiesState } from './types/entity.types';
 import { ActionHistoryState } from './reducers/action-history-reducer';
 import { UAASetupState } from './types/uaa-setup.types';
+import { ListsState } from './reducers/list.reducer';
 
 export interface AppState {
   actionHistory: ActionHistoryState;
@@ -19,4 +20,5 @@ export interface AppState {
   dashboard: DashboardState;
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
+  lists: ListsState;
 }
