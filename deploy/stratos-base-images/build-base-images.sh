@@ -112,6 +112,10 @@ build_mariadb_base(){
     build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
 }
 
+build_aio_base(){
+    build_and_push_image stratos-aio-base Dockerfile.stratos-aio-base
+}
+
 # Base with go
 build_go_base
 # Used building the UI
@@ -128,4 +132,6 @@ build_portal_proxy_builder;
 build_preflight_job_base;
 # Used for building the DB image
 build_mariadb_base;
+# Used for building the AIO image
+build_aio_base;
 rm -f mo;
