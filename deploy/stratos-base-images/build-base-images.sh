@@ -130,7 +130,7 @@ build_bk_build_base;
 build_portal_proxy_builder;
 # Used for building the postflight job image
 build_preflight_job_base;
-#Used for building the DB image
+# Used for building the DB image
 build_mariadb_base;
 # Used for building the AIO image
 build_aio_base;
