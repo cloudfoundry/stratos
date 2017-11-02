@@ -11,7 +11,7 @@ import { schema } from 'normalizr';
 import { CfTableDataSource } from './table-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
-import { SetListStateAction } from '../../store/actions/list.actions';
+import { ListFilter, SetListStateAction } from '../../store/actions/list.actions';
 
 // TODO: RC KEEP AND MOVE TO TYPES
 export interface AppEvent {
@@ -30,10 +30,8 @@ export interface AppEvent {
 
 export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
-  // private cfFilterSub: Subscription;
-  /**
-   *
-   */
+  cfFilterSub: Subscription;
+
   constructor(
     _store: Store<AppState>,
     _cfGuid: string,
@@ -70,23 +68,21 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
         filter: ''
       }));
 
-    // sort.active = this.action.initialParams['order-direction-field'];
-    // sort.direction = this.action.initialParams['order-direction'];
 
-    // const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
-    //   .do(([filter, pag]: [string, PaginationEntityState]) => {
-    //     if (filter) {
-    //       const q = pag.params.q;
-    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-    //         q: [
-    //           new QParam('type', filter, ' IN '),
-    //         ]
-    //       }));
-    //     } else {
-    //       this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
-    //     }
-    //   });
-    // this.cfFilterSub = cfFilter$.subscribe();
+    const cfFilter$ = this.listFilter$.withLatestFrom(this.cfPagination$)
+      .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
+        if (filter && filter.filter && filter.filter.length) {
+          const q = pag.params.q;
+          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+            q: [
+              new QParam('type', filter.filter, ' IN '),
+            ]
+          }));
+        } else {
+          this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
+        }
+      });
+    this.cfFilterSub = cfFilter$.subscribe();
 
   }
 
@@ -108,8 +104,8 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
   //   this.cfFilterSub = cfFilter$.subscribe();
   // }
 
-  // disconnect() {
-  //   this.cfFilterSub.unsubscribe();
-  //   super.disconnect();
-  // }
+  disconnect() {
+    this.cfFilterSub.unsubscribe();
+    super.disconnect();
+  }
 }

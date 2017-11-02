@@ -20,7 +20,7 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   private sortSub: Subscription;
   private cfPaginationSub: Subscription;
 
-  private cfPagination$: Observable<any>;
+  protected cfPagination$: Observable<any>;
   // protected listPagination$: Observable<PaginationEntityState>;
   private entities$: Observable<any>;
 
