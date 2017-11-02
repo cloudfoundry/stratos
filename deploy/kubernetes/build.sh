@@ -335,6 +335,7 @@ else
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
   sed -i -e 's/dockerOrg: splatform/dockerOrg: '"${DOCKER_ORG}"'/g' console/values.yaml
   sed -i -e 's/dockerRegistry: docker.io/dockerRegistry: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
+  
   sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
 fi
 
