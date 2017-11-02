@@ -35,18 +35,18 @@ To send your code change, use GitHub pull requests. The workflow is as follows:
 
   1. Fork the project.
 
-  2. Create a branch based on `master`.
+  1. Create a branch based on `master`.
 
-  3. Implement your change, including tests and documentation.
+  1. Implement your change, including tests and documentation.
 
-  4. Run tests to make sure your change didn't break anything.
+  1. Run tests to make sure your change didn't break anything.
 
-  5. Publish the branch and create a pull request.
+  1. Publish the branch and create a pull request.
 
-  6. Stratos UI developers will review your change and possibly point out issues.
+  1. Stratos UI developers will review your change and possibly point out issues.
      Adapt the code under their guidance until all issues are resolved.
 
-  7. Finally, the pull request will get merged or rejected.
+  1. Finally, the pull request will get merged or rejected.
 
 See also [GitHub's guide on contributing](https://help.github.com/articles/fork-a-repo).
 
