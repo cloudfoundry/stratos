@@ -21,7 +21,6 @@ noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy
-  proxyNoShared: stratos-proxy-noshared
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job

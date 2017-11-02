@@ -239,8 +239,6 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
-  # Build merged preflight & proxy image, used when deploying into multi-node k8s cluster without a shared storage backend
-  buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
 }
 
 
