@@ -78,7 +78,7 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
               new QParam('type', filter.filter, ' IN '),
             ]
           }));
-        } else {
+        } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {
           this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
         }
       });

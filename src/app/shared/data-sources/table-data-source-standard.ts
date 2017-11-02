@@ -54,9 +54,7 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       });
   }
 
-  disconnect() {
-    super.disconnect();
-  }
+  disconnect() { }
 
   abstract listFilter(collection: any, filter: ListFilter): Array<T>;
   abstract listSort(collection: Array<T>, sort: ListSort): Array<T>;
@@ -74,6 +72,9 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
       for (let i = 0; i < collection.length; i++) {
         if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this.selectRow)) {
           actualPageSize = Math.floor(i / pageSize);
+          this._dStore.dispatch(new SetListPaginationAction(this._dlistStateKey, {
+            pageIndex: actualPageSize
+          }));
           // TODO: RC raise aciton
           // this.mdPaginator.pageIndex = Math.floor(i / pageSize);
           delete this.selectRow;

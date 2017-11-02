@@ -11,7 +11,6 @@ import { getListStateObservable, ListState, getListStateObservables } from '../.
 import { ListFilter, ListPagination, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 
 export interface ITableDataSource<T> {
-  // mdPaginator: MdPaginator;
   listStateKey: string;
   listState$: Observable<ListState>;
   listPagination$: Observable<ListPagination>;
@@ -22,19 +21,18 @@ export interface ITableDataSource<T> {
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 
-  editRow: any; // Edit items - remove once ng-content can exist in md-table
+  editRow: T; // Edit items - remove once ng-content can exist in md-table
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
-  selectedRows: Map<string, any>; // Select items - remove once ng-content can exist in md-table
+  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: any); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
 
-  startEdit(row); // Edit items - remove once ng-content can exist in md-table
+  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>);
-  connect(): Observable<any>;
+  connect(): Observable<T[]>;
   disconnect();
 }
 
@@ -42,22 +40,10 @@ export type getRowUniqueId = (T) => string;
 
 export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
 
-  // private paginationSub: Subscription;
-
-  // protected pageSize$: Observable<number>;
-  // protected sort$: Observable<Sort>;
-  // protected pageIndex$: Observable<number>;
-  // protected filter$: Observable<string>;
   public listState$: Observable<ListState>;
   public listPagination$: Observable<ListPagination>;
   public listSort$: Observable<ListSort>;
   public listFilter$: Observable<ListFilter>;
-  // protected listStateSections$: {
-  //   pagination: Observable<ListPagination>,
-  //   sort: Observable<ListSort>,
-  //   filter: Observable<ListFilter>,
-  // };
-  // private listStateSub: Subscription;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -71,8 +57,6 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   public selectAllChecked = false;
 
   public editRow: T;
-
-  // public mdPaginator: MdPaginator;
 
   constructor(
     private store: Store<AppState>,
@@ -88,38 +72,10 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     this.listPagination$ = pagination.filter(x => !!x);
     this.listSort$ = sort.filter(x => !!x);
     this.listFilter$ = filter.filter(x => !!x);
-
-
-
-    // this.listStateSub = this.listState$.debounceTime(250).subscribe();
-
-
-    // this.mdPaginator = paginator;
-    // this.sort$ = sort.mdSortChange;
-
-    // this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // this.mdPaginator.pageSizeOptions = [5, 10, 20];
-
-    // this.sort$ = this._sort$.mdSortChange;
-
-    // this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
-
-    // this.paginationSub = Observable.combineLatest(
-    //   this.pageSize$,
-    //   this.pageIndex$
-    // ).subscribe();
-
-    // this.filter$ = filter$.debounceTime(250);
-
   }
 
   abstract connect(): Observable<T[]>;
-  disconnect() {
-    // this.paginationSub.unsubscribe();
-    // this.listStateSub.unsubscribe();
-  }
-
+  abstract disconnect();
 
   startAdd() {
     this.addRow = { ... (this._emptyType as object) } as T;
@@ -168,23 +124,4 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     delete this.editRow;
   }
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    // this.mdPaginator = paginator;
-    // this.sort$ = sort.mdSortChange;
-
-    // this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // this.mdPaginator.pageSizeOptions = [5, 10, 20];
-
-    // // this.sort$ = this._sort$.mdSortChange;
-
-    // this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
-
-    // this.paginationSub = Observable.combineLatest(
-    //   this.pageSize$,
-    //   this.pageIndex$
-    // ).subscribe();
-
-    // this.filter$ = filter$.debounceTime(250);
-  }
 }
