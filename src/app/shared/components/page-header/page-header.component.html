@@ -1,9 +1,21 @@
 <div class="page-header">
   <md-toolbar color="primary">
-    <md-icon class="page-header__nav-toggle" (click)="toggleSidenav()">menu</md-icon>
+    <button md-icon-button>
+      <md-icon class="page-header__nav-toggle" (click)="toggleSidenav()">menu</md-icon>
+    </button>
     <ng-content></ng-content>
     <div class="page-header__filler"></div>
     <ng-content select=".page-header-right"></ng-content>
-    <md-icon class="page-header__logout" (click)="logout()">exit_to_app</md-icon>
+    <button md-icon-button [mdMenuTriggerFor]="menu">
+      <md-icon>more_vert</md-icon>
+    </button>
+    <md-menu #menu="mdMenu">
+      <button md-menu-item>
+        <md-icon (click)="logout()">exit_to_app</md-icon>
+        <span>Logout</span>
+      </button>
+    </md-menu>
+    <md-toolbar-row>
+    </md-toolbar-row>
   </md-toolbar>
 </div>

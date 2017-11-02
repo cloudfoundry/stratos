@@ -5,6 +5,7 @@
 @import '../app/shared/components/stepper/steppers/steppers.component.theme';
 @import '../app/features/applications/application/variables-tab/variables-tab.component.theme.scss';
 @import '../app//shared/components/code-block/code-block.component.theme.scss';
+@import '../app/features/applications/application/application-base.component.theme.scss';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
@@ -30,6 +31,7 @@
   @include display-value-theme($theme, $app-theme);
   @include steppers-theme($theme, $app-theme);
   @include variables-tab-theme($theme, $app-theme);
+  @include app-base-page-theme($theme, $app-theme);
   $status-success: mat-color($primary);
   $status-warning: mat-color($warn);
   $status-danger: mat-color($accent);

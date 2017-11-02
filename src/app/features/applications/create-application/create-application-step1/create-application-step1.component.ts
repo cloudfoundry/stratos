@@ -103,8 +103,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
         const [orgList, cfList] = data;
         if (selectedOrg) {
           return selectedOrg.spaces.map(space => {
-            space.entity.guid = space.metadata.guid;
-            return space.entity;
+            const entity = { ...space.entity };
+            entity.guid = space.metadata.guid;
+            return entity;
           });
         }
         return [];

@@ -68,6 +68,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.applicationService.UpdateApplication(this.appEdits);
   }
 
+  stopApplication() {
+    this.endEdit();
+    this.applicationService.UpdateApplication({
+      state: 'STOPPED'
+    });
+  }
+
   setAppDefaults() {
     this.appEdits = { ... this.appDefaultEdits };
   }

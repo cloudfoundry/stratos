@@ -2,13 +2,13 @@
   height: 100%;
   width: 200px;
   &__top {
-    height: 64px;
+    height: 128px;
     display: flex;
     flex-direction: column;
     &-inner {
       display: flex;
       flex: 1;
-      padding: 10px;
+      padding: 35px;
     }
   }
   &__items {

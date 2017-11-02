@@ -1,18 +1,29 @@
 <app-page-header>
   <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
-    <button md-icon-button *ngIf="isEditSummary" md-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
-      <md-icon>done</md-icon>
-    </button>
-    <button md-icon-button name="cancel" md-button *ngIf="isEditSummary" (click)="endEdit()">
-      <md-icon>clear</md-icon>
-    </button>
-    <button md-icon-button name="delete" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
-      <md-icon>delete</md-icon>
-    </button>
-    <button md-icon-button name="edit" *ngIf="!isEditSummary" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
-      <md-icon>edit</md-icon>
-    </button>
+    <span *ngIf="isEditSummary">
+      <button md-icon-button md-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
+        <md-icon>done</md-icon>
+      </button>
+      <button md-icon-button name="cancel" md-button (click)="endEdit()">
+        <md-icon>clear</md-icon>
+      </button>
+    </span>
+
+    <span *ngIf="!isEditSummary">
+      <button md-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+        <md-icon>delete</md-icon>
+      </button>
+      <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
+        <md-icon>edit</md-icon>
+      </button>
+      <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async" (click)="stopApplication()">
+        <md-icon>stop</md-icon>
+      </button>
+      <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async">
+        <md-icon>autorenew</md-icon>
+      </button>
+    </span>
   </div>
 </app-page-header>
 

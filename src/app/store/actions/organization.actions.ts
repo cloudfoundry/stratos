@@ -23,10 +23,6 @@ export class GetAllOrganizations implements PaginatedAction {
     this.options = new RequestOptions();
     this.options.url = 'organizations';
     this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('page', '1');
-    this.options.params.set('results-per-page', '100');
-    this.options.params.set('inline-relations-depth', '1');
   }
   actions = [
     GET_ALL,
@@ -37,7 +33,7 @@ export class GetAllOrganizations implements PaginatedAction {
   entity = [OrganizationSchema];
   entityKey = OrganizationSchema.key;
   options: RequestOptions;
-  initialParams: {
+  initialParams = {
     page: 1,
     'results-per-page': 100,
     'inline-relations-depth': 1

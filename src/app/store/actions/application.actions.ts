@@ -137,6 +137,7 @@ export interface UpdateApplication {
   memory?: number;
   enable_ssh?: boolean;
   environment_json?: any;
+  state?: string;
 }
 
 
@@ -167,7 +168,7 @@ export class UpdateExistingApplication implements APIAction {
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntiySchema.entity) as [string]);
-    newEntities[ApplicationSchema.key][this.guid].entity = Object.assign(newEntities[ApplicationSchema.key][this.guid].entity, keepFromOld);
+    newEntities[ApplicationSchema.key][this.guid].entity = { ...newEntities[ApplicationSchema.key][this.guid].entity, ...keepFromOld };
     return newEntities;
   }
 }
