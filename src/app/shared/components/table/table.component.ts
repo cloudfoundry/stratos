@@ -47,7 +47,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
-  @ViewChild('filter') filter: NgModel;
+
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as ITableDataSource<T>;
@@ -104,30 +104,30 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
       ));
     });
 
-    const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
-      this.filter.model = filter.filter;
-    });
+    // const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
+    //   this.filter.model = filter.filter;
+    // });
 
-    const filterWidgeToStore = this.filter.valueChanges
-      .debounceTime(150)
-      .distinctUntilChanged()
-      .map(value => value as string)
-      .do((stFilter: string) => {
-        this._store.dispatch(new SetListFilterAction(
-          this.dataSource.listStateKey,
-          {
-            filter: stFilter
-          }
-        ));
-      });
+    // const filterWidgeToStore = this.filter.valueChanges
+    //   .debounceTime(150)
+    //   .distinctUntilChanged()
+    //   .map(value => value as string)
+    //   .do((stFilter: string) => {
+    //     this._store.dispatch(new SetListFilterAction(
+    //       this.dataSource.listStateKey,
+    //       {
+    //         filter: stFilter
+    //       }
+    //     ));
+    //   });
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
       paginationWidgetToStore,
       sortStoreToWidget,
       sortWidgetToStore,
-      filterStoreToWidget,
-      filterWidgeToStore
+      // filterStoreToWidget,
+      // filterWidgeToStore
     ).subscribe();
   }
 

@@ -1,14 +1,13 @@
 <!-- TODO: Error cases for both-->
 <div class="listComponent">
   <div class="listComponent__header">
-    <md-card-header>
-    </md-card-header>
     <md-card>
-      <md-card-content [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="paginator.length === 0">
+
+      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.listPagination$ | async)?.totalResults === 0">
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="spacer">{{ text?.title }}</div>
         <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
         <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-          <div [hidden]="!enableFilter || (paginator.length === 0 && !filter) ">
+          <div [hidden]="!enableFilter || ((dataSource.listPagination$ | async)?.totalResults === 0 && !filter) ">
             <form novalidate>
               <md-form-field floatPlaceholder="never">
                 <input mdInput ngModel #filter="ngModel" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
@@ -30,15 +29,18 @@
           <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
           <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
         </div>
-        <md-button-toggle-group #listView="mdButtonToggleGroup" [value]="(dataSource.listView$ | async)" (change)="updateListView($event.value)">
-          <md-button-toggle value="cards">
-            <md-icon>grid_on</md-icon>
-          </md-button-toggle>
-          <md-button-toggle value="table">
-            <md-icon>list</md-icon>
-          </md-button-toggle>
-        </md-button-toggle-group>
-      </md-card-content>
+        <div>
+          <md-button-toggle-group #listView="mdButtonToggleGroup" [value]="(dataSource.listView$ | async)" (change)="updateListView($event.value)">
+            <md-button-toggle value="cards">
+              <md-icon>grid_on</md-icon>
+            </md-button-toggle>
+            <md-button-toggle value="table">
+              <md-icon>list</md-icon>
+            </md-button-toggle>
+          </md-button-toggle-group>
+        </div>
+
+      </md-card-header>
     </md-card>
 
   </div>

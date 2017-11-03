@@ -1,23 +1,23 @@
  .app-table {
-   md-card-header {
-     display: flex;
-     height: 66px; // Fixed height so doesn't ping around after selecting
-     div:not([hidden]).spacer {
-       flex-grow: 99;
-     }
-     >div:not([hidden]) {
-       display: flex;
-       flex-direction: row;
-       align-items: center;
-       flex: 1;
-       form {
-         padding-right: 13px;
-       }
-       button:last-of-type {
-         margin-right: 26px;
-       }
-     }
-   }
+   //  md-card-header {
+   //    display: flex;
+   //    height: 66px; // Fixed height so doesn't ping around after selecting
+   //    div:not([hidden]).spacer {
+   //      flex-grow: 99;
+   //    }
+   //    >div:not([hidden]) {
+   //      display: flex;
+   //      flex-direction: row;
+   //      align-items: center;
+   //      flex: 1;
+   //      form {
+   //        padding-right: 13px;
+   //      }
+   //      button:last-of-type {
+   //        margin-right: 26px;
+   //      }
+   //    }
+   //  }
    md-card-content {
      md-table {
        &[hidden] * {
