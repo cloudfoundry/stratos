@@ -1,0 +1,14 @@
+.card-wall {
+  display: flex;
+  flex-flow: wrap;
+  justify-content: space-between;
+}
+
+.row-filler {
+  opacity: 0;
+  height: 1px;
+}
+
+// .mat-button-toggle-label-content {
+//   padding-bottom: 4px;
+// }

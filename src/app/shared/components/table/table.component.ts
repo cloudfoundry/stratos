@@ -19,7 +19,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Subscription } from 'rxjs/Subscription';
 
-export interface TableColumn<T> {
+export interface ITableColumn<T> {
   columnId: string;
   cell?: (row: T) => string; // Either cell OR cellComponent should be defined
   cellComponent?: any;
@@ -31,7 +31,7 @@ export interface TableColumn<T> {
   };
 }
 
-export interface TableText {
+export interface ITableText {
   title: string;
   filter?: string;
 }
@@ -51,10 +51,10 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as ITableDataSource<T>;
-  @Input('columns') columns: TableColumn<T>[];
+  @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 
-  @Input('text') text: TableText;
+  @Input('text') text: ITableText;
   @Input('enableFilter') enableFilter = false;
   @Input('fixedRowHeight') fixedRowHeight = false;
   @Input('addForm') addForm: NgForm;

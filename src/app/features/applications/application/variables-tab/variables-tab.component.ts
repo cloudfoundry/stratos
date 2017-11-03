@@ -16,7 +16,7 @@ import { NgModel } from '@angular/forms';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 import { EntityInfo } from '../../../../store/types/api.types';
 import { CfAppEvnVarsDataSource, AppEnvVar } from '../../../../shared/data-sources/cf-app-variables-data-source';
-import { TableColumn } from '../../../../shared/components/table/table.component';
+import { ITableColumn } from '../../../../shared/components/table/table.component';
 import { TableCellEditComponent } from '../../../../shared/components/table/table-cell-edit/table-cell-edit.component';
 import {
   TableCellEditVariableComponent
@@ -34,7 +34,7 @@ export class VariablesTabComponent implements OnInit {
 
   envVarsDataSource: CfAppEvnVarsDataSource;
   envVars$: Observable<any>;
-  columns: Array<TableColumn<AppEnvVar>> = [
+  columns: Array<ITableColumn<AppEnvVar>> = [
     {
       columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
       class: 'table-column-select'

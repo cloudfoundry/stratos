@@ -1,6 +1,6 @@
 import { ITableDataSource } from '../../../data-sources/table-data-source';
 import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild } from '@angular/core';
-import { TableColumn } from '../table.component';
+import { ITableColumn } from '../table.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
@@ -38,7 +38,7 @@ export class TableCellComponent<T> implements OnInit {
   @Input('func') func: () => string;
   @Input('row') row: T;
 
-  constructor(private viewContainerRef: ViewContainerRef, private componentFactoryResolver: ComponentFactoryResolver) { }
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
     if (this.component) {

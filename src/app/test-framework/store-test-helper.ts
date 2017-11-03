@@ -1,4 +1,5 @@
 import { AppState } from '../store/app-state';
+import { ListState } from '../store/reducers/list.reducer';
 /* tslint:disable */
 const testInitialStoreState: AppState = {
     entities: {
@@ -20168,7 +20169,8 @@ const testInitialStoreState: AppState = {
         }
       }
     },
-    actionHistory: []
+    actionHistory: [],
+    lists: new Map<string, ListState>()
   };
   /* tslint:enable */
 

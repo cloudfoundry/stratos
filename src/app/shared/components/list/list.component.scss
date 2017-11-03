@@ -1,0 +1,14 @@
+.listComponent {
+  &__header {
+    md-card-content {
+      display: flex;
+      justify-content: flex-end;
+      .spacer {
+        flex-grow: 99;
+      }
+    }
+  }
+  &__body {
+    padding-top: 15px;
+  }
+}

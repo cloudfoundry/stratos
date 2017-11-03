@@ -34,7 +34,7 @@ export function listReducer(state = defaultListsState, action): ListsState {
       return {
         ...state,
         [action.key]: {
-          view: setListState.view,
+          view: setListState.view ? setListState.view.toString() : '',
           pagination: {
             ...setListState.pagination,
           },
@@ -47,7 +47,12 @@ export function listReducer(state = defaultListsState, action): ListsState {
         }
       };
     case ListStateActionTypes.SET_VIEW:
-      return mergeListState(state, action.key, 'view', (action as SetListViewAction).view);
+      const listView = (action as SetListViewAction).view;
+      // const newState = { ...state };
+
+      // newState[action.key].view = listView;
+      // return newState;
+      return mergeListState(state, action.key, 'view', listView ? listView.toString() : '');
     case ListStateActionTypes.SET_PAGINATION:
       return mergeListState(state, action.key, 'pagination', (action as SetListPaginationAction).pagination);
     case ListStateActionTypes.SET_SORT:
@@ -70,11 +75,13 @@ function mergeListState(state, listKey, key, value) {
 
 export const getListStateObservable = (store: Store<AppState>, key: string): Observable<ListState> => store.select(selectListState(key));
 export const getListStateObservables = (store: Store<AppState>, key: string): {
+  view: Observable<ListView>,
   pagination: Observable<ListPagination>,
   sort: Observable<ListSort>,
   filter: Observable<ListFilter>,
 } => {
   return {
+    view: store.select<ListView>(selectListStateProperty(key, 'view')),
     pagination: store.select<ListPagination>(selectListStateProperty(key, 'pagination')),
     sort: store.select<ListSort>(selectListStateProperty(key, 'sort')),
     filter: store.select<ListFilter>(selectListStateProperty(key, 'filter')),
@@ -87,7 +94,6 @@ function selectListState(key: string) {
 
 function selectListStateProperty(key: string, property: string) {
   return state => {
-
     return (state['lists'][key] || {})[property];
   };
 }

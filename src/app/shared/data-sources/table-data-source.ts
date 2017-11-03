@@ -8,14 +8,17 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
-import { ListFilter, ListPagination, ListSort, SetListStateAction } from '../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
 
 export interface ITableDataSource<T> {
   listStateKey: string;
+  listView$: Observable<ListView>;
   listState$: Observable<ListState>;
   listPagination$: Observable<ListPagination>;
   listSort$: Observable<ListSort>;
   listFilter$: Observable<ListFilter>;
+
+  page$: Observable<T[]>;
 
   addRow;
   isAdding$: BehaviorSubject<boolean>;
@@ -40,10 +43,12 @@ export type getRowUniqueId = (T) => string;
 
 export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
 
+  public listView$: Observable<ListView>;
   public listState$: Observable<ListState>;
   public listPagination$: Observable<ListPagination>;
   public listSort$: Observable<ListSort>;
   public listFilter$: Observable<ListFilter>;
+  public page$: Observable<T[]>;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -68,7 +73,8 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     this.addRow = { ... (_emptyType as object) } as T;
 
     this.listState$ = getListStateObservable(this.store, listStateKey);
-    const { pagination, sort, filter } = getListStateObservables(this.store, listStateKey);
+    const { view, pagination, sort, filter } = getListStateObservables(this.store, listStateKey);
+    this.listView$ = view;
     this.listPagination$ = pagination.filter(x => !!x);
     this.listSort$ = sort.filter(x => !!x);
     this.listFilter$ = filter.filter(x => !!x);

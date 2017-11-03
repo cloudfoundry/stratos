@@ -12,7 +12,7 @@ import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-even
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
 import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
-import { TableColumn } from '../../../../shared/components/table/table.component';
+import { ITableColumn } from '../../../../shared/components/table/table.component';
 import {
   TableCellEventTypeComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
@@ -25,6 +25,7 @@ import {
 import {
   TableCellEventDetailComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { CardEventComponent } from '../../../../shared/components/cards/custom-cards/card-event/card-event.component';
 
 @Component({
   selector: 'app-events-tab',
@@ -38,7 +39,7 @@ export class EventsTabComponent implements OnInit {
 
   eventSource: CfTableDataSource<EntityInfo>;
   hasEvents$: Observable<boolean>;
-  columns: Array<TableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<EntityInfo>> = [
     {
       columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
       sort: { disableClear: true }
@@ -53,6 +54,7 @@ export class EventsTabComponent implements OnInit {
       columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cellComponent: TableCellEventDetailComponent
     },
   ];
+  cardComponent = CardEventComponent;
 
 
   ngOnInit() {

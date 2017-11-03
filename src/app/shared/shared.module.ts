@@ -32,6 +32,9 @@ import { TableCellEventTypeComponent } from './components/table/custom-cells/tab
 import { TableCellEventActionComponent } from './components/table/custom-cells/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from './components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { ListComponent } from './components/list/list.component';
+import { CardsComponent } from './components/cards/cards.component';
+import { CardComponent } from './components/cards/card/card.component';
+import { CardEventComponent } from './components/cards/custom-cards/card-event/card-event.component';
 
 
 @NgModule({
@@ -66,6 +69,9 @@ import { ListComponent } from './components/list/list.component';
     TableCellEventDetailComponent,
     EventTabActorIconPipe,
     ListComponent,
+    CardsComponent,
+    CardComponent,
+    CardEventComponent,
   ],
   exports: [
     FormsModule,
@@ -84,6 +90,8 @@ import { ListComponent } from './components/list/list.component';
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
+    ListComponent,
+    CardsComponent,
   ],
 })
 export class SharedModule { }

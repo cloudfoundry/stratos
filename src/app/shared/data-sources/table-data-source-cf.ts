@@ -86,13 +86,16 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   connect(): Observable<T[]> {
     this.isLoadingPage$ = this.cfPagination$.map((pag: PaginationEntityState) => pag.fetching);
 
-    return Observable.combineLatest(
-      this.cfPagination$,
-      this.entities$
-    )
-      .map(([listPagination, data]) => {
-        return data;
-      });
+    if (!this.page$) {
+      this.page$ = Observable.combineLatest(
+        this.cfPagination$,
+        this.entities$
+      )
+        .map(([listPagination, data]) => {
+          return data;
+        });
+    }
+    return this.page$;
   }
 
   disconnect() {

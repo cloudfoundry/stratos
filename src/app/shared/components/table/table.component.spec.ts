@@ -2,7 +2,7 @@ import { ITableDataSource } from '../../data-sources/table-data-source';
 import { TableCellComponent } from './table-cell/table-cell.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableComponent, TableColumn } from './table.component';
+import { TableComponent, ITableColumn } from './table.component';
 import { CoreModule } from '../../../core/core.module';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
@@ -62,7 +62,7 @@ describe('TableComponent', () => {
     } as ITableDataSource<any>;
     component.dataSource.selectedRows = new Map<string, any>();
 
-    component.columns = new Array<TableColumn<any>>();
+    component.columns = new Array<ITableColumn<any>>();
 
     fixture.detectChanges();
   });

@@ -29,29 +29,32 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
   }
 
   connect(): Observable<T[]> {
-    return this.data$
-      .combineLatest(
-      this.listPagination$,
-      this.listSort$,
-      this.listFilter$,
-    )
-      .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
-        // TODO: RC caching?? catch no-ops?
-        if (pagination.totalResults !== collection.length) {
-          this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
-            ...pagination,
-            totalResults: collection.length
-          }));
-        }
+    if (!this.page$) {
+      this.page$ = this.data$
+        .combineLatest(
+        this.listPagination$,
+        this.listSort$,
+        this.listFilter$,
+      )
+        .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
+          // TODO: RC caching?? catch no-ops?
+          if (pagination.totalResults !== collection.length) {
+            this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
+              ...pagination,
+              totalResults: collection.length
+            }));
+          }
 
-        const filtered = this.listFilter(collection, filter);
+          const filtered = this.listFilter(collection, filter);
 
-        const sorted = this.listSort(filtered, sort);
+          const sorted = this.listSort(filtered, sort);
 
-        const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
+          const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
 
-        return page;
-      });
+          return page;
+        })
+    }
+    return this.page$;
   }
 
   disconnect() { }

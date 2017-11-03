@@ -1,0 +1,4 @@
+<div class="card-wall">
+  <app-card *ngFor="let item of dataSource.page$ | async" [item]="item" [component]="component"></app-card>
+  <md-card class="row-filler"></md-card>
+</div>
