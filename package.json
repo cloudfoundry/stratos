@@ -33,6 +33,7 @@
     "core-js": "^2.4.1",
     "hammerjs": "^2.0.8",
     "hyperlist": "^1.0.0-beta",
+    "moment": "^2.19.1",
     "ngrx-store-logger": "^0.2.0",
     "normalizr": "^3.2.3",
     "queueing-subject": "^0.1.1",
