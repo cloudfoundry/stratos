@@ -7,31 +7,6 @@
     </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.listPagination$ | async)?.totalResults === 0">
-        <!-- Don't use md-card-title, it has no ngcontent attribute so cannot select in css
-        <div [hidden]="!(dataSource.isSelecting$ | async)" class="spacer">{{dataSource.selectedRows.size}} Selected</div>
-        <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-          <div [hidden]="!enableFilter || ((dataSource.listPagination$ | async)?.totalResults === 0 && !filter) ">
-            <form novalidate>
-              <md-form-field floatPlaceholder="never">
-                <input mdInput ngModel #filter="ngModel" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
-              </md-form-field>
-            </form>
-          </div>
-          <button md-icon-button *ngIf="addForm" (click)="safeAddForm().reset();dataSource.startAdd();;">
-              <md-icon>add</md-icon>
-            </button>
-        </div>
-        <div [hidden]="!(dataSource.isSelecting$ | async)">
-          <button md-icon-button (click)="dataSource.selectedDelete()">
-              <md-icon>delete</md-icon>
-            </button>
-        </div>
-        <div [hidden]="!(dataSource.isAdding$ | async)">
-          <div class="spacer"></div>
-          <ng-content select="[app-table-add]"></ng-content>
-          <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
-          <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
-        </div> -->
       </md-card-header>
       <md-card-content>
         <md-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0"

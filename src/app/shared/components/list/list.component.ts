@@ -1,13 +1,15 @@
-import { Component, Input, OnInit, Type, OnDestroy, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter } from '@angular/core';
 import { ITableDataSource } from '../../data-sources/table-data-source';
 import { ITableColumn, ITableText } from '../table/table.component';
 import { NgForm, NgModel } from '@angular/forms';
-import { ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction } from '../../../store/actions/list.actions';
+import {
+  ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction, SetListSortAction, ListSort
+} from '../../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
-import { MdPaginator, PageEvent } from '@angular/material';
+import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
 
 @Component({
   selector: 'app-list',
@@ -28,6 +30,11 @@ export class ListComponent<T> implements OnInit, OnDestroy {
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild('filter') filter: NgModel;
+
+  sortColumns: ITableColumn<T>[];
+  @ViewChild('headerSortField') headerSortField: MdSelect;
+  headerSortDirection: SortDirection = 'asc';
+  headerSortDirectionChanged = new EventEmitter<SortDirection>();
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -73,11 +80,35 @@ export class ListComponent<T> implements OnInit, OnDestroy {
         ));
       });
 
+    this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
+      return column.sort;
+    });
+    const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
+      this.headerSortField.value = sort.field;
+      this.headerSortDirection = sort.direction;
+      // this.sort.disableClear = sort.disableClear;
+    });
+
+    // const sortWidgetToStore = Observable.combineLatest(
+    //   this.headerSortField.change.asObservable(),
+    //   this.headerSortDirectionChanged.asObservable()
+    // ).do(([field, direction]: [MdSelectChange, SortDirection]) => {
+    //   this._store.dispatch(new SetListSortAction(
+    //     this.dataSource.listStateKey,
+    //     {
+    //       field: field.value,
+    //       direction: direction,
+    //     }
+    //   ));
+    // });
+
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
       paginationWidgetToStore,
       filterStoreToWidget,
-      filterWidgeToStore
+      filterWidgeToStore,
+      sortStoreToWidget,
+      // sortWidgetToStore
     ).subscribe();
 
     this.dataSource.connect();
@@ -89,6 +120,18 @@ export class ListComponent<T> implements OnInit, OnDestroy {
 
   updateListView(listView: ListView) {
     this._store.dispatch(new SetListViewAction(this.dataSource.listStateKey, listView));
+  }
+
+  updateListSort(field: string, direction: SortDirection) {
+    this.headerSortField.value = field;
+    this.headerSortDirection = direction;
+    this._store.dispatch(new SetListSortAction(
+      this.dataSource.listStateKey,
+      {
+        field: field,
+        direction: direction,
+      }
+    ));
   }
 
 }

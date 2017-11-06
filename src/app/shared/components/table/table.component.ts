@@ -89,6 +89,18 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
     // });
 
     const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
+      if (this.sort.active !== sort.field || this.sort.start !== sort.direction || this.sort.disableClear !== sort.disableClear) {
+        // this.sort.sort({
+        //   id: sort.field,
+        //   start: sort.direction as 'asc' | 'desc',
+        //   disableClear: sort.disableClear
+        // });
+        // this.sort.mdSortChange.emit({
+        //   active: sort.field,
+        //   direction: sort.direction
+        // });
+      }
+
       this.sort.active = sort.field;
       this.sort.direction = sort.direction;
       this.sort.disableClear = sort.disableClear;
@@ -99,7 +111,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
         this.dataSource.listStateKey,
         {
           field: sort.active,
-          direction: sort.direction as 'asc' | 'desc',
+          direction: sort.direction,
         }
       ));
     });

@@ -4,7 +4,7 @@ import { AppState } from '../../store/app-state';
 import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
-import { MdPaginator, PageEvent, MdSort, Sort } from '@angular/material';
+import { MdPaginator, PageEvent, MdSort, Sort, SortDirection } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
@@ -61,7 +61,7 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
         totalResults: 0,
       },
       {
-        direction: action.initialParams['order-direction'] as 'asc' | 'desc',
+        direction: action.initialParams['order-direction'] as SortDirection,
         field: action.initialParams['order-direction-field']
       },
       {

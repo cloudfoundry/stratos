@@ -1,4 +1,5 @@
 import { Action } from '@ngrx/store';
+import { SortDirection } from '@angular/material';
 
 export class ListPagination {
   public totalResults?= 0;
@@ -9,7 +10,7 @@ export class ListPagination {
 
 export class ListSort {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: SortDirection;
   disableClear?: boolean;
 }
 
