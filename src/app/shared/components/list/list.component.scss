@@ -1,12 +1,15 @@
 .listComponent {
   &__header {
+    md-card-header {
+      padding-left: 14px;
+    }
     &__left:not([hidden]),
     &__right:not([hidden]) {
       display: flex;
       flex-direction: row;
       align-items: center;
       >div {
-        padding: 0 20px;
+        padding-right: 10px;
       }
     }
     &__right {
@@ -14,39 +17,33 @@
         display: flex;
         align-items: center;
       }
+      .mat-paginator {
+        padding: 0;
+      }
+    }
+    &__top,
+    &__bottom {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 66px; // justify-content: flex-end;
+    }
+    &__top {}
+    &__bottom {
+      justify-content: flex-end;
     }
     md-card {
       padding: 0 10px;
       md-card-header {
-        // display: flex;
-        // justify-content: flex-end;
-        // .spacer {
-        //   flex-grow: 99;
+        // .mat-card-header-text {
+        //   display: none;
         // }
-        display: flex;
-        height: 66px; // Fixed height so doesn't ping around after selecting
-        // div:not([hidden]).spacer {
-        //   flex-grow: 99;
-        // }
+        direction: flex;
+        flex-direction: column; // height: 66px; // Fixed height so doesn't ping around after selecting
         div:not([hidden]).spacer {
           flex-grow: 99;
         }
-      } // >div:not([hidden]) {
-      //   display: flex;
-      //   flex-direction: row;
-      //   align-items: center;
-      //   flex: 1 0;
-      //   form {
-      //     padding-right: 13px;
-      //   }
-      //   button:last-of-type {
-      //     margin-right: 26px;
-      //   }
-      // }
-      // md-paginator {
-      //   // flex-basis: 309px;
-      //   flex: 1 0;
-      // }
+      }
     }
   }
   &__body {
