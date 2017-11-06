@@ -136,9 +136,9 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       const { id, cfId } = params;
       this.applicationService.setApplication(cfId, id);
       this.isFetching$ = this.applicationService.isFetchingApp$;
-      this.entityService.poll().do(() => {
+      this.sub.push(this.entityService.poll().do(() => {
         this.store.dispatch(new GetAppMetadataAction(id, cfId, AppMetadataProperties.SUMMARY as AppMetadataType));
-      }).subscribe();
+      }).subscribe());
     });
 
     this.summaryDataChanging$ = Observable.combineLatest(
