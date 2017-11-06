@@ -1,6 +1,5 @@
 import { AppEvent } from '../../../../data-sources/cf-app-events-data-source';
 import { Component, OnInit } from '@angular/core';
-// import { ICardComponent } from '../../card/card.component';
 import { TableCellCustom } from '../../../table/table-cell/table-cell-custom';
 
 @Component({

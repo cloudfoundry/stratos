@@ -1,7 +1,7 @@
 import { EntityInfo } from '../../../../store/types/api.types';
 import { resultPerPageParam } from '../../../../store/reducers/pagination.reducer';
 
-import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit, ViewChild, Pipe, PipeTransform, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
@@ -33,7 +33,7 @@ import { CardEventComponent } from '../../../../shared/components/cards/custom-c
   styleUrls: ['./events-tab.component.scss']
 })
 
-export class EventsTabComponent implements OnInit {
+export class EventsTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
@@ -41,28 +41,33 @@ export class EventsTabComponent implements OnInit {
   hasEvents$: Observable<boolean>;
   columns: Array<ITableColumn<EntityInfo>> = [
     {
-      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
       sort: { disableClear: true }
     },
     {
-      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cellComponent: TableCellEventTypeComponent
+      columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellEventTypeComponent
     },
     {
-      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cellComponent: TableCellEventActionComponent
+      columnId: 'actor_name', headerCell: () => 'Actor Name', cellComponent: TableCellEventActionComponent
     },
     {
-      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cellComponent: TableCellEventDetailComponent
+      columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent
     },
   ];
   cardComponent = CardEventComponent;
 
 
   ngOnInit() {
+    // TODO: RC Add padding: 0 10px;
     // TODO: RC Move can add, can edit into here
     this.eventSource = new CfAppEventsDataSource(
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
     );
+  }
+
+  ngOnDestroy() {
+    this.eventSource.destroy();
   }
 }

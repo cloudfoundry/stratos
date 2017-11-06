@@ -2,11 +2,12 @@ import { Component, Input, OnInit, Type, OnDestroy, ViewChild } from '@angular/c
 import { ITableDataSource } from '../../data-sources/table-data-source';
 import { ITableColumn, ITableText } from '../table/table.component';
 import { NgForm, NgModel } from '@angular/forms';
-import { ListView, SetListViewAction, ListFilter, SetListFilterAction } from '../../../store/actions/list.actions';
+import { ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction } from '../../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
+import { MdPaginator, PageEvent } from '@angular/material';
 
 @Component({
   selector: 'app-list',
@@ -25,6 +26,7 @@ export class ListComponent<T> implements OnInit, OnDestroy {
   @Input('cardComponent') cardComponent: Type<{}>;
   @Input('addForm') addForm: NgForm;
 
+  @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild('filter') filter: NgModel;
 
   public safeAddForm() {
@@ -36,6 +38,24 @@ export class ListComponent<T> implements OnInit, OnDestroy {
   constructor(private _store: Store<AppState>) { }
 
   ngOnInit() {
+
+    const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
+      this.paginator.length = pagination.totalResults;
+      this.paginator.pageIndex = pagination.pageIndex;
+      this.paginator.pageSize = pagination.pageSize;
+      this.paginator.pageSizeOptions = pagination.pageSizeOptions;
+    });
+
+    const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
+      this._store.dispatch(new SetListPaginationAction(
+        this.dataSource.listStateKey,
+        {
+          pageSize: page.pageSize,
+          pageIndex: page.pageIndex,
+        }
+      ));
+    });
+
     const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
       this.filter.model = filter.filter;
     });
@@ -54,9 +74,13 @@ export class ListComponent<T> implements OnInit, OnDestroy {
       });
 
     this.uberSub = Observable.combineLatest(
+      paginationStoreToWidget,
+      paginationWidgetToStore,
       filterStoreToWidget,
       filterWidgeToStore
     ).subscribe();
+
+    this.dataSource.connect();
   }
 
   ngOnDestroy() {

@@ -1,5 +1,20 @@
 .listComponent {
   &__header {
+    &__left:not([hidden]),
+    &__right:not([hidden]) {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      >div {
+        padding: 0 20px;
+      }
+    }
+    &__right {
+      .add-container:not([hidden]) {
+        display: flex;
+        align-items: center;
+      }
+    }
     md-card {
       padding: 0 10px;
       md-card-header {
@@ -10,25 +25,37 @@
         // }
         display: flex;
         height: 66px; // Fixed height so doesn't ping around after selecting
+        // div:not([hidden]).spacer {
+        //   flex-grow: 99;
+        // }
         div:not([hidden]).spacer {
           flex-grow: 99;
         }
-        >div:not([hidden]) {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          flex: 1;
-          form {
-            padding-right: 13px;
-          }
-          button:last-of-type {
-            margin-right: 26px;
-          }
-        }
-      }
+      } // >div:not([hidden]) {
+      //   display: flex;
+      //   flex-direction: row;
+      //   align-items: center;
+      //   flex: 1 0;
+      //   form {
+      //     padding-right: 13px;
+      //   }
+      //   button:last-of-type {
+      //     margin-right: 26px;
+      //   }
+      // }
+      // md-paginator {
+      //   // flex-basis: 309px;
+      //   flex: 1 0;
+      // }
     }
   }
   &__body {
     padding-top: 15px;
+    .no-rows {
+      padding: 20px 0;
+    }
+    md-card[hidden] {
+      display: none;
+    }
   }
 }

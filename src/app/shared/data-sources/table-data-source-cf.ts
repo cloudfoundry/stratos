@@ -22,6 +22,9 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   protected cfPagination$: Observable<any>;
 
   private entities$: Observable<any>;
+  private listPaginationWithCfPagination$;
+  private cfPaginationWithListPagination$;
+  private sortSub$;
 
   public isLoadingPage$: Observable<boolean>;
   public filteredRows: Array<T>;
@@ -45,7 +48,7 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     this.entities$ = entities$;
 
     // Track changes from listPagination to cfPagination
-    const listPaginationWithCfPagination$ = this.listPagination$.withLatestFrom(pagination$)
+    this.listPaginationWithCfPagination$ = this.listPagination$.withLatestFrom(pagination$)
       .do(([listPagination, pag]: [ListPagination, PaginationEntityState]) => {
         if (pag.params[resultPerPageParam] !== listPagination.pageSize) {
           this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
@@ -58,7 +61,7 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
       });
 
     // Track changes from cfPagination to listPagination. This should be the only one
-    const cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.listPagination$)
+    this.cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.listPagination$)
       .do(([pag, listPagination]: [PaginationEntityState, ListPagination]) => {
         if (pag.totalResults !== listPagination.totalResults) {
           this._cfStore.dispatch(new SetListPaginationAction(this._cfListStateKey, {
@@ -68,24 +71,25 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
       });
 
     // Track changes from listSort to cfPagination
-    const sortSub$ = this.listSort$.do((sortObj: ListSort) => {
+    this.sortSub$ = this.listSort$.do((sortObj: ListSort) => {
       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
         'order-direction': sortObj.direction
       }));
     });
 
-    this.cfPagination$ = pagination$;
     this.cfUberSub = Observable.combineLatest(
-      listPaginationWithCfPagination$,
-      cfPaginationWithListPagination$,
-      sortSub$
+      this.listPaginationWithCfPagination$,
+      this.cfPaginationWithListPagination$,
+      this.sortSub$
     ).subscribe();
 
+    this.cfPagination$ = pagination$;
+
+    this.isLoadingPage$ = pagination$.map((pag: PaginationEntityState) => pag.fetching);
   }
 
   connect(): Observable<T[]> {
-    this.isLoadingPage$ = this.cfPagination$.map((pag: PaginationEntityState) => pag.fetching);
-
+    console.log('source-cf connect');
     if (!this.page$) {
       this.page$ = Observable.combineLatest(
         this.cfPagination$,
@@ -98,7 +102,8 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     return this.page$;
   }
 
-  disconnect() {
+  destroy() {
+    console.log('source-cf destroy');
     this.cfUberSub.unsubscribe();
   }
 }

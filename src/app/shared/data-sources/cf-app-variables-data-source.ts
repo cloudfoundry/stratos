@@ -123,8 +123,8 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
     return super.connect();
   }
 
-  disconnect() {
-    super.disconnect();
+  destroy() {
+    super.destroy();
   }
 
   listFilter(envVars: AppEnvVar[], filter: ListFilter): any {

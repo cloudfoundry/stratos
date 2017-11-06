@@ -23,7 +23,7 @@ export interface ITableColumn<T> {
   columnId: string;
   cell?: (row: T) => string; // Either cell OR cellComponent should be defined
   cellComponent?: any;
-  headerCell?: (row: T) => string; // Either headerCell OR headerCellComponent should be defined
+  headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
   class?: string;
   sort?: {
@@ -45,7 +45,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  @ViewChild(MdPaginator) paginator: MdPaginator;
+  // @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
 
 
@@ -71,22 +71,22 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   ngOnInit() {
     this.columnNames = this.columns.map(x => x.columnId);
 
-    const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
-      this.paginator.length = pagination.totalResults;
-      this.paginator.pageIndex = pagination.pageIndex;
-      this.paginator.pageSize = pagination.pageSize;
-      this.paginator.pageSizeOptions = pagination.pageSizeOptions;
-    });
+    // const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
+    //   this.paginator.length = pagination.totalResults;
+    //   this.paginator.pageIndex = pagination.pageIndex;
+    //   this.paginator.pageSize = pagination.pageSize;
+    //   this.paginator.pageSizeOptions = pagination.pageSizeOptions;
+    // });
 
-    const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
-      this._store.dispatch(new SetListPaginationAction(
-        this.dataSource.listStateKey,
-        {
-          pageSize: page.pageSize,
-          pageIndex: page.pageIndex,
-        }
-      ));
-    });
+    // const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
+    //   this._store.dispatch(new SetListPaginationAction(
+    //     this.dataSource.listStateKey,
+    //     {
+    //       pageSize: page.pageSize,
+    //       pageIndex: page.pageIndex,
+    //     }
+    //   ));
+    // });
 
     const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
       this.sort.active = sort.field;
@@ -122,8 +122,6 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
     //   });
 
     this.uberSub = Observable.combineLatest(
-      paginationStoreToWidget,
-      paginationWidgetToStore,
       sortStoreToWidget,
       sortWidgetToStore,
       // filterStoreToWidget,

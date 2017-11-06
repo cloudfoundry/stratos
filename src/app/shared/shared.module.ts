@@ -35,6 +35,7 @@ import { ListComponent } from './components/list/list.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
 import { CardEventComponent } from './components/cards/custom-cards/card-event/card-event.component';
+import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
 
 
 @NgModule({
@@ -72,6 +73,7 @@ import { CardEventComponent } from './components/cards/custom-cards/card-event/c
     CardsComponent,
     CardComponent,
     CardEventComponent,
+    CardAppVariableComponent,
   ],
   exports: [
     FormsModule,

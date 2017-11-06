@@ -36,7 +36,7 @@ export interface ITableDataSource<T> {
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
   connect(): Observable<T[]>;
-  disconnect();
+  destroy();
 }
 
 export type getRowUniqueId = (T) => string;
@@ -81,7 +81,9 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   }
 
   abstract connect(): Observable<T[]>;
-  abstract disconnect();
+  disconnect() { }
+  destroy() { }
+
 
   startAdd() {
     this.addRow = { ... (this._emptyType as object) } as T;

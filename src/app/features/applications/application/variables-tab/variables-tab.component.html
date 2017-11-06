@@ -1,9 +1,9 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
-    <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [text]="{ title: 'Environment Variables'}" [addForm]="addRowForm"
-      [enableFilter]="true" [fixedRowHeight]="true">
+    <app-list [dataSource]="envVarsDataSource" [columns]="columns" [text]="{ title: 'Environment Variables'}" [enableFilter]="true"
+      [cardComponent]="cardComponent" [addForm]="addForm">
       <div app-table-add>
-        <form #addRowForm="ngForm" novalidate>
+        <form #addForm="ngForm" novalidate>
           <md-form-field floatPlaceholder="never">
             <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addRow.name"
               required [appUnique]="envVarsDataSource.rowNames">
@@ -16,7 +16,13 @@
           <!-- [appFocus]="envVarsDataSource.addAppFocusEventEmitter"  -->
         </form>
       </div>
-    </app-table>
+    </app-list>
+
+
+    <!-- <app-table #appTable [dataSource]="envVarsDataSource" [columns]="columns" [text]="{ title: 'Environment Variables'}" [addForm]="addRowForm"
+      [enableFilter]="true" [fixedRowHeight]="true">
+
+    </app-table> -->
   </div>
 
   <div class="variables-tab__env-code-block">

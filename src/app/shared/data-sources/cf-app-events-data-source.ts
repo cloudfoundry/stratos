@@ -86,8 +86,8 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
 
   }
 
-  disconnect() {
+  destroy() {
     this.cfFilterSub.unsubscribe();
-    super.disconnect();
+    super.destroy();
   }
 }

@@ -21,6 +21,7 @@ import { TableCellEditComponent } from '../../../../shared/components/table/tabl
 import {
   TableCellEditVariableComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
+import { CardAppVariableComponent } from '../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 
 
 @Component({
@@ -28,7 +29,7 @@ import {
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss']
 })
-export class VariablesTabComponent implements OnInit {
+export class VariablesTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
@@ -40,22 +41,27 @@ export class VariablesTabComponent implements OnInit {
       class: 'table-column-select'
     },
     {
-      columnId: 'name', headerCell: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
+      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
       sort: { disableClear: true }
     },
     {
-      columnId: 'value', headerCell: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent,
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent,
       sort: { disableClear: true }
     },
     {
-      columnId: 'edit', headerCell: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent,
+      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent,
       class: 'table-column-edit'
     },
   ];
+  cardComponent = CardAppVariableComponent;
 
   ngOnInit() {
     this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
+  }
+
+  ngOnDestroy() {
+    this.envVarsDataSource.destroy();
   }
 
 }

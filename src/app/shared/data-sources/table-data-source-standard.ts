@@ -52,12 +52,14 @@ export abstract class StandardTableDataSource<T extends object> extends TableDat
           const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
 
           return page;
-        })
+        });
     }
     return this.page$;
   }
 
-  disconnect() { }
+  destroy() {
+    super.destroy();
+  }
 
   abstract listFilter(collection: any, filter: ListFilter): Array<T>;
   abstract listSort(collection: Array<T>, sort: ListSort): Array<T>;
