@@ -1,17 +1,24 @@
-import { Action, Store } from '@ngrx/store';
+import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
-import { APIResource, EntityInfo } from '../store/types/api.types';
-import { getEntityState, selectEntity, selectEntityRequestInfo } from '../store/selectors/api.selectors';
+import { APIAction, APIResource, EntityInfo } from '../store/types/api.types';
+import {
+  getEntityState,
+  getEntityUpdateSections,
+  getUpdateSectionById,
+  selectEntity,
+  selectEntityRequestInfo,
+  selectEntityUpdateInfo,
+} from '../store/selectors/api.selectors';
 import { EntitiesState } from '../store/types/entity.types';
-import { EntityRequestState } from '../store/reducers/api-request-reducer';
+import { ActionState, EntityRequestState } from '../store/reducers/api-request-reducer';
 import { Inject, Injectable } from '@angular/core';
 
+type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 /**
  * Designed to be used in a service factory provider
  */
-
 @Injectable()
 export class EntityService {
 
@@ -20,30 +27,52 @@ export class EntityService {
     public entityKey: string,
     public schema: Schema,
     public id: string,
-    public action: Action
+    public action: APIAction
   ) {
+    this.entitySelect$ = store.select(selectEntity(entityKey, id));
+    this.entityRequestSelect$ = store.select(selectEntityRequestInfo(entityKey, id));
+    this.actionDispatch = (updatingKey) => {
+      if (updatingKey) {
+        action.updatingKey = updatingKey;
+      }
+      this.store.dispatch(action);
+    };
+
+    this.updateEntity = () => {
+      this.actionDispatch(this.refreshKey);
+    };
+
     this.entityObs$ = this.getEntityObservable(
-      entityKey,
       schema,
-      id,
-      action
+      this.actionDispatch,
+      this.entitySelect$,
+      this.entityRequestSelect$
     );
 
     this.isDeletingEntity$ = this.entityObs$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
 
     this.waitForEntity$ = this.entityObs$
       .filter((appInfo) => {
-        return (
-          !!appInfo.entity &&
+        const available = !!appInfo.entity &&
           !appInfo.entityRequestInfo.deleting.busy &&
           !appInfo.entityRequestInfo.deleting.deleted &&
-          !appInfo.entityRequestInfo.error
+          !appInfo.entityRequestInfo.error;
+        return (
+          available
         );
       })
       .delay(1);
 
     this.isFetchingEntity$ = this.entityObs$.map(ei => ei.entityRequestInfo.fetching);
   }
+
+  refreshKey = 'updating';
+
+  private entitySelect$: Observable<APIResource>;
+  private entityRequestSelect$: Observable<EntityRequestState>;
+  private actionDispatch: Function;
+
+  updateEntity: Function;
 
   entityObs$: Observable<EntityInfo>;
 
@@ -53,18 +82,17 @@ export class EntityService {
 
   waitForEntity$: Observable<EntityInfo>;
 
-
   private getEntityObservable = (
-    entityKey: string,
     schema: Schema,
-    id: string,
-    action: Action
+    actionDispatch: Function,
+    entitySelect$: Observable<APIResource>,
+    entityRequestSelect$: Observable<EntityRequestState>
   ): Observable<EntityInfo> => {
     // This fetching var needs to end up in the state
     return Observable.combineLatest(
       this.store.select(getEntityState),
-      this.store.select(selectEntity(entityKey, id)),
-      this.store.select(selectEntityRequestInfo(entityKey, id))
+      entitySelect$,
+      entityRequestSelect$
     )
       .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
         if (
@@ -75,7 +103,7 @@ export class EntityService {
           !entityRequestInfo.deleting.busy &&
           !entityRequestInfo.deleting.deleted
         ) {
-          this.store.dispatch(action);
+          actionDispatch();
         }
       })
       .filter(([entities, entity, entityRequestInfo]) => {
@@ -89,6 +117,33 @@ export class EntityService {
             metadata: entity.metadata
           } : null
         };
+      });
+  }
+  /**
+   * @param interval - The polling interval in ms.
+   * @param key - The store updating key for the poll
+   */
+  poll(interval = 10000, key = this.refreshKey) {
+    return Observable.interval(interval)
+      .withLatestFrom(
+      this.entitySelect$,
+      this.entityRequestSelect$
+      )
+      .map(a => ({
+        resource: a[1],
+        updatingSection: compose(
+          getUpdateSectionById(key),
+          getEntityUpdateSections,
+          () => a[2]
+        )({})
+      }))
+      .do(({ resource, updatingSection }) => {
+        if (!updatingSection || !updatingSection.busy) {
+          this.actionDispatch(key);
+        }
+      })
+      .filter(({ resource, updatingSection }) => {
+        return !!updatingSection;
       });
   }
 

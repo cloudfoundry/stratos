@@ -57,14 +57,14 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   saveAdd() {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[this.addRow.name] = this.addRow.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.saveAdd();
   }
 
   selectedDelete() {
     const updateApp = this._createUpdateApplication(true);
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.selectedDelete();
   }
@@ -77,7 +77,7 @@ export class CfAppEvnVarsDataSource extends StandardTableDataSource<AppEnvVar> {
   saveEdit() {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[this.editRow.name] = this.editRow.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.saveEdit();
   }

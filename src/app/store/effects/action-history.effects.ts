@@ -17,13 +17,7 @@ export class ActionHistoryEffect {
     .map(() => {
       this.store.select('actionHistory')
         .take(1)
-        .subscribe(history => {
-          console.log('Action History');
-          history.map(item => {
-            console.log(item);
-          });
-        });
-
+        .subscribe();
     });
 }
 

@@ -1,9 +1,9 @@
+import { EntityService } from '../../core/entity-service';
 import { cnsisEntitySelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { getEntityObservable } from '../../store/actions/api.actions';
 import {
   AppMetadataProperties,
   GetAppMetadataAction,
@@ -39,7 +39,10 @@ export interface ApplicationData {
 @Injectable()
 export class ApplicationService {
 
-  constructor(private store: Store<AppState>, private appStateService: ApplicationStateService,
+  constructor(
+    private store: Store<AppState>,
+    private entityService: EntityService,
+    private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsService) {
   }
 
@@ -66,7 +69,7 @@ export class ApplicationService {
   appGuid: string;
   cfGuid: string;
 
-  IsEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
+  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {
@@ -74,7 +77,7 @@ export class ApplicationService {
     }
   }
 
-  IsMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
+  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {
@@ -82,31 +85,16 @@ export class ApplicationService {
     }
   }
 
-  SetApplication(cfGuid, appGuid) {
+  setApplication(cfGuid, appGuid) {
     this.appGuid = appGuid;
     this.cfGuid = cfGuid;
 
     // First set up all the base observables
-    this.app$ = getEntityObservable(
-      this.store,
-      ApplicationSchema.key,
-      ApplicationSchema,
-      appGuid,
-      new GetApplication(appGuid, cfGuid)
-    );
+    this.app$ = this.entityService.entityObs$;
 
-    this.isDeletingApp$ = this.app$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
+    this.isDeletingApp$ = this.entityService.isDeletingEntity$;
 
-    this.waitForAppEntity$ = this.app$
-      .filter((appInfo) => {
-        return (
-          !!appInfo.entity &&
-          !appInfo.entityRequestInfo.deleting.busy &&
-          !appInfo.entityRequestInfo.deleting.deleted &&
-          !appInfo.entityRequestInfo.error
-        );
-      })
-      .delay(1);
+    this.waitForAppEntity$ = this.entityService.waitForEntity$;
 
     this.appSummary$ =
       this.waitForAppEntity$.mergeMap(() => getAppMetadataObservable(
@@ -165,7 +153,7 @@ export class ApplicationService {
     this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStatsGated$)
       .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        return this.appStateService.Get(appInfo.entity.entity, appStats ? appStats.metadata : null);
+        return this.appStateService.get(appInfo.entity.entity, appStats ? appStats.metadata : null);
       });
 
     this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
@@ -199,7 +187,7 @@ export class ApplicationService {
 
   }
 
-  UpdateApplication(updatedApplication: UpdateApplication) {
+  updateApplication(updatedApplication: UpdateApplication) {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
@@ -207,7 +195,7 @@ export class ApplicationService {
     ));
   }
 
-  UpdateApplicationEvVars(updatedApplication: UpdateApplication) {
+  updateApplicationEvVars(updatedApplication: UpdateApplication) {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,

@@ -9,17 +9,23 @@
         <md-icon>clear</md-icon>
       </button>
     </span>
-
     <span *ngIf="!isEditSummary">
       <button md-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
         <md-icon>delete</md-icon>
       </button>
-      <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
+      <button md-icon-button name="edit" *ngIf="(this.applicationState$ | async)" [disabled]="summaryDataChanging$ | async" (click)="startEdit()">
         <md-icon>edit</md-icon>
       </button>
-      <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async" (click)="stopApplication()">
-        <md-icon>stop</md-icon>
-      </button>
+      <span>
+        <button md-icon-button name="stop" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
+          (click)="stopApplication()">
+          <md-icon>stop</md-icon>
+        </button>
+        <button md-icon-button name="start" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
+          (click)="startApplication()">
+          <md-icon>play_arrow</md-icon>
+        </button>
+      </span>
       <button md-icon-button name="edit" [disabled]="summaryDataChanging$ | async">
         <md-icon>autorenew</md-icon>
       </button>
@@ -42,7 +48,7 @@
             <md-list-item role="listitem">
               <app-display-value [label]="'States'">
                 <md-chip-list aria-orientation="vertical">
-                  <md-chip>App: {{(applicationService.application$| async)?.app.entity.state}}</md-chip>
+                  <md-chip>App: {{(applicationService.application$ | async)?.app.entity.state}}</md-chip>
                   <md-chip>Package: {{(applicationService.application$| async)?.app.entity.package_state}}</md-chip>
                 </md-chip-list>
               </app-display-value>

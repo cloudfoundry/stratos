@@ -1,26 +1,51 @@
+import { AppMetadataType } from '../../../store/types/app-metadata.types';
+import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
+import { EntityService } from '../../../core/entity-service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 
-import { DeleteApplication, UpdateApplication } from '../../../store/actions/application.actions';
+import { DeleteApplication, GetApplication, UpdateApplication, ApplicationSchema } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
+
+const entityServiceFactory = (
+  store: Store<AppState>,
+  activatedRoute: ActivatedRoute
+) => {
+  const { id, cfId } = activatedRoute.snapshot.params;
+  return new EntityService(
+    store,
+    ApplicationSchema.key,
+    ApplicationSchema,
+    id,
+    new GetApplication(id, cfId)
+  );
+};
+
 
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
-  providers: [ApplicationService]
+  providers: [
+    ApplicationService,
+    {
+      provide: EntityService,
+      useFactory: entityServiceFactory,
+      deps: [Store, ActivatedRoute]
+    }
+  ]
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
-  [x: string]: any;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private applicationService: ApplicationService,
+    private entityService: EntityService,
     private store: Store<AppState>
   ) { }
 
@@ -29,6 +54,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
+  applicationActions$: Observable<string[]>;
 
   isEditSummary = false;
 
@@ -65,14 +91,34 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   saveEdits() {
     this.endEdit();
-    this.applicationService.UpdateApplication(this.appEdits);
+    this.applicationService.updateApplication(this.appEdits);
   }
 
   stopApplication() {
     this.endEdit();
-    this.applicationService.UpdateApplication({
-      state: 'STOPPED'
+    const stoppedString = 'STOPPED';
+    this.applicationService.updateApplication({
+      state: stoppedString
     });
+    this.entityService.poll(1000, 'stopping')
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== stoppedString;
+      }).subscribe();
+  }
+
+  startApplication() {
+    this.endEdit();
+    const startedString = 'STARTED';
+    this.applicationService.updateApplication({
+      state: startedString
+    });
+    this.entityService.poll(1000, 'starting')
+      .takeWhile(({ resource, updatingSection }) => {
+        console.log(resource.entity.state)
+        return resource.entity.state !== startedString;
+      })
+      .delay(1)
+      .subscribe();
   }
 
   setAppDefaults() {
@@ -86,11 +132,14 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setAppDefaults();
 
-    this.sub.push(this.route.params.subscribe(params => {
+    this.route.params.first().subscribe(params => {
       const { id, cfId } = params;
-      this.applicationService.SetApplication(cfId, id);
+      this.applicationService.setApplication(cfId, id);
       this.isFetching$ = this.applicationService.isFetchingApp$;
-    }));
+      this.entityService.poll().do(() => {
+        this.store.dispatch(new GetAppMetadataAction(id, cfId, AppMetadataProperties.SUMMARY as AppMetadataType));
+      }).subscribe();
+    });
 
     this.summaryDataChanging$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,
@@ -102,6 +151,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       const isUpdating = isUpdatingApp;
       return isFetching || isUpdating;
     });
+
+
 
     this.sub.push(this.summaryDataChanging$
       .filter((isChanging) => {

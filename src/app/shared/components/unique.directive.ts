@@ -18,9 +18,5 @@ export class UniqueDirective implements Validator {
       }
     } : null;
   }
-  // registerOnValidatorChange?(fn: () => void): void {
-  //   console.log('2sdfdsfdsfsdf');
-  //   throw new Error('Method not implemented.');
-  // }
 
 }

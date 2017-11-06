@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 export interface ApplicationStateData {
   label: string;
   indicator: string;
-  actions: string;
+  actions: {
+    [key: string]: boolean
+  };
 }
 
 @Injectable()
@@ -57,7 +59,7 @@ export class ApplicationStateService {
       '*NONE*': {
         label: 'Incomplete',
         indicator: 'warning',
-        actions: 'delete, cli'
+        actions: 'delete,cli'
       }
     },
     STARTED: {
@@ -140,7 +142,7 @@ export class ApplicationStateService {
         this.mapActions(v);
       } else if (k === 'actions') {
         const map = {};
-        v.split(',').array.forEach(a => {
+        v.array.forEach(a => {
           map[a.trim()] = true;
         });
         obj.actions = map;
@@ -153,6 +155,10 @@ export class ApplicationStateService {
     this.mapActions(this.stateMetadata);
   }
 
+  actionIsAvailable(applicationState: string, action: string) {
+
+  }
+
   /**
 * @description Get the application state metadata for an application based on its summary and
 * optionally its instance metadata.
@@ -160,7 +166,7 @@ export class ApplicationStateService {
 * @param {object} appInstances - the application instances metadata (from the app stats API call)
 * @returns {object} Object representing the state metadata for the application
 */
-  Get(summary: any, appInstances: any): ApplicationStateData {
+  get(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
     const wildcard = this.stateMetadata['?'];
@@ -213,7 +219,7 @@ export class ApplicationStateService {
     return {
       label: 'Unknown',
       indicator: 'error',
-      actions: ''
+      actions: null
     };
   }
 
