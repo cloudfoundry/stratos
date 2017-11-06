@@ -37,7 +37,7 @@
             </div>
           </div>
         </div>
-        <div class="listComponent__header__bottom" [hidden]="(!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
+        <div class="listComponent__header__bottom" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
           <div class="listComponent__header__right">
             <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)" class="sort">
               <!-- <md-form-field floatPlaceholder="never"> -->

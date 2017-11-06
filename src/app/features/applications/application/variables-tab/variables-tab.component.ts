@@ -41,12 +41,10 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
       class: 'table-column-select'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
-      sort: { disableClear: true }
+      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: true
     },
     {
-      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent,
-      sort: { disableClear: true }
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true
     },
     {
       columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent,

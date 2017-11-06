@@ -41,8 +41,7 @@ export class EventsTabComponent implements OnInit, OnDestroy {
   hasEvents$: Observable<boolean>;
   columns: Array<ITableColumn<EntityInfo>> = [
     {
-      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
-      sort: { disableClear: true }
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true
     },
     {
       columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellEventTypeComponent

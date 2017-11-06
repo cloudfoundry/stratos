@@ -11,7 +11,6 @@ export class ListPagination {
 export class ListSort {
   field: string;
   direction: SortDirection;
-  disableClear?: boolean;
 }
 
 export class ListFilter {

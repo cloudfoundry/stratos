@@ -26,9 +26,7 @@ export interface ITableColumn<T> {
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
   class?: string;
-  sort?: {
-    disableClear: boolean;
-  };
+  sort?: boolean;
 }
 
 export interface ITableText {
@@ -71,39 +69,23 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   ngOnInit() {
     this.columnNames = this.columns.map(x => x.columnId);
 
-    // const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
-    //   this.paginator.length = pagination.totalResults;
-    //   this.paginator.pageIndex = pagination.pageIndex;
-    //   this.paginator.pageSize = pagination.pageSize;
-    //   this.paginator.pageSizeOptions = pagination.pageSizeOptions;
-    // });
-
-    // const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
-    //   this._store.dispatch(new SetListPaginationAction(
-    //     this.dataSource.listStateKey,
-    //     {
-    //       pageSize: page.pageSize,
-    //       pageIndex: page.pageIndex,
-    //     }
-    //   ));
-    // });
-
     const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
-      if (this.sort.active !== sort.field || this.sort.start !== sort.direction || this.sort.disableClear !== sort.disableClear) {
-        // this.sort.sort({
-        //   id: sort.field,
-        //   start: sort.direction as 'asc' | 'desc',
-        //   disableClear: sort.disableClear
-        // });
+      // || this.sort.disableClear !== sort.disableClear
+      if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
+        this.sort.sort({
+          id: sort.field,
+          start: sort.direction as 'asc' | 'desc',
+          disableClear: true
+        });
         // this.sort.mdSortChange.emit({
         //   active: sort.field,
         //   direction: sort.direction
         // });
       }
 
-      this.sort.active = sort.field;
-      this.sort.direction = sort.direction;
-      this.sort.disableClear = sort.disableClear;
+      // this.sort.active = sort.field;
+      // this.sort.direction = sort.direction;
+      // this.sort.disableClear = sort.disableClear;
     });
 
     const sortWidgetToStore = this.sort.mdSortChange.do((sort: Sort) => {

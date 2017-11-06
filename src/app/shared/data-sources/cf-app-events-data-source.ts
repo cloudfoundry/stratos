@@ -62,7 +62,7 @@ export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
       },
       {
         direction: action.initialParams['order-direction'] as SortDirection,
-        field: action.initialParams['order-direction-field']
+        field: action.initialParams['order-direction-field'],
       },
       {
         filter: ''
