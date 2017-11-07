@@ -20,6 +20,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
+import { listReducer } from './reducers/list.reducer';
 
 
 export function logger(reducer): any {
@@ -67,6 +68,7 @@ export const appReducers = {
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,
   actionHistory: actionHistoryReducer,
+  lists: listReducer,
 };
 // TODO: Add the below line back in once https://github.com/ngrx/platform/issues/446 is confirmed fixed (bug spams ROUTER_CANCEL on log in)
 // routerReducer: routerReducer,

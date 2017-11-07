@@ -46,10 +46,10 @@ export function selectEntityRequestInfo(type: string, guid: string) {
   );
 }
 
+
 export function getEntityState(state: AppState) {
   return state.entities;
 }
-
 export function getEntityType(type: string) {
   return (entityState) => {
     return entityState[type] || {};

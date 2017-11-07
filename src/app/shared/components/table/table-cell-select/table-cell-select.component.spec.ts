@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellSelectComponent } from './table-cell-select.component';
 import { CoreModule } from '../../../../core/core.module';
-import { ITableDataSource } from '../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../data-sources/list-data-source';
 
 describe('TableCellSelectComponent', () => {
   let component: TableCellSelectComponent<any>;
@@ -22,7 +22,7 @@ describe('TableCellSelectComponent', () => {
     fixture = TestBed.createComponent(TableCellSelectComponent);
     component = fixture.componentInstance;
     component.row = {};
-    component.dataSource = {} as ITableDataSource<any>;
+    component.dataSource = {} as IListDataSource<any>;
     fixture.detectChanges();
   });
 

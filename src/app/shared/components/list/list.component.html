@@ -1,0 +1,78 @@
+<!-- TODO: Error cases for both-->
+<div class="listComponent">
+  <div class="listComponent__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }">
+    <md-card>
+      <md-card-header>
+        <div class="listComponent__header__top">
+          <div class="spacer listComponent__header__left">
+            <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">{{ text?.title }}</div>
+            <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
+          </div>
+          <div class="listComponent__header__right">
+            <div [hidden]="(dataSource.isAdding$ | async) || (dataSource.isSelecting$ | async)">
+              <!-- No way to disable an md-paginator yet -->
+              <md-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize"
+                [pageSizeOptions]="[]">
+              </md-paginator>
+            </div>
+            <div [hidden]="!(dataSource.isSelecting$ | async)">
+              <button md-icon-button (click)="dataSource.selectedDelete()">
+                  <md-icon>delete</md-icon>
+                </button>
+            </div>
+            <div [hidden]="!(dataSource.isAdding$ | async)" class="add-container">
+              <div class="spacer"></div>
+              <ng-content select="[app-table-add]"></ng-content>
+              <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
+              <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
+            </div>
+            <div [hidden]="(dataSource.isSelecting$ | async)">
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="addForm && !(dataSource.isAdding$ | async)"
+                (click)="safeAddForm().reset();dataSource.startAdd();"><md-icon>add</md-icon></button>
+            </div>
+            <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'"><md-icon>grid_on</md-icon></button>
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'"><md-icon>list</md-icon></button>
+            </div>
+          </div>
+        </div>
+        <div class="listComponent__header__bottom">
+          <div class="listComponent__header__right">
+            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+              <button md-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)"
+                *ngIf="headerSortDirection==='asc'"><md-icon>sort</md-icon></button>
+              <button md-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)"
+                *ngIf="headerSortDirection==='desc'"><md-icon style="transform: rotate(180deg);">sort</md-icon></button>
+              <md-select mdInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
+                <md-option *ngFor="let column of sortColumns" [value]="column.columnId">
+                  {{column.headerCell()}}
+                </md-option>
+              </md-select>
+            </div>
+            <div class="filter" [hidden]="!enableFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
+              <md-form-field floatPlaceholder="never">
+                <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
+              </md-form-field>
+            </div>
+          </div>
+        </div>
+      </md-card-header>
+    </md-card>
+    <div style="height: 5px;">
+      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
+        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
+      </div>
+    </div>
+  </div>
+  <div class="listComponent__body">
+    <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
+    <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [columns]="columns" [text]="text"
+      [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
+    </app-table>
+    <md-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.pagination$ | async)?.totalResults > 0">
+      <md-card-content>
+        <div class="no-rows">There are no entries.</div>
+      </md-card-content>
+    </md-card>
+  </div>
+</div>

@@ -53,6 +53,7 @@ const importExport = [
   MdPaginatorModule,
   MdSortModule,
   MdDialogModule,
+  MdButtonToggleModule,
   MdMenuModule
 ];
 

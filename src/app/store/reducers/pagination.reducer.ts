@@ -251,7 +251,6 @@ export const getPaginationObservables = (function () {
     };
 
     mem[_key] = obs;
-    console.log(_key);
 
     return obs;
   };
