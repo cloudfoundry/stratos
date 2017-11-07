@@ -11,7 +11,8 @@
           <div class="listComponent__header__right">
             <div [hidden]="(dataSource.isAdding$ | async) || (dataSource.isSelecting$ | async)">
               <!-- No way to disable an md-paginator yet -->
-              <md-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
+              <md-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize"
+                [pageSizeOptions]="[]">
               </md-paginator>
             </div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">

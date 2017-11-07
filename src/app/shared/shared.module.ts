@@ -36,7 +36,9 @@ import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
 import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
 import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
-import { AppEventDetailDialogComponentComponent } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+import {
+  AppEventDetailDialogComponentComponent
+} from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 
 
 @NgModule({

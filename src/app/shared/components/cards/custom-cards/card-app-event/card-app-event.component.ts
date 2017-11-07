@@ -1,3 +1,4 @@
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import {
   AppEventDetailDialogComponentComponent,
 } from './app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -14,13 +15,14 @@ import {
   TableCellEventTimestampComponent
 } from '../../../table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { MdDialog } from '@angular/material';
+import { EntityInfo } from '../../../../../store/types/api.types';
 
 @Component({
   selector: 'app-card-event',
   templateUrl: './card-app-event.component.html',
   styleUrls: ['./card-app-event.component.scss']
 })
-export class CardEventComponent extends TableCellCustom<AppEvent> {
+export class CardEventComponent extends TableCellCustom<EntityInfo> {
   timestampComponent = TableCellEventTimestampComponent;
   actorComponent = TableCellEventActionComponent;
   detailComponent = TableCellEventDetailComponent;

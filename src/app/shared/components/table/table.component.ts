@@ -69,22 +69,13 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
     this.columnNames = this.columns.map(x => x.columnId);
 
     const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
-      // || this.sort.disableClear !== sort.disableClear
       if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
         this.sort.sort({
           id: sort.field,
           start: sort.direction as 'asc' | 'desc',
           disableClear: true
         });
-        // this.sort.mdSortChange.emit({
-        //   active: sort.field,
-        //   direction: sort.direction
-        // });
       }
-
-      // this.sort.active = sort.field;
-      // this.sort.direction = sort.direction;
-      // this.sort.disableClear = sort.disableClear;
     });
 
     const sortWidgetToStore = this.sort.mdSortChange.do((sort: Sort) => {
@@ -97,28 +88,9 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
       ));
     });
 
-    // const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
-    //   this.filter.model = filter.filter;
-    // });
-
-    // const filterWidgeToStore = this.filter.valueChanges
-    //   .debounceTime(150)
-    //   .distinctUntilChanged()
-    //   .map(value => value as string)
-    //   .do((stFilter: string) => {
-    //     this._store.dispatch(new SetListFilterAction(
-    //       this.dataSource.listStateKey,
-    //       {
-    //         filter: stFilter
-    //       }
-    //     ));
-    //   });
-
     this.uberSub = Observable.combineLatest(
       sortStoreToWidget,
       sortWidgetToStore,
-      // filterStoreToWidget,
-      // filterWidgeToStore
     ).subscribe();
   }
 

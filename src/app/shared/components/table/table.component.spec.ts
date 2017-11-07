@@ -24,12 +24,14 @@ import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/ev
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { IListDataSource } from '../../data-sources/list-data-source';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { appReducers } from '../../../store/reducers.module';
+import { StoreModule } from '@ngrx/store';
+import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 
 describe('TableComponent', () => {
-  let component: TableComponent<any>;
-  let fixture: ComponentFixture<TableComponent<any>>;
-
-
+  let component: TableComponent<AppEnvVar>;
+  let fixture: ComponentFixture<TableComponent<AppEnvVar>>;
+  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -50,6 +52,10 @@ describe('TableComponent', () => {
       imports: [
         CoreModule,
         NoopAnimationsModule,
+        StoreModule.forRoot(appReducers,
+          {
+            initialState
+          })
       ]
     })
       .compileComponents();
@@ -62,29 +68,30 @@ describe('TableComponent', () => {
     const mdPaginatorIntl: MdPaginatorIntl = new MdPaginatorIntl();
     component.dataSource = {
       connect() { return Observable.of([]); },
-      initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
-      selectedRows: new Map(),
-      mdPaginator: new MdPaginator(mdPaginatorIntl, {} as ChangeDetectorRef),
-      listStateKey: 'listKey',
-      view$: Observable.of('table' as ListView),
-      state$: Observable.of({} as ListState),
-      pagination$: Observable.of({} as ListPagination),
       sort$: Observable.of({} as ListSort),
-      filter$: Observable.of({} as ListFilter),
-      page$: Observable.of(new Array<AppEnvVar>()),
-      addItem: null,
-      isAdding$: new BehaviorSubject(false),
-      isSelecting$: new BehaviorSubject(false),
-      editRow: null,
-      selectAllChecked: false,
-      selectAllFilteredRows: () => { },
-      selectedRowToggle: (row: AppEnvVar) => { },
-      startEdit: (row: AppEnvVar) => { },
-      saveEdit: () => { },
-      cancelEdit: () => { },
-      destroy: () => { }
     } as IListDataSource<AppEnvVar>;
-    // component.dataSource.selectedRows = new Map<string, AppEnvVar>();
+    // connect() { return Observable.of([]); },
+    // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
+    // selectedRows: new Map(),
+    // mdPaginator: new MdPaginator(mdPaginatorIntl, {} as ChangeDetectorRef),
+    // listStateKey: 'listKey',
+    // view$: Observable.of('table' as ListView),
+    // state$: Observable.of({} as ListState),
+    // pagination$: Observable.of({} as ListPagination),
+    // sort$: Observable.of({} as ListSort),
+    // filter$: Observable.of({} as ListFilter),
+    // page$: Observable.of(new Array<AppEnvVar>()),
+    // addItem: null,
+    // isAdding$: new BehaviorSubject(false),
+    // isSelecting$: new BehaviorSubject(false),
+    // editRow: null,
+    // selectAllChecked: false,
+    // selectAllFilteredRows: () => { },
+    // selectedRowToggle: (row: AppEnvVar) => { },
+    // startEdit: (row: AppEnvVar) => { },
+    // saveEdit: () => { },
+    // cancelEdit: () => { },
+    // destroy: () => { }
 
     component.columns = new Array<ITableColumn<any>>();
 
