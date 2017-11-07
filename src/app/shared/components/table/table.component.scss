@@ -18,6 +18,9 @@
    //      }
    //    }
    //  }
+   //  md-card-heade[hidden] {
+   //    display: none;
+   //  }
    md-card-content {
      md-table {
        &[hidden] * {
@@ -60,10 +63,5 @@
          height: 57px;
        }
      }
-   } //  md-card-footer {
-   //    margin: 0;
-   //  }
-   //  md-paginator[hidden] {
-   //    display: none;
-   //  }
+   }
  }

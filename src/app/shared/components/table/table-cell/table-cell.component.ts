@@ -44,10 +44,7 @@ export class TableCellComponent<T> implements OnInit {
     if (this.component) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
       // Add to target to ensure ngcontent is correct in new component
-      const componentRef = this.target.createComponent(
-        componentFactory,
-        0,
-        undefined, );
+      const componentRef = this.target.createComponent(componentFactory);
       const cellComponent = <TableCellCustom<T>>componentRef.instance;
       cellComponent.row = this.row;
       cellComponent.dataSource = this.dataSource;

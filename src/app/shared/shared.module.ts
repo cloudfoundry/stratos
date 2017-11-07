@@ -34,8 +34,9 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
 import { ListComponent } from './components/list/list.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
-import { CardEventComponent } from './components/cards/custom-cards/card-event/card-event.component';
 import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
+import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
+import { AppEventDetailDialogComponentComponent } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 
 
 @NgModule({
@@ -74,6 +75,7 @@ import { CardAppVariableComponent } from './components/cards/custom-cards/card-a
     CardComponent,
     CardEventComponent,
     CardAppVariableComponent,
+    AppEventDetailDialogComponentComponent,
   ],
   exports: [
     FormsModule,
@@ -95,5 +97,6 @@ import { CardAppVariableComponent } from './components/cards/custom-cards/card-a
     ListComponent,
     CardsComponent,
   ],
+  entryComponents: [AppEventDetailDialogComponentComponent]
 })
 export class SharedModule { }

@@ -25,7 +25,7 @@ import {
 import {
   TableCellEventDetailComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
-import { CardEventComponent } from '../../../../shared/components/cards/custom-cards/card-event/card-event.component';
+import { CardEventComponent } from '../../../../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
 
 @Component({
   selector: 'app-events-tab',

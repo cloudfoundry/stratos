@@ -1,10 +1,5 @@
 <div class="app-table">
   <div>
-    <div style="height: 5px;">
-      <div [hidden]="!(dataSource.isLoadingPage$ | async)">
-        <md-progress-bar color="primary" [mode]="'query'"></md-progress-bar>
-      </div>
-    </div>
     <md-card>
       <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.listPagination$ | async)?.totalResults === 0">
       </md-card-header>

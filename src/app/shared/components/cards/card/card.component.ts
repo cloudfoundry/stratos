@@ -1,7 +1,8 @@
 import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
-import { CardEventComponent } from '../custom-cards/card-event/card-event.component';
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
+import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
+import { ITableDataSource } from '../../../data-sources/table-data-source';
 
 @Component({
   selector: 'app-card',
@@ -16,6 +17,8 @@ export class CardComponent<T> implements OnInit {
 
   @Input('component') component: Type<{}>;
   @Input('item') item: T;
+  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+
   @ViewChild('target', { read: ViewContainerRef }) target;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
@@ -29,7 +32,7 @@ export class CardComponent<T> implements OnInit {
     const componentRef = this.target.createComponent(componentFactory);
     const cardComponent = <TableCellCustom<T>>componentRef.instance;
     cardComponent.row = this.item;
-    // cardComponent.dataSource = this
+    cardComponent.dataSource = this.dataSource;
   }
 
 }
