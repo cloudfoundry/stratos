@@ -8,16 +8,16 @@
           [dataSource]="dataSource" mdSort>
           <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnId">
             <div *ngIf="column.sort">
-              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
                 <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
               </md-header-cell>
             </div>
             <div *ngIf="!column.sort">
-              <md-header-cell *mdHeaderCellDef [ngClass]="column.class">
+              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" [style.flex]="column.cellFlex">
                 <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
               </md-header-cell>
             </div>
-            <md-cell *mdCellDef="let row" [ngClass]="column.class">
+            <md-cell *mdCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
               <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
             </md-cell>
           </ng-container>

@@ -76,14 +76,15 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     const { view, pagination, sort, filter } = getListStateObservables(this.store, listStateKey);
     this.listView$ = view;
     this.listPagination$ = pagination.filter(x => !!x);
-    this.listSort$ = sort.filter(x => !!x);
+    this.listSort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
+      return x.direction === y.direction && x.field === y.field;
+    });
     this.listFilter$ = filter.filter(x => !!x);
   }
 
   abstract connect(): Observable<T[]>;
   disconnect() { }
   destroy() { }
-
 
   startAdd() {
     this.addRow = { ... (this._emptyType as object) } as T;

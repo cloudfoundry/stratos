@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { ITableDataSource } from '../../data-sources/table-data-source';
 import { ITableColumn, ITableText } from '../table/table.component';
 import { NgForm, NgModel } from '@angular/forms';
@@ -16,7 +16,7 @@ import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from 
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss']
 })
-export class ListComponent<T> implements OnInit, OnDestroy {
+export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
   @Input('dataSource') dataSource = null as ITableDataSource<T>;
@@ -42,7 +42,7 @@ export class ListComponent<T> implements OnInit, OnDestroy {
     return this.addForm || {};
   }
 
-  constructor(private _store: Store<AppState>) { }
+  constructor(private _store: Store<AppState>, private cd: ChangeDetectorRef) { }
 
   ngOnInit() {
 
@@ -68,7 +68,7 @@ export class ListComponent<T> implements OnInit, OnDestroy {
     });
 
     const filterWidgeToStore = this.filter.valueChanges
-      .debounceTime(150)
+      .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
       .do((stFilter: string) => {
@@ -86,21 +86,7 @@ export class ListComponent<T> implements OnInit, OnDestroy {
     const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
       this.headerSortField.value = sort.field;
       this.headerSortDirection = sort.direction;
-      // this.sort.disableClear = sort.disableClear;
     });
-
-    // const sortWidgetToStore = Observable.combineLatest(
-    //   this.headerSortField.change.asObservable(),
-    //   this.headerSortDirectionChanged.asObservable()
-    // ).do(([field, direction]: [MdSelectChange, SortDirection]) => {
-    //   this._store.dispatch(new SetListSortAction(
-    //     this.dataSource.listStateKey,
-    //     {
-    //       field: field.value,
-    //       direction: direction,
-    //     }
-    //   ));
-    // });
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
@@ -108,10 +94,13 @@ export class ListComponent<T> implements OnInit, OnDestroy {
       filterStoreToWidget,
       filterWidgeToStore,
       sortStoreToWidget,
-      // sortWidgetToStore
     ).subscribe();
 
     this.dataSource.connect();
+  }
+
+  ngAfterViewInit() {
+    this.cd.detectChanges();
   }
 
   ngOnDestroy() {

@@ -7,13 +7,10 @@ import { MD_DIALOG_DATA, MdDialogRef } from '@angular/material';
   templateUrl: './app-event-detail-dialog-component.component.html',
   styleUrls: ['./app-event-detail-dialog-component.component.scss']
 })
-export class AppEventDetailDialogComponentComponent implements OnInit {
+export class AppEventDetailDialogComponentComponent {
 
   constructor(
     public dialogRef: MdDialogRef<AppEventDetailDialogComponentComponent>,
     @Optional() @Inject(MD_DIALOG_DATA) public data: any) { }
-
-  ngOnInit() {
-  }
 
 }

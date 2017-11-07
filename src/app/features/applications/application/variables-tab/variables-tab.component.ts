@@ -38,17 +38,16 @@ export class VariablesTabComponent implements OnInit, OnDestroy {
   columns: Array<ITableColumn<AppEnvVar>> = [
     {
       columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
-      class: 'table-column-select'
+      class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: true
+      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '5'
     },
     {
-      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent,
-      class: 'table-column-edit'
+      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
     },
   ];
   cardComponent = CardAppVariableComponent;

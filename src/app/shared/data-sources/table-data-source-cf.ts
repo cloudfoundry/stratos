@@ -26,7 +26,7 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   private cfPaginationWithListPagination$;
   private sortSub$;
 
-  public isLoadingPage$: Observable<boolean>;
+  public isLoadingPage$: Observable<boolean> = Observable.of(false);
   public filteredRows: Array<T>;
 
   constructor(
@@ -84,12 +84,10 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
     ).subscribe();
 
     this.cfPagination$ = pagination$;
-
-    this.isLoadingPage$ = pagination$.map((pag: PaginationEntityState) => pag.fetching);
+    this.isLoadingPage$ = this.cfPagination$.map((pag: PaginationEntityState) => pag.fetching);
   }
 
   connect(): Observable<T[]> {
-    console.log('source-cf connect');
     if (!this.page$) {
       this.page$ = Observable.combineLatest(
         this.cfPagination$,
@@ -103,7 +101,6 @@ export abstract class CfTableDataSource<T extends object> extends TableDataSourc
   }
 
   destroy() {
-    console.log('source-cf destroy');
     this.cfUberSub.unsubscribe();
   }
 }

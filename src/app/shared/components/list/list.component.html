@@ -36,25 +36,22 @@
           </div>
         </div>
         <div class="listComponent__header__bottom">
-          <div class="listComponent__header__right" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
-            <div class="sort">
+          <div class="listComponent__header__right">
+            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)"
                 *ngIf="headerSortDirection==='asc'"><md-icon>sort</md-icon></button>
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)"
                 *ngIf="headerSortDirection==='desc'"><md-icon style="transform: rotate(180deg);">sort</md-icon></button>
-              <md-select mdInput name="headerSortField" #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource.isLoadingPage$ | async)"
-                (change)="updateListSort($event.value, headerSortDirection)">
+              <md-select mdInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
                 <md-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}
                 </md-option>
               </md-select>
             </div>
-            <div class="filter">
-              <div [hidden]="!enableFilter || ((dataSource.listPagination$ | async)?.totalResults === 0 && !filter) ">
-                <md-form-field floatPlaceholder="never">
-                  <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
-                </md-form-field>
-              </div>
+            <div class="filter" [hidden]="!enableFilter || ((dataSource.listPagination$ | async)?.totalResults === 0 && !filter) ">
+              <md-form-field floatPlaceholder="never">
+                <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
+              </md-form-field>
             </div>
           </div>
         </div>

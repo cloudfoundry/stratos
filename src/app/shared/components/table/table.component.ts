@@ -27,6 +27,7 @@ export interface ITableColumn<T> {
   headerCellComponent?: any;
   class?: string;
   sort?: boolean;
+  cellFlex?: string;
 }
 
 export interface ITableText {
