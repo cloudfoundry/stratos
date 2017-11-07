@@ -12,15 +12,15 @@ import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } fr
 
 export interface IListDataSource<T> {
   listStateKey: string;
-  listView$: Observable<ListView>;
-  listState$: Observable<ListState>;
-  listPagination$: Observable<ListPagination>;
-  listSort$: Observable<ListSort>;
-  listFilter$: Observable<ListFilter>;
+  view$: Observable<ListView>;
+  state$: Observable<ListState>;
+  pagination$: Observable<ListPagination>;
+  sort$: Observable<ListSort>;
+  filter$: Observable<ListFilter>;
 
   page$: Observable<T[]>;
 
-  addItem;
+  addItem: T;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 
@@ -43,11 +43,11 @@ export type getRowUniqueId = (T) => string;
 
 export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
 
-  public listView$: Observable<ListView>;
-  public listState$: Observable<ListState>;
-  public listPagination$: Observable<ListPagination>;
-  public listSort$: Observable<ListSort>;
-  public listFilter$: Observable<ListFilter>;
+  public view$: Observable<ListView>;
+  public state$: Observable<ListState>;
+  public pagination$: Observable<ListPagination>;
+  public sort$: Observable<ListSort>;
+  public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
 
   public abstract isLoadingPage$: Observable<boolean>;
@@ -72,14 +72,14 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     super();
     this.addItem = { ... (_emptyType as object) } as T;
 
-    this.listState$ = getListStateObservable(this._store, listStateKey);
+    this.state$ = getListStateObservable(this._store, listStateKey);
     const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
-    this.listView$ = view;
-    this.listPagination$ = pagination.filter(x => !!x);
-    this.listSort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
+    this.view$ = view;
+    this.pagination$ = pagination.filter(x => !!x);
+    this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
       return x.direction === y.direction && x.field === y.field;
     });
-    this.listFilter$ = filter.filter(x => !!x);
+    this.filter$ = filter.filter(x => !!x);
   }
 
   abstract connect(): Observable<T[]>;

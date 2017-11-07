@@ -46,7 +46,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
 
-    const paginationStoreToWidget = this.dataSource.listPagination$.do((pagination: ListPagination) => {
+    const paginationStoreToWidget = this.dataSource.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex;
       this.paginator.pageSize = pagination.pageSize;
@@ -63,7 +63,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       ));
     });
 
-    const filterStoreToWidget = this.dataSource.listFilter$.do((filter: ListFilter) => {
+    const filterStoreToWidget = this.dataSource.filter$.do((filter: ListFilter) => {
       this.filter.model = filter.filter;
     });
 
@@ -83,7 +83,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
-    const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
+    const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
       this.headerSortField.value = sort.field;
       this.headerSortDirection = sort.direction;
     });

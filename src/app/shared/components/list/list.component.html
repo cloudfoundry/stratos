@@ -11,7 +11,7 @@
           <div class="listComponent__header__right">
             <div [hidden]="(dataSource.isAdding$ | async) || (dataSource.isSelecting$ | async)">
               <!-- No way to disable an md-paginator yet -->
-              <md-paginator #paginator [hidden]="(dataSource.listPagination$ | async)?.totalResults === 0 || (dataSource.listPagination$ | async)?.totalResults < (dataSource.listPagination$ | async)?.pageSize">
+              <md-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
               </md-paginator>
             </div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">
@@ -29,15 +29,15 @@
               <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="addForm && !(dataSource.isAdding$ | async)"
                 (click)="safeAddForm().reset();dataSource.startAdd();"><md-icon>add</md-icon></button>
             </div>
-            <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
-              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.listView$ | async)==='table'"><md-icon>grid_on</md-icon></button>
-              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.listView$ | async)==='cards'"><md-icon>list</md-icon></button>
+            <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'"><md-icon>grid_on</md-icon></button>
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'"><md-icon>list</md-icon></button>
             </div>
           </div>
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__right">
-            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0)">
+            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)"
                 *ngIf="headerSortDirection==='asc'"><md-icon>sort</md-icon></button>
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)"
@@ -48,7 +48,7 @@
                 </md-option>
               </md-select>
             </div>
-            <div class="filter" [hidden]="!enableFilter || ((dataSource.listPagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
+            <div class="filter" [hidden]="!enableFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <md-form-field floatPlaceholder="never">
                 <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
               </md-form-field>
@@ -64,12 +64,11 @@
     </div>
   </div>
   <div class="listComponent__body">
-    <app-cards *ngIf="(dataSource.listView$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent"
-      [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0"></app-cards>
-    <app-table *ngIf="(dataSource.listView$ | async) === 'table'" #table [dataSource]="dataSource" [columns]="columns" [text]="text"
-      [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0">
+    <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
+    <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [columns]="columns" [text]="text"
+      [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
     </app-table>
-    <md-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.listPagination$ | async)?.totalResults > 0">
+    <md-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.pagination$ | async)?.totalResults > 0">
       <md-card-content>
         <div class="no-rows">There are no entries.</div>
       </md-card-content>

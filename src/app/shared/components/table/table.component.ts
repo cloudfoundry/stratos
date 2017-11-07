@@ -68,7 +68,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   ngOnInit() {
     this.columnNames = this.columns.map(x => x.columnId);
 
-    const sortStoreToWidget = this.dataSource.listSort$.do((sort: ListSort) => {
+    const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
       // || this.sort.disableClear !== sort.disableClear
       if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
         this.sort.sort({

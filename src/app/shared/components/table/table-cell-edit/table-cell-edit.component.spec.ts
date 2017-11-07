@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEditComponent } from './table-cell-edit.component';
 import { CoreModule } from '../../../../core/core.module';
-import { IListDataSource } from '../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../data-sources/list-data-source';
 
 describe('TableCellEditComponent', () => {
   let component: TableCellEditComponent<any>;

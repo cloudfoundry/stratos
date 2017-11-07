@@ -1,10 +1,10 @@
 <div class="app-table">
   <div>
     <md-card>
-      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.listPagination$ | async)?.totalResults === 0">
+      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0">
       </md-card-header>
       <md-card-content>
-        <md-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0"
+        <md-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"
           [dataSource]="dataSource" mdSort>
           <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnId">
             <div *ngIf="column.sort">
@@ -21,8 +21,7 @@
               <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
             </md-cell>
           </ng-container>
-          <md-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.listPagination$ | async)?.totalResults === 0"
-            *mdHeaderRowDef="columnNames"></md-header-row>
+          <md-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *mdHeaderRowDef="columnNames"></md-header-row>
           <md-row *mdRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></md-row>
         </md-table>
       </md-card-content>

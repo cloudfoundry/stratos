@@ -1,8 +1,8 @@
-import { IListDataSource } from '../../../data-sources/table-data-source';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableHeaderSelectComponent } from './table-header-select.component';
 import { CoreModule } from '../../../../core/core.module';
+import { IListDataSource } from '../../../data-sources/list-data-source';
 
 describe('TableHeaderSelectComponent', () => {
   let component: TableHeaderSelectComponent<any>;

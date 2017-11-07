@@ -32,9 +32,9 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
     if (!this.page$) {
       this.page$ = this.data$
         .combineLatest(
-        this.listPagination$,
-        this.listSort$,
-        this.listFilter$,
+        this.pagination$,
+        this.sort$,
+        this.filter$,
       )
         .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
           // TODO: RC caching?? catch no-ops?

@@ -69,7 +69,7 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
       }));
 
 
-    const cfFilter$ = this.listFilter$.withLatestFrom(this.cfPagination$)
+    const cfFilter$ = this.filter$.withLatestFrom(this.cfPagination$)
       .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
         if (filter && filter.filter && filter.filter.length) {
           const q = pag.params.q;

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CardEventComponent } from './card-app-event.component';
 
-import { CardEventComponent } from './card-event.component';
 
 describe('CardEventComponent', () => {
   let component: CardEventComponent;
@@ -8,9 +8,9 @@ describe('CardEventComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CardEventComponent ]
+      declarations: [CardEventComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

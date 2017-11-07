@@ -48,7 +48,7 @@ export abstract class CfListDataSource<T extends object> extends ListDataSource<
     this.entities$ = entities$;
 
     // Track changes from listPagination to cfPagination
-    this.listPaginationWithCfPagination$ = this.listPagination$.withLatestFrom(pagination$)
+    this.listPaginationWithCfPagination$ = this.pagination$.withLatestFrom(pagination$)
       .do(([listPagination, pag]: [ListPagination, PaginationEntityState]) => {
         if (pag.params[resultPerPageParam] !== listPagination.pageSize) {
           this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
@@ -61,7 +61,7 @@ export abstract class CfListDataSource<T extends object> extends ListDataSource<
       });
 
     // Track changes from cfPagination to listPagination. This should be the only one
-    this.cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.listPagination$)
+    this.cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.pagination$)
       .do(([pag, listPagination]: [PaginationEntityState, ListPagination]) => {
         if (pag.totalResults !== listPagination.totalResults) {
           this._cfStore.dispatch(new SetListPaginationAction(this._cfListStateKey, {
@@ -71,7 +71,7 @@ export abstract class CfListDataSource<T extends object> extends ListDataSource<
       });
 
     // Track changes from listSort to cfPagination
-    this.sortSub$ = this.listSort$.do((sortObj: ListSort) => {
+    this.sortSub$ = this.sort$.do((sortObj: ListSort) => {
       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
         'order-direction': sortObj.direction
       }));
