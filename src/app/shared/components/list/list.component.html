@@ -51,7 +51,7 @@
             </div>
             <div class="filter" [hidden]="!enableFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <md-form-field floatPlaceholder="never">
-                <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter Rows'}}">
+                <input mdInput ngModel #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter'}}">
               </md-form-field>
             </div>
           </div>
