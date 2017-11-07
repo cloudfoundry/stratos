@@ -146,6 +146,12 @@ the following configuration should be used
   "pp": "https://localhost/pp"
 }
 ```
+Run the following commands to install the dependencies
+```
+$ npm install
+$ bower install
+
+```
 
 #### Run
 To run the frontend with bits as if it were production (uses minified resources) execute ...
