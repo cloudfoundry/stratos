@@ -40,6 +40,7 @@ import { CardEventComponent } from './components/cards/custom-cards/card-app-eve
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+import { ListComponent } from './components/list/list.component';
 
 
 @NgModule({
@@ -74,6 +75,7 @@ import {
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     EventTabActorIconPipe,
+    LogViewerComponent,
     ListComponent,
     CardsComponent,
     CardComponent,

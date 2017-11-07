@@ -57,7 +57,6 @@ export class EventsTabComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    // TODO: RC Add padding: 0 10px;
     // TODO: RC Move can add, can edit into here
     this.eventSource = new CfAppEventsDataSource(
       this.store,

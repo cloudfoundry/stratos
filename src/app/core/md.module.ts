@@ -25,7 +25,8 @@ import {
   MdPaginatorModule,
   MdSortModule,
   MdDialogModule,
-  MdMenuModule
+  MdMenuModule,
+  MdButtonToggleModule
 } from '@angular/material';
 
 const importExport = [
