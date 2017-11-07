@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-import { ITableDataSource } from '../../data-sources/table-data-source';
 import { ITableColumn, ITableText } from '../table/table.component';
 import { NgForm, NgModel } from '@angular/forms';
 import {
@@ -10,6 +9,7 @@ import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
+import { IListDataSource } from '../../data-sources/list-data-source';
 
 @Component({
   selector: 'app-list',
@@ -19,7 +19,7 @@ import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from 
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+  @Input('dataSource') dataSource = null as IListDataSource<T>;
   @Input('columns') columns = null as ITableColumn<T>[];
   @Input('text') text = null as ITableText;
   @Input('enableFilter') enableFilter = false;

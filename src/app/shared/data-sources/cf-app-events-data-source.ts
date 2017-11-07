@@ -8,7 +8,7 @@ import { MdPaginator, PageEvent, MdSort, Sort, SortDirection } from '@angular/ma
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
-import { CfTableDataSource } from './table-data-source-cf';
+import { CfListDataSource } from './list-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction } from '../../store/actions/list.actions';
@@ -28,7 +28,7 @@ export interface AppEvent {
   type: string;
 }
 
-export class CfAppEventsDataSource extends CfTableDataSource<EntityInfo> {
+export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
 
   cfFilterSub: Subscription;
 

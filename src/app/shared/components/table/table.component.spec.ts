@@ -1,4 +1,4 @@
-import { ITableDataSource } from '../../data-sources/table-data-source';
+import { IListDataSource } from '../../data-sources/table-data-source';
 import { TableCellComponent } from './table-cell/table-cell.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -59,7 +59,7 @@ describe('TableComponent', () => {
       initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
       selectedRows: new Map<string, any>(),
       mdPaginator: new MdPaginator(mdPaginatorIntl, {} as ChangeDetectorRef)
-    } as ITableDataSource<any>;
+    } as IListDataSource<any>;
     component.dataSource.selectedRows = new Map<string, any>();
 
     component.columns = new Array<ITableColumn<any>>();

@@ -1,4 +1,4 @@
-import { ITableDataSource } from '../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../data-sources/table-data-source';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableHeaderSelectComponent } from './table-header-select.component';
@@ -19,7 +19,7 @@ describe('TableHeaderSelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableHeaderSelectComponent);
     component = fixture.componentInstance;
-    component.dataSource = {} as ITableDataSource<any>;
+    component.dataSource = {} as IListDataSource<any>;
     fixture.detectChanges();
   });
 

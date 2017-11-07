@@ -1,4 +1,3 @@
-import { ITableDataSource } from '../../../data-sources/table-data-source';
 import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild } from '@angular/core';
 import { ITableColumn } from '../table.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
@@ -10,6 +9,7 @@ import { TableCellEventTimestampComponent } from '../custom-cells/table-cell-eve
 import { TableCellEventTypeComponent } from '../custom-cells/table-cell-event-type/table-cell-event-type.component';
 import { TableCellEventActionComponent } from '../custom-cells/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { IListDataSource } from '../../../data-sources/list-data-source';
 
 @Component({
   selector: 'app-table-cell',
@@ -32,7 +32,7 @@ export class TableCellComponent<T> implements OnInit {
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 
-  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+  @Input('dataSource') dataSource = null as IListDataSource<T>;
 
   @Input('component') component: Type<{}>;
   @Input('func') func: () => string;

@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEditComponent } from './table-cell-edit.component';
 import { CoreModule } from '../../../../core/core.module';
-import { ITableDataSource } from '../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../data-sources/table-data-source';
 
 describe('TableCellEditComponent', () => {
   let component: TableCellEditComponent<any>;
@@ -22,7 +22,7 @@ describe('TableCellEditComponent', () => {
     fixture = TestBed.createComponent(TableCellEditComponent);
     component = fixture.componentInstance;
     component.row = {};
-    component.dataSource = {} as ITableDataSource<any>;
+    component.dataSource = {} as IListDataSource<any>;
     fixture.detectChanges();
   });
 

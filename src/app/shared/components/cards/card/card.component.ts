@@ -2,7 +2,7 @@ import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentF
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
-import { ITableDataSource } from '../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../data-sources/list-data-source';
 
 @Component({
   selector: 'app-card',
@@ -17,7 +17,7 @@ export class CardComponent<T> implements OnInit {
 
   @Input('component') component: Type<{}>;
   @Input('item') item: T;
-  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+  @Input('dataSource') dataSource = null as IListDataSource<T>;
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 

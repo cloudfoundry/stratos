@@ -7,17 +7,15 @@ import {
   SetListSortAction,
   SetListStateAction,
 } from '../../../store/actions/list.actions';
-import { ITableDataSource, TableDataSource } from '../../data-sources/table-data-source';
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, MdSort, Sort, MdTable, PageEvent } from '@angular/material';
 import { NgModel, NgForm } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
-import { CfTableDataSource } from '../../data-sources/table-data-source-cf';
-import { StandardTableDataSource } from '../../data-sources/table-data-source-standard';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Subscription } from 'rxjs/Subscription';
+import { IListDataSource } from '../../data-sources/list-data-source';
 
 export interface ITableColumn<T> {
   columnId: string;
@@ -49,7 +47,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+  @Input('dataSource') dataSource = null as IListDataSource<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 

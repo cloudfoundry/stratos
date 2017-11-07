@@ -7,11 +7,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { TableDataSource, ITableDataSource, getRowUniqueId } from './table-data-source';
+import { ListDataSource, IListDataSource, getRowUniqueId } from './list-data-source';
 import { AppState } from '../../store/app-state';
 
 
-export abstract class StandardTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource<T> {
+export abstract class LocalListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
 
   abstract filteredRows: Array<T>;
   abstract isLoadingPage$: Observable<boolean>;

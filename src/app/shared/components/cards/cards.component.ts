@@ -1,6 +1,6 @@
 import { CfAppEventsDataSource } from '../../data-sources/cf-app-events-data-source';
 import { Component, Input, OnInit, Type, ViewContainerRef, ComponentFactoryResolver, ViewChild } from '@angular/core';
-import { ITableDataSource } from '../../data-sources/table-data-source';
+import { IListDataSource } from '../../data-sources/list-data-source';
 
 
 @Component({
@@ -10,6 +10,6 @@ import { ITableDataSource } from '../../data-sources/table-data-source';
 })
 export class CardsComponent<T> {
 
-  @Input('dataSource') dataSource = null as ITableDataSource<T>;
+  @Input('dataSource') dataSource = null as IListDataSource<T>;
   @Input('component') component: Type<{}>;
 }

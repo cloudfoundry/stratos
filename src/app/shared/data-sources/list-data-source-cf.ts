@@ -9,13 +9,13 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { TableDataSource, ITableDataSource, getRowUniqueId } from './table-data-source';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
+import { ListDataSource, IListDataSource, getRowUniqueId } from './list-data-source';
 
-export abstract class CfTableDataSource<T extends object> extends TableDataSource<T> implements ITableDataSource<T> {
+export abstract class CfListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
 
   private cfUberSub: Subscription;
 

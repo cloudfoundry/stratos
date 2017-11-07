@@ -10,7 +10,7 @@ import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
 
-export interface ITableDataSource<T> {
+export interface IListDataSource<T> {
   listStateKey: string;
   listView$: Observable<ListView>;
   listState$: Observable<ListState>;
@@ -20,7 +20,7 @@ export interface ITableDataSource<T> {
 
   page$: Observable<T[]>;
 
-  addRow;
+  addItem;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 
@@ -41,7 +41,7 @@ export interface ITableDataSource<T> {
 
 export type getRowUniqueId = (T) => string;
 
-export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
+export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
 
   public listView$: Observable<ListView>;
   public listState$: Observable<ListState>;
@@ -53,7 +53,7 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
 
-  public addRow: T;
+  public addItem: T;
   protected selectRow: T;
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
@@ -64,16 +64,16 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   public editRow: T;
 
   constructor(
-    private store: Store<AppState>,
+    private _store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
     private _emptyType: T,
     public listStateKey: string,
   ) {
     super();
-    this.addRow = { ... (_emptyType as object) } as T;
+    this.addItem = { ... (_emptyType as object) } as T;
 
-    this.listState$ = getListStateObservable(this.store, listStateKey);
-    const { view, pagination, sort, filter } = getListStateObservables(this.store, listStateKey);
+    this.listState$ = getListStateObservable(this._store, listStateKey);
+    const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
     this.listView$ = view;
     this.listPagination$ = pagination.filter(x => !!x);
     this.listSort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
@@ -87,11 +87,11 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
   destroy() { }
 
   startAdd() {
-    this.addRow = { ... (this._emptyType as object) } as T;
+    this.addItem = { ... (this._emptyType as object) } as T;
     this.isAdding$.next(true);
   }
   saveAdd() {
-    this.selectRow = this.addRow;
+    this.selectRow = this.addItem;
     this.isAdding$.next(false);
   }
   cancelAdd() {
