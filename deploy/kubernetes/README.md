@@ -238,6 +238,12 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 ```
 ---
 storageClass: persistent
+```
+
+If you want MariaDB to use a specific storage class (which can be different to that used for the other components), then specify the following:
+```
+---
+storageClass: persistent
 mariadb:
   persistence:
     storageClass: persistent
@@ -247,6 +253,7 @@ Run Helm with the override:
 ```
 helm install -f override.yaml stratos-ui/console
 ```
+
 #### Create a default Storage Class
 Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link] (https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
 

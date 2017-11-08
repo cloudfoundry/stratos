@@ -34,7 +34,9 @@ metadata:
   labels:
     app:  "{{ .Release.Name }}"
   annotations:
-  {{- if .Values.storageClass }}
+  {{- if .Values.mariadb.persistence.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.mariadb.persistence.storageClass | quote }}
+  {{- else if .Values.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
   {{- else if .Values.kube.storage_class.persistent }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
