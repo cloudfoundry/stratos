@@ -16,13 +16,9 @@ export interface AppEnvVar {
   value: string;
 }
 
-interface AddAppEnvVar extends AppEnvVar {
-  select: boolean;
-}
-
-function key(_cnsiGuid: string, _appGuid: string) {
-  return `app-variables:${_cnsiGuid}:${_appGuid}`;
-}
+// function key(_cnsiGuid: string, _appGuid: string) {
+//   return `app-variables:${_cnsiGuid}:${_appGuid}`;
+// }
 
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
@@ -31,7 +27,7 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   // Only needed for update purposes
   private rows = new Array<AppEnvVar>();
   // Default sort shizzle
-  private _defaultSortParmas: MdSortable;
+  // private _defaultSortParmas: MdSortable;
 
   filteredRows = new Array<AppEnvVar>();
   isLoadingPage$: Observable<boolean>;
@@ -127,7 +123,7 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
     super.destroy();
   }
 
-  listFilter(envVars: AppEnvVar[], filter: ListFilter): any {
+  listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
     this.rowNames.length = 0;
