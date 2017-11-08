@@ -240,7 +240,7 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 storageClass: persistent
 ```
 
-If you wish to deploy MariaDB to use a different storage class, then specify the following:
+If you want MariaDB to use a specific storage class (which can be different to that used for the other components), then specify the following:
 ```
 ---
 storageClass: persistent
