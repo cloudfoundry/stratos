@@ -24,10 +24,9 @@
    * @name console-app
    */
   angular
-    .module('console-app', angularModules.concat(otherModules, ['app'], pluginModules), config)
-    .factory('missingTranslateHandler', missingTranslateHandler);
+    .module('console-app', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
-  function config($compileProvider, $logProvider, $translateProvider) {
+  function config($compileProvider, $logProvider, $qProvider) {
 
     /**
      * Disabling Debug Data
@@ -44,35 +43,10 @@
     $compileProvider.debugInfoEnabled(false);
 
     $logProvider.debugEnabled(false);
+    $compileProvider.preAssignBindingsEnabled(true);
+    // Skip errors on unhandled rejections (promise chains that don't deal with errors)
+    $qProvider.errorOnUnhandledRejections(false);
 
-    // Configure i18n
-    $translateProvider.preferredLanguage('en');
-    $translateProvider.fallbackLanguage('en');
-    $translateProvider.useSanitizeValueStrategy(null);
-
-    $translateProvider.useStaticFilesLoader({
-      prefix: '/i18n/locale-',
-      suffix: '.json'
-    });
-
-    // Uncomment this for development to see which strings need localizing
-    $translateProvider.useMissingTranslationHandler('missingTranslateHandler');
-  }
-
-  // Custom missing translation handler only logs each missing translation id once
-  function missingTranslateHandler($log) {
-
-    var seen = {};
-
-    return function (translationId) {
-      if (!seen[translationId]) {
-        $log.warn('Missing translation for "' + translationId + '"');
-        seen[translationId] = true;
-      }
-
-      // Highlight missing translations (breaks unit tests)
-      //return '<span class="i18n-missing">' + translationId + '</span>';
-    };
   }
 
 })();

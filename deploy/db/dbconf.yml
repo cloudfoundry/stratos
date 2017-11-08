@@ -1,6 +1,12 @@
-development:
+cf_postgres:
     driver: postgres
-    open: host='postgres' port=5432 user='stratos' password='strat0s' dbname='stratos-db' sslmode='disable'
-k8s:
-    driver: postgres
-    open: host='$PGSQL_HOST' port=$PGSQL_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
+    open: host='$DB_HOST' port=$DB_PORT user='$DB_USER' password='$DB_PASSWORD' dbname='$DB_DATABASE_NAME' sslmode='disable'
+cf_mysql:
+    driver: mysql
+    open: $DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true
+mariadb-development:
+    driver: mysql
+    open: stratos:strat0s@tcp(mariadb:3306)/stratos-db?parseTime=true
+mariadb-k8s:
+    driver: mysql
+    open: $DB_USER:$DB_PASSWORD@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true

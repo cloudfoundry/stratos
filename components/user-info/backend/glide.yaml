@@ -1,1 +1,8 @@
-package: github.com/SUSE/stratos-ui/components/user-info/backend
+package: .
+import:
+- package: github.com/Sirupsen/logrus
+  version: ^1.0.2
+- package: github.com/labstack/echo
+  version: ^2.1.0
+  subpackages:
+  - engine

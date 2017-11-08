@@ -27,9 +27,10 @@
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
+   * @param {object} appBusyService - the appBusyService service
    * @constructor
    */
-  function ClustersRouterController($q, $state, modelManager, appUtilsService) {
+  function ClustersRouterController($q, $state, modelManager, appUtilsService, appBusyService) {
 
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -37,6 +38,7 @@
     appUtilsService.chainStateResolve('endpoint.clusters.router', $state, init);
 
     function init() {
+      var appBusyId = appBusyService.set('cf.busy');
 
       return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list()])
         .then(function () {
@@ -50,6 +52,8 @@
               connectedInstances += 1;
             }
           });
+
+          appBusyService.clear(appBusyId);
 
           if (connectedInstances === 1) {
             $state.go('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstanceGuid});

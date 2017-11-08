@@ -8,11 +8,12 @@ spec:
   template:
     metadata:
       labels:
-        app: console-uaa
+        app: "{{ .Release.Name }}"
+        component: "uaa"
     spec:
       containers:
       - image: {{.Values.dockerRegistry}}/splatform/stratos-uaa:latest
-        name: console-identity
+        name: "{{ .Release.Name }}-identity"
         ports:
         - containerPort: 8080
           name: uaa

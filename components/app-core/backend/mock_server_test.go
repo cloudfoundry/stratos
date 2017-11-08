@@ -11,13 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
@@ -131,12 +130,11 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	urlP, _ := url.Parse("https://login.52.38.188.107.nip.io:50450")
 	pc := interfaces.PortalConfig{
 		ConsoleConfig: &interfaces.ConsoleConfig{
-			ConsoleClient:        "console",
-			ConsoleClientSecret:  "",
-			UAAEndpoint:          urlP,
-			SkipSSLValidation:    true,
+			ConsoleClient:       "console",
+			ConsoleClientSecret: "",
+			UAAEndpoint:         urlP,
+			SkipSSLValidation:   true,
 			ConsoleAdminScope:   UAAAdminIdentifier,
-
 		},
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
@@ -176,15 +174,15 @@ func expectCFAndCERows() sqlmock.Rows {
 }
 
 func expectTokenRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry)
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
 }
 
 func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 
 	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry)
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
+		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false)
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
@@ -263,21 +261,21 @@ var mockUAAResponse = UAAResponse{
 }
 
 const (
-	mockAPIEndpoint = "https://api.127.0.0.1"
-	mockAuthEndpoint = "https://login.127.0.0.1"
-	mockTokenEndpoint = "https://uaa.127.0.0.1"
+	mockAPIEndpoint     = "https://api.127.0.0.1"
+	mockAuthEndpoint    = "https://login.127.0.0.1"
+	mockTokenEndpoint   = "https://uaa.127.0.0.1"
 	mockDopplerEndpoint = "https://doppler.127.0.0.1"
-	mockProxyVersion = 20161117141922
+	mockProxyVersion    = 20161117141922
 
 	stringCFType = "cf"
 	stringCEType = "hce"
 
 	selectAnyFromTokens = `SELECT .+ FROM tokens WHERE .+`
-	insertIntoTokens = `INSERT INTO tokens`
-	updateTokens = `UPDATE tokens`
-	selectAnyFromCNSIs = `SELECT (.+) FROM cnsis WHERE (.+)`
-	insertIntoCNSIs = `INSERT INTO cnsis`
-	getDbVersion = `SELECT version_id FROM goose_db_version WHERE is_applied = 't' ORDER BY id DESC LIMIT 1`
+	insertIntoTokens    = `INSERT INTO tokens`
+	updateTokens        = `UPDATE tokens`
+	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
+	insertIntoCNSIs     = `INSERT INTO cnsis`
+	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}

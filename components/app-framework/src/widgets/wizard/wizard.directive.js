@@ -76,6 +76,8 @@
     vm.hasMessage = false;
     vm.busyMessage = false;
 
+    vm.showBusy = showBusy;
+
     if (vm.workflow.initControllers) {
       vm.workflow.initControllers(vm);
     }
@@ -92,6 +94,14 @@
       var allowBack = vm.workflow.allowBack;
       vm.workflow.allowBack = function () {
         return allowBack;
+      };
+    }
+
+    // allowCancel can be a value or function
+    if (!_.isFunction(vm.workflow.allowCancel)) {
+      var cachedAllowCancel = _.isUndefined(vm.workflow.allowCancel) ? true : vm.workflow.allowCancel;
+      vm.workflow.allowCancel = function () {
+        return cachedAllowCancel;
       };
     }
 
@@ -135,6 +145,7 @@
     vm.checkAllReadiness = checkAllReadiness;
     vm.switchToFirstReadyStep = switchToFirstReadyStep;
     vm.always = always;
+    vm.allowCancel = allowCancel;
 
     vm.initPromise.then(function () {
       vm.onInitSuccess();
@@ -155,6 +166,20 @@
     }, function () {
       vm.resetButtons();
     });
+
+    function showBusy(msg) {
+      if (!msg) {
+        vm.currentIndex = vm.busyIndex;
+        vm.busyIndex = -1;
+        vm.busyMessage = false;
+        resetButtons();
+      } else {
+        vm.busyIndex = vm.currentIndex;
+        vm.busyMessage = msg;
+        vm.currentIndex = -1;
+        disableButtons();
+      }
+    }
 
     /**
      * @function disableButtons
@@ -190,14 +215,21 @@
      */
     function disableNext() {
       var step = vm.steps[vm.currentIndex] || {};
-      if (_.isFunction(step.allowNext) && !step.allowNext()) {
-        return true;
+      if (_.isFunction(step.allowNext)) {
+        return !step.allowNext();
       }
       if ($scope.wizardForm) {
         var form = $scope.wizardForm[step.formName];
         return vm.nextBtnDisabled || form && form.$invalid;
       }
       return vm.nextBtnDisabled;
+    }
+
+    function allowCancel() {
+      if (vm.workflow.allowCancel) {
+        return vm.workflow.allowCancel();
+      }
+      return !vm.steps[vm.currentIndex].isLastStep || vm.workflow.allowCancelAtLastStep;
     }
 
     /**
@@ -299,26 +331,26 @@
               };
             }
           })
-          .then(function () {
-            if (step.isLastStep) {
-              vm.resetMessage();
-              vm.actions.finish(vm);
-            } else {
-              vm.switchTo(index + 1).then(function () {
+            .then(function () {
+              if (step.isLastStep) {
                 vm.resetMessage();
-              });
-            }
-          }, function (message) {
+                vm.actions.finish(vm);
+              } else {
+                vm.switchTo(index + 1).then(function () {
+                  vm.resetMessage();
+                });
+              }
+            }, function (message) {
             // Hide the loading indicator if we showed one
-            vm.currentIndex = index;
-            vm.busyMessage = false;
-            if (message) {
-              vm.showMessage(message, 'alert-danger');
-            } else {
-              vm.resetMessage();
-            }
-            vm.resetButtons();
-          });
+              vm.currentIndex = index;
+              vm.busyMessage = false;
+              if (message) {
+                vm.showMessage(message, 'alert-danger');
+              } else {
+                vm.resetMessage();
+              }
+              vm.resetButtons();
+            });
         } else {
           if (step.isLastStep) {
             vm.actions.finish(vm);

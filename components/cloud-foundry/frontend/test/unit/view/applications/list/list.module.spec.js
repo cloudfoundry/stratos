@@ -3,7 +3,7 @@
 
   describe('list module', function () {
 
-    var $controller, $httpBackend, $scope, $state;
+    var $controller, $httpBackend, $scope, $state, appWallActionContext;
 
     var cnsiGuid = 'cnsiGuid';
     // Matches org from ListAllOrganizations
@@ -27,6 +27,8 @@
       var cfOrganizationModel = $injector.get('cfOrganizationModel');
       var cfAppWallActions = $injector.get('cfAppWallActions');
       var $window = $injector.get('$window');
+      var appLocalStorage = $injector.get('appLocalStorage');
+      var appBusyService = $injector.get('appBusyService');
 
       var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       if (Object.keys(userCnsiModel.serviceInstances).length === 0) {
@@ -52,7 +54,7 @@
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
       $controller = new ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager,
-        errorService, appUtilsService, cfOrganizationModel, cfAppWallActions);
+        errorService, appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage, appBusyService);
       expect($controller).toBeDefined();
 
       var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
@@ -72,6 +74,7 @@
         $httpBackend.whenGET(GetDetailedStatsForStartedApp.url).respond(200, GetDetailedStatsForStartedApp.response[200].body);
       });
 
+      appWallActionContext = $controller.appWallActions[0].context;
     }
 
     afterEach(function () {
@@ -437,7 +440,7 @@
           appModel.filterParams.spaceGuid = 'junk3';
 
           setUp();
-          $httpBackend.flush();
+          $scope.$digest();
 
           check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
@@ -463,6 +466,16 @@
           check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);
         });
 
+        it('avoids bad value - org only', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.orgGuid = 'junk2';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
         it('avoids bad value - space', function () {
           var appModel = modelManager.retrieve('cloud-foundry.model.application');
           appModel.filterParams.cnsiGuid = cnsiGuid;
@@ -473,6 +486,16 @@
           $httpBackend.flush();
 
           check(cnsiGuid, 3, orgGuid, 3, allFilterValue, 3);
+        });
+
+        it('avoids bad value - space only', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
         });
 
       });
@@ -490,7 +513,7 @@
       });
 
       it('should show `Add Application` button to user', function () {
-        expect($controller.appWallActionContext.show()).toBe(true);
+        expect(appWallActionContext.hidden()).toBe(false);
       });
     });
 
@@ -503,7 +526,7 @@
       it('should show `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.appWallActionContext.show()).toBe(true);
+        expect(appWallActionContext.hidden()).toBe(false);
       });
     });
 
@@ -516,7 +539,7 @@
       it('should hide `Add Application` button to user', function () {
         $controller.ready = true;
         $httpBackend.flush();
-        expect($controller.appWallActionContext.show()).toBe(false);
+        expect(appWallActionContext.hidden()).toBe(true);
       });
     });
 

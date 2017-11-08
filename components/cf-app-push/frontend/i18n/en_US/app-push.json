@@ -1,0 +1,98 @@
+{
+  "app-wall": {
+    "deploy-application": "Deploy Application"
+  },
+  "deploy-app-dialog": {
+    "title": "Deploy Application",
+    "button-deploy": "Deploy",
+    "step-destination": {
+      "title": "Destination",
+      "busy": "Updating Cloud Foundry Data",
+      "enter-failed": "Failed to refresh cloud foundry data. Please try again. If this error persists, please contact the Administrator."
+    },
+    "step-source": {
+      "title": "Source",
+      "choose-label": "Source Type",
+      "choose-placeholder": "Select the source type",
+      "git": {
+        "git": "Git",
+        "github": {
+          "github": "Public Github",
+          "project-label": "Project",
+          "project-placeholder": "suse/stratos-ui",
+          "project-not-found": "Project not found",
+          "branch-label": "Branch",
+          "branch-placeholder": "Select Branch",
+          "branch-last-commit": "",
+          "branch-last-commit-date": "",
+          "branch-last-commit-committer": ""
+        },
+        "gitUrl": {
+          "gitUrl": "Public Git URL",
+          "url": {
+            "url": "URL",
+            "placeholder": "HTTPS URL of git repository",
+            "error-required": "URL is required",
+            "error-pattern": "Invalid URL"
+          },
+          "branch": {
+            "branch": "Branch Name",
+            "placeholder": "Branch name will decrease clone time",
+            "error-required": "Branch is required"
+          }
+        }
+      },
+      "source": {
+        "file": "Select a source or drag and drop a GitHub url or an archive file",
+        "folder": "Select a source or drag and drop a GitHub url, an archive file or folder"
+      },
+      "local": {
+        "file": {
+          "label": "Local archive file",
+          "field": "File",
+          "prompt": "Choose a local archive file"
+        },
+        "folder": {
+          "folder": "Folder",
+          "label": "Local archive file or folder",
+          "field": "File / Folder",
+          "prompt": "Choose a local file or folder"
+        },
+        "info": "{{files}} file(s) - {{total}} to upload",
+        "cfignore": ".cfignore was found and applied"
+      },
+      "scanning": "Scanning for files and folders",
+      "manifest": {
+        "label": "Manifest",
+        "description": "For existing apps, if the relative path to your manifest.yml is not in the root please supply it below.",
+        "path-label": "Path to manifest",
+        "path-placeholder": "Relative path of manifest to root of app directory"
+      }
+    },
+    "step-deploying": {
+      "title": "Deploy Application",
+      "busy": "Starting deployment",
+      "title-deploying": "Deploying",
+      "title-deploy-failed": "Failed to deploy. Reason: {{reason}}",
+      "title-deploy-success": "Deployed",
+      "next-button": "App Summary",
+      "submit-failed": "Failed to deploy application. If this error persists, please contact the Administrator. Reason: {{reason}}.",
+      "uploading": "Uploading files"
+    },
+    "socket": {
+      "event-type": {
+        "CLOSE_FAILED_NO_BRANCH": "Failed to clone repository (no branch supplied), please ensure git details are correct",
+        "CLOSE_FAILED_CLONE": "Failed to clone repository, please ensure git details are correct and try again",
+        "CLOSE_FAILURE": "Unknown failure. See log for more information.",
+        "CLOSE_INVALID_MANIFEST": "Invalid manifest",
+        "CLOSE_NO_MANIFEST": "Failed to find manifest",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push unsuccessful. See log for details.",
+        "CLOSE_NO_SESSION": "Failed to create session",
+        "CLOSE_NO_CNSI": "Unknown [[@:cloud-foundry]] instance",
+        "CLOSE_NO_CNSI_USERTOKEN": "Invalid [[@:cloud-foundry]] token"
+      },
+      "failed-connection": "Failed to open socket connection",
+      "failed-unknown": "Unknown failure"
+    }
+  }
+}

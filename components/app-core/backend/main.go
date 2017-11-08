@@ -13,11 +13,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/antonlindstrom/pgstore"
+	"github.com/irfanhabib/mysqlstore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -35,8 +37,10 @@ import (
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
 const (
-	TimeoutBoundary = 10
-	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
+	TimeoutBoundary     = 10
+	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
+	UpgradeVolume       = "UPGRADE_VOLUME"
+	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
 )
 
 var appVersion string
@@ -72,7 +76,11 @@ func main() {
 		log.Fatal(err) // calls os.Exit(1) after logging
 	}
 	log.Info("Configuration loaded.")
+	isUpgrading := isConsoleUpgrading()
 
+	if isUpgrading {
+		start(portalConfig, &portalProxy{}, &setupMiddleware{}, true)
+	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
 	log.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
@@ -160,7 +168,7 @@ func main() {
 	log.Info("Initialised general plugins.")
 
 	// Start the back-end
-	if err := start(portalProxy, addSetupMiddleware); err != nil {
+	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
 	log.Info("Unable to start proxy!")
@@ -253,7 +261,7 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -267,8 +275,10 @@ func initConnPool(dc datastore.DatabaseConfig) (*sql.DB, error) {
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int) (HttpSessionStore, error) {
 	log.Debug("initSessionStore")
 
+	sessionsTable := "sessions"
+
 	// Store depends on the DB Type
-	if databaseProvider == "pgsql" {
+	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 		// Setup cookie-store options
@@ -277,9 +287,19 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.Secure = true
 		return sessionStore, err
 	}
+	// Store depends on the DB Type
+	if databaseProvider == datastore.MYSQL {
+		log.Info("Creating MySQL session store")
+		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		// Setup cookie-store options
+		sessionStore.Options.MaxAge = sessionExpiry
+		sessionStore.Options.HttpOnly = true
+		sessionStore.Options.Secure = true
+		return sessionStore, err
+	}
 
 	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, "sessions", "/", 3600, []byte(pc.SessionStoreSecret))
+	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
@@ -299,13 +319,17 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	// Add custom properties
 	pc.CFAdminIdentifier = CFAdminIdentifier
 	pc.HTTPS = true
+	pc.PluginConfig = make(map[string]string)
 
 	return pc, nil
 }
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
-	if err := config.Load(&dc); err != nil {
+
+	if datastore.ParseCFEnvs(&dc) == true {
+		log.Info("Using Cloud Foundry DB service")
+	} else if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
@@ -314,18 +338,11 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	// Determine database provider
-	if len(dc.Host) > 0 {
-		dc.DatabaseProvider = "pgsql"
-	} else {
-		dc.DatabaseProvider = "sqlite"
-	}
-
 	return dc, nil
 }
 
-func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
-	log.Debug("createTempCertFiles")
+func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
+	log.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -337,6 +354,17 @@ func createTempCertFiles(pc interfaces.PortalConfig) (string, string, error) {
 	_, errDevkey := os.Stat(devCertsDir + certKeyFilename)
 	if errDevcert == nil && errDevkey == nil {
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
+	}
+
+	// Check if certificate have been provided as files (as is the case in kubernetes)
+	if pc.TLSCertPath != "" && pc.TLSCertKeyPath != "" {
+		log.Infof("Using TLS cert: %s, %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		_, errCertMissing := os.Stat(pc.TLSCertPath)
+		_, errCertKeyMissing := os.Stat(pc.TLSCertKeyPath)
+		if errCertMissing != nil || errCertKeyMissing != nil {
+			return "", "", fmt.Errorf("unable to find certificate %s or certificate key %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		}
+		return pc.TLSCertPath, pc.TLSCertKeyPath, nil
 	}
 
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
@@ -394,44 +422,55 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 
 }
 
-func start(p *portalProxy, addSetupMiddleware *setupMiddleware) error {
+func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *setupMiddleware, isUpgrade bool) error {
 	log.Debug("start")
 	e := echo.New()
 
 	// Root level middleware
-	e.Use(sessionCleanupMiddleware)
+	if !isUpgrade {
+		e.Use(sessionCleanupMiddleware)
+	}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     p.Config.AllowedOrigins,
+		AllowOrigins:     config.AllowedOrigins,
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
-	e.Use(errorLoggingMiddleware)
+
+	if !isUpgrade {
+		e.Use(errorLoggingMiddleware)
+	}
 	e.Use(retryAfterUpgradeMiddleware)
 
-	p.registerRoutes(e, addSetupMiddleware)
+	if !isUpgrade {
+		p.registerRoutes(e, addSetupMiddleware)
+	}
 
-	if p.Config.HTTPS {
-		certFile, certKeyFile, err := createTempCertFiles(p.Config)
+	var engine *standard.Server
+	address := config.TLSAddress
+	if config.HTTPS {
+		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
-
-		address := p.Config.TLSAddress
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engine := standard.WithTLS(address, certFile, certKeyFile)
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTPS server", engineErr)
-		}
+		engine = standard.WithTLS(address, certFile, certKeyFile)
+
 	} else {
-		address := p.Config.TLSAddress
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engine := standard.New(address)
-		engineErr := e.Run(engine)
-		if engineErr != nil {
-			log.Warnf("Failed to start HTTP server", engineErr)
+		engine = standard.New(address)
+	}
+
+	if isUpgrade {
+		go stopEchoWhenUpgraded(engine)
+	}
+
+	engineErr := e.Run(engine)
+	if engineErr != nil {
+		engineErrStr := fmt.Sprintf("%s", engineErr)
+		if !strings.Contains(engineErrStr, "Server closed") {
+			log.Warnf("Failed to start HTTP/S server", engineErr)
 		}
 	}
 
@@ -588,4 +627,33 @@ func getStaticFiles() (string, error) {
 		}
 	}
 	return "", errors.New("UI folder not found")
+}
+
+func isConsoleUpgrading() bool {
+
+	upgradeVolume, noUpgradeVolumeErr := config.GetValue(UpgradeVolume)
+	upgradeLockFile, noUpgradeLockFileNameErr := config.GetValue(UpgradeLockFileName)
+
+	// If any of those properties are not set, consider Console is running in a non-upgradeable environment
+	if noUpgradeVolumeErr != nil || noUpgradeLockFileNameErr != nil {
+		return false
+	}
+
+	upgradeLockPath := fmt.Sprintf("/%s/%s", upgradeVolume, upgradeLockFile)
+	if string(upgradeVolume[0]) == "/" {
+		upgradeLockPath = fmt.Sprintf("%s/%s", upgradeVolume, upgradeLockFile)
+	}
+
+	if _, err := os.Stat(upgradeLockPath); err == nil {
+		return true
+	}
+	return false
+}
+
+func stopEchoWhenUpgraded(e *standard.Server) {
+	for isConsoleUpgrading() {
+		time.Sleep(1 * time.Second)
+	}
+	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
+	e.Close()
 }

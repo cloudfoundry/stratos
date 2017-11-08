@@ -26,19 +26,20 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
+   * @param {object} $q - Angular $q service
    * @param {app.utils.appEventService} appEventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.model.loginManager} loginManager - the login management service
    * @param {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
    * @param {object} appLocalStorage - the Local Storage In Service
-   * @param {object} appSelectLanguage - the Language Selection dialogService
-   * @param {object} appUtilsService - the App Utils service
    * @param {app.view.consoleSetupCheck} consoleSetupCheck - the Console Setup checkservice
    * @param {object} $timeout - Angular $timeout service
    * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
    * @param {$rootScope} $rootScope - Angular $rootScope service
    * @param {$scope} $scope - Angular $scope service
+   * @param {appLoggedInService} appLoggedInService - Logged In Service
+   * @param {appBusyService} appBusyService - Application Busy Service
    * @property {app.utils.appEventService} appEventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.view.appUpgradeCheck} appUpgradeCheck - the upgrade check service
@@ -48,14 +49,27 @@
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
-  function ApplicationController(appEventService, modelManager, loginManager, appUpgradeCheck, appLocalStorage,
-                                 appSelectLanguage, appUtilsService, consoleSetupCheck, $timeout, $stateParams, $window, $rootScope, $scope) {
+  function ApplicationController(
+    $q,
+    appEventService,
+    modelManager,
+    loginManager,
+    appUpgradeCheck,
+    appLocalStorage,
+    consoleSetupCheck,
+    $timeout,
+    $stateParams,
+    $window,
+    $rootScope,
+    $scope,
+    appLoggedInService,
+    appBusyService
+  ) {
 
     var vm = this;
 
     vm.appUpgradeCheck = appUpgradeCheck;
     vm.consoleSetupCheck = consoleSetupCheck;
-    vm.showLanguageSelection = showLanguageSelection;
     vm.loggedIn = false;
     vm.serverFailedToRespond = false;
     vm.showGlobalSpinner = false;
@@ -65,11 +79,13 @@
     vm.hideNavigation = $stateParams.hideNavigation;
     vm.hideAccount = $stateParams.hideAccount;
     vm.navbarIconsOnly = false;
-    vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
 
     vm.login = login;
     vm.logout = logout;
     vm.reload = reload;
+
+    // Global spinner state
+    vm.spinner = appBusyService.busyState;
 
     if (loginManager.isEnabled()) {
       $timeout(function () {
@@ -83,7 +99,7 @@
     }
 
     // Navigation options
-    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) { // eslint-disable-line angular/on-watch
       vm.hideNavigation = toParams.hideNavigation;
       vm.hideAccount = toParams.hideAccount;
     });
@@ -97,16 +113,6 @@
         appLocalStorage.setItem('navbarIconsOnly', nv);
       }
     });
-
-    /**
-     * @function showLanguageSelection
-     * @memberof app.view.application.ApplicationController
-     * @description Shows the Language Selection dialog
-     * @public
-     */
-    function showLanguageSelection() {
-      appSelectLanguage.show();
-    }
 
     /**
      * @function verifySession
@@ -158,6 +164,10 @@
      * @public
      */
     function login(username, password) {
+      vm.failedLogin = false;
+      vm.serverErrorOnLogin = false;
+      vm.serverFailedToRespond = false;
+
       modelManager.retrieve('app.model.account')
         .login(username, password)
         .then(
@@ -182,8 +192,11 @@
       vm.failedLogin = false;
       vm.serverErrorOnLogin = false;
       vm.serverFailedToRespond = false;
-      vm.showGlobalSpinner = true;
+      //vm.showGlobalSpinner = true;
+      //vm.globalSpinnerLabel = 'preparing.console';
       vm.redirectState = false;
+
+      vm.appBusyId = appBusyService.set('preparing.console');
 
       // If we have a setup error, then we don't want to continue login to some other page
       // We will redirect to our error page instead
@@ -196,61 +209,50 @@
        */
       var account = modelManager.retrieve('app.model.account');
 
-      // Fetch the list of services instances
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       /* eslint-disable */
       // TODO: If this fails, we should show a notification message
       /* eslint-enable */
-      modelManager.retrieve('app.model.serviceInstance')
-        .list()
-        .then(function onSuccess(data) {
-          var noEndpoints = data.numAvailable === 0;
-          // Admin
-          if (account.isAdmin()) {
-            // Go the endpoints dashboard if there are no CF clusters
-            if (noEndpoints) {
-              vm.redirectState = 'endpoint.dashboard';
-              if (!vm.isEndpointsDashboardAvailable) {
-                appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
-                continueLogin = false;
-              }
+      $q.all([
+        serviceInstanceModel.list(),
+        modelManager.retrieve('app.model.consoleInfo').getConsoleInfo(),
+        userServiceInstanceModel.list()
+      ])
+        .then(function () {
+          var cfOnly = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'cf'}) || [];
+          var noEndpoints = cfOnly.length === 0;
+          var dashboardRedirect = appLoggedInService.getDashboardRoute();
+
+          if (noEndpoints) {
+            // Admin
+            if (account.isAdmin()) {
+              vm.redirectState = dashboardRedirect;
             }
-          } else {
-            // Developer or Endpoint Dashboard plugin isn't loaded
-            if (noEndpoints) {
+            if (!vm.redirectState) {
               // No CF instances, so the system is not setup and the user can't fix this
               continueLogin = false;
               appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
-            } else {
-              var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-              // Need to get the user's service list to determine if they have any connected
-              return userServiceInstanceModel.list().then(function () {
-                // Developer - allow user to connect services, if we have some and none are connected
-                if (userServiceInstanceModel.getNumValid() === 0) {
-                  vm.redirectState = 'endpoint.dashboard';
-                  if (!vm.isEndpointsDashboardAvailable) {
-                    appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notConnected'});
-                    continueLogin = false;
-                  }
-                }
-              });
+            }
+          } else {
+            // Need to get the user's service list to determine if they have any connected
+            // Developer - allow user to connect services, if we have some and none are connected
+            if (userServiceInstanceModel.getNumValid() === 0) {
+              vm.redirectState = dashboardRedirect;
+              if (!vm.redirectState) {
+                appEventService.$emit(appEventService.events.TRANSFER, 'error-page', {error: 'notConnected'});
+                continueLogin = false;
+              }
             }
           }
         })
-        .then(function () {
-          // Update consoleInfo
-          return modelManager.retrieve('app.model.consoleInfo').getConsoleInfo();
-        })
-        .then(function () {
-          // Get the user registered services once at login - only refreshed in endpoints dashboard
-          var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-          return userServiceInstanceModel.list();
-        })
         .finally(function () {
-          vm.showGlobalSpinner = false;
+          vm.appBusyId = appBusyService.clear(vm.appBusyId);
+
           if (continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them
-            // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
-            // So, we pass this flag to tell them login happenned, but that they should not redirect
+            // to redirect to their page - we might want to control that they go to the endpoints dashboard (for example).
+            // So, we pass this flag to tell them login happened, but that they should not redirect
             appEventService.$emit(appEventService.events.LOGIN, !!vm.redirectState);
             // We need to do this after the login events are handled, so that ui-router states we might go to are registered
             if (vm.redirectState) {

@@ -12,14 +12,28 @@
   z-index: 2;
 }
 
-.wizard {
-  // When wizard nav item is disabled (cannot jump straight to item) treat visually as normal (not as visually 'disabled')
-  li.wizard-nav-item.disabled {
-    &.active a {
-      color: $suse-text;
+.wizard-nav-step-number, .wizard-nav-step-number-complete, .wizard-nav-item-sep {
+  display: none;
+}
+
+
+.wizard-foot {
+  overflow: hidden;
+  .wizard-foot-buttons {
+
+    button {
+      transition: margin-left 0.5s, margin-right 0.5s;
     }
-    a:hover {
-      cursor: default;
+
+    &.wizard-footer-hidden {
+
+      button:first-child {
+        margin-left: -200px
+      }
+
+      button:last-child {
+        margin-right: -200px
+      }
     }
   }
 }

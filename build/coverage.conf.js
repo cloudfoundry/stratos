@@ -20,19 +20,17 @@
   exports.config = protractorConfig.config;
   var onPrepare = exports.config.onPrepare;
   exports.config.plugins = [{path: path.join(__dirname, 'waitPlugin.js')}];
-  exports.config.params.port = 4000;
-
   exports.config.onPrepare = function () {
     onPrepare();
 
     jasmine.getEnv().addReporter(new function () {
       var deferred = [];
       var results = [];
-/*
-      this.specStarted = function (spec) {
-        console.log('Spec Start   : ' + spec.id + ':: ' + spec.fullName);
-      };
-*/
+      /*
+            this.specStarted = function (spec) {
+              console.log('Spec Start   : ' + spec.id + ':: ' + spec.fullName);
+            };
+      */
       this.specDone = function (spec) {
         //console.log('Spec Finished: ' + spec.id + ':: ' + spec.fullName);
         if (spec.status !== 'failed' && spec.status !== 'disabled') {

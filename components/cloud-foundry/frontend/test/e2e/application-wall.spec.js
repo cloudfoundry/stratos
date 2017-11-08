@@ -19,6 +19,7 @@
         appWallConfigNoClusters(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.showApplications();
       });
 
       afterAll(function () {
@@ -26,7 +27,7 @@
       });
 
       it('The page should have title "Applications"', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(applicationWall.getTitle()).toBe('Applications');
       });
 
       it('should show application message: "You cannot view any applications."', function () {
@@ -36,7 +37,7 @@
       });
 
       it('should not see ADD APPLICATION botton', function () {
-        expect(element(by.css('.btn.btn-primary')).isPresent()).not.toBeTruthy();
+        expect(applicationWall.getAddApplicationButton().isDisplayed()).not.toBeTruthy();
       });
     });
 
@@ -53,7 +54,7 @@
       });
 
       it('The page should have title "Applications"', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(applicationWall.getTitle()).toBe('Applications');
       });
 
       /*
@@ -72,6 +73,7 @@
         appWallConfig3(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.setGridView();
       });
 
       afterAll(function () {
@@ -79,9 +81,8 @@
       });
 
       it('should see an ADD APPLICATION button.', function () {
-        var btn = element(by.css('.btn.btn-primary'));
-        expect(btn.isPresent()).toBeTruthy();
-        expect(btn.getText()).toBe('ADD APPLICATION');
+        var btn = applicationWall.getAddApplicationButton();
+        expect(btn.isDisplayed()).toBeTruthy();
       });
 
       it('should not see no-application message.', function () {
@@ -133,6 +134,7 @@
         appWallConfig500(ngMockE2E.$httpBackend);
         helpers.setBrowserNormal();
         helpers.loadApp();
+        applicationWall.setGridView();
       });
 
       afterAll(function () {
@@ -140,7 +142,7 @@
       });
 
       it('The page should have title "Applications"', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(applicationWall.getTitle()).toBe('Applications');
         expect(applicationWall.getAppCount()).toBe('500');
       });
 

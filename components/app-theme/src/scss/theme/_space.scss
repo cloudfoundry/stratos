@@ -10,4 +10,5 @@ $padding-small-horizontal:  10px !default;
 $padding-xs-vertical:       3px !default;
 $padding-xs-horizontal:     4px !default;
 
-$console-unit-space:            24px !default;
+$console-unit-space:        24px !default;
+$console-half-space:        $console-unit-space / 2 !default;

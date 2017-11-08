@@ -1,14 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-# Remove current node_modules as it may
-# contain incompatible native modules
 rm -rf node_modules
-npm install
+npm install --production
+if [ ! -z ${BUILD_DB_MIGRATOR} ]; then
+npm run build-migrator
+else
 npm run build-backend
-
-if [ "${USER_NAME}" -neq "root" ]; then
-  adduser -D -G users -u ${USER_ID} ${USER_NAME}
+fi
+if [ "${USER_NAME}" != "root" ]; then
+  useradd -G users -u ${USER_ID} ${USER_NAME}
   chown -R ${USER_NAME}:${GROUP_ID} outputs/
 fi
 

@@ -1,0 +1,31 @@
+<div class="landing-container">
+  <div class="landing-top">
+    <div class="landing-spacer-left"></div>
+    <div class="landing-spacer-content">
+      <div class="landing-header">
+        <span translate>landing.header</span>
+      </div>
+      <select-input
+        class="form-control"
+        ng-show="landingPageCtrl.languageService.enableLanguageSelection()"
+        ng-model="landingPageCtrl.currentLanguage"
+        input-options="landingPageCtrl.languageOptions"
+      />
+    </div>
+    <div class="landing-spacer-right"></div>
+  </div>
+
+  <div class="landing-content">
+    <div class="landing-spacer-left"></div>
+    <div class="landing-spacer-content" ng-transclude></div>
+    <div class="landing-spacer-right"></div>
+  </div>
+
+  <div class="landing-footer">
+    <div class="landing-spacer-left"></div>
+    <page-footer context="landing.footer" class="landing-spacer-content position-bottom brand-footer"></page-footer>
+    <div class="landing-spacer-right"></div>
+  </div>
+
+  <div class="landing-bottom"></div>
+</div>

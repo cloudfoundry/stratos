@@ -36,5 +36,11 @@ $main-nav-background-color: $suse-secondary;
 $navbar-active-bg: $suse-secondary-lighter;
 $navbar-hover-bg: $suse-primary-darker;
 
+$landing-page-menu-color: $suse-text-gray;
+
+
+@import "dark-form";
 @import "login";
 @import "about";
+@import "wizard";
+@import "setup";

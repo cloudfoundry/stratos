@@ -1,12 +1,19 @@
-<div class="panel panel-default summary">
+<div class="panel panel-default summary log-viewer-panel">
   <div class="panel-heading action-header">
-    <span class="log-stream-title" translate>app.app-info.app-tabs.log-stream.title</span>
+    <span ng-if="!cfLogViewer.logTitle" class="log-stream-title" translate>app.app-info.app-tabs.log-stream.title</span>
+    <span ng-if="cfLogViewer.logTitle" class="log-stream-title" translate>{{ cfLogViewer.logTitle }}</span>
     <span ng-if="cfLogViewer.streamingStatus !== 2 && !cfLogViewer.disableStatus" class="app-log-stream-indicator material-icons"
     ng-class="{
                 'log-stream-ok text-primary': cfLogViewer.streamingStatus === 1,
                 'log-stream-error text-danger': cfLogViewer.streamingStatus === 3
               }"></span>
     <bounce-spinner classes="bounce-spinner-sm" ng-if="cfLogViewer.streamingStatus === 2 && !cfLogViewer.disableStatus"></bounce-spinner>
+    <span ng-if="cfLogViewer.disableStatus && (cfLogViewer.status === 1 || cfLogViewer.status === 3)" class="app-log-stream-indicator material-icons"
+    ng-class="{
+                'log-stream-ok text-primary': cfLogViewer.status === 1,
+                'log-stream-error text-danger': cfLogViewer.status === 3
+              }"></span>
+    <bounce-spinner classes="bounce-spinner-sm" ng-if="cfLogViewer.status === 2 && cfLogViewer.disableStatus"></bounce-spinner>
     <!--// After the user has scrolled up we disable auto-scroll-->
     <!--// They can re-enable auto-scroll either by:-->
     <!--// - manually scrolling to the bottom-->
@@ -17,6 +24,7 @@
     </a>
   </div>
   <log-viewer class="log-viewer"
+              cf-log-viewer-resize="{{cfLogViewer.fitHeight}}"
               auto-scroll-on="cfLogViewer.autoScrollOn"
               websocket-url="cfLogViewer.webSocketUrl"
               websocket="cfLogViewer.webSocket"

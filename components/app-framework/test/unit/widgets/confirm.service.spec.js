@@ -2,8 +2,9 @@
   'use strict';
 
   describe('confirm service', function () {
-    var $rootScope, $q, $sce, $timeout, confirmDialog, confirmDialogContext, service;
+    var $rootScope, $q, $sce, $timeout, $animate, confirmDialog, confirmDialogContext, service;
 
+    beforeEach(module('ngAnimateMock'));
     beforeEach(module('templates'));
     beforeEach(module('app.framework'));
     beforeEach(module('ui.bootstrap'));
@@ -13,6 +14,8 @@
       $rootScope = $injector.get('$rootScope');
       $q = $injector.get('$q');
       $sce = $injector.get('$sce');
+
+      $animate = $injector.get('$animate');
       confirmDialog = $injector.get('frameworkDialogConfirm');
       confirmDialogContext = {
         noHtmlEscape: true,
@@ -21,12 +24,14 @@
         buttonText: {
           yes: 'Yes, I am sure',
           no: 'No'
-        },
-        callback: function () {
         }
       };
       service = confirmDialog(confirmDialogContext);
     }));
+
+    afterEach(function () {
+      $animate.flush();
+    });
 
     it('confirm is defined as function', function () {
       expect(angular.isFunction(confirmDialog)).toBe(true);
@@ -47,7 +52,7 @@
 
     it('should close dialog when cancel pressed', function () {
       service.result.then(function () {
-        fail('dailog should close cancel');
+        fail('dialog should close cancel');
       });
       $rootScope.$apply();
       angular.element('.btn.btn-default').trigger('click');
@@ -77,6 +82,8 @@
       angular.element('.btn.btn-primary').trigger('click');
       $timeout.flush();
       expect(angular.element('.modal-error .alert.alert-danger').text().trim()).toBe('error_msg');
+
+      angular.element('.btn.btn-default').trigger('click');
     });
 
     it('should get error when callback fails - get description', function () {
@@ -90,6 +97,8 @@
       angular.element('.btn.btn-primary').trigger('click');
       $timeout.flush();
       expect(angular.element('.modal-error .alert.alert-danger').text().trim()).toBe('error_msg2');
+
+      angular.element('.btn.btn-default').trigger('click');
     });
 
     it('should get error when callback fails - default', function () {
@@ -102,6 +111,8 @@
       angular.element('.btn.btn-primary').trigger('click');
       $timeout.flush();
       expect(angular.element('.modal-error .alert.alert-danger').text().trim()).toBe('msg');
+
+      angular.element('.btn.btn-default').trigger('click');
     });
 
     it('should close when there is no callback', function () {

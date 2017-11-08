@@ -14,7 +14,6 @@
    * @param {app.model.loginManager} loginManager - the login management service
    * @param {object} frameworkDialogConfirm - the confirmation dialog service
    * @param {object} $interval - the angular $interval Service
-   * @param {object} $interpolate - the angular $interpolate Service
    * @param {object} $rootScope - the angular $rootScope Service
    * @param {object} $window - the angular $window Service
    * @param {object} $log - the angular $log Service
@@ -23,11 +22,11 @@
    * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(appEventService, modelManager, loginManager, frameworkDialogConfirm,
-                                  $interval, $interpolate, $rootScope, $window, $log, $document, $translate) {
+    $interval, $rootScope, $window, $log, $document, $translate) {
 
     var loggedIn = false;
     var lastUserInteraction = moment();
-    var sessionChecker, dialog;
+    var sessionChecker, dialog, dashboardRouteFunc;
 
     // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
     var checkSessionInterval = 30 * 1000;
@@ -148,7 +147,9 @@
 
     return {
       isLoggedIn: isLoggedIn,
-      userInteracted: userInteracted
+      userInteracted: userInteracted,
+      setDashboardRouteFunc: setDashboardRouteFunc,
+      getDashboardRoute: getDashboardRoute
     };
 
     function isLoggedIn() {
@@ -157,6 +158,17 @@
 
     function userInteracted() {
       lastUserInteraction = moment();
+    }
+
+    function setDashboardRouteFunc(func) {
+      dashboardRouteFunc = func;
+    }
+
+    function getDashboardRoute() {
+      // At this point console-info must have been called
+      if (angular.isFunction(dashboardRouteFunc)) {
+        return dashboardRouteFunc();
+      }
     }
 
     function _getAccountModel() {

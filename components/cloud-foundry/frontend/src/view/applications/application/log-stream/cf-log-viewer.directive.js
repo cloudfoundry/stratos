@@ -13,7 +13,10 @@
         webSocketUrl: '=?',
         webSocket: '=?',
         filter: '=?',
-        disableStatus: '=?'
+        disableStatus: '=?',
+        fitHeight: '=?',
+        logTitle: '=?',
+        status: '=?'
       },
       controller: CfLogViewerController,
       controllerAs: 'cfLogViewer',

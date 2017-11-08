@@ -24,7 +24,7 @@ RUN apk update && \
   make install && \
   cd / && \
   if [ -x /usr/bin/npm ]; then \
-    npm install -g npm@${NPM_VERSION} && \
+    npm install --production -g npm@${NPM_VERSION} && \
     find /usr/lib/node_modules/npm -name test -o -name .bin -type d | xargs rm -rf; \
   fi
 RUN curl https://glide.sh/get | sh && \

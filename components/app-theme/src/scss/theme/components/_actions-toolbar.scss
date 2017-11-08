@@ -4,7 +4,8 @@
 
 $actions-toolbar-hover-bg: darken($white, 10%) !default;
 $actions-toolbar-height: $button-height !default;
-$actions-toolbar-menu-hover-color: $link-color !default;
+$actions-toolbar-menu-color: $link-color !default;
+$actions-toolbar-menu-hover-color: $link-hover-color !default;
 $actions-toolbar-spacing: 4px !default;
 $actions-toolbar-menu-gripper-size: 28px !default;
 $actions-toolbar-icon-svg-size: 16px !default;

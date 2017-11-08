@@ -65,7 +65,7 @@
           contents: new Buffer(res)
         });
 
-       // console.log(res);
+        // console.log(res);
         that.push(file);
       });
 
@@ -98,7 +98,7 @@
                 dest[k] = v;
               }
             } else {
-             // Merge again
+              // Merge again
               merge(dest[k], v);
             }
           }
@@ -119,8 +119,7 @@
         return cb(new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
       }
 
-      var parentDir = path.dirname(file.relative);
-      var locale = parentDir.substr(parentDir.length - 2, 2);
+      var locale = path.dirname(file.relative);
       addStrings(locale, file);
       cb();
     }

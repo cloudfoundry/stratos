@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 WORK_DIR=$(pwd)
 
@@ -15,8 +15,8 @@ if [ ! -z "${CREATE_USER}" ]; then
   fi
 fi
 
-npm install
-PATH=$PATH:$WORK_DIR/node_modules/.bin
+npm install --production
+export PATH=$PATH:$WORK_DIR/node_modules/.bin
 bower install --allow-root --force
 npm run build
 

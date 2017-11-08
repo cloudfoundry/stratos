@@ -36,6 +36,7 @@ type TokenRecord struct {
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
+	Disconnected bool
 }
 
 type CFInfo struct {
@@ -86,6 +87,8 @@ type PortalConfig struct {
 	TLSAddress                  string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
 	TLSCert                     string   `configName:"CONSOLE_PROXY_CERT"`
 	TLSCertKey                  string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                 string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath              string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
 	CFClient                    string   `configName:"CF_CLIENT"`
 	CFClientSecret              string   `configName:"CF_CLIENT_SECRET"`
 	AllowedOrigins              []string `configName:"ALLOWED_ORIGINS"`
@@ -93,6 +96,7 @@ type PortalConfig struct {
 	EncryptionKeyVolume         string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool
@@ -102,4 +106,5 @@ type PortalConfig struct {
 	LoginHook                   LoginHookFunc
 	SessionStore                SessionStorer
 	ConsoleConfig               *ConsoleConfig
+	PluginConfig                map[string]string
 }

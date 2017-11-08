@@ -6,6 +6,7 @@
   var inputSelectInput = require('../../../../../../app-core/frontend/test/e2e/po/widgets/input-select-input.po');
 
   module.exports = {
+    getTitle: getTitle,
 
     applicationGalleryCards: applicationGalleryCards,
     applicationGalleryCard: applicationGalleryCard,
@@ -37,6 +38,10 @@
 
   };
 
+  function getTitle() {
+    return element(by.css('.applications-header > span')).getText();
+  }
+
   function applicationGalleryCard(idx) {
     return applicationGalleryCards().get(idx)
       .element(by.css('gallery-card'));
@@ -56,7 +61,7 @@
 
   function isApplicationWall() {
     return browser.getCurrentUrl().then(function (url) {
-      return url === helpers.getHost() + '/#/cf/applications/list/gallery-view';
+      return url === helpers.getHost() + '/#!/cf/applications/list/gallery-view';
     });
   }
 

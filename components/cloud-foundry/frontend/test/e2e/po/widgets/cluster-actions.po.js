@@ -16,7 +16,7 @@
     var orgNameField = inputText.wrap(element(by.name('form.createOrganization')));
     orgNameField.addText(orgName);
     element(by.buttonText('Create')).click();
-    helpers.checkAndCloseToast(/Organisation '.*' successfully created/);
+    helpers.checkAndCloseToast(/Organization '.*' successfully created/);
   }
 
   function createSpace(orgName, spaceName) {

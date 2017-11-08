@@ -1,10 +1,12 @@
 (function () {
   'use strict';
 
+  var appCore = '../../../../../app-core/frontend/';
+
   var _ = require('lodash');
-  var navbar = require('../../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var helpers = require('../../../../../app-core/frontend/test/e2e/po/helpers.po');
-  var actionMenu = require('../../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
+  var navbar = require(appCore + 'test/e2e/po/navbar.po');
+  var helpers = require(appCore + 'test/e2e/po/helpers.po');
+  var actionMenu = require(appCore + 'test/e2e/po/widgets/actions-menu.po');
   var credentialsFormHelper = require('../widgets/credentials-form.po');
 
   module.exports = {
@@ -52,12 +54,12 @@
   }
 
   function goToEndpoints() {
-    return browser.get(helpers.getHost() + '/#/endpoint');
+    return browser.get(helpers.getHost() + '/#!/endpoint');
   }
 
   function isEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return url === helpers.getHost() + '/#/endpoint';
+      return url === helpers.getHost() + '/#!/endpoint';
     });
   }
 
@@ -203,7 +205,7 @@
   }
 
   function endpointActionMenu(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
+    return helpers.getTableCellAt(getEndpointTable(), row, 5).element(by.css('actions-menu'));
   }
 
   function endpointUrl(row) {
@@ -222,7 +224,7 @@
   }
 
   function getHeaderRegister() {
-    return element(by.css('.endpoints-dashboard .header button'));
+    return element(by.id('endpoints-dashboard.register-button'));
   }
 
   function headerRegister() {
@@ -230,7 +232,7 @@
   }
 
   function headerRegisterVisible() {
-    return getHeaderRegister().isPresent();
+    return getHeaderRegister().isDisplayed();
   }
 
   function credentialsForm() {

@@ -198,7 +198,7 @@ func sshHostKeyChecker(fingerprint string) ssh.HostKeyCallback {
 		if fingerprint == ssh.FingerprintLegacyMD5(key) {
 			return nil
 		}
-		return errors.New("Host Kwey fingerprint is incorrect")
+		return errors.New("Host key fingerprint is incorrect")
 	}
 }
 

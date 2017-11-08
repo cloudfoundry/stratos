@@ -10,6 +10,7 @@
   var path = require('path');
 
   var prepareBuild = require('./bk-prepare-build');
+  var nodePackageFile = require('../package.json');
 
   var env, devConfig, pluginsToInclude;
 
@@ -52,8 +53,12 @@
 
   function skipGlideInstall() {
     if (isLocalDevBuild()) {
-      // Check if we can find the golang folder - indicates glide has run before
-      var folder = path.join(process.env.GOPATH, 'src', 'golang.org');
+      // Skip glide install if ...
+      // .. we're in test mode and we've found a common test dependency
+      // .. we're building the backend and we've found a common dependency
+      var folder = prepareBuild.getBuildTest()
+        ? path.join(env.GOPATH, 'src', 'github.com', 'smartystreets', 'goconvey', 'convey')
+        : path.join(env.GOPATH, 'src', 'github.com', 'labstack', 'echo');
       return fs.existsSync(folder);
     }
     return false;
@@ -112,20 +117,47 @@
     return spawnProcess('go', args, pluginPath, env);
   }
 
-  function build(srcPath, exeName) {
+  function build(srcPath, exeName, skipPlugins) {
     var args = ['build', '-i', '-o', exeName];
 
-    if (!platformSupportsPlugins()) {
+    if (!skipPlugins && !platformSupportsPlugins()) {
       prepareBuildWithoutPluginSupport(srcPath);
     }
-
-    return spawnProcess('go', args, srcPath, env);
+    
+    // Set the console version from that of the package.json and the git commit
+    return getVersion().then(function (version) {
+      if (version) {
+        args.push('-ldflags');
+        args.push('-X=main.appVersion=' + version);
+      }
+      return spawnProcess('go', args, srcPath, env);
+    });
   }
 
   function test(path) {
     return spawnProcess('go', ['test', '-v'], path, env);
   }
 
+  function getVersion() {
+    var deferred = Q.defer();
+    var version = nodePackageFile.version;
+    if (version) {
+      var args = ['log', '-1', '--format="%h"'];
+      childProcess.execFile('git', args, function (error, stdout) {
+        if (error === null) {
+          var commitSha = _.trim(stdout);
+          commitSha = _.trimStart(commitSha, '"');
+          commitSha = _.trimEnd(commitSha, '"');
+          deferred.resolve(version + '-' + commitSha);
+        } else {
+          deferred.resolve(version);
+        }
+      });
+    } else {
+      deferred.resolve('dev');
+    }
+    return deferred.promise;
+  }
   function platformSupportsPlugins() {
     return process.platform === 'linux';
   }
@@ -143,7 +175,7 @@
       _.each(plugin.files, function (name) {
         var src = path.join(plugin.path, name);
         var dest = path.join(destPath, name);
-        fs.mkdirp(destPath);
+        fs.mkdirpSync(destPath);
 
         var data = fs.readFileSync(src);
         // Re-write the package for the plugin's files

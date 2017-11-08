@@ -61,6 +61,7 @@
       }
       context.noCancel = !!config.noCancel;
       context.noSubmit = !!config.noSubmit;
+      context.allowEnter = config.allowEnter;
 
       if (angular.isFunction(invalidityCheck)) {
         context.invalidityCheck = invalidityCheck;
@@ -140,6 +141,15 @@
     vm.disableMargin = disableMargin;
     vm.hasErrorMessage = hasErrorMessage;
     vm.isFormInvalid = isFormInvalid;
+
+    // Ignore enter if event has been marked with preventDefault()
+    vm.canUseEnter = function (ev) {
+      if (vm.context.allowEnter) {
+        return vm.context.allowEnter(vm, ev);
+      } else {
+        return !ev.isDefaultPrevented();
+      }
+    };
 
     /**
      * @name invokeAction

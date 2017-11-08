@@ -45,15 +45,18 @@
     vm.getOrganizations = getOrganizations;
     vm.getSpacesForOrganization = getSpacesForOrganization;
 
-    init();
-
     var initialServiceInstance = _.get(vm.serviceInstance, 'metadata.guid') || appModel.filterParams.cnsiGuid;
     var initialOrganization = _.get(vm.organization, 'metadata.guid') || appModel.filterParams.orgGuid;
     var initialSpace = _.get(vm.space, 'metadata.guid') || appModel.filterParams.spaceGuid;
 
+    init();
+
     function init() {
       vm.organizations = [];
       vm.spaces = [];
+
+      vm.loadingOrganizations = true;
+      vm.loadingSpaces = true;
 
       if (initialServiceInstance && initialServiceInstance !== 'all') {
         // Find the option to set. If the user has no permissions this may be null
@@ -91,6 +94,8 @@
     function getOrganizations() {
       var cnsiGuid = vm.serviceInstance.guid;
       vm.organizations.length = 0;
+      vm.loadingOrganizations = true;
+      vm.loadingSpaces = true;
 
       return cfOrganizationModel.listAllOrganizations(cnsiGuid)
         .then(function (organizations) {
@@ -115,6 +120,9 @@
             var preSelectedOrg = _.find(vm.organizations, {value: {metadata: {guid: initialOrganization}}}) || {};
             vm.organization = preSelectedOrg.value;
           }
+        })
+        .finally(function () {
+          vm.loadingOrganizations = false;
         });
     }
 
@@ -128,6 +136,7 @@
     function getSpacesForOrganization(guid) {
       var cnsiGuid = vm.serviceInstance.guid;
       vm.spaces.length = 0;
+      vm.loadingSpaces = true;
 
       return cfOrganizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
         .then(function (spaces) {
@@ -145,6 +154,9 @@
             var preSelectedOrg = _.find(vm.spaces, {value: {metadata: {guid: initialSpace}}}) || {};
             vm.space = preSelectedOrg.value;
           }
+        })
+        .finally(function () {
+          vm.loadingSpaces = false;
         });
     }
 

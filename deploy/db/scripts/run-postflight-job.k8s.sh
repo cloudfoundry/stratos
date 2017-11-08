@@ -1,78 +1,76 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+echo "Running postflight job"
+MYSQL_CMD="mysql -u $DB_ADMIN_USER -h $DB_HOST -P $DB_PORT -p$DB_ADMIN_PASSWORD -e"
+echo "Checking if DB exists..."
+stratosDbExists=$(${MYSQL_CMD}  "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$DB_DATABASE_NAME';")
+DBCONF_KEY=mariadb-k8s
 
-execStatement() {
-    stmt=$1
-    PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $PGSQL_HOST -p $PGSQL_PORT -d postgres -w -tc "$stmt"
-}
-
-execBackupRestore() {
-    orig_server="hsc-stproxy-int"
-    dest_server=$PGSQL_HOST
-    bkup="pg_dump -U $PGSQL_USER -h $orig_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
-    stor="psql -U $PGSQL_USER -h $dest_server -p $PGSQL_PORT -w $PGSQL_DATABASE"
-
-    PGPASSFILE=/tmp/pgpass $bkup | PGPASSFILE=/tmp/pgpass $stor
-}
-
-# Save the superuser info to file to ensure secure access
-echo "*:$PGSQL_PORT:postgres:$POSTGRES_USER:$(cat $POSTGRES_PASSWORD_FILE)" > /tmp/pgpass
-echo "*:$PGSQL_PORT:$PGSQL_DATABASE:$PGSQL_USER:$(cat $PGSQL_PASSWORDFILE)" >> /tmp/pgpass
-chmod 0600 /tmp/pgpass
-
-# Get db user password from secrets file
-PWD=$(cat $PGSQL_PASSWORDFILE)
-
-# Create the database if necessary
-stratosDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
+# Create DB if neccessary
 if [ -z "$stratosDbExists" ] ; then
-    echo "Creating database $PGSQL_DATABASE"
-    execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
-    echo "Creating user $PGSQL_USER"
-    execStatement "CREATE USER $PGSQL_USER WITH ENCRYPTED PASSWORD '$PWD';"
-    echo "Granting privs for $PGSQL_DATABASE to $PGSQL_USER"
-    execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$PGSQL_DATABASE\" TO $PGSQL_USER;"
+    echo "Creating database $DB_DATABASE_NAME"
+    ${MYSQL_CMD} "CREATE DATABASE \"$DB_DATABASE_NAME\";"
+    echo "Creating user $DB_USER"
+    ${MYSQL_CMD} "CREATE USER $DB_USER IDENTIFIED BY '$DB_PASSWORD';"
+    echo "Granting privs for $DB_DATABASE_NAME to $DB_USER"
+    ${MYSQL_CMD} "GRANT ALL PRIVILEGES ON DATABASE \"$DB_DATABASE_NAME\" TO $DB_USER;"
 else
-    echo "$PGSQL_DATABASE already exists"
+    echo "$DB_DATABASE_NAME already exists"
 fi
-
-# Backup existing database from stolon cluster and restore it to the single instance
-#execBackupRestore
 
 # Migrate the database if necessary
 echo "Checking database to see if migration is necessary."
 
+echo "DBCONFIG: $DBCONF_KEY"
+echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-PGSQL_PASSWORD=$PWD goose --env=k8s status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-PGSQL_PASSWORD=$PWD goose --env=k8s up
+stratos-dbmigrator --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-PGSQL_PASSWORD=$PWD goose --env=k8s status
+stratos-dbmigrator --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-PGSQL_PASSWORD=$PWD goose --env=k8s dbversion
+stratos-dbmigrator --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 
 
+TEMP_SCRIPT=$(mktemp)
+cat << EOF >> $TEMP_SCRIPT
+#!/bin/sh
 # Check if Upgrade Lock file exists
-if [ ! -f "/$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME" ]; then
-  exit 1
-fi
+while [ ! -f "/$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME" ];
+do 
+    echo "Upgrade lock file does not exist yet! Sleeping..."
+    sleep 5; 
+done   
+EOF
+chmod +x $TEMP_SCRIPT
+
+timeout 5m ${TEMP_SCRIPT}
 # Remove the lock file on the shared volume
 echo "Removing the $UPGRADE_LOCK_FILENAME file from the shared upgrade volume $UPGRADE_VOLUME."
 rm /$UPGRADE_VOLUME/$UPGRADE_LOCK_FILENAME || true
 
 echo "Removed the upgrade lock file."
 
-exit 0
+# If DO_NOT_QUIT is set, don't quit script
+# This is only used in toy kubernetes deployments with no shared volume 
+if [ "${DO_NOT_QUIT:-false}" = "false" ]; then
+    echo "Running in shared volume mode, exiting..."
+    exit 0
+else
+    echo "Running in 'DO NOT QUIT' mode"
+    while true; do sleep 5; done   
+fi

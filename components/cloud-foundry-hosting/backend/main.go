@@ -20,10 +20,11 @@ import (
 )
 
 const (
-	VCapApplication     = "VCAP_APPLICATION"
-	CFApiURLOverride    = "CF_API_URL"
-	CFApiForceSecure    = "CF_API_FORCE_SECURE"
-	cfSessionCookieName = "JSESSIONID"
+	VCapApplication        = "VCAP_APPLICATION"
+	CFApiURLOverride       = "CF_API_URL"
+	CFApiForceSecure       = "CF_API_FORCE_SECURE"
+	cfSessionCookieName    = "JSESSIONID"
+	ForceEndpointDashboard = "FORCE_ENDPOINT_DASHBOARD"
 )
 
 type CFHosting struct {
@@ -60,6 +61,15 @@ func (ch *CFHosting) Init() error {
 		// Ensure that the identifier for an admin is the standard Cloud Foundry one
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = ch.portalProxy.GetConfig().CFAdminIdentifier
 
+		// Allow Console Application manifest to override the Admin Scope if really desired
+		if config.IsSet("STRATOS_ADMIN_SCOPE") {
+			stratosAdminScope, err := config.GetValue("STRATOS_ADMIN_SCOPE")
+			if err == nil {
+				ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
+				log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
+			}
+		}
+
 		// Need to run as HTTP on the port we were told to use
 		ch.portalProxy.GetConfig().HTTPS = false
 
@@ -89,7 +99,7 @@ func (ch *CFHosting) Init() error {
 		if config.IsSet(CFApiURLOverride) {
 			apiUrl, _ := config.GetValue(CFApiURLOverride)
 			appData.API = apiUrl
-			log.Infof("Overrriden CF API URL from environment variable %s", apiUrl)
+			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
 		}
 
 		if config.IsSet(CFApiForceSecure) {
@@ -99,6 +109,23 @@ func (ch *CFHosting) Init() error {
 		} else {
 			log.Info("No forced override to HTTPS")
 		}
+
+		disableEndpointDashboard := true
+		if config.IsSet(ForceEndpointDashboard) {
+			// Force the Endpoint Dashboard to be visible?
+			if forceStr, err := config.GetValue(ForceEndpointDashboard); err == nil {
+				if force, err := strconv.ParseBool(forceStr); err == nil {
+					disableEndpointDashboard = !force
+				}
+			}
+		}
+
+		if disableEndpointDashboard {
+			log.Info("Endpoint Dashboard has been DISABLED")
+		} else {
+			log.Info("Endpoint Dashboard has been ENABLED")
+		}
+		ch.portalProxy.GetConfig().PluginConfig["endpointsDashboardDisabled"] = strconv.FormatBool(disableEndpointDashboard)
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
@@ -134,41 +161,24 @@ func (ch *CFHosting) Init() error {
 		// Save to Console DB
 		err = ch.portalProxy.SaveConsoleConfig(ch.portalProxy.GetConfig().ConsoleConfig, nil)
 		if err != nil {
+			log.Fatalf("Failed to save console configuration due to %s", err)
 			return fmt.Errorf("Failed to save console configuration due to %s", err)
 		}
 
-		// Auto-register the Cloud Foundry
-		cfCnsi, regErr := ch.portalProxy.DoRegisterEndpoint("Cloud Foundry", appData.API, true, cfEndpointSpec.Info)
-		if regErr != nil {
-			log.Fatal("Could not auto-register the Cloud Foundry endpoint", err)
-			ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-				SpaceGUID: appData.SpaceID,
-				AppGUID:   appData.ApplicationID,
-			}
-			return nil
-		}
+		log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
+		ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
 			SpaceGUID:    appData.SpaceID,
 			AppGUID:      appData.ApplicationID,
-			EndpointGUID: cfCnsi.GUID,
 		}
-
-		// Add login hook to automatically conneect to the Cloud Foundry when the user logs in
-		ch.portalProxy.GetConfig().LoginHook = ch.cfLoginHook
 
 		log.Info("All done for Cloud Foundry deployment")
 	}
 	return nil
 }
 
-func (ch *CFHosting) cfLoginHook(c echo.Context) error {
-	log.Debug("Auto connecting to the Cloud Foundry instance")
-	cfInfo := ch.portalProxy.GetConfig().CloudFoundryInfo
-	_, err := ch.portalProxy.DoLoginToCNSI(c, cfInfo.EndpointGUID)
-	return err
-}
 
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {

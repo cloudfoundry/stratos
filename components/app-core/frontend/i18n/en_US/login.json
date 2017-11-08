@@ -1,0 +1,22 @@
+{
+  "login": {
+    "login": "Login",
+    "console": "@:product.console",
+    "logo": "",
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "username": "@:auth.username",
+    "password": "@:auth.password",
+    "authenticating": "Authenticating Credentials",
+    "welcome": "Use the [[@:product.console]] to develop, compose, and manage Cloud Native workloads.",
+    "error": {
+      "credentials": "The login and password combination you used are incorrect. Please try again.",
+      "server": "A server error occurred when attempting to log you in. Please try again. If this error persists, please contact the administrator.",
+      "no-response": "The authentication server failed to respond. Please try again. If this error persists, please contact the administrator."
+    },
+    "timeout": {
+      "prompt": "Are you still there?",
+      "notice": "You have been inactive for a while. For your protection, we will automatically log you out in {{timeout}}",
+      "confirm": "I am still here"
+    }
+  }
+}

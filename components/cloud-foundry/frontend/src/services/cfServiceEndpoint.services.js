@@ -67,7 +67,7 @@
     function refreshToken(allServiceInstances) {
       var cfInfoApi = apiManager.retrieve('cloud-foundry.api.Info');
       var cfGuids = _.map(_.filter(allServiceInstances, {cnsi_type: service.cnsi_type}) || [], 'guid') || [];
-      var cfCfg = {headers: {'x-cnap-cnsi-list': cfGuids.join(',')}};
+      var cfCfg = {headers: {'x-cap-cnsi-list': cfGuids.join(',')}};
       if (cfGuids.length > 0) {
         return cfInfoApi.GetInfo({}, cfCfg).then(function (response) {
           return response.data || {};

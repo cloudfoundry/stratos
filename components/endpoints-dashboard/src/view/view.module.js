@@ -28,10 +28,11 @@
    * @param {app.utils.appUtilsService} appUtilsService - the appUtilsService service
    * @param {app.view.appRegisterService} appRegisterService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.appEndpointsDashboardService} appEndpointsDashboardService - service to support endpoints dashboard
+   * @param {object} appBusyService - the appBusyService service
    * @constructor
    */
   function EndpointsDashboardController($scope, $state, modelManager, appUtilsService, appRegisterService,
-                                        appEndpointsDashboardService) {
+    appEndpointsDashboardService, appBusyService) {
     var vm = this;
 
     var currentUserAccount = modelManager.retrieve('app.model.account');
@@ -42,6 +43,18 @@
     vm.hideWelcomeMessage = hideWelcomeMessage;
     vm.isUserAdmin = isUserAdmin;
     vm.reload = reload;
+    vm.headerActions = [
+      {
+        id: 'endpoints-dashboard.register-button',
+        name: 'endpoints-dashboard.register-button',
+        execute: register,
+        hidden: function () {
+          return !isUserAdmin();
+        },
+        disabled: vm.initialised,
+        icon: 'add_circle'
+      }
+    ];
 
     appEndpointsDashboardService.refreshFromCache();
     if (appEndpointsDashboardService.endpoints.length !== 0) {
@@ -104,6 +117,7 @@
     }
 
     function init() {
+      vm.appBusyId = appBusyService.set('endpoints-dashboard.busy');
       vm.initialised = false;
       return appEndpointsDashboardService.update()
         .then(function () {
@@ -112,22 +126,30 @@
           if (!vm.endpoints) {
             vm.endpoints = appEndpointsDashboardService.endpoints;
           }
+
+          $scope.$watch(function () {
+            return vm.endpoints.length + !!_.find(vm.endpoints, {connected: 'connected'});
+          }, function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              // We only want the welcome error message to display on enter. Any changes should remove the message
+              // - Connected/Registered should remove error message
+              // - Disconnected/Unregistered should not warn afresh
+              vm.showWelcomeMessage = false;
+            }
+          });
+
           _updateWelcomeMessage();
         }).catch(function () {
           vm.listError = true;
+        }).finally(function () {
+          appBusyService.clear(vm.appBusyId);
         });
     }
 
     function _updateWelcomeMessage() {
-      // Show the welcome message if either...
-      if (vm.isUserAdmin()) {
-        // The user is admin and there are no endpoints registered
-        vm.showWelcomeMessage = vm.endpoints.length === 0;
-      } else {
-        // The user is not admin and there are no connected endpoints (note - they should never reach here if there
-        // are no registered endpoints)
-        vm.showWelcomeMessage = !_.find(vm.endpoints, {connected: 'connected'});
-      }
+      vm.endpointsRegistered = vm.endpoints.length > 0;
+      vm.endpointsConnected = !!_.find(vm.endpoints, {connected: 'connected'});
+      vm.showWelcomeMessage = !vm.endpointsConnected;
     }
   }
 

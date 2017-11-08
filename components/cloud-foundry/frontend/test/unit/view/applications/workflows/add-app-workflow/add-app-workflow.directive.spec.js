@@ -132,7 +132,6 @@
 
           it('should have right title and button labels', function () {
             expect($translate.instant(step.nextBtnText)).toBe('Add');
-            expect($translate.instant(step.cancelBtnText)).toBe('Cancel');
             expect(step.showBusyOnNext).toBe(true);
           });
 

@@ -1,0 +1,38 @@
+<div class="deploy-app-local">
+  <div class="deploy-app-local-form">
+    <div class="form-group form-group-large deploy-app-file-controls" focusable-input>
+      <label ng-if="!dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.file.field</label>
+      <label ng-if="dplyLocalCtrl.folderSupport" class="control-label" translate>deploy-app-dialog.step-source.local.folder.field</label>
+      <input fileread="dplyLocalCtrl.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFile" id="localPathSelectFile"></input>
+      <input webkitdirectory fileread="dplyLocalCtrl.userInput.localPathFile" type="file" class="form-control file-chooser" name="localPathSelectFolder" id="localPathSelectFolder"></input>
+      <!-- File support only -->
+      <label ng-if="!dplyLocalCtrl.folderSupport" class="form-control clickable" for="localPathSelectFile">
+        <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
+        <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.file.prompt</span>
+      </label>
+      <!-- File and Folder support -->
+      <label ng-if="dplyLocalCtrl.folderSupport" class="form-control">
+        <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
+        <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.folder.prompt</span>
+        <label class="deploy-app-form-btn" for="localPathSelectFile">
+          <i class="material-icons">insert_drive_file</i>
+        </label>
+        <label class="deploy-app-form-btn" for="localPathSelectFolder">
+          <i class="material-icons">folder</i>
+        </label>
+      </label>
+    </div>
+
+    <!-- File info -->
+    <div class="deploy-app-source-details deploy-app-local-details" ng-if="dplyLocalCtrl.userInput.fileScanData.files">
+      <div class="deploy-app-local-info deploy-app-file-details">
+        <i class="material-icons">file_upload</i>
+        <p translate translate-values="{files: dplyLocalCtrl.userInput.fileScanData.files, total: dplyLocalCtrl.data.bytesToHumanSize(dplyLocalCtrl.userInput.fileScanData.total)}">deploy-app-dialog.step-source.local.info</p>
+      </div>
+      <div class="deploy-app-local-info deploy-app-file-details deploy-app-found-cfignore" ng-if="dplyLocalCtrl.cfIgnoreFile">
+        <p translate>deploy-app-dialog.step-source.local.cfignore</p>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -2,15 +2,16 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.log-stream',
-    ['cloud-foundry.view.applications.application.log-stream.cfLogViewer'])
+    .module('cloud-foundry.view.applications.application.log-stream', [
+      'cloud-foundry.view.applications.application.log-stream.cfLogViewer',
+      'cloud-foundry.view.applications.application.log-stream.cfLogViewerReize'])
     .config(registerRoute)
     .run(registerAppTab);
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.log-stream', {
       url: '/log-stream',
-      template: '<cf-log-viewer web-socket-url="applicationLogStreamCtrl.webSocketUrl"/>',
+      template: '<cf-log-viewer fit-height="true" web-socket-url="applicationLogStreamCtrl.webSocketUrl"/>',
       controller: ApplicationLogStreamController,
       controllerAs: 'applicationLogStreamCtrl'
     });
@@ -22,7 +23,7 @@
       hide: false,
       uiSref: 'cf.applications.application.log-stream',
       uiSrefParam: function () {
-        return {guid: $stateParams.guid};
+        return { guid: $stateParams.guid };
       },
       label: 'app.app-info.app-tabs.log-stream.label'
     });

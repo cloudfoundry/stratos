@@ -22,14 +22,13 @@
     });
 
     it('should toggle', function () {
-      var isolateScope = element.isolateScope();
-      expect(isolateScope.showPassword).toBe(false);
+      expect(element.attr('type')).toBe('password');
       var eyeIcon = element.next();
       expect(eyeIcon).toBeDefined();
       eyeIcon.click();
-      expect(isolateScope.showPassword).toBe(true);
+      expect(element.attr('type')).toBe('text');
       eyeIcon.click();
-      expect(isolateScope.showPassword).toBe(false);
+      expect(element.attr('type')).toBe('password');
     });
   });
 })();

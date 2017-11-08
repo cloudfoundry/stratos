@@ -31,9 +31,12 @@
    * @param {object} cfOrganizationModel - the cfOrganizationModel service
    * @param {object} cfAppWallActions - service providing collection of actions that can be taken on the app wall (add,
    * deploy, etc)
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
+   * @param {appBusyService} appBusyService - the application busy service
+   * 
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
-                                      appUtilsService, cfOrganizationModel, cfAppWallActions) {
+    appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage, appBusyService) {
 
     var vm = this;
 
@@ -45,10 +48,16 @@
 
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.loading = true;
+    if (!vm.model.hasApps) {
+      vm.appBusyId = appBusyService.set('app-wall.retrieving', true);
+    } else {
+      vm.appBusyId = undefined;
+    }
+
     vm.isSpaceDeveloper = false;
-    vm.clusters = [{label: 'All Endpoints', value: 'all'}];
-    vm.organizations = [{label: 'All Organizations', value: 'all'}];
-    vm.spaces = [{label: 'All Spaces', value: 'all'}];
+    vm.clusters = [{label: 'app-wall.select-endpoint-all', value: 'all', translateLabel: true}];
+    vm.organizations = [{label: 'app-wall.select-org-all', value: 'all', translateLabel: true}];
+    vm.spaces = [{label: 'app-wall.select-space-all', value: 'all', translateLabel: true}];
     vm.isEndpointsDashboardAvailable = appUtilsService.isPluginAvailable('endpointsDashboard');
     vm.filter = {
       cnsiGuid: 'all',
@@ -86,12 +95,19 @@
     vm.resetFilter = resetFilter;
     vm.isAdminInAnyCf = isAdminInAnyCf;
     vm.goToGalleryView = goToGalleryView;
-    vm.appWallActions = cfAppWallActions.actions;
-    vm.appWallActionContext = {
-      show: showChangeAppListAction,
-      disable: disableChangeAppListAction,
+    var appWallActionContext = {
+      hidden: hideChangeAppListAction,
+      disabled: disableChangeAppListAction,
       reload: _reload
     };
+    vm.appWallActions = _.chain(cfAppWallActions.actions)
+      .map(function (action) {
+        action.context = appWallActionContext;
+        return action;
+      })
+      .orderBy('position', 'asc')
+      .value();
+
     vm.addApplication = addApplication;
     angular.element($window).on('resize', onResize);
 
@@ -102,6 +118,17 @@
       appErrorService.clearAppError();
       // Ensure that remove the resize handler on the window
       angular.element($window).off('resize', onResize);
+
+      // Clear the busy indicator if it is shown
+      if (vm.appBusyId) {
+        appBusyService.clear(vm.appBusyId);
+      }
+    });
+
+    $scope.$watch(function () {
+      return vm.model.filterParams.cnsiGuid + vm.model.filterParams.orgGuid + vm.model.filterParams.spaceGuid;
+    }, function () {
+      appLocalStorage.setItem('cf.filterParams', angular.toJson(vm.model.filterParams));
     });
 
     function onResize() {
@@ -140,6 +167,10 @@
         .finally(function () {
           // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
           vm.ready = true;
+          if (vm.appBusyId) {
+            appBusyService.clear(vm.appBusyId);
+            vm.appBusyId = undefined;
+          }
         });
     }
 
@@ -262,6 +293,9 @@
             }
           });
       } else {
+        // Cluster is set to all, so should org
+        vm.model.filterParams.orgGuid = 'all';
+        vm.filter.orgGuid = 'all';
         return $q.resolve();
       }
     }
@@ -299,6 +333,9 @@
             }
           });
       } else {
+        // Cluster & org are set to all, so should space
+        vm.model.filterParams.spaceGuid = 'all';
+        vm.filter.spaceGuid = 'all';
         return $q.resolve();
       }
     }
@@ -393,8 +430,8 @@
     }
 
     /**
-     * @function getClusterOrganizations
-     * @description Get organizations for selected cluster
+     * @function setCluster
+     * @description
      * @returns {void}
      * @public
      */
@@ -413,18 +450,7 @@
           // changed the org and space filter
           needToReload = needToReload || !_.isMatch(vm.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
-          if (needToReload) {
-            _reload();
-          } else {
-            if (vm.filter.cnsiGuid === 'all') {
-              vm.model.resetFilter();
-            } else {
-              vm.model.filterByCluster(vm.filter.cnsiGuid);
-            }
-            vm.paginationProperties.pageNumber = 1;
-            vm.paginationProperties.total = _.ceil(vm.model.filteredApplications.length / vm.model.pageSize);
-            _loadPage(1);
-          }
+          _reload(false, !needToReload);
         });
     }
 
@@ -508,14 +534,14 @@
       }
     }
 
-    function showChangeAppListAction() {
-      return isAdminInAnyCf() || vm.isSpaceDeveloper;
+    function hideChangeAppListAction() {
+      return !isAdminInAnyCf() && !vm.isSpaceDeveloper;
     }
 
     function addApplication() {
       var addAppAction = _.find(cfAppWallActions.actions, 'id', 'app-wall-add-new-application-btn');
       if (addAppAction) {
-        addAppAction.action();
+        addAppAction.execute();
       }
     }
 
@@ -537,6 +563,7 @@
      */
     function goToGalleryView(showCardLayout) {
       vm.model.showCardLayout = showCardLayout;
+      appLocalStorage.setItem('cf.app.cardLayout', showCardLayout);
       return $state.go('cf.applications.list.gallery-view');
     }
 

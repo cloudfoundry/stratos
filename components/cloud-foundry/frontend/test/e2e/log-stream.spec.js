@@ -24,10 +24,16 @@
           // Connect the test admin user to all cnsis in params (required to ensure correct permissions are set when
           // creating orgs + spaces)
           return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
-        }).then(function () {
+        })
+        .then(function () {
           helpers.setBrowserNormal();
           helpers.loadApp();
           return loginPage.loginAsAdmin();
+        })
+        .then(function () {
+          // Ensure that no org or space is selected when we come into the app wall
+          galleryWall.resetFilters();
+          return galleryWall.setGridView();
         });
       // Ensure we don't continue until everything is set up
       return browser.driver.wait(init);
@@ -76,7 +82,7 @@
         browser.driver.sleep(500);
         // Should be scrolling
         var initialScroll = getLogViewerScrollTop();
-        browser.driver.sleep(1000);
+        browser.driver.sleep(2000);
         var nextScroll = getLogViewerScrollTop();
         expect(initialScroll).toBeLessThan(nextScroll);
       });

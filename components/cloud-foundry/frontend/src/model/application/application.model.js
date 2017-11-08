@@ -17,9 +17,9 @@
     })
     .run(registerApplicationModel);
 
-  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils) {
+  function registerApplicationModel(appConfig, modelManager, apiManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     modelManager.register('cloud-foundry.model.application', new Application(appConfig, apiManager, modelManager,
-      cfAppStateService, $q, modelUtils));
+      cfAppStateService, $q, modelUtils, appLocalStorage));
   }
 
   /**
@@ -31,13 +31,14 @@
    * @param {object} cfAppStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general cf model helpers
+   * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @class
    */
-  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils) {
+  function Application(config, apiManager, modelManager, cfAppStateService, $q, modelUtils, appLocalStorage) {
     var applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
     var loadingLimit = config.loadingLimit;
 
@@ -50,13 +51,14 @@
         appStateMap: {}
       },
       pageSize: config.pagination.pageSize,
-      filterParams: {
+      filterParams: angular.fromJson(appLocalStorage.getItem('cf.filterParams')) || {
         cnsiGuid: 'all',
         orgGuid: 'all',
         spaceGuid: 'all'
       },
       // Controls view of App Wall (Card layout or List layout)
-      showCardLayout: true,
+      // Try and get this from Browser local storage, if not, default to card layout
+      showCardLayout: appLocalStorage.getItem('cf.app.cardLayout', 'true') === 'true',
       // This state should be in the model
       clusterCount: 0,
       hasApps: false,
@@ -263,7 +265,7 @@
               'results-per-page': 1
             }, {
               headers: {
-                'x-cnap-cnsi-list': _getCurrentCnsis().join(',')
+                'x-cap-cnsi-list': _getCurrentCnsis().join(',')
               }
             }).then(function (response) {
               model.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
@@ -271,17 +273,15 @@
           }
         })
         .then(function () {
-          var didFilter = false;
+          // Always start from a fresh filtered state
+          resetFilter();
+
           if (model.filterParams.cnsiGuid !== 'all') {
             filterByCluster(model.filterParams.cnsiGuid);
-            didFilter = true;
           }
+
           if (model.filterParams.text) {
             filterByText(model.filterParams.text);
-            didFilter = true;
-          }
-          if (!didFilter) {
-            resetFilter();
           }
         })
         .catch(_.bind(_onListAllAppsFailure, this));
@@ -357,7 +357,7 @@
       }, _buildFilter());
       var config = {
         headers: {
-          'x-cnap-cnsi-list': cnsis.join(',')
+          'x-cap-cnsi-list': cnsis.join(',')
         }
       };
       return applicationApi.ListAllApps(options, config).then(function (response) {
@@ -485,14 +485,14 @@
      * @public
      */
     function filterByCluster(clusterId) {
-      model.filteredApplications = _.filter(model.cachedApplications, ['clusterId', clusterId]);
+      model.filteredApplications = _.filter(model.filteredApplications, ['clusterId', clusterId]);
       _sortFilteredApplications();
       model.hasApps = model.filteredApplications.length > 0;
     }
 
     function filterByText(text) {
       text = text.toLowerCase();
-      model.filteredApplications = _.filter(model.cachedApplications, function (app) {
+      model.filteredApplications = _.filter(model.filteredApplications, function (app) {
         if (app.entity.name.toLowerCase().indexOf(text) > -1) {
           return app;
         }

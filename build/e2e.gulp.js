@@ -18,6 +18,9 @@
   var path = require('path');
   var runSequence = require('run-sequence');
   var ngAnnotate = require('gulp-ng-annotate');
+  var e2eConfigFile = './build/coverage.conf.js';
+  var glob = require('glob');
+  var fs = require('fs');
 
   var components;
   gulp.task('prepare:e2e', function () {
@@ -29,17 +32,44 @@
   });
 
   gulp.task('coverage-combine', function (cb) {
-    var combine = require('istanbul-combine');
     var coverageDir = path.resolve(__dirname, '..', 'out', 'coverage-report');
+    var toCombine = path.join(coverageDir, '_json/*.json');
+
+    // Remove 'frontend' from both key and path for all coverage reports. This makes the path invalid however now
+    // keys align across both e2e tests (components don't show '/frontend') and unit (components show '/frontend' where
+    // used). The html is fine except for the file paths drop '/frontend' in places. This behaviour matches the
+    // standalone output of the e2e coverage reports.
+    glob(toCombine, null, function (err, files) {
+      if (err) {
+        cb(err);
+        return;
+      }
+
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var content = fs.readFileSync(file, 'utf8');
+        content = content.replace(/(components\/[^\/]+)\/frontend(\/src\/)/g, '$1$2');
+        fs.writeFileSync(file, content);
+      }
+    });
+
+    var combine = require('istanbul-combine');
     var opts = {
       dir: path.join(coverageDir, 'combined'),
-      pattern: path.join(coverageDir, '_json/*.json'),
+      pattern: toCombine,
       print: 'summary',
       reporters: {
         html: {}
       }
     };
     combine(opts, cb);
+  });
+
+  gulp.task('e2e:nocov', function () {
+    e2eConfigFile = './build/protractor.conf.js';
+    runSequence(
+      'e2e:tests'
+    );
   });
 
   gulp.task('e2e:tests', function (cb) {
@@ -50,7 +80,7 @@
     options.env.NODE_ENV = 'development';
     options.env.env = 'development';
 
-    var args = ['./build/coverage.conf.js'];
+    var args = [e2eConfigFile];
     if (process.env.STRATOS_E2E_SUITE) {
       args.push('--suite');
       args.push(process.env.STRATOS_E2E_SUITE);
@@ -71,6 +101,7 @@
     var istanbul = require('gulp-istanbul');
     var sources = components.getGlobs([
       '**/*.js',
+      '!api/**/*.js',
       '!**/*.spec.js',
       '!**/*.mock.js'
     ]);

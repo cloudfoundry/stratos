@@ -1,0 +1,12 @@
+<cf-log-viewer ng-if="!step.data.uploadingFiles" web-socket="step.data.webSocket"
+  filter="step.data.logFilter" disable-status="true"
+  log-title="step.data.getState().title" status="step.data.getState().status">
+</cf-log-viewer>
+<div ng-if="step.data.uploadingFiles" class="deploy-app-file-upload-status">
+  <div class="deploy-app-file-upload-title" translate>deploy-app-dialog.step-deploying.uploading</div>
+    <percent-gauge class="deploy-app-file-progress" title="{{step.data.uploadingFiles.fileName}}"
+      value="{{step.data.uploadingFiles.bytes / step.data.uploadingFiles.total}}"
+      value-text="{{ [step.data.uploadingFiles.bytes, step.data.uploadingFiles.total] | usageBytes }}">
+    </percent-gauge>
+  </div>
+</div>

@@ -6,17 +6,72 @@ dockerOrg: splatform
 dockerRegistry: docker.io
 # Specify default DB password
 dbPassword: changeme
+dbProvider: mysql
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
+useLb: false
+console:
+  port: 443
+# externalIP: 127.0.0.1
+noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job
+  mariadb: stratos-mariadb
+
 # Specify which storage class should be used for PVCs
 #storageClass: default
+#consoleCert: |
+#    -----BEGIN CERTIFICATE-----
+#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+#   ...
+#    -----END CERTIFICATE-----
+#consoleCertKey: |
+#    -----BEGIN PRIVATE KEY-----
+#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
+#    ...
+#    -----END PRIVATE KEYE-----
+# MariaDB chart configuration
+mariadb:
+  # Only required for creating the databases
+  mariadbRootPassword: changeme
+  adminUser: root
+  # Credentials for user
+  mariadbUser: console
+  mariadbPassword: changeme
+  mariadbDatabase: console
+  usePassword: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass:
+uaa:
+  protocol: https://
+  port: 
+  host: 
+  consoleClient:  
+  consoleClientSecret: 
+  consoleAdminIdentifier: 
+  skipSSLValidation: false
+ # SCF values compatability 
+env:
+  UAA_HOST: 
+  UAA_ADMIN_CLIENT_SECRET: 
+  UAA_PORT:
+kube:
+  external_console_https_port: 8443
+  storage_class:
+    persistent:
+dockerRegistrySecret:

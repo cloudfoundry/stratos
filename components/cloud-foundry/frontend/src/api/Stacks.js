@@ -18,7 +18,7 @@
   /* eslint-disable camelcase */
   angular.extend(StacksApi.prototype, {
 
-   /*
+    /*
     * Create a Stack
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/create_a_stack.html
     */
@@ -36,7 +36,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Delete a Particular Stack
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/delete_a_particular_stack.html
     */
@@ -53,7 +53,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * List all Stacks
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/list_all_stacks.html
     */
@@ -70,7 +70,7 @@
       return this.$http(config);
     },
 
-   /*
+    /*
     * Retrieve a Particular Stack
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/retrieve_a_particular_stack.html
     */

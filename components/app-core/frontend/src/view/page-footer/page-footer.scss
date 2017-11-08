@@ -21,34 +21,6 @@ page-footer, [page-footer] {
     flex: 0;
   }
 
-  &.login-footer {
-    background-color: transparent;
-
-    .page-footer-items {
-      margin: 0 24px;
-
-      .copyright {
-        width: auto;
-
-        .product-name, .secondary {
-          color: $gray-darker;
-        }
-      }
-
-      .product-and-links {
-        padding: 0;
-
-        li a {
-          color: $gray-darker;
-        }
-
-        li:first-child {
-          margin-left: 0;
-        }
-      }
-    }
-  }
-
   .copyright {
     .secondary {
       display: block;

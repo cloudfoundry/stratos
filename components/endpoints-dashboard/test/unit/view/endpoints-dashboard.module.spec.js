@@ -67,6 +67,7 @@
       modelManager = $injector.get('modelManager');
       var appRegisterService = $injector.get('appRegisterService');
       var appUtilsService = $injector.get('appUtilsService');
+      var appBusyService = $injector.get('appBusyService');
       var appEndpointsDashboardService = $injector.get('appEndpointsDashboardService');
 
       // Patch user account model
@@ -84,7 +85,7 @@
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
       controller = new EndpointsDashboardController($scope, $state, modelManager, appUtilsService,
-        appRegisterService, appEndpointsDashboardService);
+        appRegisterService, appEndpointsDashboardService, appBusyService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
@@ -110,7 +111,7 @@
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.register();
+        controller.headerActions[0].execute();
         $scope.$digest();
         expect(registerServiceCalled).toBe(true);
         $httpBackend.flush();

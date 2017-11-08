@@ -11,7 +11,7 @@
   var conf = require('./bk-conf');
   var glob = require('glob');
 
-  var tempPath, tempSrcPath, buildTest;
+  var tempPath, tempSrcPath, tempDbMigratorSrcPath, buildTest;
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsRemoveQ = Q.denodeify(fs.remove);
   var fsCopyQ = Q.denodeify(fs.copy);
@@ -32,10 +32,14 @@
     return tempSrcPath;
   };
 
+  module.exports.getDbMigratorSourcePath = function () {
+    return tempDbMigratorSrcPath;
+  };
+
   gulp.task('clean-backend', function (done) {
     // Local dev build - only remove plugins and main binary
     if (module.exports.localDevSetup) {
-      var files = glob.sync('+(portal-proxy|*.so|plugins.json)', { cwd: conf.outputPath});
+      var files = glob.sync('+(portal-proxy|stratos-dbmigrator|*.so|plugins.json)', { cwd: conf.outputPath});
       _.each(files, function (file) {
         /* eslint-disable no-sync */
         fs.removeSync(path.join(conf.outputPath, file));
@@ -60,6 +64,7 @@
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
       tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
+      tempDbMigratorSrcPath = tempPath + path.sep + conf.goPathDbMigrator;
       return done();
     } else {
       mktemp.createDir('/tmp/stratos-ui-XXXX.build',
@@ -69,10 +74,10 @@
           }
           tempPath = path_;
           tempSrcPath = path.join(tempPath, conf.goPath, 'components');
+          tempDbMigratorSrcPath = path.join(tempPath, conf.goPathDbMigrator);
           done();
         });
     }
-
   });
 
   gulp.task('delete-temp', [], function (done) {
@@ -124,4 +129,47 @@
         done(err);
       });
   });
+
+  // DB Migrator
+  gulp.task('copy-dbmigrator', ['create-temp'], function (done) {
+    fs.ensureDir(tempDbMigratorSrcPath, function (err) {
+      if (err) {
+        throw err;
+      }
+
+      fsCopyQ('./deploy/db/migrations', tempDbMigratorSrcPath)
+        .then(function () {
+          generateMigrationIndex(done);
+        })
+        .catch(function (err) {
+          done(err);
+        });
+    });
+  });
+
+  // Create go file that references all of the detected migration files
+  function generateMigrationIndex(done) {
+    fs.readdir(tempDbMigratorSrcPath, function (err, files) {
+      if (err || !files) {
+        return done(err);
+      }
+      var migrations = _.filter(files, function (item) {
+        return item.indexOf('20') === 0 && item.indexOf('.go') === item.length - 3;
+      });
+      migrations = _.map(migrations, function (item) {
+        var name = item.substr(0, item.length - 3);
+        var parts = name.split('_');
+        return parts[0];
+      });
+
+      var migrationsGoFileContent = 'package main\n\nimport (\n\t"database/sql"\n)\n\n';
+      _.each(migrations, function (name) {
+        migrationsGoFileContent += 'func (s *StratosMigrations) Up_' + name + '(txn *sql.Tx) {\n\tUp_' + name + '(txn)\n}\n';
+      });
+
+      var migrationsOutputFile = path.join(tempDbMigratorSrcPath, 'migrations.go');
+      fs.writeFile(migrationsOutputFile, migrationsGoFileContent, done);
+    });
+  }
+
 })();

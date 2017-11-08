@@ -1,5 +1,6 @@
 @import "app-error-bar/app-error-bar";
 @import "navbar/navbar";
+@import "landing-page/landing-page";
 @import "login-page/login-page";
 @import "page-footer/page-footer";
 @import "console-view/console-view";
@@ -49,21 +50,6 @@ paginator {
   display: block;
   clear: both;
   padding: $console-unit-space / 4 $console-unit-space * 2 / 3;
-}
-
-.applications-header {
-  font-size: $font-size-heading;
-
-  .applications-count {
-    word-spacing: -2px;
-    font-size: $console-unit-space - $console-unit-space / 4;
-    padding-left: $console-unit-space / 4;
-    display: inline;
-  }
-
-  .bounce-spinner-sm {
-    margin-left: $console-unit-space;
-  }
 }
 
 .action-bar {

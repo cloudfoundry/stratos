@@ -15,9 +15,7 @@
   var inputText = require('../../../../app-core/frontend/test/e2e/po/widgets/input-text.po');
   var orgsAndSpaces = require('./po/endpoints/endpoints-org-spaces.po');
   var navbar = require('../../../../app-core/frontend/test/e2e/po/navbar.po');
-  var table = require('../../../../app-core/frontend/test/e2e/po/widgets/table.po');
-  var actionMenu = require('../../../../app-core/frontend/test/e2e/po/widgets/actions-menu.po');
-  var confirmModal = require('../../../../app-core/frontend/test/e2e/po/widgets/confirmation-modal.po');
+  var cfHelpers = require('./po/helpers.po');
 
   // Service to use when adding a service to the app
   var SERVICE_NAME = 'app-autoscaler';
@@ -157,9 +155,9 @@
 
       expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
       element(by.id('new-app-add-services')).click();
-      expect(application.getActiveTab().getText()).toBe('Services');
+      expect(application.getActiveTab().getText()).toBe('Service Catalog');
 
-      browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
+      browser.wait(until.presenceOf(element(by.css('service-catalogue-card'))), 10000);
 
       addAppService.addService(SERVICE_NAME);
 
@@ -167,15 +165,24 @@
       expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
       expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
 
-      expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+      // Click the "create new instance" button
+      addAppService.showCreateInstanceDialog();
+      var createDialog = serviceWizard.getDialog();
+
+      expect(createDialog.getTitleText()).toBe('Create Service Instance');
+
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+      expect(createDialog.isCommitEnabled()).toBe(false);
 
       serviceName = appSetupHelper.getServiceName(testTime, true);
       serviceWizard.getCreateNewName().clear();
       serviceWizard.getCreateNewName().addText(serviceName);
-      expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+      expect(createDialog.isCommitEnabled()).toBe(true);
 
+      createDialog.commit();
+
+      // Dialog should close
+      expect(serviceWizard.getWizard().getNext().getText()).toBe('BIND TO APP');
       serviceWizard.getWizard().next();
       expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
       serviceWizard.getWizard().next().then(function () {
@@ -189,6 +196,14 @@
       });
 
       application.showSummary();
+      // Check that we now have a bound service instance
+      var servicesCount = element(by.css('.app-summary-bound-services-count'));
+      expect(servicesCount.getText()).toBe('1');
+
+      // Test that the service is shown on the Service Instance tab
+      expect(application.findServiceInstanceCard(serviceName)).toBeDefined();
+
+      // Test CLI Info
       application.invokeAction('CLI Info');
 
       // cf push acceptance.e2e.1484149644648
@@ -229,15 +244,15 @@
 
     describe('check application on the cf endpoints dashboard -', function () {
 
-      var serviceName = appSetupHelper.getServiceName(testTime, true);
-
       beforeAll(function () {
         // Load the app again - keep the cookies so we don't have to login
         // This is a workaround for a Bug
         helpers.loadApp(true);
         navbar.goToView('endpoint.clusters');
-        orgsAndSpaces.goToOrg('e2e');
-        orgsAndSpaces.goToSpace('e2e');
+
+        var cfFromConfig = cfHelpers.getCfs() ? cfHelpers.getCfs().cf1 : {};
+        orgsAndSpaces.goToOrg(cfFromConfig.testOrgName || 'e2e');
+        orgsAndSpaces.goToSpace(cfFromConfig.testSpaceName || 'e2e');
       });
 
       it('should show the org/space view and its tabs', function () {
@@ -246,56 +261,6 @@
           _.each(tabs, function (tab) {
             tab.click();
           });
-        });
-      });
-
-      it('should contain the service that was created', function () {
-        // Go to Services tab
-        application.getTabs().get(1).click();
-        // Check that we have at least one service
-        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
-        serviceInstances.getRows().then(function (rows) {
-          expect(rows.length).toBeGreaterThan(0);
-        });
-        // Table should contain our service
-        var column = serviceInstances.getElement().all(by.css('td')).filter(function (elem) {
-          return elem.getText().then(function (text) {
-            return text === serviceName;
-          });
-        }).first();
-        expect(column).toBeDefined();
-      });
-
-      it('should allow the service to be detached and then deleted', function () {
-        // Go to Services tab
-        application.getTabs().get(1).click();
-        var serviceInstances = table.wrap(element(by.css('.space-services-table table')));
-        serviceInstances.getData().then(function (rows) {
-          var index = _.findIndex(rows, function (row) {
-            return row[0] === serviceName;
-          });
-
-          // Detach Service
-          var columnMenu = actionMenu.wrap(serviceInstances.getItem(index, 4));
-          columnMenu.click();
-          columnMenu.clickItem(1);
-          expect(confirmModal.getTitle()).toBe('Detach Service');
-          confirmModal.commit();
-          helpers.checkAndCloseToast(/Service instance successfully detached/);
-
-          // Delete Service
-          columnMenu.click();
-          columnMenu.clickItem(0);
-          expect(confirmModal.getTitle()).toBe('Delete Service');
-          confirmModal.commit();
-          helpers.checkAndCloseToast(/Service instance successfully deleted/);
-          if (rows.length === 1) {
-            expect(element(by.css('.space-services-table .panel-body')).getText()).toBe('You have no service instances');
-          } else {
-            serviceInstances.getData().then(function (newRows) {
-              expect(newRows.length).toBe(rows.length - 1);
-            });
-          }
         });
       });
     });

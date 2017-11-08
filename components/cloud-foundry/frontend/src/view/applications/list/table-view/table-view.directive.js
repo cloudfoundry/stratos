@@ -41,12 +41,12 @@
     var model = modelManager.retrieve('cloud-foundry.model.application');
     this.stApps = [];
     this.tableColumns = [
-      {name: 'app-wall.table.columns.appName', value: 'entity.name'},
-      {name: 'app-wall.table.columns.status', value: 'state.label', noSort: true},
-      {name: 'app-wall.table.columns.instances', value: 'entity.instances', descendingFirst: true},
-      {name: 'app-wall.table.columns.disk', value: 'entity.disk_quota', descendingFirst: true},
-      {name: 'app-wall.table.columns.memory', value: 'entity.memory', descendingFirst: true},
-      {name: 'app-wall.table.columns.creation', value: 'metadata.created_at', descendingFirst: true}
+      { name: 'app-wall.table.columns.appName', value: 'entity.name' },
+      { name: 'app-wall.table.columns.status', value: 'state.label', noSort: true },
+      { name: 'app-wall.table.columns.instances', value: 'entity.instances', descendingFirst: true },
+      { name: 'app-wall.table.columns.disk', value: 'entity.disk_quota', descendingFirst: true },
+      { name: 'app-wall.table.columns.memory', value: 'entity.memory', descendingFirst: true },
+      { name: 'app-wall.table.columns.creation', value: 'metadata.created_at', descendingFirst: true }
     ];
     this.init = false;
 
@@ -72,31 +72,22 @@
     $scope.$watchCollection(
       function () {
         return that.apps;
-      }, function () {
-      updateStTableState();
-    });
+      },
+      function () {
+        updateStTableState();
+      });
 
     $scope.$watch(
       function () {
         return that.table;
-      }, function () {
-      if (that.table) {
-        that.table.sortBy(model.currentSortOption, !model.sortAscending);
-      }
-    });
+      },
+      function () {
+        if (that.table) {
+          that.table.sortBy(model.currentSortOption, !model.sortAscending);
+        }
+      });
 
-    this.getAppSummaryLink = getAppSummaryLink;
     this.stMiddleware = stMiddleware;
-
-    /**
-     * @name getAppSummaryLink
-     * @description Get link to application summary page
-     * @param {object} app The application object
-     * @returns {string} returns the link to the app summary page
-     */
-    function getAppSummaryLink(app) {
-      return '#/cf/applications/' + app.clusterId + '/app/' + app.metadata.guid + '/summary';
-    }
 
     function stMiddleware(tableState) {
       var stSort = tableState.sort.predicate + '_' + !tableState.sort.reverse;

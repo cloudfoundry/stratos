@@ -68,7 +68,7 @@
       }
 
       function handleKeypress(event) {
-        var enterSpaceKeyCodes = [13, 32];    // enter or space
+        var enterSpaceKeyCodes = [13, 32]; // enter or space
         var keyCode = event.which || event.keyCode;
         var charStr = String.fromCharCode(keyCode);
 
@@ -131,7 +131,7 @@
      */
     function init() {
       $scope.$watch(function () {
-        return vm.inputOptions.length;
+        return vm.inputOptions ? vm.inputOptions.length : 0;
       }, function (length) {
         if (length === 1) {
           vm.setValue(vm.inputOptions[0]);

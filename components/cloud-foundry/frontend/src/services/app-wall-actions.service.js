@@ -21,28 +21,40 @@
 
     service.actions.push({
       id: 'app-wall-add-new-application-btn',
-      label: 'app-wall.add-application',
+      name: 'app-wall.add-application',
+      icon: 'add_box',
       position: 1,
-      show: function (context) {
-        if (angular.isFunction(context.show)) {
-          return context.show();
-        }
-        return true;
-      },
-      disable: function (context) {
-        if (angular.isFunction(context.disable)) {
-          return context.disable();
+      hidden: function () {
+        var hidden = _.get(this.context, 'hidden');
+        if (angular.isFunction(hidden)) {
+          return hidden();
         }
         return false;
       },
-      action: function addApplication() {
+      disabled: function () {
+        var disabled = _.get(this.context, 'disabled');
+        if (angular.isFunction(disabled)) {
+          return disabled();
+        }
+        return false;
+      },
+      execute: function addApplication() {
+        var reload = _.get(this.context, 'reload');
         frameworkDetailView(
           {
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
             dialog: true,
-            class: 'dialog-form-large'
+            class: 'dialog-form-large',
+            hideClose: true
           }
-        );
+        ).result.then(function (result) {
+          // Do we need to reload the app collection to show the newly added app? This would be the case where
+          // the route was not created/binded successfully
+          if (_.get(result, 'reload') && angular.isFunction(reload)) {
+            // Note - this won't show the app if the user selected a different cluster/org/guid than that of the filter
+            reload();
+          }
+        });
       }
     });
 

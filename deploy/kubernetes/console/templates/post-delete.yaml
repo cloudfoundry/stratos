@@ -1,0 +1,32 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-delete-job"
+  labels:
+    app: "{{ .Release.Name }}-post-delete"
+  annotations:
+    "helm.sh/hook": post-delete
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-delete-job"
+      labels:
+        app: "{{ .Release.Name }}-post-delete"
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+      - name: kubectl
+        hostPath:
+          path: /usr/bin/kubectl
+
+      containers:
+      - name: post-install-job
+        image: "lachlanevenson/k8s-kubectl:v1.6.0"
+        volumeMounts:
+        - name: kubectl
+          mountPath: /kubectl
+        command:
+        - sh
+        - -c
+        - "kubectl delete pvc,job,po --namespace {{ .Release.Namespace }} -l app={{ .Release.Name }} && kubectl delete job --namespace {{ .Release.Namespace }} -l app={{ .Release.Name }}-post-delete"

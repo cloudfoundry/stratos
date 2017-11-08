@@ -1,0 +1,10 @@
+FROM splatform/stratos-bk-base:opensuse
+
+COPY outputs/* /srv/
+COPY deploy/containers/proxy/entrypoint.sh /entrypoint.sh
+COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
+COPY /deploy/tools/generate_cert.sh /generate_cert.sh
+
+RUN chmod +x portal-proxy
+EXPOSE 443
+ENTRYPOINT ["/entrypoint.sh"]

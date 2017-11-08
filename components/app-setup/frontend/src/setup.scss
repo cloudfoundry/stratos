@@ -1,12 +1,1 @@
-.modal.detail-view.detail-view-dialog .detail-view-content.setup-wizard wizard {
-  ul.wizard-nav.nav {
-    margin-bottom: 0;
-  }
-  .wizard-step {
-    padding: 0 $console-unit-space $console-unit-space $console-unit-space;
-    min-height: 460px;
-    .message-box {
-      min-width: inherit;
-    }
-  }
-}
+@import "view/view";
