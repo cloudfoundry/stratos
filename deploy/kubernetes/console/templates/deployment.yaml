@@ -84,11 +84,7 @@ spec:
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
      {{- end }}
-     {{- if not .Values.noShared }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
-     {{- else }}
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxyNoShared}}:{{.Values.consoleVersion}}
-     {{- end }}
         name: proxy
         env:
         - name: DB_USER
@@ -143,6 +139,10 @@ spec:
           value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
         - name: CONSOLE_PROXY_CERT_KEY_PATH
           value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
+        - name: NO_SHARED_MODE
+        {{- if .Values.noShared }}
+          value: "true"
+        {{- end }}
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
