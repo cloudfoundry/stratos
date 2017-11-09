@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { MdPaginator, MdSort, Sort, PageEvent, MdSortable } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -10,29 +10,45 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
+import { ListActions, ListActionConfig } from './list-data-source';
+import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 
 export interface AppEnvVar {
   name: string;
   value: string;
 }
 
-// function key(_cnsiGuid: string, _appGuid: string) {
-//   return `app-variables:${_cnsiGuid}:${_appGuid}`;
-// }
-
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
+
+  private static listActionDelete: ListActionConfig<AppEnvVar> = {
+    createAction: (dataSource: CfAppEvnVarsDataSource, items: AppEnvVar[]): Action => {
+      return new AppVariablesDelete(dataSource.cfGuid, dataSource.appGuid, dataSource.rows, Array.from(dataSource.selectedRows.values()));
+    },
+    icon: 'delete',
+    label: 'Delete',
+    description: '',
+    visible: (row: AppEnvVar) => true,
+    enabled: (row: AppEnvVar) => true,
+  };
 
   // Only needed for unique filter when adding new env vars
   private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
-  private rows = new Array<AppEnvVar>();
+  public rows = new Array<AppEnvVar>();
   // Default sort shizzle
   // private _defaultSortParmas: MdSortable;
+  public cfGuid: string;
+  public appGuid: string;
 
   filteredRows = new Array<AppEnvVar>();
   isLoadingPage$: Observable<boolean>;
   data$: any;
 
+  actions = new ListActions();
+
+  private static key(_cfGuid: string, _appGuid: string) {
+    return `app-variables:${_cfGuid}:${_appGuid}`;
+  }
 
   constructor(
     private _cfStore: Store<AppState>,
@@ -48,11 +64,14 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
         value: '',
       },
       { active: 'name', direction: 'asc' },
-      `app-variables:${_appService.cfGuid}:${_appService.appGuid}`
+      CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid)
     );
 
+    this.cfGuid = _appService.cfGuid;
+    this.appGuid = _appService.appGuid;
+
     _cfStore.dispatch(new SetListStateAction(
-      `app-variables:${_appService.cfGuid}:${_appService.appGuid}`,
+      CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid),
       'table',
       {
         pageIndex: 0,
@@ -68,6 +87,7 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
         filter: ''
       }));
 
+    this.actions.multiActions.push(CfAppEvnVarsDataSource.listActionDelete);
 
     this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
       _appService.isFetchingEnvVars$,
@@ -78,29 +98,30 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   }
 
   saveAdd() {
-    const updateApp = this._createUpdateApplication(false);
-    updateApp.environment_json[this.addItem.name] = this.addItem.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
-
+    // const updateApp = this._createUpdateApplication(false);
+    // updateApp.environment_json[this.addItem.name] = this.addItem.value;
+    // this._appService.UpdateApplicationEvVars(updateApp);
+    this._cfStore.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.rows, this.addItem));
     super.saveAdd();
   }
 
-  selectedDelete() {
-    const updateApp = this._createUpdateApplication(true);
-    this._appService.UpdateApplicationEvVars(updateApp);
+  // TODO: RC DELETE
+  // selectedDelete() {
+  //   const updateApp = this._createUpdateApplication(true);
+  //   this._appService.UpdateApplicationEvVars(updateApp);
 
-    super.selectedDelete();
-  }
+  //   super.selectClear();
+  // }
 
   startEdit(row: AppEnvVar) {
     super.startEdit({ ...row });
   }
 
   saveEdit() {
-    const updateApp = this._createUpdateApplication(false);
-    updateApp.environment_json[this.editRow.name] = this.editRow.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
-
+    // const updateApp = this._createUpdateApplication(false);
+    // updateApp.environment_json[this.editRow.name] = this.editRow.value;
+    // this._appService.UpdateApplicationEvVars(updateApp);
+    this._cfStore.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
     super.saveEdit();
   }
 
@@ -156,15 +177,5 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
     });
   }
 
-  _createUpdateApplication(removeSelected: boolean): UpdateApplication {
-    const updateApp: UpdateApplication = {
-      environment_json: {},
-    };
-    for (const row of this.rows) {
-      if (!removeSelected || !this.selectedRows.has(row.name)) {
-        updateApp.environment_json[row.name] = row.value;
-      }
-    }
-    return updateApp;
-  }
+
 }

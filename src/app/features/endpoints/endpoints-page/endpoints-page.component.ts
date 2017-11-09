@@ -1,3 +1,4 @@
+import { TableCellActionsComponent } from '../../../shared/components/table/table-cell-actions/table-cell-actions.component';
 import { CNSISModel, CNSISState } from '../../../store/types/cnsis.types';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { Observable, Subscription } from 'rxjs/Rx';
@@ -13,16 +14,6 @@ import { EndpointsDataSource } from '../../../shared/data-sources/endpoints-data
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
-}
-
-function getEndpointUrlString(endpoint: CNSISModel): string {
-  const { api_endpoint } = endpoint;
-  let url = api_endpoint.Host;
-  if (api_endpoint.Scheme) {
-    url = api_endpoint.Scheme + url;
-  }
-  if (api_endpoint.)
-    return url;
 }
 
 @Component({
@@ -49,10 +40,14 @@ export class EndpointsPageComponent implements OnInit {
       columnId: 'type', headerCell: () => 'Type', cell: getEndpointTypeString, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'address', headerCell: () => 'Address', cell: (row: CNSISModel) => `${}`, sort: true, cellFlex: '5'
+      columnId: 'address', headerCell: () => 'Address', cell: (row: CNSISModel) => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
+      sort: true, cellFlex: '5'
     },
+    // {
+    //   columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
+    // },
     {
-      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
+      columnId: 'edit', headerCell: () => 'Actions', cellComponent: TableCellActionsComponent, class: 'table-column-edit', cellFlex: '1'
     },
   ];
 
@@ -61,8 +56,5 @@ export class EndpointsPageComponent implements OnInit {
   ngOnInit() {
     this.dataSource = new EndpointsDataSource(this.store);
   }
-
-
-
 
 }

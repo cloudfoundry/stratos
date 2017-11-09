@@ -1,15 +1,30 @@
+import { Type } from '@angular/core';
 import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
 
+// TODO: RC MOVE
+export class ListActionConfig<T> {
+  createAction: (dataSource: IListDataSource<T>, items: T[]) => Action;
+  icon: string;
+  label: string;
+  description: string;
+  visible: (row: T) => boolean;
+  enabled: (row: T) => boolean;
+}
+export class ListActions<T> {
+  globalActions = new Array<ListActionConfig<T>>();
+  multiActions = new Array<ListActionConfig<T>>();
+  singleActions = new Array<ListActionConfig<T>>();
+}
 export interface IListDataSource<T> {
   listStateKey: string;
   view$: Observable<ListView>;
@@ -17,6 +32,8 @@ export interface IListDataSource<T> {
   pagination$: Observable<ListPagination>;
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
+
+  actions: ListActions<T>;
 
   page$: Observable<T[]>;
 
@@ -39,6 +56,9 @@ export interface IListDataSource<T> {
   destroy();
 }
 
+
+
+
 export type getRowUniqueId = (T) => string;
 
 export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
@@ -49,6 +69,8 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   public sort$: Observable<ListSort>;
   public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
+
+  public abstract actions: ListActions<T>;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -118,7 +140,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
-  protected selectedDelete() {
+  protected selectClear() {
     this.selectedRows.clear();
     this.isSelecting$.next(false);
   }

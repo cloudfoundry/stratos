@@ -1,13 +1,55 @@
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { CNSISModel, CNSISState } from '../../store/types/cnsis.types';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 import { LocalListDataSource } from './list-data-source-local';
+import { ListActionConfig, ListActions } from './list-data-source';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
+  private static listActionDelete: ListActionConfig<CNSISModel> = {
+    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
+      return null;
+    },
+    icon: 'delete',
+    label: 'Delete',
+    description: 'Remove the endpoint',
+    visible: (row: CNSISModel) => true,
+    enabled: (row: CNSISModel) => true,
+  };
+  private static listActionAdd: ListActionConfig<CNSISModel> = {
+    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
+      return null;
+    },
+    icon: 'add',
+    label: 'Add',
+    description: '',
+    visible: (row: CNSISModel) => true,
+    enabled: (row: CNSISModel) => true,
+  };
+  private static listActionDisconnect: ListActionConfig<CNSISModel> = {
+    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
+      return null;
+    },
+    icon: 'remove_from_queue',
+    label: 'Disconnect',
+    description: `Disconnect but don't delete`,
+    visible: (row: CNSISModel) => true,
+    enabled: (row: CNSISModel) => true,
+  };
+  private static listActionConnect: ListActionConfig<CNSISModel> = {
+    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
+      return null;
+    },
+    icon: 'add_from_queue',
+    label: 'Connect',
+    description: '',
+    visible: (row: CNSISModel) => true,
+    enabled: (row: CNSISModel) => true,
+  };
+
   private static _storeKey = 'endpoints';
 
   // Only needed for unique filter when adding new env vars
@@ -18,6 +60,8 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   filteredRows = new Array<CNSISModel>();
   isLoadingPage$: Observable<boolean>;
   data$: any;
+
+  actions = new ListActions();
 
   constructor(
     private _eStore: Store<AppState>,
@@ -33,6 +77,11 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       { active: 'name', direction: 'asc' },
       EndpointsDataSource._storeKey
     );
+
+    this.actions.singleActions.push(EndpointsDataSource.listActionDelete, EndpointsDataSource.listActionDisconnect,
+      EndpointsDataSource.listActionConnect);
+    this.actions.multiActions.push(EndpointsDataSource.listActionDelete);
+    this.actions.globalActions.push(EndpointsDataSource.listActionAdd);
 
     _eStore.dispatch(new SetListStateAction(
       EndpointsDataSource._storeKey,
@@ -53,20 +102,20 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
 
   }
 
-  saveAdd() {
-    // const updateApp = this._createUpdateApplication(false);
-    // updateApp.environment_json[this.addItem.name] = this.addItem.value;
-    // this._appService.UpdateApplicationEvVars(updateApp);
+  // saveAdd() {
+  //   // const updateApp = this._createUpdateApplication(false);
+  //   // updateApp.environment_json[this.addItem.name] = this.addItem.value;
+  //   // this._appService.UpdateApplicationEvVars(updateApp);
 
-    // super.saveAdd();
-  }
+  //   // super.saveAdd();
+  // }
 
-  selectedDelete() {
-    // const updateApp = this._createUpdateApplication(true);
-    // this._appService.UpdateApplicationEvVars(updateApp);
+  // selectedDelete() {
+  //   // const updateApp = this._createUpdateApplication(true);
+  //   // this._appService.UpdateApplicationEvVars(updateApp);
 
-    // super.selectedDelete();
-  }
+  //   // super.selectedDelete();
+  // }
 
   startEdit(row: CNSISModel) {
     // super.startEdit({ ...row });
@@ -103,6 +152,7 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       if (filter && filter.filter && filter.filter.length > 0) {
         if (endpoint.name.indexOf(filter.filter) >= 0 ||
           endpoint.cnsi_type.indexOf(filter.filter) >= 0 ||
+          endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
           endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0) {
           // TODO: RC Connection  + type
           this.filteredRows.push(endpoint);
@@ -124,16 +174,4 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
     });
   }
-
-  // _createUpdateApplication(removeSelected: boolean): UpdateApplication {
-  //   const updateApp: UpdateApplication = {
-  //     environment_json: {},
-  //   };
-  //   for (const row of this.rows) {
-  //     if (!removeSelected || !this.selectedRows.has(row.name)) {
-  //       updateApp.environment_json[row.name] = row.value;
-  //     }
-  //   }
-  //   return updateApp;
-  // }
 }

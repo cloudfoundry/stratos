@@ -207,11 +207,11 @@ export class ApplicationService {
     ));
   }
 
-  UpdateApplicationEvVars(updatedApplication: UpdateApplication) {
-    this.store.dispatch(new UpdateExistingApplication(
-      this.appGuid,
-      this.cfGuid,
-      { ...updatedApplication }
-    ));
-  }
+  // UpdateApplicationEvVars(updatedApplication: UpdateApplication) {
+  //   this.store.dispatch(new UpdateExistingApplication(
+  //     this.appGuid,
+  //     this.cfGuid,
+  //     { ...updatedApplication }
+  //   ));
+  // }
 }
