@@ -1,4 +1,13 @@
 # Change Log
+## 0.9.7 Beta-3 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.6...0.9.7)
+
+**Fixes:**
+- Updated Helm Chart to remove delete job when running in noShared mode [\#1364](https://github.com/SUSE/stratos-ui/pull/1364)
+- Updated Helm Chart to support common storage class for MariaDB and console [\#1363](https://github.com/SUSE/stratos-ui/pull/1363)
+- Updated Helm Chart to remove `postgres-client` from postflight job [\#1358](https://github.com/SUSE/stratos-ui/pull/1358)
+- Updated Helm Chart to remove noShared backend container image [\#1357](https://github.com/SUSE/stratos-ui/pull/1357)
 
 ## 0.9.6 Beta-2 Release
 
