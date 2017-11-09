@@ -8,7 +8,7 @@ To use the script, specify the external IP of your Kubernetes cluster so that yo
 $ KUBE_EXTERNAL_IP=10.10.10.11 ./build-release.sh
 ```
 
-This will create a folder called `fissile-console` which contains the generated Helm chart. To dpeloy it in your cluster, install it with helm.
+This will create a folder called `fissile-console` which contains the generated Helm chart. To dpeloy it in your cluster, install it with Helm.
 
 ```
 $ helm install ./fissile-console --namespace console
