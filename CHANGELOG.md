@@ -1,5 +1,25 @@
 # Change Log
+## 0.9.7 Beta-3 Release
 
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.6...0.9.7)
+
+**Merged pull requests:**
+
+- Refinements to documentation:
+    - Refinements to the Kubernetes deployment documentation [\#1350](https://github.com/SUSE/stratos-ui/pull/1350), [\#1365](https://github.com/SUSE/stratos-ui/pull/1365)
+    - Update frontend developer guide  [\#1361](https://github.com/SUSE/stratos-ui/pull/1361)
+    - Small updates to the contributing guide [\#1354](https://github.com/SUSE/stratos-ui/pull/1354)
+- Updates to the Console Helm chart:
+    - Remove delete job when running in noShared mode [\#1364](https://github.com/SUSE/stratos-ui/pull/1364)
+    - Support common storage class for MariaDB and console [\#1363](https://github.com/SUSE/stratos-ui/pull/1363)
+    - Remove `postgres-client` from postflight job [\#1358](https://github.com/SUSE/stratos-ui/pull/1358)
+    - Remove noShared backend container image [\#1357](https://github.com/SUSE/stratos-ui/pull/1357)
+
+
+**Fixes:**
+- Fix helm link in helm repository when publishing releases [\#1353](https://github.com/SUSE/stratos-ui/pull/1353)
+- Fix docker registry and organisation when publishing a helm chart [\#1355](https://github.com/SUSE/stratos-ui/pull/1355)
+- Fix `chandler` in the console-release pipeline [\#1356](https://github.com/SUSE/stratos-ui/pull/1356)
 ## 0.9.6 Beta-2 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.5...0.9.6)
