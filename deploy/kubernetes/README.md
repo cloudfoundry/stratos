@@ -35,7 +35,7 @@ You will need to have the `kubectl` CLI installed and available on your path. It
 
 We use [Helm](https://github.com/kubernetes/helm) for deploying to Kubernetes.
 
-You will need the Helm client installed on the machine from which you are deploying and you will need to install the Helm Server (Tiller) into you Kubernetes environment.
+You will need the latest Helm client installed on the machine from which you are deploying and you will need to install the Helm Server (Tiller) into you Kubernetes environment.
 
 - Download the Helm client for your system from https://github.com/kubernetes/helm/releases.
 For convenience the guide assumes that the helm client has been added to your PATH.
@@ -44,6 +44,10 @@ For convenience the guide assumes that the helm client has been added to your PA
 helm init
 ```
 
+If you already Helm installed, please make sure it is the latest version. To update your Helm server (Tiller) in your Kubernetes environment after you download the latest Helm release, run the following command:
+```
+helm init --upgrade
+```
 ### Storage Class
 
 Stratos UI uses persistent volumes. In order to deploy it in your Kubernetes environment, you must
