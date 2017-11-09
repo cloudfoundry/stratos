@@ -40,5 +40,5 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
-  SetApplication() { }
+  setApplication() { }
 }

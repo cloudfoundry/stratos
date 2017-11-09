@@ -1,3 +1,5 @@
+import { MockBackend } from '@angular/http/testing';
+import { XHRBackend } from '@angular/http';
 import { CoreModule } from './core.module';
 import { TestBed, inject } from '@angular/core/testing';
 

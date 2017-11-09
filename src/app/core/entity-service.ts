@@ -126,8 +126,8 @@ export class EntityService {
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
       .withLatestFrom(
-      this.entitySelect$,
-      this.entityRequestSelect$
+      this.entitySelect$.startWith(null),
+      this.entityRequestSelect$.startWith(null)
       )
       .map(a => ({
         resource: a[1],
