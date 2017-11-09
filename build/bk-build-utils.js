@@ -187,6 +187,7 @@
 
       imports += '\t"github.com/SUSE/stratos-ui/components/app-core/backend/' + pkgName + '"\n';
       inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
+      inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
     });
 
     // Patch the static plugin loader
