@@ -123,7 +123,7 @@
     if (!skipPlugins && !platformSupportsPlugins()) {
       prepareBuildWithoutPluginSupport(srcPath);
     }
-    
+
     // Set the console version from that of the package.json and the git commit
     return getVersion().then(function (version) {
       if (version) {
