@@ -47,6 +47,7 @@ export interface IListDataSource<T> {
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectClear();
 
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
@@ -55,9 +56,6 @@ export interface IListDataSource<T> {
   connect(): Observable<T[]>;
   destroy();
 }
-
-
-
 
 export type getRowUniqueId = (T) => string;
 
@@ -140,7 +138,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
-  protected selectClear() {
+  selectClear() {
     this.selectedRows.clear();
     this.isSelecting$.next(false);
   }

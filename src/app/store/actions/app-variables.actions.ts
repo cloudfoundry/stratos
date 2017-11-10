@@ -27,7 +27,8 @@ export class AppVariablesUpdate implements Action {
       environment_json: {},
     };
     for (const row of allEnvVars) {
-      if (!selectedItems || selectedItems.findIndex((item => item.name === row.name)) <= 0) {
+      // Only include if we're ignoring the selection or it doesn't exist in the selected items
+      if (!selectedItems || selectedItems.findIndex((item => item.name === row.name)) < 0) {
         updateApp.environment_json[row.name] = row.value;
       }
     }
@@ -36,14 +37,15 @@ export class AppVariablesUpdate implements Action {
 }
 
 export class AppVariablesDelete extends AppVariablesUpdate {
-  constructor(appGuid: string, cfGuid: string, allEnvVars: AppEnvVar[], selectedItems: AppEnvVar[]) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], selectedItems: AppEnvVar[]) {
     super(cfGuid, appGuid);
+    console.log('AppVariablesDelete:', selectedItems);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, selectedItems);
   }
 }
 
 export class AppVariablesEdit extends AppVariablesUpdate {
-  constructor(appGuid: string, cfGuid: string, allEnvVars: AppEnvVar[], editedEnvVar: AppEnvVar) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], editedEnvVar: AppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
     this.updatedApplication.environment_json[editedEnvVar.name] = editedEnvVar.value;
@@ -51,7 +53,7 @@ export class AppVariablesEdit extends AppVariablesUpdate {
 }
 
 export class AppVariablesAdd extends AppVariablesUpdate {
-  constructor(appGuid: string, cfGuid: string, allEnvVars: AppEnvVar[], addedEnvVar: AppEnvVar) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], addedEnvVar: AppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
     this.updatedApplication.environment_json[addedEnvVar.name] = addedEnvVar.value;

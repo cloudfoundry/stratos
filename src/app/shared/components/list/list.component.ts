@@ -127,6 +127,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   mutliActionExecute(action: ListActionConfig<T>) {
     console.log(Array.from(this.dataSource.selectedRows.values()));
     this._store.dispatch(action.createAction(this.dataSource, Array.from(this.dataSource.selectedRows.values())));
+    this.dataSource.selectClear();
+
   }
 
 }
