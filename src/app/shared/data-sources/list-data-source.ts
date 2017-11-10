@@ -74,7 +74,6 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   public abstract filteredRows: Array<T>;
 
   public addItem: T;
-  protected selectRow: T;
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
   public selectedRows = new Map<string, T>();
@@ -111,7 +110,6 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     this.isAdding$.next(true);
   }
   saveAdd() {
-    this.selectRow = this.addItem;
     this.isAdding$.next(false);
   }
   cancelAdd() {
