@@ -17,17 +17,19 @@
             </div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of dataSource.actions.multiActions">
-                <button md-icon-button *ngIf="action.visible(row)" (click)="mutliActionExecute(action)" [disabled]="!action.enabled(row)"
+                <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)"
                   mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
                       <md-icon>{{action.icon}}</md-icon>
                     </button>
               </ng-container>
-
-
-              <!--
-              <button md-icon-button (click)="dataSource.selectedDelete()">
-                  <md-icon>delete</md-icon>
-                </button> -->
+            </div>
+            <div [hidden]="(dataSource.isSelecting$ | async)">
+              <ng-container *ngFor="let action of dataSource.actions.globalActions">
+                <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionGlobal(action)" [disabled]="!action.enabled(row)"
+                  mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
+                        <md-icon>{{action.icon}}</md-icon>
+                      </button>
+              </ng-container>
             </div>
             <div [hidden]="!(dataSource.isAdding$ | async)" class="add-container">
               <div class="spacer"></div>
