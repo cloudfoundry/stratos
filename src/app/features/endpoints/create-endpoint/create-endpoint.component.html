@@ -1,0 +1,12 @@
+<app-page-header>
+  <h1>Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints">
+  <app-step [title]="'Register a Cloud Foundry Endpoint'" [valid]="step1.validate | async" [onNext]="step1.onNext">
+    <app-create-endpoint-cf-step-1 #step1></app-create-endpoint-cf-step-1>
+  </app-step>
+  <app-step [title]="'Validate'" [onNext]="step2.onNext">
+    <app-create-endpoint-cf-step-2 #step2></app-create-endpoint-cf-step-2>
+  </app-step>
+</app-steppers>

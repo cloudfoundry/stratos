@@ -17,6 +17,7 @@ import { appMetadataRequestReducer } from './reducers/app-metadata-request.reduc
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
+import { RouterEffect } from './effects/router.effects';
 
 
 @NgModule({
@@ -34,6 +35,7 @@ import { AppVariablesEffect } from './effects/app-variables.effects';
       PaginationEffects,
       ActionHistoryEffect,
       AppVariablesEffect,
+      RouterEffect,
     ]),
   ]
 })

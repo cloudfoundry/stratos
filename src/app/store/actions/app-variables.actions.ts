@@ -39,7 +39,6 @@ export class AppVariablesUpdate implements Action {
 export class AppVariablesDelete extends AppVariablesUpdate {
   constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], selectedItems: AppEnvVar[]) {
     super(cfGuid, appGuid);
-    console.log('AppVariablesDelete:', selectedItems);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, selectedItems);
   }
 }
