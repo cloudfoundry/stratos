@@ -17,8 +17,6 @@
   module.exports.init = function () {
     env = process.env;
     env.GOPATH = prepareBuild.getGOPATH();
-    //env.GOOS = 'linux';
-    //env.GOARCH = 'amd64';
     pluginsToInclude = [];
   };
 
