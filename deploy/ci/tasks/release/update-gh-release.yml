@@ -25,4 +25,5 @@ run:
       # Upload Helm chart to release
       github-release upload -t ${GIT_TAG} --file ${CHART_PACKAGE} --name "console-helm-chart-${GIT_TAG}.tgz"
       # Sync changelog
+      cd ${ROOT_DIR}/stratos-ui
       chandler push ${GIT_TAG}

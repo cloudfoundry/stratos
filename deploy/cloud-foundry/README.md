@@ -5,7 +5,7 @@
 The quickest way to install Stratos UI is to deploy it as a Cloud Foundry application. To do so, clone the `stratos-ui` repository, cd into the newly cloned repository and push to Cloud Foundry. This can be done with:
 
 ```
-git clone git@github.com:SUSE/stratos-ui.git
+git clone https://github.com/SUSE/stratos-ui.git
 cd stratos-ui
 cf push
 ```

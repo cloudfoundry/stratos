@@ -123,8 +123,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
 
-  rm -f ${STRATOS_UI_PATH}/goose
-
 }
 
 function updateTagForRelease {
@@ -176,7 +174,7 @@ function buildProxy {
              -e GROUP_ID=$(id -g) \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -192,7 +190,6 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-    preloadImage splatform/stratos-goose:latest
     buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
   rm -f ${STRATOS_UI_PATH}/goose
 }
@@ -202,7 +199,7 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
-  preloadImage node:6.9.1
+  preloadImage splatform/stratos-nginx-base:opensuse
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -211,7 +208,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    node:6.9.1 \
+    splatform/stratos-nginx-base:opensuse \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
@@ -222,7 +219,7 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  preloadImage nginx:1.11
+  preloadImage splatform/stratos-nginx-base:opensuse
   buildAndPublishImage stratos-dc-console Dockerfile.dc ${STRATOS_UI_PATH}/deploy/containers/nginx
 }
 

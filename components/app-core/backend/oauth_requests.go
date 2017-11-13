@@ -81,7 +81,7 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 	log.Debug("refreshToken")
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
-	userToken, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
+	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
 	}
@@ -98,7 +98,7 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 
 	u.UserGUID = userGUID
 
-	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}

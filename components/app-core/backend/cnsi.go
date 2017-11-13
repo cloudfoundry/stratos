@@ -340,6 +340,21 @@ func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (inte
 	return tr, true
 }
 
+func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (interfaces.TokenRecord, bool) {
+	log.Debug("GetCNSITokenRecord")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return interfaces.TokenRecord{}, false
+	}
+
+	tr, err := tokenRepo.FindCNSITokenIncludeDisconnected(cnsiGUID, userGUID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return interfaces.TokenRecord{}, false
+	}
+
+	return tr, true
+}
+
 //TODO: remove this? It is unusable in this form as we won't know for which CNSI each token is
 func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*interfaces.TokenRecord, error) {
 	log.Debug("listCNSITokenRecordsForUser")

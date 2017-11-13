@@ -61,7 +61,7 @@
 
   function isApplicationWall() {
     return browser.getCurrentUrl().then(function (url) {
-      return url === helpers.getHost() + '/#/cf/applications/list/gallery-view';
+      return url === helpers.getHost() + '/#!/cf/applications/list/gallery-view';
     });
   }
 

@@ -2,7 +2,28 @@
 
 The following guide details how to deploy the Stratos UI Console in Kubernetes.
 
-## Requirements:
+<!-- TOC -->
+- [Requirements](#requirements)
+  * [Kubernetes](#kubernetes)
+  * [Helm](#helm)
+  * [Storage Class](#storage-class)
+- [Deploying Stratos UI](#deploying-stratos-ui)
+  * [Deploy using the Helm repository](#deploy-using-the-helm-repository)
+  * [Deploy using an archive of the Helm Chart](#deploy-using-an-archive-of-the-helm-chart)
+  * [Deploying using the GitHub repository](#deploying-using-the-github-repository)
+- [Accessing the Console](#accessing-the-console)
+- [Advanced Topics](#advanced-topics)
+  * [Using a Load Balancer](#using-a-load-balancer)
+  * [Specifying an External IP](#specifying-an-external-ip)
+  * [Upgrading your deployment](#upgrading-your-deployment)
+  * [Specifying UAA configuration](#specifying-uaa-configuration)
+  * [Specifying a custom Storage Class](#specifying-a-custom-storage-class)
+    + [Providing Storage Class override](#providing-storage-class-override)
+    + [Create a default Storage Class](#create-a-default-storage-class)
+  * [Deploying Stratos UI with your own TLS certificates](#deploying-stratos-ui-with-your-own-tls-certificates)
+<!-- /TOC -->
+
+## Requirements
 
 ### Kubernetes
 
@@ -10,11 +31,11 @@ You will need a suitable Kubernetes environment and a machine from which to run 
 
 You will need to have the `kubectl` CLI installed and available on your path. It should be appropriately configured to be able to communicate with your Kubernetes environment.
 
-### Setup Helm
+### Helm
 
 We use [Helm](https://github.com/kubernetes/helm) for deploying to Kubernetes.
 
-You will need the Helm client installed on the machine from which you are deploying and you will need to install the Helm Server (Tiller) into you Kubernetes environment.
+You will need the latest Helm client installed on the machine from which you are deploying and you will need to install the Helm Server (Tiller) into you Kubernetes environment.
 
 - Download the Helm client for your system from https://github.com/kubernetes/helm/releases.
 For convenience the guide assumes that the helm client has been added to your PATH.
@@ -22,7 +43,36 @@ For convenience the guide assumes that the helm client has been added to your PA
 ```
 helm init
 ```
-## Deploy using the Helm repository
+
+If you already Helm installed, please make sure it is the latest version. To update your Helm server (Tiller) in your Kubernetes environment after you download the latest Helm release, run the following command:
+```
+helm init --upgrade
+```
+### Storage Class
+
+Stratos UI uses persistent volumes. In order to deploy it in your Kubernetes environment, you must
+have a storage class available.
+
+Without configuration, the Stratos UI Helm Chart will use the default storage class. If a default storage
+class is not available, installation will fail.
+
+To check if a `default` storage class exists, you can list your configured storage classes with `kubectl get storageclass`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+
+For non-production environments, you may want to use the `hostpath` storage class. See the [SCF instructions](https://github.com/SUSE/scf/wiki/How-to-Install-SCF#choosing-a-storage-class) for details on setting this up. Note that you will need to make this storage class the default storage class, e.g.
+
+```
+kubectl patch storageclass <your-class-name> -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+Where `<your-class-name>` would be `hostpath` if you follow the SCF instructions.
+## Deploying Stratos UI
+
+You can deploy Stratos UI from one of three different sources:
+
+1. Using our Helm repository
+1. Using an archive file containing a given release of our Helm chart
+1. Using the latest Helm chart directly from out GitHub repository
+
+### Deploy using the Helm repository
 
 Add the Helm repository to your helm installation
 ```
@@ -43,44 +93,36 @@ helm install stratos-ui/console --namespace=console --name my-console
 
 > You can change the namespace (--namespace) and the release name (--name) to values of your choice.
 
-This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster. If you are deploying into a cluster that is not configured with a dynamic storage provisioner like `glusterfs` or `ceph`. You should specify the `noShared` override when installing the chart. 
-
-```
-helm install --set noShared=true stratos-ui/console --namespace=console --name my-console
-```
+This will create a Console instance named `my-console` in a namespace called `console` in your Kubernetes cluster.
 
 After the install, you should be able to access the Console in a web browser by following [the instructions](#accessing-the-console) below.
 
-#### Upgrading your deployment
+### Deploy using an archive of the Helm Chart
 
-To upgrade your instance when using the Helm repository, fetch any updates to the repository:
+Helm chart archives are available for Stratos UI releases from our GitHub repository, under releases - see https://github.com/SUSE/stratos-ui/releases.
 
-```
-$ helm repo update
-```
+Download the appropriate release `console-helm-chart.X.Y.Z.tgz` from the GitHub repository and unpack the archive to a local folder. The Helm Chart will be extracted to a sub-folder named `console`.
 
-To update an instance, the following assumes your instance is called `my-console`, and overrides have been specified in a file called `overrides.yaml`.
+Deploy Stratos UI with:
 
 ```
-$ helm upgrade -f overrides.yaml my-console stratos-ui/console --recreate-pods
+helm install console --namespace=console --name my-console
 ```
 
-After the upgrade, perform a `helm list` to ensure your console is the latest version.
+### Deploying using the GitHub repository
 
+> Note: Deploying using the GitHub repository uses the latest Stratos UI images that are built nightly (tagged `latest`). While these contain the very latest updates, they may contain bugs or instabilities.
 
-## Deploying using the GitHub repository
+Clone the Stratos UI GitHub repository:
 
-To deploy the Stratos UI Console:
+```
+git clone https://github.com/SUSE/stratos-ui.git
+```
 
 Open a terminal and cd to the `deploy/kubernetes` directory:
 
 ```
 $ cd deploy/kubernetes
-```
-
-Fetch dependant helm charts
-```
-$ helm dep build
 ```
 
 Run helm install:
@@ -125,39 +167,69 @@ To login use the following credentials detailed [here](../../docs/access.md).
 
 > Note: For some environments like Minikube, you are not given an IP Address - it may show as `<nodes>`. In this case, run `kubectl cluster-info` and use the IP address of your node shown in the output of this command.
 
-## UAA for Testing
-A UAA Helm chart has been provided to quickly bring up an UAA instance for testing the console.
-
-To setup the UAA, install it via Helm
-```
-$ cd test
-$  helm install uaa --namespace uaa --name my-uaa
-```
-
-After setup, the UAA should be available on the service port mapped to the external IP. In the following example it would be `192.168.77.1:31249`.
+## Advanced Topics
+### Using a Load Balancer
+If your Kubernetes deployment supports automatic configuration of a load balancer (e.g. Google Container Engine), specify the parameters `useLb=true` when installing.
 
 ```
-15:26 $ helm status my-uaa
-LAST DEPLOYED: Thu Jul  6 14:47:10 2017
-NAMESPACE: uaa
-STATUS: DEPLOYED
-
-RESOURCES:
-==> v1/Service
-NAME             CLUSTER-IP  EXTERNAL-IP  PORT(S)         AGE
-console-uaa-int  10.0.0.82   192.168.77.1      8080:31249/TCP  40m
-
-==> v1beta1/Deployment
-NAME  DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-uaa   1        1        1           1          4m
-
+helm install stratos-ui/console --namespace=console --name my-console --set useLb=true
 ```
 
-## Specifying a custom Storage Class 
+### Specifying an External IP
 
-If no default storage class has been defined in the Kuberentes cluster. The Stratos UI helm chart will fail to deploy successfully. To check if a `default` storage class exists, you can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+If the kubernetes cluster supports external IPs for services (see [ Service External IPs](https://kubernetes.io/docs/concepts/services-networking/service/#external-ips)), then the following arguments can be provided. In this following example the dashboard will be available at `https://192.168.100.100:5000`.
 
-#### Provide Storage Class override
+```
+helm install stratos-ui/console --namespace=console --name my-console --set console.externalIP=192.168.100.100 console.port=5000
+```
+
+### Upgrading your deployment
+
+To upgrade your instance when using the Helm repository, fetch any updates to the repository:
+
+```
+$ helm repo update
+```
+
+To update an instance, the following assumes your instance is called `my-console`, and overrides have been specified in a file called `overrides.yaml`.
+
+```
+$ helm upgrade -f overrides.yaml my-console stratos-ui/console --recreate-pods
+```
+
+After the upgrade, perform a `helm list` to ensure your console is the latest version.
+
+
+
+### Specifying UAA configuration
+
+When deploying with SCF, the `scf-config-values.yaml` (see [SCF Wiki link](https://github.com/SUSE/scf/wiki/How-to-Install-SCF#configuring-the-deployment)) can be supplied when installing Stratos UI.
+```
+$ helm install stratos-ui/console  -f scf-config-values.yaml
+```
+
+Alternatively, you can supply the following configuration. Edit according to your environment and save to a file called `uaa-config.yaml`.
+```
+uaa:
+  protocol: https://
+  port: 2793
+  host: uaa.cf-dev.io
+  consoleClient:  cf
+  consoleClientSecret: 
+  consoleAdminIdentifier: cloud_controller.admin 
+  skipSSLValidation: false
+```
+
+To install stratos-ui with the above specified configuration:
+```
+$ helm install stratos-ui/console -f uaa-config.yaml
+```
+
+### Specifying a custom Storage Class 
+
+If no default storage class has been defined in the Kubernetes cluster. The Stratos UI helm chart will fail to deploy successfully. To check if a `default` storage class exists, you can list your configured storage classes with `kubectl`. If no storage class has `(default)` after it, then you need to either specify a storage class override or declare a default storage class for your Kubernetes cluster.
+
+#### Providing Storage Class override
 ```
 $ kubectl get storageclass
 NAME                TYPE
@@ -170,18 +242,23 @@ For instance to use the storage class `persistent` to deploy Console persistent 
 ```
 ---
 storageClass: persistent
+```
+
+If you want MariaDB to use a specific storage class (which can be different to that used for the other components), then specify the following:
+```
+---
+storageClass: persistent
 mariadb:
   persistence:
     storageClass: persistent
-# Set the following only if the cluster is not using a clustered filesystem
-noShared: true
 ```
 
 Run Helm with the override:
 ```
 helm install -f override.yaml stratos-ui/console
 ```
-#### Create default Storage Class
+
+#### Create a default Storage Class
 Alternatively, you can configure a storage class with `storageclass.kubernetes.io/is-default-class` set to `true`. For instance the following storage class will be declared as the default. If you don't have the `hostpath` provisioner available in your local cluster, please follow the instructions on [link] (https://github.com/kubernetes-incubator/external-storage/tree/master/docs/demo/hostpath-provisioner), to deploy one.
 
 If the hostpath provisioner is available, save the file to `storageclass.yaml`
@@ -204,7 +281,7 @@ kubectl create -f storageclass.yaml
 
 See [Storage Class documentation] ( https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/) for more insformation.
 
-## Deploying Stratos UI with your own TLS certificates
+### Deploying Stratos UI with your own TLS certificates
 
 By default the console will generate self-signed certificates for demo purposes. To configure Stratos UI to use your provided TLS certificates set the `consoleCert` and `consoleCertKey` overrides.
 

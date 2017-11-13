@@ -16,10 +16,11 @@
    * @param {app.view.appNotificationsService} appNotificationsService - the toast notification service
    * @param {app.framework.widgets.frameworkDetailView} frameworkDetailView - the detail view service
    * @param {app.framework.widgets.dialog.frameworkDialogConfirm} frameworkDialogConfirm - the confirm dialog
+   * @param {object} cfServiceCreateServiceInstanceWorkflow - the cfServiceCreateServiceInstanceWorkflow service
    * @returns {object} A service instance factory
    */
   function serviceInstanceFactory($log, $translate, $q, modelManager, appNotificationsService, frameworkDetailView,
-    frameworkDialogConfirm) {
+    frameworkDialogConfirm, cfServiceCreateServiceInstanceWorkflow) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -204,8 +205,33 @@
               frameworkDetailView(config, context);
             }
           });
+      },
+
+      /**
+       * @function editService
+       * @memberof cfServiceInstanceService
+       * @description Edit a service instance.
+       * @param {string} cnsiGuid - the CNSI guid
+       * @param {string} serviceInstance - the service instance
+       * @param {function=} callbackFunc - an optional callback function
+       * @returns {promise} The confirm dialog promise object
+       * @public
+       */
+      editService: function (cnsiGuid, serviceInstance, callbackFunc) {
+        return cfServiceCreateServiceInstanceWorkflow.edit(
+          cnsiGuid,
+          serviceInstance
+        ).then(function () {
+          appNotificationsService.notify('success', $translate.instant('app.app-info.app-tabs.services.edit.success'));
+          if (angular.isDefined(callbackFunc)) {
+            callbackFunc();
+          }
+        }).catch(function (error) {
+          $log.error('Failed to update service instance: ', error);
+          // Swallow error in rejected promise (most likely a failed http response) to ensure default msg is used
+          return $q.reject();
+        });
       }
     };
   }
-
 })();

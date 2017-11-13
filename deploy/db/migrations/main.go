@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
+	"time"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 )
@@ -16,6 +18,7 @@ import (
 var flagPath = flag.String("path", "db", "folder containing db info")
 var flagEnv = flag.String("env", "development", "which DB environment to use")
 var flagPgSchema = flag.String("pgschema", "", "which postgres-schema to migrate (default = none)")
+var flagCloudFoundry = flag.Bool("cf", false, "detect and parse Cloud Foundry database configuration from VCAP_SERVICES")
 
 // helper to create a DBConf from the given flags
 func dbConfFromFlags() (dbconf *goose.DBConf, err error) {
@@ -33,13 +36,29 @@ func main() {
 		return
 	}
 
-	// TODO: Check command is up
-	fmt.Println(args[0])
+	if *flagCloudFoundry {
+		dbEnv, err := parseCloudFoundryEnv()
+		if err != nil {
+			log.Fatal("Failed to parse Cloud Foundry Environment Variables")
+		}
+		flag.Set("env", dbEnv)
 
-	err := upRun(args[1:])
-	if err != nil {
-		fmt.Println("ERROR")
-		fmt.Printf("%v\n", err)
+		// If there is no dbEnv, then we are using SQLite, so don't run migrations
+		if len(dbEnv) == 0 {
+			log.Println("No DB Environment detected - skipping migrations")
+			return
+		}
+	}
+
+	switch args[0] {
+	case "up":
+		upRun(args[1:])
+	case "status":
+		statusRun()
+	case "dbversion":
+		dbVersionRun()
+	default:
+		log.Fatal("Command not supported")
 	}
 }
 
@@ -52,13 +71,13 @@ type StratosMigrationMehod struct {
 type StratosMigrations struct {
 }
 
-func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
-	Up_20170818162837(txn)
-}
+// func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
+// 	Up_20170818162837(txn)
+// }
 
-func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
-	Up_20170818120003(txn)
-}
+// func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
+// 	Up_20170818120003(txn)
+// }
 
 // -- Sorting
 
@@ -96,7 +115,7 @@ func (s *methodsSorter) Less(i, j int) bool {
 
 // Perform the migrations
 
-func upRun(args []string) error {
+func upRun(args []string) {
 
 	conf, err := dbConfFromFlags()
 	if err != nil {
@@ -107,13 +126,13 @@ func upRun(args []string) error {
 
 	db, err := goose.OpenDBFromDBConf(conf)
 	if err != nil {
-		return err
+		log.Fatal("Failed to open database connection")
 	}
 	defer db.Close()
 
 	current, err := goose.EnsureDBVersion(conf, db)
 	if err != nil {
-		return err
+		log.Fatal("Failed to get database version")
 	}
 
 	fmt.Println("========================")
@@ -170,7 +189,6 @@ func upRun(args []string) error {
 			err = goose.FinalizeMigration(conf, txn, true, element.Version)
 			if err != nil {
 				log.Fatal("Commit() failed:", err)
-				return err
 			}
 
 			didRun = true
@@ -182,8 +200,74 @@ func upRun(args []string) error {
 	if !didRun {
 		fmt.Println("No migrations to run.")
 	}
+}
 
-	return nil
+func dbVersionRun() {
+	conf, err := dbConfFromFlags()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	current, err := goose.GetDBVersion(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("goose: dbversion %v\n", current)
+}
+
+func statusRun() {
+
+	conf, err := dbConfFromFlags()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// collect all migrations
+	min := int64(0)
+	max := int64((1 << 63) - 1)
+	migrations, e := goose.CollectMigrations(conf.MigrationsDir, min, max)
+	if e != nil {
+		log.Fatal(e)
+	}
+
+	db, e := goose.OpenDBFromDBConf(conf)
+	if e != nil {
+		log.Fatal("couldn't open DB:", e)
+	}
+	defer db.Close()
+
+	// must ensure that the version table exists if we're running on a pristine DB
+	if _, e := goose.EnsureDBVersion(conf, db); e != nil {
+		log.Fatal(e)
+	}
+
+	fmt.Printf("goose: status for environment '%v'\n", conf.Env)
+	fmt.Println("    Applied At                  Migration")
+	fmt.Println("    =======================================")
+	for _, m := range migrations {
+		printMigrationStatus(db, m.Version, filepath.Base(m.Source))
+	}
+}
+
+func printMigrationStatus(db *sql.DB, version int64, script string) {
+	var row goose.MigrationRecord
+	q := fmt.Sprintf("SELECT tstamp, is_applied FROM goose_db_version WHERE version_id=%d ORDER BY tstamp DESC LIMIT 1", version)
+	e := db.QueryRow(q).Scan(&row.TStamp, &row.IsApplied)
+
+	if e != nil && e != sql.ErrNoRows {
+		log.Fatal(e)
+	}
+
+	var appliedAt string
+
+	if row.IsApplied {
+		appliedAt = row.TStamp.Format(time.ANSIC)
+	} else {
+		appliedAt = "Pending"
+	}
+
+	fmt.Printf("    %-24s -- %v\n", appliedAt, script)
 }
 
 func usage() {

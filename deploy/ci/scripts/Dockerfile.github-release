@@ -1,3 +1,5 @@
-FROM golang:1.8-alpine
-RUN apk update && apk add git
+FROM splatform/stratos-go-build-base:opensuse
+RUN zypper in -y ruby
+RUN gem install chandler
+RUN ln -s /usr/bin/chandler* /usr/bin/chandler
 RUN go get github.com/aktau/github-release
