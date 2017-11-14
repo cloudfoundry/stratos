@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: ci-registry.ngrok.io:80/opensuse
+    repository: ci-registry.capbristol.com:5000/opensuse
     tag: latest
-    insecure_registries: [ "ci-registry.ngrok.io:80" ]
+    insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 inputs:
 - name: stratos-ui
