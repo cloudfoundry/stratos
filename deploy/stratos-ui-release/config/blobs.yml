@@ -6,8 +6,8 @@ nginx/nginx-1.11.13.tar.gz:
 nginx/pcre-8.40.tar.gz:
   size: 2065161
   object_id: 44706e8c-255c-4ff3-9737-23ab55a1a214
-  sha: sha256:1d75ce90ea3f81ee080cdc04e68c9c25a9fb984861a0618be7bbf676b18eda3e
+  sha: 10384eb3d411794cc15f55b9d837d3f69e35391e
 golang/go1.8.3.linux-amd64.tar.gz:
   size: 90029041
   object_id: 53346f1f-edfc-40d5-54b9-04126e05fdf3
-  sha: sha256:1862f4c3d3907e59b04a757cfda0ea7aa9ef39274af99a784f5be843c80c6772
+  sha: 838c415896ef5ecd395dfabde5e7e6f8ac943c8e

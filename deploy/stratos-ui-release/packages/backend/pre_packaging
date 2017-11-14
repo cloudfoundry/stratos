@@ -1,14 +1,17 @@
 # abort script on any command that exits with a non zero value
 set -ex
-
+export GOPATH=${PWD}/go
+mkdir -p $GOPATH/bin
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 cd ${BUILD_DIR}/stratos-ui
+
 # Install Glide
 build/tools/get-glide.sh
 
 # Build backend
 npm install
 export PATH=$PATH:$PWD/node_modules/.bin
-npm run build-backend
+npm run bosh-build-backend
 
 find ../stratos-ui/deploy -type d   ! -path '../stratos-ui/deploy' ! -path '*/db' -maxdepth 1 |  xargs rm -rf
 
@@ -18,12 +21,7 @@ rm -f *.*
 mv outputs/* .
 rm -rf outputs
 
-
 # The following packages are required for the post-deploy task
-mkdir go
-export GOPATH=${PWD}/go
-
-# Fetch libraries
 go get bitbucket.org/liamstask/goose/cmd/goose
 go get bitbucket.org/liamstask/goose/lib/goose
 go get github.com/go-sql-driver/mysql

@@ -333,6 +333,14 @@
     );
   });
 
+  gulp.task('bosh-build-backend', function () {
+    // Doesn't perform a `go build -i` buiild
+    prepareBuild.setNoGoInstall(true);
+    return runSequence(
+      'build-backend'
+    );
+  });
+
   gulp.task('cf-build-backend', function () {
 
     return runSequence(
