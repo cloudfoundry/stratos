@@ -47,7 +47,7 @@
   gulp.task('clean-backend', function (done) {
     // Local dev build - only remove plugins and main binary
     if (module.exports.localDevSetup) {
-      var files = glob.sync('+(portal-proxy|*.so|plugins.json)', { cwd: conf.outputPath});
+      var files = glob.sync('+(portal-proxy|stratos-dbmigrator|*.so|plugins.json)', { cwd: conf.outputPath});
       _.each(files, function (file) {
         /* eslint-disable no-sync */
         fs.removeSync(path.join(conf.outputPath, file));

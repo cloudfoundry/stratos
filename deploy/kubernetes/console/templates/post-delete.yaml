@@ -1,3 +1,4 @@
+{{- if not .Values.noShared }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -30,3 +31,4 @@ spec:
         - sh
         - -c
         - "kubectl delete pvc,job,po --namespace {{ .Release.Namespace }} -l app={{ .Release.Name }} && kubectl delete job --namespace {{ .Release.Namespace }} -l app={{ .Release.Name }}-post-delete"
+{{- end}}

@@ -21,10 +21,11 @@ noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy
-  proxyNoShared: stratos-proxy-noshared
   postgres: stratos-postgres
   preflight: stratos-preflight-job
   postflight: stratos-postflight-job
+  mariadb: stratos-mariadb
+
 # Specify which storage class should be used for PVCs
 #storageClass: default
 #consoleCert: |
@@ -41,18 +42,21 @@ images:
 mariadb:
   # Only required for creating the databases
   mariadbRootPassword: changeme
-  image: splatform/stratos-mariadb:10.1.28-r2
   adminUser: root
   # Credentials for user
   mariadbUser: console
   mariadbPassword: changeme
   mariadbDatabase: console
+  usePassword: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
   persistence:
+    enabled: true
     accessMode: ReadWriteOnce
     size: 1Gi
-#    storageClass: default
-  metrics:
-    enabled: false
+    storageClass:
 uaa:
   protocol: https://
   port: 
@@ -66,3 +70,8 @@ env:
   UAA_HOST: 
   UAA_ADMIN_CLIENT_SECRET: 
   UAA_PORT:
+kube:
+  external_console_https_port: 8443
+  storage_class:
+    persistent:
+dockerRegistrySecret:

@@ -54,12 +54,12 @@
   }
 
   function goToEndpoints() {
-    return browser.get(helpers.getHost() + '/#/endpoint');
+    return browser.get(helpers.getHost() + '/#!/endpoint');
   }
 
   function isEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return url === helpers.getHost() + '/#/endpoint';
+      return url === helpers.getHost() + '/#!/endpoint';
     });
   }
 

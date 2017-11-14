@@ -45,6 +45,10 @@
     buildUtils.init();
   });
 
+  gulp.task('init-build-migrator', ['copy-dbmigrator', 'create-outputs'], function () {
+    buildUtils.init();
+  });
+
   gulp.task('prepare-deps', ['get-plugins-data'], function (done) {
 
     if (buildUtils.skipGlideInstall()) {
@@ -54,25 +58,34 @@
     var promise = Q.resolve();
     _.each(enabledPlugins, function (pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
-      promise = promise
-        .then(function () {
-          return buildUtils.runGlideInstall(fullPluginPath);
-        });
-
+      if (fs.existsSync(fullPluginPath)) {
+        promise = promise
+          .then(function () {
+            return buildUtils.runGlideInstall(fullPluginPath);
+          });
+      }
     });
 
     // DB Migrator dependencies
-    promise = promise
-      .then(function () {
-        return buildUtils.runGlideInstall(prepareBuild.getDbMigratorSourcePath());
-      });
+    if (fs.existsSync(prepareBuild.getDbMigratorSourcePath())) {
+      promise = promise
+        .then(function () {
+          return buildUtils.runGlideInstall(prepareBuild.getDbMigratorSourcePath());
+        });
+    }
 
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
 
-    promise
-      .then(function () {
+    if (fs.existsSync(fullCorePath)) {
+      promise = promise.then(function () {
         return buildUtils.runGlideInstall(fullCorePath);
-      })
+      });
+    } else {
+      // Not building core, so ignore plugins as well
+      enabledPlugins = [];
+    }
+
+    promise
       .then(function () {
         done();
       })
@@ -138,8 +151,9 @@
       });
 
     // App Core
-    Q.all(promises)
-      .then(function () {
+    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
+    if (fs.existsSync(coreVendorPath)) {
+      promise = promise.then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
         var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
         var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', '__vendor');
@@ -149,7 +163,10 @@
         }
         fs.removeSync(coreVendorPath);
         return Q.resolve();
-      })
+      });
+    }
+
+    Q.all(promises)
       .then(function () {
         done();
       })
@@ -170,11 +187,13 @@
 
     });
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
-    promise
-      .then(function () {
+    if (fs.existsSync(corePath)) {
+      promise = promise.then(function () {
         // Build app-core
         return buildUtils.build(corePath, conf.coreName);
-      })
+      });
+    }
+    promise
       .then(function () {
         done();
       })
@@ -233,10 +252,14 @@
     var corePath = path.join(conf.getCorePath(prepareBuild.getSourcePath(), conf.coreName));
     var outputCorePath = path.join(outputPath, conf.coreName);
 
+    if (fs.existsSync(corePath)) {
+      promise = promise
+        .then(function () {
+          return fsMoveQ(corePath, outputCorePath);
+        });
+    }
+
     promise
-      .then(function () {
-        return fsMoveQ(corePath, outputCorePath);
-      })
       .then(function () {
         done();
       })
@@ -292,6 +315,17 @@
 
     return runSequence(
       'init-build',
+      'dedup-vendor',
+      'write-plugins-yaml',
+      'delete-temp',
+      'local-dev-build'
+    );
+  });
+
+  gulp.task('build-migrator', function () {
+
+    return runSequence(
+      'init-build-migrator',
       'dedup-vendor',
       'write-plugins-yaml',
       'delete-temp',

@@ -30,6 +30,7 @@ type PortalProxy interface {
 	GetCNSIRecord(guid string) (CNSIRecord, error)
 	GetCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
+	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
 

@@ -1,4 +1,4 @@
-FROM splatform/stratos-aio-base
+FROM splatform/stratos-aio-base:opensuse
 
 COPY *.json ./
 COPY gulpfile.js ./

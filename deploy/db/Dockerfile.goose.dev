@@ -1,11 +1,13 @@
-FROM splatform/stratos-goose
+FROM splatform/stratos-bk-base:opensuse
 
 WORKDIR /src
 
-COPY db/dbconf.yml db/dbconf.yml
-COPY db/migrations db/migrations
-COPY db/scripts/development.sh .
-COPY db/scripts/wait-for-it.sh .
+COPY deploy/db/dbconf.yml db/dbconf.yml
+COPY deploy/db/migrations db/migrations
+COPY deploy/db/scripts/development.sh .
+COPY deploy/db/scripts/wait-for-it.sh .
+COPY outputs/stratos-dbmigrator .
+RUN chmod +x stratos-dbmigrator
 RUN chmod +x wait-for-it.sh
 RUN chmod +x development.sh
 

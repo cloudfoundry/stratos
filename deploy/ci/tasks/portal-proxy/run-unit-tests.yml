@@ -5,9 +5,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository: ci-registry.ngrok.io:80/splatform/stratos-bk-concourse
+   repository: ci-registry.capbristol.com:5000/splatform/stratos-bk-concourse
    tag: "latest"
-   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: sh

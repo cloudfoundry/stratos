@@ -1,12 +1,13 @@
 {
   "name": "stratos-ui",
-  "version": "0.9.5",
+  "version": "0.9.7",
   "description": "Stratos UI Console",
   "main": "index.js",
   "scripts": {
     "clean": "gulp clean",
     "build": "gulp clean:dist && gulp",
     "build-backend": "gulp build-backend",
+    "build-migrator": "gulp build-migrator",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
     "bosh-build-backend": "gulp bosh-build-backend",

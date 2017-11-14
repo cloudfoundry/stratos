@@ -1,0 +1,5 @@
+FROM {{BASE_IMAGE}}
+RUN zypper in -y ca-certificates git &&\
+    mkdir -p /srv
+
+WORKDIR /srv

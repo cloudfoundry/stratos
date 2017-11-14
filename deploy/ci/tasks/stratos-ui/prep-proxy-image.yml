@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository:  ci-registry.ngrok.io:80/susetest/console-proxy-builder
-    tag: "latest"
-    insecure_registries: [ "ci-registry.ngrok.io:80" ]
+    repository:  ci-registry.capbristol.com:5000/splatform/stratos-proxy-builder
+    tag: "opensuse"
+    insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 inputs:
 - name: stratos-ui
@@ -17,7 +17,7 @@ run:
   - -exc
   - |
     cd stratos-ui
-    npm install
+    npm install --production
     npm run build-backend
     cd -
     cp -r ./stratos-ui/outputs ./portal-proxy-output
