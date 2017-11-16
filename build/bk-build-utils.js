@@ -110,7 +110,12 @@
       return Q.resolve();
     }
 
-    var args = ['build', '-i', '-buildmode=plugin', '-o', pluginName + '.so'];
+    var args = ['build'];
+    if (!prepareBuild.getNoGoInstall()) {
+      args.push('-i');
+    }
+    args = args.concat(['-buildmode=plugin', '-o', pluginName + '.so']);
+
     args = args.concat(goFiles);
     return spawnProcess('go', args, pluginPath, env);
   }
