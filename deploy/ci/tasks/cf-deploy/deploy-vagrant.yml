@@ -13,4 +13,4 @@ run:
   args:
     - -ec
     - |
-      echo "Skip"
+      echo "Skip."
