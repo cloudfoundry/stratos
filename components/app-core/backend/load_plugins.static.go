@@ -1,5 +1,7 @@
 // +build !linux
 
+// Static plugins for non-Linux platforms
+
 package main
 
 import (
