@@ -8,7 +8,7 @@ DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:d" opt; do
+while getopts ":ho:r:t:dl" opt; do
   case $opt in
     h)
       echo
@@ -26,6 +26,9 @@ while getopts ":ho:r:t:d" opt; do
       ;;
     t)
       TAG="${OPTARG}"
+      ;;
+    l)
+      TAG_LATEST="true"
       ;;
     d)
       BUILD_DOCKER_COMPOSE_IMAGES="true"
@@ -102,6 +105,10 @@ function buildAndPublishImage {
 
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
+  if [ "${TAG_LATEST}" = "true" ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
 
   # Update values.yaml
 
@@ -190,8 +197,7 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-    buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
-  rm -f ${STRATOS_UI_PATH}/goose
+    buildAndPublishImage stratos-dc-goose deploy/db/Dockerfile.goose.dev ${STRATOS_UI_PATH}
 }
 
 function buildUI {
@@ -199,7 +205,6 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
-  preloadImage splatform/stratos-nginx-base:opensuse
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -208,7 +213,7 @@ function buildUI {
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
     -w /usr/src/app \
-    splatform/stratos-nginx-base:opensuse \
+    splatform/stratos-ui-build-base:opensuse \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
@@ -219,8 +224,14 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  preloadImage splatform/stratos-nginx-base:opensuse
   buildAndPublishImage stratos-dc-console Dockerfile.dc ${STRATOS_UI_PATH}/deploy/containers/nginx
+}
+
+function buildMariaDb {
+  echo
+  echo "-- Building/publishing MariaDB"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-dc-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
 }
 
 # MAIN ------------------------------------------------------
@@ -238,6 +249,7 @@ updateTagForRelease
 buildProxy
 buildGoose
 buildUI
+buildMariaDb
 
 # Done
 echo
