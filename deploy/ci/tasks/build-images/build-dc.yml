@@ -17,8 +17,8 @@ run:
     - |
       source /docker-lib.sh
       start_docker
-      # Move dev-certs
-      ls .
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
       mv dev-certs-output/dev-certs stratos-ui/dev-certs
       cd stratos-ui/deploy/docker-compose/
-      ./build.sh -t test -r ci-registry.capbristol.com:5000
+      ./build.sh -l -t test
+

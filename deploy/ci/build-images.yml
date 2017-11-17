@@ -55,6 +55,9 @@ jobs:
       privileged: true
       timeout: 30m
       file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
 
 - name: build-aio-image
   public: true
