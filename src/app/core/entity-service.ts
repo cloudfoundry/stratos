@@ -1,3 +1,4 @@
+import { UpdatingSection } from './../store/reducers/api-request-reducer';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { denormalize, Schema } from 'normalizr';
@@ -49,6 +50,8 @@ export class EntityService {
       this.entityRequestSelect$
     );
 
+    this.updatingSection$ = this.entityObs$.map(ei => ei.entityRequestInfo.updating);
+
     this.isDeletingEntity$ = this.entityObs$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
 
     this.waitForEntity$ = this.entityObs$
@@ -81,6 +84,8 @@ export class EntityService {
   isDeletingEntity$: Observable<boolean>;
 
   waitForEntity$: Observable<EntityInfo>;
+
+  updatingSection$: Observable<UpdatingSection>;
 
   private getEntityObservable = (
     schema: Schema,

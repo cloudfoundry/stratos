@@ -1,3 +1,4 @@
+import { UpdatingSection } from '../../../store/reducers/api-request-reducer';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
 import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
 import { EntityService } from '../../../core/entity-service';
@@ -80,6 +81,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     { link: 'ssh', label: 'SSH' }
   ];
 
+  autoRefreshString = 'auto-refresh';
+
   startEdit() {
     this.isEditSummary = true;
     this.setAppDefaults();
@@ -100,6 +103,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.applicationService.updateApplication({
       state: stoppedString
     });
+
     this.entityService.poll(1000, 'stopping')
       .takeWhile(({ resource, updatingSection }) => {
         return resource.entity.state !== stoppedString;
@@ -112,9 +116,9 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.applicationService.updateApplication({
       state: startedString
     });
+
     this.entityService.poll(1000, 'starting')
       .takeWhile(({ resource, updatingSection }) => {
-        console.log(resource.entity.state)
         return resource.entity.state !== startedString;
       })
       .delay(1)
@@ -136,23 +140,30 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
       const { id, cfId } = params;
       this.applicationService.setApplication(cfId, id);
       this.isFetching$ = this.applicationService.isFetchingApp$;
-      this.sub.push(this.entityService.poll().do(() => {
+      // Auto refresh
+      this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
         this.store.dispatch(new GetAppMetadataAction(id, cfId, AppMetadataProperties.SUMMARY as AppMetadataType));
       }).subscribe());
     });
 
-    this.summaryDataChanging$ = Observable.combineLatest(
+    const initialFetch$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,
-      this.applicationService.isUpdatingApp$,
       this.applicationService.isFetchingEnvVars$,
-      this.applicationService.isFetchingStats$
-    ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]) => {
-      const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
-      const isUpdating = isUpdatingApp;
-      return isFetching || isUpdating;
+      this.applicationService.isFetchingStats$,
+    ).map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
+      return isFetchingApp || isFetchingEnvVars || isFetchingStats;
+    }).distinctUntilChanged();
+
+    this.summaryDataChanging$ = Observable.combineLatest(
+      initialFetch$,
+      this.applicationService.isUpdatingApp$,
+      this.entityService.updatingSection$.map(update => update[this.autoRefreshString] || { busy: false })
+    ).map(([isFetchingApp, isUpdating, autoRefresh]) => {
+      if (autoRefresh.busy) {
+        return false;
+      }
+      return isFetchingApp || isUpdating;
     });
-
-
 
     this.sub.push(this.summaryDataChanging$
       .filter((isChanging) => {
