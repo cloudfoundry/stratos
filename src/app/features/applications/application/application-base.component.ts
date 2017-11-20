@@ -63,6 +63,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   summaryDataChanging$: Observable<boolean>;
 
+  autoRefreshing$ = this.entityService.updatingSection$.map(update => update[this.autoRefreshString] || { busy: false });
+
   appEdits: UpdateApplication;
   appDefaultEdits: UpdateApplication = {
     enable_ssh: false,
@@ -157,7 +159,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     this.summaryDataChanging$ = Observable.combineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.entityService.updatingSection$.map(update => update[this.autoRefreshString] || { busy: false })
+      this.autoRefreshing$
     ).map(([isFetchingApp, isUpdating, autoRefresh]) => {
       if (autoRefresh.busy) {
         return false;
