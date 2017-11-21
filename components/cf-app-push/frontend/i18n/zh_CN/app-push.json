@@ -1,0 +1,98 @@
+{
+  "app-wall": {
+    "deploy-application": "部署应用"
+  },
+  "deploy-app-dialog": {
+    "title": "应用部署",
+    "button-deploy": "部署",
+    "step-destination": {
+      "title": "目标位置",
+      "busy": "更新 Cloud Foundry 数据中",
+      "enter-failed": "刷新 Cloud Foundry 数据失败。请再试一次。 如果此错误仍然存在，请联系管理员。"
+    },
+    "step-source": {
+      "title": "源",
+      "choose-label": "源类型",
+      "choose-placeholder": "选择源类型",
+      "git": {
+        "git": "Git",
+        "github": {
+          "github":"Public Github",
+          "project-label": "项目",
+          "project-placeholder": "suse/stratos-ui",
+          "project-not-found": "项目未找到",
+          "branch-label": "分支",
+          "branch-placeholder": "选择分支",
+          "branch-last-commit": "",
+          "branch-last-commit-date": "",
+          "branch-last-commit-committer": ""
+        },
+        "gitUrl": {
+          "gitUrl": "Public Git URL",
+          "url": {
+            "url": "URL",
+            "placeholder": "git 仓库的 HTTPS 地址",
+            "error-required": "需要提供 URL",
+            "error-pattern": "无效的 URL"
+          },
+          "branch": {
+            "branch": "分支名称",
+            "placeholder": "分支名称将减少克隆时间",
+            "error-required": "需要提供分支"
+          }
+        }
+      },
+      "source": {
+        "file": "选择一个源，或者拖放 GitHub url 或档案文件。",
+        "folder": "选择一个源，或者拖放 GitHub url 、档案文件或文件夹。"
+      },
+      "local": {
+        "file": {
+          "label": "本地档案文件",
+          "field": "文件",
+          "prompt": "选择一个本地档案文件"
+        },
+        "folder": {
+          "folder": "文件夹",
+          "label": "本地存档文件或文件夹",
+          "field": "文件/文件夹",
+          "prompt": "选择本地文件或文件夹"
+        },
+        "info": "{{files}} file(s) - {{total}}上传",
+        "cfignore": "已发现 .cfignore 并启用"
+      },
+      "scanning": "扫描文件和文件夹",
+      "manifest": {
+        "label": "Manifest",
+        "description": "对于现有的应用程序，如果您的 manifest.yml 的相对路径不在根目录下，请在下面提供。",
+        "path-label": "Manifest 路径",
+        "path-placeholder": "Manifest 到应用根目录的相对路径"
+      }
+    },
+    "step-deploying": {
+      "title": "部署应用",
+      "busy": "正在开始部署",
+      "title-deploying": "部署中",
+      "title-deploy-failed": "部署失败。原因:{{reason}}",
+      "title-deploy-success": "完成部署",
+      "next-button": "App概要",
+      "submit-failed": "应用部署失败。如果此错误仍然存在，请联系管理员。原因: {{reason}}.",
+      "uploading": "正在上传文件"
+    },
+    "socket": {
+      "event-type": {
+        "CLOSE_FAILED_NO_BRANCH": "克隆版本库失败（未提供该分支），请确保 git 的详细信息是正确的",
+        "CLOSE_FAILED_CLONE": "无法克隆存储库，请确保 git 的详细信息正确，并重试。",
+        "CLOSE_FAILURE": "未知失败。 查看日志以获取更多信息。",
+        "CLOSE_INVALID_MANIFEST": "无效的 manifest",
+        "CLOSE_NO_MANIFEST": "寻找 manifest 失败",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] push 不成功。查看日志以获取更多信息。",
+        "CLOSE_NO_SESSION": "创建 session 失败",
+        "CLOSE_NO_CNSI": "未知的[[@:cloud-foundry]]实例",
+        "CLOSE_NO_CNSI_USERTOKEN": "无效的[[@:cloud-foundry]] token"
+      },
+      "failed-connection": "无法打开 socket 连接",
+      "failed-unknown": "未知失败"
+    }
+  }
+}

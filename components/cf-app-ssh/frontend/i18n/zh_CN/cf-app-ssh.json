@@ -1,0 +1,25 @@
+{
+  "cf": {
+    "app-ssh": {
+      "app-ssh": "SSH",
+      "select-instance": "选择一个实例",
+      "instance-title": "实例 # {{id}}",
+      "empty": "此应用程序没有可用于 SSH 访问的实例",
+      "not-enabled": "此应用程序未启用 SSH 访问。",
+      "space-not-enabled": "SSH 被禁止访问空间'{{name}}'.",
+      "space-enable-prompt": "管理员或空间管理将需要启用该空间的访问权限。",
+      "space-enable-link": "空间视图",
+      "enable-prompt": "您可以使用“摘要”选项卡上的“编辑”链接启用和禁用 SSH 访问。",
+      "quick-enable": {
+        "quick-enable": "您也可以使用下面的按钮启用 SSH 访问。",
+        "warning" : "注意：启用 SSH 访问将重新启动所有应用程序实例。",
+        "button": "启用 SSH 访问"
+      },
+      "labels": {
+        "disconnected": "已断开",
+        "reconnect": "重新连接",
+        "select": "选择实例"
+      }
+    }
+  }
+}

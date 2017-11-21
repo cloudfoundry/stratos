@@ -1,0 +1,11 @@
+{
+  "app.deploy-location": {
+    "title": "为应用选择一个[[@:cloud-foundry]]实例、 组织以及空间。",
+    "cf-label": "[[@:cloud-foundry]]",
+    "cf-placeholder": "选择[[@:cloud-foundry]]",
+    "org-label": "[[@:organization]]",
+    "org-placeholder": "选择[[@:organization]]",
+    "space-label": "[[@:space]]",
+    "space-placeholder": "选择[[@:space]]"
+  }
+}
