@@ -22,3 +22,10 @@ export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {
   });
   return copy;
 };
+
+
+export const composeFn = (...fns) =>
+  fns.reverse().reduce((prevFn, nextFn) =>
+    value => nextFn(prevFn(value)),
+    value => value
+  );

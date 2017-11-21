@@ -28,7 +28,7 @@ export class SummaryTabComponent implements OnInit {
       )
       .map(([app, appSummary]: [ApplicationData, AppMetadataInfo]) => {
         return app.fetching || appSummary.metadataRequestState.fetching.busy;
-      });
+      }).distinct();
   }
 
 }

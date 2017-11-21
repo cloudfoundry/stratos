@@ -84,14 +84,14 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   saveAdd() {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[this.addItem.name] = this.addItem.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.saveAdd();
   }
 
   selectedDelete() {
     const updateApp = this._createUpdateApplication(true);
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.selectedDelete();
   }
@@ -103,7 +103,7 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   saveEdit() {
     const updateApp = this._createUpdateApplication(false);
     updateApp.environment_json[this.editRow.name] = this.editRow.value;
-    this._appService.UpdateApplicationEvVars(updateApp);
+    this._appService.updateApplicationEvVars(updateApp);
 
     super.saveEdit();
   }

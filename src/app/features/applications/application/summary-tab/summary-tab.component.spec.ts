@@ -55,7 +55,7 @@ describe('SummaryTabComponent', () => {
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
     const cfGuid = initialState.cnsis.entities[0].guid;
     const appGuid = (Object.values(initialState.entities.application)[0] as APIResource).metadata.guid;
-    applicationService.SetApplication(cfGuid, appGuid);
+    applicationService.setApplication(cfGuid, appGuid);
     fixture = TestBed.createComponent(SummaryTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

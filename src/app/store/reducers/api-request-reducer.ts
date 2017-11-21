@@ -32,12 +32,13 @@ export const defaultDeletingActionState = {
 };
 
 const rootUpdatingKey = '_root_';
+export interface UpdatingSection {
+  _root_: ActionState;
+  [key: string]: ActionState;
+}
 export interface EntityRequestState {
   fetching: boolean;
-  updating: {
-    _root_: ActionState,
-    [key: string]: ActionState
-  };
+  updating: UpdatingSection;
   creating: boolean;
   deleting: DeleteActionState;
   error: boolean;
@@ -85,7 +86,7 @@ function startRequest(state, action) {
   const requestTypeStart = getRequestTypeFromMethod(apiAction.options.method);
   let requestState = getEntityRequestState(state, apiAction);
 
-  if (requestTypeStart === 'update') {
+  if (apiAction.updatingKey) {
     requestState.updating = mergeUpdatingState(
       apiAction,
       requestState.updating,
@@ -106,14 +107,14 @@ function startRequest(state, action) {
 
 function succeedRequest(state, action) {
   if (action.apiAction.guid) {
-    const requestTypeSuccess = getRequestTypeFromMethod(action.apiAction.options.method);
+    const apiAction = action.apiAction as APIAction;
+    const requestTypeSuccess = getRequestTypeFromMethod(apiAction.options.method);
     const successAction = action as WrapperAPIActionSuccess;
 
-    const requestSuccessState = getEntityRequestState(state, action.apiAction);
-
-    if (requestTypeSuccess === 'update') {
+    const requestSuccessState = getEntityRequestState(state, apiAction);
+    if (apiAction.updatingKey) {
       requestSuccessState.updating = mergeUpdatingState(
-        action.apiAction,
+        apiAction,
         requestSuccessState.updating,
         {
           busy: false,
@@ -146,12 +147,13 @@ function succeedRequest(state, action) {
 
 function failRequest(state, action) {
   if (action.apiAction.guid) {
-    const requestTypeFailed = getRequestTypeFromMethod(action.apiAction.options.method);
+    const apiAction = action.apiAction as APIAction;
+    const requestTypeFailed = getRequestTypeFromMethod(apiAction.options.method);
 
-    const requestFailedState = getEntityRequestState(state, action.apiAction);
-    if (requestTypeFailed === 'update') {
+    const requestFailedState = getEntityRequestState(state, apiAction);
+    if (apiAction.updatingKey) {
       requestFailedState.updating = mergeUpdatingState(
-        action.apiAction,
+        apiAction,
         requestFailedState.updating,
         {
           busy: false,
@@ -170,7 +172,7 @@ function failRequest(state, action) {
       requestFailedState.creating = false;
       requestFailedState.message = action.message;
     }
-    return setEntityRequestState(state, requestFailedState, action.apiAction);
+    return setEntityRequestState(state, requestFailedState, apiAction);
   }
   return state;
 }
@@ -185,7 +187,7 @@ function getEntityRequestState(state, action: SingleEntityAction): EntityRequest
   return { ...defaultEntityRequest };
 }
 
-function setEntityRequestState(state, requestState, { entityKey, guid }): EntitiesState {
+function setEntityRequestState(state, requestState, { entityKey, guid }: APIAction): EntitiesState {
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -205,7 +207,7 @@ function createRequestStateFromResponse(entities, state): EntitiesState {
       entState.fetching = false;
       entState.error = false;
       entState.deleting = { ...defaultDeletingActionState };
-      newState = setEntityRequestState(newState, entState, { entityKey, guid });
+      newState = setEntityRequestState(newState, entState, { entityKey, guid } as APIAction);
     });
   });
   return newState;

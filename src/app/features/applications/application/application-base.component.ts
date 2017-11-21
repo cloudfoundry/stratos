@@ -1,26 +1,52 @@
+import { UpdatingSection } from '../../../store/reducers/api-request-reducer';
+import { AppMetadataType } from '../../../store/types/app-metadata.types';
+import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
+import { EntityService } from '../../../core/entity-service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 
-import { DeleteApplication, UpdateApplication } from '../../../store/actions/application.actions';
+import { DeleteApplication, GetApplication, UpdateApplication, ApplicationSchema } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
+
+const entityServiceFactory = (
+  store: Store<AppState>,
+  activatedRoute: ActivatedRoute
+) => {
+  const { id, cfId } = activatedRoute.snapshot.params;
+  return new EntityService(
+    store,
+    ApplicationSchema.key,
+    ApplicationSchema,
+    id,
+    new GetApplication(id, cfId)
+  );
+};
+
 
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
-  providers: [ApplicationService]
+  providers: [
+    ApplicationService,
+    {
+      provide: EntityService,
+      useFactory: entityServiceFactory,
+      deps: [Store, ActivatedRoute]
+    }
+  ]
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
-  [x: string]: any;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private applicationService: ApplicationService,
+    private entityService: EntityService,
     private store: Store<AppState>
   ) { }
 
@@ -29,12 +55,15 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
+  applicationActions$: Observable<string[]>;
 
   isEditSummary = false;
 
   summaryExpanded = true;
 
   summaryDataChanging$: Observable<boolean>;
+
+  autoRefreshing$ = this.entityService.updatingSection$.map(update => update[this.autoRefreshString] || { busy: false });
 
   appEdits: UpdateApplication;
   appDefaultEdits: UpdateApplication = {
@@ -54,6 +83,8 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     { link: 'ssh', label: 'SSH' }
   ];
 
+  autoRefreshString = 'auto-refresh';
+
   startEdit() {
     this.isEditSummary = true;
     this.setAppDefaults();
@@ -65,14 +96,35 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   saveEdits() {
     this.endEdit();
-    this.applicationService.UpdateApplication(this.appEdits);
+    this.applicationService.updateApplication(this.appEdits);
   }
 
   stopApplication() {
     this.endEdit();
-    this.applicationService.UpdateApplication({
-      state: 'STOPPED'
+    const stoppedString = 'STOPPED';
+    this.applicationService.updateApplication({
+      state: stoppedString
     });
+
+    this.entityService.poll(1000, 'stopping')
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== stoppedString;
+      }).subscribe();
+  }
+
+  startApplication() {
+    this.endEdit();
+    const startedString = 'STARTED';
+    this.applicationService.updateApplication({
+      state: startedString
+    });
+
+    this.entityService.poll(1000, 'starting')
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== startedString;
+      })
+      .delay(1)
+      .subscribe();
   }
 
   setAppDefaults() {
@@ -86,21 +138,33 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setAppDefaults();
 
-    this.sub.push(this.route.params.subscribe(params => {
+    this.route.params.first().subscribe(params => {
       const { id, cfId } = params;
-      this.applicationService.SetApplication(cfId, id);
+      this.applicationService.setApplication(cfId, id);
       this.isFetching$ = this.applicationService.isFetchingApp$;
-    }));
+      // Auto refresh
+      this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
+        this.store.dispatch(new GetAppMetadataAction(id, cfId, AppMetadataProperties.SUMMARY as AppMetadataType));
+      }).subscribe());
+    });
+
+    const initialFetch$ = Observable.combineLatest(
+      this.applicationService.isFetchingApp$,
+      this.applicationService.isFetchingEnvVars$,
+      this.applicationService.isFetchingStats$,
+    ).map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
+      return isFetchingApp || isFetchingEnvVars || isFetchingStats;
+    }).distinctUntilChanged();
 
     this.summaryDataChanging$ = Observable.combineLatest(
-      this.applicationService.isFetchingApp$,
+      initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.applicationService.isFetchingEnvVars$,
-      this.applicationService.isFetchingStats$
-    ).map(([isFetchingApp, isUpdatingApp, isFetchingEnvVars, isFetchingStats]) => {
-      const isFetching = isFetchingApp || isFetchingEnvVars || isFetchingStats;
-      const isUpdating = isUpdatingApp;
-      return isFetching || isUpdating;
+      this.autoRefreshing$
+    ).map(([isFetchingApp, isUpdating, autoRefresh]) => {
+      if (autoRefresh.busy) {
+        return false;
+      }
+      return isFetchingApp || isUpdating;
     });
 
     this.sub.push(this.summaryDataChanging$
