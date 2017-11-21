@@ -16,11 +16,12 @@ import { NgModel } from '@angular/forms';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 import { EntityInfo } from '../../../../store/types/api.types';
 import { CfAppEvnVarsDataSource, AppEnvVar } from '../../../../shared/data-sources/cf-app-variables-data-source';
-import { TableColumn } from '../../../../shared/components/table/table.component';
+import { ITableColumn } from '../../../../shared/components/table/table.component';
 import { TableCellEditComponent } from '../../../../shared/components/table/table-cell-edit/table-cell-edit.component';
 import {
   TableCellEditVariableComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
+import { CardAppVariableComponent } from '../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 
 
 @Component({
@@ -28,34 +29,36 @@ import {
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss']
 })
-export class VariablesTabComponent implements OnInit {
+export class VariablesTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
   envVarsDataSource: CfAppEvnVarsDataSource;
   envVars$: Observable<any>;
-  columns: Array<TableColumn<AppEnvVar>> = [
+  columns: Array<ITableColumn<AppEnvVar>> = [
     {
       columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
-      class: 'table-column-select'
+      class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: (row: AppEnvVar) => 'Name', cell: (row: AppEnvVar) => `${row.name}`,
-      sort: { disableClear: true }
+      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'value', headerCell: (row: AppEnvVar) => 'Value', cellComponent: TableCellEditVariableComponent,
-      sort: { disableClear: true }
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '5'
     },
     {
-      columnId: 'edit', headerCell: (row: AppEnvVar) => '', cellComponent: TableCellEditComponent,
-      class: 'table-column-edit'
+      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
     },
   ];
+  cardComponent = CardAppVariableComponent;
 
   ngOnInit() {
     this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
     this.envVars$ = this.appService.appEnvVars$;
+  }
+
+  ngOnDestroy() {
+    this.envVarsDataSource.destroy();
   }
 
 }

@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
 import { CoreModule } from '../../../../../core/core.module';
-import { ITableDataSource } from '../../../../data-sources/table-data-source';
+import { IListDataSource } from '../../../../data-sources/list-data-source';
 
 describe('TableCellEditVariableComponent', () => {
   let component: TableCellEditVariableComponent<AppEnvVar>;
@@ -26,7 +26,7 @@ describe('TableCellEditVariableComponent', () => {
       name: 'name',
       value: 'value'
     };
-    component.dataSource = {} as ITableDataSource<AppEnvVar>;
+    component.dataSource = {} as IListDataSource<AppEnvVar>;
     fixture.detectChanges();
   });
 

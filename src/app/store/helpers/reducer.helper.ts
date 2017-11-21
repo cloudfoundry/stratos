@@ -2,10 +2,14 @@ export const mergeState = (state, newState) => {
   const baseState = { ...state };
 
   Object.keys(newState).forEach(entityKey => {
-    baseState[entityKey] = {
-      ...baseState[entityKey],
-      ...newState[entityKey]
-    };
+    if (typeof (newState[entityKey]) === 'string') {
+      baseState[entityKey] = newState[entityKey];
+    } else {
+      baseState[entityKey] = {
+        ...baseState[entityKey],
+        ...newState[entityKey]
+      };
+    }
   });
 
   return baseState;

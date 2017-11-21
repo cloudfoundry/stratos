@@ -1,0 +1,20 @@
+.cards__card-row {
+  >div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+  }
+  .event-details {
+    justify-content: flex-end;
+  }
+}
+
+.mat-card-header-text {
+  display: none;
+}
+
+md-card-header {
+  margin-left: -16px;
+  padding: 10px 0;
+}

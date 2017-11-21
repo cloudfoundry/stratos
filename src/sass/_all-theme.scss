@@ -3,9 +3,10 @@
 @import '../app/features/login/login-page/login-page.component.theme';
 @import '../app/shared/components/display-value/display-value.component.theme.scss';
 @import '../app/shared/components/stepper/steppers/steppers.component.theme';
-@import '../app/features/applications/application/variables-tab/variables-tab.component.theme.scss';
+@import '../app/shared/components/list/list.component.theme.scss';
 @import '../app//shared/components/code-block/code-block.component.theme.scss';
 @import '../app/features/applications/application/application-base.component.theme.scss';
+@import '../app/shared/components/cards/cards.components.theme.scss';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);

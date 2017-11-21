@@ -16,10 +16,11 @@ import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { NgModule } from '@angular/core';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-// import { StoreRouterConnectingModule, routerReducer, RouterStateSerializer } from '@ngrx/router-store';
+import { routerReducer } from '@ngrx/router-store';
 import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
+import { listReducer } from './reducers/list.reducer';
 
 
 export function logger(reducer): any {
@@ -37,25 +38,6 @@ export function appMetaDataReducer(state, action): MetadataState {
   return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
-
-// https://stackoverflow.com/questions/46075374/can-ngrx-router-store-4-be-used-with-ngrx-store-2-2
-// export interface RouterStateUrl {
-//   url: string;
-//   queryParams: Params;
-// }
-// export class CustomRouterStateSerializer
-//   implements RouterStateSerializer<RouterStateUrl> {
-//   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
-//     const { url } = routerState;
-//     const queryParams = routerState.root.queryParams;
-
-//     return { url, queryParams };
-//   }
-// }
-// providers: [
-//   { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer },
-// ]
-
 export const appReducers = {
   entities: entitiesReducer,
   auth: authReducer,
@@ -67,10 +49,9 @@ export const appReducers = {
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,
   actionHistory: actionHistoryReducer,
+  lists: listReducer,
+  routerReducer: routerReducer,
 };
-// TODO: Add the below line back in once https://github.com/ngrx/platform/issues/446 is confirmed fixed (bug spams ROUTER_CANCEL on log in)
-// routerReducer: routerReducer,
-
 
 let metaReducers = [];
 if (!environment.production) {
@@ -91,8 +72,6 @@ if (!environment.production) {
     StoreDevtoolsModule.instrument({
       maxAge: 100
     }),
-    // StoreRouterConnectingModule
   ],
-
 })
 export class AppReducersModule { }

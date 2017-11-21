@@ -1,7 +1,7 @@
 import { EntityInfo } from '../../../../store/types/api.types';
 import { resultPerPageParam } from '../../../../store/reducers/pagination.reducer';
 
-import { Component, OnInit, ViewChild, Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit, ViewChild, Pipe, PipeTransform, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
@@ -10,9 +10,8 @@ import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CfTableDataSource } from '../../../../shared/data-sources/table-data-source-cf';
 import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
-import { TableColumn } from '../../../../shared/components/table/table.component';
+import { ITableColumn } from '../../../../shared/components/table/table.component';
 import {
   TableCellEventTypeComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
@@ -25,6 +24,8 @@ import {
 import {
   TableCellEventDetailComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
+import { CardEventComponent } from '../../../../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
+import { CfListDataSource } from '../../../../shared/data-sources/list-data-source-cf';
 
 @Component({
   selector: 'app-events-tab',
@@ -32,34 +33,39 @@ import {
   styleUrls: ['./events-tab.component.scss']
 })
 
-export class EventsTabComponent implements OnInit {
+export class EventsTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  eventSource: CfTableDataSource<EntityInfo>;
+  eventSource: CfListDataSource<EntityInfo>;
   hasEvents$: Observable<boolean>;
-  columns: Array<TableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<EntityInfo>> = [
     {
-      columnId: 'timestamp', headerCell: (row: EntityInfo) => 'Timestamp', cellComponent: TableCellEventTimestampComponent,
-      sort: { disableClear: true }
+      columnId: 'timestamp', headerCell: () => 'Timestamp', cellComponent: TableCellEventTimestampComponent, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'type', headerCell: (row: EntityInfo) => 'Type', cellComponent: TableCellEventTypeComponent
+      columnId: 'type', headerCell: () => 'Type', cellComponent: TableCellEventTypeComponent, cellFlex: '1'
     },
     {
-      columnId: 'actor_name', headerCell: (row: EntityInfo) => 'Actor Name', cellComponent: TableCellEventActionComponent
+      columnId: 'actor_name', headerCell: () => 'Actor Name', cellComponent: TableCellEventActionComponent, cellFlex: '1'
     },
     {
-      columnId: 'detail', headerCell: (row: EntityInfo) => 'Detail', cellComponent: TableCellEventDetailComponent
+      columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
   ];
+  cardComponent = CardEventComponent;
 
 
   ngOnInit() {
+    // TODO: RC Move can add, can edit into here
     this.eventSource = new CfAppEventsDataSource(
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
     );
+  }
+
+  ngOnDestroy() {
+    this.eventSource.destroy();
   }
 }

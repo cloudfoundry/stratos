@@ -1,0 +1,10 @@
+<h2 md-dialog-title>Event Detail</h2>
+<md-dialog-content>
+  <div *ngFor="let value of data.row.entity.metadata | values;">
+    {{value.key}}
+    <pre>{{value.value | json}}</pre>
+  </div>
+</md-dialog-content>
+<md-dialog-actions>
+  <button md-button [md-dialog-close]="true">Close</button>
+</md-dialog-actions>

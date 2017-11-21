@@ -46,6 +46,7 @@ export function selectEntityRequestInfo(type: string, guid: string) {
   );
 }
 
+
 export function getEntityState(state: AppState) {
   return state.entities;
 }

@@ -7,44 +7,53 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
+import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
+import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
 
-export interface ITableDataSource<T> {
-  mdPaginator: MdPaginator;
-  addRow;
+export interface IListDataSource<T> {
+  listStateKey: string;
+  view$: Observable<ListView>;
+  state$: Observable<ListState>;
+  pagination$: Observable<ListPagination>;
+  sort$: Observable<ListSort>;
+  filter$: Observable<ListFilter>;
+
+  page$: Observable<T[]>;
+
+  addItem: T;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 
-  editRow: any; // Edit items - remove once ng-content can exist in md-table
+  editRow: T; // Edit items - remove once ng-content can exist in md-table
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
-  selectedRows: Map<string, any>; // Select items - remove once ng-content can exist in md-table
+  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: any); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
 
-  startEdit(row); // Edit items - remove once ng-content can exist in md-table
+  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>);
-  connect(): Observable<any>;
-  disconnect();
+  connect(): Observable<T[]>;
+  destroy();
 }
 
 export type getRowUniqueId = (T) => string;
 
-export abstract class TableDataSource<T extends object> extends DataSource<T> implements ITableDataSource<T> {
+export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
 
-  private paginationSub: Subscription;
-
-  protected pageSize$: Observable<number>;
-  protected sort$: Observable<Sort>;
-  protected pageIndex$: Observable<number>;
-  protected filter$: Observable<string>;
+  public view$: Observable<ListView>;
+  public state$: Observable<ListState>;
+  public pagination$: Observable<ListPagination>;
+  public sort$: Observable<ListSort>;
+  public filter$: Observable<ListFilter>;
+  public page$: Observable<T[]>;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
 
-  public addRow: T;
+  public addItem: T;
   protected selectRow: T;
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
@@ -54,29 +63,35 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
 
   public editRow: T;
 
-  public mdPaginator: MdPaginator;
-
   constructor(
-    private store: Store<AppState>,
+    private _store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
     private _emptyType: T,
+    public listStateKey: string,
   ) {
     super();
-    this.addRow = { ... (_emptyType as object) } as T;
+    this.addItem = { ... (_emptyType as object) } as T;
+
+    this.state$ = getListStateObservable(this._store, listStateKey);
+    const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
+    this.view$ = view;
+    this.pagination$ = pagination.filter(x => !!x);
+    this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
+      return x.direction === y.direction && x.field === y.field;
+    });
+    this.filter$ = filter.filter(x => !!x);
   }
 
   abstract connect(): Observable<T[]>;
-  disconnect() {
-    this.paginationSub.unsubscribe();
-  }
-
+  disconnect() { }
+  destroy() { }
 
   startAdd() {
-    this.addRow = { ... (this._emptyType as object) } as T;
+    this.addItem = { ... (this._emptyType as object) } as T;
     this.isAdding$.next(true);
   }
   saveAdd() {
-    this.selectRow = this.addRow;
+    this.selectRow = this.addItem;
     this.isAdding$.next(false);
   }
   cancelAdd() {
@@ -118,23 +133,4 @@ export abstract class TableDataSource<T extends object> extends DataSource<T> im
     delete this.editRow;
   }
 
-  initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) {
-    this.mdPaginator = paginator;
-    this.sort$ = sort.mdSortChange;
-
-    this.pageSize$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    // this._mdPaginator.page.map(pageEvent => pageEvent.pageSize).distinctUntilChanged();
-    this.mdPaginator.pageSizeOptions = [5, 10, 20];
-
-    // this.sort$ = this._sort$.mdSortChange;
-
-    this.pageIndex$ = this.mdPaginator.page.map(pageEvent => pageEvent.pageIndex).distinctUntilChanged();
-
-    this.paginationSub = Observable.combineLatest(
-      this.pageSize$,
-      this.pageIndex$
-    ).subscribe();
-
-    this.filter$ = filter$.debounceTime(250);
-  }
 }
