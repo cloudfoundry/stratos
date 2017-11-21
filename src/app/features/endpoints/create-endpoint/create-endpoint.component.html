@@ -3,10 +3,71 @@
 </app-page-header>
 
 <app-steppers cancel="/endpoints">
-  <app-step [title]="'Register a Cloud Foundry Endpoint'" [valid]="step1.validate | async" [onNext]="step1.onNext">
+  <app-step [title]="'Endpoint Name'" [valid]="step1.validate | async" [onNext]="step1.onNext">
     <app-create-endpoint-cf-step-1 #step1></app-create-endpoint-cf-step-1>
   </app-step>
-  <app-step [title]="'Validate'" [onNext]="step2.onNext">
+  <app-step [title]="'Endpoint Address'" [valid]="step2.validate | async" [onNext]="step2.onNext">
     <app-create-endpoint-cf-step-2 #step2></app-create-endpoint-cf-step-2>
   </app-step>
 </app-steppers>
+
+
+
+<!-- <md-accordion class="">
+  <md-expansion-panel [expanded]="step === 0" (opened)="step = 0" hideToggle="true">
+    <md-expansion-panel-header>
+      <md-panel-title>
+        Endpoint Name
+      </md-panel-title>
+      <md-panel-description>
+        Name given to identify endpoint in the console
+        <md-icon>account_circle</md-icon>
+      </md-panel-description>
+    </md-expansion-panel-header>
+
+    <form #form="ngForm">
+      <md-form-field novalidate>
+        <input mdInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
+          pattern="{{utilsService.urlValidationExpression}}" [appUnique]="endpointUrls | async">
+        <md-error *ngIf="urlField.errors && urlField.errors.required">URL is required</md-error>
+        <md-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</md-error>
+        <md-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</md-error>
+      </md-form-field>
+      <md-form-field>
+        <input mdInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
+        <md-error *ngIf="nameField.errors && nameField.errors.required">Name is required</md-error>
+        <md-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</md-error>
+      </md-form-field>
+      <md-checkbox mdInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</md-checkbox>
+    </form>
+
+    <md-action-row>
+      <button md-button color="warn" (click)="cancel()">Cancel</button>
+      <button md-button color="primary" (click)="step = 1">Next</button>
+    </md-action-row>
+  </md-expansion-panel>
+
+  <md-expansion-panel [expanded]="step === 1" (opened)="step = 1" hideToggle="true">
+    <md-expansion-panel-header>
+      <md-panel-title>
+        Destination
+      </md-panel-title>
+      <md-panel-description>
+        Type the country name
+        <md-icon>map</md-icon>
+      </md-panel-description>
+    </md-expansion-panel-header>
+
+    <md-form-field>
+      <input mdInput placeholder="Country">
+    </md-form-field>
+
+    <md-action-row>
+      <button md-button color="primary" (click)="step = 0">Previous</button>
+      <button md-button color="warn" (click)="cancel()">Cancel</button>
+      <button md-button color="primary" (click)="complete()">Register</button>
+    </md-action-row>
+  </md-expansion-panel>
+
+
+</md-accordion> -->

@@ -1,4 +1,3 @@
-<b>Register a Cloud Foundry Endpoint</b>
 <p>
   Register an existing Cloud Foundry endpoint to allow your development team to create and manage their applications.
 </p>
@@ -7,17 +6,9 @@
   they are working with.
 </p>
 <form #form="ngForm">
-  <md-form-field novalidate>
-    <input mdInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
-      pattern="{{utilsService.urlValidationExpression}}" [appUnique]="endpointUrls | async">
-    <md-error *ngIf="urlField.errors && urlField.errors.required">URL is required</md-error>
-    <md-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</md-error>
-    <md-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</md-error>
-  </md-form-field>
   <md-form-field>
     <input mdInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
     <md-error *ngIf="nameField.errors && nameField.errors.required">Name is required</md-error>
     <md-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</md-error>
   </md-form-field>
-  <md-checkbox mdInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</md-checkbox>
 </form>

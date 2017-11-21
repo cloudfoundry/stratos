@@ -15,7 +15,7 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       return null;
     },
     icon: 'delete',
-    label: 'Delete',
+    label: 'Unregister',
     description: 'Remove the endpoint',
     visible: (row: CNSISModel) => true,
     enabled: (row: CNSISModel) => true,
@@ -79,7 +79,8 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       EndpointsDataSource._storeKey
     );
 
-    this.actions.singleActions.push(EndpointsDataSource.listActionDisconnect, EndpointsDataSource.listActionConnect);
+    this.actions.singleActions.push(EndpointsDataSource.listActionDisconnect,
+      EndpointsDataSource.listActionConnect, EndpointsDataSource.listActionDelete);
     this.actions.multiActions.push(EndpointsDataSource.listActionDelete);
     this.actions.globalActions.push(EndpointsDataSource.listActionAdd);
 
