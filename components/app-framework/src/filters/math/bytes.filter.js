@@ -6,7 +6,7 @@
   // Private utility functions
   function getDefaultPrecision(precision) {
     if (_.isUndefined(precision)) {
-      precision = 1;
+      precision = 0;
     }
     return precision;
   }
@@ -50,12 +50,27 @@
         total === 0) {
         return '-';
       }
+
+      // Precision
       usedPrecision = getDefaultPrecision(usedPrecision);
       totalPrecision = _.isUndefined(totalPrecision) ? 0 : totalPrecision;
+
+      // Units
       var number = getNumber(total);
+      var usedNumber = null;
+
+      // Values to display
       var totalDisplay = getReducedValue(total, number, totalPrecision);
       var usedDisplay = getReducedValue(used, number, usedPrecision);
-      return usedDisplay + ' / ' + totalDisplay + ' ' + units[number];
+
+      // Is the used value too small to be accurate (for instance 20M consumed of 1GB would show as 0 of 1GB)?
+      if (usedPrecision === 0 && usedDisplay < 1) {
+        // Use the units relative to the used value instead of total (20MB of 1GB instead of 0 of 1GB)
+        usedNumber = getNumber(used);
+        usedDisplay = getReducedValue(used, usedNumber, usedPrecision);
+      }
+
+      return usedDisplay + (usedNumber ? ' ' + units[usedNumber] : '') + ' / ' + totalDisplay + ' ' + units[number];
     };
   }
 })();
