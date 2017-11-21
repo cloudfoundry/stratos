@@ -50,9 +50,9 @@ export function getEntityState(state: AppState) {
   return state.entities;
 }
 
-export function getEntityType(type: string) {
+export function getEntityType(typeString: string) {
   return (entityState) => {
-    return entityState[type] || {};
+    return entityState[typeString] || {};
   };
 }
 

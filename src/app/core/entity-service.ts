@@ -1,3 +1,4 @@
+import { composeFn } from './../store/helpers/reducer.helper';
 import { UpdatingSection } from './../store/reducers/api-request-reducer';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
@@ -131,16 +132,16 @@ export class EntityService {
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
       .withLatestFrom(
-      this.entitySelect$.startWith(null),
-      this.entityRequestSelect$.startWith(null)
+      this.entitySelect$,
+      this.entityRequestSelect$
       )
       .map(a => ({
         resource: a[1],
-        updatingSection: compose(
+        updatingSection: composeFn(
           getUpdateSectionById(key),
           getEntityUpdateSections,
           () => a[2]
-        )({})
+        )
       }))
       .do(({ resource, updatingSection }) => {
         if (!updatingSection || !updatingSection.busy) {
