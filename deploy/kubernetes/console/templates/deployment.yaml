@@ -200,7 +200,7 @@ spec:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
           readOnly: true
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.dockerRegistryUserName .Values.dockerRegistryPassword }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
@@ -274,7 +274,7 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.dockerRegistryUserName .Values.dockerRegistryPassword }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}

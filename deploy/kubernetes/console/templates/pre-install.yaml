@@ -130,7 +130,7 @@ spec:
            - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
              name: "{{ .Release.Name }}-encryption-key-volume"
        restartPolicy: Never
-       {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.dockerRegistryUserName .Values.dockerRegistryPassword }}
        imagePullSecrets:
        - nane:  {{.Values.dockerRegistrySecret}}
        {{- end }}

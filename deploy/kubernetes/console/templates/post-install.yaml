@@ -66,7 +66,7 @@ spec:
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
        restartPolicy: OnFailure
-       {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.dockerRegistryUserName .Values.dockerRegistryPassword }}
        imagePullSecrets:
        - name: {{.Values.dockerRegistrySecret}}
        {{- end }}

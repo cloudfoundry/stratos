@@ -21,6 +21,7 @@ The following guide details how to deploy the Stratos UI Console in Kubernetes.
     + [Providing Storage Class override](#providing-storage-class-override)
     + [Create a default Storage Class](#create-a-default-storage-class)
   * [Deploying Stratos UI with your own TLS certificates](#deploying-stratos-ui-with-your-own-tls-certificates)
+  * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
 <!-- /TOC -->
 
 ## Requirements
@@ -300,4 +301,20 @@ consoleCertKey: |
 Assuming the above is stored in a file called `override-ssl.yaml`, install the chart with the override specified.
 ```
 helm install -f override-ssl.yaml stratos-ui/console --namespace console
+```
+
+### Using with a Secure Image Repository
+If you are deploying the helm chart against images that are hosted in a secure image repository provide the following parameters ( store the following to a file called `docker-registry-secrets.yaml`).
+
+
+```
+dockerRegistry: mysecure-dockerregistry.io
+dockerRegistryUserName: john.appleseed
+dockerRegistryPassword: sup3rs3cur3
+dockerRegistryEmail: john.appleseed@foobar.com
+```
+
+Deploy the chart with the provided parameters:
+```
+helm install -f docker-registry-secrets.yaml stratos-ui/console
 ```
