@@ -1,0 +1,21 @@
+{
+  "cf.cf-tabs": {
+    "firehose": {
+      "firehose": "Firehose",
+      "title": "Firehose Stream",
+      "scroll-bottom-button": "滚动到底部",
+      "labels": {
+        "select": "选择: ",
+        "select-all": "所有",
+        "select-none": "空",
+        "regex": "正则表达式",
+        "apps": "应用",
+        "api": "API",
+        "metrics": "指标",
+        "counters": "计数器",
+        "container-metrics": "容器指标",
+        "errors": "错误"
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "product": {
+    "name": "Cloud Foundry 控制台",
+    "console": "Cloud Foundry 控制台",
+    "cf": "Cloud Foundry"
+  },
+  "company": {
+    "name": "SUSE",
+    "terms": "Legal",
+    "terms.href": "https://www.suse.com/company/legal/",
+    "PRIVACY_HREF": "", 
+    "PRODUCT_FAMILY_HREF": "",
+    "www-link": "http://www.suse.com"
+  },
+  "about": {
+    "footer": {
+      "company.logo": "images/OpenSUSE_Logo.png",
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  },
+  "navbar": {
+    "title": "Stratos UI",
+    "logo": "svg:SUSE_Geeko.svg"
+  },
+  "login": {
+    "title":"登录",
+    "console": "Cloud Foundry 控制台"
+  },
+  "landing": {
+    "footer": {
+      "company.logo": "images/OpenSUSE_Logo.png",
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  }
+}

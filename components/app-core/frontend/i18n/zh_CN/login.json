@@ -1,0 +1,22 @@
+{
+  "login": {
+    "login": "登录",
+    "console": "@:product.console",
+    "logo": "",
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "username": "@:auth.username",
+    "password": "@:auth.password",
+    "authenticating": "凭证认证中",
+    "welcome": "使用[[@:product.console]]来开发编写和管理云本地工作负载。",
+    "error": {
+      "credentials": "您使用的登录名和密码组合不正确。请再试一次。",
+      "server": "尝试登录时发生服务器错误，请重试。如果此错误仍然存在，请联系管理员。",
+      "no-response": "身份验证服务器无法响应。请再试一次。如果此错误仍然存在，请联系管理员。"
+    },
+    "timeout": {
+      "prompt": "你还在吗？",
+      "notice": "你已经有一段时间未做任何操作。出于保护的目的，我们会在{{timeout}}后自动注销",
+      "confirm": "我还在这儿"
+    }
+  }
+}

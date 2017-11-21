@@ -1,0 +1,111 @@
+{
+  "cf": {
+    "space-info": {
+      "title": "空间：{{name}}",
+      "summary": {
+        "title": "简介",
+        "label": {
+          "apps": "应用",
+          "instances": "应用实例",
+          "services": "服务",
+          "service-instances": "服务实例",
+          "routes": "路由",
+          "memory": "内存使用情况",
+          "ssh": "启用 ssh",
+          "orgRole": "cf空间角色",
+          "address": "实例地址",
+          "cli": "cf交互",
+          "username": "账户用户名",
+          "status": "账户状态"
+        }
+      },
+      "rename-action": "重命名空间",
+      "rename-dialog": {
+        "title": "重命名空间",
+        "space-label": "空间名称",
+        "space-error-required": "需要设置名称",
+        "space-error-unique": "名称必须唯一",
+        "success-notification": "空间'{{name}}'被成功更新"
+      },
+      "delete-action": "删除空间",
+      "delete-dialog": {
+        "title": "删除空间",
+        "description": "您确定要删除空间'{{name}}'吗?",
+        "success-notification": "空间'{{name}}'被成功删除",
+        "error-message": "无法删除空间"
+      },
+      "delete-route-action": "删除路由",
+      "unmap-route-action": "取消映射路由",
+      "detach-service-action": "分离服务",
+      "delete-service-action": "删除服务",
+      "edit-service-action": "编辑服务",
+      "tabs": {
+        "show-all-button": "显示全部",
+        "column.action": "动作",
+        "applications": {
+          "title": "应用",
+          "columns": {
+            "applications": "应用",
+            "state": "状态",
+            "created": "已创建在",
+            "instances": "实例"
+          },
+          "none": "这个空间没有应用",
+          "show-all-button": "@:cf.space-info.tabs.show-all-button"
+        },
+        "services": {
+          "title": "服务实例",
+          "columns": {
+            "services": "服务实例",
+            "type": "类型",
+            "plan": "计划",
+            "attached": "附加应用程序",
+            "action": "@:cf.space-info.tabs.column.action",
+            "tags": "标签"
+          },
+          "none": "您现在没有服务实例",
+          "show-all-button": "@:cf.space-info.tabs.show-all-button"
+        },
+        "routes": {
+          "title": "路由",
+          "columns": {
+            "route": "路由",
+            "attached": "附加应用",
+            "action": "@:cf.space-info.tabs.column.action"
+          },
+          "none": "您现在没有路由",
+          "show-all-button": "@:cf.space-info.tabs.show-all-button"
+        },
+        "users": {
+          "title": "用户"
+        }
+      },
+      "ssh": {
+        "allow": {
+          "allow": "允许 SSH 登录",
+          "title": "允许 SSH 登录",
+          "prompt": "请确认您希望允许使用 SSH 登录空间 '{{name}}'。",
+          "confirm": "允许",
+          "error": "允许 SSH 登录空间时出现错误。"
+        },
+        "disallow": {
+          "disallow": "允许 SSH 登录",
+          "title": "允许 SSH 登录",
+          "prompt": "请确认您希望允许对空间'{{name}}' SSH 登录。",
+          "confirm": "禁止",
+          "error": "禁止使用 SSH 登录空间时出现错误。"
+        }
+      }
+    },
+    "space-tile": {
+      "role-label": "角色",
+      "applications-label": "应用",
+      "instances-label": "应用实例",
+      "services-label": "服务实例",
+      "memory-label": "内存使用"
+    },
+    "space-list": {
+      "none": "您现在没有空间"
+    }
+  }
+}
