@@ -13,17 +13,9 @@ metadata:
   {{- else }}
     volume.alpha.kubernetes.io/storage-class: default
   {{- end }}
-  {{- if not .Values.noShared }}
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-1"
-  {{- end }}
 spec:
   accessModes:
-{{- if .Values.noShared }}
     - ReadWriteOnce
-{{- else }}
-    - ReadWriteMany
-{{- end }}
   resources:
     requests:
       storage: 1Mi
@@ -67,112 +59,9 @@ metadata:
   {{- else }}
     volume.alpha.kubernetes.io/storage-class: default
   {{- end }}
-  {{- if not .Values.noShared }}
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-1"
-  {{- end }}
 spec:
   accessModes:
-{{- if .Values.noShared }}
     - ReadWriteOnce
-{{- else }}
-    - ReadWriteMany
-{{- end }}
   resources:
     requests:
       storage: 1Mi
-
-{{- if  not .Values.noShared }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app:  "{{ .Release.Name }}"
-  name: "{{ .Release.Name }}-preflight-job"
-  annotations:
-    "helm.sh/hook": pre-install, pre-upgrade
-    "helm.sh/hook-weight": "0"
-spec:
- template:
-     metadata:
-       labels:
-         app:  "{{ .Release.Name }}"
-         component: preflight
-     spec:
-       containers:
-         - env:
-           - name: UPGRADE_VOLUME
-             value: "{{ .Release.Name }}-upgrade-volume"
-           - name: UPGRADE_LOCK_FILENAME
-             value: upgrade.lock
-           - name: ENCRYPTION_KEY_VOLUME
-             value: "{{ .Release.Name }}-encryption-key-volume"
-           - name: CERTS_PATH
-             value: "{{ .Release.Name }}-encryption-key-volume"
-           - name: ENCRYPTION_KEY_FILENAME
-             value: key
-           {{- if .Values.consoleCert }}
-           - name: CONSOLE_CERT
-             value: | 
-{{ .Values.consoleCert | indent 12 }}
-           {{- end }}
-           {{- if .Values.consoleCertKey }}
-           - name: CONSOLE_CERT_KEY
-             value: |
-{{ .Values.consoleCertKey | indent 12 }}
-           {{- end }}
-           image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.preflight}}:{{.Values.consoleVersion}}
-           name: "{{ .Release.Name }}-preflight-job"
-           volumeMounts:
-           - mountPath: "/{{ .Release.Name }}-upgrade-volume"
-             name: "{{ .Release.Name }}-upgrade-volume"
-           - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
-             name: "{{ .Release.Name }}-encryption-key-volume"
-       restartPolicy: Never
-      {{- if and .Values.dockerRegistryUserName .Values.dockerRegistryPassword }}
-       imagePullSecrets:
-       - nane:  {{.Values.dockerRegistrySecret}}
-       {{- end }}
-       volumes:
-       - name: "{{ .Release.Name }}-upgrade-volume"
-         persistentVolumeClaim:
-           claimName: "{{ .Release.Name }}-upgrade-volume"
-       - name: "{{ .Release.Name }}-encryption-key-volume"
-         persistentVolumeClaim:
-           claimName: "{{ .Release.Name }}-encryption-key-volume"
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: "{{ .Release.Name }}-upgrade-job"
-  labels:
-    app: "{{ .Release.Name }}"
-  annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "-5"
-spec:
-  template:
-    metadata:
-      name: "{{ .Release.Name }}-upgrade-job"
-      labels:
-        app: "{{ .Release.Name }}"
-        component: upgrade-job
-    spec:
-      restartPolicy: OnFailure
-      volumes:
-      - name: kubectl
-        hostPath:
-          path: /usr/bin/kubectl
-
-      containers:
-      - name: post-install-job
-        image: "lachlanevenson/k8s-kubectl:v1.6.0"
-        volumeMounts:
-        - name: kubectl
-          mountPath: /kubectl
-        command:
-        - sh
-        - -c
-        - "kubectl delete job --namespace {{ .Release.Namespace }} -l app={{ .Release.Name }}"
-{{- end }}

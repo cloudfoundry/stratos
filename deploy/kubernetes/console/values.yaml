@@ -24,7 +24,6 @@ useLb: false
 console:
   port: 443
 # externalIP: 127.0.0.1
-noShared: true
 images:
   console: stratos-console
   proxy: stratos-proxy

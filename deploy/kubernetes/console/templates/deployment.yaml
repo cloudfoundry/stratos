@@ -32,7 +32,6 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-     {{- if .Values.noShared }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "postflight"
         env:
@@ -83,7 +82,6 @@ spec:
             name: "{{ .Release.Name }}-upgrade-volume"
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
-     {{- end }}
       - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         name: proxy
         env:
@@ -123,7 +121,6 @@ spec:
           value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
-        {{- if .Values.noShared }}
         {{- if .Values.consoleCert }}
         - name: CONSOLE_CERT
           value: | 
@@ -134,15 +131,12 @@ spec:
           value: |
 {{ .Values.consoleCertKey | indent 12 }}
         {{- end }}
-        {{- end }}
         - name: CONSOLE_PROXY_CERT_PATH
           value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
         - name: CONSOLE_PROXY_CERT_KEY_PATH
           value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
         - name: NO_SHARED_MODE
-        {{- if .Values.noShared }}
           value: "true"
-        {{- end }}
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
