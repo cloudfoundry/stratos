@@ -28,7 +28,7 @@ export function logger(reducer): any {
   return storeLogger()(reducer);
 }
 
-const appMetadataReducers: ActionReducerMap<any> = {
+const appMetadataReducers: ActionReducerMap<MetadataState> = {
   values: appMetadataReducer,
   requests: appMetadataRequestReducer
 };

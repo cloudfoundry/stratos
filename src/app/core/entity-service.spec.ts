@@ -25,7 +25,7 @@ const entityServiceFactory = (
   );
 };
 
-fdescribe('EntityServiceService', () => {
+describe('EntityServiceService', () => {
   beforeEach(() => {
     const initialState = getInitialTestStoreState();
     TestBed.configureTestingModule({
