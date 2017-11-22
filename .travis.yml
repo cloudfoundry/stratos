@@ -12,6 +12,8 @@ jobs:
     - stage: e2e tests
       before_script:
         - chmod +x ./deploy/ci/travis/e2e-allinone.sh
+        - npm install -g bower
+        - bower install
       script:
         - ./deploy/ci/travis/e2e-allinone.sh
     - stage: back-end
