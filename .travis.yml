@@ -12,7 +12,7 @@ jobs:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
         - chmod +x ~/bin/gimme
         - eval "$(gimme 1.9)"
-        - go version
+        - curl https://glide.sh/get | sh
       script:
         - npm run test-backend
     - stage: front-end
