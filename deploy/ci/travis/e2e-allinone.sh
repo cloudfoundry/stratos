@@ -31,7 +31,7 @@ cat << EOF > ./build/secrets.json
     }
   },
   "uaa": {
-    "url": "http://uaa:8080",
+    "url": "http://localhost:8080",
     "clientId": "console",
     "adminUsername": "admin",
     "adminPassword": "hscadmin"
