@@ -4,8 +4,6 @@ set -e
 
 echo "Running e2e tests..."
 
-cd deploy
-
 cat << EOF > ../build/secrets.json
 {
   "cloudFoundry": {
@@ -44,12 +42,16 @@ docker version
 
 docker pull splatform/stratos-uaa
 
+echo "Building all in one image"
 docker build -f ./Dockerfile.all-in-one . -t stratos-ui
 
+echo "Running UAA"
 docker run -d -p 8080:8080 splatform/stratos-uaa
 
+echo "Running UI"
 docker run -d -p 4443:443 stratos-ui
 
+echo "Running tests"
 npm run e2e:nocov
 
 
