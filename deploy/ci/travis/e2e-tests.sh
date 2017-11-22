@@ -38,8 +38,8 @@ EOF
 
 # Pull down base images
 for image in splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa do
-  docker pull ${REGISTRY_NAME}/$image
-  docker tag  ${REGISTRY_NAME}/$image $image
+  docker pull ${DOCKER_REGISTRY}/$image
+  docker tag  ${DOCKER_REGISTRY}/$image $image
 done
 mkdir uaa/tmp
 cp /tarballs/* ./uaa/tmp/
