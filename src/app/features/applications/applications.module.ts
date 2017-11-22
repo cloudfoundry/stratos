@@ -22,6 +22,7 @@ import { SummaryTabComponent } from './application/summary-tab/summary-tab.compo
 import { ViewBuildpackComponent } from './application/summary-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
+import { DatePipe } from '@angular/common';
 
 
 @NgModule({
@@ -47,7 +48,8 @@ import { ApplicationsRoutingModule } from './applications.routing';
   providers: [
     ApplicationService,
     ApplicationStateService,
-    ApplicationEnvVarsService
+    ApplicationEnvVarsService,
+    DatePipe
   ]
 })
 export class ApplicationsModule { }

@@ -37,7 +37,7 @@ export class EventsTabComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) { }
 
-  eventSource: CfListDataSource<EntityInfo>;
+  eventSource: CfAppEventsDataSource;
   hasEvents$: Observable<boolean>;
   columns: Array<ITableColumn<EntityInfo>> = [
     {

@@ -6,23 +6,8 @@
     </button>
   </div>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching" [text]="'Getting your applications'">
-  <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p>
-  <div [@cardEnter]="applications?.length" class="card-wall">
-    <md-card [routerLink]="['/applications', application?.cfGuid , application?.guid]" *ngFor="let application of applications"
-      [ngClass]="'card-wall__card-' + application?.state.toLowerCase()">
-      <md-card-header>
-        <md-card-title>{{ application?.name }}</md-card-title>
-      </md-card-header>
-      <md-card-content>
-        <div class="card-wall__meta">
-          <b>Instances: </b> {{ application?.instances }}</div>
-        <div class="card-wall__meta">
-          <b>State: </b> {{ application?.state }}</div>
-        <div class="card-wall__meta">
-          <b>Created at: </b>{{ application?.created_at }}</div>
-      </md-card-content>
-    </md-card>
-    <md-card class="row-filler"></md-card>
-  </div>
-</app-loading-page>
+<app-loading-page [isLoading]="appsDataSource.isLoadingPage$" [text]="'Fetching your applications'">
+  <!-- <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p> -->
+  <app-list [dataSource]="appsDataSource" [columns]="columns" [text]="{ title: '', filter: 'Filter Applications'}" [enableFilter]="true"
+    [cardComponent]="cardComponent">
+  </app-list>
