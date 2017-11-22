@@ -36,11 +36,15 @@ cat << EOF > ../build/secrets.json
 }
 EOF
 
+docker version
+echo ${DOCKER_REGISTRY}
+
 # Pull down base images
-for image in splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa do
+for image in splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa; do
   docker pull ${DOCKER_REGISTRY}/$image
   docker tag  ${DOCKER_REGISTRY}/$image $image
 done
+
 mkdir uaa/tmp
 cp /tarballs/* ./uaa/tmp/
 
