@@ -50,7 +50,7 @@ export const appReducers = {
   appMetadata: appMetaDataReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
-  routerReducer: routerReducer,
+  // routerReducer: routerReducer,  // Create action for router navigation
 };
 
 let metaReducers = [];

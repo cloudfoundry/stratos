@@ -16,20 +16,30 @@ import { LoggedInService } from './logged-in.service';
 import { StoreRouterConnectingModule, RouterStateSerializer } from '@ngrx/router-store';
 import { Params, RouterStateSnapshot } from '@angular/router';
 
-// https://stackoverflow.com/questions/46075374/can-ngrx-router-store-4-be-used-with-ngrx-store-2-2
-export interface RouterStateUrl {
-  url: string;
-  queryParams: Params;
-}
-export class CustomRouterStateSerializer
-  implements RouterStateSerializer<RouterStateUrl> {
-  serialize(routerState: RouterStateSnapshot): RouterStateUrl {
-    const { url } = routerState;
-    const queryParams = routerState.root.queryParams;
+// Create action for router navigation
+// https://github.com/ngrx/platform/blob/master/docs/router-store/api.md#custom-router-state-serializer
+// export interface RouterStateUrl {
+//   url: string;
+//   params: Params;
+//   queryParams: Params;
+// }
+// export class CustomRouterStateSerializer
+//   implements RouterStateSerializer<RouterStateUrl> {
+//   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
+//     let route = routerState.root;
+//     while (route.firstChild) {
+//       route = route.firstChild;
+//     }
 
-    return { url, queryParams };
-  }
-}
+//     const { url } = routerState;
+//     const queryParams = routerState.root.queryParams;
+//     const params = route.params;
+
+//     // Only return an object including the URL, params and query params
+//     // instead of the entire snapshot
+//     return { url, params, queryParams };
+//   }
+// }
 
 @NgModule({
   declarations: [
@@ -47,11 +57,11 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule
+    // StoreRouterConnectingModule // Create action for router navigation
   ],
   providers: [
     LoggedInService,
-    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }
+    // { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
