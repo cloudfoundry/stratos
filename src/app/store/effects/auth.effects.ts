@@ -80,7 +80,7 @@ export class AuthEffect {
           return [new VerifiedSession(sessionData, action.updateCNSIs)];
         })
         .catch((err, caught) => {
-          return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
+          return action.login ? [new InvalidSession(err.status === 503, window.location.pathname)] : [new ResetAuth()];
         });
     });
 

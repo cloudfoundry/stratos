@@ -13,10 +13,12 @@ import { UAASetupModule } from './features/uaa-setup/uaa-setup.module';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { LoggedInService } from './logged-in.service';
-import { StoreRouterConnectingModule, RouterStateSerializer } from '@ngrx/router-store';
 import { Params, RouterStateSnapshot } from '@angular/router';
 
-// Create action for router navigation
+// Create action for router navigation. See
+// - https://github.com/ngrx/platform/issues/68
+// - https://github.com/ngrx/platform/issues/201 (https://github.com/ngrx/platform/pull/355)
+
 // https://github.com/ngrx/platform/blob/master/docs/router-store/api.md#custom-router-state-serializer
 // export interface RouterStateUrl {
 //   url: string;

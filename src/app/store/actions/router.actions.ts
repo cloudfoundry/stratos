@@ -1,11 +1,20 @@
 import { Action } from '@ngrx/store';
-import { Router } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
+import { LoggerAction, LogLevel } from './log.actions';
 
 export const RouterActions = {
   GO: '[Router] Go To',
 };
 
-export class GoToState implements Action {
+export class RouterNav implements Action, LoggerAction {
+  public logLevel: LogLevel.INFO;
+  public message: string;
   type = RouterActions.GO;
-  constructor(public url: string) { }
+  constructor(public payload: {
+    path: any[];
+    query?: object;
+    extras?: NavigationExtras;
+  }, public clearRedirect: boolean = false) {
+    this.message = payload.path.join('/');
+  }
 }

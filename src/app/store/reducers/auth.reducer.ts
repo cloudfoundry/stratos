@@ -1,4 +1,4 @@
-import { LOGIN } from '../actions/auth.actions';
+import { InvalidSession, LOGIN } from '../actions/auth.actions';
 import {
   LOGIN_FAILED,
   LOGIN_SUCCESS,
@@ -10,6 +10,7 @@ import {
   VERIFY_SESSION,
 } from './../actions/auth.actions';
 import { SessionData } from '../types/auth.types';
+import { RouterNav, RouterActions } from '../actions/router.actions';
 
 export interface AuthState {
   loggedIn: boolean;
@@ -19,6 +20,7 @@ export interface AuthState {
   errorMessage: string;
   sessionData: SessionData;
   verifying: boolean;
+  redirectPath?: string;
 }
 
 const defaultState = {
@@ -56,7 +58,18 @@ export function authReducer(state: AuthState = defaultState, action) {
         verifying: false
       };
     case SESSION_INVALID:
-      return { ...state, sessionData: { valid: false, uaaError: action.uaaError }, verifying: false };
+      const sessionInvalid: InvalidSession = action;
+      return {
+        ...state, sessionData: { valid: false, uaaError: action.uaaError },
+        redirectPath: sessionInvalid.redirectPath,
+        verifying: false
+      };
+    case RouterActions.GO:
+      const goToState: RouterNav = action;
+      return {
+        ...state,
+        redirectPath: goToState.clearRedirect ? null : state.redirectPath
+      };
     case RESET_AUTH:
       return defaultState;
     default:

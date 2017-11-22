@@ -1,4 +1,4 @@
-import { GoToState, RouterActions } from '../actions/router.actions';
+import { RouterNav, RouterActions } from '../actions/router.actions';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
@@ -14,9 +14,8 @@ export class RouterEffect {
     private router: Router
   ) { }
 
-  @Effect({ dispatch: false }) routerGoUrl$ = this.actions$.ofType<GoToState>(RouterActions.GO)
-    .map((apiAction: GoToState) => {
-      this.router.navigateByUrl(apiAction.url);
-    });
+  @Effect({ dispatch: false })
+  routerGoUrl$ = this.actions$.ofType<RouterNav>(RouterActions.GO)
+    .map((action: RouterNav) => action.payload)
+    .do(({ path, query: queryParams, extras }) => this.router.navigate(path, { queryParams, ...extras }));
 }
-

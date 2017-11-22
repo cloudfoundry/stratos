@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs/Rx';
 import { DeleteApplication, GetApplication, UpdateApplication, ApplicationSchema } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
+import { RouterNav } from '../../../store/actions/router.actions';
 
 const entityServiceFactory = (
   store: Store<AppState>,
@@ -189,7 +190,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
         app.entityRequestInfo.deleting.deleted ||
         app.entityRequestInfo.error
       ) {
-        this.router.navigateByUrl('applications');
+        this.store.dispatch(new RouterNav({ path: ['applications'] }));
       }
     });
 

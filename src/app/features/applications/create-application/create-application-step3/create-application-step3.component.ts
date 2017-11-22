@@ -16,6 +16,7 @@ import { CreateRoute, RouteSchema } from '../../../../store/actions/route.action
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
+import { RouterNav } from '../../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -118,7 +119,7 @@ export class CreateApplicationStep3Component implements OnInit {
             app.response.result[0],
             cloudFoundry.guid
           ));
-          this.router.navigateByUrl(`/applications/${cloudFoundry.guid}/${app.response.result[0]}/summary`);
+          this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry.guid, app.response.result[0], 'summary'] }));
         }
         return { success: !update };
       });

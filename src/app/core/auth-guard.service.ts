@@ -1,3 +1,4 @@
+import { RouterNav } from '../store/actions/router.actions';
 import { Observable } from 'rxjs/Rx';
 
 import { VerifySession } from '../store/actions/auth.actions';
@@ -30,13 +31,13 @@ export class AuthGuardService implements CanActivate {
       .skipWhile((state: AuthState) => {
         return !state.loggedIn && !state.error;
       })
-      .map(state => {
+      .map((state: AuthState) => {
         if (state.sessionData.valid) {
           return true;
         } else {
           state.sessionData.uaaError ?
-          this.router.navigateByUrl('/uaa') :
-          this.router.navigateByUrl('/login');
+            this.store.dispatch(new RouterNav({ path: ['/uaa'] })) :
+            this.store.dispatch(new RouterNav({ path: ['/login'] }));
           return false;
         }
       });

@@ -43,7 +43,7 @@ export class VerifiedSession implements Action {
 }
 
 export class InvalidSession implements Action {
-  constructor(public uaaError: boolean = false) { }
+  constructor(public uaaError: boolean = false, public redirectPath?: string) { }
   type = SESSION_INVALID;
 }
 

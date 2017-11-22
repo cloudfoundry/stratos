@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs/Rx';
 import { Login } from '../../../store/actions/auth.actions';
 import { AppState } from '../../../store/app-state';
 import { AuthState } from '../../../store/reducers/auth.reducer';
+import { RouterNav } from '../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-login-page',
@@ -38,8 +39,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.subscription =
       this.store.select(s => [s.auth, s.cnsis])
         .subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
-          if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
-            this.router.navigateByUrl('');
+          if (!auth.loggingIn && auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
+            this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
+            this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, true));
           } else {
             this.loggedIn = auth.loggedIn;
             this.loggingIn = auth.loggingIn;

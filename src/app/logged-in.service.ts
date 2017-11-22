@@ -96,12 +96,10 @@ export class LoggedInService {
     const safeExpire = sessionExpiresOn - this._autoLogoutDelta;
     const delta = safeExpire - now;
     const aboutToExpire = delta < this._warnBeforeLogout;
-    // aboutToExpire = true; // REMOVE
 
     if (aboutToExpire) {
       const idleDelta = now - this._lastUserInteraction;
       const userIsActive = idleDelta < this._userIdlePeriod;
-      // userIsActive = false; // REMOVE
       if (userIsActive) {
         this.store.dispatch(new VerifySession(false, false));
       } else {

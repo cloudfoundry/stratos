@@ -6,7 +6,7 @@ import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 import { LocalListDataSource } from './list-data-source-local';
 import { ListActionConfig, ListActions } from './list-data-source';
-import { GoToState } from '../../store/actions/router.actions';
+import { RouterNav } from '../../store/actions/router.actions';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
@@ -22,7 +22,7 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   };
   private static listActionAdd: ListActionConfig<CNSISModel> = {
     createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return new GoToState('/endpoints/new');
+      return new RouterNav({ path: ['endpoints', 'new'] });
     },
     icon: 'add',
     label: 'Add',
