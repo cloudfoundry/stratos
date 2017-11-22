@@ -4,9 +4,10 @@ node_js:
 sudo: required
 services:
   - docker
+addons:
+  chrome: stable  
 install:
   - npm install
-
 jobs:
   include:
     - stage: e2e tests
