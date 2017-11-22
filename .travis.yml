@@ -16,7 +16,7 @@ jobs:
       script:
         - npm run test-backend
     - stage: front-end
-      install:
+      before_script:
         - npm install -g bower
         - bower install
       script:
