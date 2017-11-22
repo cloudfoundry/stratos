@@ -11,13 +11,14 @@ import { TableCellEventActionComponent } from '../custom-cells/table-cell-event-
 import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { IListDataSource } from '../../../data-sources/list-data-source';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
+import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
 
 @Component({
   selector: 'app-table-cell',
   templateUrl: './table-cell.component.html',
   styleUrls: ['./table-cell.component.scss'],
   // When we look at modules we should think about swapping this approach (create + insert in code, hard code types here) with
-  // NgComponentOutlet (create in html with custom external module factory)
+  // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
   entryComponents: [
     TableCellSelectComponent,
     TableHeaderSelectComponent,
@@ -28,6 +29,7 @@ import { TableCellActionsComponent } from '../table-cell-actions/table-cell-acti
     TableCellEventActionComponent,
     TableCellEventDetailComponent,
     TableCellActionsComponent,
+    TableCellAppNameComponent,
   ],
 })
 export class TableCellComponent<T> implements OnInit {

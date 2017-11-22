@@ -2,7 +2,7 @@
 .cards {
   app-card {
     $space: 15px;
-    $space-row: $space + 40px;
+    $space-row: $space + 10px;
     width: 100%;
     margin-bottom: $space;
     @include breakpoint(desktop) {

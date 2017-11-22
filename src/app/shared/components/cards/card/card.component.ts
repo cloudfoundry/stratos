@@ -3,6 +3,7 @@ import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
 import { IListDataSource } from '../../../data-sources/list-data-source';
+import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
 
 @Component({
   selector: 'app-card',
@@ -11,6 +12,7 @@ import { IListDataSource } from '../../../data-sources/list-data-source';
   entryComponents: [
     CardEventComponent,
     CardAppVariableComponent,
+    CardAppComponent,
   ]
 })
 export class CardComponent<T> implements OnInit {

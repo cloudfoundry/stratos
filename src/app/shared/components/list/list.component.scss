@@ -66,7 +66,7 @@
     md-card {
       padding: 0 10px;
       md-card-header {
-        direction: flex;
+        display: flex;
         flex-direction: column;
         div:not([hidden]).spacer {
           flex-grow: 99;

@@ -50,6 +50,9 @@ export const ApplicationSchema = new schema.Entity('application', ApplicationEnt
 });
 
 export class GetAllApplications implements PaginatedAction {
+
+  private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
+
   constructor(public paginationKey: string) {
     this.options = new RequestOptions();
     this.options.url = 'apps';
@@ -65,8 +68,10 @@ export class GetAllApplications implements PaginatedAction {
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
   initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': GetAllApplications.sortField,
     page: 1,
-    'results-per-page': 100,
+    'results-per-page': 50,
     'inline-relations-depth': 2
   };
 }

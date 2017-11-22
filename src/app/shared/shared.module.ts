@@ -42,6 +42,8 @@ import {
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import { ListComponent } from './components/list/list.component';
 import { TableCellActionsComponent } from './components/table/table-cell-actions/table-cell-actions.component';
+import { CardAppComponent } from './components/cards/custom-cards/card-app/card-app.component';
+import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 
 
 @NgModule({
@@ -84,6 +86,8 @@ import { TableCellActionsComponent } from './components/table/table-cell-actions
     CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
     TableCellActionsComponent,
+    CardAppComponent,
+    TableCellAppNameComponent,
   ],
   exports: [
     FormsModule,
