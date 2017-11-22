@@ -43,9 +43,7 @@ docker version
 docker pull splatform/stratos-uaa
 
 echo "Building all in one image"
-pushd deploy
-docker build -f ./Dockerfile.all-in-one . -t stratos-ui
-popd
+docker build -f deploy/Dockerfile.all-in-one . -t stratos-ui
 
 echo "Running UAA"
 docker run -d -p 8080:8080 splatform/stratos-uaa
