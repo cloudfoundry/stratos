@@ -11,9 +11,9 @@ jobs:
   include:
     - stage: e2e tests
       before_script:
-        - chmod +x ./deploy/ci/travis/e2e-tests.sh
+        - chmod +x ./deploy/ci/travis/e2e-allinone.sh
       script:
-        - ./deploy/ci/travis/e2e-tests.sh
+        - ./deploy/ci/travis/e2e-allinone.sh
     - stage: back-end
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
