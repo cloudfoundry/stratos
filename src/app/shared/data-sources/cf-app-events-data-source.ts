@@ -12,6 +12,7 @@ import { CfListDataSource } from './list-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction } from '../../store/actions/list.actions';
+import { ListActions } from './list-data-source';
 
 // TODO: RC KEEP AND MOVE TO TYPES
 export interface AppEvent {
@@ -32,6 +33,8 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
 
   cfFilterSub: Subscription;
 
+  actions: ListActions<EntityInfo>;
+
   constructor(
     _store: Store<AppState>,
     _cfGuid: string,
@@ -51,6 +54,7 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
       paginationKey
     );
 
+    this.actions = new ListActions();
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'table',

@@ -14,11 +14,10 @@
        md-cell {
          flex: 1 1 200px;
          padding: 10px 5px;
-       }
-       .table-column-select {
-         flex-grow: 0;
-         min-width: 100px;
-       }
+       } //  .table-column-select {
+       //    flex-grow: 0;
+       //    min-width: 100px;
+       //  }
        .table-column-edit {
          flex-grow: 0;
          min-width: inherit;

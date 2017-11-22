@@ -1,29 +1,7 @@
 <app-page-header>
   <h1>Endpoints</h1>
 </app-page-header>
-<md-card>
-  <md-table #table [dataSource]="dataSource">
-    <ng-container mdColumnDef="name">
-      <md-header-cell *mdHeaderCellDef> Name </md-header-cell>
-      <md-cell *mdCellDef="let endpoint"> {{ endpoint.name }} </md-cell>
-    </ng-container>
 
-    <ng-container mdColumnDef="connection">
-      <md-header-cell *mdHeaderCellDef> Connection </md-header-cell>
-      <md-cell *mdCellDef="let endpoint"> {{ endpoint.connection }}</md-cell>
-    </ng-container>
-
-    <ng-container mdColumnDef="type">
-      <md-header-cell *mdHeaderCellDef> Type </md-header-cell>
-      <md-cell *mdCellDef="let endpoint"> {{ getEndpointTypeString(endpoint) }} </md-cell>
-    </ng-container>
-
-    <ng-container mdColumnDef="address">
-      <md-header-cell *mdHeaderCellDef> Address </md-header-cell>
-      <md-cell *mdCellDef="let endpoint"> {{ endpoint.api_endpoint.Host }} </md-cell>
-    </ng-container>
-
-    <md-header-row *mdHeaderRowDef="displayedColumns"></md-header-row>
-    <md-row *mdRowDef="let row; columns: displayedColumns;"></md-row>
-  </md-table>
-</md-card>
+<app-list [dataSource]="dataSource" [columns]="columns" [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true"
+  [cardComponent]="cardComponent" [tableFixedRowHeight]="true">
+</app-list>

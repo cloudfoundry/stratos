@@ -4,12 +4,12 @@ import { NgForm, NgModel } from '@angular/forms';
 import {
   ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction, SetListSortAction, ListSort
 } from '../../../store/actions/list.actions';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
-import { IListDataSource } from '../../data-sources/list-data-source';
+import { IListDataSource, ListActionConfig } from '../../data-sources/list-data-source';
 
 @Component({
   selector: 'app-list',
@@ -27,6 +27,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   @Input('cardComponent') cardComponent: Type<{}>;
   @Input('addForm') addForm: NgForm;
+
 
   @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild('filter') filter: NgModel;
@@ -121,6 +122,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         direction: direction,
       }
     ));
+  }
+
+  executeActionMultiple(action: ListActionConfig<T>) {
+    this._store.dispatch(action.createAction(this.dataSource, Array.from(this.dataSource.selectedRows.values())));
+    this.dataSource.selectClear();
+  }
+
+  executeActionGlobal(action: ListActionConfig<T>) {
+    this._store.dispatch(action.createAction(this.dataSource, []));
   }
 
 }

@@ -1,5 +1,5 @@
 export interface CNSISModel {
-  api_endpoint: {
+  api_endpoint?: {
     ForceQuery: boolean,
     Fragment: string,
     Host: string,
@@ -10,13 +10,13 @@ export interface CNSISModel {
     Scheme: string,
     User: object
   };
-  authorization_endpoint: string;
-  cnsi_type: string;
-  doppler_logging_endpoint: string;
-  guid: string;
+  authorization_endpoint?: string;
+  cnsi_type?: string;
+  doppler_logging_endpoint?: string;
+  guid?: string;
   name: string;
-  skip_ssl_validation: boolean;
-  token_endpoint: string;
+  skip_ssl_validation?: boolean;
+  token_endpoint?: string;
   // This is generated client side when we login
   registered?: boolean;
 }

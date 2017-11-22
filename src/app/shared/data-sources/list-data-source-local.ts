@@ -17,6 +17,7 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
   abstract isLoadingPage$: Observable<boolean>;
   abstract data$: any;
   private bsCount: BehaviorSubject<number> = new BehaviorSubject(0);
+  private _selectItemAfterPagination: T;
 
   constructor(
     private _dStore: Store<AppState>,
@@ -64,6 +65,11 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
   abstract listFilter(collection: any, filter: ListFilter): Array<T>;
   abstract listSort(collection: Array<T>, sort: ListSort): Array<T>;
 
+  saveAdd() {
+    this._selectItemAfterPagination = this.addItem;
+    super.saveAdd();
+  }
+
   paginate(collection: Array<T>, pageSize: number, pageIndex: number): T[] {
     // Is the paginators pageIndex valid?
     if (pageIndex * pageSize > collection.length) {
@@ -71,14 +77,14 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
     }
 
     // Should the paginator select a freshly added row?
-    if (this.selectRow) {
+    if (this._selectItemAfterPagination) {
       for (let i = 0; i < collection.length; i++) {
-        if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this.selectRow)) {
+        if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this._selectItemAfterPagination)) {
           pageIndex = Math.floor(i / pageSize);
           this._dStore.dispatch(new SetListPaginationAction(this._dlistStateKey, {
             pageIndex: pageIndex
           }));
-          delete this.selectRow;
+          delete this._selectItemAfterPagination;
           break;
         }
       }

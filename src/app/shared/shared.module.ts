@@ -41,6 +41,7 @@ import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import { ListComponent } from './components/list/list.component';
+import { TableCellActionsComponent } from './components/table/table-cell-actions/table-cell-actions.component';
 
 
 @NgModule({
@@ -82,6 +83,7 @@ import { ListComponent } from './components/list/list.component';
     CardEventComponent,
     CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
+    TableCellActionsComponent,
   ],
   exports: [
     FormsModule,

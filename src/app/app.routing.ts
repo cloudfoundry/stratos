@@ -14,7 +14,6 @@ const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
-  { path: 'application/new', component: CreateApplicationComponent },
   {
     path: '',
     component: DashboardBaseComponent,

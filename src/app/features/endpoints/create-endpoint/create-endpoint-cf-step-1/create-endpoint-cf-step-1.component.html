@@ -1,0 +1,14 @@
+<p>
+  Register an existing Cloud Foundry endpoint to allow your development team to create and manage their applications.
+</p>
+<p>
+  When registering, choose a unique, recognizable name so that your developers can easily know which Cloud Foundry endpoint
+  they are working with.
+</p>
+<form #form="ngForm">
+  <md-form-field>
+    <input mdInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
+    <md-error *ngIf="nameField.errors && nameField.errors.required">Name is required</md-error>
+    <md-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</md-error>
+  </md-form-field>
+</form>

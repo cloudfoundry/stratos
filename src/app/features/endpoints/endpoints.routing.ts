@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
+import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 
 
 // TODO: RC split pages into sectional folders with own modules, use loadChildren: 'app/pages/pages.module#PagesModule' &
 // RouterModule.forChild(appRoutes),
 
 const endpointsRoutes: Routes = [
-  { path: '', component: EndpointsPageComponent, }
+  { path: '', component: EndpointsPageComponent, },
+  { path: 'new', component: CreateEndpointComponent },
 ];
 
 @NgModule({

@@ -1,15 +1,30 @@
+import { Type } from '@angular/core';
 import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
 
+// TODO: RC MOVE
+export class ListActionConfig<T> {
+  createAction: (dataSource: IListDataSource<T>, items: T[]) => Action;
+  icon: string;
+  label: string;
+  description: string;
+  visible: (row: T) => boolean;
+  enabled: (row: T) => boolean;
+}
+export class ListActions<T> {
+  globalActions = new Array<ListActionConfig<T>>();
+  multiActions = new Array<ListActionConfig<T>>();
+  singleActions = new Array<ListActionConfig<T>>();
+}
 export interface IListDataSource<T> {
   listStateKey: string;
   view$: Observable<ListView>;
@@ -17,6 +32,8 @@ export interface IListDataSource<T> {
   pagination$: Observable<ListPagination>;
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
+
+  actions: ListActions<T>;
 
   page$: Observable<T[]>;
 
@@ -30,6 +47,7 @@ export interface IListDataSource<T> {
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectClear();
 
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
@@ -50,11 +68,12 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
 
+  public abstract actions: ListActions<T>;
+
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
 
   public addItem: T;
-  protected selectRow: T;
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
   public selectedRows = new Map<string, T>();
@@ -91,7 +110,6 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     this.isAdding$.next(true);
   }
   saveAdd() {
-    this.selectRow = this.addItem;
     this.isAdding$.next(false);
   }
   cancelAdd() {
@@ -118,7 +136,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
-  protected selectedDelete() {
+  selectClear() {
     this.selectedRows.clear();
     this.isSelecting$.next(false);
   }
