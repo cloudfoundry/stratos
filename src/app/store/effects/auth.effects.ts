@@ -80,7 +80,7 @@ export class AuthEffect {
           return [new VerifiedSession(sessionData, action.updateCNSIs)];
         })
         .catch((err, caught) => {
-          return action.login ? [new InvalidSession(err.status === 503, window.location.pathname)] : [new ResetAuth()];
+          return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
         });
     });
 
@@ -122,9 +122,8 @@ export class AuthEffect {
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH)
     .do(() => {
-      window.location.reload();
-      // this.dialog.closeAll();
-      // this.router.navigateByUrl('/login');
+      // Ensure that we clear any path fro mthe location (otherwise would be stored via auth gate as redirectPath for log in)
+      window.location.assign(window.location.origin);
     });
 
 }

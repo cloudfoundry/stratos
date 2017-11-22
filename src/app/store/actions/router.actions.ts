@@ -14,7 +14,7 @@ export class RouterNav implements Action, LoggerAction {
     path: any[];
     query?: object;
     extras?: NavigationExtras;
-  }, public clearRedirect: boolean = false) {
+  }, public redirectPath?: string) {
     this.message = payload.path.join('/');
   }
 }

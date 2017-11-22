@@ -30,7 +30,8 @@ const defaultState = {
   error: false,
   errorMessage: '',
   sessionData: null,
-  verifying: false
+  verifying: false,
+  redirectPath: null,
 };
 
 export function authReducer(state: AuthState = defaultState, action) {
@@ -61,14 +62,13 @@ export function authReducer(state: AuthState = defaultState, action) {
       const sessionInvalid: InvalidSession = action;
       return {
         ...state, sessionData: { valid: false, uaaError: action.uaaError },
-        redirectPath: sessionInvalid.redirectPath,
         verifying: false
       };
     case RouterActions.GO:
       const goToState: RouterNav = action;
       return {
         ...state,
-        redirectPath: goToState.clearRedirect ? null : state.redirectPath
+        redirectPath: goToState.redirectPath !== undefined ? goToState.redirectPath : state.redirectPath
       };
     case RESET_AUTH:
       return defaultState;

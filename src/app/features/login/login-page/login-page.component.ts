@@ -41,7 +41,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         .subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
           if (!auth.loggingIn && auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
             this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
-            this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, true));
+            this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, null));
           } else {
             this.loggedIn = auth.loggedIn;
             this.loggingIn = auth.loggingIn;

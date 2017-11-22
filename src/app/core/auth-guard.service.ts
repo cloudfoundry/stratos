@@ -37,7 +37,7 @@ export class AuthGuardService implements CanActivate {
         } else {
           state.sessionData.uaaError ?
             this.store.dispatch(new RouterNav({ path: ['/uaa'] })) :
-            this.store.dispatch(new RouterNav({ path: ['/login'] }));
+            this.store.dispatch(new RouterNav({ path: ['/login'] }, window.location.pathname));
           return false;
         }
       });
