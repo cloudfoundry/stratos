@@ -9,8 +9,17 @@ install:
 before_script:
   - echo 'Europe/London' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
-script:
-  - npm build
-  - npm run gate-check
 
+jobs:
+  include:
+    - stage: front-end
+      script:
+        - npm build
+        - npm run gate-check
+    - stage: back-end
+      before_script:
+        - echo 'STAGE 2'
+      script:
+        - npm run test-backend
+        
 
