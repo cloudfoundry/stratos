@@ -55,5 +55,4 @@ docker run -d -p 4443:443 stratos-ui
 echo "Running tests"
 npm run e2e:nocov
 
-
-
+docker logs stratos-ui

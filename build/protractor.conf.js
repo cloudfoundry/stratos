@@ -179,7 +179,7 @@
   };
 
   if (secrets.headless) {
-    exports.config.capabilities.chromeOptions.args = [ '--headless', '--disable-gpu', '--window-size=1280,800', '--no-sandbox' ];
+    exports.config.capabilities.chromeOptions.args = [ '--headless', '--remote-debugging-port=9222', '--ignore-certificate-errors', '--disable-gpu', '--window-size=1280,800', '--no-sandbox' ];
   }
 
   var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
