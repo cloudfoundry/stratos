@@ -41,14 +41,6 @@
       return d.format('HH:mm:ss.SSS');
     }
 
-    function logString(str) {
-      var bytes = []; // char codes
-      for (var i = 0; i < str.length; ++i) {
-        var code = str.charCodeAt(i);
-        bytes = bytes.concat([code]);
-      }
-    }
-
     it('should correctly parse APP messages', function () {
       var yellow = '\x1B[1;32m';
       var reset = '\x1B[0m';
