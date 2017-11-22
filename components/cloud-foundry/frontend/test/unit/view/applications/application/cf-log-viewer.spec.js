@@ -36,6 +36,19 @@
       expect(logViewerCtrl.webSocketUrl).toEqual(webSocketUrl);
     });
 
+    function formatTimeStamp(epoch) {
+      var d = moment(Math.round(epoch / 1000000));
+      return d.format('HH:mm:ss.SSS');
+    }
+
+    function logString(str) {
+      var bytes = []; // char codes
+      for (var i = 0; i < str.length; ++i) {
+        var code = str.charCodeAt(i);
+        bytes = bytes.concat([code]);
+      }
+    }
+
     it('should correctly parse APP messages', function () {
       var yellow = '\x1B[1;32m';
       var reset = '\x1B[0m';
@@ -44,14 +57,13 @@
       var filtered = logViewerCtrl.jsonFilter(jsonMessage);
 
       // Message date should be blue
-      var expected = '17:00:58.341: ';
+      var expected = formatTimeStamp(1477324858341484766) + ': ';
 
       // Message source should be yellow
       expected += yellow + '[APP.0]' + reset;
 
       // Message should be default colour
       expected += ' Party car character suddenly chair large party meat\n';
-
       expect(filtered).toBe(expected);
     });
 
@@ -63,7 +75,7 @@
       var filtered = logViewerCtrl.jsonFilter(jsonMessage);
 
       // Message date should be blue
-      var expected = '17:18:13.419: ';
+      var expected = formatTimeStamp(1477325893418618476) + ': ';
 
       // Message source should be red
       expected += yellow + '[CELL.0]' + reset;
