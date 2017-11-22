@@ -251,7 +251,6 @@ export const getPaginationObservables = (function () {
     };
 
     mem[_key] = obs;
-
     return obs;
   };
 })();

@@ -51,7 +51,7 @@ describe('VariablesTabComponent', () => {
     component = fixture.componentInstance;
 
     appService = fixture.debugElement.injector.get(ApplicationService);
-    appService.SetApplication('01ccda9d-8f40-4dd0-bc39-08eea68e364f', '4e4858c4-24ab-4caf-87a8-7703d1da58a0');
+    appService.setApplication('01ccda9d-8f40-4dd0-bc39-08eea68e364f', '4e4858c4-24ab-4caf-87a8-7703d1da58a0');
 
     fixture.detectChanges();
   });

@@ -1,3 +1,5 @@
+import { RouterReducerState } from '@ngrx/router-store';
+import { RouterStateSnapshot } from '@angular/router';
 import { CNSISState } from './types/cnsis.types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
@@ -21,4 +23,5 @@ export interface AppState {
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
   lists: ListsState;
+  routerReducer: RouterReducerState<any>;
 }

@@ -13,7 +13,7 @@ export class ApplicationResolver implements Resolve<boolean> {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): boolean {
-        this.applicationService.SetApplication(route.paramMap.get('cfId'), route.paramMap.get('id'));
+        this.applicationService.setApplication(route.paramMap.get('cfId'), route.paramMap.get('id'));
         return true;
     }
 }

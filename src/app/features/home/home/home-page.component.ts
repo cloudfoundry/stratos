@@ -13,7 +13,6 @@ export class HomePageComponent implements OnInit, AfterContentInit {
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
-    console.log('dashboard-home');
   }
 
   ngAfterContentInit() {
