@@ -308,10 +308,13 @@ If you are deploying the helm chart against images that are hosted in a secure i
 
 
 ```
-dockerRegistry: mysecure-dockerregistry.io
-dockerRegistryUserName: john.appleseed
-dockerRegistryPassword: sup3rs3cur3
-dockerRegistryEmail: john.appleseed@foobar.com
+kube:
+  registry:
+    hostname: mysecure-dockerregistry.io
+    username: john.appleseed
+    password: sup3rs3cur3
+    # `email` is an optional field
+    email: john.appleseed@foobar.com
 ```
 
 Deploy the chart with the provided parameters:

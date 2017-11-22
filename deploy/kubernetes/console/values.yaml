@@ -1,15 +1,5 @@
 # Tag for images
 consoleVersion: latest
-# Docker Org
-dockerOrg: splatform
-# Docker Registry where images are available
-dockerRegistry: docker.io
-# Username in case Docker registry is secured
-dockerRegistryUserName: 
-# Password Docker registry is secured
-dockerRegistryPassword: 
-# Email Docker registry is secured
-dockerRegistryEmail: 
 dockerRegistrySecret: regsecret
 # Specify default DB password
 dbPassword: changeme
@@ -80,3 +70,9 @@ kube:
   external_console_https_port: 8443
   storage_class:
     persistent:
+  organization: splatform
+  registry:
+    hostname: docker.io
+    username:
+    password:
+    email: default
