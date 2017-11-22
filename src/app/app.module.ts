@@ -13,6 +13,23 @@ import { UAASetupModule } from './features/uaa-setup/uaa-setup.module';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { LoggedInService } from './logged-in.service';
+import { StoreRouterConnectingModule, RouterStateSerializer } from '@ngrx/router-store';
+import { Params, RouterStateSnapshot } from '@angular/router';
+
+// https://stackoverflow.com/questions/46075374/can-ngrx-router-store-4-be-used-with-ngrx-store-2-2
+export interface RouterStateUrl {
+  url: string;
+  queryParams: Params;
+}
+export class CustomRouterStateSerializer
+  implements RouterStateSerializer<RouterStateUrl> {
+  serialize(routerState: RouterStateSnapshot): RouterStateUrl {
+    const { url } = routerState;
+    const queryParams = routerState.root.queryParams;
+
+    return { url, queryParams };
+  }
+}
 
 @NgModule({
   declarations: [
@@ -29,10 +46,12 @@ import { LoggedInService } from './logged-in.service';
     UAASetupModule,
     LoginModule,
     HomeModule,
-    DashboardModule
+    DashboardModule,
+    StoreRouterConnectingModule
   ],
   providers: [
     LoggedInService,
+    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }
   ],
   bootstrap: [AppComponent]
 })

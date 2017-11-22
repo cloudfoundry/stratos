@@ -11,10 +11,10 @@
     width: 100%;
     margin-bottom: $space;
     @include breakpoint(desktop) {
-      width: calc(25% - #{$space-row});
+      width: 25%;
     }
     @include breakpoint(tablet) {
-      width: calc(33% - #{$space-row});
+      width: 33%;
     }
     &-content {}
     &-header-text {

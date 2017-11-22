@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  position: relative;
   &__inner {
     display: flex;
     flex: 1;
@@ -48,6 +49,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 15px;
     }
     &-text {
       white-space: nowrap;

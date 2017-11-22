@@ -26,3 +26,13 @@ html {
 .dashboard .mat-drawer-content {
   overflow: visible;
 }
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}

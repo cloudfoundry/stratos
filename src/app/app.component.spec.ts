@@ -31,10 +31,12 @@ describe('AppComponent', () => {
         // CoreModule,
         SharedModule,
         RouterTestingModule,
-        StoreModule.forRoot(appReducers,
+        StoreModule.forRoot(
+          appReducers,
           {
             initialState
-          })
+          }
+        )
       ]
     }).compileComponents();
   }));

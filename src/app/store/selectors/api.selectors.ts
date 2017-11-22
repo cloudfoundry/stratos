@@ -1,7 +1,7 @@
 import { EntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
-import { EntityRequestState, ActionState } from '../reducers/api-request-reducer';
+import { ActionState, EntityRequestState, UpdatingSection } from '../reducers/api-request-reducer';
 import { AppState } from '../app-state';
 
 
@@ -50,9 +50,10 @@ export function selectEntityRequestInfo(type: string, guid: string) {
 export function getEntityState(state: AppState) {
   return state.entities;
 }
-export function getEntityType(type: string) {
+
+export function getEntityType(typeString: string) {
   return (entityState) => {
-    return entityState[type] || {};
+    return entityState[typeString] || {};
   };
 }
 
@@ -60,8 +61,8 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
-export const getEntityUpdateSections = (request: EntityRequestState) => {
-  return request ? request.updating : false;
+export const getEntityUpdateSections = (request: EntityRequestState): UpdatingSection => {
+  return request ? request.updating : null;
 };
 
 export const getEntityDeleteSections = (request: EntityRequestState) => {

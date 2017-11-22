@@ -127,7 +127,6 @@ export class CreateApplicationStep3Component implements OnInit {
   ngOnInit() {
     this.store.select(selectNewAppState)
       .subscribe(state => {
-        console.log(state);
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
       });
