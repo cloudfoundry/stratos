@@ -17,8 +17,6 @@ console:
 images:
   console: stratos-console
   proxy: stratos-proxy
-  postgres: stratos-postgres
-  preflight: stratos-preflight-job
   postflight: stratos-postflight-job
   mariadb: stratos-mariadb
 

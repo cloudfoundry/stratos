@@ -241,14 +241,6 @@ function buildProxy {
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
 }
 
-
-function buildPreflightJob {
-  # Build the preflight container
-  echo
-  echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
-}
-
 function buildPostflightJob {
   # Build the postflight container
   echo
@@ -318,7 +310,6 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPreflightJob
 buildPostflightJob
 buildMariaDb
 buildUI
