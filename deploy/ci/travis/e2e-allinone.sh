@@ -6,6 +6,7 @@ echo "Running e2e tests..."
 
 cat << EOF > ./build/secrets.json
 {
+  "headless": true,
   "cloudFoundry": {
     "url": "${CF_LOCATION}",
     "admin": {
