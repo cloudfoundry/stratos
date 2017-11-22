@@ -4,22 +4,21 @@ node_js:
 sudo: enabled
 install:
   - npm install
-  - npm install -g bower
-  - bower install
-before_script:
-  - echo 'Europe/London' | sudo tee /etc/timezone
-  - sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 jobs:
   include:
+    - stage: back-end
+      before_script:
+        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+        - chmod +x ~/bin/gimme
+        - eval "$(gimme 1.9)"
+        - go version
+      script:
+        - npm run test-backend
     - stage: front-end
+      install:
+        - npm install -g bower
+        - bower install
       script:
         - npm build
         - npm run gate-check
-    - stage: back-end
-      before_script:
-        - echo 'STAGE 2'
-      script:
-        - npm run test-backend
-        
-
