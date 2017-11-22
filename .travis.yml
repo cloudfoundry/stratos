@@ -6,6 +6,10 @@ install:
   - npm install
   - npm install -g bower
   - bower install
+before_script:
+  - echo 'Europe/London' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+  - sudo ntpdate ntp.ubuntu.com
 script:
   - npm build
   - npm run gate-check
