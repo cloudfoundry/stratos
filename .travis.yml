@@ -1,12 +1,19 @@
 language: node_js
 node_js:
   - "6"
-sudo: enabled
+sudo: required
+services:
+  - docker
 install:
   - npm install
 
 jobs:
   include:
+    - stage: e2e tests
+      before_script:
+        - chmod +x ./deploy/ci/travis/e2e-tests.sh
+      script:
+        - ./deploy/ci/travis/e2e-tests.sh
     - stage: back-end
       before_script:
         - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
