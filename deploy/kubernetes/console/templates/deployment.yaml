@@ -13,7 +13,7 @@ spec:
         component: "console"
     spec:
       containers:
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
         env:
         - name: ENCRYPTION_KEY_VOLUME
@@ -32,7 +32,7 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "postflight"
         env:
         - name: DB_HOST
@@ -82,7 +82,7 @@ spec:
             name: "{{ .Release.Name }}-upgrade-volume"
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         name: proxy
         env:
         - name: DB_USER
@@ -194,7 +194,7 @@ spec:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
           readOnly: true
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
@@ -223,7 +223,7 @@ spec:
     spec:
       containers:
       - name: mariadb
-        image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
         env:
         {{- if .Values.mariadb.usePassword }}
         - name: MYSQL_ROOT_PASSWORD
@@ -268,7 +268,7 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}

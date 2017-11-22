@@ -1,9 +1,6 @@
 # Tag for images
 consoleVersion: latest
-# Docker Org
-dockerOrg: splatform
-# Docker Registry where images are available
-dockerRegistry: docker.io
+dockerRegistrySecret: regsecret
 # Specify default DB password
 dbPassword: changeme
 dbProvider: mysql
@@ -73,4 +70,9 @@ kube:
   external_console_https_port: 8443
   storage_class:
     persistent:
-dockerRegistrySecret:
+  organization: splatform
+  registry:
+    hostname: docker.io
+    username:
+    password:
+    email: default
