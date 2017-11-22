@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "Running e2e tests..."
 
 cd deploy
@@ -45,10 +47,15 @@ for image in splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:ope
   docker tag  ${DOCKER_REGISTRY}/$image $image
 done
 
-mkdir uaa/tmp
-cp /tarballs/* ./uaa/tmp/
+mkdir -p uaa/tmp
+#cp /tarballs/* ./uaa/tmp/
+
+echo "Running docker compose build"
 
 COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
+
+echo "Running docker compose up"
+
 COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
 docker logs -f deploy_ui_1
 
