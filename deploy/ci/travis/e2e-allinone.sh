@@ -4,7 +4,7 @@ set -e
 
 echo "Running e2e tests..."
 
-cat << EOF > ../build/secrets.json
+cat << EOF > ./build/secrets.json
 {
   "cloudFoundry": {
     "url": "${CF_LOCATION}",
