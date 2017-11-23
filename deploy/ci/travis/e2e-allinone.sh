@@ -41,7 +41,7 @@ EOF
 
 #docker pull splatform/stratos-uaa
 
-echo "Building imageS"
+echo "Building images"
 #docker build -f deploy/Dockerfile.all-in-one . -t stratos-ui
 
 df
@@ -49,7 +49,7 @@ du -h -s /tmp
 du -h -s $HOME
 du -h -s .
 
-./deploy/docker-compose/build.sh -n -l
+./deploy/docker-compose/build.sh -n -l &> build_log.log
 
 echo "Build Finished"
 
@@ -57,7 +57,6 @@ df
 du -h -s /tmp
 du -h -s $HOME
 du -h -s .
-
 
 echo "Running Console in Docker Compose"
 
