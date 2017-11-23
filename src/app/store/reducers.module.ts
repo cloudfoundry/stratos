@@ -1,3 +1,4 @@
+import { ApiActionTypes } from './actions/api.actions';
 import { combineReducers, StoreModule, ActionReducerMap, State } from '@ngrx/store';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
@@ -21,6 +22,7 @@ import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
 import { listReducer } from './reducers/list.reducer';
+import { requestReducerFactory } from './reducers/api-request-reducer/request-reducer.factory';
 
 
 export function logger(reducer): any {
@@ -44,7 +46,18 @@ export const appReducers = {
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
   pagination: paginationReducer,
-  apiRequest: apiRequestReducer,
+  apiRequest: requestReducerFactory([
+    'application',
+    'stack',
+    'space',
+    'organization',
+    'route',
+    'event'
+  ], [
+      ApiActionTypes.API_REQUEST_START,
+      ApiActionTypes.API_REQUEST_SUCCESS,
+      ApiActionTypes.API_REQUEST_FAILED,
+    ]),
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,
