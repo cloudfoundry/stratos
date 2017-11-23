@@ -12,6 +12,8 @@ import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { LoggerService } from './logger.service';
+import { EndpointsService } from './endpoints.service';
+import { UserService } from './user.service';
 
 @NgModule({
   imports: [
@@ -30,7 +32,9 @@ import { LoggerService } from './logger.service';
     EventWatcherService,
     WindowRef,
     UtilsService,
-    LoggerService
+    LoggerService,
+    EndpointsService,
+    UserService,
   ],
   declarations: [LogOutDialogComponent],
   entryComponents: [
