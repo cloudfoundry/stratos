@@ -53,7 +53,7 @@
 
       // Precision
       usedPrecision = getDefaultPrecision(usedPrecision);
-      totalPrecision = _.isUndefined(totalPrecision) ? 0 : totalPrecision;
+      totalPrecision = getDefaultPrecision(totalPrecision);
 
       // Units
       var number = getNumber(total);
