@@ -4,13 +4,14 @@
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.7...0.9.8)
 
+This is an update of the third beta release of the Stratos UI Console. It contains the following bug fixes and improvements:
+
 **Improvements:**
 
-- Improve byte filter [\#1388](https://github.com/SUSE/stratos-ui/pull/1388)
+- Improve display of byte usage information for small numbers [\#1388](https://github.com/SUSE/stratos-ui/pull/1388)
 - Remove the yellow autocomplete background in dark form fields [\#1372](https://github.com/SUSE/stratos-ui/pull/1372)
 - Helm Chart: Create Image pull secret for secure repositories [\#1387](https://github.com/SUSE/stratos-ui/pull/1387)
 - Helm Chart: Remove `shared` mode [\#1385](https://github.com/SUSE/stratos-ui/pull/1385)
-- Turn off secure Cookie for CF [\#1383](https://github.com/SUSE/stratos-ui/pull/1383)
 
 **Fixes:**
 
@@ -18,13 +19,12 @@
 - Fix leak of Persistent volume claims when deleting Helm deployed release [\#1368](https://github.com/SUSE/stratos-ui/pull/1368)
 - Remove legacy images and associated files [\#1390](https://github.com/SUSE/stratos-ui/pull/1390)
 - Fix unsafe casting for mysql Service [\#1381](https://github.com/SUSE/stratos-ui/pull/1381)
-- Fix `build-images` pipeline [\#1379](https://github.com/SUSE/stratos-ui/pull/1379)
-- Pin smart table to exact version - newer one breaks things for us [\#1376](https://github.com/SUSE/stratos-ui/pull/1376)
-
 
 ## 0.9.7 Beta-3 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.6...0.9.7)
+
+This is the third beta release of the Stratos UI Console. It contains the following bug fixes:
 
 **Fixes:**
 - Updated Helm Chart to remove delete job when running in noShared mode [\#1364](https://github.com/SUSE/stratos-ui/pull/1364)
