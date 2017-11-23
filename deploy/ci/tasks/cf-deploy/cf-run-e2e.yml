@@ -25,7 +25,7 @@ run:
       cat << EOF > build/secrets.json
       {
         "cloudFoundry": {
-          "url": "https://api.cf-dev.io",
+          "url": "${CF_API_URL}",
           "admin": {
             "username": "${CF_ADMIN_USER}",
             "password": "${CF_ADMIN_PASSWORD}"
