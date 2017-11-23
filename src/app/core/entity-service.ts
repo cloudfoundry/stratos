@@ -1,5 +1,5 @@
 import { interval } from 'rxjs/observable/interval';
-import { ActionState, EntityRequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
+import { ActionState, RequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
 import { composeFn } from './../store/helpers/reducer.helper';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
@@ -73,7 +73,7 @@ export class EntityService {
   refreshKey = 'updating';
 
   private entitySelect$: Observable<APIResource>;
-  private entityRequestSelect$: Observable<EntityRequestState>;
+  private entityRequestSelect$: Observable<RequestState>;
   private actionDispatch: Function;
 
   updateEntity: Function;
@@ -92,7 +92,7 @@ export class EntityService {
     schema: Schema,
     actionDispatch: Function,
     entitySelect$: Observable<APIResource>,
-    entityRequestSelect$: Observable<EntityRequestState>
+    entityRequestSelect$: Observable<RequestState>
   ): Observable<EntityInfo> => {
     // This fetching var needs to end up in the state
     return Observable.combineLatest(
@@ -100,7 +100,7 @@ export class EntityService {
       entitySelect$,
       entityRequestSelect$
     )
-      .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, EntityRequestState]) => {
+      .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, RequestState]) => {
         if (
           !entityRequestInfo ||
           !entity &&

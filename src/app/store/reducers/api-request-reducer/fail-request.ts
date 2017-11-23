@@ -1,4 +1,4 @@
-import { APIAction } from '../../types/api.types';
+import { APIAction, RequestAction } from '../../types/api.types';
 import {
   getEntityRequestState,
   getRequestTypeFromMethod,
@@ -8,7 +8,7 @@ import {
 
 export function failRequest(state, action) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as APIAction;
+    const apiAction = action.apiAction as RequestAction;
     const requestTypeFailed = getRequestTypeFromMethod(apiAction.options.method);
 
     const requestFailedState = getEntityRequestState(state, apiAction);

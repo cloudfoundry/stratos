@@ -1,4 +1,5 @@
-import { EntityRequestState } from '../reducers/api-request-reducer/types';
+import { stringDistance } from 'codelyzer/util/utils';
+import { RequestState } from '../reducers/api-request-reducer/types';
 import { Schema } from 'normalizr';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
@@ -7,7 +8,7 @@ import { PaginatedAction } from './pagination.types';
 import { EntitiesState } from './entity.types';
 
 export interface EntityInfo {
-  entityRequestInfo: EntityRequestState;
+  entityRequestInfo: RequestState;
   entity: any;
 }
 
@@ -24,9 +25,16 @@ export interface APIResourceMetadata {
 }
 export interface SingleEntityAction {
   entityKey: string;
+  // For single entity requests
   guid?: string;
+  options: RequestOptions;
 }
-export class APIAction implements Action, SingleEntityAction {
+
+export interface RequestAction extends Action, SingleEntityAction {
+  cnis?: string;
+  updatingKey?: string;
+}
+export class APIAction implements Action, RequestAction {
   actions: string[];
   type = ApiActionTypes.API_REQUEST;
   options: RequestOptions;

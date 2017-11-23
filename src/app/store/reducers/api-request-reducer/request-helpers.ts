@@ -1,20 +1,20 @@
-import { APIAction, SingleEntityAction } from '../../types/api.types';
+import { APIAction, SingleEntityAction, RequestAction } from '../../types/api.types';
 import { EntitiesState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
-import { defaultDeletingActionState, defaultEntityRequest, EntityRequestState, rootUpdatingKey } from './types';
+import { defaultDeletingActionState, defaultRequestState, RequestState, rootUpdatingKey } from './types';
 
 
-export function getEntityRequestState(state, action: SingleEntityAction): EntityRequestState {
+export function getEntityRequestState(state, action: SingleEntityAction): RequestState {
   const { entityKey, guid } = action;
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
     return requestState;
   }
-  return { ...defaultEntityRequest };
+  return { ...defaultRequestState };
 }
 
-export function setEntityRequestState(state, requestState, { entityKey, guid }: APIAction): EntitiesState {
+export function setEntityRequestState(state, requestState, { entityKey, guid }: RequestAction) {
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -26,7 +26,7 @@ export function setEntityRequestState(state, requestState, { entityKey, guid }: 
 }
 
 
-export function createRequestStateFromResponse(entities, state): EntitiesState {
+export function createRequestStateFromResponse(entities, state) {
   let newState = { ...state };
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {
@@ -34,7 +34,7 @@ export function createRequestStateFromResponse(entities, state): EntitiesState {
       entState.fetching = false;
       entState.error = false;
       entState.deleting = { ...defaultDeletingActionState };
-      newState = setEntityRequestState(newState, entState, { entityKey, guid } as APIAction);
+      newState = setEntityRequestState(newState, entState, { entityKey, guid } as RequestAction);
     });
   });
   return newState;
@@ -68,7 +68,7 @@ export function getRequestTypeFromMethod(method): ApiRequestTypes {
   return 'fetch';
 }
 
-export function modifyRequestWithRequestType(requestState: EntityRequestState, type: ApiRequestTypes) {
+export function modifyRequestWithRequestType(requestState: RequestState, type: ApiRequestTypes) {
   if (type === 'fetch') {
     requestState.fetching = true;
   } else if (type === 'create') {

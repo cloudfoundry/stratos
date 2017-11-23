@@ -2,7 +2,7 @@ import { EntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, IRequestState, IStateHasEntities } from '../app-state';
-import { ActionState, EntityRequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
+import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
 
 
 export const selectEntities = createFeatureSelector<EntitiesState>('entities');
@@ -22,7 +22,7 @@ export function selectEntity(type: string, guid: string) {
 export function selectDeletionInfo(type: string, entityGuid: string, section?: string) {
   return compose(
     getEntityDeleteSections,
-    getEntityById<EntityRequestState>(entityGuid),
+    getEntityById<RequestState>(entityGuid),
     getRequestType(type),
     getRequestBySection(section),
   );
@@ -32,7 +32,7 @@ export function selectUpdateInfo(type: string, entityGuid: string, updatingGuid:
   return compose(
     getUpdateSectionById(updatingGuid),
     getEntityUpdateSections,
-    getEntityById<EntityRequestState>(entityGuid),
+    getEntityById<RequestState>(entityGuid),
     getRequestType(type),
     getRequestBySection(section),
   );
@@ -40,7 +40,7 @@ export function selectUpdateInfo(type: string, entityGuid: string, updatingGuid:
 
 export function selectRequestInfo(type: string, guid: string, section?: string) {
   return compose(
-    getEntityById<EntityRequestState>(guid),
+    getEntityById<RequestState>(guid),
     getRequestType(type),
     getRequestBySection(section)
   );
@@ -73,11 +73,11 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
-export const getEntityUpdateSections = (request: EntityRequestState): UpdatingSection => {
+export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
   return request ? request.updating : null;
 };
 
-export const getEntityDeleteSections = (request: EntityRequestState) => {
+export const getEntityDeleteSections = (request: RequestState) => {
   return request.deleting;
 };
 

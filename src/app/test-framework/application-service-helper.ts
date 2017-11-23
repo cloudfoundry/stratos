@@ -1,4 +1,4 @@
-import { EntityRequestState } from '../store/reducers/api-request-reducer/types';
+import { RequestState } from '../store/reducers/api-request-reducer/types';
 import { ApplicationService, ApplicationData } from '../features/applications/application.service';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../store/types/api.types';
@@ -12,7 +12,7 @@ export class ApplicationServiceMock {
       metadata: {},
       entity: {
       },
-      entityRequestInfo: {} as EntityRequestState
+      entityRequestInfo: {} as RequestState
     } as EntityInfo,
     stack: {
       entity: {

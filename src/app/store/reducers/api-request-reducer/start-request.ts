@@ -5,13 +5,13 @@ import {
   modifyRequestWithRequestType,
   setEntityRequestState,
 } from './request-helpers';
-import { APIAction } from '../../types/api.types';
+import { APIAction, RequestAction } from '../../types/api.types';
 
 export function startRequest(state, action) {
   if (!action.apiAction.guid) {
     return state;
   }
-  const apiAction = action.apiAction as APIAction;
+  const apiAction = action.apiAction as RequestAction;
   const requestTypeStart = getRequestTypeFromMethod(apiAction.options.method);
   let requestState = getEntityRequestState(state, apiAction);
 

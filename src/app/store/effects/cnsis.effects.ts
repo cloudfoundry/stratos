@@ -1,5 +1,12 @@
 import { Observable } from 'rxjs/Rx';
-import { GET_CNSIS, GetAllCNSIS, GetAllCNSISFailed, GetAllCNSISSuccess } from './../actions/cnsis.actions';
+import {
+  CONNECT_CNSIS,
+  ConnectCnis,
+  GET_CNSIS,
+  GetAllCNSIS,
+  GetAllCNSISFailed,
+  GetAllCNSISSuccess,
+} from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
@@ -19,6 +26,28 @@ export class CNSISEffect {
 
   @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
     .flatMap(action => {
+      return Observable.zip(
+        this.http.get('/pp/v1/cnsis'),
+        this.http.get('/pp/v1/cnsis/registered'),
+        (all, registered) => {
+          const allCnsis: CNSISModel[] = all.json();
+          const registeredCnsis: CNSISModel[] = registered.json();
+
+          return allCnsis.map(c => {
+            c.registered = !!registeredCnsis.find(r => r.guid === c.guid);
+            return c;
+          });
+        }
+      )
+        .map(data => new GetAllCNSISSuccess(data, action.login))
+        .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
+
+    });
+
+  @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
+    .flatMap(action => {
+
+      // DISPATCH THE NONEAPIACTION THINGY
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),

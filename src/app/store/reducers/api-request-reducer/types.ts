@@ -26,7 +26,7 @@ export interface UpdatingSection {
   _root_: ActionState;
   [key: string]: ActionState;
 }
-export interface EntityRequestState {
+export interface RequestState {
   fetching: boolean;
   updating: UpdatingSection;
   creating: boolean;
@@ -36,7 +36,7 @@ export interface EntityRequestState {
   message: string;
 }
 
-export const defaultEntityRequest = {
+export const defaultRequestState = {
   fetching: false,
   updating: {
     _root_: { ...defaultActionState }
