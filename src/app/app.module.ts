@@ -14,6 +14,8 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { LoggedInService } from './logged-in.service';
 import { Params, RouterStateSnapshot } from '@angular/router';
+// import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -46,6 +48,7 @@ import { Params, RouterStateSnapshot } from '@angular/router';
 @NgModule({
   declarations: [
     AppComponent,
+    NoEndpointsNonAdminComponent,
   ],
   imports: [
     BrowserModule,

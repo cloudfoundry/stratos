@@ -1,3 +1,4 @@
+import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -9,6 +10,7 @@ import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dash
 import { HomePageComponent } from './features/home/home/home-page.component';
 import { ConsoleUaaWizardComponent } from './features/uaa-setup/uaa-wizard/console-uaa-wizard.component';
 import { SharedModule } from './shared/shared.module';
+import { EndpointsService } from './core/endpoints.service';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -17,12 +19,17 @@ const appRoutes: Routes = [
   {
     path: '',
     component: DashboardBaseComponent,
-    canActivate: [AuthGuardService],
+    canActivate: [AuthGuardService, EndpointsService],
     children: [
       { path: 'dashboard', component: HomePageComponent },
       { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
       { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' }
     ]
+  },
+  {
+    path: 'noendpoints',
+    component: NoEndpointsNonAdminComponent,
+    canActivate: [AuthGuardService],
   }
 ];
 

@@ -1,3 +1,4 @@
+import { timeout } from 'rxjs/operator/timeout';
 import { TableCellActionsComponent } from '../../../shared/components/table/table-cell-actions/table-cell-actions.component';
 import { CNSISModel, CNSISState } from '../../../store/types/cnsis.types';
 import { AuthState } from '../../../store/reducers/auth.reducer';
@@ -34,7 +35,7 @@ export class EndpointsPageComponent implements OnInit {
       columnId: 'name', headerCell: () => 'Name', cell: (row: CNSISModel) => `${row.name}`, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'connection', headerCell: () => 'Connection', cell: (row: CNSISModel) => `missing..`, sort: true, cellFlex: '1'
+      columnId: 'connection', headerCell: () => 'Connection', cell: (row: CNSISModel) => `${row.registered}`, sort: true, cellFlex: '1'
     },
     {
       columnId: 'type', headerCell: () => 'Type', cell: getEndpointTypeString, sort: true, cellFlex: '2'
@@ -51,10 +52,15 @@ export class EndpointsPageComponent implements OnInit {
     },
   ];
 
+  showTable$: Observable<boolean>;
+
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     this.dataSource = new EndpointsDataSource(this.store);
+    this.showTable$ = this.dataSource.pagination$.map(pagination => {
+      return pagination.totalResults > 0;
+    });
   }
 
 }

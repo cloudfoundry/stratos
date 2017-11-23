@@ -26,7 +26,8 @@ import {
   MdSortModule,
   MdDialogModule,
   MdMenuModule,
-  MdButtonToggleModule
+  MdButtonToggleModule,
+  MdSnackBarModule
 } from '@angular/material';
 
 const importExport = [
@@ -55,7 +56,8 @@ const importExport = [
   MdSortModule,
   MdDialogModule,
   MdButtonToggleModule,
-  MdMenuModule
+  MdMenuModule,
+  MdSnackBarModule
 ];
 
 @NgModule({

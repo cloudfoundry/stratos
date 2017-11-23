@@ -2,6 +2,8 @@
   <h1>Endpoints</h1>
 </app-page-header>
 
+<app-endpoints-missing></app-endpoints-missing>
+
 <app-list [dataSource]="dataSource" [columns]="columns" [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true"
-  [cardComponent]="cardComponent" [tableFixedRowHeight]="true">
+  [cardComponent]="cardComponent" [tableFixedRowHeight]="true" [hidden]="!(showTable$ | async)">
 </app-list>

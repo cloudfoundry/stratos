@@ -12,10 +12,16 @@ import {
 import { SessionData } from '../types/auth.types';
 import { RouterNav, RouterActions } from '../actions/router.actions';
 
+export interface AuthUser {
+  guid: string;
+  name: string;
+  admin: boolean;
+}
+
 export interface AuthState {
   loggedIn: boolean;
   loggingIn: boolean;
-  user: object;
+  user: AuthUser;
   error: boolean;
   errorMessage: string;
   sessionData: SessionData;
