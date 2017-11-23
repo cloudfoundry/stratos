@@ -91,7 +91,7 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>) {
   const defaultState = {};
   keys.forEach(key => {
-    defaultState[key] = defaultEntityRequest;
+    defaultState[key] = {};
   });
   return defaultState;
 }
