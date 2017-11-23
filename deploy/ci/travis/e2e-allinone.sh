@@ -44,6 +44,10 @@ EOF
 echo "Building imageS"
 #docker build -f deploy/Dockerfile.all-in-one . -t stratos-ui
 
+df
+
+du -h -s /
+
 ./deploy/docker-compose/build.sh -n -l
 
 echo "Running Console in Docker Compose"
