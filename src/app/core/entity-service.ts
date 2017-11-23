@@ -1,5 +1,6 @@
+import { interval } from 'rxjs/observable/interval';
+import { ActionState, EntityRequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
 import { composeFn } from './../store/helpers/reducer.helper';
-import { UpdatingSection } from './../store/reducers/api-request-reducer';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { denormalize, Schema } from 'normalizr';
@@ -10,11 +11,10 @@ import {
   getEntityUpdateSections,
   getUpdateSectionById,
   selectEntity,
-  selectEntityRequestInfo,
-  selectEntityUpdateInfo,
+  selectRequestInfo,
+  selectUpdateInfo,
 } from '../store/selectors/api.selectors';
 import { EntitiesState } from '../store/types/entity.types';
-import { ActionState, EntityRequestState } from '../store/reducers/api-request-reducer';
 import { Inject, Injectable } from '@angular/core';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
@@ -32,7 +32,7 @@ export class EntityService {
     public action: APIAction
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id));
-    this.entityRequestSelect$ = store.select(selectEntityRequestInfo(entityKey, id));
+    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id));
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
         action.updatingKey = updatingKey;

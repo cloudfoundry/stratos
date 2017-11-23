@@ -1,4 +1,4 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191/ */
 import { ListActionConfig } from '../../../data-sources/list-data-source';
 import { Component, OnInit } from '@angular/core';
 import { TableCellCustom } from '../table-cell/table-cell-custom';
@@ -18,6 +18,5 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
 
   execute(action: ListActionConfig<T>, row: T) {
     this.store.dispatch(action.createAction(this.dataSource, [row]));
-    console.log('exeecugthbt: ', row);
   }
 }

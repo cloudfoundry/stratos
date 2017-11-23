@@ -9,7 +9,6 @@ import { DataSource } from '@angular/cdk/table';
 import { MdPaginator, PageEvent, MdSort, Sort, MdInput } from '@angular/material';
 
 import { UpdateApplication, ApplicationSchema } from '../../../../store/actions/application.actions';
-import { ActionState } from '../../../../store/reducers/api-request-reducer';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { NgModel } from '@angular/forms';

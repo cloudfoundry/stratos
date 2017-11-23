@@ -2,7 +2,7 @@ import { IListDataSource } from '../../shared/data-sources/list-data-source';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 
-import { ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './request.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
 import { PaginatedAction, QParam } from '../types/pagination.types';

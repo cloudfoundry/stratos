@@ -1,9 +1,9 @@
+import { EntityRequestState } from '../reducers/api-request-reducer/types';
 import { Schema } from 'normalizr';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
-import { ApiActionTypes } from '../actions/api.actions';
+import { ApiActionTypes } from '../actions/request.actions';
 import { PaginatedAction } from './pagination.types';
-import { EntityRequestState } from '../reducers/api-request-reducer';
 import { EntitiesState } from './entity.types';
 
 export interface EntityInfo {

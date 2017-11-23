@@ -1,6 +1,6 @@
+import { EntityRequestState } from '../store/reducers/api-request-reducer/types';
 import { ApplicationService, ApplicationData } from '../features/applications/application.service';
 import { Observable } from 'rxjs/Observable';
-import { EntityRequestState } from '../store/reducers/api-request-reducer';
 import { EntityInfo } from '../store/types/api.types';
 import { AppMetadataInfo } from '../store/types/app-metadata.types';
 

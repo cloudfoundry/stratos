@@ -125,6 +125,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
+
   selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
     for (const row of this.filteredRows) {
@@ -136,6 +137,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
+
   selectClear() {
     this.selectedRows.clear();
     this.isSelecting$.next(false);
@@ -144,9 +146,11 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   startEdit(rowClone: T) {
     this.editRow = rowClone;
   }
+
   saveEdit() {
     delete this.editRow;
   }
+
   cancelEdit() {
     delete this.editRow;
   }

@@ -1,4 +1,3 @@
-import { UpdatingSection } from '../../../store/reducers/api-request-reducer';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
 import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
 import { EntityService } from '../../../core/entity-service';

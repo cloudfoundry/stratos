@@ -12,7 +12,7 @@ import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions'
 import { environment } from './../../../environments/environment';
 import {
   ApiActionTypes
-} from './../actions/api.actions';
+} from './../actions/request.actions';
 import {
   APIAction,
 

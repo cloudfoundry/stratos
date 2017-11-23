@@ -3,7 +3,7 @@ import { error } from 'util';
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 
-import { ApiActionTypes } from '../actions/api.actions';
+import { ApiActionTypes } from '../actions/request.actions';
 import {
   ADD_PARAMS,
   AddParams,

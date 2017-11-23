@@ -17,7 +17,6 @@ import {
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { ActionState, EntityRequestState } from '../../store/reducers/api-request-reducer';
 
 import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
 import {

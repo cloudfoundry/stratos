@@ -2,7 +2,7 @@ import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './request.actions';
 import { APIAction } from '../types/api.types';
 
 export const CREATE_ROUTE = '[Route] Create start';

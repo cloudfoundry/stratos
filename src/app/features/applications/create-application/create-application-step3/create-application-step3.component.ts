@@ -1,4 +1,4 @@
-import { selectEntityRequestInfo, selectEntityUpdateInfo } from '../../../../store/selectors/api.selectors';
+import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -69,10 +69,10 @@ export class CreateApplicationStep3Component implements OnInit {
     this.message = `Creating application${shouldCreateRoute ? ' and route' : ''}`;
 
     return Observable.combineLatest(
-      this.store.select(selectEntityRequestInfo(ApplicationSchema.key, newAppGuid)),
+      this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid)),
       // If we don't create a route, just fake it till we make it!
       shouldCreateRoute ?
-        this.store.select(selectEntityRequestInfo(RouteSchema.key, newRouteGuid)) :
+        this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid)) :
         Observable.of({ fake: true, creating: false, error: false })
     )
       .filter(([app, route]) => {
@@ -99,7 +99,7 @@ export class CreateApplicationStep3Component implements OnInit {
         this.message = `Assigning creating application${shouldCreateRoute ? ' and route' : ''}`;
         return (
           shouldCreateRoute ?
-            this.store.select(selectEntityUpdateInfo(
+            this.store.select(selectUpdateInfo(
               ApplicationSchema.key,
               app.response.result[0],
               updatingKey
