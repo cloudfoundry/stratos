@@ -50,9 +50,8 @@ echo "Building imageS"
 
 echo "Running Console in Docker Compose"
 
-pushd ./deploy/docker-compose
+cd deploy/docker-compose
 docker-compose up -d
-popd
 
 echo "Running tests"
 npm run e2e:nocov
