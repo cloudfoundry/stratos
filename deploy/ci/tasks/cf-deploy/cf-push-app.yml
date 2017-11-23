@@ -17,7 +17,7 @@ run:
       cf login --skip-ssl-validation -a ${CF_API_URL} -u ${CF_USER} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
       cd stratos-ui
       if [ ! -z ${CREATE_DB} ]; then
-      cf create-service mysql-dev 20mb console_db
+      cf create-service p-mysql 512mb console_db
       cat << EOF >> manifest.yml
       services:
       - console_db
