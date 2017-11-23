@@ -53,11 +53,17 @@ echo "Building images"
 
 echo "Build Finished"
 
+docker images
+
 echo "Running Console in Docker Compose"
 
 pushd deploy/ci/travis
 docker-compose up -d
 popd
+
+ls -al
+ls ./node_modules/.bine
+echo $PATH
 
 echo "Running tests"
 npm run e2e:nocov
