@@ -9,6 +9,7 @@ addons:
   chrome: stable  
 install:
   - npm install
+filter_secrets: false
 jobs:
   include:
     - stage: e2e tests

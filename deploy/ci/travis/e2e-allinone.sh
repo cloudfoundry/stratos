@@ -49,7 +49,8 @@ du -h -s /tmp
 du -h -s $HOME
 du -h -s .
 
-./deploy/docker-compose/build.sh -n -l &> build_log.log
+#./deploy/docker-compose/build.sh -n -l &> build_log.log
+./deploy/docker-compose/build.sh -n -l
 
 echo "Build Finished"
 
