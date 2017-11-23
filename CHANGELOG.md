@@ -1,4 +1,27 @@
 # Change Log
+
+## 0.9.8 Beta-3 Release 2
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.7...0.9.8)
+
+**Improvements:**
+
+- Improve byte filter [\#1388](https://github.com/SUSE/stratos-ui/pull/1388)
+- Remove the yellow autocomplete background in dark form fields [\#1372](https://github.com/SUSE/stratos-ui/pull/1372)
+- Helm Chart: Create Image pull secret for secure repositories [\#1387](https://github.com/SUSE/stratos-ui/pull/1387)
+- Helm Chart: Remove `shared` mode [\#1385](https://github.com/SUSE/stratos-ui/pull/1385)
+- Turn off secure Cookie for CF [\#1383](https://github.com/SUSE/stratos-ui/pull/1383)
+
+**Fixes:**
+
+- Fix link shown on cf dashboard when no endpoints connected [\#1369](https://github.com/SUSE/stratos-ui/pull/1369)
+- Fix leak of Persistent volume claims when deleting Helm deployed release [\#1368](https://github.com/SUSE/stratos-ui/pull/1368)
+- Remove legacy images and associated files [\#1390](https://github.com/SUSE/stratos-ui/pull/1390)
+- Fix unsafe casting for mysql Service [\#1381](https://github.com/SUSE/stratos-ui/pull/1381)
+- Fix `build-images` pipeline [\#1379](https://github.com/SUSE/stratos-ui/pull/1379)
+- Pin smart table to exact version - newer one breaks things for us [\#1376](https://github.com/SUSE/stratos-ui/pull/1376)
+
+
 ## 0.9.7 Beta-3 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.6...0.9.7)
