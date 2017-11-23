@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Running e2e tests..."
 
@@ -38,8 +38,6 @@ cat << EOF > ./build/secrets.json
   }
 }
 EOF
-
-docker version
 
 #docker pull splatform/stratos-uaa
 
