@@ -10,6 +10,10 @@ addons:
 install:
   - npm install
 filter_secrets: false
+cache:
+  directories:
+    - /home/travis/.cache/bower/
+    - /home/travis/.npm/
 jobs:
   include:
     - stage: e2e tests
