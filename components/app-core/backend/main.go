@@ -41,6 +41,7 @@ const (
 	SessionExpiry       = 20 * 60 // Session cookies expire after 20 minutes
 	UpgradeVolume       = "UPGRADE_VOLUME"
 	UpgradeLockFileName = "UPGRADE_LOCK_FILENAME"
+	VCapApplication     = "VCAP_APPLICATION"
 )
 
 var appVersion string
@@ -119,7 +120,7 @@ func main() {
 	}()
 	log.Info("Proxy database connection pool created.")
 
-	// Initialize the Postgres backed session store for Gorilla sessions
+	// Initialize session store for Gorilla sessions
 	sessionStore, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
 	if err != nil {
 		log.Fatal(err)
@@ -276,6 +277,11 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	log.Debug("initSessionStore")
 
 	sessionsTable := "sessions"
+	setSecureCookie := true
+
+	if config.IsSet(VCapApplication) {
+		setSecureCookie = false
+	}
 
 	// Store depends on the DB Type
 	if databaseProvider == datastore.PGSQL {
@@ -284,7 +290,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
+		sessionStore.Options.Secure = setSecureCookie
 		return sessionStore, err
 	}
 	// Store depends on the DB Type
@@ -294,7 +300,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
+		sessionStore.Options.Secure = setSecureCookie
 		return sessionStore, err
 	}
 
@@ -303,7 +309,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
-	sessionStore.Options.Secure = true
+	sessionStore.Options.Secure = setSecureCookie
 	return sessionStore, err
 }
 

@@ -1,13 +1,19 @@
 version: '2'
 services:
 
-  postgres:
-    extends:
-      file: ../common.yml
-      service: postgres
+  mariadb:
+    image: splatform/stratos-dc-mariadb:latest
+    env_file:
+      ../mariadb.env
 
   goose:
     image: splatform/stratos-dc-goose:latest
+    env_file:
+      ../mariadb.env
+    links:
+    - mariadb:mariadb
+    ports:
+    - "3306:3306"
 
   proxy:
     image: splatform/stratos-dc-proxy:latest
@@ -18,6 +24,7 @@ services:
     links:
       - goose:goose
       - uaa:uaa
+      - mariadb:mariadb
 
   nginx:
     image: splatform/stratos-dc-console:latest

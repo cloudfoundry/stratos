@@ -87,18 +87,7 @@
         }
       });
 
-    this.getAppSummaryLink = getAppSummaryLink;
     this.stMiddleware = stMiddleware;
-
-    /**
-     * @name getAppSummaryLink
-     * @description Get link to application summary page
-     * @param {object} app The application object
-     * @returns {string} returns the link to the app summary page
-     */
-    function getAppSummaryLink(app) {
-      return '#/cf/applications/' + app.clusterId + '/app/' + app.metadata.guid + '/summary';
-    }
 
     function stMiddleware(tableState) {
       var stSort = tableState.sort.predicate + '_' + !tableState.sort.reverse;

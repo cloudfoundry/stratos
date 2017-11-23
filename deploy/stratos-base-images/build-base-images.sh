@@ -104,12 +104,12 @@ build_portal_proxy_builder(){
     popd
 }
 
-build_preflight_job_base(){
-    build_and_push_image stratos-preflight-base Dockerfile.stratos-preflight-base
-}
-
 build_mariadb_base(){
     build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
+}
+
+build_aio_base(){
+    build_and_push_image stratos-aio-base Dockerfile.stratos-aio-base
 }
 
 # Base with go
@@ -124,8 +124,8 @@ build_nginx_base;
 build_bk_build_base;
 # Used for building the backend
 build_portal_proxy_builder;
-# Used for building the postflight job image
-build_preflight_job_base;
 # Used for building the DB image
 build_mariadb_base;
+# Used for building the AIO image
+build_aio_base;
 rm -f mo;

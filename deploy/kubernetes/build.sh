@@ -6,9 +6,11 @@ PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
+OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
-
-while getopts ":ho:r:t:dTclb" opt; do
+ADD_OFFICIAL_TAG="false"
+TAG_LATEST="false"
+while getopts ":ho:r:t:dTclb:O" opt; do
   case $opt in
     h)
       echo
@@ -39,6 +41,9 @@ while getopts ":ho:r:t:dTclb" opt; do
       ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    O)
+      ADD_OFFICIAL_TAG="true"
       ;;
     l)
       TAG_LATEST="true"
@@ -114,7 +119,7 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
-  if [ ! -z ${TAG_LATEST} ]; then
+  if [ "${TAG_LATEST}" = "true" ]; then
     docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
     docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
   fi
@@ -158,6 +163,9 @@ function updateTagForRelease {
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-g${GIT_HASH}"
+  if [ "${ADD_OFFICIAL_TAG}" = "true" ]; then
+  TAG=${OFFICIAL_TAG}-${TAG}
+  fi
   echo "New TAG: ${TAG}"
   popd > /dev/null 2>&1
 }
@@ -231,16 +239,6 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
-  # Build merged preflight & proxy image, used when deploying into multi-node k8s cluster without a shared storage backend
-  buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
-}
-
-
-function buildPreflightJob {
-  # Build the preflight container
-  echo
-  echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
@@ -312,7 +310,6 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPreflightJob
 buildPostflightJob
 buildMariaDb
 buildUI
@@ -325,6 +322,9 @@ if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 else
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
+  sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
+  sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
+  
   sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
 fi
 

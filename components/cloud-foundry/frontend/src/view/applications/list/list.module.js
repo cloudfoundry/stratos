@@ -33,7 +33,7 @@
    * deploy, etc)
    * @param {appLocalStorage} appLocalStorage - service provides access to the local storage facility of the web browser
    * @param {appBusyService} appBusyService - the application busy service
-   * 
+   *
    */
   function ApplicationsListController($scope, $translate, $state, $timeout, $q, $window, modelManager, appErrorService,
     appUtilsService, cfOrganizationModel, cfAppWallActions, appLocalStorage, appBusyService) {
