@@ -5,10 +5,11 @@ set -eu
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
+NO_PUSH=false
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dl" opt; do
+while getopts ":ho:r:t:ln" opt; do
   case $opt in
     h)
       echo
@@ -30,8 +31,8 @@ while getopts ":ho:r:t:dl" opt; do
     l)
       TAG_LATEST="true"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
+    n)
+      NO_PUSH="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -103,11 +104,18 @@ function buildAndPublishImage {
 
   docker tag ${NAME} ${IMAGE_URL}
 
-  echo Pushing Docker Image ${IMAGE_URL}
-  docker push  ${IMAGE_URL}
   if [ "${TAG_LATEST}" = "true" ]; then
     docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
-    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
+
+  if [ "${NO_PUSH}" != "true" ]; then
+    echo Pushing Docker Image ${IMAGE_URL}
+    docker push ${IMAGE_URL}
+    if [ "${TAG_LATEST}" = "true" ]; then
+      docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    fi
+  else
+    echo "Docker Images will NOT be pushed"
   fi
 
   # Update values.yaml

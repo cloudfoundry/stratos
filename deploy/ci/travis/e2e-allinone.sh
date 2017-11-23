@@ -20,7 +20,7 @@ cat << EOF > ./build/secrets.json
   },
   "console": {
     "host": "localhost",
-    "port": "4443",
+    "port": "443",
     "admin": {
       "username": "${CONSOLE_ADMIN_USER}",
       "password": "${CONSOLE_ADMIN_PASSWORD}"
@@ -31,7 +31,7 @@ cat << EOF > ./build/secrets.json
     }
   },
   "uaa": {
-    "url": "http://localhost:8080",
+    "url": "http://uaa:8080",
     "clientId": "console",
     "adminUsername": "admin",
     "adminPassword": "hscadmin"
@@ -41,18 +41,18 @@ EOF
 
 docker version
 
-docker pull splatform/stratos-uaa
+#docker pull splatform/stratos-uaa
 
-echo "Building all in one image"
-docker build -f deploy/Dockerfile.all-in-one . -t stratos-ui
+echo "Building imageS"
+#docker build -f deploy/Dockerfile.all-in-one . -t stratos-ui
 
-echo "Running UAA"
-docker run -d -p 8080:8080 splatform/stratos-uaa
+./deploy/docker-compose/build.sh -n -l
 
-echo "Running UI"
-docker run -d -p 4443:443 stratos-ui
+echo "Running Console in Docker Compose"
+
+docker-compose up -d
 
 echo "Running tests"
 npm run e2e:nocov
 
-docker logs stratos-ui
+#docker logs stratos-ui
