@@ -58,7 +58,7 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "lodash": "^4.13.1",
-    "merge-dirs": "^0.2.1",
+    "stratos-merge-dirs": "^0.2.1",
     "mktemp": "^0.4.0",
     "minimatch": "^3.0.2",
     "q": "^1.4.1",
