@@ -50,6 +50,7 @@ echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
 echo "REGISTRY: ${DOCKER_REGISTRY}"
 echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
+echo "NO PUSH: ${NO_PUSH}"
 
 echo
 echo "Starting build"

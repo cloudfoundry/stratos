@@ -43,6 +43,8 @@ EOF
 
 echo "Generating certificate"
 
+export CERTS_PATH=./dev-certs
+
 ./deploy/tools/generate_cert.sh
 
 echo "Building images"
@@ -61,9 +63,7 @@ pushd deploy/ci/travis
 docker-compose up -d
 popd
 
-ls -al
-ls ./node_modules/.bine
-echo $PATH
+npm install
 
 echo "Running tests"
 npm run e2e:nocov
