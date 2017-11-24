@@ -9,8 +9,6 @@ import { EndointsRoutingModule } from './endpoints.routing';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
-import { EndpointsMissingComponent } from './endpoints-page/endpoints-missing/endpoints-missing.component';
-
 
 @NgModule({
   imports: [
@@ -21,7 +19,6 @@ import { EndpointsMissingComponent } from './endpoints-page/endpoints-missing/en
   ],
   declarations: [
     EndpointsPageComponent,
-    EndpointsMissingComponent,
   ],
 })
 export class EndpointsModule { }

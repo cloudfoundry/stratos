@@ -13,6 +13,7 @@ import { ITableColumn } from '../../../shared/components/table/table.component';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import { TableCellAppNameComponent } from '../../../shared/components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
+import { UtilsService } from '../../../core/utils.service';
 
 
 @Component({
@@ -35,7 +36,7 @@ import { CardAppComponent } from '../../../shared/components/cards/custom-cards/
 export class ApplicationWallComponent implements OnInit, OnDestroy {
 
 
-  constructor(private store: Store<AppState>, private datePipe: DatePipe) { }
+  constructor(private store: Store<AppState>, private datePipe: DatePipe, private utilsService: UtilsService) { }
 
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
@@ -49,10 +50,12 @@ export class ApplicationWallComponent implements OnInit, OnDestroy {
       columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'
     },
     {
-      columnId: 'disk', headerCell: () => 'Disk Quota', cell: (row: APIResource) => ``, cellFlex: '1'
+      columnId: 'disk', headerCell: () => 'Disk Quota',
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1'
     },
     {
-      columnId: 'memory', headerCell: () => 'Memory', cell: (row: APIResource) => ``, cellFlex: '1'
+      columnId: 'memory', headerCell: () => 'Memory',
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1'
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
